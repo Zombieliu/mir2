@@ -1946,6 +1946,10 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
   );
   assert.match(
     recoveryBody,
+    /while \(Date\.now\(\) < recoveryDeadline\)[\s\S]{0,500}String\(state\.mapFileName\) === SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,350}supplyFundingShelterUntil = 0[\s\S]{0,120}shelterActive = false/,
+  );
+  assert.match(
+    recoveryBody,
     /const activeShelterThreat = nearestActiveHostile[\s\S]{0,900}String\(transfer\.toMapFileName[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,900}nearestPointInTransferBounds\(state\.player, recoveryTransfer\)[\s\S]{0,650}navigateNear\(retreat, recoveryTransfer \? 0 : 1[\s\S]{0,350}allowTransferToMap: recoveryTransfer[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,220}return true/,
   );
   assert.match(
@@ -1974,11 +1978,15 @@ test("field continuation consumes stock down to a bounded reserve before returni
     returnBody,
     /const inSupplyArea =[\s\S]{0,300}!inSupplyArea && potionQuantity >= HEALTH_POTION_FIELD_RESERVE/,
   );
-  assert.match(runner, /if \(await retreatFromLowStockActiveThreatIfNeeded\(before\)\) \{/);
-  assert.match(runner, /Low-stock safety owns the next input[\s\S]{0,500}continue/);
+  assert.match(runner, /if \(await retreatFromUnsafeActiveThreatIfNeeded\(before\)\) \{/);
+  assert.match(runner, /Unsafe combat recovery owns the next input[\s\S]{0,500}continue/);
   assert.match(
     runner,
-    /async function retreatFromLowStockActiveThreatIfNeeded[\s\S]{0,700}healthPotionQuantity\(state\) >= HEALTH_POTION_FIELD_RESERVE[\s\S]{0,1200}nearestActiveHostile[\s\S]{0,900}low-stock \$\{inSupplyArea \? "supply" : "field"\} disengage:[\s\S]{0,900}autoUsePotions: false/,
+    /async function retreatFromUnsafeActiveThreatIfNeeded[\s\S]{0,900}const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE[\s\S]{0,220}const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO[\s\S]{0,900}nearestActiveHostile[\s\S]{0,1800}nearestPointInTransferBounds\(state\.player, recoveryTransfer\)[\s\S]{0,800}autoUsePotions: true/,
+  );
+  assert.match(
+    runner,
+    /recoverQuestDepartureHealthIfNeeded\(before\)[\s\S]{0,700}Recovery must precede every optional pickup/,
   );
   assert.match(
     runner,
@@ -2038,19 +2046,28 @@ test("low-stock supply work retreats before optional actions and budgets every N
     runner.indexOf("async function executeTalkGoal"),
   );
   assert.ok(
-    policyLoop.indexOf("retreatFromLowStockActiveThreatIfNeeded(before)") <
+    policyLoop.indexOf("retreatFromUnsafeActiveThreatIfNeeded(before)") <
       policyLoop.indexOf("collectVisibleHealthPotionDropIfNeeded(before)"),
-    "an active low-stock attacker must be handled before optional pickups",
+    "an active unsafe attacker must be handled before optional pickups",
+  );
+  assert.ok(
+    policyLoop.indexOf("recoverQuestDepartureHealthIfNeeded(before)") <
+      policyLoop.indexOf("collectVisibleHealthPotionDropIfNeeded(before)"),
+    "low-HP recovery must run before optional supply and NPC actions",
   );
 
   const retreatBody = runner.slice(
-    runner.indexOf("async function retreatFromLowStockActiveThreatIfNeeded"),
+    runner.indexOf("async function retreatFromUnsafeActiveThreatIfNeeded"),
     runner.indexOf("async function returnToSupplyAreaForPotionsIfNeeded"),
   );
   assert.doesNotMatch(retreatBody, /if \(inSupplyArea\) return false/);
   assert.match(
     retreatBody,
-    /supplyFundingShelterUntil = Math\.max\([\s\S]{0,260}low-stock \$\{inSupplyArea \? "supply" : "field"\} disengage/,
+    /const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE[\s\S]{0,220}const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO[\s\S]{0,1000}supplyFundingShelterUntil = Math\.max\([\s\S]{0,1800}unsafe \$\{inSupplyArea \? "supply" : "field"\} disengage/,
+  );
+  assert.match(
+    retreatBody,
+    /String\(transfer\.toMapFileName[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,800}nearestPointInTransferBounds\(state\.player, recoveryTransfer\)[\s\S]{0,900}autoUsePotions: true[\s\S]{0,220}allowTransferToMap: recoveryTransfer/,
   );
 
   const safetyBody = runner.slice(
@@ -2059,7 +2076,7 @@ test("low-stock supply work retreats before optional actions and budgets every N
   );
   assert.match(
     safetyBody,
-    /potionQuantity >= HEALTH_POTION_FIELD_RESERVE[\s\S]{0,500}healthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO && !activeThreat[\s\S]{0,300}supplyFundingShelterUntil/,
+    /const activeThreat = nearestActiveHostile[\s\S]{0,500}if \(activeThreat\)[\s\S]{0,700}throw new SupplyFundingSafetyError[\s\S]{0,250}potionQuantity >= HEALTH_POTION_FIELD_RESERVE/,
   );
 
   const restockBody = runner.slice(
@@ -2067,6 +2084,20 @@ test("low-stock supply work retreats before optional actions and budgets every N
     runner.indexOf("async function liquidateSupersededGearForPotions"),
   );
   assert.match(restockBody, /assertSafeSupplyNpcActionState\(state, "visible health-potion restock"\)/);
+  assert.ok(
+    restockBody.indexOf("initialPotionQuantity >= HEALTH_POTION_DEPARTURE_STOCK") <
+      restockBody.indexOf('assertSafeSupplyNpcActionState(state, "visible health-potion restock")'),
+    "an already-full belt must exit before NPC safety can arm the shelter latch",
+  );
+  const fundingBody = runner.slice(
+    runner.indexOf("async function fundHealthPotionsWithSafeHuntIfNeeded"),
+    runner.indexOf("function authoritativeFundingFields"),
+  );
+  assert.ok(
+    fundingBody.indexOf("if (!shouldFundHealthPotions") <
+      fundingBody.indexOf("assertSafeSupplyNpcActionState(state, fundingReason)"),
+    "a no-op funding check must exit before NPC safety can arm the shelter latch",
+  );
   assert.match(
     restockBody,
     /const restockResourceBaseline = state[\s\S]{0,500}openNpcDialog\(merchant, "@BuySell", \{[\s\S]{0,220}resourceBaseline: restockResourceBaseline,[\s\S]{0,180}resourceAccountingGoal: restockResourceGoal/,
@@ -2349,7 +2380,11 @@ test("late harvest progression settles after corpse removal without another inpu
   );
   assert.match(
     harvestBody,
-    /!entityIsCorpse\(liveCorpse\)[\s\S]{0,1300}progressedAfterRemoval = await waitUntil\([\s\S]{0,180}progressionExpression,[\s\S]{0,100}4_000[\s\S]{0,350}completed: true, progressed: true/,
+    /!entityIsCorpse\(liveCorpse\)[\s\S]{0,1800}Boolean\(\$\{progressionExpression\}\) \|\| Boolean\(\$\{corpsePresentExpression\}\)[\s\S]{0,800}completed: true, progressed: true/,
+  );
+  assert.match(
+    harvestBody,
+    /harvest corpse reappeared during observation settle:[\s\S]{0,120}continue;/,
   );
   assert.match(
     harvestBody,
@@ -2363,6 +2398,15 @@ test("late harvest progression settles after corpse removal without another inpu
     finalSettle,
     /pressKey|clickEntity/,
     "the late-progress settle window must remain observation-only",
+  );
+  const removalSettle = harvestBody.slice(
+    harvestBody.indexOf("A successful final pass can remove the corpse"),
+    harvestBody.indexOf("harvest stopped: killed"),
+  );
+  assert.doesNotMatch(
+    removalSettle,
+    /pressKey|clickEntity/,
+    "corpse-removal observation must not send another input",
   );
 });
 
@@ -2422,7 +2466,7 @@ test("active threats preempt corpse harvesting and stationary field recovery", a
   );
   assert.match(
     runner,
-    /active recovery retreat:[\s\S]{0,500}navigateNear\(retreat, 1,[\s\S]{0,180}maxAttempts: 2/,
+    /unsafe \$\{inSupplyArea \? "supply" : "field"\} disengage:[\s\S]{0,700}navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: 2/,
   );
   assert.match(
     page,

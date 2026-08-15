@@ -903,12 +903,19 @@ async function runQuestPolicy() {
         continue;
       }
     }
-    if (await retreatFromLowStockActiveThreatIfNeeded(before)) {
-      // Low-stock safety owns the next input. In particular, do not walk
+    if (await retreatFromUnsafeActiveThreatIfNeeded(before)) {
+      // Unsafe combat recovery owns the next input. In particular, do not walk
       // toward an optional drop or NPC while an attacker is still landing
       // hits merely because the player is already inside the broad village
       // supply radius. The next policy turn will commit to the visible 0141
       // shelter entrance when the retreat raises the shelter latch.
+      continue;
+    }
+    if (await recoverQuestDepartureHealthIfNeeded(before)) {
+      // Recovery must precede every optional pickup, sale, repair, and stock
+      // gate. The broad village supply radius also contains real monster
+      // fields; letting a low-HP character enter an NPC trip from there can
+      // consume its entire potion reserve before the later departure check.
       continue;
     }
     if (await collectVisibleHealthPotionDropIfNeeded(before).catch((error) => {
@@ -1007,47 +1014,6 @@ async function runQuestPolicy() {
     })) {
       // A repair visit is a complete visible economy action. Re-read supplies,
       // threats, and the remaining damaged slots before leaving town again.
-      continue;
-    }
-    const departureMaxHp = Number(before.playerMaxHp ?? 0);
-    const departureHealthRatio = departureMaxHp > 0
-      ? Number(before.playerHp ?? 0) / departureMaxHp
-      : 1;
-    if (
-      extendedRouteEnabled && maxQuestId >= 23 &&
-      departureHealthRatio < QUEST_DEPARTURE_HEALTH_RATIO
-    ) {
-      const usedPotion = await usePotionIfNeeded(
-        before,
-        QUEST_DEPARTURE_HEALTH_RATIO,
-      );
-      const activeThreat = nearestActiveHostile(before, {
-        maxDistance: 8,
-        withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
-      });
-      if (activeThreat) {
-        const retreat = retreatPointFromHostile(before, activeThreat, 8);
-        console.log(
-          `  active recovery retreat: ${activeThreat.name} ` +
-          `${activeThreat.objectId}@${activeThreat.x},${activeThreat.y} ` +
-          `HP=${Number(before.playerHp ?? 0)}/${departureMaxHp}`,
-        );
-        if (retreat) {
-          await navigateNear(retreat, 1, {
-            maxAttempts: 2,
-            abortOnDeath: true,
-            autoUsePotions: true,
-          }).catch(() => false);
-        }
-        await delay(usedPotion ? 500 : 250);
-        continue;
-      }
-      console.log(
-        `  hold quest departure for HP recovery: ` +
-        `${Number(before.playerHp ?? 0)}/${departureMaxHp} ` +
-        `potions=${healthPotionQuantity(before)}/${HEALTH_POTION_DEPARTURE_STOCK}`,
-      );
-      await delay(usedPotion ? 900 : 500);
       continue;
     }
     if (!commonQ1Q6Completed(before)) {
@@ -4240,6 +4206,10 @@ async function harvestCorpse(corpse, goal, objectiveBefore) {
     .filter((item) => normalizeName(item.name) === objectiveName)
     .reduce((total, item) => total + Math.max(1, Number(item.quantity ?? 1)), 0);
   const progressionExpression = `(() => { const s = window.__mir2Stage5?.state ?? {}; const q = (s.questLog ?? []).find((entry) => Number(entry?.questId) === ${Number(goal.questId)}); const o = (q?.objectives ?? []).find((entry) => String(entry?.label ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase().includes(${JSON.stringify(objectiveName)})); const current = Number(o?.current ?? q?.current ?? 0); const inventory = (s.inventoryItems ?? []).filter((item) => String(item?.name ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase() === ${JSON.stringify(objectiveName)}).reduce((total, item) => total + Math.max(1, Number(item?.quantity ?? 1)), 0); return current > ${Number(objectiveBefore.current)} || inventory > ${inventoryBefore} || String(q?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'readytoturnin'; })()`;
+  const corpsePresentExpression =
+    `window.__mir2Stage5?.state?.entities?.some((entry) => ` +
+    `String(entry?.objectId) === ${JSON.stringify(String(corpse.objectId))} && ` +
+    `(entry?.dead === true || (entry?.hp != null && Number(entry.hp) <= 0))) === true`;
   let acceptedPasses = 0;
   let unacknowledgedPasses = 0;
   for (let attempt = 0; attempt < 16; attempt += 1) {
@@ -4276,7 +4246,7 @@ async function harvestCorpse(corpse, goal, objectiveBefore) {
     if (!entityIsCorpse(liveCorpse)) {
       await waitUntil(
         client,
-        `window.__mir2Stage5?.state?.entities?.some((entry) => String(entry?.objectId) === ${JSON.stringify(String(corpse.objectId))} && (entry?.dead === true || (entry?.hp != null && Number(entry.hp) <= 0))) === true`,
+        corpsePresentExpression,
         4_000,
       );
       state = await readAgentState(client);
@@ -4291,16 +4261,29 @@ async function harvestCorpse(corpse, goal, objectiveBefore) {
       // progression before declaring the exact lifecycle lost; live r30 q25
       // produced ObjectRemove followed by CannibalStem 0->1 on the next policy
       // turn.
-      const progressedAfterRemoval = await waitUntil(
+      await waitUntil(
         client,
-        progressionExpression,
+        `Boolean(${progressionExpression}) || Boolean(${corpsePresentExpression})`,
         4_000,
+      );
+      const progressedAfterRemoval = await client.evaluate(
+        `Boolean(${progressionExpression})`,
       );
       if (progressedAfterRemoval) {
         console.log(
           `  harvest progress settled after corpse removal: ${corpse.objectId}`,
         );
         return { completed: true, progressed: true };
+      }
+      state = await readAgentState(client);
+      liveCorpse = state.entities.find(
+        (entry) => String(entry.objectId) === String(corpse.objectId),
+      ) ?? null;
+      if (entityIsCorpse(liveCorpse)) {
+        console.log(
+          `  harvest corpse reappeared during observation settle: ${corpse.objectId}`,
+        );
+        continue;
       }
       console.log(`  harvest stopped: killed ${goal.monsterName} corpse ${corpse.objectId} left the visible world`);
       return { completed: false, progressed: false };
@@ -6749,6 +6732,17 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   while (Date.now() < recoveryDeadline) {
     assertRuntimeBudget("waiting for safe passive health recovery");
     state = await readAgentState(client);
+    if (
+      String(state.mapFileName) === SAFE_RECOVERY_MAP_FILE_NAME &&
+      Date.now() < supplyFundingShelterUntil
+    ) {
+      // The same function may have just completed the ordinary map transfer.
+      // Its local shelterActive value was captured on the field, so repeat the
+      // arrival acknowledgement here instead of idling at full HP until the
+      // two-minute field latch naturally expires.
+      supplyFundingShelterUntil = 0;
+      shelterActive = false;
+    }
     if (state.playerDead || state.deathOverlayVisible) {
       await recoverPlayerIfNeeded(state, { autoUsePotions: false });
       return true;
@@ -6795,11 +6789,16 @@ function localPotionSupplyIncomplete(state) {
     healthPotionQuantity(state) < HEALTH_POTION_DEPARTURE_STOCK;
 }
 
-async function retreatFromLowStockActiveThreatIfNeeded(providedState = null) {
+async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
   if (!extendedRouteEnabled || maxQuestId < 23) return false;
   const state = providedState ?? await readAgentState(client);
   if (!state?.player || state.playerDead || state.deathOverlayVisible) return false;
-  if (healthPotionQuantity(state) >= HEALTH_POTION_FIELD_RESERVE) return false;
+  const potionQuantity = healthPotionQuantity(state);
+  const maxHp = Number(state.playerMaxHp ?? 0);
+  const healthRatio = maxHp > 0 ? Number(state.playerHp ?? 0) / maxHp : 1;
+  const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE;
+  const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO;
+  if (!lowStock && !unsafeHealth) return false;
   const homeMapFileName = String(BICHON_Q1_Q9_ROUTE.mapFileName);
   const merchant = BICHON_Q1_Q9_ROUTE.npcs.merchantRuben;
   const inSupplyArea =
@@ -6814,20 +6813,76 @@ async function retreatFromLowStockActiveThreatIfNeeded(providedState = null) {
     supplyFundingShelterUntil,
     Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
   );
-  const retreat = retreatPointFromHostile(state, activeThreat, 8);
+  // A monster can momentarily occupy the same tile as the player. A pure
+  // "move away" vector then has no stable direction and may flip on every
+  // policy turn as the monster follows. Prefer the ordinary visible shelter
+  // transfer as a fixed destination whenever this map exposes one.
+  const recoveryTransfer = (state.mapTransfers ?? [])
+    .filter((transfer) => (
+      String(transfer.toMapFileName ?? "") === SAFE_RECOVERY_MAP_FILE_NAME &&
+      [transfer.minX, transfer.maxX, transfer.minY, transfer.maxY]
+        .every((value) => Number.isFinite(Number(value)))
+    ))
+    .sort((left, right) => (
+      distanceToTransferBounds(state.player, left) -
+      distanceToTransferBounds(state.player, right)
+    ))[0] ?? null;
+  const retreat = recoveryTransfer
+    ? nearestPointInTransferBounds(state.player, recoveryTransfer)
+    : retreatPointFromHostile(state, activeThreat, 8);
   console.log(
-    `  low-stock ${inSupplyArea ? "supply" : "field"} disengage: ${activeThreat.name} ` +
+    `  unsafe ${inSupplyArea ? "supply" : "field"} disengage: ${activeThreat.name} ` +
     `${activeThreat.objectId}@${activeThreat.x},${activeThreat.y} ` +
-    `potions=${healthPotionQuantity(state)}/${HEALTH_POTION_FIELD_RESERVE}`,
+    `HP=${Number(state.playerHp ?? 0)}/${maxHp} ` +
+    `potions=${potionQuantity}/${HEALTH_POTION_FIELD_RESERVE} ` +
+    `target=${retreat?.x ?? "none"},${retreat?.y ?? "none"}`,
   );
   if (retreat) {
-    await navigateNear(retreat, 1, {
+    await navigateNear(retreat, recoveryTransfer ? 0 : 1, {
       maxAttempts: 2,
       abortOnDeath: true,
-      autoUsePotions: false,
+      autoUsePotions: true,
+      allowTransferToMap: recoveryTransfer
+        ? SAFE_RECOVERY_MAP_FILE_NAME
+        : null,
+      transferKey: recoveryTransfer?.key ?? null,
     }).catch(() => false);
   }
   await delay(250);
+  return true;
+}
+
+async function recoverQuestDepartureHealthIfNeeded(providedState = null) {
+  if (!extendedRouteEnabled || maxQuestId < 23) return false;
+  let state = providedState ?? await readAgentState(client);
+  if (!state?.player || state.playerDead || state.deathOverlayVisible) return false;
+  const maxHp = Number(state.playerMaxHp ?? 0);
+  const healthRatio = maxHp > 0 ? Number(state.playerHp ?? 0) / maxHp : 1;
+  if (healthRatio >= QUEST_DEPARTURE_HEALTH_RATIO) return false;
+
+  // With no remaining potion on a non-home map, the normal visible supply
+  // return below owns the route. Holding here would starve that return forever.
+  const currentMapFileName = String(state.mapFileName ?? "");
+  if (
+    healthPotionQuantity(state) <= 0 &&
+    ![
+      String(BICHON_Q1_Q9_ROUTE.mapFileName),
+      SAFE_RECOVERY_MAP_FILE_NAME,
+    ].includes(currentMapFileName)
+  ) return false;
+
+  const usedPotion = await usePotionIfNeeded(
+    state,
+    QUEST_DEPARTURE_HEALTH_RATIO,
+  );
+  state = await readAgentState(client);
+  if (await retreatFromUnsafeActiveThreatIfNeeded(state)) return true;
+  console.log(
+    `  hold quest departure for HP recovery: ` +
+    `${Number(state.playerHp ?? 0)}/${Number(state.playerMaxHp ?? maxHp)} ` +
+    `potions=${healthPotionQuantity(state)}/${HEALTH_POTION_DEPARTURE_STOCK}`,
+  );
+  await delay(usedPotion ? 900 : 500);
   return true;
 }
 
@@ -7028,22 +7083,35 @@ function assertSafeSupplyFundingState(goal, state, requestedMonsterName = null) 
 function assertSafeSupplyNpcActionState(state, actionLabel) {
   if (!state?.player || state.playerDead || state.deathOverlayVisible) return;
   const potionQuantity = healthPotionQuantity(state);
-  if (potionQuantity >= HEALTH_POTION_FIELD_RESERVE) return;
   const maxHp = Number(state.playerMaxHp ?? 0);
   const healthRatio = maxHp > 0 ? Number(state.playerHp ?? 0) / maxHp : 1;
   const activeThreat = nearestActiveHostile(state, {
     maxDistance: 8,
     withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
   });
+  // Stock is not safety while a monster is actively landing hits. Live r34
+  // entered the broad village supply radius with nine drugs, then repeatedly
+  // attempted a distant liquidation trip while a ForestYeti consumed every
+  // one. Reject the NPC action before the stock fast-path so recovery owns the
+  // next physical input.
+  if (activeThreat) {
+    supplyFundingShelterUntil = Math.max(
+      supplyFundingShelterUntil,
+      Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
+    );
+    throw new SupplyFundingSafetyError(
+      `${activeThreat.name} ${activeThreat.objectId} is attacking during ${actionLabel}`,
+    );
+  }
+  if (potionQuantity >= HEALTH_POTION_FIELD_RESERVE) return;
   if (healthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO && !activeThreat) return;
   supplyFundingShelterUntil = Math.max(
     supplyFundingShelterUntil,
     Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
   );
-  const reason = activeThreat
-    ? `${activeThreat.name} ${activeThreat.objectId} is attacking during ${actionLabel}`
-    : `HP ratio ${healthRatio.toFixed(3)} is below ${SAFE_FUNDING_READY_HEALTH_RATIO}`;
-  throw new SupplyFundingSafetyError(reason);
+  throw new SupplyFundingSafetyError(
+    `HP ratio ${healthRatio.toFixed(3)} is below ${SAFE_FUNDING_READY_HEALTH_RATIO}`,
+  );
 }
 
 async function fundHealthPotionsWithSafeHuntIfNeeded(
@@ -7052,7 +7120,6 @@ async function fundHealthPotionsWithSafeHuntIfNeeded(
 ) {
   if (!extendedRouteEnabled || maxQuestId < 23) return false;
   let state = providedState ?? await readAgentState(client);
-  assertSafeSupplyNpcActionState(state, fundingReason);
   const merchant = BICHON_Q1_Q9_ROUTE.npcs.merchantRuben;
   const missingPotionQuantity = Math.max(
     0,
@@ -7077,6 +7144,10 @@ async function fundHealthPotionsWithSafeHuntIfNeeded(
       ? currentPotionQuantity + 1
       : HEALTH_POTION_DEPARTURE_STOCK,
   })) return false;
+  // A no-op funding check must not arm the shelter latch merely because an
+  // incidental monster attacks while stock and gold already satisfy the
+  // request. Enforce NPC-action safety only after funding is actually needed.
+  assertSafeSupplyNpcActionState(state, fundingReason);
 
   assertRuntimeBudget(`funding ${fundingReason} through safe hunting`);
   if (await collectNearbyGoldIfVisible(state)) return true;
@@ -7314,10 +7385,6 @@ function authoritativeFundingFields(monsterName, state) {
 async function restockHealthPotionsIfNeeded(providedState = null) {
   if (!extendedRouteEnabled || maxQuestId < 23 || potionRestockInFlight) return false;
   let state = providedState ?? await readAgentState(client);
-  // A post-funding purchase happens inside the same outer policy turn. The
-  // preceding hunt or liquidation may have crossed the safe HP boundary, so
-  // do not rely on the next turn's recovery gate to protect this NPC trip.
-  assertSafeSupplyNpcActionState(state, "visible health-potion restock");
   // A new ordinary gold pickup should make the shop immediately eligible.
   // Suppress only a same-balance retry after a transient UI failure.
   if (
@@ -7343,6 +7410,7 @@ async function restockHealthPotionsIfNeeded(providedState = null) {
   ) {
     potionSupplyRecallRequested = false;
   }
+  if (initialPotionQuantity >= HEALTH_POTION_DEPARTURE_STOCK) return false;
   // Do not turn a normal field continuation into a liquidation trip merely
   // because the full departure stock is no longer intact. The return policy
   // above owns that decision and recalls the character once the bounded field
@@ -7352,6 +7420,12 @@ async function restockHealthPotionsIfNeeded(providedState = null) {
     !resumingInsideLiquidationMerchant &&
     initialPotionQuantity >= HEALTH_POTION_FIELD_RESERVE
   ) return false;
+  // A post-funding purchase happens inside the same outer policy turn. The
+  // preceding hunt or liquidation may have crossed the safe HP boundary, so
+  // do not rely on the next turn's recovery gate to protect a real NPC trip.
+  // This guard intentionally follows the no-op exits above: checking an
+  // already-full belt must never create a shelter retreat by itself.
+  assertSafeSupplyNpcActionState(state, "visible health-potion restock");
   if (
     resumingInsideLiquidationMerchant &&
     initialPotionQuantity < HEALTH_POTION_DEPARTURE_STOCK &&
