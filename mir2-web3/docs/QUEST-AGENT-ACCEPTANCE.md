@@ -12,18 +12,19 @@ level-1-to-50 playthrough.
   `ef33e4764c1342620e30532fb5ffa4e784013dd2`.
 - Main integration base: `aa928b99ae7346eb6816ab8ca0b3f1063dae9394`
   (current `main`, including the squash merge of PR #235).
-- Main-based follow-up code freeze:
-  `d68674ce83f21680f4cc7546561471bd084ee216`.
+- Main-based follow-up code freezes:
+  `d68674ce83f21680f4cc7546561471bd084ee216` and
+  `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `0256c33a95f29ad9794569dbe82b79cd79e95df7` (patch-equivalent to clean
-  commit `d68674ce8`).
+  `0afc30449963721c527e5992feb532d49b2b2889` (patch-equivalent to clean
+  commit `e50a8fce0`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
-  `aa928b99a`. This follow-up adds one code/test commit plus one acceptance
-  documentation commit; source `0256c33a9` and clean `d68674ce8` have the same
-  stable patch id.
+  `aa928b99a`. This follow-up adds two code/test commits plus their acceptance
+  documentation commits; source `0256c33a9`/`0afc30449` and clean
+  `d68674ce8`/`e50a8fce0` have matching stable patch ids respectively.
 
 ## Acceptance matrix
 
@@ -79,12 +80,13 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `d68674ce8` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 172/172, including the
+The later Quest Agent-only follow-ups through `e50a8fce0` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 173/173, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
 cross-run supply recall, safe-room settlement, full-map route fallback, and
-dense-shelter escape regressions; Node syntax checks and `git diff --check`
-pass in both source and clean worktrees. The earlier full
+dense-shelter escape plus congested-portal rotation and physical-hit-target
+selection regressions; Node syntax checks and `git diff --check` pass in both
+source and clean worktrees. The earlier full
 Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
 #235 at exact head `45192e947` finished 20 successful remote checks, two
@@ -108,12 +110,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 57 finalized development reports
-through `warrior-q30-r57-supervised`:
+The private evidence directory contains 63 finalized development reports
+through `warrior-q30-r63-supervised`:
 
-- 50,306,239 ms (13 h 58 m 26 s) browser-active runtime;
-- 26,193 recorded physical inputs;
-- 279 historical kill rows, including one r44 row now proven to repeat the
+- 55,479,635 ms (15 h 24 m 39 s) browser-active runtime;
+- 28,917 recorded physical inputs;
+- 296 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 12 deaths and 11 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -223,6 +225,38 @@ browser/network diagnostic; EXP advanced from 17,483 to 18,265 and the final
 state remained level 14. This closes the two exact recovery regressions, not
 level 15 or q25/q30 completion.
 
+r58-r60 returned to ordinary progression and advanced EXP from 18,265 to
+21,721 without a death. r58 reached a real SpittingSpider field, r59 survived
+a one-HP/zero-potion retreat before a visible `0 -> 10` restock and completed
+five Oma goals, and r60 recorded seven historical kill rows while clearing a
+dense village-edge pack. The r60 aggregate includes incidental and delayed
+combat settlement, so those rows remain audit rows rather than a unique-kill
+claim.
+
+r61 resumed the dense state and eventually moved from the pack to the merchant
+approach, but spent most of its 624,288 ms budget switching among adjacent
+actors whose rendered hit surfaces were not physically clickable. It gained
+one historical kill row and EXP `21,721 -> 22,385`, then expired with zero
+potions before opening the merchant. Clean commit `e50a8fce0` (source
+`0afc30449`) restricts bounded occupancy clearing to physical hit targets,
+prefers the already selected clickable actor, and rotates an ordinary recovery
+portal only after 45 seconds without net distance improvement. The same portal
+is cooled for 120 seconds; no direct movement, target, or map command is added.
+
+r62 resumed the authoritative r61 character, escaped the same area through
+ordinary movement, sold visible Venison for gold `178 -> 428`, and bought HP
+drugs `0 -> 10` for gold `428 -> 28`. Its remaining ten-minute budget moved
+from the merchant district toward the real SpittingSpider fields, ending at
+131/135 HP with all ten potions. r63 then selected a physically clickable
+SpittingSpider, completed one normal-client goal, and advanced EXP
+`22,385 -> 22,601` in 187,583 ms with no potion use. Across r58-r63, the six
+reports add 5,173,396 ms, 2,724 inputs, 17 historical kill rows, two shop
+purchases, zero deaths/revives, zero shortcut violations, and zero critical
+browser/network diagnostics. r62 did not need to emit the new portal-rotation
+or occupancy-clear branch, so those exact branches remain unit-covered rather
+than separately live-certified. The current character is still level 14;
+q25 remains 6/20 and q30 remains open.
+
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
 summary fields; do not attach raw `report.json` files to a PR.
@@ -291,6 +325,17 @@ supply hunting or add direct movement/combat commands: the existing visible
 target requirement, level gate, attempt bound, quarantine, and mouse/keyboard
 inputs remain authoritative. r57 proves that exact crowded resume can escape,
 harvest, sell, restock, and depart without a shortcut violation.
+
+r60-r61 exposed a later dynamic-occupancy boundary rather than a static-atlas
+disconnect: the route remained connected, but the clearer could repeatedly
+choose an adjacent actor with no usable physical hit surface. Clean commit
+`e50a8fce0` probes the actual rendered sprite/nameplate surfaces before bounded
+clearing and gives the already selected clickable object priority. It also
+tracks best distance to a visible recovery portal and permits rotation only
+after a bounded 45-second stall. r62-r63 prove that the patched build resumes,
+restocks, returns to a real spawn field, and completes combat without a
+regression; the exact selector and portal-rotation branches still require a
+future naturally occurring live hit before being called live-certified.
 
 ## Sign-off wording
 

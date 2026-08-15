@@ -200,9 +200,23 @@ runtime limit. It advanced EXP from 17,483 to 18,265 with five kills, 635
 physical inputs, no death, no shortcut violation, and no critical diagnostic.
 The final state remains level 14; q25 and q30 remain open.
 
-Across the 57 finalized local development reports through r57, the harness
-recorded 50,306,239 ms (13 h 58 m 26 s) of browser-active runtime, 26,193
-physical inputs, 279 historical kill rows, 12 deaths, 11 revives, and zero
+r58-r60 advanced the same character from 18,265 to 21,721 EXP without a death,
+then r61 exposed a new dynamic-occupancy loop: the route was connected, but
+the bounded clearer repeatedly selected adjacent actors without a usable
+physical hit surface. Clean commit `e50a8fce0` (source `0afc30449`) limits that
+clearer to rendered physical hit targets, prefers the already selected
+clickable actor, and rotates an ordinary recovery portal only after a
+45-second net-progress stall. r62 resumed the same character, sold visible
+Venison for gold `178 -> 428`, bought HP drugs `0 -> 10` for gold `428 -> 28`,
+and returned toward the real field. r63 completed one SpittingSpider goal and
+advanced EXP to 22,601 with all ten potions retained. The exact new selector
+and portal-rotation branches are unit-covered; r62 escaped through ordinary
+movement without emitting either branch, so they are not separately claimed
+as live-certified.
+
+Across the 63 finalized local development reports through r63, the harness
+recorded 55,479,635 ms (15 h 24 m 39 s) of browser-active runtime, 28,917
+physical inputs, 296 historical kill rows, 12 deaths, 11 revives, and zero
 shortcut violations. One r44 kill row is now known to duplicate another row's
 object id, so the raw historical kill-row total must not be presented as a
 unique-kill count. These reports span multiple runner revisions and include
