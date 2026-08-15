@@ -48,6 +48,7 @@ import {
   shouldFundHealthPotions,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
+  unresolvedCombatResourceStrains,
 } from "./policy.mjs";
 import {
   buildProgressionEquipmentCandidates,
@@ -138,6 +139,7 @@ const evidence = {
   kills: [],
   targetQuarantines: [],
   combatResourceStrains: [],
+  combatResourceRecoveries: [],
   grindingSourceStalls: [],
   deaths: 0,
   revives: 0,
@@ -154,6 +156,23 @@ const evidence = {
       : []),
     ...(Array.isArray(resumeEvidence?.combatResourceStrains)
       ? resumeEvidence.combatResourceStrains
+      : []),
+  ].slice(-128).map((record) => ({ ...record })),
+  inheritedCombatResourceRecoveries: [
+    ...(Array.isArray(resumeEvidence?.inheritedCombatResourceRecoveries)
+      ? resumeEvidence.inheritedCombatResourceRecoveries
+      : []),
+    ...(Array.isArray(resumeEvidence?.combatResourceRecoveries)
+      ? resumeEvidence.combatResourceRecoveries
+      : []),
+    ...(Array.isArray(resumeEvidence?.kills)
+      ? resumeEvidence.kills
+          .filter((record) => record?.monsterName && Number.isFinite(Number(record?.at)))
+          .map((record) => ({
+            monsterName: String(record.monsterName),
+            at: Number(record.at),
+            reason: "confirmed-normal-client-kill",
+          }))
       : []),
   ].slice(-128).map((record) => ({ ...record })),
   inheritedGrindingSourceStalls: [
@@ -1227,6 +1246,10 @@ function adaptiveCombatPreparationGoal(state, plannedGoal) {
   }
   if (!Number.isFinite(preparationLevel)) return plannedGoal;
   if (playerLevel >= preparationLevel) {
+    recordCombatResourceRecovery(
+      plannedGoal.monsterName,
+      "adaptive-preparation-complete",
+    );
     questMonsterPreparationLevel.delete(monsterKey);
     questMonsterDeaths.delete(monsterKey);
     questMonsterResourceStrains.delete(monsterKey);
@@ -1891,6 +1914,10 @@ async function executeHuntGoal(goal, resourceBaseline = null) {
   // One unlucky pack or collision trap is not evidence that the character
   // needs an entire extra level. A successful normal-client engagement proves
   // the source is sustainable again and breaks the consecutive-strain chain.
+  recordCombatResourceRecovery(
+    goal.monsterName,
+    "successful-normal-client-engagement",
+  );
   questMonsterResourceStrains.delete(normalizeName(goal.monsterName));
 
   if (wantedItem && !goal.harvest) {
@@ -2381,8 +2408,23 @@ function rememberGrindingSourceStall(goal, goalRecord, before, after) {
   return true;
 }
 
+function recordCombatResourceRecovery(monsterName, reason) {
+  const monsterKey = normalizeName(monsterName);
+  if (
+    !monsterKey ||
+    (!questMonsterResourceStrains.has(monsterKey) &&
+      !questMonsterPreparationLevel.has(monsterKey))
+  ) return false;
+  evidence.combatResourceRecoveries.push({
+    monsterName: String(monsterName),
+    reason: String(reason),
+    at: Date.now(),
+  });
+  return true;
+}
+
 function restoreAdaptiveCombatMemory(report) {
-  const strains = [
+  const allStrains = [
     ...(Array.isArray(report?.inheritedCombatResourceStrains)
       ? report.inheritedCombatResourceStrains
       : []),
@@ -2390,6 +2432,22 @@ function restoreAdaptiveCombatMemory(report) {
       ? report.combatResourceStrains
       : []),
   ].slice(-128);
+  const recoveries = [
+    ...(Array.isArray(report?.inheritedCombatResourceRecoveries)
+      ? report.inheritedCombatResourceRecoveries
+      : []),
+    ...(Array.isArray(report?.combatResourceRecoveries)
+      ? report.combatResourceRecoveries
+      : []),
+    ...(Array.isArray(report?.kills)
+      ? report.kills.map((record) => ({
+          monsterName: record?.monsterName,
+          at: record?.at,
+          reason: "confirmed-normal-client-kill",
+        }))
+      : []),
+  ].slice(-256);
+  const strains = unresolvedCombatResourceStrains(allStrains, recoveries);
   const now = Date.now();
   for (const record of strains) {
     const monsterKey = normalizeName(record?.monsterName);
