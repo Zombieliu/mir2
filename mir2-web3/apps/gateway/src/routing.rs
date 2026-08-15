@@ -15613,35 +15613,33 @@ mod tests {
 
     #[test]
     fn shared_in_process_registry_syncs_visible_paid_sailor_round_trip_into_zone() {
+        let config = GatewayConfig::default().with_platinum_176_profile();
+        {
+            let mut account_store = config
+                .account_store
+                .lock()
+                .expect("paid sailor account fixture should lock");
+            let account = account_store
+                .accounts
+                .get_mut("demo")
+                .expect("demo account fixture should exist");
+            account
+                .characters
+                .iter_mut()
+                .find(|character| character.index == 0)
+                .expect("demo character fixture should exist")
+                .level = 14;
+            let save = account
+                .saves
+                .get_mut(&0)
+                .expect("demo character save fixture should exist");
+            save.character.level = 14;
+            save.gold = 5_000;
+        }
         let registry = ZoneRegistry::in_process();
-        let mut session =
-            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let mut session = GatewaySession::new_with_zone_registry(config, &registry);
         start_demo_character(&mut session);
-        let payload = r#"{
-            "character": {
-                "name": "BoatRouteFixture",
-                "level": 14,
-                "class": "Warrior",
-                "gender": "Male"
-            },
-            "mapFileName": "0",
-            "mapTitle": "BichonProvince",
-            "position": { "x": 251, "y": 676 },
-            "direction": "Down",
-            "hp": 85,
-            "maxHp": 85,
-            "mp": 40,
-            "maxMp": 40,
-            "experience": 0,
-            "maxExperience": 900,
-            "gold": 5000,
-            "credit": 0,
-            "inventoryItemsJson": [],
-            "beltItemsJson": [],
-            "storageItemsJson": [],
-            "equipmentItemsJson": []
-        }"#;
-        let _ = session.stage5_command("qa.applyNativeState", vec![payload.to_string()]);
+        let _ = session.transfer_map("crystal:0:251:676");
 
         let _ = session.interact(9);
         assert!(session
