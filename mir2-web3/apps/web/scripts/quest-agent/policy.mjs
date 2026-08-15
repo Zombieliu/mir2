@@ -496,19 +496,44 @@ export function chooseImmediateMeleeTarget(
  * signal when it exhausted the character's ordinary healing resources. A
  * near-death win is not sustainable evidence for an autonomous farming loop.
  */
-export function assessQuestCombatResourceStrain(
-  before,
-  after,
-  { criticalHealthRatio = 0.2, criticalPotionUse = 5 } = {},
-) {
-  const potionQuantity = (state) => [
+function policyHealthPotionQuantity(state) {
+  return [
     ...(Array.isArray(state?.beltItems) ? state.beltItems : []),
     ...(Array.isArray(state?.inventoryItems) ? state.inventoryItems : []),
   ]
     .filter((item) => /\(hp\).*drug|health.*potion/i.test(String(item?.name ?? item?.key ?? "")))
     .reduce((total, item) => total + Math.max(1, finiteNumber(item?.quantity, 1)), 0);
-  const potionsBefore = potionQuantity(before);
-  const potionsAfter = potionQuantity(after);
+}
+
+/**
+ * An ordinary journey should stop once its combat reserve becomes unsafe.
+ * A shelter escape that starts after the reserve is already exhausted cannot
+ * use that same absolute threshold: it would reject the first unchanged frame
+ * and prevent every physical retreat. Keep the guard only while the character
+ * still has both non-critical health and at least one emergency potion. The
+ * caller still uses normal movement, death detection, and visible revival.
+ */
+export function shouldEnforceShelterEscapeResourceBudget(
+  state,
+  { criticalHealthRatio = 0.2 } = {},
+) {
+  const hp = Math.max(0, finiteNumber(state?.playerHp, 0));
+  const maxHp = Math.max(0, finiteNumber(state?.playerMaxHp, 0));
+  const healthRatio = maxHp > 0 ? hp / maxHp : 1;
+  return (
+    hp > 0 &&
+    healthRatio > Math.max(0, finiteNumber(criticalHealthRatio, 0.2)) &&
+    policyHealthPotionQuantity(state) > 0
+  );
+}
+
+export function assessQuestCombatResourceStrain(
+  before,
+  after,
+  { criticalHealthRatio = 0.2, criticalPotionUse = 5 } = {},
+) {
+  const potionsBefore = policyHealthPotionQuantity(before);
+  const potionsAfter = policyHealthPotionQuantity(after);
   const potionsUsed = Math.max(0, potionsBefore - potionsAfter);
   const hp = Math.max(0, finiteNumber(after?.playerHp, 0));
   const maxHp = Math.max(0, finiteNumber(after?.playerMaxHp, 0));
