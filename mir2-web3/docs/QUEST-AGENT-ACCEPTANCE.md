@@ -37,7 +37,7 @@ level-1-to-50 playthrough.
 | Physical input and read-only observation contract | PASS | CDP mouse/keyboard/text only; static and runtime shortcut audits report zero violations. |
 | Resume, reconnect, death, potion, merchant, navigation, combat, harvest, and equipment framework | PASS for staged use | Exercised across the local development soak; failures remain explicit and resumable. |
 | Warrior q1-q9 functional route | PASS | One finalized certificate reached all required authoritative stages with 684 inputs, 18 kills, no death, and zero shortcut violations. |
-| Current extended Warrior chain | PARTIAL | q22-q24, q28, and q29 are complete; q25 is 6/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
+| Current extended Warrior chain | PARTIAL | The resumed character has reached level 15. q22-q24, q28, and q29 are complete; q25 is 6/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
 | Three-class route generation | STATIC PASS | Warrior, Wizard, and Taoist manifests each contain 140 level-1-to-50 quests and report zero generated blockers. This is not live completion. |
 | Clean visual-assets certificate | NOT ACCEPTED | The completed q1-q9 run contains missing-raster diagnostics. A later incomplete segment is diagnostics-clean, but cannot replace a complete clean run. |
 | Contiguous Warrior level 1-50 | NOT ACCEPTED | No single/resumed evidence chain has completed it. |
@@ -117,13 +117,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 69 finalized development reports
-through `warrior-q30-r70-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 70 finalized development reports
+through `warrior-q30-r71-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 61,299,699 ms (17 h 1 m 40 s) browser-active runtime;
-- 32,248 recorded physical inputs;
-- 318 historical kill rows, including one r44 row now proven to repeat the
+- 61,864,668 ms (17 h 11 m 5 s) browser-active runtime;
+- 32,510 recorded physical inputs;
+- 330 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 13 deaths and 12 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -349,6 +349,27 @@ visually inspected and agree with the structured state. This closes a complete
 live recovery/restock cycle and preserves a resumable position; it remains a
 0/1 grind-goal segment and does not certify level 15, q25, or q30. Those quest
 states remain 6/20 and 0/1 respectively.
+
+r71 resumed the stocked r70 field position, physically reached the nearest
+SpittingSpider band, and completed four of four grind goals. The fourth kill
+crossed the authoritative threshold from level 14 and EXP 29,945/30,000 to
+level 15 and EXP 377/40,000; the planner then immediately replaced the
+preparation goal with q25 CannibalPlant hunting and harvesting. It killed six
+CannibalPlants and two certified incidental threats. Four q25 harvest flows
+completed, while two were explicitly marked retryable failures after an Oma or
+SpittingSpider preempted the corpse and the corpse left the visible world.
+None of those six plants produced the required random quest drops, so q25
+honestly remains 6/20 rather than being advanced from kill count alone.
+
+The r71 report records 564,969 ms, 262 physical inputs, 8/10 successful goals,
+12 kill rows, two visible gold pickups, zero deaths/revives, zero potion use,
+zero shortcuts, zero quarantines, and zero critical browser/network
+diagnostics. It stopped at its explicit ten-goal bound, not at a runtime or
+route failure. The final state is map 0 `(124,214)`, level 15 with EXP
+2,009/40,000, 149/149 HP, ten HP drugs, and 421 gold. The level-up combat frame,
+q25 corpse frame, and final frame were visually inspected and agree with the
+structured report. This certifies the level-15 transition and live q25 route,
+not q25 or q30 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
