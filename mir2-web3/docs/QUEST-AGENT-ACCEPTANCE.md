@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 106 finalized development reports
-through `warrior-q30-r107-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 107 finalized development reports
+through `warrior-q30-r108-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 94,442,204 ms (26 h 14 m 02 s) browser-active runtime;
-- 49,861 recorded physical inputs;
-- 500 historical kill rows, including one r44 row now proven to repeat the
+- 95,352,315 ms (26 h 29 m 12 s) browser-active runtime;
+- 50,360 recorded physical inputs;
+- 504 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 18 deaths and 17 completed revives across intentionally interrupted and
+- 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -1131,6 +1131,31 @@ authoritative balance are claimed. The character ends at map-0 `(56,264)`,
 remains 8/20 and q30 remains 0/1. All three private frames render coherently.
 This is strong sustained level-17 preparation throughput, not level-17 or
 q25/q30 completion.
+
+r108 resumes inside that live Spider region, but a dense bootstrap pack drops
+HP to 42/162 and drugs from ten to five before the first goal can advance. The
+resource guard cools the source. One normal death/revive follows; Merchant
+Ruben visibly restores drugs `2 -> 10` for 320 gold, and four visible transfer
+milestones cover two ordinary safe-room cycles. Merchant Clara is contacted,
+but no durability or gold delta is recorded, so no repair is claimed.
+
+Inherited risk then switches the preparation source from SpittingSpider to
+ForestYeti. The agent completes 2/4 goals against two distinct Yeti ids and
+records two additional responsive Scarecrow occupancy kills while withdrawing;
+one other Scarecrow receives the exact fast-timeout quarantine. The finalized
+r108 report records 910,111 ms, 499 physical inputs, four kill rows, one
+death/revive, eight potion uses, one purchase, zero shortcuts or critical
+browser/network diagnostics, and EXP `8,557 -> 9,025/50,000`. The immediate
+row deltas do not account for every delayed settlement, so only the total
+authoritative boundary is claimed.
+
+It ends resumably at map-0 `(213,578)`, 155/162 HP, ten drugs, one Venison, 99
+gold, and 40,975 EXP remaining to level 17; q25 remains 8/20 and q30 remains
+0/1. The initial and first-goal private frames show visible rectangular terrain
+patching, while the final ForestYeti frame renders coherently. This remains a
+frontend observation rather than a visual certificate. Adaptive-source reach
+and recovery are proven, but sustained ForestYeti throughput and level 17
+remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
