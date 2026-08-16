@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 112 finalized development reports
-through `warrior-q30-r113-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 113 finalized development reports
+through `warrior-q30-r114-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 99,860,687 ms (27 h 44 m 21 s) browser-active runtime;
-- 52,777 recorded physical inputs;
-- 525 historical kill rows, including one r44 row now proven to repeat the
+- 100,761,537 ms (27 h 59 m 22 s) browser-active runtime;
+- 53,226 recorded physical inputs;
+- 538 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1269,6 +1269,29 @@ browser/network diagnostics. Authoritative EXP advances `13,305 ->
 Venison, 214 gold, and 36,203 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. All three private frames render coherently. Three Yeti goals
 are proven; the long Spider migration and level 17 remain open.
+
+r114 resumes the long Spider migration, re-evaluates to a nearer 137-tile
+field, and reaches it entirely through ordinary movement. The first candidate
+point is empty at arrival, so the agent truthfully searches the remaining live
+spawn cluster rather than inventing a target. Once it finds the cluster, it
+completes 13 consecutive SpittingSpider goals against 13 distinct object ids.
+
+Every successful goal snapshot has positive authoritative EXP movement. One
+individual row has zero immediate delta, but its enclosing goal advances and
+the report uses the total authoritative boundary rather than fabricating an
+extra immediate reward. A single visible gold pickup changes the balance `214
+-> 286`. The fourteenth goal exhausts the runtime while moving among empty
+candidate points, so it is not counted as a kill or completion.
+
+The finalized r114 report records 900,850 ms, 449 physical inputs, 13/14
+successful goals, 13 target-specific kill rows, one gold pickup, and zero
+deaths, revives, potion uses, purchases, quarantines, shortcut violations, or
+critical browser/network diagnostics. Authoritative EXP advances `13,797 ->
+19,197/50,000`; it ends at map-0 `(607,106)`, 153/162 HP, ten drugs, no
+Venison, 286 gold, and 30,803 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. The migrated
+Spider source and sustained target throughput are proven; level 17 remains
+open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
