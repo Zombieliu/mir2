@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 90 finalized development reports
-through `warrior-q30-r91-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 91 finalized development reports
+through `warrior-q30-r92-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 80,044,652 ms (22 h 14 m 4 s) browser-active runtime;
-- 42,200 recorded physical inputs;
-- 420 historical kill rows, including one r44 row now proven to repeat the
+- 80,934,015 ms (22 h 28 m 54 s) browser-active runtime;
+- 42,622 recorded physical inputs;
+- 439 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -798,6 +798,27 @@ the current SpittingSpider corridor target; q25 remains 8/20 and q30 remains
 0/1. The start and final frames were visually inspected and match the town
 funding state followed by the fully stocked travel state. This closes the r87-
 r90 low-funds recovery chain, not field arrival, level 16, or quest completion.
+
+r92 resumed the exact r91 departure state and independently selected a nearer
+SpittingSpider field around `(111,318)` instead of mechanically following the
+old corridor target. The normal client walked from `(306,389)` into that live
+field, rotated through visible targets, and cooled down one temporarily visible
+but unreachable target rather than orbiting it. Four visible gold pickups
+advanced gold `89 -> 199 -> 292 -> 380 -> 529`; the ten departure HP drugs were
+not consumed.
+
+The finalized r92 report records 889,363 ms, 422 physical inputs, 19/20
+successful goals, 19 target-specific SpittingSpider kill rows across nine live
+server object ids, four visible gold pickups, zero death/revive, zero potion
+use, zero shortcuts, and zero critical browser/network diagnostics. It advances
+authoritative EXP `23,645 -> 31,637/40,000` and ends on map 0 at `(63,334)`
+with 145/149 HP, ten HP drugs, one Venison, and 529 gold. Its goal budget ends
+during the twentieth target, so the expected nonzero process exit means the
+full route remains incomplete; q25 is still 8/20, q30 is still 0/1, and level
+16 has not yet been reached. The start, first combat, and final frames were
+visually inspected and match the reported transform, live SpittingSpider
+combat, drops, HP, EXP, and gold state. This is a high-throughput preparation
+segment, not a q25/q30 or level-16 completion certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
