@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 87 finalized development reports
-through `warrior-q30-r88-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 88 finalized development reports
+through `warrior-q30-r89-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 77,339,163 ms (21 h 28 m 59 s) browser-active runtime;
-- 40,800 recorded physical inputs;
-- 409 historical kill rows, including one r44 row now proven to repeat the
+- 78,239,585 ms (21 h 43 m 59 s) browser-active runtime;
+- 41,277 recorded physical inputs;
+- 415 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -737,6 +737,28 @@ were visually inspected and show the zero-stock field resume followed by the
 live Ruben area under one-point incoming damage. This proves safe settlement
 and physical entrance disengagement, not funding, restock, level 16, or quest
 completion.
+
+r89 resumed beside the supply area and first attempted a visible Deer harvest;
+active Scarecrow pressure preempted it without any Venison inventory increase,
+so no new supply was claimed. After a completed map-0141 settlement, the agent
+sold one retained Venison for a visible gold change `14 -> 213` and Merchant
+Ruben performed the affordable partial restock `0 -> 5` for 200 gold. It then
+used ordinary Scarecrow combat as a fallback funding source, but none of the
+six target-specific kill rows produced a visible gold pickup before the run
+returned through another completed safe-room settlement.
+
+The finalized r89 report records 900,422 ms, 477 physical inputs, zero goals,
+six Scarecrow kill rows across four server ids, one visible purchase, zero
+gold/supply pickups, five target quarantines, zero death/revive, zero potion
+use, zero shortcuts, and zero critical browser/network diagnostics. Three
+quarantines use the incidental two-attack/four-second reason, while two funding
+combat targets retain the conservative five-attack/15-second reason; this live
+run exercises both policy branches without counting either failure as a kill.
+It ends on map 0 at `(300,622)` with 149/149 HP, five HP drugs, 13 gold, and EXP
+23,369/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and match the partial-stock recovery. This proves a
+truthful low-funds fallback and policy split, not full funding, level 16, or
+quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
