@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 83 finalized development reports
-through `warrior-q30-r84-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 84 finalized development reports
+through `warrior-q30-r85-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 73,735,966 ms (20 h 28 m 55 s) browser-active runtime;
-- 38,862 recorded physical inputs;
-- 399 historical kill rows, including one r44 row now proven to repeat the
+- 74,636,420 ms (20 h 43 m 56 s) browser-active runtime;
+- 39,373 recorded physical inputs;
+- 403 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -654,6 +654,27 @@ target-specific death/EXP settlement, so it is retained as combat-in-progress
 rather than relabeled as a post-death visual certificate. This proves the
 alternate field's sustained throughput and bounded withdrawal, not safe-room,
 level-16, or quest completion.
+
+r85 resumed the exact r84 mid-withdrawal transform with the persisted resource
+recall active. It crossed the remaining 138-tile town journey through the same
+dense occupancy band, confirming four ordinary low-level kills and rotating
+six different no-response blockers without counting those failures as kills.
+Merchant Ruben then performed a visible partial restock `1 -> 5` for the
+available 160 gold. Because an attacker was still present and the character
+could not afford the ten-drug departure stock, the planner entered map 0141
+instead of returning to combat.
+
+The finalized r85 report records 900,454 ms, 511 physical inputs, four
+confirmed kill rows, six target quarantines, one visible purchase, zero
+completed goals, zero death/revive, zero potion use, zero shortcuts, and zero
+critical browser/network diagnostics. Authoritative EXP advanced independently
+from 19,983 to 21,205. It ends inside map 0141 at `(2,11)` with 149/149 HP, five
+HP drugs, and 9 gold; q25 remains 8/20 and q30 remains 0/1. The safe-room pace
+reached 17,416 ms of the 20-second settlement window before the run budget
+expired, and two optional interior pace targets had no live collision path.
+The start and final frames were visually inspected and match the field-to-store
+transition. This closes the physical withdrawal and partial restock, not the
+safe-room settlement, full departure stock, level-16, or quest milestone.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
