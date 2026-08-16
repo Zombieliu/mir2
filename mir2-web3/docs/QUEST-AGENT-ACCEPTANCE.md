@@ -126,12 +126,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 94 finalized development reports
-through `warrior-q30-r95-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 95 finalized development reports
+through `warrior-q30-r96-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 83,659,838 ms (23 h 14 m 19 s) browser-active runtime;
-- 44,187 recorded physical inputs;
+- 84,560,073 ms (23 h 29 m 20 s) browser-active runtime;
+- 44,590 recorded physical inputs;
 - 447 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
@@ -886,6 +886,22 @@ full 149/149 HP, five HP drugs, zero Venison, 89 gold, and authoritative EXP
 The start and final frames were visually inspected and match the live Oma field
 and crowded entrance state. Exact-state r96 replay is required before treating
 the remaining entrance congestion as a repeatable recovery defect.
+
+The exact-state r96 replay supplies that counterexample. It ran for 900,235 ms
+and sent 403 ordinary keyboard/mouse inputs, but the authoritative player stayed
+on map 0 at `(302,622)` for the whole report. The recovery loop repeatedly
+waited at distance zero from the visible one-cell 0141 entrance, rotated to the
+alternate entrance after its bounded stall window, then returned to the same
+source without ever observing a map change. It records 0/0 completed goals,
+zero kills, zero deaths/revives, zero potion uses or purchases, ten conservative
+target quarantines, zero shortcuts, and zero critical browser/network
+diagnostics. Final HP remains 149/149, EXP remains 33,525/40,000, inventory
+remains five HP drugs and no Venison, gold remains 89, q25 remains 8/20, and
+q30 remains 0/1. Both private frames were visually inspected and confirm the
+same `(302,622)` endpoint; the fatal capture also contains transient light-column
+and roof ghosting, so it is evidence of the navigation stall rather than a
+frontend rendering certificate. This establishes a resumable transfer-source
+defect; it does not establish q25/q30 or level-16 progress.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
