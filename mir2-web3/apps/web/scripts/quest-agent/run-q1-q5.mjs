@@ -8,6 +8,7 @@ import {
   QUEST_AGENT_CONTRACT,
   allQ1Q9Completed,
   assessGrindingSourceStall,
+  assessNavigationPositionCycle,
   assessQuestCombatResourceStrain,
   assessRecoveryTransferProgress,
   chooseImmediateMeleeTarget,
@@ -31,6 +32,7 @@ import {
   nearestGroundDropByName,
   nearestHealthPotionGroundDrop,
   nearestBlockingHostile,
+  nearestQuarantinedHostile,
   ordinarySupplyLootForSale,
   offensiveCombatSkillHotkey,
   restorativeSelfSkillHotkey,
@@ -221,6 +223,7 @@ const recordedCombatResourceStrainGoals = new WeakSet();
 const groundDropCooldownUntil = new Map();
 const navigationDetourByTarget = new Map();
 const navigationRejectedCollisionCellUntil = new Map();
+const navigationPositionHistoryByMap = new Map();
 const collisionAtlasByMap = new Map();
 let collisionRegionCache = null;
 let authoritativeRoute = null;
@@ -4619,6 +4622,7 @@ async function navigateNear(
   const visitedPositions = new Set();
   const positionVisitCount = new Map();
   let denseOccupancyClears = 0;
+  let lastQuarantineEscapeObjectId = null;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     assertRuntimeBudget(`navigating to ${requestedTarget.x},${requestedTarget.y}`);
     const beforeRecovery = await readAgentState(client);
@@ -4672,6 +4676,39 @@ async function navigateNear(
     );
     const player = state.player;
     if (!player) throw new Error("player position unavailable during navigation");
+    const navigationCycle = assessNavigationPositionCycle({
+      history: navigationPositionHistoryByMap.get(expectedMapFileName) ?? [],
+      position: player,
+      now: Date.now(),
+    });
+    navigationPositionHistoryByMap.set(expectedMapFileName, navigationCycle.history);
+    const quarantinedTravelThreat = nearestQuarantinedHostile(
+      state,
+      quarantinedMonsterUntil,
+      { maxDistance: 6 },
+    );
+    const quarantineEscapeTarget = quarantinedTravelThreat
+      ? retreatPointFromHostile(state, quarantinedTravelThreat, 10)
+      : null;
+    if (quarantineEscapeTarget) {
+      // The target-specific no-response quarantine proves that selecting this
+      // pursuer again cannot clear the route. Its current authoritative tile
+      // remains a dynamic blocker, and a ten-cell collision-planned retreat
+      // lets normal Shift/direction input create real separation before the
+      // original field route is reconsidered.
+      rejectCollisionCell(quarantinedTravelThreat);
+      if (lastQuarantineEscapeObjectId !== String(quarantinedTravelThreat.objectId)) {
+        console.log(
+          `  escape quarantined travel threat: ${quarantinedTravelThreat.name} ` +
+          `${quarantinedTravelThreat.objectId}@${quarantinedTravelThreat.x},` +
+          `${quarantinedTravelThreat.y} toward=${quarantineEscapeTarget.x},` +
+          `${quarantineEscapeTarget.y}`,
+        );
+        lastQuarantineEscapeObjectId = String(quarantinedTravelThreat.objectId);
+      }
+    } else {
+      lastQuarantineEscapeObjectId = null;
+    }
     if (
       clearTrivialOccupancy &&
       denseOccupancyClears < 4 &&
@@ -4743,8 +4780,10 @@ async function navigateNear(
       navigationDetourByTarget.delete(detourKey);
       collisionRegionCache = null;
     }
-    const steeringTarget = forcedDetourTarget ?? liveTarget;
-    const steeringDesiredDistance = forcedDetourTarget ? 1 : desiredDistance;
+    const steeringTarget = quarantineEscapeTarget ?? forcedDetourTarget ?? liveTarget;
+    const steeringDesiredDistance = quarantineEscapeTarget || forcedDetourTarget
+      ? 1
+      : desiredDistance;
     const steeringDistance = chebyshev(player, steeringTarget);
     // A Crystal movement portal is a one-cell trigger. Four tiles is enough
     // to see and click its map surface, but not enough for the normal client
@@ -4883,7 +4922,7 @@ async function navigateNear(
       );
       continue;
     }
-    if (distance <= desiredDistance) {
+    if (!quarantineEscapeTarget && distance <= desiredDistance) {
       navigationDetourByTarget.delete(detourKey);
       return true;
     }
@@ -4979,9 +5018,12 @@ async function navigateNear(
       rejectedCollisionCells.add(signature);
       return null;
     });
+    const crossChunkQuarantineCycle = Boolean(
+      quarantineEscapeTarget && navigationCycle.cycling,
+    );
     if (
       usedGlobalCollisionPath &&
-      signatureVisits >= 3 &&
+      (signatureVisits >= 3 || crossChunkQuarantineCycle) &&
       collisionPath?.[1]
     ) {
       // A server-acknowledged two-cell oscillation still reports every key
@@ -4990,11 +5032,29 @@ async function navigateNear(
       // first BFS cell and recompute once. This preserves legitimate detours
       // that temporarily increase distance, while breaking A<->B loops around
       // a stale atlas edge or moving occupancy cell.
-      const cyclingCell = `${collisionPath[1].x},${collisionPath[1].y}`;
+      const crossChunkReturnCell = crossChunkQuarantineCycle
+        ? navigationCycle.cycleCells.find(
+            (cell) => `${cell.x},${cell.y}` !== signature,
+          ) ?? null
+        : null;
+      const cyclingCell = crossChunkReturnCell
+        ? `${crossChunkReturnCell.x},${crossChunkReturnCell.y}`
+        : `${collisionPath[1].x},${collisionPath[1].y}`;
       rejectCollisionCell(cyclingCell);
+      const cyclingReason = crossChunkQuarantineCycle
+        ? "cross-chunk quarantined "
+        : "";
       console.log(
-        `  reject cycling collision edge: ${signature}->${cyclingCell}; replanning`,
+        `  reject cycling collision edge: ${signature}->${cyclingCell}; ` +
+        `${cyclingReason}replanning`,
       );
+      if (crossChunkQuarantineCycle) {
+        navigationPositionHistoryByMap.set(expectedMapFileName, [{
+          x: Number(player.x),
+          y: Number(player.y),
+          at: Date.now(),
+        }]);
+      }
       collisionPath = await collisionAtlasPathToward(
         player,
         steeringTarget,
@@ -5017,7 +5077,7 @@ async function navigateNear(
         `${steeringTarget.x},${steeringTarget.y}`,
       );
     }
-    if (!forcedDetourTarget && collisionPath?.detourEndpoint) {
+    if (!quarantineEscapeTarget && !forcedDetourTarget && collisionPath?.detourEndpoint) {
       forcedDetourTarget = {
         ...collisionPath.detourEndpoint,
         createdAt: Date.now(),
@@ -6756,6 +6816,7 @@ async function recoverPlayerIfNeeded(
     // the old field position, so restart route choice from the authoritative
     // revive transform.
     navigationDetourByTarget.clear();
+    navigationPositionHistoryByMap.clear();
     collisionRegionCache = null;
     state = await readAgentState(client);
     if (await client.evaluate("document.querySelector('.inventory-window') != null")) {

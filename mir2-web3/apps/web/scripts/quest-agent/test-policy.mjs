@@ -15,6 +15,7 @@ import {
   BICHON_Q1_Q9_ROUTE,
   QUEST_AGENT_CONTRACT,
   assessGrindingSourceStall,
+  assessNavigationPositionCycle,
   assessQuestCombatResourceStrain,
   auditOutgoingBrowserCommand,
   chooseImmediateMeleeTarget,
@@ -38,6 +39,7 @@ import {
   nearestGroundDropByName,
   nearestHealthPotionGroundDrop,
   nearestBlockingHostile,
+  nearestQuarantinedHostile,
   nearestRespawnApproachPoint,
   objectiveProgress,
   offensiveCombatSkillHotkey,
@@ -618,6 +620,83 @@ test("incidental travel no-response budget is shorter than quest combat", async 
     runner,
     /Date\.now\(\) - since > noResponseBudget\.minimumElapsedMs[\s\S]{0,120}outgoingAttackCount >= noResponseBudget\.minimumAttackCount/,
   );
+});
+
+test("R121 cross-chunk two-tile oscillation remains detectable", () => {
+  let history = [];
+  let assessment = null;
+  const samples = [
+    { x: 268, y: 621, at: 1_000 },
+    { x: 268, y: 622, at: 2_000 },
+    { x: 268, y: 621, at: 3_000 },
+    { x: 268, y: 622, at: 4_000 },
+  ];
+  for (const sample of samples) {
+    assessment = assessNavigationPositionCycle({
+      history,
+      position: sample,
+      now: sample.at,
+    });
+    history = assessment.history;
+  }
+
+  assert.equal(assessment.cycling, true);
+  assert.deepEqual(assessment.cycleCells, [
+    { x: 268, y: 621 },
+    { x: 268, y: 622 },
+  ]);
+
+  const expired = assessNavigationPositionCycle({
+    history,
+    position: { x: 270, y: 622 },
+    now: 40_001,
+  });
+  assert.equal(expired.cycling, false);
+  assert.deepEqual(expired.history, [{ x: 270, y: 622, at: 40_001 }]);
+});
+
+test("R121 quarantined adjacent pursuer is selected for physical disengage", () => {
+  const state = {
+    player: { x: 268, y: 621 },
+    entities: [
+      {
+        objectId: "206608",
+        kind: "monster",
+        disposition: "hostile",
+        name: "Scarecrow",
+        dead: false,
+        hp: 20,
+        x: 269,
+        y: 622,
+      },
+      {
+        objectId: "quest-target",
+        kind: "monster",
+        disposition: "hostile",
+        name: "Spider",
+        dead: false,
+        hp: 20,
+        x: 274,
+        y: 621,
+      },
+    ],
+  };
+  const quarantinedUntil = new Map([["206608", 121_000]]);
+
+  assert.equal(nearestQuarantinedHostile(
+    state,
+    quarantinedUntil,
+    { now: 1_000, maxDistance: 6 },
+  )?.objectId, "206608");
+  assert.equal(nearestQuarantinedHostile(
+    state,
+    quarantinedUntil,
+    { now: 121_000, maxDistance: 6 },
+  ), null);
+  assert.deepEqual(retreatPointFromHostile(state, state.entities[0], 10), {
+    x: 258,
+    y: 611,
+  });
 });
 
 test("a currently attacking requested monster overrides stale approach cooldown", async () => {
@@ -2081,7 +2160,7 @@ test("collision escape exhausts the bounded direction set around dynamic occupan
   assert.doesNotMatch(probesBody, /!entry\.dead/);
   assert.match(
     runner,
-    /signatureVisits >= 3[\s\S]{0,900}collisionAtlasPathToward/,
+    /signatureVisits >= 3 \|\| crossChunkQuarantineCycle[\s\S]{0,1800}collisionAtlasPathToward/,
   );
 });
 
@@ -2115,6 +2194,37 @@ test("long travel flees while moving and clears a safe attacker only after stall
   assert.match(
     runner,
     /const revivesBeforeSearch = evidence\.revives[\s\S]{0,500}main policy must replan from town/,
+  );
+});
+
+test("quarantined pursuers break cross-chunk travel loops with physical retreat", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const navigationBody = runner.slice(
+    runner.indexOf("async function navigateNear("),
+    runner.indexOf("async function collisionPathToward("),
+  );
+  assert.match(
+    navigationBody,
+    /assessNavigationPositionCycle\(\{[\s\S]{0,500}navigationPositionHistoryByMap\.set/,
+    "two-attempt resource chunks must share authoritative position history",
+  );
+  assert.match(
+    navigationBody,
+    /nearestQuarantinedHostile\([\s\S]{0,300}retreatPointFromHostile\(state, quarantinedTravelThreat, 10\)/,
+  );
+  assert.match(navigationBody, /escape quarantined travel threat:/);
+  assert.match(
+    navigationBody,
+    /const steeringTarget = quarantineEscapeTarget \?\? forcedDetourTarget \?\? liveTarget/,
+  );
+  assert.match(
+    navigationBody,
+    /!quarantineEscapeTarget && distance <= desiredDistance/,
+    "reaching the old patrol radius must not cancel an active quarantine escape",
+  );
+  assert.match(
+    navigationBody,
+    /crossChunkQuarantineCycle[\s\S]{0,900}cross-chunk quarantined/,
   );
 });
 
