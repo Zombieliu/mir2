@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 111 finalized development reports
-through `warrior-q30-r112-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 112 finalized development reports
+through `warrior-q30-r113-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 98,960,106 ms (27 h 29 m 20 s) browser-active runtime;
-- 52,302 recorded physical inputs;
-- 521 historical kill rows, including one r44 row now proven to repeat the
+- 99,860,687 ms (27 h 44 m 21 s) browser-active runtime;
+- 52,777 recorded physical inputs;
+- 525 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1247,6 +1247,28 @@ Venison, 214 gold, and 36,695 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. All three private frames render coherently. Supply recovery
 and one Yeti goal are proven; the runtime cap lands during a later physical
 repair route, so another repair and level 17 remain open.
+
+r113 resumes the repair route, but nearby RakingCat and Scarecrow occupancy
+prevents the Whitney dialog from opening. No durability or gold delta occurs,
+so the agent explicitly defers the optional repair and returns to progression.
+It then completes three consecutive ForestYeti goals against three distinct
+target ids. Each goal snapshot advances authoritative EXP, and one responsive
+Scarecrow is recorded separately as incidental occupancy combat.
+
+After the third goal, expired live-risk memory causes the planner to choose a
+different SpittingSpider field. Ordinary movement reduces that route from
+about 405 to 152 tiles, including a coherent static-terrain detour, before the
+runtime cap. The fourth goal is therefore incomplete and is not counted as a
+Spider kill or throughput success.
+
+The finalized r113 report records 900,581 ms, 475 physical inputs, 3/4
+successful goals, four kill rows, and zero deaths, revives, potion uses,
+purchases, pickups, quarantines, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `13,305 ->
+13,797/50,000`; it ends at map-0 `(365,231)`, 156/162 HP, ten drugs, no
+Venison, 214 gold, and 36,203 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. Three Yeti goals
+are proven; the long Spider migration and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
