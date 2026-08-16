@@ -130,6 +130,60 @@ export function safeRecoveryPaceTargets(anchor, distance = 2) {
 }
 
 /**
+ * Preserve a short authoritative-position history across bounded navigation
+ * calls and identify the A,B,A,B pattern produced by a moving occupancy loop.
+ * Resource-sensitive travel deliberately uses two-attempt chunks, so a visit
+ * counter local to one call can never observe the third return to either cell.
+ */
+export function assessNavigationPositionCycle({
+  history = [],
+  position,
+  now = Date.now(),
+  windowMs = 30_000,
+  maxEntries = 8,
+} = {}) {
+  const observedAt = finiteNumber(now, Date.now());
+  const window = Math.max(1, finiteNumber(windowMs, 30_000));
+  const limit = Math.max(4, Math.floor(finiteNumber(maxEntries, 8)));
+  const recent = (Array.isArray(history) ? history : [])
+    .map((entry) => ({
+      x: Number(entry?.x),
+      y: Number(entry?.y),
+      at: Number(entry?.at),
+    }))
+    .filter((entry) => (
+      Number.isFinite(entry.x) &&
+      Number.isFinite(entry.y) &&
+      Number.isFinite(entry.at) &&
+      entry.at >= observedAt - window &&
+      entry.at <= observedAt
+    ));
+  const x = Number(position?.x);
+  const y = Number(position?.y);
+  if (Number.isFinite(x) && Number.isFinite(y)) {
+    recent.push({ x, y, at: observedAt });
+  }
+  if (recent.length > limit) recent.splice(0, recent.length - limit);
+
+  const tail = recent.slice(-4);
+  const same = (left, right) => left?.x === right?.x && left?.y === right?.y;
+  const cycling = tail.length === 4 &&
+    same(tail[0], tail[2]) &&
+    same(tail[1], tail[3]) &&
+    !same(tail[0], tail[1]);
+  return {
+    history: recent,
+    cycling,
+    cycleCells: cycling
+      ? [
+          { x: tail[0].x, y: tail[0].y },
+          { x: tail[1].x, y: tail[1].y },
+        ]
+      : [],
+  };
+}
+
+/**
  * Track net progress toward one visible recovery transfer. Dynamic actors can
  * make every immediate movement probe fail while the static route remains
  * connected; callers may rotate to another ordinary portal only after this
@@ -519,6 +573,44 @@ export function nearestActiveHostile(
     .sort((left, right) => (
       distance(left) - distance(right) ||
       finiteNumber(right?.attackUntil, 0) - finiteNumber(left?.attackUntil, 0) ||
+      String(left?.objectId ?? "").localeCompare(String(right?.objectId ?? ""))
+    ))[0] ?? null;
+}
+
+/**
+ * Return the nearest live hostile whose exact object id is still under the
+ * target-specific no-response quarantine. This is separate from an ordinary
+ * combat cooldown: navigation should physically create separation from an
+ * unresponsive pursuer instead of selecting it for another attack cycle.
+ */
+export function nearestQuarantinedHostile(
+  state,
+  quarantinedUntil,
+  {
+    maxDistance = 6,
+    now = Date.now(),
+  } = {},
+) {
+  const player = state?.player;
+  if (!player || !(quarantinedUntil instanceof Map)) return null;
+  const observedAt = finiteNumber(now, Date.now());
+  const radius = Math.max(0, finiteNumber(maxDistance, 6));
+  const distance = (entity) => Math.max(
+    Math.abs(finiteNumber(entity?.x, 0) - finiteNumber(player.x, 0)),
+    Math.abs(finiteNumber(entity?.y, 0) - finiteNumber(player.y, 0)),
+  );
+  return (Array.isArray(state?.entities) ? state.entities : [])
+    .filter((entity) => (
+      entity?.kind === "monster" &&
+      entity?.disposition === "hostile" &&
+      entityIsLiveActor(entity) &&
+      Number(quarantinedUntil.get(String(entity?.objectId ?? "")) ?? 0) > observedAt &&
+      distance(entity) <= radius
+    ))
+    .sort((left, right) => (
+      distance(left) - distance(right) ||
+      Number(quarantinedUntil.get(String(right?.objectId ?? "")) ?? 0) -
+        Number(quarantinedUntil.get(String(left?.objectId ?? "")) ?? 0) ||
       String(left?.objectId ?? "").localeCompare(String(right?.objectId ?? ""))
     ))[0] ?? null;
 }
