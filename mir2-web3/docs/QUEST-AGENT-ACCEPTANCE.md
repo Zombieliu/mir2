@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 105 finalized development reports
-through `warrior-q30-r106-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 106 finalized development reports
+through `warrior-q30-r107-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 93,590,626 ms (25 h 59 m 50 s) browser-active runtime;
-- 49,443 recorded physical inputs;
-- 480 historical kill rows, including one r44 row now proven to repeat the
+- 94,442,204 ms (26 h 14 m 02 s) browser-active runtime;
+- 49,861 recorded physical inputs;
+- 500 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 18 deaths and 17 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1111,6 +1111,26 @@ diagnostics. It ends resumably at map-0 `(275,325)`, 156/162 HP, ten drugs, one
 Venison, and 15 gold; q25 remains 8/20 and q30 remains 0/1. Both private frames
 render coherently. This closes recovery and restock, but level-17 preparation
 and q25 remain open.
+
+r107 resumes the intermediate route, re-evaluates to a nearer SpittingSpider
+band, and completes the full 20/20 bounded goal budget. Its 20 target-specific
+kill rows cover 15 server object ids. Five ids later reappear after live
+respawn; every repeated occurrence carries a fresh positive immediate EXP
+delta. Two single-occurrence rows have delayed rather than immediate EXP
+settlement, so per-goal authoritative snapshots are the safer accounting
+boundary: all 20 goals advance EXP and the run moves from
+`349 -> 8,557/50,000` in total.
+
+The finalized r107 report records 851,578 ms, 418 physical inputs, 20 kill
+rows, one potion use, three visible gold pickups, zero deaths, purchases,
+quarantines, shortcut violations, or critical browser/network diagnostics.
+Final gold is 345; the three individually recorded pickups do not account for
+every delayed gold settlement, so only their visible deltas and the final
+authoritative balance are claimed. The character ends at map-0 `(56,264)`,
+116/162 HP, ten drugs, one Venison, and 41,443 EXP remaining to level 17; q25
+remains 8/20 and q30 remains 0/1. All three private frames render coherently.
+This is strong sustained level-17 preparation throughput, not level-17 or
+q25/q30 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
