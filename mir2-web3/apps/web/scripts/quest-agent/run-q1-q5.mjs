@@ -47,6 +47,7 @@ import {
   rankRespawnFieldsForTravel,
   reconcileConfirmedDeadMonsterObjects,
   retreatPointFromHostile,
+  retreatPointsFromHostile,
   respawnCorridorAvoidanceWaypoint,
   respawnTravelAttemptBudget,
   safeRecoveryPaceTargets,
@@ -4687,9 +4688,10 @@ async function navigateNear(
       quarantinedMonsterUntil,
       { maxDistance: 6 },
     );
-    const quarantineEscapeTarget = quarantinedTravelThreat
-      ? retreatPointFromHostile(state, quarantinedTravelThreat, 10)
-      : null;
+    const quarantineEscapeTargets = quarantinedTravelThreat
+      ? retreatPointsFromHostile(state, quarantinedTravelThreat, 10)
+      : [];
+    let quarantineEscapeTarget = quarantineEscapeTargets[0] ?? null;
     if (quarantineEscapeTarget) {
       // The target-specific no-response quarantine proves that selecting this
       // pursuer again cannot clear the route. Its current authoritative tile
@@ -4697,15 +4699,6 @@ async function navigateNear(
       // lets normal Shift/direction input create real separation before the
       // original field route is reconsidered.
       rejectCollisionCell(quarantinedTravelThreat);
-      if (lastQuarantineEscapeObjectId !== String(quarantinedTravelThreat.objectId)) {
-        console.log(
-          `  escape quarantined travel threat: ${quarantinedTravelThreat.name} ` +
-          `${quarantinedTravelThreat.objectId}@${quarantinedTravelThreat.x},` +
-          `${quarantinedTravelThreat.y} toward=${quarantineEscapeTarget.x},` +
-          `${quarantineEscapeTarget.y}`,
-        );
-        lastQuarantineEscapeObjectId = String(quarantinedTravelThreat.objectId);
-      }
     } else {
       lastQuarantineEscapeObjectId = null;
     }
@@ -4780,11 +4773,11 @@ async function navigateNear(
       navigationDetourByTarget.delete(detourKey);
       collisionRegionCache = null;
     }
-    const steeringTarget = quarantineEscapeTarget ?? forcedDetourTarget ?? liveTarget;
+    let steeringTarget = quarantineEscapeTarget ?? forcedDetourTarget ?? liveTarget;
     const steeringDesiredDistance = quarantineEscapeTarget || forcedDetourTarget
       ? 1
       : desiredDistance;
-    const steeringDistance = chebyshev(player, steeringTarget);
+    let steeringDistance = chebyshev(player, steeringTarget);
     // A Crystal movement portal is a one-cell trigger. Four tiles is enough
     // to see and click its map surface, but not enough for the normal client
     // to enter it reliably around a building wall. Keep collision-routing
@@ -4981,7 +4974,42 @@ async function navigateNear(
 
     let collisionPath = null;
     let usedGlobalCollisionPath = false;
-    if (steeringDistance > GLOBAL_COLLISION_PATH_THRESHOLD) {
+    if (quarantineEscapeTargets.length > 0) {
+      for (const [escapeIndex, escapeCandidate] of quarantineEscapeTargets.entries()) {
+        const candidatePath = await collisionAtlasPathToward(
+          player,
+          escapeCandidate,
+          1,
+          state,
+          protectedTransfers,
+          expectedMapFileName,
+          [...rejectedCollisionCells],
+        );
+        if (!candidatePath) continue;
+        quarantineEscapeTarget = escapeCandidate;
+        steeringTarget = escapeCandidate;
+        steeringDistance = chebyshev(player, escapeCandidate);
+        collisionPath = candidatePath;
+        usedGlobalCollisionPath = true;
+        if (lastQuarantineEscapeObjectId !== String(quarantinedTravelThreat.objectId)) {
+          console.log(
+            `  escape quarantined travel threat: ${quarantinedTravelThreat.name} ` +
+            `${quarantinedTravelThreat.objectId}@${quarantinedTravelThreat.x},` +
+            `${quarantinedTravelThreat.y} toward=${escapeCandidate.x},` +
+            `${escapeCandidate.y} candidate=${escapeIndex + 1}/` +
+            `${quarantineEscapeTargets.length}`,
+          );
+          lastQuarantineEscapeObjectId = String(quarantinedTravelThreat.objectId);
+        }
+        break;
+      }
+      if (!collisionPath) {
+        throw new NavigationUnreachableError(
+          `no collision-reachable quarantine escape on ${expectedMapFileName} from ` +
+          `${player.x},${player.y} around ${quarantinedTravelThreat.objectId}`,
+        );
+      }
+    } else if (steeringDistance > GLOBAL_COLLISION_PATH_THRESHOLD) {
       try {
         collisionPath = await collisionAtlasPathToward(
           player,
