@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 99 finalized development reports
-through `warrior-q30-r100-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 100 finalized development reports
+through `warrior-q30-r101-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 88,180,774 ms (24 h 29 m 40 s) browser-active runtime;
-- 46,509 recorded physical inputs;
-- 464 historical kill rows, including one r44 row now proven to repeat the
+- 89,083,399 ms (24 h 44 m 43 s) browser-active runtime;
+- 47,020 recorded physical inputs;
+- 466 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -996,6 +996,27 @@ coherently and match the dense starting corridor plus final route coordinate,
 HP, ten-drug belt, gold, and 92.86% EXP bar. This closes the exact zero-stock
 recovery/restock replay and leaves another safe travel checkpoint; it does not
 complete the grind.
+
+r101 first attempts a farther SpittingSpider source, but a dense town-edge
+attack drops the player to 12/149 HP and consumes three HP drugs. The resource
+guard cools that source instead of committing to the 391-tile journey. One
+normal death/revive follows; the agent sells its retained Venison for the
+visible gold change `80 -> 280`, restores drugs `7 -> 10` at Ruben for 120
+gold, completes a safe-room cycle, and switches to a nearer Oma source under
+the existing adaptive-risk policy.
+
+The finalized r101 report records 902,625 ms, 511 physical inputs, 1/3
+successful grind goals, one Oma and one incidental Scarecrow kill row, one
+death and one completed revive, three potion uses, one visible purchase, zero
+quarantines, shortcuts, or critical browser/network diagnostics. Authoritative
+EXP advances `37,143 -> 37,323/40,000`. It ends during the third goal's
+physical Oma route at map-0 `(291,616)`, full 149/149 HP, ten HP drugs, no
+Venison, 160 gold, and 2,677 EXP remaining to level 16; q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. The goal frame
+documents the real critical 12/149 pursuit rather than a clean post-kill scene;
+the final frame matches the full-HP town state, ten-drug belt, gold, coordinate,
+and 93.31% EXP bar. This proves adaptive risk recovery and one nearer-field
+goal, not level-16 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
