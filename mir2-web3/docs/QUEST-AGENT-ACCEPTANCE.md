@@ -126,12 +126,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 96 finalized development reports
-through `warrior-q30-r97-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 97 finalized development reports
+through `warrior-q30-r98-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 85,462,565 ms (23 h 44 m 22 s) browser-active runtime;
-- 45,058 recorded physical inputs;
+- 86,364,826 ms (23 h 59 m 24 s) browser-active runtime;
+- 45,540 recorded physical inputs;
 - 456 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
@@ -932,6 +932,26 @@ level 16 remains open. Both private frames were visually inspected: they match
 the reported initial and final coordinates but retain vertical-slice/roof
 ghosting, so r97 is a transfer/recovery certificate, not a frontend rendering
 certificate or a sell/restock closure.
+
+r98 closes that deferred economy chain through visible NPC input. Butcher John
+sells one Venison for the observed gold change `89 -> 352`, while one Venison
+remains in the bag; Merchant Ruben then restores HP drugs `5 -> 10` for 200
+gold. Merchant Whitney emits `Item repaired.`, but the report has no confirmed
+durability or gold delta, so this is not counted as a completed repair. With
+full stock, the policy selects the inherited level-16 SpittingSpider
+preparation goal and starts the real collision-routed field journey.
+
+The finalized r98 report records 902,261 ms, 482 physical inputs, 0/1 completed
+goals, one visible purchase, zero kills, deaths/revives, potion uses,
+quarantines, shortcuts, or critical browser/network diagnostics. It moves from
+map-0 `(286,638)` to `(279,322)` before the runtime limit expires during the
+long field route. Final state is 146/149 HP, ten HP drugs, one Venison, 152
+gold, and unchanged EXP `34,019/40,000`; q25 remains 8/20, q30 remains 0/1,
+and level 16 remains open. The initial private frame again contains severe
+vertical-slice tearing; the final frame renders coherently and matches the
+reported coordinate, HP, gold, and ten-drug belt. Treat r98 as the visible
+sell/restock closure and an intermediate travel checkpoint, not grind or
+frontend-rendering acceptance.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
