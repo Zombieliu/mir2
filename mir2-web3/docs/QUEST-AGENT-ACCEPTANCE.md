@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 97 finalized development reports
-through `warrior-q30-r98-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 98 finalized development reports
+through `warrior-q30-r99-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 86,364,826 ms (23 h 59 m 24 s) browser-active runtime;
-- 45,540 recorded physical inputs;
-- 456 historical kill rows, including one r44 row now proven to repeat the
+- 87,278,613 ms (24 h 14 m 38 s) browser-active runtime;
+- 46,029 recorded physical inputs;
+- 463 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -952,6 +952,28 @@ vertical-slice tearing; the final frame renders coherently and matches the
 reported coordinate, HP, gold, and ten-drug belt. Treat r98 as the visible
 sell/restock closure and an intermediate travel checkpoint, not grind or
 frontend-rendering acceptance.
+
+r99 resumes that intermediate route, reaches a live SpittingSpider band, and
+completes 6/6 grind goals against six distinct target ids. One additional
+Scarecrow is killed during the subsequent ordinary withdrawal. The seven kill
+rows advance authoritative EXP `34,019 -> 36,863/40,000`, while one visible
+gold pickup changes gold `152 -> 266`. Dense spider combat consumes all ten HP
+drugs without a death; the resource guard stops further combat and begins the
+normal map-0141 shelter journey.
+
+The finalized r99 report records 913,787 ms, 489 physical inputs, seven kill
+rows, ten potion uses, one gold pickup, seven fast travel-blocker quarantines,
+zero deaths/revives, purchases, shortcuts, or critical browser/network
+diagnostics. Every quarantine keeps the exact two-real-attack/four-second
+nonresponse reason and none is counted as a kill. The budget expires in the
+dense return corridor at map-0 `(311,563)`, leaving a resumable full 148/149 HP
+state with zero drugs, one Venison, 266 gold, and 3,137 EXP remaining to level
+16. q25 remains 8/20 and q30 remains 0/1. The initial private frame contains
+vertical-slice tearing; the grind frame cleanly shows a selected 0/65 spider
+corpse, and the final clean frame shows the dense blocker field plus the
+reported HP, gold, empty belt, coordinate, and 92.16% EXP bar. This is real
+grind throughput and a safe withdrawal checkpoint, not level-16 or recovery
+closure.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
