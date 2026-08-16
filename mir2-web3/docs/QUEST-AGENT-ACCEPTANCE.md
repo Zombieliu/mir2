@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 102 finalized development reports
-through `warrior-q30-r103-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 103 finalized development reports
+through `warrior-q30-r104-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 90,884,401 ms (25 h 14 m 44 s) browser-active runtime;
-- 47,987 recorded physical inputs;
-- 470 historical kill rows, including one r44 row now proven to repeat the
+- 91,784,524 ms (25 h 29 m 44 s) browser-active runtime;
+- 48,479 recorded physical inputs;
+- 478 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 18 deaths and 17 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1051,6 +1051,26 @@ It ends resumably at map-0 `(229,350)`, 146/149 HP, ten drugs, no Venison, 160
 gold, and 2,233 EXP remaining to level 16; q25 remains 8/20 and q30 remains
 0/1. Both private frames render coherently. This is physical long-preparation
 progress, not grind, level-16, or quest completion.
+
+r104 resumes that intermediate field route, selects a nearer SpittingSpider
+band, and completes 3/4 target-specific grind goals. The fourth goal exceeds
+the sustainable combat-resource budget after HP drops to 77/149 and the belt
+falls from ten to five drugs, so the source is cooled rather than forced. The
+already committed shelter escape continues after the remaining drugs are
+consumed. Five ordinary occupancy kills occur during that physical withdrawal;
+six different nonresponsive blockers retain the exact fast-timeout quarantine
+and none is counted as a kill.
+
+The finalized r104 report records 900,123 ms, 492 physical inputs, three
+target-specific SpittingSpider plus five incidental kill rows, ten potion uses,
+zero deaths, purchases, shortcut violations, or critical browser/network
+diagnostics. The final RakingCat row crosses the authoritative level boundary
+from `39,981/40,000` to level 16 at `35/50,000`; delayed settlement leaves the
+final state at level 16 and `89/50,000`. The character remains resumable on map
+0 at `(307,569)`, 144/162 HP, zero drugs, no Venison, and 160 gold while still
+withdrawing toward map 0141. q25 remains 8/20 and q30 remains 0/1. All three
+private frames render coherently. This certifies the level-16 transition, but
+not the still-open recovery loop or q25/q30 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
