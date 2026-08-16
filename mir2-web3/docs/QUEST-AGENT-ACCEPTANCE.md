@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 104 finalized development reports
-through `warrior-q30-r105-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 105 finalized development reports
+through `warrior-q30-r106-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 92,686,941 ms (25 h 44 m 46 s) browser-active runtime;
-- 48,959 recorded physical inputs;
-- 479 historical kill rows, including one r44 row now proven to repeat the
+- 93,590,626 ms (25 h 59 m 50 s) browser-active runtime;
+- 49,443 recorded physical inputs;
+- 480 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 18 deaths and 17 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1091,6 +1091,26 @@ full 162/162 HP, zero drugs, no Venison, and 160 gold; q25 remains 8/20 and q30
 remains 0/1. Both private frames render coherently. This proves resumable
 safe-room and threat-expiry handling, but the funding/restock loop remains
 open.
+
+r106 closes that exact open funding/restock loop. It resumes beside the live
+Deer population, completes a normal Deer kill with an immediate EXP change
+`313 -> 349/50,000`, and finishes the delayed corpse harvest. The visible
+inventory changes `Venison 1 -> 2`; Butcher John then changes gold
+`160 -> 415` while one Venison remains, and Merchant Ruben restores HP drugs
+`0 -> 10` for 400 gold. No repair is claimed because the subsequent Whitney
+interaction records no durability or gold delta.
+
+After restock, the risk model raises the CannibalPlant preparation level from
+16 to 17 rather than sending the character directly into the level-20 q25
+target. The agent starts another physical SpittingSpider journey and reduces
+the first hostile-corridor leg from about 258 tiles to roughly 30 tiles before
+the runtime cap. The finalized r106 report records 903,685 ms, 484 physical
+inputs, one kill row, one supply pickup, one purchase, zero deaths, potion
+uses, quarantines, shortcut violations, or critical browser/network
+diagnostics. It ends resumably at map-0 `(275,325)`, 156/162 HP, ten drugs, one
+Venison, and 15 gold; q25 remains 8/20 and q30 remains 0/1. Both private frames
+render coherently. This closes recovery and restock, but level-17 preparation
+and q25 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
