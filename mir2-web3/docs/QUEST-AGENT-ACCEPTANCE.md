@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 81 finalized development reports
-through `warrior-q30-r82-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 82 finalized development reports
+through `warrior-q30-r83-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 71,933,717 ms (19 h 58 m 53 s) browser-active runtime;
-- 37,922 recorded physical inputs;
-- 387 historical kill rows, including one r44 row now proven to repeat the
+- 72,833,906 ms (20 h 13 m 53 s) browser-active runtime;
+- 38,405 recorded physical inputs;
+- 388 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -613,6 +613,25 @@ and q30 remains 0/1. The start, failed-goal, and final frames were visually
 inspected and show the ordinary town departure followed by the authoritative
 post-revive town state. This is a bounded route-risk counterexample, not level
 16 or quest completion.
+
+r83 resumed the authoritative r82 post-revive state and first restored a
+sustainable departure stock through normal-client economy actions. A visible
+Deer was killed and harvested, Venison advanced `1 -> 2`, Butcher John bought
+the supply for a visible gold change `51 -> 289`, and Merchant Ruben restored
+HP drugs `7 -> 10` for 120 gold. The inherited lethal-route memory then chose a
+different SpittingSpider field instead of repeating r82's approach. The agent
+walked the alternate route from roughly 421 tiles away to 94 before the runtime
+budget expired, preserving the intermediate transform for the next resume.
+
+The finalized r83 report records 900,189 ms, 483 physical inputs, 0/1
+successful goals, one confirmed Deer kill with completed harvest, one supply
+pickup, one visible purchase, zero death/revive, zero potion use, zero target
+quarantines, zero shortcuts, and zero critical browser/network diagnostics. It
+ends on map 0 at `(295,275)` with 148/149 HP, ten HP drugs, 169 gold, and EXP
+15,339/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and show the town funding state followed by the live
+alternate route. This proves cross-run risk-memory rerouting and economic
+recovery, not arrival at the grind field or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
