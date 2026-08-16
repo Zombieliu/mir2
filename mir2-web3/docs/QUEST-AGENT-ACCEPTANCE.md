@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 100 finalized development reports
-through `warrior-q30-r101-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 101 finalized development reports
+through `warrior-q30-r102-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 89,083,399 ms (24 h 44 m 43 s) browser-active runtime;
-- 47,020 recorded physical inputs;
-- 466 historical kill rows, including one r44 row now proven to repeat the
+- 89,984,193 ms (24 h 59 m 44 s) browser-active runtime;
+- 47,510 recorded physical inputs;
+- 470 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 17 deaths and 16 completed revives across intentionally interrupted and
+- 18 deaths and 17 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -1017,6 +1017,23 @@ documents the real critical 12/149 pursuit rather than a clean post-kill scene;
 the final frame matches the full-HP town state, ten-drug belt, gold, coordinate,
 and 93.31% EXP bar. This proves adaptive risk recovery and one nearer-field
 goal, not level-16 completion.
+
+r102 resumes that exact full-health town state and completes 2/2 adaptive Oma
+grind goals through ordinary field travel and combat. Two target-specific Oma
+rows and two incidental Scarecrow rows advance authoritative EXP
+`37,323 -> 37,713/40,000`. Between the two goals, the agent performs one normal
+map-0141 safe-room cycle; the report records two visible transfer milestones
+and then returns to the live field without a shortcut.
+
+The finalized r102 report records 900,794 ms, 490 physical inputs, four kill
+rows, zero deaths, potion uses, purchases, quarantines, shortcut violations,
+or critical browser/network diagnostics. Its budget expires during the
+ordinary return toward the equipment-repair vendor, leaving a resumable map-0
+state at `(289,611)`, full 149/149 HP, ten HP drugs, no Venison, 160 gold, and
+2,287 EXP remaining to level 16. q25 remains 8/20 and q30 remains 0/1. The
+three private frames render coherently and match the initial town state, first
+completed Oma goal, and final return coordinate. This is another bounded
+progression slice, not a level-16 or q25 completion certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
