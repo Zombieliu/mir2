@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 93 finalized development reports
-through `warrior-q30-r94-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 94 finalized development reports
+through `warrior-q30-r95-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 82,742,787 ms (22 h 59 m 2 s) browser-active runtime;
-- 43,647 recorded physical inputs;
-- 444 historical kill rows, including one r44 row now proven to repeat the
+- 83,659,838 ms (23 h 14 m 19 s) browser-active runtime;
+- 44,187 recorded physical inputs;
+- 447 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -863,6 +863,29 @@ gold. The budget expires during the fifth goal's physical search; q25 remains
 contains transient vertical slice tearing, while the later merchant and Oma
 frames render normally and match the reported state. Treat that visual artifact
 as an open observation rather than a successful frontend certificate.
+
+r95 resumed inside the exact r94 Oma field, immediately observed active damage,
+and treated the save as an unsafe supply state rather than retrying the two old
+object ids. All ten HP drugs were consumed during the normal 77-tile shelter
+escape. The agent entered map 0141, recovered to full HP, sold the one retained
+Venison for a visible gold change `89 -> 289`, and bought five HP drugs for 200
+gold. A visible Deer corpse accepted three physical harvest inputs but produced
+no new Venison, so the agent truthfully fell back to local Scarecrow funding.
+
+The finalized r95 report records 917,051 ms, 540 physical inputs, no quest/grind
+goals, three target-specific Scarecrow kill rows, ten potion uses, one visible
+purchase, seven target quarantines, zero death/revive, zero shortcuts, and zero
+critical browser/network diagnostics. The first three funding targets retain
+the conservative five-real-attack/15-second window; later entrance occupants
+use the separate two-real-attack/four-second travel-clearing window. The first
+0141 entrance stalled at distance one and rotated to the second entrance after
+45,544 ms without improvement, but continuing dynamic occupancy kept the agent
+at the old entrance until the runtime cap. It ends on map 0 at `(302,622)` with
+full 149/149 HP, five HP drugs, zero Venison, 89 gold, and authoritative EXP
+33,525/40,000. q25 remains 8/20, q30 remains 0/1, and level 16 remains open.
+The start and final frames were visually inspected and match the live Oma field
+and crowded entrance state. Exact-state r96 replay is required before treating
+the remaining entrance congestion as a repeatable recovery defect.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
