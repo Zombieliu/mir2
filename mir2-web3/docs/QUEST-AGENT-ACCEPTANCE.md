@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 89 finalized development reports
-through `warrior-q30-r90-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 90 finalized development reports
+through `warrior-q30-r91-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 79,143,833 ms (21 h 59 m 3 s) browser-active runtime;
-- 41,724 recorded physical inputs;
-- 419 historical kill rows, including one r44 row now proven to repeat the
+- 80,044,652 ms (22 h 14 m 4 s) browser-active runtime;
+- 42,200 recorded physical inputs;
+- 420 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -779,6 +779,25 @@ were visually inspected and show the first entrance followed by a live town
 position with multiple visible Deer and the reported stock/gold. This proves
 portal rotation prevents a deterministic shelter orbit and that funding can
 make state progress, not full restock, level 16, or quest completion.
+
+r91 resumed the r90 town position, quarantined one immediate no-response
+attacker, and completed a normal map-0141 settlement before retrying the
+visible Deer source. Six physical harvest inputs advanced Venison `1 -> 2`.
+Butcher John then bought one unit for a visible gold change `39 -> 289`,
+Merchant Ruben restored HP drugs `5 -> 10` for 200 gold, and one Venison was
+retained for a later recovery. Only after the full departure stock was visible
+did the agent restart the learned level-16 preparation walk.
+
+The finalized r91 report records 900,819 ms, 476 physical inputs, 0/1
+successful goals, one target-specific Deer kill with completed harvest, one
+supply pickup, one visible purchase, one incidental target quarantine, zero
+death/revive, zero potion use, zero shortcuts, and zero critical
+browser/network diagnostics. It ends on map 0 at `(306,389)` with 148/149 HP,
+ten HP drugs, one Venison, 89 gold, and EXP 23,645/40,000, roughly 40 tiles from
+the current SpittingSpider corridor target; q25 remains 8/20 and q30 remains
+0/1. The start and final frames were visually inspected and match the town
+funding state followed by the fully stocked travel state. This closes the r87-
+r90 low-funds recovery chain, not field arrival, level 16, or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
