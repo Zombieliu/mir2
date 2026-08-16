@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 82 finalized development reports
-through `warrior-q30-r83-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 83 finalized development reports
+through `warrior-q30-r84-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 72,833,906 ms (20 h 13 m 53 s) browser-active runtime;
-- 38,405 recorded physical inputs;
-- 388 historical kill rows, including one r44 row now proven to repeat the
+- 73,735,966 ms (20 h 28 m 55 s) browser-active runtime;
+- 38,862 recorded physical inputs;
+- 399 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -632,6 +632,28 @@ ends on map 0 at `(295,275)` with 148/149 HP, ten HP drugs, 169 gold, and EXP
 were visually inspected and show the town funding state followed by the live
 alternate route. This proves cross-run risk-memory rerouting and economic
 recovery, not arrival at the grind field or quest completion.
+
+r84 resumed the r83 intermediate transform and re-evaluated the current map to
+select a nearer, non-r82 SpittingSpider field. It completed the ordinary
+184-tile walk, then finished all eleven bounded grind goals with eleven
+target-specific SpittingSpider kill rows. The rows span eight server object ids;
+three ids recur only after later live reappearance, and every row carries a
+fresh positive authoritative EXP delta. They remain kill-row evidence rather
+than a claim of eleven permanently unique spawn ids. After the eleventh goal,
+the resource guard stopped combat and began a normal map-0141 withdrawal.
+
+The finalized r84 report records 902,060 ms, 457 physical inputs, 11/11
+successful goals, eleven confirmed kill rows, nine potion-use events, one
+incidental travel quarantine, zero death/revive, zero purchases, zero
+shortcuts, and zero critical browser/network diagnostics. Authoritative EXP
+advanced independently from 15,339 to 19,983. It ends mid-withdrawal on map 0
+at `(238,470)` with 142/149 HP, one HP drug, and 169 gold; q25 remains 8/20 and
+q30 remains 0/1. The start, first-goal, and final frames were visually
+inspected. The first-goal frame still shows 4/65 target HP before the later
+target-specific death/EXP settlement, so it is retained as combat-in-progress
+rather than relabeled as a post-death visual certificate. This proves the
+alternate field's sustained throughput and bounded withdrawal, not safe-room,
+level-16, or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
