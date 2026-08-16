@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 107 finalized development reports
-through `warrior-q30-r108-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 108 finalized development reports
+through `warrior-q30-r109-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 95,352,315 ms (26 h 29 m 12 s) browser-active runtime;
-- 50,360 recorded physical inputs;
-- 504 historical kill rows, including one r44 row now proven to repeat the
+- 96,254,672 ms (26 h 44 m 14 s) browser-active runtime;
+- 50,845 recorded physical inputs;
+- 508 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1156,6 +1156,29 @@ patching, while the final ForestYeti frame renders coherently. This remains a
 frontend observation rather than a visual certificate. Adaptive-source reach
 and recovery are proven, but sustained ForestYeti throughput and level 17
 remain open.
+
+r109 resumes the adaptive Yeti checkpoint and first closes the previously
+uncertified equipment branch. A visible Merchant Whitney interaction repairs
+`BaseDress(M)` from zero durability to 4,544 and changes gold `99 -> 71`.
+The later post-combat attempt cannot reopen the dialog and is explicitly
+deferred, so only the first repair is counted.
+
+The agent then completes three ForestYeti goals against three distinct ids and
+records one responsive Scarecrow occupancy kill. Authoritative EXP advances
+`9,025 -> 9,547/50,000`; the initial Scarecrow row settles late, so the total
+boundary rather than its zero immediate delta is used. When live risk memory
+expires, the fourth goal switches back to a different SpittingSpider field and
+reduces its physical route from 384 to about 335 tiles before the runtime cap.
+
+The finalized r109 report records 902,357 ms, 485 physical inputs, four kill
+rows, one repair, zero deaths, potion uses, purchases, quarantines, shortcut
+violations, or critical browser/network diagnostics. Final gold is 216, but no
+individual pickup event covers every delayed settlement, so only the final
+authoritative balance is claimed. It ends at map-0 `(257,522)`, 156/162 HP,
+ten drugs, one Venison, and 40,453 EXP remaining to level 17; q25 remains 8/20
+and q30 remains 0/1. All three private frames render coherently. Equipment
+repair and three Yeti goals are proven; sustained level-17 preparation remains
+open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
