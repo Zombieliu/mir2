@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 84 finalized development reports
-through `warrior-q30-r85-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 85 finalized development reports
+through `warrior-q30-r86-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 74,636,420 ms (20 h 43 m 56 s) browser-active runtime;
-- 39,373 recorded physical inputs;
-- 403 historical kill rows, including one r44 row now proven to repeat the
+- 75,537,279 ms (20 h 58 m 57 s) browser-active runtime;
+- 39,847 recorded physical inputs;
+- 404 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -675,6 +675,26 @@ expired, and two optional interior pace targets had no live collision path.
 The start and final frames were visually inspected and match the field-to-store
 transition. This closes the physical withdrawal and partial restock, not the
 safe-room settlement, full departure stock, level-16, or quest milestone.
+
+r86 resumed inside map 0141 and immediately confirmed that the cross-run safe
+state could exit normally rather than repeating r85's nearly complete
+settlement wait. The character sold the retained Venison for a visible gold
+change `9 -> 214`, and Merchant Ruben restored HP drugs `5 -> 10` for 200
+gold. It then completed the full 419-tile hostile-corridor leg toward a distant
+SpittingSpider field and advanced the second leg from 242 to 140 tiles before
+the runtime budget expired.
+
+The finalized r86 report records 900,859 ms, 474 physical inputs, 0/1
+successful goals, one incidental Scarecrow kill row, one no-response target
+quarantine, one visible purchase, zero death/revive, zero potion use, zero
+shortcuts, and zero critical browser/network diagnostics. The Scarecrow row
+has target-specific death evidence but no immediate EXP delta, so it is not
+used as an EXP claim; authoritative EXP independently advanced from 21,205 to
+21,295. It ends on map 0 at `(395,166)` with 148/149 HP, ten HP drugs, and 14
+gold; q25 remains 8/20 and q30 remains 0/1. The initial bootstrap and final
+field frames were inspected; the latter matches the saved transform and full
+stock. This closes the safe-room resume and restock continuation, not arrival
+at the final grind field, level 16, or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
