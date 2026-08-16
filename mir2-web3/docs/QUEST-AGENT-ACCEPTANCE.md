@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 86 finalized development reports
-through `warrior-q30-r87-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 87 finalized development reports
+through `warrior-q30-r88-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 76,437,777 ms (21 h 13 m 57 s) browser-active runtime;
-- 40,326 recorded physical inputs;
-- 408 historical kill rows, including one r44 row now proven to repeat the
+- 77,339,163 ms (21 h 28 m 59 s) browser-active runtime;
+- 40,800 recorded physical inputs;
+- 409 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -717,6 +717,26 @@ shows 6/65 target HP before the later target-specific death/EXP settlement and
 is therefore combat-in-progress, while the final frame matches the zero-stock
 withdrawal. This proves the alternate source and depleted-escape continuation,
 not safe arrival, restock, level 16, or quest completion.
+
+r88 resumed the exact r87 zero-stock waypoint and completed the remaining
+238-tile return to the town supply area. Because 14 gold could not buy an HP
+drug and live attackers still occupied the merchant entrance, the character
+entered map 0141 twice rather than pretending to restock. Both safe-room cycles
+completed their 20-second settlement through visible two-tile pacing, directly
+closing r85's 17,416 ms partial window. On the second exit, short bounded
+disengagement steps moved the attacker cluster away from the transfer before
+the runtime budget expired.
+
+The finalized r88 report records 901,386 ms, 474 physical inputs, zero goals,
+one incidental Scarecrow kill row with positive immediate EXP, two
+no-response target quarantines, zero death/revive, zero potion use, zero
+purchases, zero shortcuts, and zero critical browser/network diagnostics. It
+ends on map 0 at `(291,612)` with 149/149 HP, zero HP drugs, 14 gold, and EXP
+22,897/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and show the zero-stock field resume followed by the
+live Ruben area under one-point incoming damage. This proves safe settlement
+and physical entrance disengagement, not funding, restock, level 16, or quest
+completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
