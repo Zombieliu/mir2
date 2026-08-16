@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 115 finalized development reports
-through `warrior-q30-r116-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 116 finalized development reports
+through `warrior-q30-r117-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 102,562,671 ms (28 h 29 m 23 s) browser-active runtime;
-- 54,177 recorded physical inputs;
-- 552 historical kill rows, including one r44 row now proven to repeat the
+- 103,464,858 ms (28 h 44 m 25 s) browser-active runtime;
+- 54,644 recorded physical inputs;
+- 554 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1337,6 +1337,28 @@ browser/network diagnostics. Authoritative EXP advances `24,381 ->
 Venison, 184 gold, and 25,463 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. Both private frames render coherently. Physical retreat and
 partial restock are proven; funding, full restock, and level 17 remain open.
+
+r117 resumes the five-drug funding state under persistent Scarecrow pressure.
+The agent refuses to force merchant or harvest interaction while an attacker
+is active, completes five ordinary 20-second safe-room settlement cycles, and
+uses visible movement to draw the chase away from the entrance. Two Deer
+attempts and one early Scarecrow receive explicit conservative or fast travel
+quarantines rather than false kill credit.
+
+The later funding path confirms one responsive Scarecrow and one distinct Deer
+kill. Six accepted harvest inputs on the Deer corpse change Venison `1 -> 2`,
+providing a visible supply pickup. The agent then walks back toward Butcher
+John, but his dialog does not open before the cap. No sale or second potion
+purchase is claimed.
+
+The finalized r117 report records 902,187 ms, 467 physical inputs, 0/0
+progression goals, two kill rows, one supply pickup, three quarantines, and
+zero deaths, revives, potion uses, purchases, gold pickups, shortcut
+violations, or critical browser/network diagnostics. Authoritative EXP
+advances `24,537 -> 24,693/50,000`; it ends at map-0 `(283,639)`, full 162/162
+HP, five drugs, two Venison, 184 gold, and 25,307 EXP remaining to level 17.
+q25 remains 8/20 and q30 remains 0/1. Both private frames render coherently.
+Funding supply is proven; its sale, full restock, and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
