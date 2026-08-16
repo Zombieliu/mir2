@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 108 finalized development reports
-through `warrior-q30-r109-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 109 finalized development reports
+through `warrior-q30-r110-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 96,254,672 ms (26 h 44 m 14 s) browser-active runtime;
-- 50,845 recorded physical inputs;
-- 508 historical kill rows, including one r44 row now proven to repeat the
+- 97,156,649 ms (26 h 59 m 16 s) browser-active runtime;
+- 51,340 recorded physical inputs;
+- 510 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1179,6 +1179,25 @@ ten drugs, one Venison, and 40,453 EXP remaining to level 17; q25 remains 8/20
 and q30 remains 0/1. All three private frames render coherently. Equipment
 repair and three Yeti goals are proven; sustained level-17 preparation remains
 open.
+
+r110 begins by physically returning toward Merchant Whitney for another worn
+item, but dense Scarecrow/HookingCat occupancy prevents the dialog from
+opening. No durability or gold delta occurs, so no second repair is claimed.
+Two responsive Scarecrows die during ordinary occupancy clearing; their
+immediate EXP deltas and delayed settlement move the authoritative boundary
+from `9,547 -> 9,697/50,000`.
+
+The agent then starts an alternate SpittingSpider field through a 421-tile
+hostile-corridor leg. After one temporary all-direction block is released by a
+departing Scarecrow, the route shows sustained net progress and reaches map-0
+`(228,262)`, about 75 tiles from its first waypoint, before the runtime cap.
+The finalized r110 report records 901,977 ms, 495 physical inputs, 0/1
+successful goals, two kill rows, zero deaths, potion uses, purchases,
+quarantines, shortcut violations, or critical browser/network diagnostics. It
+ends at 156/162 HP with ten drugs, one Venison, 216 gold, and 40,303 EXP
+remaining to level 17; q25 remains 8/20 and q30 remains 0/1. Both private
+frames render coherently. This is resumable long-route evidence, not a Spider
+goal or level-17 completion certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
