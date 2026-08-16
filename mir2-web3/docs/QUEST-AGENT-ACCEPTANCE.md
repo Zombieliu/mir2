@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 79 finalized development reports
-through `warrior-q30-r80-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 80 finalized development reports
+through `warrior-q30-r81-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 70,130,006 ms (19 h 28 m 50 s) browser-active runtime;
-- 36,913 recorded physical inputs;
-- 382 historical kill rows, including one r44 row now proven to repeat the
+- 71,033,371 ms (19 h 43 m 53 s) browser-active runtime;
+- 37,394 recorded physical inputs;
+- 386 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 15 deaths and 14 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -574,6 +574,26 @@ frames were visually inspected; the final frame shows the reported dense actor
 cluster and a live game screen rather than a disconnect or modal stall. This is
 direct live timing evidence for fast blocker rotation, not a funding closure,
 level-16 milestone, or quest completion certificate.
+
+r81 resumed the exact dense r80 endpoint and completed the recovery work that
+r80 left open. Seven more incidental occupied-tile targets were quarantined;
+all seven carry the same two-attack/four-second no-response reason and none is
+counted as a kill. Four other low-level targets produced target-specific kill
+evidence. Ordinary collision-routed movement escaped the cluster, one visible
+gold pickup advanced gold `141 -> 251`, map 0141 provided safe passive
+settlement, and the character returned to map 0 for a visible Merchant Ruben
+purchase that restored HP drugs `5 -> 10` for 200 gold.
+
+The finalized r81 report records 903,365 ms, 481 physical inputs, four
+confirmed kill rows, seven target quarantines, one gold pickup, one purchase,
+zero completed goals, zero death/revive, zero potion use, zero shortcuts, and
+zero critical browser/network diagnostics. Authoritative EXP advanced
+independently from 14,125 to 15,213. It ends on map 0 at `(295,609)` with
+149/149 HP, ten HP drugs, and 51 gold; q25 remains 8/20 and q30 remains 0/1.
+The start and final frames were visually inspected and show the congested
+resume point followed by the live town/merchant area with the reported stock
+and gold. This closes the low-funds restock continuation but does not certify
+level 16, q25, or q30 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
