@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 123 finalized development reports
-through `warrior-q30-r124-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 124 finalized development reports
+through `warrior-q30-r125-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 109,106,053 ms (30 h 18 m 26 s) browser-active runtime;
-- 57,729 recorded physical inputs;
-- 561 historical kill rows, including one r44 row now proven to repeat the
+- 110,026,091 ms (30 h 33 m 46 s) browser-active runtime;
+- 58,244 recorded physical inputs;
+- 565 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1514,6 +1514,32 @@ slice artifacts while the final frame renders coherently. Its last seconds
 encounter an all-direction dynamic block; the exact r125 resume must determine
 whether that is an ordinary resumable congestion event or another bounded
 recovery defect.
+
+r125 is the exact-state discriminator for that final r124 block. It recognizes
+the adjacent RakingCat and HookingCat pressure, gives the optional Whitney
+repair a bounded attempt, then defers it when no dialog or repair delta occurs.
+Normal keyboard probing immediately leaves `(303,522)`, so the r124 endpoint is
+not a permanent navigation trap. A newly selected Spider route advances from
+336 to 280 tiles before live attacks consume all ten drugs and correctly force
+a zero-stock shelter withdrawal.
+
+The agent then physically covers the 165-tile return, including two bounded
+no-response quarantines and several responsive occupancy clears, enters map
+0141 through the visible source, settles to 156/162 HP, and returns normally.
+Renewed attackers at the entrance prevent a safe Deer funding action and
+restock before the runtime cap. The agent neither invents the Venison nor
+claims a purchase; it retreats, clears four Scarecrows with fresh positive EXP
+evidence, and remains resumable near the transfer.
+
+The finalized r125 report records 920,038 ms, 515 physical inputs, 0/1
+successful goals, four incidental kill rows, ten potion uses, two quarantines,
+and zero deaths, revives, purchases, pickups, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `26,175 ->
+26,589/50,000`; it ends at map-0 `(305,607)`, full 162/162 HP, zero drugs, no
+Venison, 70 gold, and 23,411 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. This proves the
+r124 congestion is resumable and another safe-room cycle is reachable; visible
+funding, sale, restock, and the level-17 grind remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
