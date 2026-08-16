@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 113 finalized development reports
-through `warrior-q30-r114-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 114 finalized development reports
+through `warrior-q30-r115-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 100,761,537 ms (27 h 59 m 22 s) browser-active runtime;
-- 53,226 recorded physical inputs;
-- 538 historical kill rows, including one r44 row now proven to repeat the
+- 101,662,016 ms (28 h 14 m 22 s) browser-active runtime;
+- 53,677 recorded physical inputs;
+- 550 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1292,6 +1292,30 @@ Venison, 286 gold, and 30,803 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. All three private frames render coherently. The migrated
 Spider source and sustained target throughput are proven; level 17 remains
 open.
+
+r115 resumes inside the same Spider region and completes 12/12 goals. Its 12
+target-specific rows cover ten object ids; the two later repeated ids each
+carry fresh positive immediate EXP after their live reappearance. The first
+row settles late with zero immediate delta, but its enclosing authoritative
+goal snapshot advances by 216. Every one of the 12 goal snapshots advances,
+so the report uses the total boundary without inventing another kill.
+
+One candidate spawn is statically unreachable and is skipped, while the
+remaining visible cluster sustains progression. A visible pickup changes gold
+`286 -> 384`. After the twelfth completed goal, high-density combat consumes
+the ten-drug stock and the resource guard begins a physical shelter retreat.
+It reduces the first hostile-corridor leg from about 326 to 196 tiles before
+the runtime cap, including a large but coherent static-terrain detour.
+
+The finalized r115 report records 900,479 ms, 451 physical inputs, 12/12
+successful goals, 12 target-specific kill rows, ten potion uses, one gold
+pickup, and zero deaths, revives, purchases, quarantines, shortcut violations,
+or critical browser/network diagnostics. Authoritative EXP advances `19,197
+-> 24,381/50,000`; it ends at map-0 `(318,269)`, 156/162 HP, zero drugs, no
+Venison, 384 gold, and 25,619 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. Sustained Spider
+throughput and a safe zero-stock disengage are proven; shelter arrival,
+restock, and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
