@@ -56,6 +56,7 @@ import {
   respawnTerminalExposure,
   respawnTravelAttemptBudget,
   retreatPointFromHostile,
+  retreatPointsFromHostile,
   restorativeSelfSkillHotkey,
   safeRecoveryPaceTargets,
   selectBestAvailableEquipmentUpgrade,
@@ -697,6 +698,27 @@ test("R121 quarantined adjacent pursuer is selected for physical disengage", () 
     x: 258,
     y: 611,
   });
+});
+
+test("R122 quarantined retreat fans out when the direct-away tile is blocked", () => {
+  const state = {
+    player: { x: 269, y: 620 },
+  };
+  const threat = { x: 268, y: 620 };
+  const candidates = retreatPointsFromHostile(state, threat, 10);
+
+  assert.deepEqual(candidates[0], { x: 279, y: 620 });
+  assert.equal(
+    candidates.some((point) => point.x === 279 && point.y === 610),
+    true,
+    "an upper-right escape must remain available when the direct-right endpoint is sealed",
+  );
+  assert.equal(
+    candidates.some((point) => point.x === 269 && point.y === 610),
+    true,
+    "a perpendicular escape must remain available around a wall",
+  );
+  assert.equal(new Set(candidates.map((point) => `${point.x},${point.y}`)).size, 8);
 });
 
 test("a currently attacking requested monster overrides stale approach cooldown", async () => {
@@ -2210,12 +2232,12 @@ test("quarantined pursuers break cross-chunk travel loops with physical retreat"
   );
   assert.match(
     navigationBody,
-    /nearestQuarantinedHostile\([\s\S]{0,300}retreatPointFromHostile\(state, quarantinedTravelThreat, 10\)/,
+    /nearestQuarantinedHostile\([\s\S]{0,300}retreatPointsFromHostile\(state, quarantinedTravelThreat, 10\)/,
   );
   assert.match(navigationBody, /escape quarantined travel threat:/);
   assert.match(
     navigationBody,
-    /const steeringTarget = quarantineEscapeTarget \?\? forcedDetourTarget \?\? liveTarget/,
+    /let steeringTarget = quarantineEscapeTarget \?\? forcedDetourTarget \?\? liveTarget/,
   );
   assert.match(
     navigationBody,
@@ -2225,6 +2247,11 @@ test("quarantined pursuers break cross-chunk travel loops with physical retreat"
   assert.match(
     navigationBody,
     /crossChunkQuarantineCycle[\s\S]{0,900}cross-chunk quarantined/,
+  );
+  assert.match(
+    navigationBody,
+    /for \(const \[escapeIndex, escapeCandidate\] of quarantineEscapeTargets\.entries\(\)\)[\s\S]{0,1200}collisionAtlasPathToward/,
+    "an unreachable direct-away endpoint must rotate through collision-planned escape candidates",
   );
 });
 

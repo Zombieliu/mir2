@@ -615,21 +615,45 @@ export function nearestQuarantinedHostile(
     ))[0] ?? null;
 }
 
-/** Pick a short visible-input retreat vector directly away from an attacker. */
-export function retreatPointFromHostile(state, hostile, span = 8) {
+/**
+ * Rank a bounded eight-direction retreat fan away from an attacker. The first
+ * candidate preserves the historical direct-away vector; callers with live
+ * collision data can rotate through the remaining candidates when that exact
+ * endpoint lies inside a wall or sealed building pocket.
+ */
+export function retreatPointsFromHostile(state, hostile, span = 8) {
   const player = state?.player;
-  if (!player || !hostile) return null;
+  if (!player || !hostile) return [];
   const retreatSpan = Math.max(1, Math.floor(finiteNumber(span, 8)));
   const dx = finiteNumber(player.x, 0) - finiteNumber(hostile.x, 0);
   const dy = finiteNumber(player.y, 0) - finiteNumber(hostile.y, 0);
   // Exact overlap has no geometric preference. Pick a deterministic cardinal
   // direction and let collision-aware navigation choose a legal detour.
-  const xSign = dx === 0 && dy === 0 ? -1 : Math.sign(dx);
-  const ySign = dx === 0 && dy === 0 ? 0 : Math.sign(dy);
-  return {
-    x: finiteNumber(player.x, 0) + xSign * retreatSpan,
-    y: finiteNumber(player.y, 0) + ySign * retreatSpan,
-  };
+  const awayX = dx === 0 && dy === 0 ? -1 : Math.sign(dx);
+  const awayY = dx === 0 && dy === 0 ? 0 : Math.sign(dy);
+  const directions = [
+    [-1, -1], [0, -1], [1, -1],
+    [-1, 0], [1, 0],
+    [-1, 1], [0, 1], [1, 1],
+  ].map(([x, y], index) => ({ x, y, index }));
+  directions.sort((left, right) => (
+    (right.x * awayX + right.y * awayY) -
+      (left.x * awayX + left.y * awayY) ||
+    (Math.abs(left.x) + Math.abs(left.y)) -
+      (Math.abs(right.x) + Math.abs(right.y)) ||
+    left.index - right.index
+  ));
+  return directions
+    .map((direction) => ({
+      x: finiteNumber(player.x, 0) + direction.x * retreatSpan,
+      y: finiteNumber(player.y, 0) + direction.y * retreatSpan,
+    }))
+    .filter((point) => point.x >= 0 && point.y >= 0);
+}
+
+/** Pick the preferred short visible-input retreat vector from the ranked fan. */
+export function retreatPointFromHostile(state, hostile, span = 8) {
+  return retreatPointsFromHostile(state, hostile, span)[0] ?? null;
 }
 
 /**
