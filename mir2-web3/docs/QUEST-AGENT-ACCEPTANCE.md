@@ -126,12 +126,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 116 finalized development reports
-through `warrior-q30-r117-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 117 finalized development reports
+through `warrior-q30-r118-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 103,464,858 ms (28 h 44 m 25 s) browser-active runtime;
-- 54,644 recorded physical inputs;
+- 104,365,714 ms (28 h 59 m 26 s) browser-active runtime;
+- 55,131 recorded physical inputs;
 - 554 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
@@ -1359,6 +1359,30 @@ advances `24,537 -> 24,693/50,000`; it ends at map-0 `(283,639)`, full 162/162
 HP, five drugs, two Venison, 184 gold, and 25,307 EXP remaining to level 17.
 q25 remains 8/20 and q30 remains 0/1. Both private frames render coherently.
 Funding supply is proven; its sale, full restock, and level 17 remain open.
+
+r118 resumes with the two harvested Venison, reaches Butcher John, and visibly
+changes gold `184 -> 442` while retaining one Venison. Merchant Ruben then
+changes HP drugs `5 -> 10` and gold `442 -> 242`. This closes the exact r115-r117
+zero-stock recovery chain without a direct item, gold, health, or movement
+mutation. The subsequent Whitney interaction has no durability or gold delta,
+so it is not counted as a repair.
+
+The fully stocked agent next begins a new low-exposure SpittingSpider route.
+Ordinary collision-routed movement reduces its first corridor leg from 258 to
+about 29 tiles, including one temporary all-direction block that direction
+probing releases. The runtime cap lands before a visible target appears, so the
+single open goal is not counted as a completion or kill.
+
+The finalized r118 report records 900,856 ms, 487 physical inputs, 0/1
+successful goals, one purchase, and zero kills, deaths, revives, potion uses,
+pickups, quarantines, shortcut violations, or critical browser/network
+diagnostics. EXP remains `24,693/50,000`; it ends at map-0 `(302,380)`,
+159/162 HP, ten drugs, one Venison, 242 gold, and 25,307 EXP remaining to level
+17. q25 remains 8/20 and q30 remains 0/1. The initial private frame contains
+visible vertical terrain-slice tearing while the final frame renders
+coherently, so this is recorded as a frontend observation rather than a visual
+certificate. Full restock and route continuation are proven; level 17 remains
+open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
