@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 118 finalized development reports
-through `warrior-q30-r119-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 119 finalized development reports
+through `warrior-q30-r120-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 105,269,161 ms (29 h 14 m 29 s) browser-active runtime;
-- 55,628 recorded physical inputs;
-- 557 historical kill rows, including one r44 row now proven to repeat the
+- 106,170,373 ms (29 h 29 m 30 s) browser-active runtime;
+- 56,107 recorded physical inputs;
+- 559 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1407,6 +1407,29 @@ HP, five drugs, one Venison, 42 gold, and 24,413 EXP remaining to level 17.
 q25 remains 8/20 and q30 remains 0/1. All three private frames render
 coherently. Three Spider goals and normal death/revive recovery are proven;
 safe-room entry, funding, full restock, and level 17 remain open.
+
+r120 immediately closes the partial post-revive stock: Butcher John sells the
+last retained Venison for gold `42 -> 270`, and Ruben visibly changes HP drugs
+`5 -> 10` and gold `270 -> 70`. The agent then reaches the nearby ForestYeti
+field selected by live-risk memory and completes two goals against two distinct
+ids. Both authoritative goal snapshots advance; the report uses the total EXP
+boundary because some settlement occurs between snapshots.
+
+The agent enters and leaves map 0141 normally for an optional Merchant Clara
+interaction, then later attempts Whitney. Neither interaction produces a
+durability or gold delta, so no repair is claimed. The third Yeti goal begins
+only as the runtime cap arrives and is not counted as a kill or completion.
+
+The finalized r120 report records 901,212 ms, 479 physical inputs, 2/3
+successful goals, two target-specific kill rows, one purchase, and zero
+deaths, revives, potion uses, pickups, quarantines, shortcut violations, or
+critical browser/network diagnostics. Authoritative EXP advances `25,587 ->
+25,965/50,000`; it ends at map-0 `(247,597)`, full 162/162 HP, ten drugs, no
+Venison, 70 gold, and 24,035 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. The initial private frame shows vertical terrain-slice
+tearing, while both later field frames render coherently; this remains a
+frontend observation rather than a visual certificate. Full restock and two
+Yeti goals are proven; level 17 remains open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
