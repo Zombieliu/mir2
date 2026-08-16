@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 92 finalized development reports
-through `warrior-q30-r93-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 93 finalized development reports
+through `warrior-q30-r94-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 81,834,530 ms (22 h 43 m 54 s) browser-active runtime;
-- 43,143 recorded physical inputs;
-- 443 historical kill rows, including one r44 row now proven to repeat the
+- 82,742,787 ms (22 h 59 m 2 s) browser-active runtime;
+- 43,647 recorded physical inputs;
+- 444 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 16 deaths and 15 completed revives across intentionally interrupted and
+- 17 deaths and 16 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -841,6 +841,28 @@ approach to `(302,622)`, so safe-room entry and restock remain for the next
 resume; q25 is still 8/20, q30 is still 0/1, and level 16 remains open. The
 start, first combat, and final frames were visually inspected and match the
 reported live field, HP-drug consumption, endpoint, HP, EXP, and gold state.
+
+r94 completed the r93 merchant closure immediately: Ruben visibly restored HP
+drugs `2 -> 10` for 320 gold. A dense departure then produced one normal
+death/revive; the resumed recovery returned to Ruben and visibly restored the
+post-combat stock `7 -> 10` for another 120 gold. The live-risk memory cooled
+down that SpittingSpider source and selected a nearer Oma field instead of
+repeating the lethal route. In the replacement field, one Oma produced a fresh
+positive EXP delta while two different visible Oma ids exhausted the
+conservative five-real-attack/15-second quest-combat window and were not
+counted as kills.
+
+The finalized r94 report records 908,257 ms, 504 physical inputs, 1/5
+successful goals, one target-specific Oma kill, one death and one completed
+revive, four potion uses, two visible shop purchases, two conservative target
+quarantines, zero shortcuts, and zero critical browser/network diagnostics. It
+advances authoritative EXP `33,249 -> 33,309/40,000` and ends on map 0 at
+`(254,545)` in the Oma field with 86/149 HP, ten HP drugs, one Venison, and 89
+gold. The budget expires during the fifth goal's physical search; q25 remains
+8/20, q30 remains 0/1, and level 16 remains open. The initial resumed frame
+contains transient vertical slice tearing, while the later merchant and Oma
+frames render normally and match the reported state. Treat that visual artifact
+as an open observation rather than a successful frontend certificate.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
