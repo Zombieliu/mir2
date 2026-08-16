@@ -3143,6 +3143,15 @@ test("visible map transfers route adjacent before a physical key step into the t
   const page = await fs.readFile(new URL("../../app/page.tsx", import.meta.url), "utf8");
   assert.match(runner, /if \(allowTransferToMap && distance <= 1\)/);
   assert.doesNotMatch(runner, /if \(allowTransferToMap && distance <= 4\)/);
+  const transferReactivationBody = runner.slice(
+    runner.indexOf("if (distance === 0)"),
+    runner.indexOf("const portalProbe"),
+  );
+  assert.match(transferReactivationBody, /reactivate-visible-map-transfer/);
+  assert.match(
+    transferReactivationBody,
+    /String\(afterTransferInput\.mapFileName\) === String\(allowTransferToMap\)/,
+  );
   assert.match(runner, /enter-visible-map-transfer-diagonal-approach/);
   assert.doesNotMatch(
     runner,

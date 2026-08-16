@@ -4756,6 +4756,48 @@ async function navigateNear(
     if (allowTransferToMap && distance <= 1) {
       const startedAt = Date.now();
       const beforeTransferSignature = `${player.x},${player.y}`;
+      if (distance === 0) {
+        // A stopped client can resume with its authoritative transform already
+        // on a one-cell movement source. There is then no direction "toward"
+        // the same tile, so the old branch threw before sending any input and
+        // repeated the shelter loop until portal rotation. Send one ordinary
+        // cardinal key: the server uses that real movement intent to finish an
+        // already-earned transfer; an older server may instead step off the
+        // source, after which the next iteration physically steps back on.
+        const reactivationProbe = (
+          await prioritizedMovementProbes(player, liveTarget, state.mapTransfers)
+        ).find((probe) => probe.keys.length === 1);
+        if (!reactivationProbe) {
+          throw new Error(
+            `no physical direction-key input can reactivate visible transfer ${transferKey ?? "unknown"}`,
+          );
+        }
+        const [key] = reactivationProbe.keys;
+        await waitForDiscreteMovementInput();
+        await client.pressKey(key.key, key.code, key.vk, {
+          action: "reactivate-visible-map-transfer",
+          transferKey,
+          fromMapFileName: expectedMapFileName,
+          toMapFileName: String(allowTransferToMap),
+          direction: key.direction,
+        });
+        const advanced = await waitUntil(
+          client,
+          `(() => { const s = window.__mir2Stage5?.state ?? {}; const p = s.authoritativePlayer ?? s.player; return String(s.mapFileName ?? '') === ${JSON.stringify(String(allowTransferToMap))} || (p && (Number(p.x) + ',' + Number(p.y)) !== ${JSON.stringify(beforeTransferSignature)}); })()`,
+          5_000,
+        );
+        const afterTransferInput = await readAgentState(client);
+        if (String(afterTransferInput.mapFileName) === String(allowTransferToMap)) {
+          navigationDetourByTarget.delete(detourKey);
+          return true;
+        }
+        console.log(
+          `  visible transfer ${transferKey ?? "unknown"} reactivation ` +
+          `${advanced ? "stepped off source without changing map" : "did not advance"} ` +
+          `after ${Date.now() - startedAt}ms; recomputing`,
+        );
+        continue;
+      }
       const portalProbe = movementProbesToward(player, liveTarget)
         .filter((probe) =>
           chebyshev(movementProbeDestination(player, probe), liveTarget) === 0
