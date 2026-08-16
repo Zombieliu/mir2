@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 110 finalized development reports
-through `warrior-q30-r111-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 111 finalized development reports
+through `warrior-q30-r112-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 98,059,957 ms (27 h 14 m 20 s) browser-active runtime;
-- 51,788 recorded physical inputs;
-- 518 historical kill rows, including one r44 row now proven to repeat the
+- 98,960,106 ms (27 h 29 m 20 s) browser-active runtime;
+- 52,302 recorded physical inputs;
+- 521 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1223,6 +1223,30 @@ Venison, 341 gold, and 37,387 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. The world-entry, first-goal, and final private frames all
 render coherently. Six Spider goals and the low-resource disengage are proven;
 safe-room arrival, restock, and level 17 remain open.
+
+r112 resumes the retreat and closes the deferred supply loop entirely through
+visible client input. Merchant Ruben first changes HP drugs `0 -> 5` and gold
+`341 -> 141`; one ordinary pickup changes gold `141 -> 168`, Butcher John sells
+the retained Venison for `168 -> 382`, and Ruben then restores drugs `5 -> 10`
+for `382 -> 182`. A later visible pickup leaves 214 gold. No inventory, gold,
+or potion state is injected directly.
+
+After the restock, the adaptive planner selects ForestYeti and completes one
+target-specific goal with EXP `13,041 -> 13,113`. One RakingCat is confirmed
+during the initial crowded merchant approach, and one later Scarecrow row is
+recorded as incidental; two separate nonresponsive occupants receive the exact
+fast travel quarantine and are not counted as kills. The later Whitney
+interaction has no durability or gold delta, so no repair is claimed.
+
+The finalized r112 report records 900,149 ms, 514 physical inputs, 1/1
+successful goals, three kill rows, two purchases, two gold pickups, two
+quarantines, and zero deaths, revives, potion uses, shortcut violations, or
+critical browser/network diagnostics. Authoritative EXP advances `12,613 ->
+13,305/50,000`; it ends at map-0 `(276,599)`, full 162/162 HP, ten drugs, no
+Venison, 214 gold, and 36,695 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. Supply recovery
+and one Yeti goal are proven; the runtime cap lands during a later physical
+repair route, so another repair and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
