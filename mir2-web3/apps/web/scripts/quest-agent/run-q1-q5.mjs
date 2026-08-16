@@ -56,6 +56,7 @@ import {
   shouldCaptureGoalFrame,
   shouldEnforceShelterEscapeResourceBudget,
   shouldFundHealthPotions,
+  shouldPreferPostRecoveryFieldDisengage,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
   unresolvedCombatResourceStrains,
@@ -209,6 +210,8 @@ let knownHealthPotionUnitPrice = null;
 let deerFundingUnavailableUntil = 0;
 let supplyFundingShelterUntil = 0;
 let safeRecoveryThreatSettleUntil = 0;
+let safeRecoveryPostExitDisengageUntil = 0;
+let safeRecoveryPostExitTarget = null;
 let safeRecoveryTransferProgress = null;
 const safeRecoveryTransferCongestionUntil = new Map();
 const fieldGroupCooldownUntil = new Map();
@@ -292,6 +295,7 @@ const HEALTH_POTION_FUNDING_FIELD_RADIUS = 64;
 const SAFE_FUNDING_MIN_HEALTH_RATIO = 0.70;
 const SAFE_FUNDING_READY_HEALTH_RATIO = 0.90;
 const SAFE_RECOVERY_THREAT_SETTLE_MS = 20_000;
+const SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS = 120_000;
 const SAFE_RECOVERY_PACE_INTERVAL_MS = 3_500;
 const SAFE_RECOVERY_PACE_DISTANCE = 2;
 const SAFE_RECOVERY_TRANSFER_STALL_MS = 45_000;
@@ -6870,6 +6874,44 @@ function healthPotionQuantity(state) {
     .reduce((total, item) => total + Math.max(1, Number(item.quantity ?? 1)), 0);
 }
 
+async function collisionPlannedPostRecoveryRetreat(state, hostile) {
+  if (!state?.player || !hostile) return null;
+  const currentMapFileName = String(state.mapFileName ?? "");
+  const preferredTarget =
+    safeRecoveryPostExitTarget?.mapFileName === currentMapFileName &&
+    chebyshev(state.player, safeRecoveryPostExitTarget) > 1
+      ? safeRecoveryPostExitTarget
+      : null;
+  const candidates = [
+    ...(preferredTarget ? [preferredTarget] : []),
+    ...retreatPointsFromHostile(state, hostile, 10),
+  ].filter((candidate, index, entries) => (
+    entries.findIndex((entry) => (
+      Number(entry.x) === Number(candidate.x) &&
+      Number(entry.y) === Number(candidate.y)
+    )) === index
+  ));
+  for (const candidate of candidates) {
+    const collisionPath = await collisionAtlasPathToward(
+      state.player,
+      candidate,
+      1,
+      state,
+      state.mapTransfers ?? [],
+      currentMapFileName,
+    ).catch(() => null);
+    if (!collisionPath) continue;
+    safeRecoveryPostExitTarget = {
+      mapFileName: currentMapFileName,
+      x: Number(candidate.x),
+      y: Number(candidate.y),
+    };
+    return safeRecoveryPostExitTarget;
+  }
+  safeRecoveryPostExitTarget = null;
+  return null;
+}
+
 async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   if (!extendedRouteEnabled || maxQuestId < 23) return false;
   let state = providedState ?? await readAgentState(client);
@@ -6912,8 +6954,23 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     maxDistance: 8,
     withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
   });
+  const postRecoveryFieldDisengage = shouldPreferPostRecoveryFieldDisengage({
+    currentMapFileName,
+    homeMapFileName,
+    healthRatio,
+    potionQuantity: healthPotionQuantity(state),
+    fieldReserve: HEALTH_POTION_FIELD_RESERVE,
+    disengageUntil: safeRecoveryPostExitDisengageUntil,
+  });
   if (activeShelterThreat) {
-    if (!shelterActive) return false;
+    if (!shelterActive && !postRecoveryFieldDisengage) return false;
+    if (postRecoveryFieldDisengage) {
+      // NPC safety may have re-armed the field latch immediately after the
+      // normal 0141 exit. While the player remains freshly recovered, keep
+      // the same chase from sending it through the same door again.
+      supplyFundingShelterUntil = 0;
+      shelterActive = false;
+    }
     // With several attackers, repeatedly moving away from whichever one is
     // closest makes the retreat vector flip and can zig-zag until death. The
     // visible recovery portal is a stable safe destination. Move toward its
@@ -6948,7 +7005,8 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
           distanceToTransferBounds(state.player, left) -
             distanceToTransferBounds(state.player, right);
       });
-    let recoveryTransfer = recoveryTransferCandidates[0] ?? null;
+    let recoveryTransfer = postRecoveryFieldDisengage ? null :
+      recoveryTransferCandidates[0] ?? null;
     if (recoveryTransfer) {
       const transferKey = recoveryTransferIdentity(recoveryTransfer);
       const transferDistance = distanceToTransferBounds(state.player, recoveryTransfer);
@@ -6992,9 +7050,11 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     } else {
       safeRecoveryTransferProgress = null;
     }
-    const retreat = recoveryTransfer
-      ? nearestPointInTransferBounds(state.player, recoveryTransfer)
-      : retreatPointFromHostile(state, activeShelterThreat, 8);
+    const retreat = postRecoveryFieldDisengage
+      ? await collisionPlannedPostRecoveryRetreat(state, activeShelterThreat)
+      : recoveryTransfer
+        ? nearestPointInTransferBounds(state.player, recoveryTransfer)
+        : retreatPointFromHostile(state, activeShelterThreat, 8);
     // This is no longer optional funding combat: the player is already
     // committed to an emergency shelter escape and every adjacent tile is
     // occupied. A supplyFunding goal would reject the clearing attack merely
@@ -7009,7 +7069,9 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       travelLabel: "visible active-threat shelter escape",
     };
     console.log(
-      `  safe funding shelter retreat: ${activeShelterThreat.name} ` +
+      `  ${postRecoveryFieldDisengage
+        ? "post-recovery supply disengage"
+        : "safe funding shelter retreat"}: ${activeShelterThreat.name} ` +
       `${activeShelterThreat.objectId}@${activeShelterThreat.x},${activeShelterThreat.y} ` +
       `target=${retreat?.x ?? "none"},${retreat?.y ?? "none"}`,
     );
@@ -7189,6 +7251,21 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       Date.now() >= safeRecoveryThreatSettleUntil
     ) {
       safeRecoveryThreatSettleUntil = 0;
+      if (
+        String(state.mapFileName) === SAFE_RECOVERY_MAP_FILE_NAME &&
+        healthPotionQuantity(state) < HEALTH_POTION_FIELD_RESERVE
+      ) {
+        const disengageStartedAt = Date.now();
+        safeRecoveryPostExitDisengageUntil = Math.max(
+          safeRecoveryPostExitDisengageUntil,
+          disengageStartedAt + SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS,
+        );
+        safeRecoveryPostExitTarget = null;
+        recordMilestone("safe-recovery-post-exit-disengage-armed", state, {
+          disengageUntil: safeRecoveryPostExitDisengageUntil,
+          potionQuantity: healthPotionQuantity(state),
+        });
+      }
       recordMilestone("safe-passive-health-recovered", state, {
         healthRatio: liveHealthRatio,
         potionQuantity: healthPotionQuantity(state),
@@ -7294,20 +7371,32 @@ async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
   const inSupplyArea =
     String(state.mapFileName) === homeMapFileName &&
     chebyshev(state.player, merchant) <= HEALTH_POTION_RESTOCK_RADIUS;
+  const postRecoveryFieldDisengage = shouldPreferPostRecoveryFieldDisengage({
+    currentMapFileName: state.mapFileName,
+    homeMapFileName,
+    healthRatio,
+    potionQuantity,
+    fieldReserve: HEALTH_POTION_FIELD_RESERVE,
+    disengageUntil: safeRecoveryPostExitDisengageUntil,
+  });
   const activeThreat = nearestActiveHostile(state, {
     maxDistance: 8,
     withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
   });
   if (!activeThreat) return false;
-  supplyFundingShelterUntil = Math.max(
-    supplyFundingShelterUntil,
-    Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
-  );
+  if (postRecoveryFieldDisengage) {
+    supplyFundingShelterUntil = 0;
+  } else {
+    supplyFundingShelterUntil = Math.max(
+      supplyFundingShelterUntil,
+      Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
+    );
+  }
   // A monster can momentarily occupy the same tile as the player. A pure
   // "move away" vector then has no stable direction and may flip on every
   // policy turn as the monster follows. Prefer the ordinary visible shelter
   // transfer as a fixed destination whenever this map exposes one.
-  const recoveryTransfer = (state.mapTransfers ?? [])
+  const recoveryTransfer = postRecoveryFieldDisengage ? null : (state.mapTransfers ?? [])
     .filter((transfer) => (
       String(transfer.toMapFileName ?? "") === SAFE_RECOVERY_MAP_FILE_NAME &&
       [transfer.minX, transfer.maxX, transfer.minY, transfer.maxY]
@@ -7317,11 +7406,14 @@ async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
       distanceToTransferBounds(state.player, left) -
       distanceToTransferBounds(state.player, right)
     ))[0] ?? null;
-  const retreat = recoveryTransfer
-    ? nearestPointInTransferBounds(state.player, recoveryTransfer)
-    : retreatPointFromHostile(state, activeThreat, 8);
+  const retreat = postRecoveryFieldDisengage
+    ? await collisionPlannedPostRecoveryRetreat(state, activeThreat)
+    : recoveryTransfer
+      ? nearestPointInTransferBounds(state.player, recoveryTransfer)
+      : retreatPointFromHostile(state, activeThreat, 8);
   console.log(
-    `  unsafe ${inSupplyArea ? "supply" : "field"} disengage: ${activeThreat.name} ` +
+    `  ${postRecoveryFieldDisengage ? "post-recovery supply" :
+      `unsafe ${inSupplyArea ? "supply" : "field"}`} disengage: ${activeThreat.name} ` +
     `${activeThreat.objectId}@${activeThreat.x},${activeThreat.y} ` +
     `HP=${Number(state.playerHp ?? 0)}/${maxHp} ` +
     `potions=${potionQuantity}/${HEALTH_POTION_FIELD_RESERVE} ` +
@@ -7329,7 +7421,7 @@ async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
   );
   if (retreat) {
     await navigateNear(retreat, recoveryTransfer ? 0 : 1, {
-      maxAttempts: 2,
+      maxAttempts: postRecoveryFieldDisengage ? 4 : 2,
       abortOnDeath: true,
       autoUsePotions: true,
       allowTransferToMap: recoveryTransfer
