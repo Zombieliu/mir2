@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 88 finalized development reports
-through `warrior-q30-r89-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 89 finalized development reports
+through `warrior-q30-r90-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 78,239,585 ms (21 h 43 m 59 s) browser-active runtime;
-- 41,277 recorded physical inputs;
-- 415 historical kill rows, including one r44 row now proven to repeat the
+- 79,143,833 ms (21 h 59 m 3 s) browser-active runtime;
+- 41,724 recorded physical inputs;
+- 419 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -759,6 +759,26 @@ It ends on map 0 at `(300,622)` with 149/149 HP, five HP drugs, 13 gold, and EXP
 were visually inspected and match the partial-stock recovery. This proves a
 truthful low-funds fallback and policy split, not full funding, level 16, or
 quest completion.
+
+r90 resumed the partial-stock state at the first safe transfer. Consecutive
+outside attackers initially forced normal settlement cycles and bounded
+eight-tile disengagement steps. The escape did not become a permanent orbit:
+the recovery portal rotated to the second map-0141 entrance, settled there,
+later returned to the first entrance, and continued moving through the town
+funding band. Four distinct Scarecrow targets produced confirmed kill rows and
+authoritative gold advanced `13 -> 39`, although no individual visible gold
+pickup event was recorded.
+
+The finalized r90 report records 904,248 ms, 447 physical inputs, zero goals,
+four distinct Scarecrow kill rows, three incidental no-response quarantines,
+zero death/revive, zero potion use, zero purchases, zero gold/supply pickups,
+zero shortcuts, and zero critical browser/network diagnostics. It ends on map
+0 at `(305,612)` with 149/149 HP, five HP drugs, 39 gold, and EXP
+23,609/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and show the first entrance followed by a live town
+position with multiple visible Deer and the reported stock/gold. This proves
+portal rotation prevents a deterministic shelter orbit and that funding can
+make state progress, not full restock, level 16, or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
