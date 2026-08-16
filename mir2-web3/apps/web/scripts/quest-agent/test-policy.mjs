@@ -64,6 +64,7 @@ import {
   shouldCaptureGoalFrame,
   shouldEnforceShelterEscapeResourceBudget,
   shouldFundHealthPotions,
+  shouldPreferPostRecoveryFieldDisengage,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
   unresolvedCombatResourceStrains,
@@ -719,6 +720,66 @@ test("R122 quarantined retreat fans out when the direct-away tile is blocked", (
     "a perpendicular escape must remain available around a wall",
   );
   assert.equal(new Set(candidates.map((point) => `${point.x},${point.y}`)).size, 8);
+});
+
+test("R126 full-health zero-stock exit kites instead of repeating shelter", () => {
+  const baseline = {
+    currentMapFileName: "0",
+    homeMapFileName: "0",
+    healthRatio: 1,
+    potionQuantity: 0,
+    fieldReserve: 5,
+    now: 10_000,
+    disengageUntil: 130_000,
+  };
+
+  assert.equal(shouldPreferPostRecoveryFieldDisengage(baseline), true);
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    healthRatio: 0.89,
+  }), false, "an injured zero-stock player must retain the shelter escape");
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    potionQuantity: 5,
+  }), false, "normal field reserve must not enter the zero-stock exit mode");
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    currentMapFileName: "0141",
+  }), false, "the interior settlement itself must never be treated as field kiting");
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    now: 130_000,
+  }), false, "the bounded post-exit window must expire");
+});
+
+test("R126 runner collision-plans one bounded post-settlement field disengage", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  assert.match(runner, /SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS = 120_000/);
+  const recoveryBody = runner.slice(
+    runner.indexOf("async function recoverHealthInSafeInteriorIfNeeded"),
+    runner.indexOf("function localPotionSupplyIncomplete"),
+  );
+  assert.match(
+    recoveryBody,
+    /safeRecoveryPostExitDisengageUntil = Math\.max\([\s\S]{0,300}SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS/,
+  );
+  assert.match(recoveryBody, /shouldPreferPostRecoveryFieldDisengage\(/);
+  assert.match(recoveryBody, /postRecoveryFieldDisengage \? null :/);
+  const retreatBody = runner.slice(
+    runner.indexOf("async function retreatFromUnsafeActiveThreatIfNeeded"),
+    runner.indexOf("async function recoverQuestDepartureHealthIfNeeded"),
+  );
+  assert.match(retreatBody, /shouldPreferPostRecoveryFieldDisengage\(/);
+  assert.match(retreatBody, /postRecoveryFieldDisengage \? null :/);
+  assert.match(
+    runner,
+    /async function collisionPlannedPostRecoveryRetreat[\s\S]{0,1200}retreatPointsFromHostile\(state, hostile, 10\)[\s\S]{0,1200}collisionAtlasPathToward\(/,
+  );
+  assert.match(retreatBody, /post-recovery supply/);
+  assert.doesNotMatch(
+    retreatBody,
+    /type:\s*["']tick["']|stage5Command|WorldCommand|MoveTo/,
+  );
 });
 
 test("a currently attacking requested monster overrides stale approach cooldown", async () => {
@@ -2596,7 +2657,7 @@ test("low-stock supply work retreats before optional actions and budgets every N
   assert.doesNotMatch(retreatBody, /if \(inSupplyArea\) return false/);
   assert.match(
     retreatBody,
-    /const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE[\s\S]{0,220}const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO[\s\S]{0,1000}supplyFundingShelterUntil = Math\.max\([\s\S]{0,1800}unsafe \$\{inSupplyArea \? "supply" : "field"\} disengage/,
+    /const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE[\s\S]{0,220}const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO[\s\S]{0,1200}if \(postRecoveryFieldDisengage\)[\s\S]{0,180}supplyFundingShelterUntil = 0[\s\S]{0,180}else \{[\s\S]{0,180}supplyFundingShelterUntil = Math\.max\(/,
   );
   assert.match(
     retreatBody,
@@ -3073,7 +3134,7 @@ test("active threats preempt corpse harvesting and stationary field recovery", a
   );
   assert.match(
     runner,
-    /unsafe \$\{inSupplyArea \? "supply" : "field"\} disengage:[\s\S]{0,700}navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: 2/,
+    /postRecoveryFieldDisengage \? "post-recovery supply"[\s\S]{0,100}`unsafe \$\{inSupplyArea \? "supply" : "field"\}`\} disengage:[\s\S]{0,700}navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: postRecoveryFieldDisengage \? 4 : 2/,
   );
   assert.match(
     page,

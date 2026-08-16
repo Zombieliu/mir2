@@ -616,6 +616,28 @@ export function nearestQuarantinedHostile(
 }
 
 /**
+ * A fully recovered zero-stock player may leave the shelter into the same
+ * rendered chase window it just waited out. During one bounded post-exit
+ * window, prefer physical separation on the home map over immediately
+ * entering the same shelter again. Falling below the ready-health threshold
+ * restores the conservative shelter path.
+ */
+export function shouldPreferPostRecoveryFieldDisengage({
+  currentMapFileName,
+  homeMapFileName,
+  healthRatio,
+  potionQuantity,
+  fieldReserve,
+  now = Date.now(),
+  disengageUntil,
+} = {}) {
+  return String(currentMapFileName ?? "") === String(homeMapFileName ?? "") &&
+    finiteNumber(now, 0) < finiteNumber(disengageUntil, 0) &&
+    finiteNumber(potionQuantity, 0) < Math.max(0, finiteNumber(fieldReserve, 0)) &&
+    finiteNumber(healthRatio, 0) >= 0.90;
+}
+
+/**
  * Rank a bounded eight-direction retreat fan away from an attacker. The first
  * candidate preserves the historical direct-away vector; callers with live
  * collision data can rotate through the remaining candidates when that exact
