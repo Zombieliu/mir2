@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 98 finalized development reports
-through `warrior-q30-r99-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 99 finalized development reports
+through `warrior-q30-r100-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 87,278,613 ms (24 h 14 m 38 s) browser-active runtime;
-- 46,029 recorded physical inputs;
-- 463 historical kill rows, including one r44 row now proven to repeat the
+- 88,180,774 ms (24 h 29 m 40 s) browser-active runtime;
+- 46,509 recorded physical inputs;
+- 464 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -974,6 +974,28 @@ corpse, and the final clean frame shows the dense blocker field plus the
 reported HP, gold, empty belt, coordinate, and 92.16% EXP bar. This is real
 grind throughput and a safe withdrawal checkpoint, not level-16 or recovery
 closure.
+
+r100 resumes the exact dense zero-drug withdrawal. It rotates from the first
+0141 entrance after ordinary movement stops at `(302,623)`, reaches the second
+visible entrance at `(311,631)`, enters the safe room, and returns at full HP.
+Merchant Ruben visibly restores HP drugs `0 -> 5` for the available 200 gold.
+A Deer harvest supplies no immediate inventory acknowledgement; Butcher John
+then visibly changes gold `66 -> 280`, and Ruben restores drugs `5 -> 10` for
+another 200 gold. One Venison remains in the final bag.
+
+The finalized r100 report records 902,161 ms, 480 physical inputs, 0/1
+completed goals, one HookingCat kill row, two visible purchases, one
+fast-timeout quarantine, zero deaths/revives, potion uses, shortcuts, or
+critical browser/network diagnostics. Authoritative EXP advances
+`36,863 -> 37,143/40,000`, but the larger delta is not relabeled as extra
+confirmed kills. After restocking, the agent restarts the real SpittingSpider
+journey and reaches map-0 `(299,579)` before the runtime limit. It ends at
+146/149 HP with ten drugs, one Venison, 80 gold, and 2,857 EXP remaining to
+level 16; q25 stays 8/20 and q30 stays 0/1. Both private frames render
+coherently and match the dense starting corridor plus final route coordinate,
+HP, ten-drug belt, gold, and 92.86% EXP bar. This closes the exact zero-stock
+recovery/restock replay and leaves another safe travel checkpoint; it does not
+complete the grind.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
