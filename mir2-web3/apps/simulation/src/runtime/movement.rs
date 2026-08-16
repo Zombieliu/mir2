@@ -651,6 +651,18 @@ impl SimulationSession {
             return packets;
         }
 
+        // A disconnect can persist the authoritative transform after the
+        // player stepped onto a one-cell movement source but before the client
+        // observed the ensuing map change. The next ordinary movement intent
+        // must finish that already-earned transfer instead of trying to walk
+        // out through the surrounding building collision.
+        let mut standing_transfer_packets =
+            apply_current_player_position_map_transfer(self.app.world_mut());
+        if !standing_transfer_packets.is_empty() {
+            standing_transfer_packets.extend(advance_world(self.app.world_mut()));
+            return standing_transfer_packets;
+        }
+
         dismiss_dialog(self.app.world_mut());
         let target = clamp_to_map_region(self.app.world(), destination);
         let player_entity = player_entity(self.app.world()).expect("player should exist");
@@ -751,6 +763,15 @@ impl SimulationSession {
             }];
             packets.extend(advance_world(self.app.world_mut()));
             return packets;
+        }
+
+        // See move_to_with_mode_impl: a normal direction key also reactivates
+        // a transfer source restored as the persisted player position.
+        let mut standing_transfer_packets =
+            apply_current_player_position_map_transfer(self.app.world_mut());
+        if !standing_transfer_packets.is_empty() {
+            standing_transfer_packets.extend(advance_world(self.app.world_mut()));
+            return standing_transfer_packets;
         }
 
         let Some(player) = player_entity(self.app.world()) else {
