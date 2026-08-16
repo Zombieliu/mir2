@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 120 finalized development reports
-through `warrior-q30-r121-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 122 finalized development reports
+through `warrior-q30-r123-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 107,077,663 ms (29 h 44 m 38 s) browser-active runtime;
-- 56,617 recorded physical inputs;
-- 559 historical kill rows, including one r44 row now proven to repeat the
+- 108,186,019 ms (30 h 3 m 6 s) browser-active runtime;
+- 57,192 recorded physical inputs;
+- 560 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1449,6 +1449,51 @@ private frames render coherently. This report proves neither progression nor a
 generic static-route failure: it isolates repeated handling of an already
 quarantined adjacent pursuer as the next recovery defect.
 
+Clean commit `f6b36a9c2` (source `dd58a349e`) retains a bounded cross-call
+position history, recognizes the observed A-B-A-B cycle across two-attempt
+navigation chunks, rejects a quarantined actor's current occupancy cell, and
+routes ordinary physical input toward a retreat endpoint. The first live
+replay, r122, is deliberately retained as a counterexample: it breaks the
+one-tile oscillation, but the direct-away endpoint `(279,620)` lies in a
+statically blocked pocket. Repeated goals therefore reselect the same
+unreachable retreat and stop at the no-progress bound.
+
+The finalized r122 report records 205,211 ms, 84 physical inputs, 0/9
+successful goals, one quarantine for Scarecrow `206608`, and zero kills,
+deaths, revives, potion uses, purchases, pickups, shortcut violations, or
+critical browser/network diagnostics. EXP remains `25,965/50,000`; it ends at
+map-0 `(269,620)`, full 162/162 HP, ten drugs, no Venison, 70 gold, and 24,035
+EXP remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Its final
+private frame renders coherently. This rejects a single direct-away endpoint
+as a complete fix.
+
+Clean commit `3180b5f78` (source `803d60fac`) replaces that single endpoint
+with an eight-direction retreat fan ranked away from the quarantined hostile.
+Each candidate is checked through the existing collision-atlas pathfinder, so
+the first reachable endpoint is selected without granting movement or
+modifying the authoritative transform. The full Quest Agent gate passes
+182/182 in both worktrees, and both clean/source commit pairs have matching
+stable patch ids.
+
+r123 is the live certificate for that second fix. On the exact r122 resume it
+quarantines the same Scarecrow once, rejects the cross-chunk return edge, and
+physically moves from the `(268,621)` trap through multiple collision-routed
+positions to `(297,616)`, reaching at least six tiles of separation before
+ordinary planning resumes. The same object is not quarantined again after the
+120-second cooldown. The agent then continues normal repair checking and
+field travel and completes one confirmed Oma goal against object `205612`.
+
+The finalized r123 report records 903,145 ms, 491 physical inputs, 1/2
+successful goals, one target-specific kill row, one quarantine, and zero
+deaths, revives, potion uses, purchases, pickups, shortcut violations, or
+critical browser/network diagnostics. The confirmed row begins at EXP 25,965;
+the total authoritative boundary reaches `26,085/50,000`, including delayed
+settlement that is not mislabeled as a second kill. It ends at map-0
+`(284,485)`, 160/162 HP, ten drugs, no Venison, 70 gold, and 23,915 EXP
+remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Both private
+frames render coherently. This closes the quarantined-pursuer escape
+regression; it does not certify level 17, q25, or q30.
+
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
 summary fields; do not attach raw `report.json` files to a PR.
@@ -1539,6 +1584,16 @@ unreachable. r65 proves continuation past the old depletion fatal, while the
 r66 live trace proves ordinary portal entry, safe-room settlement, visible
 harvest/sale, and full restock. r67 confirms that state persisted across a new
 client bootstrap.
+
+r121-r123 expose and close a later cross-chunk recovery boundary. The old
+cycle detector could not accumulate enough samples inside the runner's
+two-attempt navigation chunks, while repeatedly quarantining the same adjacent
+pursuer did not make its occupied cell ineligible. A cross-call cycle history
+and quarantine-aware retreat solve that state leak. r122 further proves that a
+geometric direct-away point can itself be unreachable, so the final fix ranks
+and collision-plans an eight-direction retreat fan. r123 proves the exact
+saved state leaves the old trap, avoids repeat quarantine, and returns to a
+confirmed normal-client kill. Extended progression remains open.
 
 ## Sign-off wording
 
