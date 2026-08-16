@@ -126,12 +126,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 119 finalized development reports
-through `warrior-q30-r120-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 120 finalized development reports
+through `warrior-q30-r121-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 106,170,373 ms (29 h 29 m 30 s) browser-active runtime;
-- 56,107 recorded physical inputs;
+- 107,077,663 ms (29 h 44 m 38 s) browser-active runtime;
+- 56,617 recorded physical inputs;
 - 559 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
@@ -1430,6 +1430,24 @@ q30 remains 0/1. The initial private frame shows vertical terrain-slice
 tearing, while both later field frames render coherently; this remains a
 frontend observation rather than a visual certificate. Full restock and two
 Yeti goals are proven; level 17 remains open.
+
+r121 is a deterministic dynamic-occupancy counterexample. After an optional
+Whitney interaction produces no repair delta, the fully stocked agent begins a
+Spider route and becomes trapped near map-0 `(268,622)`. The same Scarecrow id
+`206608` is quarantined five times. The last four records remain within the
+same one-tile neighborhood for about 6 minutes 22 seconds, while the supervised
+trace alternates between the same two positions and rotates several distant
+Spider sources without escaping the local blocker.
+
+The finalized r121 report records 907,290 ms, 510 physical inputs, 0/1
+successful goals, zero kills, deaths, revives, potion uses, purchases, pickups,
+shortcut violations, or critical browser/network diagnostics, and five
+quarantines for that same nonresponsive id. EXP remains `25,965/50,000`; it
+ends at map-0 `(268,620)`, full 162/162 HP, ten drugs, no Venison, 70 gold, and
+24,035 EXP remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Both
+private frames render coherently. This report proves neither progression nor a
+generic static-route failure: it isolates repeated handling of an already
+quarantined adjacent pursuer as the next recovery defect.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
