@@ -45,7 +45,9 @@ import {
   questState,
   rankCombatTargetsByIsolation,
   rankRespawnFieldsForTravel,
+  quarantineRequiresTravelDisengage,
   reconcileConfirmedDeadMonsterObjects,
+  renderedTargetHealthCertainty,
   retreatPointFromHostile,
   retreatPointsFromHostile,
   respawnCorridorAvoidanceWaypoint,
@@ -217,6 +219,7 @@ const safeRecoveryTransferCongestionUntil = new Map();
 const fieldGroupCooldownUntil = new Map();
 const monsterCooldownUntil = new Map();
 const quarantinedMonsterUntil = new Map();
+const quarantinedTravelThreatUntil = new Map();
 let confirmedDeadMonsterObjects = new Map();
 const questMonsterDeaths = new Map();
 const questMonsterPreparationLevel = new Map();
@@ -241,6 +244,20 @@ let lastRestorativeSkillInputAt = 0;
 const FAILED_APPROACH_COOLDOWN_MS = 15_000;
 const FAILED_COMBAT_COOLDOWN_MS = 30_000;
 const QUARANTINED_TARGET_COOLDOWN_MS = 120_000;
+for (const quarantine of (
+  Array.isArray(resumeEvidence?.targetQuarantines)
+    ? resumeEvidence.targetQuarantines
+    : []
+)) {
+  const objectId = String(quarantine?.objectId ?? "");
+  const quarantineUntil = Number(quarantine?.at ?? 0) + QUARANTINED_TARGET_COOLDOWN_MS;
+  if (!objectId || quarantineUntil <= Date.now()) continue;
+  quarantinedMonsterUntil.set(objectId, quarantineUntil);
+  monsterCooldownUntil.set(objectId, quarantineUntil);
+  if (quarantine.travelDisengage === true) {
+    quarantinedTravelThreatUntil.set(objectId, quarantineUntil);
+  }
+}
 const CONFIRMED_DEAD_OBJECT_MAX_HOLD_MS = 10 * 60_000;
 const COMBAT_PROGRESS_WINDOW_MS = 45_000;
 const COMBAT_HARD_DEADLINE_MS = 5 * 60_000;
@@ -4122,6 +4139,7 @@ async function killMonster(
       rememberConfirmedMonsterDeath(objectId);
       monsterCooldownUntil.delete(objectId);
       quarantinedMonsterUntil.delete(objectId);
+      quarantinedTravelThreatUntil.delete(objectId);
       return { success: true, corpse: corpse ?? live ?? target };
     }
     if (live) await useOffensiveCombatSkillIfReady(state, live);
@@ -4158,11 +4176,21 @@ async function killMonster(
       outgoingAttackCount >= noResponseBudget.minimumAttackCount &&
       !combatEvidence.targetResponded
     ) {
+      const quarantineObservedAt = Date.now();
+      const travelDisengage = quarantineRequiresTravelDisengage({
+        incidentalTravelThreat: goal.incidentalTravelThreat === true,
+        targetAttackRecent: entityAttackIsRecent(
+          live ?? target,
+          quarantineObservedAt,
+          ACTIVE_TRAVEL_THREAT_WINDOW_MS,
+        ),
+      });
       const quarantine = {
         questId: goal.questId,
         monsterName: goal.monsterName,
         objectId,
-        at: Date.now(),
+        at: quarantineObservedAt,
+        travelDisengage,
         reason:
           `${noResponseBudget.minimumAttackCount} real attacks over ` +
           `${noResponseBudget.minimumElapsedMs}ms produced no target-specific combat packet`,
@@ -4178,8 +4206,13 @@ async function killMonster(
         player: state.player,
       };
       evidence.targetQuarantines.push(quarantine);
-      const quarantineUntil = Date.now() + QUARANTINED_TARGET_COOLDOWN_MS;
+      const quarantineUntil = quarantineObservedAt + QUARANTINED_TARGET_COOLDOWN_MS;
       quarantinedMonsterUntil.set(objectId, quarantineUntil);
+      if (travelDisengage) {
+        quarantinedTravelThreatUntil.set(objectId, quarantineUntil);
+      } else {
+        quarantinedTravelThreatUntil.delete(objectId);
+      }
       monsterCooldownUntil.set(objectId, quarantineUntil);
       return {
         success: false,
@@ -4318,6 +4351,7 @@ async function killMonster(
       rememberConfirmedMonsterDeath(objectId);
       monsterCooldownUntil.delete(objectId);
       quarantinedMonsterUntil.delete(objectId);
+      quarantinedTravelThreatUntil.delete(objectId);
       return { success: true, corpse: finalTarget ?? target };
     }
     await delay(125);
@@ -4689,7 +4723,7 @@ async function navigateNear(
     navigationPositionHistoryByMap.set(expectedMapFileName, navigationCycle.history);
     const quarantinedTravelThreat = nearestQuarantinedHostile(
       state,
-      quarantinedMonsterUntil,
+      quarantinedTravelThreatUntil,
       { maxDistance: 6 },
     );
     const quarantineEscapeTargets = quarantinedTravelThreat
@@ -8743,9 +8777,12 @@ function rankMonsterApproachTargets(state, candidates, preferNearest = false) {
     isolated.map((entry, index) => [String(entry.objectId), index]),
   );
   // Supply work is intentionally short and abortable. Minimise time outside
-  // the recovery/shop perimeter; use pack isolation only to break equal-range
-  // ties. Ordinary quest combat keeps the safer pack-edge ordering above.
+  // the recovery/shop perimeter, but never let a nearer hp-unknown stale
+  // actor outrank another rendered object with definite positive HP. Use pack
+  // isolation only after health certainty and range. Ordinary quest combat
+  // keeps the safer pack-edge ordering above.
   return [...isolated].sort((left, right) => (
+    renderedTargetHealthCertainty(left) - renderedTargetHealthCertainty(right) ||
     chebyshev(state.player, left) - chebyshev(state.player, right) ||
     Number(isolationOrder.get(String(left.objectId)) ?? 0) -
       Number(isolationOrder.get(String(right.objectId)) ?? 0)
@@ -8754,8 +8791,16 @@ function rankMonsterApproachTargets(state, candidates, preferNearest = false) {
 
 async function nearestVisibleMonsterByName(state, name, preferNearest = false) {
   const candidates = matchingLiveMonsters(state, name);
-  const immediateCandidate = preferNearest
+  const rankedSupplyCandidates = preferNearest
     ? rankMonsterApproachTargets(state, candidates, true)
+    : [];
+  const definiteLiveCandidates = rankedSupplyCandidates.filter(
+    (entry) => renderedTargetHealthCertainty(entry) === 0,
+  );
+  const immediateCandidate = preferNearest
+    ? (definiteLiveCandidates.length > 0
+        ? definiteLiveCandidates
+        : rankedSupplyCandidates)
       .find((entry) => chebyshev(state.player, entry) <= 1) ?? null
     : chooseImmediateMeleeTarget(
       state,

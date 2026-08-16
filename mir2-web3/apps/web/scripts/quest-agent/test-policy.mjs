@@ -50,7 +50,9 @@ import {
   protectedTransfersForNavigation,
   rankCombatTargetsByIsolation,
   rankRespawnFieldsForTravel,
+  quarantineRequiresTravelDisengage,
   reconcileConfirmedDeadMonsterObjects,
+  renderedTargetHealthCertainty,
   respawnCorridorAvoidanceWaypoint,
   respawnCorridorExposure,
   respawnTerminalExposure,
@@ -779,6 +781,58 @@ test("R126 runner collision-plans one bounded post-settlement field disengage", 
   assert.doesNotMatch(
     retreatBody,
     /type:\s*["']tick["']|stage5Command|WorldCommand|MoveTo/,
+  );
+});
+
+test("R127 passive funding quarantine does not become a travel pursuer", () => {
+  assert.equal(quarantineRequiresTravelDisengage({
+    incidentalTravelThreat: false,
+    targetAttackRecent: false,
+  }), false);
+  assert.equal(quarantineRequiresTravelDisengage({
+    incidentalTravelThreat: true,
+    targetAttackRecent: false,
+  }), true);
+  assert.equal(quarantineRequiresTravelDisengage({
+    incidentalTravelThreat: false,
+    targetAttackRecent: true,
+  }), true);
+  assert.equal(renderedTargetHealthCertainty({ hp: 25 }), 0);
+  assert.equal(renderedTargetHealthCertainty({ hp: null }), 1);
+  assert.equal(renderedTargetHealthCertainty({}), 1);
+});
+
+test("R127 runner separates target cooldown from travel escape and prefers known life", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  assert.match(runner, /const quarantinedTravelThreatUntil = new Map\(\)/);
+  assert.match(
+    runner,
+    /resumeEvidence\?\.targetQuarantines[\s\S]{0,1200}quarantinedMonsterUntil\.set[\s\S]{0,700}quarantine\.travelDisengage === true[\s\S]{0,300}quarantinedTravelThreatUntil\.set/,
+  );
+  const combatBody = runner.slice(
+    runner.indexOf("async function killMonster("),
+    runner.indexOf("async function harvestCorpse("),
+  );
+  assert.match(
+    combatBody,
+    /const travelDisengage = quarantineRequiresTravelDisengage\([\s\S]{0,500}travelDisengage,[\s\S]{0,1500}quarantinedTravelThreatUntil\.set/,
+  );
+  const navigationBody = runner.slice(
+    runner.indexOf("async function navigateNear("),
+    runner.indexOf("async function collisionPathToward("),
+  );
+  assert.match(
+    navigationBody,
+    /nearestQuarantinedHostile\([\s\S]{0,120}quarantinedTravelThreatUntil/,
+  );
+  const rankBody = runner.slice(
+    runner.indexOf("function rankMonsterApproachTargets"),
+    runner.indexOf("function matchingLiveMonsters"),
+  );
+  assert.match(rankBody, /renderedTargetHealthCertainty\(left\)/);
+  assert.match(
+    rankBody,
+    /const definiteLiveCandidates =[\s\S]{0,300}renderedTargetHealthCertainty\(entry\) === 0[\s\S]{0,300}definiteLiveCandidates\.length > 0/,
   );
 });
 
@@ -2439,7 +2493,7 @@ test("supply hunting stays inside authoritative village-edge respawn fields", as
   );
   assert.match(
     runner,
-    /function rankMonsterApproachTargets[\s\S]{0,650}chebyshev\(state\.player, left\) - chebyshev\(state\.player, right\)/,
+    /function rankMonsterApproachTargets[\s\S]{0,900}renderedTargetHealthCertainty\(left\) - renderedTargetHealthCertainty\(right\)[\s\S]{0,180}chebyshev\(state\.player, left\) - chebyshev\(state\.player, right\)/,
   );
   assert.match(runner, /fundingGoal,[\s\S]{0,100}fundingStateBefore,[\s\S]{0,500}killMonster\([\s\S]{0,300}fundingStateBefore/);
 });

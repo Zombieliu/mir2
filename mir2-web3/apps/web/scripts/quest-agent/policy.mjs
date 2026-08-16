@@ -615,6 +615,22 @@ export function nearestQuarantinedHostile(
     ))[0] ?? null;
 }
 
+/** Only a real travel blocker or a recently attacking target drives escape. */
+export function quarantineRequiresTravelDisengage({
+  incidentalTravelThreat = false,
+  targetAttackRecent = false,
+} = {}) {
+  return incidentalTravelThreat === true || targetAttackRecent === true;
+}
+
+/** Prefer authoritative positive HP over a rendered actor with unknown life. */
+export function renderedTargetHealthCertainty(entity) {
+  const hp = entity?.hp;
+  return hp != null && hp !== "" && Number.isFinite(Number(hp)) && Number(hp) > 0
+    ? 0
+    : 1;
+}
+
 /**
  * A fully recovered zero-stock player may leave the shelter into the same
  * rendered chase window it just waited out. During one bounded post-exit
