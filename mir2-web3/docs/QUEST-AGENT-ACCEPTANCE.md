@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 122 finalized development reports
-through `warrior-q30-r123-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 123 finalized development reports
+through `warrior-q30-r124-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 108,186,019 ms (30 h 3 m 6 s) browser-active runtime;
-- 57,192 recorded physical inputs;
-- 560 historical kill rows, including one r44 row now proven to repeat the
+- 109,106,053 ms (30 h 18 m 26 s) browser-active runtime;
+- 57,729 recorded physical inputs;
+- 561 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1493,6 +1493,27 @@ settlement that is not mislabeled as a second kill. It ends at map-0
 remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Both private
 frames render coherently. This closes the quarantined-pursuer escape
 regression; it does not certify level 17, q25, or q30.
+
+r124 continues from the r123 certificate rather than replaying the old trap.
+It physically reaches Merchant Whitney through a congested route; the visible
+interaction produces no durability or gold delta, so no repair is claimed. It
+then starts the 257-tile SpittingSpider preparation route. Several dynamic
+blocks require ordinary direction probing and one responsive Scarecrow clear,
+but the route leaves the former quarantine area and reduces the remaining
+distance to about 171 tiles before the runtime cap.
+
+The finalized r124 report records 920,034 ms, 537 physical inputs, 0/1
+successful goals, one incidental Scarecrow kill row, and zero deaths, revives,
+potion uses, purchases, pickups, quarantines, shortcut violations, or critical
+browser/network diagnostics. That kill row has no immediate EXP delta, so the
+total authoritative movement `26,085 -> 26,175/50,000` is not relabeled as a
+target-specific grind kill. It ends at map-0 `(303,522)`, 159/162 HP, ten
+drugs, no Venison, 70 gold, and 23,825 EXP remaining to level 17. q25 remains
+8/20 and q30 remains 0/1. The initial private frame contains vertical terrain
+slice artifacts while the final frame renders coherently. Its last seconds
+encounter an all-direction dynamic block; the exact r125 resume must determine
+whether that is an ordinary resumable congestion event or another bounded
+recovery defect.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
