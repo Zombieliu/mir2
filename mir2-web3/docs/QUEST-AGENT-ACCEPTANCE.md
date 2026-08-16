@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 114 finalized development reports
-through `warrior-q30-r115-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 115 finalized development reports
+through `warrior-q30-r116-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 101,662,016 ms (28 h 14 m 22 s) browser-active runtime;
-- 53,677 recorded physical inputs;
-- 550 historical kill rows, including one r44 row now proven to repeat the
+- 102,562,671 ms (28 h 29 m 23 s) browser-active runtime;
+- 54,177 recorded physical inputs;
+- 552 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1316,6 +1316,27 @@ Venison, 384 gold, and 25,619 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. All three private frames render coherently. Sustained Spider
 throughput and a safe zero-stock disengage are proven; shelter arrival,
 restock, and level 17 remain open.
+
+r116 is a recovery-only continuation. It resumes the exact zero-stock field
+transform, traverses the remaining 339-tile merchant route through ordinary
+movement, and reaches Merchant Ruben without death or a state reset. Ruben
+visibly changes HP drugs `0 -> 5` and gold `384 -> 184`.
+
+The agent then tries to fund the second purchase honestly. One Deer is
+quarantined after the conservative funding-combat timeout; a separate visible
+Deer corpse receives three harvest inputs but produces no Venison inventory
+delta, so neither event is claimed as a confirmed Deer kill or supply pickup.
+Fallback funding confirms two Scarecrow kill rows with positive immediate EXP,
+but no visible gold pickup arrives before the cap.
+
+The finalized r116 report records 900,655 ms, 500 physical inputs, 0/0
+progression goals, two funding kill rows, one purchase, one quarantine, and
+zero deaths, revives, potion uses, pickups, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `24,381 ->
+24,537/50,000`; it ends at map-0 `(308,606)`, full 162/162 HP, five drugs, no
+Venison, 184 gold, and 25,463 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. Both private frames render coherently. Physical retreat and
+partial restock are proven; funding, full restock, and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
