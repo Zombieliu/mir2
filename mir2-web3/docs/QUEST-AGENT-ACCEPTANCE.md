@@ -126,12 +126,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 124 finalized development reports
-through `warrior-q30-r125-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 126 finalized development reports
+through `warrior-q30-r127-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 110,026,091 ms (30 h 33 m 46 s) browser-active runtime;
-- 58,244 recorded physical inputs;
+- 111,829,101 ms (31 h 3 m 49 s) browser-active runtime;
+- 59,196 recorded physical inputs;
 - 565 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
@@ -1540,6 +1540,53 @@ Venison, 70 gold, and 23,411 EXP remaining to level 17. q25 remains 8/20 and
 q30 remains 0/1. All three private frames render coherently. This proves the
 r124 congestion is resumable and another safe-room cycle is reachable; visible
 funding, sale, restock, and the level-17 grind remain open.
+
+r126 is the exact counterexample to treating repeated safe-room success as
+supply recovery. From the full-HP, zero-stock r125 save it completes four
+separate map-0141 settlement cycles. The report contains seven visible map
+transfers, but no Deer harvest, sale, purchase, pickup, kill, or quest goal.
+Each return exposes another recent attacker, re-arms the shelter latch, and
+sends the character back through the same visible entrance before funding can
+begin.
+
+The finalized r126 report records 902,824 ms, 456 physical inputs, 0/0 goals,
+zero kills, deaths, revives, potion uses, purchases, or pickups, one explicit
+no-response quarantine, and zero shortcut violations or critical
+browser/network diagnostics. Authoritative EXP moves `26,589 ->
+26,649/50,000` without an r126 kill row and is retained only as delayed
+settlement. It ends at map-0 `(300,618)`, 160/162 HP, zero drugs, no Venison,
+70 gold, and 23,351 EXP remaining to level 17. q25 remains 8/20 and q30 remains
+0/1. Both private frames render coherently. Four successful shelter cycles
+with no economic output prove a recovery-state orbit.
+
+Clean commit `18b027ec6` (source `c25e30b86`) arms one 120-second post-exit
+disengagement window only after a real interior settlement leaves the player
+at at least 90% HP and below the five-drug field reserve. During that window,
+a recent attacker is handled through a stable, collision-planned
+eight-direction physical retreat while visible transfer cells remain
+protected. Falling below the health threshold restores the original shelter
+escape. The two commits have matching stable patch id `bdd63fc99dc1`, Node
+syntax checks pass, and the full Quest Agent gate passes 184/184 in both
+worktrees.
+
+r127 replays the exact r126 save on the patched runner. One congested recovery
+attempt rotates from the `(302,622)` entrance to the visible `(311,631)`
+entrance, completes one map-0141 settlement, and returns normally. The report
+then records the new post-exit milestone once and only two total map transfers
+for the entire run. It physically pulls the attacker away, does not enter the
+shelter again, and resumes visible Deer funding attempts. This closes the
+seven-transfer shelter orbit.
+
+The finalized r127 report records 900,186 ms, 496 physical inputs, 0/0 goals,
+zero kills, deaths, revives, potion uses, purchases, or pickups, six explicit
+quarantines, and zero shortcut violations or critical browser/network
+diagnostics. EXP remains `26,649/50,000`; it ends at map-0 `(286,616)`, full
+162/162 HP, zero drugs, no Venison, 70 gold, and 23,351 EXP remaining to level
+17. q25 remains 8/20 and q30 remains 0/1. Both private frames render
+coherently. Four quarantine rows belong to three Deer objects that emit no
+target-specific combat response; one object is retried only after cooldown.
+The shelter-loop fix is live-proven, while Deer funding, sale, restock, and
+level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
