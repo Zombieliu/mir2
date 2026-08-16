@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 91 finalized development reports
-through `warrior-q30-r92-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 92 finalized development reports
+through `warrior-q30-r93-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 80,934,015 ms (22 h 28 m 54 s) browser-active runtime;
-- 42,622 recorded physical inputs;
-- 439 historical kill rows, including one r44 row now proven to repeat the
+- 81,834,530 ms (22 h 43 m 54 s) browser-active runtime;
+- 43,143 recorded physical inputs;
+- 443 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -819,6 +819,28 @@ full route remains incomplete; q25 is still 8/20, q30 is still 0/1, and level
 visually inspected and match the reported transform, live SpittingSpider
 combat, drops, HP, EXP, and gold state. This is a high-throughput preparation
 segment, not a q25/q30 or level-16 completion certificate.
+
+r93 resumed the exact r92 field state and completed two more target-specific
+SpittingSpider goals before a denser respawn consumed eight of the ten HP drugs
+and triggered the ordinary resource guard. The agent abandoned the unsafe
+fight, walked the low-exposure corridor toward map 0141, and recovered from a
+temporary cluster north of the merchant entrance by clearing two responsive
+incidental occupants, cooling down six nonresponsive occupants with the exact
+fast travel-blocker policy, expiring stale collision corrections, and
+replanning. It did not teleport, grant supplies, or claim the nonresponsive
+targets as kills.
+
+The finalized r93 report records 900,515 ms, 521 physical inputs, 2/2
+successful goals, four kill rows (two SpittingSpiders plus one RakingCat and one
+Scarecrow), eight potion uses, six target quarantines, zero death/revive, zero
+purchase, zero shortcuts, and zero critical browser/network diagnostics. It
+advances authoritative EXP `31,637 -> 33,249/40,000` and ends on map 0 at
+`(281,609)` beside the merchant district with full 149/149 HP, two HP drugs,
+one Venison, and 529 gold. The runtime limit lands during the final physical
+approach to `(302,622)`, so safe-room entry and restock remain for the next
+resume; q25 is still 8/20, q30 is still 0/1, and level 16 remains open. The
+start, first combat, and final frames were visually inspected and match the
+reported live field, HP-drug consumption, endpoint, HP, EXP, and gold state.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
