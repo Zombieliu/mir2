@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 85 finalized development reports
-through `warrior-q30-r86-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 86 finalized development reports
+through `warrior-q30-r87-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 75,537,279 ms (20 h 58 m 57 s) browser-active runtime;
-- 39,847 recorded physical inputs;
-- 404 historical kill rows, including one r44 row now proven to repeat the
+- 76,437,777 ms (21 h 13 m 57 s) browser-active runtime;
+- 40,326 recorded physical inputs;
+- 408 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -695,6 +695,28 @@ gold; q25 remains 8/20 and q30 remains 0/1. The initial bootstrap and final
 field frames were inspected; the latter matches the saved transform and full
 stock. This closes the safe-room resume and restock continuation, not arrival
 at the final grind field, level 16, or quest completion.
+
+r87 resumed the second r86 travel leg and re-evaluated a nearer SpittingSpider
+field from the persisted transform. After two empty spawn bands, it found a new
+object-id range and completed four distinct target-specific kills. The fifth
+goal failed explicitly when movement and combat reduced the sustainable stock
+from ten HP drugs to five at roughly 83/149 HP. The resource guard cooled that
+source, consumed the remaining stock while disengaging, and continued the
+committed shelter escape with zero drugs rather than aborting or claiming the
+fifth goal.
+
+The finalized r87 report records 900,498 ms, 479 physical inputs, 4/5
+successful goals, four distinct SpittingSpider kill rows, ten potion-use
+events, zero target quarantines, zero death/revive, zero purchases, zero
+shortcuts, and zero critical browser/network diagnostics. Authoritative EXP
+advanced independently from 21,295 to 22,807. It ends on map 0 at `(259,370)`
+with 149/149 HP, zero HP drugs, and 14 gold, 96 tiles from the current hostile-
+corridor withdrawal waypoint; q25 remains 8/20 and q30 remains 0/1. The start,
+first-goal, and final frames were visually inspected. The first-goal frame
+shows 6/65 target HP before the later target-specific death/EXP settlement and
+is therefore combat-in-progress, while the final frame matches the zero-stock
+withdrawal. This proves the alternate source and depleted-escape continuation,
+not safe arrival, restock, level 16, or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
