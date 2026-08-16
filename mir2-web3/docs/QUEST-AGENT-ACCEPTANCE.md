@@ -12,26 +12,20 @@ level-1-to-50 playthrough.
   `ef33e4764c1342620e30532fb5ffa4e784013dd2`.
 - Main integration base: `aa928b99ae7346eb6816ab8ca0b3f1063dae9394`
   (current `main`, including the squash merge of PR #235).
-- Main-based follow-up code freezes:
-  `d68674ce83f21680f4cc7546561471bd084ee216` and
-  `e50a8fce04e8ae6cf9b0b5091c930fabd6a3375e`, followed by
-  `030cebe31806e3fb7ef79f6014d12864593c3c34` and
-  `d8264b5c1d80f150e29462dec47380995cc93185` and
-  `40ffedcb55a31d5cc2da8f5007464dd21616d549` and
-  `32f5b2f9d8ea7eaa6468007f97737b6ee781f2b6`.
+- Latest main-based follow-up runtime code freeze:
+  `24cd9c81724748b28e0567c2385252aa97dd6ad2` (patch-equivalent to source
+  commit `54a4b01aed754fd9a783f8c5da6745cb1cc0c9ba`). The matching stable patch id is
+  `a7d296c61dbba31c007615790690d7bf2e85a6f7`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `e8065e599face64456dece9c9ca4a017433c1730` (patch-equivalent to clean
-  commit `32f5b2f9d`).
+  `54a4b01aed754fd9a783f8c5da6745cb1cc0c9ba` (patch-equivalent to clean
+  commit `24cd9c81724748b28e0567c2385252aa97dd6ad2`).
 - Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
 - Integration lineage: PR #235's reviewed range is squash-merged as
-  `aa928b99a`. This follow-up adds six code/test commits plus their acceptance
-  documentation commits; source
-  `0256c33a9`/`0afc30449`/`1c9ac3b4`/`acd95a4b4`/`e533efbb3`/`e8065e599`
-  and clean
-  `d68674ce8`/`e50a8fce0`/`030cebe3`/`d8264b5c1`/`40ffedcb5`/`32f5b2f9d`
-  have matching stable patch ids respectively.
+  `aa928b99a`. PR #236 carries the subsequent main-based recovery and
+  progression follow-ups; acceptance-document-only commits may follow the
+  tested runtime freeze without changing runtime code.
 
 ## Acceptance matrix
 
@@ -40,7 +34,7 @@ level-1-to-50 playthrough.
 | Physical input and read-only observation contract | PASS | CDP mouse/keyboard/text only; static and runtime shortcut audits report zero violations. |
 | Resume, reconnect, death, potion, merchant, navigation, combat, harvest, and equipment framework | PASS for staged use | Exercised across the local development soak; failures remain explicit and resumable. |
 | Warrior q1-q9 functional route | PASS | One finalized certificate reached all required authoritative stages with 684 inputs, 18 kills, no death, and zero shortcut violations. |
-| Current extended Warrior chain | PARTIAL | The resumed character has reached level 15. q22-q24, q28, and q29 are complete; q25 is 8/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
+| Current extended Warrior chain | PARTIAL | The resumed character is level 16. q22-q24, q28, and q29 are complete; q25 is 8/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
 | Three-class route generation | STATIC PASS | Warrior, Wizard, and Taoist manifests each contain 140 level-1-to-50 quests and report zero generated blockers. This is not live completion. |
 | Clean visual-assets certificate | NOT ACCEPTED | The completed q1-q9 run contains missing-raster diagnostics. A later incomplete segment is diagnostics-clean, but cannot replace a complete clean run. |
 | Contiguous Warrior level 1-50 | NOT ACCEPTED | No single/resumed evidence chain has completed it. |
@@ -87,14 +81,16 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `32f5b2f9d` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 178/178, including the
+The later Quest Agent-only follow-ups through `24cd9c817` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 186/186, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
 cross-run supply recall, safe-room settlement, full-map route fallback, and
 dense-shelter escape plus congested-portal rotation and physical-hit-target
 selection, en-route reserve exhaustion, and optional hazard-waypoint
-regressions. It also covers budget-disabled equipment-repair travel retaining
-its explicit non-funding resource accounting while independently enabling
+regressions. It also covers bounded post-settlement field disengagement,
+separate passive-target and travel-threat quarantine state, and positive-HP
+target preference during funding. Budget-disabled equipment-repair travel
+retains its explicit non-funding resource accounting while independently enabling
 certified physical occupancy clearing; Node syntax checks and `git diff
 --check` pass in both source and clean worktrees. The latest regression also
 requires a harvest goal to handle at most two already attacking, certified
@@ -126,13 +122,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 126 finalized development reports
-through `warrior-q30-r127-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 127 finalized development reports
+through `warrior-q30-r128-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 111,829,101 ms (31 h 3 m 49 s) browser-active runtime;
-- 59,196 recorded physical inputs;
-- 565 historical kill rows, including one r44 row now proven to repeat the
+- 112,732,693 ms (31 h 18 m 52 s) browser-active runtime;
+- 59,690 recorded physical inputs;
+- 566 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1587,6 +1583,38 @@ coherently. Four quarantine rows belong to three Deer objects that emit no
 target-specific combat response; one object is retried only after cooldown.
 The shelter-loop fix is live-proven, while Deer funding, sale, restock, and
 level 17 remain open.
+
+Clean commit `24cd9c817` (source `54a4b01ae`) keeps target cooldown separate
+from travel-threat disengagement: a no-response passive funding target is not
+treated as a pursuing blocker unless it was an incidental travel threat or
+recently attacked the player. Funding selection now also ranks rendered
+positive HP ahead of unknown-HP actors before applying range and isolation
+ties. The commits share stable patch id `a7d296c61dbba31c007615790690d7bf2e85a6f7`;
+Node syntax and whitespace checks pass, and the full Quest Agent gate passes
+186/186 independently in both worktrees.
+
+r128 resumes the exact r127 state on that source revision. It skips the stale
+unknown-HP choices, reaches a responsive Deer through ordinary collision-aware
+movement, records one positive-EXP kill, and performs six visible harvest
+inputs until Venison advances from one to two. Two visible Butcher sales move
+gold `70 -> 320` and later `120 -> 345`; two normal Merchant purchases move HP
+drugs `0 -> 5 -> 10` while gold settles at 145. The controller then leaves the
+supply loop and starts its level-17 SpittingSpider preparation route. It
+physically reduces that long route from about 421 to 281 tiles before the
+15-minute cap. Because this segment creates no new quarantine row, it is the
+live certificate for positive-HP target selection and the complete
+harvest/sale/restock economy, while passive-quarantine separation remains
+locked by the unit regression rather than relabeled as a live event.
+
+The finalized r128 report records 903,592 ms, 494 physical inputs, 0/1
+successful goals, one target-specific Deer kill row, one sellable-supply
+pickup, two shop purchases, and zero quarantines, deaths, revives, potion uses,
+shortcut violations, or critical browser/network diagnostics. Authoritative
+EXP advances `26,649 -> 26,685/50,000`; it ends at map-0 `(287,469)`, 156/162
+HP, ten drugs, no Venison, 145 gold, and 23,315 EXP remaining to level 17. q25
+remains 8/20 and q30 remains 0/1. Both private frames render coherently. The
+zero-stock funding blocker is closed; level 17 and the q25/q30 task counters
+remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
