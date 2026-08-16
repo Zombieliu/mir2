@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 95 finalized development reports
-through `warrior-q30-r96-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 96 finalized development reports
+through `warrior-q30-r97-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 84,560,073 ms (23 h 29 m 20 s) browser-active runtime;
-- 44,590 recorded physical inputs;
-- 447 historical kill rows, including one r44 row now proven to repeat the
+- 85,462,565 ms (23 h 44 m 22 s) browser-active runtime;
+- 45,058 recorded physical inputs;
+- 456 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 17 deaths and 16 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -902,6 +902,36 @@ same `(302,622)` endpoint; the fatal capture also contains transient light-colum
 and roof ghosting, so it is evidence of the navigation stall rather than a
 frontend rendering certificate. This establishes a resumable transfer-source
 defect; it does not establish q25/q30 or level-16 progress.
+
+Source commit `2a3751901` and its main-based equivalent `dc03df754` close the
+distance-zero input hole without adding a direct movement or map command. The
+normal movement handlers first complete a Crystal source restored as the
+authoritative player transform, while the browser agent sends one ordinary
+cardinal key when there is no geometric direction toward the tile it already
+occupies. The server regression was red before the change and green after it;
+the complete source Simulation suite and the 178/178 Quest Agent gate pass.
+
+The exact-state r97 replay starts from the same map-0 `(302,622)` transform and
+does not repeat the 15-minute zero-distance loop. In 902,492 ms it sends 468
+physical inputs, completes two visible map-0-to-0141 entries, two normal return
+transfers, and both 20-second safe-room settlement cycles. Its action audit
+contains two `enter-visible-map-transfer-diagonal-approach` inputs and four
+`enter-visible-map-transfer` inputs. The policy first chose a nearby Deer
+funding action and stepped off the saved source, so the new
+`reactivate-visible-map-transfer` action itself remains red/green unit-covered
+rather than being relabeled as live-covered.
+
+r97 records nine kill rows (seven Scarecrows, one HookingCat, and one Deer),
+one visible Venison supply pickup, zero deaths/revives, zero potion uses,
+purchases, quarantines, shortcuts, or critical browser/network diagnostics.
+Authoritative EXP advances `33,525 -> 34,019/40,000`; the final inventory has
+five HP drugs and two Venison. The budget expires after visible harvest when
+the agent cannot open Butcher John, so gold remains 89 and the final position is
+map 0 `(286,638)` at full 149/149 HP. q25 remains 8/20, q30 remains 0/1, and
+level 16 remains open. Both private frames were visually inspected: they match
+the reported initial and final coordinates but retain vertical-slice/roof
+ghosting, so r97 is a transfer/recovery certificate, not a frontend rendering
+certificate or a sell/restock closure.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
