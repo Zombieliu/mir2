@@ -126,12 +126,12 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 101 finalized development reports
-through `warrior-q30-r102-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 102 finalized development reports
+through `warrior-q30-r103-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 89,984,193 ms (24 h 59 m 44 s) browser-active runtime;
-- 47,510 recorded physical inputs;
+- 90,884,401 ms (25 h 14 m 44 s) browser-active runtime;
+- 47,987 recorded physical inputs;
 - 470 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 18 deaths and 17 completed revives across intentionally interrupted and
@@ -1034,6 +1034,23 @@ state at `(289,611)`, full 149/149 HP, ten HP drugs, no Venison, 160 gold, and
 three private frames render coherently and match the initial town state, first
 completed Oma goal, and final return coordinate. This is another bounded
 progression slice, not a level-16 or q25 completion certificate.
+
+r103 resumes the r102 coordinate, physically reaches Merchant Whitney, and
+then starts a high-yield SpittingSpider journey. The interaction produces no
+recorded durability or gold delta, so it is not counted as a completed repair.
+The agent walks the full first hostile-corridor leg from roughly 257 tiles away
+to the `(304,351)` waypoint, then reduces the second leg toward `(100,351)`
+from 206 to 135 tiles before the runtime cap.
+
+The finalized r103 report records 900,208 ms, 477 physical inputs, 0/1
+successful goals, zero kill rows, deaths, potion uses, purchases, quarantines,
+shortcut violations, or critical browser/network diagnostics. EXP changes
+`37,713 -> 37,767/40,000` without a matching r103 kill row and is therefore
+treated as delayed authoritative settlement rather than a new confirmed kill.
+It ends resumably at map-0 `(229,350)`, 146/149 HP, ten drugs, no Venison, 160
+gold, and 2,233 EXP remaining to level 16; q25 remains 8/20 and q30 remains
+0/1. Both private frames render coherently. This is physical long-preparation
+progress, not grind, level-16, or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
