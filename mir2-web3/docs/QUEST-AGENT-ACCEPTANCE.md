@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 80 finalized development reports
-through `warrior-q30-r81-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 81 finalized development reports
+through `warrior-q30-r82-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 71,033,371 ms (19 h 43 m 53 s) browser-active runtime;
-- 37,394 recorded physical inputs;
-- 386 historical kill rows, including one r44 row now proven to repeat the
+- 71,933,717 ms (19 h 58 m 53 s) browser-active runtime;
+- 37,922 recorded physical inputs;
+- 387 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 15 deaths and 14 completed revives across intentionally interrupted and
+- 16 deaths and 15 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -594,6 +594,25 @@ The start and final frames were visually inspected and show the congested
 resume point followed by the live town/merchant area with the reported stock
 and gold. This closes the low-funds restock continuation but does not certify
 level 16, q25, or q30 completion.
+
+r82 resumed the fully stocked r81 town state and selected the learned
+SpittingSpider level-16 preparation objective. It used ordinary client movement
+to reduce the field distance from roughly 257 tiles to 121 despite two dense
+collision stalls. At the second stall, an adjacent Scarecrow without a usable
+rendered hit surface continued attacking; one different Scarecrow produced a
+confirmed kill and one no-response target was quarantined. The character then
+died normally, revived in town, and the planner marked that source route as a
+retryable lethal failure instead of recording the grind goal as successful.
+
+The finalized r82 report records 900,346 ms, 528 physical inputs, 0/1
+successful goals, one confirmed kill row, one death/revive, four potion-use
+events, one target quarantine, zero purchases, zero shortcuts, and zero
+critical browser/network diagnostics. It ends on map 0 at `(288,616)` with
+149/149 HP, seven HP drugs, 51 gold, and EXP 15,303/40,000; q25 remains 8/20
+and q30 remains 0/1. The start, failed-goal, and final frames were visually
+inspected and show the ordinary town departure followed by the authoritative
+post-revive town state. This is a bounded route-risk counterexample, not level
+16 or quest completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
