@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 109 finalized development reports
-through `warrior-q30-r110-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 110 finalized development reports
+through `warrior-q30-r111-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 97,156,649 ms (26 h 59 m 16 s) browser-active runtime;
-- 51,340 recorded physical inputs;
-- 510 historical kill rows, including one r44 row now proven to repeat the
+- 98,059,957 ms (27 h 14 m 20 s) browser-active runtime;
+- 51,788 recorded physical inputs;
+- 518 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 19 deaths and 18 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1198,6 +1198,31 @@ ends at 156/162 HP with ten drugs, one Venison, 216 gold, and 40,303 EXP
 remaining to level 17; q25 remains 8/20 and q30 remains 0/1. Both private
 frames render coherently. This is resumable long-route evidence, not a Spider
 goal or level-17 completion certificate.
+
+r111 resumes that route, finds the alternate southern SpittingSpider field,
+and completes six consecutive grind goals. Each goal's before/after snapshot
+has positive authoritative EXP movement; six target kill rows use distinct
+object ids. Two RakingCat rows are incidental occupancy clears during the later
+retreat, bringing the report total to eight kill rows. A visible gold pickup
+moves the balance `216 -> 341`.
+
+The seventh goal is deliberately rejected when combat drains HP to 52/162 and
+the potion reserve to one. The agent disengages rather than continuing an
+unsustainable fight, consumes the final potion during its physical retreat,
+and makes sustained progress around static terrain and dense live occupancy.
+The 900-second cap then expires while it is still walking toward the visible
+safe-room transfer; this is an incomplete resumable segment, not a crash or a
+recovery-completion certificate.
+
+The finalized r111 report records 903,308 ms, 448 physical inputs, 6/7
+successful goals, eight kill rows, eleven potion uses, one gold pickup, and
+zero deaths, revives, purchases, quarantines, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `9,697 ->
+12,613/50,000`; it ends at map-0 `(255,517)`, 157/162 HP, zero drugs, one
+Venison, 341 gold, and 37,387 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. The world-entry, first-goal, and final private frames all
+render coherently. Six Spider goals and the low-resource disengage are proven;
+safe-room arrival, restock, and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
