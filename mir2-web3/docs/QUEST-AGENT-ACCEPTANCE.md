@@ -126,15 +126,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 117 finalized development reports
-through `warrior-q30-r118-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 118 finalized development reports
+through `warrior-q30-r119-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 104,365,714 ms (28 h 59 m 26 s) browser-active runtime;
-- 55,131 recorded physical inputs;
-- 554 historical kill rows, including one r44 row now proven to repeat the
+- 105,269,161 ms (29 h 14 m 29 s) browser-active runtime;
+- 55,628 recorded physical inputs;
+- 557 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 19 deaths and 18 completed revives across intentionally interrupted and
+- 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -1383,6 +1383,30 @@ visible vertical terrain-slice tearing while the final frame renders
 coherently, so this is recorded as a frontend observation rather than a visual
 certificate. Full restock and route continuation are proven; level 17 remains
 open.
+
+r119 re-evaluates the second route leg, reaches a live southern Spider cluster,
+and completes three consecutive goals against three distinct target ids. Each
+confirmed row has a fresh positive immediate EXP delta. The fourth attempt
+fails explicitly when dense attacks exceed the sustainable navigation budget;
+the later EXP movement has no matching fourth kill row and is retained only in
+the total authoritative boundary.
+
+The withdrawal consumes all ten drugs and reaches critical health before one
+normal death/revive. Ruben then visibly buys five drugs for `242 -> 42` gold.
+The recovery route uses a 218-tile risk-reducing western waypoint before
+returning toward the true `(302,622)` transfer, rather than teleporting or
+mutating the saved transform. One nonresponsive Scarecrow at the entrance is
+quarantined and not counted as a kill.
+
+The finalized r119 report records 903,447 ms, 497 physical inputs, 3/4
+successful goals, three target-specific kill rows, one death, one revive, ten
+potion uses, one purchase, one quarantine, and zero pickups, shortcut
+violations, or critical browser/network diagnostics. Authoritative EXP
+advances `24,693 -> 25,587/50,000`; it ends at map-0 `(281,607)`, full 162/162
+HP, five drugs, one Venison, 42 gold, and 24,413 EXP remaining to level 17.
+q25 remains 8/20 and q30 remains 0/1. All three private frames render
+coherently. Three Spider goals and normal death/revive recovery are proven;
+safe-room entry, funding, full restock, and level 17 remain open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
