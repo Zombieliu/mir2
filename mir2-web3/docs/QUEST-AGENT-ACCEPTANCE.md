@@ -126,13 +126,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 103 finalized development reports
-through `warrior-q30-r104-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 104 finalized development reports
+through `warrior-q30-r105-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 91,784,524 ms (25 h 29 m 44 s) browser-active runtime;
-- 48,479 recorded physical inputs;
-- 478 historical kill rows, including one r44 row now proven to repeat the
+- 92,686,941 ms (25 h 44 m 46 s) browser-active runtime;
+- 48,959 recorded physical inputs;
+- 479 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 18 deaths and 17 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1071,6 +1071,26 @@ final state at level 16 and `89/50,000`. The character remains resumable on map
 withdrawing toward map 0141. q25 remains 8/20 and q30 remains 0/1. All three
 private frames render coherently. This certifies the level-16 transition, but
 not the still-open recovery loop or q25/q30 completion.
+
+r105 resumes the exact level-16 zero-stock withdrawal and closes the remaining
+physical distance to map 0141. Five visible transfer milestones span repeated
+safe-room pacing and exits while one still-attacking RakingCat is deliberately
+drawn away from the merchant entrance. The policy rejects restock while that
+attacker is live, then makes visible funding attempts only after the chase has
+cleared.
+
+One Deer is killed through ordinary input and receives three visible harvest
+passes, but the server grants no Venison; the policy records no supply pickup
+and falls back to a local Scarecrow gold hunt. The finalized r105 report
+records 902,417 ms, 480 physical inputs, one kill row, three explicit
+quarantines, zero deaths, potion uses, purchases, gold/supply pickups, shortcut
+violations, or critical browser/network diagnostics. Authoritative EXP changes
+`89 -> 313/50,000`, but the Deer row has no immediate EXP delta, so that change
+is not attributed as a new confirmed kill reward. It ends at map-0 `(289,640)`,
+full 162/162 HP, zero drugs, no Venison, and 160 gold; q25 remains 8/20 and q30
+remains 0/1. Both private frames render coherently. This proves resumable
+safe-room and threat-expiry handling, but the funding/restock loop remains
+open.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
