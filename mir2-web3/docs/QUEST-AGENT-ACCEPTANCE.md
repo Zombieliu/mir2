@@ -122,13 +122,13 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 127 finalized development reports
-through `warrior-q30-r128-supervised` (r66 was an intentionally stopped live
+The private evidence directory contains 128 finalized development reports
+through `warrior-q30-r129-supervised` (r66 was an intentionally stopped live
 trace and is excluded from these report aggregates):
 
-- 112,732,693 ms (31 h 18 m 52 s) browser-active runtime;
-- 59,690 recorded physical inputs;
-- 566 historical kill rows, including one r44 row now proven to repeat the
+- 113,633,085 ms (31 h 33 m 53 s) browser-active runtime;
+- 60,125 recorded physical inputs;
+- 573 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
 - 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
@@ -1615,6 +1615,25 @@ HP, ten drugs, no Venison, 145 gold, and 23,315 EXP remaining to level 17. q25
 remains 8/20 and q30 remains 0/1. Both private frames render coherently. The
 zero-stock funding blocker is closed; level 17 and the q25/q30 task counters
 remain open.
+
+r129 resumes the exact r128 save on the same source runtime code freeze. It
+keeps the optional Whitney repair detour bounded and defers it when the long
+level-17 preparation route is more useful, then reaches the SpittingSpider
+field through ordinary collision-aware movement. Seven of eight requested
+goals complete against seven target-specific `SpittingSpider` rows, each with
+216 positive EXP. The report records 900,392 ms, 435 physical inputs, zero
+target quarantines, deaths, revives, potion uses, purchases, supply pickups,
+shortcut violations, or critical browser/network diagnostics.
+
+Authoritative EXP advances `26,685 -> 29,493/50,000`, a total settlement delta
+of 2,808. Only the seven target-specific rows (`7 x 216 = 1,512`) are claimed as
+r129 kills; the remainder is retained as delayed authoritative settlement and
+is not relabeled as extra combat. The run ends at map-0 `(588,89)`, full
+162/162 HP, 67/67 MP, ten drugs, 145 gold, and 20,507 EXP remaining to level
+17. q25 remains 8/20 (eight stems and zero leaves) and q30 remains 0/1. The
+private world-entry, field-combat, and terminal frames render coherently. This
+proves arrival and sustained target-specific progress in the selected field,
+not level 17 or q25/q30 completion.
 
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
