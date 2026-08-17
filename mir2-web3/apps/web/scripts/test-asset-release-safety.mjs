@@ -20,6 +20,11 @@ const VERIFY_MONSTER_FRAME_CLOSURE_SCRIPT = path.join(
 );
 const CAS_RELEASE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "cas-release.mjs");
 const FULL_PACK_CLOSURE_MODULE = path.join(SCRIPT_DIR, "asset-pipeline", "full-pack-closure.mjs");
+const QUEST_ITEM_ICON_CLOSURE_MODULE = path.join(
+  SCRIPT_DIR,
+  "asset-pipeline",
+  "quest-item-icon-closure.mjs",
+);
 const R2_RELEASE_WORKFLOW = path.resolve(
   SCRIPT_DIR,
   "..",
@@ -51,6 +56,7 @@ await test("map-atlas pages accompany a referenced map-atlas manifest", async ()
       FULL_PACK_CLOSURE_MODULE,
       path.join(path.dirname(fixtureScript), "asset-pipeline", "full-pack-closure.mjs"),
     );
+    await installQuestItemIconClosureFixture(root, fixtureScript, publicRoot);
     await fs.writeFile(path.join(publicRoot, "original-map", "fixture.png"), "original");
     await fs.writeFile(
       path.join(publicRoot, "original-asset-manifest.generated.json"),
@@ -143,6 +149,7 @@ await test("verified full Crystal pack files are included only when explicitly r
       FULL_PACK_CLOSURE_MODULE,
       path.join(path.dirname(fixtureScript), "asset-pipeline", "full-pack-closure.mjs"),
     );
+    await installQuestItemIconClosureFixture(root, fixtureScript, publicRoot);
     await fs.writeFile(path.join(publicRoot, "original-map", "fixture.png"), "original");
     await fs.writeFile(
       path.join(publicRoot, "original-asset-manifest.generated.json"),
@@ -1024,4 +1031,24 @@ function runNode(script, args, env = {}) {
       else reject(new Error(`${path.basename(script)} exited ${code}\n${stdout}\n${stderr}`));
     });
   });
+}
+
+async function installQuestItemIconClosureFixture(root, fixtureScript, publicRoot) {
+  const generatedDataRoot = path.join(root, "packages", "game-data", "data", "generated");
+  const itemIconRoot = path.join(publicRoot, "original-ui", "Items");
+  await fs.copyFile(
+    QUEST_ITEM_ICON_CLOSURE_MODULE,
+    path.join(path.dirname(fixtureScript), "asset-pipeline", "quest-item-icon-closure.mjs"),
+  );
+  await fs.mkdir(generatedDataRoot, { recursive: true });
+  await fs.mkdir(itemIconRoot, { recursive: true });
+  await fs.writeFile(
+    path.join(generatedDataRoot, "crystal_quest_packet_manifest.json"),
+    JSON.stringify({ quests: [] }),
+  );
+  await fs.writeFile(
+    path.join(generatedDataRoot, "crystal_item_manifest.json"),
+    JSON.stringify({ items: [] }),
+  );
+  await fs.writeFile(path.join(itemIconRoot, "meta.json"), JSON.stringify({ frames: [] }));
 }
