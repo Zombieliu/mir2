@@ -334,7 +334,7 @@ fn platinum_176_levels_22_to_35_have_core_skills_gear_and_boss_sources() {
         .collect::<BTreeSet<_>>();
     assert_eq!(
         expected_skills.len(),
-        17,
+        25,
         "22-35 should expose the complete three-class core skill set"
     );
     assert_items_have_boss_sources(
@@ -361,16 +361,23 @@ fn platinum_176_levels_22_to_35_have_core_skills_gear_and_boss_sources() {
 #[test]
 fn platinum_176_levels_36_to_50_have_endgame_boss_and_equipment_sources() {
     let profile = platinum_176_profile();
-    assert!(
-        profile
-            .skills
-            .iter()
-            .all(|skill| skill.required_level <= 35),
-        "Platinum 1.76 should finish its three-class skill ladder at level 35"
-    );
-
     let bosses = ["WoomaTaurus", "ZumaTaurus", "EvilBigApe", "RedMoonEvil"];
     assert_profile_bosses_spawn_on_allowed_maps(&bosses);
+    let expected_skills = profile
+        .skills
+        .iter()
+        .filter(|skill| (36..=50).contains(&skill.required_level))
+        .map(|skill| skill.spell.as_str())
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        expected_skills.len(),
+        22,
+        "36-50 should expose the complete three-class advanced skill set"
+    );
+    assert_items_have_boss_sources(
+        &bosses,
+        &expected_skills.iter().copied().collect::<Vec<_>>(),
+    );
     assert_items_have_boss_sources(
         &bosses,
         &[

@@ -86,6 +86,7 @@ pub(crate) fn apply_observer_action_state(
                 ZonePlayerBuff {
                     buff,
                     expires_at_ms,
+                    notify_owner_on_expiry: false,
                 },
             );
         }

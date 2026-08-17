@@ -743,6 +743,7 @@ export type ViewportProjectileLike = {
   toX: number;
   toY: number;
   startedAt: number;
+  travelEndsAt?: number;
   expiresAt: number;
 };
 
@@ -825,7 +826,8 @@ export function collectViewportProjectileFallbacks(
     }
     const element = elementForName(spell);
     const archetype = archetypeForName(spell);
-    const lifeMs = Math.max(projectile.expiresAt - projectile.startedAt, 1);
+    const travelEndsAt = projectile.travelEndsAt ?? projectile.expiresAt;
+    const lifeMs = Math.max(travelEndsAt - projectile.startedAt, 1);
     // A "streak" draws the origin->target line in the render hook; the element palette gives each
     // projectile its identity (electric arc for lightning, fiery trail for fire, etc.). The
     // distinct landing burst comes from impactKindForArchetype below.
@@ -844,7 +846,9 @@ export function collectViewportProjectileFallbacks(
       durationMs: lifeMs,
     });
     const impact = impactKindForArchetype(archetype);
-    const impactStart = projectile.startedAt + lifeMs * 0.66;
+    const impactStart = projectile.expiresAt > travelEndsAt
+      ? travelEndsAt
+      : projectile.startedAt + lifeMs * 0.66;
     if (now >= impactStart && now < impactStart + impact.durationMs) {
       out.push({
         key: `vfx-impact-${projectile.key}`,

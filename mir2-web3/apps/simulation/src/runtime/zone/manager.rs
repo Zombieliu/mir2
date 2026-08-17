@@ -156,6 +156,8 @@ impl ZoneManager {
             | ZoneCommand::PlayerAttackObject { session_id, .. }
             | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
+            | ZoneCommand::ResolveReincarnation { session_id, .. }
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
             | ZoneCommand::CommitGroundDropClaim { session_id, .. }

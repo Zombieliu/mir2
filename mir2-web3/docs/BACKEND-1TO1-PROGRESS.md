@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> Latest three-class skill backend sync: 2026-08-18 closes the strict active
+> Warrior/Wizard/Taoist <=50 set at 63/63 automated gates. Shared Zone now owns
+> the relevant melee shapes/timing, spell damage and MAC mitigation, movement
+> and control effects, buffs/debuffs, poison item shape, healing/revival,
+> summons and support targeting; Gateway routes those actions through the Zone
+> and propagates item parameters without restoring a personal-session-as-world
+> shortcut. Regression cleanup preserves immediate monster-target FireBang and
+> IceStorm while allowing their ground-target form, distinguishes mirrored
+> personal Buff expiry from Zone-native owner notification, and keeps
+> Entrapment pull plus HealingCircle friendly-area semantics authoritative.
+> The reproducible audit also requires exact profile gates and reachable world
+> book sources. Browser casting with a new ordinary account is still a human
+> acceptance prerequisite because that account legitimately knows no skills;
+> no production admin permission was weakened to manufacture evidence.
+
 > Latest staged Quest Agent backend sync: 2026-08-15 corrects StartGame legacy
 > transform recovery to use the loaded map's authoritative full collision
 > bounds. A valid field position outside the starter preload window is retained;

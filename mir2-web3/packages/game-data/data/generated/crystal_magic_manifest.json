@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-04-22T14:48:06.531Z",
+  "generated_at": "2026-08-17T11:24:07.846Z",
   "source_file": "Crystal/Server/MirEnvir/Envir.cs",
-  "total_magics": 110,
+  "total_magics": 109,
   "magics": [
     {
       "baseCost": 12,
@@ -1145,28 +1145,6 @@
       "multiplierBonus": 0,
       "range": 0,
       "name": "ImmortalSkin",
-      "spell": "ImmortalSkin"
-    },
-    {
-      "baseCost": 0,
-      "levelCost": 0,
-      "icon": 0,
-      "level1": 0,
-      "level2": 0,
-      "level3": 0,
-      "need1": 0,
-      "need2": 0,
-      "need3": 0,
-      "delayBase": 1800,
-      "delayReduction": 0,
-      "powerBase": 0,
-      "powerBonus": 0,
-      "mpowerBase": 0,
-      "mpowerBonus": 0,
-      "multiplierBase": 1,
-      "multiplierBonus": 0,
-      "range": 9,
-      "name": "FastMove",
       "spell": "ImmortalSkin"
     },
     {

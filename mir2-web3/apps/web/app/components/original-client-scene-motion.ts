@@ -368,11 +368,12 @@ function directionForMotionDelta(dx: number, dy: number) {
 }
 
 export function projectileProgress(projectile: DisplayProjectile, now: number) {
-  if (projectile.expiresAt <= projectile.startedAt) {
+  const travelEndsAt = projectile.travelEndsAt ?? projectile.expiresAt;
+  if (travelEndsAt <= projectile.startedAt) {
     return 1;
   }
 
-  const duration = projectile.expiresAt - projectile.startedAt;
+  const duration = travelEndsAt - projectile.startedAt;
   const elapsed = Math.min(Math.max(now - projectile.startedAt, 0), duration);
   return elapsed / duration;
 }

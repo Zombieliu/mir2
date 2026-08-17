@@ -1,5 +1,12 @@
 Original prompt: OK开始落地
 
+## 2026-08-18 three-class level-50 skill parity
+
+- Work is isolated on `codex/three-class-skill-parity` under `numeron-worktrees/three-class-skill-parity`; this pass does not push, deploy or alter production.
+- The active Crystal/Jev <=50 set is 63 skills: Warrior 15, Wizard 23 and Taoist 25. A reproducible audit now requires source data, protocol, personal behavior, shared-Zone authority, Gateway route, exact `platinum_176` v25 availability, reachable book source and visual route for every entry.
+- Missing class mechanics and 522 original effect frames were added; all strict visual routes resolve. Level-53 SlashingBurst/IceThrust are explicitly adjacent, and the commented-out FastMove placeholder is excluded.
+- Automated gates pass for the 63/63 audit, effect export, scene-effect runtime, Web typecheck, full Simulation (core 1182/1182 plus all integration suites), shared Zone 174/174 and the complete Gateway package. Browser QA with an ordinary fresh account cannot yet cast because it correctly has no learned books, and production correctly rejects the admin skill shortcut; real learned-book/human feel acceptance therefore remains open.
+
 Goal: Turn the current functional mobile layout into a polished landscape-first mobile experience.
 
 ## Implementation plan

@@ -27,6 +27,11 @@ export type EffectSubSpec = {
   base: number;
   count: number;
   interval?: number;
+  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "return";
+  light?: number;
+  blend?: boolean;
+  repeat?: boolean;
+  offset?: { x: number; y: number };
 };
 
 export type EffectSpec = {
@@ -50,6 +55,7 @@ export type EffectSpec = {
   repeat?: boolean;
   offset?: { x: number; y: number };
   provenance?: { source: string; symbol: string };
+  projectile?: EffectSubSpec;
   impact?: EffectSubSpec;
   returnEffect?: EffectSubSpec;
 };
@@ -63,7 +69,9 @@ export type EffectAnimation = {
   light: number;
   repeat: boolean;
   offset: { x: number; y: number };
+  projectile?: EffectAnimation;
   impact?: EffectAnimation;
+  returnEffect?: EffectAnimation;
   durationMs: number;
 };
 
@@ -187,21 +195,26 @@ function resolveFrames(
   return frames.length === count ? frames : [];
 }
 
-function resolveSub(assets: EffectAssets, sub: EffectSubSpec): EffectAnimation | undefined {
+function resolveSub(
+  assets: EffectAssets,
+  sub: EffectSubSpec,
+  name: string,
+  fallbackKind: EffectSubSpec["kind"],
+): EffectAnimation | undefined {
   const frames = resolveFrames(assets, sub.library, sub.base, sub.count);
   if (frames.length === 0) {
     return undefined;
   }
   const interval = sub.interval ?? 100;
   return {
-    name: "impact",
-    kind: "impact",
+    name,
+    kind: sub.kind ?? fallbackKind ?? "impact",
     frames,
     interval,
-    blend: true,
-    light: 0,
-    repeat: false,
-    offset: { x: 0, y: 0 },
+    blend: sub.blend ?? true,
+    light: sub.light ?? 0,
+    repeat: sub.repeat ?? false,
+    offset: sub.offset ?? { x: 0, y: 0 },
     durationMs: interval * frames.length,
   };
 }
@@ -239,7 +252,15 @@ export function resolveAnimation(
     light: entry.light ?? 6,
     repeat: entry.repeat ?? false,
     offset: entry.offset ?? { x: 0, y: 0 },
-    impact: entry.impact ? resolveSub(assets, entry.impact) : undefined,
+    projectile: entry.projectile
+      ? resolveSub(assets, entry.projectile, entry.spell ?? entry.effect ?? "projectile", "projectile")
+      : undefined,
+    impact: entry.impact
+      ? resolveSub(assets, entry.impact, entry.spell ?? entry.effect ?? "impact", "impact")
+      : undefined,
+    returnEffect: entry.returnEffect
+      ? resolveSub(assets, entry.returnEffect, entry.spell ?? entry.effect ?? "return", "return")
+      : undefined,
     durationMs: entry.interval * frames.length,
   };
 }
@@ -251,6 +272,49 @@ export function resolveSpellEffect(
 ): EffectAnimation | null {
   const entry = assets.spellByName.get(spell);
   return entry ? resolveAnimation(assets, entry, direction) : null;
+}
+
+/** Resolve only the actor/caster phase. Projectile/target-only entries must not be drawn on caster. */
+export function resolveSpellCastEffect(
+  assets: EffectAssets,
+  spell: string,
+  direction = 0,
+): EffectAnimation | null {
+  const entry = assets.spellByName.get(spell);
+  if (!entry || entry.kind === "projectile" || entry.kind === "impact" || entry.kind === "target") {
+    return null;
+  }
+  return resolveAnimation(assets, entry, direction);
+}
+
+export function resolveSpellProjectileEffect(
+  assets: EffectAssets,
+  spell: string,
+): EffectAnimation | null {
+  const entry = assets.spellByName.get(spell);
+  if (!entry) return null;
+  if (entry.projectile) {
+    return resolveSub(assets, entry.projectile, spell, "projectile") ?? null;
+  }
+  return entry.kind === "projectile" ? resolveAnimation(assets, entry) : null;
+}
+
+export function resolveSpellImpactEffect(
+  assets: EffectAssets,
+  spell: string,
+): EffectAnimation | null {
+  const entry = assets.spellByName.get(spell);
+  return entry?.impact ? resolveSub(assets, entry.impact, spell, "impact") ?? null : null;
+}
+
+export function resolveSpellReturnEffect(
+  assets: EffectAssets,
+  spell: string,
+): EffectAnimation | null {
+  const entry = assets.spellByName.get(spell);
+  return entry?.returnEffect
+    ? resolveSub(assets, entry.returnEffect, spell, "return") ?? null
+    : null;
 }
 
 export function resolveMapEffect(
@@ -422,6 +486,11 @@ export function resolveMapEffectByNumber(
  */
 export function effectNameForNumber(assets: EffectAssets, effect: number): string | null {
   return assets.effectNameByNumber.get(effect) ?? SPELL_NAME_BY_ID[Math.trunc(effect)] ?? null;
+}
+
+/** Spell packets use the protocol Spell enum, not the overlapping SpellEffect enum. */
+export function spellNameForNumber(spell: number): string | null {
+  return SPELL_NAME_BY_ID[Math.trunc(spell)] ?? null;
 }
 
 /** A live effect placed at a tile, used by the render loop. */

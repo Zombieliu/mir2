@@ -1825,6 +1825,7 @@ enum ZoneNativePlayerAttackKind {
         cast: bool,
         mp_cost: i32,
         cooldown_ms: u64,
+        item_param: u8,
     },
 }
 
@@ -5018,9 +5019,16 @@ fn gateway_zone_magic_targets_ground(spell: Spell) -> bool {
     matches!(
         spell,
         Spell::FireWall
+            | Spell::FireBang
+            | Spell::IceStorm
+            | Spell::Teleport
+            | Spell::Blink
             | Spell::Blizzard
             | Spell::MeteorStrike
             | Spell::PoisonCloud
+            | Spell::TrapHexagon
+            | Spell::Curse
+            | Spell::Plague
             | Spell::ExplosiveTrap
     )
 }
@@ -5028,7 +5036,8 @@ fn gateway_zone_magic_targets_ground(spell: Spell) -> bool {
 fn gateway_zone_magic_targets_summon(spell: Spell) -> bool {
     matches!(
         spell,
-        Spell::SummonSkeleton
+        Spell::Mirroring
+            | Spell::SummonSkeleton
             | Spell::SummonShinsu
             | Spell::SummonHolyDeva
             | Spell::SummonVampire
@@ -5041,15 +5050,62 @@ fn gateway_zone_magic_targets_summon(spell: Spell) -> bool {
 fn gateway_zone_magic_targets_self(spell: Spell) -> bool {
     matches!(
         spell,
-        Spell::Healing | Spell::MassHealing | Spell::HealingCircle | Spell::MagicShield
+        Spell::Healing
+            | Spell::Repulsion
+            | Spell::EnergyRepulsor
+            | Spell::HellFire
+            | Spell::Lightning
+            | Spell::ThunderStorm
+            | Spell::FlameField
+            | Spell::ShoulderDash
+            | Spell::BladeAvalanche
+            | Spell::LionRoar
+            | Spell::ProtectionField
+            | Spell::Rage
+            | Spell::Fury
+            | Spell::MagicBooster
+            | Spell::Hiding
+            | Spell::MassHiding
+            | Spell::SoulShield
+            | Spell::BlessedArmour
+            | Spell::MassHealing
+            | Spell::HealingCircle
+            | Spell::Purification
+            | Spell::EnergyShield
+            | Spell::MagicShield
     )
 }
 
 fn gateway_zone_magic_requires_item_consumption(spell: Spell) -> bool {
     matches!(
         spell,
-        Spell::PoisonCloud | Spell::SummonSkeleton | Spell::SummonShinsu | Spell::SummonHolyDeva
+        Spell::SoulFireBall
+            | Spell::Hiding
+            | Spell::SoulShield
+            | Spell::BlessedArmour
+            | Spell::UltimateEnhancer
+            | Spell::Hallucination
+            | Spell::Curse
+            | Spell::TrapHexagon
+            | Spell::Trap
+            | Spell::DelayedExplosion
+            | Spell::ExplosiveTrap
+            | Spell::BindingShot
+            | Spell::Poisoning
+            | Spell::PoisonSword
+            | Spell::PoisonShot
+            | Spell::CrippleShot
+            | Spell::PoisonCloud
+            | Spell::Plague
+            | Spell::Reincarnation
+            | Spell::SummonSkeleton
+            | Spell::SummonShinsu
+            | Spell::SummonHolyDeva
     )
+}
+
+fn gateway_zone_magic_requires_item_preflight_only(spell: Spell) -> bool {
+    matches!(spell, Spell::MassHiding)
 }
 
 fn gateway_zone_magic_item_damage_bonus(spell: Spell) -> i32 {
@@ -7426,12 +7482,20 @@ impl SharedInProcessZoneSessionRuntime {
         &self,
         command: &WorldCommand,
     ) -> Option<ZoneNativePlayerAttack> {
-        let (object_id, packet_direction, mut kind) = match command {
+        let (mut object_id, packet_direction, mut kind) = match command {
             WorldCommand::Attack { object_id } => (
                 *object_id,
                 None,
                 ZoneNativePlayerAttackKind::Melee {
                     spell: Spell::None as u8,
+                    attack_type: 0,
+                },
+            ),
+            WorldCommand::ClientPacket(ClientPacket::Attack { direction, spell }) => (
+                0,
+                Some(*direction),
+                ZoneNativePlayerAttackKind::Melee {
+                    spell: *spell as u8,
                     attack_type: 0,
                 },
             ),
@@ -7464,6 +7528,7 @@ impl SharedInProcessZoneSessionRuntime {
                     cast: true,
                     mp_cost: 0,
                     cooldown_ms: 0,
+                    item_param: 0,
                 },
             ),
             WorldCommand::ClientPacket(ClientPacket::Magic {
@@ -7481,6 +7546,7 @@ impl SharedInProcessZoneSessionRuntime {
                     cast: true,
                     mp_cost: 0,
                     cooldown_ms: 0,
+                    item_param: 0,
                 },
             ),
             WorldCommand::ClientPacket(ClientPacket::Magic {
@@ -7502,6 +7568,7 @@ impl SharedInProcessZoneSessionRuntime {
                         cast: true,
                         mp_cost: 0,
                         cooldown_ms: 0,
+                        item_param: 0,
                     },
                 )
             }
@@ -7520,12 +7587,46 @@ impl SharedInProcessZoneSessionRuntime {
                     cast: true,
                     mp_cost: 0,
                     cooldown_ms: 0,
+                    item_param: 0,
                 },
             ),
             _ => return None,
         };
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
+        if object_id == 0 {
+            if let ZoneNativePlayerAttackKind::Melee { spell, .. } = &kind {
+                let origin = self.authoritative_self_entity_for_snapshot(&snapshot)?;
+                let requested_spell = Spell::try_from(*spell).unwrap_or(Spell::None);
+                let max_distance = if requested_spell == Spell::Thrusting {
+                    2
+                } else {
+                    1
+                };
+                object_id = (1..=max_distance).find_map(|distance| {
+                    let mut point = Point {
+                        x: origin.x,
+                        y: origin.y,
+                    };
+                    for _ in 0..distance {
+                        point = point_in_direction(&point, packet_direction?);
+                    }
+                    snapshot
+                        .entities
+                        .iter()
+                        .find(|entity| {
+                            !entity.dead
+                                && matches!(
+                                    entity.kind,
+                                    WorldEntityKind::Monster | WorldEntityKind::Player
+                                )
+                                && entity.x == point.x
+                                && entity.y == point.y
+                        })
+                        .map(|entity| entity.object_id)
+                })?;
+            }
+        }
         let (monster, direction, is_player_target, is_red_player_target) = if object_id == 0 {
             (None, packet_direction, false, false)
         } else {
@@ -7550,7 +7651,14 @@ impl SharedInProcessZoneSessionRuntime {
             if !matches!(
                 target.kind,
                 WorldEntityKind::Monster | WorldEntityKind::Player
-            ) || target.dead
+            ) || (target.dead
+                && !matches!(
+                    &kind,
+                    ZoneNativePlayerAttackKind::Magic {
+                        spell: Spell::Reincarnation,
+                        ..
+                    }
+                ))
             {
                 return None;
             }
@@ -7594,8 +7702,12 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let direction = direction?;
         let (level, damage) = match &mut kind {
-            ZoneNativePlayerAttackKind::Melee { .. } => {
-                (0, self.inner.zone_melee_attack_damage().max(1))
+            ZoneNativePlayerAttackKind::Melee { spell, .. } => {
+                let requested_spell = Spell::try_from(*spell).unwrap_or(Spell::None);
+                let (profile_spell, profile_level, profile_damage) =
+                    self.inner.zone_melee_attack_profile(requested_spell);
+                *spell = profile_spell as u8;
+                (profile_level, profile_damage.max(1))
             }
             ZoneNativePlayerAttackKind::Range { spell, .. } => {
                 let (profile_spell, profile_level, profile_damage) =
@@ -7607,12 +7719,14 @@ impl SharedInProcessZoneSessionRuntime {
                 spell,
                 mp_cost,
                 cooldown_ms,
+                item_param,
                 ..
             } => {
                 let (profile_level, profile_damage, profile_mp_cost, profile_cooldown_ms) =
                     self.inner.zone_magic_attack_profile(*spell)?;
                 *mp_cost = profile_mp_cost;
                 *cooldown_ms = profile_cooldown_ms;
+                *item_param = self.inner.shared_skill_item_param(*spell);
                 (profile_level, profile_damage.max(0))
             }
         };
@@ -7653,6 +7767,14 @@ impl SharedInProcessZoneSessionRuntime {
             Vec::new()
         };
         if let ZoneNativePlayerAttackKind::Magic { spell, .. } = &attack.kind {
+            if gateway_zone_magic_requires_item_preflight_only(*spell)
+                && self
+                    .inner
+                    .shared_skill_item_consumption_components(*spell)
+                    .is_none()
+            {
+                return Vec::new();
+            }
             if gateway_zone_magic_requires_item_consumption(*spell)
                 && self.zone_native_player_attack_requires_item_consumption(&session_id, &attack)
             {
@@ -7686,6 +7808,10 @@ impl SharedInProcessZoneSessionRuntime {
             }
         }
         let mut accepted_magic_spend = None;
+        let melee_spell_to_commit = match &attack.kind {
+            ZoneNativePlayerAttackKind::Melee { spell, .. } => Spell::try_from(*spell).ok(),
+            _ => None,
+        };
         let command = match attack.kind {
             ZoneNativePlayerAttackKind::Melee { spell, attack_type } => {
                 ZoneCommand::PlayerAttackObject {
@@ -7720,9 +7846,10 @@ impl SharedInProcessZoneSessionRuntime {
                 cast,
                 mp_cost,
                 cooldown_ms,
+                item_param,
             } => {
                 accepted_magic_spend = cast.then_some((spell, mp_cost, cooldown_ms));
-                ZoneCommand::PlayerCastMagic {
+                ZoneCommand::PlayerCastMagicWithItem {
                     session_id,
                     object_id: attack.object_id,
                     spell,
@@ -7733,11 +7860,24 @@ impl SharedInProcessZoneSessionRuntime {
                     damage: attack.damage,
                     mp_cost,
                     cooldown_ms,
+                    item_param,
                     now_ms,
                 }
             }
         };
-        let dispatched = self.dispatch_zone_player_command(command, false);
+        let mut dispatched = self.dispatch_zone_player_command(command, false);
+        if let Some(spell) = melee_spell_to_commit.filter(|spell| *spell != Spell::None) {
+            let accepted = dispatched.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectAttack { info }
+                        if info.object_id != target_object_id && info.spell == spell as u8
+                )
+            });
+            if accepted {
+                dispatched.extend(self.inner.commit_zone_melee_attack_spell(spell));
+            }
+        }
         let mut pk_colour_changed = false;
         if is_player_target
             && dispatched.iter().any(|packet| {
@@ -7787,6 +7927,7 @@ impl SharedInProcessZoneSessionRuntime {
             cast,
             mp_cost,
             cooldown_ms,
+            ..
         } = &attack.kind
         else {
             return true;
@@ -8146,6 +8287,16 @@ impl SharedInProcessZoneSessionRuntime {
                     ZoneCommand::OpenDoor {
                         session_id,
                         door_index: *door_index,
+                        now_ms: Self::zone_now_ms(),
+                    },
+                    false,
+                ))
+            }
+            ClientPacket::AcceptReincarnation | ClientPacket::CancelReincarnation => {
+                Some(self.dispatch_zone_player_command(
+                    ZoneCommand::ResolveReincarnation {
+                        session_id,
+                        accept: matches!(packet, ClientPacket::AcceptReincarnation),
                         now_ms: Self::zone_now_ms(),
                     },
                     false,
@@ -12633,6 +12784,7 @@ mod tests {
                 cast: true,
                 mp_cost: 0,
                 cooldown_ms: 10_000,
+                item_param: 0,
             },
         };
 
@@ -12761,6 +12913,7 @@ mod tests {
                 cast: true,
                 mp_cost: 0,
                 cooldown_ms: 1,
+                item_param: 0,
             },
         };
 
@@ -15294,24 +15447,65 @@ mod tests {
     #[test]
     fn shared_in_process_registry_routes_monster_attack_through_zone_native_combat() {
         let (mut first, mut second) = started_shared_zone_sessions();
-        let snapshot = first.world_snapshot();
-        let map_file_name = snapshot
+        let map_file_name = first
+            .world_snapshot()
             .map_file_name
             .clone()
             .expect("first session should be in a map");
-        let monster = snapshot
-            .entities
-            .iter()
-            .find(|entity| {
-                entity.kind == WorldEntityKind::Monster
-                    && entity.disposition == WorldEntityDisposition::Hostile
-                    && !entity.dead
-            })
-            .cloned()
-            .expect("starter scene should expose a live monster");
         assert!(
             !map_file_name.is_empty(),
             "first session should report a non-empty map"
+        );
+
+        // Replace the personal starter fixture with the real shared map layer,
+        // then seed a bounded test monster that remains owned by the shared Zone.
+        first.transfer_map(&format!("crystal:{map_file_name}:330:270"));
+        first.stage5_command(
+            "event.spawn",
+            vec!["RakingCat0".to_string(), "1".to_string()],
+        );
+        let monster = first
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && entity.name == "RakingCat0"
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && !entity.dead
+            })
+            .expect("shared map should expose a live hostile monster");
+        let player = first
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("first session should expose its shared player");
+        if (player.x - monster.x).abs() > 1 || (player.y - monster.y).abs() > 1 {
+            let direction = if player.y > monster.y {
+                MirDirection::Up
+            } else if player.y < monster.y {
+                MirDirection::Down
+            } else if player.x > monster.x {
+                MirDirection::Left
+            } else {
+                MirDirection::Right
+            };
+            first.handle_packet(ClientPacket::Walk { direction });
+        }
+        let player = first
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("first session should remain visible after approaching");
+        assert!(
+            (player.x - monster.x).abs() <= 1 && (player.y - monster.y).abs() <= 1,
+            "event fixture should spawn adjacent: player=({}, {}), monster=({}, {})",
+            player.x,
+            player.y,
+            monster.x,
+            monster.y
         );
         let owner_packets = first.attack(monster.object_id);
         let observer_packets = second.handle_packet(ClientPacket::KeepAlive { time: 100 });
@@ -16550,22 +16744,53 @@ mod tests {
         let mut second = shared_session_runtime(zone_state.clone());
         start_demo_runtime(&mut first);
         start_new_runtime(&mut second, "second-delayed", "Blade");
-        let target = first
+        let mut target = shared_monster_entity(260_501);
+        target.name = "RakingCat0".to_string();
+        target.disposition = WorldEntityDisposition::Hostile;
+        target.x = 331;
+        target.y = 270;
+        target.hp = Some(32);
+        target.max_hp = Some(32);
+        target.sprite = Some(mir2_simulation::WorldEntitySpriteSnapshot {
+            body_library: "Monster/007".to_string(),
+            direction_stride: 4,
+            frame_base_offset: 0,
+            frame_count: 4,
+            hair_library: None,
+            weapon_library: None,
+            weapon_library_secondary: None,
+            weapon_frame_offset: None,
+            mount_library: None,
+            mount_frame_offset: None,
+            alt_body_library: None,
+            alt_hair_library: None,
+            alt_weapon_library: None,
+            alt_weapon_library_secondary: None,
+            alt_weapon_frame_offset: None,
+            alt_frame_base_offset: None,
+        });
+        let attacker_position = Point { x: 330, y: 270 };
+        let first_key = first
+            .current_presence_key()
+            .expect("first runtime should have joined the shared Zone");
+        {
+            let mut state = zone_state.lock().expect("shared zone state should lock");
+            state.update_player_transform(
+                &first_key,
+                attacker_position.clone(),
+                MirDirection::Right,
+            );
+            state.sync_map_layer(
+                "0".to_string(),
+                vec![target.clone()],
+                BTreeSet::new(),
+                Vec::new(),
+                BTreeSet::new(),
+            );
+        }
+        first
             .inner
-            .world_snapshot()
-            .entities
-            .into_iter()
-            .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
-            })
-            .expect("starter scene should expose a live monster");
-        first.inner.force_authoritative_player_transform(
-            Point {
-                x: target.x.saturating_sub(1),
-                y: target.y,
-            },
-            MirDirection::Right,
-        );
+            .force_authoritative_player_transform(attacker_position, MirDirection::Right);
         first.sync_zone_snapshot();
         second.sync_zone_snapshot();
         let first_zone_object_id = second

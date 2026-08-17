@@ -148,11 +148,13 @@ export type DisplayProjectile = {
   key: string;
   attackerId: string;
   targetId: string;
+  spellOrEffect?: string | number;
   fromX: number;
   fromY: number;
   toX: number;
   toY: number;
   startedAt: number;
+  travelEndsAt?: number;
   expiresAt: number;
 };
 

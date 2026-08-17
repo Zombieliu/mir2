@@ -44,6 +44,95 @@ const randomItemStatsOutputPath = resolve(
   outputDir,
   "crystal_random_item_stats_manifest.json",
 );
+const magicOnly = process.argv.includes("--magic-only");
+
+function stripCSharpComments(source) {
+  let output = "";
+  let state = "code";
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    const next = source[index + 1];
+
+    if (state === "line-comment") {
+      if (char === "\n" || char === "\r") {
+        output += char;
+        state = "code";
+      } else {
+        output += " ";
+      }
+      continue;
+    }
+
+    if (state === "block-comment") {
+      if (char === "*" && next === "/") {
+        output += "  ";
+        index += 1;
+        state = "code";
+      } else {
+        output += char === "\n" || char === "\r" ? char : " ";
+      }
+      continue;
+    }
+
+    if (state === "string") {
+      output += char;
+      if (char === "\\" && next !== undefined) {
+        output += next;
+        index += 1;
+      } else if (char === '"') {
+        state = "code";
+      }
+      continue;
+    }
+
+    if (state === "verbatim-string") {
+      output += char;
+      if (char === '"' && next === '"') {
+        output += next;
+        index += 1;
+      } else if (char === '"') {
+        state = "code";
+      }
+      continue;
+    }
+
+    if (state === "character") {
+      output += char;
+      if (char === "\\" && next !== undefined) {
+        output += next;
+        index += 1;
+      } else if (char === "'") {
+        state = "code";
+      }
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      output += "  ";
+      index += 1;
+      state = "line-comment";
+    } else if (char === "/" && next === "*") {
+      output += "  ";
+      index += 1;
+      state = "block-comment";
+    } else if (char === "@" && next === '"') {
+      output += '@"';
+      index += 1;
+      state = "verbatim-string";
+    } else if (char === '"') {
+      output += char;
+      state = "string";
+    } else if (char === "'") {
+      output += char;
+      state = "character";
+    } else {
+      output += char;
+    }
+  }
+
+  return output;
+}
 
 function extractMethodBody(source, signature) {
   const signatureIndex = source.indexOf(signature);
@@ -596,19 +685,16 @@ function writeJson(path, value) {
 }
 
 const envirSource = readFileSync(envirPath, "utf8");
-const buffSource = readFileSync(buffInfoPath, "utf8");
-const fillMagicInfoBody = extractMethodBody(envirSource, "private void FillMagicInfoList()");
-const updateMagicInfoBody = extractMethodBody(envirSource, "private void UpdateMagicInfo()");
+const fillMagicInfoBody = stripCSharpComments(
+  extractMethodBody(envirSource, "private void FillMagicInfoList()"),
+);
+const updateMagicInfoBody = stripCSharpComments(
+  extractMethodBody(envirSource, "private void UpdateMagicInfo()"),
+);
 
 const magics = applyMagicOverrides(parseMagicEntries(fillMagicInfoBody), updateMagicInfoBody).sort(
   (left, right) => left.spell.localeCompare(right.spell),
 );
-const buffs = parseBuffEntries(buffSource).sort((left, right) =>
-  left.buffType.localeCompare(right.buffType),
-);
-const dropTables = parseDropTables(crystalDropsRoot);
-const npcScripts = parseNpcScripts(crystalNpcsRoot);
-const randomItemStats = parseRandomItemStats(randomItemStatsPath);
 
 writeJson(magicOutputPath, {
   generated_at: new Date().toISOString(),
@@ -617,39 +703,50 @@ writeJson(magicOutputPath, {
   magics,
 });
 
-writeJson(buffOutputPath, {
-  generated_at: new Date().toISOString(),
-  source_file: "Crystal/Server/MirDatabase/BuffInfo.cs",
-  total_buffs: buffs.length,
-  buffs,
-});
-
-writeJson(dropOutputPath, {
-  generated_at: new Date().toISOString(),
-  source_dir: "Crystal/Build/Server/Debug/Envir/Drops",
-  total_tables: dropTables.length,
-  total_entries: dropTables.reduce((sum, table) => sum + table.total_entries, 0),
-  tables: dropTables,
-});
-
-writeJson(npcOutputPath, {
-  generated_at: new Date().toISOString(),
-  source_dir: "Crystal/Build/Server/Debug/Envir/NPCs",
-  total_scripts: npcScripts.length,
-  total_labels: npcScripts.reduce((sum, script) => sum + script.label_count, 0),
-  total_inserts: npcScripts.reduce((sum, script) => sum + script.insert_count, 0),
-  scripts: npcScripts,
-});
-
-writeJson(randomItemStatsOutputPath, {
-  generated_at: new Date().toISOString(),
-  source_file: "Crystal/Build/Server/Debug/Configs/RandomItemStats.ini",
-  total_profiles: randomItemStats.length,
-  profiles: randomItemStats,
-});
-
 console.log(`wrote ${magicOutputPath}`);
-console.log(`wrote ${buffOutputPath}`);
-console.log(`wrote ${dropOutputPath}`);
-console.log(`wrote ${npcOutputPath}`);
-console.log(`wrote ${randomItemStatsOutputPath}`);
+
+if (!magicOnly) {
+  const buffSource = readFileSync(buffInfoPath, "utf8");
+  const buffs = parseBuffEntries(buffSource).sort((left, right) =>
+    left.buffType.localeCompare(right.buffType),
+  );
+  const dropTables = parseDropTables(crystalDropsRoot);
+  const npcScripts = parseNpcScripts(crystalNpcsRoot);
+  const randomItemStats = parseRandomItemStats(randomItemStatsPath);
+
+  writeJson(buffOutputPath, {
+    generated_at: new Date().toISOString(),
+    source_file: "Crystal/Server/MirDatabase/BuffInfo.cs",
+    total_buffs: buffs.length,
+    buffs,
+  });
+
+  writeJson(dropOutputPath, {
+    generated_at: new Date().toISOString(),
+    source_dir: "Crystal/Build/Server/Debug/Envir/Drops",
+    total_tables: dropTables.length,
+    total_entries: dropTables.reduce((sum, table) => sum + table.total_entries, 0),
+    tables: dropTables,
+  });
+
+  writeJson(npcOutputPath, {
+    generated_at: new Date().toISOString(),
+    source_dir: "Crystal/Build/Server/Debug/Envir/NPCs",
+    total_scripts: npcScripts.length,
+    total_labels: npcScripts.reduce((sum, script) => sum + script.label_count, 0),
+    total_inserts: npcScripts.reduce((sum, script) => sum + script.insert_count, 0),
+    scripts: npcScripts,
+  });
+
+  writeJson(randomItemStatsOutputPath, {
+    generated_at: new Date().toISOString(),
+    source_file: "Crystal/Build/Server/Debug/Configs/RandomItemStats.ini",
+    total_profiles: randomItemStats.length,
+    profiles: randomItemStats,
+  });
+
+  console.log(`wrote ${buffOutputPath}`);
+  console.log(`wrote ${dropOutputPath}`);
+  console.log(`wrote ${npcOutputPath}`);
+  console.log(`wrote ${randomItemStatsOutputPath}`);
+}

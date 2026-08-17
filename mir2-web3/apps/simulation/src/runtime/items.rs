@@ -59,7 +59,9 @@ use super::session::{
     current_language, hint_chat_key, hint_chat_key_args, is_in_world, runtime_tick,
     system_message_key, SimulationSession,
 };
-use super::skills::{client_magic_for_skill_state, crystal_book_skill_state, SkillState};
+use super::skills::{
+    client_magic_for_skill_state, crystal_book_skill_state, crystal_magic_for_skill_key, SkillState,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ItemState {
@@ -2136,10 +2138,13 @@ pub(super) fn crystal_use_item_eligibility(
         else {
             return CrystalUseItemEligibility::Rejected(None);
         };
+        let content_spell = crystal_magic_for_skill_key(&skill.key)
+            .map(|magic| magic.spell)
+            .unwrap_or_else(|| skill.key.clone());
         if !world
             .resource::<RuntimeConfigResource>()
             .config
-            .skill_is_allowed(&skill.key, character.class, character.level)
+            .skill_is_allowed(&content_spell, character.class, character.level)
         {
             return CrystalUseItemEligibility::Rejected(Some(super::session::system_message(
                 "This skill is unavailable in the active content profile.",

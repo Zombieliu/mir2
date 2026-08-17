@@ -2869,7 +2869,7 @@ mod tests {
         let profile = platinum_176_profile();
 
         assert_eq!(profile.profile_id, "platinum_176");
-        assert_eq!(profile.version, 24);
+        assert_eq!(profile.version, 25);
         assert_eq!(
             profile.allowed_classes,
             [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]
@@ -2903,7 +2903,7 @@ mod tests {
         assert_eq!(profile.boss_monsters.len(), 7);
         assert_eq!(profile.boss_respawn_jitter_minutes, 30);
         assert_eq!(profile.respawn_overrides.len(), 2);
-        assert_eq!(profile.drop_overrides.len(), 25);
+        assert_eq!(profile.drop_overrides.len(), 40);
         assert_eq!(profile.quest_prerequisite_overrides.len(), 1);
         assert_eq!(profile.quest_reward_overrides.len(), 1);
         assert_eq!(
@@ -3248,6 +3248,118 @@ mod tests {
             .magics
             .iter()
             .any(|magic| magic.spell == "Thrusting" && magic.multiplier_base > 0.0));
+    }
+
+    #[test]
+    fn crystal_magic_manifest_contains_only_unique_enabled_spells() {
+        let manifest = crystal_magic_manifest();
+        let mut names = std::collections::HashSet::new();
+        let mut spells = std::collections::HashSet::new();
+
+        assert_eq!(manifest.total_magics, manifest.magics.len());
+        for magic in &manifest.magics {
+            assert!(
+                names.insert(magic.name.as_str()),
+                "duplicate Crystal magic name: {}",
+                magic.name
+            );
+            assert!(
+                spells.insert(magic.spell.as_str()),
+                "duplicate Crystal spell: {}",
+                magic.spell
+            );
+        }
+
+        assert!(
+            !names.contains("FastMove"),
+            "commented-out Crystal placeholders must not enter the runtime manifest"
+        );
+    }
+
+    #[test]
+    fn platinum_176_exposes_every_source_three_class_book_through_level_50() {
+        let profile = platinum_176_profile();
+        let magics = crystal_magic_manifest()
+            .magics
+            .into_iter()
+            .map(|magic| magic.spell)
+            .collect::<std::collections::BTreeSet<_>>();
+        let books = crystal_item_manifest()
+            .items
+            .into_iter()
+            .filter_map(|item| {
+                if item.item_type != 20
+                    || item.required_type != 0
+                    || item.required_amount == 0
+                    || u16::from(item.required_amount) > profile.acceptance_level
+                {
+                    return None;
+                }
+                let class = match item.required_class {
+                    1 => MirClass::Warrior,
+                    2 => MirClass::Wizard,
+                    4 => MirClass::Taoist,
+                    _ => return None,
+                };
+                Some((item.name, class, u16::from(item.required_amount)))
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            books
+                .iter()
+                .filter(|(_, class, _)| *class == MirClass::Warrior)
+                .count(),
+            15
+        );
+        assert_eq!(
+            books
+                .iter()
+                .filter(|(_, class, _)| *class == MirClass::Wizard)
+                .count(),
+            23
+        );
+        assert_eq!(
+            books
+                .iter()
+                .filter(|(_, class, _)| *class == MirClass::Taoist)
+                .count(),
+            25
+        );
+        assert_eq!(books.len(), 63);
+        assert_eq!(profile.skills.len(), books.len());
+
+        for (spell, class, required_level) in books {
+            assert!(magics.contains(&spell), "{spell} is missing MagicInfo");
+            assert!(
+                profile
+                    .item_whitelist
+                    .iter()
+                    .any(|item| item.eq_ignore_ascii_case(&spell)),
+                "{spell} book is blocked by the content profile"
+            );
+            let rule = profile
+                .skills
+                .iter()
+                .find(|rule| rule.spell.eq_ignore_ascii_case(&spell))
+                .unwrap_or_else(|| panic!("{spell} is missing from the content skill catalog"));
+            assert_eq!(rule.class, class, "{spell} has the wrong class gate");
+            assert_eq!(
+                rule.required_level, required_level,
+                "{spell} does not use the source book level"
+            );
+        }
+
+        for adjacent_spell in ["SlashingBurst", "IceThrust"] {
+            assert!(magics.contains(adjacent_spell));
+            assert!(
+                !profile
+                    .skills
+                    .iter()
+                    .any(|rule| rule.spell == adjacent_spell),
+                "level-53 adjacent skills must stay outside the level-50 profile"
+            );
+        }
     }
 
     #[test]

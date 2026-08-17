@@ -716,11 +716,13 @@ type ProjectileState = {
   key: string;
   attackerId: string;
   targetId: string;
+  spellOrEffect?: string | number;
   fromX: number;
   fromY: number;
   toX: number;
   toY: number;
   startedAt: number;
+  travelEndsAt?: number;
   expiresAt: number;
 };
 
@@ -738,6 +740,7 @@ type SceneEffectState = {
 };
 
 let sceneEffectSequence = 0;
+let projectileSequence = 0;
 
 // Floating combat number over a struck object (Crystal `DamageIndicator`). Structurally
 // matches `DisplayDamageFloater` so `WorldState` stays assignable to `DisplayWorld`.
@@ -8925,6 +8928,12 @@ export default function HomePage() {
       case "Magic":
       case "MagicCast":
         markPlayerMagic(payload);
+        if (worldRef.current.playerObjectId) {
+          enqueueSceneEffect({ ...payload, objectId: worldRef.current.playerObjectId }, "spell");
+        }
+        if (stringifyId(payload.targetId) !== "0") {
+          spawnRangeProjectile({ ...payload, objectId: worldRef.current.playerObjectId });
+        }
         restoreObjectSelection(stringifyId(payload.targetId));
         break;
       case "MagicDelay":
@@ -11646,16 +11655,40 @@ export default function HomePage() {
       const startedAt = Date.now();
       const animation = "range";
       const durationMs = crystalAttackActionDurationMs(attacker, animation);
+      const rawSpellOrEffect = payload.spell ?? payload.magic;
+      const spellOrEffect = typeof rawSpellOrEffect === "string" || typeof rawSpellOrEffect === "number"
+        ? rawSpellOrEffect
+        : undefined;
+      // The owner receives Magic, its ObjectMagic broadcast, and for projectile families an
+      // ObjectProjectile packet for the same cast. They are three authoritative views of one
+      // visual event, not three missiles. Physical range attacks have no spell/effect id and
+      // remain unsuppressed so genuine multi-shot attacks still render independently.
+      const duplicateMagicProjectile = spellOrEffect !== undefined && current.projectiles.some(
+        (entry) =>
+          entry.spellOrEffect !== undefined &&
+          String(entry.spellOrEffect) === String(spellOrEffect) &&
+          entry.attackerId === attackerId &&
+          entry.targetId === targetId &&
+          startedAt - entry.startedAt >= 0 &&
+          startedAt - entry.startedAt <= 500,
+      );
+      if (duplicateMagicProjectile) return current;
+      const travelEndsAt = startedAt + durationMs;
+      projectileSequence += 1;
       const projectile: ProjectileState = {
-        key: `${attackerId}:${targetId}:${startedAt}`,
+        key: `${attackerId}:${targetId}:${startedAt}:${projectileSequence}`,
         attackerId,
         targetId,
+        spellOrEffect,
         fromX: attacker.x,
         fromY: attacker.y,
         toX: target.x,
         toY: target.y,
         startedAt,
-        expiresAt: startedAt + durationMs,
+        travelEndsAt,
+        // Crystal target/impact phases can outlive the moving missile (Curse is 2s).
+        // Keep magic projectiles available to the renderer for that bounded tail.
+        expiresAt: travelEndsAt + (spellOrEffect === undefined ? 0 : 2_100),
       };
 
       return {
@@ -11709,8 +11742,19 @@ export default function HomePage() {
       const y = numberOrUndefined(location?.y) ?? anchor?.y ?? target?.y;
       if (x === undefined || y === undefined) return current;
 
-      sceneEffectSequence += 1;
       const startedAt = now + delayMs;
+      // Magic + the caster's ObjectMagic echo describe the same local cast. Keep one source
+      // animation while still accepting remote casts and later legitimate recasts.
+      const duplicateTransientSpell = !isWorldSpell && source === "spell" && current.effects.some(
+        (entry) =>
+          entry.source === "spell" &&
+          entry.objectId === (objectId !== "0" ? objectId : undefined) &&
+          String(entry.spellOrEffect) === String(rawId) &&
+          Math.abs(entry.startedAt - startedAt) <= 500,
+      );
+      if (duplicateTransientSpell) return current;
+
+      sceneEffectSequence += 1;
       const lifetimeMs = explicitTimeMs > 0 ? explicitTimeMs : 5_000;
       const effectKey = isWorldSpell && objectId !== "0"
         ? `crystal-world-spell:${objectId}`

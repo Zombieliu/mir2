@@ -1233,6 +1233,7 @@ fn crystal_toggle_spell_is_stateful(spell: Spell) -> bool {
             | Spell::HalfMoon
             | Spell::CrossHalfMoon
             | Spell::DoubleSlash
+            | Spell::TwinDrakeBlade
     )
 }
 

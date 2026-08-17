@@ -1,9 +1,10 @@
 import {
   effectFrameAt,
-  effectNameForNumber,
   resolveMapEffect,
   resolveMapEffectByNumber,
+  resolveSpellCastEffect,
   resolveSpellEffect,
+  spellNameForNumber,
   type EffectAnimation,
   type EffectAssets,
   type EffectFrameMeta,
@@ -54,14 +55,14 @@ function resolveEffectAnimation(
 ): EffectAnimation | null {
   if (effect.source === "spell" || effect.source === "objectSpell") {
     const name = typeof effect.spellOrEffect === "number"
-      ? effectNameForNumber(assets, effect.spellOrEffect)
+      ? spellNameForNumber(effect.spellOrEffect)
       : effect.spellOrEffect;
     if (!name) return null;
     // Crystal's ObjectSpell is a tile-anchored world object. Its animation can
     // differ from the caster animation for the same Spell enum value.
     return effect.source === "objectSpell"
       ? resolveMapEffect(assets, name, effect.value) ?? resolveSpellEffect(assets, name, effect.direction)
-      : resolveSpellEffect(assets, name, effect.direction) ?? resolveMapEffect(assets, name, effect.value);
+      : resolveSpellCastEffect(assets, name, effect.direction) ?? resolveMapEffect(assets, name, effect.value);
   }
   return typeof effect.spellOrEffect === "number"
     ? resolveMapEffectByNumber(assets, effect.spellOrEffect, effect.value)

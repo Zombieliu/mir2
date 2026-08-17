@@ -12,7 +12,8 @@
 //   3. Cast on SELF (a heal / self-buff)            -> MP deducted + cooldown + cast packet.
 //   4. Cast in a MONSTER context (offensive / summon) -> target HP change / a summoned pet.
 //   5. Cast GROUND-targeted (an aimed AoE / trap)   -> the cast fires at a chosen tile.
-//   6. Magic feedback: damage floaters / projectile / the Bevy magic-cast VFX signal.
+//   6. Magic feedback: original Crystal atlas frames (cast / projectile / impact /
+//      return), damage floaters and authoritative projectile packets.
 //
 // Why a browser (not a protocol bot): the client's cast path
 // (page.tsx castSkill -> sendMagicSkill -> send({type:"magic", spell, targetId, x, y}))
@@ -41,10 +42,10 @@
 //     when they no-op, and exercises the reachable casts (self-heal/buff + summon + the
 //     Stonetrap trap) regardless. If GM/test IS on, it exercises the full offensive +
 //     ground path too.
-//   * Magic VFX is largely Bevy-side: a successful cast emits a `magicCast` game-bus event
-//     (page.tsx markWorldEntityMagic), NOT a DOM node. The only DOM-observable magic visual
-//     is `.scene-damage-floater` (damage numbers on an offensive hit), so the floater check
-//     is meaningful only for damaging casts; non-damaging casts are verified off the wire.
+//   * Original Crystal VFX frames are rendered as `.scene-crystal-effect-frame` images.
+//     A MutationObserver records their original-effect paths and phase metadata because
+//     short cast frames can appear between ordinary polling intervals. Damage floaters are
+//     still checked separately and are meaningful only for damaging casts.
 //
 // This file deliberately reuses the patterns proven in qa-combat-survival.mjs / qa-playthrough.mjs
 // (CDP client, headed chrome launch, register->login->enter flow, tile clicking, WS-truth
@@ -76,7 +77,9 @@ const RUN_URL = buildRunUrl(baseUrl, { gatewayWs: forceGateway ? gatewayWs : nul
 
 const createAccount = booleanArg(args.createAccount ?? process.env.MIR2_CREATE_ACCOUNT, true);
 const account = args.account ?? process.env.MIR2_QA_ACCOUNT ?? defaultAccountName();
-const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? "Mir2test1";
+// Keep the local-only default inside the commercial credential floor as well, so the same
+// harness cannot silently fail account creation when the gateway enables that policy.
+const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? "Mir2test123";
 const characterName = args.characterName ?? defaultCharacterName();
 // The starter spell book (Healing/Summons/Stonetrap) is Taoist-flavoured, so a Taoist is
 // the natural caster. Casting is NOT class-gated in the sim (skill_cast_preflight_for_key
@@ -121,10 +124,15 @@ const gmLevel = numberArg(args.gmLevel, 22);
 // Hunting fields the harness explores for a live monster (shared with the combat loop). The
 // on-demand monster pool (#83) spawns wild monsters on these field maps.
 const HUNTING_FIELDS = [
-  { map: "1", x: 315, y: 82, label: "Woomyon Woods (1)" },
-  { map: "2", x: 503, y: 483, label: "Serpent Valley (2)" },
+  // Enter just outside each respawn safe zone. Starting at its center and walking out is
+  // flaky once @MOB fills the safe-zone tiles and occupancy blocks the player.
+  // (333,173) is a verified open 3x3 patch in the original map collision data, which
+  // leaves deterministic room for control-spell push destinations.
+  { map: "1", x: 333, y: 173, label: "Woomyon Woods field (1)" },
+  { map: "2", x: 503, y: 500, label: "Serpent Valley field (2)" },
 ];
 const GM_SPAWN_TEMPLATE = args.spawnTemplate ?? "Deer";
+const TARGET_MONSTER_NAME = args.targetName ?? null;
 
 if (!chromePath) {
   throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
@@ -145,6 +153,7 @@ class CdpClient {
     this.consoleMessages = [];
     this.consoleErrors = [];
     this.networkFailures = [];
+    this.networkCancellations = [];
     this.requestUrlById = new Map();
     this.webSocketFramesReceived = [];
     this.webSocketFramesSent = [];
@@ -216,7 +225,19 @@ class CdpClient {
     } else if (m === "Network.loadingFailed") {
       const url = this.requestUrlById.get(p.requestId) ?? "(unknown)";
       if (!String(url).includes("favicon")) {
-        this.networkFailures.push({ url, status: 0, errorText: p.errorText ?? "", kind: classifyAssetUrl(url), at: Date.now() });
+        const entry = {
+          url,
+          status: 0,
+          errorText: p.errorText ?? "",
+          canceled: Boolean(p.canceled),
+          kind: classifyAssetUrl(url),
+          at: Date.now(),
+        };
+        // CDP reports an image request canceled because its React entity unmounted as
+        // `loadingFailed`, usually `net::ERR_ABORTED`. That is lifecycle telemetry, not a
+        // missing/failed asset. Preserve it separately so the report remains auditable.
+        if (entry.canceled && entry.errorText === "net::ERR_ABORTED") this.networkCancellations.push(entry);
+        else this.networkFailures.push(entry);
       }
     } else if (m === "Network.webSocketCreated") {
       if (p.url) this.gatewayUrls.push({ url: String(p.url), at: Date.now() });
@@ -300,7 +321,7 @@ function createContext(client) {
       castMonster: { label: "4. Cast in a MONSTER context (offensive / summon)", status: "skip", note: "" },
       castGround: { label: "5. Cast GROUND-targeted (aimed AoE / trap)", status: "skip", note: "" },
       mpCooldown: { label: "6. MP is deducted and a cooldown (MagicDelay) is applied", status: "skip", note: "" },
-      magicVfx: { label: "7. Magic feedback (damage floater / projectile / cast VFX)", status: "skip", note: "" },
+      magicVfx: { label: "7. Original Crystal VFX frames (cast / projectile / impact / world)", status: "skip", note: "" },
     },
     log: (msg) => console.log(msg),
     score(key, status, note) {
@@ -415,6 +436,7 @@ async function readGameState(client) {
           cooldownRemainingTicks: typeof s.cooldownRemainingTicks === "number" ? s.cooldownRemainingTicks : null,
         })),
         damageFloaterDom: document.querySelectorAll(".scene-damage-floater").length,
+        crystalEffectFrameDom: document.querySelectorAll(".scene-crystal-effect-frame").length,
       };
     })()
   `);
@@ -423,6 +445,15 @@ async function readGameState(client) {
 async function readKnownSkills(client) {
   const state = await readGameState(client);
   return state.knownSkills ?? [];
+}
+
+async function waitForKnownSpell(client, spell, timeoutMs = 10_000) {
+  const wanted = String(spell).toLowerCase().replace(/[^a-z0-9]/g, "");
+  return waitUntilSoft(
+    client,
+    `(() => (window.__mir2Stage5?.state?.knownSkills ?? []).some((s) => String(s?.spell ?? s?.name ?? s?.key ?? '').toLowerCase().replace(/[^a-z0-9]/g, '') === ${JSON.stringify(wanted)}))()`,
+    timeoutMs,
+  );
 }
 
 async function readSelf(client) {
@@ -550,9 +581,9 @@ async function gmCommand(client, message) {
 async function gmElevate(client) {
   if (!gmPassword) return false;
   await gmCommand(client, "@LOGIN");
-  await delay(500);
+  await delay(1200);
   await gmCommand(client, gmPassword);
-  await delay(800);
+  await delay(1500);
   return true;
 }
 
@@ -655,12 +686,22 @@ async function readTargetMonster(client, maxRange, excludeIds = []) {
       const ents = Array.isArray(s.entities) ? s.entities : [];
       const p = s.player ?? { x: 0, y: 0 };
       const excl = new Set(${exclJson});
+      const targetName = ${JSON.stringify(TARGET_MONSTER_NAME ? String(TARGET_MONSTER_NAME).toLowerCase() : null)};
       const cheb = (e) => Math.max(Math.abs(e.x - p.x), Math.abs(e.y - p.y));
+      // Crystal source respawn safe zones for the two hunting fields used below. An
+      // offensive target inside one is invalid even when the caster has walked outside it.
+      const fieldSafeZones = {
+        '1': [{ x: 315, y: 82, size: 15 }],
+        '2': [{ x: 503, y: 483, size: 10 }],
+      };
+      const inSafeZone = (e) => (fieldSafeZones[s.mapFileName] || []).some(
+        (z) => Math.abs(e.x - z.x) <= z.size && Math.abs(e.y - z.y) <= z.size,
+      );
       const isGuard = (e) => /guard/i.test(e.name || "");
       const invuln = (e) => typeof e.maxHp === "number" && e.maxHp >= 1000;
       const isProp = (e) => /tree|chestnut|herb|mushroom|stump|flower|sprout|sapling|shrub|\\bbush\\b|\\brock\\b|\\bore\\b|vein|plant|\\blog\\b|grass|reed|fungus/i.test(e.name || "");
       const mons = ents.filter(
-        (e) => e && e.kind === "monster" && !e.dead && !isGuard(e) && !invuln(e) && !isProp(e) && !excl.has(String(e.objectId)) && cheb(e) <= ${range},
+        (e) => e && e.kind === "monster" && !e.dead && !isGuard(e) && !invuln(e) && !isProp(e) && !inSafeZone(e) && !excl.has(String(e.objectId)) && cheb(e) <= ${range} && (!targetName || String(e.name || '').toLowerCase() === targetName),
       );
       if (!mons.length) return null;
       mons.sort((a, b) => {
@@ -716,6 +757,112 @@ async function countDamageFloaters(client) {
   return typeof n === "number" ? n : 0;
 }
 
+// Original Crystal cast/projectile/impact frames are intentionally short lived. Install a
+// page-side observer before sending the cast so the QA record does not depend on a polling
+// interval landing on the exact animation frame.
+async function startMagicVfxProbe(client) {
+  return client.evaluate(`
+    (() => {
+      window.__mir2MagicVfxProbe?.observer?.disconnect?.();
+      const probe = {
+        startedAt: Date.now(),
+        eventCount: 0,
+        sourceFrameEvents: 0,
+        maxLiveFrames: 0,
+        phases: {},
+        effectNames: [],
+        sourcePaths: [],
+      };
+      const effectKey = (node) => node.dataset.projectileKey || node.dataset.effectKey || '';
+      const baselineKeys = new Set(
+        [...document.querySelectorAll('.scene-crystal-effect-frame')]
+          .map(effectKey)
+          .filter(Boolean),
+      );
+      const addUnique = (array, value) => {
+        if (value && !array.includes(value) && array.length < 80) array.push(value);
+      };
+      const record = (node) => {
+        if (!(node instanceof HTMLImageElement) || !node.matches('.scene-crystal-effect-frame')) return;
+        // Persistent safe-zone/world effects keep cycling their src; they are not evidence
+        // for this cast. Only frames whose effect instance appeared after the probe began count.
+        if (baselineKeys.has(effectKey(node))) return;
+        const source = node.dataset.mir2OriginalSrc || node.getAttribute('src') || '';
+        const phase = node.dataset.projectilePhase || node.dataset.effectSource || 'frame';
+        probe.eventCount += 1;
+        if (source.includes('/original-effects/')) probe.sourceFrameEvents += 1;
+        probe.phases[phase] = (probe.phases[phase] || 0) + 1;
+        addUnique(probe.effectNames, node.dataset.projectileSpell || node.dataset.effectName || '');
+        addUnique(probe.sourcePaths, source);
+        probe.maxLiveFrames = Math.max(
+          probe.maxLiveFrames,
+          document.querySelectorAll('.scene-crystal-effect-frame').length,
+        );
+      };
+      const recordTree = (node) => {
+        if (!(node instanceof Element)) return;
+        record(node);
+        node.querySelectorAll?.('.scene-crystal-effect-frame').forEach(record);
+      };
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === 'attributes') record(mutation.target);
+          mutation.addedNodes.forEach(recordTree);
+        }
+      });
+      observer.observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['src', 'data-projectile-phase', 'data-effect-name'],
+      });
+      Object.defineProperty(probe, 'baselineKeys', { value: baselineKeys, enumerable: false });
+      Object.defineProperty(probe, 'observer', { value: observer, enumerable: false });
+      window.__mir2MagicVfxProbe = probe;
+      return true;
+    })()
+  `);
+}
+
+async function stopMagicVfxProbe(client) {
+  return client.evaluate(`
+    (() => {
+      const probe = window.__mir2MagicVfxProbe;
+      if (!probe) return null;
+      probe.observer?.disconnect?.();
+      const result = {
+        durationMs: Date.now() - probe.startedAt,
+        eventCount: probe.eventCount,
+        sourceFrameEvents: probe.sourceFrameEvents,
+        maxLiveFrames: probe.maxLiveFrames,
+        phases: probe.phases,
+        effectNames: probe.effectNames,
+        sourcePaths: probe.sourcePaths,
+      };
+      delete window.__mir2MagicVfxProbe;
+      return result;
+    })()
+  `).catch(() => null);
+}
+
+async function currentMagicVfxProbeState(client) {
+  return client.evaluate(`
+    (() => {
+      const probe = window.__mir2MagicVfxProbe;
+      if (!probe) return { sourceFrameEvents: 0, phases: [], livePhases: [] };
+      const effectKey = (node) => node.dataset.projectileKey || node.dataset.effectKey || '';
+      const livePhases = [...document.querySelectorAll('.scene-crystal-effect-frame')]
+        .filter((node) => !probe.baselineKeys?.has(effectKey(node)))
+        .map((node) => node.dataset.projectilePhase || node.dataset.effectSource || 'frame');
+      return {
+        sourceFrameEvents: Number(probe.sourceFrameEvents || 0),
+        phases: Object.keys(probe.phases || {}),
+        livePhases: [...new Set(livePhases)],
+      };
+    })()
+  `).catch(() => ({ sourceFrameEvents: 0, phases: [], livePhases: [] }));
+}
+
 // ---------------------------------------------------------------------------
 // WebSocket truth layer — the authoritative magic signals.
 //
@@ -749,6 +896,8 @@ function scanWsMagic(client, sinceSeq, { casterId, targetId } = {}) {
     manaUpdatesSelf: 0,
     manaMinPercentSelf: null,
     projectilesSelf: 0,
+    objectPushes: 0,
+    targetPushes: 0,
     newMagic: 0,
     magicLeveled: 0,
     spellsCast: [],
@@ -797,6 +946,10 @@ function scanWsMagic(client, sinceSeq, { casterId, targetId } = {}) {
       }
       case "ObjectProjectile":
         if (!cid || String(p.sourceId) === cid) out.projectilesSelf += 1;
+        break;
+      case "ObjectPushed":
+        out.objectPushes += 1;
+        if (tid && oid === tid) out.targetPushes += 1;
         break;
       case "NewMagic":
         out.newMagic += 1;
@@ -880,9 +1033,22 @@ function scanWsSnapshotCooldown(client, sinceSeq, spell) {
 // record (also pushed onto ctx.casts) describing whether the cast FIRED and what fired.
 async function performCast(ctx, { skill, mode, monster, groundTile, label }) {
   const client = ctx.client;
+  const spell = spellNameForSkill(skill);
+  // Repeated acceptance runs reuse a persisted character. Its authoritative spell
+  // cooldown survives a reconnect, so wait it out instead of misclassifying a legitimate
+  // cooldown rejection as a broken cast path.
+  const readyDeadline = Date.now() + 25_000;
+  let readyCooldown = await skillCooldown(client, skill.key, spell);
+  while (typeof readyCooldown === "number" && readyCooldown > 0 && Date.now() < readyDeadline) {
+    await delay(500);
+    readyCooldown = await skillCooldown(client, skill.key, spell);
+  }
+  if (typeof readyCooldown === "number" && readyCooldown > 0) {
+    return { fired: false, error: `spell cooldown did not reach zero (${readyCooldown} ticks)`, spell, mode };
+  }
+  await delay(250);
   const self = await readSelf(client);
   if (!self) return { fired: false, error: "no self position" };
-  const spell = spellNameForSkill(skill);
   const mpBefore = self.mp;
   const hpBefore = self.hp;
   const cdBefore = await skillCooldown(client, skill.key, spell);
@@ -912,6 +1078,7 @@ async function performCast(ctx, { skill, mode, monster, groundTile, label }) {
   }
 
   const wsBase = client.wsRxCount;
+  await startMagicVfxProbe(client);
   const accepted = await castMagic(client, { spell, direction, targetId, x, y, spellTargetLock });
 
   // Collect the server's frames for this cast. The definitive "fired" signal is a Magic /
@@ -921,15 +1088,32 @@ async function performCast(ctx, { skill, mode, monster, groundTile, label }) {
   // as a fire signal: MP regen / the @LEVEL restore emit ObjectMana independent of casting.
   const castPacketSeen = (s) => s.selfCasts > 0 || s.objectMagicSelf > 0 || s.magicCast > 0;
   let floaterPeak = 0;
-  const deadline = Date.now() + CAST_OBSERVE_MS;
+  const visualFrames = [];
+  const capturedVisualPhases = new Set();
+  const observeStartedAt = Date.now();
+  const deadline = observeStartedAt + CAST_OBSERVE_MS;
+  const minimumObservationMs = mode === "self" || mode === "summon" ? 700 : 2_200;
   while (Date.now() < deadline) {
     floaterPeak = Math.max(floaterPeak, await countDamageFloaters(client));
+    const visualState = await currentMagicVfxProbeState(client);
+    const uncapturedPhase = visualState.livePhases.find((phase) => !capturedVisualPhases.has(phase));
+    if (visualState.sourceFrameEvents > 0 && uncapturedPhase) {
+      const frameName = `cast-${String(ctx.casts.length + 1).padStart(2, "0")}-${slug(spell)}-${slug(mode)}-${slug(uncapturedPhase)}.png`;
+      await captureFrame(client, path.join(framesDir, frameName));
+      capturedVisualPhases.add(uncapturedPhase);
+      visualFrames.push({ phase: uncapturedPhase, path: `frames/${frameName}` });
+    }
     const scan = scanWsMagic(client, wsBase, { casterId: self.objectId, targetId: monster?.objectId });
     // Stop once we have the cast confirmation AND any damage/projectile it would produce.
-    if (castPacketSeen(scan) && (scan.projectilesSelf > 0 || scan.monsterDamageHits > 0 || mode === "self" || mode === "summon")) break;
-    await delay(250);
+    if (
+      Date.now() - observeStartedAt >= minimumObservationMs &&
+      castPacketSeen(scan) &&
+      (scan.projectilesSelf > 0 || scan.monsterDamageHits > 0 || scan.targetPushes > 0 || mode === "self" || mode === "summon")
+    ) break;
+    await delay(80);
   }
   floaterPeak = Math.max(floaterPeak, await countDamageFloaters(client));
+  const visualProbe = await stopMagicVfxProbe(client);
 
   const scan = scanWsMagic(client, wsBase, { casterId: self.objectId, targetId: monster?.objectId });
   const after = await readSelf(client);
@@ -979,6 +1163,8 @@ async function performCast(ctx, { skill, mode, monster, groundTile, label }) {
     magicDelays: scan.magicDelays,
     manaUpdatesSelf: scan.manaUpdatesSelf,
     projectilesSelf: scan.projectilesSelf,
+    objectPushes: scan.objectPushes,
+    targetPushes: scan.targetPushes,
     spellsCast: scan.spellsCast,
     targetDamageHits: scan.targetDamageHits,
     monsterDamageHits: scan.monsterDamageHits,
@@ -986,10 +1172,13 @@ async function performCast(ctx, { skill, mode, monster, groundTile, label }) {
     targetKilled: scan.targetKilled,
     anyMonsterDied: scan.anyMonsterDied,
     damageFloaterPeak: floaterPeak,
+    visualProbe,
+    visualFrame: visualFrames[0]?.path ?? null,
+    visualFrames,
     target: mode === "monster" && monster ? { objectId: monster.objectId, name: monster.name, x: monster.x, y: monster.y } : mode === "ground" && groundTile ? groundTile : { x, y, objectId: targetId || null },
   };
   ctx.casts.push(record);
-  ctx.log(`    cast ${record.label}: fired=${fired} mpΔ=${mpDelta ?? "?"} cd=${cdBefore ?? "?"}→${cdAfter ?? "?"} dmgHits=${scan.monsterDamageHits} floaters=${floaterPeak}`);
+  ctx.log(`    cast ${record.label}: fired=${fired} mpΔ=${mpDelta ?? "?"} cd=${cdBefore ?? "?"}→${cdAfter ?? "?"} dmgHits=${scan.monsterDamageHits} floaters=${floaterPeak} sourceFrames=${visualProbe?.sourceFrameEvents ?? 0}`);
   return record;
 }
 
@@ -1066,6 +1255,7 @@ const DIRECTION_SPELLS = new Set(
 const TARGET_OFFENSIVE_SPELLS = new Set(
   ["thunderbolt", "fireball", "greatfireball", "soulfireball", "firebounce", "cattongue", "frostcrunch", "poisondart", "flamefield"],
 );
+const PUSH_CONTROL_SPELLS = new Set(["repulsion", "energyrepulsor", "fireburst"]);
 
 function spellNameKey(skill) {
   return String(spellNameForSkill(skill)).toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -1095,9 +1285,11 @@ function classifySpellBook(skills) {
   const isHeal = (s) => spellNameKey(s).includes("heal") && kind(s) !== "ground";
   const isTrap = (s) => /stonetrap|trap/i.test(spellNameForSkill(s));
   const castable = skills.filter((s) => kind(s) !== "passive");
+  const requestedSelfKey = String(SELF_GRANT_SPELL).toLowerCase().replace(/[^a-z0-9]/g, "");
   return {
     all: skills,
     castable,
+    requestedSelf: skills.find((s) => spellNameKey(s) === requestedSelfKey) ?? null,
     // SELF: a heal (Healing self-targets even though it is castKind "target") or a self-buff.
     selfHeal: skills.find(isHeal) ?? null,
     selfBuff: skills.find((s) => kind(s) === "self" && !isSummon(s) && !isTrap(s)) ?? null,
@@ -1141,7 +1333,7 @@ async function ensureOnHuntingField(ctx) {
 // town-edge tile where OFFENSIVE magic is a no-op — the only offensive-specific preflight gate
 // both target + ground spells share is crystal_magic_point_in_safe_zone(player_position)).
 // Walks `tiles` deep into the field from the current field's spawn, in viewport hops.
-async function pushIntoField(ctx, tiles = 16) {
+async function pushIntoField(ctx, tiles = 28) {
   const client = ctx.client;
   const mapNow = await client.evaluate(`window.__mir2Stage5?.state?.mapFileName ?? null`);
   const field = HUNTING_FIELDS.find((f) => f.map === mapNow) ?? HUNTING_FIELDS[0];
@@ -1170,6 +1362,10 @@ async function acquireMonster(ctx, beat, excluded = []) {
   const visited = beat?.visitedFields ?? [];
   if (beat) beat.visitedFields = visited;
 
+  if (TARGET_MONSTER_NAME) {
+    await gmCommand(client, `@MOB ${TARGET_MONSTER_NAME}`).catch(() => {});
+    await delay(700);
+  }
   let monster = await readTargetMonster(client, EXPLORE_SCAN_RANGE, excluded);
   if (monster) return monster;
 
@@ -1217,6 +1413,39 @@ async function acquireMonster(ctx, beat, excluded = []) {
   return monster;
 }
 
+// A GM-spawned control target begins on the caster's occupied tile. Move the real player
+// one tile away while keeping an empty tile behind the monster, so push-control spells have
+// a deterministic legal destination instead of being defeated by crowd occupancy.
+async function stagePushControlTarget(client, monster) {
+  const offsets = [
+    { playerDx: 1, playerDy: 0, pushDx: -1, pushDy: 0 },
+    { playerDx: -1, playerDy: 0, pushDx: 1, pushDy: 0 },
+    { playerDx: 0, playerDy: 1, pushDx: 0, pushDy: -1 },
+    { playerDx: 0, playerDy: -1, pushDx: 0, pushDy: 1 },
+  ];
+  for (const offset of offsets) {
+    const fresh = (await readMonsterById(client, monster.objectId)) ?? monster;
+    const playerTile = { x: fresh.x + offset.playerDx, y: fresh.y + offset.playerDy };
+    const pushTile = { x: fresh.x + offset.pushDx, y: fresh.y + offset.pushDy };
+    const occupied = await client.evaluate(`
+      (() => (window.__mir2Stage5?.state?.entities ?? []).some(
+        (e) => e && !e.dead && e.objectId !== window.__mir2Stage5?.state?.playerObjectId &&
+          String(e.objectId) !== ${JSON.stringify(String(monster.objectId))} &&
+          ((e.x === ${playerTile.x} && e.y === ${playerTile.y}) || (e.x === ${pushTile.x} && e.y === ${pushTile.y}))
+      ))()
+    `);
+    if (occupied) continue;
+    if (!(await clickTile(client, playerTile.x, playerTile.y, "left"))) continue;
+    const reached = await waitUntilSoft(
+      client,
+      `window.__mir2Stage5?.state?.player?.x === ${playerTile.x} && window.__mir2Stage5?.state?.player?.y === ${playerTile.y}`,
+      4_000,
+    );
+    if (reached) return (await readMonsterById(client, monster.objectId)) ?? fresh;
+  }
+  return (await readMonsterById(client, monster.objectId)) ?? monster;
+}
+
 // ---------------------------------------------------------------------------
 // The magic / skill cycle.
 // ---------------------------------------------------------------------------
@@ -1247,11 +1476,17 @@ async function magicSkills(ctx) {
     beat.gmElevated = elevated;
     if (elevated) {
       await gmCommand(client, `@LEVEL ${gmLevel}`).catch(() => {});
-      await delay(700);
+      const previousMaxMp = typeof before.playerMaxMp === "number" ? before.playerMaxMp : 0;
+      await waitUntilSoft(
+        client,
+        `Number(window.__mir2Stage5?.state?.playerMaxMp ?? 0) > ${previousMaxMp}`,
+        10_000,
+      );
+      await delay(1200);
       // Survive the offensive field beats (the GM character keeps level-1-ish HP via the
       // snapshot) — gm_never_die makes incoming damage non-lethal while we exercise casting.
       await gmCommand(client, "@SUPERMAN").catch(() => {});
-      await delay(400);
+      await delay(1200);
     }
     const grantList = elevated
       ? [SELF_GRANT_SPELL, OFFENSIVE_GRANT_SPELL, GROUND_GRANT_SPELL]
@@ -1262,23 +1497,32 @@ async function magicSkills(ctx) {
     const learnWsBase = client.wsRxCount;
     for (const sp of grantList) {
       await gmCommand(client, `@GIVESKILL ${sp} ${GRANT_LEVEL}`).catch(() => {});
-      await delay(500);
+      await waitForKnownSpell(client, sp, 10_000);
+      await delay(1200);
     }
     // Let the @LEVEL HP/MP restore + skill snapshot fully flush before any cast, so the
     // level-up MP refill does not mask a cast's MP deduction in the next beat.
-    await delay(1800);
+    await delay(1200);
     const learn = scanWsMagic(client, learnWsBase, {});
+    const after = await readGameState(client);
+    const knownAfter = new Set(after.knownSkills.map(spellNameKey));
+    const missingRequested = grantList.filter(
+      (sp) => !knownAfter.has(String(sp).toLowerCase().replace(/[^a-z0-9]/g, "")),
+    );
     beat.learnAttempt = {
       elevated,
       requested: grantList.map((sp) => `${sp}@${GRANT_LEVEL}`),
       newMagicPackets: learn.newMagic,
+      magicLeveledPackets: learn.magicLeveled,
       learned: learn.spellsLearned,
+      leveled: learn.spellsLeveled,
+      missingRequested,
     };
 
-    const after = await readGameState(client);
     book = classifySpellBook(after.knownSkills);
     beat.spellBook = {
       count: after.knownSkillCount,
+      requestedSelf: book.requestedSelf?.spell ?? null,
       selfHeal: book.selfHeal?.spell ?? null,
       selfBuff: book.selfBuff?.spell ?? null,
       summon: book.summon?.spell ?? null,
@@ -1295,15 +1539,19 @@ async function magicSkills(ctx) {
       ctx.addIssue({ category: "magic", severity: "high", beat: beat.id, summary: "entered as a caster but knownSkills is empty — no spell book delivered in the world snapshot", detail: { class: characterClass } });
     }
 
-    // Document the @GIVESKILL gate when it produced no NewMagic (the local non-GM stack).
-    if (learn.newMagic === 0) {
+    // NewMagic is emitted only for a newly learned entry. A repeated acceptance run on the
+    // same character legitimately emits MagicLeveled instead, so judge the resulting book.
+    if (missingRequested.length > 0) {
       ctx.addIssue({
         category: "env",
         severity: "low",
         beat: beat.id,
-        summary: `@GIVESKILL produced no NewMagic — ${elevated ? "GM elevation did not unlock skill granting on this stack" : "GM/test-gated (is_gm_or_test=false here)"}. Offensive single-target + ground casts fall back to the reachable book.`,
+        summary: `@GIVESKILL left ${missingRequested.length} requested spell(s) unavailable — ${elevated ? "GM elevation did not unlock all skill grants on this stack" : "GM/test-gated (is_gm_or_test=false here)"}.`,
         detail: {
           requested: beat.learnAttempt.requested,
+          missingRequested,
+          newMagicPackets: learn.newMagic,
+          magicLeveledPackets: learn.magicLeveled,
           elevated,
           note: elevated
             ? "GM @LOGIN was attempted but @GIVESKILL still no-op'd — check MIR2_GM_PASSWORD / spell names."
@@ -1318,7 +1566,7 @@ async function magicSkills(ctx) {
 
   // ---- Beat: place a spell on the skill bar (MagicKey). ----
   await runBeat(ctx, "place a spell on the skill bar (MagicKey)", async (beat) => {
-    const skill = book.selfHeal ?? book.selfBuff ?? book.summon ?? book.castable[0] ?? null;
+    const skill = book.requestedSelf ?? book.selfHeal ?? book.selfBuff ?? book.summon ?? book.castable[0] ?? null;
     if (!skill) {
       ctx.score("skillBarPlace", "skip", "no known spell to bind");
       beat.note = "no castable spell";
@@ -1359,7 +1607,7 @@ async function magicSkills(ctx) {
 
   // ---- Beat: cast on SELF (heal / self-buff). ----
   await runBeat(ctx, "cast on self (heal / self-buff)", async (beat) => {
-    const skill = book.selfHeal ?? book.selfBuff ?? null;
+    const skill = book.requestedSelf ?? book.selfHeal ?? book.selfBuff ?? null;
     if (!skill) {
       ctx.score("castSelf", "skip", "no self-castable heal/buff in the spell book");
       beat.note = "no self heal/buff";
@@ -1371,6 +1619,8 @@ async function magicSkills(ctx) {
     if (isHeal) {
       await maybeSelfDamage(ctx, beat);
     }
+    await waitForPlayerSettled(client);
+    await delay(800);
     const rec = await performCast(ctx, { skill, mode: "self", label: `${spellNameForSkill(skill)} (self)` });
     beat.cast = rec;
     if (rec.fired) {
@@ -1402,7 +1652,9 @@ async function magicSkills(ctx) {
     // clear of the field-spawn safe zone before acquiring a target.
     if (offensive) {
       beat.onField = await ensureOnHuntingField(ctx);
-      await pushIntoField(ctx, 16);
+      // Explicit GM targets are spawned at our already non-safe field coordinate; walking
+      // 28 more tiles only drags the control probe into unrelated roaming monsters.
+      if (!TARGET_MONSTER_NAME) await pushIntoField(ctx, 28);
     }
     const monster = await acquireMonster(ctx, beat);
     beat.monster = monster ? { name: monster.name, at: { x: monster.x, y: monster.y }, maxHp: monster.maxHp } : null;
@@ -1419,39 +1671,53 @@ async function magicSkills(ctx) {
       // movement, then PROVOKE it (melee swing → aggro) before casting. ThunderBolt range is 9,
       // so adjacency is well within range; @SUPERMAN keeps the caster alive while meleed.
       let rec = null;
+      let firedRec = null;
       let lastMonster = monster;
+      const pushControl = PUSH_CONTROL_SPELLS.has(spellNameKey(offensive));
       for (let attempt = 0; attempt < 4; attempt += 1) {
         const fresh = (await readMonsterById(client, lastMonster.objectId)) ?? (await readTargetMonster(client, EXPLORE_SCAN_RANGE));
         if (!fresh) break;
         lastMonster = fresh;
-        await closeTo(ctx, fresh, 1);
+        if (pushControl) {
+          lastMonster = await stagePushControlTarget(client, fresh);
+        } else {
+          await closeTo(ctx, fresh, 1);
+        }
         await waitForPlayerSettled(client);
         // Aggro the target first — an offensive target spell needs a hostile monster.
-        await provokeMonster(client, fresh);
+        // @MOB targets are already hostile; do not add a delayed melee hit to a push-control
+        // probe because it can move the target or contaminate damage evidence.
+        if (!pushControl) await provokeMonster(client, fresh);
         const m2 = (await readMonsterById(client, fresh.objectId)) ?? fresh;
         rec = await performCast(ctx, { skill: offensive, mode: "monster", monster: m2, label: `${spellNameForSkill(offensive)} (monster a${attempt + 1})` });
-        if (rec.fired) break;
+        if (rec.fired) firedRec = rec;
+        if (rec.fired && (!pushControl || rec.targetPushes > 0)) break;
         await delay(700);
       }
+      if (pushControl && (!rec?.targetPushes || rec.targetPushes === 0) && firedRec) rec = firedRec;
       beat.cast = rec;
       if (!rec) {
         ctx.score("castMonster", "skip", "monster left view before an offensive cast could be attempted");
         return;
       }
-      // The ObjectProjectile (ThunderBolt/FireBall-family) is itself proof the offensive cast
-      // engaged the target, even if the DamageIndicator lands just after the window.
-      const engaged = rec.monsterDamageHits > 0 || rec.targetDamageHits > 0 || (rec.targetMinPercent !== null && rec.targetMinPercent < 100) || rec.damageFloaterPeak > 0 || rec.projectilesSelf > 0;
+      // A damage/projectile signal proves a damaging nuke engaged the target; ObjectPushed
+      // proves a control spell such as Taoist EnergyRepulsor engaged it.
+      // The melee swing used to provoke hostility can land after the cast observation begins;
+      // for a push-control spell, only its authoritative ObjectPushed is effect evidence.
+      const engaged = pushControl
+        ? rec.targetPushes > 0
+        : rec.monsterDamageHits > 0 || rec.targetDamageHits > 0 || (rec.targetMinPercent !== null && rec.targetMinPercent < 100) || rec.damageFloaterPeak > 0 || rec.projectilesSelf > 0;
       if (rec.fired && engaged) {
-        ctx.score("castMonster", "pass", `${rec.spell} engaged "${lastMonster.name}" — ${rec.monsterDamageHits} damage number(s), ${rec.projectilesSelf} projectile(s), floaters ${rec.damageFloaterPeak}${rec.anyMonsterDied ? ", target died" : ""}`);
+        ctx.score("castMonster", "pass", `${rec.spell} engaged "${lastMonster.name}" — ${rec.monsterDamageHits} damage number(s), ${rec.projectilesSelf} projectile(s), ${rec.targetPushes} push(es), floaters ${rec.damageFloaterPeak}${rec.anyMonsterDied ? ", target died" : ""}`);
       } else if (rec.fired) {
-        ctx.score("castMonster", "gap", `${rec.spell} fired but no damage/projectile observed in-window (target may have moved out of LoS)`);
-        ctx.addIssue({ category: "magic", severity: "low", beat: beat.id, summary: `offensive cast ${rec.spell} fired (Magic packet) but no DamageIndicator/ObjectProjectile was captured in the observe window`, detail: rec });
+        ctx.score("castMonster", "gap", `${rec.spell} fired but no damage/projectile/control effect was observed in-window (target may have moved out of LoS)`);
+        ctx.addIssue({ category: "magic", severity: "low", beat: beat.id, summary: `offensive cast ${rec.spell} fired (Magic packet) but no DamageIndicator/ObjectProjectile/ObjectPushed was captured in the observe window`, detail: rec });
       } else {
         // The cast PIPE is proven by the self-cast; an offensive rejection here is a
         // server-side preflight condition the harness cannot fully control from the client, so
         // record it as a documented gap rather than a magic-system failure.
-        ctx.score("castMonster", "gap", `${rec.spell} was rejected (UserLocation-only) on every attempt despite provoking the target — server-side offensive preflight (caster-tile safe zone / a movement-blocking status / target hostility timing / LoS)`);
-        ctx.addIssue({ category: "magic", severity: "medium", beat: beat.id, summary: `offensive cast ${rec.spell} was rejected (UserLocation-only) on every attempt — the sim's offensive-magic preflight refused it (candidates: caster-tile safe zone, a movement-blocking status applied by the monster, target hostility not yet set, or LoS). Melee provocation landed (dmg observed), so combat is live; the self-cast confirms the magic pipe itself works.`, detail: rec });
+        ctx.score("castMonster", "gap", `${rec.spell} was rejected (UserLocation-only) on every attempt — server-side offensive preflight (caster-tile safe zone / a movement-blocking status / target hostility timing / LoS)`);
+        ctx.addIssue({ category: "magic", severity: "medium", beat: beat.id, summary: `offensive cast ${rec.spell} was rejected (UserLocation-only) on every attempt — the sim's offensive-magic preflight refused it (candidates: caster-tile safe zone, a movement-blocking status, target hostility timing, or LoS). The self-cast confirms the magic pipe itself works.`, detail: rec });
       }
       return;
     }
@@ -1516,13 +1782,17 @@ async function magicSkills(ctx) {
     // is exempt and cast at the caster's feet wherever they stand.
     let rec = null;
     if (ground) {
-      beat.onField = await ensureOnHuntingField(ctx);
-      await pushIntoField(ctx, 16);
-      const monster = await acquireMonster(ctx, beat);
-      beat.monster = monster ? { name: monster.name, at: { x: monster.x, y: monster.y } } : null;
+      const groundOffensive = isOffensiveSpell(ground);
+      let monster = null;
+      if (groundOffensive) {
+        beat.onField = await ensureOnHuntingField(ctx);
+        await pushIntoField(ctx, 28);
+        monster = await acquireMonster(ctx, beat);
+        beat.monster = monster ? { name: monster.name, at: { x: monster.x, y: monster.y } } : null;
+      }
       for (let attempt = 0; attempt < 3 && (!rec || !rec.fired); attempt += 1) {
         const m = monster ? (await readMonsterById(client, monster.objectId)) ?? monster : null;
-        if (m) {
+        if (groundOffensive && m) {
           await closeTo(ctx, m, 1);
           await waitForPlayerSettled(client);
           await provokeMonster(client, m); // engage combat → caster stands in non-safe territory
@@ -1547,7 +1817,7 @@ async function magicSkills(ctx) {
     beat.cast = rec;
     if (rec && rec.fired) {
       if (ground) {
-        const engaged = rec.monsterDamageHits > 0 || rec.damageFloaterPeak > 0;
+        const engaged = isOffensiveSpell(ground) && (rec.monsterDamageHits > 0 || rec.damageFloaterPeak > 0);
         ctx.score("castGround", "pass", `${rec.spell} cast at ground tile (${beat.aim?.x},${beat.aim?.y}) — fired${engaged ? ` and dealt damage (${rec.monsterDamageHits} hit(s), floaters ${rec.damageFloaterPeak})` : ""}`);
       } else {
         ctx.score("castGround", "gap", `no true ground-aimed spell reachable; cast the Stonetrap trap (${rec.spell}, SelfOnly@feet) instead — it fired. A tile-aimed AoE (FireWall/Blizzard/…) requires @GIVESKILL (GM-gated) and a non-safe-zone position.`);
@@ -1576,7 +1846,7 @@ async function magicSkills(ctx) {
     // spell level-up). The behavioural re-cast probe is a secondary, MP-permitting check.
     const cooldownCasts = fired.filter((c) => c.cooldownApplied || (c.snapshotCooldownMax ?? 0) > 0);
     let probe = null;
-    const probeSkill = ctx.book?.selfHeal ?? ctx.book?.selfBuff ?? null;
+    const probeSkill = ctx.book?.requestedSelf ?? ctx.book?.selfHeal ?? ctx.book?.selfBuff ?? null;
     if (cooldownCasts.length === 0 && probeSkill && fired.length > 0) {
       await waitForPlayerSettled(client);
       await delay(600);
@@ -1606,28 +1876,39 @@ async function magicSkills(ctx) {
     }
   });
 
-  // ---- Beat: magic visual feedback (damage floater / projectile / cast VFX). ----
+  // ---- Beat: original Crystal frame feedback (cast / projectile / impact / world). ----
   await runBeat(ctx, "magic visual feedback", async (beat) => {
     const fired = ctx.casts.filter((c) => c.fired);
     const floaterPeak = ctx.casts.reduce((m, c) => Math.max(m, c.damageFloaterPeak ?? 0), 0);
     const projectiles = ctx.casts.reduce((m, c) => m + (c.projectilesSelf ?? 0), 0);
     const damaging = ctx.casts.filter((c) => (c.monsterDamageHits ?? 0) > 0 || (c.damageFloaterPeak ?? 0) > 0);
-    beat.summary = { firedCasts: fired.length, floaterPeak, projectiles, damagingCasts: damaging.length };
+    const sourceFrameEvents = fired.reduce((m, c) => m + (c.visualProbe?.sourceFrameEvents ?? 0), 0);
+    const maxLiveFrames = fired.reduce((m, c) => Math.max(m, c.visualProbe?.maxLiveFrames ?? 0), 0);
+    const phases = [...new Set(fired.flatMap((c) => Object.keys(c.visualProbe?.phases ?? {})))];
+    const effectNames = [...new Set(fired.flatMap((c) => c.visualProbe?.effectNames ?? []))];
+    const sourcePaths = [...new Set(fired.flatMap((c) => c.visualProbe?.sourcePaths ?? []))];
+    beat.summary = {
+      firedCasts: fired.length,
+      sourceFrameEvents,
+      maxLiveFrames,
+      phases,
+      effectNames,
+      sourcePaths: sourcePaths.slice(0, 24),
+      floaterPeak,
+      projectiles,
+      damagingCasts: damaging.length,
+    };
     if (fired.length === 0) {
       ctx.score("magicVfx", "skip", "no cast fired, so no visual feedback to observe");
-    } else if (floaterPeak > 0 || projectiles > 0) {
-      ctx.score("magicVfx", "pass", `observed ${floaterPeak} damage floater(s)${projectiles ? ` and ${projectiles} projectile packet(s)` : ""} from offensive casting`);
+    } else if (sourceFrameEvents > 0) {
+      ctx.score("magicVfx", "pass", `observed ${sourceFrameEvents} original Crystal frame event(s), phases ${phases.join("/") || "cast"}, peak ${maxLiveFrames} live frame(s)`);
     } else {
-      // Self/buff/summon/trap casts have no DOM-observable VFX — magicCast is a Bevy game-bus
-      // event (page.tsx markWorldEntityMagic), not a DOM node. Only damaging casts surface
-      // `.scene-damage-floater`. With the starter book (no reachable single-target nuke), this
-      // is expected, not a regression.
-      ctx.score("magicVfx", "gap", "fired casts were non-damaging (self/buff/summon/trap) → no DOM-observable VFX; magic-cast VFX is Bevy-side (game-bus magicCast), and `.scene-damage-floater` only renders on damaging hits");
+      ctx.score("magicVfx", "gap", `cast packets fired but no original Crystal atlas frame was observed${floaterPeak || projectiles ? ` (fallback signals: ${floaterPeak} floater(s), ${projectiles} projectile packet(s))` : ""}`);
       ctx.addIssue({
         category: "magic",
-        severity: "low",
+        severity: "medium",
         beat: beat.id,
-        summary: "no DOM-observable magic VFX for the reachable (non-damaging) casts — magic-cast visuals are Bevy-side (game-bus `magicCast`), and `.scene-damage-floater` only appears on a damaging hit. A reachable single-target offensive nuke (GM-gated) would surface floaters.",
+        summary: "cast packets fired but the browser probe observed no `.scene-crystal-effect-frame` backed by `/original-effects/`; inspect the selected spell's source mapping or render phase",
         detail: beat.summary,
       });
     }
@@ -1727,19 +2008,59 @@ async function enterWorld(ctx) {
     if (screen === "login") await waitForSelectorSoft(client, ".login-overlay", 8_000);
   });
 
-  await runBeat(ctx, "register + log in", async (beat) => {
+  const loginBeat = await runBeat(ctx, "register + log in", async (beat) => {
     beat.account = account;
     let screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
     if (screen === "login") {
       await fillInput(client, ".login-input.account", account);
       await fillInput(client, ".login-input.password", password);
+      await delay(300); // let React commit controlled-input state before the click handler reads it
       if (createAccount) {
-        await click(client, ".login-button.account button").catch(() => {});
-        await waitUntilSoft(client, "window.__mir2Stage5?.state?.wsState === 'open'", 15_000);
-        await delay(1500);
+        // Use the actual New Account DOM control, but invoke its click directly. The
+        // sprite button has a small transparent hit area; coordinate-based CDP clicking
+        // can land on the decorative parent and silently send no NewAccount packet.
+        const newAccountClicked = await client.evaluate(`
+          (() => {
+            const button = document.querySelector('.login-button.account button');
+            if (!(button instanceof HTMLElement)) return false;
+            button.click();
+            return true;
+          })()
+        `);
+        if (!newAccountClicked) throw new Error("New Account button was not present/clickable");
+        const newAccountDeadline = Date.now() + 15_000;
+        while (
+          Date.now() < newAccountDeadline &&
+          !client.webSocketFramesSent.some((frame) => {
+            const command = parseWsFrame(frame);
+            return command?.type === "newAccount" && command?.accountId === account;
+          })
+        ) {
+          await delay(100);
+        }
+        if (!client.webSocketFramesSent.some((frame) => {
+          const command = parseWsFrame(frame);
+          return command?.type === "newAccount" && command?.accountId === account;
+        })) {
+          throw new Error("New Account button did not send the expected newAccount command");
+        }
+        const newAccountResultDeadline = Date.now() + 10_000;
+        let newAccountResult = null;
+        while (Date.now() < newAccountResultDeadline && newAccountResult === null) {
+          for (const frame of client.webSocketFramesReceived) {
+            const packet = parseWsFrame(frame);
+            if (packet?.packet === "NewAccount") newAccountResult = packet?.payload?.result ?? -1;
+          }
+          if (newAccountResult === null) await delay(100);
+        }
+        if (newAccountResult !== 8) {
+          throw new Error(`New Account returned result=${newAccountResult ?? "timeout"}, expected 8`);
+        }
+        await delay(500);
       }
       await fillInput(client, ".login-input.account", account);
       await fillInput(client, ".login-input.password", password);
+      await delay(300);
       await click(client, ".login-button.ok button");
       await waitUntil(client, "['select','game'].includes(window.__mir2Stage5?.state?.screen)", "select/game screen", 30_000);
     }
@@ -1758,8 +2079,11 @@ async function enterWorld(ctx) {
     ctx.gatewayUrl = url;
     ctx.gatewayIsRust = onRust;
   });
+  if (!loginBeat.ok) {
+    throw new Error(`authentication preflight failed for isolated QA account ${account}`);
+  }
 
-  await runBeat(ctx, `create ${characterClass} character + start game`, async (beat) => {
+  const characterBeat = await runBeat(ctx, `create ${characterClass} character + start game`, async (beat) => {
     let screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
     if (screen === "game") return;
     beat.characterName = characterName;
@@ -1779,12 +2103,17 @@ async function enterWorld(ctx) {
       }
       if (!created) {
         ctx.addIssue({ category: "flow", severity: "high", beat: beat.id, summary: "character creation did not produce a server-backed character", detail: { characterName, characterClass } });
+        throw new Error(`character ${characterName} was not created`);
       }
     }
     const startIndex = await client.evaluate(
-      `(() => { const cs = window.__mir2Stage5?.state?.characters ?? []; const c = cs.find((e) => e?.name === ${JSON.stringify(characterName)}) ?? cs[0]; return c?.index ?? 0; })()`,
+      `(() => { const cs = window.__mir2Stage5?.state?.characters ?? []; const c = cs.find((e) => e?.name === ${JSON.stringify(characterName)}); return c?.index ?? null; })()`,
     );
+    if (typeof startIndex !== "number") throw new Error(`character ${characterName} has no server index`);
     beat.startIndex = startIndex;
+    // Let the character-selection sprite requests settle before the route unmounts; otherwise
+    // Chrome reports a harmless net::ERR_ABORTED image request as a QA network failure.
+    await delay(800);
     const wsBefore = client.wsRxCount;
     await sendCommand(client, { type: "startGame", characterIndex: startIndex });
     const entered = await waitUntilSoft(client, "window.__mir2Stage5?.state?.screen === 'game'", 25_000);
@@ -1800,6 +2129,9 @@ async function enterWorld(ctx) {
       throw new Error(`did not enter game (StartGame result=${result})`);
     }
   });
+  if (!characterBeat.ok) {
+    throw new Error(`character/startGame preflight failed for ${characterName}`);
+  }
 
   await runBeat(ctx, "enter world + scene ready", async (beat) => {
     await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 8_000).catch(() => {});
@@ -1901,6 +2233,7 @@ async function writeReport(ctx) {
   await fs.writeFile(path.join(outputDir, "report.json"), JSON.stringify({ summary, issues: ctx.issues, beats: ctx.beats, casts: ctx.casts }, null, 2));
   await fs.writeFile(path.join(outputDir, "console.json"), JSON.stringify({ errors: ctx.client.consoleErrors, messages: ctx.client.consoleMessages.slice(-200) }, null, 2));
   await fs.writeFile(path.join(outputDir, "network-failures.json"), JSON.stringify(ctx.client.networkFailures, null, 2));
+  await fs.writeFile(path.join(outputDir, "network-cancellations.json"), JSON.stringify(ctx.client.networkCancellations, null, 2));
   await fs.writeFile(
     path.join(outputDir, "ws-timeline.json"),
     JSON.stringify({ sent: ctx.client.webSocketFramesSent.slice(-200), received: ctx.client.webSocketFramesReceived.slice(-200) }, null, 2),
@@ -1959,7 +2292,12 @@ async function writeReport(ctx) {
     if (b.vitals) md.push(`- vitals: ${JSON.stringify(b.vitals)}`);
     if (b.spellBook) md.push(`- spell book: ${JSON.stringify(b.spellBook)}`);
     if (b.bind) md.push(`- bind: ${JSON.stringify(b.bind)} → hotkey=${b.reflectedHotkey ?? "?"}`);
-    if (b.cast) md.push(`- cast: ${JSON.stringify({ spell: b.cast.spell, mode: b.cast.mode, fired: b.cast.fired, mpDelta: b.cast.mpDelta, cooldown: `${b.cast.cooldownBefore}→${b.cast.cooldownAfter}`, dmgHits: b.cast.monsterDamageHits, floaters: b.cast.damageFloaterPeak })}`);
+    if (b.cast) md.push(`- cast: ${JSON.stringify({ spell: b.cast.spell, mode: b.cast.mode, fired: b.cast.fired, mpDelta: b.cast.mpDelta, cooldown: `${b.cast.cooldownBefore}→${b.cast.cooldownAfter}`, dmgHits: b.cast.monsterDamageHits, floaters: b.cast.damageFloaterPeak, originalFrameEvents: b.cast.visualProbe?.sourceFrameEvents ?? 0, phases: Object.keys(b.cast.visualProbe?.phases ?? {}) })}`);
+    if (b.cast?.visualFrames?.length) {
+      md.push(`- cast frames: ${b.cast.visualFrames.map((frame) => `[\`${frame.phase}\`](${frame.path})`).join(" · ")}`);
+    } else if (b.cast?.visualFrame) {
+      md.push(`- cast frame: [\`${b.cast.visualFrame}\`](${b.cast.visualFrame})`);
+    }
     if (b.summary) md.push(`- summary: ${JSON.stringify(b.summary)}`);
     if (b.state) {
       md.push(`- state: screen=\`${b.state.screen}\` map=\`${b.state.mapFileName ?? "?"}\` hp=${b.state.playerHp ?? "?"}/${b.state.playerMaxHp ?? "?"} mp=${b.state.playerMp ?? "?"}/${b.state.playerMaxMp ?? "?"} spells=${b.state.knownSkillCount} monsters=${b.state.liveMonsterCount} pets=${b.state.petCount} floaters=${b.state.damageFloaterDom}`);

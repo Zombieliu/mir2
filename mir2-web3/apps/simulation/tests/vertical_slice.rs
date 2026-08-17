@@ -1484,8 +1484,17 @@ fn five_classes_cover_level_1_to_20_core_skill_matrix() {
         ("Haste", "haste", Spell::Haste),
         ("Hiding", "hiding", Spell::Hiding),
     ] {
-        let mut assassin =
-            start_level_20_skill_session(MirClass::Assassin, MirGender::Female, &[spell_name], &[]);
+        let required_items = if spell == Spell::Hiding {
+            &[("Amulet", EquipmentSlot::Amulet)][..]
+        } else {
+            &[][..]
+        };
+        let mut assassin = start_level_20_skill_session(
+            MirClass::Assassin,
+            MirGender::Female,
+            &[spell_name],
+            required_items,
+        );
         assert_knows_skill(&assassin, spell_name);
         let object_id = assassin
             .world_snapshot()

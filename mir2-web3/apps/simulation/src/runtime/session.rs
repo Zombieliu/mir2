@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::combat::{apply_damage_to_current_player, combat_delay_ticks};
+use super::combat::{apply_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state};
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
     MonsterAgent, MonsterVitals, PlayerVitals, Position,
@@ -796,6 +796,16 @@ impl SimulationSession {
             {
                 self.apply_zone_player_remove_buff(*buff_type);
             }
+            ServerPacket::SpellToggle {
+                object_id,
+                spell: Spell::CounterAttack,
+                can_use: false,
+            } if local_player_object_id.is_some_and(|local_object_id| {
+                *object_id == local_object_id || *object_id == zone_object_id
+            }) =>
+            {
+                set_skill_toggle_state(self.app.world_mut(), Spell::CounterAttack, false);
+            }
             _ => {}
         }
     }
@@ -877,6 +887,13 @@ impl SimulationSession {
             return None;
         }
         super::skills::zone_magic_inventory_components(self.app.world(), spell)
+    }
+
+    pub fn shared_skill_item_param(&self, spell: Spell) -> u8 {
+        if !is_in_world(self.app.world()) {
+            return 0;
+        }
+        super::skills::zone_magic_inventory_item_param(self.app.world(), spell)
     }
 
     pub fn apply_shared_entity_snapshot(&mut self, snapshot: &WorldEntitySnapshot) -> bool {

@@ -4,8 +4,14 @@ import { Fragment, memo, useEffect, useRef, useState, type CSSProperties, type M
 
 import type { ClientScreen } from "../../lib/original-ui";
 import { originalAssetPath } from "../../lib/asset-url";
-import type { EffectAnimation, EffectAssets } from "../../lib/crystal-magic-effects";
-import { loadEffectAssets } from "../../lib/crystal-magic-effects";
+import type { EffectAnimation, EffectAssets, EffectFrameMeta } from "../../lib/crystal-magic-effects";
+import {
+  loadEffectAssets,
+  resolveSpellImpactEffect,
+  resolveSpellProjectileEffect,
+  resolveSpellReturnEffect,
+  spellNameForNumber,
+} from "../../lib/crystal-magic-effects";
 import {
   collectResolvedSceneEffectFrames,
   CRYSTAL_ADDITIVE_MIX_BLEND_MODE,
@@ -81,6 +87,18 @@ type ViewportProjectile = DisplayProjectile & {
   toDy: number;
   progress: number;
 };
+
+function projectilePhaseFrame(
+  animation: EffectAnimation | null,
+  startedAt: number,
+  now: number,
+  loop: boolean,
+): EffectFrameMeta | null {
+  if (!animation || now < startedAt || animation.frames.length === 0) return null;
+  const rawIndex = Math.floor((now - startedAt) / Math.max(animation.interval, 1));
+  const index = loop ? rawIndex % animation.frames.length : rawIndex;
+  return index >= 0 && index < animation.frames.length ? animation.frames[index] ?? null : null;
+}
 
 type ViewportEntitySpriteEntry = {
   entity: DisplayEntity & { dx: number; dy: number };
@@ -590,6 +608,13 @@ function OriginalClientSceneVisualLayersInner({
     }
   }
   for (const projectile of viewportProjectiles) {
+    const packetSpell = typeof projectile.spellOrEffect === "number"
+      ? spellNameForNumber(projectile.spellOrEffect)
+      : projectile.spellOrEffect;
+    if (packetSpell) {
+      spellByCaster.set(projectile.key, packetSpell);
+      continue;
+    }
     const resolved = resolvedEffectFrames.find(
       (entry) =>
         entry.effect.source === "spell" &&
@@ -597,6 +622,30 @@ function OriginalClientSceneVisualLayersInner({
         Math.abs(entry.effect.startedAt - projectile.startedAt) <= 1_000,
     );
     if (resolved) spellByCaster.set(projectile.key, resolved.animation.name);
+  }
+  const exactProjectileEffects = new Map<
+    string,
+    {
+      spell: string;
+      projectile: EffectAnimation | null;
+      impact: EffectAnimation | null;
+      returnEffect: EffectAnimation | null;
+    }
+  >();
+  if (effectAssets) {
+    for (const projectile of viewportProjectiles) {
+      const spell = spellByCaster.get(projectile.key);
+      if (!spell) continue;
+      const phases = {
+        spell,
+        projectile: resolveSpellProjectileEffect(effectAssets, spell),
+        impact: resolveSpellImpactEffect(effectAssets, spell),
+        returnEffect: resolveSpellReturnEffect(effectAssets, spell),
+      };
+      if (phases.projectile || phases.impact || phases.returnEffect) {
+        exactProjectileEffects.set(projectile.key, phases);
+      }
+    }
   }
   // Ground-drop item icons resolve from /original-ui/Items/{icon}.png (same pipeline as the bag).
   // Any icon index whose PNG fails to load (stale R2 / unmapped item) falls back to the dot marker.
@@ -628,7 +677,7 @@ function OriginalClientSceneVisualLayersInner({
           );
         }
         if (instance.kind === "projectile") {
-          return spellByCaster.has(instance.projectile.key);
+          return exactProjectileEffects.has(instance.projectile.key);
         }
         return false;
       },
@@ -823,6 +872,101 @@ function OriginalClientSceneVisualLayersInner({
           );
         })}
         {viewportProjectiles.map((projectile) => {
+          const travelEndsAt = projectile.travelEndsAt ?? projectile.expiresAt;
+          const exact = exactProjectileEffects.get(projectile.key);
+          const exactSpell = exact?.spell ?? "";
+          const impactStartedAt = travelEndsAt;
+          const returnStartedAt = impactStartedAt + (exact?.impact?.durationMs ?? 0);
+          const exactFrames = exact
+            ? [
+                {
+                  phase: "projectile",
+                  animation: exact.projectile,
+                  frame: motionNow < travelEndsAt
+                    ? projectilePhaseFrame(exact.projectile, projectile.startedAt, motionNow, true)
+                    : null,
+                  dx: projectile.fromDx + (projectile.toDx - projectile.fromDx) * projectile.progress,
+                  dy: projectile.fromDy + (projectile.toDy - projectile.fromDy) * projectile.progress,
+                  worldX: projectile.toX,
+                  worldY: projectile.toY,
+                },
+                {
+                  phase: "impact",
+                  animation: exact.impact,
+                  frame: projectilePhaseFrame(exact.impact, impactStartedAt, motionNow, false),
+                  dx: projectile.toDx,
+                  dy: projectile.toDy,
+                  worldX: projectile.toX,
+                  worldY: projectile.toY,
+                },
+                {
+                  phase: "return",
+                  animation: exact.returnEffect,
+                  frame: projectilePhaseFrame(exact.returnEffect, returnStartedAt, motionNow, false),
+                  dx: projectile.fromDx,
+                  dy: projectile.fromDy,
+                  worldX: projectile.fromX,
+                  worldY: projectile.fromY,
+                },
+              ].filter(
+                (entry): entry is typeof entry & { animation: EffectAnimation; frame: EffectFrameMeta } =>
+                  Boolean(entry.animation && entry.frame),
+              )
+            : [];
+          if (exactFrames.length > 0) {
+            return (
+              <Fragment key={projectile.key}>
+                {exactFrames.map(({ phase, animation, frame, dx, dy, worldX, worldY }) => (
+                  <img
+                    key={`${projectile.key}:${phase}`}
+                    ref={
+                      imperativeCamera
+                        ? registerCameraSurface(`projectile:${projectile.key}:${phase}`)
+                        : undefined
+                    }
+                    className="scene-crystal-effect-frame projectile"
+                    src={frame.path}
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                    data-projectile-key={projectile.key}
+                    data-projectile-spell={exactSpell}
+                    data-projectile-phase={phase}
+                    data-mir2-original-src={frame.path}
+                    onError={handleSceneAssetImageError}
+                    onLoad={handleSceneAssetImageLoad}
+                    style={{
+                      position: "absolute",
+                      left:
+                        VIEWPORT_ENTITY_LEFT_ORIGIN +
+                        dx * VIEWPORT_CELL_WIDTH +
+                        playerCameraMotionOffset.x +
+                        animation.offset.x +
+                        frame.x,
+                      top:
+                        VIEWPORT_ENTITY_TOP_ORIGIN +
+                        dy * VIEWPORT_CELL_HEIGHT +
+                        playerCameraMotionOffset.y +
+                        animation.offset.y +
+                        frame.y,
+                      width: frame.width,
+                      height: frame.height,
+                      mixBlendMode: animation.blend
+                        ? CRYSTAL_ADDITIVE_MIX_BLEND_MODE
+                        : "normal",
+                      filter:
+                        animation.light > 0
+                          ? `drop-shadow(0 0 ${Math.min(animation.light * 2, 16)}px #fff)`
+                          : undefined,
+                      pointerEvents: "none",
+                      zIndex: viewportDepthForCell(worldX, worldY, viewportDepthPlayer, 80),
+                    }}
+                  />
+                ))}
+              </Fragment>
+            );
+          }
+          if (exact || motionNow >= travelEndsAt) return null;
           const currentLeft =
             VIEWPORT_TILE_CENTER_X +
             (projectile.fromDx + (projectile.toDx - projectile.fromDx) * projectile.progress) * VIEWPORT_CELL_WIDTH +
