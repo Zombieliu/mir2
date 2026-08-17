@@ -19,6 +19,15 @@ export function originalItemIconPath(icon: number) {
     : EMPTY_ORIGINAL_ITEM_ICON;
 }
 
+export function applyOriginalItemIconFallback(image: HTMLImageElement) {
+  if (image.dataset.itemIconFallback === "1") {
+    image.hidden = true;
+    return;
+  }
+  image.dataset.itemIconFallback = "1";
+  image.src = originalItemIconPath(0);
+}
+
 export function formatBinaryDateTimeLabel(locale: string, value: number, template: string) {
   const date = dateFromBinaryDateTime(value);
   if (!date) {

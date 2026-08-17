@@ -3480,6 +3480,12 @@ html[data-display-mode="standalone"] .mir-client-page {
   position: absolute;
 }
 
+/* Tab buttons sit above the item grid (slot z-index 1, card z-index 2) whose
+   container spans the window from 0,0 and would otherwise swallow tab clicks. */
+.inventory-tab {
+  z-index: 3;
+}
+
 .window-tab-button,
 .sprite-button {
   display: block;

@@ -7924,7 +7924,10 @@ export default function HomePage() {
 
   function toggleInventoryWindow() {
     const opening = !showInventory;
-    if (opening) closeTouchSecondaryWindows("inventory");
+    if (opening) {
+      closeTouchSecondaryWindows("inventory");
+      setActiveInventoryTab("bag1");
+    }
     setShowInventory(opening);
   }
 
