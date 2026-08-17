@@ -8,11 +8,15 @@ import {
   QUEST_AGENT_CONTRACT,
   allQ1Q9Completed,
   assessGrindingSourceStall,
+  assessNavigationPositionCycle,
   assessQuestCombatResourceStrain,
+  assessRecoveryTransferProgress,
   chooseImmediateMeleeTarget,
+  collisionAtlasSearchMargins,
   collisionPathHasImmediateDynamicBlock,
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
+  combatNoResponseBudget,
   combatMemoryRequiresSupplyRecall,
   continuousCollisionRunAvoidsTransfers,
   dangerousHostileAvoidanceCells,
@@ -28,6 +32,7 @@ import {
   nearestGroundDropByName,
   nearestHealthPotionGroundDrop,
   nearestBlockingHostile,
+  nearestQuarantinedHostile,
   ordinarySupplyLootForSale,
   offensiveCombatSkillHotkey,
   restorativeSelfSkillHotkey,
@@ -40,8 +45,11 @@ import {
   questState,
   rankCombatTargetsByIsolation,
   rankRespawnFieldsForTravel,
+  quarantineRequiresTravelDisengage,
   reconcileConfirmedDeadMonsterObjects,
+  renderedTargetHealthCertainty,
   retreatPointFromHostile,
+  retreatPointsFromHostile,
   respawnCorridorAvoidanceWaypoint,
   respawnTravelAttemptBudget,
   safeRecoveryPaceTargets,
@@ -50,6 +58,7 @@ import {
   shouldCaptureGoalFrame,
   shouldEnforceShelterEscapeResourceBudget,
   shouldFundHealthPotions,
+  shouldPreferPostRecoveryFieldDisengage,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
   unresolvedCombatResourceStrains,
@@ -203,9 +212,14 @@ let knownHealthPotionUnitPrice = null;
 let deerFundingUnavailableUntil = 0;
 let supplyFundingShelterUntil = 0;
 let safeRecoveryThreatSettleUntil = 0;
+let safeRecoveryPostExitDisengageUntil = 0;
+let safeRecoveryPostExitTarget = null;
+let safeRecoveryTransferProgress = null;
+const safeRecoveryTransferCongestionUntil = new Map();
 const fieldGroupCooldownUntil = new Map();
 const monsterCooldownUntil = new Map();
 const quarantinedMonsterUntil = new Map();
+const quarantinedTravelThreatUntil = new Map();
 let confirmedDeadMonsterObjects = new Map();
 const questMonsterDeaths = new Map();
 const questMonsterPreparationLevel = new Map();
@@ -216,6 +230,7 @@ const recordedCombatResourceStrainGoals = new WeakSet();
 const groundDropCooldownUntil = new Map();
 const navigationDetourByTarget = new Map();
 const navigationRejectedCollisionCellUntil = new Map();
+const navigationPositionHistoryByMap = new Map();
 const collisionAtlasByMap = new Map();
 let collisionRegionCache = null;
 let authoritativeRoute = null;
@@ -229,6 +244,20 @@ let lastRestorativeSkillInputAt = 0;
 const FAILED_APPROACH_COOLDOWN_MS = 15_000;
 const FAILED_COMBAT_COOLDOWN_MS = 30_000;
 const QUARANTINED_TARGET_COOLDOWN_MS = 120_000;
+for (const quarantine of (
+  Array.isArray(resumeEvidence?.targetQuarantines)
+    ? resumeEvidence.targetQuarantines
+    : []
+)) {
+  const objectId = String(quarantine?.objectId ?? "");
+  const quarantineUntil = Number(quarantine?.at ?? 0) + QUARANTINED_TARGET_COOLDOWN_MS;
+  if (!objectId || quarantineUntil <= Date.now()) continue;
+  quarantinedMonsterUntil.set(objectId, quarantineUntil);
+  monsterCooldownUntil.set(objectId, quarantineUntil);
+  if (quarantine.travelDisengage === true) {
+    quarantinedTravelThreatUntil.set(objectId, quarantineUntil);
+  }
+}
 const CONFIRMED_DEAD_OBJECT_MAX_HOLD_MS = 10 * 60_000;
 const COMBAT_PROGRESS_WINDOW_MS = 45_000;
 const COMBAT_HARD_DEADLINE_MS = 5 * 60_000;
@@ -283,8 +312,11 @@ const HEALTH_POTION_FUNDING_FIELD_RADIUS = 64;
 const SAFE_FUNDING_MIN_HEALTH_RATIO = 0.70;
 const SAFE_FUNDING_READY_HEALTH_RATIO = 0.90;
 const SAFE_RECOVERY_THREAT_SETTLE_MS = 20_000;
+const SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS = 120_000;
 const SAFE_RECOVERY_PACE_INTERVAL_MS = 3_500;
 const SAFE_RECOVERY_PACE_DISTANCE = 2;
+const SAFE_RECOVERY_TRANSFER_STALL_MS = 45_000;
+const SAFE_RECOVERY_TRANSFER_CONGESTION_MS = 120_000;
 // GroceryStore has zero authoritative respawns and is connected to the
 // Border Village by ordinary movement portals. It is the nearest real-client
 // shelter where passive Crystal regeneration cannot be interrupted by mobs.
@@ -1722,6 +1754,7 @@ async function executeHuntGoal(goal, resourceBaseline = null) {
   let harvest = null;
   let combatSettled = false;
   let wantedItemProgressBeforeLastKill = null;
+  let preHarvestDefences = 0;
   // A harvest field can contain several same-name attackers. If one begins
   // attacking while the first corpse is being processed, immediately switch
   // to that live object and finish its ordinary client combat before touching
@@ -1740,6 +1773,64 @@ async function executeHuntGoal(goal, resourceBaseline = null) {
       );
       console.log(`  cooldown strained ${goal.monsterName} field groups: ${cooledFields}`);
       throw new Error(`${goal.monsterName} search exceeded the sustainable combat resource budget`);
+    }
+    const preHarvestThreat = goal.harvest
+      ? nearestActiveHostile(stateBefore, {
+          excludeObjectId: target.objectId,
+          maxDistance: 8,
+          withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
+        })
+      : null;
+    const livePreHarvestThreat = preHarvestThreat
+      ? stateBefore.entities.find((entry) => (
+          String(entry.objectId) === String(preHarvestThreat.objectId) &&
+          !entityIsCorpse(entry)
+        )) ?? null
+      : null;
+    if (livePreHarvestThreat) {
+      if (
+        normalizeName(livePreHarvestThreat.name) ===
+        normalizeName(goal.monsterName)
+      ) {
+        console.log(
+          `  switch to active harvest source before corpse creation: ` +
+          `${livePreHarvestThreat.name} ${livePreHarvestThreat.objectId}`,
+        );
+        target = livePreHarvestThreat;
+      } else if (
+        preHarvestDefences >= 2 ||
+        !canDefendHarvestThreat(stateBefore, livePreHarvestThreat)
+      ) {
+        console.log(
+          `  pre-harvest defence limit reached: ${livePreHarvestThreat.name} ` +
+          `${livePreHarvestThreat.objectId}`,
+        );
+        await disengageFromUnsafeHarvestThreat(
+          goal,
+          stateBefore,
+          livePreHarvestThreat,
+          resourceBaseline,
+        );
+        throw new Error(
+          `${goal.monsterName} source combat deferred by active ` +
+          `${livePreHarvestThreat.name} threat`,
+        );
+      } else {
+        console.log(
+          `  pre-clear active harvest threat before source combat: ` +
+          `${livePreHarvestThreat.name} ${livePreHarvestThreat.objectId}`,
+        );
+        const cleared = await clearAdjacentTravelThreat(
+          livePreHarvestThreat,
+          goal,
+          resourceBaseline,
+        );
+        preHarvestDefences += 1;
+        if (cleared) continue;
+        // A moving attacker may have left the bounded combat radius without
+        // dying. Re-read on the next engagement before creating the corpse.
+        continue;
+      }
     }
     const questBefore = questState(stateBefore, goal.questId);
     const monsterBefore = objectiveProgress(
@@ -3961,6 +4052,7 @@ async function killMonster(
   let stalledRelockCount = 0;
   let corpse = null;
   const initialState = await readAgentState(client);
+  const noResponseBudget = combatNoResponseBudget(goal.incidentalTravelThreat);
   assertSafeSupplyFundingState(goal, initialState, goal.monsterName);
   if (!goal.supplyFunding) {
     const healing = await useRestorativeSelfSkillIfNeeded(initialState);
@@ -4047,6 +4139,7 @@ async function killMonster(
       rememberConfirmedMonsterDeath(objectId);
       monsterCooldownUntil.delete(objectId);
       quarantinedMonsterUntil.delete(objectId);
+      quarantinedTravelThreatUntil.delete(objectId);
       return { success: true, corpse: corpse ?? live ?? target };
     }
     if (live) await useOffensiveCombatSkillIfReady(state, live);
@@ -4079,16 +4172,28 @@ async function killMonster(
       (entry) => entry.at >= since && entry.type === "attack",
     ).length;
     if (
-      Date.now() - since > 15_000 &&
-      outgoingAttackCount >= 5 &&
+      Date.now() - since > noResponseBudget.minimumElapsedMs &&
+      outgoingAttackCount >= noResponseBudget.minimumAttackCount &&
       !combatEvidence.targetResponded
     ) {
+      const quarantineObservedAt = Date.now();
+      const travelDisengage = quarantineRequiresTravelDisengage({
+        incidentalTravelThreat: goal.incidentalTravelThreat === true,
+        targetAttackRecent: entityAttackIsRecent(
+          live ?? target,
+          quarantineObservedAt,
+          ACTIVE_TRAVEL_THREAT_WINDOW_MS,
+        ),
+      });
       const quarantine = {
         questId: goal.questId,
         monsterName: goal.monsterName,
         objectId,
-        at: Date.now(),
-        reason: "five real attacks produced no target-specific combat packet",
+        at: quarantineObservedAt,
+        travelDisengage,
+        reason:
+          `${noResponseBudget.minimumAttackCount} real attacks over ` +
+          `${noResponseBudget.minimumElapsedMs}ms produced no target-specific combat packet`,
         outgoingAttackCount,
         combatEvidence,
         collateralProgress: { objectiveAdvanced, experienceAdvanced },
@@ -4101,8 +4206,13 @@ async function killMonster(
         player: state.player,
       };
       evidence.targetQuarantines.push(quarantine);
-      const quarantineUntil = Date.now() + QUARANTINED_TARGET_COOLDOWN_MS;
+      const quarantineUntil = quarantineObservedAt + QUARANTINED_TARGET_COOLDOWN_MS;
       quarantinedMonsterUntil.set(objectId, quarantineUntil);
+      if (travelDisengage) {
+        quarantinedTravelThreatUntil.set(objectId, quarantineUntil);
+      } else {
+        quarantinedTravelThreatUntil.delete(objectId);
+      }
       monsterCooldownUntil.set(objectId, quarantineUntil);
       return {
         success: false,
@@ -4241,6 +4351,7 @@ async function killMonster(
       rememberConfirmedMonsterDeath(objectId);
       monsterCooldownUntil.delete(objectId);
       quarantinedMonsterUntil.delete(objectId);
+      quarantinedTravelThreatUntil.delete(objectId);
       return { success: true, corpse: finalTarget ?? target };
     }
     await delay(125);
@@ -4550,6 +4661,7 @@ async function navigateNear(
   const visitedPositions = new Set();
   const positionVisitCount = new Map();
   let denseOccupancyClears = 0;
+  let lastQuarantineEscapeObjectId = null;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     assertRuntimeBudget(`navigating to ${requestedTarget.x},${requestedTarget.y}`);
     const beforeRecovery = await readAgentState(client);
@@ -4603,6 +4715,31 @@ async function navigateNear(
     );
     const player = state.player;
     if (!player) throw new Error("player position unavailable during navigation");
+    const navigationCycle = assessNavigationPositionCycle({
+      history: navigationPositionHistoryByMap.get(expectedMapFileName) ?? [],
+      position: player,
+      now: Date.now(),
+    });
+    navigationPositionHistoryByMap.set(expectedMapFileName, navigationCycle.history);
+    const quarantinedTravelThreat = nearestQuarantinedHostile(
+      state,
+      quarantinedTravelThreatUntil,
+      { maxDistance: 6 },
+    );
+    const quarantineEscapeTargets = quarantinedTravelThreat
+      ? retreatPointsFromHostile(state, quarantinedTravelThreat, 10)
+      : [];
+    let quarantineEscapeTarget = quarantineEscapeTargets[0] ?? null;
+    if (quarantineEscapeTarget) {
+      // The target-specific no-response quarantine proves that selecting this
+      // pursuer again cannot clear the route. Its current authoritative tile
+      // remains a dynamic blocker, and a ten-cell collision-planned retreat
+      // lets normal Shift/direction input create real separation before the
+      // original field route is reconsidered.
+      rejectCollisionCell(quarantinedTravelThreat);
+    } else {
+      lastQuarantineEscapeObjectId = null;
+    }
     if (
       clearTrivialOccupancy &&
       denseOccupancyClears < 4 &&
@@ -4613,7 +4750,7 @@ async function navigateNear(
       // Ignore the short approach cooldown in this exact trap, but continue to
       // respect the stronger no-response quarantine and the completed-quest /
       // level certification inside nearestTrivialAdjacentHostile.
-      const blocker = nearestTrivialAdjacentHostile(
+      const blocker = await nearestPhysicallyClickableTrivialAdjacentHostile(
         state,
         null,
         quarantinedMonsterUntil,
@@ -4674,9 +4811,11 @@ async function navigateNear(
       navigationDetourByTarget.delete(detourKey);
       collisionRegionCache = null;
     }
-    const steeringTarget = forcedDetourTarget ?? liveTarget;
-    const steeringDesiredDistance = forcedDetourTarget ? 1 : desiredDistance;
-    const steeringDistance = chebyshev(player, steeringTarget);
+    let steeringTarget = quarantineEscapeTarget ?? forcedDetourTarget ?? liveTarget;
+    const steeringDesiredDistance = quarantineEscapeTarget || forcedDetourTarget
+      ? 1
+      : desiredDistance;
+    let steeringDistance = chebyshev(player, steeringTarget);
     // A Crystal movement portal is a one-cell trigger. Four tiles is enough
     // to see and click its map surface, but not enough for the normal client
     // to enter it reliably around a building wall. Keep collision-routing
@@ -4687,6 +4826,48 @@ async function navigateNear(
     if (allowTransferToMap && distance <= 1) {
       const startedAt = Date.now();
       const beforeTransferSignature = `${player.x},${player.y}`;
+      if (distance === 0) {
+        // A stopped client can resume with its authoritative transform already
+        // on a one-cell movement source. There is then no direction "toward"
+        // the same tile, so the old branch threw before sending any input and
+        // repeated the shelter loop until portal rotation. Send one ordinary
+        // cardinal key: the server uses that real movement intent to finish an
+        // already-earned transfer; an older server may instead step off the
+        // source, after which the next iteration physically steps back on.
+        const reactivationProbe = (
+          await prioritizedMovementProbes(player, liveTarget, state.mapTransfers)
+        ).find((probe) => probe.keys.length === 1);
+        if (!reactivationProbe) {
+          throw new Error(
+            `no physical direction-key input can reactivate visible transfer ${transferKey ?? "unknown"}`,
+          );
+        }
+        const [key] = reactivationProbe.keys;
+        await waitForDiscreteMovementInput();
+        await client.pressKey(key.key, key.code, key.vk, {
+          action: "reactivate-visible-map-transfer",
+          transferKey,
+          fromMapFileName: expectedMapFileName,
+          toMapFileName: String(allowTransferToMap),
+          direction: key.direction,
+        });
+        const advanced = await waitUntil(
+          client,
+          `(() => { const s = window.__mir2Stage5?.state ?? {}; const p = s.authoritativePlayer ?? s.player; return String(s.mapFileName ?? '') === ${JSON.stringify(String(allowTransferToMap))} || (p && (Number(p.x) + ',' + Number(p.y)) !== ${JSON.stringify(beforeTransferSignature)}); })()`,
+          5_000,
+        );
+        const afterTransferInput = await readAgentState(client);
+        if (String(afterTransferInput.mapFileName) === String(allowTransferToMap)) {
+          navigationDetourByTarget.delete(detourKey);
+          return true;
+        }
+        console.log(
+          `  visible transfer ${transferKey ?? "unknown"} reactivation ` +
+          `${advanced ? "stepped off source without changing map" : "did not advance"} ` +
+          `after ${Date.now() - startedAt}ms; recomputing`,
+        );
+        continue;
+      }
       const portalProbe = movementProbesToward(player, liveTarget)
         .filter((probe) =>
           chebyshev(movementProbeDestination(player, probe), liveTarget) === 0
@@ -4772,7 +4953,7 @@ async function navigateNear(
       );
       continue;
     }
-    if (distance <= desiredDistance) {
+    if (!quarantineEscapeTarget && distance <= desiredDistance) {
       navigationDetourByTarget.delete(detourKey);
       return true;
     }
@@ -4802,7 +4983,7 @@ async function navigateNear(
       // scene and fought (or allowed to disengage) before navigation can make
       // progress. The certification/level filter below still prevents this
       // fallback from pulling an unrelated dangerous monster.
-      const blocker = nearestTrivialAdjacentHostile(state);
+      const blocker = await nearestPhysicallyClickableTrivialAdjacentHostile(state);
       if (blocker) {
         console.log(
           `  clear trapped navigation occupant: ${blocker.name} ` +
@@ -4831,7 +5012,42 @@ async function navigateNear(
 
     let collisionPath = null;
     let usedGlobalCollisionPath = false;
-    if (steeringDistance > GLOBAL_COLLISION_PATH_THRESHOLD) {
+    if (quarantineEscapeTargets.length > 0) {
+      for (const [escapeIndex, escapeCandidate] of quarantineEscapeTargets.entries()) {
+        const candidatePath = await collisionAtlasPathToward(
+          player,
+          escapeCandidate,
+          1,
+          state,
+          protectedTransfers,
+          expectedMapFileName,
+          [...rejectedCollisionCells],
+        );
+        if (!candidatePath) continue;
+        quarantineEscapeTarget = escapeCandidate;
+        steeringTarget = escapeCandidate;
+        steeringDistance = chebyshev(player, escapeCandidate);
+        collisionPath = candidatePath;
+        usedGlobalCollisionPath = true;
+        if (lastQuarantineEscapeObjectId !== String(quarantinedTravelThreat.objectId)) {
+          console.log(
+            `  escape quarantined travel threat: ${quarantinedTravelThreat.name} ` +
+            `${quarantinedTravelThreat.objectId}@${quarantinedTravelThreat.x},` +
+            `${quarantinedTravelThreat.y} toward=${escapeCandidate.x},` +
+            `${escapeCandidate.y} candidate=${escapeIndex + 1}/` +
+            `${quarantineEscapeTargets.length}`,
+          );
+          lastQuarantineEscapeObjectId = String(quarantinedTravelThreat.objectId);
+        }
+        break;
+      }
+      if (!collisionPath) {
+        throw new NavigationUnreachableError(
+          `no collision-reachable quarantine escape on ${expectedMapFileName} from ` +
+          `${player.x},${player.y} around ${quarantinedTravelThreat.objectId}`,
+        );
+      }
+    } else if (steeringDistance > GLOBAL_COLLISION_PATH_THRESHOLD) {
       try {
         collisionPath = await collisionAtlasPathToward(
           player,
@@ -4868,9 +5084,12 @@ async function navigateNear(
       rejectedCollisionCells.add(signature);
       return null;
     });
+    const crossChunkQuarantineCycle = Boolean(
+      quarantineEscapeTarget && navigationCycle.cycling,
+    );
     if (
       usedGlobalCollisionPath &&
-      signatureVisits >= 3 &&
+      (signatureVisits >= 3 || crossChunkQuarantineCycle) &&
       collisionPath?.[1]
     ) {
       // A server-acknowledged two-cell oscillation still reports every key
@@ -4879,11 +5098,29 @@ async function navigateNear(
       // first BFS cell and recompute once. This preserves legitimate detours
       // that temporarily increase distance, while breaking A<->B loops around
       // a stale atlas edge or moving occupancy cell.
-      const cyclingCell = `${collisionPath[1].x},${collisionPath[1].y}`;
+      const crossChunkReturnCell = crossChunkQuarantineCycle
+        ? navigationCycle.cycleCells.find(
+            (cell) => `${cell.x},${cell.y}` !== signature,
+          ) ?? null
+        : null;
+      const cyclingCell = crossChunkReturnCell
+        ? `${crossChunkReturnCell.x},${crossChunkReturnCell.y}`
+        : `${collisionPath[1].x},${collisionPath[1].y}`;
       rejectCollisionCell(cyclingCell);
+      const cyclingReason = crossChunkQuarantineCycle
+        ? "cross-chunk quarantined "
+        : "";
       console.log(
-        `  reject cycling collision edge: ${signature}->${cyclingCell}; replanning`,
+        `  reject cycling collision edge: ${signature}->${cyclingCell}; ` +
+        `${cyclingReason}replanning`,
       );
+      if (crossChunkQuarantineCycle) {
+        navigationPositionHistoryByMap.set(expectedMapFileName, [{
+          x: Number(player.x),
+          y: Number(player.y),
+          at: Date.now(),
+        }]);
+      }
       collisionPath = await collisionAtlasPathToward(
         player,
         steeringTarget,
@@ -4906,7 +5143,7 @@ async function navigateNear(
         `${steeringTarget.x},${steeringTarget.y}`,
       );
     }
-    if (!forcedDetourTarget && collisionPath?.detourEndpoint) {
+    if (!quarantineEscapeTarget && !forcedDetourTarget && collisionPath?.detourEndpoint) {
       forcedDetourTarget = {
         ...collisionPath.detourEndpoint,
         createdAt: Date.now(),
@@ -5290,9 +5527,21 @@ async function collisionAtlasPathToward(
 ) {
   const entities = Array.isArray(state?.entities) ? state.entities : [];
   const distance = chebyshev(player, target);
-  const baseMargin = Math.min(160, Math.max(72, Math.ceil(distance * 0.25)));
-  for (const margin of [baseMargin, Math.min(350, Math.max(240, baseMargin * 2))]) {
-    const corridor = await collisionAtlasCorridor(mapFileName, player, target, margin);
+  const initialMargin = collisionAtlasSearchMargins(distance)[0];
+  const initialCorridor = await collisionAtlasCorridor(
+    mapFileName,
+    player,
+    target,
+    initialMargin,
+  );
+  const searchMargins = collisionAtlasSearchMargins(distance, {
+    mapWidth: initialCorridor.mapWidth,
+    mapHeight: initialCorridor.mapHeight,
+  });
+  for (const margin of searchMargins) {
+    const corridor = margin === initialMargin
+      ? initialCorridor
+      : await collisionAtlasCorridor(mapFileName, player, target, margin);
     const occupied = entities
       // Only nearby actors can still occupy their current cell when this
       // route reaches it. Treating every moving deer/chicken in AOI as a
@@ -5446,6 +5695,8 @@ async function collisionAtlasCorridor(mapFileName, start, target, margin) {
   const mapMaxY = Number.isFinite(Number(atlas.mapHeight)) ? Number(atlas.mapHeight) - 1 : requested.maxY;
   return {
     blocked: atlas.blocked,
+    mapWidth: atlas.mapWidth,
+    mapHeight: atlas.mapHeight,
     bounds: {
       minX: Math.max(0, Math.floor(requested.minX)),
       maxX: Math.min(mapMaxX, Math.ceil(requested.maxX)),
@@ -5908,7 +6159,11 @@ async function travelToMap(
   if (!mapTravelGraph) throw new Error(`map travel graph is unavailable for ${targetMap}`);
   let scriptedGoldSpent = 0;
   let journeyResourceBaseline = enforceCombatResourceBudget ? resourceBaseline : null;
-  let journeyResourceGoal = enforceCombatResourceBudget ? resourceAccountingGoal : null;
+  // Budget enforcement and occupancy intent are separate controls. An urgent
+  // repair or already-depleted shelter journey can deliberately disable the
+  // before/after resource budget while still identifying a physically
+  // blocking, previously certified monster as non-funding travel combat.
+  let journeyResourceGoal = resourceAccountingGoal ?? null;
   for (let hop = 0; hop < 32; hop += 1) {
     let state = await readAgentState(client);
     const currentMap = String(state.mapFileName);
@@ -6058,7 +6313,12 @@ async function travelToMap(
               reachedSafeWaypoint = true;
               break;
             } catch (error) {
-              if (!(error instanceof NavigationUnreachableError)) throw error;
+              // navigateNear has two bounded-unreachable forms: the typed
+              // collision result and its max-attempt "navigation did not
+              // reach" result. Both describe only this optional risk-reducing
+              // waypoint, never the actual visible transfer. Reject the
+              // waypoint and retain the direct portal route in either case.
+              if (!isRetryableVisibleTransferNavigationError(error)) throw error;
               console.log(
                 `  reject unreachable hostile-corridor waypoint: ` +
                 `${corridorWaypoint.x},${corridorWaypoint.y}`,
@@ -6430,6 +6690,15 @@ function distanceToTransferBounds(point, transfer) {
   return chebyshev(point, nearestPointInTransferBounds(point, transfer));
 }
 
+function recoveryTransferIdentity(transfer) {
+  return String(
+    transfer?.key ??
+      [transfer?.minX, transfer?.maxX, transfer?.minY, transfer?.maxY]
+        .map((value) => Number(value))
+        .join(":"),
+  );
+}
+
 function nearestPointInTransferBounds(point, transfer) {
   return {
     x: Math.max(Number(transfer.minX), Math.min(Number(transfer.maxX), Number(point.x))),
@@ -6613,6 +6882,7 @@ async function recoverPlayerIfNeeded(
     // the old field position, so restart route choice from the authoritative
     // revive transform.
     navigationDetourByTarget.clear();
+    navigationPositionHistoryByMap.clear();
     collisionRegionCache = null;
     state = await readAgentState(client);
     if (await client.evaluate("document.querySelector('.inventory-window') != null")) {
@@ -6638,6 +6908,44 @@ function healthPotionQuantity(state) {
     .reduce((total, item) => total + Math.max(1, Number(item.quantity ?? 1)), 0);
 }
 
+async function collisionPlannedPostRecoveryRetreat(state, hostile) {
+  if (!state?.player || !hostile) return null;
+  const currentMapFileName = String(state.mapFileName ?? "");
+  const preferredTarget =
+    safeRecoveryPostExitTarget?.mapFileName === currentMapFileName &&
+    chebyshev(state.player, safeRecoveryPostExitTarget) > 1
+      ? safeRecoveryPostExitTarget
+      : null;
+  const candidates = [
+    ...(preferredTarget ? [preferredTarget] : []),
+    ...retreatPointsFromHostile(state, hostile, 10),
+  ].filter((candidate, index, entries) => (
+    entries.findIndex((entry) => (
+      Number(entry.x) === Number(candidate.x) &&
+      Number(entry.y) === Number(candidate.y)
+    )) === index
+  ));
+  for (const candidate of candidates) {
+    const collisionPath = await collisionAtlasPathToward(
+      state.player,
+      candidate,
+      1,
+      state,
+      state.mapTransfers ?? [],
+      currentMapFileName,
+    ).catch(() => null);
+    if (!collisionPath) continue;
+    safeRecoveryPostExitTarget = {
+      mapFileName: currentMapFileName,
+      x: Number(candidate.x),
+      y: Number(candidate.y),
+    };
+    return safeRecoveryPostExitTarget;
+  }
+  safeRecoveryPostExitTarget = null;
+  return null;
+}
+
 async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   if (!extendedRouteEnabled || maxQuestId < 23) return false;
   let state = providedState ?? await readAgentState(client);
@@ -6650,6 +6958,10 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
   const maxHp = Number(state.playerMaxHp ?? 0);
   const healthRatio = maxHp > 0 ? Number(state.playerHp ?? 0) / maxHp : 1;
   let shelterActive = Date.now() < supplyFundingShelterUntil;
+  if (currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME) {
+    safeRecoveryTransferProgress = null;
+    safeRecoveryTransferCongestionUntil.clear();
+  }
   if (currentMapFileName === SAFE_RECOVERY_MAP_FILE_NAME && shelterActive) {
     // The field deadline exists only to keep one retreat committed to the
     // portal. Once the ordinary map transfer succeeds, replace it with one
@@ -6676,28 +6988,124 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
     maxDistance: 8,
     withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
   });
+  const postRecoveryFieldDisengage = shouldPreferPostRecoveryFieldDisengage({
+    currentMapFileName,
+    homeMapFileName,
+    healthRatio,
+    potionQuantity: healthPotionQuantity(state),
+    fieldReserve: HEALTH_POTION_FIELD_RESERVE,
+    disengageUntil: safeRecoveryPostExitDisengageUntil,
+  });
   if (activeShelterThreat) {
-    if (!shelterActive) return false;
+    if (!shelterActive && !postRecoveryFieldDisengage) return false;
+    if (postRecoveryFieldDisengage) {
+      // NPC safety may have re-armed the field latch immediately after the
+      // normal 0141 exit. While the player remains freshly recovered, keep
+      // the same chase from sending it through the same door again.
+      supplyFundingShelterUntil = 0;
+      shelterActive = false;
+    }
     // With several attackers, repeatedly moving away from whichever one is
     // closest makes the retreat vector flip and can zig-zag until death. The
     // visible recovery portal is a stable safe destination. Move toward its
     // rendered transfer bounds while they are available; only fall back to a
     // geometric flee vector on maps without that ordinary exit.
-    const recoveryTransfer = (state.mapTransfers ?? [])
+    const recoveryNow = Date.now();
+    for (const [transferKey, until] of safeRecoveryTransferCongestionUntil) {
+      if (until <= recoveryNow) safeRecoveryTransferCongestionUntil.delete(transferKey);
+    }
+    const preferredRecoveryTransferKey = String(
+      safeRecoveryTransferProgress?.transferKey ?? "",
+    );
+    const recoveryTransferCandidates = (state.mapTransfers ?? [])
       .filter((transfer) => (
         String(transfer.toMapFileName ?? "") === SAFE_RECOVERY_MAP_FILE_NAME &&
         [transfer.minX, transfer.maxX, transfer.minY, transfer.maxY]
           .every((value) => Number.isFinite(Number(value)))
       ))
-      .sort((left, right) => (
-        distanceToTransferBounds(state.player, left) -
-        distanceToTransferBounds(state.player, right)
-      ))[0] ?? null;
-    const retreat = recoveryTransfer
-      ? nearestPointInTransferBounds(state.player, recoveryTransfer)
-      : retreatPointFromHostile(state, activeShelterThreat, 8);
+      .sort((left, right) => {
+        const leftKey = recoveryTransferIdentity(left);
+        const rightKey = recoveryTransferIdentity(right);
+        const leftCongested = Number(
+          Number(safeRecoveryTransferCongestionUntil.get(leftKey) ?? 0) > recoveryNow,
+        );
+        const rightCongested = Number(
+          Number(safeRecoveryTransferCongestionUntil.get(rightKey) ?? 0) > recoveryNow,
+        );
+        const leftPreferred = Number(leftKey !== preferredRecoveryTransferKey);
+        const rightPreferred = Number(rightKey !== preferredRecoveryTransferKey);
+        return leftCongested - rightCongested ||
+          leftPreferred - rightPreferred ||
+          distanceToTransferBounds(state.player, left) -
+            distanceToTransferBounds(state.player, right);
+      });
+    let recoveryTransfer = postRecoveryFieldDisengage ? null :
+      recoveryTransferCandidates[0] ?? null;
+    if (recoveryTransfer) {
+      const transferKey = recoveryTransferIdentity(recoveryTransfer);
+      const transferDistance = distanceToTransferBounds(state.player, recoveryTransfer);
+      safeRecoveryTransferProgress = assessRecoveryTransferProgress({
+        transferKey,
+        distance: transferDistance,
+        now: recoveryNow,
+        previous: safeRecoveryTransferProgress,
+        stalledAfterMs: SAFE_RECOVERY_TRANSFER_STALL_MS,
+      });
+      if (safeRecoveryTransferProgress.stalled && recoveryTransferCandidates.length > 1) {
+        safeRecoveryTransferCongestionUntil.set(
+          transferKey,
+          recoveryNow + SAFE_RECOVERY_TRANSFER_CONGESTION_MS,
+        );
+        const alternate = recoveryTransferCandidates.find((candidate) => (
+          recoveryTransferIdentity(candidate) !== transferKey &&
+          Number(
+            safeRecoveryTransferCongestionUntil.get(recoveryTransferIdentity(candidate)) ?? 0,
+          ) <= recoveryNow
+        )) ?? recoveryTransferCandidates.find((candidate) => (
+          recoveryTransferIdentity(candidate) !== transferKey
+        ));
+        if (alternate) {
+          const alternateKey = recoveryTransferIdentity(alternate);
+          console.log(
+            `  rotate congested recovery transfer: ${transferKey}->${alternateKey} ` +
+            `after ${recoveryNow - safeRecoveryTransferProgress.lastProgressAt}ms ` +
+            `without improving distance ${safeRecoveryTransferProgress.bestDistance}`,
+          );
+          recoveryTransfer = alternate;
+          safeRecoveryTransferProgress = assessRecoveryTransferProgress({
+            transferKey: alternateKey,
+            distance: distanceToTransferBounds(state.player, alternate),
+            now: recoveryNow,
+            previous: safeRecoveryTransferProgress,
+            stalledAfterMs: SAFE_RECOVERY_TRANSFER_STALL_MS,
+          });
+        }
+      }
+    } else {
+      safeRecoveryTransferProgress = null;
+    }
+    const retreat = postRecoveryFieldDisengage
+      ? await collisionPlannedPostRecoveryRetreat(state, activeShelterThreat)
+      : recoveryTransfer
+        ? nearestPointInTransferBounds(state.player, recoveryTransfer)
+        : retreatPointFromHostile(state, activeShelterThreat, 8);
+    // This is no longer optional funding combat: the player is already
+    // committed to an emergency shelter escape and every adjacent tile is
+    // occupied. A supplyFunding goal would reject the clearing attack merely
+    // because another mixed-field monster is also attacking, producing a
+    // no-input retry loop. The existing level certification, four-attempt
+    // bound, target quarantine, and normal combat inputs stay in force.
+    const shelterOccupancyClearGoal = {
+      kind: "travel",
+      questId: 0,
+      monsterName: "safe-shelter blocker",
+      supplyFunding: false,
+      travelLabel: "visible active-threat shelter escape",
+    };
     console.log(
-      `  safe funding shelter retreat: ${activeShelterThreat.name} ` +
+      `  ${postRecoveryFieldDisengage
+        ? "post-recovery supply disengage"
+        : "safe funding shelter retreat"}: ${activeShelterThreat.name} ` +
       `${activeShelterThreat.objectId}@${activeShelterThreat.x},${activeShelterThreat.y} ` +
       `target=${retreat?.x ?? "none"},${retreat?.y ?? "none"}`,
     );
@@ -6713,6 +7121,7 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
         maxAttempts: 4,
         abortOnDeath: true,
         clearTrivialOccupancy: true,
+        resourceAccountingGoal: shelterOccupancyClearGoal,
         // Preserve stock while HP is healthy, but let the normal potion
         // threshold save a critically injured character during the physical
         // retreat. With zero stock this remains a pure passive-recovery path.
@@ -6787,9 +7196,16 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
         clearTrivialOccupancy: true,
       });
     } catch (error) {
+      // Resource enforcement is chosen from the state at journey start. A
+      // normal emergency potion can cross that budget while the player is
+      // already travelling to the shelter (live r64: 2 -> 0 potions). Yield
+      // to the outer policy so this function re-reads the authoritative state
+      // and resumes the same visible route with the depleted-escape rule;
+      // treating the transition as fatal strands a living character outdoors.
       if (
         error instanceof NavigationInterruptedByDeathError ||
-        error instanceof SupplyFundingSafetyError
+        error instanceof SupplyFundingSafetyError ||
+        error instanceof CombatResourceBudgetError
       ) return true;
       const recoveredDuringApproach = await readAgentState(client).catch(() => null);
       const recoveredMaxHp = Number(recoveredDuringApproach?.playerMaxHp ?? 0);
@@ -6869,6 +7285,21 @@ async function recoverHealthInSafeInteriorIfNeeded(providedState = null) {
       Date.now() >= safeRecoveryThreatSettleUntil
     ) {
       safeRecoveryThreatSettleUntil = 0;
+      if (
+        String(state.mapFileName) === SAFE_RECOVERY_MAP_FILE_NAME &&
+        healthPotionQuantity(state) < HEALTH_POTION_FIELD_RESERVE
+      ) {
+        const disengageStartedAt = Date.now();
+        safeRecoveryPostExitDisengageUntil = Math.max(
+          safeRecoveryPostExitDisengageUntil,
+          disengageStartedAt + SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS,
+        );
+        safeRecoveryPostExitTarget = null;
+        recordMilestone("safe-recovery-post-exit-disengage-armed", state, {
+          disengageUntil: safeRecoveryPostExitDisengageUntil,
+          potionQuantity: healthPotionQuantity(state),
+        });
+      }
       recordMilestone("safe-passive-health-recovered", state, {
         healthRatio: liveHealthRatio,
         potionQuantity: healthPotionQuantity(state),
@@ -6974,20 +7405,32 @@ async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
   const inSupplyArea =
     String(state.mapFileName) === homeMapFileName &&
     chebyshev(state.player, merchant) <= HEALTH_POTION_RESTOCK_RADIUS;
+  const postRecoveryFieldDisengage = shouldPreferPostRecoveryFieldDisengage({
+    currentMapFileName: state.mapFileName,
+    homeMapFileName,
+    healthRatio,
+    potionQuantity,
+    fieldReserve: HEALTH_POTION_FIELD_RESERVE,
+    disengageUntil: safeRecoveryPostExitDisengageUntil,
+  });
   const activeThreat = nearestActiveHostile(state, {
     maxDistance: 8,
     withinMs: ACTIVE_TRAVEL_THREAT_WINDOW_MS,
   });
   if (!activeThreat) return false;
-  supplyFundingShelterUntil = Math.max(
-    supplyFundingShelterUntil,
-    Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
-  );
+  if (postRecoveryFieldDisengage) {
+    supplyFundingShelterUntil = 0;
+  } else {
+    supplyFundingShelterUntil = Math.max(
+      supplyFundingShelterUntil,
+      Date.now() + SUPPLY_FUNDING_THREAT_SHELTER_MS,
+    );
+  }
   // A monster can momentarily occupy the same tile as the player. A pure
   // "move away" vector then has no stable direction and may flip on every
   // policy turn as the monster follows. Prefer the ordinary visible shelter
   // transfer as a fixed destination whenever this map exposes one.
-  const recoveryTransfer = (state.mapTransfers ?? [])
+  const recoveryTransfer = postRecoveryFieldDisengage ? null : (state.mapTransfers ?? [])
     .filter((transfer) => (
       String(transfer.toMapFileName ?? "") === SAFE_RECOVERY_MAP_FILE_NAME &&
       [transfer.minX, transfer.maxX, transfer.minY, transfer.maxY]
@@ -6997,11 +7440,14 @@ async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
       distanceToTransferBounds(state.player, left) -
       distanceToTransferBounds(state.player, right)
     ))[0] ?? null;
-  const retreat = recoveryTransfer
-    ? nearestPointInTransferBounds(state.player, recoveryTransfer)
-    : retreatPointFromHostile(state, activeThreat, 8);
+  const retreat = postRecoveryFieldDisengage
+    ? await collisionPlannedPostRecoveryRetreat(state, activeThreat)
+    : recoveryTransfer
+      ? nearestPointInTransferBounds(state.player, recoveryTransfer)
+      : retreatPointFromHostile(state, activeThreat, 8);
   console.log(
-    `  unsafe ${inSupplyArea ? "supply" : "field"} disengage: ${activeThreat.name} ` +
+    `  ${postRecoveryFieldDisengage ? "post-recovery supply" :
+      `unsafe ${inSupplyArea ? "supply" : "field"}`} disengage: ${activeThreat.name} ` +
     `${activeThreat.objectId}@${activeThreat.x},${activeThreat.y} ` +
     `HP=${Number(state.playerHp ?? 0)}/${maxHp} ` +
     `potions=${potionQuantity}/${HEALTH_POTION_FIELD_RESERVE} ` +
@@ -7009,7 +7455,7 @@ async function retreatFromUnsafeActiveThreatIfNeeded(providedState = null) {
   );
   if (retreat) {
     await navigateNear(retreat, recoveryTransfer ? 0 : 1, {
-      maxAttempts: 2,
+      maxAttempts: postRecoveryFieldDisengage ? 4 : 2,
       abortOnDeath: true,
       autoUsePotions: true,
       allowTransferToMap: recoveryTransfer
@@ -8056,7 +8502,18 @@ async function repairProgressionEquipmentIfNeeded(providedState = null) {
   const { candidate: first, route, routeKey } = selection;
   if (state.activeNpcDialog) await closeNpcDialog();
   if (String(state.mapFileName) !== String(route.mapFileName)) {
-    await travelToMap(route.mapFileName, { enforceCombatResourceBudget: false });
+    const repairTravelGoal = {
+      kind: "travel",
+      questId: 0,
+      monsterName: "equipment repair blocker",
+      supplyFunding: false,
+      travelLabel: `visible ${route.npc.label} repair journey`,
+    };
+    await travelToMap(route.mapFileName, {
+      enforceCombatResourceBudget: false,
+      clearTrivialOccupancy: true,
+      resourceAccountingGoal: repairTravelGoal,
+    });
   }
   await openNpcDialog(route.npc, "@Repair", { clearTrivialOccupancy: true });
   await clickDialogTarget("@Repair", `open-equipment-repair-${String(first.slot)}`);
@@ -8320,9 +8777,12 @@ function rankMonsterApproachTargets(state, candidates, preferNearest = false) {
     isolated.map((entry, index) => [String(entry.objectId), index]),
   );
   // Supply work is intentionally short and abortable. Minimise time outside
-  // the recovery/shop perimeter; use pack isolation only to break equal-range
-  // ties. Ordinary quest combat keeps the safer pack-edge ordering above.
+  // the recovery/shop perimeter, but never let a nearer hp-unknown stale
+  // actor outrank another rendered object with definite positive HP. Use pack
+  // isolation only after health certainty and range. Ordinary quest combat
+  // keeps the safer pack-edge ordering above.
   return [...isolated].sort((left, right) => (
+    renderedTargetHealthCertainty(left) - renderedTargetHealthCertainty(right) ||
     chebyshev(state.player, left) - chebyshev(state.player, right) ||
     Number(isolationOrder.get(String(left.objectId)) ?? 0) -
       Number(isolationOrder.get(String(right.objectId)) ?? 0)
@@ -8331,8 +8791,16 @@ function rankMonsterApproachTargets(state, candidates, preferNearest = false) {
 
 async function nearestVisibleMonsterByName(state, name, preferNearest = false) {
   const candidates = matchingLiveMonsters(state, name);
-  const immediateCandidate = preferNearest
+  const rankedSupplyCandidates = preferNearest
     ? rankMonsterApproachTargets(state, candidates, true)
+    : [];
+  const definiteLiveCandidates = rankedSupplyCandidates.filter(
+    (entry) => renderedTargetHealthCertainty(entry) === 0,
+  );
+  const immediateCandidate = preferNearest
+    ? (definiteLiveCandidates.length > 0
+        ? definiteLiveCandidates
+        : rankedSupplyCandidates)
       .find((entry) => chebyshev(state.player, entry) <= 1) ?? null
     : chooseImmediateMeleeTarget(
       state,
@@ -8577,6 +9045,8 @@ function nearestTrivialAdjacentHostile(
   state,
   requestedMonsterName = null,
   cooldownUntil = monsterCooldownUntil,
+  eligibleObjectIds = null,
+  preferredObjectId = null,
 ) {
   const playerLevel = Number(state?.playerLevel ?? 0);
   return nearestBlockingHostile(
@@ -8585,6 +9055,10 @@ function nearestTrivialAdjacentHostile(
     cooldownUntil,
     Date.now(),
     (entity) => {
+      if (
+        eligibleObjectIds instanceof Set &&
+        !eligibleObjectIds.has(String(entity?.objectId))
+      ) return false;
       const profile = grindingCatalog.find(
         (entry) => normalizeName(entry.monsterName) === normalizeName(entity?.name),
       ) ?? null;
@@ -8593,6 +9067,35 @@ function nearestTrivialAdjacentHostile(
         incidentalTravelThreatIsTrivial(profile.level, playerLevel)
       ) || completedQuestCertifiesMonster(state, entity?.name);
     },
+    preferredObjectId,
+  );
+}
+
+async function nearestPhysicallyClickableTrivialAdjacentHostile(
+  state,
+  requestedMonsterName = null,
+  cooldownUntil = monsterCooldownUntil,
+) {
+  const adjacentObjectIds = (Array.isArray(state?.entities) ? state.entities : [])
+    .filter((entity) => (
+      entity?.kind === "monster" &&
+      entity?.disposition === "hostile" &&
+      !entityIsCorpse(entity) &&
+      chebyshev(state?.player, entity) <= 1
+    ))
+    .map((entity) => String(entity.objectId));
+  const clickableObjectIds = new Set(
+    (await physicalEntityHitTargets(adjacentObjectIds))
+      .filter((target) => Number(target.clickableSamples) > 0)
+      .map((target) => String(target.objectId)),
+  );
+  if (!clickableObjectIds.size) return null;
+  return nearestTrivialAdjacentHostile(
+    state,
+    requestedMonsterName,
+    cooldownUntil,
+    clickableObjectIds,
+    state?.selectedObjectId ?? null,
   );
 }
 

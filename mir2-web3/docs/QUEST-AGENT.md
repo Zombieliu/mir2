@@ -181,9 +181,55 @@ The segment ended at level 14 with 115/135 HP, ten potions, five kills, 934
 physical inputs, and zero shortcut or critical diagnostic. q25 remains 6/20
 and q30 remains 0/1.
 
-Across the 53 finalized local development reports through r53, the harness
-recorded 47,298,267 ms (13 h 08 m 18 s) of browser-active runtime, 24,658
-physical inputs, 273 historical kill rows, 12 deaths, 11 revives, and zero
+r54 then exposed a false-unreachable collision window at `(503,633)`: both
+GroceryStore entrances were in the same full-map component, but the old
+240-tile search omitted the required wall detour. Clean commit `d68674ce8`
+(source `0256c33a9`) now escalates from cheap local corridors to a full-map
+fallback only for small Crystal atlases, while bounding the large-map fallback.
+r55 resumed the exact state and kept moving for its full 20-minute slice.
+
+r56 exposed a second dense-field recovery loop where an emergency shelter
+escape inherited supply-funding accounting and rejected every bounded clearing
+attack in a mixed pack. The same commit gives only that committed escape a
+normal travel accounting goal while preserving target visibility, level
+certification, the four-attempt cap, quarantine, and physical input. r57
+resumed the crowded state, escaped, entered the GroceryStore, recovered,
+harvested visible Venison `1 -> 2`, sold it for gold `29 -> 279`, bought HP
+drugs `8 -> 10` for gold `279 -> 199`, and continued ordinary travel until its
+runtime limit. It advanced EXP from 17,483 to 18,265 with five kills, 635
+physical inputs, no death, no shortcut violation, and no critical diagnostic.
+The final state remains level 14; q25 and q30 remain open.
+
+r58-r60 advanced the same character from 18,265 to 21,721 EXP without a death,
+then r61 exposed a new dynamic-occupancy loop: the route was connected, but
+the bounded clearer repeatedly selected adjacent actors without a usable
+physical hit surface. Clean commit `e50a8fce0` (source `0afc30449`) limits that
+clearer to rendered physical hit targets, prefers the already selected
+clickable actor, and rotates an ordinary recovery portal only after a
+45-second net-progress stall. r62 resumed the same character, sold visible
+Venison for gold `178 -> 428`, bought HP drugs `0 -> 10` for gold `428 -> 28`,
+and returned toward the real field. r63 completed one SpittingSpider goal and
+advanced EXP to 22,601 with all ten potions retained. The exact new selector
+and portal-rotation branches are unit-covered; r62 escaped through ordinary
+movement without emitting either branch. r65 later exercised both branches
+against a naturally congested live field.
+
+r64 completed two SpittingSpider goals before a retreat crossed from two
+potions to zero and exposed an uncaught resource-budget transition. Source
+commit `1c9ac3b4` (clean `030cebe3`) yields that signal to the outer recovery
+loop, which re-reads the depleted state and resumes ordinary shelter travel.
+The same patch keeps a retryable failure of an optional hostile-corridor
+waypoint from rejecting the real visible portal. r65 moved through the old
+fatal point, performed seven normal-client occupancy clears, and emitted the
+two-portal congestion rotation. The stopped r66 live trace entered
+GroceryStore, settled, harvested and sold Venison, and bought HP drugs
+`0 -> 5 -> 10`; r67 finalized the persisted 135/135 HP, ten-drug state and a
+visible equipment repair. The complete Quest Agent gate is now 175/175.
+
+Across the 66 finalized local development reports through r67 (excluding the
+intentionally stopped r66 trace), the harness recorded 56,393,728 ms
+(15 h 39 m 53 s) of browser-active runtime, 29,443 physical inputs, 305
+historical kill rows, 12 deaths, 11 revives, and zero
 shortcut violations. One r44 kill row is now known to duplicate another row's
 object id, so the raw historical kill-row total must not be presented as a
 unique-kill count. These reports span multiple runner revisions and include

@@ -10,21 +10,22 @@ level-1-to-50 playthrough.
 
 - Source review base: PR #233 exact head
   `ef33e4764c1342620e30532fb5ffa4e784013dd2`.
-- Main integration base: `f0e0bb6cdc7129fc3b183e7875603d198198bb75`
-  (current `main`, including PR #234).
-- Main-based acceptance code freeze:
-  `4d089b4bb12e1f5b6168a740ec5b8e65a620b27a`.
+- Main integration base: `aa928b99ae7346eb6816ab8ca0b3f1063dae9394`
+  (current `main`, including the squash merge of PR #235).
+- Latest main-based follow-up runtime code freeze:
+  `24cd9c81724748b28e0567c2385252aa97dd6ad2` (patch-equivalent to source
+  commit `54a4b01aed754fd9a783f8c5da6745cb1cc0c9ba`). The matching stable patch id is
+  `a7d296c61dbba31c007615790690d7bf2e85a6f7`.
 - Patch-equivalent source freeze for the original transplant:
   `ccaba013515b0f1908e9c3aa6fca6a5c847db1f8`.
 - Latest live-soak Quest Agent runtime revision:
-  `a71cfce467c1ecbb88db1c13ef720e850c8a41ee` (patch-equivalent to clean
-  commit `4d089b4bb`).
-- Remote clean branch: `origin/codex/autonomous-quest-agent-main`.
-- Code range: twelve code/test commits plus six acceptance-documentation
-  commits on top of the main integration base. The original eight transplanted
-  source commits remain one-for-one matches under `git range-diff`; the later
-  scene-cache regression, grind-travel, depleted-shelter, confirmed-corpse,
-  and resumed-supply recovery fixes are clean-branch follow-ups.
+  `54a4b01aed754fd9a783f8c5da6745cb1cc0c9ba` (patch-equivalent to clean
+  commit `24cd9c81724748b28e0567c2385252aa97dd6ad2`).
+- Remote follow-up branch: `origin/codex/quest-agent-recovery-followup`.
+- Integration lineage: PR #235's reviewed range is squash-merged as
+  `aa928b99a`. PR #236 carries the subsequent main-based recovery and
+  progression follow-ups; acceptance-document-only commits may follow the
+  tested runtime freeze without changing runtime code.
 
 ## Acceptance matrix
 
@@ -33,7 +34,7 @@ level-1-to-50 playthrough.
 | Physical input and read-only observation contract | PASS | CDP mouse/keyboard/text only; static and runtime shortcut audits report zero violations. |
 | Resume, reconnect, death, potion, merchant, navigation, combat, harvest, and equipment framework | PASS for staged use | Exercised across the local development soak; failures remain explicit and resumable. |
 | Warrior q1-q9 functional route | PASS | One finalized certificate reached all required authoritative stages with 684 inputs, 18 kills, no death, and zero shortcut violations. |
-| Current extended Warrior chain | PARTIAL | q22-q24, q28, and q29 are complete; q25 is 6/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
+| Current extended Warrior chain | PARTIAL | The resumed character is level 16. q22-q24, q28, and q29 are complete; q25 is 8/20, q26/q27 are not yet unlocked in the current snapshot, and q30 is 0/1. |
 | Three-class route generation | STATIC PASS | Warrior, Wizard, and Taoist manifests each contain 140 level-1-to-50 quests and report zero generated blockers. This is not live completion. |
 | Clean visual-assets certificate | NOT ACCEPTED | The completed q1-q9 run contains missing-raster diagnostics. A later incomplete segment is diagnostics-clean, but cannot replace a complete clean run. |
 | Contiguous Warrior level 1-50 | NOT ACCEPTED | No single/resumed evidence chain has completed it. |
@@ -80,15 +81,29 @@ The main-based clean transplant was then verified independently:
 - the Gateway paid-sailor round-trip passes 1/1;
 - Rust formatting and whitespace checks pass.
 
-The later Quest Agent-only follow-ups through `4d089b4bb` change JavaScript and
-its unit tests. The complete Quest Agent gate now passes 171/171, including the
+The later Quest Agent-only follow-ups through `24cd9c817` change JavaScript and
+its unit tests. The complete Quest Agent gate now passes 186/186, including the
 long-preparation travel, depleted-shelter recovery, confirmed-corpse lifecycle,
-cross-run supply recall, and safe-room settlement regressions; Node syntax
-checks and `git diff --check` pass in both source and clean worktrees. The
-earlier full Simulation/Gateway/TypeScript results remain the backend baseline
+cross-run supply recall, safe-room settlement, full-map route fallback, and
+dense-shelter escape plus congested-portal rotation and physical-hit-target
+selection, en-route reserve exhaustion, and optional hazard-waypoint
+regressions. It also covers bounded post-settlement field disengagement,
+separate passive-target and travel-threat quarantine state, and positive-HP
+target preference during funding. Budget-disabled equipment-repair travel
+retains its explicit non-funding resource accounting while independently enabling
+certified physical occupancy clearing; Node syntax checks and `git diff
+--check` pass in both source and clean worktrees. The latest regression also
+requires a harvest goal to handle at most two already attacking, certified
+nearby threats before creating the source corpse; an unsafe or excess threat
+forces physical disengagement instead. The newest regression keeps the
+conservative 15-second/five-attack no-response budget for quest combat, but
+lets incidental travel clearing rotate an unresponsive occupied tile after
+four seconds and two real attacks. The earlier full
+Simulation/Gateway/TypeScript results remain the backend baseline
 rather than being relabeled as a fresh run for these Agent-only changes. PR
-#235 at this exact head also finished 20 successful remote checks, two
-conditional skips, and zero failures or pending checks.
+#235 at exact head `45192e947` finished 20 successful remote checks, two
+conditional skips, and zero failures or pending checks before squash-merging as
+`aa928b99a`; the follow-up head must be judged by its own remote check rollup.
 
 The first full acceptance run exposed a deterministic saved-transform
 regression introduced after the PR #233 base: a valid Bichon field position was
@@ -107,14 +122,15 @@ internal test transfer. It no longer depends on a production-profile-rejected
 
 ## Live evidence summary
 
-The private evidence directory contains 53 finalized development reports
-through `warrior-q30-r53-supervised`:
+The private evidence directory contains 128 finalized development reports
+through `warrior-q30-r129-supervised` (r66 was an intentionally stopped live
+trace and is excluded from these report aggregates):
 
-- 47,298,267 ms (13 h 08 m 18 s) browser-active runtime;
-- 24,658 recorded physical inputs;
-- 273 historical kill rows, including one r44 row now proven to repeat the
+- 113,633,085 ms (31 h 33 m 53 s) browser-active runtime;
+- 60,125 recorded physical inputs;
+- 573 historical kill rows, including one r44 row now proven to repeat the
   same target object id rather than represent another kill;
-- 12 deaths and 11 completed revives across intentionally interrupted and
+- 20 deaths and 19 completed revives across intentionally interrupted and
   diagnostic runs;
 - zero shortcut violations.
 
@@ -198,6 +214,1427 @@ browser/network diagnostics. It ended at level 14 with 115/135 HP and ten
 potions. This proves resumable recovery and continued progression, not level
 15 or q25/q30 completion.
 
+r54-r57 then exercised the same recovery chain from two deterministic failure
+states. r54 reached `(503,633)` but the old collision atlas searched only local
+margins through 240 tiles and falsely declared both GroceryStore entrances
+unreachable even though the full 700-by-700 map had a connected route around a
+wall. The first fix adds cheap local searches followed by a true full-map
+fallback on small Crystal maps and a bounded adaptive fallback on large maps.
+r55 resumed the exact state and moved for its full 20-minute slice instead of
+taking the former immediate fatal branch.
+
+r56 then reached a dense beginner field and exposed a separate no-input retry:
+the emergency shelter escape inherited `supplyFunding=true`, so mixed adjacent
+attackers caused the funding safety guard to reject every bounded clearing
+attack. The second fix classifies only that already-committed escape as normal
+travel while retaining level certification, the four-attempt cap, target
+quarantine, and ordinary combat input. r57 resumed the exact crowded state,
+escaped the field, entered the GroceryStore, recovered passively, returned to a
+visible Deer corpse, harvested Venison `1 -> 2`, sold it for gold `29 -> 279`,
+and bought HP drugs `8 -> 10` for gold `279 -> 199`. It then continued ordinary
+travel until the 1,200,000 ms slice limit. The report records 1,203,435 ms, 635
+inputs, five kills, no death, no shortcut violation, and no critical
+browser/network diagnostic; EXP advanced from 17,483 to 18,265 and the final
+state remained level 14. This closes the two exact recovery regressions, not
+level 15 or q25/q30 completion.
+
+r58-r60 returned to ordinary progression and advanced EXP from 18,265 to
+21,721 without a death. r58 reached a real SpittingSpider field, r59 survived
+a one-HP/zero-potion retreat before a visible `0 -> 10` restock and completed
+five Oma goals, and r60 recorded seven historical kill rows while clearing a
+dense village-edge pack. The r60 aggregate includes incidental and delayed
+combat settlement, so those rows remain audit rows rather than a unique-kill
+claim.
+
+r61 resumed the dense state and eventually moved from the pack to the merchant
+approach, but spent most of its 624,288 ms budget switching among adjacent
+actors whose rendered hit surfaces were not physically clickable. It gained
+one historical kill row and EXP `21,721 -> 22,385`, then expired with zero
+potions before opening the merchant. Clean commit `e50a8fce0` (source
+`0afc30449`) restricts bounded occupancy clearing to physical hit targets,
+prefers the already selected clickable actor, and rotates an ordinary recovery
+portal only after 45 seconds without net distance improvement. The same portal
+is cooled for 120 seconds; no direct movement, target, or map command is added.
+
+r62 resumed the authoritative r61 character, escaped the same area through
+ordinary movement, sold visible Venison for gold `178 -> 428`, and bought HP
+drugs `0 -> 10` for gold `428 -> 28`. Its remaining ten-minute budget moved
+from the merchant district toward the real SpittingSpider fields, ending at
+131/135 HP with all ten potions. r63 then selected a physically clickable
+SpittingSpider, completed one normal-client goal, and advanced EXP
+`22,385 -> 22,601` in 187,583 ms with no potion use. Across r58-r63, the six
+reports add 5,173,396 ms, 2,724 inputs, 17 historical kill rows, two shop
+purchases, zero deaths/revives, zero shortcut violations, and zero critical
+browser/network diagnostics. r62 did not need to emit the new portal-rotation
+or occupancy-clear branch, so those exact branches remain unit-covered rather
+than separately live-certified at that point. r65 later closes both branches.
+
+r64 completed two of two SpittingSpider goals and advanced EXP
+`22,601 -> 23,465`, but spent all ten potions during the physical retreat. The
+journey had enabled resource enforcement while two potions remained; when the
+same trip reached zero, the travel budget correctly fired but the recovery
+layer failed to re-read the new depleted state and propagated a fatal at
+80/135 HP. Source commit `1c9ac3b4` (clean `030cebe3`) treats that budget
+crossing as a resumable outer-policy transition. The next authoritative frame
+therefore chooses the existing depleted-escape rule; movement, death, revive,
+health, stock, and map transfer remain client/server authoritative.
+
+r65 resumed the exact 80-HP/zero-potion state and moved through the old fatal
+point. It naturally exercised physically clickable occupancy clearing against
+Oma, HookingCat, RakingCat, and Scarecrow targets, then emitted the bounded
+recovery-transfer rotation after 117,841 ms without net progress. That closes
+both branches that r62 had left unit-only. r65 also exposed a second error:
+`navigateNear` may return either a typed collision error or the bounded text
+form `navigation did not reach`; the optional hostile-corridor waypoint caught
+only the typed form and therefore misclassified the optional point as a failed
+portal. The same commit applies the existing retryable-navigation classifier
+inside that optional waypoint and retains the direct physical portal route.
+
+r66 was a live trace rather than a finalized report because it was stopped
+after the acceptance closure. It entered GroceryStore through an ordinary
+direction-key portal step, paced through the pursuit settlement window,
+returned to map 0, killed and visibly harvested a Deer, sold Venison twice,
+and bought HP drugs `0 -> 5 -> 10`. r67 then finalized the persisted result:
+135/135 HP, two visible five-drug belt stacks, EXP 24,341/30,000, and a visible
+Merchant Whitney equipment repair before ordinary SpittingSpider travel. The
+three finalized r64/r65/r67 reports add 914,093 ms, 526 inputs, nine historical
+kill rows, zero deaths/revives, zero shortcut violations, and zero critical
+browser/network diagnostics. At the r67 boundary the character remained level
+14; q25 was 6/20 and q30 remained open.
+
+r68 resumed that exact persisted state at map 0 `(313/314,603)`, level 14 with
+EXP 24,341/30,000, full HP, ten HP drugs, and a worn left bracelet. Equipment
+repair selected Merchant Alice on map 0141, but the transfer remained pinned by
+four adjacent low-level actors. Across 1,805,231 ms and 1,191 physical inputs it
+attempted both known transfer entrances, emitted 960 turns, and issued zero
+attacks: 0/0 goals, zero kills, zero shortcuts, and zero critical
+browser/network diagnostics. The defect was exact rather than general map
+disconnection: disabling the combat-resource budget also defaulted physical
+occupancy clearing off and discarded the explicitly supplied non-funding
+accounting goal.
+
+Source commit `acd95a4b4` (clean `d8264b5c1`) separates those policies. Repair
+travel still does not impose a funding gate, but it preserves the explicit
+resource-accounting goal and explicitly permits bounded clearing of certified,
+physically clickable trivial occupancy. A red/green regression locks this
+case, and the full Quest Agent gate passes 176/176.
+
+r69 then resumed the exact authoritative r68 save on the patched runtime and
+left the former stuck position through ordinary input. It completed 10/10
+bounded SpittingSpider goals and ten target-specific kill rows in 1,300,030 ms
+with 639 physical inputs, advancing EXP `24,341 -> 28,661` (+4,320), with zero
+death/revive, potion use, shortcut violation, target quarantine, or critical
+browser/network diagnostic. Some object ids legitimately recur only after a
+complete absence and positive-HP respawn lifecycle, so this is ten
+target-specific successes rather than a claim of ten globally unique ids. On
+bootstrap, recent nearby attackers caused the repair routine to defer safely;
+therefore r69 proves the formerly stuck saved state is resumable and progressing
+but does not relabel the exact repair-clear branch as live-covered. That branch
+remains red/green unit-covered. At the finalized r69 boundary the character is
+level 14 with EXP 28,661/30,000; q25 remains 6/20 and q30 remains 0/1.
+
+r70 resumed that exact save and supplied live coverage for the shared
+non-funding travel-policy separation without misrepresenting it as the
+equipment-repair branch. Pending field combat consumed all ten HP drugs; the
+depleted shelter journey then physically cleared one RakingCat and one
+Scarecrow under the preserved non-funding accounting goal, recorded one
+authoritative death/revive, entered map 0141, and recovered. The ordinary
+client path returned to map 0, killed and visibly harvested a Deer, acquired a
+second Venison, completed two visible sales, and bought HP drugs `0 -> 5 -> 10`
+across a threat-driven safe-room settlement. It then resumed the real
+SpittingSpider journey.
+
+The finalized r70 report records 1,800,710 ms, 975 physical inputs, three kill
+rows, one death/revive, ten potion uses, two visible purchases, zero shortcut
+violations, zero target quarantines, and zero critical browser/network
+diagnostics. Its budget expired during the long field walk at map 0
+`(284,393)`, not during recovery: final state is 130/135 HP, ten HP drugs, 172
+gold, and EXP `28,865/30,000`. The two sanitized start/final frames were
+visually inspected and agree with the structured state. This closes a complete
+live recovery/restock cycle and preserves a resumable position; it remains a
+0/1 grind-goal segment and does not certify level 15, q25, or q30. Those quest
+states remain 6/20 and 0/1 respectively.
+
+r71 resumed the stocked r70 field position, physically reached the nearest
+SpittingSpider band, and completed four of four grind goals. The fourth kill
+crossed the authoritative threshold from level 14 and EXP 29,945/30,000 to
+level 15 and EXP 377/40,000; the planner then immediately replaced the
+preparation goal with q25 CannibalPlant hunting and harvesting. It killed six
+CannibalPlants and two certified incidental threats. Four q25 harvest flows
+completed, while two were explicitly marked retryable failures after an Oma or
+SpittingSpider preempted the corpse and the corpse left the visible world.
+None of those six plants produced the required random quest drops, so q25
+honestly remains 6/20 rather than being advanced from kill count alone.
+
+The r71 report records 564,969 ms, 262 physical inputs, 8/10 successful goals,
+12 kill rows, two visible gold pickups, zero deaths/revives, zero potion use,
+zero shortcuts, zero quarantines, and zero critical browser/network
+diagnostics. It stopped at its explicit ten-goal bound, not at a runtime or
+route failure. The final state is map 0 `(124,214)`, level 15 with EXP
+2,009/40,000, 149/149 HP, ten HP drugs, and 421 gold. The level-up combat frame,
+q25 corpse frame, and final frame were visually inspected and agree with the
+structured report. This certifies the level-15 transition and live q25 route,
+not q25 or q30 completion.
+
+r72 ran the pre-fix in-memory runtime from the exact r71 state and supplied the
+bounded counterexample for dense q25 harvest timing. It killed twelve
+CannibalPlants and two incidental Omas, but only 3/11 goals completed: three
+corpses were preempted after an adjacent attacker became active and five more
+ended with an explicit incomplete harvest lifecycle. Two ordinary no-drop
+harvests and one quest-drop harvest completed. That last result advanced the
+authoritative CannibalStem objective `6 -> 7`; the normal inventory also held
+nine CannibalLeaves, five CannibalFruits, and one CannibalPoison, while the
+separate quest counter for CannibalLeaf remained 0/10.
+
+The r72 report records 1,805,174 ms, 885 physical inputs, 14 kill rows, 28
+harvest commands, three visible gold pickups, zero death/revive, zero potion
+use, zero shortcuts, zero quarantines, and zero critical browser/network
+diagnostics. It finished at map 0 `(164,238)`, level 15 with EXP 3,833/40,000,
+149/149 HP, ten HP drugs, and 751 gold. Two long alternate-field walks consumed
+most of the budget, but did not hide the exact ordering defect: the old policy
+created the quest corpse before reacting to an already attacking nearby actor.
+
+Source commit `e533efbb3` (clean `40ffedcb5`) adds a pre-combat guard for
+harvest goals. It handles at most two already attacking, quest-certified
+nearby threats through ordinary combat before creating the source corpse; an
+unsafe or excess threat triggers the existing physical disengagement instead.
+The new contract was first red, then passed with the full 177/177 Quest Agent
+gate in both source and clean worktrees. This is a bounded ordering fix, not a
+claim that post-kill attacks or harvest RNG disappear. The exact r72 resume was
+therefore replayed on the patched runtime as recorded below.
+
+r73 performed that exact-state replay on source `e533efbb3`. Seven of ten
+bounded q25 goals completed, compared with 3/11 in the pre-fix r72 segment.
+Spawn ordering was not controlled between runs, so this is marked live
+improvement rather than a deterministic throughput benchmark. The replay
+exercised all three new branches through ordinary client inputs: it cleared an
+already attacking Oma before source combat, safely disengaged when the bounded
+pre-harvest defence limit was reached, and twice switched to an already active
+CannibalPlant before creating a new corpse. Thirteen CannibalPlants and one Oma
+were killed; one successful quest drop advanced CannibalStem `7 -> 8`. The
+three failed goals remained explicit and retryable: one bounded preflight
+disengagement and two post-kill attacker/preemption cases outside this
+pre-combat fix.
+
+The finalized r73 report records 525,497 ms, 262 physical inputs, 14 kill rows,
+24 harvest commands, two visible gold pickups, zero death/revive, zero potion
+use, zero purchases, zero shortcuts, zero quarantines, and zero critical
+browser/network diagnostics. Its final state is map 0 `(176,169)`, level 15
+with EXP 5,681/40,000, 149/149 HP, ten HP drugs, and 1,045 gold; q25 is 8/20
+and q30 remains 0/1. The quest-progress, safe-failure, and final frames were
+visually inspected and agree with the structured report. This validates the
+patched branches in live play, but does not certify q25 or q30 completion.
+
+r74 resumed that exact state and supplied a separate zero-potion recovery
+checkpoint. Its first q25 attempt hit the bounded pre-harvest defence limit,
+physically disengaged from the active Oma, and then stopped the target attempt
+when ten HP drugs had been consumed instead of sacrificing another quest
+corpse. The outer recovery loop walked from the CannibalPlant field toward the
+real map-0141 GroceryStore transfer. It confirmed three ordinary
+travel-occupancy kills (HookingCat, RakingCat, and Scarecrow), explicitly
+quarantined one different RakingCat after five attacks produced no
+target-specific response, and continued collision-routed movement until the
+run budget expired in a dense actor cluster at `(326,535)`.
+
+The finalized r74 report records 904,508 ms, 513 physical inputs, 3 kill rows,
+ten potion uses, zero death/revive, zero purchases, one target quarantine, zero
+shortcuts, and zero critical browser/network diagnostics. Passive recovery
+left the character at 149/149 HP with no HP drugs, level 15 and EXP
+6,217/40,000; q25 remains 8/20 and q30 remains 0/1. Its combat and final
+screenshots were visually inspected and match the report. This is a resumable
+partial recovery trace, not a completed restock loop or quest certificate.
+
+r75 resumed the exact r74 state on the same pre-fix in-memory runtime and
+confirmed that the remaining recovery cost was not a one-run anomaly. It
+advanced from `(326,535)` to `(304,567)` toward outdoor Merchant Ruben, but
+seven different low-level occupants each consumed the old five-attack,
+15-second no-response window before quarantine. Three other occupants produced
+recorded combat completion. The normal-client merchant route was attempted but
+the dialog could not be opened before the 900-second budget expired, so the
+agent correctly held quest departure at zero HP drugs.
+
+The finalized r75 report records 912,805 ms, 463 physical inputs, 266 attack
+commands, 3 kill rows, seven target quarantines, zero death/revive, zero potion
+use, zero purchases, zero shortcuts, and zero critical browser/network
+diagnostics. Final state is map 0 `(304,567)`, 149/149 HP, level 15 with EXP
+7,485/40,000 and 1,045 gold; q25 remains 8/20 and q30 remains 0/1. The final
+frame shows the character inside the reported dense actor cluster. Together,
+r74 and r75 are consecutive counterexamples to the old incidental-combat
+no-response latency, not completed recovery or quest certificates.
+
+Source commit `e8065e599` (clean `32f5b2f9d`) separates the two audit budgets:
+ordinary quest combat still requires five real attacks over 15 seconds before
+an unresponsive target is quarantined, while incidental travel clearing can
+rotate after two real attacks over four seconds because it is only trying to
+open one occupied movement tile. No-response is still a failed clear and is
+never counted as a kill. The new unit contract was first red, then passed with
+the full 178/178 Quest Agent gate in both source and clean worktrees. The exact
+r75 patched replay is recorded below.
+
+r76 loaded source `e8065e599` and resumed the exact r75 state. The character
+died normally while trying to clear the initial dense cluster, two visible
+town-revive attempts awaited authoritative acknowledgement, and the recovery
+then completed through ordinary client actions: Merchant Ruben restocked HP
+drugs `0 -> 10` for 400 gold. The agent entered map 0141 and used the visible
+repair services to restore WornIronBracelet durability `0 -> 3739` through
+Merchant Betty and OldCopperRing `778 -> 4699` through Merchant Alice. It then
+left the shelter and crossed the former r74/r75 congestion band without any
+target quarantine. Because no target reached the new four-second quarantine
+branch, this is live closure for exact-state recovery and repair, not direct
+live timing proof of that branch.
+
+The finalized r76 report records 901,065 ms, 523 physical inputs, one
+death/revive, one visible purchase, two visible repairs, zero kills, zero
+target quarantines, zero potion use, zero shortcuts, and zero critical
+browser/network diagnostics. Prior CannibalPlant resource strain correctly
+changed the next preparation goal to level 16. The remaining budget expired
+during the ordinary SpittingSpider walk at map 0 `(316,524)`, with 133/149 HP,
+ten HP drugs, 233 gold, and EXP 7,569/40,000. q25 remains 8/20 and q30 remains
+0/1. The exact start and final frames were visually inspected and match the
+report; the grind goal and quests remain incomplete.
+
+r77 resumed the safe r76 field state and completed the full physical journey
+to the selected SpittingSpider band, reducing a 336-tile initial distance to a
+visible, clickable target without a death, potion use, or supply return. Two of
+four bounded grind goals completed with two target-specific confirmed kills.
+One different spider was conservatively quarantined after the unchanged
+quest-combat five-attack/15-second no-response window, and the final goal
+expired while rotating to another real field. Authoritative EXP advanced
+`7,569 -> 8,433`; the larger delta than the two recorded kill rows is retained
+as state evidence but is not relabeled as additional confirmed kills.
+
+The finalized r77 report records 903,536 ms, 456 physical inputs, two confirmed
+kill rows, one target quarantine, zero death/revive, zero potion use, zero
+purchases, zero shortcuts, and zero critical browser/network diagnostics. It
+ends at map 0 `(506,168)`, 149/149 HP, ten HP drugs, and 233 gold. q25 remains
+8/20 and q30 remains 0/1. The confirmed-combat and final frames were visually
+inspected and agree with the report. This proves live level-16 preparation
+progress, not level 16 or quest completion.
+
+r78 resumed inside the reached SpittingSpider region and measured the
+short-range grind throughput without paying the cross-map journey again. The
+first selected spider left AOI without target-specific death evidence and was
+correctly failed. Goals 2-10 then completed with nine distinct confirmed
+target object ids. A visible gold pickup advanced gold `233 -> 341`, while
+authoritative EXP advanced `8,433 -> 12,105`. As in r77, the EXP delta is
+reported independently and is not converted into extra unrecorded kill claims.
+
+The finalized r78 report records 509,352 ms, 257 physical inputs, 9/10
+successful goals, nine confirmed kill rows, one visible gold pickup, zero
+target quarantines, zero death/revive, zero potion use, zero shortcuts, and
+zero critical browser/network diagnostics. It ends at map 0 `(646,128)`,
+143/149 HP, ten HP drugs, and level 15. q25 remains 8/20 and q30 remains 0/1.
+The first-success and final combat frames were visually inspected. The final
+frame still showed the last target at 6/65 HP; target-specific death/EXP settled
+in the following subsecond before report finalization, so that frame is treated
+as combat-in-progress rather than a post-death visual certificate. This is
+efficient preparation progress, not level 16 or quest completion.
+
+r79 resumed the final r78 combat region with a larger 20-goal ceiling, but a
+multi-spider overlap immediately converted the run into a recovery test. The
+first grind goal completed against object `202218`; the character then consumed
+all ten HP drugs while physically disengaging, died, revived, and returned to
+Merchant Ruben. Available gold funded a visible partial restock `0 -> 5` for
+200 gold rather than inventing the full ten-drug departure stock. The agent
+entered map 0141 for safe settlement, returned through its visible exit, and
+started toward a different lower-risk SpittingSpider field. A visible repair
+interaction emitted an item-repaired chat but produced no recorded durability
+or gold delta, so it is not counted as a completed repair.
+
+The finalized r79 report records 903,077 ms, 536 physical inputs, 1/2
+successful goals, one confirmed kill row, one death/revive, ten potion uses,
+one visible purchase, zero target quarantines, zero shortcuts, and zero
+critical browser/network diagnostics. It ends at map 0 `(284,481)`, 143/149
+HP, five HP drugs, 141 gold, and EXP 12,567/40,000. q25 remains 8/20 and q30
+remains 0/1. The high-risk combat and final resumed-travel frames were visually
+inspected and match the report. This is a complete low-funds recovery cycle and
+one preparation kill, not sustained grind throughput or quest completion.
+
+r80 resumed that exact low-funds state and directly exercised the patched
+incidental-travel no-response budget under live congestion. The character used
+ordinary movement and attacks while trying to reach a visible Deer funding
+source, confirmed six incidental low-level kills, and quarantined eleven
+different occupied-tile targets. Every quarantine carries the exact reason
+`2 real attacks over 4000ms produced no target-specific combat packet`; none is
+counted as a kill. The recovery portal also rotated after 88,510 ms without a
+distance improvement, proving that the outer route can replan independently of
+the faster per-occupant rotation.
+
+The finalized r80 report records 900,324 ms, 508 physical inputs, six confirmed
+kill rows, eleven target quarantines, zero completed goals, zero death/revive,
+zero potion use, zero purchase, zero shortcuts, and zero critical
+browser/network diagnostics. Authoritative EXP advanced independently from
+12,567 to 14,125, while q25 remains 8/20 and q30 remains 0/1. It ends on map 0
+at `(305,576)` with 149/149 HP, five HP drugs, and 141 gold. The start and final
+frames were visually inspected; the final frame shows the reported dense actor
+cluster and a live game screen rather than a disconnect or modal stall. This is
+direct live timing evidence for fast blocker rotation, not a funding closure,
+level-16 milestone, or quest completion certificate.
+
+r81 resumed the exact dense r80 endpoint and completed the recovery work that
+r80 left open. Seven more incidental occupied-tile targets were quarantined;
+all seven carry the same two-attack/four-second no-response reason and none is
+counted as a kill. Four other low-level targets produced target-specific kill
+evidence. Ordinary collision-routed movement escaped the cluster, one visible
+gold pickup advanced gold `141 -> 251`, map 0141 provided safe passive
+settlement, and the character returned to map 0 for a visible Merchant Ruben
+purchase that restored HP drugs `5 -> 10` for 200 gold.
+
+The finalized r81 report records 903,365 ms, 481 physical inputs, four
+confirmed kill rows, seven target quarantines, one gold pickup, one purchase,
+zero completed goals, zero death/revive, zero potion use, zero shortcuts, and
+zero critical browser/network diagnostics. Authoritative EXP advanced
+independently from 14,125 to 15,213. It ends on map 0 at `(295,609)` with
+149/149 HP, ten HP drugs, and 51 gold; q25 remains 8/20 and q30 remains 0/1.
+The start and final frames were visually inspected and show the congested
+resume point followed by the live town/merchant area with the reported stock
+and gold. This closes the low-funds restock continuation but does not certify
+level 16, q25, or q30 completion.
+
+r82 resumed the fully stocked r81 town state and selected the learned
+SpittingSpider level-16 preparation objective. It used ordinary client movement
+to reduce the field distance from roughly 257 tiles to 121 despite two dense
+collision stalls. At the second stall, an adjacent Scarecrow without a usable
+rendered hit surface continued attacking; one different Scarecrow produced a
+confirmed kill and one no-response target was quarantined. The character then
+died normally, revived in town, and the planner marked that source route as a
+retryable lethal failure instead of recording the grind goal as successful.
+
+The finalized r82 report records 900,346 ms, 528 physical inputs, 0/1
+successful goals, one confirmed kill row, one death/revive, four potion-use
+events, one target quarantine, zero purchases, zero shortcuts, and zero
+critical browser/network diagnostics. It ends on map 0 at `(288,616)` with
+149/149 HP, seven HP drugs, 51 gold, and EXP 15,303/40,000; q25 remains 8/20
+and q30 remains 0/1. The start, failed-goal, and final frames were visually
+inspected and show the ordinary town departure followed by the authoritative
+post-revive town state. This is a bounded route-risk counterexample, not level
+16 or quest completion.
+
+r83 resumed the authoritative r82 post-revive state and first restored a
+sustainable departure stock through normal-client economy actions. A visible
+Deer was killed and harvested, Venison advanced `1 -> 2`, Butcher John bought
+the supply for a visible gold change `51 -> 289`, and Merchant Ruben restored
+HP drugs `7 -> 10` for 120 gold. The inherited lethal-route memory then chose a
+different SpittingSpider field instead of repeating r82's approach. The agent
+walked the alternate route from roughly 421 tiles away to 94 before the runtime
+budget expired, preserving the intermediate transform for the next resume.
+
+The finalized r83 report records 900,189 ms, 483 physical inputs, 0/1
+successful goals, one confirmed Deer kill with completed harvest, one supply
+pickup, one visible purchase, zero death/revive, zero potion use, zero target
+quarantines, zero shortcuts, and zero critical browser/network diagnostics. It
+ends on map 0 at `(295,275)` with 148/149 HP, ten HP drugs, 169 gold, and EXP
+15,339/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and show the town funding state followed by the live
+alternate route. This proves cross-run risk-memory rerouting and economic
+recovery, not arrival at the grind field or quest completion.
+
+r84 resumed the r83 intermediate transform and re-evaluated the current map to
+select a nearer, non-r82 SpittingSpider field. It completed the ordinary
+184-tile walk, then finished all eleven bounded grind goals with eleven
+target-specific SpittingSpider kill rows. The rows span eight server object ids;
+three ids recur only after later live reappearance, and every row carries a
+fresh positive authoritative EXP delta. They remain kill-row evidence rather
+than a claim of eleven permanently unique spawn ids. After the eleventh goal,
+the resource guard stopped combat and began a normal map-0141 withdrawal.
+
+The finalized r84 report records 902,060 ms, 457 physical inputs, 11/11
+successful goals, eleven confirmed kill rows, nine potion-use events, one
+incidental travel quarantine, zero death/revive, zero purchases, zero
+shortcuts, and zero critical browser/network diagnostics. Authoritative EXP
+advanced independently from 15,339 to 19,983. It ends mid-withdrawal on map 0
+at `(238,470)` with 142/149 HP, one HP drug, and 169 gold; q25 remains 8/20 and
+q30 remains 0/1. The start, first-goal, and final frames were visually
+inspected. The first-goal frame still shows 4/65 target HP before the later
+target-specific death/EXP settlement, so it is retained as combat-in-progress
+rather than relabeled as a post-death visual certificate. This proves the
+alternate field's sustained throughput and bounded withdrawal, not safe-room,
+level-16, or quest completion.
+
+r85 resumed the exact r84 mid-withdrawal transform with the persisted resource
+recall active. It crossed the remaining 138-tile town journey through the same
+dense occupancy band, confirming four ordinary low-level kills and rotating
+six different no-response blockers without counting those failures as kills.
+Merchant Ruben then performed a visible partial restock `1 -> 5` for the
+available 160 gold. Because an attacker was still present and the character
+could not afford the ten-drug departure stock, the planner entered map 0141
+instead of returning to combat.
+
+The finalized r85 report records 900,454 ms, 511 physical inputs, four
+confirmed kill rows, six target quarantines, one visible purchase, zero
+completed goals, zero death/revive, zero potion use, zero shortcuts, and zero
+critical browser/network diagnostics. Authoritative EXP advanced independently
+from 19,983 to 21,205. It ends inside map 0141 at `(2,11)` with 149/149 HP, five
+HP drugs, and 9 gold; q25 remains 8/20 and q30 remains 0/1. The safe-room pace
+reached 17,416 ms of the 20-second settlement window before the run budget
+expired, and two optional interior pace targets had no live collision path.
+The start and final frames were visually inspected and match the field-to-store
+transition. This closes the physical withdrawal and partial restock, not the
+safe-room settlement, full departure stock, level-16, or quest milestone.
+
+r86 resumed inside map 0141 and immediately confirmed that the cross-run safe
+state could exit normally rather than repeating r85's nearly complete
+settlement wait. The character sold the retained Venison for a visible gold
+change `9 -> 214`, and Merchant Ruben restored HP drugs `5 -> 10` for 200
+gold. It then completed the full 419-tile hostile-corridor leg toward a distant
+SpittingSpider field and advanced the second leg from 242 to 140 tiles before
+the runtime budget expired.
+
+The finalized r86 report records 900,859 ms, 474 physical inputs, 0/1
+successful goals, one incidental Scarecrow kill row, one no-response target
+quarantine, one visible purchase, zero death/revive, zero potion use, zero
+shortcuts, and zero critical browser/network diagnostics. The Scarecrow row
+has target-specific death evidence but no immediate EXP delta, so it is not
+used as an EXP claim; authoritative EXP independently advanced from 21,205 to
+21,295. It ends on map 0 at `(395,166)` with 148/149 HP, ten HP drugs, and 14
+gold; q25 remains 8/20 and q30 remains 0/1. The initial bootstrap and final
+field frames were inspected; the latter matches the saved transform and full
+stock. This closes the safe-room resume and restock continuation, not arrival
+at the final grind field, level 16, or quest completion.
+
+r87 resumed the second r86 travel leg and re-evaluated a nearer SpittingSpider
+field from the persisted transform. After two empty spawn bands, it found a new
+object-id range and completed four distinct target-specific kills. The fifth
+goal failed explicitly when movement and combat reduced the sustainable stock
+from ten HP drugs to five at roughly 83/149 HP. The resource guard cooled that
+source, consumed the remaining stock while disengaging, and continued the
+committed shelter escape with zero drugs rather than aborting or claiming the
+fifth goal.
+
+The finalized r87 report records 900,498 ms, 479 physical inputs, 4/5
+successful goals, four distinct SpittingSpider kill rows, ten potion-use
+events, zero target quarantines, zero death/revive, zero purchases, zero
+shortcuts, and zero critical browser/network diagnostics. Authoritative EXP
+advanced independently from 21,295 to 22,807. It ends on map 0 at `(259,370)`
+with 149/149 HP, zero HP drugs, and 14 gold, 96 tiles from the current hostile-
+corridor withdrawal waypoint; q25 remains 8/20 and q30 remains 0/1. The start,
+first-goal, and final frames were visually inspected. The first-goal frame
+shows 6/65 target HP before the later target-specific death/EXP settlement and
+is therefore combat-in-progress, while the final frame matches the zero-stock
+withdrawal. This proves the alternate source and depleted-escape continuation,
+not safe arrival, restock, level 16, or quest completion.
+
+r88 resumed the exact r87 zero-stock waypoint and completed the remaining
+238-tile return to the town supply area. Because 14 gold could not buy an HP
+drug and live attackers still occupied the merchant entrance, the character
+entered map 0141 twice rather than pretending to restock. Both safe-room cycles
+completed their 20-second settlement through visible two-tile pacing, directly
+closing r85's 17,416 ms partial window. On the second exit, short bounded
+disengagement steps moved the attacker cluster away from the transfer before
+the runtime budget expired.
+
+The finalized r88 report records 901,386 ms, 474 physical inputs, zero goals,
+one incidental Scarecrow kill row with positive immediate EXP, two
+no-response target quarantines, zero death/revive, zero potion use, zero
+purchases, zero shortcuts, and zero critical browser/network diagnostics. It
+ends on map 0 at `(291,612)` with 149/149 HP, zero HP drugs, 14 gold, and EXP
+22,897/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and show the zero-stock field resume followed by the
+live Ruben area under one-point incoming damage. This proves safe settlement
+and physical entrance disengagement, not funding, restock, level 16, or quest
+completion.
+
+r89 resumed beside the supply area and first attempted a visible Deer harvest;
+active Scarecrow pressure preempted it without any Venison inventory increase,
+so no new supply was claimed. After a completed map-0141 settlement, the agent
+sold one retained Venison for a visible gold change `14 -> 213` and Merchant
+Ruben performed the affordable partial restock `0 -> 5` for 200 gold. It then
+used ordinary Scarecrow combat as a fallback funding source, but none of the
+six target-specific kill rows produced a visible gold pickup before the run
+returned through another completed safe-room settlement.
+
+The finalized r89 report records 900,422 ms, 477 physical inputs, zero goals,
+six Scarecrow kill rows across four server ids, one visible purchase, zero
+gold/supply pickups, five target quarantines, zero death/revive, zero potion
+use, zero shortcuts, and zero critical browser/network diagnostics. Three
+quarantines use the incidental two-attack/four-second reason, while two funding
+combat targets retain the conservative five-attack/15-second reason; this live
+run exercises both policy branches without counting either failure as a kill.
+It ends on map 0 at `(300,622)` with 149/149 HP, five HP drugs, 13 gold, and EXP
+23,369/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and match the partial-stock recovery. This proves a
+truthful low-funds fallback and policy split, not full funding, level 16, or
+quest completion.
+
+r90 resumed the partial-stock state at the first safe transfer. Consecutive
+outside attackers initially forced normal settlement cycles and bounded
+eight-tile disengagement steps. The escape did not become a permanent orbit:
+the recovery portal rotated to the second map-0141 entrance, settled there,
+later returned to the first entrance, and continued moving through the town
+funding band. Four distinct Scarecrow targets produced confirmed kill rows and
+authoritative gold advanced `13 -> 39`, although no individual visible gold
+pickup event was recorded.
+
+The finalized r90 report records 904,248 ms, 447 physical inputs, zero goals,
+four distinct Scarecrow kill rows, three incidental no-response quarantines,
+zero death/revive, zero potion use, zero purchases, zero gold/supply pickups,
+zero shortcuts, and zero critical browser/network diagnostics. It ends on map
+0 at `(305,612)` with 149/149 HP, five HP drugs, 39 gold, and EXP
+23,609/40,000; q25 remains 8/20 and q30 remains 0/1. The start and final frames
+were visually inspected and show the first entrance followed by a live town
+position with multiple visible Deer and the reported stock/gold. This proves
+portal rotation prevents a deterministic shelter orbit and that funding can
+make state progress, not full restock, level 16, or quest completion.
+
+r91 resumed the r90 town position, quarantined one immediate no-response
+attacker, and completed a normal map-0141 settlement before retrying the
+visible Deer source. Six physical harvest inputs advanced Venison `1 -> 2`.
+Butcher John then bought one unit for a visible gold change `39 -> 289`,
+Merchant Ruben restored HP drugs `5 -> 10` for 200 gold, and one Venison was
+retained for a later recovery. Only after the full departure stock was visible
+did the agent restart the learned level-16 preparation walk.
+
+The finalized r91 report records 900,819 ms, 476 physical inputs, 0/1
+successful goals, one target-specific Deer kill with completed harvest, one
+supply pickup, one visible purchase, one incidental target quarantine, zero
+death/revive, zero potion use, zero shortcuts, and zero critical
+browser/network diagnostics. It ends on map 0 at `(306,389)` with 148/149 HP,
+ten HP drugs, one Venison, 89 gold, and EXP 23,645/40,000, roughly 40 tiles from
+the current SpittingSpider corridor target; q25 remains 8/20 and q30 remains
+0/1. The start and final frames were visually inspected and match the town
+funding state followed by the fully stocked travel state. This closes the r87-
+r90 low-funds recovery chain, not field arrival, level 16, or quest completion.
+
+r92 resumed the exact r91 departure state and independently selected a nearer
+SpittingSpider field around `(111,318)` instead of mechanically following the
+old corridor target. The normal client walked from `(306,389)` into that live
+field, rotated through visible targets, and cooled down one temporarily visible
+but unreachable target rather than orbiting it. Four visible gold pickups
+advanced gold `89 -> 199 -> 292 -> 380 -> 529`; the ten departure HP drugs were
+not consumed.
+
+The finalized r92 report records 889,363 ms, 422 physical inputs, 19/20
+successful goals, 19 target-specific SpittingSpider kill rows across nine live
+server object ids, four visible gold pickups, zero death/revive, zero potion
+use, zero shortcuts, and zero critical browser/network diagnostics. It advances
+authoritative EXP `23,645 -> 31,637/40,000` and ends on map 0 at `(63,334)`
+with 145/149 HP, ten HP drugs, one Venison, and 529 gold. Its goal budget ends
+during the twentieth target, so the expected nonzero process exit means the
+full route remains incomplete; q25 is still 8/20, q30 is still 0/1, and level
+16 has not yet been reached. The start, first combat, and final frames were
+visually inspected and match the reported transform, live SpittingSpider
+combat, drops, HP, EXP, and gold state. This is a high-throughput preparation
+segment, not a q25/q30 or level-16 completion certificate.
+
+r93 resumed the exact r92 field state and completed two more target-specific
+SpittingSpider goals before a denser respawn consumed eight of the ten HP drugs
+and triggered the ordinary resource guard. The agent abandoned the unsafe
+fight, walked the low-exposure corridor toward map 0141, and recovered from a
+temporary cluster north of the merchant entrance by clearing two responsive
+incidental occupants, cooling down six nonresponsive occupants with the exact
+fast travel-blocker policy, expiring stale collision corrections, and
+replanning. It did not teleport, grant supplies, or claim the nonresponsive
+targets as kills.
+
+The finalized r93 report records 900,515 ms, 521 physical inputs, 2/2
+successful goals, four kill rows (two SpittingSpiders plus one RakingCat and one
+Scarecrow), eight potion uses, six target quarantines, zero death/revive, zero
+purchase, zero shortcuts, and zero critical browser/network diagnostics. It
+advances authoritative EXP `31,637 -> 33,249/40,000` and ends on map 0 at
+`(281,609)` beside the merchant district with full 149/149 HP, two HP drugs,
+one Venison, and 529 gold. The runtime limit lands during the final physical
+approach to `(302,622)`, so safe-room entry and restock remain for the next
+resume; q25 is still 8/20, q30 is still 0/1, and level 16 remains open. The
+start, first combat, and final frames were visually inspected and match the
+reported live field, HP-drug consumption, endpoint, HP, EXP, and gold state.
+
+r94 completed the r93 merchant closure immediately: Ruben visibly restored HP
+drugs `2 -> 10` for 320 gold. A dense departure then produced one normal
+death/revive; the resumed recovery returned to Ruben and visibly restored the
+post-combat stock `7 -> 10` for another 120 gold. The live-risk memory cooled
+down that SpittingSpider source and selected a nearer Oma field instead of
+repeating the lethal route. In the replacement field, one Oma produced a fresh
+positive EXP delta while two different visible Oma ids exhausted the
+conservative five-real-attack/15-second quest-combat window and were not
+counted as kills.
+
+The finalized r94 report records 908,257 ms, 504 physical inputs, 1/5
+successful goals, one target-specific Oma kill, one death and one completed
+revive, four potion uses, two visible shop purchases, two conservative target
+quarantines, zero shortcuts, and zero critical browser/network diagnostics. It
+advances authoritative EXP `33,249 -> 33,309/40,000` and ends on map 0 at
+`(254,545)` in the Oma field with 86/149 HP, ten HP drugs, one Venison, and 89
+gold. The budget expires during the fifth goal's physical search; q25 remains
+8/20, q30 remains 0/1, and level 16 remains open. The initial resumed frame
+contains transient vertical slice tearing, while the later merchant and Oma
+frames render normally and match the reported state. Treat that visual artifact
+as an open observation rather than a successful frontend certificate.
+
+r95 resumed inside the exact r94 Oma field, immediately observed active damage,
+and treated the save as an unsafe supply state rather than retrying the two old
+object ids. All ten HP drugs were consumed during the normal 77-tile shelter
+escape. The agent entered map 0141, recovered to full HP, sold the one retained
+Venison for a visible gold change `89 -> 289`, and bought five HP drugs for 200
+gold. A visible Deer corpse accepted three physical harvest inputs but produced
+no new Venison, so the agent truthfully fell back to local Scarecrow funding.
+
+The finalized r95 report records 917,051 ms, 540 physical inputs, no quest/grind
+goals, three target-specific Scarecrow kill rows, ten potion uses, one visible
+purchase, seven target quarantines, zero death/revive, zero shortcuts, and zero
+critical browser/network diagnostics. The first three funding targets retain
+the conservative five-real-attack/15-second window; later entrance occupants
+use the separate two-real-attack/four-second travel-clearing window. The first
+0141 entrance stalled at distance one and rotated to the second entrance after
+45,544 ms without improvement, but continuing dynamic occupancy kept the agent
+at the old entrance until the runtime cap. It ends on map 0 at `(302,622)` with
+full 149/149 HP, five HP drugs, zero Venison, 89 gold, and authoritative EXP
+33,525/40,000. q25 remains 8/20, q30 remains 0/1, and level 16 remains open.
+The start and final frames were visually inspected and match the live Oma field
+and crowded entrance state. Exact-state r96 replay is required before treating
+the remaining entrance congestion as a repeatable recovery defect.
+
+The exact-state r96 replay supplies that counterexample. It ran for 900,235 ms
+and sent 403 ordinary keyboard/mouse inputs, but the authoritative player stayed
+on map 0 at `(302,622)` for the whole report. The recovery loop repeatedly
+waited at distance zero from the visible one-cell 0141 entrance, rotated to the
+alternate entrance after its bounded stall window, then returned to the same
+source without ever observing a map change. It records 0/0 completed goals,
+zero kills, zero deaths/revives, zero potion uses or purchases, ten conservative
+target quarantines, zero shortcuts, and zero critical browser/network
+diagnostics. Final HP remains 149/149, EXP remains 33,525/40,000, inventory
+remains five HP drugs and no Venison, gold remains 89, q25 remains 8/20, and
+q30 remains 0/1. Both private frames were visually inspected and confirm the
+same `(302,622)` endpoint; the fatal capture also contains transient light-column
+and roof ghosting, so it is evidence of the navigation stall rather than a
+frontend rendering certificate. This establishes a resumable transfer-source
+defect; it does not establish q25/q30 or level-16 progress.
+
+Source commit `2a3751901` and its main-based equivalent `dc03df754` close the
+distance-zero input hole without adding a direct movement or map command. The
+normal movement handlers first complete a Crystal source restored as the
+authoritative player transform, while the browser agent sends one ordinary
+cardinal key when there is no geometric direction toward the tile it already
+occupies. The server regression was red before the change and green after it;
+the complete source Simulation suite and the 178/178 Quest Agent gate pass.
+
+The exact-state r97 replay starts from the same map-0 `(302,622)` transform and
+does not repeat the 15-minute zero-distance loop. In 902,492 ms it sends 468
+physical inputs, completes two visible map-0-to-0141 entries, two normal return
+transfers, and both 20-second safe-room settlement cycles. Its action audit
+contains two `enter-visible-map-transfer-diagonal-approach` inputs and four
+`enter-visible-map-transfer` inputs. The policy first chose a nearby Deer
+funding action and stepped off the saved source, so the new
+`reactivate-visible-map-transfer` action itself remains red/green unit-covered
+rather than being relabeled as live-covered.
+
+r97 records nine kill rows (seven Scarecrows, one HookingCat, and one Deer),
+one visible Venison supply pickup, zero deaths/revives, zero potion uses,
+purchases, quarantines, shortcuts, or critical browser/network diagnostics.
+Authoritative EXP advances `33,525 -> 34,019/40,000`; the final inventory has
+five HP drugs and two Venison. The budget expires after visible harvest when
+the agent cannot open Butcher John, so gold remains 89 and the final position is
+map 0 `(286,638)` at full 149/149 HP. q25 remains 8/20, q30 remains 0/1, and
+level 16 remains open. Both private frames were visually inspected: they match
+the reported initial and final coordinates but retain vertical-slice/roof
+ghosting, so r97 is a transfer/recovery certificate, not a frontend rendering
+certificate or a sell/restock closure.
+
+r98 closes that deferred economy chain through visible NPC input. Butcher John
+sells one Venison for the observed gold change `89 -> 352`, while one Venison
+remains in the bag; Merchant Ruben then restores HP drugs `5 -> 10` for 200
+gold. Merchant Whitney emits `Item repaired.`, but the report has no confirmed
+durability or gold delta, so this is not counted as a completed repair. With
+full stock, the policy selects the inherited level-16 SpittingSpider
+preparation goal and starts the real collision-routed field journey.
+
+The finalized r98 report records 902,261 ms, 482 physical inputs, 0/1 completed
+goals, one visible purchase, zero kills, deaths/revives, potion uses,
+quarantines, shortcuts, or critical browser/network diagnostics. It moves from
+map-0 `(286,638)` to `(279,322)` before the runtime limit expires during the
+long field route. Final state is 146/149 HP, ten HP drugs, one Venison, 152
+gold, and unchanged EXP `34,019/40,000`; q25 remains 8/20, q30 remains 0/1,
+and level 16 remains open. The initial private frame again contains severe
+vertical-slice tearing; the final frame renders coherently and matches the
+reported coordinate, HP, gold, and ten-drug belt. Treat r98 as the visible
+sell/restock closure and an intermediate travel checkpoint, not grind or
+frontend-rendering acceptance.
+
+r99 resumes that intermediate route, reaches a live SpittingSpider band, and
+completes 6/6 grind goals against six distinct target ids. One additional
+Scarecrow is killed during the subsequent ordinary withdrawal. The seven kill
+rows advance authoritative EXP `34,019 -> 36,863/40,000`, while one visible
+gold pickup changes gold `152 -> 266`. Dense spider combat consumes all ten HP
+drugs without a death; the resource guard stops further combat and begins the
+normal map-0141 shelter journey.
+
+The finalized r99 report records 913,787 ms, 489 physical inputs, seven kill
+rows, ten potion uses, one gold pickup, seven fast travel-blocker quarantines,
+zero deaths/revives, purchases, shortcuts, or critical browser/network
+diagnostics. Every quarantine keeps the exact two-real-attack/four-second
+nonresponse reason and none is counted as a kill. The budget expires in the
+dense return corridor at map-0 `(311,563)`, leaving a resumable full 148/149 HP
+state with zero drugs, one Venison, 266 gold, and 3,137 EXP remaining to level
+16. q25 remains 8/20 and q30 remains 0/1. The initial private frame contains
+vertical-slice tearing; the grind frame cleanly shows a selected 0/65 spider
+corpse, and the final clean frame shows the dense blocker field plus the
+reported HP, gold, empty belt, coordinate, and 92.16% EXP bar. This is real
+grind throughput and a safe withdrawal checkpoint, not level-16 or recovery
+closure.
+
+r100 resumes the exact dense zero-drug withdrawal. It rotates from the first
+0141 entrance after ordinary movement stops at `(302,623)`, reaches the second
+visible entrance at `(311,631)`, enters the safe room, and returns at full HP.
+Merchant Ruben visibly restores HP drugs `0 -> 5` for the available 200 gold.
+A Deer harvest supplies no immediate inventory acknowledgement; Butcher John
+then visibly changes gold `66 -> 280`, and Ruben restores drugs `5 -> 10` for
+another 200 gold. One Venison remains in the final bag.
+
+The finalized r100 report records 902,161 ms, 480 physical inputs, 0/1
+completed goals, one HookingCat kill row, two visible purchases, one
+fast-timeout quarantine, zero deaths/revives, potion uses, shortcuts, or
+critical browser/network diagnostics. Authoritative EXP advances
+`36,863 -> 37,143/40,000`, but the larger delta is not relabeled as extra
+confirmed kills. After restocking, the agent restarts the real SpittingSpider
+journey and reaches map-0 `(299,579)` before the runtime limit. It ends at
+146/149 HP with ten drugs, one Venison, 80 gold, and 2,857 EXP remaining to
+level 16; q25 stays 8/20 and q30 stays 0/1. Both private frames render
+coherently and match the dense starting corridor plus final route coordinate,
+HP, ten-drug belt, gold, and 92.86% EXP bar. This closes the exact zero-stock
+recovery/restock replay and leaves another safe travel checkpoint; it does not
+complete the grind.
+
+r101 first attempts a farther SpittingSpider source, but a dense town-edge
+attack drops the player to 12/149 HP and consumes three HP drugs. The resource
+guard cools that source instead of committing to the 391-tile journey. One
+normal death/revive follows; the agent sells its retained Venison for the
+visible gold change `80 -> 280`, restores drugs `7 -> 10` at Ruben for 120
+gold, completes a safe-room cycle, and switches to a nearer Oma source under
+the existing adaptive-risk policy.
+
+The finalized r101 report records 902,625 ms, 511 physical inputs, 1/3
+successful grind goals, one Oma and one incidental Scarecrow kill row, one
+death and one completed revive, three potion uses, one visible purchase, zero
+quarantines, shortcuts, or critical browser/network diagnostics. Authoritative
+EXP advances `37,143 -> 37,323/40,000`. It ends during the third goal's
+physical Oma route at map-0 `(291,616)`, full 149/149 HP, ten HP drugs, no
+Venison, 160 gold, and 2,677 EXP remaining to level 16; q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. The goal frame
+documents the real critical 12/149 pursuit rather than a clean post-kill scene;
+the final frame matches the full-HP town state, ten-drug belt, gold, coordinate,
+and 93.31% EXP bar. This proves adaptive risk recovery and one nearer-field
+goal, not level-16 completion.
+
+r102 resumes that exact full-health town state and completes 2/2 adaptive Oma
+grind goals through ordinary field travel and combat. Two target-specific Oma
+rows and two incidental Scarecrow rows advance authoritative EXP
+`37,323 -> 37,713/40,000`. Between the two goals, the agent performs one normal
+map-0141 safe-room cycle; the report records two visible transfer milestones
+and then returns to the live field without a shortcut.
+
+The finalized r102 report records 900,794 ms, 490 physical inputs, four kill
+rows, zero deaths, potion uses, purchases, quarantines, shortcut violations,
+or critical browser/network diagnostics. Its budget expires during the
+ordinary return toward the equipment-repair vendor, leaving a resumable map-0
+state at `(289,611)`, full 149/149 HP, ten HP drugs, no Venison, 160 gold, and
+2,287 EXP remaining to level 16. q25 remains 8/20 and q30 remains 0/1. The
+three private frames render coherently and match the initial town state, first
+completed Oma goal, and final return coordinate. This is another bounded
+progression slice, not a level-16 or q25 completion certificate.
+
+r103 resumes the r102 coordinate, physically reaches Merchant Whitney, and
+then starts a high-yield SpittingSpider journey. The interaction produces no
+recorded durability or gold delta, so it is not counted as a completed repair.
+The agent walks the full first hostile-corridor leg from roughly 257 tiles away
+to the `(304,351)` waypoint, then reduces the second leg toward `(100,351)`
+from 206 to 135 tiles before the runtime cap.
+
+The finalized r103 report records 900,208 ms, 477 physical inputs, 0/1
+successful goals, zero kill rows, deaths, potion uses, purchases, quarantines,
+shortcut violations, or critical browser/network diagnostics. EXP changes
+`37,713 -> 37,767/40,000` without a matching r103 kill row and is therefore
+treated as delayed authoritative settlement rather than a new confirmed kill.
+It ends resumably at map-0 `(229,350)`, 146/149 HP, ten drugs, no Venison, 160
+gold, and 2,233 EXP remaining to level 16; q25 remains 8/20 and q30 remains
+0/1. Both private frames render coherently. This is physical long-preparation
+progress, not grind, level-16, or quest completion.
+
+r104 resumes that intermediate field route, selects a nearer SpittingSpider
+band, and completes 3/4 target-specific grind goals. The fourth goal exceeds
+the sustainable combat-resource budget after HP drops to 77/149 and the belt
+falls from ten to five drugs, so the source is cooled rather than forced. The
+already committed shelter escape continues after the remaining drugs are
+consumed. Five ordinary occupancy kills occur during that physical withdrawal;
+six different nonresponsive blockers retain the exact fast-timeout quarantine
+and none is counted as a kill.
+
+The finalized r104 report records 900,123 ms, 492 physical inputs, three
+target-specific SpittingSpider plus five incidental kill rows, ten potion uses,
+zero deaths, purchases, shortcut violations, or critical browser/network
+diagnostics. The final RakingCat row crosses the authoritative level boundary
+from `39,981/40,000` to level 16 at `35/50,000`; delayed settlement leaves the
+final state at level 16 and `89/50,000`. The character remains resumable on map
+0 at `(307,569)`, 144/162 HP, zero drugs, no Venison, and 160 gold while still
+withdrawing toward map 0141. q25 remains 8/20 and q30 remains 0/1. All three
+private frames render coherently. This certifies the level-16 transition, but
+not the still-open recovery loop or q25/q30 completion.
+
+r105 resumes the exact level-16 zero-stock withdrawal and closes the remaining
+physical distance to map 0141. Five visible transfer milestones span repeated
+safe-room pacing and exits while one still-attacking RakingCat is deliberately
+drawn away from the merchant entrance. The policy rejects restock while that
+attacker is live, then makes visible funding attempts only after the chase has
+cleared.
+
+One Deer is killed through ordinary input and receives three visible harvest
+passes, but the server grants no Venison; the policy records no supply pickup
+and falls back to a local Scarecrow gold hunt. The finalized r105 report
+records 902,417 ms, 480 physical inputs, one kill row, three explicit
+quarantines, zero deaths, potion uses, purchases, gold/supply pickups, shortcut
+violations, or critical browser/network diagnostics. Authoritative EXP changes
+`89 -> 313/50,000`, but the Deer row has no immediate EXP delta, so that change
+is not attributed as a new confirmed kill reward. It ends at map-0 `(289,640)`,
+full 162/162 HP, zero drugs, no Venison, and 160 gold; q25 remains 8/20 and q30
+remains 0/1. Both private frames render coherently. This proves resumable
+safe-room and threat-expiry handling, but the funding/restock loop remains
+open.
+
+r106 closes that exact open funding/restock loop. It resumes beside the live
+Deer population, completes a normal Deer kill with an immediate EXP change
+`313 -> 349/50,000`, and finishes the delayed corpse harvest. The visible
+inventory changes `Venison 1 -> 2`; Butcher John then changes gold
+`160 -> 415` while one Venison remains, and Merchant Ruben restores HP drugs
+`0 -> 10` for 400 gold. No repair is claimed because the subsequent Whitney
+interaction records no durability or gold delta.
+
+After restock, the risk model raises the CannibalPlant preparation level from
+16 to 17 rather than sending the character directly into the level-20 q25
+target. The agent starts another physical SpittingSpider journey and reduces
+the first hostile-corridor leg from about 258 tiles to roughly 30 tiles before
+the runtime cap. The finalized r106 report records 903,685 ms, 484 physical
+inputs, one kill row, one supply pickup, one purchase, zero deaths, potion
+uses, quarantines, shortcut violations, or critical browser/network
+diagnostics. It ends resumably at map-0 `(275,325)`, 156/162 HP, ten drugs, one
+Venison, and 15 gold; q25 remains 8/20 and q30 remains 0/1. Both private frames
+render coherently. This closes recovery and restock, but level-17 preparation
+and q25 remain open.
+
+r107 resumes the intermediate route, re-evaluates to a nearer SpittingSpider
+band, and completes the full 20/20 bounded goal budget. Its 20 target-specific
+kill rows cover 15 server object ids. Five ids later reappear after live
+respawn; every repeated occurrence carries a fresh positive immediate EXP
+delta. Two single-occurrence rows have delayed rather than immediate EXP
+settlement, so per-goal authoritative snapshots are the safer accounting
+boundary: all 20 goals advance EXP and the run moves from
+`349 -> 8,557/50,000` in total.
+
+The finalized r107 report records 851,578 ms, 418 physical inputs, 20 kill
+rows, one potion use, three visible gold pickups, zero deaths, purchases,
+quarantines, shortcut violations, or critical browser/network diagnostics.
+Final gold is 345; the three individually recorded pickups do not account for
+every delayed gold settlement, so only their visible deltas and the final
+authoritative balance are claimed. The character ends at map-0 `(56,264)`,
+116/162 HP, ten drugs, one Venison, and 41,443 EXP remaining to level 17; q25
+remains 8/20 and q30 remains 0/1. All three private frames render coherently.
+This is strong sustained level-17 preparation throughput, not level-17 or
+q25/q30 completion.
+
+r108 resumes inside that live Spider region, but a dense bootstrap pack drops
+HP to 42/162 and drugs from ten to five before the first goal can advance. The
+resource guard cools the source. One normal death/revive follows; Merchant
+Ruben visibly restores drugs `2 -> 10` for 320 gold, and four visible transfer
+milestones cover two ordinary safe-room cycles. Merchant Clara is contacted,
+but no durability or gold delta is recorded, so no repair is claimed.
+
+Inherited risk then switches the preparation source from SpittingSpider to
+ForestYeti. The agent completes 2/4 goals against two distinct Yeti ids and
+records two additional responsive Scarecrow occupancy kills while withdrawing;
+one other Scarecrow receives the exact fast-timeout quarantine. The finalized
+r108 report records 910,111 ms, 499 physical inputs, four kill rows, one
+death/revive, eight potion uses, one purchase, zero shortcuts or critical
+browser/network diagnostics, and EXP `8,557 -> 9,025/50,000`. The immediate
+row deltas do not account for every delayed settlement, so only the total
+authoritative boundary is claimed.
+
+It ends resumably at map-0 `(213,578)`, 155/162 HP, ten drugs, one Venison, 99
+gold, and 40,975 EXP remaining to level 17; q25 remains 8/20 and q30 remains
+0/1. The initial and first-goal private frames show visible rectangular terrain
+patching, while the final ForestYeti frame renders coherently. This remains a
+frontend observation rather than a visual certificate. Adaptive-source reach
+and recovery are proven, but sustained ForestYeti throughput and level 17
+remain open.
+
+r109 resumes the adaptive Yeti checkpoint and first closes the previously
+uncertified equipment branch. A visible Merchant Whitney interaction repairs
+`BaseDress(M)` from zero durability to 4,544 and changes gold `99 -> 71`.
+The later post-combat attempt cannot reopen the dialog and is explicitly
+deferred, so only the first repair is counted.
+
+The agent then completes three ForestYeti goals against three distinct ids and
+records one responsive Scarecrow occupancy kill. Authoritative EXP advances
+`9,025 -> 9,547/50,000`; the initial Scarecrow row settles late, so the total
+boundary rather than its zero immediate delta is used. When live risk memory
+expires, the fourth goal switches back to a different SpittingSpider field and
+reduces its physical route from 384 to about 335 tiles before the runtime cap.
+
+The finalized r109 report records 902,357 ms, 485 physical inputs, four kill
+rows, one repair, zero deaths, potion uses, purchases, quarantines, shortcut
+violations, or critical browser/network diagnostics. Final gold is 216, but no
+individual pickup event covers every delayed settlement, so only the final
+authoritative balance is claimed. It ends at map-0 `(257,522)`, 156/162 HP,
+ten drugs, one Venison, and 40,453 EXP remaining to level 17; q25 remains 8/20
+and q30 remains 0/1. All three private frames render coherently. Equipment
+repair and three Yeti goals are proven; sustained level-17 preparation remains
+open.
+
+r110 begins by physically returning toward Merchant Whitney for another worn
+item, but dense Scarecrow/HookingCat occupancy prevents the dialog from
+opening. No durability or gold delta occurs, so no second repair is claimed.
+Two responsive Scarecrows die during ordinary occupancy clearing; their
+immediate EXP deltas and delayed settlement move the authoritative boundary
+from `9,547 -> 9,697/50,000`.
+
+The agent then starts an alternate SpittingSpider field through a 421-tile
+hostile-corridor leg. After one temporary all-direction block is released by a
+departing Scarecrow, the route shows sustained net progress and reaches map-0
+`(228,262)`, about 75 tiles from its first waypoint, before the runtime cap.
+The finalized r110 report records 901,977 ms, 495 physical inputs, 0/1
+successful goals, two kill rows, zero deaths, potion uses, purchases,
+quarantines, shortcut violations, or critical browser/network diagnostics. It
+ends at 156/162 HP with ten drugs, one Venison, 216 gold, and 40,303 EXP
+remaining to level 17; q25 remains 8/20 and q30 remains 0/1. Both private
+frames render coherently. This is resumable long-route evidence, not a Spider
+goal or level-17 completion certificate.
+
+r111 resumes that route, finds the alternate southern SpittingSpider field,
+and completes six consecutive grind goals. Each goal's before/after snapshot
+has positive authoritative EXP movement; six target kill rows use distinct
+object ids. Two RakingCat rows are incidental occupancy clears during the later
+retreat, bringing the report total to eight kill rows. A visible gold pickup
+moves the balance `216 -> 341`.
+
+The seventh goal is deliberately rejected when combat drains HP to 52/162 and
+the potion reserve to one. The agent disengages rather than continuing an
+unsustainable fight, consumes the final potion during its physical retreat,
+and makes sustained progress around static terrain and dense live occupancy.
+The 900-second cap then expires while it is still walking toward the visible
+safe-room transfer; this is an incomplete resumable segment, not a crash or a
+recovery-completion certificate.
+
+The finalized r111 report records 903,308 ms, 448 physical inputs, 6/7
+successful goals, eight kill rows, eleven potion uses, one gold pickup, and
+zero deaths, revives, purchases, quarantines, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `9,697 ->
+12,613/50,000`; it ends at map-0 `(255,517)`, 157/162 HP, zero drugs, one
+Venison, 341 gold, and 37,387 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. The world-entry, first-goal, and final private frames all
+render coherently. Six Spider goals and the low-resource disengage are proven;
+safe-room arrival, restock, and level 17 remain open.
+
+r112 resumes the retreat and closes the deferred supply loop entirely through
+visible client input. Merchant Ruben first changes HP drugs `0 -> 5` and gold
+`341 -> 141`; one ordinary pickup changes gold `141 -> 168`, Butcher John sells
+the retained Venison for `168 -> 382`, and Ruben then restores drugs `5 -> 10`
+for `382 -> 182`. A later visible pickup leaves 214 gold. No inventory, gold,
+or potion state is injected directly.
+
+After the restock, the adaptive planner selects ForestYeti and completes one
+target-specific goal with EXP `13,041 -> 13,113`. One RakingCat is confirmed
+during the initial crowded merchant approach, and one later Scarecrow row is
+recorded as incidental; two separate nonresponsive occupants receive the exact
+fast travel quarantine and are not counted as kills. The later Whitney
+interaction has no durability or gold delta, so no repair is claimed.
+
+The finalized r112 report records 900,149 ms, 514 physical inputs, 1/1
+successful goals, three kill rows, two purchases, two gold pickups, two
+quarantines, and zero deaths, revives, potion uses, shortcut violations, or
+critical browser/network diagnostics. Authoritative EXP advances `12,613 ->
+13,305/50,000`; it ends at map-0 `(276,599)`, full 162/162 HP, ten drugs, no
+Venison, 214 gold, and 36,695 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. Supply recovery
+and one Yeti goal are proven; the runtime cap lands during a later physical
+repair route, so another repair and level 17 remain open.
+
+r113 resumes the repair route, but nearby RakingCat and Scarecrow occupancy
+prevents the Whitney dialog from opening. No durability or gold delta occurs,
+so the agent explicitly defers the optional repair and returns to progression.
+It then completes three consecutive ForestYeti goals against three distinct
+target ids. Each goal snapshot advances authoritative EXP, and one responsive
+Scarecrow is recorded separately as incidental occupancy combat.
+
+After the third goal, expired live-risk memory causes the planner to choose a
+different SpittingSpider field. Ordinary movement reduces that route from
+about 405 to 152 tiles, including a coherent static-terrain detour, before the
+runtime cap. The fourth goal is therefore incomplete and is not counted as a
+Spider kill or throughput success.
+
+The finalized r113 report records 900,581 ms, 475 physical inputs, 3/4
+successful goals, four kill rows, and zero deaths, revives, potion uses,
+purchases, pickups, quarantines, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `13,305 ->
+13,797/50,000`; it ends at map-0 `(365,231)`, 156/162 HP, ten drugs, no
+Venison, 214 gold, and 36,203 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. Three Yeti goals
+are proven; the long Spider migration and level 17 remain open.
+
+r114 resumes the long Spider migration, re-evaluates to a nearer 137-tile
+field, and reaches it entirely through ordinary movement. The first candidate
+point is empty at arrival, so the agent truthfully searches the remaining live
+spawn cluster rather than inventing a target. Once it finds the cluster, it
+completes 13 consecutive SpittingSpider goals against 13 distinct object ids.
+
+Every successful goal snapshot has positive authoritative EXP movement. One
+individual row has zero immediate delta, but its enclosing goal advances and
+the report uses the total authoritative boundary rather than fabricating an
+extra immediate reward. A single visible gold pickup changes the balance `214
+-> 286`. The fourteenth goal exhausts the runtime while moving among empty
+candidate points, so it is not counted as a kill or completion.
+
+The finalized r114 report records 900,850 ms, 449 physical inputs, 13/14
+successful goals, 13 target-specific kill rows, one gold pickup, and zero
+deaths, revives, potion uses, purchases, quarantines, shortcut violations, or
+critical browser/network diagnostics. Authoritative EXP advances `13,797 ->
+19,197/50,000`; it ends at map-0 `(607,106)`, 153/162 HP, ten drugs, no
+Venison, 286 gold, and 30,803 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. The migrated
+Spider source and sustained target throughput are proven; level 17 remains
+open.
+
+r115 resumes inside the same Spider region and completes 12/12 goals. Its 12
+target-specific rows cover ten object ids; the two later repeated ids each
+carry fresh positive immediate EXP after their live reappearance. The first
+row settles late with zero immediate delta, but its enclosing authoritative
+goal snapshot advances by 216. Every one of the 12 goal snapshots advances,
+so the report uses the total boundary without inventing another kill.
+
+One candidate spawn is statically unreachable and is skipped, while the
+remaining visible cluster sustains progression. A visible pickup changes gold
+`286 -> 384`. After the twelfth completed goal, high-density combat consumes
+the ten-drug stock and the resource guard begins a physical shelter retreat.
+It reduces the first hostile-corridor leg from about 326 to 196 tiles before
+the runtime cap, including a large but coherent static-terrain detour.
+
+The finalized r115 report records 900,479 ms, 451 physical inputs, 12/12
+successful goals, 12 target-specific kill rows, ten potion uses, one gold
+pickup, and zero deaths, revives, purchases, quarantines, shortcut violations,
+or critical browser/network diagnostics. Authoritative EXP advances `19,197
+-> 24,381/50,000`; it ends at map-0 `(318,269)`, 156/162 HP, zero drugs, no
+Venison, 384 gold, and 25,619 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. Sustained Spider
+throughput and a safe zero-stock disengage are proven; shelter arrival,
+restock, and level 17 remain open.
+
+r116 is a recovery-only continuation. It resumes the exact zero-stock field
+transform, traverses the remaining 339-tile merchant route through ordinary
+movement, and reaches Merchant Ruben without death or a state reset. Ruben
+visibly changes HP drugs `0 -> 5` and gold `384 -> 184`.
+
+The agent then tries to fund the second purchase honestly. One Deer is
+quarantined after the conservative funding-combat timeout; a separate visible
+Deer corpse receives three harvest inputs but produces no Venison inventory
+delta, so neither event is claimed as a confirmed Deer kill or supply pickup.
+Fallback funding confirms two Scarecrow kill rows with positive immediate EXP,
+but no visible gold pickup arrives before the cap.
+
+The finalized r116 report records 900,655 ms, 500 physical inputs, 0/0
+progression goals, two funding kill rows, one purchase, one quarantine, and
+zero deaths, revives, potion uses, pickups, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `24,381 ->
+24,537/50,000`; it ends at map-0 `(308,606)`, full 162/162 HP, five drugs, no
+Venison, 184 gold, and 25,463 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. Both private frames render coherently. Physical retreat and
+partial restock are proven; funding, full restock, and level 17 remain open.
+
+r117 resumes the five-drug funding state under persistent Scarecrow pressure.
+The agent refuses to force merchant or harvest interaction while an attacker
+is active, completes five ordinary 20-second safe-room settlement cycles, and
+uses visible movement to draw the chase away from the entrance. Two Deer
+attempts and one early Scarecrow receive explicit conservative or fast travel
+quarantines rather than false kill credit.
+
+The later funding path confirms one responsive Scarecrow and one distinct Deer
+kill. Six accepted harvest inputs on the Deer corpse change Venison `1 -> 2`,
+providing a visible supply pickup. The agent then walks back toward Butcher
+John, but his dialog does not open before the cap. No sale or second potion
+purchase is claimed.
+
+The finalized r117 report records 902,187 ms, 467 physical inputs, 0/0
+progression goals, two kill rows, one supply pickup, three quarantines, and
+zero deaths, revives, potion uses, purchases, gold pickups, shortcut
+violations, or critical browser/network diagnostics. Authoritative EXP
+advances `24,537 -> 24,693/50,000`; it ends at map-0 `(283,639)`, full 162/162
+HP, five drugs, two Venison, 184 gold, and 25,307 EXP remaining to level 17.
+q25 remains 8/20 and q30 remains 0/1. Both private frames render coherently.
+Funding supply is proven; its sale, full restock, and level 17 remain open.
+
+r118 resumes with the two harvested Venison, reaches Butcher John, and visibly
+changes gold `184 -> 442` while retaining one Venison. Merchant Ruben then
+changes HP drugs `5 -> 10` and gold `442 -> 242`. This closes the exact r115-r117
+zero-stock recovery chain without a direct item, gold, health, or movement
+mutation. The subsequent Whitney interaction has no durability or gold delta,
+so it is not counted as a repair.
+
+The fully stocked agent next begins a new low-exposure SpittingSpider route.
+Ordinary collision-routed movement reduces its first corridor leg from 258 to
+about 29 tiles, including one temporary all-direction block that direction
+probing releases. The runtime cap lands before a visible target appears, so the
+single open goal is not counted as a completion or kill.
+
+The finalized r118 report records 900,856 ms, 487 physical inputs, 0/1
+successful goals, one purchase, and zero kills, deaths, revives, potion uses,
+pickups, quarantines, shortcut violations, or critical browser/network
+diagnostics. EXP remains `24,693/50,000`; it ends at map-0 `(302,380)`,
+159/162 HP, ten drugs, one Venison, 242 gold, and 25,307 EXP remaining to level
+17. q25 remains 8/20 and q30 remains 0/1. The initial private frame contains
+visible vertical terrain-slice tearing while the final frame renders
+coherently, so this is recorded as a frontend observation rather than a visual
+certificate. Full restock and route continuation are proven; level 17 remains
+open.
+
+r119 re-evaluates the second route leg, reaches a live southern Spider cluster,
+and completes three consecutive goals against three distinct target ids. Each
+confirmed row has a fresh positive immediate EXP delta. The fourth attempt
+fails explicitly when dense attacks exceed the sustainable navigation budget;
+the later EXP movement has no matching fourth kill row and is retained only in
+the total authoritative boundary.
+
+The withdrawal consumes all ten drugs and reaches critical health before one
+normal death/revive. Ruben then visibly buys five drugs for `242 -> 42` gold.
+The recovery route uses a 218-tile risk-reducing western waypoint before
+returning toward the true `(302,622)` transfer, rather than teleporting or
+mutating the saved transform. One nonresponsive Scarecrow at the entrance is
+quarantined and not counted as a kill.
+
+The finalized r119 report records 903,447 ms, 497 physical inputs, 3/4
+successful goals, three target-specific kill rows, one death, one revive, ten
+potion uses, one purchase, one quarantine, and zero pickups, shortcut
+violations, or critical browser/network diagnostics. Authoritative EXP
+advances `24,693 -> 25,587/50,000`; it ends at map-0 `(281,607)`, full 162/162
+HP, five drugs, one Venison, 42 gold, and 24,413 EXP remaining to level 17.
+q25 remains 8/20 and q30 remains 0/1. All three private frames render
+coherently. Three Spider goals and normal death/revive recovery are proven;
+safe-room entry, funding, full restock, and level 17 remain open.
+
+r120 immediately closes the partial post-revive stock: Butcher John sells the
+last retained Venison for gold `42 -> 270`, and Ruben visibly changes HP drugs
+`5 -> 10` and gold `270 -> 70`. The agent then reaches the nearby ForestYeti
+field selected by live-risk memory and completes two goals against two distinct
+ids. Both authoritative goal snapshots advance; the report uses the total EXP
+boundary because some settlement occurs between snapshots.
+
+The agent enters and leaves map 0141 normally for an optional Merchant Clara
+interaction, then later attempts Whitney. Neither interaction produces a
+durability or gold delta, so no repair is claimed. The third Yeti goal begins
+only as the runtime cap arrives and is not counted as a kill or completion.
+
+The finalized r120 report records 901,212 ms, 479 physical inputs, 2/3
+successful goals, two target-specific kill rows, one purchase, and zero
+deaths, revives, potion uses, pickups, quarantines, shortcut violations, or
+critical browser/network diagnostics. Authoritative EXP advances `25,587 ->
+25,965/50,000`; it ends at map-0 `(247,597)`, full 162/162 HP, ten drugs, no
+Venison, 70 gold, and 24,035 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. The initial private frame shows vertical terrain-slice
+tearing, while both later field frames render coherently; this remains a
+frontend observation rather than a visual certificate. Full restock and two
+Yeti goals are proven; level 17 remains open.
+
+r121 is a deterministic dynamic-occupancy counterexample. After an optional
+Whitney interaction produces no repair delta, the fully stocked agent begins a
+Spider route and becomes trapped near map-0 `(268,622)`. The same Scarecrow id
+`206608` is quarantined five times. The last four records remain within the
+same one-tile neighborhood for about 6 minutes 22 seconds, while the supervised
+trace alternates between the same two positions and rotates several distant
+Spider sources without escaping the local blocker.
+
+The finalized r121 report records 907,290 ms, 510 physical inputs, 0/1
+successful goals, zero kills, deaths, revives, potion uses, purchases, pickups,
+shortcut violations, or critical browser/network diagnostics, and five
+quarantines for that same nonresponsive id. EXP remains `25,965/50,000`; it
+ends at map-0 `(268,620)`, full 162/162 HP, ten drugs, no Venison, 70 gold, and
+24,035 EXP remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Both
+private frames render coherently. This report proves neither progression nor a
+generic static-route failure: it isolates repeated handling of an already
+quarantined adjacent pursuer as the next recovery defect.
+
+Clean commit `f6b36a9c2` (source `dd58a349e`) retains a bounded cross-call
+position history, recognizes the observed A-B-A-B cycle across two-attempt
+navigation chunks, rejects a quarantined actor's current occupancy cell, and
+routes ordinary physical input toward a retreat endpoint. The first live
+replay, r122, is deliberately retained as a counterexample: it breaks the
+one-tile oscillation, but the direct-away endpoint `(279,620)` lies in a
+statically blocked pocket. Repeated goals therefore reselect the same
+unreachable retreat and stop at the no-progress bound.
+
+The finalized r122 report records 205,211 ms, 84 physical inputs, 0/9
+successful goals, one quarantine for Scarecrow `206608`, and zero kills,
+deaths, revives, potion uses, purchases, pickups, shortcut violations, or
+critical browser/network diagnostics. EXP remains `25,965/50,000`; it ends at
+map-0 `(269,620)`, full 162/162 HP, ten drugs, no Venison, 70 gold, and 24,035
+EXP remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Its final
+private frame renders coherently. This rejects a single direct-away endpoint
+as a complete fix.
+
+Clean commit `3180b5f78` (source `803d60fac`) replaces that single endpoint
+with an eight-direction retreat fan ranked away from the quarantined hostile.
+Each candidate is checked through the existing collision-atlas pathfinder, so
+the first reachable endpoint is selected without granting movement or
+modifying the authoritative transform. The full Quest Agent gate passes
+182/182 in both worktrees, and both clean/source commit pairs have matching
+stable patch ids.
+
+r123 is the live certificate for that second fix. On the exact r122 resume it
+quarantines the same Scarecrow once, rejects the cross-chunk return edge, and
+physically moves from the `(268,621)` trap through multiple collision-routed
+positions to `(297,616)`, reaching at least six tiles of separation before
+ordinary planning resumes. The same object is not quarantined again after the
+120-second cooldown. The agent then continues normal repair checking and
+field travel and completes one confirmed Oma goal against object `205612`.
+
+The finalized r123 report records 903,145 ms, 491 physical inputs, 1/2
+successful goals, one target-specific kill row, one quarantine, and zero
+deaths, revives, potion uses, purchases, pickups, shortcut violations, or
+critical browser/network diagnostics. The confirmed row begins at EXP 25,965;
+the total authoritative boundary reaches `26,085/50,000`, including delayed
+settlement that is not mislabeled as a second kill. It ends at map-0
+`(284,485)`, 160/162 HP, ten drugs, no Venison, 70 gold, and 23,915 EXP
+remaining to level 17. q25 remains 8/20 and q30 remains 0/1. Both private
+frames render coherently. This closes the quarantined-pursuer escape
+regression; it does not certify level 17, q25, or q30.
+
+r124 continues from the r123 certificate rather than replaying the old trap.
+It physically reaches Merchant Whitney through a congested route; the visible
+interaction produces no durability or gold delta, so no repair is claimed. It
+then starts the 257-tile SpittingSpider preparation route. Several dynamic
+blocks require ordinary direction probing and one responsive Scarecrow clear,
+but the route leaves the former quarantine area and reduces the remaining
+distance to about 171 tiles before the runtime cap.
+
+The finalized r124 report records 920,034 ms, 537 physical inputs, 0/1
+successful goals, one incidental Scarecrow kill row, and zero deaths, revives,
+potion uses, purchases, pickups, quarantines, shortcut violations, or critical
+browser/network diagnostics. That kill row has no immediate EXP delta, so the
+total authoritative movement `26,085 -> 26,175/50,000` is not relabeled as a
+target-specific grind kill. It ends at map-0 `(303,522)`, 159/162 HP, ten
+drugs, no Venison, 70 gold, and 23,825 EXP remaining to level 17. q25 remains
+8/20 and q30 remains 0/1. The initial private frame contains vertical terrain
+slice artifacts while the final frame renders coherently. Its last seconds
+encounter an all-direction dynamic block; the exact r125 resume must determine
+whether that is an ordinary resumable congestion event or another bounded
+recovery defect.
+
+r125 is the exact-state discriminator for that final r124 block. It recognizes
+the adjacent RakingCat and HookingCat pressure, gives the optional Whitney
+repair a bounded attempt, then defers it when no dialog or repair delta occurs.
+Normal keyboard probing immediately leaves `(303,522)`, so the r124 endpoint is
+not a permanent navigation trap. A newly selected Spider route advances from
+336 to 280 tiles before live attacks consume all ten drugs and correctly force
+a zero-stock shelter withdrawal.
+
+The agent then physically covers the 165-tile return, including two bounded
+no-response quarantines and several responsive occupancy clears, enters map
+0141 through the visible source, settles to 156/162 HP, and returns normally.
+Renewed attackers at the entrance prevent a safe Deer funding action and
+restock before the runtime cap. The agent neither invents the Venison nor
+claims a purchase; it retreats, clears four Scarecrows with fresh positive EXP
+evidence, and remains resumable near the transfer.
+
+The finalized r125 report records 920,038 ms, 515 physical inputs, 0/1
+successful goals, four incidental kill rows, ten potion uses, two quarantines,
+and zero deaths, revives, purchases, pickups, shortcut violations, or critical
+browser/network diagnostics. Authoritative EXP advances `26,175 ->
+26,589/50,000`; it ends at map-0 `(305,607)`, full 162/162 HP, zero drugs, no
+Venison, 70 gold, and 23,411 EXP remaining to level 17. q25 remains 8/20 and
+q30 remains 0/1. All three private frames render coherently. This proves the
+r124 congestion is resumable and another safe-room cycle is reachable; visible
+funding, sale, restock, and the level-17 grind remain open.
+
+r126 is the exact counterexample to treating repeated safe-room success as
+supply recovery. From the full-HP, zero-stock r125 save it completes four
+separate map-0141 settlement cycles. The report contains seven visible map
+transfers, but no Deer harvest, sale, purchase, pickup, kill, or quest goal.
+Each return exposes another recent attacker, re-arms the shelter latch, and
+sends the character back through the same visible entrance before funding can
+begin.
+
+The finalized r126 report records 902,824 ms, 456 physical inputs, 0/0 goals,
+zero kills, deaths, revives, potion uses, purchases, or pickups, one explicit
+no-response quarantine, and zero shortcut violations or critical
+browser/network diagnostics. Authoritative EXP moves `26,589 ->
+26,649/50,000` without an r126 kill row and is retained only as delayed
+settlement. It ends at map-0 `(300,618)`, 160/162 HP, zero drugs, no Venison,
+70 gold, and 23,351 EXP remaining to level 17. q25 remains 8/20 and q30 remains
+0/1. Both private frames render coherently. Four successful shelter cycles
+with no economic output prove a recovery-state orbit.
+
+Clean commit `18b027ec6` (source `c25e30b86`) arms one 120-second post-exit
+disengagement window only after a real interior settlement leaves the player
+at at least 90% HP and below the five-drug field reserve. During that window,
+a recent attacker is handled through a stable, collision-planned
+eight-direction physical retreat while visible transfer cells remain
+protected. Falling below the health threshold restores the original shelter
+escape. The two commits have matching stable patch id `bdd63fc99dc1`, Node
+syntax checks pass, and the full Quest Agent gate passes 184/184 in both
+worktrees.
+
+r127 replays the exact r126 save on the patched runner. One congested recovery
+attempt rotates from the `(302,622)` entrance to the visible `(311,631)`
+entrance, completes one map-0141 settlement, and returns normally. The report
+then records the new post-exit milestone once and only two total map transfers
+for the entire run. It physically pulls the attacker away, does not enter the
+shelter again, and resumes visible Deer funding attempts. This closes the
+seven-transfer shelter orbit.
+
+The finalized r127 report records 900,186 ms, 496 physical inputs, 0/0 goals,
+zero kills, deaths, revives, potion uses, purchases, or pickups, six explicit
+quarantines, and zero shortcut violations or critical browser/network
+diagnostics. EXP remains `26,649/50,000`; it ends at map-0 `(286,616)`, full
+162/162 HP, zero drugs, no Venison, 70 gold, and 23,351 EXP remaining to level
+17. q25 remains 8/20 and q30 remains 0/1. Both private frames render
+coherently. Four quarantine rows belong to three Deer objects that emit no
+target-specific combat response; one object is retried only after cooldown.
+The shelter-loop fix is live-proven, while Deer funding, sale, restock, and
+level 17 remain open.
+
+Clean commit `24cd9c817` (source `54a4b01ae`) keeps target cooldown separate
+from travel-threat disengagement: a no-response passive funding target is not
+treated as a pursuing blocker unless it was an incidental travel threat or
+recently attacked the player. Funding selection now also ranks rendered
+positive HP ahead of unknown-HP actors before applying range and isolation
+ties. The commits share stable patch id `a7d296c61dbba31c007615790690d7bf2e85a6f7`;
+Node syntax and whitespace checks pass, and the full Quest Agent gate passes
+186/186 independently in both worktrees.
+
+r128 resumes the exact r127 state on that source revision. It skips the stale
+unknown-HP choices, reaches a responsive Deer through ordinary collision-aware
+movement, records one positive-EXP kill, and performs six visible harvest
+inputs until Venison advances from one to two. Two visible Butcher sales move
+gold `70 -> 320` and later `120 -> 345`; two normal Merchant purchases move HP
+drugs `0 -> 5 -> 10` while gold settles at 145. The controller then leaves the
+supply loop and starts its level-17 SpittingSpider preparation route. It
+physically reduces that long route from about 421 to 281 tiles before the
+15-minute cap. Because this segment creates no new quarantine row, it is the
+live certificate for positive-HP target selection and the complete
+harvest/sale/restock economy, while passive-quarantine separation remains
+locked by the unit regression rather than relabeled as a live event.
+
+The finalized r128 report records 903,592 ms, 494 physical inputs, 0/1
+successful goals, one target-specific Deer kill row, one sellable-supply
+pickup, two shop purchases, and zero quarantines, deaths, revives, potion uses,
+shortcut violations, or critical browser/network diagnostics. Authoritative
+EXP advances `26,649 -> 26,685/50,000`; it ends at map-0 `(287,469)`, 156/162
+HP, ten drugs, no Venison, 145 gold, and 23,315 EXP remaining to level 17. q25
+remains 8/20 and q30 remains 0/1. Both private frames render coherently. The
+zero-stock funding blocker is closed; level 17 and the q25/q30 task counters
+remain open.
+
+r129 resumes the exact r128 save on the same source runtime code freeze. It
+keeps the optional Whitney repair detour bounded and defers it when the long
+level-17 preparation route is more useful, then reaches the SpittingSpider
+field through ordinary collision-aware movement. Seven of eight requested
+goals complete against seven target-specific `SpittingSpider` rows, each with
+216 positive EXP. The report records 900,392 ms, 435 physical inputs, zero
+target quarantines, deaths, revives, potion uses, purchases, supply pickups,
+shortcut violations, or critical browser/network diagnostics.
+
+Authoritative EXP advances `26,685 -> 29,493/50,000`, a total settlement delta
+of 2,808. Only the seven target-specific rows (`7 x 216 = 1,512`) are claimed as
+r129 kills; the remainder is retained as delayed authoritative settlement and
+is not relabeled as extra combat. The run ends at map-0 `(588,89)`, full
+162/162 HP, 67/67 MP, ten drugs, 145 gold, and 20,507 EXP remaining to level
+17. q25 remains 8/20 (eight stems and zero leaves) and q30 remains 0/1. The
+private world-entry, field-combat, and terminal frames render coherently. This
+proves arrival and sustained target-specific progress in the selected field,
+not level 17 or q25/q30 completion.
+
 Reports contain local account and character identifiers so that a stopped run
 can resume. Keep the evidence directory private and review only sanitized
 summary fields; do not attach raw `report.json` files to a PR.
@@ -248,6 +1685,56 @@ the safe room for 20 seconds. r52 proves both settlement cycles plus the
 sell-and-restock closure; r53 proves a later death/revive can reuse that path
 and return to successful combat. These fixes do not advance quest counters or
 grant movement, health, items, gold, or experience directly.
+
+r54 exposed a distinct static-routing boundary: the route endpoints and wall
+detour belonged to the same full-map collision component, but the largest old
+search window omitted the required northern passage. Clean commit `d68674ce8`
+(source `0256c33a9`) keeps the inexpensive 72/240-tile searches, then permits a
+full-map fallback only when the collision atlas is at most one million cells;
+larger maps receive a bounded 384-to-700-tile fallback. The synthetic wall
+regression fails at the old bound and passes at the fallback, and r55/r57 prove
+the previously disconnected saved state can keep moving and reach the supply
+area.
+
+The same commit also closes the r56 mixed-occupancy retry loop. Emergency
+shelter escape now supplies an explicit non-funding travel accounting goal to
+the existing adjacent-occupancy clearing path. It does not relax ordinary
+supply hunting or add direct movement/combat commands: the existing visible
+target requirement, level gate, attempt bound, quarantine, and mouse/keyboard
+inputs remain authoritative. r57 proves that exact crowded resume can escape,
+harvest, sell, restock, and depart without a shortcut violation.
+
+r60-r61 exposed a later dynamic-occupancy boundary rather than a static-atlas
+disconnect: the route remained connected, but the clearer could repeatedly
+choose an adjacent actor with no usable physical hit surface. Clean commit
+`e50a8fce0` probes the actual rendered sprite/nameplate surfaces before bounded
+clearing and gives the already selected clickable object priority. It also
+tracks best distance to a visible recovery portal and permits rotation only
+after a bounded 45-second stall. r62-r63 prove that the patched build resumes,
+restocks, returns to a real spawn field, and completes combat without a
+regression. r65 later supplies the naturally occurring live hits: several
+physically clickable occupancy clears and an explicit two-portal rotation.
+
+r64-r66 then closed two state-transition errors in that same ordinary travel
+stack. A shelter journey can cross from reserved to depleted after it starts;
+the recovery layer now yields and re-evaluates the authoritative state instead
+of treating the budget signal as fatal. An optional hostile-corridor waypoint
+also uses the same retryable-unreachable classification as the outer transfer,
+so failure of a risk-reducing elbow no longer proves the visible portal itself
+unreachable. r65 proves continuation past the old depletion fatal, while the
+r66 live trace proves ordinary portal entry, safe-room settlement, visible
+harvest/sale, and full restock. r67 confirms that state persisted across a new
+client bootstrap.
+
+r121-r123 expose and close a later cross-chunk recovery boundary. The old
+cycle detector could not accumulate enough samples inside the runner's
+two-attempt navigation chunks, while repeatedly quarantining the same adjacent
+pursuer did not make its occupied cell ineligible. A cross-call cycle history
+and quarantine-aware retreat solve that state leak. r122 further proves that a
+geometric direct-away point can itself be unreachable, so the final fix ranks
+and collision-plans an eight-direction retreat fan. r123 proves the exact
+saved state leaves the old trap, avoids repeat quarantine, and returns to a
+confirmed normal-client kill. Extended progression remains open.
 
 ## Sign-off wording
 

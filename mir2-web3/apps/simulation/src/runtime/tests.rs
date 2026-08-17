@@ -3986,6 +3986,40 @@ fn walk_onto_crystal_manifest_movement_transfers_map() {
 }
 
 #[test]
+fn movement_input_reactivates_crystal_transfer_when_player_is_already_on_source() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let transfer = session
+        .world_snapshot()
+        .map_transfers
+        .into_iter()
+        .find(|transfer| {
+            transfer.map_file_name == "0"
+                && transfer.to_map_file_name == "0102"
+                && transfer.to_position == (Point { x: 3, y: 7 })
+        })
+        .expect("Bichon MeatStore movement should be imported");
+    set_player_position(
+        &mut session,
+        Point {
+            x: transfer.bounds.min_x,
+            y: transfer.bounds.min_y,
+        },
+    );
+
+    let packets = session.move_player_by_direction(MirDirection::Left, false);
+    let snapshot = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info }
+            if info.file_name == "0102" && info.title == "MeatStore"
+    )));
+    assert_eq!(snapshot.map_file_name.as_deref(), Some("0102"));
+    assert_eq!(player_position(&session), Point { x: 3, y: 7 });
+}
+
+#[test]
 fn walk_onto_blocked_crystal_manifest_movement_source_transfers_map() {
     // Asserts the destination map 0104/Library's geometry; needs the Crystal
     // client `.map` binaries (not vendored). Skip when the client is absent.

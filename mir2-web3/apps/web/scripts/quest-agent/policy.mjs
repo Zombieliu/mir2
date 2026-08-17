@@ -130,6 +130,97 @@ export function safeRecoveryPaceTargets(anchor, distance = 2) {
 }
 
 /**
+ * Preserve a short authoritative-position history across bounded navigation
+ * calls and identify the A,B,A,B pattern produced by a moving occupancy loop.
+ * Resource-sensitive travel deliberately uses two-attempt chunks, so a visit
+ * counter local to one call can never observe the third return to either cell.
+ */
+export function assessNavigationPositionCycle({
+  history = [],
+  position,
+  now = Date.now(),
+  windowMs = 30_000,
+  maxEntries = 8,
+} = {}) {
+  const observedAt = finiteNumber(now, Date.now());
+  const window = Math.max(1, finiteNumber(windowMs, 30_000));
+  const limit = Math.max(4, Math.floor(finiteNumber(maxEntries, 8)));
+  const recent = (Array.isArray(history) ? history : [])
+    .map((entry) => ({
+      x: Number(entry?.x),
+      y: Number(entry?.y),
+      at: Number(entry?.at),
+    }))
+    .filter((entry) => (
+      Number.isFinite(entry.x) &&
+      Number.isFinite(entry.y) &&
+      Number.isFinite(entry.at) &&
+      entry.at >= observedAt - window &&
+      entry.at <= observedAt
+    ));
+  const x = Number(position?.x);
+  const y = Number(position?.y);
+  if (Number.isFinite(x) && Number.isFinite(y)) {
+    recent.push({ x, y, at: observedAt });
+  }
+  if (recent.length > limit) recent.splice(0, recent.length - limit);
+
+  const tail = recent.slice(-4);
+  const same = (left, right) => left?.x === right?.x && left?.y === right?.y;
+  const cycling = tail.length === 4 &&
+    same(tail[0], tail[2]) &&
+    same(tail[1], tail[3]) &&
+    !same(tail[0], tail[1]);
+  return {
+    history: recent,
+    cycling,
+    cycleCells: cycling
+      ? [
+          { x: tail[0].x, y: tail[0].y },
+          { x: tail[1].x, y: tail[1].y },
+        ]
+      : [],
+  };
+}
+
+/**
+ * Track net progress toward one visible recovery transfer. Dynamic actors can
+ * make every immediate movement probe fail while the static route remains
+ * connected; callers may rotate to another ordinary portal only after this
+ * bounded window expires without improving the best observed distance.
+ */
+export function assessRecoveryTransferProgress({
+  transferKey,
+  distance,
+  now = Date.now(),
+  previous = null,
+  stalledAfterMs = 45_000,
+} = {}) {
+  const key = String(transferKey ?? "");
+  const currentDistance = Math.max(0, finiteNumber(distance, Number.POSITIVE_INFINITY));
+  const currentAt = Math.max(0, finiteNumber(now, Date.now()));
+  const previousKey = String(previous?.transferKey ?? "");
+  const previousBestDistance = Number(previous?.bestDistance);
+  const previousProgressAt = Number(previous?.lastProgressAt);
+  const reset =
+    key !== previousKey ||
+    !Number.isFinite(previousBestDistance) ||
+    !Number.isFinite(previousProgressAt);
+  const progressed = !reset && currentDistance < previousBestDistance;
+  const bestDistance = reset
+    ? currentDistance
+    : Math.min(previousBestDistance, currentDistance);
+  const lastProgressAt = reset || progressed ? currentAt : previousProgressAt;
+  const stallWindow = Math.max(1, finiteNumber(stalledAfterMs, 45_000));
+  return {
+    transferKey: key,
+    bestDistance,
+    lastProgressAt,
+    stalled: Number.isFinite(currentDistance) && currentAt - lastProgressAt >= stallWindow,
+  };
+}
+
+/**
  * Resolve the same F1-F8 skill-bar choice as the visible client, but admit
  * only an immediately targetable offensive spell. Ground skills need a
  * second physical tile click and self/toggle/passive skills are not attacks,
@@ -357,6 +448,7 @@ export function nearestBlockingHostile(
   cooldownUntil = new Map(),
   now = Date.now(),
   candidateFilter = null,
+  preferredObjectId = null,
 ) {
   const player = state?.player;
   if (!player) return null;
@@ -374,6 +466,11 @@ export function nearestBlockingHostile(
       (typeof candidateFilter !== "function" || candidateFilter(entity))
     ))
     .sort((left, right) => {
+      const leftPreferred = preferredObjectId != null &&
+        String(left?.objectId ?? "") === String(preferredObjectId);
+      const rightPreferred = preferredObjectId != null &&
+        String(right?.objectId ?? "") === String(preferredObjectId);
+      if (leftPreferred !== rightPreferred) return leftPreferred ? -1 : 1;
       const rightAttack = finiteNumber(right?.attackUntil, 0);
       const leftAttack = finiteNumber(left?.attackUntil, 0);
       if (rightAttack !== leftAttack) return rightAttack - leftAttack;
@@ -418,6 +515,19 @@ export function incidentalTravelThreatIsTrivial(
   const advantage = Math.max(0, finiteNumber(minimumLevelAdvantage, 3));
   return Number.isFinite(monster) && Number.isFinite(player) &&
     monster <= player - advantage;
+}
+
+/**
+ * A travel-clear click is only trying to open one occupied tile. If two real
+ * attacks over four seconds produce no packet for that exact object, waiting
+ * the full quest-combat window only burns recovery time while the player stays
+ * surrounded. Keep ordinary quest combat conservative because its target may
+ * legitimately have a slower first response.
+ */
+export function combatNoResponseBudget(incidentalTravelThreat = false) {
+  return incidentalTravelThreat
+    ? { minimumElapsedMs: 4_000, minimumAttackCount: 2 }
+    : { minimumElapsedMs: 15_000, minimumAttackCount: 5 };
 }
 
 /**
@@ -467,21 +577,121 @@ export function nearestActiveHostile(
     ))[0] ?? null;
 }
 
-/** Pick a short visible-input retreat vector directly away from an attacker. */
-export function retreatPointFromHostile(state, hostile, span = 8) {
+/**
+ * Return the nearest live hostile whose exact object id is still under the
+ * target-specific no-response quarantine. This is separate from an ordinary
+ * combat cooldown: navigation should physically create separation from an
+ * unresponsive pursuer instead of selecting it for another attack cycle.
+ */
+export function nearestQuarantinedHostile(
+  state,
+  quarantinedUntil,
+  {
+    maxDistance = 6,
+    now = Date.now(),
+  } = {},
+) {
   const player = state?.player;
-  if (!player || !hostile) return null;
+  if (!player || !(quarantinedUntil instanceof Map)) return null;
+  const observedAt = finiteNumber(now, Date.now());
+  const radius = Math.max(0, finiteNumber(maxDistance, 6));
+  const distance = (entity) => Math.max(
+    Math.abs(finiteNumber(entity?.x, 0) - finiteNumber(player.x, 0)),
+    Math.abs(finiteNumber(entity?.y, 0) - finiteNumber(player.y, 0)),
+  );
+  return (Array.isArray(state?.entities) ? state.entities : [])
+    .filter((entity) => (
+      entity?.kind === "monster" &&
+      entity?.disposition === "hostile" &&
+      entityIsLiveActor(entity) &&
+      Number(quarantinedUntil.get(String(entity?.objectId ?? "")) ?? 0) > observedAt &&
+      distance(entity) <= radius
+    ))
+    .sort((left, right) => (
+      distance(left) - distance(right) ||
+      Number(quarantinedUntil.get(String(right?.objectId ?? "")) ?? 0) -
+        Number(quarantinedUntil.get(String(left?.objectId ?? "")) ?? 0) ||
+      String(left?.objectId ?? "").localeCompare(String(right?.objectId ?? ""))
+    ))[0] ?? null;
+}
+
+/** Only a real travel blocker or a recently attacking target drives escape. */
+export function quarantineRequiresTravelDisengage({
+  incidentalTravelThreat = false,
+  targetAttackRecent = false,
+} = {}) {
+  return incidentalTravelThreat === true || targetAttackRecent === true;
+}
+
+/** Prefer authoritative positive HP over a rendered actor with unknown life. */
+export function renderedTargetHealthCertainty(entity) {
+  const hp = entity?.hp;
+  return hp != null && hp !== "" && Number.isFinite(Number(hp)) && Number(hp) > 0
+    ? 0
+    : 1;
+}
+
+/**
+ * A fully recovered zero-stock player may leave the shelter into the same
+ * rendered chase window it just waited out. During one bounded post-exit
+ * window, prefer physical separation on the home map over immediately
+ * entering the same shelter again. Falling below the ready-health threshold
+ * restores the conservative shelter path.
+ */
+export function shouldPreferPostRecoveryFieldDisengage({
+  currentMapFileName,
+  homeMapFileName,
+  healthRatio,
+  potionQuantity,
+  fieldReserve,
+  now = Date.now(),
+  disengageUntil,
+} = {}) {
+  return String(currentMapFileName ?? "") === String(homeMapFileName ?? "") &&
+    finiteNumber(now, 0) < finiteNumber(disengageUntil, 0) &&
+    finiteNumber(potionQuantity, 0) < Math.max(0, finiteNumber(fieldReserve, 0)) &&
+    finiteNumber(healthRatio, 0) >= 0.90;
+}
+
+/**
+ * Rank a bounded eight-direction retreat fan away from an attacker. The first
+ * candidate preserves the historical direct-away vector; callers with live
+ * collision data can rotate through the remaining candidates when that exact
+ * endpoint lies inside a wall or sealed building pocket.
+ */
+export function retreatPointsFromHostile(state, hostile, span = 8) {
+  const player = state?.player;
+  if (!player || !hostile) return [];
   const retreatSpan = Math.max(1, Math.floor(finiteNumber(span, 8)));
   const dx = finiteNumber(player.x, 0) - finiteNumber(hostile.x, 0);
   const dy = finiteNumber(player.y, 0) - finiteNumber(hostile.y, 0);
   // Exact overlap has no geometric preference. Pick a deterministic cardinal
   // direction and let collision-aware navigation choose a legal detour.
-  const xSign = dx === 0 && dy === 0 ? -1 : Math.sign(dx);
-  const ySign = dx === 0 && dy === 0 ? 0 : Math.sign(dy);
-  return {
-    x: finiteNumber(player.x, 0) + xSign * retreatSpan,
-    y: finiteNumber(player.y, 0) + ySign * retreatSpan,
-  };
+  const awayX = dx === 0 && dy === 0 ? -1 : Math.sign(dx);
+  const awayY = dx === 0 && dy === 0 ? 0 : Math.sign(dy);
+  const directions = [
+    [-1, -1], [0, -1], [1, -1],
+    [-1, 0], [1, 0],
+    [-1, 1], [0, 1], [1, 1],
+  ].map(([x, y], index) => ({ x, y, index }));
+  directions.sort((left, right) => (
+    (right.x * awayX + right.y * awayY) -
+      (left.x * awayX + left.y * awayY) ||
+    (Math.abs(left.x) + Math.abs(left.y)) -
+      (Math.abs(right.x) + Math.abs(right.y)) ||
+    left.index - right.index
+  ));
+  return directions
+    .map((direction) => ({
+      x: finiteNumber(player.x, 0) + direction.x * retreatSpan,
+      y: finiteNumber(player.y, 0) + direction.y * retreatSpan,
+    }))
+    .filter((point) => point.x >= 0 && point.y >= 0);
+}
+
+/** Pick the preferred short visible-input retreat vector from the ranked fan. */
+export function retreatPointFromHostile(state, hostile, span = 8) {
+  return retreatPointsFromHostile(state, hostile, span)[0] ?? null;
 }
 
 /**
@@ -1528,6 +1738,39 @@ export function collisionPathNeedsPerpendicularFrontier(player, target, bounds, 
   return dy >= 0
     ? finiteNumber(endpoint.y, 0) < finiteNumber(bounds.maxY, 0) - 1
     : finiteNumber(endpoint.y, 0) > finiteNumber(bounds.minY, 0) + 1;
+}
+
+/**
+ * Expand a long-route collision search only after its cheap local corridors
+ * fail. Small Crystal maps can afford one true full-map fallback; larger maps
+ * retain a bounded adaptive fallback so a short route never allocates an
+ * unbounded world-sized BFS merely because a distant wall exists.
+ */
+export function collisionAtlasSearchMargins(
+  distance,
+  {
+    mapWidth = null,
+    mapHeight = null,
+    fullMapCellLimit = 1_000_000,
+    maximumFallbackMargin = 700,
+  } = {},
+) {
+  const routeDistance = Math.max(0, finiteNumber(distance, 0));
+  const baseMargin = Math.min(160, Math.max(72, Math.ceil(routeDistance * 0.25)));
+  const expandedMargin = Math.min(350, Math.max(240, baseMargin * 2));
+  const width = Math.max(0, Math.floor(finiteNumber(mapWidth, 0)));
+  const height = Math.max(0, Math.floor(finiteNumber(mapHeight, 0)));
+  const fullMapEligible = width > 0 && height > 0 &&
+    width * height <= Math.max(1, finiteNumber(fullMapCellLimit, 1_000_000));
+  const fallbackMargin = fullMapEligible
+    ? Math.max(width, height)
+    : Math.min(
+        Math.max(1, finiteNumber(maximumFallbackMargin, 700)),
+        Math.max(384, Math.ceil(routeDistance * 2)),
+      );
+  return [...new Set([baseMargin, expandedMargin, fallbackMargin])]
+    .filter((margin) => Number.isFinite(margin) && margin > 0)
+    .sort((left, right) => left - right);
 }
 
 /**

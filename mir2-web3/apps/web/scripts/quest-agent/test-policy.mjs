@@ -15,12 +15,14 @@ import {
   BICHON_Q1_Q9_ROUTE,
   QUEST_AGENT_CONTRACT,
   assessGrindingSourceStall,
+  assessNavigationPositionCycle,
   assessQuestCombatResourceStrain,
   auditOutgoingBrowserCommand,
   chooseImmediateMeleeTarget,
   collisionPathHasImmediateDynamicBlock,
   collisionPathNeedsPerpendicularFrontier,
   collisionPathNeedsStickyDetour,
+  combatNoResponseBudget,
   continuousCollisionRunAvoidsTransfers,
   combatMemoryRequiresSupplyRecall,
   dangerousHostileAvoidanceCells,
@@ -37,6 +39,7 @@ import {
   nearestGroundDropByName,
   nearestHealthPotionGroundDrop,
   nearestBlockingHostile,
+  nearestQuarantinedHostile,
   nearestRespawnApproachPoint,
   objectiveProgress,
   offensiveCombatSkillHotkey,
@@ -47,12 +50,15 @@ import {
   protectedTransfersForNavigation,
   rankCombatTargetsByIsolation,
   rankRespawnFieldsForTravel,
+  quarantineRequiresTravelDisengage,
   reconcileConfirmedDeadMonsterObjects,
+  renderedTargetHealthCertainty,
   respawnCorridorAvoidanceWaypoint,
   respawnCorridorExposure,
   respawnTerminalExposure,
   respawnTravelAttemptBudget,
   retreatPointFromHostile,
+  retreatPointsFromHostile,
   restorativeSelfSkillHotkey,
   safeRecoveryPaceTargets,
   selectBestAvailableEquipmentUpgrade,
@@ -60,6 +66,7 @@ import {
   shouldCaptureGoalFrame,
   shouldEnforceShelterEscapeResourceBudget,
   shouldFundHealthPotions,
+  shouldPreferPostRecoveryFieldDisengage,
   surplusQuestMaterialsForSale,
   supersededProgressionGearForSale,
   unresolvedCombatResourceStrains,
@@ -213,6 +220,55 @@ test("safe recovery pacing stays in a bounded cardinal loop around its anchor", 
     { x: 2, y: 10 },
   ]);
   assert.deepEqual(safeRecoveryPaceTargets(null, 2), []);
+});
+
+test("safe recovery rotates a portal only after bounded net-progress stall", async () => {
+  const policy = await import("./policy.mjs");
+  let progress = policy.assessRecoveryTransferProgress?.({
+    transferKey: "near",
+    distance: 38,
+    now: 1_000,
+  });
+  assert.deepEqual(progress, {
+    transferKey: "near",
+    bestDistance: 38,
+    lastProgressAt: 1_000,
+    stalled: false,
+  });
+
+  progress = policy.assessRecoveryTransferProgress?.({
+    transferKey: "near",
+    distance: 29,
+    now: 2_000,
+    previous: progress,
+    stalledAfterMs: 45_000,
+  });
+  assert.equal(progress.stalled, false);
+  assert.equal(progress.bestDistance, 29);
+
+  progress = policy.assessRecoveryTransferProgress?.({
+    transferKey: "near",
+    distance: 38,
+    now: 47_000,
+    previous: progress,
+    stalledAfterMs: 45_000,
+  });
+  assert.equal(progress.stalled, true);
+  assert.equal(progress.bestDistance, 29);
+
+  const alternate = policy.assessRecoveryTransferProgress?.({
+    transferKey: "alternate",
+    distance: 47,
+    now: 47_000,
+    previous: progress,
+    stalledAfterMs: 45_000,
+  });
+  assert.deepEqual(alternate, {
+    transferKey: "alternate",
+    bestDistance: 47,
+    lastProgressAt: 47_000,
+    stalled: false,
+  });
 });
 
 test("visible HP-drug selection ignores unrelated and distant drops", () => {
@@ -381,6 +437,40 @@ test("global collision path goes around a wall instead of oscillating at it", ()
   assert.ok(!path.some((point) => point.x === 10 && point.y <= 25));
 });
 
+test("global collision search expands beyond a bounded false-unreachable corridor", async () => {
+  const policy = await import("./policy.mjs");
+  const margins = policy.collisionAtlasSearchMargins?.(192, {
+    mapWidth: 700,
+    mapHeight: 700,
+  });
+  assert.deepEqual(margins, [72, 240, 700]);
+  assert.deepEqual(
+    policy.collisionAtlasSearchMargins?.(192, {
+      mapWidth: 3_000,
+      mapHeight: 3_000,
+    }),
+    [72, 240, 384],
+  );
+
+  const blocked = [];
+  for (let y = 300; y < 700; y += 1) blocked.push({ x: 400, y });
+  const start = { x: 503, y: 635 };
+  const target = { x: 311, y: 631 };
+  const route = (margin) => findCollisionGridPath({
+    start,
+    target,
+    bounds: {
+      minX: Math.max(0, Math.min(start.x, target.x) - margin),
+      maxX: Math.min(699, Math.max(start.x, target.x) + margin),
+      minY: Math.max(0, Math.min(start.y, target.y) - margin),
+      maxY: Math.min(699, Math.max(start.y, target.y) + margin),
+    },
+    blocked,
+  });
+  assert.equal(route(margins[1]), null);
+  assert.ok(route(margins.at(-1)));
+});
+
 test("global collision path stops at pickup range and does not cut blocked corners", () => {
   const path = findCollisionGridPath({
     start: { x: 1, y: 1 },
@@ -456,6 +546,28 @@ test("travel policy identifies only an adjacent non-target hostile", () => {
     )?.objectId,
     "threat",
   );
+
+  state.entities.push({
+    objectId: "selected-clickable",
+    kind: "monster",
+    disposition: "hostile",
+    name: "ForestYeti",
+    x: 11,
+    y: 10,
+    attackUntil: 150,
+  });
+  assert.equal(
+    nearestBlockingHostile(
+      state,
+      "CannibalPlant",
+      new Map(),
+      100,
+      (entity) => ["threat", "selected-clickable"].includes(entity.objectId),
+      "selected-clickable",
+    )?.objectId,
+    "selected-clickable",
+    "an already selected physical hit target should clear before a newer invisible attacker",
+  );
 });
 
 test("travel combat interruption requires a recent rendered monster attack", () => {
@@ -491,6 +603,237 @@ test("incidental travel combat is limited to monsters with a real level disadvan
   assert.equal(incidentalTravelThreatIsTrivial(13, 13), false);
   assert.equal(incidentalTravelThreatIsTrivial(15, 13), false);
   assert.equal(incidentalTravelThreatIsTrivial(undefined, 13), false);
+});
+
+test("incidental travel no-response budget is shorter than quest combat", async () => {
+  assert.deepEqual(combatNoResponseBudget(true), {
+    minimumElapsedMs: 4_000,
+    minimumAttackCount: 2,
+  });
+  assert.deepEqual(combatNoResponseBudget(false), {
+    minimumElapsedMs: 15_000,
+    minimumAttackCount: 5,
+  });
+
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  assert.match(
+    runner,
+    /const noResponseBudget = combatNoResponseBudget\(goal\.incidentalTravelThreat\)/,
+  );
+  assert.match(
+    runner,
+    /Date\.now\(\) - since > noResponseBudget\.minimumElapsedMs[\s\S]{0,120}outgoingAttackCount >= noResponseBudget\.minimumAttackCount/,
+  );
+});
+
+test("R121 cross-chunk two-tile oscillation remains detectable", () => {
+  let history = [];
+  let assessment = null;
+  const samples = [
+    { x: 268, y: 621, at: 1_000 },
+    { x: 268, y: 622, at: 2_000 },
+    { x: 268, y: 621, at: 3_000 },
+    { x: 268, y: 622, at: 4_000 },
+  ];
+  for (const sample of samples) {
+    assessment = assessNavigationPositionCycle({
+      history,
+      position: sample,
+      now: sample.at,
+    });
+    history = assessment.history;
+  }
+
+  assert.equal(assessment.cycling, true);
+  assert.deepEqual(assessment.cycleCells, [
+    { x: 268, y: 621 },
+    { x: 268, y: 622 },
+  ]);
+
+  const expired = assessNavigationPositionCycle({
+    history,
+    position: { x: 270, y: 622 },
+    now: 40_001,
+  });
+  assert.equal(expired.cycling, false);
+  assert.deepEqual(expired.history, [{ x: 270, y: 622, at: 40_001 }]);
+});
+
+test("R121 quarantined adjacent pursuer is selected for physical disengage", () => {
+  const state = {
+    player: { x: 268, y: 621 },
+    entities: [
+      {
+        objectId: "206608",
+        kind: "monster",
+        disposition: "hostile",
+        name: "Scarecrow",
+        dead: false,
+        hp: 20,
+        x: 269,
+        y: 622,
+      },
+      {
+        objectId: "quest-target",
+        kind: "monster",
+        disposition: "hostile",
+        name: "Spider",
+        dead: false,
+        hp: 20,
+        x: 274,
+        y: 621,
+      },
+    ],
+  };
+  const quarantinedUntil = new Map([["206608", 121_000]]);
+
+  assert.equal(nearestQuarantinedHostile(
+    state,
+    quarantinedUntil,
+    { now: 1_000, maxDistance: 6 },
+  )?.objectId, "206608");
+  assert.equal(nearestQuarantinedHostile(
+    state,
+    quarantinedUntil,
+    { now: 121_000, maxDistance: 6 },
+  ), null);
+  assert.deepEqual(retreatPointFromHostile(state, state.entities[0], 10), {
+    x: 258,
+    y: 611,
+  });
+});
+
+test("R122 quarantined retreat fans out when the direct-away tile is blocked", () => {
+  const state = {
+    player: { x: 269, y: 620 },
+  };
+  const threat = { x: 268, y: 620 };
+  const candidates = retreatPointsFromHostile(state, threat, 10);
+
+  assert.deepEqual(candidates[0], { x: 279, y: 620 });
+  assert.equal(
+    candidates.some((point) => point.x === 279 && point.y === 610),
+    true,
+    "an upper-right escape must remain available when the direct-right endpoint is sealed",
+  );
+  assert.equal(
+    candidates.some((point) => point.x === 269 && point.y === 610),
+    true,
+    "a perpendicular escape must remain available around a wall",
+  );
+  assert.equal(new Set(candidates.map((point) => `${point.x},${point.y}`)).size, 8);
+});
+
+test("R126 full-health zero-stock exit kites instead of repeating shelter", () => {
+  const baseline = {
+    currentMapFileName: "0",
+    homeMapFileName: "0",
+    healthRatio: 1,
+    potionQuantity: 0,
+    fieldReserve: 5,
+    now: 10_000,
+    disengageUntil: 130_000,
+  };
+
+  assert.equal(shouldPreferPostRecoveryFieldDisengage(baseline), true);
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    healthRatio: 0.89,
+  }), false, "an injured zero-stock player must retain the shelter escape");
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    potionQuantity: 5,
+  }), false, "normal field reserve must not enter the zero-stock exit mode");
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    currentMapFileName: "0141",
+  }), false, "the interior settlement itself must never be treated as field kiting");
+  assert.equal(shouldPreferPostRecoveryFieldDisengage({
+    ...baseline,
+    now: 130_000,
+  }), false, "the bounded post-exit window must expire");
+});
+
+test("R126 runner collision-plans one bounded post-settlement field disengage", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  assert.match(runner, /SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS = 120_000/);
+  const recoveryBody = runner.slice(
+    runner.indexOf("async function recoverHealthInSafeInteriorIfNeeded"),
+    runner.indexOf("function localPotionSupplyIncomplete"),
+  );
+  assert.match(
+    recoveryBody,
+    /safeRecoveryPostExitDisengageUntil = Math\.max\([\s\S]{0,300}SAFE_RECOVERY_POST_EXIT_DISENGAGE_MS/,
+  );
+  assert.match(recoveryBody, /shouldPreferPostRecoveryFieldDisengage\(/);
+  assert.match(recoveryBody, /postRecoveryFieldDisengage \? null :/);
+  const retreatBody = runner.slice(
+    runner.indexOf("async function retreatFromUnsafeActiveThreatIfNeeded"),
+    runner.indexOf("async function recoverQuestDepartureHealthIfNeeded"),
+  );
+  assert.match(retreatBody, /shouldPreferPostRecoveryFieldDisengage\(/);
+  assert.match(retreatBody, /postRecoveryFieldDisengage \? null :/);
+  assert.match(
+    runner,
+    /async function collisionPlannedPostRecoveryRetreat[\s\S]{0,1200}retreatPointsFromHostile\(state, hostile, 10\)[\s\S]{0,1200}collisionAtlasPathToward\(/,
+  );
+  assert.match(retreatBody, /post-recovery supply/);
+  assert.doesNotMatch(
+    retreatBody,
+    /type:\s*["']tick["']|stage5Command|WorldCommand|MoveTo/,
+  );
+});
+
+test("R127 passive funding quarantine does not become a travel pursuer", () => {
+  assert.equal(quarantineRequiresTravelDisengage({
+    incidentalTravelThreat: false,
+    targetAttackRecent: false,
+  }), false);
+  assert.equal(quarantineRequiresTravelDisengage({
+    incidentalTravelThreat: true,
+    targetAttackRecent: false,
+  }), true);
+  assert.equal(quarantineRequiresTravelDisengage({
+    incidentalTravelThreat: false,
+    targetAttackRecent: true,
+  }), true);
+  assert.equal(renderedTargetHealthCertainty({ hp: 25 }), 0);
+  assert.equal(renderedTargetHealthCertainty({ hp: null }), 1);
+  assert.equal(renderedTargetHealthCertainty({}), 1);
+});
+
+test("R127 runner separates target cooldown from travel escape and prefers known life", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  assert.match(runner, /const quarantinedTravelThreatUntil = new Map\(\)/);
+  assert.match(
+    runner,
+    /resumeEvidence\?\.targetQuarantines[\s\S]{0,1200}quarantinedMonsterUntil\.set[\s\S]{0,700}quarantine\.travelDisengage === true[\s\S]{0,300}quarantinedTravelThreatUntil\.set/,
+  );
+  const combatBody = runner.slice(
+    runner.indexOf("async function killMonster("),
+    runner.indexOf("async function harvestCorpse("),
+  );
+  assert.match(
+    combatBody,
+    /const travelDisengage = quarantineRequiresTravelDisengage\([\s\S]{0,500}travelDisengage,[\s\S]{0,1500}quarantinedTravelThreatUntil\.set/,
+  );
+  const navigationBody = runner.slice(
+    runner.indexOf("async function navigateNear("),
+    runner.indexOf("async function collisionPathToward("),
+  );
+  assert.match(
+    navigationBody,
+    /nearestQuarantinedHostile\([\s\S]{0,120}quarantinedTravelThreatUntil/,
+  );
+  const rankBody = runner.slice(
+    runner.indexOf("function rankMonsterApproachTargets"),
+    runner.indexOf("function matchingLiveMonsters"),
+  );
+  assert.match(rankBody, /renderedTargetHealthCertainty\(left\)/);
+  assert.match(
+    rankBody,
+    /const definiteLiveCandidates =[\s\S]{0,300}renderedTargetHealthCertainty\(entry\) === 0[\s\S]{0,300}definiteLiveCandidates\.length > 0/,
+  );
 });
 
 test("a currently attacking requested monster overrides stale approach cooldown", async () => {
@@ -1076,6 +1419,22 @@ test("ordinary map transfers use progressive hostile detours and a cumulative tr
   assert.match(
     runner,
     /goal\.kind === "travel"[\s\S]{0,900}travel resource risk:[\s\S]{0,300}returning to visible supply/,
+  );
+});
+
+test("an optional map hazard waypoint cannot reject an otherwise valid transfer", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const travelBody = runner.slice(
+    runner.indexOf("async function travelToMap("),
+    runner.indexOf("async function ensureVisibleScriptTravelFunding"),
+  );
+  assert.match(
+    travelBody,
+    /navigateNear\(corridorWaypoint, 2,[\s\S]{0,900}catch \(error\) \{[\s\S]{0,700}!isRetryableVisibleTransferNavigationError\(error\)[\s\S]{0,350}reject unreachable hostile-corridor waypoint/,
+  );
+  assert.match(
+    travelBody,
+    /if \(!reachedSafeWaypoint\)[\s\S]{0,300}retaining direct physical route[\s\S]{0,500}if \(!reachedDuringDetour\)[\s\S]{0,220}navigateNear\(target, 0/,
   );
 });
 
@@ -1938,7 +2297,7 @@ test("collision escape exhausts the bounded direction set around dynamic occupan
   assert.doesNotMatch(probesBody, /!entry\.dead/);
   assert.match(
     runner,
-    /signatureVisits >= 3[\s\S]{0,900}collisionAtlasPathToward/,
+    /signatureVisits >= 3 \|\| crossChunkQuarantineCycle[\s\S]{0,1800}collisionAtlasPathToward/,
   );
 });
 
@@ -1972,6 +2331,42 @@ test("long travel flees while moving and clears a safe attacker only after stall
   assert.match(
     runner,
     /const revivesBeforeSearch = evidence\.revives[\s\S]{0,500}main policy must replan from town/,
+  );
+});
+
+test("quarantined pursuers break cross-chunk travel loops with physical retreat", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const navigationBody = runner.slice(
+    runner.indexOf("async function navigateNear("),
+    runner.indexOf("async function collisionPathToward("),
+  );
+  assert.match(
+    navigationBody,
+    /assessNavigationPositionCycle\(\{[\s\S]{0,500}navigationPositionHistoryByMap\.set/,
+    "two-attempt resource chunks must share authoritative position history",
+  );
+  assert.match(
+    navigationBody,
+    /nearestQuarantinedHostile\([\s\S]{0,300}retreatPointsFromHostile\(state, quarantinedTravelThreat, 10\)/,
+  );
+  assert.match(navigationBody, /escape quarantined travel threat:/);
+  assert.match(
+    navigationBody,
+    /let steeringTarget = quarantineEscapeTarget \?\? forcedDetourTarget \?\? liveTarget/,
+  );
+  assert.match(
+    navigationBody,
+    /!quarantineEscapeTarget && distance <= desiredDistance/,
+    "reaching the old patrol radius must not cancel an active quarantine escape",
+  );
+  assert.match(
+    navigationBody,
+    /crossChunkQuarantineCycle[\s\S]{0,900}cross-chunk quarantined/,
+  );
+  assert.match(
+    navigationBody,
+    /for \(const \[escapeIndex, escapeCandidate\] of quarantineEscapeTargets\.entries\(\)\)[\s\S]{0,1200}collisionAtlasPathToward/,
+    "an unreachable direct-away endpoint must rotate through collision-planned escape candidates",
   );
 });
 
@@ -2098,7 +2493,7 @@ test("supply hunting stays inside authoritative village-edge respawn fields", as
   );
   assert.match(
     runner,
-    /function rankMonsterApproachTargets[\s\S]{0,650}chebyshev\(state\.player, left\) - chebyshev\(state\.player, right\)/,
+    /function rankMonsterApproachTargets[\s\S]{0,900}renderedTargetHealthCertainty\(left\) - renderedTargetHealthCertainty\(right\)[\s\S]{0,180}chebyshev\(state\.player, left\) - chebyshev\(state\.player, right\)/,
   );
   assert.match(runner, /fundingGoal,[\s\S]{0,100}fundingStateBefore,[\s\S]{0,500}killMonster\([\s\S]{0,300}fundingStateBefore/);
 });
@@ -2150,11 +2545,27 @@ test("unsafe potion funding shelters with emergency-only potion survival", async
   );
   assert.match(
     activeShelterThreatBody,
+    /assessRecoveryTransferProgress\([\s\S]{0,900}safeRecoveryTransferProgress\.stalled/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /safeRecoveryTransferCongestionUntil\.set\([\s\S]{0,1200}rotate congested recovery transfer:/,
+  );
+  assert.match(
+    activeShelterThreatBody,
     /allowTransferToMap: recoveryTransfer[\s\S]{0,180}SAFE_RECOVERY_MAP_FILE_NAME[\s\S]{0,250}return true/,
   );
   assert.match(
     activeShelterThreatBody,
     /navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: 4,[\s\S]{0,500}clearTrivialOccupancy: true/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /const shelterOccupancyClearGoal = \{[\s\S]{0,180}kind: "travel",[\s\S]{0,180}supplyFunding: false/,
+  );
+  assert.match(
+    activeShelterThreatBody,
+    /navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,650}resourceAccountingGoal: shelterOccupancyClearGoal/,
   );
   assert.match(
     recoveryBody,
@@ -2243,11 +2654,11 @@ test("supply NPC navigation clears only a repeatedly blocking trivial occupant",
   );
   assert.match(
     navigationBody,
-    /clearTrivialOccupancy && \(stagnant >= 2 \|\| signatureVisits >= 3\)[\s\S]{0,900}nearestTrivialAdjacentHostile[\s\S]{0,500}supplyFunding: true/,
+    /clearTrivialOccupancy && \(stagnant >= 2 \|\| signatureVisits >= 3\)[\s\S]{0,900}nearestPhysicallyClickableTrivialAdjacentHostile[\s\S]{0,500}supplyFunding: true/,
   );
   assert.match(
     navigationBody,
-    /const blocker = nearestTrivialAdjacentHostile\(state\);/,
+    /const blocker = await nearestPhysicallyClickableTrivialAdjacentHostile\(state\);/,
     "a same-name target occupying the only adjacent exit must remain clearable",
   );
   assert.match(
@@ -2267,8 +2678,12 @@ test("supply NPC navigation clears only a repeatedly blocking trivial occupant",
     /function nearestTrivialAdjacentHostile[\s\S]{0,900}completedQuestCertifiesMonster\(state, entity\?\.name\)/,
   );
   assert.match(
+    runner,
+    /async function nearestPhysicallyClickableTrivialAdjacentHostile[\s\S]{0,1800}physicalEntityHitTargets[\s\S]{0,800}state\?\.selectedObjectId/,
+  );
+  assert.match(
     navigationBody,
-    /denseAdjacentHostileCount\(state\) >= 3[\s\S]{0,900}nearestTrivialAdjacentHostile\([\s\S]{0,120}quarantinedMonsterUntil[\s\S]{0,900}denseOccupancyClears \+= 1/,
+    /denseAdjacentHostileCount\(state\) >= 3[\s\S]{0,900}nearestPhysicallyClickableTrivialAdjacentHostile\([\s\S]{0,120}quarantinedMonsterUntil[\s\S]{0,900}denseOccupancyClears \+= 1/,
   );
 });
 
@@ -2296,7 +2711,7 @@ test("low-stock supply work retreats before optional actions and budgets every N
   assert.doesNotMatch(retreatBody, /if \(inSupplyArea\) return false/);
   assert.match(
     retreatBody,
-    /const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE[\s\S]{0,220}const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO[\s\S]{0,1000}supplyFundingShelterUntil = Math\.max\([\s\S]{0,1800}unsafe \$\{inSupplyArea \? "supply" : "field"\} disengage/,
+    /const lowStock = potionQuantity < HEALTH_POTION_FIELD_RESERVE[\s\S]{0,220}const unsafeHealth = healthRatio < QUEST_DEPARTURE_HEALTH_RATIO[\s\S]{0,1200}if \(postRecoveryFieldDisengage\)[\s\S]{0,180}supplyFundingShelterUntil = 0[\s\S]{0,180}else \{[\s\S]{0,180}supplyFundingShelterUntil = Math\.max\(/,
   );
   assert.match(
     retreatBody,
@@ -2406,6 +2821,34 @@ test("ordinary map travel rotates same-destination entrances only after physical
   );
 });
 
+test("budget-disabled equipment repair travel still clears certified physical occupancy", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const travelBody = runner.slice(
+    runner.indexOf("async function travelToMap("),
+    runner.indexOf("async function ensureVisibleScriptTravelFunding("),
+  );
+  assert.match(
+    travelBody,
+    /let journeyResourceGoal = resourceAccountingGoal \?\? null/,
+    "disabling the combat budget must not discard the non-funding occupancy policy",
+  );
+
+  const repairBody = runner.slice(
+    runner.indexOf("async function repairProgressionEquipmentIfNeeded"),
+    runner.indexOf("async function usePotionIfNeeded"),
+  );
+  assert.match(
+    repairBody,
+    /const repairTravelGoal = \{[\s\S]{0,300}supplyFunding: false/,
+    "repair travel must classify a certified blocker as ordinary travel combat, not supply funding",
+  );
+  assert.match(
+    repairBody,
+    /travelToMap\(route\.mapFileName, \{[\s\S]{0,260}enforceCombatResourceBudget: false,[\s\S]{0,180}clearTrivialOccupancy: true,[\s\S]{0,180}resourceAccountingGoal: repairTravelGoal/,
+    "an urgent repair route must retain bounded real-client occupancy clearing",
+  );
+});
+
 test("safe passive recovery accepts authoritative healing completed on the approach", async () => {
   const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
   const recoveryBody = runner.slice(
@@ -2414,12 +2857,25 @@ test("safe passive recovery accepts authoritative healing completed on the appro
   );
   assert.match(
     recoveryBody,
-    /catch \(error\)[\s\S]{0,1000}recoveredHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO/,
+    /catch \(error\)[\s\S]{0,1500}recoveredHealthRatio >= SAFE_FUNDING_READY_HEALTH_RATIO/,
   );
   assert.match(recoveryBody, /safe-passive-health-recovered-en-route/);
   assert.match(
     recoveryBody,
     /error instanceof NavigationInterruptedByDeathError \|\|[\s\S]{0,100}error instanceof SupplyFundingSafetyError/,
+  );
+});
+
+test("safe shelter travel re-evaluates a resource budget crossed en route", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const recoveryBody = runner.slice(
+    runner.indexOf("async function recoverHealthInSafeInteriorIfNeeded"),
+    runner.indexOf("async function collectVisibleHealthPotionDropIfNeeded"),
+  );
+  assert.match(
+    recoveryBody,
+    /catch \(error\)[\s\S]{0,800}error instanceof CombatResourceBudgetError[\s\S]{0,120}return true/,
+    "a shelter route that consumes its last potion must resume through the outer recovery loop",
   );
 });
 
@@ -2732,7 +3188,7 @@ test("active threats preempt corpse harvesting and stationary field recovery", a
   );
   assert.match(
     runner,
-    /unsafe \$\{inSupplyArea \? "supply" : "field"\} disengage:[\s\S]{0,700}navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: 2/,
+    /postRecoveryFieldDisengage \? "post-recovery supply"[\s\S]{0,100}`unsafe \$\{inSupplyArea \? "supply" : "field"\}`\} disengage:[\s\S]{0,700}navigateNear\(retreat, recoveryTransfer \? 0 : 1,[\s\S]{0,180}maxAttempts: postRecoveryFieldDisengage \? 4 : 2/,
   );
   assert.match(
     page,
@@ -2741,6 +3197,32 @@ test("active threats preempt corpse harvesting and stationary field recovery", a
   assert.match(
     page,
     /function markPlayerStruck[\s\S]{0,2200}patchEntityInList\(current\.entities, attackerId,[\s\S]{0,180}attackStartedAt: now/,
+  );
+});
+
+test("harvest goals clear a certified active threat before creating the source corpse", async () => {
+  const runner = await fs.readFile(new URL("run-q1-q5.mjs", import.meta.url), "utf8");
+  const huntBody = runner.slice(
+    runner.indexOf("async function executeHuntGoal(goal, resourceBaseline = null)"),
+    runner.indexOf("function rememberQuestCombatResourceStrain"),
+  );
+  const preflightIndex = huntBody.indexOf("pre-clear active harvest threat before source combat:");
+  const sourceKillIndex = huntBody.indexOf("const killed = await killMonster(");
+  assert.ok(
+    preflightIndex >= 0 && preflightIndex < sourceKillIndex,
+    "a recent adjacent attacker must be handled before the harvestable corpse is created",
+  );
+  assert.match(
+    huntBody,
+    /const preHarvestThreat = goal\.harvest[\s\S]{0,500}nearestActiveHostile\(stateBefore,[\s\S]{0,300}excludeObjectId: target\.objectId/,
+  );
+  assert.match(
+    huntBody,
+    /canDefendHarvestThreat\(stateBefore, livePreHarvestThreat\)[\s\S]{0,900}clearAdjacentTravelThreat\([\s\S]{0,300}preHarvestDefences \+= 1[\s\S]{0,200}continue/,
+  );
+  assert.match(
+    huntBody,
+    /pre-harvest defence limit reached[\s\S]{0,700}disengageFromUnsafeHarvestThreat/,
   );
 });
 
@@ -2913,6 +3395,15 @@ test("visible map transfers route adjacent before a physical key step into the t
   const page = await fs.readFile(new URL("../../app/page.tsx", import.meta.url), "utf8");
   assert.match(runner, /if \(allowTransferToMap && distance <= 1\)/);
   assert.doesNotMatch(runner, /if \(allowTransferToMap && distance <= 4\)/);
+  const transferReactivationBody = runner.slice(
+    runner.indexOf("if (distance === 0)"),
+    runner.indexOf("const portalProbe"),
+  );
+  assert.match(transferReactivationBody, /reactivate-visible-map-transfer/);
+  assert.match(
+    transferReactivationBody,
+    /String\(afterTransferInput\.mapFileName\) === String\(allowTransferToMap\)/,
+  );
   assert.match(runner, /enter-visible-map-transfer-diagonal-approach/);
   assert.doesNotMatch(
     runner,
