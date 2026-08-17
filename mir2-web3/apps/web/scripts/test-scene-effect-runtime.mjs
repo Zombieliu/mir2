@@ -32,10 +32,24 @@ const animation = {
   offset: { x: 1, y: 2 },
   durationMs: 200,
 };
+const protectionAnimation = {
+  ...animation,
+  name: "ProtectionField",
+  frames: [{ path: "/fx/protection.png", width: 20, height: 24, x: -10, y: -18 }],
+  durationMs: 100,
+};
 const crystal = {
-  effectNameForNumber: (_assets, value) => (value === 31 ? "FireBall" : null),
+  // Spell 12 and SpellEffect 12 deliberately have different names. The scene
+  // runtime must resolve spell packets through the Spell enum, not Effect.
+  effectNameForNumber: (_assets, value) => (value === 12 ? "Mine" : value === 31 ? "FireBall" : null),
+  spellNameForNumber: (value) => (value === 12 ? "ProtectionField" : value === 31 ? "FireBall" : null),
   resolveSpellEffect: (_assets, name, direction) => (name === "FireBall" && direction === 3 ? animation : null),
-  resolveSpellCastEffect: (_assets, name, direction) => (name === "FireBall" && direction === 3 ? animation : null),
+  resolveSpellCastEffect: (_assets, name, direction) => {
+    if (direction !== 3) return null;
+    if (name === "FireBall") return animation;
+    if (name === "ProtectionField") return protectionAnimation;
+    return null;
+  },
   resolveMapEffect: (_assets, name) => name === "FireBall" ? { ...animation, repeat: true } : null,
   resolveMapEffectByNumber: () => null,
   effectFrameAt: (instance, now) => {
@@ -83,6 +97,11 @@ assert.match(
   pageSource,
   /duplicateMagicProjectile[\s\S]*startedAt - entry\.startedAt <= 500/,
   "Magic, ObjectMagic and ObjectProjectile echoes must collapse to one visual projectile",
+);
+assert.match(
+  pageSource,
+  /entry\.spellOrEffect !== undefined &&\s*String\(entry\.spellOrEffect\) === String\(spellOrEffect\)/,
+  "projectile deduplication must preserve distinct spells cast at the same target",
 );
 assert.match(
   pageSource,
@@ -165,6 +184,11 @@ assert.equal(runtime.resolveSceneEffectFrame({}, base, 1_100).frame.path, "/fx/1
 assert.equal(runtime.resolveSceneEffectFrame({}, base, 1_200), null, "non-repeat animation ends");
 assert.equal(runtime.resolveSceneEffectFrame({}, base, 2_000), null, "packet lifetime expires");
 assert.equal(
+  runtime.resolveSceneEffectFrame({}, { ...base, key: "protection", spellOrEffect: 12 }, 1_000).frame.path,
+  "/fx/protection.png",
+  "overlapping Spell and SpellEffect numbers must resolve through the Spell enum",
+);
+assert.equal(
   runtime.collectResolvedSceneEffectFrames({}, [base, { ...base, key: "unknown", spellOrEffect: 999 }], 1_000).length,
   1,
 );
@@ -182,4 +206,4 @@ assert.equal(
   "ObjectSpell resolves the repeating ground animation after the cast animation would end",
 );
 
-console.log("scene effect runtime: 15 passed");
+console.log("scene effect runtime: 17 passed");

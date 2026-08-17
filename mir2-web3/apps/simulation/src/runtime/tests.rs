@@ -46660,6 +46660,25 @@ fn magic_preflight_healing_self_target_and_action_lock_behave_like_crystal() {
 }
 
 #[test]
+fn zone_melee_attack_profile_rejects_non_melee_requested_spell() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let plain_swing = session.zone_melee_attack_profile(Spell::None);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("Healing", 2).expect("Healing skill"));
+
+    assert_eq!(
+        session.zone_melee_attack_profile(Spell::Healing),
+        plain_swing,
+        "an untrusted Attack packet must not route a known non-melee spell through melee damage"
+    );
+}
+
+#[test]
 fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

@@ -2943,6 +2943,23 @@ impl SimulationSession {
             return (Spell::None, 0, 1);
         }
         let world = self.app.world();
+        let base_damage = crystal_player_zone_base_melee_damage(world).max(1);
+        // Attack packets are client-controlled. Only Crystal's armed weapon
+        // skills may enter the shared-Zone melee path; accepting another known
+        // spell here would apply its magic formula to a plain adjacent swing.
+        if requested_spell != Spell::None
+            && !matches!(
+                requested_spell,
+                Spell::Slaying
+                    | Spell::Thrusting
+                    | Spell::HalfMoon
+                    | Spell::CrossHalfMoon
+                    | Spell::TwinDrakeBlade
+                    | Spell::FlamingSword
+            )
+        {
+            return (Spell::None, 0, base_damage);
+        }
         let active_spell = if requested_spell != Spell::None {
             requested_spell
         } else {
@@ -2958,7 +2975,6 @@ impl SimulationSession {
             .find(|spell| skill_toggle_state(world, *spell))
             .unwrap_or(Spell::None)
         };
-        let base_damage = crystal_player_zone_base_melee_damage(world).max(1);
         if active_spell == Spell::None {
             return (Spell::None, 0, base_damage);
         }

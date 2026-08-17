@@ -11666,6 +11666,7 @@ export default function HomePage() {
       const duplicateMagicProjectile = spellOrEffect !== undefined && current.projectiles.some(
         (entry) =>
           entry.spellOrEffect !== undefined &&
+          String(entry.spellOrEffect) === String(spellOrEffect) &&
           entry.attackerId === attackerId &&
           entry.targetId === targetId &&
           startedAt - entry.startedAt >= 0 &&
