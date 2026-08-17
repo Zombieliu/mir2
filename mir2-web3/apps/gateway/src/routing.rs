@@ -1616,8 +1616,8 @@ struct SharedItemRentalInvite {
     renting: bool,
 }
 
-const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 1;
-const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 1;
+const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 2;
+const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 2;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
     crate::zone_rpc::DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES;
 
@@ -1652,12 +1652,33 @@ struct SharedInProcessZoneState {
     npc_random_seed: Option<u64>,
 }
 
+/// Serde adapter for binary checkpoint blobs. `Vec<u8>` payloads (zone manager
+/// images, packet frames) default to JSON number arrays that inflate a
+/// multi-megabyte world image roughly 4-5x; base64 keeps them compact.
+pub(crate) mod base64_bytes {
+    use base64::engine::general_purpose::STANDARD;
+    use base64::Engine as _;
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S: Serializer>(bytes: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&STANDARD.encode(bytes))
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<u8>, D::Error> {
+        let encoded = String::deserialize(deserializer)?;
+        STANDARD
+            .decode(encoded.as_bytes())
+            .map_err(serde::de::Error::custom)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SharedInProcessZoneStateCheckpoint {
     version: u32,
     next_zone_object_id: u32,
     next_live_outbound_registration_id: u64,
+    #[serde(with = "crate::routing::base64_bytes", default)]
     zone_manager_bytes: Vec<u8>,
     zone_sessions: Vec<(ZonePresenceKey, SessionId)>,
     zone_session_keys: Vec<(SessionId, ZonePresenceKey)>,
