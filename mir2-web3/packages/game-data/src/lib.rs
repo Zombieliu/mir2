@@ -3251,6 +3251,32 @@ mod tests {
     }
 
     #[test]
+    fn crystal_magic_manifest_contains_only_unique_enabled_spells() {
+        let manifest = crystal_magic_manifest();
+        let mut names = std::collections::HashSet::new();
+        let mut spells = std::collections::HashSet::new();
+
+        assert_eq!(manifest.total_magics, manifest.magics.len());
+        for magic in &manifest.magics {
+            assert!(
+                names.insert(magic.name.as_str()),
+                "duplicate Crystal magic name: {}",
+                magic.name
+            );
+            assert!(
+                spells.insert(magic.spell.as_str()),
+                "duplicate Crystal spell: {}",
+                magic.spell
+            );
+        }
+
+        assert!(
+            !names.contains("FastMove"),
+            "commented-out Crystal placeholders must not enter the runtime manifest"
+        );
+    }
+
+    #[test]
     fn crystal_buff_manifest_loads() {
         let manifest = crystal_buff_manifest();
 
