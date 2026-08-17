@@ -121,6 +121,10 @@ jobs:
         working-directory: mir2-web3/apps/web
         run: npm ci
 
+      - name: Verify quest item icon closure
+        working-directory: mir2-web3/apps/web
+        run: npm run test:quest-item-icons
+
       - name: Resolve deterministic asset version
         env:
           INPUT_RUN_ID: ${{ inputs.run_id }}

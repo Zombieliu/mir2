@@ -9,6 +9,7 @@ import { constants as zlibConstants, createGzip } from "node:zlib";
 
 import { createCasRelease, writeCasReleaseArtifacts } from "./asset-pipeline/cas-release.mjs";
 import { inspectFullPackClosure, sha256File } from "./asset-pipeline/full-pack-closure.mjs";
+import { assertQuestItemIconClosure } from "./asset-pipeline/quest-item-icon-closure.mjs";
 import { verifyMonsterFrameClosure } from "./verify-monster-frame-closure.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -67,6 +68,7 @@ const EXTRA_ORIGINAL_ASSET_PATHS = [
   ...makeRange(340, 354).map((value) => `/original-ui/Title/${value}.png`),
   ...makeRange(360, 362).map((value) => `/original-ui/Title/${value}.png`),
 ];
+const QUEST_ITEM_ICON_CLOSURE = assertQuestItemIconClosure();
 const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".cur",
   ".gif",
@@ -88,6 +90,7 @@ const REQUIRED_MANIFEST_PATHS = [
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
   ...EXTRA_ORIGINAL_ASSET_PATHS,
+  ...QUEST_ITEM_ICON_CLOSURE.requiredPaths,
 ];
 
 const args = parseArgs(process.argv.slice(2));

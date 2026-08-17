@@ -16,6 +16,7 @@ import {
   type InventorySortKey,
 } from "./original-client-inventory-action-panels";
 import {
+  applyOriginalItemIconFallback,
   equipmentSlotForItem,
   formatBinaryDateTimeLabel,
   originalItemIconPath,
@@ -733,6 +734,7 @@ export function InventoryWindow({
                 src={originalItemIconPath(item.icon)}
                 alt=""
                 draggable={false}
+                onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
               />
               {item.quantity > 1 ? <span className="item-stack-count inventory-item-count">{item.quantity}</span> : null}
               <OriginalItemTooltip
@@ -1105,6 +1107,7 @@ export function InventoryWindow({
                     src={originalItemIconPath(item.icon)}
                     alt=""
                     draggable={false}
+                    onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
                   />
                   {item.quantity > 1 ? (
                     <span className="item-stack-count storage-item-count">{item.quantity}</span>

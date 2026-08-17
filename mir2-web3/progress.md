@@ -636,3 +636,23 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   inputs, zero deaths, potion uses, shortcut violations, or critical
   browser/network failures. This closes duplicate-corpse accounting, while
   Warrior level 15, q25, and q30 remain open.
+
+## 2026-08-18 Quest material icon delivery closure
+
+- Audited generated quest carry-item/item-task data against the original item
+  manifest and checked-in Crystal export. The closure covers 71 material
+  records, 60 unique image indices, and identified 44 frames missing from the
+  previous 316-frame curated `Items` export.
+- Exported those 44 frames from the full original `Items.Lib`, updated
+  `Items/meta.json` and the generated UI manifest, and added a reusable verifier
+  that checks both the raster file and metadata membership.
+- Wired the verifier into the offline asset gate, frontend logic suite, remote
+  release builder, and R2 release workflow so incomplete task-material art can
+  no longer be published silently.
+- Added one-step unknown-icon fallback handling to every inventory/storage item
+  preview, retained the confirmed first-bag reset and tab stacking fixes, and
+  verified `test:quest-item-icons`, `test:asset-url`, TypeScript, whitespace,
+  direct `Items/412.png` serving, and a production-shaped browser render.
+- The local full item-lifecycle harness could not pass its account/character
+  bootstrap against the already-running gateway fixture. That environment
+  block is recorded separately and is not counted as frontend gameplay proof.

@@ -1,7 +1,11 @@
 import type { CSSProperties, MouseEvent } from "react";
 
 import type { DisplayItem, TranslateFn } from "./original-client-types";
-import { equipmentSlotForItem, originalItemIconPath } from "./original-client-inventory-utils";
+import {
+  applyOriginalItemIconFallback,
+  equipmentSlotForItem,
+  originalItemIconPath,
+} from "./original-client-inventory-utils";
 
 function primaryMouseAction(event: MouseEvent, action: () => void) {
   if (event.button !== 0) return;
@@ -29,7 +33,14 @@ export function InventoryDeletePanel({
     <div className="inventory-delete-panel">
       <strong>{t("ui.deleteItem")}</strong>
       <div className="inventory-delete-preview">
-        <img className="original-item-icon inventory-delete-icon" src={originalItemIconPath(item.icon)} alt="" draggable={false} />
+        <img
+          key={item.icon}
+          className="original-item-icon inventory-delete-icon"
+          src={originalItemIconPath(item.icon)}
+          alt=""
+          draggable={false}
+          onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
+        />
       </div>
       <span>{item.name}</span>
       <InventoryActionButtons t={t} onConfirm={onConfirm} onClose={onClose} />
@@ -52,7 +63,14 @@ export function InventorySellPanel({
     <div className="inventory-delete-panel">
       <strong>{t("ui.sellItem", [], "Sell Item")}</strong>
       <div className="inventory-delete-preview">
-        <img className="original-item-icon inventory-delete-icon" src={originalItemIconPath(item.icon)} alt="" draggable={false} />
+        <img
+          key={item.icon}
+          className="original-item-icon inventory-delete-icon"
+          src={originalItemIconPath(item.icon)}
+          alt=""
+          draggable={false}
+          onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
+        />
       </div>
       <span>{item.name}</span>
       <InventoryActionButtons t={t} onConfirm={onConfirm} onClose={onClose} />
@@ -86,7 +104,14 @@ export function InventorySplitPanel({
     <div className="inventory-delete-panel">
       <strong>{t("ui.splitItem", [], "Split Item")}</strong>
       <div className="inventory-delete-preview">
-        <img className="original-item-icon inventory-delete-icon" src={originalItemIconPath(item.icon)} alt="" draggable={false} />
+        <img
+          key={item.icon}
+          className="original-item-icon inventory-delete-icon"
+          src={originalItemIconPath(item.icon)}
+          alt=""
+          draggable={false}
+          onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
+        />
       </div>
       <span>{item.name}</span>
 

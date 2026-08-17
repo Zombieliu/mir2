@@ -2709,3 +2709,29 @@ Human acceptance is still required for:
   `docs/generated/remote-assets/20260812-monster-render-death/remote-asset-release.json`:
   40,944 files, 237,928,682 bytes, zero missing files, with object prefix
   `mir2/v/20260812-monster-render-death`.
+
+## 2026-08-18 Quest material inventory icon closure
+
+- Root cause: quest material records referenced valid original `Items.Lib`
+  frame indices, but the curated web export and R2 release contained only 316
+  item frames. The inventory metadata guard consequently substituted a
+  transparent placeholder for absent frames, so the item existed while its
+  picture appeared blank.
+- The curated export now contains every frame referenced by generated quest
+  carry-item and item-task data: 71 quest material records resolve to 60 unique
+  item images. This adds 44 previously absent original frames and raises the
+  checked-in `Items` export from 316 to 360 frames.
+- `assets:remote:build` now asserts the complete quest-item icon set before
+  staging a release, and the R2 release workflow runs the same regression test.
+  A future quest material without both a PNG and matching `Items/meta.json`
+  entry therefore fails CI instead of shipping a transparent icon.
+- Inventory, storage, delete, sell, and split previews now fall back once to the
+  original unknown-item icon when an image request fails, then hide the broken
+  image to avoid an error loop. Opening the inventory also returns to the first
+  bag tab, and the tab chrome remains above the item grid.
+- Local Candidate evidence: quest icon closure reports 71/71 records and 60/60
+  unique images, TypeScript compiles cleanly, asset URL tests pass, the local
+  route for `Items/412.png` returns HTTP 200, and the production-shaped login
+  page renders without a black/blank stage. The full item-lifecycle browser
+  script was blocked before character selection by the local gateway account
+  fixture and is not claimed as a passing gameplay certificate.
