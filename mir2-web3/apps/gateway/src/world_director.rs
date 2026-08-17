@@ -25,7 +25,7 @@ const WORLD_DIRECTOR_FINALITY_DOMAIN: &[u8] = b"obelisk.world-director.finality.
 const DIRECTOR_SIMULATION_CHECKPOINT_VERSION: u32 = 1;
 const DIRECTOR_SIMULATION_CHECKPOINT_DOMAIN: &[u8] =
     b"obelisk.world-director.simulation-checkpoint.v1\0";
-const DIRECTOR_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
+const DIRECTOR_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
 const DIRECTOR_RUNTIME_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.world-director.runtime-checkpoint.v1\0";
 const DIRECTOR_RUNTIME_CHECKPOINT_INTERVAL_MS: u64 = 30_000;
 const MAX_DIRECTOR_TEXT_BYTES: usize = 512;
@@ -1341,12 +1341,35 @@ pub struct FinalizedDirectorInstallReceipt {
     pub advance: DirectorSimulationAdvanceReceipt,
 }
 
+/// Serde adapter that encodes binary checkpoint blobs as base64 strings instead
+/// of the default JSON number arrays. Nested `Vec<u8>` payloads otherwise
+/// inflate a multi-megabyte world image by roughly 4-5x and make the 30-second
+/// world-director checkpoint write tens of megabytes large.
+mod base64_bytes {
+    use base64::engine::general_purpose::STANDARD;
+    use base64::Engine as _;
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S: Serializer>(bytes: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&STANDARD.encode(bytes))
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<u8>, D::Error> {
+        let encoded = String::deserialize(deserializer)?;
+        STANDARD
+            .decode(encoded.as_bytes())
+            .map_err(serde::de::Error::custom)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct WorldDirectorRuntimeCheckpoint {
     version: u32,
     finalized: Vec<FinalizedControlBlock>,
+    #[serde(with = "base64_bytes", default)]
     simulation_checkpoint: Vec<u8>,
+    #[serde(with = "base64_bytes", default)]
     zone_factory_checkpoint: Vec<u8>,
     spawned_monsters_total: u64,
     broadcast_messages_total: u64,
@@ -1430,12 +1453,19 @@ impl WorldDirectorRuntimeService {
             last_advance: None,
         };
         if let Some(path) = checkpoint_path.as_deref().filter(|path| path.exists()) {
-            state = restore_runtime_checkpoint(
+            match restore_runtime_checkpoint(
                 path,
                 &committee.iter().cloned().collect::<Vec<_>>(),
                 &trusted_director,
                 factory.as_ref(),
-            )?;
+            ) {
+                Ok(restored) => state = restored,
+                Err(error) => {
+                    eprintln!(
+                        "world director checkpoint skipped, starting from empty state: {error}"
+                    );
+                }
+            }
         }
         let restored_checkpoint_at_ms = state.last_checkpoint_at_ms;
         let restored_checkpoint_bytes = checkpoint_path
@@ -1680,6 +1710,11 @@ fn advance_runtime_state(
     Ok(receipt)
 }
 
+#[derive(serde::Deserialize)]
+struct RuntimeCheckpointVersionProbe {
+    version: u32,
+}
+
 fn restore_runtime_checkpoint(
     path: &Path,
     committee: &[String],
@@ -1692,6 +1727,17 @@ fn restore_runtime_checkpoint(
             path.display()
         )
     })?;
+    // Peek only the version field before the full decode so a checkpoint written
+    // by the older binary-array format can be skipped cleanly, without failing
+    // the base64 decode of multi-megabyte number arrays.
+    let stored_version = serde_json::from_slice::<RuntimeCheckpointVersionProbe>(&bytes)
+        .map(|probe| probe.version)
+        .unwrap_or_default();
+    if stored_version != DIRECTOR_RUNTIME_CHECKPOINT_VERSION {
+        return Err(format!(
+            "world director checkpoint version {stored_version} is not the current format (expected {DIRECTOR_RUNTIME_CHECKPOINT_VERSION}); it will be discarded"
+        ));
+    }
     let checkpoint: WorldDirectorRuntimeCheckpoint = serde_json::from_slice(&bytes)
         .map_err(|error| format!("world director runtime checkpoint decode failed: {error}"))?;
     if checkpoint.version != DIRECTOR_RUNTIME_CHECKPOINT_VERSION
@@ -1749,7 +1795,7 @@ fn persist_runtime_checkpoint(
         state_commitment: String::new(),
     };
     checkpoint.state_commitment = runtime_checkpoint_commitment(&checkpoint)?;
-    let bytes = serde_json::to_vec_pretty(&checkpoint)
+    let bytes = serde_json::to_vec(&checkpoint)
         .map_err(|error| format!("world director runtime checkpoint encode failed: {error}"))?;
     let temporary = path.with_extension(format!("tmp-{}", std::process::id()));
     fs::write(&temporary, [&bytes[..], b"\n"].concat()).map_err(|error| {

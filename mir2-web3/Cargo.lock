@@ -3716,6 +3716,7 @@ name = "mir2-simulation"
 version = "0.1.0"
 dependencies = [
  "argon2",
+ "base64 0.22.1",
  "bevy_app",
  "bevy_ecs",
  "bevy_tasks",

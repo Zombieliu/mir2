@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use base64::engine::general_purpose::STANDARD;
+use base64::Engine as _;
 use bevy_tasks::{ComputeTaskPool, TaskPool};
 use mir2_protocol::{MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
@@ -8,7 +10,7 @@ use serde::{Deserialize, Serialize};
 /// so `tick_all` runs inline. Measured break-even; see the multi-zone scaling
 /// section of `examples/zone_load.rs` and docs/L2-ECS-ZONE-DESIGN.md.
 const PARALLEL_TICK_MIN_ZONES: usize = 4;
-const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 1;
+const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 2;
 
 use super::runtime::ZoneRuntime;
 use super::types::{
@@ -26,7 +28,7 @@ pub struct ZoneManager {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ZoneManagerCheckpoint {
     version: u32,
-    zones: Vec<(ZoneKey, Vec<u8>)>,
+    zones: Vec<(ZoneKey, String)>,
     session_zones: BTreeMap<SessionId, ZoneKey>,
 }
 
@@ -42,7 +44,7 @@ impl ZoneManager {
         let zones = self
             .zones
             .iter()
-            .map(|(key, runtime)| Ok((key.clone(), runtime.checkpoint_bytes()?)))
+            .map(|(key, runtime)| Ok((key.clone(), STANDARD.encode(runtime.checkpoint_bytes()?))))
             .collect::<Result<Vec<_>, String>>()?;
         serde_json::to_vec(&ZoneManagerCheckpoint {
             version: ZONE_MANAGER_CHECKPOINT_VERSION,
@@ -76,7 +78,12 @@ impl ZoneManager {
             ));
         }
         let mut zones = BTreeMap::new();
-        for (expected_key, runtime_bytes) in checkpoint.zones {
+        for (expected_key, runtime_encoded) in checkpoint.zones {
+            let runtime_bytes = STANDARD
+                .decode(runtime_encoded.as_bytes())
+                .map_err(|error| {
+                    format!("failed to decode zone manager runtime checkpoint: {error}")
+                })?;
             let runtime = restore_runtime(&runtime_bytes)?;
             if runtime.key() != &expected_key {
                 return Err(format!(
