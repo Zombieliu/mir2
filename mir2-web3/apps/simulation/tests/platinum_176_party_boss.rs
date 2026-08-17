@@ -131,7 +131,11 @@ fn participants() -> [Participant; 3] {
             class: MirClass::Wizard,
             object_id: 102,
             position: Point { x: 21, y: 17 },
-            action: ParticipantAction::Magic(Spell::IceStorm, 18),
+            // Use a direct-hit Wizard spell in this attribution fixture. Ground
+            // spells resolve on a later Zone tick and are covered separately;
+            // attributing that delayed damage to the next party member would
+            // make this report lie about which class contributed it.
+            action: ParticipantAction::Magic(Spell::FlameDisruptor, 18),
             stats: ZonePlayerCombatStats {
                 // The shared-zone spell boundary consumes the same projected
                 // attack base that the Gateway sends from the equipped player.

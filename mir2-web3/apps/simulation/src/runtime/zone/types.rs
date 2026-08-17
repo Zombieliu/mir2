@@ -404,6 +404,27 @@ pub enum ZoneCommand {
         cooldown_ms: u64,
         now_ms: u64,
     },
+    /// Production gateway cast carrying the equipped reagent shape. The
+    /// legacy variant remains for deterministic replays and existing callers.
+    PlayerCastMagicWithItem {
+        session_id: SessionId,
+        object_id: u32,
+        spell: Spell,
+        direction: MirDirection,
+        target: Point,
+        cast: bool,
+        level: u8,
+        damage: i32,
+        mp_cost: i32,
+        cooldown_ms: u64,
+        item_param: u8,
+        now_ms: u64,
+    },
+    ResolveReincarnation {
+        session_id: SessionId,
+        accept: bool,
+        now_ms: u64,
+    },
     ClaimGroundDrop {
         session_id: SessionId,
         object_id: Option<u32>,
@@ -494,6 +515,10 @@ pub enum ZoneOutbound {
 pub(crate) struct ZonePlayerBuff {
     pub buff: ClientBuff,
     pub expires_at_ms: Option<u64>,
+    /// Buffs mirrored from a personal session expire there; buffs created by
+    /// the shared Zone need a removal packet sent back to their owner.
+    #[serde(default)]
+    pub notify_owner_on_expiry: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -548,6 +573,13 @@ pub(crate) struct ZoneNativeMonster {
     pub next_attack_ready_at_ms: u64,
     pub control_until_ms: u64,
     pub control_poison: u16,
+    /// Crystal Hallucination suppresses a monster's normal player targeting
+    /// without freezing its movement or making it invulnerable.
+    #[serde(default)]
+    pub hallucination_until_ms: u64,
+    /// Crystal Revelation temporarily exposes health to nearby observers.
+    #[serde(default)]
+    pub revelation_until_ms: u64,
     pub damage_poison: u16,
     pub damage_poison_value: i32,
     pub damage_poison_next_damage_at_ms: u64,
@@ -616,6 +648,8 @@ impl ZoneNativeMonster {
             next_attack_ready_at_ms: 0,
             control_until_ms: 0,
             control_poison: 0,
+            hallucination_until_ms: 0,
+            revelation_until_ms: 0,
             damage_poison: 0,
             damage_poison_value: 0,
             damage_poison_next_damage_at_ms: 0,
@@ -705,6 +739,19 @@ pub(crate) struct ZonePlayer {
     pub chat_profile: ZoneChatProfile,
     pub combat_stats: ZonePlayerCombatStats,
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) reincarnation_offer: Option<ZoneReincarnationOffer>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct ZoneReincarnationOffer {
+    pub caster_session_id: SessionId,
+    pub caster_object_id: u32,
+    pub ready_at_ms: u64,
+    pub expires_at_ms: u64,
+    pub effect_sent: bool,
+    pub requested: bool,
+    pub will_succeed: bool,
 }
 
 impl ZonePlayer {
@@ -755,6 +802,7 @@ impl ZonePlayer {
             chat_profile: join.chat_profile,
             combat_stats: join.combat_stats,
             buffs: BTreeMap::new(),
+            reincarnation_offer: None,
         }
     }
 }

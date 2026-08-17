@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest three-class level-50 skill closure sync: 2026-08-18 adds a
+> deterministic source-to-runtime gate for every active Crystal/Jev
+> Warrior/Wizard/Taoist book through required level 50. The strict profile is
+> now 63/63 automated implementation gates (15 Warrior, 23 Wizard, 25 Taoist):
+> source MagicInfo and book data, protocol id, personal-session behavior,
+> shared-Zone authority, Gateway routing, `platinum_176` v25 availability and
+> reachable book sources all pass. Original effect routing covers 54 atlas
+> spells, 8 actor-action skills and EnergyShield's source-defined no-extra-
+> sprite behavior; 522 previously missing source frames were exported. The two
+> level-53 boundary skills remain explicitly outside the <=50 promise but keep
+> runtime/visual coverage. FastMove remains excluded because its source
+> initializer is commented out. This is automated Candidate implementation
+> evidence, not physical-device or human combat-feel acceptance; the ordinary
+> fresh browser account has no learned books and production correctly rejects
+> the admin `@GIVESKILL` shortcut.
+
 > Latest staged Quest Agent acceptance sync: 2026-08-15 fixes the StartGame
 > saved-transform regression found by the full acceptance gate. Recovery now
 > validates a durable position against authoritative full-map collision rather

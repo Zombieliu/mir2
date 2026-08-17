@@ -5,6 +5,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import sharp from "sharp";
 import {
   allPresentFrameIndices,
   decodeFrameRgba,
@@ -19,6 +20,7 @@ const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
 const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
 const DEFAULT_PUBLIC_DIR = path.join(WORKSPACE_ROOT, "public", "original-effects");
 const DEFAULT_DATA_DIR = "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Data";
+const DEFAULT_PACK_INDEX_PATH = "/generated/crystal-packs/full/index.json";
 const DIRECTION_COUNT = 8;
 
 const SPELL_IDS = {
@@ -26,12 +28,15 @@ const SPELL_IDS = {
   ProtectionField: 12, Rage: 13, CounterAttack: 14, SlashingBurst: 15, Fury: 16,
   ImmortalSkin: 17, FireBall: 31, Repulsion: 32, ElectricShock: 33,
   GreatFireBall: 34, HellFire: 35, ThunderBolt: 36, Teleport: 37, FireBang: 38,
-  FireWall: 39, FrostCrunch: 41, ThunderStorm: 42, MagicShield: 43,
+  FireWall: 39, Lightning: 40, FrostCrunch: 41, ThunderStorm: 42, MagicShield: 43,
   TurnUndead: 44, Vampirism: 45, IceStorm: 46, FlameDisruptor: 47, Mirroring: 48,
-  FlameField: 49, Blizzard: 50, MagicBooster: 51, MeteorStrike: 52,
-  StormEscape: 55, Healing: 61, Poisoning: 63, SummonSkeleton: 65, Hiding: 67,
-  Revelation: 70, EnergyRepulsor: 72, TrapHexagon: 73, Purification: 74,
-  MassHealing: 75, UltimateEnhancer: 77, SummonShinsu: 78, PetEnhancer: 85,
+  FlameField: 49, Blizzard: 50, MagicBooster: 51, MeteorStrike: 52, IceThrust: 53,
+  StormEscape: 55, Healing: 61, Poisoning: 63, SoulFireBall: 64,
+  SummonSkeleton: 65, Hiding: 67, MassHiding: 68, SoulShield: 69,
+  Revelation: 70, BlessedArmour: 71, EnergyRepulsor: 72, TrapHexagon: 73,
+  Purification: 74, MassHealing: 75, Hallucination: 76, UltimateEnhancer: 77,
+  SummonShinsu: 78, Reincarnation: 79, SummonHolyDeva: 80, Curse: 81,
+  Plague: 82, PoisonCloud: 83, PetEnhancer: 85,
   HealingCircle: 86, Haste: 93, LightBody: 95, HeavenlySword: 96, FireBurst: 97,
   Trap: 98, PoisonSword: 99, MoonLight: 100, SwiftFeet: 102, DarkBody: 103,
   CrescentSlash: 105, MoonMist: 106, ElementalBarrier: 131, PoisonShot: 135,
@@ -77,17 +82,50 @@ const spell = (name, library, base, count, interval, kind = "cast", directionStr
   provenance: { source: PLAYER_SPELL_SOURCE, symbol: `Spell.${name}` },
 });
 
+const phase = (library, base, count, interval, kind, extra = {}) => ({
+  library,
+  base,
+  count,
+  interval,
+  kind,
+  blend: true,
+  light: 6,
+  repeat: false,
+  offset: { x: 0, y: 0 },
+  ...extra,
+});
+
+const withPhases = (effect, phases) => ({ ...effect, ...phases });
+
 // Cast effects constructed immediately by PlayerObject's MirAction.Spell switch.
 export const SPELL_EFFECTS = [
-  spell("FireBall", "Magic", 0, 10, 60),
-  spell("Healing", "Magic", 200, 10, 60),
+  withPhases(spell("FireBall", "Magic", 0, 10, 60), {
+    projectile: phase("Magic", 10, 6, 30, "projectile"),
+    impact: phase("Magic", 170, 10, 60, "target"),
+  }),
+  withPhases(spell("Healing", "Magic", 200, 10, 60), {
+    impact: phase("Magic", 370, 10, 80, "target"),
+  }),
   spell("Repulsion", "Magic", 900, 6, 100),
-  spell("ElectricShock", "Magic", 1560, 10, 60),
-  spell("Poisoning", "Magic", 600, 10, 60),
-  spell("GreatFireBall", "Magic", 400, 10, 60),
-  spell("HellFire", "Magic", 920, 10, 60),
-  spell("ThunderBolt", "Magic2", 20, 3, 100),
+  withPhases(spell("ElectricShock", "Magic", 1560, 10, 60), {
+    impact: phase("Magic", 1570, 10, 100, "target"),
+  }),
+  withPhases(spell("Poisoning", "Magic", 600, 10, 60), {
+    impact: phase("Magic", 770, 10, 100, "target"),
+  }),
+  withPhases(spell("GreatFireBall", "Magic", 400, 10, 60), {
+    projectile: phase("Magic", 410, 6, 30, "projectile"),
+    impact: phase("Magic", 570, 10, 60, "target"),
+  }),
+  withPhases(spell("HellFire", "Magic", 920, 10, 60), {
+    impact: phase("Magic", 930, 6, 83, "ground", { light: 0 }),
+  }),
+  withPhases(spell("ThunderBolt", "Magic2", 20, 3, 100), {
+    impact: phase("Magic2", 10, 5, 80, "target"),
+  }),
+  spell("Lightning", "Magic", 970, 6, 100, "cast", 20),
   spell("SummonSkeleton", "Magic", 1500, 10, 60),
+  spell("SummonHolyDeva", "Magic", 1500, 10, 60),
   spell("StormEscape", "Magic3", 590, 10, 60),
   spell("Teleport", "Magic", 1590, 10, 60),
   spell("Blink", "Magic", 1590, 10, 60),
@@ -95,18 +133,31 @@ export const SPELL_EFFECTS = [
   spell("Haste", "Magic2", 2140, 6, 100, "cast", 10),
   spell("Fury", "Magic3", 200, 8, 100),
   spell("ImmortalSkin", "Magic3", 550, 17, 141),
-  spell("FireBang", "Magic", 1650, 10, 60),
+  withPhases(spell("FireBang", "Magic", 1650, 10, 60), {
+    impact: phase("Magic", 1660, 10, 100, "target"),
+  }),
   spell("FireWall", "Magic", 1620, 10, 60),
-  spell("HealingCircle", "Magic3", 620, 10, 60),
+  withPhases(spell("HealingCircle", "Magic3", 620, 10, 60), {
+    impact: phase("Magic3", 620, 10, 120, "target"),
+  }),
   spell("MoonMist", "Magic3", 680, 25, 72, "ground"),
   spell("TrapHexagon", "Magic", 1380, 10, 60),
   spell("EnergyRepulsor", "Magic2", 190, 6, 100),
   spell("FireBurst", "Magic2", 2320, 10, 60),
-  spell("FlameDisruptor", "Magic2", 130, 6, 100),
+  withPhases(spell("FlameDisruptor", "Magic2", 130, 6, 100), {
+    impact: phase("Magic2", 140, 10, 60, "target"),
+  }),
   spell("SummonShinsu", "Magic2", 0, 10, 60),
-  spell("UltimateEnhancer", "Magic2", 160, 15, 66),
-  spell("FrostCrunch", "Magic2", 400, 10, 60),
-  spell("Purification", "Magic2", 600, 10, 60),
+  withPhases(spell("UltimateEnhancer", "Magic2", 160, 15, 66), {
+    impact: phase("Magic2", 160, 15, 66, "target"),
+  }),
+  withPhases(spell("FrostCrunch", "Magic2", 400, 10, 60), {
+    projectile: phase("Magic2", 410, 4, 30, "projectile"),
+    impact: phase("Magic2", 570, 8, 75, "target"),
+  }),
+  withPhases(spell("Purification", "Magic2", 600, 10, 60), {
+    impact: phase("Magic2", 620, 10, 80, "target"),
+  }),
   spell("FlameField", "Magic2", 910, 23, 78, "ground"),
   spell("Trap", "Magic2", 2340, 11, 100),
   spell("MoonLight", "Magic2", 2380, 10, 60),
@@ -115,22 +166,34 @@ export const SPELL_EFFECTS = [
   spell("PoisonSword", "Magic2", 2490, 10, 110, "cast", 10),
   spell("DarkBody", "Magic2", 2580, 10, 100),
   spell("ThunderStorm", "Magic", 1680, 10, 60, "ground"),
-  spell("MassHealing", "Magic", 1790, 10, 60),
-  spell("IceStorm", "Magic", 3840, 10, 60),
+  withPhases(spell("MassHealing", "Magic", 1790, 10, 60), {
+    impact: phase("Magic", 1800, 10, 100, "target"),
+  }),
+  withPhases(spell("IceStorm", "Magic", 3840, 10, 60), {
+    impact: phase("Magic", 3850, 20, 65, "target"),
+  }),
   spell("MagicShield", "Magic", 3880, 10, 60),
-  spell("TurnUndead", "Magic", 3920, 10, 60),
+  withPhases(spell("TurnUndead", "Magic", 3920, 10, 60), {
+    impact: phase("Magic", 3930, 15, 66, "target"),
+  }),
   spell("MagicBooster", "Magic3", 80, 9, 100),
   spell("PetEnhancer", "Magic3", 200, 8, 100),
-  spell("Revelation", "Magic", 3960, 20, 60),
+  withPhases(spell("Revelation", "Magic", 3960, 20, 60), {
+    impact: phase("Magic", 3990, 10, 100, "target"),
+  }),
   spell("ProtectionField", "Magic2", 1520, 10, 60),
   spell("Rage", "Magic2", 1510, 10, 60),
-  spell("Vampirism", "Magic2", 1040, 7, 85),
+  withPhases(spell("Vampirism", "Magic2", 1040, 7, 85), {
+    impact: phase("Magic2", 1060, 20, 50, "target"),
+    returnEffect: phase("Magic2", 1090, 10, 50, "return"),
+  }),
   spell("LionRoar", "Magic2", 710, 20, 60),
   spell("BattleCry", "Magic2", 710, 20, 60),
   spell("TwinDrakeBlade", "Magic2", 210, 6, 83),
   spell("Entrapment", "Magic2", 990, 10, 60),
   spell("BladeAvalanche", "Magic2", 740, 15, 100, "cast", 20),
   spell("SlashingBurst", "Magic2", 1700, 9, 100, "ground", 10),
+  spell("IceThrust", "Magic2", 1790, 10, 100, "ground", 10),
   spell("CounterAttack", "Magic", 3480, 10, 100, "cast", 10),
   spell("CrescentSlash", "Magic2", 2620, 20, 100, "cast", 20),
   spell("Mirroring", "Magic2", 650, 10, 60),
@@ -141,6 +204,28 @@ export const SPELL_EFFECTS = [
   spell("PoisonShot", "Magic3", 2300, 8, 125),
   spell("OneWithNature", "Magic3", 2710, 8, 150, "ground"),
   spell("FireBounce", "Magic", 400, 10, 60),
+  withPhases(spell("SoulFireBall", "Magic", 1160, 3, 30, "projectile"), {
+    impact: phase("Magic", 1360, 10, 60, "target"),
+  }),
+  withPhases(spell("MassHiding", "Magic", 1160, 3, 30, "projectile"), {
+    impact: phase("Magic", 1540, 10, 80, "target"),
+  }),
+  withPhases(spell("SoulShield", "Magic", 1160, 3, 30, "projectile"), {
+    impact: phase("Magic", 1320, 15, 80, "target"),
+  }),
+  withPhases(spell("BlessedArmour", "Magic", 1160, 3, 30, "projectile"), {
+    impact: phase("Magic", 1340, 15, 80, "target"),
+  }),
+  withPhases(spell("Hallucination", "Magic", 1160, 3, 48, "projectile"), {
+    impact: phase("Magic2", 1110, 10, 100, "target"),
+  }),
+  withPhases(spell("Curse", "Magic", 1160, 3, 30, "projectile"), {
+    impact: phase("Magic2", 950, 24, 83, "target"),
+  }),
+  withPhases(spell("Plague", "Magic", 1160, 3, 30, "projectile"), {
+    impact: phase("Magic3", 110, 10, 120, "target"),
+  }),
+  spell("PoisonCloud", "Magic", 1160, 3, 30, "projectile"),
 ];
 
 const worldSpell = (name, library, base, count, interval, extra = {}) => ({
@@ -163,6 +248,20 @@ const worldSpell = (name, library, base, count, interval, extra = {}) => ({
 // caster's MirAction.Spell animation and remain alive until ObjectRemove.
 export const WORLD_SPELL_EFFECTS = [
   worldSpell("TrapHexagon", "Magic", 1390, 10, 100),
+  worldSpell("FireWall", "Magic", 1630, 6, 120, { light: 3 }),
+  worldSpell("PoisonCloud", "Magic2", 1650, 20, 120, { light: 3 }),
+  worldSpell("Blizzard", "Magic2", 1550, 30, 100, {
+    light: 3,
+    repeat: false,
+    offset: { x: 0, y: -20 },
+  }),
+  worldSpell("MeteorStrike", "Magic2", 1610, 30, 100, {
+    light: 3,
+    repeat: false,
+    offset: { x: 0, y: -20 },
+  }),
+  worldSpell("Reincarnation", "Magic2", 1680, 10, 100, { light: 1 }),
+  worldSpell("HealingCircle", "Magic3", 630, 11, 80, { light: 3 }),
 ];
 
 const packetEffect = (effect, library, base, count, interval, source, extra = {}) => ({
@@ -250,6 +349,17 @@ export function validateEffectDefinitions() {
     if (spec.spell && !Number.isInteger(spec.spellId)) throw new Error(`${name} lacks an authoritative Spell id`);
     if (spec.effect && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))) throw new Error(`${name} lacks an authoritative SpellEffect id`);
     if (typeof spec.blend !== "boolean" || typeof spec.repeat !== "boolean" || !Number.isInteger(spec.light)) throw new Error(`${name} lacks explicit render flags`);
+    for (const phaseName of ["projectile", "impact", "returnEffect"]) {
+      const sub = spec[phaseName];
+      if (!sub) continue;
+      if (!sub.library || !sub.kind) throw new Error(`${name}.${phaseName} lacks library/kind`);
+      for (const field of ["base", "count", "interval"]) {
+        assertInteger(sub[field], `${name}.${phaseName}.${field}`, field === "base" ? 0 : 1);
+      }
+      if (typeof sub.blend !== "boolean" || typeof sub.repeat !== "boolean" || !Number.isInteger(sub.light)) {
+        throw new Error(`${name}.${phaseName} lacks explicit render flags`);
+      }
+    }
   }
 }
 
@@ -269,9 +379,11 @@ function frameIndices(spec) {
 function additiveFrameIndicesByLibrary() {
   const result = new Map();
   for (const spec of allSpecs()) {
-    if (!spec.blend) continue;
-    if (!result.has(spec.library)) result.set(spec.library, new Set());
-    for (const index of frameIndices(spec)) result.get(spec.library).add(index);
+    for (const phaseSpec of [spec, spec.projectile, spec.impact, spec.returnEffect].filter(Boolean)) {
+      if (!phaseSpec.blend) continue;
+      if (!result.has(phaseSpec.library)) result.set(phaseSpec.library, new Set());
+      for (const index of frameIndices(phaseSpec)) result.get(phaseSpec.library).add(index);
+    }
   }
   return result;
 }
@@ -302,8 +414,10 @@ export function normalizeAdditiveRgba(rgba) {
 function neededByLibrary() {
   const result = new Map();
   for (const spec of allSpecs()) {
-    if (!result.has(spec.library)) result.set(spec.library, new Set());
-    for (const index of frameIndices(spec)) result.get(spec.library).add(index);
+    for (const phaseSpec of [spec, spec.projectile, spec.impact, spec.returnEffect].filter(Boolean)) {
+      if (!result.has(phaseSpec.library)) result.set(phaseSpec.library, new Set());
+      for (const index of frameIndices(phaseSpec)) result.get(phaseSpec.library).add(index);
+    }
   }
   return new Map([...result].sort(([left], [right]) => left.localeCompare(right)));
 }
@@ -354,6 +468,163 @@ function indexFrameLookup(srcMeta, source) {
 
 function assertNoMissingFrames(library, missing) {
   if (missing.length) throw new Error(`${library} is missing ${missing.length} required frame(s): ${missing.join(", ")}`);
+}
+
+function packFrameLookup(shard, source) {
+  if (!Array.isArray(shard?.frames)) throw new Error(`invalid full-pack shard: ${source} has no frames`);
+  const lookup = new Map();
+  for (const frame of shard.frames.filter(Boolean)) {
+    const index = Number(frame.index);
+    if (!Number.isInteger(index) || index < 0 || lookup.has(index)) {
+      throw new Error(`invalid/duplicate frame index in ${source}: ${frame.index}`);
+    }
+    lookup.set(index, frame);
+  }
+  return lookup;
+}
+
+function assetUrl(assetBaseUrl, relativeOrAbsoluteUrl) {
+  const value = String(relativeOrAbsoluteUrl);
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${String(assetBaseUrl).replace(/\/$/, "")}/${value.replace(/^\/+/, "")}`;
+}
+
+async function fetchJson(fetchImpl, url, label) {
+  const response = await fetchImpl(url);
+  if (!response?.ok) throw new Error(`missing ${label}: ${url} (${response?.status ?? "no response"})`);
+  return response.json();
+}
+
+export function cropPackedRgba(pageRgba, pageWidth, pageHeight, placement) {
+  const { x, y, width, height } = placement ?? {};
+  for (const [field, value] of Object.entries({ pageWidth, pageHeight, x, y, width, height })) {
+    if (!Number.isInteger(value) || value < (field === "width" || field === "height" ? 1 : 0)) {
+      throw new Error(`invalid packed frame ${field}: ${value}`);
+    }
+  }
+  if (x + width > pageWidth || y + height > pageHeight) throw new Error("packed frame exceeds atlas page bounds");
+  if (pageRgba.byteLength !== pageWidth * pageHeight * 4) throw new Error("packed atlas page is not RGBA");
+  const source = Buffer.isBuffer(pageRgba)
+    ? pageRgba
+    : Buffer.from(pageRgba.buffer, pageRgba.byteOffset, pageRgba.byteLength);
+  const output = Buffer.alloc(width * height * 4);
+  for (let row = 0; row < height; row += 1) {
+    const sourceStart = ((y + row) * pageWidth + x) * 4;
+    const targetStart = row * width * 4;
+    source.copy(output, targetStart, sourceStart, sourceStart + width * 4);
+  }
+  return output;
+}
+
+// The immutable full Crystal pack stores source frames in content-addressed atlas pages. This
+// mode reconstructs the same per-frame files/meta consumed by the browser without requiring a
+// Windows Crystal client checkout or committing opaque hand-cropped images.
+export async function assembleMagicEffectsFromPack({
+  assetBaseUrl,
+  packIndexUrl = DEFAULT_PACK_INDEX_PATH,
+  outputDir = DEFAULT_PUBLIC_DIR,
+  fetchImpl = fetch,
+  overwriteExisting = false,
+} = {}) {
+  validateEffectDefinitions();
+  const base = String(assetBaseUrl ?? "").replace(/\/$/, "");
+  if (!base) throw new Error("assetBaseUrl is required");
+  const indexUrl = assetUrl(base, packIndexUrl);
+  const packIndex = await fetchJson(fetchImpl, indexUrl, "full Crystal pack index");
+  await mkdir(outputDir, { recursive: true });
+  const available = [];
+  const perLibrary = {};
+  const additiveFrames = additiveFrameIndicesByLibrary();
+
+  for (const [library, indexSet] of neededByLibrary()) {
+    const libraryRecord = packIndex?.librariesByKey?.[library]
+      ?? packIndex?.libraries?.find((entry) => entry?.libraryKey === library || entry?.key === library);
+    if (!libraryRecord?.manifestUrl) throw new Error(`full Crystal pack index lacks ${library}`);
+    const shardUrl = assetUrl(base, libraryRecord.manifestUrl);
+    const shard = await fetchJson(fetchImpl, shardUrl, `${library} full-pack shard`);
+    const lookup = packFrameLookup(shard, shardUrl);
+    const missing = [...indexSet].filter((index) => {
+      const frame = lookup.get(index);
+      return !frame
+        || frame.noDraw
+        || frame.status !== "packed"
+        || !frame.image?.imageUrl
+        || ![frame.width, frame.height, frame.x, frame.y].every(Number.isInteger)
+        || frame.width <= 0
+        || frame.height <= 0;
+    });
+    assertNoMissingFrames(library, missing);
+
+    const exportDir = path.join(outputDir, library);
+    await mkdir(exportDir, { recursive: true });
+    const pageSources = new Map();
+    const frames = {};
+    let written = 0;
+    for (const index of [...indexSet].sort((left, right) => left - right)) {
+      const frame = lookup.get(index);
+      const mask = frame.mask?.status === "packed" ? frame.mask.image : null;
+      const mainOutputPath = path.join(exportDir, `${index}.png`);
+      if (overwriteExisting || !existsSync(mainOutputPath)) {
+        const mainPageUrl = assetUrl(base, frame.image.imageUrl);
+        if (!pageSources.has(mainPageUrl)) pageSources.set(mainPageUrl, []);
+        pageSources.get(mainPageUrl).push({ frame, index, placement: frame.image, mask: false });
+        written += 1;
+      }
+      if (mask?.imageUrl) {
+        const maskOutputPath = path.join(exportDir, `${index}.mask.png`);
+        if (overwriteExisting || !existsSync(maskOutputPath)) {
+          const maskPageUrl = assetUrl(base, mask.imageUrl);
+          if (!pageSources.has(maskPageUrl)) pageSources.set(maskPageUrl, []);
+          pageSources.get(maskPageUrl).push({ frame, index, placement: mask, mask: true });
+          written += 1;
+        }
+      }
+      frames[String(index)] = {
+        path: `/original-effects/${library}/${index}.png`,
+        width: frame.width,
+        height: frame.height,
+        x: frame.x,
+        y: frame.y,
+        shadowX: frame.shadowX ?? 0,
+        shadowY: frame.shadowY ?? 0,
+        maskPath: mask ? `/original-effects/${library}/${index}.mask.png` : null,
+        ...(mask ? {
+          maskWidth: frame.maskWidth ?? mask.width,
+          maskHeight: frame.maskHeight ?? mask.height,
+          maskX: frame.maskX ?? frame.x,
+          maskY: frame.maskY ?? frame.y,
+        } : {}),
+      };
+    }
+
+    for (const [pageUrl, sources] of pageSources) {
+      const response = await fetchImpl(pageUrl);
+      if (!response?.ok) throw new Error(`missing full-pack atlas page: ${pageUrl} (${response?.status ?? "no response"})`);
+      const pageBytes = Buffer.from(await response.arrayBuffer());
+      const decoded = await sharp(pageBytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      if (decoded.info.channels !== 4) throw new Error(`full-pack atlas page is not RGBA: ${pageUrl}`);
+      for (const source of sources) {
+        const cropped = cropPackedRgba(decoded.data, decoded.info.width, decoded.info.height, source.placement);
+        const renderRgba = additiveFrames.get(library)?.has(source.index)
+          ? normalizeAdditiveRgba(cropped)
+          : cropped;
+        const suffix = source.mask ? ".mask.png" : ".png";
+        await writeFile(
+          path.join(exportDir, `${source.index}${suffix}`),
+          encodePng(source.placement.width, source.placement.height, renderRgba, 1),
+        );
+      }
+    }
+
+    await writeFile(
+      path.join(exportDir, "meta.json"),
+      `${JSON.stringify({ count: shard.frameSlotCount ?? lookup.size, frames }, null, 2)}\n`,
+    );
+    available.push(library);
+    perLibrary[library] = { requested: indexSet.size, covered: indexSet.size, written, pages: pageSources.size, missing: 0 };
+  }
+  await writeEffectsManifest(outputDir, available, "assemble-from-full-pack");
+  return { outputDir, available, spellCount: SPELL_EFFECTS.length, perLibrary };
 }
 
 export async function assembleMagicEffectsFromMeta({ assetBaseUrl, outputDir = DEFAULT_PUBLIC_DIR, fetchImpl = fetch } = {}) {
@@ -480,6 +751,17 @@ async function main() {
   const outputDir = path.resolve(args.outputDir ?? DEFAULT_PUBLIC_DIR);
   const assetBaseUrl = args.assetBaseUrl ?? process.env.MIR2_ASSET_BASE_URL ?? process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
   const dataDir = args.fromLib === undefined ? null : args.dataDir ?? args._[0] ?? process.env.CRYSTAL_CLIENT_DATA_DIR ?? dataDirFromClientRoot(process.env.CRYSTAL_CLIENT_ROOT) ?? (existsSync(LOCAL_CRYSTAL_CLIENT_ROOT) ? path.join(LOCAL_CRYSTAL_CLIENT_ROOT, "Data") : DEFAULT_DATA_DIR);
+  if (assetBaseUrl && args.fromPack !== undefined) {
+    const summary = await assembleMagicEffectsFromPack({
+      assetBaseUrl,
+      packIndexUrl: args.packIndexUrl,
+      outputDir,
+      overwriteExisting: args.overwriteExisting === "true",
+    });
+    for (const [library, stats] of Object.entries(summary.perLibrary)) console.log(`[magic-effects] ${library}: covered ${stats.covered}/${stats.requested} frames; extracted ${stats.written} from ${stats.pages} pack page(s)`);
+    console.log(`[magic-effects] assembled ${summary.spellCount} spells from full pack -> ${path.join(outputDir, "effects.generated.json")}`);
+    return;
+  }
   if (assetBaseUrl) {
     const summary = await assembleMagicEffectsFromMeta({ assetBaseUrl, outputDir });
     for (const [library, stats] of Object.entries(summary.perLibrary)) console.log(`[magic-effects] ${library}: ${stats.found}/${stats.requested} frames mapped`);

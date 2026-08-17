@@ -35,6 +35,7 @@ const animation = {
 const crystal = {
   effectNameForNumber: (_assets, value) => (value === 31 ? "FireBall" : null),
   resolveSpellEffect: (_assets, name, direction) => (name === "FireBall" && direction === 3 ? animation : null),
+  resolveSpellCastEffect: (_assets, name, direction) => (name === "FireBall" && direction === 3 ? animation : null),
   resolveMapEffect: (_assets, name) => name === "FireBall" ? { ...animation, repeat: true } : null,
   resolveMapEffectByNumber: () => null,
   effectFrameAt: (instance, now) => {
@@ -51,6 +52,7 @@ const visualLayersSource = readFileSync(
   "utf8",
 );
 const shellSource = readFileSync(new URL("../app/original-client-shell.tsx", import.meta.url), "utf8");
+const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const globalCssSource = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
 const resolvedEffectLayerStart = visualLayersSource.indexOf("displayResolvedEffectFrames.map");
 const resolvedEffectLayerSource = visualLayersSource.slice(
@@ -61,6 +63,31 @@ assert.match(
   resolvedEffectLayerSource,
   /VIEWPORT_ENTITY_LEFT_ORIGIN[\s\S]*VIEWPORT_ENTITY_TOP_ORIGIN/,
   "Crystal effect frames must anchor from the tile top-left DrawLocation",
+);
+assert.match(
+  visualLayersSource,
+  /resolveSpellProjectileEffect[\s\S]*resolveSpellImpactEffect[\s\S]*data-projectile-phase/,
+  "projectile and impact phases must render from source atlas frames",
+);
+assert.match(
+  pageSource,
+  /case "Magic":[\s\S]*enqueueSceneEffect\(\{ \.\.\.payload, objectId: worldRef\.current\.playerObjectId \}, "spell"\)[\s\S]*spawnRangeProjectile/,
+  "the local player Magic packet must enter the same cast/projectile renderer as ObjectMagic",
+);
+assert.match(
+  pageSource,
+  /travelEndsAt \+ \(spellOrEffect === undefined \? 0 : 2_100\)/,
+  "magic projectile state must survive long enough to render the longest source impact phase",
+);
+assert.match(
+  pageSource,
+  /duplicateMagicProjectile[\s\S]*startedAt - entry\.startedAt <= 500/,
+  "Magic, ObjectMagic and ObjectProjectile echoes must collapse to one visual projectile",
+);
+assert.match(
+  pageSource,
+  /duplicateTransientSpell[\s\S]*Math\.abs\(entry\.startedAt - startedAt\) <= 500/,
+  "the local Magic/ObjectMagic echo must collapse to one caster effect",
 );
 assert.doesNotMatch(
   resolvedEffectLayerSource,
@@ -155,4 +182,4 @@ assert.equal(
   "ObjectSpell resolves the repeating ground animation after the cast animation would end",
 );
 
-console.log("scene effect runtime: 10 passed");
+console.log("scene effect runtime: 15 passed");

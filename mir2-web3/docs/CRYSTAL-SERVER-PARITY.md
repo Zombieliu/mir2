@@ -1,5 +1,21 @@
 # Crystal Server Parity
 
+> Latest level-50 skill parity note: 2026-08-18 verifies all 63 active
+> Warrior/Wizard/Taoist books with required level <=50 across imported source
+> data, protocol mapping, personal runtime, shared-Zone authority, Gateway
+> route, profile availability, book acquisition and original visual routing.
+> The implementation includes Crystal-specific reagent consumption, stat
+> scaling, melee geometry and delayed hits, movement/control, AoE/ground
+> lifetimes, buffs/debuffs, poison, healing/reincarnation and summons. Direct
+> FireBang/IceStorm retains its existing immediate target contract; their
+> object-id-zero form uses authoritative ground resolution. Zone-native Buffs
+> notify their owner on expiry, while Buffs mirrored from the personal runtime
+> remain observer-only at Zone expiry to avoid duplicate owner packets. The
+> audit deliberately excludes the commented-out FastMove initializer and
+> classifies SlashingBurst/IceThrust at level 53 as adjacent, not <=50. These
+> are deterministic server/client implementation gates; real learned-book
+> browser casts and human timing/feel remain separate acceptance evidence.
+
 > Latest StartGame transform parity note: 2026-08-15 distinguishes a real map
 > boundary from the bounded collision window used by starter rendering. Loaded
 > characters keep valid Crystal full-map coordinates even when those coordinates

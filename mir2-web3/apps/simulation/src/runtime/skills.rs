@@ -311,7 +311,6 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::MoonLight
         | Spell::DarkBody
         | Spell::Hiding
-        | Spell::MassHiding
         | Spell::ImmortalSkin
         | Spell::MagicShield
         | Spell::EnergyShield
@@ -327,11 +326,6 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::SummonVampire
         | Spell::SummonToad
         | Spell::SummonSnakes
-        | Spell::PetEnhancer
-        // Taoist support buffs applied to self/allies (no hostile target).
-        | Spell::SoulShield
-        | Spell::BlessedArmour
-        | Spell::UltimateEnhancer
         // Assassin self-centred hide that also mists nearby tiles.
         | Spell::MoonMist
         // Friendly decoy trap placed at the caster's own feet (no target/aim).
@@ -353,6 +347,9 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::Teleport
         | Spell::MassHealing
         | Spell::HealingCircle
+        | Spell::MassHiding
+        | Spell::SoulShield
+        | Spell::BlessedArmour
         | Spell::Curse => SkillCastKind::Ground,
         Spell::HellFire
         | Spell::Lightning
@@ -372,7 +369,9 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::IceThrust
         | Spell::HeavenlySword
         | Spell::ThunderStorm
+        | Spell::FlameField
         | Spell::BattleCry => SkillCastKind::Direction,
+        Spell::PetEnhancer | Spell::UltimateEnhancer => SkillCastKind::Target,
         _ => SkillCastKind::Target,
     }
 }
@@ -386,6 +385,11 @@ fn crystal_spell_is_offensive(spell: Spell) -> bool {
         Spell::Healing
             | Spell::MassHealing
             | Spell::HealingCircle
+            | Spell::MassHiding
+            | Spell::SoulShield
+            | Spell::BlessedArmour
+            | Spell::UltimateEnhancer
+            | Spell::PetEnhancer
             | Spell::Teleport
             | Spell::Blink
             | Spell::Portal
@@ -743,6 +747,11 @@ fn crystal_skill_context_preflight(
             if metadata.offensive && !crystal_magic_target_hostile(world, target_entity) {
                 return false;
             }
+            if matches!(spell, Some(Spell::PetEnhancer | Spell::UltimateEnhancer))
+                && !crystal_support_target_friendly(world, player, target_entity, spell)
+            {
+                return false;
+            }
             if !crystal_magic_range_allows(magic, &player_position, &target_position) {
                 return false;
             }
@@ -752,6 +761,22 @@ fn crystal_skill_context_preflight(
             crystal_magic_line_of_sight_clear(world, &player_position, &target_position)
         }
     }
+}
+
+fn crystal_support_target_friendly(
+    world: &World,
+    player: Entity,
+    target: Entity,
+    spell: Option<Spell>,
+) -> bool {
+    if target == player {
+        return !matches!(spell, Some(Spell::PetEnhancer));
+    }
+    let entry = world.entity(target);
+    let Some(agent) = entry.get::<MonsterAgent>() else {
+        return false;
+    };
+    !agent.dead && (!agent.hostile_to_player || entry.get::<SummonedMonster>().is_some())
 }
 
 fn crystal_healing_preflight(
@@ -831,6 +856,12 @@ fn crystal_spell_map_restrictions_allow(world: &World, spell: Spell) -> bool {
 fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
     match spell {
         Spell::SoulFireBall
+        | Spell::Hiding
+        | Spell::MassHiding
+        | Spell::SoulShield
+        | Spell::BlessedArmour
+        | Spell::UltimateEnhancer
+        | Spell::Hallucination
         | Spell::Curse
         | Spell::TrapHexagon
         | Spell::Plague
@@ -1149,7 +1180,7 @@ fn apply_manifest_spell_effect(
 
     match magic.spell.as_str() {
         "Fury" | "Haste" | "SwiftFeet" | "ProtectionField" | "Rage" | "LightBody" | "MoonLight"
-        | "DarkBody" | "Hiding" | "MassHiding" | "ImmortalSkin" => {
+        | "DarkBody" | "Hiding" | "ImmortalSkin" => {
             if let Some(buff_packets) = apply_crystal_self_buff_spell(world, skill, magic, tick) {
                 packets.extend(buff_packets);
             }
@@ -1157,7 +1188,7 @@ fn apply_manifest_spell_effect(
         }
         "SoulShield" | "BlessedArmour" | "UltimateEnhancer" => {
             packets.extend(apply_crystal_taoist_support_spell(
-                world, skill, magic, context, tick,
+                world, player, skill, magic, context, tick,
             ));
             return packets;
         }
@@ -1260,6 +1291,12 @@ fn apply_manifest_spell_effect(
         "MassHealing" => {
             packets.extend(apply_crystal_area_healing_spell(
                 world, player, skill, magic, context, tick, false,
+            ));
+            return packets;
+        }
+        "MassHiding" => {
+            packets.extend(apply_crystal_mass_hiding_spell(
+                world, player, skill, magic, context, tick,
             ));
             return packets;
         }
@@ -1657,6 +1694,17 @@ fn apply_crystal_self_buff_spell(
     magic: &CrystalMagicTemplate,
     tick: u64,
 ) -> Option<Vec<ServerPacket>> {
+    // Crystal `Hiding` consumes one equipped shape-0 amulet. Keep the actual
+    // mutation next to the effect as a second guard even though cast preflight
+    // prevents mana/cooldown changes when the reagent is absent.
+    let hiding_amulet_packet = if magic.spell == "Hiding" {
+        let Some(packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+            return Some(Vec::new());
+        };
+        Some(packet)
+    } else {
+        None
+    };
     let level = i32::from(skill.level);
     let (key, name, description, duration_ms, stats) = match magic.spell.as_str() {
         "Fury" => (
@@ -1724,15 +1772,17 @@ fn apply_crystal_self_buff_spell(
                 )
             }
         }
-        "Hiding" | "MassHiding" => (
+        "Hiding" => (
             "hiding",
-            if magic.spell == "MassHiding" {
-                "Mass Hiding"
-            } else {
-                "Hiding"
-            },
+            "Hiding",
             "Crystal hiding buff is active.",
-            (10_u64 + u64::from(skill.level).saturating_mul(10)).saturating_mul(1_000),
+            u64::try_from(
+                crystal_spell_attack_power(world, tick, magic)
+                    .saturating_add((i32::from(skill.level) + 1).saturating_mul(5))
+                    .max(1),
+            )
+            .unwrap_or(1)
+            .saturating_mul(1_000),
             Vec::new(),
         ),
         "ImmortalSkin" => {
@@ -1819,9 +1869,8 @@ fn apply_crystal_self_buff_spell(
         stats,
     };
     apply_or_refresh_buff(world, buff.clone());
-    let mut packets: Vec<ServerPacket> = client_buff_packet_for_state(world, &buff)
-        .into_iter()
-        .collect();
+    let mut packets: Vec<ServerPacket> = hiding_amulet_packet.into_iter().collect();
+    packets.extend(client_buff_packet_for_state(world, &buff));
     if matches!(key, "hiding" | "moon-light" | "dark-body") {
         if let Some(object_id) = current_player_object_id(world) {
             packets.push(ServerPacket::ObjectHidden {
@@ -1846,17 +1895,15 @@ fn crystal_scaled_stat_bonus(base: i32, multiplier: f64) -> i32 {
 fn apply_crystal_energy_shield_spell(
     world: &mut World,
     skill: &SkillState,
-    _magic: &CrystalMagicTemplate,
+    magic: &CrystalMagicTemplate,
     tick: u64,
 ) -> Vec<ServerPacket> {
     let level = i32::from(skill.level);
     let luck = current_player_crystal_stat(world, CRYSTAL_STAT_LUCK).max(0);
     let chance = (10 - (luck / 3 + level + 1)).max(2);
     let shield_percent = (100 + chance / 2) / chance;
-    let hp_gain = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
-        .saturating_add((level + 1).saturating_mul(5))
-        .max(1);
+    let spirit_power = crystal_spell_attack_power(world, tick, magic);
+    let hp_gain = ((spirit_power as f32 / 4.0) * (level + 1) as f32).round() as i32;
     let duration_ms = (30_u64 + u64::from(skill.level).saturating_mul(50)).saturating_mul(1_000);
     let buff = BuffState {
         key: "energy-shield".to_string(),
@@ -2267,6 +2314,7 @@ fn apply_crystal_warrior_area_control_spell(
 
 fn apply_crystal_taoist_support_spell(
     world: &mut World,
+    player: Entity,
     skill: &SkillState,
     magic: &CrystalMagicTemplate,
     context: Option<&SkillCastContext>,
@@ -2279,40 +2327,37 @@ fn apply_crystal_taoist_support_spell(
             let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
                 return packets;
             };
-            let player_level = active_player_level(world);
-            let value = player_level / 7 + 4;
-            let stat = if magic.spell == "SoulShield" {
-                CRYSTAL_STAT_MAX_MAC
-            } else {
-                CRYSTAL_STAT_MAX_AC
-            };
-            let duration_ms = u64::try_from(taoist_support_duration_seconds(world, skill))
-                .unwrap_or_default()
-                .saturating_mul(1_000);
-            let key = if magic.spell == "SoulShield" {
-                "soul-shield"
-            } else {
-                "blessed-armour"
-            };
-            let name = if magic.spell == "SoulShield" {
-                "Soul Shield"
-            } else {
-                "Blessed Armour"
-            };
-            let buff = BuffState {
-                key: key.to_string(),
-                name: name.to_string(),
-                description: format!("Crystal {name} buff is active."),
-                expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
-                attack_bonus: 0,
-                defence_bonus: (stat == CRYSTAL_STAT_MAX_AC).then_some(value).unwrap_or(0),
-                stats: vec![UserItemStat { stat, value }],
-            };
             packets.push(delete_packet);
-            apply_or_refresh_buff(world, buff.clone());
-            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
-                packets.push(packet);
-            }
+            let Some(player_object_id) = current_player_object_id(world) else {
+                return packets;
+            };
+            let Some(player_position) = entity_position(world, player) else {
+                return packets;
+            };
+            let target = context
+                .map(|context| context.target.clone())
+                .unwrap_or_else(|| player_position.clone());
+            let due_tick = queued_before_world_tick_due_tick(
+                tick,
+                ranged_attack_delay_ticks(&player_position, &target),
+            );
+            let duration_seconds = taoist_support_duration_seconds(world, skill, magic, tick);
+            world
+                .resource_mut::<RuntimeQueueResource>()
+                .pending_ground_spell_actions
+                .push(PendingGroundSpellAction {
+                    spell: if magic.spell == "SoulShield" {
+                        Spell::SoulShield
+                    } else {
+                        Spell::BlessedArmour
+                    },
+                    caster_object_id: player_object_id,
+                    damage: duration_seconds,
+                    locations: square_locations(&target, 3),
+                    next_tick: due_tick,
+                    expires_at_tick: u64::MAX,
+                    tick_interval: 1,
+                });
             packets
         }
         "UltimateEnhancer" => {
@@ -2329,9 +2374,10 @@ fn apply_crystal_taoist_support_spell(
                 Some(MirClass::Taoist) => CRYSTAL_STAT_MAX_SC,
                 _ => CRYSTAL_STAT_MAX_DC,
             };
-            let duration_ms = u64::try_from(taoist_support_duration_seconds(world, skill))
-                .unwrap_or_default()
-                .saturating_mul(1_000);
+            let duration_ms =
+                u64::try_from(taoist_support_duration_seconds(world, skill, magic, tick))
+                    .unwrap_or_default()
+                    .saturating_mul(1_000);
             let buff = BuffState {
                 key: "ultimate-enhancer".to_string(),
                 name: "Ultimate Enhancer".to_string(),
@@ -4318,6 +4364,28 @@ pub(super) fn tick_ground_spell_actions(
             continue;
         }
         if tick >= action.next_tick {
+            if action.spell == Spell::MassHealing {
+                apply_crystal_taoist_area_healing_action(world, &action, tick, packets);
+                continue;
+            }
+            if action.spell == Spell::HealingCircle {
+                apply_crystal_taoist_area_healing_action(world, &action, tick, packets);
+                action.next_tick = tick.saturating_add(action.tick_interval.max(1));
+                if action.next_tick < action.expires_at_tick {
+                    retained.push(action);
+                }
+                continue;
+            }
+            if action.spell == Spell::MassHiding {
+                apply_crystal_mass_hiding_action(world, &action, tick, packets);
+                // MassHiding is a one-shot delayed area buff, not a persistent
+                // ground field. Removing it here also prevents duplicate refreshes.
+                continue;
+            }
+            if matches!(action.spell, Spell::SoulShield | Spell::BlessedArmour) {
+                apply_crystal_taoist_area_support_action(world, &action, tick, packets);
+                continue;
+            }
             let mut detonated_trap = false;
             if matches!(
                 action.spell,
@@ -4506,24 +4574,44 @@ fn apply_crystal_area_healing_spell(
     tick: u64,
     healing_circle: bool,
 ) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
     let Some(player_position) = entity_position(world, player) else {
         return Vec::new();
     };
     let target = context
         .map(|context| context.target.clone())
         .unwrap_or_else(|| player_position.clone());
-    if tile_distance(&player_position, &target) > 1 {
-        return Vec::new();
-    }
-
     let delay_ms = if healing_circle { 1_700 } else { 500 };
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(delay_ms));
-    let heal = if healing_circle {
-        25
+    let value = crystal_spell_damage(world, tick, magic, skill.level).max(1);
+    let duration_ticks = if healing_circle {
+        (10_u64 + u64::from(skill.level).saturating_mul(5))
+            .saturating_mul(combat_delay_ticks(1_000))
     } else {
-        crystal_spell_damage(world, tick, magic, skill.level)
+        1
     };
-    schedule_heal_to_player(world, due_tick, heal);
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(PendingGroundSpellAction {
+            spell: if healing_circle {
+                Spell::HealingCircle
+            } else {
+                Spell::MassHealing
+            },
+            caster_object_id: player_object_id,
+            locations: square_locations(&target, 1),
+            damage: value,
+            next_tick: due_tick,
+            expires_at_tick: if healing_circle {
+                due_tick.saturating_add(duration_ticks)
+            } else {
+                u64::MAX
+            },
+            tick_interval: combat_delay_ticks(400),
+        });
 
     if healing_circle {
         let object_id = current_player_object_id(world)
@@ -4550,6 +4638,348 @@ fn apply_crystal_area_healing_spell(
     }
 
     Vec::new()
+}
+
+fn apply_crystal_taoist_area_healing_action(
+    world: &mut World,
+    action: &PendingGroundSpellAction,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let healing_circle = action.spell == Spell::HealingCircle;
+    let heal = if healing_circle { 25 } else { action.damage };
+
+    if let Some(player) = player_entity(world) {
+        let player_in_area = entity_position(world, player)
+            .is_some_and(|position| action.locations.iter().any(|cell| cell == &position));
+        if player_in_area {
+            let mut healed = false;
+            let updated_vitals = {
+                let mut entry = world.entity_mut(player);
+                let Some(mut vitals) = entry.get_mut::<PlayerVitals>() else {
+                    return;
+                };
+                if vitals.hp > 0 && vitals.hp < vitals.max_hp {
+                    vitals.hp = vitals.hp.saturating_add(heal).min(vitals.max_hp);
+                    healed = true;
+                }
+                *vitals
+            };
+            if healed {
+                world.resource_mut::<PlayerRuntimeResource>().player_vitals = updated_vitals;
+                if let Some(info) = object_health_info_for_entity(world, player, 0) {
+                    packets.push(ServerPacket::ObjectHealth { info });
+                }
+                if let Some(object_id) = current_player_object_id(world) {
+                    packets.push(ServerPacket::ObjectEffect {
+                        info: ObjectEffectInfo {
+                            object_id,
+                            effect: CRYSTAL_SPELL_EFFECT_HEALING,
+                            effect_type: 0,
+                            delay_time: 0,
+                            time: 0,
+                        },
+                    });
+                }
+            }
+        }
+    }
+
+    let monster_entities = world
+        .query_filtered::<Entity, bevy_ecs::query::With<Monster>>()
+        .iter(world)
+        .collect::<Vec<_>>();
+    let mut friendly_to_heal = Vec::new();
+    let mut hostile_to_damage = Vec::new();
+    for entity in monster_entities {
+        let entry = world.entity(entity);
+        let Some(agent) = entry.get::<MonsterAgent>() else {
+            continue;
+        };
+        if agent.dead {
+            continue;
+        }
+        let in_area = entry
+            .get::<Position>()
+            .is_some_and(|position| action.locations.iter().any(|cell| cell == &position.0));
+        if !in_area {
+            continue;
+        }
+        if !agent.hostile_to_player || entry.get::<SummonedMonster>().is_some() {
+            friendly_to_heal.push(entity);
+        } else if healing_circle {
+            hostile_to_damage.push(entity);
+        }
+    }
+
+    for entity in friendly_to_heal {
+        let healed = {
+            let mut entry = world.entity_mut(entity);
+            let Some(mut vitals) = entry.get_mut::<MonsterVitals>() else {
+                continue;
+            };
+            if vitals.hp <= 0 || vitals.hp >= vitals.max_hp {
+                false
+            } else {
+                vitals.hp = vitals.hp.saturating_add(heal).min(vitals.max_hp);
+                true
+            }
+        };
+        if healed {
+            if let Some(info) = object_health_info_for_entity(world, entity, 0) {
+                packets.push(ServerPacket::ObjectHealth { info });
+            }
+            if let Some(object_id) = entity_object_id(world, entity) {
+                packets.push(ServerPacket::ObjectEffect {
+                    info: ObjectEffectInfo {
+                        object_id,
+                        effect: CRYSTAL_SPELL_EFFECT_HEALING,
+                        effect_type: 0,
+                        delay_time: 0,
+                        time: 0,
+                    },
+                });
+            }
+        }
+    }
+
+    if healing_circle {
+        let previous_defence = set_cast_defence(world, Some(CrystalDefence::Mac));
+        for entity in hostile_to_damage {
+            if let Some(packet) = object_struck_packet(world, entity, action.caster_object_id) {
+                packets.push(packet);
+            }
+            damage_player_owned_monster_entity(world, entity, action.damage, tick, packets);
+            if let Some(object_id) = entity_object_id(world, entity) {
+                let slow_duration = 5_u64.saturating_add(deterministic_roll(
+                    tick,
+                    usize::try_from(object_id).unwrap_or_default(),
+                    0xC1AC_1E,
+                    5,
+                ));
+                apply_player_monster_poison(
+                    world,
+                    entity,
+                    4,
+                    0,
+                    tick,
+                    slow_duration.saturating_mul(combat_delay_ticks(1_000)),
+                );
+                packets.push(ServerPacket::ObjectPoisoned {
+                    object_id,
+                    poison: 4,
+                });
+            }
+        }
+        set_cast_defence(world, previous_defence);
+    }
+}
+
+fn apply_crystal_mass_hiding_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .unwrap_or_else(|| player_position.clone());
+
+    // Crystal HumanObject.MassHiding: distance * 50 ms + 500 ms, then apply
+    // Hiding to friendly players/monsters in a 3x3 square. The original source
+    // checks for one amulet but, unlike Hiding/SoulShield, does not ConsumeItem;
+    // cast preflight intentionally preserves that source quirk.
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target),
+    );
+    let spirit_power = crystal_spell_attack_power(world, tick, magic);
+    let duration_seconds = spirit_power
+        .saturating_div(2)
+        .saturating_add((i32::from(skill.level) + 1).saturating_mul(2))
+        .max(1);
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(PendingGroundSpellAction {
+            spell: Spell::MassHiding,
+            caster_object_id: player_object_id,
+            damage: duration_seconds,
+            locations: square_locations(&target, 1),
+            next_tick: due_tick,
+            // One-shot actions are removed immediately after execution; MAX keeps
+            // a delayed tick from expiring the action before it can run.
+            expires_at_tick: u64::MAX,
+            tick_interval: 1,
+        });
+
+    Vec::new()
+}
+
+fn apply_crystal_mass_hiding_action(
+    world: &mut World,
+    action: &PendingGroundSpellAction,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let duration_ticks = u64::try_from(action.damage)
+        .unwrap_or(1)
+        .max(1)
+        .saturating_mul(combat_delay_ticks(1_000));
+    let duration_ms = duration_ticks.saturating_mul(1_000);
+
+    if let Some(player) = player_entity(world) {
+        let player_in_area = entity_position(world, player)
+            .is_some_and(|position| action.locations.iter().any(|cell| cell == &position));
+        if player_in_area {
+            let buff = BuffState {
+                key: "hiding".to_string(),
+                name: "Mass Hiding".to_string(),
+                description: "Crystal mass hiding buff is active.".to_string(),
+                expires_at_tick: tick.saturating_add(duration_ticks),
+                attack_bonus: 0,
+                defence_bonus: 0,
+                stats: Vec::new(),
+            };
+            apply_or_refresh_buff(world, buff.clone());
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
+            }
+            if let Some(object_id) = current_player_object_id(world) {
+                packets.push(ServerPacket::ObjectHidden {
+                    object_id,
+                    hidden: true,
+                });
+            }
+        }
+    }
+
+    // The personal runtime can also contain player-owned/non-hostile summons.
+    // Surface the same timed Hiding state to clients; hostile world monsters are
+    // deliberately excluded. Remote players are owned by the shared Zone runtime
+    // and are outside this single-session action queue.
+    let friendly_monster_ids = world
+        .iter_entities()
+        .filter_map(|entry| {
+            let agent = entry.get::<MonsterAgent>()?;
+            if agent.dead || (agent.hostile_to_player && entry.get::<SummonedMonster>().is_none()) {
+                return None;
+            }
+            let position = &entry.get::<Position>()?.0;
+            if !action.locations.iter().any(|cell| cell == position) {
+                return None;
+            }
+            entry.get::<super::components::ObjectId>().map(|id| id.0)
+        })
+        .collect::<Vec<_>>();
+    for object_id in friendly_monster_ids {
+        packets.push(ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: crystal_buff_type_for_key("hiding").unwrap_or(2),
+                visible: false,
+                object_id,
+                expire_time: i64::try_from(duration_ms).unwrap_or(i64::MAX),
+                infinite: false,
+                paused: false,
+                stats: Vec::new(),
+                values: Vec::new(),
+            },
+        });
+        packets.push(ServerPacket::ObjectHidden {
+            object_id,
+            hidden: true,
+        });
+        queue_due_packet(
+            world,
+            tick.saturating_add(duration_ticks),
+            ServerPacket::ObjectHidden {
+                object_id,
+                hidden: false,
+            },
+        );
+    }
+}
+
+fn apply_crystal_taoist_area_support_action(
+    world: &mut World,
+    action: &PendingGroundSpellAction,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let (key, name, buff_type, stat) = if action.spell == Spell::SoulShield {
+        ("soul-shield", "Soul Shield", 6, CRYSTAL_STAT_MAX_MAC)
+    } else {
+        ("blessed-armour", "Blessed Armour", 7, CRYSTAL_STAT_MAX_AC)
+    };
+    let duration_ticks = u64::try_from(action.damage)
+        .unwrap_or(1)
+        .max(1)
+        .saturating_mul(combat_delay_ticks(1_000));
+    let duration_ms = duration_ticks.saturating_mul(1_000);
+
+    if let Some(player) = player_entity(world) {
+        let player_in_area = entity_position(world, player)
+            .is_some_and(|position| action.locations.iter().any(|cell| cell == &position));
+        if player_in_area {
+            let value = active_player_level(world)
+                .saturating_div(7)
+                .saturating_add(4);
+            let buff = BuffState {
+                key: key.to_string(),
+                name: name.to_string(),
+                description: format!("Crystal {name} buff is active."),
+                expires_at_tick: tick.saturating_add(duration_ticks),
+                attack_bonus: 0,
+                defence_bonus: (stat == CRYSTAL_STAT_MAX_AC).then_some(value).unwrap_or(0),
+                stats: vec![UserItemStat { stat, value }],
+            };
+            apply_or_refresh_buff(world, buff.clone());
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
+            }
+        }
+    }
+
+    let friendly_monsters = world
+        .iter_entities()
+        .filter_map(|entry| {
+            let agent = entry.get::<MonsterAgent>()?;
+            if agent.dead || (agent.hostile_to_player && entry.get::<SummonedMonster>().is_none()) {
+                return None;
+            }
+            let position = &entry.get::<Position>()?.0;
+            if !action.locations.iter().any(|cell| cell == position) {
+                return None;
+            }
+            let object_id = entry.get::<super::components::ObjectId>()?.0;
+            Some((object_id, i32::from(monster_level(world, entry.id()))))
+        })
+        .collect::<Vec<_>>();
+    for (object_id, level) in friendly_monsters {
+        packets.push(ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type,
+                visible: false,
+                object_id,
+                expire_time: i64::try_from(duration_ms).unwrap_or(i64::MAX),
+                infinite: false,
+                paused: false,
+                stats: vec![UserItemStat {
+                    stat,
+                    value: level.saturating_div(7).saturating_add(4),
+                }],
+                values: Vec::new(),
+            },
+        });
+    }
 }
 
 fn apply_crystal_curse_spell(
@@ -6804,9 +7234,13 @@ fn apply_crystal_arrow_green_poison(
     );
 }
 
-fn taoist_support_duration_seconds(world: &World, skill: &SkillState) -> i32 {
-    let spell_power = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC));
+fn taoist_support_duration_seconds(
+    world: &World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> i32 {
+    let spell_power = crystal_spell_attack_power(world, tick, magic);
     spell_power
         .saturating_mul(4)
         .saturating_add((i32::from(skill.level) + 1).saturating_mul(50))
@@ -6994,10 +7428,46 @@ pub(super) fn zone_magic_inventory_components(
     let component =
         |item_key: String, quantity| SharedSkillItemConsumptionComponent { item_key, quantity };
     match spell {
+        Spell::SoulFireBall
+        | Spell::Hiding
+        | Spell::MassHiding
+        | Spell::SoulShield
+        | Spell::BlessedArmour
+        | Spell::UltimateEnhancer
+        | Spell::Hallucination
+        | Spell::Curse
+        | Spell::TrapHexagon
+        | Spell::Trap
+        | Spell::DelayedExplosion
+        | Spell::ExplosiveTrap
+        | Spell::BindingShot => Some(vec![component(
+            equipped_crystal_amulet_component(world, 0, 1)?,
+            1,
+        )]),
+        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+            Some(vec![component(
+                equipped_crystal_poison_component(world, None, 1)?,
+                1,
+            )])
+        }
         Spell::PoisonCloud => Some(vec![
             component(equipped_crystal_amulet_component(world, 0, 5)?, 5),
             component(equipped_crystal_poison_component(world, Some(1), 5)?, 5),
         ]),
+        Spell::Plague => {
+            let mut components = vec![component(
+                equipped_crystal_amulet_component(world, 0, 1)?,
+                1,
+            )];
+            if let Some(poison) = equipped_crystal_poison_component(world, None, 1) {
+                components.push(component(poison, 1));
+            }
+            Some(components)
+        }
+        Spell::Reincarnation => Some(vec![component(
+            equipped_crystal_amulet_component(world, 3, 1)?,
+            1,
+        )]),
         Spell::SummonSkeleton => Some(vec![component(
             equipped_crystal_amulet_component(world, 0, 1)?,
             1,
@@ -7012,6 +7482,29 @@ pub(super) fn zone_magic_inventory_components(
         )]),
         _ => Some(Vec::new()),
     }
+}
+
+/// Preserve the Crystal poison colour selected by the equipped poison stack
+/// while the gateway moves the cast into the shared Zone runtime. Shape 1 is
+/// green poison, shape 2 is red poison, and zero means no poison component.
+pub(super) fn zone_magic_inventory_item_param(world: &World, spell: Spell) -> u8 {
+    if !matches!(spell, Spell::Poisoning | Spell::Plague) {
+        return 0;
+    }
+    let inventory = world.resource::<super::resources::InventoryResource>();
+    inventory
+        .equipment_items
+        .iter()
+        .find_map(|item| {
+            let shape = item.shape?;
+            (!item.is_broken()
+                && item.quantity > 0
+                && matches!(shape, 1 | 2)
+                && crystal_item_template_for_dynamic_key(&item.key)
+                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET))
+            .then(|| u8::try_from(shape).unwrap_or_default())
+        })
+        .unwrap_or_default()
 }
 
 fn consume_equipped_crystal_poison(
@@ -7050,6 +7543,32 @@ pub(super) fn consume_zone_magic_inventory_components(
     spell: Spell,
 ) -> Option<Vec<ServerPacket>> {
     match spell {
+        Spell::SoulFireBall
+        | Spell::Hiding
+        | Spell::SoulShield
+        | Spell::BlessedArmour
+        | Spell::UltimateEnhancer
+        | Spell::Hallucination
+        | Spell::Curse
+        | Spell::TrapHexagon
+        | Spell::Trap
+        | Spell::DelayedExplosion
+        | Spell::ExplosiveTrap
+        | Spell::BindingShot => {
+            let delete_packet = consume_equipped_crystal_amulet(world, 0, 1)?;
+            Some(vec![delete_packet])
+        }
+        // Crystal's MassHiding checks GetAmulet(1), but deliberately does not
+        // call ConsumeItem. The gateway uses the component list for preflight
+        // and this empty projection preserves that original quirk.
+        Spell::MassHiding => {
+            equipped_crystal_amulet_component(world, 0, 1)?;
+            Some(Vec::new())
+        }
+        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+            let (delete_packet, _) = consume_equipped_crystal_poison(world, None, 1)?;
+            Some(vec![delete_packet])
+        }
         Spell::PoisonCloud => {
             if equipped_crystal_amulet_component(world, 0, 5).is_none()
                 || equipped_crystal_poison_component(world, Some(1), 5).is_none()
@@ -7059,6 +7578,19 @@ pub(super) fn consume_zone_magic_inventory_components(
             let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 5)?;
             let (poison_delete_packet, _) = consume_equipped_crystal_poison(world, Some(1), 5)?;
             Some(vec![amulet_delete_packet, poison_delete_packet])
+        }
+        Spell::Plague => {
+            let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 1)?;
+            let mut packets = vec![amulet_delete_packet];
+            if let Some((poison_delete_packet, _)) = consume_equipped_crystal_poison(world, None, 1)
+            {
+                packets.push(poison_delete_packet);
+            }
+            Some(packets)
+        }
+        Spell::Reincarnation => {
+            let delete_packet = consume_equipped_crystal_amulet(world, 3, 1)?;
+            Some(vec![delete_packet])
         }
         Spell::SummonSkeleton => {
             let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 1)?;
@@ -7144,7 +7676,8 @@ pub(super) enum CrystalDamageChannel {
 pub(super) fn crystal_spell_damage_channel(spell: &str) -> CrystalDamageChannel {
     match spell {
         // Taoist spells roll Spirit-Crystal (SC).
-        "SoulFireBall" | "Healing" | "MassHealing" | "HealingCircle" | "Poisoning"
+        "SoulFireBall" | "Healing" | "MassHealing" | "HealingCircle" | "Hiding" | "MassHiding"
+        | "SoulShield" | "BlessedArmour" | "UltimateEnhancer" | "EnergyShield" | "Poisoning"
         | "PoisonCloud" | "Plague" | "Curse" | "TrapHexagon" | "Revelation" => {
             CrystalDamageChannel::Sc
         }

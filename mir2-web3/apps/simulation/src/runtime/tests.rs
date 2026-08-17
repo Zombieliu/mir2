@@ -42238,6 +42238,38 @@ fn casting_crystal_soul_shield_and_blessed_armour_consume_amulet_and_apply_targe
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 35);
     set_current_player_mp(&mut session, 500);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_box(&session, player, 5, 2, 2, 2);
+    set_player_position(&mut session, origin.clone());
+    let friendly = spawn_crystal_monster_for_test(
+        &mut session,
+        98_935,
+        "Yob",
+        Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        false,
+    );
+    let outside = spawn_crystal_monster_for_test(
+        &mut session,
+        98_936,
+        "Yob",
+        Point {
+            x: origin.x + 4,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        false,
+    );
+    for entity in [friendly, outside] {
+        let mut entry = session.app.world_mut().entity_mut(entity);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("monster agent");
+        agent.can_wander = false;
+        agent.next_move_tick = u64::MAX;
+    }
+    let friendly_value = 5; // Crystal Yob level 12 / 7 + 4.
     {
         let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
         skills
@@ -42252,6 +42284,10 @@ fn casting_crystal_soul_shield_and_blessed_armour_consume_amulet_and_apply_targe
     let soul_packets = session.cast_skill("soulshield");
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let armour_packets = session.cast_skill("blessedarmour");
+    let mut delayed_packets = Vec::new();
+    for _ in 0..4 {
+        delayed_packets.extend(session.tick());
+    }
     let snapshot = session.world_snapshot();
 
     assert!(soul_packets.iter().any(|packet| matches!(
@@ -42261,13 +42297,32 @@ fn casting_crystal_soul_shield_and_blessed_armour_consume_amulet_and_apply_targe
             count: 1
         }
     )));
-    assert!(soul_packets.iter().any(|packet| matches!(
+    assert!(delayed_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::AddBuff { buff }
             if buff.buff_type == 6
                 && !buff.visible
                 && buff.stats.iter().any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_MAC && stat.value == 9)
                 && buff.expire_time >= 150_000
+    )));
+    assert!(delayed_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.buff_type == 6
+                && buff.object_id == 98_935
+                && buff.stats.iter().any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_MAC && stat.value == friendly_value)
+    )));
+    assert!(delayed_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.buff_type == 7
+                && buff.object_id == 98_935
+                && buff.stats.iter().any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_AC && stat.value == friendly_value)
+    )));
+    assert!(!delayed_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.object_id == 98_936 && matches!(buff.buff_type, 6 | 7)
     )));
     assert!(armour_packets.iter().any(|packet| matches!(
         packet,
@@ -42276,7 +42331,7 @@ fn casting_crystal_soul_shield_and_blessed_armour_consume_amulet_and_apply_targe
             count: 1
         }
     )));
-    assert!(armour_packets.iter().any(|packet| matches!(
+    assert!(delayed_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::AddBuff { buff }
             if buff.buff_type == 7
@@ -42322,6 +42377,10 @@ fn magic_packet_crystal_ultimate_enhancer_consumes_amulet_and_scales_target_clas
             .expect("starter weapon");
         weapon.added_stats.push(UserItemStat {
             stat: super::CRYSTAL_STAT_MAX_SC,
+            value: 25,
+        });
+        weapon.added_stats.push(UserItemStat {
+            stat: super::CRYSTAL_STAT_MIN_SC,
             value: 25,
         });
     }
@@ -43543,6 +43602,128 @@ fn magic_packet_crystal_thunder_storm_hits_current_location_square_and_reduces_l
 }
 
 #[test]
+fn magic_packet_crystal_flame_field_hits_current_location_square_without_living_reduction() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 50);
+    set_current_player_mp(&mut session, 500);
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("starter weapon");
+        weapon.added_stats.extend([
+            UserItemStat {
+                stat: super::CRYSTAL_STAT_MIN_MC,
+                value: 200,
+            },
+            UserItemStat {
+                stat: super::CRYSTAL_STAT_MAX_MC,
+                value: 200,
+            },
+        ]);
+    }
+    let player = player_entity(session.app.world()).expect("player entity");
+    let (origin, inside_position, outside_position, requested_target) = (300..370)
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
+        .find_map(|candidate| {
+            let inside = offset_point(&candidate, MirDirection::Right, 1);
+            let requested = offset_point(&candidate, MirDirection::Right, 5);
+            let points = [candidate.clone(), inside.clone(), requested.clone()];
+            points
+                .iter()
+                .all(|point| {
+                    can_occupy(session.app.world(), point.clone(), Some(player))
+                        && is_combat_position(&session, point)
+                })
+                .then_some((candidate, inside, requested.clone(), requested))
+        })
+        .expect("open FlameField square");
+    set_player_position(&mut session, origin);
+    let inside = spawn_crystal_monster_for_test(
+        &mut session,
+        98_972,
+        "Yob",
+        inside_position,
+        MirDirection::Left,
+        true,
+    );
+    let outside = spawn_crystal_monster_for_test(
+        &mut session,
+        98_973,
+        "Yob",
+        outside_position,
+        MirDirection::Left,
+        true,
+    );
+    for entity in [inside, outside] {
+        session
+            .app
+            .world_mut()
+            .entity_mut(entity)
+            .insert(MonsterVitals {
+                hp: 1_000,
+                max_hp: 1_000,
+            });
+    }
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("FlameField", 3).expect("FlameField skill"));
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::FlameField,
+        direction: MirDirection::Down,
+        target_id: 0,
+        location: requested_target,
+        spell_target_lock: false,
+    });
+
+    let mut struck_ids = Vec::new();
+    for _ in 0..4 {
+        struck_ids.extend(
+            session
+                .tick()
+                .into_iter()
+                .filter_map(|packet| match packet {
+                    ServerPacket::ObjectStruck { info } if info.attacker_id == object_id => {
+                        Some(info.object_id)
+                    }
+                    _ => None,
+                }),
+        );
+    }
+
+    assert!(struck_ids.contains(&98_972));
+    assert!(!struck_ids.contains(&98_973));
+    let inside_hp = session
+        .app
+        .world()
+        .entity(inside)
+        .get::<MonsterVitals>()
+        .expect("inside target vitals")
+        .hp;
+    let outside_hp = session
+        .app
+        .world()
+        .entity(outside)
+        .get::<MonsterVitals>()
+        .expect("outside target vitals")
+        .hp;
+    assert!(
+        1_000 - inside_hp > 20,
+        "FlameField must not apply ThunderStorm's /10 living-target reduction"
+    );
+    assert_eq!(outside_hp, 1_000);
+}
+
+#[test]
 fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_thunder_element() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -43640,6 +43821,75 @@ fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_t
         .expect("thunder element vitals")
         .hp;
     assert!(after_hp < before_hp);
+}
+
+#[test]
+fn magic_packet_crystal_energy_repulsor_allows_level_50_taoist_browser_target_context() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 50);
+    set_current_player_mp(&mut session, 500);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let (origin, monster_origin) = (300..380)
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
+        .find_map(|candidate| {
+            let monster = offset_point(&candidate, MirDirection::Right, 1);
+            let push_1 = offset_point(&candidate, MirDirection::Right, 2);
+            let push_2 = offset_point(&candidate, MirDirection::Right, 3);
+            (can_occupy(session.app.world(), candidate.clone(), Some(player))
+                && is_combat_position(&session, &candidate)
+                && can_occupy(session.app.world(), monster.clone(), None)
+                && is_combat_position(&session, &monster)
+                && can_occupy(session.app.world(), push_1.clone(), None)
+                && is_combat_position(&session, &push_1)
+                && can_occupy(session.app.world(), push_2.clone(), None)
+                && is_combat_position(&session, &push_2))
+            .then_some((candidate, monster))
+        })
+        .expect("open EnergyRepulsor lane");
+    set_player_position(&mut session, origin.clone());
+    let target_object_id = 98_986;
+    spawn_crystal_monster_for_test(
+        &mut session,
+        target_object_id,
+        "RakingCat0",
+        monster_origin,
+        MirDirection::Left,
+        true,
+    );
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("EnergyRepulsor", 3).expect("EnergyRepulsor skill"));
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    // The web client supplies its selected hostile as target_id even for a direction spell.
+    // Direction preflight must ignore target locking and apply the control effect in front.
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::EnergyRepulsor,
+        direction: MirDirection::Right,
+        target_id: target_object_id,
+        location: origin,
+        spell_target_lock: true,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::EnergyRepulsor,
+            ..
+        }
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectPushed {
+            object_id: pushed_id,
+            ..
+        } if *pushed_id == target_object_id
+    )));
 }
 
 #[test]
@@ -44209,6 +44459,48 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
     set_current_player_hp(&mut session, 10);
     let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
+    let hostile = spawn_crystal_monster_for_test(
+        &mut session,
+        98_937,
+        "Yob",
+        Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let friendly = spawn_crystal_monster_for_test(
+        &mut session,
+        98_938,
+        "Yob",
+        Point {
+            x: origin.x,
+            y: origin.y + 1,
+        },
+        MirDirection::Left,
+        false,
+    );
+    for entity in [hostile, friendly] {
+        let mut entry = session.app.world_mut().entity_mut(entity);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("monster agent");
+        agent.can_wander = false;
+        agent.next_move_tick = u64::MAX;
+        agent.next_attack_tick = u64::MAX;
+    }
+    session
+        .app
+        .world_mut()
+        .entity_mut(hostile)
+        .insert(MonsterVitals {
+            hp: 1_000,
+            max_hp: 1_000,
+        });
+    session
+        .app
+        .world_mut()
+        .entity_mut(friendly)
+        .insert(MonsterVitals { hp: 1, max_hp: 100 });
     session
         .app
         .world_mut()
@@ -44239,6 +44531,7 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
 
     let mut spawned_circle = false;
     let mut healed = false;
+    let mut slowed_hostile = false;
     for _ in 0..5 {
         let tick_packets = session.tick();
         spawned_circle |= tick_packets.iter().any(|packet| {
@@ -44255,6 +44548,15 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
                     if info.object_id == object_id && info.percent > 16
             )
         });
+        slowed_hostile |= tick_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectPoisoned {
+                    object_id: 98_937,
+                    poison: 4,
+                }
+            )
+        });
     }
     assert!(
         spawned_circle,
@@ -44269,6 +44571,30 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
             .expect("player vitals")
             .hp
             > 10
+    );
+    assert!(
+        session
+            .app
+            .world()
+            .entity(friendly)
+            .get::<MonsterVitals>()
+            .expect("friendly vitals")
+            .hp
+            > 1
+    );
+    assert!(
+        session
+            .app
+            .world()
+            .entity(hostile)
+            .get::<MonsterVitals>()
+            .expect("hostile vitals")
+            .hp
+            < 1_000
+    );
+    assert!(
+        slowed_hostile,
+        "HealingCircle should slow hostile occupants"
     );
 }
 
@@ -45036,6 +45362,25 @@ fn magic_packet_crystal_hiding_hides_until_buff_expires() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("starter weapon");
+        weapon.added_stats.extend([
+            UserItemStat {
+                stat: super::CRYSTAL_STAT_MIN_SC,
+                value: 5,
+            },
+            UserItemStat {
+                stat: super::CRYSTAL_STAT_MAX_SC,
+                value: 5,
+            },
+        ]);
+    }
     session
         .app
         .world_mut()
@@ -45055,12 +45400,23 @@ fn magic_packet_crystal_hiding_hides_until_buff_expires() {
 
     assert!(packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::AddBuff { buff }
-            if buff.buff_type == 2
-                && !buff.visible
-                && buff.object_id == object_id
-                && buff.expire_time >= 10_000
+        ServerPacket::DeleteItem {
+            unique_id: 9,
+            count: 1
+        }
     )));
+
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::AddBuff { buff }
+                if buff.buff_type == 2
+                    && !buff.visible
+                    && buff.object_id == object_id
+                    && buff.expire_time >= 10_000
+        )),
+        "Hiding packets: {packets:#?}"
+    );
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ObjectHidden {
@@ -45086,11 +45442,161 @@ fn magic_packet_crystal_hiding_hides_until_buff_expires() {
 }
 
 #[test]
+fn magic_packet_crystal_mass_hiding_delays_three_by_three_friendly_area_without_consuming_amulet() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 50);
+    set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_box(&session, player, 4, 2, 2, 2);
+    set_player_position(&mut session, origin.clone());
+    let center = Point {
+        x: origin.x + 1,
+        y: origin.y,
+    };
+    let pet = spawn_crystal_monster_for_test(
+        &mut session,
+        98_932,
+        "Yob",
+        center.clone(),
+        MirDirection::Left,
+        false,
+    );
+    let hostile = spawn_crystal_monster_for_test(
+        &mut session,
+        98_933,
+        "Yob",
+        Point {
+            x: center.x,
+            y: center.y + 1,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let outside_friend = spawn_crystal_monster_for_test(
+        &mut session,
+        98_934,
+        "Yob",
+        Point {
+            x: center.x + 2,
+            y: center.y,
+        },
+        MirDirection::Left,
+        false,
+    );
+    for entity in [pet, hostile, outside_friend] {
+        let mut entity = session.app.world_mut().entity_mut(entity);
+        let mut agent = entity.get_mut::<MonsterAgent>().expect("monster agent");
+        agent.can_wander = false;
+        agent.next_move_tick = u64::MAX;
+        agent.next_attack_tick = u64::MAX;
+    }
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("MassHiding", 3).expect("MassHiding skill"));
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let cast_packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::MassHiding,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: center,
+        spell_target_lock: false,
+    });
+
+    assert!(cast_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::MassHiding,
+            cast: true,
+            ..
+        }
+    )));
+    assert!(!cast_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff } if buff.buff_type == 2
+    )));
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .any(|item| item.slot == EquipmentSlot::Amulet && item.quantity > 0));
+
+    let mut hidden_ids = Vec::new();
+    for _ in 0..5 {
+        hidden_ids.extend(
+            session
+                .tick()
+                .into_iter()
+                .filter_map(|packet| match packet {
+                    ServerPacket::ObjectHidden {
+                        object_id,
+                        hidden: true,
+                    } => Some(object_id),
+                    _ => None,
+                }),
+        );
+    }
+    assert!(hidden_ids.contains(&object_id));
+    assert!(hidden_ids.contains(&98_932));
+    assert!(!hidden_ids.contains(&98_933));
+    assert!(!hidden_ids.contains(&98_934));
+    assert!(session
+        .world_snapshot()
+        .active_buffs
+        .iter()
+        .any(|buff| buff.key == "hiding"));
+
+    let mut revealed_ids = Vec::new();
+    for _ in 0..20 {
+        revealed_ids.extend(
+            session
+                .tick()
+                .into_iter()
+                .filter_map(|packet| match packet {
+                    ServerPacket::ObjectHidden {
+                        object_id,
+                        hidden: false,
+                    } => Some(object_id),
+                    _ => None,
+                }),
+        );
+    }
+    assert!(revealed_ids.contains(&object_id));
+    assert!(revealed_ids.contains(&98_932));
+}
+
+#[test]
 fn magic_packet_crystal_energy_shield_applies_visible_hp_gain_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 48);
     set_current_player_mp(&mut session, 500);
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("starter weapon");
+        weapon.added_stats.extend([
+            UserItemStat {
+                stat: super::CRYSTAL_STAT_MIN_SC,
+                value: 20,
+            },
+            UserItemStat {
+                stat: super::CRYSTAL_STAT_MAX_SC,
+                value: 20,
+            },
+        ]);
+    }
     session
         .app
         .world_mut()

@@ -39,6 +39,7 @@
     "qa:quest-agent:1-50": "node ./scripts/quest-agent/run-1-50.mjs",
     "generate:quest-agent-route": "node ./scripts/quest-agent/generate-route-manifest.mjs",
     "qa:magic": "node ./scripts/qa-magic-skills.mjs",
+    "audit:three-class-skills": "node ./scripts/audit-three-class-level-50-skills.mjs",
     "qa:economy": "node ./scripts/qa-economy.mjs",
     "qa:quests": "node ./scripts/qa-quests.mjs",
     "qa:web3": "node ./scripts/qa-web3.mjs",

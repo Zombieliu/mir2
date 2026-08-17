@@ -3,6 +3,7 @@ import {
   effectNameForNumber,
   resolveMapEffect,
   resolveMapEffectByNumber,
+  resolveSpellCastEffect,
   resolveSpellEffect,
   type EffectAnimation,
   type EffectAssets,
@@ -61,7 +62,7 @@ function resolveEffectAnimation(
     // differ from the caster animation for the same Spell enum value.
     return effect.source === "objectSpell"
       ? resolveMapEffect(assets, name, effect.value) ?? resolveSpellEffect(assets, name, effect.direction)
-      : resolveSpellEffect(assets, name, effect.direction) ?? resolveMapEffect(assets, name, effect.value);
+      : resolveSpellCastEffect(assets, name, effect.direction) ?? resolveMapEffect(assets, name, effect.value);
   }
   return typeof effect.spellOrEffect === "number"
     ? resolveMapEffectByNumber(assets, effect.spellOrEffect, effect.value)

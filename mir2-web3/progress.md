@@ -1,5 +1,15 @@
 Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the current frontend input and NPC marker issues are landed and verified.
 
+## 2026-08-18 — Three-class original skills through level 50
+
+- Isolated branch/worktree: `codex/three-class-skill-parity` at `../numeron-worktrees/three-class-skill-parity`; no production deploy or push is part of this pass.
+- Added a deterministic audit for the active source set and closed 63/63 <=50 implementation gates: 15 Warrior, 23 Wizard and 25 Taoist. SlashingBurst/IceThrust are retained as the explicit level-53 boundary; commented-out FastMove is not fabricated as active content.
+- Completed personal-session and shared-Zone behavior for the missing class-specific melee, direct/ground/AoE magic, relocation/control, Buff/debuff, poison/reagent, healing/reincarnation and summon paths. Gateway routing and the `platinum_176` v25 book/profile surface are part of the same gate.
+- Exported and mapped 522 missing original source frames. The strict set resolves to 54 source-atlas spells, 8 actor-action skills and EnergyShield's source-defined no-extra-sprite route, with zero missing visual routes.
+- Regression fixes preserve immediate monster-target FireBang/IceStorm, separate personal mirrored Buff expiry from Zone-native owner notification, and align older tests with Entrapment pull, Hiding's amulet requirement and collision-valid melee range.
+- Automated evidence is green for the 63/63 audit, 73-spell effect export, 15 scene-effect runtime checks, Web typecheck, shared Zone 174/174, the complete Gateway package and the final full Simulation package (core 1182/1182 plus every integration suite, including `vertical_slice` 8/8).
+- Human boundary: the browser QA reached the normal world with a newly created account, but that character has no learned books; production correctly blocks `@GIVESKILL`. Therefore real learned-book casts and human combat feel are not claimed complete.
+
 ## 2026-08-13 — Autonomous real-client quest Agent
 
 - Goal: build a reusable, auditable Agent that progresses through Mir2 quests with the same visible mouse/keyboard interactions as a human, starting with Warrior q1-q5 on the exact PR #233 head and expanding by evidence-backed bands toward three-class 1-50.

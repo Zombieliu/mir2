@@ -9,6 +9,7 @@ import ts from "typescript";
 
 import {
   assembleMagicEffectsFromMeta,
+  cropPackedRgba,
   MAP_EFFECTS,
   normalizeAdditiveRgba,
   OBJECT_EFFECTS,
@@ -46,11 +47,13 @@ function effectsFetch(outputDir) {
 function allRequiredIndices() {
   const byLibrary = new Map();
   for (const spec of [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS]) {
-    if (!byLibrary.has(spec.library)) byLibrary.set(spec.library, new Set());
-    for (let value = 0; value < (spec.valueCount ?? 1); value += 1) {
-      for (let direction = 0; direction < (spec.directionCount ?? 1); direction += 1) {
-        const base = spec.base + value * (spec.valueStride ?? 0) + direction * (spec.directionStride ?? 0);
-        for (let frame = 0; frame < spec.count; frame += 1) byLibrary.get(spec.library).add(base + frame);
+    for (const phaseSpec of [spec, spec.projectile, spec.impact, spec.returnEffect].filter(Boolean)) {
+      if (!byLibrary.has(phaseSpec.library)) byLibrary.set(phaseSpec.library, new Set());
+      for (let value = 0; value < (phaseSpec.valueCount ?? 1); value += 1) {
+        for (let direction = 0; direction < (phaseSpec.directionCount ?? 1); direction += 1) {
+          const base = phaseSpec.base + value * (phaseSpec.valueStride ?? 0) + direction * (phaseSpec.directionStride ?? 0);
+          for (let frame = 0; frame < phaseSpec.count; frame += 1) byLibrary.get(phaseSpec.library).add(base + frame);
+        }
       }
     }
   }
@@ -131,6 +134,37 @@ async function testAssembleMode() {
     { base: 1390, count: 10, interval: 100 },
   );
   assert.equal(trapWorldSpell.repeat, true);
+  const expectedWorldSpells = {
+    FireWall: { library: "Magic", base: 1630, count: 6, interval: 120, light: 3, repeat: true },
+    PoisonCloud: { library: "Magic2", base: 1650, count: 20, interval: 120, light: 3, repeat: true },
+    Blizzard: { library: "Magic2", base: 1550, count: 30, interval: 100, light: 3, repeat: false },
+    MeteorStrike: { library: "Magic2", base: 1610, count: 30, interval: 100, light: 3, repeat: false },
+    Reincarnation: { library: "Magic2", base: 1680, count: 10, interval: 100, light: 1, repeat: true },
+    HealingCircle: { library: "Magic3", base: 630, count: 11, interval: 80, light: 3, repeat: true },
+  };
+  for (const [spell, expected] of Object.entries(expectedWorldSpells)) {
+    const actual = manifest.ground_effects.find(
+      (entry) => entry.spell === spell && entry.provenance.source.includes("SpellObject.cs"),
+    );
+    assert.ok(actual, `${spell} world effect is exported`);
+    assert.deepEqual(
+      {
+        library: actual.library,
+        base: actual.base,
+        count: actual.count,
+        interval: actual.interval,
+        light: actual.light,
+        repeat: actual.repeat,
+      },
+      expected,
+    );
+  }
+  assert.deepEqual(
+    manifest.ground_effects.find(
+      (entry) => entry.spell === "MeteorStrike" && entry.provenance.source.includes("SpellObject.cs"),
+    ).offset,
+    { x: 0, y: -20 },
+  );
   assert.deepEqual(manifest.spell_effect_enum, SPELL_EFFECT_ENUM.map((entry) => entry.name), "legacy enum array remains compatible");
   assert.deepEqual(manifest.spell_effect_map, SPELL_EFFECT_ENUM, "explicit numeric map is authoritative");
   assert.equal(manifest.map_effects.find((entry) => entry.effect === "Mine").effectId, 12);
@@ -148,6 +182,27 @@ async function testAssembleMode() {
     symbol: "Spell.Haste",
   });
 
+  const lightning = manifest.spell_effects.find((entry) => entry.spell === "Lightning");
+  assert.equal(lightning.spellId, 40);
+  assert.equal(lightning.directionStride, 20);
+  assert.deepEqual(lightning.directionRanges[7], { direction: 7, base: 1110, end: 1115 });
+  assert.deepEqual(
+    manifest.spell_effects.find((entry) => entry.spell === "SummonHolyDeva"),
+    {
+      ...manifest.spell_effects.find((entry) => entry.spell === "SummonSkeleton"),
+      spell: "SummonHolyDeva",
+      spellId: 80,
+      provenance: {
+        source: "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        symbol: "Spell.SummonHolyDeva",
+      },
+    },
+  );
+  const iceThrust = manifest.ground_effects.find((entry) => entry.spell === "IceThrust");
+  assert.equal(iceThrust.spellId, 53);
+  assert.equal(iceThrust.directionStride, 10);
+  assert.deepEqual(iceThrust.directionRanges[7], { direction: 7, base: 1860, end: 1869 });
+
   const magicMeta = JSON.parse(readFileSync(path.join(outputDir, "Magic", "meta.json"), "utf8"));
   assert.equal(magicMeta.frames["0"].path, "/original-ui/Magic/0.png");
   assert.equal(magicMeta.frames["0"].width, 4);
@@ -155,6 +210,14 @@ async function testAssembleMode() {
 
   const assets = await effects.loadEffectAssets(effectsFetch(outputDir));
   assert.equal(effects.resolveSpellEffect(assets, "FireBall").frames.length, 10);
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/0.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/10.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/170.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "SoulFireBall"), null);
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1160.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1360.png");
+  assert.equal(effects.resolveSpellReturnEffect(assets, "Vampirism").frames[0].path, "/original-ui/Magic2/1090.png");
+  assert.equal(effects.spellNameForNumber(12), "ProtectionField", "Spell ids do not collide with SpellEffect names");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").frames[0].path, "/original-ui/Magic/1390.png");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").repeat, true);
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 7).frames[0].path, "/original-ui/Magic2/2210.png");
@@ -207,8 +270,24 @@ function testAdditiveAlphaNormalization() {
   );
 }
 
+function testPackedAtlasCrop() {
+  const page = Uint8Array.from([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+  ]);
+  assert.deepEqual(
+    [...cropPackedRgba(page, 3, 2, { x: 1, y: 0, width: 2, height: 2 })],
+    [5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24],
+  );
+  assert.throws(
+    () => cropPackedRgba(page, 3, 2, { x: 2, y: 1, width: 2, height: 1 }),
+    /exceeds atlas page bounds/,
+  );
+}
+
 async function main() {
   testAdditiveAlphaNormalization();
+  testPackedAtlasCrop();
   await testAssembleMode();
   await testLibMode();
   await testStrictValidation();

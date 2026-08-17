@@ -157,7 +157,7 @@ fn skill_toggle_state(world: &World, spell: Spell) -> bool {
         .unwrap_or(false)
 }
 
-fn set_skill_toggle_state(world: &mut World, spell: Spell, enabled: bool) {
+pub(super) fn set_skill_toggle_state(world: &mut World, spell: Spell, enabled: bool) {
     let mut skills = world.resource_mut::<SkillResource>();
     if let Some((_, existing)) = skills
         .spell_toggles
@@ -2933,6 +2933,71 @@ impl SimulationSession {
             return 1;
         }
         crystal_player_zone_base_melee_damage(self.app.world())
+    }
+
+    /// Read the melee spell currently armed by Crystal's toggle packets. This
+    /// keeps shared-Zone attacks from silently degrading an armed skill to a
+    /// plain swing.
+    pub fn zone_melee_attack_profile(&self, requested_spell: Spell) -> (Spell, u8, i32) {
+        if !is_in_world(self.app.world()) {
+            return (Spell::None, 0, 1);
+        }
+        let world = self.app.world();
+        let active_spell = if requested_spell != Spell::None {
+            requested_spell
+        } else {
+            [
+                Spell::FlamingSword,
+                Spell::Slaying,
+                Spell::TwinDrakeBlade,
+                Spell::Thrusting,
+                Spell::CrossHalfMoon,
+                Spell::HalfMoon,
+            ]
+            .into_iter()
+            .find(|spell| skill_toggle_state(world, *spell))
+            .unwrap_or(Spell::None)
+        };
+        let base_damage = crystal_player_zone_base_melee_damage(world).max(1);
+        if active_spell == Spell::None {
+            return (Spell::None, 0, base_damage);
+        }
+        let spell_name = format!("{active_spell:?}");
+        let Some((magic, level)) = crystal_skill_magic(world, &spell_name) else {
+            return (Spell::None, 0, base_damage);
+        };
+        if matches!(
+            active_spell,
+            Spell::Slaying
+                | Spell::Thrusting
+                | Spell::HalfMoon
+                | Spell::CrossHalfMoon
+                | Spell::TwinDrakeBlade
+                | Spell::FlamingSword
+        ) && !skill_toggle_state(world, active_spell)
+        {
+            return (Spell::None, 0, base_damage);
+        }
+        (
+            active_spell,
+            level,
+            crystal_magic_damage_from_base(&magic, level, base_damage).max(1),
+        )
+    }
+
+    pub fn commit_zone_melee_attack_spell(&mut self, spell: Spell) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world())
+            || !matches!(spell, Spell::Slaying | Spell::FlamingSword)
+            || !skill_toggle_state(self.app.world(), spell)
+        {
+            return Vec::new();
+        }
+        set_skill_toggle_state(self.app.world_mut(), spell, false);
+        vec![ServerPacket::SpellToggle {
+            object_id: current_player_object_id(self.app.world()).unwrap_or_default(),
+            spell,
+            can_use: false,
+        }]
     }
 
     /// Authoritative combat stat block handed to the shared zone so the zone —

@@ -407,6 +407,10 @@ impl InProcessWorldRuntime {
         self.session.shared_skill_item_consumption_components(spell)
     }
 
+    pub fn shared_skill_item_param(&self, spell: Spell) -> u8 {
+        self.session.shared_skill_item_param(spell)
+    }
+
     pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {
         self.session.zone_monster_spawn_snapshot(object_id)
     }
@@ -417,6 +421,14 @@ impl InProcessWorldRuntime {
 
     pub fn zone_melee_attack_damage(&self) -> i32 {
         self.session.zone_melee_attack_damage()
+    }
+
+    pub fn zone_melee_attack_profile(&self, requested_spell: Spell) -> (Spell, u8, i32) {
+        self.session.zone_melee_attack_profile(requested_spell)
+    }
+
+    pub fn commit_zone_melee_attack_spell(&mut self, spell: Spell) -> Vec<ServerPacket> {
+        self.session.commit_zone_melee_attack_spell(spell)
     }
 
     pub fn zone_range_attack_profile(&self) -> (Spell, u8, i32) {

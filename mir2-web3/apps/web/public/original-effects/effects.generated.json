@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "generatedAt": null,
   "source": "Crystal client source (see per-entry provenance)",
-  "mode": "extract-from-lib",
+  "mode": "assemble-from-full-pack",
   "available": [
     "Effect",
     "Magic",
@@ -274,6 +274,40 @@
       }
     },
     {
+      "spell": "BlessedArmour",
+      "spellId": 71,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.BlessedArmour"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1340,
+        "count": 15,
+        "interval": 80,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
       "spell": "Blink",
       "spellId": 151,
       "library": "Magic",
@@ -442,6 +476,40 @@
       }
     },
     {
+      "spell": "Curse",
+      "spellId": 81,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.Curse"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 950,
+        "count": 24,
+        "interval": 83,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
       "spell": "DarkBody",
       "spellId": 103,
       "library": "Magic2",
@@ -479,6 +547,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.ElectricShock"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1570,
+        "count": 10,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -559,6 +641,34 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.FireBall"
+      },
+      "projectile": {
+        "library": "Magic",
+        "base": 10,
+        "count": 6,
+        "interval": 30,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 170,
+        "count": 10,
+        "interval": 60,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -579,6 +689,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.FireBang"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1660,
+        "count": 10,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -659,6 +783,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.FlameDisruptor"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 140,
+        "count": 10,
+        "interval": 60,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -699,6 +837,34 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.FrostCrunch"
+      },
+      "projectile": {
+        "library": "Magic2",
+        "base": 410,
+        "count": 4,
+        "interval": 30,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 570,
+        "count": 8,
+        "interval": 75,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -739,6 +905,68 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.GreatFireBall"
+      },
+      "projectile": {
+        "library": "Magic",
+        "base": 410,
+        "count": 6,
+        "interval": 30,
+        "kind": "projectile",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 570,
+        "count": 10,
+        "interval": 60,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "spell": "Hallucination",
+      "spellId": 76,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 48,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.Hallucination"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 1110,
+        "count": 10,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -823,6 +1051,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.Healing"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 370,
+        "count": 10,
+        "interval": 80,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -843,6 +1085,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.HealingCircle"
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 620,
+        "count": 10,
+        "interval": 120,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -927,6 +1183,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.HellFire"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 930,
+        "count": 6,
+        "interval": 83,
+        "kind": "ground",
+        "blend": true,
+        "light": 0,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -967,6 +1237,84 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.IceStorm"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 3850,
+        "count": 20,
+        "interval": 65,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "spell": "IceThrust",
+      "spellId": 53,
+      "library": "Magic2",
+      "base": 1790,
+      "count": 10,
+      "interval": 100,
+      "kind": "ground",
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1790,
+          "end": 1799
+        },
+        {
+          "direction": 1,
+          "base": 1800,
+          "end": 1809
+        },
+        {
+          "direction": 2,
+          "base": 1810,
+          "end": 1819
+        },
+        {
+          "direction": 3,
+          "base": 1820,
+          "end": 1829
+        },
+        {
+          "direction": 4,
+          "base": 1830,
+          "end": 1839
+        },
+        {
+          "direction": 5,
+          "base": 1840,
+          "end": 1849
+        },
+        {
+          "direction": 6,
+          "base": 1850,
+          "end": 1859
+        },
+        {
+          "direction": 7,
+          "base": 1860,
+          "end": 1869
+        }
+      ],
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.IceThrust"
       }
     },
     {
@@ -1007,6 +1355,70 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.LightBody"
+      }
+    },
+    {
+      "spell": "Lightning",
+      "spellId": 40,
+      "library": "Magic",
+      "base": 970,
+      "count": 6,
+      "interval": 100,
+      "kind": "cast",
+      "directionCount": 8,
+      "directionStride": 20,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 970,
+          "end": 975
+        },
+        {
+          "direction": 1,
+          "base": 990,
+          "end": 995
+        },
+        {
+          "direction": 2,
+          "base": 1010,
+          "end": 1015
+        },
+        {
+          "direction": 3,
+          "base": 1030,
+          "end": 1035
+        },
+        {
+          "direction": 4,
+          "base": 1050,
+          "end": 1055
+        },
+        {
+          "direction": 5,
+          "base": 1070,
+          "end": 1075
+        },
+        {
+          "direction": 6,
+          "base": 1090,
+          "end": 1095
+        },
+        {
+          "direction": 7,
+          "base": 1110,
+          "end": 1115
+        }
+      ],
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.Lightning"
       }
     },
     {
@@ -1087,6 +1499,54 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.MassHealing"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1800,
+        "count": 10,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "spell": "MassHiding",
+      "spellId": 68,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.MassHiding"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1540,
+        "count": 10,
+        "interval": 80,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1210,6 +1670,60 @@
       }
     },
     {
+      "spell": "Plague",
+      "spellId": 82,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.Plague"
+      },
+      "impact": {
+        "library": "Magic3",
+        "base": 110,
+        "count": 10,
+        "interval": 120,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "spell": "PoisonCloud",
+      "spellId": 83,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.PoisonCloud"
+      }
+    },
+    {
       "spell": "Poisoning",
       "spellId": 63,
       "library": "Magic",
@@ -1227,6 +1741,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.Poisoning"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 770,
+        "count": 10,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1351,6 +1879,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.Purification"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 620,
+        "count": 10,
+        "interval": 80,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1411,6 +1953,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.Revelation"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 3990,
+        "count": 10,
+        "interval": 100,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1478,6 +2034,74 @@
       }
     },
     {
+      "spell": "SoulFireBall",
+      "spellId": 64,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.SoulFireBall"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1360,
+        "count": 10,
+        "interval": 60,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "spell": "SoulShield",
+      "spellId": 69,
+      "library": "Magic",
+      "base": 1160,
+      "count": 3,
+      "interval": 30,
+      "kind": "projectile",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.SoulShield"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 1320,
+        "count": 15,
+        "interval": 80,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
       "spell": "StormEscape",
       "spellId": 55,
       "library": "Magic3",
@@ -1495,6 +2119,26 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.StormEscape"
+      }
+    },
+    {
+      "spell": "SummonHolyDeva",
+      "spellId": 80,
+      "library": "Magic",
+      "base": 1500,
+      "count": 10,
+      "interval": 60,
+      "kind": "cast",
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.SummonHolyDeva"
       }
     },
     {
@@ -1595,6 +2239,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.ThunderBolt"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 10,
+        "count": 5,
+        "interval": 80,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1675,6 +2333,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.TurnUndead"
+      },
+      "impact": {
+        "library": "Magic",
+        "base": 3930,
+        "count": 15,
+        "interval": 66,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1715,6 +2387,20 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.UltimateEnhancer"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 160,
+        "count": 15,
+        "interval": 66,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     },
     {
@@ -1735,10 +2421,78 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.Vampirism"
+      },
+      "impact": {
+        "library": "Magic2",
+        "base": 1060,
+        "count": 20,
+        "interval": 50,
+        "kind": "target",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "returnEffect": {
+        "library": "Magic2",
+        "base": 1090,
+        "count": 10,
+        "interval": 50,
+        "kind": "return",
+        "blend": true,
+        "light": 6,
+        "repeat": false,
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
       }
     }
   ],
   "ground_effects": [
+    {
+      "spell": "Blizzard",
+      "spellId": 50,
+      "library": "Magic2",
+      "base": 1550,
+      "count": 30,
+      "interval": 100,
+      "kind": "ground",
+      "blend": true,
+      "light": 3,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": -20
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.Blizzard"
+      }
+    },
+    {
+      "spell": "FireWall",
+      "spellId": 39,
+      "library": "Magic",
+      "base": 1630,
+      "count": 6,
+      "interval": 120,
+      "kind": "ground",
+      "blend": true,
+      "light": 3,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.FireWall"
+      }
+    },
     {
       "spell": "FlameField",
       "spellId": 49,
@@ -1757,6 +2511,110 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.FlameField"
+      }
+    },
+    {
+      "spell": "HealingCircle",
+      "spellId": 86,
+      "library": "Magic3",
+      "base": 630,
+      "count": 11,
+      "interval": 80,
+      "kind": "ground",
+      "blend": true,
+      "light": 3,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.HealingCircle"
+      }
+    },
+    {
+      "spell": "IceThrust",
+      "spellId": 53,
+      "library": "Magic2",
+      "base": 1790,
+      "count": 10,
+      "interval": 100,
+      "kind": "ground",
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1790,
+          "end": 1799
+        },
+        {
+          "direction": 1,
+          "base": 1800,
+          "end": 1809
+        },
+        {
+          "direction": 2,
+          "base": 1810,
+          "end": 1819
+        },
+        {
+          "direction": 3,
+          "base": 1820,
+          "end": 1829
+        },
+        {
+          "direction": 4,
+          "base": 1830,
+          "end": 1839
+        },
+        {
+          "direction": 5,
+          "base": 1840,
+          "end": 1849
+        },
+        {
+          "direction": 6,
+          "base": 1850,
+          "end": 1859
+        },
+        {
+          "direction": 7,
+          "base": 1860,
+          "end": 1869
+        }
+      ],
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "Spell.IceThrust"
+      }
+    },
+    {
+      "spell": "MeteorStrike",
+      "spellId": 52,
+      "library": "Magic2",
+      "base": 1610,
+      "count": 30,
+      "interval": 100,
+      "kind": "ground",
+      "blend": true,
+      "light": 3,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": -20
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.MeteorStrike"
       }
     },
     {
@@ -1797,6 +2655,46 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
         "symbol": "Spell.OneWithNature"
+      }
+    },
+    {
+      "spell": "PoisonCloud",
+      "spellId": 83,
+      "library": "Magic2",
+      "base": 1650,
+      "count": 20,
+      "interval": 120,
+      "kind": "ground",
+      "blend": true,
+      "light": 3,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.PoisonCloud"
+      }
+    },
+    {
+      "spell": "Reincarnation",
+      "spellId": 79,
+      "library": "Magic2",
+      "base": 1680,
+      "count": 10,
+      "interval": 100,
+      "kind": "ground",
+      "blend": true,
+      "light": 1,
+      "repeat": true,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/SpellObject.cs::Load",
+        "symbol": "Spell.Reincarnation"
       }
     },
     {

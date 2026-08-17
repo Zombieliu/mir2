@@ -4458,11 +4458,14 @@ fn zone_native_player_area_magic_damages_secondary_monsters_authoritatively() {
 
     let resolved = zone.tick(20);
     for target in [&first, &second] {
-        assert!(has_packet(&resolved, target, |packet| matches!(
-            packet,
-            ServerPacket::ObjectHealth { info }
-                if info.object_id == 9100 && info.percent == 80
-        )));
+        assert!(
+            has_packet(&resolved, target, |packet| matches!(
+                packet,
+                ServerPacket::ObjectHealth { info }
+                    if info.object_id == 9100 && info.percent == 80
+            )),
+            "expected primary FireBang health update for {target:?}, got {resolved:?}"
+        );
         assert!(has_packet(&resolved, target, |packet| matches!(
             packet,
             ServerPacket::ObjectHealth { info }
@@ -6003,13 +6006,16 @@ fn zone_native_player_magic_control_stops_monster_ai_until_expiry() {
         ServerPacket::ObjectPoisoned { object_id, poison }
             if *object_id == 9100 && *poison == 0
     )));
-    assert!(has_packet(&released_tick, &first, |packet| matches!(
-        packet,
-        ServerPacket::ObjectWalk { movement }
-            if movement.object_id == 9100
-                && movement.position == (Point { x: 333, y: 270 })
-                && movement.direction == MirDirection::Left
-    )));
+    assert!(
+        has_packet(&released_tick, &first, |packet| matches!(
+            packet,
+                ServerPacket::ObjectWalk { movement }
+                    if movement.object_id == 9100
+                    && movement.position == (Point { x: 331, y: 270 })
+                    && movement.direction == MirDirection::Left
+        )),
+        "expected monster AI to resume after Entrapment expiry: {released_tick:?}"
+    );
 }
 
 #[test]
@@ -6058,20 +6064,23 @@ fn zone_native_player_buff_stats_authoritatively_modify_damage_until_expiry() {
     )));
 
     let expired = zone.tick(200);
-    assert!(!has_packet(&expired, &first, |packet| matches!(
-        packet,
-        ServerPacket::RemoveBuff { object_id, buff_type }
-            if *object_id == 101 && *buff_type == 5
-    )));
+    assert!(
+        !has_packet(&expired, &first, |packet| matches!(
+            packet,
+            ServerPacket::RemoveBuff { object_id, buff_type }
+                if *object_id == 101 && *buff_type == 5
+        )),
+        "the Zone must not duplicate the personal session's owner expiry packet: {expired:?}"
+    );
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_monster_spawn(9101, 332, 270),
+        monster: native_monster_spawn(9101, 329, 270),
         now_ms: 610,
     });
     zone.handle(ZoneCommand::PlayerAttackObject {
         session_id: first.clone(),
         object_id: 9101,
-        direction: MirDirection::Right,
+        direction: MirDirection::Left,
         spell: 0,
         level: 0,
         attack_type: 0,
@@ -6337,13 +6346,16 @@ fn zone_native_player_healing_circle_spawns_spell_and_heals_in_zone() {
         } if *spell == Spell::HealingCircle && *target_id == 101
     )));
     let delayed = zone.tick(1_720);
-    assert!(has_packet(&delayed, &first, |packet| matches!(
-        packet,
-        ServerPacket::ObjectSpell { info }
-            if info.spell == Spell::HealingCircle
-                && info.object_id == 70_121
-                && info.location == (Point { x: 330, y: 270 })
-    )));
+    assert!(
+        has_packet(&delayed, &first, |packet| matches!(
+            packet,
+            ServerPacket::ObjectSpell { info }
+                if info.spell == Spell::HealingCircle
+                    && info.object_id >= 1_000_000
+                    && info.location == (Point { x: 330, y: 270 })
+        )),
+        "expected HealingCircle ground spell packet: {delayed:?}"
+    );
     assert!(has_packet(&delayed, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectHealth { info } if info.object_id == 101 && info.percent > 16
@@ -9806,4 +9818,1164 @@ fn aoi_grid_relocates_moving_shared_monster_before_visibility_diff() {
         )),
         "a moved monster must be discoverable from its new AOI grid cell"
     );
+}
+
+#[test]
+fn level50_warrior_melee_skills_keep_crystal_range_shapes_and_hit_timing() {
+    let combat_stats = ZonePlayerCombatStats {
+        min_dc: 100,
+        max_dc: 100,
+        accuracy: 100,
+        ..ZonePlayerCombatStats::default()
+    };
+
+    // Thrusting is the only classic warrior weapon skill that may acquire a
+    // target two tiles ahead. At level 3 its 0.25 + 3*0.25 multiplier is 1.0.
+    let mut thrusting_zone = zone();
+    let warrior = session("warrior");
+    let mut warrior_join =
+        join_with_combat_stats("warrior", 101, "Warrior", 330, 270, combat_stats);
+    warrior_join.level = 50;
+    thrusting_zone.handle(ZoneCommand::Join(warrior_join));
+    let mut thrust_target = native_monster_spawn(9_100, 332, 270);
+    thrust_target.max_hp = 500;
+    thrust_target.hp = 500;
+    thrusting_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: warrior.clone(),
+        monster: thrust_target,
+        now_ms: 0,
+    });
+    let launch = thrusting_zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: warrior.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Right,
+        spell: Spell::Thrusting as u8,
+        level: 3,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 20,
+    });
+    assert!(has_packet(&launch, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info }
+            if info.spell == Spell::Thrusting as u8 && info.level == 3
+    )));
+    assert_eq!(
+        damage_indicator_for(&thrusting_zone.tick(20), 9_100),
+        Some(100)
+    );
+
+    // HalfMoon damages the forward semicircle after 300 ms, while leaving the
+    // tile directly behind untouched.
+    let mut half_moon_zone = zone();
+    let mut warrior_join =
+        join_with_combat_stats("warrior", 101, "Warrior", 330, 270, combat_stats);
+    warrior_join.level = 50;
+    half_moon_zone.handle(ZoneCommand::Join(warrior_join));
+    for (object_id, x, y) in [
+        (9_100, 331, 270),
+        (9_101, 331, 269),
+        (9_102, 330, 271),
+        (9_103, 329, 270),
+    ] {
+        let mut spawn = native_monster_spawn(object_id, x, y);
+        spawn.max_hp = 500;
+        spawn.hp = 500;
+        half_moon_zone.handle(ZoneCommand::SpawnMonster {
+            session_id: warrior.clone(),
+            monster: spawn,
+            now_ms: 0,
+        });
+    }
+    half_moon_zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: warrior.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Right,
+        spell: Spell::HalfMoon as u8,
+        level: 3,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 20,
+    });
+    assert_eq!(
+        damage_indicator_for(&half_moon_zone.tick(20), 9_100),
+        Some(60)
+    );
+    let half_moon_impact = half_moon_zone.tick(320);
+    assert_eq!(damage_indicator_for(&half_moon_impact, 9_101), Some(60));
+    assert_eq!(damage_indicator_for(&half_moon_impact, 9_102), Some(60));
+    assert_eq!(damage_indicator_for(&half_moon_impact, 9_103), None);
+
+    // CrossHalfMoon adds the rear half of the ring.
+    let mut cross_zone = zone();
+    let mut warrior_join =
+        join_with_combat_stats("warrior", 101, "Warrior", 330, 270, combat_stats);
+    warrior_join.level = 50;
+    cross_zone.handle(ZoneCommand::Join(warrior_join));
+    for (object_id, x) in [(9_100, 331), (9_101, 329)] {
+        let mut spawn = native_monster_spawn(object_id, x, 270);
+        spawn.max_hp = 500;
+        spawn.hp = 500;
+        cross_zone.handle(ZoneCommand::SpawnMonster {
+            session_id: warrior.clone(),
+            monster: spawn,
+            now_ms: 0,
+        });
+    }
+    cross_zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: warrior.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Right,
+        spell: Spell::CrossHalfMoon as u8,
+        level: 3,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 20,
+    });
+    cross_zone.tick(20);
+    assert_eq!(damage_indicator_for(&cross_zone.tick(320), 9_101), Some(70));
+
+    // TwinDrakeBlade retains the original two delayed hits and stun surface.
+    let mut twin_zone = zone();
+    let mut warrior_join =
+        join_with_combat_stats("warrior", 101, "Warrior", 330, 270, combat_stats);
+    warrior_join.level = 50;
+    twin_zone.handle(ZoneCommand::Join(warrior_join));
+    let mut twin_target = native_monster_spawn(9_100, 331, 270);
+    twin_target.max_hp = 500;
+    twin_target.hp = 500;
+    twin_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: warrior.clone(),
+        monster: twin_target,
+        now_ms: 0,
+    });
+    let twin_launch = twin_zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: warrior.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Right,
+        spell: Spell::TwinDrakeBlade as u8,
+        level: 3,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 20,
+    });
+    assert!(has_packet(&twin_launch, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::ObjectEffect { info } if info.object_id == 9_100 && info.effect == 5
+    )));
+    assert!(has_packet(&twin_launch, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned {
+            object_id: 9_100,
+            poison: 16
+        }
+    )));
+    assert_eq!(damage_indicator_for(&twin_zone.tick(319), 9_100), None);
+    assert_eq!(damage_indicator_for(&twin_zone.tick(320), 9_100), Some(110));
+    assert_eq!(damage_indicator_for(&twin_zone.tick(420), 9_100), Some(110));
+}
+
+#[test]
+fn level50_warrior_entrapment_pulls_and_counterattack_closes_shared_combat_loop() {
+    let mut entrapment_zone = zone();
+    let warrior = session("warrior");
+    let mut warrior_join = join("warrior", 101, "Warrior", 330, 270);
+    warrior_join.level = 50;
+    entrapment_zone.handle(ZoneCommand::Join(warrior_join));
+    entrapment_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: warrior.clone(),
+        monster: native_monster_spawn(9_100, 336, 270),
+        now_ms: 0,
+    });
+    let cast = entrapment_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: warrior.clone(),
+        object_id: 9_100,
+        spell: Spell::Entrapment,
+        direction: MirDirection::Right,
+        target: Point { x: 336, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert_eq!(
+        entrapment_zone
+            .native_monster_snapshots()
+            .into_iter()
+            .find(|monster| monster.object_id == 9_100)
+            .expect("entrapped monster")
+            .position,
+        Point { x: 332, y: 270 }
+    );
+    assert_eq!(
+        packets_for(&cast, &warrior)
+            .into_iter()
+            .filter(|packet| matches!(
+                packet,
+                ServerPacket::ObjectPushed {
+                    object_id: 9_100,
+                    ..
+                }
+            ))
+            .count(),
+        4
+    );
+    assert!(has_packet(&cast, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned {
+            object_id: 9_100,
+            poison: 256
+        }
+    )));
+
+    let mut counter_zone = zone();
+    let mut counter_join = join_with_combat_stats(
+        "warrior",
+        101,
+        "Warrior",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_dc: 100,
+            max_dc: 100,
+            accuracy: 100,
+            ..ZonePlayerCombatStats::default()
+        },
+    );
+    counter_join.level = 50;
+    counter_join.hp = 1_000;
+    counter_join.max_hp = 1_000;
+    counter_zone.handle(ZoneCommand::Join(counter_join));
+    counter_zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: warrior.clone(),
+        owner_local_object_id: 1_001,
+        packets: vec![ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: 18,
+                visible: true,
+                object_id: 1_001,
+                expire_time: 5_000,
+                infinite: false,
+                paused: false,
+                stats: vec![
+                    UserItemStat { stat: 0, value: 20 },
+                    UserItemStat { stat: 1, value: 20 },
+                    UserItemStat { stat: 2, value: 20 },
+                    UserItemStat { stat: 3, value: 20 },
+                ],
+                values: Vec::new(),
+            },
+        }],
+        now_ms: 0,
+    });
+    let mut attacker = native_monster_spawn(9_100, 331, 270);
+    attacker.name = "Royal_Guard".to_string();
+    attacker.max_hp = 500;
+    attacker.hp = 500;
+    counter_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: warrior.clone(),
+        monster: attacker,
+        now_ms: 0,
+    });
+    counter_zone.tick(0);
+    let incoming = counter_zone.tick(600);
+    assert!(has_packet(&incoming, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMagic {
+            spell: Spell::CounterAttack,
+            target_id: 9_100,
+            ..
+        }
+    )));
+    assert!(has_packet(&incoming, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::RemoveBuff {
+            object_id: 101,
+            buff_type: 18
+        }
+    )));
+    assert!(has_packet(&incoming, &warrior, |packet| matches!(
+        packet,
+        ServerPacket::SpellToggle {
+            object_id: 101,
+            spell: Spell::CounterAttack,
+            can_use: false
+        }
+    )));
+    assert_eq!(
+        damage_indicator_for(&counter_zone.tick(900), 9_100),
+        Some(220)
+    );
+}
+
+#[test]
+fn taoist_poison_item_shape_reaches_shared_zone_authority() {
+    for (item_param, expected_poison) in [(1, 1), (2, 2)] {
+        let mut poison_zone = zone();
+        let taoist = session("taoist");
+        let mut taoist_join = join("taoist", 101, "Taoist", 330, 270);
+        taoist_join.class = MirClass::Taoist;
+        taoist_join.level = 50;
+        poison_zone.handle(ZoneCommand::Join(taoist_join));
+        poison_zone.handle(ZoneCommand::SpawnMonster {
+            session_id: taoist.clone(),
+            monster: native_monster_spawn(9_100, 334, 270),
+            now_ms: 0,
+        });
+        let cast = poison_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+            session_id: taoist.clone(),
+            object_id: 9_100,
+            spell: Spell::Poisoning,
+            direction: MirDirection::Right,
+            target: Point { x: 334, y: 270 },
+            cast: true,
+            level: 3,
+            damage: 12,
+            mp_cost: 0,
+            cooldown_ms: 500,
+            item_param,
+            now_ms: 20,
+        });
+        assert!(has_packet(&cast, &taoist, |packet| matches!(
+            packet,
+            ServerPacket::ObjectPoisoned { object_id: 9_100, poison }
+                if *poison == expected_poison
+        )));
+        if expected_poison == 1 {
+            assert!(damage_indicator_for(&poison_zone.tick(2_020), 9_100).is_some());
+        } else {
+            assert_eq!(damage_indicator_for(&poison_zone.tick(2_020), 9_100), None);
+        }
+    }
+}
+
+#[test]
+fn level50_wizard_ground_and_direction_spell_families_hit_crystal_shapes() {
+    for spell in [Spell::FireBang, Spell::IceStorm] {
+        let mut spell_zone = zone();
+        let wizard = session("wizard");
+        let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+        wizard_join.class = MirClass::Wizard;
+        wizard_join.level = 50;
+        spell_zone.handle(ZoneCommand::Join(wizard_join));
+        for (object_id, x, y) in [(9_100, 334, 270), (9_101, 335, 271), (9_102, 336, 270)] {
+            let mut spawn = native_monster_spawn(object_id, x, y);
+            spawn.max_hp = 100;
+            spawn.hp = 100;
+            spell_zone.handle(ZoneCommand::SpawnMonster {
+                session_id: wizard.clone(),
+                monster: spawn,
+                now_ms: 0,
+            });
+        }
+        let launch = spell_zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: wizard.clone(),
+            object_id: 0,
+            spell,
+            direction: MirDirection::Right,
+            target: Point { x: 334, y: 270 },
+            cast: true,
+            level: 3,
+            damage: 10,
+            mp_cost: 0,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        assert!(has_packet(&launch, &wizard, |packet| matches!(
+            packet,
+            ServerPacket::ObjectMagic { spell: packet_spell, .. } if *packet_spell == spell
+        )));
+        let impact = spell_zone.tick(520);
+        assert_eq!(damage_indicator_for(&impact, 9_100), Some(10));
+        assert_eq!(damage_indicator_for(&impact, 9_101), Some(10));
+        assert_eq!(damage_indicator_for(&impact, 9_102), None);
+    }
+
+    for (spell, monster_position, expected_damage) in [
+        (Spell::HellFire, Point { x: 332, y: 270 }, 10),
+        (Spell::Lightning, Point { x: 335, y: 270 }, 10),
+        (Spell::ThunderStorm, Point { x: 331, y: 270 }, 1),
+        (Spell::FlameField, Point { x: 331, y: 270 }, 10),
+        (Spell::BladeAvalanche, Point { x: 333, y: 270 }, 6),
+    ] {
+        let mut spell_zone = zone();
+        let wizard = session("wizard");
+        let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+        wizard_join.class = MirClass::Wizard;
+        wizard_join.level = 50;
+        spell_zone.handle(ZoneCommand::Join(wizard_join));
+        let mut spawn = native_monster_spawn(9_100, monster_position.x, monster_position.y);
+        spawn.max_hp = 100;
+        spawn.hp = 100;
+        spell_zone.handle(ZoneCommand::SpawnMonster {
+            session_id: wizard.clone(),
+            monster: spawn,
+            now_ms: 0,
+        });
+        let launch = spell_zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: wizard.clone(),
+            object_id: 0,
+            spell,
+            direction: MirDirection::Right,
+            target: Point { x: 330, y: 270 },
+            cast: true,
+            level: 3,
+            damage: 10,
+            mp_cost: 0,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        assert!(has_packet(&launch, &wizard, |packet| matches!(
+            packet,
+            ServerPacket::ObjectMagic { spell: packet_spell, .. } if *packet_spell == spell
+        )));
+        assert_eq!(
+            damage_indicator_for(&spell_zone.tick(520), 9_100),
+            Some(expected_damage),
+            "{spell:?} should retain its shared Zone hit shape"
+        );
+    }
+}
+
+#[test]
+fn level50_wizard_relocation_clone_and_self_buffs_are_zone_authoritative() {
+    for spell in [Spell::Teleport, Spell::Blink] {
+        let mut relocation_zone = zone();
+        let wizard = session("wizard");
+        let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+        wizard_join.class = MirClass::Wizard;
+        wizard_join.level = 50;
+        relocation_zone.handle(ZoneCommand::Join(wizard_join));
+        let destination = Point { x: 340, y: 270 };
+        let cast = relocation_zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: wizard.clone(),
+            object_id: 0,
+            spell,
+            direction: MirDirection::Right,
+            target: destination.clone(),
+            cast: true,
+            level: 3,
+            damage: 0,
+            mp_cost: 5,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        assert_eq!(
+            relocation_zone.player_position(&wizard),
+            Some(destination.clone())
+        );
+        assert!(has_packet(&cast, &wizard, |packet| matches!(
+            packet,
+            ServerPacket::ObjectTeleportOut { object_id: 101, .. }
+        )));
+        assert!(has_packet(&cast, &wizard, |packet| matches!(
+            packet,
+            ServerPacket::ObjectTeleportIn { object_id: 101, .. }
+        )));
+        assert!(cast.iter().any(|outbound| matches!(
+            outbound,
+            ZoneOutbound::SaveTransform { session_id, position, .. }
+                if session_id == &wizard && position == &destination
+        )));
+    }
+
+    let mut clone_zone = zone();
+    let wizard = session("wizard");
+    let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+    wizard_join.class = MirClass::Wizard;
+    wizard_join.level = 50;
+    clone_zone.handle(ZoneCommand::Join(wizard_join));
+    clone_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 0,
+        spell: Spell::Mirroring,
+        direction: MirDirection::Right,
+        target: Point { x: 331, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let clone_spawn = clone_zone.tick(520);
+    let clone = clone_zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.name == "Clone")
+        .expect("Mirroring clone should enter the shared Zone");
+    assert!(has_packet(&clone_spawn, &wizard, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info } if info.name == "Clone"
+    )));
+    let recast = clone_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 0,
+        spell: Spell::Mirroring,
+        direction: MirDirection::Right,
+        target: Point { x: 331, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 1_000,
+    });
+    assert!(has_packet(&recast, &wizard, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == clone.object_id
+    )));
+
+    for (spell, buff_type, expected_stat) in [
+        (Spell::ProtectionField, 10, 1),
+        (Spell::Rage, 11, 5),
+        (Spell::Fury, 5, 14),
+        (Spell::MagicBooster, 21, 7),
+    ] {
+        let mut buff_zone = zone();
+        let wizard = session("wizard");
+        let mut wizard_join = join_with_combat_stats(
+            "wizard",
+            101,
+            "Wizard",
+            330,
+            270,
+            ZonePlayerCombatStats {
+                min_dc: 40,
+                max_dc: 40,
+                min_mc: 40,
+                max_mc: 40,
+                min_ac: 20,
+                max_ac: 20,
+                ..ZonePlayerCombatStats::default()
+            },
+        );
+        wizard_join.class = MirClass::Wizard;
+        wizard_join.level = 50;
+        buff_zone.handle(ZoneCommand::Join(wizard_join));
+        let cast = buff_zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: wizard.clone(),
+            object_id: 0,
+            spell,
+            direction: MirDirection::Right,
+            target: Point { x: 330, y: 270 },
+            cast: true,
+            level: 3,
+            damage: 1,
+            mp_cost: 0,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        assert!(has_packet(&cast, &wizard, |packet| matches!(
+            packet,
+            ServerPacket::AddBuff { buff }
+                if buff.buff_type == buff_type
+                    && buff.stats.iter().any(|stat| stat.stat == expected_stat)
+        )));
+    }
+}
+
+#[test]
+fn level50_wizard_single_target_specializations_keep_control_and_monster_rules() {
+    let mut frost_zone = zone();
+    let wizard = session("wizard");
+    let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+    wizard_join.class = MirClass::Wizard;
+    wizard_join.level = 50;
+    frost_zone.handle(ZoneCommand::Join(wizard_join));
+    frost_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: wizard.clone(),
+        monster: native_monster_spawn(9_100, 334, 270),
+        now_ms: 0,
+    });
+    let frost = frost_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 9_100,
+        spell: Spell::FrostCrunch,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert!(has_packet(&frost, &wizard, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned {
+            object_id: 9_100,
+            poison: 8
+        }
+    )));
+    assert_eq!(damage_indicator_for(&frost_zone.tick(20), 9_100), Some(10));
+
+    let mut undead_zone = zone();
+    let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+    wizard_join.class = MirClass::Wizard;
+    wizard_join.level = 50;
+    undead_zone.handle(ZoneCommand::Join(wizard_join));
+    let mut undead = native_monster_spawn(9_100, 334, 270);
+    undead.name = "BoneFamiliar".to_string();
+    undead.max_hp = 100;
+    undead.hp = 100;
+    undead.level = 10;
+    undead_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: wizard.clone(),
+        monster: undead,
+        now_ms: 0,
+    });
+    undead_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 9_100,
+        spell: Spell::TurnUndead,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let undead_hit = undead_zone.tick(20);
+    assert!(has_packet(&undead_hit, &wizard, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_100
+    )));
+
+    let mut living_zone = zone();
+    let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+    wizard_join.class = MirClass::Wizard;
+    wizard_join.level = 50;
+    living_zone.handle(ZoneCommand::Join(wizard_join));
+    living_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: wizard.clone(),
+        monster: native_monster_spawn(9_100, 334, 270),
+        now_ms: 0,
+    });
+    living_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 9_100,
+        spell: Spell::TurnUndead,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert_eq!(damage_indicator_for(&living_zone.tick(20), 9_100), None);
+
+    let mut disruptor_zone = zone();
+    let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+    wizard_join.class = MirClass::Wizard;
+    wizard_join.level = 50;
+    disruptor_zone.handle(ZoneCommand::Join(wizard_join));
+    let mut living = native_monster_spawn(9_100, 334, 270);
+    living.max_hp = 100;
+    living.hp = 100;
+    disruptor_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: wizard.clone(),
+        monster: living,
+        now_ms: 0,
+    });
+    disruptor_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 9_100,
+        spell: Spell::FlameDisruptor,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert_eq!(
+        damage_indicator_for(&disruptor_zone.tick(20), 9_100),
+        Some(15)
+    );
+}
+
+#[test]
+fn level50_wizard_vampirism_damages_and_heals_through_shared_authority() {
+    let mut vampirism_zone = zone();
+    let wizard = session("wizard");
+    let mut wizard_join = join("wizard", 101, "Wizard", 330, 270);
+    wizard_join.class = MirClass::Wizard;
+    wizard_join.level = 50;
+    wizard_join.hp = 20;
+    wizard_join.max_hp = 60;
+    vampirism_zone.handle(ZoneCommand::Join(wizard_join));
+
+    let mut target = native_monster_spawn(9_100, 334, 270);
+    target.hp = 100;
+    target.max_hp = 100;
+    vampirism_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: wizard.clone(),
+        monster: target,
+        now_ms: 0,
+    });
+    vampirism_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: wizard.clone(),
+        object_id: 9_100,
+        spell: Spell::Vampirism,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 30,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let impact = vampirism_zone.tick(20);
+    assert_eq!(damage_indicator_for(&impact, 9_100), Some(30));
+    assert_eq!(vampirism_zone.player_vitals(&wizard), Some((50, 60, 100)));
+    assert!(impact.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::PlayerHealed { session_id, amount }
+            if session_id == &wizard && *amount == 30
+    )));
+}
+
+#[test]
+fn level50_taoist_support_spells_apply_to_shared_friendly_targets() {
+    for (spell, buff_type, target, due_ms) in [
+        (Spell::Hiding, 2, Point { x: 330, y: 270 }, 520),
+        (Spell::MassHiding, 2, Point { x: 332, y: 270 }, 620),
+        (Spell::SoulShield, 6, Point { x: 332, y: 270 }, 620),
+        (Spell::BlessedArmour, 7, Point { x: 332, y: 270 }, 620),
+    ] {
+        let mut support_zone = zone();
+        let taoist = session("taoist");
+        let friend = session("friend");
+        let mut taoist_join = join_with_combat_stats(
+            "taoist",
+            101,
+            "Taoist",
+            330,
+            270,
+            ZonePlayerCombatStats {
+                min_sc: 20,
+                max_sc: 20,
+                ..ZonePlayerCombatStats::default()
+            },
+        );
+        taoist_join.class = MirClass::Taoist;
+        taoist_join.level = 50;
+        support_zone.handle(ZoneCommand::Join(taoist_join));
+        let mut friend_join = join("friend", 102, "Friend", 332, 270);
+        friend_join.level = 50;
+        support_zone.handle(ZoneCommand::Join(friend_join));
+        let cast = support_zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: taoist.clone(),
+            object_id: 0,
+            spell,
+            direction: MirDirection::Right,
+            target: target.clone(),
+            cast: true,
+            level: 3,
+            damage: 1,
+            mp_cost: 0,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        assert!(has_packet(&cast, &taoist, |packet| matches!(
+            packet,
+            ServerPacket::ObjectMagic { spell: packet_spell, .. } if *packet_spell == spell
+        )));
+        let impact = support_zone.tick(due_ms);
+        let expected_object_id = if spell == Spell::Hiding { 101 } else { 102 };
+        assert!(has_packet(&impact, &friend, |packet| matches!(
+            packet,
+            ServerPacket::AddBuff { buff }
+                if buff.object_id == expected_object_id && buff.buff_type == buff_type
+        )));
+        if matches!(spell, Spell::Hiding | Spell::MassHiding) {
+            assert!(has_packet(&impact, &friend, |packet| matches!(
+                packet,
+                ServerPacket::ObjectHidden { object_id, hidden: true }
+                    if *object_id == expected_object_id
+            )));
+        }
+    }
+
+    for (spell, buff_type) in [(Spell::UltimateEnhancer, 9), (Spell::EnergyShield, 20)] {
+        let mut support_zone = zone();
+        let taoist = session("taoist");
+        let friend = session("friend");
+        let mut taoist_join = join_with_combat_stats(
+            "taoist",
+            101,
+            "Taoist",
+            330,
+            270,
+            ZonePlayerCombatStats {
+                min_sc: 20,
+                max_sc: 20,
+                ..ZonePlayerCombatStats::default()
+            },
+        );
+        taoist_join.class = MirClass::Taoist;
+        taoist_join.level = 50;
+        support_zone.handle(ZoneCommand::Join(taoist_join));
+        let mut friend_join = join("friend", 102, "Friend", 332, 270);
+        friend_join.level = 50;
+        support_zone.handle(ZoneCommand::Join(friend_join));
+        let cast = support_zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: taoist.clone(),
+            object_id: 102,
+            spell,
+            direction: MirDirection::Right,
+            target: Point { x: 332, y: 270 },
+            cast: true,
+            level: 3,
+            damage: 10,
+            mp_cost: 0,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        assert!(has_packet(&cast, &friend, |packet| matches!(
+            packet,
+            ServerPacket::AddBuff { buff }
+                if buff.object_id == 102 && buff.buff_type == buff_type && !buff.stats.is_empty()
+        )));
+    }
+
+    let mut healing_zone = zone();
+    let taoist = session("taoist");
+    let friend = session("friend");
+    let mut taoist_join = join("taoist", 101, "Taoist", 330, 270);
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    healing_zone.handle(ZoneCommand::Join(taoist_join));
+    let mut wounded_friend = join("friend", 102, "Friend", 332, 270);
+    wounded_friend.hp = 20;
+    healing_zone.handle(ZoneCommand::Join(wounded_friend));
+    healing_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: taoist.clone(),
+        object_id: 102,
+        spell: Spell::Healing,
+        direction: MirDirection::Right,
+        target: Point { x: 332, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let healed = healing_zone.tick(520);
+    assert_eq!(healing_zone.player_vitals(&friend), Some((60, 60, 100)));
+    assert!(healed.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::PlayerHealed { session_id, amount }
+            if session_id == &friend && *amount == 40
+    )));
+}
+
+#[test]
+fn level50_taoist_control_debuff_and_revelation_paths_are_shared() {
+    let taoist = session("taoist");
+
+    let mut repulsion_zone = zone();
+    let mut taoist_join = join("taoist", 101, "Taoist", 330, 270);
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    repulsion_zone.handle(ZoneCommand::Join(taoist_join));
+    repulsion_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: taoist.clone(),
+        monster: native_monster_spawn(9_100, 331, 270),
+        now_ms: 0,
+    });
+    let repelled = repulsion_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: taoist.clone(),
+        object_id: 0,
+        spell: Spell::EnergyRepulsor,
+        direction: MirDirection::Right,
+        target: Point { x: 330, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert!(
+        has_packet(&repelled, &taoist, |packet| matches!(
+            packet,
+            ServerPacket::ObjectPushed {
+                object_id: 9_100,
+                ..
+            }
+        )),
+        "expected EnergyRepulsor push packets: {repelled:?}; monsters={:?}",
+        repulsion_zone.native_monster_snapshots()
+    );
+    assert!(
+        repulsion_zone
+            .native_monster_snapshots()
+            .into_iter()
+            .find(|monster| monster.object_id == 9_100)
+            .expect("repelled monster")
+            .position
+            .x
+            > 331
+    );
+
+    let mut reveal_zone = zone();
+    let mut taoist_join = join_with_combat_stats(
+        "taoist",
+        101,
+        "Taoist",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_sc: 20,
+            max_sc: 20,
+            ..ZonePlayerCombatStats::default()
+        },
+    );
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    reveal_zone.handle(ZoneCommand::Join(taoist_join));
+    reveal_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: taoist.clone(),
+        monster: native_monster_spawn(9_100, 334, 270),
+        now_ms: 0,
+    });
+    let revealed = reveal_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: taoist.clone(),
+        object_id: 9_100,
+        spell: Spell::Revelation,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert!(has_packet(&revealed, &taoist, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info }
+            if info.object_id == 9_100 && info.expire > 0
+    )));
+
+    let mut hallucination_zone = zone();
+    let mut taoist_join = join("taoist", 101, "Taoist", 330, 270);
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    hallucination_zone.handle(ZoneCommand::Join(taoist_join));
+    hallucination_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: taoist.clone(),
+        monster: native_monster_spawn(9_100, 331, 270),
+        now_ms: 0,
+    });
+    hallucination_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: taoist.clone(),
+        object_id: 9_100,
+        spell: Spell::Hallucination,
+        direction: MirDirection::Right,
+        target: Point { x: 331, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 0,
+    });
+    assert!(!has_packet(
+        &hallucination_zone.tick(0),
+        &taoist,
+        |packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { info } if info.object_id == 9_100
+        )
+    ));
+
+    let mut curse_zone = zone();
+    let mut taoist_join = join("taoist", 101, "Taoist", 330, 270);
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    curse_zone.handle(ZoneCommand::Join(taoist_join));
+    curse_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: taoist.clone(),
+        monster: native_monster_spawn(9_102, 334, 270),
+        now_ms: 0,
+    });
+    curse_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: taoist.clone(),
+        object_id: 0,
+        spell: Spell::Curse,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let cursed = curse_zone.tick(520);
+    assert!(has_packet(&cursed, &taoist, |packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff } if buff.object_id == 9_102 && buff.buff_type == 12
+    )));
+    assert!(has_packet(&cursed, &taoist, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 9_102, poison } if *poison & 4 != 0
+    )));
+
+    let mut plague_zone = zone();
+    let mut taoist_join = join_with_combat_stats(
+        "taoist",
+        101,
+        "Taoist",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_sc: 10,
+            max_sc: 10,
+            ..ZonePlayerCombatStats::default()
+        },
+    );
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    plague_zone.handle(ZoneCommand::Join(taoist_join));
+    let mut plague_target = native_monster_spawn(9_112, 334, 270);
+    plague_target.max_hp = 100;
+    plague_target.hp = 100;
+    plague_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: taoist.clone(),
+        monster: plague_target,
+        now_ms: 0,
+    });
+    plague_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+        session_id: taoist.clone(),
+        object_id: 0,
+        spell: Spell::Plague,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        item_param: 2,
+        now_ms: 20,
+    });
+    let plagued = plague_zone.tick(520);
+    assert_eq!(damage_indicator_for(&plagued, 9_112), Some(20));
+    assert!(has_packet(&plagued, &taoist, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 9_112, poison } if *poison & 2 != 0
+    )));
+}
+
+#[test]
+fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
+    let mut purification_zone = zone();
+    let poisoner = session("poisoner");
+    let taoist = session("taoist");
+    let friend = session("friend");
+
+    let mut poisoner_join = join_with_profile("poisoner", 101, "Poisoner", 330, 270, |profile| {
+        profile.attack_mode = 5;
+    });
+    poisoner_join.class = MirClass::Taoist;
+    poisoner_join.level = 50;
+    purification_zone.handle(ZoneCommand::Join(poisoner_join));
+
+    let mut friend_join = join("friend", 102, "Friend", 332, 270);
+    friend_join.level = 50;
+    purification_zone.handle(ZoneCommand::Join(friend_join));
+
+    let mut taoist_join = join("taoist", 103, "Taoist", 334, 270);
+    taoist_join.class = MirClass::Taoist;
+    taoist_join.level = 50;
+    purification_zone.handle(ZoneCommand::Join(taoist_join));
+
+    let poisoned = purification_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+        session_id: poisoner.clone(),
+        object_id: 102,
+        spell: Spell::Poisoning,
+        direction: MirDirection::Right,
+        target: Point { x: 332, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 10,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        item_param: 1,
+        now_ms: 20,
+    });
+    assert!(has_packet(&poisoned, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
+    )));
+
+    purification_zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: friend.clone(),
+        owner_local_object_id: 1_001,
+        packets: vec![ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: 12,
+                visible: true,
+                object_id: 1_001,
+                expire_time: 10_000,
+                infinite: false,
+                paused: false,
+                stats: Vec::new(),
+                values: Vec::new(),
+            },
+        }],
+        now_ms: 25,
+    });
+
+    let purified = purification_zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: taoist.clone(),
+        object_id: 102,
+        spell: Spell::Purification,
+        direction: MirDirection::Left,
+        target: Point { x: 332, y: 270 },
+        cast: true,
+        level: 3,
+        damage: 0,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 40,
+    });
+    assert!(has_packet(&purified, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned {
+            object_id: 102,
+            poison: 0
+        }
+    )));
+    assert!(has_packet(&purified, &friend, |packet| matches!(
+        packet,
+        ServerPacket::RemoveBuff {
+            object_id: 102,
+            buff_type: 12
+        }
+    )));
+
+    let observer = session("observer");
+    let joined = purification_zone.handle(ZoneCommand::Join(join(
+        "observer", 104, "Observer", 335, 270,
+    )));
+    assert!(has_packet(&joined, &observer, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPlayer { info }
+            if info.object_id == 102 && info.poison == 0 && !info.buffs.contains(&12)
+    )));
 }
