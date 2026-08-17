@@ -200,7 +200,7 @@ test("summarizes the complete Warrior 1-50 data surface", () => {
 
 test("records current runtime-profile gaps separately from Crystal content gaps", () => {
   assert.equal(route.source.runtimeProfileId, "platinum_176");
-  assert.equal(route.source.runtimeProfileVersion, 24);
+  assert.equal(route.source.runtimeProfileVersion, 25);
   assert.deepEqual(quest(22).runtimeBlockers, []);
   assert.deepEqual(quest(27).runtimeBlockers, []);
   assert.deepEqual(quest(27).contentBlockers, []);
