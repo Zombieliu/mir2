@@ -41411,6 +41411,82 @@ fn use_item_packet_crystal_book_learns_skill_when_eligible() {
 }
 
 #[test]
+fn platinum_profile_learns_all_three_class_source_books_through_level_50() {
+    for (required_class, class, expected_count) in [
+        (1, MirClass::Warrior, 15),
+        (2, MirClass::Wizard, 23),
+        (4, MirClass::Taoist, 25),
+    ] {
+        let mut session =
+            SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(&mut session, class, MirGender::Male, 50);
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SkillResource>()
+            .skills
+            .clear();
+
+        let mut books = mir2_game_data::crystal_item_manifest()
+            .items
+            .into_iter()
+            .filter(|item| {
+                item.item_type == 20
+                    && item.required_type == 0
+                    && item.required_class == required_class
+                    && item.required_amount > 0
+                    && item.required_amount <= 50
+            })
+            .collect::<Vec<_>>();
+        books.sort_by_key(|book| (book.required_amount, book.shape));
+        assert_eq!(
+            books.len(),
+            expected_count,
+            "unexpected {class:?} book count"
+        );
+
+        for book in books {
+            add_inventory_crystal_item(&mut session, &book.name, 31);
+            let expected_spell = Spell::from_crystal_name(&book.name)
+                .unwrap_or_else(|| panic!("{} has no protocol Spell", book.name));
+            let packets = session.handle_packet(ClientPacket::UseItem {
+                unique_id: 31,
+                grid: MirGridType::Inventory,
+            });
+
+            assert!(
+                packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::UseItem {
+                        unique_id: 31,
+                        success: true,
+                        grid: MirGridType::Inventory,
+                    }
+                )),
+                "{} book was rejected for {class:?} at level 50: {packets:?}",
+                book.name
+            );
+            assert!(
+                packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::NewMagic { magic, hero: false }
+                        if magic.spell == expected_spell
+                )),
+                "{} did not emit NewMagic for {class:?}: {packets:?}",
+                book.name
+            );
+        }
+
+        assert_eq!(
+            session.world_snapshot().known_skills.len(),
+            expected_count,
+            "{class:?} did not retain every learned skill"
+        );
+    }
+}
+
+#[test]
 fn use_item_packet_crystal_book_rejects_wrong_class_with_localized_message() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
