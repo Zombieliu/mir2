@@ -40,6 +40,7 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import { localizeQuestLog } from "../lib/quest-localization";
+import { localizeCrystalMapTitle } from "../lib/crystal-content-localization";
 import { questIdsFromPacket } from "../lib/quest-entity-binding";
 import {
   CrystalChatType,
@@ -137,6 +138,7 @@ import {
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
 import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
+import { OriginalClientStagePortal } from "./components/original-client-stage-portal";
 import {
   IdentitySecurityPanel,
   type BrowserIdentitySession,
@@ -2350,7 +2352,7 @@ export default function HomePage() {
   const [assetFirstPlayable, setAssetFirstPlayable] = useState(false);
   const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable;
   const [isClientReady, setIsClientReady] = useState(false);
-  const t = buildTranslator(language);
+  const t = useMemo(() => buildTranslator(language), [language]);
   const locale = languageLocale(language);
   const localizedQuestLog = useMemo(
     () =>
@@ -2360,8 +2362,12 @@ export default function HomePage() {
     [language, world.questLog],
   );
   const presentationWorld = useMemo(
-    () => ({ ...world, questLog: localizedQuestLog }),
-    [localizedQuestLog, world],
+    () => ({
+      ...world,
+      mapTitle: localizeCrystalMapTitle(world.mapTitle, t),
+      questLog: localizedQuestLog,
+    }),
+    [localizedQuestLog, t, world],
   );
 
   const loggedSceneResourceErrorsRef = useRef(new Set<string>());
@@ -8311,7 +8317,7 @@ export default function HomePage() {
         }
       ).__mir2RealmInfo = info;
       appendLog(
-        `Realm ${info.realmId} · ${info.profileId} v${info.profileVersion}`,
+        t("log.realmInfo", [info.realmId, info.profileId, info.profileVersion]),
         "system",
       );
       return;
@@ -13884,7 +13890,7 @@ export default function HomePage() {
       trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
       mail={{ open: showMail, onClose: () => setShowMail(false), mail: extraWindowData.mail, gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
-      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: extraWindowData.worldMapMarkers }}
+      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: localizeCrystalMapTitle(world.mapTitle, t), markers: extraWindowData.worldMapMarkers }}
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
@@ -13906,15 +13912,49 @@ export default function HomePage() {
     {screen === "game" && !spectatorMode ? (
       <AiLiveGameHighlight status={aiLiveStatus} />
     ) : null}
-    <IdentitySecurityPanel
-      token={identitySessionToken}
-      accountId={accountId}
-      language={language}
-      onCurrentSessionRevoked={() => {
-        setIdentitySessionToken(null);
-        send({ type: "logOut" });
-      }}
-    />
+    <OriginalClientStagePortal>
+      <IdentitySecurityPanel
+        token={identitySessionToken}
+        accountId={accountId}
+        language={language}
+        onCurrentSessionRevoked={() => {
+          setIdentitySessionToken(null);
+          send({ type: "logOut" });
+        }}
+      />
+      {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
+        <OnchainMinePanelWithStore
+          t={t}
+          store={worldStoreRef.current}
+          compactMode={clientProfile.layout === "touch"}
+          suppressed={clientProfile.layout === "touch" && showTutorial}
+          walletAddress={onchainWallet?.account.address ?? null}
+          walletBusy={onchainWalletBusy}
+          pendingSwings={onchainMine.pendingSwings}
+          batchSize={ONCHAIN_MINE_BATCH_SIZE}
+          optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
+          inFlightSwings={onchainMine.inFlightSwings}
+          inFlightDigest={onchainMine.inFlightDigest}
+          confirmedUnits={onchainMine.confirmedUnits}
+          settledBatches={onchainMine.settledBatches}
+          lastReconcile={onchainMine.lastReconcile}
+          lastError={onchainMine.lastError}
+          nextNonce={onchainNextNonce}
+          veinLocation={ONCHAIN_MINE_VEIN}
+          submitBusy={onchainSubmitBusy}
+          redeemAmount={onchainRedeemAmount}
+          onRedeemAmountChange={setOnchainRedeemAmount}
+          onConnectWallet={() => void connectOnchainWallet()}
+          sessionAddress={onchainSession?.address ?? null}
+          sessionExpiresAt={onchainSession?.expiresAt ?? null}
+          onActivateSession={() => void activateOnchainSession()}
+          onDeactivateSession={() => void deactivateOnchainSession()}
+          onSwing={onchainSwing}
+          onFlushNow={() => void flushOnchainBatch()}
+          onRedeem={() => void redeemOnchainOre()}
+          onNonceChange={setOnchainNonce}
+        />
+      ) : null}
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
         <span>{debugSnapshotNotice.message}</span>
@@ -13940,38 +13980,6 @@ export default function HomePage() {
         onClose={() => setShowTutorial(false)}
       />
     ) : null}
-    {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
-      <OnchainMinePanelWithStore
-        store={worldStoreRef.current}
-        compactMode={clientProfile.layout === "touch"}
-        suppressed={clientProfile.layout === "touch" && showTutorial}
-        walletAddress={onchainWallet?.account.address ?? null}
-        walletBusy={onchainWalletBusy}
-        pendingSwings={onchainMine.pendingSwings}
-        batchSize={ONCHAIN_MINE_BATCH_SIZE}
-        optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
-        inFlightSwings={onchainMine.inFlightSwings}
-        inFlightDigest={onchainMine.inFlightDigest}
-        confirmedUnits={onchainMine.confirmedUnits}
-        settledBatches={onchainMine.settledBatches}
-        lastReconcile={onchainMine.lastReconcile}
-        lastError={onchainMine.lastError}
-        nextNonce={onchainNextNonce}
-        veinLocation={ONCHAIN_MINE_VEIN}
-        submitBusy={onchainSubmitBusy}
-        redeemAmount={onchainRedeemAmount}
-        onRedeemAmountChange={setOnchainRedeemAmount}
-        onConnectWallet={() => void connectOnchainWallet()}
-        sessionAddress={onchainSession?.address ?? null}
-        sessionExpiresAt={onchainSession?.expiresAt ?? null}
-        onActivateSession={() => void activateOnchainSession()}
-        onDeactivateSession={() => void deactivateOnchainSession()}
-        onSwing={onchainSwing}
-        onFlushNow={() => void flushOnchainBatch()}
-        onRedeem={() => void redeemOnchainOre()}
-        onNonceChange={setOnchainNonce}
-      />
-    ) : null}
     {screen === "game" && (self?.dead === true || world.playerHp === 0) ? (
       <DeathReviveOverlay
         title={t("ui.death.title", [], "You have died")}
@@ -13984,6 +13992,7 @@ export default function HomePage() {
         }}
       />
     ) : null}
+    </OriginalClientStagePortal>
     </>
   );
 }

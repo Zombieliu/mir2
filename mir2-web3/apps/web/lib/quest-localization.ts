@@ -1,3 +1,8 @@
+import {
+  localizeCrystalEntityName,
+  localizeCrystalItemName,
+} from "./crystal-content-localization";
+
 export type QuestTranslateFn = (
   key: string,
   params?: Array<string | number>,
@@ -16,18 +21,31 @@ export type LocalizableQuestEntry = {
   required: number;
   rewardPreview: string;
   descriptionLines?: string[];
+  npc?: string;
   objectives?: Array<{
     label: string;
     current?: number;
     required?: number;
     done?: boolean;
   }>;
+  rewards?: {
+    items?: Array<{ name: string; [key: string]: unknown }>;
+    selectItems?: Array<{ name: string; [key: string]: unknown }>;
+    [key: string]: unknown;
+  };
 };
 
 const CRYSTAL_QUEST_KEY_BY_ID: Readonly<Record<number, string>> = {
   1: "assistantRequest",
   2: "craftLadyRequest",
+  3: "talkWithButcher",
+  4: "huntForButcher",
   5: "smithFirstTest",
+  6: "smithSecondTest",
+  7: "meetWarriorInstructor",
+  8: "fencingSkillTest",
+  9: "toBichon",
+  22: "forestYetiThreat",
   154: "emperorsProblem",
 };
 
@@ -45,14 +63,27 @@ export function localizeQuestEntry<T extends LocalizableQuestEntry>(
 
   const prefix = `content.quest.${questKey}`;
   const stagePrefix = `${prefix}.stage.${quest.stage}`;
+  const genericStagePrefix = `content.quest.generic.stage.${quest.stage}`;
   const params = [quest.current, quest.required];
+  const genericObjective = t(`${genericStagePrefix}.objective`, params, quest.objective);
+  const questObjective = t(`${prefix}.objective`, params, quest.objective);
+  const stageObjectiveFallback =
+    quest.stage === "available" || quest.stage === "inProgress"
+      ? questObjective
+      : genericObjective;
+  const genericProgressLabel = t(
+    `${genericStagePrefix}.progressLabel`,
+    params,
+    quest.progressLabel,
+  );
+  const genericTracker = t(`${genericStagePrefix}.tracker`, params, quest.tracker ?? "");
   const localized = {
     ...quest,
     title: t(`${prefix}.title`, [], quest.title),
     summary: t(`${prefix}.summary`, params, quest.summary),
-    objective: t(`${stagePrefix}.objective`, params, quest.objective),
-    progressLabel: t(`${stagePrefix}.progressLabel`, params, quest.progressLabel),
-    tracker: t(`${stagePrefix}.tracker`, params, quest.tracker ?? ""),
+    objective: t(`${stagePrefix}.objective`, params, stageObjectiveFallback),
+    progressLabel: t(`${stagePrefix}.progressLabel`, params, genericProgressLabel),
+    tracker: t(`${stagePrefix}.tracker`, params, genericTracker),
     rewardPreview: t(`${prefix}.rewardPreview`, [], quest.rewardPreview),
   } as T;
 
@@ -67,6 +98,32 @@ export function localizeQuestEntry<T extends LocalizableQuestEntry>(
       ...objective,
       label: t(`${prefix}.objective.${index}`, params, objective.label),
     }));
+  }
+
+  if (quest.npc) {
+    localized.npc = localizeCrystalEntityName(quest.npc, t);
+  }
+
+  if (quest.rewards) {
+    localized.rewards = {
+      ...quest.rewards,
+      ...(quest.rewards.items
+        ? {
+            items: quest.rewards.items.map((item) => ({
+              ...item,
+              name: localizeCrystalItemName(item.name, t),
+            })),
+          }
+        : {}),
+      ...(quest.rewards.selectItems
+        ? {
+            selectItems: quest.rewards.selectItems.map((item) => ({
+              ...item,
+              name: localizeCrystalItemName(item.name, t),
+            })),
+          }
+        : {}),
+    };
   }
 
   return localized;

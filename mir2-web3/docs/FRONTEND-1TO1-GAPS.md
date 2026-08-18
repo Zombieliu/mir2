@@ -1,6 +1,31 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-12
+Last updated: 2026-08-18
+
+> 2026-08-18 4K stage-overlay and Chinese presentation closure: a user-supplied
+> 3840x2160 production capture showed that the 1024x768 Crystal stage itself was
+> centered correctly, while Account Security and On-chain Mine were positioned
+> against the browser viewport and therefore appeared in the black letterbox.
+> Both overlays now portal into `.client-stage-frame`; their absolute position,
+> drag bounds, compact layout and persisted-coordinate clamping all use the
+> stage coordinate space. The Account Security trigger is anchored at the
+> stage's top-left so it cannot cover the top-right language selector before
+> login or the minimap after StartGame. The tutorial coach, debug toast, and
+> death/revive backdrop now use that portal too; spotlight rectangles are
+> converted from browser coordinates into the scaled 1024x768 stage space.
+> The resource-cache progress/debug HUD is likewise stage-local, so map loading
+> progress remains visible beside the game instead of in an ultra-wide letterbox.
+> The same capture exposed English fallbacks in q3/q4,
+> Accept, realm metadata, `BichonProvince`, NPC/monster nameplates and the mine
+> panel. Presentation-edge localization now covers every q1-q9 state, structured
+> quest NPC/reward names, the visible Bichon entities/map title, owner-Hero
+> labels, realm metadata and the complete mine panel without mutating canonical
+> packet/world identifiers. The importer and both generated bundles are kept
+> byte-identical by regression coverage. Focused quest/localization,
+> responsive-stage and mine tests, TypeScript, the direct Next production build,
+> script syntax and diff checks pass. This is local Candidate evidence only;
+> deployment plus an authenticated 4K Chinese screenshot remains the production
+> and human acceptance gate.
 
 > 2026-08-12 tracked-quest NPC marker closure: Gateway NPC packets already
 > carried authoritative `questIds`, but the Web packet reducer discarded that

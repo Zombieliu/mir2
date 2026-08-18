@@ -28,7 +28,14 @@ export type OnchainMinePanelReconcile = {
   shortfall: boolean;
 };
 
+export type OnchainMineTranslateFn = (
+  key: string,
+  params?: Array<string | number>,
+  fallback?: string,
+) => string;
+
 export type OnchainMinePanelProps = {
+  t: OnchainMineTranslateFn;
   /** Touch layouts use a fixed, compact presentation instead of a draggable desktop tool window. */
   compactMode?: boolean;
   /** Temporarily yield the viewport to higher-priority onboarding or modal UI. */
@@ -79,7 +86,7 @@ const POSITION_STORAGE_KEY = "mir2.onchainMinePanel.pos.v1";
 const COLLAPSED_STORAGE_KEY = "mir2.onchainMinePanel.collapsed.v1";
 
 const panelStyle: CSSProperties = {
-  position: "fixed",
+  position: "absolute",
   zIndex: 60,
   width: PANEL_WIDTH,
   padding: "10px 12px",
@@ -92,22 +99,41 @@ const panelStyle: CSSProperties = {
 
 type PanelPosition = { left: number; top: number };
 
+const DEFAULT_STAGE_WIDTH = 1024;
+const DEFAULT_STAGE_HEIGHT = 768;
+const DEFAULT_PANEL_TOP = 158;
+
+function stageRootFor(element?: Element | null): HTMLElement | null {
+  return element?.closest<HTMLElement>(".client-stage-frame") ?? null;
+}
+
+function stageBounds(element?: Element | null): { width: number; height: number } {
+  const stageRoot = stageRootFor(element);
+  return {
+    width: stageRoot?.clientWidth || DEFAULT_STAGE_WIDTH,
+    height: stageRoot?.clientHeight || DEFAULT_STAGE_HEIGHT,
+  };
+}
+
 /**
  * Default the panel to the right gutter just under the minimap — clear of Mir2's
  * bottom control bar / system-menu cluster, which the old `bottom: 96` anchor used to
  * sit on top of and swallow clicks for. The player can still drag it anywhere or
  * collapse it to the title bar; both choices persist.
  */
-function defaultPosition(): PanelPosition {
-  if (typeof window === "undefined") return { left: 12, top: 372 };
-  return { left: Math.max(12, window.innerWidth - PANEL_WIDTH - 12), top: 372 };
+function defaultPosition(element?: Element | null): PanelPosition {
+  const bounds = stageBounds(element);
+  return {
+    left: Math.max(12, bounds.width - PANEL_WIDTH - 12),
+    top: Math.min(DEFAULT_PANEL_TOP, Math.max(8, bounds.height - 40)),
+  };
 }
 
-/** Keep the panel on-screen after drags / viewport resizes (leave the title bar reachable). */
-function clampPosition(pos: PanelPosition): PanelPosition {
-  if (typeof window === "undefined") return pos;
-  const maxLeft = Math.max(0, window.innerWidth - PANEL_WIDTH);
-  const maxTop = Math.max(0, window.innerHeight - 40);
+/** Keep the panel inside the Crystal stage after drags / resizes. */
+function clampPosition(pos: PanelPosition, element?: Element | null): PanelPosition {
+  const bounds = stageBounds(element);
+  const maxLeft = Math.max(0, bounds.width - PANEL_WIDTH - 4);
+  const maxTop = Math.max(0, bounds.height - 40 - 4);
   return {
     left: Math.min(Math.max(0, pos.left), maxLeft),
     top: Math.min(Math.max(0, pos.top), maxTop),
@@ -172,14 +198,15 @@ function shortAddress(address: string): string {
   return address.length > 14 ? `${address.slice(0, 8)}…${address.slice(-4)}` : address;
 }
 
-function veinStageLabel(stage: number | null): string {
+function veinStageLabel(stage: number | null, t: OnchainMineTranslateFn): string {
   if (stage === null) return "—";
-  if (stage >= 2) return "full vein 满";
-  if (stage === 1) return "cracked 裂";
-  return "depleted 空";
+  if (stage >= 2) return t("ui.onchainMine.veinStage.full", [], "full");
+  if (stage === 1) return t("ui.onchainMine.veinStage.cracked", [], "cracked");
+  return t("ui.onchainMine.veinStage.depleted", [], "depleted");
 }
 
 export function OnchainMinePanel({
+  t,
   compactMode = false,
   suppressed = false,
   walletAddress,
@@ -218,7 +245,15 @@ export function OnchainMinePanel({
   // localStorage after mount to avoid a hydration mismatch.
   const [position, setPosition] = useState<PanelPosition | null>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const dragRef = useRef<{ pointerStartX: number; pointerStartY: number; originLeft: number; originTop: number } | null>(
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{
+    pointerStartX: number;
+    pointerStartY: number;
+    originLeft: number;
+    originTop: number;
+    scaleX: number;
+    scaleY: number;
+  } | null>(
     null,
   );
 
@@ -228,20 +263,30 @@ export function OnchainMinePanel({
       if (storedPos) {
         const parsed = JSON.parse(storedPos) as Partial<PanelPosition>;
         if (typeof parsed?.left === "number" && typeof parsed?.top === "number") {
-          setPosition(clampPosition({ left: parsed.left, top: parsed.top }));
+          setPosition(clampPosition({ left: parsed.left, top: parsed.top }, panelRef.current));
         } else {
-          setPosition(defaultPosition());
+          setPosition(defaultPosition(panelRef.current));
         }
       } else {
-        setPosition(defaultPosition());
+        setPosition(defaultPosition(panelRef.current));
       }
       const storedCollapsed = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
       setCollapsed(storedCollapsed === null ? compactMode : storedCollapsed === "1");
     } catch {
-      setPosition(defaultPosition());
+      setPosition(defaultPosition(panelRef.current));
       setCollapsed(compactMode);
     }
   }, [compactMode]);
+
+  useEffect(() => {
+    const onResize = () => {
+      setPosition((current) =>
+        current ? clampPosition(current, panelRef.current) : defaultPosition(panelRef.current),
+      );
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const persistPosition = useCallback((next: PanelPosition) => {
     try {
@@ -254,12 +299,18 @@ export function OnchainMinePanel({
   const onDragPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (compactMode || event.button !== 0) return;
-      const origin = position ?? defaultPosition();
+      const origin = position ?? defaultPosition(event.currentTarget);
+      const stageRoot = stageRootFor(event.currentTarget);
+      const stageRect = stageRoot?.getBoundingClientRect();
+      const scaleX = stageRoot && stageRect ? stageRect.width / Math.max(1, stageRoot.clientWidth) : 1;
+      const scaleY = stageRoot && stageRect ? stageRect.height / Math.max(1, stageRoot.clientHeight) : 1;
       dragRef.current = {
         pointerStartX: event.clientX,
         pointerStartY: event.clientY,
         originLeft: origin.left,
         originTop: origin.top,
+        scaleX: scaleX || 1,
+        scaleY: scaleY || 1,
       };
       event.currentTarget.setPointerCapture(event.pointerId);
     },
@@ -270,10 +321,13 @@ export function OnchainMinePanel({
     const drag = dragRef.current;
     if (!drag) return;
     setPosition(
-      clampPosition({
-        left: drag.originLeft + (event.clientX - drag.pointerStartX),
-        top: drag.originTop + (event.clientY - drag.pointerStartY),
-      }),
+      clampPosition(
+        {
+          left: drag.originLeft + (event.clientX - drag.pointerStartX) / drag.scaleX,
+          top: drag.originTop + (event.clientY - drag.pointerStartY) / drag.scaleY,
+        },
+        event.currentTarget,
+      ),
     );
   }, []);
 
@@ -310,21 +364,22 @@ export function OnchainMinePanel({
     ? {
         ...panelStyle,
         left: "50%",
-        top: "max(8px, env(safe-area-inset-top))",
-        width: collapsed ? 206 : "min(360px, calc(100vw - 24px))",
-        maxHeight: "calc(100dvh - 16px)",
+        top: 8,
+        width: collapsed ? 206 : "min(360px, calc(100% - 24px))",
+        maxHeight: "calc(100% - 16px)",
         overflowY: collapsed ? "hidden" : "auto",
         transform: "translateX(-50%)",
         padding: collapsed ? "7px 10px" : panelStyle.padding,
       }
     : position
       ? { ...panelStyle, left: position.left, top: position.top }
-      : { ...panelStyle, right: 12, top: 372 };
+      : { ...panelStyle, right: 12, top: DEFAULT_PANEL_TOP };
 
   if (suppressed) return null;
 
   return (
     <div
+      ref={panelRef}
       style={positionedStyle}
       data-testid="onchain-mine-panel"
       data-compact={compactMode ? "true" : "false"}
@@ -342,16 +397,20 @@ export function OnchainMinePanel({
         onPointerMove={onDragPointerMove}
         onPointerUp={onDragPointerUp}
         onPointerCancel={onDragPointerUp}
-        title="拖动标题栏移动面板 / drag the title bar to move"
+        title={t("ui.onchainMine.drag", [], "Drag the title bar to move the panel")}
       >
-        <strong>On-chain Mine (testnet)</strong>
+        <strong>{t("ui.onchainMine.title", [], "On-chain Mine (testnet)")}</strong>
         <button
           type="button"
           style={collapseButtonStyle}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={toggleCollapsed}
-          aria-label={collapsed ? "展开 / expand" : "收起 / collapse"}
-          title={collapsed ? "展开 / expand" : "收起 / collapse"}
+          aria-label={collapsed
+            ? t("ui.onchainMine.expand", [], "Expand")
+            : t("ui.onchainMine.collapse", [], "Collapse")}
+          title={collapsed
+            ? t("ui.onchainMine.expand", [], "Expand")
+            : t("ui.onchainMine.collapse", [], "Collapse")}
         >
           {collapsed ? "▸" : "▾"}
         </button>
@@ -362,14 +421,14 @@ export function OnchainMinePanel({
           <span>
             ({veinLocation.x},{veinLocation.y})
           </span>
-          <span>{veinStageLabel(veinStage)}</span>
+          <span>{veinStageLabel(veinStage, t)}</span>
         </div>
       ) : collapsed ? null : (
         <>
       <div style={{ ...rowStyle, marginBottom: 6 }}>
-        <span>矿脉 vein</span>
+        <span>{t("ui.onchainMine.vein", [], "Vein")}</span>
         <span>
-          ({veinLocation.x},{veinLocation.y}) {veinStageLabel(veinStage)}
+          ({veinLocation.x},{veinLocation.y}) {veinStageLabel(veinStage, t)}
         </span>
       </div>
 
@@ -380,11 +439,13 @@ export function OnchainMinePanel({
           disabled={walletBusy}
           onClick={onConnectWallet}
         >
-          {walletBusy ? "连接中…" : "连接 Sui 钱包 / Connect wallet"}
+          {walletBusy
+            ? t("ui.onchainMine.connectingWallet", [], "Connecting…")
+            : t("ui.onchainMine.connectWallet", [], "Connect Sui wallet")}
         </button>
       ) : (
         <div style={rowStyle}>
-          <span>签名钱包</span>
+          <span>{t("ui.onchainMine.signingWallet", [], "Signing wallet")}</span>
           <span title={walletAddress}>{shortAddress(walletAddress)}</span>
         </div>
       )}
@@ -393,17 +454,27 @@ export function OnchainMinePanel({
         sessionAddress !== null ? (
           <div style={{ ...rowStyle, marginTop: 4 }}>
             <span title={sessionAddress}>
-              会话 {shortAddress(sessionAddress)} ✓免弹窗
-              {sessionExpiresAt ? ` 至${new Date(sessionExpiresAt).toLocaleTimeString()}` : ""}
+              {t(
+                "ui.onchainMine.sessionActive",
+                [shortAddress(sessionAddress)],
+                `Session ${shortAddress(sessionAddress)} · popup-free`,
+              )}
+              {sessionExpiresAt
+                ? ` ${t(
+                    "ui.onchainMine.sessionExpires",
+                    [new Date(sessionExpiresAt).toLocaleTimeString()],
+                    `until ${new Date(sessionExpiresAt).toLocaleTimeString()}`,
+                  )}`
+                : ""}
             </span>
             <button
               type="button"
               style={walletBusy ? disabledButtonStyle : { ...buttonStyle, flex: "0 0 auto", padding: "2px 6px" }}
               disabled={walletBusy}
               onClick={onDeactivateSession}
-              title="撤销会话密钥 / revoke session key"
+              title={t("ui.onchainMine.revokeSessionHint", [], "Revoke the session key")}
             >
-              撤销
+              {t("ui.onchainMine.revokeSession", [], "Revoke")}
             </button>
           </div>
         ) : (
@@ -412,46 +483,59 @@ export function OnchainMinePanel({
             style={walletBusy ? disabledButtonStyle : { ...buttonStyle, marginTop: 4 }}
             disabled={walletBusy}
             onClick={onActivateSession}
-            title="授权一个临时会话密钥，之后连续挖矿不再弹钱包 / authorize a session key so continuous mining is popup-free"
+            title={t(
+              "ui.onchainMine.activateSessionHint",
+              [],
+              "Authorize a temporary session key for popup-free continuous mining",
+            )}
           >
-            {walletBusy ? "…" : "开启免弹窗会话 / Activate session"}
+            {walletBusy
+              ? t("ui.onchainMine.activatingSession", [], "Activating…")
+              : t("ui.onchainMine.activateSession", [], "Activate popup-free session")}
           </button>
         )
       ) : null}
 
       <div style={rowStyle}>
-        <span>攒挥 pending</span>
+        <span>{t("ui.onchainMine.pendingSwings", [], "Pending swings")}</span>
         <span>
           {pendingSwings}/{batchSize}
         </span>
       </div>
       <div style={rowStyle}>
-        <span>乐观矿石(显示)</span>
+        <span>{t("ui.onchainMine.optimisticOre", [], "Optimistic ore")}</span>
         <span>~{optimisticUnits}</span>
       </div>
       <div style={rowStyle}>
-        <span>链上已确认</span>
-        <span>
-          {confirmedUnits} 矿石 / {settledBatches} 批
-        </span>
+        <span>{t("ui.onchainMine.confirmed", [], "On-chain confirmed")}</span>
+        <span>{t("ui.onchainMine.confirmedValue", [confirmedUnits, settledBatches], "{0} ore / {1} batches")}</span>
       </div>
       {lastReconcile ? (
         <div style={rowStyle}>
-          <span>上次对账</span>
+          <span>{t("ui.onchainMine.lastReconcile", [], "Last reconcile")}</span>
           <span>
             {lastReconcile.deltaUnits === 0
-              ? "一致 ✓"
+              ? t("ui.onchainMine.reconcileMatch", [], "Matched ✓")
               : lastReconcile.phantom
-                ? `幻影 ${-lastReconcile.deltaUnits}(已退)`
-                : `补差 +${lastReconcile.deltaUnits}`}
+                ? t("ui.onchainMine.reconcilePhantom", [-lastReconcile.deltaUnits], "Phantom {0} removed")
+                : t("ui.onchainMine.reconcileShortfall", [lastReconcile.deltaUnits], "Added +{0}")}
           </span>
         </div>
       ) : null}
       {inFlight ? (
         <div style={rowStyle}>
-          <span>在途批次</span>
+          <span>{t("ui.onchainMine.inFlightBatch", [], "In-flight batch")}</span>
           <span title={inFlightDigest ?? undefined}>
-            {inFlightSwings} 挥 {inFlightDigest ? `· ${inFlightDigest.slice(0, 8)}…` : "(签名中)"}
+            {t(
+              "ui.onchainMine.inFlightValue",
+              [
+                inFlightSwings,
+                inFlightDigest
+                  ? `· ${inFlightDigest.slice(0, 8)}…`
+                  : t("ui.onchainMine.signing", [], "signing"),
+              ],
+              "{0} swings {1}",
+            )}
           </span>
         </div>
       ) : null}
@@ -476,9 +560,13 @@ export function OnchainMinePanel({
           style={canAct ? buttonStyle : disabledButtonStyle}
           disabled={!canAct}
           onClick={onSwing}
-          title="调试用：正式挖矿请走到矿脉前攻击它 / Dev shortcut — to mine, attack the vein in the world"
+          title={t(
+            "ui.onchainMine.swingHint",
+            [],
+            "Development shortcut; normally attack the vein in the world",
+          )}
         >
-          挥镐(调试) Swing
+          {t("ui.onchainMine.swing", [], "Swing (debug)")}
         </button>
         <button
           type="button"
@@ -486,7 +574,9 @@ export function OnchainMinePanel({
           disabled={!canAct || pendingSwings === 0 || inFlight}
           onClick={onFlushNow}
         >
-          {submitBusy ? "上链中…" : "立即结算"}
+          {submitBusy
+            ? t("ui.onchainMine.settling", [], "Settling…")
+            : t("ui.onchainMine.settleNow", [], "Settle now")}
         </button>
       </div>
 
@@ -504,7 +594,7 @@ export function OnchainMinePanel({
           disabled={!canAct}
           onClick={onRedeem}
         >
-          兑换金币 Redeem
+          {t("ui.onchainMine.redeem", [], "Redeem for gold")}
         </button>
       </div>
 

@@ -50,6 +50,7 @@ const ACTION_EVENT = "mir2:action";
 
 // Detail shape dispatched by page.tsx send(): { type: <ClientPacket type> }.
 type ActionEventDetail = { type?: unknown };
+type SpotlightRect = Pick<DOMRect, "left" | "top" | "width" | "height">;
 
 export function OriginalClientTutorialOverlay({
   language,
@@ -65,7 +66,8 @@ export function OriginalClientTutorialOverlay({
     { input, gamepadFamily },
     (seed) => createTutorialState(seed.input, seed.gamepadFamily),
   );
-  const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
+  const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const closedRef = useRef(false);
 
   // Outbound-action stream → reducer. One global listener; cheap.
@@ -172,7 +174,21 @@ export function OriginalClientTutorialOverlay({
     }
     const update = () => {
       const el = document.querySelector(step.spotlight as string);
-      setSpotlightRect(el ? el.getBoundingClientRect() : null);
+      const overlay = overlayRef.current;
+      if (!el || !overlay) {
+        setSpotlightRect(null);
+        return;
+      }
+      const targetRect = el.getBoundingClientRect();
+      const overlayRect = overlay.getBoundingClientRect();
+      const scaleX = overlayRect.width / Math.max(overlay.offsetWidth, 1);
+      const scaleY = overlayRect.height / Math.max(overlay.offsetHeight, 1);
+      setSpotlightRect({
+        left: (targetRect.left - overlayRect.left) / Math.max(scaleX, Number.EPSILON),
+        top: (targetRect.top - overlayRect.top) / Math.max(scaleY, Number.EPSILON),
+        width: targetRect.width / Math.max(scaleX, Number.EPSILON),
+        height: targetRect.height / Math.max(scaleY, Number.EPSILON),
+      });
     };
     update();
     window.addEventListener("resize", update);
@@ -204,6 +220,7 @@ export function OriginalClientTutorialOverlay({
 
   return (
     <div
+      ref={overlayRef}
       className="mir-tutorial-overlay"
       data-tutorial-input={state.input}
       data-tutorial-gamepad-family={state.gamepadFamily}
@@ -514,7 +531,7 @@ function tutorialCardStyle(touchPresentation: boolean, isManual: boolean): CSSPr
     : { ...CARD_STYLE, ...TOUCH_CARD_STYLE, ...TOUCH_COACH_STYLE };
 }
 
-function spotlightStyle(rect: DOMRect): CSSProperties {
+function spotlightStyle(rect: SpotlightRect): CSSProperties {
   const pad = 6;
   return {
     position: "absolute",

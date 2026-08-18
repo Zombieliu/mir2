@@ -71,11 +71,9 @@ const availableSceneSpriteLibraries = new Set(
   ),
 );
 const sourceSceneSpriteLibraries = new Set(
-  process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL?.trim()
-    ? Object.keys((originalSceneSpriteSourceIndex as OriginalSceneSpriteManifestPayload).libraries ?? {})
-        .map(normalizeSceneSpriteLibraryKey)
-        .filter((libraryKey) => !libraryKey.startsWith("Map/"))
-    : [],
+  Object.keys((originalSceneSpriteSourceIndex as OriginalSceneSpriteManifestPayload).libraries ?? {})
+    .map(normalizeSceneSpriteLibraryKey)
+    .filter((libraryKey) => !libraryKey.startsWith("Map/")),
 );
 // True when an R2 asset base is configured, so the asset Service Worker can backfill
 // frame PNGs that are absent same-origin (mir2-asset-worker.js). The kept actor libraries

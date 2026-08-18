@@ -24,6 +24,7 @@ import type {
   EntityMotionSnapshot,
   TranslateFn,
 } from "./original-client-types";
+import { localizeCrystalEntityName } from "../../lib/crystal-content-localization";
 
 // One over-head speech bubble, derived in the shell from recent chat/say log lines and matched to a
 // visible speaker by name. `firstSeenAt` is stamped with the shell's motion clock so the shell can
@@ -417,7 +418,9 @@ function SelectedTargetReadout({
   return (
     <div className="scene-target-readout" role="status" aria-live="polite">
       <div className="scene-target-readout-head">
-        <strong style={{ color: nameColor }}>{selectedEntity.name.replace(/_/g, " ")}</strong>
+        <strong style={{ color: nameColor }}>
+          {localizeCrystalEntityName(selectedEntity.name, t).replace(/_/g, " ")}
+        </strong>
         {selectedEntity.level !== undefined ? (
           <span className="scene-target-readout-level">
             {t("ui.level", [selectedEntity.level], `Lv ${selectedEntity.level}`)}

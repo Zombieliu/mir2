@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
@@ -114,6 +122,52 @@ const QUEST_LOG_ROWS_PER_PAGE = 8;
 // The window is rendered on top of the Crystal "Title/670" mail frame, a tall
 // 312x444 list panel. Coordinates below are expressed in that frame's space.
 const FRAME = ORIGINAL_UI.mail;
+const QUEST_WINDOW_POSITION_STORAGE_KEY = "mir2.questLogWindow.pos.v1";
+const DEFAULT_STAGE_WIDTH = 1024;
+const DEFAULT_STAGE_HEIGHT = 768;
+const DEFAULT_QUEST_WINDOW_TOP = 40;
+const QUEST_WINDOW_MARGIN = 4;
+
+type QuestWindowPosition = { left: number; top: number };
+type QuestWindowBounds = { width: number; height: number };
+
+function stageRootFor(element?: Element | null): HTMLElement | null {
+  return element?.closest<HTMLElement>(".client-stage-frame") ?? null;
+}
+
+function questStageBounds(element?: Element | null): QuestWindowBounds {
+  const stageRoot = stageRootFor(element);
+  return {
+    width: stageRoot?.clientWidth || DEFAULT_STAGE_WIDTH,
+    height: stageRoot?.clientHeight || DEFAULT_STAGE_HEIGHT,
+  };
+}
+
+/** Keep the complete 312x444 quest window visible inside the Crystal stage. */
+export function clampQuestWindowPosition(
+  position: QuestWindowPosition,
+  bounds: QuestWindowBounds,
+): QuestWindowPosition {
+  const maxLeft = Math.max(0, bounds.width - FRAME.width - QUEST_WINDOW_MARGIN);
+  const maxTop = Math.max(0, bounds.height - FRAME.height - QUEST_WINDOW_MARGIN);
+  const minLeft = maxLeft >= QUEST_WINDOW_MARGIN ? QUEST_WINDOW_MARGIN : 0;
+  const minTop = maxTop >= QUEST_WINDOW_MARGIN ? QUEST_WINDOW_MARGIN : 0;
+  return {
+    left: Math.min(Math.max(minLeft, position.left), maxLeft),
+    top: Math.min(Math.max(minTop, position.top), maxTop),
+  };
+}
+
+/** Center the quest diary by default, clear of the top-right account control. */
+export function defaultQuestWindowPosition(bounds: QuestWindowBounds): QuestWindowPosition {
+  return clampQuestWindowPosition(
+    {
+      left: Math.round((bounds.width - FRAME.width) / 2),
+      top: DEFAULT_QUEST_WINDOW_TOP,
+    },
+    bounds,
+  );
+}
 
 export function QuestLogWindow({
   t,
@@ -130,6 +184,16 @@ export function QuestLogWindow({
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedRewards, setSelectedRewards] = useState<Record<number, number>>({});
+  const [position, setPosition] = useState<QuestWindowPosition | null>(null);
+  const windowRef = useRef<HTMLElement | null>(null);
+  const dragRef = useRef<{
+    pointerStartX: number;
+    pointerStartY: number;
+    originLeft: number;
+    originTop: number;
+    scaleX: number;
+    scaleY: number;
+  } | null>(null);
 
   const filtered = useMemo(
     () => quests.filter((quest) => stageFilter === "all" || quest.stage === stageFilter),
@@ -170,16 +234,141 @@ export function QuestLogWindow({
     }
   }, [page, pageCount]);
 
+  useEffect(() => {
+    const bounds = questStageBounds(windowRef.current);
+    try {
+      const stored = window.localStorage.getItem(QUEST_WINDOW_POSITION_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<QuestWindowPosition>;
+        if (Number.isFinite(parsed.left) && Number.isFinite(parsed.top)) {
+          setPosition(
+            clampQuestWindowPosition(
+              { left: parsed.left as number, top: parsed.top as number },
+              bounds,
+            ),
+          );
+          return;
+        }
+      }
+    } catch {
+      // Placement persistence is optional; use the safe centered position below.
+    }
+    setPosition(defaultQuestWindowPosition(bounds));
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      const bounds = questStageBounds(windowRef.current);
+      setPosition((current) =>
+        current
+          ? clampQuestWindowPosition(current, bounds)
+          : defaultQuestWindowPosition(bounds),
+      );
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const persistPosition = useCallback((next: QuestWindowPosition) => {
+    try {
+      window.localStorage.setItem(QUEST_WINDOW_POSITION_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Storage can be unavailable in private browsing; dragging still works in-memory.
+    }
+  }, []);
+
+  const onDragPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0) return;
+      const bounds = questStageBounds(event.currentTarget);
+      const origin = position ?? defaultQuestWindowPosition(bounds);
+      const stageRoot = stageRootFor(event.currentTarget);
+      const stageRect = stageRoot?.getBoundingClientRect();
+      const scaleX = stageRoot && stageRect
+        ? stageRect.width / Math.max(1, stageRoot.clientWidth)
+        : 1;
+      const scaleY = stageRoot && stageRect
+        ? stageRect.height / Math.max(1, stageRoot.clientHeight)
+        : 1;
+      dragRef.current = {
+        pointerStartX: event.clientX,
+        pointerStartY: event.clientY,
+        originLeft: origin.left,
+        originTop: origin.top,
+        scaleX: scaleX || 1,
+        scaleY: scaleY || 1,
+      };
+      event.preventDefault();
+      event.stopPropagation();
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [position],
+  );
+
+  const onDragPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const bounds = questStageBounds(event.currentTarget);
+    setPosition(
+      clampQuestWindowPosition(
+        {
+          left: drag.originLeft + (event.clientX - drag.pointerStartX) / drag.scaleX,
+          top: drag.originTop + (event.clientY - drag.pointerStartY) / drag.scaleY,
+        },
+        bounds,
+      ),
+    );
+  }, []);
+
+  const onDragPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!dragRef.current) return;
+      dragRef.current = null;
+      event.preventDefault();
+      event.stopPropagation();
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // Pointer capture can already be released by the browser on cancellation.
+      }
+      setPosition((current) => {
+        if (current) persistPosition(current);
+        return current;
+      });
+    },
+    [persistPosition],
+  );
+
   return (
     <section
+      ref={windowRef}
       aria-label={t("ui.quest", [], "Quest Log")}
+      data-testid="quest-log-window"
       data-quest-stage-filter={stageFilter}
       data-quest-selected={selected?.questId ?? ""}
-      style={style.window}
+      data-quest-window-left={position?.left ?? ""}
+      data-quest-window-top={position?.top ?? ""}
+      style={{
+        ...style.window,
+        left: position?.left ?? Math.round((DEFAULT_STAGE_WIDTH - FRAME.width) / 2),
+        top: position?.top ?? DEFAULT_QUEST_WINDOW_TOP,
+      }}
     >
       <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
-      <img style={style.title} src={FRAME.title} alt="" draggable={false} />
-      <div style={style.titleText}>{t("ui.quest", [], "Quest Log")}</div>
+      <div style={style.contentBackdrop} aria-hidden="true" />
+      <div
+        data-testid="quest-window-drag-handle"
+        style={style.dragHandle}
+        onPointerDown={onDragPointerDown}
+        onPointerMove={onDragPointerMove}
+        onPointerUp={onDragPointerUp}
+        onPointerCancel={onDragPointerUp}
+        title={t("ui.onchainMine.drag", [], "Drag the title bar to move the panel")}
+      >
+        <span style={style.titleText}>{t("ui.quest", [], "Quest Log")}</span>
+      </div>
       <div style={style.close}>
         <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
       </div>
@@ -559,8 +748,8 @@ function progressPercentLabel(current: number, required: number) {
 const style: Record<string, CSSProperties> = {
   window: {
     position: "absolute",
-    left: 562,
-    top: 5,
+    left: Math.round((DEFAULT_STAGE_WIDTH - FRAME.width) / 2),
+    top: DEFAULT_QUEST_WINDOW_TOP,
     width: FRAME.width,
     height: FRAME.height,
     zIndex: 29,
@@ -570,14 +759,32 @@ const style: Record<string, CSSProperties> = {
     fontFamily: "inherit",
   },
   frame: { position: "absolute", inset: 0, width: FRAME.width, height: FRAME.height, pointerEvents: "none" },
-  title: { position: "absolute", left: 18, top: 9 },
-  titleText: {
+  contentBackdrop: {
     position: "absolute",
-    left: 18,
-    top: 8,
-    height: 16,
-    lineHeight: "16px",
-    fontSize: 12,
+    left: 8,
+    top: 28,
+    width: 296,
+    height: 403,
+    pointerEvents: "none",
+    background: "linear-gradient(180deg, rgba(8, 10, 10, 0.98), rgba(5, 7, 8, 0.98))",
+    boxShadow: "inset 0 0 0 1px rgba(117, 91, 50, 0.3)",
+  },
+  dragHandle: {
+    position: "absolute",
+    left: 8,
+    top: 3,
+    width: 250,
+    height: 24,
+    display: "flex",
+    alignItems: "center",
+    cursor: "move",
+    userSelect: "none",
+    touchAction: "none",
+  },
+  titleText: {
+    paddingLeft: 10,
+    lineHeight: "22px",
+    fontSize: 14,
     fontWeight: 700,
     color: "#f4dcaf",
     letterSpacing: 0.5,
@@ -589,6 +796,7 @@ const style: Record<string, CSSProperties> = {
     left: 10,
     top: 30,
     width: 292,
+    height: 28,
     display: "flex",
     gap: 2,
   },
@@ -598,7 +806,10 @@ const style: Record<string, CSSProperties> = {
     border: "1px solid rgba(190, 157, 99, 0.5)",
     background: "linear-gradient(180deg, rgba(52, 32, 18, 0.92), rgba(28, 17, 9, 0.92))",
     color: "#cbb38a",
-    padding: "2px 0",
+    height: 28,
+    padding: "1px 0 0",
+    boxSizing: "border-box",
+    lineHeight: "12px",
     fontSize: 10,
     display: "flex",
     flexDirection: "column",
@@ -610,13 +821,13 @@ const style: Record<string, CSSProperties> = {
     color: "#f8e6bb",
     borderColor: "rgba(214, 180, 110, 0.85)",
   },
-  tabCount: { fontSize: 9, opacity: 0.8 },
+  tabCount: { fontSize: 9, lineHeight: "11px", opacity: 0.8 },
   list: {
     position: "absolute",
     left: 10,
-    top: 56,
+    top: 60,
     width: 292,
-    height: 196,
+    height: 192,
     display: "flex",
     flexDirection: "column",
     gap: 2,
@@ -629,7 +840,10 @@ const style: Record<string, CSSProperties> = {
     gap: 6,
     width: "100%",
     height: 22,
+    minHeight: 22,
+    flex: "0 0 22px",
     padding: "0 6px",
+    boxSizing: "border-box",
     border: "1px solid transparent",
     background: "rgba(20, 13, 7, 0.4)",
     color: "#e3d3af",
@@ -657,10 +871,11 @@ const style: Record<string, CSSProperties> = {
   pageNext: { position: "absolute", left: 214, top: 256 },
   detail: {
     position: "absolute",
-    left: 12,
+    left: 10,
     top: 278,
-    width: 288,
+    width: 292,
     height: 118,
+    boxSizing: "border-box",
     overflowY: "auto",
     overflowX: "hidden",
     border: "1px solid rgba(190, 157, 99, 0.32)",
@@ -736,9 +951,9 @@ const style: Record<string, CSSProperties> = {
   },
   actions: {
     position: "absolute",
-    left: 12,
+    left: 10,
     top: 402,
-    width: 288,
+    width: 292,
     display: "flex",
     gap: 6,
   },
@@ -748,6 +963,7 @@ const style: Record<string, CSSProperties> = {
     background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
     color: "#f4dcaf",
     padding: "4px 0",
+    boxSizing: "border-box",
     fontSize: 11,
     cursor: "pointer",
   },

@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const originalAssetBaseUrl = process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
-process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL = "https://assets.example.test";
 
 const sourcePath = new URL("../lib/original-scene-sprite-meta.ts", import.meta.url);
 const source = readFileSync(sourcePath, "utf8");
@@ -18,31 +17,46 @@ const compiled = ts.transpileModule(source, {
   },
   fileName: fileURLToPath(sourcePath),
 });
-const module = { exports: {} };
-new Function("exports", "module", "require", compiled.outputText)(
-  module.exports,
-  module,
-  (request) => {
-    if (request.endsWith("manifest.generated.json")) {
-      return {
-        libraries: {
-          "Title/000": {},
-        },
-      };
-    }
-    if (request.endsWith("source-libraries.generated.json")) {
-      return {
-        libraries: {
-          "Monster/000": {},
-          "Monster/139": {},
-        },
-      };
-    }
-    throw new Error(`Unexpected test require ${request}`);
-  },
-);
 
-const { fetchOriginalSceneSpriteMeta } = module.exports;
+function loadSpriteMetaModule(assetBaseUrl) {
+  if (assetBaseUrl === undefined) {
+    delete process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL;
+  } else {
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL = assetBaseUrl;
+  }
+  const module = { exports: {} };
+  new Function("exports", "module", "require", compiled.outputText)(
+    module.exports,
+    module,
+    (request) => {
+      if (request.endsWith("manifest.generated.json")) {
+        return {
+          libraries: {
+            "Title/000": {},
+          },
+        };
+      }
+      if (request.endsWith("source-libraries.generated.json")) {
+        return {
+          libraries: {
+            "Monster/000": {},
+            "Monster/139": {},
+            "Map/2": {},
+          },
+        };
+      }
+      throw new Error(`Unexpected test require ${request}`);
+    },
+  );
+  return module.exports;
+}
+
+const localOnlyModule = loadSpriteMetaModule(undefined);
+assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Monster/000"), true);
+assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Monster\\139"), true);
+assert.equal(localOnlyModule.originalSceneSpriteLibraryExists("Map/2"), false);
+
+const { fetchOriginalSceneSpriteMeta } = loadSpriteMetaModule("https://assets.example.test");
 const originalFetch = globalThis.fetch;
 
 try {

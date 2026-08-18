@@ -5957,9 +5957,9 @@ button.character-spell-value:hover {
 /* Commercial identity security center. Kept above the legacy Crystal canvas so
    account recovery and session revocation remain usable at every client size. */
 .identity-security-trigger {
-  position: fixed;
-  right: max(14px, env(safe-area-inset-right));
-  top: max(14px, env(safe-area-inset-top));
+  position: absolute;
+  left: 12px;
+  top: 8px;
   z-index: 1200;
   border: 1px solid rgba(112, 214, 255, 0.5);
   border-radius: 999px;
@@ -5972,7 +5972,7 @@ button.character-spell-value:hover {
 }
 
 .identity-security-backdrop {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 2000;
   display: grid;
