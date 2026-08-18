@@ -216,15 +216,21 @@ jobs:
           node - <<'NODE'
           (async () => {
             const remoteReleaseUrl = process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE;
-            const expectedVersion = process.env.MIR2_ASSET_VERSION;
+            const expectedObjectPrefix = String(process.env.MIR2_ASSET_OBJECT_PREFIX ?? "").replace(/^\/+|\/+$/g, "");
+            const expectedAssetBaseUrl = String(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? "").replace(/\/+$/g, "");
             const response = await fetch(remoteReleaseUrl, { cache: "no-store" });
             if (!response.ok) {
               throw new Error(`remote asset release fetch failed: HTTP ${response.status} ${remoteReleaseUrl}`);
             }
             const release = await response.json();
             const fs = await import("node:fs/promises");
-            if (release.version !== expectedVersion) {
-              throw new Error(`remote release version mismatch: expected ${expectedVersion}, got ${release.version}`);
+            const releaseObjectPrefix = String(release.objectPrefix ?? "").replace(/^\/+|\/+$/g, "");
+            const releaseAssetBaseUrl = String(release.assetBaseUrl ?? release.baseUrl ?? "").replace(/\/+$/g, "");
+            if (releaseObjectPrefix !== expectedObjectPrefix) {
+              throw new Error(`remote release objectPrefix mismatch: expected ${expectedObjectPrefix}, got ${releaseObjectPrefix}`);
+            }
+            if (releaseAssetBaseUrl !== expectedAssetBaseUrl) {
+              throw new Error(`remote release assetBaseUrl mismatch: expected ${expectedAssetBaseUrl}, got ${releaseAssetBaseUrl}`);
             }
             const fallbackObjectPrefix = String(release.fallbackObjectPrefix ?? "").replace(/^\/+|\/+$/g, "");
             if (
@@ -317,6 +323,7 @@ jobs:
             console.log(JSON.stringify({
               ok: true,
               version: release.version,
+              objectPrefix: releaseObjectPrefix,
               fileCount: files.length,
               missingCount: release.stats?.missingCount ?? null,
               fallbackObjectPrefix: fallbackObjectPrefix || null,
