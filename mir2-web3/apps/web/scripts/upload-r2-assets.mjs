@@ -53,6 +53,10 @@ const verifyOriginalAssetTimeoutMs = numberArg(
   args.verifyOriginalAssetTimeoutMs ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSET_TIMEOUT_MS,
   15_000,
 );
+const verifyOriginalAssetAttempts = numberArg(
+  args.verifyOriginalAssetAttempts ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSET_ATTEMPTS,
+  Math.max(maxAttempts, 8),
+);
 const uploadDriverInput = String(args.driver ?? process.env.MIR2_R2_UPLOAD_DRIVER ?? "r2-s3").toLowerCase();
 const uploadDriver = normalizeUploadDriver(uploadDriverInput);
 const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
@@ -314,7 +318,7 @@ async function verifyUploadedOriginalAssets(release, uploads) {
 
 async function verifyUploadedOriginalAsset(upload, url) {
   let lastError;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+  for (let attempt = 1; attempt <= verifyOriginalAssetAttempts; attempt += 1) {
     try {
       const response = await fetch(url, {
         method: "HEAD",
@@ -329,10 +333,10 @@ async function verifyUploadedOriginalAsset(upload, url) {
       return;
     } catch (error) {
       lastError = error;
-      if (attempt >= maxAttempts || !isRetryableUploadError(error)) break;
+      if (attempt >= verifyOriginalAssetAttempts || !isRetryableUploadError(error)) break;
       const delayMs = uploadRetryDelayMs(error, attempt);
       console.warn(
-        `[mir2-r2] retry original asset verification ${attempt + 1}/${maxAttempts} in ${delayMs}ms ${url}`,
+        `[mir2-r2] retry original asset verification ${attempt + 1}/${verifyOriginalAssetAttempts} in ${delayMs}ms ${url}`,
       );
       await sleep(delayMs);
     }

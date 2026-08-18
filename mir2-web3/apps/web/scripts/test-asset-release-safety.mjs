@@ -384,7 +384,7 @@ await test("original asset verification retries transient fetch failures", async
       }
       if (request.method === "HEAD" && request.url === "/assets/original-ui/Items/412.png") {
         headRequests += 1;
-        if (headRequests === 1) {
+        if (headRequests <= 3) {
           request.socket.destroy();
           return;
         }
@@ -423,10 +423,11 @@ await test("original asset verification retries transient fetch failures", async
         "--concurrency", "1",
         "--verifyOriginalAssetConcurrency", "1",
         "--maxAttempts", "2",
+        "--verifyOriginalAssetAttempts", "4",
       ], { MIR2_R2_UPLOAD_SECRET: "fixture-secret" });
 
-      assert.equal(headRequests, 2);
-      assert.match(result.stderr, /retry original asset verification 2\/2/);
+      assert.equal(headRequests, 4);
+      assert.match(result.stderr, /retry original asset verification 4\/4/);
     } finally {
       await server.close();
     }
