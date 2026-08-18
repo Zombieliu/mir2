@@ -45,6 +45,7 @@ const CRYSTAL_QUEST_KEY_BY_ID: Readonly<Record<number, string>> = {
   7: "meetWarriorInstructor",
   8: "fencingSkillTest",
   9: "toBichon",
+  22: "forestYetiThreat",
   154: "emperorsProblem",
 };
 

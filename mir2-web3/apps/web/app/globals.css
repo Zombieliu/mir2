@@ -5958,7 +5958,7 @@ button.character-spell-value:hover {
    account recovery and session revocation remain usable at every client size. */
 .identity-security-trigger {
   position: absolute;
-  right: 136px;
+  left: 12px;
   top: 8px;
   z-index: 1200;
   border: 1px solid rgba(112, 214, 255, 0.5);

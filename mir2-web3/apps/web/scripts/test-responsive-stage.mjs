@@ -23,6 +23,14 @@ const minePanelSource = readFileSync(
   new URL("../app/components/onchain-mine-panel.tsx", import.meta.url),
   "utf8",
 );
+const tutorialOverlaySource = readFileSync(
+  new URL("../app/components/original-client-tutorial-overlay.tsx", import.meta.url),
+  "utf8",
+);
+const assetCacheRegistrarSource = readFileSync(
+  new URL("../app/components/asset-cache-registrar.tsx", import.meta.url),
+  "utf8",
+);
 const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const globalCss = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, {
@@ -253,11 +261,21 @@ assert.match(stagePortalSource, /createPortal\(children, stageRoot\)/);
 assert.match(stagePortalSource, /querySelector<HTMLElement>\("\.client-stage-frame"\)/);
 assert.match(pageSource, /<OriginalClientStagePortal>[\s\S]*?<IdentitySecurityPanel/);
 assert.match(pageSource, /<OriginalClientStagePortal>[\s\S]*?<OnchainMinePanelWithStore/);
+assert.match(pageSource, /<OriginalClientStagePortal>[\s\S]*?<OriginalClientTutorialOverlay/);
+assert.match(pageSource, /<OriginalClientStagePortal>[\s\S]*?<DeathReviveOverlay/);
 assert.match(globalCss, /\.identity-security-trigger\s*\{[\s\S]*?position:\s*absolute/);
+assert.match(globalCss, /\.identity-security-trigger\s*\{[\s\S]*?left:\s*12px/);
+assert.doesNotMatch(globalCss, /\.identity-security-trigger\s*\{[\s\S]*?right:\s*136px/);
 assert.match(globalCss, /\.identity-security-backdrop\s*\{[\s\S]*?position:\s*absolute/);
 assert.match(minePanelSource, /position:\s*"absolute"/);
 assert.match(minePanelSource, /closest<HTMLElement>\("\.client-stage-frame"\)/);
 assert.doesNotMatch(minePanelSource, /window\.inner(?:Width|Height)/);
 assert.match(minePanelSource, /event\.clientX - drag\.pointerStartX\) \/ drag\.scaleX/);
+assert.match(tutorialOverlaySource, /ref=\{overlayRef\}/);
+assert.match(tutorialOverlaySource, /targetRect\.left - overlayRect\.left/);
+assert.match(tutorialOverlaySource, /targetRect\.width \/ Math\.max\(scaleX/);
+assert.match(assetCacheRegistrarSource, /<OriginalClientStagePortal>/);
+assert.match(assetCacheRegistrarSource, /className="mir-cache-progress-panel"[\s\S]*?position:\s*"absolute"/);
+assert.doesNotMatch(assetCacheRegistrarSource, /maxWidth:\s*"calc\(100vw - 24px\)"/);
 
 console.log("responsive stage tests passed");

@@ -175,6 +175,7 @@ const routeTitles = new Map([
   [7, "拜访战士导师"],
   [8, "基本剑术考验"],
   [9, "前往比奇城"],
+  [22, "森林雪人的威胁"],
 ]);
 
 for (const [questId, expectedTitle] of routeTitles) {
@@ -232,7 +233,10 @@ assert.equal(zhT("log.realmInfo", ["platinum_176", "platinum_176", 25]), "服务
 assert.equal(contentLocalization.localizeCrystalMapTitle("BichonProvince", zhT), "比奇省");
 assert.equal(contentLocalization.localizeCrystalEntityName("Deer", zhT), "鹿");
 assert.equal(contentLocalization.localizeCrystalEntityName("Royal_Guard", zhT), "皇家_卫兵");
+assert.equal(contentLocalization.localizeCrystalEntityName("ForestYeti", zhT), "森林雪人");
+assert.equal(contentLocalization.localizeCrystalEntityName("ForestYeti0", zhT), "森林雪人");
 assert.equal(contentLocalization.localizeCrystalEntityName("MIRDM", zhT), "MIRDM");
+assert.equal(contentLocalization.localizeCrystalItemName("PrecisionPendant", zhT), "精准吊坠");
 
 const minePanelSource = readFileSync(
   new URL("../app/components/onchain-mine-panel.tsx", import.meta.url),

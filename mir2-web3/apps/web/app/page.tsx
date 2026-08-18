@@ -13955,7 +13955,6 @@ export default function HomePage() {
           onNonceChange={setOnchainNonce}
         />
       ) : null}
-    </OriginalClientStagePortal>
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
         <span>{debugSnapshotNotice.message}</span>
@@ -13993,6 +13992,7 @@ export default function HomePage() {
         }}
       />
     ) : null}
+    </OriginalClientStagePortal>
     </>
   );
 }

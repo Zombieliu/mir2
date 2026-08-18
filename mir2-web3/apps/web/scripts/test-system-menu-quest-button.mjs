@@ -18,6 +18,10 @@ const extraWindowsSource = fs.readFileSync(
   path.join(webRoot, "app/components/original-client-extra-windows.tsx"),
   "utf8",
 );
+const questWindowSource = fs.readFileSync(
+  path.join(webRoot, "app/components/original-client-quest-log-window.tsx"),
+  "utf8",
+);
 const shellSource = fs.readFileSync(
   path.join(webRoot, "app/original-client-shell.tsx"),
   "utf8",
@@ -64,5 +68,18 @@ assert.doesNotMatch(
   extraWindowsSource,
   /setStageRoot\(document\.querySelector<HTMLElement>\("\.client-stage-frame"\)\);\s*\}, \[\]\);/,
 );
+
+// The task diary reuses the Crystal mail frame, but owns its title/content
+// geometry. Never paint the MAIL title over the localized task title.
+assert.doesNotMatch(questWindowSource, /<img style=\{style\.title\} src=\{FRAME\.title\}/);
+assert.match(questWindowSource, /style=\{style\.contentBackdrop\}/);
+assert.match(questWindowSource, /data-testid="quest-window-drag-handle"/);
+assert.match(questWindowSource, /onPointerDown=\{onDragPointerDown\}/);
+assert.match(questWindowSource, /onPointerMove=\{onDragPointerMove\}/);
+assert.match(questWindowSource, /setPointerCapture\(event\.pointerId\)/);
+assert.match(questWindowSource, /QUEST_WINDOW_POSITION_STORAGE_KEY/);
+assert.match(questWindowSource, /clampQuestWindowPosition/);
+assert.match(questWindowSource, /left: 10,\s*top: 278,\s*width: 292,/);
+assert.match(questWindowSource, /left: 10,\s*top: 402,\s*width: 292,/);
 
 console.log("system menu quest button tests passed");

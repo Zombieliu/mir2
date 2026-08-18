@@ -17,6 +17,8 @@ const ENTITY_KEY_BY_NAME: Readonly<Record<string, string>> = {
   HookingCat: "content.entity.hookingCat.name",
   Oma: "content.entity.oma.name",
   RakingCat: "content.entity.rakingCat.name",
+  ForestYeti: "content.entity.forestYeti.name",
+  ForestYeti0: "content.entity.forestYeti.name",
   Teleport_Gilbert: "content.entity.teleportGilbert.name",
   BorderVillage_Board: "content.entity.borderVillageBoard.name",
   Assistant_Jane: "content.entity.assistantJane.name",
@@ -45,6 +47,7 @@ const ITEM_KEY_BY_NAME: Readonly<Record<string, string>> = {
   StrongWoodenBow: "content.item.strongWoodenBow.name",
   OldLoafer: "content.item.oldLoafer.name",
   Fencing: "content.item.fencing.name",
+  PrecisionPendant: "content.item.precisionPendant.name",
 };
 
 /** Localize canonical Crystal map titles without mutating protocol/world state. */

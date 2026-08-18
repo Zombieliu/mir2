@@ -25,6 +25,7 @@ import {
   type AssetReleaseCapabilities,
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
+import { OriginalClientStagePortal } from "./original-client-stage-portal";
 
 type AssetManifest = {
   version?: string;
@@ -706,11 +707,21 @@ export function AssetCacheRegistrar() {
 
   if (!mounted || !snapshot) return null;
 
-  if (debugEnabled) return <CacheDebugPanel snapshot={snapshot} />;
+  if (debugEnabled) {
+    return (
+      <OriginalClientStagePortal>
+        <CacheDebugPanel snapshot={snapshot} />
+      </OriginalClientStagePortal>
+    );
+  }
 
   if (!shouldShowCacheProgress(snapshot)) return null;
 
-  return <CacheProgressPanel snapshot={snapshot} />;
+  return (
+    <OriginalClientStagePortal>
+      <CacheProgressPanel snapshot={snapshot} />
+    </OriginalClientStagePortal>
+  );
 }
 
 function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
@@ -730,12 +741,12 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
       className="mir-cache-progress-panel"
       aria-label="Mir2 resource loading status"
       style={{
-        position: "fixed",
+        position: "absolute",
         left: 12,
         bottom: 12,
         zIndex: 9998,
         width: 286,
-        maxWidth: "calc(100vw - 24px)",
+        maxWidth: "calc(100% - 24px)",
         padding: "9px 10px",
         color: "#f5f1df",
         background: "rgba(7, 7, 6, 0.84)",
@@ -789,12 +800,12 @@ function CacheDebugPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
     <section
       aria-label="Mir2 cache debug"
       style={{
-        position: "fixed",
+        position: "absolute",
         right: 12,
         bottom: 12,
         zIndex: 9999,
         width: 300,
-        maxWidth: "calc(100vw - 24px)",
+        maxWidth: "calc(100% - 24px)",
         padding: "10px 12px",
         color: "#d6f7d0",
         background: "rgba(0, 0, 0, 0.82)",
