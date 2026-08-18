@@ -45,6 +45,10 @@ const verifyOriginalAssetConcurrency = numberArg(
   args.verifyOriginalAssetConcurrency ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSET_CONCURRENCY,
   16,
 );
+const verifyOriginalAssetTimeoutMs = numberArg(
+  args.verifyOriginalAssetTimeoutMs ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSET_TIMEOUT_MS,
+  15_000,
+);
 const uploadDriverInput = String(args.driver ?? process.env.MIR2_R2_UPLOAD_DRIVER ?? "r2-s3").toLowerCase();
 const uploadDriver = normalizeUploadDriver(uploadDriverInput);
 const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
@@ -288,17 +292,40 @@ async function verifyUploadedOriginalAssets(release, uploads) {
   let completed = 0;
   await runPool(originalAssetUploads, verifyOriginalAssetConcurrency, async (upload) => {
     const url = `${assetBaseUrl}/${String(upload.relativePath || upload.path || "").replace(/^\/+/, "")}`;
-    const response = await fetch(url, { method: "HEAD" });
-    if (!response.ok) {
-      throw new Error(
-        `Original asset missing after R2 upload: HTTP ${response.status} ${url} objectKey=${upload.objectKey}`,
-      );
-    }
+    await verifyUploadedOriginalAsset(upload, url);
     completed += 1;
     if (completed % 500 === 0 || completed === originalAssetUploads.length) {
       console.log(`[mir2-r2] verified original assets ${completed}/${originalAssetUploads.length}`);
     }
   });
+}
+
+async function verifyUploadedOriginalAsset(upload, url) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        method: "HEAD",
+        signal: AbortSignal.timeout(verifyOriginalAssetTimeoutMs),
+      });
+      if (!response.ok) {
+        throw createUploadHttpError(
+          `Original asset missing after R2 upload: HTTP ${response.status} ${url} objectKey=${upload.objectKey}`,
+          response,
+        );
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt >= maxAttempts || !isRetryableUploadError(error)) break;
+      const delayMs = uploadRetryDelayMs(error, attempt);
+      console.warn(
+        `[mir2-r2] retry original asset verification ${attempt + 1}/${maxAttempts} in ${delayMs}ms ${url}`,
+      );
+      await sleep(delayMs);
+    }
+  }
+  throw lastError;
 }
 
 async function buildUploadList(release) {
