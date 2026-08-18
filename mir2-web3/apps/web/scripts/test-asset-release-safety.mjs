@@ -735,6 +735,9 @@ await test("immutable runtime workflow serializes and retries R2 uploads", async
 await test("Vercel release can verify a pre-deployed Worker", async () => {
   const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
   assert.doesNotMatch(workflow, /deploy_vercel requires deploy_worker/);
+  assert.doesNotMatch(workflow, /remote release version mismatch/);
+  assert.match(workflow, /remote release objectPrefix mismatch/);
+  assert.match(workflow, /remote release assetBaseUrl mismatch/);
   assert.match(
     workflow,
     /name: Deploy Player Web to Vercel\n\s+if: \$\{\{ \(inputs\.publish_r2 \|\| inputs\.use_existing_release\) && inputs\.deploy_vercel \}\}/,
