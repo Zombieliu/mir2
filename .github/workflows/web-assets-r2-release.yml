@@ -24,6 +24,11 @@ on:
         required: false
         default: false
         type: boolean
+      resume_existing_assets:
+        description: Verify an already uploaded immutable prefix and publish only release manifests
+        required: false
+        default: false
+        type: boolean
       use_existing_release:
         description: Use an existing R2 remote-asset-release.json instead of uploading a new release
         required: false
@@ -401,6 +406,7 @@ jobs:
           MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
           MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
           MIR2_R2_VERIFY_ORIGINAL_ASSETS: "1"
+          MIR2_R2_RESUME_EXISTING_ASSETS: ${{ inputs.resume_existing_assets }}
         run: |
           set -euo pipefail
           bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"

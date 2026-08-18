@@ -29,6 +29,10 @@ const FULL_PACK_GZIP_OPTIONS = Object.freeze({
 const args = parseArgs(process.argv.slice(2));
 const manifestPath = path.resolve(args.manifest ?? process.env.MIR2_REMOTE_ASSET_RELEASE_MANIFEST ?? DEFAULT_MANIFEST);
 const dryRun = booleanArg(args.dryRun ?? process.env.MIR2_R2_DRY_RUN, false);
+const resumeExistingAssets = booleanArg(
+  args.resumeExistingAssets ?? process.env.MIR2_R2_RESUME_EXISTING_ASSETS,
+  false,
+);
 const bucket = args.bucket ?? process.env.MIR2_R2_BUCKET ?? "";
 const ensureBucket = booleanArg(args.ensureBucket ?? process.env.MIR2_R2_ENSURE_BUCKET, false);
 const concurrency = numberArg(args.concurrency ?? process.env.MIR2_R2_UPLOAD_CONCURRENCY, 4);
@@ -96,6 +100,9 @@ async function main() {
         "so large shards are streamed directly to R2.",
     );
   }
+  if (resumeExistingAssets && !verifyOriginalAssets) {
+    throw new Error("Resuming an existing R2 asset prefix requires MIR2_R2_VERIFY_ORIGINAL_ASSETS=1.");
+  }
   const legacyAssetUploads = await buildUploadList(release);
   await verifyEncodedUploads(legacyAssetUploads);
   const encodedUploads = legacyAssetUploads.filter((upload) => upload.contentEncoding);
@@ -128,7 +135,7 @@ async function main() {
     };
   }
   const uploads = [
-    ...assetUploads,
+    ...(resumeExistingAssets ? [] : assetUploads),
     ...immutableManifestUploads,
     ...(releaseManifestUpload ? [releaseManifestUpload] : []),
     ...(casUploads ? [casUploads.channel] : []),
@@ -153,6 +160,7 @@ async function main() {
           encodedUploadCount: encodedUploads.length,
           storageSavingsBytes: logicalTotalBytes - totalBytes,
           verifyOriginalAssets,
+          resumeExistingAssets,
           publishOrder: {
             assets: assetUploads.length,
             immutableManifests: immutableManifestUploads.length,
@@ -230,7 +238,11 @@ async function main() {
       console.log(`[mir2-r2] uploaded ${completed}/${uploads.length}`);
     }
   };
-  await runPool(assetUploads, concurrency, uploadOne);
+  if (resumeExistingAssets) {
+    console.log(`[mir2-r2] resuming existing asset prefix; verifying ${assetUploads.length} assets before publishing manifests`);
+  } else {
+    await runPool(assetUploads, concurrency, uploadOne);
+  }
 
   if (verifyOriginalAssets) {
     await verifyUploadedOriginalAssets(release, legacyAssetUploads);
