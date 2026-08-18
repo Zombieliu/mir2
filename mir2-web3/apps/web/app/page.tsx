@@ -137,6 +137,7 @@ import {
 } from "../lib/onchain-mine-state";
 import { OnchainMinePanel } from "./components/onchain-mine-panel";
 import type { OnchainMinePanelProps } from "./components/onchain-mine-panel";
+import { OriginalClientStagePortal } from "./components/original-client-stage-portal";
 import {
   IdentitySecurityPanel,
   type BrowserIdentitySession,
@@ -13906,15 +13907,49 @@ export default function HomePage() {
     {screen === "game" && !spectatorMode ? (
       <AiLiveGameHighlight status={aiLiveStatus} />
     ) : null}
-    <IdentitySecurityPanel
-      token={identitySessionToken}
-      accountId={accountId}
-      language={language}
-      onCurrentSessionRevoked={() => {
-        setIdentitySessionToken(null);
-        send({ type: "logOut" });
-      }}
-    />
+    <OriginalClientStagePortal>
+      <IdentitySecurityPanel
+        token={identitySessionToken}
+        accountId={accountId}
+        language={language}
+        onCurrentSessionRevoked={() => {
+          setIdentitySessionToken(null);
+          send({ type: "logOut" });
+        }}
+      />
+      {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
+        <OnchainMinePanelWithStore
+          store={worldStoreRef.current}
+          compactMode={clientProfile.layout === "touch"}
+          suppressed={clientProfile.layout === "touch" && showTutorial}
+          walletAddress={onchainWallet?.account.address ?? null}
+          walletBusy={onchainWalletBusy}
+          pendingSwings={onchainMine.pendingSwings}
+          batchSize={ONCHAIN_MINE_BATCH_SIZE}
+          optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
+          inFlightSwings={onchainMine.inFlightSwings}
+          inFlightDigest={onchainMine.inFlightDigest}
+          confirmedUnits={onchainMine.confirmedUnits}
+          settledBatches={onchainMine.settledBatches}
+          lastReconcile={onchainMine.lastReconcile}
+          lastError={onchainMine.lastError}
+          nextNonce={onchainNextNonce}
+          veinLocation={ONCHAIN_MINE_VEIN}
+          submitBusy={onchainSubmitBusy}
+          redeemAmount={onchainRedeemAmount}
+          onRedeemAmountChange={setOnchainRedeemAmount}
+          onConnectWallet={() => void connectOnchainWallet()}
+          sessionAddress={onchainSession?.address ?? null}
+          sessionExpiresAt={onchainSession?.expiresAt ?? null}
+          onActivateSession={() => void activateOnchainSession()}
+          onDeactivateSession={() => void deactivateOnchainSession()}
+          onSwing={onchainSwing}
+          onFlushNow={() => void flushOnchainBatch()}
+          onRedeem={() => void redeemOnchainOre()}
+          onNonceChange={setOnchainNonce}
+        />
+      ) : null}
+    </OriginalClientStagePortal>
     {debugSnapshotNotice ? (
       <div className={`debug-snapshot-toast ${debugSnapshotNotice.status}`} role="status" aria-live="polite">
         <span>{debugSnapshotNotice.message}</span>
@@ -13938,38 +13973,6 @@ export default function HomePage() {
         questLog={localizedQuestLog}
         playerClass={self?.classKey ?? null}
         onClose={() => setShowTutorial(false)}
-      />
-    ) : null}
-    {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
-      <OnchainMinePanelWithStore
-        store={worldStoreRef.current}
-        compactMode={clientProfile.layout === "touch"}
-        suppressed={clientProfile.layout === "touch" && showTutorial}
-        walletAddress={onchainWallet?.account.address ?? null}
-        walletBusy={onchainWalletBusy}
-        pendingSwings={onchainMine.pendingSwings}
-        batchSize={ONCHAIN_MINE_BATCH_SIZE}
-        optimisticUnits={onchainMine.pendingOptimisticUnits + onchainMine.inFlightOptimisticUnits}
-        inFlightSwings={onchainMine.inFlightSwings}
-        inFlightDigest={onchainMine.inFlightDigest}
-        confirmedUnits={onchainMine.confirmedUnits}
-        settledBatches={onchainMine.settledBatches}
-        lastReconcile={onchainMine.lastReconcile}
-        lastError={onchainMine.lastError}
-        nextNonce={onchainNextNonce}
-        veinLocation={ONCHAIN_MINE_VEIN}
-        submitBusy={onchainSubmitBusy}
-        redeemAmount={onchainRedeemAmount}
-        onRedeemAmountChange={setOnchainRedeemAmount}
-        onConnectWallet={() => void connectOnchainWallet()}
-        sessionAddress={onchainSession?.address ?? null}
-        sessionExpiresAt={onchainSession?.expiresAt ?? null}
-        onActivateSession={() => void activateOnchainSession()}
-        onDeactivateSession={() => void deactivateOnchainSession()}
-        onSwing={onchainSwing}
-        onFlushNow={() => void flushOnchainBatch()}
-        onRedeem={() => void redeemOnchainOre()}
-        onNonceChange={setOnchainNonce}
       />
     ) : null}
     {screen === "game" && (self?.dead === true || world.playerHp === 0) ? (

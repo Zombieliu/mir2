@@ -79,7 +79,7 @@ const POSITION_STORAGE_KEY = "mir2.onchainMinePanel.pos.v1";
 const COLLAPSED_STORAGE_KEY = "mir2.onchainMinePanel.collapsed.v1";
 
 const panelStyle: CSSProperties = {
-  position: "fixed",
+  position: "absolute",
   zIndex: 60,
   width: PANEL_WIDTH,
   padding: "10px 12px",
@@ -92,22 +92,41 @@ const panelStyle: CSSProperties = {
 
 type PanelPosition = { left: number; top: number };
 
+const DEFAULT_STAGE_WIDTH = 1024;
+const DEFAULT_STAGE_HEIGHT = 768;
+const DEFAULT_PANEL_TOP = 158;
+
+function stageRootFor(element?: Element | null): HTMLElement | null {
+  return element?.closest<HTMLElement>(".client-stage-frame") ?? null;
+}
+
+function stageBounds(element?: Element | null): { width: number; height: number } {
+  const stageRoot = stageRootFor(element);
+  return {
+    width: stageRoot?.clientWidth || DEFAULT_STAGE_WIDTH,
+    height: stageRoot?.clientHeight || DEFAULT_STAGE_HEIGHT,
+  };
+}
+
 /**
  * Default the panel to the right gutter just under the minimap — clear of Mir2's
  * bottom control bar / system-menu cluster, which the old `bottom: 96` anchor used to
  * sit on top of and swallow clicks for. The player can still drag it anywhere or
  * collapse it to the title bar; both choices persist.
  */
-function defaultPosition(): PanelPosition {
-  if (typeof window === "undefined") return { left: 12, top: 372 };
-  return { left: Math.max(12, window.innerWidth - PANEL_WIDTH - 12), top: 372 };
+function defaultPosition(element?: Element | null): PanelPosition {
+  const bounds = stageBounds(element);
+  return {
+    left: Math.max(12, bounds.width - PANEL_WIDTH - 12),
+    top: Math.min(DEFAULT_PANEL_TOP, Math.max(8, bounds.height - 40)),
+  };
 }
 
-/** Keep the panel on-screen after drags / viewport resizes (leave the title bar reachable). */
-function clampPosition(pos: PanelPosition): PanelPosition {
-  if (typeof window === "undefined") return pos;
-  const maxLeft = Math.max(0, window.innerWidth - PANEL_WIDTH);
-  const maxTop = Math.max(0, window.innerHeight - 40);
+/** Keep the panel inside the Crystal stage after drags / resizes. */
+function clampPosition(pos: PanelPosition, element?: Element | null): PanelPosition {
+  const bounds = stageBounds(element);
+  const maxLeft = Math.max(0, bounds.width - PANEL_WIDTH - 4);
+  const maxTop = Math.max(0, bounds.height - 40 - 4);
   return {
     left: Math.min(Math.max(0, pos.left), maxLeft),
     top: Math.min(Math.max(0, pos.top), maxTop),
@@ -218,7 +237,15 @@ export function OnchainMinePanel({
   // localStorage after mount to avoid a hydration mismatch.
   const [position, setPosition] = useState<PanelPosition | null>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const dragRef = useRef<{ pointerStartX: number; pointerStartY: number; originLeft: number; originTop: number } | null>(
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{
+    pointerStartX: number;
+    pointerStartY: number;
+    originLeft: number;
+    originTop: number;
+    scaleX: number;
+    scaleY: number;
+  } | null>(
     null,
   );
 
@@ -228,20 +255,30 @@ export function OnchainMinePanel({
       if (storedPos) {
         const parsed = JSON.parse(storedPos) as Partial<PanelPosition>;
         if (typeof parsed?.left === "number" && typeof parsed?.top === "number") {
-          setPosition(clampPosition({ left: parsed.left, top: parsed.top }));
+          setPosition(clampPosition({ left: parsed.left, top: parsed.top }, panelRef.current));
         } else {
-          setPosition(defaultPosition());
+          setPosition(defaultPosition(panelRef.current));
         }
       } else {
-        setPosition(defaultPosition());
+        setPosition(defaultPosition(panelRef.current));
       }
       const storedCollapsed = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
       setCollapsed(storedCollapsed === null ? compactMode : storedCollapsed === "1");
     } catch {
-      setPosition(defaultPosition());
+      setPosition(defaultPosition(panelRef.current));
       setCollapsed(compactMode);
     }
   }, [compactMode]);
+
+  useEffect(() => {
+    const onResize = () => {
+      setPosition((current) =>
+        current ? clampPosition(current, panelRef.current) : defaultPosition(panelRef.current),
+      );
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const persistPosition = useCallback((next: PanelPosition) => {
     try {
@@ -254,12 +291,18 @@ export function OnchainMinePanel({
   const onDragPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (compactMode || event.button !== 0) return;
-      const origin = position ?? defaultPosition();
+      const origin = position ?? defaultPosition(event.currentTarget);
+      const stageRoot = stageRootFor(event.currentTarget);
+      const stageRect = stageRoot?.getBoundingClientRect();
+      const scaleX = stageRoot && stageRect ? stageRect.width / Math.max(1, stageRoot.clientWidth) : 1;
+      const scaleY = stageRoot && stageRect ? stageRect.height / Math.max(1, stageRoot.clientHeight) : 1;
       dragRef.current = {
         pointerStartX: event.clientX,
         pointerStartY: event.clientY,
         originLeft: origin.left,
         originTop: origin.top,
+        scaleX: scaleX || 1,
+        scaleY: scaleY || 1,
       };
       event.currentTarget.setPointerCapture(event.pointerId);
     },
@@ -270,10 +313,13 @@ export function OnchainMinePanel({
     const drag = dragRef.current;
     if (!drag) return;
     setPosition(
-      clampPosition({
-        left: drag.originLeft + (event.clientX - drag.pointerStartX),
-        top: drag.originTop + (event.clientY - drag.pointerStartY),
-      }),
+      clampPosition(
+        {
+          left: drag.originLeft + (event.clientX - drag.pointerStartX) / drag.scaleX,
+          top: drag.originTop + (event.clientY - drag.pointerStartY) / drag.scaleY,
+        },
+        event.currentTarget,
+      ),
     );
   }, []);
 
@@ -310,21 +356,22 @@ export function OnchainMinePanel({
     ? {
         ...panelStyle,
         left: "50%",
-        top: "max(8px, env(safe-area-inset-top))",
-        width: collapsed ? 206 : "min(360px, calc(100vw - 24px))",
-        maxHeight: "calc(100dvh - 16px)",
+        top: 8,
+        width: collapsed ? 206 : "min(360px, calc(100% - 24px))",
+        maxHeight: "calc(100% - 16px)",
         overflowY: collapsed ? "hidden" : "auto",
         transform: "translateX(-50%)",
         padding: collapsed ? "7px 10px" : panelStyle.padding,
       }
     : position
       ? { ...panelStyle, left: position.left, top: position.top }
-      : { ...panelStyle, right: 12, top: 372 };
+      : { ...panelStyle, right: 12, top: DEFAULT_PANEL_TOP };
 
   if (suppressed) return null;
 
   return (
     <div
+      ref={panelRef}
       style={positionedStyle}
       data-testid="onchain-mine-panel"
       data-compact={compactMode ? "true" : "false"}
