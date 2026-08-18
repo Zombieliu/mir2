@@ -373,6 +373,66 @@ await test("release manifest upload starts after every referenced asset upload c
   });
 });
 
+await test("original asset verification retries transient fetch failures", async () => {
+  await withTempDir(async (root) => {
+    let headRequests = 0;
+    const server = await listen((request, response) => {
+      if (request.method === "PUT") {
+        request.resume();
+        request.on("end", () => response.end("ok"));
+        return;
+      }
+      if (request.method === "HEAD" && request.url === "/assets/original-ui/Items/412.png") {
+        headRequests += 1;
+        if (headRequests === 1) {
+          request.socket.destroy();
+          return;
+        }
+        response.statusCode = 200;
+        response.end();
+        return;
+      }
+      response.statusCode = 404;
+      response.end();
+    });
+
+    try {
+      const stagePath = path.join(root, "412.png");
+      const manifestPath = path.join(root, "release.json");
+      await fs.writeFile(stagePath, "quest-item-icon");
+      await fs.writeFile(manifestPath, JSON.stringify({
+        assetBaseUrl: `${server.url}/assets`,
+        objectPrefix: "mir2/v/verify-retry-fixture",
+        publishReleaseManifest: false,
+        files: [{
+          relativePath: "original-ui/Items/412.png",
+          stagePath,
+          size: 15,
+          contentType: "image/png",
+          sources: ["original-asset-manifest"],
+        }],
+      }));
+
+      const result = await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "worker",
+        "--workerUrl", server.url,
+        "--includeReleaseManifest", "false",
+        "--verifyOriginalAssets", "true",
+        "--concurrency", "1",
+        "--verifyOriginalAssetConcurrency", "1",
+        "--maxAttempts", "2",
+      ], { MIR2_R2_UPLOAD_SECRET: "fixture-secret" });
+
+      assert.equal(headRequests, 2);
+      assert.match(result.stderr, /retry original asset verification 2\/2/);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
 await test("r2-s3 uploads deterministic gzip bytes with matching metadata", async () => {
   await withTempDir(async (root) => {
     const requests = [];
