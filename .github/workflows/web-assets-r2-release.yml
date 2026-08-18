@@ -643,6 +643,28 @@ jobs:
             (
               cd "$GITHUB_WORKSPACE"
               npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
+              sync_vercel_production_env() {
+                npx vercel@56.4.1 env add "$1" production \
+                  --force \
+                  --yes \
+                  --no-sensitive \
+                  --value "$2" \
+                  --token "$VERCEL_TOKEN"
+              }
+              # Vercel's remote builder resolves project-level production
+              # variables after accepting deploy-time --build-env values. Keep
+              # the project environment pinned to the release before starting
+              # the build so a successful deploy cannot silently reuse the
+              # previous asset version.
+              sync_vercel_production_env "MIR2_USE_PREBUILT_BEVY_RUNTIME" "1"
+              sync_vercel_production_env "MIR2_ASSET_VERSION" "$MIR2_ASSET_VERSION"
+              sync_vercel_production_env "MIR2_ASSET_OBJECT_PREFIX" "$MIR2_ASSET_OBJECT_PREFIX"
+              sync_vercel_production_env "MIR2_FALLBACK_OBJECT_PREFIX" "$MIR2_FALLBACK_OBJECT_PREFIX"
+              sync_vercel_production_env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL" "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+              sync_vercel_production_env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL" "$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
+              sync_vercel_production_env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE" "$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
+              sync_vercel_production_env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE" "$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
+              sync_vercel_production_env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST" "1"
               npx vercel@56.4.1 deploy . --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
             )
             exit 0
