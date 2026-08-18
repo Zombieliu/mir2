@@ -134,6 +134,15 @@ test("the generated map atlas never exceeds the WebGL2 compatibility budget", as
     throw error;
   }
 
+  if (!Array.isArray(manifest.pages)) {
+    if (requireManifest) {
+      assert.fail("manifest must be schema version 2 with pages array");
+    } else {
+      context.skip("generated map atlas manifest is not schema version 2");
+      return;
+    }
+  }
+
   const oversized = manifest.pages.filter(
     (page) => page.w > MAX_SIZE || page.h > MAX_SIZE || page.b <= 0,
   );
