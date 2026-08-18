@@ -4,23 +4,39 @@
 > 用「抽帧 + 本地视觉模型(qwen2.5vl)语义审查」对比两条渲染通道的画面。
 > 更新日期 2026-08-18。此链路已实测打通后端。
 
-## 0. 一图看懂：运行时拓扑
+> **⚠️ 架构澄清（2026-08-18）**：本地 Web **并不连接原版 Crystal Server**。本手册
+> 早期版本误写"两条渲染通道共用后端"，是错误的。实际是**两套相互独立的后端**：
+>
+> ```
+> 原版 Client.exe ──TCP──► 原版 Crystal Server.exe (:7000)   ← C# 服务器 + 原版渲染
+> 本地 Web/Bevy   ──WS──► 本地 gateway ─► 本地 Rust mir2-simulation  ← 自研仿真 + Bevy
+>                         (InProcessWorldRuntime，进程内)
+> ```
+>
+> 二者是**换语言重构的两条独立实现链路**，不共享数据。
+> `MIR2_CRYSTAL_TCP_ADDR` 仅在 `packet_trace` 工具中用于「原版 vs Rust 仿真」的
+> packet 级对比，并不把 Web 会话代理到原版 Server。
+
+## 0. 一图看懂：运行时拓扑（正确版）
 
 ```
-               ┌─────────── 原版 Crystal Server.exe (Setup.ini Port=7000)
-               │
-原版 Client.exe ──┘  ← 原版渲染通道（图形窗口，需人工操作/录屏）
-   │
-   └──────────────────────────────────────────────┐
-                                                  ▼
-本地 web (Next, :3002) ──WS 7010──► 本地 gateway ──►(按下需连) 原版 7000
-   └─CDP 抓帧(capture-crystal-parity.mjs)─► png
-                                                  │
-qwen2.5vl:7b-local (Ollama) ◄──ask-vl.mjs 描述每帧 ◄──┘
+┌─ 链路 A：C# 原版 ─────────────────────────────┐
+│ Client.exe → Crystal Server.exe (:7000)       │  参考实现（原始 C# 服务器/渲染）
+└───────────────────────────────────────────────┘
+┌─ 链路 B：Rust 重构 ───────────────────────────┐
+│ 本地 Web(Bevy,:3002) → gateway(7010/7310)     │  被重构实现（Rust 仿真/渲染）
+│   → InProcessWorldRuntime(mir2-simulation)    │
+└───────────────────────────────────────────────┘
+         ↓ 对比目标（重构项目的核心）
+   同一操作·同输入 → 原版输出 vs Rust 输出是否一致
+   - 逻辑层: packet_trace 逐包/状态对比
+   - 画面层: 同场景各自截图 → pixel-diff / qwen2.5vl 语义审查
 ```
 
-- **两条渲染通道共用同一套 Crystal 后端数据**；差异 = 原版渲染器 vs 自研 Web/Bevy 渲染器。
-- 这正是 AGENTS.md / parity 文档里反复提到的 **original/Web visual parity**。
+- **为什么分两条链路**：这是**换语言全平台重构**。对拍 = 证明 Rust 实现与 C# 原版
+  在同样的输入下行为等价（1:1 parity），而非让两个客户端连同一后端。
+- 逻辑层对拍已有现成工具：`apps/gateway/src/bin/packet_trace.rs`（R298/R300 达
+  stable-diff 9/9 接受）。画面层对拍需"两个客户端到同一状态"，见策略总纲。
 
 ## 1. 启动顺序（已在 E:\mir2 验证）
 
