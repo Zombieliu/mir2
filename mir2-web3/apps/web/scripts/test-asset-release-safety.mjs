@@ -433,6 +433,94 @@ await test("original asset verification retries transient fetch failures", async
   });
 });
 
+await test("resume mode verifies existing assets and uploads only release metadata", async () => {
+  await withTempDir(async (root) => {
+    const putKeys = [];
+    let headRequests = 0;
+    const server = await listen((request, response) => {
+      if (request.method === "PUT") {
+        putKeys.push(new URL(request.url, server.url).searchParams.get("key"));
+        request.resume();
+        request.on("end", () => response.end("ok"));
+        return;
+      }
+      if (request.method === "HEAD" && request.url === "/assets/original-ui/Items/412.png") {
+        headRequests += 1;
+        response.statusCode = 200;
+        response.end();
+        return;
+      }
+      response.statusCode = 404;
+      response.end();
+    });
+
+    try {
+      const stagePath = path.join(root, "412.png");
+      const manifestPath = path.join(root, "release.json");
+      await fs.writeFile(stagePath, "quest-item-icon");
+      await fs.writeFile(manifestPath, JSON.stringify({
+        assetBaseUrl: `${server.url}/assets`,
+        objectPrefix: "mir2/v/resume-fixture",
+        files: [{
+          relativePath: "original-ui/Items/412.png",
+          stagePath,
+          size: 15,
+          contentType: "image/png",
+          sources: ["original-asset-manifest"],
+        }],
+      }));
+
+      const result = await runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "worker",
+        "--workerUrl", server.url,
+        "--verifyOriginalAssets", "true",
+        "--resumeExistingAssets", "true",
+        "--concurrency", "1",
+        "--verifyOriginalAssetConcurrency", "1",
+        "--maxAttempts", "2",
+      ], { MIR2_R2_UPLOAD_SECRET: "fixture-secret" });
+
+      assert.equal(headRequests, 1);
+      assert.deepEqual(putKeys, ["mir2/v/resume-fixture/remote-asset-release.json"]);
+      assert.match(result.stdout, /resuming existing asset prefix; verifying 1 assets/);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+await test("resume mode refuses to skip uploads without full original asset verification", async () => {
+  await withTempDir(async (root) => {
+    const stagePath = path.join(root, "412.png");
+    const manifestPath = path.join(root, "release.json");
+    await fs.writeFile(stagePath, "quest-item-icon");
+    await fs.writeFile(manifestPath, JSON.stringify({
+      assetBaseUrl: "https://assets.invalid/mir2/v/resume-guard-fixture",
+      objectPrefix: "mir2/v/resume-guard-fixture",
+      files: [{
+        relativePath: "original-ui/Items/412.png",
+        stagePath,
+        size: 15,
+        contentType: "image/png",
+        sources: ["original-asset-manifest"],
+      }],
+    }));
+
+    await assert.rejects(
+      runNode(UPLOAD_SCRIPT, [
+        "--manifest", manifestPath,
+        "--bucket", "fixture",
+        "--driver", "worker",
+        "--workerUrl", "https://upload.invalid",
+        "--resumeExistingAssets", "true",
+      ], { MIR2_R2_UPLOAD_SECRET: "fixture-secret" }),
+      /requires MIR2_R2_VERIFY_ORIGINAL_ASSETS=1/,
+    );
+  });
+});
+
 await test("r2-s3 uploads deterministic gzip bytes with matching metadata", async () => {
   await withTempDir(async (root) => {
     const requests = [];
