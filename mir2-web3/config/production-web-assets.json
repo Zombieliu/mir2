@@ -1,15 +1,15 @@
 {
   "schemaVersion": 3,
-  "version": "20260813-actor-closure-f69fd2d9",
-  "objectPrefix": "mir2/v/20260813-actor-closure-f69fd2d9",
+  "version": "20260818-main-97887dcd",
+  "objectPrefix": "mir2/v/20260818-main-97887dcd",
   "fallbackObjectPrefix": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
-  "assetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20260813-actor-closure-f69fd2d9",
+  "assetBaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20260818-main-97887dcd",
   "browserFallbackBaseUrls": [
-    "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260813-actor-closure-f69fd2d9",
-    "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260813-actor-closure-f69fd2d9",
+    "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd",
+    "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd",
     "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
   ],
-  "remoteReleaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20260813-actor-closure-f69fd2d9/remote-asset-release.json",
+  "remoteReleaseUrl": "https://assets.mir2.obelisk.build/mir2/v/20260818-main-97887dcd/remote-asset-release.json",
   "fullCrystalPack": {
     "enabled": true,
     "verified": true,

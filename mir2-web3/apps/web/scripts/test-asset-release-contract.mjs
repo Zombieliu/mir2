@@ -264,6 +264,16 @@ test("production release and Next routing expose the pinned capability and immut
   const productionConfig = JSON.parse(
     readFileSync(new URL("../../../config/production-web-assets.json", import.meta.url), "utf8"),
   );
+  const assetWorkerConfig = JSON.parse(
+    readFileSync(new URL("../../../infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc", import.meta.url), "utf8"),
+  );
+  const domainProxyConfig = JSON.parse(
+    readFileSync(new URL("../../../infra/cloudflare/mir2-domain-proxy/wrangler.jsonc", import.meta.url), "utf8"),
+  );
+  assert.equal(assetWorkerConfig.vars.MIR2_OVERLAY_OBJECT_PREFIX, productionConfig.objectPrefix);
+  assert.equal(domainProxyConfig.vars.MIR2_ASSET_VERSION, productionConfig.version);
+  assert.equal(domainProxyConfig.vars.MIR2_ASSET_OBJECT_PREFIX, productionConfig.objectPrefix);
+  assert.equal(domainProxyConfig.vars.ASSET_ORIGIN_URL, productionConfig.assetBaseUrl);
   assert.equal(productionConfig.fullCrystalPack.enabled, true);
   assert.equal(productionConfig.fullCrystalPack.verified, true);
   assert.match(productionConfig.fullCrystalPack.contentHash, /^[a-f0-9]{64}$/);
