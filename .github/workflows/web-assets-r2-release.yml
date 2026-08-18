@@ -665,6 +665,10 @@ jobs:
               sync_vercel_production_env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE" "$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
               sync_vercel_production_env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE" "$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
               sync_vercel_production_env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST" "1"
+              # Refresh the local Vercel snapshot created by the first pull;
+              # otherwise the uploaded archive still contains the previous
+              # production values even though the project environment changed.
+              npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
               npx vercel@56.4.1 deploy . --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
             )
             exit 0

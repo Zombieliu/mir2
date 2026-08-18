@@ -770,6 +770,10 @@ await test("Vercel release can verify a pre-deployed Worker", async () => {
     workflow,
     /npx vercel@56\.4\.1 env add "\$1" production[\s\S]*?--force[\s\S]*?--value "\$2"/,
   );
+  assert.match(
+    workflow,
+    /sync_vercel_production_env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST" "1"[\s\S]*?npx vercel@56\.4\.1 pull --yes --environment=production[\s\S]*?npx vercel@56\.4\.1 deploy \. --prod/,
+  );
 });
 
 await test("new R2 releases bootstrap the original-asset manifest locally before upload", async () => {
