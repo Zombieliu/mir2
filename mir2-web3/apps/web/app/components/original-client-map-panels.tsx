@@ -15,6 +15,10 @@ import {
 import { CRYSTAL_MINI_MAP_TRANSFORMS } from "../../lib/generated/crystal-minimap-transforms";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { CRYSTAL_BIG_MAP_NPCS } from "../../lib/generated/crystal-npc-info-data";
+import {
+  localizeCrystalEntityName,
+  localizeCrystalMapTitle,
+} from "../../lib/crystal-content-localization";
 import miniMapMeta from "../../public/original-ui/MMap/meta.json";
 import { SpriteButton } from "./original-client-overlays";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
@@ -134,7 +138,9 @@ export function BigMapDialog({
         onError={handleSceneAssetImageError}
         onLoad={handleSceneAssetImageLoad}
       />
-      <div className="big-map-title">{world.mapTitle ?? world.mapFileName ?? ""}</div>
+      <div className="big-map-title">
+        {localizeCrystalMapTitle(world.mapTitle, t) ?? world.mapFileName ?? ""}
+      </div>
       <div className="big-map-close"><SpriteButton sprite={ORIGINAL_UI.bigMap.closeButton} label={t("ui.close")} onClick={onClose} /></div>
       <div className="big-map-scroll up"><SpriteButton sprite={ORIGINAL_UI.bigMap.upButton} label={t("ui.up", [], "Up")} onClick={() => undefined} /></div>
       <div className="big-map-scroll thumb"><SpriteButton sprite={ORIGINAL_UI.bigMap.positionBar} label={t("ui.scroll", [], "Scroll")} onClick={() => undefined} /></div>
@@ -231,7 +237,9 @@ export function BigMapDialog({
               onError={handleSceneAssetImageError}
               onLoad={handleSceneAssetImageLoad}
             />
-            <span className="big-map-npc-name">{bigMapNpcDisplayName(entity.name)}</span>
+            <span className="big-map-npc-name">
+              {bigMapNpcDisplayName(localizeCrystalEntityName(entity.name, t))}
+            </span>
           </button>
         ))}
       </div>
@@ -510,7 +518,7 @@ function crystalMiniMapTitle(mapTitle: string | null, t: TranslateFn) {
     .map((part) => part.trim())
     .filter(Boolean)
     .filter((part) => !safeZoneLabels.some((label) => part.toLocaleLowerCase() === label.toLocaleLowerCase()));
-  return normalized[0] ?? fallback;
+  return localizeCrystalMapTitle(normalized[0] ?? fallback, t) ?? fallback;
 }
 
 function crystalMiniMapLightIcon(lightSetting: number | null | undefined) {

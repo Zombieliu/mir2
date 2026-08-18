@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest 4K UI/i18n regression sync: 2026-08-18 fixes the production-capture
+> mismatch where stage-external Account Security and On-chain Mine controls used
+> browser-viewport coordinates while the Crystal client was centered inside a
+> 1024x768 stage. Both surfaces now share the stage coordinate system, including
+> drag/clamp behavior. The Chinese presentation route now resolves q1-q9 across
+> all stages plus the visible quest controls, descriptions, NPCs, rewards,
+> Bichon map/entity labels, realm banner and mine panel, while canonical runtime
+> names remain unchanged. Focused regressions, TypeScript and a direct optimized
+> Next build pass. Publication and an authenticated 4K Chinese recapture remain
+> separate production/human gates; this does not by itself claim Accepted.
+
 > Latest three-class level-50 skill closure sync: 2026-08-18 adds a
 > deterministic source-to-runtime gate for every active Crystal/Jev
 > Warrior/Wizard/Taoist book through required level 50. The strict profile is

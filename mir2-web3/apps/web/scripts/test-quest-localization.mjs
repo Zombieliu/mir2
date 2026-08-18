@@ -3,20 +3,32 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-const sourcePath = new URL("../lib/quest-localization.ts", import.meta.url);
-const source = readFileSync(sourcePath, "utf8");
-const compiled = ts.transpileModule(source, {
-  compilerOptions: {
-    module: ts.ModuleKind.CommonJS,
-    target: ts.ScriptTarget.ES2022,
-    strict: true,
-  },
-  fileName: fileURLToPath(sourcePath),
-});
-const module = { exports: {} };
-new Function("exports", "module", compiled.outputText)(module.exports, module);
+function loadTypeScriptModule(url, requireMap = {}) {
+  const source = readFileSync(url, "utf8");
+  const compiled = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      strict: true,
+    },
+    fileName: fileURLToPath(url),
+  });
+  const module = { exports: {} };
+  const require = (specifier) => {
+    if (specifier in requireMap) return requireMap[specifier];
+    throw new Error(`Unexpected require(${specifier}) while loading ${url}`);
+  };
+  new Function("exports", "module", "require", compiled.outputText)(module.exports, module, require);
+  return module.exports;
+}
 
-const { localizeQuestEntry, localizeQuestLog } = module.exports;
+const contentLocalization = loadTypeScriptModule(
+  new URL("../lib/crystal-content-localization.ts", import.meta.url),
+);
+const { localizeQuestEntry, localizeQuestLog } = loadTypeScriptModule(
+  new URL("../lib/quest-localization.ts", import.meta.url),
+  { "./crystal-content-localization": contentLocalization },
+);
 const texts = {
   "content.quest.smithFirstTest.title": "铁匠的第一次考验",
   "content.quest.smithFirstTest.summary": "清理村外道路。",
@@ -134,5 +146,109 @@ for (const expected of emperorStagePresentations) {
   assert.equal(stagePresentation.progressLabel, expected.progressLabel);
   assert.equal(stagePresentation.tracker, expected.tracker);
 }
+
+const webBundleSource = readFileSync(
+  new URL("../lib/generated/localization_bundle.json", import.meta.url),
+  "utf8",
+);
+const gameDataBundleSource = readFileSync(
+  new URL("../../../packages/game-data/data/generated/localization_bundle.json", import.meta.url),
+  "utf8",
+);
+assert.equal(webBundleSource, gameDataBundleSource, "web and game-data localization bundles must stay in sync");
+const localizationBundle = JSON.parse(webBundleSource);
+const zhTexts = localizationBundle.languages["zh-CN"].texts;
+const enTexts = localizationBundle.languages.en.texts;
+const zhT = (key, params = [], fallback = key) =>
+  params.reduce(
+    (value, entry, index) => value.split(`{${index}}`).join(String(entry)),
+    zhTexts[key] ?? enTexts[key] ?? fallback,
+  );
+
+const routeTitles = new Map([
+  [1, "简助理的请求"],
+  [2, "朱迪女工匠的请求"],
+  [3, "与屠夫交谈"],
+  [4, "屠夫的狩猎委托"],
+  [5, "铁匠的第一次考验"],
+  [6, "铁匠的第二次考验"],
+  [7, "拜访战士导师"],
+  [8, "基本剑术考验"],
+  [9, "前往比奇城"],
+]);
+
+for (const [questId, expectedTitle] of routeTitles) {
+  for (const stage of ["available", "inProgress", "readyToTurnIn", "completed"]) {
+    const routeQuest = localizeQuestEntry({
+      ...smith,
+      questId,
+      title: "English title",
+      summary: "English summary",
+      objective: "English objective",
+      progressLabel: "English progress",
+      tracker: "English tracker",
+      rewardPreview: "English reward",
+      descriptionLines: ["English description"],
+      stage,
+    }, zhT);
+    assert.equal(routeQuest.title, expectedTitle, `quest ${questId} ${stage} title`);
+    for (const value of [
+      routeQuest.summary,
+      routeQuest.objective,
+      routeQuest.progressLabel,
+      routeQuest.tracker,
+      routeQuest.rewardPreview,
+      routeQuest.descriptionLines?.join("\n"),
+    ]) {
+      assert.doesNotMatch(
+        value ?? "",
+        /English/,
+        `quest ${questId} ${stage} must not fall back to English`,
+      );
+    }
+  }
+}
+
+const butcherHunt = localizeQuestEntry({
+  ...smith,
+  questId: 4,
+  title: "Hunt for the Butcher",
+  stage: "available",
+  descriptionLines: ["English description"],
+  objectives: [{ label: "Collect Deer Meat", current: 0, required: 5 }],
+  npc: "Merchant_John",
+  rewards: {
+    items: [{ name: "OldCopperRing", itemIndex: 1175, count: 1 }],
+  },
+}, zhT);
+assert.equal(butcherHunt.descriptionLines[0], "替屠夫约翰猎鹿并带回五块鹿肉。需要查看原版屠宰说明时可按 H 键。");
+assert.equal(butcherHunt.objectives[0].label, "收集 5 块鹿肉。");
+assert.equal(butcherHunt.npc, "屠夫_约翰");
+assert.equal(butcherHunt.rewards.items[0].name, "旧铜戒指");
+
+assert.equal(zhT("ui.questAccept"), "接受");
+assert.equal(zhT("ui.questComplete"), "完成");
+assert.equal(zhT("log.realmInfo", ["platinum_176", "platinum_176", 25]), "服务器 platinum_176 · 配置 platinum_176 v25");
+assert.equal(contentLocalization.localizeCrystalMapTitle("BichonProvince", zhT), "比奇省");
+assert.equal(contentLocalization.localizeCrystalEntityName("Deer", zhT), "鹿");
+assert.equal(contentLocalization.localizeCrystalEntityName("Royal_Guard", zhT), "皇家_卫兵");
+assert.equal(contentLocalization.localizeCrystalEntityName("MIRDM", zhT), "MIRDM");
+
+const minePanelSource = readFileSync(
+  new URL("../app/components/onchain-mine-panel.tsx", import.meta.url),
+  "utf8",
+);
+assert.match(minePanelSource, /t: OnchainMineTranslateFn/);
+assert.match(minePanelSource, /t\("ui\.onchainMine\.title"/);
+assert.doesNotMatch(minePanelSource, /<strong>On-chain Mine \(testnet\)<\/strong>/);
+assert.equal(zhT("ui.onchainMine.title"), "链上矿脉（测试网）");
+assert.equal(zhT("ui.onchainMine.redeem"), "兑换金币");
+
+const sceneLayerSource = readFileSync(
+  new URL("../app/components/original-client-scene-visual-layers.tsx", import.meta.url),
+  "utf8",
+);
+assert.match(sceneLayerSource, /t\("client\.OwnerHero"/);
+assert.doesNotMatch(sceneLayerSource, /text: `\$\{entity\.ownerName\}'s Hero`/);
 
 console.log("quest localization tests passed");

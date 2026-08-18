@@ -20,6 +20,7 @@ import {
 } from "../../lib/scene-effect-runtime";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
+import { localizeCrystalEntityName } from "../../lib/crystal-content-localization";
 import {
   collectViewportFallbackVfx,
   fallbackVfxStyle,
@@ -812,7 +813,7 @@ function OriginalClientSceneVisualLayersInner({
               ? EMPTY_VIEWPORT_OFFSET
               : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
           const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
-          const label = entityDisplayName(entity);
+          const label = entityDisplayName(entity, t);
           const hitBounds = entitySpriteHitBounds(sprite);
           const hitWidth = hitBounds.right - hitBounds.left;
           const hitHeight = hitBounds.bottom - hitBounds.top;
@@ -1231,7 +1232,7 @@ function OriginalClientSceneVisualLayersInner({
                   ? EMPTY_VIEWPORT_OFFSET
                   : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
-              const labelLines = entityDisplayLabelLines(entity);
+              const labelLines = entityDisplayLabelLines(entity, t);
               const labelText = labelLines.map((line) => line.text).join("\r\n");
               const labelColour = entityNameplateColor(entity);
               const questIcon =
@@ -1248,7 +1249,7 @@ function OriginalClientSceneVisualLayersInner({
                     height: labelLines.length > 1 ? 32 : 15,
                   }) ??
                   findCrystalGdiTextAsset({
-                    text: entity.name.replace(/_/g, " "),
+                    text: labelText.replace(/\r?\n/g, " "),
                     foreground: labelColour,
                     outline: true,
                     width: 50,
@@ -1390,25 +1391,32 @@ function OriginalClientSceneVisualLayersInner({
 // that only advances `motionNow` (no new world/sprite data) re-renders nothing here.
 export const OriginalClientSceneVisualLayers = memo(OriginalClientSceneVisualLayersInner);
 
-function entityDisplayName(entity: DisplayEntity): string {
-  return entity.name;
+function entityDisplayName(entity: DisplayEntity, t: TranslateFn): string {
+  return localizeCrystalEntityName(entity.name, t);
 }
 
-function entityDisplayLabelLines(entity: DisplayEntity): Array<{ text: string; role: "primary" | "secondary" }> {
+function entityDisplayLabelLines(
+  entity: DisplayEntity,
+  t: TranslateFn,
+): Array<{ text: string; role: "primary" | "secondary" }> {
+  const displayName = localizeCrystalEntityName(entity.name, t);
   if (entity.ownerName) {
     return [
-      { text: entity.name, role: "primary" },
-      { text: `${entity.ownerName}'s Hero`, role: "secondary" },
+      { text: displayName, role: "primary" },
+      {
+        text: t("client.OwnerHero", [entity.ownerName], `${entity.ownerName}'s Hero`),
+        role: "secondary",
+      },
     ];
   }
 
   if (entity.kind !== "npc" && entity.kind !== "monster") {
-    return [{ text: entity.name, role: "primary" }];
+    return [{ text: displayName, role: "primary" }];
   }
 
-  const parts = entity.name.split("_").filter(Boolean);
+  const parts = displayName.split("_").filter(Boolean);
   if (parts.length <= 1) {
-    return [{ text: entity.name.replace(/_/g, " "), role: "primary" }];
+    return [{ text: displayName.replace(/_/g, " "), role: "primary" }];
   }
 
   return parts.map((part, index) => ({ text: part, role: index === 0 ? "primary" : "secondary" }));

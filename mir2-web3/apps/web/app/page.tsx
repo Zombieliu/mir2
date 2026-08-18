@@ -40,6 +40,7 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import { localizeQuestLog } from "../lib/quest-localization";
+import { localizeCrystalMapTitle } from "../lib/crystal-content-localization";
 import { questIdsFromPacket } from "../lib/quest-entity-binding";
 import {
   CrystalChatType,
@@ -2351,7 +2352,7 @@ export default function HomePage() {
   const [assetFirstPlayable, setAssetFirstPlayable] = useState(false);
   const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable;
   const [isClientReady, setIsClientReady] = useState(false);
-  const t = buildTranslator(language);
+  const t = useMemo(() => buildTranslator(language), [language]);
   const locale = languageLocale(language);
   const localizedQuestLog = useMemo(
     () =>
@@ -2361,8 +2362,12 @@ export default function HomePage() {
     [language, world.questLog],
   );
   const presentationWorld = useMemo(
-    () => ({ ...world, questLog: localizedQuestLog }),
-    [localizedQuestLog, world],
+    () => ({
+      ...world,
+      mapTitle: localizeCrystalMapTitle(world.mapTitle, t),
+      questLog: localizedQuestLog,
+    }),
+    [localizedQuestLog, t, world],
   );
 
   const loggedSceneResourceErrorsRef = useRef(new Set<string>());
@@ -8312,7 +8317,7 @@ export default function HomePage() {
         }
       ).__mir2RealmInfo = info;
       appendLog(
-        `Realm ${info.realmId} · ${info.profileId} v${info.profileVersion}`,
+        t("log.realmInfo", [info.realmId, info.profileId, info.profileVersion]),
         "system",
       );
       return;
@@ -13885,7 +13890,7 @@ export default function HomePage() {
       trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
       mail={{ open: showMail, onClose: () => setShowMail(false), mail: extraWindowData.mail, gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
-      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: extraWindowData.worldMapMarkers }}
+      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: localizeCrystalMapTitle(world.mapTitle, t), markers: extraWindowData.worldMapMarkers }}
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
       chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
@@ -13919,6 +13924,7 @@ export default function HomePage() {
       />
       {ONCHAIN_MINE_ENABLED && screen === "game" && worldStoreRef.current ? (
         <OnchainMinePanelWithStore
+          t={t}
           store={worldStoreRef.current}
           compactMode={clientProfile.layout === "touch"}
           suppressed={clientProfile.layout === "touch" && showTutorial}
