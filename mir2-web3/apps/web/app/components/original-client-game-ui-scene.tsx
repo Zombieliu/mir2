@@ -319,10 +319,12 @@ function GameUiSceneInner({
         world={world}
         showCharacter={showCharacter}
         showInventory={showInventory}
+        showQuestLog={showQuestLog}
         activeCharacterTab={activeCharacterTab}
         activeInventoryTab={activeInventoryTab}
         onToggleCharacter={onToggleCharacter}
         onToggleInventory={onToggleInventory}
+        onToggleQuestLog={onToggleQuestLog}
         onOpenCharacterTab={onOpenCharacterTab}
         onOpenInventoryTab={onOpenInventoryTab}
         onDropGold={() => onDropGold(100)}
