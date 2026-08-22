@@ -1,5 +1,256 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Fresh Web production-build sync (2026-08-22): the complete current-source
+> pipeline passes with both release WASM backends, 9,650 entity frames, 40,808
+> original assets, 58 map-atlas pages, TypeScript and 13/13 static pages. The
+> strict runtime budget passes at WebGPU 27,119,641 raw / 5,902,117 gzip and
+> WebGL2 28,489,677 raw / 6,342,038 gzip (runtime
+> `bevy-1813be587ef98bc1`, BUILD_ID `OXQE2c59Nd1B4bxoWcPQf`). This closes the
+> local Web build P1, not the signed Windows package, Windows native-client
+> soak/deployment, Android-device, or human visual/audio/feel acceptance gates.
+> A separate strict local pre-seeded 64-client/30-minute Gateway soak passed on
+> 2026-08-22 and closes only WN-CANDIDATE Closing 4b.
+>
+> Windows package-chain audit (2026-08-22): v4 packaging/verifier self-tests are
+> green, but no installed CurrentUser certificate has both a private key and
+> Code Signing EKU. The old `dist` tree lacks attestation, v4 manifest and the
+> detached CMS release signature, so it is retained only as an unsigned internal
+> playtest and is not promoted to Candidate.
+>
+> WN-WEB-PARITY-01 final non-visual sync (2026-08-21): the current integrated
+> source is green across Simulation 1,283/1,283, shared Zone 189/189, Gateway
+> 529/0 plus one environment-gated ignored test, ui-core 30/30, runtime 166/166,
+> native-ui 254/254, Windows 237/237 and Android 36/36. Explicit authoritative
+> monster disposition, live native-monster Gateway rehydration, PVP command
+> routing and fresh recursive delivery IDs close the failures found during the
+> aggregate run. Gateway check, Web typecheck and diff-check pass. This is an
+> automated non-visual milestone, not whole-project Candidate. A focused real
+> Axum `/ws` test now passes authenticated native GameShop purchase, dedicated
+> receipt, Gameshop Mail and exact durable parcel claim. A signed self-contained
+> Windows package, live PostgreSQL/remote Zone, soak, Android device and human
+> visual/audio/feel acceptance remain open.
+
+> Native reconnect server Phase 1 P1 rework sync (2026-08-21): opt-in-only
+> `nativeResumeV1` now read-only validates binding/identity, atomically reserves
+> the retained lease without consuming its credential, prepares route renewal
+> and Zone outbound registration, then commits credential-family consumption
+> and lease transfer under one mutex. RAII rollback makes injected route/Zone
+> failures retryable with the exact token and preserves active/reconnect
+> permits; commit replay and concurrent consumers remain single-winner.
+> Credential construction rejects every value except exact 43-character
+> unpadded base64url decoding to 32 bytes. Production has finite defaults for
+> WS/active/reconnect capacity (2,048/512/512), 64 KiB frame/message caps and a
+> 16 MiB semaphore-enforced 256-message input budget. Uniform unavailable,
+> opt-in isolation, LogOut/Disconnect revocation and MapChanged rotation remain
+> covered. Gates pass native resume 14/14, registry 6/6 and Gateway lib 490/0
+> with one existing PostgreSQL integration ignored. Windows Phase 2, real live
+> reconnect, cross-process state and final Candidate acceptance remain open;
+> source connection nonce is metadata and is not claimed as device binding.
+
+> Latest simulation mail closure (2026-08-21): opaque persisted delivery
+> identities prevent equal-content mail loss and make external refresh
+> idempotent across collision re-keying. Active client-visible IDs remain
+> stable; incoming collisions get the unused ID, and active lock/unlock state
+> remains authoritative. GameShop delivery and ordinary CollectParcel now use
+> durable account-store transactions before live mutation or ACK, including
+> exact gold/items, malformed JSON, full bag, injected failure, reload,
+> duplicate and concurrent-claim regressions. Active save without an
+> authenticated account no longer falls back to `demo`. Legacy same-ID/header
+> ambiguity now safely merges independently claimed payload states to prevent
+> duplicate collection. Gates pass Simulation 1,234/1,234, legacy focused 3/3,
+> mail 28/28, social-economy 3/3, security lifecycle 18/18 and
+> simulation check. Live PostgreSQL and distributed mirror 2PC remain outside
+> this workstation's proven boundary.
+
+> Native Windows social P1 sync (2026-08-21): Group/Guild/Trade typed client
+> closure is automated-verified in
+> `docs/generated/player-qa/native-social/WN-SOCIAL-01-REPORT.md` with
+> ui-core 25, client-bevy 243 and platform-windows 195 tests passing. This
+> does not claim live protocol acceptance; TradeGold/TradeConfirm lack a
+> sender-correlated ACK and native guild notice editing still needs a text
+> editor.
+
+> Latest WN-WEB-PARITY-01 SendMail transaction closure (2026-08-21): the
+> cross-character persistence P1 is implemented. Sender currency and exact
+> unique-ID attachments plus recipient mail are staged together, persisted as
+> one File atomic snapshot or one PostgreSQL version-checked transaction, and
+> only then reflected into the live World and success ACK. Self-mail is covered
+> by the same path. Failure injection and reload tests prove zero mutation for
+> fail-before-persist/fail-persist and one-call/one-mail conservation on
+> success, including a stale online recipient save after delivery. Gates pass
+> Simulation lib 1,220/1,220, mail 21/21, related
+> integrations 21/21 and simulation check. PostgreSQL test code compiled but
+> no live DB was reachable on this workstation; File+PostgreSQL mirror mode is
+> compensating dual-write rather than distributed 2PC and remains documented
+> as a crash-only temporary-mirror-divergence boundary.
+
+> WN-WEB-PARITY-01 security correction status (2026-08-21): the simulation
+> SendMail/CollectParcel/save-identity findings are closed by the latest mail
+> transaction pass. The parser, real-peer, qaControl and result-code findings
+> retain separate evidence. A fresh independent review is still required; the
+> older pre-repair counts are not a security sign-off.
+
+> Latest WN-WEB-PARITY-01 truth boundary: 2026-08-21 removes generic
+> `stage5Command` from normal Web React sources and replaces supported Mail,
+> Group-leave and GameShop actions with dedicated packets; actions lacking a
+> real target, item selection, input or authority context remain visibly
+> unavailable instead of sending fixtures. The server now provides atomic
+> GameShop purchase/mail semantics and fail-closed player-command safety.
+> Independent gates pass Simulation 1,206/1,206, Gateway 461 passed / 1 ignored,
+> ordinary loop 1/1, Web typecheck, 68 Stage5 adapter groups and the normal-player
+> source guard. This does not establish Windows-native 100% Candidate: current
+> native P1s are GameShop client closure, reconnect restoration, social/trade,
+> SendMail, AbandonQuest and learned-skill casting. Older 100% notes retain only
+> their named Web/package scope.
+
+> Latest WN-WEB-PARITY-01 non-visual sync: 2026-08-21 closes the World Map
+> configuration/atomicity subgate. `[Game] TeleportToNPCCost` is loaded from
+> runtime-discovered Crystal `Setup.ini` and shared by client setup packets and
+> Zone charging. Invalid configuration disables the feature. Gateway and Zone
+> tests cover checkpoint rollback before dispatch, AOI/occupancy restoration,
+> exact replay rejection, and stale movement-intent clearing. Simulation
+> 1,194/1,194, Gateway 456 passed / 1 ignored, Big Map 7/7 plus 11 internal, and
+> Web typecheck are green. Real teleport content remains disabled; no visual,
+> audible-feel, device, or human acceptance is claimed.
+
+> Latest R3 non-visual sync: 2026-08-21 adds a real native Bevy/WAV backend for
+> Options music/sound settings, packages validated legal fallback WAVs, replaces
+> compile-time World Map source assumptions with runtime authoritative
+> `WorldMap.ini` discovery, and implements the server-owned shared-Zone
+> `TeleportToNpc` transaction. Client input supplies only the NPC object id;
+> destination, exact 3,000-gold fee, eligibility, collision, occupancy, AOI and
+> persistence remain authoritative. Current Crystal data still says
+> `Enabled=False` and contains zero `CanTeleportTo` NPCs, so the live path stays
+> disabled while an explicit enabled fixture proves the legal state machine.
+> Automated non-visual gates are recorded in
+> `docs/generated/player-qa/native-ui-controls/R3-AUDIO-WORLDMAP-ZONE-REPORT.md`;
+> no screenshot, human audible, Android device, or visual acceptance is claimed.
+
+> Latest non-visual UI/backend sync: 2026-08-21 closes WN-UI-CORE-02's
+> Options-consumer, Chat Settings and BM-BE-01 backend slices. Options now
+> applies the Bevy window mode and atomically persists a non-secret allow-list;
+> at R2 time audio remained honestly marked `audible_backend=false` (superseded
+> by R3 above). Chat Settings uses
+> shared staged `ui-core` state as the only authority and applies/persists via
+> bounded typed effects. `RequestMapInfo` now emits Crystal
+> `WorldMapSetup/NewMapInfo`, `SearchMap` is bounded/deterministic, and Gateway
+> exposes strict command mappings. Current authoritative `WorldMap.ini` is
+> disabled with zero eligible teleport NPCs, so `TeleportToNpc` remains a
+> tested no-mutation no-op; the R2 slice did not fabricate shared-Zone teleport
+> (the guarded R3 path above now exists). Gates:
+> ui-core 16, native-ui 178, Windows 164, Android host 7, Simulation 1,186 plus
+> Big Map 7, Gateway 453 passed/1 ignored, Web typecheck. Visual/computer-control
+> work is paused by user direction; native Big Map rendering, lighting,
+> screenshots and human acceptance remain open. See
+> `docs/generated/player-qa/native-ui-controls/R2-INTEGRATION-REPORT.md`.
+
+> Latest native UI-core integration sync: 2026-08-21 delivers real native
+> ChangePassword handling, mandatory exactly-once character deletion,
+> Crystal-style local Safe Key assets/behavior, exhaustive shared UI reducer
+> paths, strict Mail/Shop/Storage ingestion and an Android host-buildable
+> shared-action foundation. Gates: ui-core 12/12, native-ui 167/167, runtime
+> 146/146, Windows 164/164, Android host 7/7 plus all-target check, and Web
+> typecheck. Keep WN-UI-FUNC-01 open: Options runtime effect consumers, the
+> data-driven Big Map, Chat Settings, Android SDK/device evidence and live
+> mouse/human parity evidence remain ordered blockers. See
+> `docs/generated/player-qa/native-ui-controls/R1-INTEGRATION-REPORT.md`.
+
+> Latest Windows-native alternate-class/combat sync: 2026-08-19 extends V6
+> with Web-equivalent Archer alternate body/hair/weapon libraries and Assassin
+> alternate body/hair plus directional dual weapons. The packet adapter now
+> uses `ObjectStruck` for pose and the separate authoritative
+> `DamageIndicator` for bounded animated hit/miss/crit/heal floaters. Native
+> target ranking prevents stale `selectedObjectId` state from defeating nearer
+> live F-key targets. A live Deer moved `10/25 -> 9/25 -> 8/25`; renderer-owned
+> evidence visibly captures red damage `1` with SHA-256
+> `0E24F11B963382F02C82F0DAEEE745F51794A01460175E92523AABE7DCBD49AA`.
+> Windows 104/104, runtime 133/133, Simulation 1183/1183, exact Release build
+> SHA-256 `B6A7078173865DF3415B089DE4119EAA438886EF518AFD9DEC69054B445773D9`
+> and Web typecheck are green. V6 remains open: starter exports have no usable
+> shadow/mask metadata, and spell/projectile effects, lighting, exact text,
+> same-scene Gemini review and final human acceptance are still ordered gates.
+
+> Latest Windows-native entity-composition sync: 2026-08-19 advances V6 from a
+> generic action clock to 697 Crystal per-library frame-set catalogs using exact
+> source range, cadence, skip and reverse metadata. Native actors now compose
+> body, hair, directional front/rear weapon and mount layers; body-library or
+> mount changes replace the animation incarnation. Native labels, dead-state
+> lines and the self HP bar use the authoritative entity payload and track live
+> movement (`288,615 -> 287,613`). Evidence SHA-256 is
+> `343B4B05A9E67EF7B687F0DFA9B5D8D2F34E222A7AD95BC03AD6D1E4569E8DC4`.
+> Windows 98/98, runtime 133/133, exact Release build and Web typecheck are
+> green. V6 is still open for alternate class libraries, shadows/effect masks,
+> combat effects, high-priority interruptions, exact outlined text/overlap,
+> lighting and final same-scene visual/human acceptance.
+
+> Latest Windows-native entity-animation sync: 2026-08-19 adds a persistent
+> main-thread Crystal action clock and monotonic packet hints for walk/run/
+> attack/range/magic/struck/die/revive. Entity atlas rects now advance without a
+> new Gateway snapshot, duplicate hints preserve phase, and a real 254 ms F12
+> pair changes 5,087 world-only pixels. TownRevive and subsequent movement remain
+> authoritative at `18/18 @ 288,616 -> 288,615`. Windows 90/90, runtime 133/133,
+> Release and Web typecheck are green. This is the first V6 subgate, not V6
+> completion: library-specific frameSet metadata, composite actor layers,
+> overlays, interruption policy and final same-scene evidence remain ordered.
+
+> Latest Windows-native world-render sync: 2026-08-19 fixes multi-page entity
+> atlas routing/source offsets, packet-first map-center synchronization, partial
+> viewport atlas-layout invalidation, and self HP/death packet overlays. Visible
+> proof covers black-hole-free movement, persisted transform recovery, an honest
+> `0/18` dead HUD, real TownRevive to `288,616`, and immediate field-damage HUD
+> updates. Windows 83/83, shared runtime 133/133, Release, Web typecheck and
+> package-script syntax are green. Full offline asset staging also passes with
+> 8,325 files / 269.91 MiB and all required sentinels. This advances WN-VIS-006
+> but does not close it: exact `257,594` evidence, full actor action/composite
+> layers, labels,
+> effects/lighting, DPI and packaged-EXE launch, final HUD >=92 and human acceptance
+> remain ordered gates.
+> Clean-checkout generation and repository-independent EXE launch are explicit
+> release blockers; the passing local staging run alone is not release proof.
+
+> Latest Windows-native HUD sync: 2026-08-19 replaces the generic in-game
+> panels with a native-only Crystal MainDialog/ChatDialog/belt/minimap composition.
+> The stable 1024x768 HUD capture uses live Gateway state and its mechanically
+> matched HUD evidence pair is Accepted 88/100 by Antigravity High with
+> `sameScene=true` and no P0/P1, clearing the first-Candidate >=85 gate. Native
+> UI tests pass 90/90, Windows host tests 80/80, Release builds, and Web typecheck
+> remains green. This does not close Windows parity: authoritative EXP/weight
+> presentation, final HUD >=92, same-coordinate world/map/entity/effect evidence,
+> DPI/package verification and final human acceptance remain ordered work.
+
+> Latest Windows-native visual implementation sync: 2026-08-19 closes
+> WN-VIS-003/004/005 and lands the WN-VIS-002 map route described by
+> `docs/NATIVE-WINDOWS-VISUAL-PARITY-PLAN.md`.
+> The native map path now supports the Web-equivalent atlas plus keyed/additive
+> standalone route; the typed Crystal UI layer owns source metrics and a 1024x768
+> stage; and the exact login migration is accepted by structured visual review
+> at 100/100 with `sameScene=true` and no visible issues, up from 46/100. Exact
+> four-slot character select is now independently Accepted 100/100, up from
+> 20/100; occupied-roster evidence covers the 16-frame class/gender preview and
+> a real native Start button reaches authoritative Bichon. The implementation
+> preserves the Gateway/Simulation state machine and changes no Web UI code.
+> Regression gates pass at Windows 80/80, shared Bevy 22/22, native-ui 77/77,
+> Windows Release, Web typecheck, local shared-asset probes, and packaged ChrSel
+> 237/237. This is not a full native-parity close: in-game remains at 12/100,
+> 2,494 native map source references are unavailable, and map animation, exact
+> HUD/entity layers/effects, DPI and final human acceptance remain ordered work.
+
+> Latest Windows-native playable-slice sync: 2026-08-19 adds an actual
+> Bevy/Winit/WGPU desktop client on main instead of treating cross-platform
+> shared code as a complete native frontend. The EXE now exposes visible login,
+> account and character flows, enters Bichon only after authoritative bootstrap,
+> and renders native HUD/NPC/quest/target/inventory state. A fresh-account
+> Gateway smoke completed q1 and q2 in one run with normal movement, 20
+> server-confirmed Scarecrow hits, Crystal's direct-Q GingerTea item delivery,
+> formal TownRevive, turn-in rewards and logout/login persistence. Six 1024x768
+> native evidence frames and an input-to-packet manual checklist are recorded in
+> `docs/NATIVE-WINDOWS-PLAYER-QA.md`. Windows 73/73, shared Bevy 22/22 and
+> native-ui 56/56, both WASM backends, Web typecheck/runtime policy, Windows
+> Release, health and map API 18/18 gates pass. This is a bounded playable
+> Candidate, not a new 100% native visual-parity claim: entity atlas anchoring/
+> action coverage and exact Crystal HUD/chat/shortcut/minimap presentation remain
+> open frontend work before final human Accepted status.
+
 > Latest 4K UI/i18n regression sync: 2026-08-18 fixes the production-capture
 > mismatch where stage-external Account Security and On-chain Mine controls used
 > browser-viewport coordinates while the Crystal client was centered inside a
@@ -2211,7 +2462,9 @@ Last updated: 2026-05-10
 Backend/server tracked-slice status: 100% Accepted under explicit stable-diff packet acceptance
 Active backend/global round: R309
 Completed backend rounds: R82, R83, R84, R85, R86, R87, R88, R89, R90, R91, R92, R93, R94, R95, R96, R97, R98, R99, R100, R101, R102, R103, R104, R105, R106, R107, R108, R109, R110, R111, R112, R113, R114, R115, R116, R117, R118, R119, R120, R121, R122, R123, R124, R125, R126, R127, R128, R129, R130, R131, R132, R133, R134, R135, R136, R137, R138, R139, R140, R141, R142, R143, R144, R145, R146, R147, R148, R149, R150, R151, R152, R153, R154, R155, R156, R157, R158, R159, R160, R161, R162, R163, R164, R165, R166, R167, R168, R169, R170, R171, R172, R173, R174, R175, R176, R177, R178, R179, R180, R181, R182, R183
-Whole-project automation status: 100.0% Candidate
+Historical Web/Stage5 automation baseline: 100.0% Candidate (2026-05-10).
+This is not Windows-native Candidate acceptance and is superseded for current
+release decisions by the 2026-08-22 header/package/soak/human gates.
 Whole-project real accepted 1:1 estimate: roughly 90.0%
 Backend full-suite status: latest locked Simulation regression passed on 2026-05-10 with `mir2-simulation` 836/836 plus Hero AI integration 5/5; latest locked GameData/Protocol/Simulation/Gateway check passed on 2026-05-10, while broader package-specific full-suite evidence remains tracked in the dated sync entries above.
 

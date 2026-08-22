@@ -1,5 +1,177 @@
 # Crystal Server Parity
 
+> Web artifact sync (2026-08-22): the current source has a fresh complete Web
+> production build. Dual WASM runtime budget, map-atlas budget, TypeScript and
+> 13/13 static pages pass under runtime `bevy-1813be587ef98bc1` and BUILD_ID
+> `OXQE2c59Nd1B4bxoWcPQf`. This is client artifact evidence only and does not
+> close the remaining server-environment gates: live PostgreSQL, deployed
+> remote Zone and crash recovery. A strict local pre-seeded 64-client/30-minute
+> Gateway soak passed on 2026-08-22, but does not prove a deployed environment.
+>
+> Aggregate shared-Zone authority correction (2026-08-21): authoritative
+> monster disposition is now an explicit game-data/session/Zone/checkpoint
+> field. Gateway projection refreshes `ObjectMonster` from the live native Zone
+> snapshot and otherwise fails neutral; it does not manufacture hostility from
+> an untrusted client or stale projection. Player targets use Zone PVP commands,
+> while monster targets retain materialized combat transactions. Fresh
+> mail/GameShop item trees receive recursively fresh IDs and storage split keeps
+> its Crystal grid-scoped identity. Full evidence is Simulation 1,283/1,283,
+> shared Zone 189/189, Gateway 529/0 with one environment-gated ignored test,
+> plus a green default Gateway check. A focused authenticated Axum `/ws`
+> GameShop buy/receipt/mail/claim black-box and its exactly-once reload neighbor
+> now pass. Live PostgreSQL, deployed remote-Zone and crash-recovery E2E remain
+> outside this proof.
+
+> Native GameShop Sol-audit correction (2026-08-21): both generic transport and
+> session paths now force `NativeGameShopPurchaseV2` through the V2-capable,
+> one-endpoint executor. Ordinary `GameShopBuy` remains old-host compatible but
+> is also one-attempt after endpoint selection; raw common-call economic Execute
+> cannot bypass the rule, and non-economic commands retain normal fallback.
+> Native pre-execution pending state clears only after its receipt is sent.
+> Complete operation-4,097 tests cover Gold/Credit, finite global/individual
+> stock, visible mail, packets, durable store and oldest-key replay, while player
+> mail commands cannot expose, collect or delete the hidden ledger. Focused gates
+> pass Simulation 8/8, typed RPC 12/12, native handler 7/7 and generic-session
+> bypass 1/1. No Gateway full was run during concurrent `routing.rs` ownership.
+> Local scoped status is P0=0/P1=0, not fresh independent acceptance; the hard
+> 4,096 availability limit/hidden-mail carrier and missing real authenticated
+> WS, live PostgreSQL, deployed remote-Zone and crash-recovery E2E remain P2.
+> `typedGameShopOutcomeV1` is retained only as a legacy optional-outcome marker;
+> Native V2 authority is `nativeGameShopPurchaseV2`.
+
+> Native GameShop at-most-once parity note (2026-08-21): the opted-in JSON path
+> now generates a trusted 256-bit operation key and uses a versioned
+> `NativeGameShopPurchaseV2` Zone command. The authoritative transaction stores
+> debit, stock, purchase mail and exact typed outcome together; duplicate keys
+> replay the outcome with no normal mutation packets. Its hidden character
+> ledger survives Gateway-session rollover and uses a deterministic union merge
+> so stale A/B refresh/save cannot forget either key; conflicting keys and the
+> hard 4,096-entry limit fail closed without eviction. Typed mutation Execute
+> never crosses endpoints after send, rolling old hosts execute V2 zero times,
+> and post-execution `CommitFailed`/response loss closes unknown with zero
+> receipt. Ordinary non-opted-in old-host behavior is unchanged. Focused gates
+> pass Simulation 6/6, Gateway handler 6/6, typed RPC 4/4 and old-host 2/2; a
+> full Simulation snapshot passes 1,267/1,267. At that intermediate snapshot,
+> Gateway full 513 was blocked by shared combat/routing failures followed by
+> Windows `STATUS_STACK_BUFFER_OVERRUN`; the top aggregate correction supersedes
+> this with the repaired 529/0/1 result. The 4,096 cap/hidden-mail carrier, real
+> authenticated WebSocket path, live PostgreSQL and deployed remote Zone remain
+> explicitly P2/unclaimed.
+
+> Native reconnect Phase 1 P1 rework parity note (2026-08-21): no Crystal binary
+> packet ID, Simulation authentication path or ordinary Web protocol changed.
+> The native JSON capability path now read-only validates binding/identity,
+> reserves the exact retained lease without consuming its credential, prepares
+> route refresh and Zone registration, and only then atomically commits family
+> consumption plus lease transfer. RAII rollback preserves token/session/permits
+> after injected route or Zone failure; replay and concurrent commit remain
+> single-winner. Credentials fail construction unless exact 43-character
+> unpadded base64url decoding to 32 bytes. Production defaults cap
+> WS/active/reconnect counts at 2,048/512/512, frames/messages at 64 KiB and the
+> 256-entry socket input queue at an enforced 16 MiB byte budget. Native resume
+> is 14/14, registry 6/6, and full Gateway lib 490 passed / 0 failed / 1 existing
+> database test ignored. Windows-client/live reconnect and cross-process state
+> remain open; source nonce is metadata, not asserted device binding.
+
+> Latest mail durability closure (2026-08-21): GameShop delivery, cross/self
+> `SendMail`, and ordinary `ClientPacket::CollectParcel` are
+> durable-before-success. Mail has a persisted 128-bit delivery identity;
+> equal-content sends do not collapse, repeat refresh is idempotent, incoming
+> ID collisions re-key only the not-yet-visible external mail, and local
+> reversible lock state wins. Claim preflight reuses the authoritative exact
+> item core in a staged CharacterSave and commits before GainedGold/GainedItem/
+> ParcelCollected(1); failure returns ParcelCollected(-1) with World/store/File
+> unchanged. Anonymous active saves no longer write `demo`. Legacy identity
+> ignores mutable status and claim-cleared payload, safely merging ambiguous
+> same-ID/same-header history to prevent double collection. Simulation lib
+> 1,234/1,234, legacy focused 3/3, mail 28/28, social-economy 3/3, security lifecycle 18/18 and
+> simulation check pass. Live PostgreSQL and distributed cross-backend 2PC are
+> still not claimed.
+
+> Native Windows social client boundary (2026-08-21): the Windows adapter now
+> consumes the existing ordinary Group/Guild/Trade packet surface using typed,
+> bounded commands and read models, with fail-closed pending handling. No
+> server protocol changes were made in this slice; TradeGold/TradeConfirm
+> sender correlation remains a known protocol limitation. See
+> `docs/generated/player-qa/native-social/WN-SOCIAL-01-REPORT.md`.
+
+> Latest SendMail server-transaction parity note (2026-08-21): remote-character
+> delivery no longer persists the recipient before debiting the sender. The
+> server stages the active sender save, exact unique-ID attachment removal,
+> gold/postage debit and recipient mailbox append in one account-store unit;
+> persistence must succeed before the shared store, live World or `MailSent(1)`
+> changes. File uses atomic replacement and PostgreSQL source mode uses one
+> transaction with optimistic version checks across the touched accounts.
+> Self-mail is also all-or-nothing, and stale online recipient saves merge the
+> durable mailbox before persisting. Simulation lib 1,220/1,220, mail 21/21,
+> social-economy 3/3 and security lifecycle 18/18 pass. The PostgreSQL rollback
+> regression auto-skipped because no DB service was reachable, so live-DB
+> execution remains an environment gate. File+PostgreSQL mirror mode performs
+> synchronous mirror-first write plus compensation on File failure, but is not
+> distributed 2PC and can temporarily diverge if the process dies between
+> backend commits.
+
+> Correction closed (2026-08-21): the unauthenticated mail/save fallbacks and
+> ordinary-player CollectParcel durability gap are repaired and covered by the
+> latest gates above. Strict transfer parsing and real-TCP-peer safety are
+> tracked by their separate named closures; fresh independent review remains
+> required for Candidate promotion.
+
+> Latest GameShop/mail security parity note: 2026-08-21 adds the dedicated
+> ordinary-player GameShop packet and makes product/class/payment/price/
+> balance/mail/attachment checks authoritative before mutation. Purchases use
+> exact StackSize-bounded ItemState attachments and the Crystal mailbox hint;
+> a corrupt exact attachment causes a repeatable all-or-nothing claim failure.
+> Player-command safety is fail-closed even when deployment environment
+> variables are absent; only explicit loopback dev/test can opt out, never
+> production/staging. Independent full gates pass Simulation 1,206/1,206 and
+> Gateway 461 passed / 1 ignored. Persistent finite stock and a correlated
+> GameShop purchase-result packet remain open and are not claimed here.
+
+> Latest NPC teleport atomicity note: 2026-08-21 additionally sources the
+> advertised and charged fee from the same runtime-discovered Crystal
+> `Setup.ini`. Missing/invalid cost disables World Map rather than accepting a
+> client value. Gateway checkpoint failure is tested before dispatch and rolls
+> the single-writer Zone back without observer half-packets; rollback restores
+> AOI/occupancy, and success clears queued pre-teleport movement. Full gates are
+> Simulation 1,194/1,194 and Gateway 456 passed / 1 ignored. This remains a
+> guarded implementation only: real `WorldMap.ini` is disabled and has no
+> eligible teleport NPC.
+
+> Latest shared-Zone NPC teleport parity note: 2026-08-21 adds the guarded
+> successful path anticipated below. The client sends only `objectId`; Gateway
+> reads authoritative gold and the Zone derives destination/cost from runtime-
+> loaded `WorldMap.ini` plus imported map/NPC data. A retained same-map NPC,
+> eligibility, walkable free destination and sufficient gold are mandatory.
+> Success updates single-writer Zone occupancy/AOI, commits the personal
+> checkpoint, emits the Crystal-facing gold/map/location packets, and saves the
+> authoritative transform for relogin. Failure emits nothing and preserves
+> currency/transform. This does not enable unavailable content: the actual
+> Crystal file remains `Enabled=False` and imported `CanTeleportTo` count is
+> zero, so live production requests still reject safely.
+
+> Latest Big Map packet parity note: 2026-08-21 replaces the incorrect
+> `RequestMapInfo -> MapInformation` behavior with Crystal
+> `WorldMapSetup/NewMapInfo`, adds authoritative bounded `SearchMapResult`, and
+> exposes exact Gateway command mappings. Setup/map de-duplication is scoped to
+> the active in-world connection and resets on logout. Current source data has
+> `WorldMap Enabled=False` and no `CanTeleportTo` NPCs; consequently
+> `TeleportToNpc` intentionally emits no fabricated success and changes no
+> transform or currency. A later enabled-world implementation must route
+> teleport through the shared Zone and revalidate destination, cost, occupancy
+> and save state under one frontier-led writer.
+
+> Latest native-client parity evidence: 2026-08-19 revalidates, without changing
+> server code, that the production Gateway/Simulation path is consumable by a
+> non-Web frontend. A fresh native account completed q1/q2 through real NPC,
+> Walk, Attack, death/revive, quest and reconnect packets. The q2 GingerTea path
+> is explicitly the Crystal `Q` contract: on the rewarded Scarecrow kill the
+> eligible player receives `GainedItem(item_index=1112)` directly in the quest
+> container; ordinary ground objects continue to use ObjectItem/PickUp. Turn-in
+> and a second login confirmed exact reward and persistence behavior. This note
+> adds end-to-end evidence only; it neither expands the accepted server matrix
+> nor converts the still-open frontend visual/feel gate into Accepted.
+
 > Latest level-50 skill parity note: 2026-08-18 verifies all 63 active
 > Warrior/Wizard/Taoist books with required level <=50 across imported source
 > data, protocol mapping, personal runtime, shared-Zone authority, Gateway
@@ -1512,7 +1684,9 @@ Backend rounds:
 - Completed rounds: **R82**, **R83**, **R84**, **R85**, **R86**, **R87**, **R88**, **R89**, **R90**, **R91**, **R92**, **R93**, **R94**, **R95**, **R96**, **R97**, **R98**, **R99**, **R100**, **R101**, **R102**, **R103**, **R104**, **R105**, **R106**, **R107**, **R108**, **R109**, **R110**, **R111**, **R112**, **R113**, **R114**, **R115**, **R116**, **R117**, **R118**, **R119**, **R120**, **R121**, **R122**, **R123**, **R124**, **R125**, **R126**, **R127**, **R128**, **R129**, **R130**, **R131**, **R132**, **R133**, **R134**, **R135**, **R136**, **R137**, **R138**, **R139**, **R140**, **R141**, **R142**, **R143**, **R144**, **R145**, **R146**, **R147**, **R148**, **R149**, **R150**, **R151**, **R152**, **R153**, **R154**, **R155**, **R156**, **R157**, **R158**, **R159**, **R160**, **R161**, **R162**, **R163**, **R164**, **R165**, **R166**, **R167**, **R168**, **R169**, **R170**, **R171**, **R172**, **R173**, **R174**, **R175**, **R176**, **R177**, **R178**, **R179**, **R180**, **R181**, **R182**, **R183**
 - Active round: **R305**
 - Full-suite regression status: **674/674** passing after R301; R305 focused/adjacent `mir2-simulation` tests and `mir2-gateway` build passing; latest `mir2-gateway` **55/55** plus packet-trace bin **15/15** passing after R301; `mir2-admin-api` **22/22** passing after R301; `mir2-game-data` **27/27** passing after R301
-- Whole-project automation status: **100.0% Candidate**
+- Historical Web/Stage5 automated-evidence status: **100.0% Candidate**. This
+  does not include formal WN-CANDIDATE signing/attestation, native 30-minute
+  client soak, real OS-DPI, independent-model review, or human acceptance.
 - Whole-project real accepted 1:1 estimate: **roughly 90.0%**
 
 ## Current Migration Target
