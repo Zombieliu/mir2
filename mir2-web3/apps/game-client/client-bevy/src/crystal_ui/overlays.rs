@@ -2,6 +2,7 @@
 
 use std::collections::VecDeque;
 
+use bevy::app::AppExit;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
@@ -40,7 +41,10 @@ use crate::storage::{
     storage_withdraw_enabled, StorageModel,
 };
 
+use super::assets::CrystalButtonAssetSet;
 use super::hud::CrystalHudAction;
+use super::spec::{CrystalButtonSpec, CrystalRect};
+use super::widget::spawn_crystal_image_button;
 
 /// Overlay mutation must run before any `Res<NativePlayerUiState>` readers in
 /// the same Update. Unordered Res + ResMut on this resource panics Bevy B0001.
@@ -63,6 +67,9 @@ pub const BIGMAP_ZOOM_MAX: f32 = 3.0;
 pub const BIGMAP_ZOOM_STEP: f32 = 0.25;
 pub const BIGMAP_WIDTH: f32 = 568.0;
 pub const BIGMAP_HEIGHT: f32 = 380.0;
+pub const CRYSTAL_MENU_PANEL_RECT: CrystalRect = CrystalRect::new(988.0, 349.0, 36.0, 282.0);
+pub const CRYSTAL_OPTIONS_PANEL_RECT: CrystalRect = CrystalRect::new(382.0, 207.0, 259.0, 354.0);
+pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0, 760.0, 500.0);
 
 // Re-export shop/storage constants for external consumers that import via overlays.
 pub use crate::shop::{SHOP_QUANTITY_MAX, SHOP_QUANTITY_MIN, SHOP_QUANTITY_STEP};
@@ -450,6 +457,14 @@ impl UiEffectQueue {
                     | mir2_ui_core::effect::UiEffect::PersistChatSettings { .. }
             )
         })
+    }
+
+    fn take_exit_application(&mut self) -> bool {
+        !self
+            .drain_matching_bounded(1, |effect| {
+                matches!(effect, mir2_ui_core::effect::UiEffect::ExitApplication)
+            })
+            .is_empty()
     }
 
     #[cfg(test)]
@@ -1114,6 +1129,7 @@ struct OverlaySocial;
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 enum OverlayButton {
+    ExitApplication,
     CloseWindows,
     CloseMail,
     CloseBigMap,
@@ -1278,6 +1294,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     consume_hud_buttons,
                     process_overlay_keyboard,
                     process_overlay_buttons,
+                    consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
                     reconcile_native_game_shop_ui_state,
                     crate::options_effects::consume_options_effects,
@@ -1452,17 +1469,15 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayMenu,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(412.0),
-                    top: Val::Px(260.0),
-                    width: Val::Px(200.0),
+                    left: Val::Px(CRYSTAL_MENU_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_MENU_PANEL_RECT.top),
+                    width: Val::Px(CRYSTAL_MENU_PANEL_RECT.width),
+                    height: Val::Px(CRYSTAL_MENU_PANEL_RECT.height),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(6.0),
                     ..default()
                 },
                 GlobalZIndex(OVERLAY_MENU_Z),
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlaySkill,
@@ -1545,17 +1560,14 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayBigMap,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(112.0),
-                    top: Val::Px(80.0),
-                    width: Val::Px(800.0),
-                    height: Val::Px(500.0),
+                    left: Val::Px(CRYSTAL_BIGMAP_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_BIGMAP_PANEL_RECT.top),
+                    width: Val::Px(CRYSTAL_BIGMAP_PANEL_RECT.width),
+                    height: Val::Px(CRYSTAL_BIGMAP_PANEL_RECT.height),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(6.0),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayShop,
@@ -1609,17 +1621,14 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayOptions,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(212.0),
-                    top: Val::Px(100.0),
-                    width: Val::Px(600.0),
-                    max_height: Val::Px(480.0),
+                    left: Val::Px(CRYSTAL_OPTIONS_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_OPTIONS_PANEL_RECT.top),
+                    width: Val::Px(CRYSTAL_OPTIONS_PANEL_RECT.width),
+                    height: Val::Px(CRYSTAL_OPTIONS_PANEL_RECT.height),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(6.0),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlaySocial,
@@ -2049,6 +2058,9 @@ fn process_overlay_buttons(
             continue;
         }
         match *button {
+            OverlayButton::ExitApplication => {
+                effects.push(mir2_ui_core::effect::UiEffect::ExitApplication);
+            }
             OverlayButton::CloseWindows => {
                 state.close_windows();
                 state.shop_quantity = 1;
@@ -3040,6 +3052,15 @@ fn process_overlay_buttons(
     }
 }
 
+fn consume_exit_application(
+    mut effects: ResMut<UiEffectQueue>,
+    mut app_exit: MessageWriter<AppExit>,
+) {
+    if effects.take_exit_application() {
+        app_exit.write(AppExit::Success);
+    }
+}
+
 fn inspect_from_item(item: &ItemModel) -> ItemInspect {
     ItemInspect {
         container: item.container,
@@ -3192,7 +3213,9 @@ fn render_overlays(
             state.equipment_open(),
             |parent| render_equipment(parent, &inventory),
         );
-        fill_panel(&mut commands, &mut all.p3(), state.menu_open(), render_menu);
+        fill_panel(&mut commands, &mut all.p3(), state.menu_open(), |parent| {
+            render_menu(parent, asset_server.as_deref())
+        });
         fill_panel(&mut commands, &mut all.p4(), state.skill_open(), |parent| {
             render_skills(parent, &skills)
         });
@@ -3247,7 +3270,7 @@ fn render_overlays(
             &mut commands,
             &mut secondary.p5(),
             state.options_open(),
-            |parent| render_options(parent, &state.core),
+            |parent| render_options(parent, asset_server.as_deref(), &state.core),
         );
         fill_panel(
             &mut commands,
@@ -3375,23 +3398,155 @@ fn render_equipment(parent: &mut ChildSpawnerCommands, inventory: &InventoryMode
     }
 }
 
-fn render_menu(parent: &mut ChildSpawnerCommands) {
-    title(parent, "System");
-    overlay_button(parent, "Bag (I)", OverlayButton::ToggleInventory, true);
-    overlay_button(
+fn spawn_overlay_frame(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    path: &'static str,
+    width: f32,
+    height: f32,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
+            width: Val::Px(width),
+            height: Val::Px(height),
+            ..default()
+        },
+        ImageNode {
+            image: asset_server.load(path),
+            ..default()
+        },
+    ));
+}
+
+fn spawn_static_overlay_sprite(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    path: String,
+    rect: CrystalRect,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        ImageNode {
+            image: asset_server.load(path),
+            ..default()
+        },
+    ));
+}
+
+fn spawn_overlay_crystal_button(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    library: &'static str,
+    normal: u16,
+    hover: u16,
+    pressed: u16,
+    rect: CrystalRect,
+    action: OverlayButton,
+) {
+    let spec = CrystalButtonSpec::new(
+        library,
+        normal,
+        hover,
+        pressed,
+        rect,
+        rect.width,
+        rect.height,
+    );
+    spawn_crystal_image_button(
         parent,
-        "Character (C)",
-        OverlayButton::ToggleEquipment,
+        asset_server,
+        spec,
+        CrystalButtonAssetSet::from_spec(spec),
+        action,
+        false,
         true,
     );
-    overlay_button(parent, "Cash Shop (O)", OverlayButton::ToggleShop, true);
-    overlay_button(parent, "NPC Shop", OverlayButton::ToggleNpcShop, true);
-    overlay_button(parent, "Warehouse (P)", OverlayButton::ToggleStorage, true);
-    overlay_button(parent, "Group", OverlayButton::ToggleGroup, true);
-    overlay_button(parent, "Guild", OverlayButton::ToggleGuild, true);
-    overlay_button(parent, "Trade", OverlayButton::ToggleTrade, true);
-    overlay_button(parent, "Logout", OverlayButton::Logout, true);
-    overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
+}
+
+fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>) {
+    let Some(asset_server) = asset_server else {
+        return;
+    };
+    spawn_overlay_frame(
+        parent,
+        asset_server,
+        "original-ui/Title/567.png",
+        36.0,
+        282.0,
+    );
+
+    // Crystal MenuDialog is a 36x282 icon strip. Only controls backed by a
+    // native surface are interactive here; unsupported late-system icons are
+    // rendered faithfully but deliberately do not masquerade as working UI.
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Title",
+        633,
+        634,
+        635,
+        CrystalRect::new(3.0, 12.0, 32.0, 20.0),
+        OverlayButton::ExitApplication,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Title",
+        636,
+        637,
+        638,
+        CrystalRect::new(3.0, 31.0, 32.0, 20.0),
+        OverlayButton::Logout,
+    );
+
+    for (library, index, top) in [
+        ("Prguse", 1970, 50.0),
+        ("Prguse", 1973, 69.0),
+        ("Prguse", 2000, 88.0),
+        ("Prguse2", 431, 126.0),
+        ("Prguse", 1976, 145.0),
+        ("Prguse", 1979, 164.0),
+        ("Prguse", 1982, 183.0),
+        ("Prguse", 1985, 202.0),
+        ("Prguse", 1988, 221.0),
+    ] {
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            format!("original-ui/{library}/{index}.png"),
+            CrystalRect::new(3.0, top, 32.0, 20.0),
+        );
+    }
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        1991,
+        1992,
+        1993,
+        CrystalRect::new(3.0, 240.0, 32.0, 20.0),
+        OverlayButton::ToggleGroup,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        1994,
+        1995,
+        1996,
+        CrystalRect::new(3.0, 259.0, 32.0, 20.0),
+        OverlayButton::ToggleGuild,
+    );
 }
 
 fn render_social(
@@ -3999,29 +4154,54 @@ fn render_bigmap(
     ui: &UiReadModel,
     state: &NativePlayerUiState,
 ) {
-    let map_name = ui.player.map_name.as_deref().unwrap_or("Unknown Map");
-    title(parent, &format!("Big Map - {}", map_name));
-    body(
+    let Some(asset_server) = asset_server else {
+        return;
+    };
+    let map_name = ui.player.map_name.as_deref().unwrap_or("");
+    spawn_overlay_frame(
         parent,
-        &format!("Position: {}, {}", map.center_x, map.center_y),
+        asset_server,
+        "original-ui/Title/820.png",
+        760.0,
+        500.0,
     );
-    body(parent, &format!("Zoom: {:.2}x", state.bigmap_zoom));
-    if let (Some(asset), Some(asset_server)) = (bigmap_asset_path(Some(map_name)), asset_server) {
-        // Render the same exported Crystal minimap image used by the native HUD.
-        // The previous green placeholder only printed this path and therefore
-        // could pass state tests while remaining visibly incomplete.
-        parent
-            .spawn(Node {
-                width: Val::Px(BIGMAP_WIDTH),
-                height: Val::Px(BIGMAP_HEIGHT),
-                border: UiRect::all(Val::Px(1.0)),
-                ..default()
-            })
-            .with_children(|viewport| {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(19.0),
+            top: Val::Px(6.0),
+            width: Val::Px(699.0),
+            height: Val::Px(20.0),
+            ..default()
+        },
+        Text::new(map_name.to_owned()),
+        TextFont {
+            font_size: FontSize::Px(12.0),
+            ..default()
+        },
+        TextColor(Color::WHITE),
+        TextLayout::justify(Justify::Center),
+    ));
+
+    parent
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(14.0),
+            top: Val::Px(52.0),
+            width: Val::Px(BIGMAP_WIDTH),
+            height: Val::Px(BIGMAP_HEIGHT),
+            overflow: Overflow::clip(),
+            ..default()
+        })
+        .with_children(|viewport| {
+            if let Some(asset) = bigmap_asset_path(Some(map_name)) {
                 viewport.spawn((
                     Node {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(0.0),
+                        top: Val::Px(0.0),
+                        width: Val::Px(BIGMAP_WIDTH),
+                        height: Val::Px(BIGMAP_HEIGHT),
                         ..default()
                     },
                     ImageNode {
@@ -4030,49 +4210,92 @@ fn render_bigmap(
                         ..default()
                     },
                 ));
-                let (px, py) = bigmap_player_position(map, state.bigmap_zoom);
+            } else {
                 viewport.spawn((
                     Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(px - 4.0),
-                        top: Val::Px(py - 4.0),
-                        width: Val::Px(8.0),
-                        height: Val::Px(8.0),
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
                         ..default()
                     },
-                    BackgroundColor(Color::srgb(1.0, 0.2, 0.2)),
+                    BackgroundColor(Color::srgb(0.02, 0.015, 0.01)),
                 ));
-            });
-    } else {
-        body(parent, "No big map image for this region.");
-        body(parent, &format!("Fallback world size: {}x{}", 700, 700));
-        if !map.patches.is_empty() {
-            body(
-                parent,
-                &format!("Terrain patches: {} (authoritative)", map.patches.len()),
-            );
-        }
-    }
-    // Zoom controls row
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            let can_zoom_in = state.bigmap_zoom < BIGMAP_ZOOM_MAX - 0.01;
-            let can_zoom_out = state.bigmap_zoom > BIGMAP_ZOOM_MIN + 0.01;
-            overlay_button(row, "Zoom In (+)", OverlayButton::BigMapZoomIn, can_zoom_in);
-            overlay_button(
-                row,
-                "Zoom Out (-)",
-                OverlayButton::BigMapZoomOut,
-                can_zoom_out,
-            );
+            }
+            let (px, py) = bigmap_player_position(map, state.bigmap_zoom);
+            viewport.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(px - 6.0),
+                    top: Val::Px(py - 5.0),
+                    width: Val::Px(12.0),
+                    height: Val::Px(10.0),
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load("original-ui/Prguse2/1350.png"),
+                    ..default()
+                },
+            ));
         });
-    overlay_button(parent, "Close", OverlayButton::CloseBigMap, true);
+
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(519.0),
+            top: Val::Px(435.0),
+            width: Val::Px(100.0),
+            height: Val::Px(15.0),
+            ..default()
+        },
+        Text::new(format!("[ {}, {} ]", map.center_x, map.center_y)),
+        TextFont {
+            font_size: FontSize::Px(11.0),
+            ..default()
+        },
+        TextColor(Color::WHITE),
+    ));
+
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        CrystalRect::new(735.0, 3.0, 24.0, 21.0),
+        OverlayButton::CloseBigMap,
+    );
+    for (path, rect) in [
+        (
+            "original-ui/Prguse2/197.png",
+            CrystalRect::new(739.0, 48.0, 16.0, 16.0),
+        ),
+        (
+            "original-ui/Prguse2/205.png",
+            CrystalRect::new(739.0, 61.0, 16.0, 16.0),
+        ),
+        (
+            "original-ui/Prguse2/207.png",
+            CrystalRect::new(739.0, 417.0, 16.0, 16.0),
+        ),
+        (
+            "original-ui/Title/827.png",
+            CrystalRect::new(250.0, 467.0, 80.0, 25.0),
+        ),
+        (
+            "original-ui/Title/824.png",
+            CrystalRect::new(400.0, 467.0, 80.0, 25.0),
+        ),
+        (
+            "original-ui/Title/821.png",
+            CrystalRect::new(638.0, 432.0, 72.0, 25.0),
+        ),
+        (
+            "original-ui/Prguse2/1340.png",
+            CrystalRect::new(23.0, 464.0, 32.0, 30.0),
+        ),
+    ] {
+        spawn_static_overlay_sprite(parent, asset_server, path.to_owned(), rect);
+    }
 }
 
 fn render_shop(
@@ -4640,108 +4863,169 @@ fn render_storage(
     overlay_button(parent, "Close", OverlayButton::CloseStorage, true);
 }
 
-fn render_options(parent: &mut ChildSpawnerCommands, core: &mir2_ui_core::state::UiState) {
+fn spawn_invisible_overlay_button(
+    parent: &mut ChildSpawnerCommands,
+    rect: CrystalRect,
+    action: OverlayButton,
+) {
+    parent.spawn((
+        Button,
+        action,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        BackgroundColor(Color::NONE),
+    ));
+}
+
+fn spawn_option_volume_bar(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    top: f32,
+    volume: u8,
+) {
+    let ratio = f32::from(volume.min(100)) / 100.0;
+    let fill_width = 74.0 * ratio;
+    parent
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(159.0),
+            top: Val::Px(top),
+            width: Val::Px(fill_width),
+            height: Val::Px(19.0),
+            overflow: Overflow::clip(),
+            ..default()
+        })
+        .with_children(|clip| {
+            clip.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(76.0),
+                    height: Val::Px(19.0),
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load("original-ui/Prguse2/468.png"),
+                    ..default()
+                },
+            ));
+        });
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(155.0 + fill_width),
+            top: Val::Px(top - 7.0),
+            width: Val::Px(8.0),
+            height: Val::Px(22.0),
+            ..default()
+        },
+        ImageNode {
+            image: asset_server.load("original-ui/Prguse/20.png"),
+            ..default()
+        },
+    ));
+}
+
+fn render_options(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    core: &mir2_ui_core::state::UiState,
+) {
+    let Some(asset_server) = asset_server else {
+        return;
+    };
     let options = core.options_draft.as_ref().unwrap_or(&core.options);
-    title(parent, "Options");
-    body(parent, "Changes are staged until Apply.");
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                if options.music_enabled {
-                    "Music: On"
-                } else {
-                    "Music: Off"
-                },
-                OverlayButton::OptionsMusicToggle,
-                true,
-            );
-            overlay_button(
-                row,
-                "Music -",
-                OverlayButton::OptionsMusicVolumeDown,
-                options.music_volume > 0,
-            );
-            body(row, &format!("{}%", options.music_volume));
-            overlay_button(
-                row,
-                "Music +",
-                OverlayButton::OptionsMusicVolumeUp,
-                options.music_volume < 100,
-            );
-        });
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                if options.sound_enabled {
-                    "Sound: On"
-                } else {
-                    "Sound: Off"
-                },
-                OverlayButton::OptionsSoundToggle,
-                true,
-            );
-            overlay_button(
-                row,
-                "Sound -",
-                OverlayButton::OptionsSoundVolumeDown,
-                options.sound_volume > 0,
-            );
-            body(row, &format!("{}%", options.sound_volume));
-            overlay_button(
-                row,
-                "Sound +",
-                OverlayButton::OptionsSoundVolumeUp,
-                options.sound_volume < 100,
-            );
-        });
-    body(parent, &format!("Window mode: {:?}", options.window_mode));
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                "Windowed",
-                OverlayButton::OptionsWindowed,
-                options.window_mode != mir2_ui_core::state::UiWindowMode::Windowed,
-            );
-            overlay_button(
-                row,
-                "Fullscreen",
-                OverlayButton::OptionsFullscreen,
-                options.window_mode != mir2_ui_core::state::UiWindowMode::Fullscreen,
-            );
-        });
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(row, "Apply", OverlayButton::OptionsApply, true);
-            overlay_button(row, "Cancel", OverlayButton::OptionsCancel, true);
-            overlay_button(row, "Defaults", OverlayButton::OptionsDefaults, true);
-        });
+    spawn_overlay_frame(
+        parent,
+        asset_server,
+        "original-ui/Title/411.png",
+        259.0,
+        354.0,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        CrystalRect::new(233.0, 5.0, 24.0, 21.0),
+        // Crystal applies local option changes immediately. The shared reducer
+        // stages them, so the source close button commits the draft.
+        OverlayButton::OptionsApply,
+    );
+
+    // These rows are part of Crystal's exact option frame. Their backing
+    // preferences do not exist in the shared cross-platform UiState yet, so
+    // render the source-default state without attaching a deceptive hit box.
+    // Audio remains live below because it is already shared and persisted.
+    for (library, left_index, right_index, top) in [
+        ("Prguse2", 450, 455, 68.0),  // skill activation mode
+        ("Prguse2", 458, 459, 93.0),  // skill bar
+        ("Prguse2", 458, 459, 118.0), // effects
+        ("Prguse2", 458, 459, 143.0), // drop names
+        ("Prguse2", 458, 459, 168.0), // actor names
+        ("Prguse2", 464, 465, 193.0), // HP display mode
+        ("Prguse2", 456, 461, 271.0), // observer mode
+        ("Title", 853, 848, 296.0),   // movement style
+    ] {
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            format!("original-ui/{library}/{left_index}.png"),
+            CrystalRect::new(159.0, top, 36.0, 17.0),
+        );
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            format!("original-ui/{library}/{right_index}.png"),
+            CrystalRect::new(201.0, top, 36.0, 17.0),
+        );
+    }
+
+    let sound_volume = if options.sound_enabled {
+        options.sound_volume
+    } else {
+        0
+    };
+    let music_volume = if options.music_enabled {
+        options.music_volume
+    } else {
+        0
+    };
+    spawn_option_volume_bar(parent, asset_server, 225.0, sound_volume);
+    spawn_option_volume_bar(parent, asset_server, 251.0, music_volume);
+
+    // Crystal uses drag bars. Until pointer-drag state is shared across the
+    // Windows/Android adapters, the left/right halves provide deterministic
+    // decrement/increment behavior without adding non-Crystal text buttons.
+    spawn_invisible_overlay_button(
+        parent,
+        CrystalRect::new(159.0, 225.0, 38.0, 19.0),
+        OverlayButton::OptionsSoundVolumeDown,
+    );
+    spawn_invisible_overlay_button(
+        parent,
+        CrystalRect::new(197.0, 225.0, 38.0, 19.0),
+        OverlayButton::OptionsSoundVolumeUp,
+    );
+    spawn_invisible_overlay_button(
+        parent,
+        CrystalRect::new(159.0, 251.0, 38.0, 19.0),
+        OverlayButton::OptionsMusicVolumeDown,
+    );
+    spawn_invisible_overlay_button(
+        parent,
+        CrystalRect::new(197.0, 251.0, 38.0, 19.0),
+        OverlayButton::OptionsMusicVolumeUp,
+    );
 }
 
 fn short_name(name: &str, key: &str) -> String {
@@ -4857,6 +5141,24 @@ mod tests {
             effect,
             mir2_ui_core::effect::UiEffect::PersistOptions { .. }
         )));
+    }
+
+    #[test]
+    fn exit_application_effect_is_taken_once_without_swallowing_gateway_work() {
+        let mut effects = UiEffectQueue::default();
+        effects.push(mir2_ui_core::effect::UiEffect::GatewayCommand(
+            mir2_ui_core::effect::GatewayCommand::Logout,
+        ));
+        effects.push(mir2_ui_core::effect::UiEffect::ExitApplication);
+
+        assert!(effects.take_exit_application());
+        assert!(!effects.take_exit_application());
+        assert_eq!(
+            effects.drain(),
+            vec![mir2_ui_core::effect::UiEffect::GatewayCommand(
+                mir2_ui_core::effect::GatewayCommand::Logout,
+            )]
+        );
     }
 
     fn item(key: &str, name: &str, container: u8, slot: u32) -> ItemModel {
@@ -5181,6 +5483,24 @@ mod tests {
         assert!(!state.storage_open());
         assert!(!state.minimap_visible());
         assert_eq!(state.bigmap_zoom, 2.0);
+    }
+
+    #[test]
+    fn crystal_menu_options_and_bigmap_use_source_geometry() {
+        assert_eq!(
+            CRYSTAL_MENU_PANEL_RECT,
+            CrystalRect::new(988.0, 349.0, 36.0, 282.0)
+        );
+        assert_eq!(
+            CRYSTAL_OPTIONS_PANEL_RECT,
+            CrystalRect::new(382.0, 207.0, 259.0, 354.0)
+        );
+        assert_eq!(
+            CRYSTAL_BIGMAP_PANEL_RECT,
+            CrystalRect::new(132.0, 134.0, 760.0, 500.0)
+        );
+        assert_eq!(BIGMAP_WIDTH, 568.0);
+        assert_eq!(BIGMAP_HEIGHT, 380.0);
     }
 
     #[test]

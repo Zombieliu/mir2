@@ -17,10 +17,7 @@ use super::assets::CrystalButtonAssetSet;
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::widget::spawn_crystal_image_button;
 
-const WHITE: Color = Color::srgb(0.94, 0.94, 0.94);
-const GOLD: Color = Color::srgb(0.95, 0.78, 0.30);
-const HP_TEXT: Color = Color::srgb(1.0, 0.88, 0.78);
-const MP_TEXT: Color = Color::srgb(0.78, 0.88, 1.0);
+const WHITE: Color = Color::WHITE;
 const HUD_Z_INDEX: i32 = 950;
 
 /// Fixed source dimensions of Crystal's `Prguse/4` orb texture.
@@ -285,8 +282,8 @@ fn spawn_crystal_hud(
                 CrystalHudHpText,
                 &format!("HP {}", ui_model.player.hp_label().replacen(" / ", "/", 1)),
                 HP_TEXT_RECT,
-                10.0,
-                HP_TEXT,
+                8.0,
+                WHITE,
                 Justify::Center,
             );
             spawn_text(
@@ -294,8 +291,8 @@ fn spawn_crystal_hud(
                 CrystalHudMpText,
                 &format!("MP {}", ui_model.player.mp_label().replacen(" / ", "/", 1)),
                 MP_TEXT_RECT,
-                10.0,
-                MP_TEXT,
+                8.0,
+                WHITE,
                 Justify::Center,
             );
             spawn_text(
@@ -303,7 +300,7 @@ fn spawn_crystal_hud(
                 CrystalHudLevel,
                 &ui_model.player.level.to_string(),
                 LEVEL_RECT,
-                11.0,
+                8.0,
                 WHITE,
                 Justify::Left,
             );
@@ -312,7 +309,7 @@ fn spawn_crystal_hud(
                 CrystalHudName,
                 ui_model.player.name.as_deref().unwrap_or(""),
                 NAME_RECT,
-                9.0,
+                8.0,
                 WHITE,
                 Justify::Center,
             );
@@ -321,8 +318,8 @@ fn spawn_crystal_hud(
                 CrystalHudGold,
                 &format_gold(ui_model.player.gold),
                 GOLD_RECT,
-                9.0,
-                GOLD,
+                8.0,
+                WHITE,
                 Justify::Left,
             );
             spawn_text(
@@ -339,7 +336,7 @@ fn spawn_crystal_hud(
                 CrystalHudWeightText,
                 &ui_model.player.available_weight().to_string(),
                 spec::WEIGHT_LABEL,
-                9.0,
+                8.0,
                 WHITE,
                 Justify::Left,
             );
@@ -348,7 +345,7 @@ fn spawn_crystal_hud(
                 CrystalHudSpaceText,
                 &free_inventory_slots(&inventory).to_string(),
                 spec::SPACE_LABEL,
-                9.0,
+                8.0,
                 WHITE,
                 Justify::Center,
             );
@@ -370,9 +367,9 @@ fn spawn_crystal_hud(
             spawn_text(
                 root,
                 CrystalHudMapTitle,
-                ui_model.player.map_name.as_deref().unwrap_or("Unknown Map"),
+                ui_model.player.map_name.as_deref().unwrap_or(""),
                 MAP_TITLE_RECT,
-                9.0,
+                8.0,
                 WHITE,
                 Justify::Center,
             );
@@ -381,7 +378,7 @@ fn spawn_crystal_hud(
                 CrystalHudMapCoordinate,
                 &format!("{}, {}", map_model.center_x, map_model.center_y),
                 MAP_COORDINATE_RECT,
-                9.0,
+                8.0,
                 WHITE,
                 Justify::Center,
             );
@@ -601,7 +598,7 @@ fn spawn_belt_labels(parent: &mut ChildSpawnerCommands, slot: u8, item_label: &s
         &(slot + 1).to_string(),
         CrystalRect::new(238.0 + BELT_SLOT_STEP * slot as f32, 620.0, 12.0, 11.0),
         8.0,
-        GOLD,
+        WHITE,
         Justify::Left,
     );
     spawn_text(
@@ -727,12 +724,7 @@ fn update_hud_read_model(
     set_text(&mut text_queries.p4(), format_gold(model.player.gold));
     set_text(
         &mut text_queries.p5(),
-        model
-            .player
-            .map_name
-            .as_deref()
-            .unwrap_or("Unknown Map")
-            .to_owned(),
+        model.player.map_name.as_deref().unwrap_or("").to_owned(),
     );
     set_text(
         &mut text_queries.p6(),

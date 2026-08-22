@@ -562,6 +562,189 @@ struct WalletState {
     credit: u32,
 }
 
+/// Packet-first authoritative HUD cursor for the native client.
+///
+/// Gateway snapshots may be partial during bootstrap, reconnect, and map
+/// transitions. A missing JSON field means "no update"; it must not erase the
+/// complete `UserInformation` values that were already delivered.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeUiPlayerCursor {
+    hp: Option<i32>,
+    max_hp: Option<i32>,
+    mp: Option<i32>,
+    max_mp: Option<i32>,
+    gold: Option<u32>,
+    credit: Option<u32>,
+    level: Option<u32>,
+    experience: Option<i64>,
+    max_experience: Option<i64>,
+    current_weight: Option<u16>,
+    max_weight: Option<u16>,
+    name: Option<String>,
+    class_name: Option<String>,
+    map_name: Option<String>,
+}
+
+impl NativeUiPlayerCursor {
+    fn reset(&mut self) {
+        *self = Self::default();
+    }
+
+    fn observe_world_snapshot(&mut self, payload: &Value) {
+        if let Some(value) = value_i32(payload.get("playerHp")) {
+            self.hp = Some(value);
+        }
+        if let Some(value) = value_i32(payload.get("playerMaxHp")) {
+            self.max_hp = Some(value);
+        }
+        if let Some(value) = value_i32(payload.get("playerMp")) {
+            self.mp = Some(value);
+        }
+        if let Some(value) = value_i32(payload.get("playerMaxMp")) {
+            self.max_mp = Some(value);
+        }
+        if let Some(value) = value_u32(payload.get("gold")) {
+            self.gold = Some(value);
+        }
+        if let Some(value) = value_u32(payload.get("credit")) {
+            self.credit = Some(value);
+        }
+        if let Some(value) = value_i64(payload.get("playerExperience")) {
+            self.experience = Some(value);
+        }
+        if let Some(value) = value_i64(payload.get("playerMaxExperience")) {
+            self.max_experience = Some(value);
+        }
+        if let Some(value) =
+            value_u32(payload.get("currentWeight")).and_then(|value| u16::try_from(value).ok())
+        {
+            self.current_weight = Some(value);
+        }
+        if let Some(value) =
+            value_u32(payload.get("maxWeight")).and_then(|value| u16::try_from(value).ok())
+        {
+            self.max_weight = Some(value);
+        }
+        if let Some(value) = value_string(payload.get("mapTitle")) {
+            self.map_name = Some(value);
+        }
+
+        let player_object_id = value_u32(payload.get("playerObjectId"));
+        let self_player = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .and_then(|entities| {
+                entities.iter().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || player_object_id.is_some_and(|object_id| {
+                            value_u32(entity.get("objectId")) == Some(object_id)
+                        })
+                })
+            });
+        if let Some(value) = value_u32(self_player.and_then(|entity| entity.get("level"))) {
+            self.level = Some(value);
+        }
+        if let Some(value) = value_string(self_player.and_then(|entity| entity.get("name"))) {
+            self.name = Some(value);
+        }
+        if let Some(value) = value_string(
+            self_player.and_then(|entity| entity.get("class").or_else(|| entity.get("className"))),
+        ) {
+            self.class_name = Some(value);
+        }
+    }
+
+    fn observe_user_information(&mut self, payload: &Value) {
+        if let Some(value) = value_i32(payload.get("hp").or_else(|| payload.get("playerHp"))) {
+            self.hp = Some(value);
+        }
+        if let Some(value) = value_i32(payload.get("maxHp").or_else(|| payload.get("playerMaxHp")))
+        {
+            self.max_hp = Some(value);
+        }
+        if let Some(value) = value_i32(payload.get("mp").or_else(|| payload.get("playerMp"))) {
+            self.mp = Some(value);
+        }
+        if let Some(value) = value_i32(payload.get("maxMp").or_else(|| payload.get("playerMaxMp")))
+        {
+            self.max_mp = Some(value);
+        }
+        if let Some(value) = value_u32(payload.get("gold")) {
+            self.gold = Some(value);
+        }
+        if let Some(value) = value_u32(payload.get("credit")) {
+            self.credit = Some(value);
+        }
+        if let Some(value) = value_u32(payload.get("level")) {
+            self.level = Some(value);
+        }
+        if let Some(value) = value_i64(
+            payload
+                .get("experience")
+                .or_else(|| payload.get("playerExperience")),
+        ) {
+            self.experience = Some(value);
+        }
+        if let Some(value) = value_i64(
+            payload
+                .get("maxExperience")
+                .or_else(|| payload.get("playerMaxExperience")),
+        ) {
+            self.max_experience = Some(value);
+        }
+        if let Some(value) =
+            value_u32(payload.get("currentWeight")).and_then(|value| u16::try_from(value).ok())
+        {
+            self.current_weight = Some(value);
+        }
+        if let Some(value) =
+            value_u32(payload.get("maxWeight")).and_then(|value| u16::try_from(value).ok())
+        {
+            self.max_weight = Some(value);
+        }
+        if let Some(value) = value_string(payload.get("name")) {
+            self.name = Some(value);
+        }
+        if let Some(value) = value_string(payload.get("class").or_else(|| payload.get("className")))
+        {
+            self.class_name = Some(value);
+        }
+        self.observe_map_identity(payload);
+    }
+
+    fn observe_map_identity(&mut self, payload: &Value) {
+        if let Some(value) = value_string(
+            payload
+                .get("title")
+                .or_else(|| payload.get("mapTitle"))
+                .or_else(|| payload.get("mapName")),
+        ) {
+            self.map_name = Some(value);
+        }
+    }
+
+    fn to_read_model_json(&self) -> Value {
+        json!({
+            "player": {
+                "hp": self.hp.unwrap_or_default(),
+                "maxHp": self.max_hp.unwrap_or_default(),
+                "mp": self.mp.unwrap_or_default(),
+                "maxMp": self.max_mp.unwrap_or_default(),
+                "gold": self.gold.unwrap_or_default(),
+                "credit": self.credit.unwrap_or_default(),
+                "level": self.level.unwrap_or_default(),
+                "experience": self.experience.unwrap_or_default(),
+                "maxExperience": self.max_experience.unwrap_or_default(),
+                "currentWeight": self.current_weight.unwrap_or_default(),
+                "maxWeight": self.max_weight.unwrap_or_default(),
+                "name": self.name,
+                "className": self.class_name,
+                "mapName": self.map_name,
+            }
+        })
+    }
+}
+
 /// Acknowledgement captured before Crystal's follow-up `ReceiveMail` packet.
 /// The protocol has no request id, so collect is correlated to the sole
 /// native claim that was actually written to this WebSocket connection.
@@ -1847,6 +2030,7 @@ where
     gameplay_adapter.set_generation(generation);
     let mut last_world_payload: Option<Value> = None;
     let mut last_wallet: Option<WalletState> = None;
+    let mut ui_cursor = NativeUiPlayerCursor::default();
     let mut skill_cursor = SkillPacketCursor::default();
     let mut social_cursor = SocialModel::default();
     let mut in_flight_claim_mail_id: Option<u64> = None;
@@ -2012,6 +2196,7 @@ where
                                     gameplay_events,
                                     &mut last_world_payload,
                                     &mut last_wallet,
+                                    &mut ui_cursor,
                                     &mut in_flight_claim_mail_id,
                                     &mut send_mail_in_flight,
                                     &mut pending_mail_feedback,
@@ -2218,6 +2403,7 @@ fn handle_gateway_text_for_connection<F>(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
     pending_mail_feedback: &mut VecDeque<PendingMailOperationFeedback>,
@@ -2310,6 +2496,7 @@ where
         gameplay_events,
         last_world_payload,
         last_wallet,
+        ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
         pending_mail_feedback,
@@ -2400,6 +2587,7 @@ fn handle_gateway_text(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
     pending_mail_feedback: &mut VecDeque<PendingMailOperationFeedback>,
@@ -2415,6 +2603,7 @@ fn handle_gateway_text(
         gameplay_events,
         last_world_payload,
         last_wallet,
+        ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
         pending_mail_feedback,
@@ -2433,6 +2622,7 @@ fn handle_gateway_text_with_world_ingest<F>(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
     pending_mail_feedback: &mut VecDeque<PendingMailOperationFeedback>,
@@ -2464,6 +2654,7 @@ where
         // the previous map's personal snapshot.
         *last_world_payload = None;
         if scope == NativeResetScope::Session {
+            ui_cursor.reset();
             *last_wallet = None;
             *in_flight_claim_mail_id = None;
             *send_mail_in_flight = false;
@@ -2533,7 +2724,8 @@ where
             // snapshot cannot overwrite the fresh HUD balance.
             merge_wallet_into_payload(&mut payload, *last_wallet);
             *last_world_payload = Some(payload.clone());
-            let ui_model = transform_ui_read_model(&payload);
+            ui_cursor.observe_world_snapshot(&payload);
+            let ui_model = ui_cursor.to_read_model_json();
             let ui_json = serde_json::to_string(&ui_model).map_err(|e| e.to_string())?;
             let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
 
@@ -2610,12 +2802,28 @@ where
                 }
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if let Some(payload) = event.payload.as_ref() {
+                        ui_cursor.observe_map_identity(payload);
+                        let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
+                            ui_cursor.to_read_model_json().to_string(),
+                        );
+                    }
+                }
+                "MapChanged" => {
+                    eprintln!("[gateway-client] packet {packet}");
+                    if let Some(payload) = event.payload.as_ref() {
+                        ui_cursor.observe_map_identity(payload);
+                        let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
+                            ui_cursor.to_read_model_json().to_string(),
+                        );
+                    }
                 }
                 "UserInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if let Some(payload) = event.payload.as_ref() {
                         update_wallet_from_snapshot(last_wallet, payload);
-                        let ui_model = transform_ui_read_model_from_user_information(payload);
+                        ui_cursor.observe_user_information(payload);
+                        let ui_model = ui_cursor.to_read_model_json();
                         let ui_json =
                             serde_json::to_string(&ui_model).map_err(|error| error.to_string())?;
                         let _ =
@@ -2773,7 +2981,7 @@ where
                     // not logged to keep the native console readable.
                 }
             }
-            if packet_updates_world {
+            if packet_updates_world || skill_packet_updates_world {
                 if let Some(base_payload) = last_world_payload.as_ref() {
                     let mut payload = base_payload.clone();
                     gameplay_adapter.apply_authoritative_overlay(&mut payload);
@@ -5144,6 +5352,95 @@ mod tests {
         assert_eq!(model.player.current_weight, 0);
         assert_eq!(model.player.max_weight, 0);
         assert_eq!(model.player.map_name, None);
+    }
+
+    #[test]
+    fn native_ui_cursor_preserves_user_information_across_partial_snapshots() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        cursor.observe_user_information(&json!({
+            "name": "Alice",
+            "class": "Wizard",
+            "level": 7,
+            "hp": 80,
+            "maxHp": 100,
+            "mp": 20,
+            "maxMp": 40,
+            "gold": 321,
+            "credit": 12,
+            "experience": 4,
+            "maxExperience": 10,
+            "currentWeight": 3,
+            "maxWeight": 50,
+            "mapTitle": "BichonProvince"
+        }));
+
+        cursor.observe_world_snapshot(&json!({
+            "mapTitle": null,
+            "playerHp": null,
+            "playerMaxHp": null,
+            "playerMp": null,
+            "playerMaxMp": null,
+            "entities": []
+        }));
+
+        let model = serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(
+            cursor.to_read_model_json(),
+        )
+        .expect("cursor read model");
+        assert_eq!(model.player.name.as_deref(), Some("Alice"));
+        assert_eq!(model.player.class_name.as_deref(), Some("Wizard"));
+        assert_eq!(model.player.level, 7);
+        assert_eq!((model.player.hp, model.player.max_hp), (80, 100));
+        assert_eq!((model.player.mp, model.player.max_mp), (20, 40));
+        assert_eq!(model.player.map_name.as_deref(), Some("BichonProvince"));
+    }
+
+    #[test]
+    fn native_ui_cursor_applies_explicit_updates_and_map_changed_identity() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        cursor.observe_user_information(&json!({
+            "name": "Alice",
+            "level": 7,
+            "hp": 80,
+            "maxHp": 100,
+            "mapTitle": "BichonProvince"
+        }));
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
+            "playerHp": 0,
+            "entities": [{
+                "objectId": 99,
+                "kind": "player",
+                "name": "Alice Renamed",
+                "level": 8,
+                "className": "Wizard"
+            }]
+        }));
+        cursor.observe_map_identity(&json!({
+            "fileName": "1",
+            "title": "BorderVillage"
+        }));
+
+        let model = serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(
+            cursor.to_read_model_json(),
+        )
+        .expect("cursor read model");
+        assert_eq!(
+            model.player.hp, 0,
+            "explicit death HP must remain authoritative"
+        );
+        assert_eq!(model.player.name.as_deref(), Some("Alice Renamed"));
+        assert_eq!(model.player.level, 8);
+        assert_eq!(model.player.map_name.as_deref(), Some("BorderVillage"));
+
+        cursor.reset();
+        let reset = serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(
+            cursor.to_read_model_json(),
+        )
+        .expect("reset cursor read model");
+        assert_eq!(reset.player.name, None);
+        assert_eq!(reset.player.hp, 0);
+        assert_eq!(reset.player.map_name, None);
     }
 
     #[test]

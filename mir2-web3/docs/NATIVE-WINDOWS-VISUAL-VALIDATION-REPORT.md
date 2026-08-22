@@ -5,6 +5,29 @@ Run: `20260822-current-source-live`
 Logical stage: `1024x768`
 Reference: Crystal debug client and current-source native Windows client, both on Bichon Province at `288,616`
 
+## Latest WN-VIS-UI-01 closure — 2026-08-22
+
+The first focused HUD/core-panel calibration slice is complete. The native HUD
+now keeps packet-authoritative player values across partial snapshots, the
+oversized non-Crystal combat-target panel is removed, and Menu, Options and Big
+Map use their exact Crystal source frames and anchored geometry. Live Windows
+evidence is recorded in
+`docs/generated/player-qa/native-windows-vis-ui01/WN-VIS-UI01-REPORT.md`.
+
+This improves the earlier table as follows:
+
+| Surface | Current result | Still open |
+|---|---|---|
+| Main HUD | Authoritative values are stable and the false target overlay is gone | Exact GDI font metrics, labels, belt/minimap detail and effect density |
+| Menu | Exact `Title/567` vertical frame; Exit/Logout/Group/Guild are distinct actions | Unsupported later-system icons remain intentionally static |
+| Options | Exact `Title/411` composition and functional audio controls | Remaining settings need shared authoritative state before becoming clickable |
+| Big Map | Exact `Title/820` frame, real map, marker and coordinates | NPC list, search, world/location navigation and teleport actions |
+| Target selection | Selected-object priority, stale fallback and unknown-HP semantics are tested | No separate overlay until Crystal reference proves its form |
+
+The status remains **Visual Validation In Progress — not Accepted**. These are
+current-source live captures, not same-run original/client pairs and not a human
+visual-signoff result.
+
 ## Outcome first
 
 The current Windows client is no longer correctly described as having only P2 visual debt. Login and character selection are close to the Crystal reference, and the HUD frame is recognizable, but the in-game scene and most secondary panels still have release-blocking visual defects.

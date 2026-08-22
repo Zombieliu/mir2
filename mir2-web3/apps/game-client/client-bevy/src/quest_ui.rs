@@ -45,6 +45,19 @@ const MAX_PICKUP_BUTTONS: usize = 3;
 const MAX_QUICK_BAG_ITEMS: usize = 6;
 pub const MAX_QUEUED_INTENTS: usize = 24;
 
+// Crystal does not render a separate oversized target window. Keep this
+// native-only target readout in the unused upper-left HUD gutter, clear of the
+// minimap (x >= 898), the quest tracker (y >= 118), and the central play area.
+const COMBAT_TARGET_PANEL_LEFT: f32 = 8.0;
+const COMBAT_TARGET_PANEL_TOP: f32 = 8.0;
+const COMBAT_TARGET_PANEL_WIDTH: f32 = 236.0;
+const COMBAT_TARGET_PANEL_MIN_HEIGHT: f32 = 0.0;
+const COMBAT_TARGET_PANEL_PADDING: f32 = 4.0;
+const COMBAT_TARGET_BAR_HEIGHT: f32 = 8.0;
+// Crystal targets are selected and attacked in the world; it does not render
+// a separate top-left target/action window over the scene.
+const CRYSTAL_TARGET_PANEL_VISIBLE: bool = false;
+
 /// Player-side intents emitted by the in-game UI, to be bridged by host layer.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
@@ -483,16 +496,16 @@ fn spawn_quest_ui_panels(mut commands: Commands) {
                 CombatTargetPanel,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(352.0),
-                    top: Val::Px(12.0),
-                    width: Val::Px(320.0),
-                    min_height: Val::Px(70.0),
-                    min_width: Val::Px(220.0),
-                    max_width: Val::Px(320.0),
+                    left: Val::Px(COMBAT_TARGET_PANEL_LEFT),
+                    top: Val::Px(COMBAT_TARGET_PANEL_TOP),
+                    width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
+                    min_height: Val::Px(COMBAT_TARGET_PANEL_MIN_HEIGHT),
+                    min_width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
+                    max_width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(6.0),
-                    padding: UiRect::all(Val::Px(8.0)),
+                    row_gap: Val::Px(2.0),
+                    padding: UiRect::all(Val::Px(COMBAT_TARGET_PANEL_PADDING)),
                     ..default()
                 },
                 BackgroundColor(PANEL_BG),
@@ -1001,7 +1014,7 @@ fn render_quest_ui(
         let visible = if is_dialog.is_some() {
             has_dialog_content
         } else if is_target.is_some() {
-            target.target.is_some()
+            CRYSTAL_TARGET_PANEL_VISIBLE && target.target.is_some()
         } else if is_pickup.is_some() {
             has_pickups
         } else if is_player_hud.is_some() || is_control_hint.is_some() || is_quick_bag.is_some() {
@@ -1324,38 +1337,38 @@ fn render_combat_target_panel(
     parent: &mut ChildSpawnerCommands,
     target: Option<&crate::quest_model::CombatTarget>,
 ) {
-    title_line(parent, "Combat Target");
-
     let Some(target) = target else {
-        body_line(parent, "No target.");
         return;
     };
 
-    let ratio = target.hp_ratio().clamp(0.0, 1.0);
-    parent
-        .spawn((
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Px(14.0),
-                display: Display::Flex,
-                ..default()
-            },
-            BackgroundColor(Color::srgba(0.20, 0.20, 0.22, 0.85)),
-        ))
-        .with_children(|bar| {
-            bar.spawn((
+    detail_title(parent, &target.name);
+    if let Some((ratio, label)) = combat_target_health(target) {
+        parent
+            .spawn((
                 Node {
-                    width: Val::Percent((ratio * 100.0).clamp(0.0, 100.0)),
-                    height: Val::Px(14.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Px(COMBAT_TARGET_BAR_HEIGHT),
+                    display: Display::Flex,
                     ..default()
                 },
-                BackgroundColor(Color::srgb(0.90, 0.22, 0.22)),
-            ));
-        });
+                BackgroundColor(Color::srgba(0.20, 0.20, 0.22, 0.85)),
+            ))
+            .with_children(|bar| {
+                bar.spawn((
+                    Node {
+                        width: Val::Percent((ratio * 100.0).clamp(0.0, 100.0)),
+                        height: Val::Px(COMBAT_TARGET_BAR_HEIGHT),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgb(0.90, 0.22, 0.22)),
+                ));
+            });
+        tracker_body_line(parent, &label);
+    } else {
+        tracker_body_line(parent, "HP unavailable");
+    }
 
-    body_line(parent, &format!("{}  [{}]", target.name, target.hp_label()));
-
-    if !target.is_dead() {
+    if target.max_hp > 0 && !target.is_dead() {
         action_button(
             parent,
             "Attack",
@@ -1365,6 +1378,10 @@ fn render_combat_target_panel(
             true,
         );
     }
+}
+
+fn combat_target_health(target: &crate::quest_model::CombatTarget) -> Option<(f32, String)> {
+    (target.max_hp > 0).then(|| (target.hp_ratio().clamp(0.0, 1.0), target.hp_label()))
 }
 
 fn render_pickup_panel(parent: &mut ChildSpawnerCommands, pickups: &GroundPickupModel) {
@@ -1770,6 +1787,41 @@ mod tests {
         ] {
             assert!(!can_abandon_quest(&quest(1, status)));
         }
+    }
+
+    #[test]
+    fn combat_target_panel_uses_compact_crystal_safe_geometry() {
+        assert!(!CRYSTAL_TARGET_PANEL_VISIBLE);
+        assert_eq!(COMBAT_TARGET_PANEL_LEFT, 8.0);
+        assert_eq!(COMBAT_TARGET_PANEL_TOP, 8.0);
+        assert_eq!(COMBAT_TARGET_PANEL_WIDTH, 236.0);
+        assert_eq!(COMBAT_TARGET_PANEL_MIN_HEIGHT, 0.0);
+        assert_eq!(COMBAT_TARGET_PANEL_PADDING, 4.0);
+        assert_eq!(COMBAT_TARGET_BAR_HEIGHT, 8.0);
+        assert!(COMBAT_TARGET_PANEL_LEFT + COMBAT_TARGET_PANEL_WIDTH < 898.0);
+        assert!(COMBAT_TARGET_PANEL_TOP < 118.0);
+    }
+
+    #[test]
+    fn unknown_combat_target_health_has_no_zero_bar_or_zero_label() {
+        let target = crate::quest_model::CombatTarget {
+            object_id: 42,
+            name: "Scarecrow".to_owned(),
+            hp: 0,
+            max_hp: 0,
+            is_player: false,
+        };
+        assert!(combat_target_health(&target).is_none());
+
+        let known = crate::quest_model::CombatTarget {
+            max_hp: 20,
+            hp: 8,
+            ..target
+        };
+        assert_eq!(
+            combat_target_health(&known),
+            Some((0.4, "8 / 20".to_owned()))
+        );
     }
 
     #[test]

@@ -163,7 +163,7 @@ function Test-PackageRelativeFileAllowed {
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
     if($RelativePath -ceq 'mir2-assets/original-ui/Sound/Login2.wav' -or $RelativePath -ceq 'mir2-assets/original-ui/Sound/Select2.wav'){return $true}
     if($RelativePath.StartsWith('mir2-assets/crystal-map-pack/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.map.gz',[StringComparison]::OrdinalIgnoreCase)}
-    $imageJsonRoots=@('mir2-assets/bevy-entity-atlases/','mir2-assets/generated/map-atlas/','mir2-assets/generated/native-map-keyed/','mir2-assets/original-effects/','mir2-assets/original-ui/ChrSel/','mir2-assets/original-ui/MMap/','mir2-assets/original-ui/Prguse/','mir2-assets/original-ui/UI_32bit/','mir2-assets/original-ui/Title/','mir2-assets/original-ui/AArmour/00/','mir2-assets/original-ui/Monster/000/','mir2-assets/original-ui/NPC/00/')
+    $imageJsonRoots=@('mir2-assets/bevy-entity-atlases/','mir2-assets/generated/map-atlas/','mir2-assets/generated/native-map-keyed/','mir2-assets/original-effects/','mir2-assets/original-ui/ChrSel/','mir2-assets/original-ui/MMap/','mir2-assets/original-ui/Prguse/','mir2-assets/original-ui/Prguse2/','mir2-assets/original-ui/UI_32bit/','mir2-assets/original-ui/Title/','mir2-assets/original-ui/AArmour/00/','mir2-assets/original-ui/Monster/000/','mir2-assets/original-ui/NPC/00/')
     foreach($prefix in $imageJsonRoots){if($RelativePath.StartsWith($prefix,[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}}
     return $false
 }
@@ -172,7 +172,7 @@ function Test-PackageRelativeDirectoryAllowed {
     param([string]$RelativePath)
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
     if(@('logs','mir2-assets','mir2-assets/generated','mir2-assets/original-ui','mir2-assets/original-ui/AArmour','mir2-assets/original-ui/Monster','mir2-assets/original-ui/NPC','mir2-assets/original-ui/Sound') -ccontains $RelativePath){return $true}
-    $treeRoots=@('mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title','mir2-assets/original-ui/AArmour/00','mir2-assets/original-ui/Monster/000','mir2-assets/original-ui/NPC/00')
+    $treeRoots=@('mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/Prguse2','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title','mir2-assets/original-ui/AArmour/00','mir2-assets/original-ui/Monster/000','mir2-assets/original-ui/NPC/00')
     foreach($root in $treeRoots){if($RelativePath -ceq $root -or $RelativePath.StartsWith($root+'/',[StringComparison]::Ordinal)){return $true}}
     return $false
 }
@@ -254,7 +254,11 @@ function Fail([string]$Message) { [void]$script:Failures.Add($Message); Write-Ho
 
 function Get-RequiredCandidateFiles {
     param([string]$ExeName)
-    return @($ExeName, 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s', 'mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'mir2-assets\bevy-entity-atlases\manifest.json', 'mir2-assets\generated\map-atlas\manifest.json', 'mir2-assets\generated\native-map-keyed\manifest.json', 'mir2-assets\original-effects\effects.generated.json', 'mir2-assets\crystal-map-pack\0.map.gz', 'mir2-assets\original-ui\frame-sets.generated.json', 'mir2-assets\original-ui\Sound\Login2.wav', 'mir2-assets\original-ui\Sound\Select2.wav')
+    $required = @($ExeName, 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s', 'mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'mir2-assets\bevy-entity-atlases\manifest.json', 'mir2-assets\generated\map-atlas\manifest.json', 'mir2-assets\generated\native-map-keyed\manifest.json', 'mir2-assets\original-effects\effects.generated.json', 'mir2-assets\crystal-map-pack\0.map.gz', 'mir2-assets\original-ui\frame-sets.generated.json', 'mir2-assets\original-ui\Prguse\20.png', 'mir2-assets\original-ui\Sound\Login2.wav', 'mir2-assets\original-ui\Sound\Select2.wav')
+    foreach($index in @(197,205,207,360,431,1340,1350) + @(450..468)){ $required += "mir2-assets\original-ui\Prguse2\$index.png" }
+    foreach($index in @(411,567,633,634,635,636,637,638,820,821,824,827,848,850,851,853)){ $required += "mir2-assets\original-ui\Title\$index.png" }
+    foreach($index in @(1970,1973,1976,1979,1982,1985,1988,1991,1992,1993,1994,1995,1996,2000)){ $required += "mir2-assets\original-ui\Prguse\$index.png" }
+    return $required
 }
 
 function Get-MissingRequiredCandidateFiles {

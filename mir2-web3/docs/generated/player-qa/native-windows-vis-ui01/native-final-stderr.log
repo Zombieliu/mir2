@@ -1,0 +1,23 @@
+[platform-windows] asset_root=E:\mir2\mir2-web3\apps\web\public has_entity_manifest=true has_map_manifest=true has_effect_manifest=true complete=true
+[platform-windows] gateway_url=ws://127.0.0.1:7110/ws window=1024x768
+[atlas] pushed starter-bichon-base 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base.png")
+[atlas] pushed starter-bichon-base:p1 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base-p1.png")
+[atlas] pushed starter-bichon-base:p2 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base-p2.png")
+[atlas] pushed starter-bichon-base:p3 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base-p3.png")
+[atlas] pushed starter-bichon-base:p4 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base-p4.png")
+[atlas] pushed starter-bichon-base:p5 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base-p5.png")
+[atlas] pushed starter-bichon-base:p6 2048x2048 ("E:\\mir2\\mir2-web3\\apps\\web\\public\\bevy-entity-atlases/starter-bichon-base-p6.png")
+[platform-windows] native window opened; runtime running
+[gateway-client] connected generation=1 resume=false
+[gateway-client] forwarded world snapshot #1
+[gateway-client] pushed real map render state for 0
+[gateway-client] forwarded world snapshot #2
+[gateway-client] pushed real map render state for 0
+[gateway-client] LoginSuccess
+[gateway-client] forwarded world snapshot #3
+[frame-sets] loaded 697 Crystal library catalogs from "E:\\mir2\\mir2-web3\\apps\\web\\public\\original-ui/frame-sets.generated.json"
+[gateway-client] pushed real map render state for 0
+[gateway-client] StartGame ack
+[gateway-client] packet MapInformation
+[gateway-client] packet UserInformation
+[gateway-client] pushed real map render state for 0

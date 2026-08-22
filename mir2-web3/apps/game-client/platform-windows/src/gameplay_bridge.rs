@@ -1802,21 +1802,31 @@ fn transform_combat_target(payload: &Value, player_x: i32, player_y: i32) -> Com
         .map(Vec::as_slice)
         .unwrap_or(&[]);
     let selected = payload.get("selectedObjectId").and_then(value_u32);
-    let entity = entities
-        .iter()
-        .filter(|entity| is_attackable_entity(entity))
-        .min_by_key(|entity| {
-            let object_id = entity.get("objectId").and_then(value_u32);
-            (
-                !entity_name_matches_active_quest(payload, entity),
-                tile_distance(
-                    player_x,
-                    player_y,
-                    entity.get("x").and_then(value_i32).unwrap_or(i32::MAX),
-                    entity.get("y").and_then(value_i32).unwrap_or(i32::MAX),
-                ),
-                object_id != selected,
-            )
+    let entity = selected
+        .and_then(|selected_id| {
+            entities.iter().find(|entity| {
+                entity.get("objectId").and_then(value_u32) == Some(selected_id)
+                    && is_attackable_entity(entity)
+            })
+        })
+        .or_else(|| {
+            entities
+                .iter()
+                .filter(|entity| is_attackable_entity(entity))
+                .min_by_key(|entity| {
+                    (
+                        tile_distance(
+                            player_x,
+                            player_y,
+                            entity.get("x").and_then(value_i32).unwrap_or(i32::MAX),
+                            entity.get("y").and_then(value_i32).unwrap_or(i32::MAX),
+                        ),
+                        entity
+                            .get("objectId")
+                            .and_then(value_u32)
+                            .unwrap_or(u32::MAX),
+                    )
+                })
         });
 
     let Some(entity) = entity else {
@@ -1902,52 +1912,10 @@ fn world_click_state_from_payload(payload: &Value) -> NativeWorldClickState {
     state
 }
 
-fn entity_name_matches_active_quest(payload: &Value, entity: &Value) -> bool {
-    let Some(name) = entity.get("name").and_then(Value::as_str) else {
-        return false;
-    };
-    let normalized_name = name.trim().to_ascii_lowercase();
-    if normalized_name.is_empty() {
-        return false;
-    }
-
-    payload
-        .get("questLog")
-        .and_then(Value::as_array)
-        .into_iter()
-        .flatten()
-        .filter(|quest| {
-            matches!(
-                quest.get("stage").and_then(Value::as_str),
-                Some("inProgress" | "readyToTurnIn")
-            )
-        })
-        .flat_map(|quest| {
-            let mut text = Vec::new();
-            for field in ["title", "objective", "description"] {
-                if let Some(value) = quest.get(field).and_then(Value::as_str) {
-                    text.push(value);
-                }
-            }
-            if let Some(objectives) = quest.get("objectives").and_then(Value::as_array) {
-                for objective in objectives {
-                    for field in ["text", "name", "targetName"] {
-                        if let Some(value) = objective.get(field).and_then(Value::as_str) {
-                            text.push(value);
-                        }
-                    }
-                }
-            }
-            text
-        })
-        .any(|text| text.to_ascii_lowercase().contains(&normalized_name))
-}
-
 fn is_attackable_entity(entity: &Value) -> bool {
     if entity.get("kind").and_then(Value::as_str) != Some("monster")
         || entity.get("disposition").and_then(Value::as_str) != Some("hostile")
         || entity.get("dead").and_then(Value::as_bool) == Some(true)
-        || entity.get("maxHp").and_then(value_i32).unwrap_or(0) <= 0
     {
         return false;
     }
@@ -2726,7 +2694,7 @@ mod tests {
     }
 
     #[test]
-    fn stale_selected_target_does_not_override_a_nearer_hostile() {
+    fn valid_selected_target_overrides_a_nearer_hostile() {
         let mut payload = gameplay_payload();
         payload["entities"]
             .as_array_mut()
@@ -2743,9 +2711,50 @@ mod tests {
                 .target
                 .as_ref()
                 .map(|target| target.object_id),
-            Some(2003),
-            "the native F-key target should follow the nearest live hostile instead of a stale server selection"
+            Some(2001),
+            "an authoritative live selection must win over a nearer unrelated hostile"
         );
+    }
+
+    #[test]
+    fn removed_selected_target_falls_back_to_nearest_live_hostile() {
+        let mut payload = gameplay_payload();
+        payload["selectedObjectId"] = json!(2999);
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId":2003,"kind":"monster","name":"Deer","x":288,"y":616,
+                "hp":25,"maxHp":25,"dead":false,"disposition":"hostile"
+            }));
+
+        let snapshot = NativeGameplayAdapter::default().snapshot(&payload);
+        assert_eq!(
+            snapshot
+                .combat_target
+                .target
+                .as_ref()
+                .map(|target| target.object_id),
+            Some(2003)
+        );
+    }
+
+    #[test]
+    fn selected_target_with_unknown_max_hp_is_retained_without_fabricated_health() {
+        let mut payload = gameplay_payload();
+        payload["entities"][3] = json!({
+            "objectId":2001,"kind":"monster","name":"Scarecrow","x":289,"y":616,
+            "dead":false,"disposition":"hostile"
+        });
+
+        let target = NativeGameplayAdapter::default()
+            .snapshot(&payload)
+            .combat_target
+            .target
+            .expect("selected live target should remain visible when HP is unknown");
+        assert_eq!(target.object_id, 2001);
+        assert_eq!(target.hp, 0);
+        assert_eq!(target.max_hp, 0);
     }
 
     #[test]
@@ -2773,7 +2782,7 @@ mod tests {
     }
 
     #[test]
-    fn active_quest_monster_is_preferred_over_a_nearer_unrelated_hostile() {
+    fn fallback_uses_nearest_hostile_without_a_valid_selection() {
         let mut payload = gameplay_payload();
         payload["selectedObjectId"] = Value::Null;
         payload["questLog"] = json!([{
@@ -2797,7 +2806,7 @@ mod tests {
                 .target
                 .as_ref()
                 .map(|target| target.object_id),
-            Some(2001)
+            Some(2003)
         );
     }
 
