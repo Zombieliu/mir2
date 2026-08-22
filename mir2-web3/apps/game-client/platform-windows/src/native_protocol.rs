@@ -266,11 +266,17 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "uniqueId")]
         unique_id: u64,
     },
+    #[serde(rename = "storeItemV2")]
     StoreItem {
+        #[serde(rename = "requestId")]
+        request_id: String,
         from: i32,
         to: i32,
     },
+    #[serde(rename = "takeBackItemV2")]
     TakeBackItem {
+        #[serde(rename = "requestId")]
+        request_id: String,
         from: i32,
         to: i32,
     },
@@ -474,8 +480,8 @@ impl NativeOutboundCommand {
             Self::SellItem { .. } => "sellItem",
             Self::RepairItem { .. } => "repairItem",
             Self::SpecialRepairItem { .. } => "specialRepairItem",
-            Self::StoreItem { .. } => "storeItem",
-            Self::TakeBackItem { .. } => "takeBackItem",
+            Self::StoreItem { .. } => "storeItemV2",
+            Self::TakeBackItem { .. } => "takeBackItemV2",
             Self::UnlockStorage { .. } => "unlockStorage",
             Self::SetStoragePassword { .. } => "setStoragePassword",
             Self::RemoveStoragePassword { .. } => "removeStoragePassword",
@@ -1286,6 +1292,22 @@ mod tests {
                 price_type: 0,
             },
             json!({"type":"gameShopBuy","requestId":"gs-0000000000000001","gIndex":105,"quantity":3,"priceType":0}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::StoreItem {
+                request_id: "st-0000000000000001".into(),
+                from: 3,
+                to: 9,
+            },
+            json!({"type":"storeItemV2","requestId":"st-0000000000000001","from":3,"to":9}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::TakeBackItem {
+                request_id: "st-0000000000000002".into(),
+                from: 9,
+                to: 3,
+            },
+            json!({"type":"takeBackItemV2","requestId":"st-0000000000000002","from":9,"to":3}),
         );
         assert_serialized(
             NativeOutboundCommand::SendMail {

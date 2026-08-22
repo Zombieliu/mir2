@@ -37,6 +37,7 @@ use crate::ZonePlacementLease;
 pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2: &str = "nativeGameShopPurchaseV2";
+pub const ZONE_RPC_STORAGE_REQUEST_ID_V1: &str = "storageRequestIdV1";
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -1757,10 +1758,9 @@ impl TcpZoneOwnerRpcTransport {
     ) -> Result<ZoneRpcPayload, String> {
         validate_identifier("RPC session id", &self.session_id)?;
         if let ZoneRpcRequest::Execute { command, .. } = &request {
-            if wire_game_shop_economic_mutation_policy(command)?.is_some() {
+            if wire_correlated_mutation_policy(command)?.is_some() {
                 return Err(
-                    "zone RPC GameShop economic mutation must use the single-attempt executor"
-                        .to_string(),
+                    "zone RPC correlated mutation must use the single-attempt executor".to_string(),
                 );
             }
         }
@@ -1906,27 +1906,25 @@ impl TcpZoneOwnerRpcTransport {
             if let (Some(required_capability), Some(encoded_health)) =
                 (required_capability, encoded_health.as_deref())
             {
-                let supported = match self.call_endpoint_index(
-                    index,
-                    encoded_health,
-                    ZoneRpcPriority::Control,
-                ) {
-                    Ok(ZoneRpcResponse::Ok { payload }) => matches!(
-                        &*payload,
-                        ZoneRpcPayload::Health { capabilities, .. }
-                            if capabilities
-                                .iter()
-                                .any(|capability| capability == required_capability)
-                    ),
-                    Ok(ZoneRpcResponse::Error { code, message }) => {
-                        probe_failures.push(format!("{address}: zone RPC {code}: {message}"));
-                        false
-                    }
-                    Err(error) => {
-                        probe_failures.push(format!("{address}: {error}"));
-                        false
-                    }
-                };
+                let supported =
+                    match self.call_endpoint_index(index, encoded_health, ZoneRpcPriority::Control)
+                    {
+                        Ok(ZoneRpcResponse::Ok { payload }) => matches!(
+                            &*payload,
+                            ZoneRpcPayload::Health { capabilities, .. }
+                                if capabilities
+                                    .iter()
+                                    .any(|capability| capability == required_capability)
+                        ),
+                        Ok(ZoneRpcResponse::Error { code, message }) => {
+                            probe_failures.push(format!("{address}: zone RPC {code}: {message}"));
+                            false
+                        }
+                        Err(error) => {
+                            probe_failures.push(format!("{address}: {error}"));
+                            false
+                        }
+                    };
                 if !supported {
                     if !probe_failures
                         .last()
@@ -2011,40 +2009,43 @@ impl TcpZoneOwnerRpcTransport {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum GameShopEconomicMutationPolicy {
+enum CorrelatedMutationPolicy {
     NativePurchaseV2,
     OrdinaryPurchase,
+    StorageRequestV2,
 }
 
-/// Keep the no-fallback rule narrow: only the two GameShop purchase commands
-/// are economic mutations in this protocol slice. Read-only and unrelated
-/// gameplay commands retain the existing endpoint fallback behavior.
-fn game_shop_economic_mutation_policy(
-    command: &WorldCommand,
-) -> Option<GameShopEconomicMutationPolicy> {
+/// Keep the no-fallback rule narrow: correlated GameShop and Storage writes
+/// must never be replayed after an endpoint may have committed them. Read-only
+/// and unrelated gameplay commands retain endpoint fallback behavior.
+fn correlated_mutation_policy(command: &WorldCommand) -> Option<CorrelatedMutationPolicy> {
     match command {
-        WorldCommand::NativeGameShopPurchase(_) => {
-            Some(GameShopEconomicMutationPolicy::NativePurchaseV2)
-        }
+        WorldCommand::NativeGameShopPurchase(_) => Some(CorrelatedMutationPolicy::NativePurchaseV2),
         WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) => {
-            Some(GameShopEconomicMutationPolicy::OrdinaryPurchase)
+            Some(CorrelatedMutationPolicy::OrdinaryPurchase)
         }
+        WorldCommand::ClientPacket(
+            ClientPacket::StoreItemV2 { .. } | ClientPacket::TakeBackItemV2 { .. },
+        ) => Some(CorrelatedMutationPolicy::StorageRequestV2),
         _ => None,
     }
 }
 
-fn wire_game_shop_economic_mutation_policy(
+fn wire_correlated_mutation_policy(
     command: &WireWorldCommand,
-) -> Result<Option<GameShopEconomicMutationPolicy>, String> {
+) -> Result<Option<CorrelatedMutationPolicy>, String> {
     match command {
         WireWorldCommand::NativeGameShopPurchaseV2 { .. } => {
-            Ok(Some(GameShopEconomicMutationPolicy::NativePurchaseV2))
+            Ok(Some(CorrelatedMutationPolicy::NativePurchaseV2))
         }
         WireWorldCommand::ClientPacket { frame } => match decode_client_packet(frame)
             .map_err(|error| format!("client packet decode failed: {error}"))?
         {
             ClientPacket::GameShopBuy { .. } => {
-                Ok(Some(GameShopEconomicMutationPolicy::OrdinaryPurchase))
+                Ok(Some(CorrelatedMutationPolicy::OrdinaryPurchase))
+            }
+            ClientPacket::StoreItemV2 { .. } | ClientPacket::TakeBackItemV2 { .. } => {
+                Ok(Some(CorrelatedMutationPolicy::StorageRequestV2))
             }
             _ => Ok(None),
         },
@@ -2061,17 +2062,20 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
     }
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
-        match game_shop_economic_mutation_policy(request.command()) {
-            Some(GameShopEconomicMutationPolicy::NativePurchaseV2) => self.execute_owner_request(
+        match correlated_mutation_policy(request.command()) {
+            Some(CorrelatedMutationPolicy::NativePurchaseV2) => self.execute_owner_request(
                 request,
                 Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2),
                 true,
             ),
-            Some(GameShopEconomicMutationPolicy::OrdinaryPurchase) => {
+            Some(CorrelatedMutationPolicy::OrdinaryPurchase) => {
                 // Preserve old-host compatibility (no capability probe), but
                 // never replay an economic write to another endpoint after the
                 // selected Host may have received Execute.
                 self.execute_owner_request(request, None, true)
+            }
+            Some(CorrelatedMutationPolicy::StorageRequestV2) => {
+                self.execute_owner_request(request, Some(ZONE_RPC_STORAGE_REQUEST_ID_V1), true)
             }
             None => self.execute_owner_request(request, None, false),
         }
@@ -2081,20 +2085,13 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(
-            request.command(),
-            WorldCommand::NativeGameShopPurchase(_)
-        ) {
+        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
             return Err(
                 "typed GameShop outcome execution requires a native idempotent purchase"
                     .to_string(),
             );
         }
-        self.execute_owner_request(
-            request,
-            Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2),
-            true,
-        )
+        self.execute_owner_request(request, Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2), true)
     }
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
@@ -3632,6 +3629,7 @@ impl ZoneHostServer {
                 capabilities: vec![
                     ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
                     ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
+                    ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
                 ],
             });
         }
@@ -6638,8 +6636,7 @@ mod typed_game_shop_rpc_tests {
             true,
             WorldCommand::NativeGameShopPurchase(NativeGameShopPurchaseRequest {
                 protocol_version: mir2_simulation::NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
-                server_idempotency_key:
-                    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".to_string(),
+                server_idempotency_key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".to_string(),
                 gateway_session_id: "typed-game-shop-gateway-session".to_string(),
                 account_id: "typed-game-shop-account".to_string(),
                 character_index: 7,
@@ -6647,6 +6644,18 @@ mod typed_game_shop_rpc_tests {
                 g_index: 31,
                 quantity: 1,
                 price_type: 1,
+            }),
+        )
+    }
+
+    fn storage_request(zone_id: &ZoneId) -> ZoneOwnerCommandRequest {
+        ZoneOwnerCommandRequest::production_player(
+            ZoneOwnerLease::new(zone_id.clone(), "owner", 1),
+            true,
+            WorldCommand::ClientPacket(ClientPacket::StoreItemV2 {
+                request_id: "st-0000000000000001".to_string(),
+                from: 2,
+                to: 4,
             }),
         )
     }
@@ -6752,6 +6761,56 @@ mod typed_game_shop_rpc_tests {
             .execute_requiring_typed_game_shop_purchase_outcome(native_purchase_request(&zone_id))
             .expect_err("old host must fail closed before purchase Execute");
         assert!(error.contains(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2));
+        server.join().unwrap();
+        assert_eq!(execute_requests.load(Ordering::SeqCst), 0);
+    }
+
+    #[test]
+    fn old_host_without_storage_request_id_capability_rejects_before_execute() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let execute_requests = Arc::new(AtomicUsize::new(0));
+        let observed = Arc::clone(&execute_requests);
+        let server = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let frame = read_frame(&mut stream, 64 * 1024).unwrap();
+            let envelope = decode_rpc_envelope(&frame, ZoneRpcCodec::Json).unwrap();
+            assert!(matches!(envelope.request, ZoneRpcRequest::Health));
+            write_frame(&mut stream, &health_response(None), 64 * 1024).unwrap();
+            drop(stream);
+
+            listener.set_nonblocking(true).unwrap();
+            let deadline = Instant::now() + Duration::from_millis(300);
+            while Instant::now() < deadline {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let frame = read_frame(&mut stream, 64 * 1024).unwrap();
+                        let envelope = decode_rpc_envelope(&frame, ZoneRpcCodec::Json).unwrap();
+                        if matches!(envelope.request, ZoneRpcRequest::Execute { .. }) {
+                            observed.fetch_add(1, Ordering::SeqCst);
+                        }
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(5));
+                    }
+                    Err(error) => panic!("old-host listener failed: {error}"),
+                }
+            }
+        });
+
+        let zone_id = ZoneId::new("storage-request-id-old");
+        let mut transport = TcpZoneOwnerRpcTransport::with_options(
+            address.to_string(),
+            zone_id.clone(),
+            "storage-request-id-old-session",
+            None,
+            ZoneRpcLimits::default(),
+        );
+        transport.codec = ZoneRpcCodec::Json;
+        let error = transport
+            .execute(storage_request(&zone_id))
+            .expect_err("old host must fail closed before storage Execute");
+        assert!(error.contains(ZONE_RPC_STORAGE_REQUEST_ID_V1));
         server.join().unwrap();
         assert_eq!(execute_requests.load(Ordering::SeqCst), 0);
     }
@@ -6970,9 +7029,7 @@ mod typed_game_shop_rpc_tests {
                         if matches!(envelope.request, ZoneRpcRequest::Health) {
                             write_frame(
                                 &mut stream,
-                                &health_response(Some(vec![
-                                    ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2,
-                                ])),
+                                &health_response(Some(vec![ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2])),
                                 64 * 1024,
                             )
                             .unwrap();
@@ -6988,10 +7045,7 @@ mod typed_game_shop_rpc_tests {
 
         let zone_id = ZoneId::new("typed-shop-response-loss");
         let mut transport = TcpZoneOwnerRpcTransport::with_endpoints(
-            vec![
-                committing_address.to_string(),
-                fallback_address.to_string(),
-            ],
+            vec![committing_address.to_string(), fallback_address.to_string()],
             zone_id.clone(),
             "typed-shop-response-loss-session",
             None,
@@ -7011,6 +7065,97 @@ mod typed_game_shop_rpc_tests {
             fallback_executes.load(Ordering::SeqCst),
             0,
             "a possibly committed mutation must never be replayed to another endpoint"
+        );
+    }
+
+    #[test]
+    fn storage_v2_response_loss_never_replays_execute_to_fallback_endpoint() {
+        let committing_listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let committing_address = committing_listener.local_addr().unwrap();
+        let fallback_listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let fallback_address = fallback_listener.local_addr().unwrap();
+        let committing_executes = Arc::new(AtomicUsize::new(0));
+        let fallback_executes = Arc::new(AtomicUsize::new(0));
+
+        let observed_committing = Arc::clone(&committing_executes);
+        let committing_server = thread::spawn(move || {
+            let (mut health_stream, _) = committing_listener.accept().unwrap();
+            let frame = read_frame(&mut health_stream, 64 * 1024).unwrap();
+            let envelope = decode_rpc_envelope(&frame, ZoneRpcCodec::Json).unwrap();
+            assert!(matches!(envelope.request, ZoneRpcRequest::Health));
+            write_frame(
+                &mut health_stream,
+                &health_response(Some(vec![ZONE_RPC_STORAGE_REQUEST_ID_V1])),
+                64 * 1024,
+            )
+            .unwrap();
+            drop(health_stream);
+
+            let (mut execute_stream, _) = committing_listener.accept().unwrap();
+            let frame = read_frame(&mut execute_stream, 64 * 1024).unwrap();
+            let envelope = decode_rpc_envelope(&frame, ZoneRpcCodec::Json).unwrap();
+            assert!(matches!(
+                envelope.request,
+                ZoneRpcRequest::Execute {
+                    command: WireWorldCommand::ClientPacket { .. },
+                    ..
+                }
+            ));
+            observed_committing.fetch_add(1, Ordering::SeqCst);
+            drop(execute_stream);
+        });
+
+        let observed_fallback = Arc::clone(&fallback_executes);
+        let fallback_server = thread::spawn(move || {
+            fallback_listener.set_nonblocking(true).unwrap();
+            let deadline = Instant::now() + Duration::from_millis(500);
+            while Instant::now() < deadline {
+                match fallback_listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let frame = read_frame(&mut stream, 64 * 1024).unwrap();
+                        let envelope = decode_rpc_envelope(&frame, ZoneRpcCodec::Json).unwrap();
+                        if matches!(envelope.request, ZoneRpcRequest::Execute { .. }) {
+                            observed_fallback.fetch_add(1, Ordering::SeqCst);
+                        }
+                        if matches!(envelope.request, ZoneRpcRequest::Health) {
+                            write_frame(
+                                &mut stream,
+                                &health_response(Some(vec![ZONE_RPC_STORAGE_REQUEST_ID_V1])),
+                                64 * 1024,
+                            )
+                            .unwrap();
+                        }
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(5));
+                    }
+                    Err(error) => panic!("fallback endpoint listener failed: {error}"),
+                }
+            }
+        });
+
+        let zone_id = ZoneId::new("storage-v2-response-loss");
+        let mut transport = TcpZoneOwnerRpcTransport::with_endpoints(
+            vec![committing_address.to_string(), fallback_address.to_string()],
+            zone_id.clone(),
+            "storage-v2-response-loss-session",
+            None,
+            ZoneRpcLimits::default(),
+        )
+        .unwrap();
+        transport.codec = ZoneRpcCodec::Json;
+        let error = transport
+            .execute(storage_request(&zone_id))
+            .expect_err("storage response loss after Execute must be an unknown commit state");
+        committing_server.join().unwrap();
+        fallback_server.join().unwrap();
+        assert!(error.contains("commit state is unknown"));
+        assert!(error.contains("no endpoint fallback"));
+        assert_eq!(committing_executes.load(Ordering::SeqCst), 1);
+        assert_eq!(
+            fallback_executes.load(Ordering::SeqCst),
+            0,
+            "a possibly committed storage mutation must never be replayed"
         );
     }
 
@@ -7074,10 +7219,7 @@ mod typed_game_shop_rpc_tests {
 
         let zone_id = ZoneId::new("generic-native-shop-response-loss");
         let mut transport = TcpZoneOwnerRpcTransport::with_endpoints(
-            vec![
-                committing_address.to_string(),
-                fallback_address.to_string(),
-            ],
+            vec![committing_address.to_string(), fallback_address.to_string()],
             zone_id.clone(),
             "generic-native-shop-response-loss-session",
             None,
@@ -7144,10 +7286,7 @@ mod typed_game_shop_rpc_tests {
 
         let zone_id = ZoneId::new("ordinary-shop-response-loss");
         let mut transport = TcpZoneOwnerRpcTransport::with_endpoints(
-            vec![
-                committing_address.to_string(),
-                fallback_address.to_string(),
-            ],
+            vec![committing_address.to_string(), fallback_address.to_string()],
             zone_id.clone(),
             "ordinary-shop-response-loss-session",
             None,
@@ -7170,18 +7309,35 @@ mod typed_game_shop_rpc_tests {
     fn game_shop_economic_mutation_classifier_is_exact() {
         let zone_id = ZoneId::new("game-shop-classifier");
         assert_eq!(
-            game_shop_economic_mutation_policy(native_purchase_request(&zone_id).command()),
-            Some(GameShopEconomicMutationPolicy::NativePurchaseV2)
+            correlated_mutation_policy(native_purchase_request(&zone_id).command()),
+            Some(CorrelatedMutationPolicy::NativePurchaseV2)
         );
         assert_eq!(
-            game_shop_economic_mutation_policy(purchase_request(&zone_id).command()),
-            Some(GameShopEconomicMutationPolicy::OrdinaryPurchase)
+            correlated_mutation_policy(purchase_request(&zone_id).command()),
+            Some(CorrelatedMutationPolicy::OrdinaryPurchase)
         );
-        assert_eq!(game_shop_economic_mutation_policy(&WorldCommand::Tick), None);
+        for packet in [
+            ClientPacket::StoreItemV2 {
+                request_id: "st-0000000000000001".to_string(),
+                from: 2,
+                to: 4,
+            },
+            ClientPacket::TakeBackItemV2 {
+                request_id: "st-0000000000000002".to_string(),
+                from: 4,
+                to: 2,
+            },
+        ] {
+            assert_eq!(
+                correlated_mutation_policy(&WorldCommand::ClientPacket(packet)),
+                Some(CorrelatedMutationPolicy::StorageRequestV2)
+            );
+        }
+        assert_eq!(correlated_mutation_policy(&WorldCommand::Tick), None);
         assert_eq!(
-            game_shop_economic_mutation_policy(&WorldCommand::ClientPacket(
-                ClientPacket::KeepAlive { time: 0 }
-            )),
+            correlated_mutation_policy(&WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 0
+            })),
             None
         );
     }
@@ -7201,7 +7357,11 @@ mod typed_game_shop_rpc_tests {
         );
         transport.codec = ZoneRpcCodec::Json;
 
-        for request in [purchase_request(&zone_id), native_purchase_request(&zone_id)] {
+        for request in [
+            purchase_request(&zone_id),
+            native_purchase_request(&zone_id),
+            storage_request(&zone_id),
+        ] {
             let (owner_lease, mode, command) = request.into_parts();
             let error = transport
                 .call(ZoneRpcRequest::Execute {
@@ -7294,15 +7454,11 @@ mod typed_game_shop_rpc_tests {
                 auth_token: None,
                 request: ZoneRpcRequest::Execute {
                     owner_lease: WireZoneOwnerLease::from(&ZoneOwnerLease::new(
-                        zone_id,
-                        "owner",
-                        1,
+                        zone_id, "owner", 1,
                     )),
-                    mode: WireZoneOwnerCommandMode::from(
-                        ZoneOwnerCommandMode::ProductionPlayer {
-                            authenticated: true,
-                        },
-                    ),
+                    mode: WireZoneOwnerCommandMode::from(ZoneOwnerCommandMode::ProductionPlayer {
+                        authenticated: true,
+                    }),
                     command: WireWorldCommand::from_world(command).unwrap(),
                 },
             },

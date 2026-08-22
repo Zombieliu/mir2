@@ -10,17 +10,67 @@ pub mod gateway_bridge;
 use android_input::{
     apply_android_lifecycle_messages, collect_android_back_key, route_android_input_messages,
     AndroidInputMessage, AndroidLifecycleEffects, AndroidLifecycleMessage, AndroidMotionQueue,
-    AndroidShellState, AndroidUiActionQueue,
+    AndroidNetwork, AndroidShellState, AndroidUiActionQueue,
 };
 use bevy::app::AppExit;
 use bevy::prelude::*;
 use gateway_bridge::{
     clear_bounded_inbound_transaction, drain_bounded_inbound_into_models,
-    enqueue_game_shop_purchase, enqueue_security_request, AndroidGatewayInboundQueue,
-    AndroidGatewayOutboundQueue,
+    enqueue_game_shop_purchase, enqueue_security_request, enqueue_storage_request,
+    AndroidGatewayHostAdapter, AndroidGatewayHostWriteOutcome, AndroidGatewayHostWriteResult,
+    AndroidGatewayInboundQueue, AndroidGatewayOutboundLease, AndroidGatewayOutboundQueue,
 };
 use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 use mir2_ui_core::{effect::UiEffect, reducer::reduce, state::UiState};
+use serde_json::json;
+use std::collections::{BTreeMap, VecDeque};
+use std::sync::{Mutex, OnceLock};
+
+const ANDROID_HOST_TRANSPORT_CAPACITY: usize = 256;
+
+#[derive(Debug, Default)]
+struct AndroidGatewayFfiState {
+    active: bool,
+    generation: u64,
+    lost_generation: Option<u64>,
+    outbound: VecDeque<AndroidGatewayOutboundLease>,
+    in_flight: BTreeMap<u64, AndroidGatewayOutboundLease>,
+    results: VecDeque<(AndroidGatewayOutboundLease, AndroidGatewayHostWriteResult)>,
+}
+
+static ANDROID_GATEWAY_FFI_STATE: OnceLock<Mutex<AndroidGatewayFfiState>> = OnceLock::new();
+
+fn android_gateway_ffi_state() -> &'static Mutex<AndroidGatewayFfiState> {
+    ANDROID_GATEWAY_FFI_STATE.get_or_init(|| Mutex::new(AndroidGatewayFfiState::default()))
+}
+
+fn try_publish_android_gateway_leases(
+    observed_generation: u64,
+    leases: Vec<AndroidGatewayOutboundLease>,
+) -> bool {
+    let mut state = android_gateway_ffi_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    if !state.active || state.generation != observed_generation {
+        return false;
+    }
+    state.outbound.extend(leases);
+    true
+}
+
+#[derive(Debug, Resource)]
+pub struct AndroidGatewayTransportEnabled(pub bool);
+
+impl Default for AndroidGatewayTransportEnabled {
+    fn default() -> Self {
+        Self(cfg!(target_os = "android"))
+    }
+}
+
+#[derive(Debug, Default, Resource)]
+struct AndroidGatewayTransportLifecycle {
+    last_network: AndroidNetwork,
+}
 
 #[derive(Debug, Default, Resource)]
 pub struct AndroidUiEffects(pub Vec<UiEffect>);
@@ -36,6 +86,9 @@ impl Plugin for AndroidShellPlugin {
             .init_resource::<AndroidMotionQueue>()
             .init_resource::<AndroidLifecycleEffects>()
             .init_resource::<AndroidUiEffects>()
+            .init_resource::<AndroidGatewayTransportEnabled>()
+            .init_resource::<AndroidGatewayTransportLifecycle>()
+            .init_resource::<AndroidGatewayHostAdapter>()
             .init_resource::<AndroidGatewayOutboundQueue>()
             .init_resource::<AndroidGatewayInboundQueue>()
             .init_resource::<ButtonInput<KeyCode>>()
@@ -47,12 +100,260 @@ impl Plugin for AndroidShellPlugin {
                 (
                     collect_android_back_key,
                     apply_android_lifecycle_messages,
+                    drive_android_gateway_host_transport,
                     drain_android_gateway_inbound,
                     route_android_input_messages,
                     apply_queued_ui_actions,
                 )
                     .chain(),
             );
+    }
+}
+
+/// Production Activity/JNI/WebSocket host entry point.
+///
+/// The host calls this after the Android lifecycle/network state has been
+/// delivered to the Bevy app. Each returned lease must be written by the host
+/// and passed to [`report_android_gateway_write_result`] exactly once.
+pub fn drain_android_gateway_for_host(
+    app: &mut App,
+    max_entries: usize,
+) -> Vec<AndroidGatewayOutboundLease> {
+    app.world_mut()
+        .resource_scope(|world, mut adapter: Mut<AndroidGatewayHostAdapter>| {
+            let shell = *world.resource::<AndroidShellState>();
+            world.resource_scope(|_world, mut queue: Mut<AndroidGatewayOutboundQueue>| {
+                adapter.drain_ready(&mut queue, &shell, max_entries)
+            })
+        })
+}
+
+/// Production host callback for the actual socket/JNI write result.
+///
+/// A failed Storage V2 write is terminal for that exact request: the pending
+/// state becomes unknown and is cleared, the drained command is not replayed,
+/// and the next request receives a fresh process-lifetime ID. Non-storage
+/// failures are intentionally left unchanged by this callback.
+pub fn report_android_gateway_write_result(
+    app: &mut App,
+    lease: AndroidGatewayOutboundLease,
+    result: AndroidGatewayHostWriteResult,
+) -> AndroidGatewayHostWriteOutcome {
+    app.world_mut()
+        .resource_scope(|world, mut adapter: Mut<AndroidGatewayHostAdapter>| {
+            world.resource_scope(|world, mut queue: Mut<AndroidGatewayOutboundQueue>| {
+                world.resource_scope(|_world, mut ui_state: Mut<UiState>| {
+                    adapter.on_host_write_result(&mut queue, &mut ui_state, lease, result)
+                })
+            })
+        })
+}
+
+/// Activate the production GameActivity/JNI transport bridge. The Android
+/// host calls this exported C ABI symbol once its WebSocket writer is ready.
+#[unsafe(no_mangle)]
+pub extern "C" fn mir2_android_gateway_host_start() {
+    let mut state = android_gateway_ffi_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let replaces_live_transport = state.active
+        || !state.outbound.is_empty()
+        || !state.in_flight.is_empty()
+        || !state.results.is_empty();
+    if replaces_live_transport {
+        state.lost_generation = Some(state.generation);
+    }
+    let Some(generation) = state.generation.checked_add(1) else {
+        state.active = false;
+        return;
+    };
+    state.generation = generation;
+    state.active = true;
+    state.outbound.clear();
+    state.in_flight.clear();
+    state.results.clear();
+}
+
+/// Stop the production host transport. The next Bevy update performs the same
+/// commit-unknown transition as a socket close and never replays a mutation.
+#[unsafe(no_mangle)]
+pub extern "C" fn mir2_android_gateway_host_stop() {
+    let mut state = android_gateway_ffi_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    state.active = false;
+    state.lost_generation = Some(state.generation);
+    state.outbound.clear();
+    state.in_flight.clear();
+    state.results.clear();
+}
+
+/// Notify the production bridge that the WebSocket closed or connectivity was
+/// lost after a write. Sent-but-unacknowledged Storage V2 operations become
+/// unknown on the next Bevy update and are never replayed.
+#[unsafe(no_mangle)]
+pub extern "C" fn mir2_android_gateway_connection_lost() {
+    let mut state = android_gateway_ffi_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    state.active = false;
+    state.lost_generation = Some(state.generation);
+    state.outbound.clear();
+    state.in_flight.clear();
+    state.results.clear();
+}
+
+/// Copy the next outbound JSON envelope into a caller-owned JNI/native buffer.
+///
+/// The envelope is `{ "sequence": u64, "command": <BrowserCommand> }`.
+/// A null/undersized buffer returns the required byte length without consuming
+/// the lease. A large enough buffer copies exactly that many UTF-8 bytes and
+/// moves the lease to the bounded in-flight table. Zero means no message and
+/// `-1` means the bridge rejected the request.
+///
+/// # Safety
+///
+/// When `buffer` is non-null, it must be writable for at least `capacity`
+/// bytes for the duration of this call.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mir2_android_gateway_copy_next_outbound(
+    buffer: *mut u8,
+    capacity: usize,
+) -> isize {
+    let mut state = android_gateway_ffi_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    if !state.active {
+        return 0;
+    }
+    let Some(lease) = state.outbound.front() else {
+        return 0;
+    };
+    let command = match serde_json::from_str::<serde_json::Value>(&lease.outbound().json) {
+        Ok(command) => command,
+        Err(_) => return -1,
+    };
+    let encoded = match serde_json::to_vec(&json!({
+        "sequence": lease.sequence(),
+        "command": command,
+    })) {
+        Ok(encoded) => encoded,
+        Err(_) => return -1,
+    };
+    let Ok(required) = isize::try_from(encoded.len()) else {
+        return -1;
+    };
+    if buffer.is_null() || capacity < encoded.len() {
+        return required;
+    }
+    // SAFETY: the caller contract above guarantees a writable buffer of at
+    // least `capacity` bytes, and this branch verified `capacity >= len`.
+    unsafe {
+        std::ptr::copy_nonoverlapping(encoded.as_ptr(), buffer, encoded.len());
+    }
+    let lease = state.outbound.pop_front().expect("front was checked");
+    if state.in_flight.insert(lease.sequence(), lease).is_some() {
+        state.active = false;
+        state.lost_generation = Some(state.generation);
+        return -1;
+    }
+    required
+}
+
+/// Return the actual JNI/WebSocket write result for one copied lease.
+#[unsafe(no_mangle)]
+pub extern "C" fn mir2_android_gateway_report_write_result(sequence: u64, sent: bool) -> bool {
+    let mut state = android_gateway_ffi_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let Some(lease) = state.in_flight.remove(&sequence) else {
+        return false;
+    };
+    if state.results.len() >= ANDROID_HOST_TRANSPORT_CAPACITY {
+        state.active = false;
+        state.lost_generation = Some(state.generation);
+        state.outbound.clear();
+        state.in_flight.clear();
+        state.results.clear();
+        return false;
+    }
+    state.results.push_back((
+        lease,
+        if sent {
+            AndroidGatewayHostWriteResult::Sent
+        } else {
+            AndroidGatewayHostWriteResult::Failed
+        },
+    ));
+    true
+}
+
+fn drive_android_gateway_host_transport(
+    enabled: Res<AndroidGatewayTransportEnabled>,
+    shell: Res<AndroidShellState>,
+    mut lifecycle: ResMut<AndroidGatewayTransportLifecycle>,
+    mut adapter: ResMut<AndroidGatewayHostAdapter>,
+    mut queue: ResMut<AndroidGatewayOutboundQueue>,
+    mut inbound: ResMut<AndroidGatewayInboundQueue>,
+    mut ui_state: ResMut<UiState>,
+) {
+    if !enabled.0 {
+        lifecycle.last_network = shell.network;
+        return;
+    }
+
+    let network_lost = shell.network == AndroidNetwork::Unavailable
+        && lifecycle.last_network != AndroidNetwork::Unavailable;
+    lifecycle.last_network = shell.network;
+
+    let (active, observed_generation, lost_generation, available, results) = {
+        let mut state = android_gateway_ffi_state()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let active = state.active;
+        let observed_generation = state.generation;
+        let lost_generation = state.lost_generation.take();
+        let available = ANDROID_HOST_TRANSPORT_CAPACITY.saturating_sub(state.outbound.len());
+        let results = state.results.drain(..).collect::<Vec<_>>();
+        (
+            active,
+            observed_generation,
+            lost_generation,
+            available,
+            results,
+        )
+    };
+
+    if network_lost || lost_generation.is_some() {
+        let mut state = android_gateway_ffi_state()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let closes_current_transport = network_lost
+            || lost_generation.is_some_and(|lost_generation| state.generation <= lost_generation);
+        if closes_current_transport {
+            state.active = false;
+            state.outbound.clear();
+            state.in_flight.clear();
+            state.results.clear();
+        }
+        drop(state);
+        adapter.on_connection_lost(&mut queue, &mut ui_state);
+        clear_bounded_inbound_transaction(&mut inbound);
+    }
+    for (lease, result) in results {
+        let _ = adapter.on_host_write_result(&mut queue, &mut ui_state, lease, result);
+    }
+
+    if !active || shell.network != AndroidNetwork::Available || available == 0 {
+        return;
+    }
+    let leases = adapter.drain_ready(&mut queue, &shell, available);
+    if leases.is_empty() {
+        return;
+    }
+    if !try_publish_android_gateway_leases(observed_generation, leases) {
+        adapter.on_connection_lost(&mut queue, &mut ui_state);
+        clear_bounded_inbound_transaction(&mut inbound);
     }
 }
 
@@ -80,9 +381,11 @@ fn apply_queued_ui_actions(
                 | mir2_ui_core::action::UiAction::ExitApplication
         );
         if terminal_session {
-            // Clear a possibly lost native purchase before enqueueing the
+            // Clear possibly lost native transactions before enqueueing the
             // explicit logout command. The command itself is still retained.
             gateway.mark_terminal_reset();
+            ui_state.mark_game_shop_unknown();
+            ui_state.mark_storage_unknown();
             clear_bounded_inbound_transaction(&mut inbound);
         }
         if let mir2_ui_core::action::UiAction::GameShopBuy {
@@ -98,6 +401,29 @@ fn apply_queued_ui_actions(
                 g_index,
                 quantity,
                 price_type,
+            );
+            continue;
+        }
+        if let Some((operation, from, to)) = match &action {
+            mir2_ui_core::action::UiAction::StoreItem { from, to } => Some((
+                mir2_ui_core::storage::StorageOperation::StoreItem,
+                *from,
+                *to,
+            )),
+            mir2_ui_core::action::UiAction::TakeBackItem { from, to } => Some((
+                mir2_ui_core::storage::StorageOperation::TakeBackItem,
+                *from,
+                *to,
+            )),
+            _ => None,
+        } {
+            let _ = enqueue_storage_request(
+                &mut ui_state,
+                &mut gateway,
+                &mut inbound,
+                operation,
+                from,
+                to,
             );
             continue;
         }
@@ -184,12 +510,22 @@ pub fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::android_input::{AndroidInputEvent, AndroidLifecycleEvent, AndroidUiTarget};
+    use crate::android_input::{
+        AndroidInputEvent, AndroidLifecycle, AndroidLifecycleEvent, AndroidNetwork, AndroidUiTarget,
+    };
     use mir2_ui_core::{
         action::UiAction,
         effect::UiEffect,
         state::{UiChatChannel, UiPanel, UiScreen, UiWindowMode},
     };
+
+    static ANDROID_GATEWAY_FFI_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+    fn reset_android_gateway_ffi_for_test() {
+        *android_gateway_ffi_state()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner()) = AndroidGatewayFfiState::default();
+    }
 
     fn in_game_app() -> App {
         let mut app = App::new();
@@ -201,6 +537,12 @@ mod tests {
     fn send(app: &mut App, event: AndroidInputEvent) {
         app.world_mut().write_message(AndroidInputMessage(event));
         app.update();
+    }
+
+    fn make_host_ready(app: &mut App) {
+        let mut shell = app.world_mut().resource_mut::<AndroidShellState>();
+        shell.lifecycle = AndroidLifecycle::Foreground;
+        shell.network = AndroidNetwork::Available;
     }
 
     fn take_effects(app: &mut App) -> Vec<UiEffect> {
@@ -231,6 +573,333 @@ mod tests {
             .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
         assert_eq!(queue.len(), 1);
         assert_eq!(queue.status().overflow_count, 0);
+    }
+
+    #[test]
+    fn production_host_write_failure_marks_storage_unknown_and_next_request_is_new() {
+        let mut app = in_game_app();
+        make_host_ready(&mut app);
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+
+        let first_id = app
+            .world()
+            .resource::<UiState>()
+            .storage_pending
+            .as_ref()
+            .expect("storage request is pending")
+            .request_id
+            .clone();
+        let first_lease = drain_android_gateway_for_host(&mut app, 1)
+            .into_iter()
+            .next()
+            .expect("host receives one storage lease");
+        let late_duplicate = first_lease.clone();
+        assert_eq!(first_lease.sequence(), 1);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&first_lease.outbound().json)
+                .unwrap()
+                .get("requestId")
+                .and_then(serde_json::Value::as_str),
+            Some(first_id.as_str())
+        );
+
+        assert_eq!(
+            report_android_gateway_write_result(
+                &mut app,
+                first_lease,
+                AndroidGatewayHostWriteResult::Failed,
+            ),
+            AndroidGatewayHostWriteOutcome::StorageMarkedUnknown
+        );
+        assert!(app.world().resource::<UiState>().storage_pending.is_none());
+        assert!(app.world().resource::<UiState>().storage_unknown);
+        assert!(drain_android_gateway_for_host(&mut app, 1).is_empty());
+
+        // The same coordinates are intentionally reused. A late callback for
+        // the drained old lease cannot release this new request.
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        let second_id = app
+            .world()
+            .resource::<UiState>()
+            .storage_pending
+            .as_ref()
+            .expect("next storage request is pending")
+            .request_id
+            .clone();
+        assert_ne!(first_id, second_id);
+        let second_lease = drain_android_gateway_for_host(&mut app, 1)
+            .into_iter()
+            .next()
+            .expect("host receives the next storage lease");
+        assert_eq!(second_lease.sequence(), 2);
+        assert_eq!(
+            report_android_gateway_write_result(
+                &mut app,
+                late_duplicate,
+                AndroidGatewayHostWriteResult::Failed,
+            ),
+            AndroidGatewayHostWriteOutcome::UnknownLease
+        );
+        assert!(app.world().resource::<UiState>().storage_pending.is_some());
+        assert_eq!(
+            report_android_gateway_write_result(
+                &mut app,
+                second_lease,
+                AndroidGatewayHostWriteResult::Sent,
+            ),
+            AndroidGatewayHostWriteOutcome::Sent
+        );
+    }
+
+    #[test]
+    fn production_ffi_sent_without_ack_then_disconnect_allows_fresh_storage_id() {
+        let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        reset_android_gateway_ffi_for_test();
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidGatewayTransportEnabled>()
+            .0 = true;
+        make_host_ready(&mut app);
+        mir2_android_gateway_host_start();
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        app.update();
+        let first_id = app
+            .world()
+            .resource::<UiState>()
+            .storage_pending
+            .as_ref()
+            .expect("first storage request remains pending")
+            .request_id
+            .clone();
+
+        let required = unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) };
+        assert!(required > 0);
+        let mut bytes = vec![0_u8; required as usize];
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(), bytes.len()) },
+            required
+        );
+        let envelope: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        let sequence = envelope["sequence"].as_u64().unwrap();
+        assert_eq!(
+            envelope["command"]["requestId"].as_str(),
+            Some(first_id.as_str())
+        );
+        assert!(mir2_android_gateway_report_write_result(sequence, true));
+        app.update();
+        assert!(app.world().resource::<UiState>().storage_pending.is_some());
+
+        mir2_android_gateway_connection_lost();
+        // Reconnect before ECS consumes the loss flag. The barrier must remain
+        // sticky and close the old sent-but-unacknowledged request first.
+        mir2_android_gateway_host_start();
+        app.update();
+        assert!(app.world().resource::<UiState>().storage_pending.is_none());
+        assert!(app.world().resource::<UiState>().storage_unknown);
+        assert!(!mir2_android_gateway_report_write_result(sequence, false));
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) },
+            0,
+            "replacement transport cannot expose a stale lease for replay"
+        );
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        app.update();
+        let second_id = app
+            .world()
+            .resource::<UiState>()
+            .storage_pending
+            .as_ref()
+            .expect("new request is allowed after response loss")
+            .request_id
+            .clone();
+        assert_ne!(first_id, second_id);
+
+        let required = unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) };
+        assert!(
+            required > 0,
+            "replacement transport stays live without a second start"
+        );
+        let mut bytes = vec![0_u8; required as usize];
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(), bytes.len()) },
+            required
+        );
+        let envelope: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        let second_sequence = envelope["sequence"].as_u64().unwrap();
+        assert_eq!(
+            envelope["command"]["requestId"].as_str(),
+            Some(second_id.as_str())
+        );
+        assert!(mir2_android_gateway_report_write_result(
+            second_sequence,
+            true
+        ));
+        app.update();
+        assert!(app.world().resource::<UiState>().storage_pending.is_some());
+
+        app.world_mut().write_message(AndroidLifecycleMessage(
+            crate::android_input::AndroidLifecycleEvent::NetworkUnavailable,
+        ));
+        app.update();
+        assert!(app.world().resource::<UiState>().storage_pending.is_none());
+        assert!(app.world().resource::<UiState>().storage_unknown);
+
+        mir2_android_gateway_host_stop();
+        app.update();
+    }
+
+    #[test]
+    fn production_ffi_rejects_leases_drained_before_generation_change() {
+        let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        reset_android_gateway_ffi_for_test();
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidGatewayTransportEnabled>()
+            .0 = true;
+        make_host_ready(&mut app);
+        mir2_android_gateway_host_start();
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 4, to: 10 }),
+        );
+        let first_id = app
+            .world()
+            .resource::<UiState>()
+            .storage_pending
+            .as_ref()
+            .expect("old-generation request is pending")
+            .request_id
+            .clone();
+        let observed_generation = android_gateway_ffi_state()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .generation;
+        let old_leases = drain_android_gateway_for_host(&mut app, 1);
+        assert_eq!(old_leases.len(), 1);
+
+        // Deterministically model host_start landing between the driver's
+        // transport snapshot and its second lock/mailbox publication.
+        mir2_android_gateway_host_start();
+        assert!(!try_publish_android_gateway_leases(
+            observed_generation,
+            old_leases
+        ));
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) },
+            0,
+            "an old-generation lease must never enter the replacement mailbox"
+        );
+
+        app.update();
+        assert!(app.world().resource::<UiState>().storage_pending.is_none());
+        assert!(app.world().resource::<UiState>().storage_unknown);
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 4, to: 10 }),
+        );
+        app.update();
+        let second_id = app
+            .world()
+            .resource::<UiState>()
+            .storage_pending
+            .as_ref()
+            .expect("replacement-generation request is pending")
+            .request_id
+            .clone();
+        assert_ne!(first_id, second_id);
+        let required = unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) };
+        assert!(required > 0);
+        let mut bytes = vec![0_u8; required as usize];
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(), bytes.len()) },
+            required
+        );
+        let envelope: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(
+            envelope["command"]["requestId"].as_str(),
+            Some(second_id.as_str())
+        );
+
+        mir2_android_gateway_host_stop();
+        app.update();
+    }
+
+    #[test]
+    fn production_ffi_never_exposes_local_only_as_socket_command() {
+        let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        reset_android_gateway_ffi_for_test();
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidGatewayTransportEnabled>()
+            .0 = true;
+        make_host_ready(&mut app);
+        mir2_android_gateway_host_start();
+        app.world_mut()
+            .resource_mut::<AndroidGatewayOutboundQueue>()
+            .enqueue(mir2_ui_core::effect::GatewayCommand::RetryConnection)
+            .unwrap();
+        app.update();
+
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) },
+            0,
+            "LocalOnly retryConnection must never become a BrowserCommand"
+        );
+        mir2_android_gateway_host_stop();
+        app.update();
+    }
+
+    #[test]
+    fn production_host_non_storage_failure_does_not_change_existing_state() {
+        let mut app = App::new();
+        app.add_plugins(AndroidShellPlugin);
+        {
+            let mut state = app.world_mut().resource_mut::<UiState>();
+            state.screen = UiScreen::Login;
+            state.login_account = "account".into();
+            state.login_password = "password".into();
+        }
+        make_host_ready(&mut app);
+        send(&mut app, AndroidInputEvent::Semantic(UiAction::Login));
+
+        let lease = drain_android_gateway_for_host(&mut app, 1)
+            .into_iter()
+            .next()
+            .expect("host receives login lease");
+        assert_eq!(
+            report_android_gateway_write_result(
+                &mut app,
+                lease,
+                AndroidGatewayHostWriteResult::Failed,
+            ),
+            AndroidGatewayHostWriteOutcome::NonStorageFailureIgnored
+        );
+        assert_eq!(
+            app.world().resource::<AndroidGatewayOutboundQueue>().len(),
+            0
+        );
     }
 
     #[test]

@@ -32,7 +32,7 @@ use crate::native_shell::{
 use crate::pending_operations::{
     AuthoritativeModelRevisions, InventoryOperationFeedback, NativeSessionBoundaryTracker,
     OverlayResetTracker, PendingLifecycleSet, PendingOperationKey, PendingOperations,
-    SessionResetGameShopPreservation, SessionResetRevision,
+    SessionResetGameShopPreservation, SessionResetRevision, StorageRequestIdGenerator,
 };
 use crate::quest_model::NpcDialogModel;
 use crate::read_model::{UiReadModel, UiSurfaceSignals};
@@ -942,11 +942,13 @@ pub enum NativePlayerUiIntent {
     },
     // Storage
     StoreItem {
+        request_id: String,
         unique_id: u64,
         from: i32,
         to: i32,
     },
     TakeBackItem {
+        request_id: String,
         unique_id: u64,
         from: i32,
         to: i32,
@@ -1091,19 +1093,23 @@ impl NativePlayerUiIntent {
                 count: *count,
             }),
             Self::StoreItem {
+                request_id,
                 unique_id,
                 from,
                 to,
-            } => Some(PendingOperationKey::StorageDeposit {
+            } => Some(PendingOperationKey::StorageDepositV2 {
+                request_id: request_id.clone(),
                 unique_id: *unique_id,
                 from: *from,
                 to: *to,
             }),
             Self::TakeBackItem {
+                request_id,
                 unique_id,
                 from,
                 to,
-            } => Some(PendingOperationKey::StorageWithdraw {
+            } => Some(PendingOperationKey::StorageWithdrawV2 {
+                request_id: request_id.clone(),
                 unique_id: *unique_id,
                 from: *from,
                 to: *to,
@@ -1140,6 +1146,7 @@ impl NativePlayerUiIntent {
 #[derive(Debug, Default, Resource)]
 pub struct NativePlayerUiIntentQueue {
     intents: VecDeque<NativePlayerUiIntent>,
+    storage_request_ids: StorageRequestIdGenerator,
 }
 
 impl NativePlayerUiIntentQueue {
@@ -1331,6 +1338,38 @@ impl NativePlayerUiIntentQueue {
             return false;
         }
         true
+    }
+
+    /// Allocate and enqueue a V2 storage transfer. Allocation happens before
+    /// any capacity/pending check so a failed attempt still consumes its id;
+    /// ids are never reused after a connection reset or queue rejection.
+    pub fn push_storage_pending_intent(
+        &mut self,
+        pending: &mut PendingOperations,
+        deposit: bool,
+        unique_id: u64,
+        from: i32,
+        to: i32,
+    ) -> bool {
+        let Some(request_id) = self.storage_request_ids.next_request_id() else {
+            return false;
+        };
+        let intent = if deposit {
+            NativePlayerUiIntent::StoreItem {
+                request_id,
+                unique_id,
+                from,
+                to,
+            }
+        } else {
+            NativePlayerUiIntent::TakeBackItem {
+                request_id,
+                unique_id,
+                from,
+                to,
+            }
+        };
+        self.push_pending_intent(pending, intent)
     }
 
     /// Atomically reserve and enqueue the one in-flight native GameShop
@@ -4209,14 +4248,7 @@ fn process_overlay_buttons(
                             break;
                         }
                     }
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::StoreItem {
-                            unique_id,
-                            from,
-                            to,
-                        },
-                    );
+                    intents.push_storage_pending_intent(&mut pending, true, unique_id, from, to);
                 }
             }
             OverlayButton::StorageWithdraw => {
@@ -4238,14 +4270,7 @@ fn process_overlay_buttons(
                             break;
                         }
                     }
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::TakeBackItem {
-                            unique_id,
-                            from,
-                            to,
-                        },
-                    );
+                    intents.push_storage_pending_intent(&mut pending, false, unique_id, from, to);
                 }
             }
             OverlayButton::StorageUnlock => {
@@ -10838,9 +10863,11 @@ mod tests {
                 .resource::<NativePlayerUiIntentQueue>()
                 .intents
                 .clone();
-            assert!(intents
-                .iter()
-                .any(|i| matches!(i, NativePlayerUiIntent::StoreItem { .. })));
+            assert!(intents.iter().any(|i| matches!(
+                i,
+                NativePlayerUiIntent::StoreItem { request_id, .. }
+                    if request_id == "st-0000000000000001"
+            )));
         }
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
@@ -10858,9 +10885,11 @@ mod tests {
                 .resource::<NativePlayerUiIntentQueue>()
                 .intents
                 .clone();
-            assert!(intents
-                .iter()
-                .any(|i| matches!(i, NativePlayerUiIntent::TakeBackItem { .. })));
+            assert!(intents.iter().any(|i| matches!(
+                i,
+                NativePlayerUiIntent::TakeBackItem { request_id, .. }
+                    if request_id == "st-0000000000000002"
+            )));
         }
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
@@ -10881,6 +10910,29 @@ mod tests {
                 .iter()
                 .any(|i| matches!(i, NativePlayerUiIntent::ExpandStorage)));
         }
+    }
+
+    #[test]
+    fn storage_request_ids_survive_queue_clear_for_connection_reset() {
+        let mut queue = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+
+        assert!(queue.push_storage_pending_intent(&mut pending, true, 10, 3, 9));
+        let first = queue.drain_intents();
+        assert!(matches!(
+            first.as_slice(),
+            [NativePlayerUiIntent::StoreItem { request_id, .. }]
+                if request_id == "st-0000000000000001"
+        ));
+
+        queue.clear();
+        assert!(queue.push_storage_pending_intent(&mut pending, false, 11, 9, 3));
+        let second = queue.drain_intents();
+        assert!(matches!(
+            second.as_slice(),
+            [NativePlayerUiIntent::TakeBackItem { request_id, .. }]
+                if request_id == "st-0000000000000002"
+        ));
     }
 
     #[test]

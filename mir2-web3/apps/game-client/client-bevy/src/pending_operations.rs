@@ -12,6 +12,37 @@ use serde::{Deserialize, Serialize};
 
 pub const MAX_PENDING_OPERATIONS: usize = 128;
 
+/// Process-local storage request ids. The allocator is deliberately not part
+/// of any session reset path: reconnecting must not make an old id usable for
+/// a later transfer.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StorageRequestIdGenerator {
+    next_sequence: Option<u64>,
+}
+
+impl Default for StorageRequestIdGenerator {
+    fn default() -> Self {
+        Self {
+            next_sequence: Some(1),
+        }
+    }
+}
+
+impl StorageRequestIdGenerator {
+    pub fn next_request_id(&mut self) -> Option<String> {
+        let sequence = self.next_sequence?;
+        self.next_sequence = sequence.checked_add(1);
+        Some(format!("st-{sequence:016}"))
+    }
+
+    #[cfg(test)]
+    fn with_next_sequence(sequence: u64) -> Self {
+        Self {
+            next_sequence: Some(sequence),
+        }
+    }
+}
+
 /// Shared schedule boundary used by the runtime ingest path and native UI.
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PendingLifecycleSet {
@@ -67,6 +98,21 @@ pub enum PendingOperationKey {
         to: i32,
     },
     StorageWithdraw {
+        unique_id: u64,
+        from: i32,
+        to: i32,
+    },
+    /// V2 storage transfers are correlated by the request id echoed by the
+    /// server. The legacy coordinate-only variants above remain decodable for
+    /// old runtime callers and old ACKs.
+    StorageDepositV2 {
+        request_id: String,
+        unique_id: u64,
+        from: i32,
+        to: i32,
+    },
+    StorageWithdrawV2 {
+        request_id: String,
         unique_id: u64,
         from: i32,
         to: i32,
@@ -265,12 +311,32 @@ pub fn apply_inventory_operation_ack(
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "operation", rename_all = "camelCase")]
 pub enum StorageOperationAck {
-    Deposit { from: i32, to: i32, success: bool },
-    Withdraw { from: i32, to: i32, success: bool },
-    Unlock { success: bool },
-    SetPassword { success: bool },
-    RemovePassword { success: bool },
-    Expand { success: bool },
+    Deposit {
+        #[serde(rename = "requestId", default, skip_serializing_if = "Option::is_none")]
+        request_id: Option<String>,
+        from: i32,
+        to: i32,
+        success: bool,
+    },
+    Withdraw {
+        #[serde(rename = "requestId", default, skip_serializing_if = "Option::is_none")]
+        request_id: Option<String>,
+        from: i32,
+        to: i32,
+        success: bool,
+    },
+    Unlock {
+        success: bool,
+    },
+    SetPassword {
+        success: bool,
+    },
+    RemovePassword {
+        success: bool,
+    },
+    Expand {
+        success: bool,
+    },
 }
 
 impl StorageOperationAck {
@@ -295,7 +361,40 @@ pub fn apply_storage_operation_ack(
 ) -> usize {
     pending.release_one_matching(|key| match (ack, key) {
         (
-            StorageOperationAck::Deposit { from, to, .. },
+            StorageOperationAck::Deposit {
+                request_id: Some(request_id),
+                from,
+                to,
+                ..
+            },
+            PendingOperationKey::StorageDepositV2 {
+                request_id: pending_request_id,
+                from: pending_from,
+                to: pending_to,
+                ..
+            },
+        ) => request_id == pending_request_id && from == pending_from && to == pending_to,
+        (
+            StorageOperationAck::Withdraw {
+                request_id: Some(request_id),
+                from,
+                to,
+                ..
+            },
+            PendingOperationKey::StorageWithdrawV2 {
+                request_id: pending_request_id,
+                from: pending_from,
+                to: pending_to,
+                ..
+            },
+        ) => request_id == pending_request_id && from == pending_from && to == pending_to,
+        (
+            StorageOperationAck::Deposit {
+                request_id: None,
+                from,
+                to,
+                ..
+            },
             PendingOperationKey::StorageDeposit {
                 from: pending_from,
                 to: pending_to,
@@ -303,7 +402,12 @@ pub fn apply_storage_operation_ack(
             },
         ) => from == pending_from && to == pending_to,
         (
-            StorageOperationAck::Withdraw { from, to, .. },
+            StorageOperationAck::Withdraw {
+                request_id: None,
+                from,
+                to,
+                ..
+            },
             PendingOperationKey::StorageWithdraw {
                 from: pending_from,
                 to: pending_to,
@@ -792,6 +896,8 @@ pub fn reconcile_storage_refresh(
                 && item_by_id(inventory, *unique_id)
                     .is_some_and(|item| i32::try_from(item.slot).ok() == Some(*to))
         }
+        PendingOperationKey::StorageDepositV2 { .. }
+        | PendingOperationKey::StorageWithdrawV2 { .. } => false,
         PendingOperationKey::StorageUnlock => old.has_password && !old.unlocked && new.unlocked,
         PendingOperationKey::StorageSetPassword => !old.has_password && new.has_password,
         PendingOperationKey::StorageRemovePassword => old.has_password && !new.has_password,
@@ -1439,6 +1545,7 @@ mod tests {
             apply_storage_operation_ack(
                 &mut pending,
                 &StorageOperationAck::Deposit {
+                    request_id: None,
                     from: 3,
                     to: 9,
                     success: false,
@@ -1459,6 +1566,92 @@ mod tests {
         assert!(!pending.contains(&unlock));
         assert!(pending.contains(&remove));
         assert!(!StorageOperationAck::Unlock { success: false }.success());
+    }
+
+    #[test]
+    fn storage_v2_ack_releases_exact_request_only_even_for_same_coordinates() {
+        let mut pending = PendingOperations::default();
+        let a = PendingOperationKey::StorageDepositV2 {
+            request_id: "st-0000000000000001".to_owned(),
+            unique_id: 55,
+            from: 3,
+            to: 9,
+        };
+        let b = PendingOperationKey::StorageDepositV2 {
+            request_id: "st-0000000000000002".to_owned(),
+            unique_id: 56,
+            from: 3,
+            to: 9,
+        };
+        assert!(pending.try_begin(a.clone()));
+        assert!(pending.try_begin(b.clone()));
+
+        let ack_a = StorageOperationAck::Deposit {
+            request_id: Some("st-0000000000000001".to_owned()),
+            from: 3,
+            to: 9,
+            success: true,
+        };
+        assert_eq!(apply_storage_operation_ack(&mut pending, &ack_a), 1);
+        assert!(!pending.contains(&a));
+        assert!(pending.contains(&b));
+        assert_eq!(apply_storage_operation_ack(&mut pending, &ack_a), 0);
+        assert!(pending.contains(&b), "duplicate A ACK must not release B");
+
+        let ack_b = StorageOperationAck::Deposit {
+            request_id: Some("st-0000000000000002".to_owned()),
+            from: 3,
+            to: 9,
+            success: false,
+        };
+        assert_eq!(apply_storage_operation_ack(&mut pending, &ack_b), 1);
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn legacy_storage_ack_does_not_release_v2_pending() {
+        let mut pending = PendingOperations::default();
+        let v2 = PendingOperationKey::StorageWithdrawV2 {
+            request_id: "st-0000000000000003".to_owned(),
+            unique_id: 77,
+            from: 9,
+            to: 3,
+        };
+        assert!(pending.try_begin(v2.clone()));
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Withdraw {
+                    request_id: None,
+                    from: 9,
+                    to: 3,
+                    success: true,
+                },
+            ),
+            0
+        );
+        assert!(pending.contains(&v2));
+    }
+
+    #[test]
+    fn storage_request_id_generation_is_monotonic_and_fails_closed_on_overflow() {
+        let mut generator = StorageRequestIdGenerator::default();
+        assert_eq!(
+            generator.next_request_id().as_deref(),
+            Some("st-0000000000000001")
+        );
+        assert_eq!(
+            generator.next_request_id().as_deref(),
+            Some("st-0000000000000002")
+        );
+
+        let mut at_limit = StorageRequestIdGenerator::with_next_sequence(u64::MAX);
+        assert_eq!(
+            at_limit.next_request_id().as_deref(),
+            Some("st-18446744073709551615")
+        );
+        assert_eq!(at_limit.next_request_id(), None);
+        assert_eq!(at_limit.next_request_id(), None);
     }
 
     #[test]
@@ -1513,6 +1706,7 @@ mod tests {
             apply_storage_operation_ack(
                 &mut pending,
                 &StorageOperationAck::Deposit {
+                    request_id: None,
                     from: 3,
                     to: 9,
                     success: true,
@@ -1530,6 +1724,7 @@ mod tests {
             apply_storage_operation_ack(
                 &mut pending,
                 &StorageOperationAck::Deposit {
+                    request_id: None,
                     from: 3,
                     to: 9,
                     success: true,
@@ -1565,6 +1760,7 @@ mod tests {
             apply_storage_operation_ack(
                 &mut pending,
                 &StorageOperationAck::Deposit {
+                    request_id: None,
                     from: 5,
                     to: 12,
                     success: true,
@@ -1587,6 +1783,7 @@ mod tests {
         assert!(pending.try_begin(withdraw));
 
         let failed = StorageOperationAck::Withdraw {
+            request_id: None,
             from: 11,
             to: 2,
             success: false,
@@ -1617,6 +1814,7 @@ mod tests {
             apply_storage_operation_ack(
                 &mut pending,
                 &StorageOperationAck::Deposit {
+                    request_id: None,
                     from: 1,
                     to: 7,
                     success: false,

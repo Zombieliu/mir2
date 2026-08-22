@@ -1618,6 +1618,18 @@ enum BrowserCommand {
         from: i32,
         to: i32,
     },
+    StoreItemV2 {
+        #[serde(rename = "requestId")]
+        request_id: String,
+        from: i32,
+        to: i32,
+    },
+    TakeBackItemV2 {
+        #[serde(rename = "requestId")]
+        request_id: String,
+        from: i32,
+        to: i32,
+    },
     TakeBackHeroItem {
         from: i32,
         to: i32,
@@ -7056,6 +7068,36 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                 to,
             }))
         }
+        BrowserCommand::StoreItemV2 {
+            request_id,
+            from,
+            to,
+        } => {
+            if mir2_protocol::is_valid_request_id(&request_id) {
+                Ok(SessionAction::Packet(ClientPacket::StoreItemV2 {
+                    request_id,
+                    from,
+                    to,
+                }))
+            } else {
+                Err("invalid storage requestId".to_string())
+            }
+        }
+        BrowserCommand::TakeBackItemV2 {
+            request_id,
+            from,
+            to,
+        } => {
+            if mir2_protocol::is_valid_request_id(&request_id) {
+                Ok(SessionAction::Packet(ClientPacket::TakeBackItemV2 {
+                    request_id,
+                    from,
+                    to,
+                }))
+            } else {
+                Err("invalid storage requestId".to_string())
+            }
+        }
         BrowserCommand::TakeBackHeroItem { from, to } => {
             Ok(SessionAction::Packet(ClientPacket::TakeBackHeroItem {
                 from,
@@ -9614,10 +9656,40 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "success": success
             }
         }),
+        ServerPacket::TakeBackItemV2 {
+            request_id,
+            from,
+            to,
+            success,
+        } => json!({
+            "type": "packet",
+            "packet": "TakeBackItemV2",
+            "payload": {
+                "requestId": request_id,
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
         ServerPacket::StoreItem { from, to, success } => json!({
             "type": "packet",
             "packet": "StoreItem",
             "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::StoreItemV2 {
+            request_id,
+            from,
+            to,
+            success,
+        } => json!({
+            "type": "packet",
+            "packet": "StoreItemV2",
+            "payload": {
+                "requestId": request_id,
                 "from": from,
                 "to": to,
                 "success": success
@@ -12793,11 +12865,7 @@ mod tests {
         state.reserve(request.clone()).unwrap();
 
         assert_eq!(
-            super::finish_native_game_shop_pre_execution_receipt(
-                &mut state,
-                &request,
-                false,
-            ),
+            super::finish_native_game_shop_pre_execution_receipt(&mut state, &request, false,),
             super::NativeGameShopPreExecutionReceiptDisposition::CloseUnknown
         );
         assert_eq!(state.pending.as_ref(), Some(&request));
@@ -12807,11 +12875,7 @@ mod tests {
         assert_eq!(replay["code"], "requestInFlight");
 
         assert_eq!(
-            super::finish_native_game_shop_pre_execution_receipt(
-                &mut state,
-                &request,
-                true,
-            ),
+            super::finish_native_game_shop_pre_execution_receipt(&mut state, &request, true,),
             super::NativeGameShopPreExecutionReceiptDisposition::Continue
         );
         assert!(state.pending.is_none());
@@ -12961,14 +13025,7 @@ mod tests {
         for (key_seed, request_id, g_index, quantity, price_type, code) in [
             (1, "gs-invalid-quantity", 31, 0, 1, "invalidQuantity"),
             (2, "gs-invalid-price", 31, 1, 77, "invalidRequest"),
-            (
-                3,
-                "gs-invalid-product",
-                i32::MAX,
-                1,
-                1,
-                "unknownProduct",
-            ),
+            (3, "gs-invalid-product", i32::MAX, 1, 1, "unknownProduct"),
         ] {
             assert_native_game_shop_failure_without_mutation(
                 &mut invalid,
@@ -13282,14 +13339,9 @@ mod tests {
         let delivered_items = snapshot
             .inventory_items
             .iter()
-            .filter(|item| {
-                item.key == expected_item_key && item.quantity == expected_quantity
-            })
+            .filter(|item| item.key == expected_item_key && item.quantity == expected_quantity)
             .collect::<Vec<_>>();
-        assert_eq!(
-            delivered_items.len(),
-            1
-        );
+        assert_eq!(delivered_items.len(), 1);
         let delivered_unique_id = delivered_items[0].unique_id;
         assert_ne!(
             delivered_unique_id, attachment_unique_id,
@@ -14015,6 +14067,86 @@ mod tests {
             }
             _ => panic!("unexpected action"),
         }
+    }
+
+    #[test]
+    fn storage_request_ids_opt_into_v2_without_breaking_legacy_commands() {
+        let store = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"storeItemV2","requestId":"st-0000000000000001","from":2,"to":5}"#,
+        )
+        .expect("v2 store item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(store).expect("v2 store item command should map"),
+            SessionAction::Packet(ClientPacket::StoreItemV2 {
+                request_id,
+                from: 2,
+                to: 5,
+            }) if request_id == "st-0000000000000001"
+        ));
+
+        let take_back = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"takeBackItemV2","requestId":"st-0000000000000002","from":5,"to":3}"#,
+        )
+        .expect("v2 take back command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(take_back)
+                .expect("v2 take back command should map"),
+            SessionAction::Packet(ClientPacket::TakeBackItemV2 {
+                request_id,
+                from: 5,
+                to: 3,
+            }) if request_id == "st-0000000000000002"
+        ));
+
+        let invalid = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"storeItemV2","requestId":"bad\nline","from":2,"to":5}"#,
+        )
+        .expect("JSON shape is valid before request id validation");
+        assert!(super::browser_command_to_action(invalid).is_err());
+    }
+
+    #[test]
+    fn frozen_legacy_gateway_schema_rejects_storage_v2_before_execution() {
+        #[allow(dead_code)]
+        #[derive(serde::Deserialize)]
+        #[serde(tag = "type", rename_all = "camelCase")]
+        enum LegacyStorageCommand {
+            StoreItem { from: i32, to: i32 },
+            TakeBackItem { from: i32, to: i32 },
+        }
+
+        let executions = std::cell::Cell::new(0_u32);
+        let decoded = serde_json::from_str::<LegacyStorageCommand>(
+            r#"{"type":"storeItemV2","requestId":"st-0000000000000001","from":2,"to":5}"#,
+        );
+        if decoded.is_ok() {
+            executions.set(executions.get() + 1);
+        }
+        assert!(decoded.is_err());
+        assert_eq!(executions.get(), 0);
+    }
+
+    #[test]
+    fn storage_v2_server_packets_echo_the_exact_request_id() {
+        let event = super::server_packet_to_event(&ServerPacket::StoreItemV2 {
+            request_id: "st-0000000000000007".to_string(),
+            from: 2,
+            to: 5,
+            success: false,
+        });
+        assert_eq!(event["packet"], "StoreItemV2");
+        assert_eq!(event["payload"]["requestId"], "st-0000000000000007");
+        assert_eq!(event["payload"]["success"], false);
+
+        let event = super::server_packet_to_event(&ServerPacket::TakeBackItemV2 {
+            request_id: "st-0000000000000008".to_string(),
+            from: 5,
+            to: 3,
+            success: true,
+        });
+        assert_eq!(event["packet"], "TakeBackItemV2");
+        assert_eq!(event["payload"]["requestId"], "st-0000000000000008");
+        assert_eq!(event["payload"]["success"], true);
     }
 
     #[test]

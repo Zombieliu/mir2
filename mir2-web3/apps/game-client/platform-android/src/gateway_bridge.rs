@@ -5,7 +5,10 @@
 //! the Web/Windows BrowserCommand path, then retains them until an Activity or
 //! websocket host explicitly drains the queue.
 
-use std::{collections::VecDeque, fmt};
+use std::{
+    collections::{BTreeSet, VecDeque},
+    fmt,
+};
 
 use bevy::prelude::Resource;
 use mir2_ui_core::action::UiAction;
@@ -18,6 +21,7 @@ use mir2_ui_core::game_shop::{
 };
 use mir2_ui_core::reducer::reduce;
 use mir2_ui_core::state::UiState;
+use mir2_ui_core::storage::{StorageOperation, StorageReceipt, StorageRequest};
 use serde_json::{json, Value};
 
 use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};
@@ -55,6 +59,55 @@ pub fn parse_native_game_shop_receipt(json_text: &str) -> Result<GameShopReceipt
         .is_valid()
         .then_some(receipt)
         .ok_or_else(|| "invalid gameShopReceipt contract".to_owned())
+}
+
+pub fn parse_native_storage_receipt(json_text: &str) -> Result<StorageReceipt, String> {
+    let value = serde_json::from_str::<Value>(json_text)
+        .map_err(|error| format!("invalid storage receipt: {error}"))?;
+    let receipt = if value.get("type").and_then(Value::as_str) == Some("packet") {
+        let packet = value
+            .get("packet")
+            .and_then(Value::as_str)
+            .ok_or_else(|| "storage packet receipt is missing packet".to_owned())?;
+        let operation = match packet {
+            "StoreItemV2" => StorageOperation::StoreItem,
+            "TakeBackItemV2" => StorageOperation::TakeBackItem,
+            _ => return Err("unsupported storage packet receipt".to_owned()),
+        };
+        let payload = value
+            .get("payload")
+            .and_then(Value::as_object)
+            .ok_or_else(|| "storage packet receipt is missing payload".to_owned())?;
+        let coordinate = |name: &str| {
+            payload
+                .get(name)
+                .and_then(Value::as_i64)
+                .and_then(|value| i32::try_from(value).ok())
+                .ok_or_else(|| format!("storage packet receipt has invalid {name}"))
+        };
+        StorageReceipt {
+            protocol: mir2_ui_core::storage::NATIVE_STORAGE_RECEIPT_PROTOCOL.to_owned(),
+            request_id: payload
+                .get("requestId")
+                .and_then(Value::as_str)
+                .ok_or_else(|| "storage packet receipt is missing requestId".to_owned())?
+                .to_owned(),
+            operation,
+            from: coordinate("from")?,
+            to: coordinate("to")?,
+            success: payload
+                .get("success")
+                .and_then(Value::as_bool)
+                .ok_or_else(|| "storage packet receipt is missing success".to_owned())?,
+        }
+    } else {
+        serde_json::from_value::<StorageReceipt>(value)
+            .map_err(|error| format!("invalid storage receipt: {error}"))?
+    };
+    receipt
+        .is_valid()
+        .then_some(receipt)
+        .ok_or_else(|| "invalid storage receipt contract".to_owned())
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -115,6 +168,120 @@ impl AndroidGatewayOutbound {
     }
 }
 
+/// The one outbound item handed to the Android Activity/WebSocket host.
+///
+/// A lease is deliberately not the queue entry itself: draining removes the
+/// entry from the FIFO, while the host still owns the responsibility to report
+/// whether its actual socket/JNI write succeeded. The host must return the
+/// same lease to [`AndroidGatewayHostAdapter::on_host_write_result`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AndroidGatewayOutboundLease {
+    outbound: AndroidGatewayOutbound,
+}
+
+impl AndroidGatewayOutboundLease {
+    pub fn sequence(&self) -> u64 {
+        self.outbound.sequence
+    }
+
+    pub fn outbound(&self) -> &AndroidGatewayOutbound {
+        &self.outbound
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AndroidGatewayHostWriteResult {
+    Sent,
+    Failed,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AndroidGatewayHostWriteOutcome {
+    Sent,
+    StorageMarkedUnknown,
+    NonStorageFailureIgnored,
+    UnknownLease,
+}
+
+/// Production Activity/JNI/WebSocket adapter for the Android gateway queue.
+///
+/// This is the transport seam used by the native entry point. The repository
+/// does not own a concrete Android WebSocket, so the host performs the actual
+/// write and calls `on_host_write_result` with the exact lease afterwards.
+/// Lease identity prevents a late/duplicate callback from affecting a later
+/// request, and the queue's process-lifetime sequence is never reset.
+#[derive(Debug, Default, Resource)]
+pub struct AndroidGatewayHostAdapter {
+    leased_sequences: BTreeSet<u64>,
+}
+
+impl AndroidGatewayHostAdapter {
+    pub fn drain_ready(
+        &mut self,
+        queue: &mut AndroidGatewayOutboundQueue,
+        shell: &AndroidShellState,
+        max_entries: usize,
+    ) -> Vec<AndroidGatewayOutboundLease> {
+        let available = ANDROID_GATEWAY_QUEUE_CAPACITY.saturating_sub(self.leased_sequences.len());
+        queue
+            .drain_ready(shell, max_entries.min(available))
+            .into_iter()
+            .filter_map(|outbound| {
+                if !outbound.is_sendable() {
+                    // LocalOnly entries are diagnostics/host intents, never
+                    // BrowserCommand websocket frames. Consuming them here
+                    // prevents the production socket ABI from fabricating an
+                    // unsupported protocol command.
+                    return None;
+                }
+                self.leased_sequences.insert(outbound.sequence);
+                Some(AndroidGatewayOutboundLease { outbound })
+            })
+            .collect()
+    }
+
+    pub fn on_host_write_result(
+        &mut self,
+        queue: &mut AndroidGatewayOutboundQueue,
+        ui_state: &mut UiState,
+        lease: AndroidGatewayOutboundLease,
+        result: AndroidGatewayHostWriteResult,
+    ) -> AndroidGatewayHostWriteOutcome {
+        if !self.leased_sequences.remove(&lease.sequence()) {
+            return AndroidGatewayHostWriteOutcome::UnknownLease;
+        }
+        match result {
+            AndroidGatewayHostWriteResult::Sent => AndroidGatewayHostWriteOutcome::Sent,
+            AndroidGatewayHostWriteResult::Failed
+                if outbound_is_storage(&lease.outbound)
+                    && queue.fail_drained_storage_write(ui_state, &lease.outbound) =>
+            {
+                AndroidGatewayHostWriteOutcome::StorageMarkedUnknown
+            }
+            AndroidGatewayHostWriteResult::Failed => {
+                // The storage fail-closed contract must not change the
+                // existing handling of unrelated host writes.
+                AndroidGatewayHostWriteOutcome::NonStorageFailureIgnored
+            }
+        }
+    }
+
+    /// Close every outstanding host lease at a transport boundary. Storage
+    /// and GameShop mutations are never replayed because the peer may already
+    /// have committed them; their authoritative outcome becomes unknown.
+    pub fn on_connection_lost(
+        &mut self,
+        queue: &mut AndroidGatewayOutboundQueue,
+        ui_state: &mut UiState,
+    ) {
+        self.leased_sequences.clear();
+        queue.mark_game_shop_unknown();
+        queue.mark_storage_unknown();
+        ui_state.mark_game_shop_unknown();
+        ui_state.mark_storage_unknown();
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AndroidGatewayQueueStatus {
     pub capacity: usize,
@@ -159,6 +326,10 @@ pub enum AndroidGameShopAdapterError {
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum AndroidGatewayInboundMessage {
     GameShopReceipt {
+        json: String,
+        exact_for_pending: bool,
+    },
+    StorageReceipt {
         json: String,
         exact_for_pending: bool,
     },
@@ -281,6 +452,7 @@ impl AndroidGatewayInboundMessage {
     fn byte_len(&self) -> usize {
         match self {
             Self::GameShopReceipt { json, .. } => json.len(),
+            Self::StorageReceipt { json, .. } => json.len(),
             Self::ChangePasswordResult { wire_bytes, .. } => *wire_bytes,
         }
     }
@@ -289,7 +461,15 @@ impl AndroidGatewayInboundMessage {
         match self {
             Self::GameShopReceipt { json, .. } => parse_native_game_shop_receipt(json)
                 .is_ok_and(|receipt| receipt.matches_request(request)),
-            Self::ChangePasswordResult { .. } => false,
+            _ => false,
+        }
+    }
+
+    fn matches_storage_request(&self, request: &StorageRequest) -> bool {
+        match self {
+            Self::StorageReceipt { json, .. } => parse_native_storage_receipt(json)
+                .is_ok_and(|receipt| receipt.matches_request(request)),
+            _ => false,
         }
     }
 
@@ -300,6 +480,9 @@ impl AndroidGatewayInboundMessage {
     fn set_exact_for_pending(&mut self, exact: bool) {
         match self {
             Self::GameShopReceipt {
+                exact_for_pending, ..
+            } => *exact_for_pending = exact,
+            Self::StorageReceipt {
                 exact_for_pending, ..
             } => *exact_for_pending = exact,
             Self::ChangePasswordResult {
@@ -314,7 +497,18 @@ impl AndroidGatewayInboundMessage {
                 json,
                 exact_for_pending,
             } => (json, exact_for_pending),
+            Self::StorageReceipt { .. } => unreachable!("wrong inbound message kind"),
             Self::ChangePasswordResult { .. } => unreachable!("wrong inbound message kind"),
+        }
+    }
+
+    fn into_storage_receipt(self) -> (String, bool) {
+        match self {
+            Self::StorageReceipt {
+                json,
+                exact_for_pending,
+            } => (json, exact_for_pending),
+            _ => unreachable!("wrong inbound message kind"),
         }
     }
 
@@ -334,7 +528,9 @@ impl AndroidGatewayInboundMessage {
                 },
                 exact_for_pending,
             ),
-            Self::GameShopReceipt { .. } => unreachable!("wrong inbound message kind"),
+            Self::GameShopReceipt { .. } | Self::StorageReceipt { .. } => {
+                unreachable!("wrong inbound message kind")
+            }
         }
     }
 }
@@ -390,9 +586,12 @@ pub struct AndroidGatewayInboundQueue {
     unmatched_count: u64,
     pending_game_shop: Option<GameShopRequest>,
     exact_receipt_reserved: bool,
+    pending_storage: Option<StorageRequest>,
+    exact_storage_receipt_reserved: bool,
     pending_change_password: bool,
     exact_change_password_reserved: bool,
     change_password_overflow_pending: bool,
+    storage_overflow_pending: bool,
 }
 
 impl Default for AndroidGatewayInboundQueue {
@@ -437,9 +636,12 @@ impl AndroidGatewayInboundQueue {
             unmatched_count: 0,
             pending_game_shop: None,
             exact_receipt_reserved: false,
+            pending_storage: None,
+            exact_storage_receipt_reserved: false,
             pending_change_password: false,
             exact_change_password_reserved: false,
             change_password_overflow_pending: false,
+            storage_overflow_pending: false,
         }
     }
 
@@ -459,6 +661,7 @@ impl AndroidGatewayInboundQueue {
             self.byte_overflow_count = self.byte_overflow_count.saturating_add(1);
             self.overflow_pending = self.should_mark_pending_unknown();
             self.change_password_overflow_pending = self.should_mark_change_password_unknown();
+            self.storage_overflow_pending = self.should_mark_storage_unknown();
             return Err(AndroidGatewayInboundEnqueueError::BytesFull {
                 capacity_bytes: self.max_bytes,
                 queued_bytes: self.queued_bytes,
@@ -472,6 +675,7 @@ impl AndroidGatewayInboundQueue {
             // FIFO-owned and will be consumed on the next Bevy update.
             self.overflow_pending = self.should_mark_pending_unknown();
             self.change_password_overflow_pending = self.should_mark_change_password_unknown();
+            self.storage_overflow_pending = self.should_mark_storage_unknown();
             return Err(AndroidGatewayInboundEnqueueError::Full {
                 capacity: self.capacity,
             });
@@ -484,11 +688,21 @@ impl AndroidGatewayInboundQueue {
                 .pending_game_shop
                 .as_ref()
                 .is_some_and(|request| message.matches_game_shop_request(request));
-        message.set_exact_for_pending(reserves_exact_receipt || reserves_change_password);
+        let reserves_exact_storage_receipt = !self.exact_storage_receipt_reserved
+            && self
+                .pending_storage
+                .as_ref()
+                .is_some_and(|request| message.matches_storage_request(request));
+        message.set_exact_for_pending(
+            reserves_exact_receipt || reserves_exact_storage_receipt || reserves_change_password,
+        );
         self.queued_bytes = self.queued_bytes.saturating_add(message_bytes);
         self.entries.push_back(message);
         if reserves_exact_receipt {
             self.exact_receipt_reserved = true;
+        }
+        if reserves_exact_storage_receipt {
+            self.exact_storage_receipt_reserved = true;
         }
         if reserves_change_password {
             self.exact_change_password_reserved = true;
@@ -514,6 +728,7 @@ impl AndroidGatewayInboundQueue {
     fn drain(&mut self) -> Vec<AndroidGatewayInboundMessage> {
         self.queued_bytes = 0;
         self.exact_receipt_reserved = false;
+        self.exact_storage_receipt_reserved = false;
         self.exact_change_password_reserved = false;
         self.entries.drain(..).collect()
     }
@@ -523,8 +738,10 @@ impl AndroidGatewayInboundQueue {
         self.entries.clear();
         self.queued_bytes = 0;
         self.exact_receipt_reserved = false;
+        self.exact_storage_receipt_reserved = false;
         self.exact_change_password_reserved = false;
         self.change_password_overflow_pending = false;
+        self.storage_overflow_pending = false;
     }
 
     fn take_overflow_pending(&mut self) -> bool {
@@ -543,6 +760,14 @@ impl AndroidGatewayInboundQueue {
         std::mem::take(&mut self.change_password_overflow_pending)
     }
 
+    fn take_storage_overflow_pending(&mut self) -> bool {
+        if self.exact_storage_receipt_reserved {
+            self.storage_overflow_pending = false;
+            return false;
+        }
+        std::mem::take(&mut self.storage_overflow_pending)
+    }
+
     fn bind_game_shop_pending(&mut self, pending: Option<GameShopRequest>) {
         if self.pending_game_shop != pending {
             self.pending_game_shop = pending;
@@ -557,6 +782,20 @@ impl AndroidGatewayInboundQueue {
         self.pending_game_shop = None;
         self.exact_receipt_reserved = false;
         self.overflow_pending = false;
+    }
+
+    fn bind_storage_pending(&mut self, pending: Option<StorageRequest>) {
+        if self.pending_storage != pending {
+            self.pending_storage = pending;
+            self.exact_storage_receipt_reserved = false;
+            self.storage_overflow_pending = false;
+        }
+    }
+
+    fn clear_storage_pending(&mut self) {
+        self.pending_storage = None;
+        self.exact_storage_receipt_reserved = false;
+        self.storage_overflow_pending = false;
     }
 
     fn bind_change_password_pending(&mut self, pending: bool) {
@@ -575,6 +814,10 @@ impl AndroidGatewayInboundQueue {
 
     fn should_mark_pending_unknown(&self) -> bool {
         self.pending_game_shop.is_some() && !self.exact_receipt_reserved
+    }
+
+    fn should_mark_storage_unknown(&self) -> bool {
+        self.pending_storage.is_some() && !self.exact_storage_receipt_reserved
     }
 
     fn should_mark_change_password_unknown(&self) -> bool {
@@ -597,6 +840,19 @@ pub fn enqueue_native_game_shop_receipt(
     json_text: impl Into<String>,
 ) -> Result<(), AndroidGatewayInboundEnqueueError> {
     inbound.enqueue(AndroidGatewayInboundMessage::GameShopReceipt {
+        json: json_text.into(),
+        exact_for_pending: false,
+    })
+}
+
+/// Public transport/JNI-host boundary for the versioned ordinary-storage
+/// receipt. The raw text is retained only in the bounded queue until the
+/// exact request is consumed by the Bevy single-writer.
+pub fn enqueue_native_storage_receipt(
+    inbound: &mut AndroidGatewayInboundQueue,
+    json_text: impl Into<String>,
+) -> Result<(), AndroidGatewayInboundEnqueueError> {
+    inbound.enqueue(AndroidGatewayInboundMessage::StorageReceipt {
         json: json_text.into(),
         exact_for_pending: false,
     })
@@ -715,6 +971,56 @@ pub fn enqueue_game_shop_purchase(
     Ok(request)
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AndroidStorageAdapterError {
+    ReducerRejected,
+    UnexpectedEffects,
+    Enqueue(AndroidGatewayEnqueueError),
+}
+
+/// Atomically reduce one shared personal-storage action and retain its
+/// requestId-bearing outbound command. This helper is reusable by a future
+/// Android storage control, but does not create one here.
+pub fn enqueue_storage_request(
+    ui_state: &mut UiState,
+    gateway: &mut AndroidGatewayOutboundQueue,
+    inbound: &mut AndroidGatewayInboundQueue,
+    operation: StorageOperation,
+    from: i32,
+    to: i32,
+) -> Result<StorageRequest, AndroidStorageAdapterError> {
+    let action = match operation {
+        StorageOperation::StoreItem => UiAction::StoreItem { from, to },
+        StorageOperation::TakeBackItem => UiAction::TakeBackItem { from, to },
+    };
+    let transition = reduce(ui_state, action);
+    let request = transition
+        .state
+        .storage_pending
+        .clone()
+        .ok_or(AndroidStorageAdapterError::ReducerRejected)?;
+    let mut effects = transition.effects.into_iter();
+    let Some(UiEffect::GatewayCommand(command)) = effects.next() else {
+        return Err(AndroidStorageAdapterError::UnexpectedEffects);
+    };
+    if effects.next().is_some() {
+        return Err(AndroidStorageAdapterError::UnexpectedEffects);
+    }
+    let expected = match operation {
+        StorageOperation::StoreItem => matches!(&command, GatewayCommand::StoreItem { .. }),
+        StorageOperation::TakeBackItem => matches!(&command, GatewayCommand::TakeBackItem { .. }),
+    };
+    if !expected {
+        return Err(AndroidStorageAdapterError::UnexpectedEffects);
+    }
+    gateway
+        .enqueue(command)
+        .map_err(AndroidStorageAdapterError::Enqueue)?;
+    inbound.bind_storage_pending(Some(request.clone()));
+    *ui_state = transition.state;
+    Ok(request)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AndroidQueuedReceiptOutcome {
     Applied,
@@ -751,6 +1057,44 @@ fn consume_queued_native_game_shop_receipt(
     let ui_applied = ui_state.apply_game_shop_receipt(receipt);
     debug_assert_eq!(queue_applied, ui_applied);
     if queue_applied && ui_applied {
+        AndroidQueuedReceiptOutcome::Applied
+    } else {
+        AndroidQueuedReceiptOutcome::Unmatched
+    }
+}
+
+fn consume_queued_native_storage_receipt(
+    ui_state: &mut UiState,
+    gateway: &mut AndroidGatewayOutboundQueue,
+    message: AndroidGatewayInboundMessage,
+) -> AndroidQueuedReceiptOutcome {
+    let (json, exact_for_pending) = message.into_storage_receipt();
+    let Ok(receipt) = parse_native_storage_receipt(&json) else {
+        return AndroidQueuedReceiptOutcome::Malformed;
+    };
+    if !exact_for_pending {
+        return AndroidQueuedReceiptOutcome::Unmatched;
+    }
+    let ui_matches = ui_state
+        .storage_pending
+        .as_ref()
+        .is_some_and(|request| receipt.matches_request(request));
+    let queue_matches = gateway
+        .storage_pending()
+        .is_some_and(|request| receipt.matches_request(request));
+    if !ui_matches || !queue_matches {
+        return AndroidQueuedReceiptOutcome::Unmatched;
+    }
+    let queue_applied = gateway.apply_storage_receipt(&receipt);
+    let transition = reduce(ui_state, UiAction::StorageReceiptReceived { receipt });
+    let ui_applied =
+        transition.state.storage_pending.is_none() && ui_state.storage_pending.is_some();
+    if !ui_applied {
+        return AndroidQueuedReceiptOutcome::Unmatched;
+    }
+    *ui_state = transition.state;
+    debug_assert!(queue_applied);
+    if queue_applied {
         AndroidQueuedReceiptOutcome::Applied
     } else {
         AndroidQueuedReceiptOutcome::Unmatched
@@ -795,6 +1139,7 @@ pub(crate) fn drain_bounded_inbound_into_models(
     gateway: &mut AndroidGatewayOutboundQueue,
 ) {
     inbound.bind_game_shop_pending(gateway.game_shop_pending().cloned());
+    inbound.bind_storage_pending(gateway.storage_pending().cloned());
     inbound.bind_change_password_pending(gateway.change_password_in_flight());
     if inbound.take_overflow_pending() {
         gateway.mark_game_shop_unknown();
@@ -815,12 +1160,26 @@ pub(crate) fn drain_bounded_inbound_into_models(
         }
         inbound.clear_change_password_pending();
     }
+    if inbound.take_storage_overflow_pending() {
+        gateway.mark_storage_unknown();
+        ui_state.mark_storage_unknown();
+        inbound.clear_storage_pending();
+    }
 
     for message in inbound.drain() {
         if message.is_change_password_result() {
             match consume_queued_native_change_password_result(ui_state, gateway, message) {
                 AndroidQueuedSecurityOutcome::Applied => inbound.clear_change_password_pending(),
                 AndroidQueuedSecurityOutcome::Unmatched => inbound.record_unmatched(),
+            }
+        } else if matches!(
+            &message,
+            AndroidGatewayInboundMessage::StorageReceipt { .. }
+        ) {
+            match consume_queued_native_storage_receipt(ui_state, gateway, message) {
+                AndroidQueuedReceiptOutcome::Applied => inbound.clear_storage_pending(),
+                AndroidQueuedReceiptOutcome::Unmatched => inbound.record_unmatched(),
+                AndroidQueuedReceiptOutcome::Malformed => inbound.record_malformed(),
             }
         } else {
             match consume_queued_native_game_shop_receipt(ui_state, gateway, message) {
@@ -836,6 +1195,7 @@ pub(crate) fn drain_bounded_inbound_into_models(
 /// state and only prevents a receipt from qualifying against a closed session.
 pub(crate) fn clear_bounded_inbound_transaction(inbound: &mut AndroidGatewayInboundQueue) {
     inbound.clear_game_shop_pending();
+    inbound.clear_storage_pending();
     inbound.clear_change_password_pending();
 }
 
@@ -856,6 +1216,8 @@ pub struct AndroidGatewayOutboundQueue {
     last_local_only_type: Option<String>,
     pending_game_shop: Option<GameShopRequest>,
     game_shop_unknown: bool,
+    pending_storage: Option<StorageRequest>,
+    storage_unknown: bool,
     change_password_in_flight: bool,
     change_password_unknown: bool,
 }
@@ -882,6 +1244,8 @@ impl AndroidGatewayOutboundQueue {
             last_local_only_type: None,
             pending_game_shop: None,
             game_shop_unknown: false,
+            pending_storage: None,
+            storage_unknown: false,
             change_password_in_flight: false,
             change_password_unknown: false,
         }
@@ -1022,6 +1386,35 @@ impl AndroidGatewayOutboundQueue {
             // Reserved below only after queue capacity is confirmed.
             let _ = request;
         }
+        if let GatewayCommand::StoreItem {
+            request_id,
+            from,
+            to,
+        }
+        | GatewayCommand::TakeBackItem {
+            request_id,
+            from,
+            to,
+        } = &command
+        {
+            if self.pending_storage.is_some() {
+                return Err(AndroidGatewayEnqueueError::RequestInFlight);
+            }
+            if StorageRequest::new(
+                request_id.clone(),
+                if matches!(&command, GatewayCommand::StoreItem { .. }) {
+                    StorageOperation::StoreItem
+                } else {
+                    StorageOperation::TakeBackItem
+                },
+                *from,
+                *to,
+            )
+            .is_none()
+            {
+                return Err(AndroidGatewayEnqueueError::RequestInFlight);
+            }
+        }
         let command_type = command_type(&command);
         if self.entries.len() >= self.capacity {
             self.overflow_count = self.overflow_count.saturating_add(1);
@@ -1042,6 +1435,25 @@ impl AndroidGatewayOutboundQueue {
             self.pending_game_shop =
                 GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type);
             self.game_shop_unknown = false;
+        }
+        if let GatewayCommand::StoreItem {
+            request_id,
+            from,
+            to,
+        }
+        | GatewayCommand::TakeBackItem {
+            request_id,
+            from,
+            to,
+        } = &command
+        {
+            let operation = if matches!(&command, GatewayCommand::StoreItem { .. }) {
+                StorageOperation::StoreItem
+            } else {
+                StorageOperation::TakeBackItem
+            };
+            self.pending_storage = StorageRequest::new(request_id.clone(), operation, *from, *to);
+            self.storage_unknown = false;
         }
 
         let (kind, value) = to_wire_value(&command);
@@ -1100,6 +1512,21 @@ impl AndroidGatewayOutboundQueue {
         true
     }
 
+    fn apply_storage_receipt(&mut self, receipt: &StorageReceipt) -> bool {
+        let Some(request) = self.pending_storage.as_ref() else {
+            return false;
+        };
+        if !receipt.is_valid() || !receipt.matches_request(request) {
+            return false;
+        }
+        let request_id = request.request_id.clone();
+        self.pending_storage = None;
+        self.storage_unknown = false;
+        self.entries
+            .retain(|entry| !outbound_matches_storage_request(entry, &request_id));
+        true
+    }
+
     fn apply_change_password_result(&mut self, _result: &AndroidChangePasswordResult) -> bool {
         if !self.change_password_in_flight {
             return false;
@@ -1118,6 +1545,13 @@ impl AndroidGatewayOutboundQueue {
         self.entries.retain(|entry| !outbound_is_game_shop(entry));
     }
 
+    pub(crate) fn mark_storage_unknown(&mut self) {
+        if self.pending_storage.take().is_some() {
+            self.storage_unknown = true;
+        }
+        self.entries.retain(|entry| !outbound_is_storage(entry));
+    }
+
     pub(crate) fn mark_change_password_unknown(&mut self) {
         if self.change_password_in_flight {
             self.change_password_in_flight = false;
@@ -1129,6 +1563,7 @@ impl AndroidGatewayOutboundQueue {
 
     pub(crate) fn mark_terminal_reset(&mut self) {
         self.mark_game_shop_unknown();
+        self.mark_storage_unknown();
         self.mark_change_password_unknown();
         self.entries.clear();
     }
@@ -1140,6 +1575,32 @@ impl AndroidGatewayOutboundQueue {
 
     pub(crate) fn game_shop_pending(&self) -> Option<&GameShopRequest> {
         self.pending_game_shop.as_ref()
+    }
+
+    pub(crate) fn storage_pending(&self) -> Option<&StorageRequest> {
+        self.pending_storage.as_ref()
+    }
+
+    /// Fail closed after the host drained a Storage V2 command but could not
+    /// write it to the transport. The exact request becomes unknown, is never
+    /// replayed, and the process-lifetime request sequence is not reset.
+    pub fn fail_drained_storage_write(
+        &mut self,
+        ui_state: &mut UiState,
+        outbound: &AndroidGatewayOutbound,
+    ) -> bool {
+        let Some(request_id) = self
+            .pending_storage
+            .as_ref()
+            .filter(|request| outbound_matches_storage_request(outbound, &request.request_id))
+            .map(|request| request.request_id.clone())
+        else {
+            return false;
+        };
+        debug_assert!(outbound_matches_storage_request(outbound, &request_id));
+        self.mark_storage_unknown();
+        ui_state.mark_storage_unknown();
+        true
     }
 
     /// Drain only when the host is in the foreground and has a usable network.
@@ -1171,6 +1632,13 @@ fn outbound_is_game_shop(entry: &AndroidGatewayOutbound) -> bool {
         == Some("gameShopBuy")
 }
 
+fn outbound_is_storage(entry: &AndroidGatewayOutbound) -> bool {
+    serde_json::from_str::<Value>(&entry.json)
+        .ok()
+        .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
+        .is_some_and(|kind| kind == "storeItemV2" || kind == "takeBackItemV2")
+}
+
 fn outbound_is_change_password(entry: &AndroidGatewayOutbound) -> bool {
     serde_json::from_str::<Value>(&entry.json)
         .ok()
@@ -1187,6 +1655,16 @@ fn outbound_matches_game_shop_request(entry: &AndroidGatewayOutbound, request_id
         && value.get("requestId").and_then(Value::as_str) == Some(request_id)
 }
 
+fn outbound_matches_storage_request(entry: &AndroidGatewayOutbound, request_id: &str) -> bool {
+    let Ok(value) = serde_json::from_str::<Value>(&entry.json) else {
+        return false;
+    };
+    matches!(
+        value.get("type").and_then(Value::as_str),
+        Some("storeItemV2") | Some("takeBackItemV2")
+    ) && value.get("requestId").and_then(Value::as_str) == Some(request_id)
+}
+
 pub fn can_send(shell: &AndroidShellState) -> bool {
     shell.lifecycle == AndroidLifecycle::Foreground && shell.network == AndroidNetwork::Available
 }
@@ -1197,6 +1675,8 @@ fn command_type(command: &GatewayCommand) -> String {
         GatewayCommand::RegisterAccount { .. } => "newAccount",
         GatewayCommand::StartGame { .. } => "startGame",
         GatewayCommand::GameShopBuy { .. } => "gameShopBuy",
+        GatewayCommand::StoreItem { .. } => "storeItemV2",
+        GatewayCommand::TakeBackItem { .. } => "takeBackItemV2",
         GatewayCommand::SendMail { .. } => "sendMail",
         GatewayCommand::CreateCharacter { .. } => "newCharacter",
         GatewayCommand::DeleteCharacter { .. } => "deleteCharacter",
@@ -1292,6 +1772,32 @@ fn to_wire_value(command: &GatewayCommand) -> (AndroidGatewayOutboundKind, Value
                 "gIndex":g_index,
                 "quantity":quantity,
                 "priceType":price_type
+            }),
+        ),
+        GatewayCommand::StoreItem {
+            request_id,
+            from,
+            to,
+        } => (
+            AndroidGatewayOutboundKind::Wire,
+            json!({
+                "type":"storeItemV2",
+                "requestId":request_id,
+                "from":from,
+                "to":to
+            }),
+        ),
+        GatewayCommand::TakeBackItem {
+            request_id,
+            from,
+            to,
+        } => (
+            AndroidGatewayOutboundKind::Wire,
+            json!({
+                "type":"takeBackItemV2",
+                "requestId":request_id,
+                "from":from,
+                "to":to
             }),
         ),
         GatewayCommand::SendMail {
@@ -1575,6 +2081,12 @@ mod tests {
         )
     }
 
+    fn valid_storage_receipt_json(request_id: &str, operation: &str, from: i32, to: i32) -> String {
+        format!(
+            r#"{{"protocol":"nativeStorageReceiptV1","requestId":"{request_id}","operation":"{operation}","from":{from},"to":{to},"success":true}}"#
+        )
+    }
+
     fn game_shop_request(request_id: &str) -> GameShopRequest {
         GameShopRequest::new(request_id.into(), 31, 1, 1).unwrap()
     }
@@ -1764,6 +2276,22 @@ mod tests {
                 price_type: 0,
             },
             json!({"type":"gameShopBuy","requestId":"gs-0000000000000001","gIndex":105,"quantity":3,"priceType":0}),
+        );
+        one(
+            GatewayCommand::StoreItem {
+                request_id: "st-0000000000000001".into(),
+                from: 3,
+                to: 9,
+            },
+            json!({"type":"storeItemV2","requestId":"st-0000000000000001","from":3,"to":9}),
+        );
+        one(
+            GatewayCommand::TakeBackItem {
+                request_id: "st-0000000000000002".into(),
+                from: 9,
+                to: 3,
+            },
+            json!({"type":"takeBackItemV2","requestId":"st-0000000000000002","from":9,"to":3}),
         );
         one(
             GatewayCommand::SendMail {
@@ -2108,6 +2636,151 @@ mod tests {
             ..receipt.clone()
         }));
         assert!(queue.apply_game_shop_receipt(&receipt));
+    }
+
+    #[test]
+    fn storage_receipt_parser_and_queue_require_exact_current_request() {
+        let packet_receipt = parse_native_storage_receipt(
+            r#"{"type":"packet","packet":"StoreItemV2","payload":{"requestId":"st-0000000000000001","from":3,"to":9,"success":true}}"#,
+        )
+        .unwrap();
+        assert_eq!(packet_receipt.operation, StorageOperation::StoreItem);
+        assert_eq!(packet_receipt.request_id, "st-0000000000000001");
+
+        let parsed = parse_native_storage_receipt(&valid_storage_receipt_json(
+            "st-0000000000000001",
+            "storeItem",
+            3,
+            9,
+        ))
+        .unwrap();
+        assert!(parsed.is_valid());
+        assert_eq!(parsed.operation, StorageOperation::StoreItem);
+        assert!(parse_native_storage_receipt(&valid_storage_receipt_json(
+            "st-0000000000000001",
+            "takeBackItem",
+            3,
+            9,
+        ))
+        .is_ok());
+
+        let mut state = UiState {
+            screen: mir2_ui_core::state::UiScreen::InGame,
+            ..Default::default()
+        };
+        let mut gateway = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        let first = enqueue_storage_request(
+            &mut state,
+            &mut gateway,
+            &mut inbound,
+            StorageOperation::StoreItem,
+            3,
+            9,
+        )
+        .unwrap();
+        assert_eq!(first.request_id, "st-0000000000000001");
+
+        let first_receipt = parsed.clone();
+        assert!(gateway.apply_storage_receipt(&first_receipt));
+        assert!(state.apply_storage_receipt(first_receipt));
+
+        let second = enqueue_storage_request(
+            &mut state,
+            &mut gateway,
+            &mut inbound,
+            StorageOperation::TakeBackItem,
+            9,
+            3,
+        )
+        .unwrap();
+        assert_eq!(second.request_id, "st-0000000000000002");
+
+        // This is a delayed ACK from the completed first operation. It was
+        // not exact for the newly bound request and cannot clear it.
+        enqueue_native_storage_receipt(
+            &mut inbound,
+            valid_storage_receipt_json("st-0000000000000001", "storeItem", 3, 9),
+        )
+        .unwrap();
+        drain_bounded_inbound_into_models(&mut inbound, &mut state, &mut gateway);
+        assert_eq!(
+            state
+                .storage_pending
+                .as_ref()
+                .map(|request| request.request_id.as_str()),
+            Some("st-0000000000000002")
+        );
+        assert_eq!(inbound.status().unmatched_count, 1);
+
+        enqueue_native_storage_receipt(
+            &mut inbound,
+            valid_storage_receipt_json("st-0000000000000002", "takeBackItem", 9, 3),
+        )
+        .unwrap();
+        drain_bounded_inbound_into_models(&mut inbound, &mut state, &mut gateway);
+        assert!(state.storage_pending.is_none());
+        assert!(gateway.storage_pending().is_none());
+    }
+
+    #[test]
+    fn drained_storage_transport_failure_clears_exact_pending_without_replay_or_id_reuse() {
+        let mut state = UiState {
+            screen: mir2_ui_core::state::UiScreen::InGame,
+            ..Default::default()
+        };
+        let mut gateway = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        let first = enqueue_storage_request(
+            &mut state,
+            &mut gateway,
+            &mut inbound,
+            StorageOperation::StoreItem,
+            3,
+            9,
+        )
+        .unwrap();
+        let outbound = gateway
+            .drain_ready(
+                &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+                1,
+            )
+            .pop()
+            .unwrap();
+
+        assert!(gateway.fail_drained_storage_write(&mut state, &outbound));
+        assert!(gateway.storage_pending().is_none());
+        assert!(state.storage_pending.is_none());
+        assert!(state.storage_unknown);
+        assert!(!gateway.fail_drained_storage_write(&mut state, &outbound));
+
+        let second = enqueue_storage_request(
+            &mut state,
+            &mut gateway,
+            &mut inbound,
+            StorageOperation::TakeBackItem,
+            9,
+            3,
+        )
+        .unwrap();
+        assert_ne!(second.request_id, first.request_id);
+        assert_eq!(second.request_id, "st-0000000000000002");
+    }
+
+    #[test]
+    fn storage_receipt_with_wrong_protocol_or_coordinates_is_rejected() {
+        assert!(parse_native_storage_receipt(
+            r#"{"protocol":"nativeStorageReceiptV0","requestId":"st-1","operation":"storeItem","from":3,"to":9,"success":true}"#
+        )
+        .is_err());
+        assert!(parse_native_storage_receipt(
+            r#"{"protocol":"nativeStorageReceiptV1","requestId":"st-1","operation":"storeItem","from":-1,"to":9,"success":true}"#
+        )
+        .is_err());
+        assert!(parse_native_storage_receipt(
+            r#"{"protocol":"nativeStorageReceiptV1","requestId":"st-1","operation":"notStorage","from":3,"to":9,"success":true}"#
+        )
+        .is_err());
     }
 
     #[test]

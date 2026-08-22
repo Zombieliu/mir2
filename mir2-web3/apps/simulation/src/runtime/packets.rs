@@ -38,9 +38,8 @@ use super::big_map::{
 use super::combat::{
     crystal_player_attack_blocked_by_status, crystal_player_can_mount_attack,
     crystal_player_has_class_weapon, crystal_player_is_dazed,
-    crystal_player_magic_blocked_by_status,
-    crystal_player_movement_blocked_by_status, crystal_player_slowed_by_status,
-    melee_target_is_authoritatively_hostile_in_direction,
+    crystal_player_magic_blocked_by_status, crystal_player_movement_blocked_by_status,
+    crystal_player_slowed_by_status, melee_target_is_authoritatively_hostile_in_direction,
 };
 use super::components::{
     current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
@@ -8090,6 +8089,54 @@ impl SimulationSession {
             ClientPacket::StoreItem { from, to } => store_item_impl(self.app.world_mut(), from, to),
             ClientPacket::TakeBackItem { from, to } => {
                 take_back_item_impl(self.app.world_mut(), from, to)
+            }
+            ClientPacket::StoreItemV2 {
+                request_id,
+                from,
+                to,
+            } => {
+                if !mir2_protocol::is_valid_request_id(&request_id) {
+                    Vec::new()
+                } else {
+                    store_item_impl(self.app.world_mut(), from, to)
+                        .into_iter()
+                        .map(|packet| match packet {
+                            ServerPacket::StoreItem { from, to, success } => {
+                                ServerPacket::StoreItemV2 {
+                                    request_id: request_id.clone(),
+                                    from,
+                                    to,
+                                    success,
+                                }
+                            }
+                            other => other,
+                        })
+                        .collect()
+                }
+            }
+            ClientPacket::TakeBackItemV2 {
+                request_id,
+                from,
+                to,
+            } => {
+                if !mir2_protocol::is_valid_request_id(&request_id) {
+                    Vec::new()
+                } else {
+                    take_back_item_impl(self.app.world_mut(), from, to)
+                        .into_iter()
+                        .map(|packet| match packet {
+                            ServerPacket::TakeBackItem { from, to, success } => {
+                                ServerPacket::TakeBackItemV2 {
+                                    request_id: request_id.clone(),
+                                    from,
+                                    to,
+                                    success,
+                                }
+                            }
+                            other => other,
+                        })
+                        .collect()
+                }
             }
             ClientPacket::MergeItem {
                 grid_from,

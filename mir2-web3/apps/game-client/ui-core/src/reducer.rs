@@ -8,6 +8,7 @@ use crate::effect::{
 use crate::state::{
     UiChatSettings, UiOptions, UiPanel, UiPlatformSettings, UiScreen, UiSecurityPanel, UiState,
 };
+use crate::storage::StorageOperation;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Transition {
@@ -601,6 +602,35 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 }
             }
         }
+        UiAction::StoreItem { from, to } => {
+            if in_game(state) {
+                if let Some(request) =
+                    next.begin_storage_request(StorageOperation::StoreItem, from, to)
+                {
+                    effects.push(UiEffect::GatewayCommand(GatewayCommand::StoreItem {
+                        request_id: request.request_id,
+                        from,
+                        to,
+                    }));
+                }
+            }
+        }
+        UiAction::TakeBackItem { from, to } => {
+            if in_game(state) {
+                if let Some(request) =
+                    next.begin_storage_request(StorageOperation::TakeBackItem, from, to)
+                {
+                    effects.push(UiEffect::GatewayCommand(GatewayCommand::TakeBackItem {
+                        request_id: request.request_id,
+                        from,
+                        to,
+                    }));
+                }
+            }
+        }
+        UiAction::StorageReceiptReceived { receipt } => {
+            next.apply_storage_receipt(receipt);
+        }
         UiAction::UseItem { unique_id } => {
             if in_game(state) {
                 effects.push(UiEffect::GatewayCommand(GatewayCommand::UseItem {
@@ -773,6 +803,7 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 next.login_password.clear();
                 close_panels(&mut next);
                 next.clear_game_shop_session();
+                next.clear_storage_session();
                 effects.push(UiEffect::GatewayCommand(GatewayCommand::Logout));
             }
         }
@@ -780,6 +811,7 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
             if state.screen == UiScreen::InGame {
                 next.screen = UiScreen::CharacterSelect;
                 close_panels(&mut next);
+                next.clear_storage_session();
             }
         }
     }
@@ -889,6 +921,18 @@ mod tests {
                 g_index: 42,
                 quantity: 3,
                 price_type: 0,
+            },
+            UiAction::StoreItem { from: 1, to: 2 },
+            UiAction::TakeBackItem { from: 2, to: 1 },
+            UiAction::StorageReceiptReceived {
+                receipt: crate::storage::StorageReceipt {
+                    protocol: crate::storage::NATIVE_STORAGE_RECEIPT_PROTOCOL.into(),
+                    request_id: "st-1".into(),
+                    operation: StorageOperation::StoreItem,
+                    from: 1,
+                    to: 2,
+                    success: true,
+                },
             },
             UiAction::UseItem { unique_id: 1 },
             UiAction::EquipItem {
@@ -1151,6 +1195,106 @@ mod tests {
         assert_eq!(
             second.state.game_shop_pending,
             first.state.game_shop_pending
+        );
+    }
+
+    #[test]
+    fn storage_reducer_allocates_exact_request_and_rejects_old_receipts() {
+        let state = game();
+        let first = reduce(&state, UiAction::StoreItem { from: 3, to: 9 });
+        assert_eq!(
+            first.state.storage_pending.as_ref().unwrap().request_id,
+            "st-0000000000000001"
+        );
+        assert_eq!(first.state.storage_next_request_id, 2);
+        assert_eq!(
+            first.effects,
+            vec![UiEffect::GatewayCommand(GatewayCommand::StoreItem {
+                request_id: "st-0000000000000001".into(),
+                from: 3,
+                to: 9,
+            })]
+        );
+
+        // A second personal-storage operation cannot overtake the first.
+        let duplicate = reduce(&first.state, UiAction::TakeBackItem { from: 9, to: 3 });
+        assert!(duplicate.effects.is_empty());
+        assert_eq!(duplicate.state.storage_pending, first.state.storage_pending);
+
+        let old_receipt = crate::storage::StorageReceipt {
+            protocol: crate::storage::NATIVE_STORAGE_RECEIPT_PROTOCOL.into(),
+            request_id: "st-0000000000000000".into(),
+            operation: StorageOperation::StoreItem,
+            from: 3,
+            to: 9,
+            success: true,
+        };
+        let unchanged = reduce(
+            &first.state,
+            UiAction::StorageReceiptReceived {
+                receipt: old_receipt,
+            },
+        );
+        assert_eq!(unchanged.state.storage_pending, first.state.storage_pending);
+
+        let exact = crate::storage::StorageReceipt {
+            protocol: crate::storage::NATIVE_STORAGE_RECEIPT_PROTOCOL.into(),
+            request_id: "st-0000000000000001".into(),
+            operation: StorageOperation::StoreItem,
+            from: 3,
+            to: 9,
+            success: true,
+        };
+        let applied = reduce(
+            &first.state,
+            UiAction::StorageReceiptReceived { receipt: exact },
+        );
+        assert!(applied.state.storage_pending.is_none());
+        assert!(applied.state.storage_last_receipt.is_some());
+    }
+
+    #[test]
+    fn storage_request_sequence_fails_closed_after_u64_max() {
+        let mut state = game();
+        state.storage_next_request_id = u64::MAX;
+        let first = reduce(&state, UiAction::StoreItem { from: 1, to: 2 });
+        assert_eq!(
+            first.state.storage_pending.as_ref().unwrap().request_id,
+            "st-18446744073709551615"
+        );
+        assert_eq!(first.state.storage_next_request_id, 0);
+        let second = reduce(
+            &first.state,
+            UiAction::StorageReceiptReceived {
+                receipt: crate::storage::StorageReceipt {
+                    protocol: crate::storage::NATIVE_STORAGE_RECEIPT_PROTOCOL.into(),
+                    request_id: "st-18446744073709551615".into(),
+                    operation: StorageOperation::StoreItem,
+                    from: 1,
+                    to: 2,
+                    success: true,
+                },
+            },
+        );
+        let third = reduce(&second.state, UiAction::StoreItem { from: 2, to: 3 });
+        assert!(third.effects.is_empty());
+        assert_eq!(third.state.storage_next_request_id, 0);
+    }
+
+    #[test]
+    fn storage_session_clear_drops_pending_without_reusing_request_ids() {
+        let first = reduce(&game(), UiAction::StoreItem { from: 3, to: 9 });
+        let logged_out = reduce(&first.state, UiAction::Logout);
+        assert!(logged_out.state.storage_pending.is_none());
+        assert!(logged_out.state.storage_unknown);
+        assert_eq!(logged_out.state.storage_next_request_id, 2);
+
+        let mut next_session = logged_out.state;
+        next_session.screen = UiScreen::InGame;
+        let second = reduce(&next_session, UiAction::TakeBackItem { from: 9, to: 3 });
+        assert_eq!(
+            second.state.storage_pending.as_ref().unwrap().request_id,
+            "st-0000000000000002"
         );
     }
 

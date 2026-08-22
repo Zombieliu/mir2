@@ -155,6 +155,21 @@ pub enum UiAction {
         quantity: u8,
         price_type: i32,
     },
+    /// Request-only ordinary personal storage operation. The reducer owns
+    /// requestId allocation; no Android renderer is implied by this seam.
+    StoreItem {
+        from: i32,
+        to: i32,
+    },
+    TakeBackItem {
+        from: i32,
+        to: i32,
+    },
+    /// Host-delivered authoritative storage receipt. It clears pending state
+    /// only when every receipt field matches the current request.
+    StorageReceiptReceived {
+        receipt: crate::storage::StorageReceipt,
+    },
     // Inventory / Character / Skill
     UseItem {
         unique_id: u64,

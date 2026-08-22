@@ -16,6 +16,14 @@ use crate::types::{
 };
 use serde::Serialize;
 
+pub const REQUEST_ID_MAX_LEN: usize = 64;
+
+pub fn is_valid_request_id(request_id: &str) -> bool {
+    !request_id.is_empty()
+        && request_id.len() <= REQUEST_ID_MAX_LEN
+        && request_id.bytes().all(|byte| (0x20..=0x7e).contains(&byte))
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ClientPacket {
     ClientVersion {
@@ -78,6 +86,16 @@ pub enum ClientPacket {
         to: i32,
     },
     TakeBackItem {
+        from: i32,
+        to: i32,
+    },
+    StoreItemV2 {
+        request_id: String,
+        from: i32,
+        to: i32,
+    },
+    TakeBackItemV2 {
+        request_id: String,
         from: i32,
         to: i32,
     },
@@ -573,6 +591,8 @@ impl ClientPacket {
             Self::MoveItem { .. } => ClientPacketId::MoveItem,
             Self::StoreItem { .. } => ClientPacketId::StoreItem,
             Self::TakeBackItem { .. } => ClientPacketId::TakeBackItem,
+            Self::StoreItemV2 { .. } => ClientPacketId::StoreItemV2,
+            Self::TakeBackItemV2 { .. } => ClientPacketId::TakeBackItemV2,
             Self::MergeItem { .. } => ClientPacketId::MergeItem,
             Self::EquipItem { .. } => ClientPacketId::EquipItem,
             Self::RemoveItem { .. } => ClientPacketId::RemoveItem,
@@ -791,6 +811,23 @@ impl ClientPacket {
                 writer.write_i32(*to);
             }
             Self::StoreItem { from, to } | Self::TakeBackItem { from, to } => {
+                writer.write_i32(*from);
+                writer.write_i32(*to);
+            }
+            Self::StoreItemV2 {
+                request_id,
+                from,
+                to,
+            }
+            | Self::TakeBackItemV2 {
+                request_id,
+                from,
+                to,
+            } => {
+                if !is_valid_request_id(request_id) {
+                    return Err(PacketCodecError::InvalidRequestId);
+                }
+                writer.write_string(request_id)?;
                 writer.write_i32(*from);
                 writer.write_i32(*to);
             }
@@ -1385,6 +1422,28 @@ impl ClientPacket {
                 from: reader.read_i32()?,
                 to: reader.read_i32()?,
             },
+            ClientPacketId::StoreItemV2 => {
+                let request_id = reader.read_string()?;
+                if !is_valid_request_id(&request_id) {
+                    return Err(PacketCodecError::InvalidRequestId);
+                }
+                Self::StoreItemV2 {
+                    request_id,
+                    from: reader.read_i32()?,
+                    to: reader.read_i32()?,
+                }
+            }
+            ClientPacketId::TakeBackItemV2 => {
+                let request_id = reader.read_string()?;
+                if !is_valid_request_id(&request_id) {
+                    return Err(PacketCodecError::InvalidRequestId);
+                }
+                Self::TakeBackItemV2 {
+                    request_id,
+                    from: reader.read_i32()?,
+                    to: reader.read_i32()?,
+                }
+            }
             ClientPacketId::SendMail => Self::SendMail {
                 name: reader.read_string()?,
                 message: reader.read_string()?,
@@ -2348,6 +2407,18 @@ pub enum ServerPacket {
         to: i32,
         success: bool,
     },
+    StoreItemV2 {
+        request_id: String,
+        from: i32,
+        to: i32,
+        success: bool,
+    },
+    TakeBackItemV2 {
+        request_id: String,
+        from: i32,
+        to: i32,
+        success: bool,
+    },
     CombineItem {
         grid: MirGridType,
         id_from: u64,
@@ -3097,6 +3168,8 @@ impl ServerPacket {
             Self::RemoveSlotItem { .. } => ServerPacketId::RemoveSlotItem,
             Self::TakeBackItem { .. } => ServerPacketId::TakeBackItem,
             Self::StoreItem { .. } => ServerPacketId::StoreItem,
+            Self::StoreItemV2 { .. } => ServerPacketId::StoreItemV2,
+            Self::TakeBackItemV2 { .. } => ServerPacketId::TakeBackItemV2,
             Self::CombineItem { .. } => ServerPacketId::CombineItem,
             Self::ItemUpgraded { .. } => ServerPacketId::ItemUpgraded,
             Self::SplitItem { .. } => ServerPacketId::SplitItem,
@@ -3877,6 +3950,26 @@ impl ServerPacket {
             | Self::StoreItem { from, to, success }
             | Self::TakeBackHeroItem { from, to, success }
             | Self::TransferHeroItem { from, to, success } => {
+                writer.write_i32(*from);
+                writer.write_i32(*to);
+                writer.write_bool(*success);
+            }
+            Self::StoreItemV2 {
+                request_id,
+                from,
+                to,
+                success,
+            }
+            | Self::TakeBackItemV2 {
+                request_id,
+                from,
+                to,
+                success,
+            } => {
+                if !is_valid_request_id(request_id) {
+                    return Err(PacketCodecError::InvalidRequestId);
+                }
+                writer.write_string(request_id)?;
                 writer.write_i32(*from);
                 writer.write_i32(*to);
                 writer.write_bool(*success);
@@ -5175,6 +5268,30 @@ impl ServerPacket {
                 to: reader.read_i32()?,
                 success: reader.read_bool()?,
             },
+            ServerPacketId::StoreItemV2 => {
+                let request_id = reader.read_string()?;
+                if !is_valid_request_id(&request_id) {
+                    return Err(PacketCodecError::InvalidRequestId);
+                }
+                Self::StoreItemV2 {
+                    request_id,
+                    from: reader.read_i32()?,
+                    to: reader.read_i32()?,
+                    success: reader.read_bool()?,
+                }
+            }
+            ServerPacketId::TakeBackItemV2 => {
+                let request_id = reader.read_string()?;
+                if !is_valid_request_id(&request_id) {
+                    return Err(PacketCodecError::InvalidRequestId);
+                }
+                Self::TakeBackItemV2 {
+                    request_id,
+                    from: reader.read_i32()?,
+                    to: reader.read_i32()?,
+                    success: reader.read_bool()?,
+                }
+            }
             ServerPacketId::CombineItem => Self::CombineItem {
                 grid: MirGridType::try_from(reader.read_u8()?)?,
                 id_from: reader.read_u64()?,
@@ -6301,6 +6418,179 @@ mod tests {
             element_orb_max: 0,
             buffs: vec![1, 2],
             level_effects: 0,
+        }
+    }
+
+    #[test]
+    fn request_id_validation_accepts_only_bounded_printable_ascii() {
+        assert!(is_valid_request_id("storage-1"));
+        assert!(is_valid_request_id(&"~".repeat(REQUEST_ID_MAX_LEN)));
+
+        assert!(!is_valid_request_id(""));
+        assert!(!is_valid_request_id(&"x".repeat(REQUEST_ID_MAX_LEN + 1)));
+        assert!(!is_valid_request_id("line\nbreak"));
+        assert!(!is_valid_request_id("delete\u{7f}"));
+        assert!(!is_valid_request_id("存储-1"));
+    }
+
+    #[test]
+    fn storage_v2_codec_enforces_request_id_validation_on_both_directions() {
+        for request_id in [
+            String::new(),
+            "x".repeat(REQUEST_ID_MAX_LEN + 1),
+            "bad\nline".into(),
+        ] {
+            assert_eq!(
+                encode_client_packet(&ClientPacket::StoreItemV2 {
+                    request_id: request_id.clone(),
+                    from: 1,
+                    to: 2,
+                }),
+                Err(PacketCodecError::InvalidRequestId)
+            );
+            assert_eq!(
+                encode_server_packet(&ServerPacket::StoreItemV2 {
+                    request_id,
+                    from: 1,
+                    to: 2,
+                    success: false,
+                }),
+                Err(PacketCodecError::InvalidRequestId)
+            );
+        }
+
+        let mut client = encode_client_packet(&ClientPacket::StoreItemV2 {
+            request_id: "storage-1".to_string(),
+            from: 1,
+            to: 2,
+        })
+        .unwrap();
+        let first_request_byte = client.iter().position(|byte| *byte == b's').unwrap();
+        client[first_request_byte] = b'\n';
+        assert_eq!(
+            decode_client_packet(&client),
+            Err(PacketCodecError::InvalidRequestId)
+        );
+
+        let mut server = encode_server_packet(&ServerPacket::StoreItemV2 {
+            request_id: "storage-1".to_string(),
+            from: 1,
+            to: 2,
+            success: true,
+        })
+        .unwrap();
+        let first_request_byte = server.iter().position(|byte| *byte == b's').unwrap();
+        server[first_request_byte] = b'\n';
+        assert_eq!(
+            decode_server_packet(&server),
+            Err(PacketCodecError::InvalidRequestId)
+        );
+    }
+
+    #[test]
+    fn storage_v2_client_packets_encode_decode_and_round_trip() {
+        let cases = [
+            (
+                ClientPacket::StoreItemV2 {
+                    request_id: "store-7".to_string(),
+                    from: -2,
+                    to: 41,
+                },
+                ClientPacketId::StoreItemV2,
+            ),
+            (
+                ClientPacket::TakeBackItemV2 {
+                    request_id: "take-8".to_string(),
+                    from: 73,
+                    to: 9,
+                },
+                ClientPacketId::TakeBackItemV2,
+            ),
+        ];
+
+        for (packet, expected_id) in cases {
+            let bytes = encode_client_packet(&packet).expect("V2 client packet should encode");
+            let frame = decode_frame(&bytes).expect("V2 client frame should decode");
+            let (request_id, from, to) = match &packet {
+                ClientPacket::StoreItemV2 {
+                    request_id,
+                    from,
+                    to,
+                }
+                | ClientPacket::TakeBackItemV2 {
+                    request_id,
+                    from,
+                    to,
+                } => (request_id, from, to),
+                _ => unreachable!("test cases contain only V2 storage packets"),
+            };
+            let mut expected_payload = vec![request_id.len() as u8];
+            expected_payload.extend_from_slice(request_id.as_bytes());
+            expected_payload.extend_from_slice(&from.to_le_bytes());
+            expected_payload.extend_from_slice(&to.to_le_bytes());
+            let decoded =
+                decode_client_packet(&bytes).expect("V2 client packet should decode and roundtrip");
+
+            assert_eq!(frame.packet_id, expected_id as i16);
+            assert_eq!(frame.payload, expected_payload);
+            assert_eq!(ClientPacketId::try_from(frame.packet_id), Ok(expected_id));
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn storage_v2_server_packets_encode_decode_and_round_trip() {
+        let cases = [
+            (
+                ServerPacket::StoreItemV2 {
+                    request_id: "store-7".to_string(),
+                    from: -2,
+                    to: 41,
+                    success: true,
+                },
+                ServerPacketId::StoreItemV2,
+            ),
+            (
+                ServerPacket::TakeBackItemV2 {
+                    request_id: "take-8".to_string(),
+                    from: 73,
+                    to: 9,
+                    success: false,
+                },
+                ServerPacketId::TakeBackItemV2,
+            ),
+        ];
+
+        for (packet, expected_id) in cases {
+            let bytes = encode_server_packet(&packet).expect("V2 server packet should encode");
+            let frame = decode_frame(&bytes).expect("V2 server frame should decode");
+            let (request_id, from, to, success) = match &packet {
+                ServerPacket::StoreItemV2 {
+                    request_id,
+                    from,
+                    to,
+                    success,
+                }
+                | ServerPacket::TakeBackItemV2 {
+                    request_id,
+                    from,
+                    to,
+                    success,
+                } => (request_id, from, to, success),
+                _ => unreachable!("test cases contain only V2 storage packets"),
+            };
+            let mut expected_payload = vec![request_id.len() as u8];
+            expected_payload.extend_from_slice(request_id.as_bytes());
+            expected_payload.extend_from_slice(&from.to_le_bytes());
+            expected_payload.extend_from_slice(&to.to_le_bytes());
+            expected_payload.push(u8::from(*success));
+            let decoded =
+                decode_server_packet(&bytes).expect("V2 server packet should decode and roundtrip");
+
+            assert_eq!(frame.packet_id, expected_id as i16);
+            assert_eq!(frame.payload, expected_payload);
+            assert_eq!(ServerPacketId::try_from(frame.packet_id), Ok(expected_id));
+            assert_eq!(decoded, packet);
         }
     }
 

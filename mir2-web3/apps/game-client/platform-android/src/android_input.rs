@@ -514,6 +514,7 @@ pub fn apply_android_lifecycle_messages(
         if terminal {
             gateway.mark_terminal_reset();
             ui_state.mark_game_shop_unknown();
+            ui_state.mark_storage_unknown();
         }
         if next
             .iter()

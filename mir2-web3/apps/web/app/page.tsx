@@ -1849,6 +1849,10 @@ export default function HomePage() {
     movementShadowBridgeRef.current = createBevyMovementShadowBridge(() => runtimeRef.current);
   }
   const socketRef = useRef<WebSocket | null>(null);
+  const storageRequestSequenceRef = useRef(1);
+  const pendingStorageRequestsRef = useRef<
+    Map<string, { operation: "deposit" | "withdraw"; from: number; to: number }>
+  >(new Map());
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
   // NewQuestInfo is a static definition stream, while world snapshots contain
   // only quests currently visible for this character. Keep definitions outside
@@ -4672,6 +4676,9 @@ export default function HomePage() {
     return () => {
       socketRef.current?.close();
       socketRef.current = null;
+      // Storage mutations are never replayed across a reconnect. Their exact
+      // request ids remain spent; snapshots reconcile any unknown outcome.
+      pendingStorageRequestsRef.current.clear();
     };
   }, []);
 
@@ -5950,6 +5957,7 @@ export default function HomePage() {
       const closedManually = manualSocketCloseRef.current;
       socketRef.current = null;
       manualSocketCloseRef.current = false;
+      pendingStorageRequestsRef.current.clear();
       if (closedManually) {
         pendingGatewayProtocolActionRef.current = null;
       }
@@ -7189,19 +7197,41 @@ export default function HomePage() {
   }
 
   function storeItem(item: ItemMoveRef, toSlot: number) {
-    send({
-      type: "storeItem",
+    const sequence = storageRequestSequenceRef.current;
+    if (!Number.isSafeInteger(sequence) || sequence <= 0) return;
+    const requestId = `st-${sequence.toString().padStart(16, "0")}`;
+    if (!send({
+      type: "storeItemV2",
+      requestId,
+      from: item.slot,
+      to: toSlot,
+    })) return;
+    pendingStorageRequestsRef.current.set(requestId, {
+      operation: "deposit",
       from: item.slot,
       to: toSlot,
     });
+    storageRequestSequenceRef.current =
+      sequence === Number.MAX_SAFE_INTEGER ? 0 : sequence + 1;
   }
 
   function takeBackItem(item: ItemMoveRef, toSlot: number) {
-    send({
-      type: "takeBackItem",
+    const sequence = storageRequestSequenceRef.current;
+    if (!Number.isSafeInteger(sequence) || sequence <= 0) return;
+    const requestId = `st-${sequence.toString().padStart(16, "0")}`;
+    if (!send({
+      type: "takeBackItemV2",
+      requestId,
+      from: item.slot,
+      to: toSlot,
+    })) return;
+    pendingStorageRequestsRef.current.set(requestId, {
+      operation: "withdraw",
       from: item.slot,
       to: toSlot,
     });
+    storageRequestSequenceRef.current =
+      sequence === Number.MAX_SAFE_INTEGER ? 0 : sequence + 1;
   }
 
   function unlockStorage(storagePassword: string) {
@@ -10410,6 +10440,24 @@ export default function HomePage() {
           appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
         }
         break;
+      case "StoreItemV2":
+      case "TakeBackItemV2": {
+        const requestId = typeof payload.requestId === "string" ? payload.requestId : "";
+        const pending = pendingStorageRequestsRef.current.get(requestId);
+        const expectedOperation = event.packet === "StoreItemV2" ? "deposit" : "withdraw";
+        if (
+          pending &&
+          pending.operation === expectedOperation &&
+          pending.from === payload.from &&
+          pending.to === payload.to
+        ) {
+          pendingStorageRequestsRef.current.delete(requestId);
+          if (payload.success === false) {
+            appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+          }
+        }
+        break;
+      }
       case "UserSlotsRefresh":
         // Full inventory/equipment refresh handled by the snapshot pipeline; flag
         // the next snapshot as an in-place packet refresh so it merges cleanly.
@@ -10423,6 +10471,7 @@ export default function HomePage() {
         }
         break;
       case "ReturnToLogin":
+        pendingStorageRequestsRef.current.clear();
         screenRef.current = "login";
         setScreen("login");
         setLoginBusy(false);

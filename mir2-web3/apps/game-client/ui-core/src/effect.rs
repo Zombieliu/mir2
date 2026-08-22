@@ -152,6 +152,16 @@ pub enum GatewayCommand {
         quantity: u8,
         price_type: i32,
     },
+    StoreItem {
+        request_id: String,
+        from: i32,
+        to: i32,
+    },
+    TakeBackItem {
+        request_id: String,
+        from: i32,
+        to: i32,
+    },
     SendMail {
         recipient: String,
         message: String,

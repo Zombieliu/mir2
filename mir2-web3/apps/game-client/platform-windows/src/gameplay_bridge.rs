@@ -21,7 +21,7 @@ use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::pending_operations::{
     mark_authoritative_refresh, reconcile_quest_refresh, AuthoritativeModelDomain,
-    AuthoritativeModelRevisions, PendingOperations,
+    AuthoritativeModelRevisions, PendingOperationKey, PendingOperations,
 };
 use mir2_client_bevy::quest_model::{
     CombatTargetModel, CombatTargetUpdate, GroundPickupModel, NearbyNpc, NearbyNpcModel,
@@ -1332,6 +1332,31 @@ pub fn forward_quest_ui_intents(
     }
 
     for intent in player_pending {
+        let storage_pending_key = match &intent {
+            NativePlayerUiIntent::StoreItem {
+                request_id,
+                unique_id,
+                from,
+                to,
+            } => Some(PendingOperationKey::StorageDepositV2 {
+                request_id: request_id.clone(),
+                unique_id: *unique_id,
+                from: *from,
+                to: *to,
+            }),
+            NativePlayerUiIntent::TakeBackItem {
+                request_id,
+                unique_id,
+                from,
+                to,
+            } => Some(PendingOperationKey::StorageWithdrawV2 {
+                request_id: request_id.clone(),
+                unique_id: *unique_id,
+                from: *from,
+                to: *to,
+            }),
+            _ => None,
+        };
         let command = match intent {
             NativePlayerUiIntent::UseItem {
                 key,
@@ -1422,12 +1447,26 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::SRepairItem { unique_id } => {
                 NativeOutboundCommand::SpecialRepairItem { unique_id }
             }
-            NativePlayerUiIntent::StoreItem { from, to, .. } => {
-                NativeOutboundCommand::StoreItem { from, to }
-            }
-            NativePlayerUiIntent::TakeBackItem { from, to, .. } => {
-                NativeOutboundCommand::TakeBackItem { from, to }
-            }
+            NativePlayerUiIntent::StoreItem {
+                request_id,
+                from,
+                to,
+                ..
+            } => NativeOutboundCommand::StoreItem {
+                request_id,
+                from,
+                to,
+            },
+            NativePlayerUiIntent::TakeBackItem {
+                request_id,
+                from,
+                to,
+                ..
+            } => NativeOutboundCommand::TakeBackItem {
+                request_id,
+                from,
+                to,
+            },
             NativePlayerUiIntent::UnlockStorage { password } => {
                 NativeOutboundCommand::UnlockStorage { password }
             }
@@ -1590,6 +1629,10 @@ pub fn forward_quest_ui_intents(
                 }
                 if let Some(player_ui_state) = player_ui_state.as_mut() {
                     player_ui_state.core.cancel_game_shop_purchase(&request_id);
+                }
+            } else if let Some(key) = storage_pending_key {
+                if let Some(pending) = operation_pending.as_mut() {
+                    pending.release(&key);
                 }
             }
         }
@@ -2443,11 +2486,23 @@ mod tests {
                 grid: "inventory".into(),
                 count: 1,
             });
+            queue.push_intent(NativePlayerUiIntent::StoreItem {
+                request_id: "st-0000000000000001".into(),
+                unique_id: 13,
+                from: 3,
+                to: 9,
+            });
+            queue.push_intent(NativePlayerUiIntent::TakeBackItem {
+                request_id: "st-0000000000000002".into(),
+                unique_id: 14,
+                from: 9,
+                to: 3,
+            });
         }
         app.update();
 
         let commands = receiver.try_iter().collect::<Vec<_>>();
-        assert_eq!(commands.len(), 4);
+        assert_eq!(commands.len(), 6);
         assert!(matches!(
             &commands[0],
             GatewayCommand::Wire(NativeOutboundCommand::DropItem {
@@ -2481,6 +2536,22 @@ mod tests {
                 grid,
                 count: 1,
             }) if grid == "inventory"
+        ));
+        assert!(matches!(
+            &commands[4],
+            GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
+                request_id,
+                from: 3,
+                to: 9,
+            }) if request_id == "st-0000000000000001"
+        ));
+        assert!(matches!(
+            &commands[5],
+            GatewayCommand::Wire(NativeOutboundCommand::TakeBackItem {
+                request_id,
+                from: 9,
+                to: 3,
+            }) if request_id == "st-0000000000000002"
         ));
     }
 

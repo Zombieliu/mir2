@@ -275,7 +275,7 @@ impl GatewayCommandSender {
                         queue.push_back(command);
                     }
                     Ok(())
-                } else if is_game_shop_transaction(&command) {
+                } else if is_correlated_transaction(&command) {
                     let mut slot = transaction
                         .lock()
                         .unwrap_or_else(|poisoned| poisoned.into_inner());
@@ -335,6 +335,19 @@ fn is_game_shop_transaction(command: &GatewayCommand) -> bool {
     )
 }
 
+fn is_storage_transaction(command: &GatewayCommand) -> bool {
+    matches!(
+        command,
+        GatewayCommand::Wire(
+            NativeOutboundCommand::StoreItem { .. } | NativeOutboundCommand::TakeBackItem { .. }
+        )
+    )
+}
+
+fn is_correlated_transaction(command: &GatewayCommand) -> bool {
+    is_game_shop_transaction(command) || is_storage_transaction(command)
+}
+
 fn game_shop_request_from_command(command: &GatewayCommand) -> Option<GameShopRequest> {
     let GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
         request_id,
@@ -348,10 +361,10 @@ fn game_shop_request_from_command(command: &GatewayCommand) -> Option<GameShopRe
     GameShopRequest::new(request_id.clone(), *g_index, *quantity, *price_type)
 }
 
-/// Resolve a transactional command that was removed from its bounded lane but
-/// cannot reach `socket.send`. Ordinary commands keep their existing freeze or
-/// drop semantics; only GameShopBuy owns this terminal unknown transition.
-fn discard_game_shop_before_socket_write<F>(
+/// Resolve a correlated mutation that was removed from its bounded lane but
+/// cannot reach `socket.send`. A reset is the fail-closed "commit unknown"
+/// transition for both GameShop and Storage V2; neither command is replayed.
+fn discard_correlated_before_socket_write<F>(
     command: &GatewayCommand,
     gate: &mut GameShopReceiptGate,
     mut push_data_reset: F,
@@ -359,12 +372,30 @@ fn discard_game_shop_before_socket_write<F>(
 where
     F: FnMut() -> bool,
 {
-    if !is_game_shop_transaction(command) {
+    if !is_correlated_transaction(command) {
         return false;
     }
-    gate.clear_terminal();
+    if is_game_shop_transaction(command) {
+        gate.clear_terminal();
+    }
     let _ = push_data_reset();
     true
+}
+
+/// Deliver one authoritative Storage patch. If the ordinary critical FIFO is
+/// saturated, replace the queued session models with the non-evictable reset
+/// barrier. This deliberately reports the storage commit as unknown instead
+/// of losing the exact receipt and leaving the UI pending forever.
+fn push_storage_patch_or_reset<P, R>(json: String, mut push_patch: P, mut push_reset: R) -> bool
+where
+    P: FnMut(String) -> bool,
+    R: FnMut() -> bool,
+{
+    if push_patch(json) {
+        true
+    } else {
+        push_reset()
+    }
 }
 
 fn same_priority_kind(left: &GatewayCommand, right: &GatewayCommand) -> bool {
@@ -1670,7 +1701,7 @@ where
         // batch; drain_command_batch deliberately appends reserved lanes and
         // a control command may otherwise return first.
         for command in &batch {
-            let _ = discard_game_shop_before_socket_write(
+            let _ = discard_correlated_before_socket_write(
                 command,
                 game_shop_receipt_gate,
                 &mut push_data_reset,
@@ -1757,7 +1788,7 @@ where
             _ = poll.tick() => {
                 let batch = drain_command_batch(commands, batch_limit);
                 for command in &batch {
-                    let _ = discard_game_shop_before_socket_write(
+                    let _ = discard_correlated_before_socket_write(
                         command,
                         game_shop_receipt_gate,
                         &mut push_data_reset,
@@ -1790,7 +1821,7 @@ fn drain_command_batch<R: CommandSource>(
     let mut batch = Vec::with_capacity(limit);
     let mut latest_player = None;
     let mut leave = None;
-    let mut game_shop = None;
+    let mut transaction = None;
     while let Ok(command) = commands.try_command() {
         match command {
             GatewayCommand::Shutdown => return vec![GatewayCommand::Shutdown],
@@ -1804,23 +1835,27 @@ fn drain_command_batch<R: CommandSource>(
             | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                 leave = Some(command);
             }
-            GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy { .. }) => {
-                if game_shop.is_none() {
-                    game_shop = Some(command);
-                }
+            other if is_correlated_transaction(&other) => {
+                transaction = Some(other);
+                // A bounded receiver takes the reserved transaction slot
+                // atomically. Stop this drain immediately so a second
+                // transaction concurrently inserted after that take remains
+                // in the slot for the next poll instead of being accepted and
+                // silently discarded in this batch.
+                break;
             }
             other if batch.len() < limit => batch.push(other),
             _ => {}
         }
     }
-    let reserved = usize::from(game_shop.is_some())
+    let reserved = usize::from(transaction.is_some())
         .saturating_add(usize::from(leave.is_some()))
         .saturating_add(usize::from(latest_player.is_some()));
     while batch.len().saturating_add(reserved) > limit && !batch.is_empty() {
         batch.pop();
     }
-    if let Some(game_shop) = game_shop {
-        batch.push(game_shop);
+    if let Some(transaction) = transaction {
+        batch.push(transaction);
     }
     if let Some(leave) = leave {
         if batch.len() == limit && reserved <= limit {
@@ -1883,11 +1918,29 @@ fn drain_resume_lifecycle_commands<R: CommandSource>(
     batch_limit: usize,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
 ) -> ResumeLifecycle<()> {
+    drain_resume_lifecycle_commands_with_reset(
+        commands,
+        batch_limit,
+        game_shop_receipt_gate,
+        mir2_bevy_runtime::native_ingest::push_native_data_reset,
+    )
+}
+
+fn drain_resume_lifecycle_commands_with_reset<R, F>(
+    commands: &mut R,
+    batch_limit: usize,
+    game_shop_receipt_gate: &mut GameShopReceiptGate,
+    mut push_data_reset: F,
+) -> ResumeLifecycle<()>
+where
+    R: CommandSource,
+    F: FnMut() -> bool,
+{
     for command in drain_command_batch(commands, batch_limit) {
-        if discard_game_shop_before_socket_write(
+        if discard_correlated_before_socket_write(
             &command,
             game_shop_receipt_gate,
-            mir2_bevy_runtime::native_ingest::push_native_data_reset,
+            &mut push_data_reset,
         ) {
             continue;
         }
@@ -2227,7 +2280,7 @@ where
             _ = input_poll.tick() => {
                 for command in drain_command_batch(commands, reconnect_config.command_batch_limit) {
                     if *phase != ConnectionPhase::Normal {
-                        if discard_game_shop_before_socket_write(
+                        if discard_correlated_before_socket_write(
                             &command,
                             game_shop_receipt_gate,
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
@@ -3156,7 +3209,9 @@ where
                     }
                 }
                 "StoreItem"
+                | "StoreItemV2"
                 | "TakeBackItem"
+                | "TakeBackItemV2"
                 | "StorageUnlockResult"
                 | "StoragePasswordResult"
                 | "ResizeStorage" => {
@@ -3164,8 +3219,11 @@ where
                         if let Some(patch) = transform_storage_patch_from_packet(packet, payload) {
                             let json =
                                 serde_json::to_string(&patch).map_err(|error| error.to_string())?;
-                            let _ =
-                                mir2_bevy_runtime::native_ingest::push_native_storage_patch(json);
+                            let _ = push_storage_patch_or_reset(
+                                json,
+                                mir2_bevy_runtime::native_ingest::push_native_storage_patch,
+                                mir2_bevy_runtime::native_ingest::push_native_data_reset,
+                            );
                         }
                     }
                 }
@@ -4157,23 +4215,44 @@ fn storage_items_json(entries: &[Value]) -> Option<Vec<Value>> {
 }
 
 fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<Value> {
+    let request_id = payload
+        .get("requestId")
+        .or_else(|| payload.get("request_id"))
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty());
     match packet {
-        "StoreItem" => Some(json!({
-            "ack": {
+        "StoreItem" | "StoreItemV2" => {
+            if packet == "StoreItemV2" && request_id.is_none() {
+                return None;
+            }
+            let request_id = (packet == "StoreItemV2").then_some(request_id).flatten();
+            let mut ack = json!({
                 "operation": "deposit",
                 "from": value_i32(payload.get("from"))?,
                 "to": value_i32(payload.get("to"))?,
                 "success": payload.get("success").and_then(Value::as_bool)?,
+            });
+            if let Some(request_id) = request_id {
+                ack["requestId"] = json!(request_id);
             }
-        })),
-        "TakeBackItem" => Some(json!({
-            "ack": {
+            Some(json!({ "ack": ack }))
+        }
+        "TakeBackItem" | "TakeBackItemV2" => {
+            if packet == "TakeBackItemV2" && request_id.is_none() {
+                return None;
+            }
+            let request_id = (packet == "TakeBackItemV2").then_some(request_id).flatten();
+            let mut ack = json!({
                 "operation": "withdraw",
                 "from": value_i32(payload.get("from"))?,
                 "to": value_i32(payload.get("to"))?,
                 "success": payload.get("success").and_then(Value::as_bool)?,
+            });
+            if let Some(request_id) = request_id {
+                ack["requestId"] = json!(request_id);
             }
-        })),
+            Some(json!({ "ack": ack }))
+        }
         "StorageUnlockResult" => {
             let result = value_i32(payload.get("result"))?;
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
@@ -4844,11 +4923,52 @@ mod tests {
         assert_eq!(
             deposit_ack,
             mir2_client_bevy::pending_operations::StorageOperationAck::Deposit {
+                request_id: None,
                 from: 3,
                 to: 9,
                 success: false,
             }
         );
+        let legacy_with_untrusted_id = transform_storage_patch_from_packet(
+            "StoreItem",
+            &json!({
+                "requestId": "st-0000000000000042",
+                "from": 3,
+                "to": 9,
+                "success": true
+            }),
+        )
+        .expect("legacy StoreItem acknowledgement");
+        assert!(legacy_with_untrusted_id["ack"].get("requestId").is_none());
+
+        let v2_deposit = transform_storage_patch_from_packet(
+            "StoreItemV2",
+            &json!({
+                "requestId": "st-0000000000000042",
+                "from": 3,
+                "to": 9,
+                "success": true
+            }),
+        )
+        .expect("V2 StoreItem acknowledgement");
+        assert_eq!(v2_deposit["ack"]["requestId"], json!("st-0000000000000042"));
+        assert_eq!(
+            serde_json::from_value::<mir2_client_bevy::pending_operations::StorageOperationAck>(
+                v2_deposit["ack"].clone()
+            )
+            .expect("typed V2 deposit acknowledgement"),
+            mir2_client_bevy::pending_operations::StorageOperationAck::Deposit {
+                request_id: Some("st-0000000000000042".to_owned()),
+                from: 3,
+                to: 9,
+                success: true,
+            }
+        );
+        assert!(transform_storage_patch_from_packet(
+            "StoreItemV2",
+            &json!({ "from": 3, "to": 9, "success": true }),
+        )
+        .is_none());
 
         let password_failure = transform_storage_patch_from_packet(
             "StoragePasswordResult",
@@ -5265,6 +5385,123 @@ mod tests {
     }
 
     #[test]
+    fn storage_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
+        let (sender, mut receiver) = command_channel(8);
+        for _ in 0..256 {
+            sender
+                .send(GatewayCommand::Player(PlayerIntent::Walk {
+                    direction: "up".to_owned(),
+                }))
+                .expect("ordinary saturation remains nonblocking");
+        }
+        sender
+            .send(GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
+                request_id: "st-0000000000000001".to_owned(),
+                from: 3,
+                to: 9,
+            }))
+            .expect("reserved correlated transaction lane");
+
+        let batch = drain_command_batch(&mut receiver, 8);
+        assert_eq!(
+            batch
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::StoreItem { request_id, .. })
+                        if request_id == "st-0000000000000001"
+                ))
+                .count(),
+            1
+        );
+        assert!(!drain_command_batch(&mut receiver, 8)
+            .iter()
+            .any(is_storage_transaction));
+    }
+
+    #[test]
+    fn second_correlated_transaction_fails_closed_while_lane_is_occupied() {
+        let (sender, mut receiver) = command_channel(8);
+        let store = |request_id: &str| {
+            GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
+                request_id: request_id.to_owned(),
+                from: 3,
+                to: 9,
+            })
+        };
+        assert!(sender.send(store("st-0000000000000001")).is_ok());
+        assert!(sender.send(store("st-0000000000000002")).is_err());
+        let batch = drain_command_batch(&mut receiver, 8);
+        assert_eq!(
+            batch
+                .iter()
+                .filter(|command| is_storage_transaction(command))
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn correlated_transaction_inserted_during_drain_waits_for_next_batch() {
+        struct RefillAfterFirst<'a> {
+            receiver: &'a mut GatewayCommandReceiver,
+            sender: GatewayCommandSender,
+            refilled: bool,
+        }
+
+        impl CommandSource for RefillAfterFirst<'_> {
+            fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
+                let command = self.receiver.try_recv();
+                if !self.refilled
+                    && command
+                        .as_ref()
+                        .is_ok_and(|command| is_correlated_transaction(command))
+                {
+                    self.refilled = true;
+                    self.sender
+                        .send(GatewayCommand::Wire(NativeOutboundCommand::TakeBackItem {
+                            request_id: "st-0000000000000002".to_owned(),
+                            from: 9,
+                            to: 3,
+                        }))
+                        .expect("slot was atomically freed by the first take");
+                }
+                command
+            }
+        }
+
+        let (sender, mut receiver) = command_channel(8);
+        sender
+            .send(GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
+                request_id: "st-0000000000000001".to_owned(),
+                from: 3,
+                to: 9,
+            }))
+            .unwrap();
+        let mut source = RefillAfterFirst {
+            receiver: &mut receiver,
+            sender,
+            refilled: false,
+        };
+
+        let first = drain_command_batch(&mut source, 8);
+        assert!(matches!(
+            first.as_slice(),
+            [GatewayCommand::Wire(NativeOutboundCommand::StoreItem { request_id, .. })]
+                if request_id == "st-0000000000000001"
+        ));
+        drop(source);
+
+        let second = drain_command_batch(&mut receiver, 8);
+        assert!(matches!(
+            second.as_slice(),
+            [GatewayCommand::Wire(NativeOutboundCommand::TakeBackItem { request_id, .. })]
+                if request_id == "st-0000000000000002"
+        ));
+        assert!(drain_command_batch(&mut receiver, 8).is_empty());
+    }
+
+    #[test]
     fn second_game_shop_transaction_fails_closed_while_lane_is_occupied() {
         let (sender, mut receiver) = command_channel(8);
         let purchase = |request_id: &str| {
@@ -5357,6 +5594,126 @@ mod tests {
             .all(|command| !is_game_shop_transaction(command)));
     }
 
+    #[tokio::test]
+    async fn prewrite_storage_in_retry_and_connect_wait_resets_and_never_replays() {
+        let storage = || {
+            GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
+                request_id: "st-0000000000000010".to_owned(),
+                from: 3,
+                to: 9,
+            })
+        };
+
+        let (retry_sender, mut retry_receiver) = command_channel(8);
+        retry_sender.send(storage()).unwrap();
+        retry_sender.send(GatewayCommand::Connect).unwrap();
+        let mut retry_gate = GameShopReceiptGate::default();
+        let mut retry_resets = 0;
+        let outcome = wait_for_retry_or_leave_with_reset(
+            &mut retry_receiver,
+            Duration::from_secs(1),
+            8,
+            &mut retry_gate,
+            None,
+            || {
+                retry_resets += 1;
+                true
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(outcome, RetryWait::Connect);
+        assert_eq!(retry_resets, 1);
+        assert!(drain_command_batch(&mut retry_receiver, 8).is_empty());
+
+        let (connect_sender, mut connect_receiver) = command_channel(8);
+        connect_sender.send(storage()).unwrap();
+        connect_sender.send(GatewayCommand::Connect).unwrap();
+        let mut connect_gate = GameShopReceiptGate::default();
+        let mut connect_resets = 0;
+        assert!(wait_for_connect_request_with_reset(
+            &mut connect_receiver,
+            8,
+            &mut connect_gate,
+            || {
+                connect_resets += 1;
+                true
+            },
+        )
+        .await
+        .unwrap());
+        assert_eq!(connect_resets, 1);
+        assert!(drain_command_batch(&mut connect_receiver, 8).is_empty());
+    }
+
+    #[test]
+    fn prewrite_storage_in_resume_and_pre_normal_paths_resets_without_socket_write() {
+        let storage = || {
+            GatewayCommand::Wire(NativeOutboundCommand::TakeBackItem {
+                request_id: "st-0000000000000011".to_owned(),
+                from: 9,
+                to: 3,
+            })
+        };
+
+        let (sender, mut receiver) = command_channel(8);
+        sender.send(storage()).unwrap();
+        let mut gate = GameShopReceiptGate::default();
+        let mut resume_resets = 0;
+        assert!(matches!(
+            drain_resume_lifecycle_commands_with_reset(&mut receiver, 8, &mut gate, || {
+                resume_resets += 1;
+                true
+            },),
+            ResumeLifecycle::Complete(())
+        ));
+        assert_eq!(resume_resets, 1);
+        assert!(drain_command_batch(&mut receiver, 8).is_empty());
+
+        let mut pre_normal_resets = 0;
+        let mut socket_writes = 0;
+        if discard_correlated_before_socket_write(&storage(), &mut gate, || {
+            pre_normal_resets += 1;
+            true
+        }) {
+            // This is exactly the branch used by the connected loop while its
+            // phase is not Normal.
+        } else {
+            socket_writes += 1;
+        }
+        assert_eq!(pre_normal_resets, 1);
+        assert_eq!(socket_writes, 0);
+    }
+
+    #[test]
+    fn saturated_storage_patch_falls_back_to_non_evictable_reset_barrier() {
+        let mut delivered = Vec::new();
+        let mut resets = 0;
+        assert!(push_storage_patch_or_reset(
+            "{\"ack\":{\"operation\":\"deposit\"}}".to_owned(),
+            |json| {
+                delivered.push(json);
+                false
+            },
+            || {
+                resets += 1;
+                true
+            },
+        ));
+        assert_eq!(delivered.len(), 1);
+        assert_eq!(resets, 1);
+
+        assert!(push_storage_patch_or_reset(
+            "{}".to_owned(),
+            |_| true,
+            || {
+                resets += 1;
+                true
+            },
+        ));
+        assert_eq!(resets, 1, "successful receipt must not reset the session");
+    }
+
     #[test]
     fn prewrite_transaction_frozen_awaiting_resume_marks_all_owners_unknown_once() {
         use mir2_client_bevy::crystal_ui::NativePlayerUiState;
@@ -5378,7 +5735,7 @@ mod tests {
         let mut resets = 0;
         let mut socket_sends = 0;
         for command in batch {
-            if discard_game_shop_before_socket_write(
+            if discard_correlated_before_socket_write(
                 &command,
                 &mut GameShopReceiptGate::default(),
                 || {

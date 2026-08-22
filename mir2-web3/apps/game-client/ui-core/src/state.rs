@@ -426,9 +426,20 @@ pub struct UiState {
     /// terminal connection reset. The client must refresh mail/wallet and
     /// must never replay the purchase automatically.
     pub game_shop_unknown: bool,
+    /// Per-session ordinary personal-storage correlation state. This is a
+    /// contract seam only; no renderer is implied by these fields.
+    #[serde(default = "default_storage_next_request_id")]
+    pub storage_next_request_id: u64,
+    pub storage_pending: Option<crate::storage::StorageRequest>,
+    pub storage_last_receipt: Option<crate::storage::StorageReceipt>,
+    pub storage_unknown: bool,
 }
 
 fn default_game_shop_next_request_id() -> u64 {
+    1
+}
+
+fn default_storage_next_request_id() -> u64 {
     1
 }
 
@@ -457,6 +468,10 @@ impl Default for UiState {
             game_shop_pending: None,
             game_shop_last_receipt: None,
             game_shop_unknown: false,
+            storage_next_request_id: 1,
+            storage_pending: None,
+            storage_last_receipt: None,
+            storage_unknown: false,
         }
     }
 }
@@ -541,6 +556,54 @@ impl UiState {
         self.game_shop_last_receipt = None;
         self.game_shop_unknown = false;
         true
+    }
+
+    pub fn begin_storage_request(
+        &mut self,
+        operation: crate::storage::StorageOperation,
+        from: i32,
+        to: i32,
+    ) -> Option<crate::storage::StorageRequest> {
+        if self.storage_pending.is_some() || self.storage_next_request_id == 0 {
+            return None;
+        }
+        let request_id = crate::storage::request_id_for_sequence(self.storage_next_request_id);
+        let request = crate::storage::StorageRequest::new(request_id, operation, from, to)?;
+        self.storage_next_request_id =
+            crate::storage::next_request_sequence(self.storage_next_request_id);
+        self.storage_pending = Some(request.clone());
+        self.storage_unknown = false;
+        Some(request)
+    }
+
+    pub fn apply_storage_receipt(&mut self, receipt: crate::storage::StorageReceipt) -> bool {
+        if !receipt.is_valid() {
+            return false;
+        }
+        let Some(request) = self.storage_pending.as_ref() else {
+            return false;
+        };
+        if !receipt.matches_request(request) {
+            return false;
+        }
+        self.storage_last_receipt = Some(receipt);
+        self.storage_pending = None;
+        self.storage_unknown = false;
+        true
+    }
+
+    pub fn mark_storage_unknown(&mut self) {
+        if self.storage_pending.take().is_some() {
+            self.storage_unknown = true;
+        }
+    }
+
+    pub fn clear_storage_session(&mut self) {
+        let had_pending = self.storage_pending.take().is_some();
+        // Keep the process-lifetime sequence monotonic. Reusing an identifier
+        // after reconnect would let a delayed receipt match a later request.
+        self.storage_last_receipt = None;
+        self.storage_unknown = had_pending;
     }
 
     pub fn is_inventory_open(&self) -> bool {

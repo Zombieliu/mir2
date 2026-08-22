@@ -9,6 +9,7 @@ pub enum PacketCodecError {
     NegativeLength { field: &'static str, value: i32 },
     Invalid7BitEncodedInt,
     InvalidUtf8String,
+    InvalidRequestId,
     InvalidBool(u8),
     InvalidEnumValue { type_name: &'static str, value: u8 },
     UnknownClientPacketId(i16),
@@ -49,6 +50,7 @@ impl Display for PacketCodecError {
             }
             Self::Invalid7BitEncodedInt => write!(f, "invalid .NET 7-bit encoded integer"),
             Self::InvalidUtf8String => write!(f, "invalid utf-8 string data"),
+            Self::InvalidRequestId => write!(f, "invalid request id"),
             Self::InvalidBool(value) => write!(f, "invalid bool value: {value}"),
             Self::InvalidEnumValue { type_name, value } => {
                 write!(f, "invalid {type_name} enum value: {value}")
