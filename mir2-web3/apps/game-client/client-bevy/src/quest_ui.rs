@@ -17,6 +17,7 @@ use bevy::ui::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::crystal_ui::hud::HUD_Z_INDEX;
 use crate::crystal_ui::overlays::{
     dispatch_ui_action, NativePlayerUiSet, NativePlayerUiState, UiEffectQueue,
 };
@@ -496,6 +497,11 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
                     display: Display::None,
                     ..default()
                 },
+                // Crystal's quest diary is a sorted movable window, not a
+                // modal screen. Keep world capture below the persistent HUD
+                // so every bottom-bar control remains reachable while the
+                // diary is open; the quest panels themselves stay at 980.
+                GlobalZIndex(HUD_Z_INDEX - 1),
                 BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
                 FocusPolicy::Block,
             ));

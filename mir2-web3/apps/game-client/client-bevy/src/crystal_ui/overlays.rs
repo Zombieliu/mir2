@@ -1466,6 +1466,12 @@ struct BigMapPlayerEntity {
     location: BigMapPoint,
 }
 
+/// Renderer-only marker for the authoritative map response wait state.  It
+/// intentionally carries no map identity or fake image: once the server
+/// supplies `map_image_url`, the normal panel rebuild removes this entity.
+#[derive(Debug, Clone, Copy, Component, PartialEq, Eq)]
+struct BigMapLoadingText;
+
 #[derive(Debug, Clone, Component, PartialEq, Eq)]
 struct BigMapNpcRowEntity {
     object_id: u32,
@@ -7337,6 +7343,24 @@ fn render_bigmap(
                     },
                     BackgroundColor(Color::srgb(0.02, 0.015, 0.01)),
                 ));
+                viewport.spawn((
+                    BigMapLoadingText,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(0.0),
+                        top: Val::Px(BIGMAP_HEIGHT * 0.5 - 8.0),
+                        width: Val::Px(BIGMAP_WIDTH),
+                        height: Val::Px(16.0),
+                        ..default()
+                    },
+                    Text::new("Loading map..."),
+                    TextFont {
+                        font_size: FontSize::Px(12.0),
+                        ..default()
+                    },
+                    TextColor(Color::srgb(0.82, 0.74, 0.55)),
+                    TextLayout::justify(Justify::Center),
+                ));
             }
 
             if model.view == BigMapView::WorldMap && model.world.enabled {
@@ -8899,6 +8923,161 @@ mod tests {
     }
 
     #[test]
+    fn hud_controls_remain_above_quest_world_blocker_and_options_switches_panel() {
+        // This intentionally wires the real native HUD, overlay renderer and
+        // quest renderer together.  A reducer-only test cannot catch the
+        // full-stage quest modal blocker covering the HUD hit target.
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
+            .init_asset::<Image>()
+            .init_asset::<bevy::audio::AudioSource>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<KeyboardInput>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_plugins((
+                super::super::hud::Mir2CrystalHudPlugin,
+                crate::quest_ui::Mir2QuestUiPlugin,
+            ));
+
+        // Startup creates the actual HUD/Quest/Options entities.
+        app.update();
+
+        let option_button = {
+            let mut query = app.world_mut().query::<(Entity, &CrystalHudAction)>();
+            query
+                .iter(app.world())
+                .find_map(|(entity, action)| {
+                    matches!(action, CrystalHudAction::Option).then_some(entity)
+                })
+                .expect("native HUD option button should be present")
+        };
+
+        let hud_z = {
+            let mut query = app
+                .world_mut()
+                .query_filtered::<&GlobalZIndex, With<super::super::hud::CrystalHudRoot>>();
+            query.single(app.world()).expect("HUD root should exist").0
+        };
+        let world_blocker_z = {
+            let mut query = app.world_mut().query::<(&Node, &GlobalZIndex)>();
+            query
+                .iter(app.world())
+                .find_map(|(node, z)| {
+                    (node.width == Val::Percent(100.0)
+                        && node.height == Val::Percent(100.0)
+                        && z.0 < 980)
+                        .then_some(z.0)
+                })
+                .expect("quest world blocker should carry an explicit z-index")
+        };
+        assert!(
+            world_blocker_z < hud_z,
+            "quest world blocker must stay below every persistent HUD control"
+        );
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::QuestLog;
+        app.update();
+
+        // Press the real HUD button entity as Bevy's pointer hit-test would.
+        // The quest modal is open at this point, so this reproduces the
+        // previously failing transition rather than opening Options in an
+        // otherwise empty game state.
+        app.world_mut()
+            .entity_mut(option_button)
+            .insert(Interaction::Pressed);
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert_eq!(
+            state.core.panel,
+            mir2_ui_core::state::UiPanel::Options,
+            "HUD Option must replace QuestLog, not merely close it"
+        );
+        assert!(
+            state.blocks_world_click(),
+            "Options must capture world clicks"
+        );
+
+        let options_visible = {
+            let mut query = app.world_mut().query::<(&OverlayOptions, &Node)>();
+            query
+                .iter(app.world())
+                .any(|(_, node)| node.display == Display::Flex)
+        };
+        assert!(
+            options_visible,
+            "OverlayOptions must be visible after the switch"
+        );
+
+        let quest_root_stays_in_game_layer = {
+            let mut query = app.world_mut().query::<(&GlobalZIndex, &Node)>();
+            query
+                .iter(app.world())
+                .any(|(z, node)| z.0 == 980 && node.display == Display::Flex)
+        };
+        assert!(
+            quest_root_stays_in_game_layer,
+            "QuestUiRoot remains the in-game layer"
+        );
+        let quest_log_hidden = {
+            let mut query = app.world_mut().query::<&Node>();
+            query.iter(app.world()).any(|node| {
+                node.left == Val::Px(212.0)
+                    && node.top == Val::Px(80.0)
+                    && node.width == Val::Px(600.0)
+                    && node.display == Display::None
+            })
+        };
+        assert!(
+            quest_log_hidden,
+            "QuestLog panel must disappear after opening Options"
+        );
+        let quest_blocker_hidden = {
+            let mut query = app.world_mut().query::<&Node>();
+            query.iter(app.world()).any(|node| {
+                node.width == Val::Percent(100.0)
+                    && node.height == Val::Percent(100.0)
+                    && node.display == Display::None
+            })
+        };
+        assert!(
+            quest_blocker_hidden,
+            "Quest modal blocker must release the pointer"
+        );
+
+        // Release then press again to verify the same HUD control closes the
+        // Options panel and does not leave a stale visible overlay behind.
+        app.world_mut()
+            .entity_mut(option_button)
+            .insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(option_button)
+            .insert(Interaction::Pressed);
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::None);
+        assert!(!state.blocks_world_click());
+        let options_hidden = {
+            let mut query = app.world_mut().query::<(&OverlayOptions, &Node)>();
+            query
+                .iter(app.world())
+                .all(|(_, node)| node.display == Display::None)
+        };
+        assert!(
+            options_hidden,
+            "repeated Option click must hide the overlay"
+        );
+    }
+
+    #[test]
     fn exit_application_effect_is_taken_once_without_swallowing_gateway_work() {
         let mut effects = UiEffectQueue::default();
         effects.push(mir2_ui_core::effect::UiEffect::GatewayCommand(
@@ -9804,6 +9983,41 @@ mod tests {
         assert_eq!(rows[0].object_id, 77);
         assert_eq!(rows[0].name, "Village Guide");
         assert_eq!(rows[0].location, BigMapPoint { x: 330, y: 270 });
+        assert_eq!(
+            app.world_mut()
+                .query::<&BigMapLoadingText>()
+                .iter(app.world())
+                .count(),
+            0,
+            "an authoritative map image must replace the loading state"
+        );
+    }
+
+    #[test]
+    fn big_map_ecs_shows_loading_text_without_authoritative_image() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<BigMapModel>()
+            .init_resource::<BigMapUiState>()
+            .init_resource::<UiReadModel>()
+            .add_systems(Startup, spawn_big_map_render_test);
+
+        app.update();
+
+        let world = app.world_mut();
+        let loading = world
+            .query::<(&BigMapLoadingText, &Text)>()
+            .iter(world)
+            .map(|(_, text)| text.0.clone())
+            .collect::<Vec<_>>();
+        assert_eq!(loading, vec!["Loading map...".to_owned()]);
+        assert_eq!(
+            world.query::<&BigMapImageEntity>().iter(world).count(),
+            0,
+            "waiting for authority must not fabricate a map image"
+        );
     }
 
     #[test]

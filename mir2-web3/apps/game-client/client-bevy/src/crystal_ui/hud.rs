@@ -18,7 +18,7 @@ use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
-const HUD_Z_INDEX: i32 = 950;
+pub(crate) const HUD_Z_INDEX: i32 = 950;
 
 /// Fixed source dimensions of Crystal's `Prguse/4` orb texture.
 pub const ORB_WIDTH: f32 = 104.0;
