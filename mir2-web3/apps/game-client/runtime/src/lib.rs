@@ -125,6 +125,9 @@ struct RuntimeSceneResetTracker(u64);
 #[derive(Resource, Default)]
 struct RuntimeSceneModelResetTracker(u64);
 
+#[derive(Resource, Default)]
+struct RuntimeEffectShadowCleanupTracker(u64);
+
 /// Production native session-boundary pipeline, factored as a plugin so host
 /// state-machine tests can exercise the exact same reset and receipt systems
 /// without creating a renderer/window.
@@ -203,7 +206,7 @@ struct SceneRegistry {
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     effect_render: HashMap<String, EffectRenderLayerHandle>,
     effect_render_masks: HashMap<String, EffectRenderLayerHandle>,
-    effect_render_shadows: HashMap<String, Entity>,
+    effect_render_shadows: HashMap<String, EffectShadowLayerHandle>,
     effect_render_images: HashMap<String, Handle<Image>>,
     lighting_layers: HashMap<String, EffectRenderLayerHandle>,
     lighting_images: Vec<Handle<Image>>,
@@ -282,6 +285,16 @@ struct EffectRenderLayerHandle {
     entity: Entity,
     image_key: String,
     additive: bool,
+}
+
+/// Retained procedural ground shadow for a scene effect. The mesh and material
+/// are owned by the handle so removing an effect can release both GPU-facing
+/// assets immediately instead of relying on asset-server ref counting.
+#[derive(Clone)]
+struct EffectShadowLayerHandle {
+    entity: Entity,
+    mesh: Handle<Mesh>,
+    material: Handle<ColorMaterial>,
 }
 
 #[derive(Clone)]
@@ -1112,6 +1125,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(SceneResetRevision::default())
         .insert_resource(RuntimeSceneResetTracker::default())
         .insert_resource(RuntimeSceneModelResetTracker::default())
+        .insert_resource(RuntimeEffectShadowCleanupTracker::default())
         .insert_resource(native_ingest::NativeInbound::new())
         .add_plugins(
             DefaultPlugins
@@ -1153,6 +1167,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             Update,
             (
                 apply_scene_reset_to_runtime,
+                cleanup_reset_effect_shadows,
                 apply_scene_reset_to_lighting,
                 apply_scene_reset_to_scene_models,
                 ingest_pending_world_state,
@@ -1692,6 +1707,26 @@ fn apply_scene_reset_to_runtime(
         &mut additive_cache,
         &mut additive_materials,
     );
+}
+
+fn cleanup_reset_effect_shadows(
+    reset: Res<SceneResetRevision>,
+    mut tracker: ResMut<RuntimeEffectShadowCleanupTracker>,
+    mut registry: ResMut<SceneRegistry>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut shadow_materials: ResMut<Assets<ColorMaterial>>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+
+    for (_, handle) in registry.effect_render_shadows.drain() {
+        commands.entity(handle.entity).despawn();
+        meshes.remove(handle.mesh.id());
+        shadow_materials.remove(handle.material.id());
+    }
 }
 
 fn apply_scene_reset_to_lighting(
@@ -2638,6 +2673,7 @@ fn sync_effect_render(
     asset_server: Res<AssetServer>,
     state: Res<RuntimeEffectRenderState>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut shadow_materials: ResMut<Assets<ColorMaterial>>,
     mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
     mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
     mut registry: ResMut<SceneRegistry>,
@@ -2653,6 +2689,8 @@ fn sync_effect_render(
             &mut registry,
             &mut additive_cache,
             &mut additive_materials,
+            &mut meshes,
+            &mut shadow_materials,
         );
         return;
     };
@@ -2662,6 +2700,8 @@ fn sync_effect_render(
             &mut registry,
             &mut additive_cache,
             &mut additive_materials,
+            &mut meshes,
+            &mut shadow_materials,
         );
         return;
     }
@@ -2865,17 +2905,63 @@ fn sync_effect_render(
             }
         }
 
-        // Shadow lifecycle: the rule is "if should-show, create/update; otherwise
-        // ALWAYS remove". There is no packed shadow data in the current export and
-        // no shadow texture in the asset root, so shadow drawing is temporarily
-        // DISABLED: we never spawn a fake ellipse and always remove any previous
-        // one. The lifecycle (create-on-should-show / remove-otherwise) is kept
-        // so a later SHADOW goal can flip on a real ellipse Mesh2d + material.
-        if let Some(entity) = registry
-            .effect_render_shadows
-            .remove(&format!("{}:shadow", effect.key))
-        {
-            commands.entity(entity).despawn();
+        // Shadow metadata is a complete pair: Some(0) is still a valid axis,
+        // while a missing axis means the producer has no legal shadow for this
+        // frame. The shadow is an independent procedural ellipse, so its offset
+        // can never move or resize the primary effect frame.
+        let shadow_key = format!("{}:shadow", effect.key);
+        match (effect.shadow_x, effect.shadow_y) {
+            (Some(shadow_x), Some(shadow_y)) => {
+                let shadow_size = Vec2::new(
+                    (effect.width * 0.70).max(8.0),
+                    (effect.height * 0.24).max(4.0),
+                );
+                let primary_position = effect_render_layer_position(snapshot, effect);
+                let shadow_position = Vec3::new(
+                    primary_position.x + shadow_x,
+                    primary_position.y - shadow_y,
+                    primary_position.z - 0.0005,
+                );
+
+                if let Some(handle) = registry.effect_render_shadows.get(&shadow_key) {
+                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        transform.translation = shadow_position;
+                        transform.scale = Vec3::new(shadow_size.x, shadow_size.y, 1.0);
+                    }
+                } else {
+                    let mesh = meshes.add(Ellipse::new(0.5, 0.5));
+                    let material = shadow_materials.add(ColorMaterial::from_color(Color::srgba(
+                        0.02, 0.01, 0.01, 0.28,
+                    )));
+                    let entity = commands
+                        .spawn((
+                            MirEffectRenderLayer,
+                            Mesh2d(mesh.clone()),
+                            MeshMaterial2d(material.clone()),
+                            Transform::from_translation(shadow_position).with_scale(Vec3::new(
+                                shadow_size.x,
+                                shadow_size.y,
+                                1.0,
+                            )),
+                        ))
+                        .id();
+                    registry.effect_render_shadows.insert(
+                        shadow_key,
+                        EffectShadowLayerHandle {
+                            entity,
+                            mesh,
+                            material,
+                        },
+                    );
+                }
+            }
+            _ => remove_effect_shadow_layer(
+                &shadow_key,
+                &mut commands,
+                &mut registry,
+                &mut meshes,
+                &mut shadow_materials,
+            ),
         }
     }
 
@@ -2899,9 +2985,13 @@ fn sync_effect_render(
             additive_cache.evict(&mask_key, &mut additive_materials);
         }
         let shadow_key = format!("{}:shadow", key);
-        if let Some(entity) = registry.effect_render_shadows.remove(&shadow_key) {
-            commands.entity(entity).despawn();
-        }
+        remove_effect_shadow_layer(
+            &shadow_key,
+            &mut commands,
+            &mut registry,
+            &mut meshes,
+            &mut shadow_materials,
+        );
     }
 
     // Evict standalone images no longer referenced by any effect.
@@ -2927,6 +3017,8 @@ fn clear_effect_render_layers(
     registry: &mut SceneRegistry,
     additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
     additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+    meshes: &mut Assets<Mesh>,
+    shadow_materials: &mut Assets<ColorMaterial>,
 ) {
     for (key, handle) in registry.effect_render.drain() {
         commands.entity(handle.entity).despawn();
@@ -2938,10 +3030,26 @@ fn clear_effect_render_layers(
         commands.entity(handle.entity).despawn();
         additive_cache.evict(&key, additive_materials);
     }
-    for (_, entity) in registry.effect_render_shadows.drain() {
-        commands.entity(entity).despawn();
+    for (_, handle) in registry.effect_render_shadows.drain() {
+        commands.entity(handle.entity).despawn();
+        meshes.remove(handle.mesh.id());
+        shadow_materials.remove(handle.material.id());
     }
     registry.effect_render_images.clear();
+}
+
+fn remove_effect_shadow_layer(
+    key: &str,
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    meshes: &mut Assets<Mesh>,
+    shadow_materials: &mut Assets<ColorMaterial>,
+) {
+    if let Some(handle) = registry.effect_render_shadows.remove(key) {
+        commands.entity(handle.entity).despawn();
+        meshes.remove(handle.mesh.id());
+        shadow_materials.remove(handle.material.id());
+    }
 }
 
 /// Despawn every retained scene entity and clear every renderer-side scene
@@ -2961,7 +3069,15 @@ fn clear_scene_registry(
     }
     registry.entity_render_atlases.clear();
 
-    clear_effect_render_layers(commands, registry, additive_cache, additive_materials);
+    // Keep the shadow handles until cleanup_reset_effect_shadows can remove
+    // their mesh/material assets; this reset system intentionally has a
+    // bounded parameter list because it is part of a chained system tuple.
+    clear_effect_render_layers_for_scene_reset(
+        commands,
+        registry,
+        additive_cache,
+        additive_materials,
+    );
 
     for entity in registry.map.spawned.drain(..) {
         commands.entity(entity).despawn();
@@ -2975,6 +3091,25 @@ fn clear_scene_registry(
 
     registry.map = MapSceneCache::default();
     registry.map_render = MapRenderSceneCache::default();
+}
+
+fn clear_effect_render_layers_for_scene_reset(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+) {
+    for (key, handle) in registry.effect_render.drain() {
+        commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&key, additive_materials);
+        }
+    }
+    for (key, handle) in registry.effect_render_masks.drain() {
+        commands.entity(handle.entity).despawn();
+        additive_cache.evict(&key, additive_materials);
+    }
+    registry.effect_render_images.clear();
 }
 
 fn ingest_pending_map_render_images(
@@ -5505,6 +5640,7 @@ mod effect_mask_shadow_tests {
             .add_plugins(AssetPlugin::default())
             .init_asset::<Image>()
             .init_asset::<Mesh>()
+            .init_asset::<ColorMaterial>()
             .init_asset::<crate::additive_material::CrystalAdditiveMaterial>()
             .init_asset::<crate::lighting::CrystalMultiplyMaterial>()
             .init_resource::<SceneRegistry>()
@@ -5512,9 +5648,11 @@ mod effect_mask_shadow_tests {
             .init_resource::<RuntimeLightingRenderState>()
             .init_resource::<SceneResetRevision>()
             .init_resource::<RuntimeLightingSceneResetTracker>()
+            .init_resource::<RuntimeEffectShadowCleanupTracker>()
             .init_resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
             .init_resource::<Assets<Image>>()
             .init_resource::<Assets<Mesh>>()
+            .init_resource::<Assets<ColorMaterial>>()
             .init_resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
             .init_resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
             .add_systems(
@@ -5523,6 +5661,7 @@ mod effect_mask_shadow_tests {
                     apply_scene_reset_to_lighting,
                     sync_effect_render,
                     sync_lighting_render,
+                    cleanup_reset_effect_shadows,
                 )
                     .chain(),
             );
@@ -5532,9 +5671,7 @@ mod effect_mask_shadow_tests {
     #[test]
     fn sync_effect_render_spawns_primary_mask_and_shadow_and_cleans_up() {
         // Run the real ECS sync_effect_render system and verify the layer
-        // lifecycle: spawn, update, despawn, and material recycling. Shadow is
-        // temporarily disabled (no packed shadow asset), so it never spawns but
-        // the "always remove" path is exercised.
+        // lifecycle: spawn, update, despawn, and asset recycling.
         let mut app = sync_test_app();
         // A mask+shadow effect snapshot (geometry distinct from primary: the
         // producer sends real local values frame.x=-20, frame.y=0, maskX=3,
@@ -5592,10 +5729,27 @@ mod effect_mask_shadow_tests {
             "mask uses mask width"
         );
 
-        // Shadow disabled for now (no real shadow asset): never spawned, always removed.
+        // (4, 0) is valid: a single axis may be zero, and the shadow remains
+        // below the primary without changing the primary transform.
+        assert_eq!(registry.effect_render_shadows.len(), 1, "shadow spawned");
+        let shadow_entity = registry.effect_render_shadows["fx-e2e:shadow"].entity;
+        let primary_entity = registry.effect_render["fx-e2e"].entity;
+        let primary_transform = *app.world().get::<Transform>(primary_entity).unwrap();
+        let shadow_transform = *app.world().get::<Transform>(shadow_entity).unwrap();
+        assert!(shadow_transform.translation.z < primary_transform.translation.z);
         assert!(
-            registry.effect_render_shadows.is_empty(),
-            "shadow not spawned when disabled"
+            (shadow_transform.translation.x - (primary_transform.translation.x + 4.0)).abs() < 0.5
+        );
+        assert_ne!(shadow_transform.scale, primary_transform.scale);
+        assert_eq!(
+            app.world().resource::<Assets<ColorMaterial>>().len(),
+            1,
+            "shadow owns one procedural material"
+        );
+        assert_eq!(
+            app.world().resource::<Assets<Mesh>>().len(),
+            2,
+            "primary unit quad and shadow ellipse are allocated"
         );
 
         // Update the same effect (retained in place, no new entities).
@@ -5610,6 +5764,11 @@ mod effect_mask_shadow_tests {
             .resource::<SceneRegistry>()
             .effect_render_shadows
             .len();
+        let shadow_entity_after_first_update = app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows["fx-e2e:shadow"]
+            .entity;
         app.update();
         let registry_after = app.world().resource::<SceneRegistry>();
         assert_eq!(
@@ -5626,6 +5785,11 @@ mod effect_mask_shadow_tests {
             registry_after.effect_render_shadows.len(),
             shadow_count,
             "no duplicate shadow on update"
+        );
+        assert_eq!(
+            registry_after.effect_render_shadows["fx-e2e:shadow"].entity,
+            shadow_entity_after_first_update,
+            "shadow entity retained on update"
         );
 
         // Remove the effect; all layers and materials are cleaned up.
@@ -5653,11 +5817,22 @@ mod effect_mask_shadow_tests {
             .world()
             .resource::<crate::additive_material::CrystalAdditiveMaterialCache>();
         assert_eq!(cache.len(), 0, "materials recycled");
+        assert_eq!(
+            app.world().resource::<Assets<ColorMaterial>>().len(),
+            0,
+            "shadow materials recycled"
+        );
+        assert_eq!(
+            app.world().resource::<Assets<Mesh>>().len(),
+            1,
+            "shadow ellipse mesh recycled while primary unit quad remains"
+        );
     }
 
     #[test]
     fn sync_effect_render_no_shadow_when_only_single_axis_missing() {
-        // A mask with no shadow data must not create a shadow entity.
+        // A missing axis must not create a shadow entity, even though the other
+        // axis is present.
         let mut app = sync_test_app();
         app.world_mut()
             .resource_mut::<RuntimeEffectRenderState>()
@@ -5693,6 +5868,116 @@ mod effect_mask_shadow_tests {
             "no shadow when pair incomplete"
         );
         assert_eq!(registry.effect_render.len(), 1, "primary still rendered");
+    }
+
+    #[test]
+    fn sync_effect_render_shadow_zero_axes_still_spawn_and_update_in_place() {
+        let mut app = sync_test_app();
+        let shadow_state = |x, y| EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-zero-axis".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                mask_image_url: None,
+                mask_width: None,
+                mask_height: None,
+                mask_x: None,
+                mask_y: None,
+                frame_x: None,
+                frame_y: None,
+                shadow_x: Some(x),
+                shadow_y: Some(y),
+            }],
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(shadow_state(0.0, -5.0));
+        app.update();
+        let first = app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows["fx-zero-axis:shadow"]
+            .clone();
+        let first_transform = *app.world().get::<Transform>(first.entity).unwrap();
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 1);
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(shadow_state(6.0, 0.0));
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        let updated = registry.effect_render_shadows["fx-zero-axis:shadow"].clone();
+        assert_eq!(
+            updated.entity, first.entity,
+            "zero-axis update retained entity"
+        );
+        assert_eq!(
+            updated.material, first.material,
+            "zero-axis update retained material"
+        );
+        let updated_transform = *app.world().get::<Transform>(updated.entity).unwrap();
+        assert_ne!(updated_transform.translation, first_transform.translation);
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 1);
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![],
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows
+            .is_empty());
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 0);
+        assert_eq!(app.world().resource::<Assets<Mesh>>().len(), 1);
+    }
+
+    #[test]
+    fn sync_effect_render_scene_reset_recycles_shadow_assets() {
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(effect_state_with_mask(None, Some((0.0, 0.0))));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .effect_render_shadows
+                .len(),
+            1
+        );
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 1);
+
+        // MapChanged and LogOut both advance the scene reset revision in the
+        // native host. Clearing the snapshot before the revision models the
+        // same boundary and prevents the renderer from recreating the layer.
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = None;
+        app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
+        app.update();
+
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows
+            .is_empty());
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 0);
+        assert_eq!(app.world().resource::<Assets<Mesh>>().len(), 1);
     }
 
     #[test]
