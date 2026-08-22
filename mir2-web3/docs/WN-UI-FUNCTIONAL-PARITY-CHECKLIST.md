@@ -4,6 +4,18 @@
 > 目标：Windows 原生客户端中每个可见页面、按钮、输入框、列表项和快捷键都与 Crystal 原版具有一致的可见结果与服务端结果。
 > 原则：页面能显示不等于功能完成；按钮有贴图不等于按钮可用；自动登录、环境变量和直接发包不能替代真实鼠标/键盘验收。
 
+> 2026-08-23 R8 真实窗口与视觉进度：最新真实窗口已通过 Login、Select、
+> InGame 以及 Character、Inventory、Skill、Quest、Mail、BigMap、GameShop、
+> Menu 的基础打开/关闭或导航检查。BigMap 已增加 loading 状态，约 1–2 秒后
+> 加载权威地图视图；EXP 与重量已绑定权威玩家数据。地图/实体照明和 FireBall
+> 施法、弹道、命中三阶段已实现。导出的 effect mask 素材仍为 null，shadow
+> 元数据仍为零，但原生 runtime 的 procedural shadow 已恢复。技能的
+> cast/projectile/impact 光照已按帧发布、绑定 generation，并提交为
+> `a46e0ecd4`。最新 Release 已在真实 100% DPI 窗口验证 Quest 打开时 Options
+> 与 Character 均可点击，且 Options 会替换 Quest；BigMap loading 也已在真实
+> 窗口观察到。真机 125%/150% DPI 与真人 `Accepted` 仍保持 OPEN。本
+> checkpoint 只追加当前事实，不改变下方历史结论或验收勾选。
+
 > 2026-08-21 R1 集成：账号改密、删除确认、Safe Key、本地共享
 > `ui-core`、Mail/Shop/Storage 严格数据入口及 Android 主机骨架已落地，
 > 自动化门禁通过。Options 的运行时 effect consumer、Big Map、Chat

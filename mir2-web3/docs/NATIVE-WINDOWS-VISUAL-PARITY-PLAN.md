@@ -22,6 +22,22 @@
 > `docs/NATIVE-WINDOWS-VISUAL-VALIDATION-REPORT.md`; do not reuse the old 88/100
 > HUD score as evidence for the current full scene.
 
+> 2026-08-23 R8 checkpoint: latest real-window smoke coverage has passed
+> Login, Select, InGame, Character, Inventory, Skill, Quest, Mail, BigMap,
+> GameShop and Menu open/close or navigation checks. BigMap now shows an
+> explicit loading state and loads the authoritative map view after roughly
+> 1–2 seconds. EXP and weight are bound to authoritative player data. The
+> map/entity lighting path and the FireBall cast/projectile/impact three-phase
+> effect path are implemented. Exported effect assets still have null mask
+> metadata and zero shadow metadata; the native runtime procedural shadow path
+> has nevertheless been restored. Active cast/projectile/impact lighting is
+> generation-bound, rebuilt on every effect tick, and committed in
+> `a46e0ecd4`. The newest Release was exercised at 100% DPI: while Quest was
+> visible both Options and Character remained reachable, and Options replaced
+> Quest instead of only closing it. BigMap's loading text was also observed
+> before the authoritative image/NPC list arrived. Real hardware 125%/150%
+> DPI checks and final human `Accepted` remain open.
+
 > 2026-08-19 V6 alternate-class/combat update: native entity composition now
 > routes Archer `ARArmour`/`ARHair`/`ARWeapon` action families and Assassin
 > `AArmour`/`AHair`/directional dual-`AWeapon*` action families with Web-equivalent
