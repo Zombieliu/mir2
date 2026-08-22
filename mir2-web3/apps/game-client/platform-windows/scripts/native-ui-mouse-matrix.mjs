@@ -37,7 +37,7 @@ const CASES = Object.freeze([
   { id: 'hud-shop', page: 'Shop', entry: 'HUD.GAME_SHOP', point: { x: 939, y: 670 }, safe: true, precondition: 'InGame.' },
   { id: 'hud-warehouse', page: 'Warehouse', entry: 'HUD.WAREHOUSE', point: { x: 985, y: 670 }, safe: true, precondition: 'InGame and storage/NPC service is available.' },
   { id: 'npc', page: 'NPC', entry: 'NPC.TALK', point: null, safe: true, precondition: 'InGame with an NPC at a known logical coordinate; provide --point npc=x,y.' },
-  { id: 'inventory-item-use', page: 'Inventory.ItemUse', entry: 'HUD.BELT', point: { x: 258, y: 637 }, safe: false, precondition: 'InGame with a disposable/useable item in belt slot 1; requires --allow-mutations.' },
+  { id: 'inventory-item-use', page: 'Inventory.ItemUse', entry: 'HUD.BELT', point: { x: 258, y: 637 }, safe: false, precondition: 'InGame with a disposable/useable item in belt slot 1; requires --allow-mutation-case inventory-item-use.' },
   { id: 'disconnect', page: 'Disconnect', entry: 'DISCONNECT.OBSERVE', point: null, safe: true, observeOnly: true, precondition: 'Client is already on the intentional disconnected/connection-lost screen; provide no click point.' }
 ]);
 
@@ -351,8 +351,11 @@ function makeVerdict(args, items, plans, results, mode, runDirectory) {
     blockedCaseIds: blocked.map((item) => item.id),
     statusCounts: { functionalPass: results.filter((item) => item.status === 'FUNCTIONAL_PASS').length, inputSequenceCompleted: inputOnly.length, unverified: unverified.length, blocked: blocked.length },
     verdict: mode === 'dry-run' ? 'DRY_RUN' : blocked.length ? 'BLOCKED' : functionalPass ? 'FUNCTIONAL_PASS' : unverified.length ? 'UNVERIFIED' : inputOnly.length ? 'INPUT_SEQUENCE_COMPLETED' : 'UNVERIFIED',
+    status: blocked.length ? 'BLOCKED' : 'HANDOFF',
     evidenceDirectory: runDirectory,
-    note: 'A PASS means the real input/capture sequence completed. It does not replace human visual/feel acceptance or server-side semantic review.'
+    desktopTouched: mode === 'run',
+    repositoryMutated: false,
+    note: 'HANDOFF means the input/capture sequence is evidence only; it does not replace human visual/feel acceptance or server-side semantic review.'
   };
 }
 
@@ -415,7 +418,7 @@ function main() {
   const verdict = makeVerdict(args, items, plans, results, 'run', directory);
   writeJson(path.join(directory, 'verdict.json'), verdict);
   console.log(JSON.stringify(verdict, null, 2));
-  if (verdict.verdict !== 'PASS') process.exitCode = 2;
+  if (!['FUNCTIONAL_PASS', 'INPUT_SEQUENCE_COMPLETED'].includes(verdict.verdict)) process.exitCode = 2;
 }
 
 try { main(); } catch (error) { console.error(`native-ui-mouse-matrix: ${error.message ?? error}`); usage(); process.exitCode = 1; }
