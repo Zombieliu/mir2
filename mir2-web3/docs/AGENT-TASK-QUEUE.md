@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> WN-UI-FUNC-01 R7.2 BuySell UI closure (2026-08-23): the targeted frontier
+> re-review found one remaining P1 after the R7.1 model fix: the Buy renderer
+> still gated on the legacy single `service_mode`, so a valid
+> `NPCGoods -> NPCSell` sequence retained both capabilities but displayed only
+> Sell. The native state now has an explicit local Buy/Sell presentation tab,
+> both entries are reachable only when their authoritative capability is
+> present, ShopConfirm follows the selected tab, and close/new-service resets
+> to the safe Buy-first view. ECS input and Windows double-packet tests pass.
+> This closes the final P1 from the independent review; the request-ID Storage
+> protocol P2 and all real-window/visual/human gates remain open.
+
 > WN-UI-FUNC-01 R7.1 independent-review remediation (2026-08-23): a
 > `gpt-5.6-sol high` read-only review of `e32caf2cc` found no P0 and six P1;
 > all six are now fixed. Login/register receipts are operation-scoped;

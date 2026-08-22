@@ -271,6 +271,9 @@ pub struct NativePlayerUiState {
     pub chat_draft: String,
     pub inspect: Option<ItemInspect>,
     pub shop_quantity: u16,
+    /// Local presentation tab for an NPC service that advertises both Buy
+    /// and Sell. Capabilities remain authoritative in `ShopModel`.
+    pub npc_shop_buy_tab: bool,
     pub shop_repair_mode: bool,
     /// Repair selection is a `(container, slot)` pair. The emitted command
     /// still carries the authoritative unique id, so bag slot 3 cannot be
@@ -379,6 +382,7 @@ impl Default for NativePlayerUiState {
             chat_draft: String::new(),
             inspect: None,
             shop_quantity: 1,
+            npc_shop_buy_tab: true,
             shop_repair_mode: false,
             shop_repair_container: 0,
             shop_repair_slot: None,
@@ -1567,6 +1571,8 @@ enum OverlayButton {
     SelectBigMapNpc(u32),
     // NPC shop
     SelectShopGood(u64),
+    ShopShowBuy,
+    ShopShowSell,
     ShopBuy,
     ShopSell,
     ShopRepair,
@@ -2503,6 +2509,7 @@ pub(crate) fn process_overlay_keyboard(
 
     if let Some(signals) = surface_signals.as_deref_mut() {
         if signals.npc_shop_open_requested {
+            state.npc_shop_buy_tab = true;
             if !state.npc_shop_open() {
                 state.toggle_npc_shop();
             }
@@ -2888,6 +2895,7 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.shop_quantity = 1;
+                state.npc_shop_buy_tab = true;
                 state.shop_repair_container = 0;
                 state.shop_repair_slot = None;
                 let _ = shop.apply_service_signal(NpcShopServiceSignal::default());
@@ -3973,6 +3981,16 @@ fn process_overlay_buttons(
                     shop.selected_id = Some(id);
                 }
             }
+            OverlayButton::ShopShowBuy => {
+                if state.npc_shop_open() && shop.allows_buy() {
+                    state.npc_shop_buy_tab = true;
+                }
+            }
+            OverlayButton::ShopShowSell => {
+                if state.npc_shop_open() && shop.allows_sell() {
+                    state.npc_shop_buy_tab = false;
+                }
+            }
             OverlayButton::ShopBuy => {
                 if state.npc_shop_open()
                     && shop.allows_buy()
@@ -4090,7 +4108,7 @@ fn process_overlay_buttons(
                             }
                         }
                     }
-                } else if shop.allows_sell() {
+                } else if shop.allows_sell() && (!shop.allows_buy() || !state.npc_shop_buy_tab) {
                     if let Some(slot) = shop.selected_bag_slot_for_sell {
                         if let Some(item) = inventory
                             .items
@@ -4126,6 +4144,7 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.shop_quantity = 1;
+                state.npc_shop_buy_tab = true;
                 shop.selected_id = None;
                 shop.selected_bag_slot_for_sell = None;
                 shop.selected_bag_slot_for_repair = None;
@@ -7516,7 +7535,8 @@ fn render_shop(
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
 ) {
-    if shop.service_mode != NpcShopServiceMode::Buy {
+    let show_buy = shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab);
+    if !show_buy {
         render_npc_item_service(parent, asset_server, shop, inventory, state);
         return;
     }
@@ -7681,6 +7701,15 @@ fn render_shop(
         OverlayButton::ShopQuantityInc,
         state.shop_quantity < SHOP_QUANTITY_MAX,
     );
+    if shop.allows_sell() {
+        overlay_absolute_button(
+            parent,
+            "Sell",
+            CrystalRect::new(162.0, 304.0, 52.0, 22.0),
+            OverlayButton::ShopShowSell,
+            true,
+        );
+    }
 }
 
 fn render_npc_item_service(
@@ -7690,12 +7719,14 @@ fn render_npc_item_service(
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
 ) {
-    let title = match shop.service_mode {
-        NpcShopServiceMode::Closed => "NPC service unavailable",
-        NpcShopServiceMode::Sell => "Sell items",
-        NpcShopServiceMode::Repair => "Repair items",
-        NpcShopServiceMode::SpecialRepair => "Special repair",
-        NpcShopServiceMode::Buy => return,
+    let title = if shop.allows_special_repair() {
+        "Special repair"
+    } else if shop.allows_repair() {
+        "Repair items"
+    } else if shop.allows_sell() {
+        "Sell items"
+    } else {
+        "NPC service unavailable"
     };
     let sell_mode = shop.allows_sell();
     let repair_mode = shop.allows_repair() || shop.allows_special_repair();
@@ -7729,6 +7760,9 @@ fn render_npc_item_service(
                 })
                 .with_children(|header| {
                     body(header, title);
+                    if shop.allows_buy() && shop.allows_sell() {
+                        overlay_button(header, "Buy", OverlayButton::ShopShowBuy, true);
+                    }
                     overlay_button(header, "Close", OverlayButton::ShopCancel, true);
                 });
 
@@ -10647,6 +10681,20 @@ mod tests {
                 mode: NpcShopServiceMode::Sell,
                 repair_rate: None,
             }));
+        assert!(app.world().resource::<ShopModel>().allows_buy());
+        assert!(app.world().resource::<ShopModel>().allows_sell());
+        assert!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .npc_shop_buy_tab,
+            "NPCGoods followed by NPCSell must keep the Buy entry visible"
+        );
+        press(&mut app, OverlayButton::ShopShowSell);
+        assert!(
+            !app.world()
+                .resource::<NativePlayerUiState>()
+                .npc_shop_buy_tab
+        );
         // Select bag for sell
         press(&mut app, OverlayButton::SelectBagForSell(0));
         assert_eq!(
@@ -10679,6 +10727,26 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
             .drain_intents();
+        press(&mut app, OverlayButton::ShopShowBuy);
+        assert!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .npc_shop_buy_tab
+        );
+        press(&mut app, OverlayButton::SelectShopGood(101));
+        press(&mut app, OverlayButton::ShopConfirm);
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .iter()
+            .any(|intent| matches!(
+                intent,
+                NativePlayerUiIntent::BuyItem {
+                    item_index: 101,
+                    count: 1
+                }
+            )));
         assert!(app
             .world_mut()
             .resource_mut::<ShopModel>()

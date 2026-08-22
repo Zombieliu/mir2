@@ -73,6 +73,12 @@
 > 48/48，Simulation Guild 回执精确测试通过。仍保留一个非阻断协议 P2：普通
 > StoreItem/TakeBackItem ACK 尚无 requestId，延迟重复 ACK 与新同坐标 ACK 无法由
 > 客户端正确区分；必须在协议版本升级中端到端解决，不能以本地代际猜测冒充完成。
+>
+> 2026-08-23 R7.2：针对性复核发现 BUYSELL 的模型能力虽正确，但购买渲染仍使用
+> 旧单值 `service_mode`，最终只显示 Sell。现已增加仅控制表现、不授予能力的
+> Buy/Sell 页签；两个入口均受服务端 capability 约束，Confirm 跟随当前页签，关闭
+> 或新 NPC 服务恢复 Buy-first。ECS 点击链与 Windows 双包序列测试通过。前次审查
+> 的 6 个 P1 至此全部闭环；普通 Storage requestId P2 与真人/视觉门仍保持 OPEN。
 
 ## 0. Candidate 硬门禁
 
