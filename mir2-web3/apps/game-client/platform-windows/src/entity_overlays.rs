@@ -4,6 +4,7 @@
 //! UI layer so native entity sprites do not depend on a browser surface.
 
 use bevy::prelude::*;
+use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use serde_json::Value;
 
@@ -25,6 +26,26 @@ pub struct NativeEntityOverlays {
     last_damage_sequence: u64,
     dirty: bool,
     last_in_game: bool,
+    last_visibility: Option<OverlayVisibility>,
+}
+
+/// Local Crystal name/drop presentation flags. They only select which labels
+/// this host draws from its latest authoritative scene payload; neither flag
+/// changes packet ingestion, entity state, pickup eligibility, or the world.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct OverlayVisibility {
+    name_view: bool,
+    drop_view: bool,
+}
+
+impl OverlayVisibility {
+    fn from_player_ui(state: Option<&NativePlayerUiState>) -> Self {
+        let options = state.map(|state| &state.core.options);
+        Self {
+            name_view: options.map(|options| options.name_view).unwrap_or(true),
+            drop_view: options.map(|options| options.drop_view).unwrap_or(true),
+        }
+    }
 }
 
 impl NativeEntityOverlays {
@@ -147,6 +168,7 @@ pub fn sync_native_entity_overlays(
     mut overlays: ResMut<NativeEntityOverlays>,
     roots: Query<Entity, With<NativeEntityOverlayRoot>>,
     time: Res<Time>,
+    player_ui: Option<Res<NativePlayerUiState>>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let previous_floater_count = overlays.active_floaters.len();
@@ -159,10 +181,15 @@ pub fn sync_native_entity_overlays(
         overlays.dirty = true;
     }
     let in_game = shell.screen == NativeShellScreen::InGame;
-    if !overlays.dirty && overlays.last_in_game == in_game {
+    let visibility = OverlayVisibility::from_player_ui(player_ui.as_deref());
+    if !overlays.dirty
+        && overlays.last_in_game == in_game
+        && overlays.last_visibility == Some(visibility)
+    {
         return;
     }
     overlays.last_in_game = in_game;
+    overlays.last_visibility = Some(visibility);
     overlays.dirty = false;
     for root in &roots {
         commands.entity(root).despawn();
@@ -173,7 +200,7 @@ pub fn sync_native_entity_overlays(
     let Some(payload) = overlays.latest_payload.as_ref() else {
         return;
     };
-    let entries = overlay_entries(payload);
+    let entries = overlay_entries(payload, visibility);
     let floaters = damage_floater_entries(payload, &overlays.active_floaters, now_ms);
     if entries.is_empty() && floaters.is_empty() {
         return;
@@ -362,7 +389,7 @@ fn damage_floater_entries(
         .collect()
 }
 
-fn overlay_entries(payload: &Value) -> Vec<OverlayEntry> {
+fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<OverlayEntry> {
     let center = payload.get("sceneView").and_then(|view| view.get("center"));
     let center_x = center
         .and_then(|center| center.get("x"))
@@ -377,79 +404,115 @@ fn overlay_entries(payload: &Value) -> Vec<OverlayEntry> {
     let player_hp = payload.get("playerHp").and_then(value_i64);
     let player_max_hp = payload.get("playerMaxHp").and_then(value_i64);
 
-    payload
-        .get("entities")
-        .and_then(Value::as_array)
-        .into_iter()
-        .flatten()
-        .filter_map(|entity| {
-            let name = entity.get("name")?.as_str()?.trim();
-            if name.is_empty() {
-                return None;
-            }
-            let kind = entity
-                .get("kind")
-                .and_then(Value::as_str)
-                .unwrap_or("monster");
-            let x = entity.get("x").and_then(value_i64).unwrap_or(0);
-            let y = entity.get("y").and_then(value_i64).unwrap_or(0);
-            let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
-            let is_self = kind == "selfPlayer";
-            let lines = if matches!(kind, "npc" | "monster") {
-                name.split('_')
-                    .filter(|part| !part.is_empty())
-                    .collect::<Vec<_>>()
-            } else {
-                vec![name]
-            };
-            let mut display_name = lines.join("\n");
-            if dead {
-                display_name.push_str("\nDead");
-            }
-            let line_adjustment = if matches!(kind, "npc" | "monster") {
-                -((lines.len().saturating_sub(1) as f32) * 10.0) / 2.0
-            } else {
-                0.0
-            };
-            let top_offset = if matches!(kind, "npc" | "monster") {
-                -18.0
-            } else {
-                -17.0
-            } + line_adjustment
-                + if dead { 35.0 } else { 0.0 };
-            let color = entity
-                .get("nameColourArgb")
-                .and_then(value_i64)
-                .and_then(argb_color)
-                .unwrap_or_else(|| {
-                    if kind == "npc" {
-                        Color::srgb_u8(0x00, 0xff, 0x00)
-                    } else {
-                        Color::WHITE
+    let mut entries = Vec::new();
+    if visibility.name_view {
+        entries.extend(
+            payload
+                .get("entities")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+                .filter_map(|entity| {
+                    let name = entity.get("name")?.as_str()?.trim();
+                    if name.is_empty() {
+                        return None;
                     }
-                });
-            let self_health_ratio = is_self
-                .then(|| {
-                    let hp = entity.get("hp").and_then(value_i64).or(player_hp)?;
-                    let max_hp = entity.get("maxHp").and_then(value_i64).or(player_max_hp)?;
-                    (max_hp > 0).then_some((hp as f32 / max_hp as f32).clamp(0.0, 1.0))
-                })
-                .flatten();
+                    let kind = entity
+                        .get("kind")
+                        .and_then(Value::as_str)
+                        .unwrap_or("monster");
+                    let x = entity.get("x").and_then(value_i64).unwrap_or(0);
+                    let y = entity.get("y").and_then(value_i64).unwrap_or(0);
+                    let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
+                    let is_self = kind == "selfPlayer";
+                    let lines = if matches!(kind, "npc" | "monster") {
+                        name.split('_')
+                            .filter(|part| !part.is_empty())
+                            .collect::<Vec<_>>()
+                    } else {
+                        vec![name]
+                    };
+                    let mut display_name = lines.join("\n");
+                    if dead {
+                        display_name.push_str("\nDead");
+                    }
+                    let line_adjustment = if matches!(kind, "npc" | "monster") {
+                        -((lines.len().saturating_sub(1) as f32) * 10.0) / 2.0
+                    } else {
+                        0.0
+                    };
+                    let top_offset = if matches!(kind, "npc" | "monster") {
+                        -18.0
+                    } else {
+                        -17.0
+                    } + line_adjustment
+                        + if dead { 35.0 } else { 0.0 };
+                    let color = entity
+                        .get("nameColourArgb")
+                        .and_then(value_i64)
+                        .and_then(argb_color)
+                        .unwrap_or_else(|| {
+                            if kind == "npc" {
+                                Color::srgb_u8(0x00, 0xff, 0x00)
+                            } else {
+                                Color::WHITE
+                            }
+                        });
+                    let self_health_ratio = is_self
+                        .then(|| {
+                            let hp = entity.get("hp").and_then(value_i64).or(player_hp)?;
+                            let max_hp =
+                                entity.get("maxHp").and_then(value_i64).or(player_max_hp)?;
+                            (max_hp > 0).then_some((hp as f32 / max_hp as f32).clamp(0.0, 1.0))
+                        })
+                        .flatten();
 
-            Some(OverlayEntry {
-                name: display_name,
-                color,
-                left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
-                top: origin_y + (y - center_y) as f32 * CELL_HEIGHT + top_offset,
-                width: if matches!(kind, "npc" | "monster") {
-                    48.0
-                } else {
-                    50.0
-                },
-                self_health_ratio,
-            })
-        })
-        .collect()
+                    Some(OverlayEntry {
+                        name: display_name,
+                        color,
+                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
+                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT + top_offset,
+                        width: if matches!(kind, "npc" | "monster") {
+                            48.0
+                        } else {
+                            50.0
+                        },
+                        self_health_ratio,
+                    })
+                }),
+        );
+    }
+
+    // Crystal's DropView draws item names after map/world rendering. The
+    // native snapshot already carries groundDrops, so this is a presentation
+    // gate only; drops remain authoritative and pick-up logic stays live.
+    if visibility.drop_view {
+        entries.extend(
+            payload
+                .get("groundDrops")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+                .take(256)
+                .filter_map(|drop| {
+                    let name = drop.get("name").and_then(Value::as_str)?.trim();
+                    if name.is_empty() {
+                        return None;
+                    }
+                    let x = drop.get("x").and_then(value_i64)?;
+                    let y = drop.get("y").and_then(value_i64)?;
+                    Some(OverlayEntry {
+                        name: name.to_owned(),
+                        color: Color::srgb_u8(0xff, 0xe6, 0x58),
+                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0,
+                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0,
+                        width: 80.0,
+                        self_health_ratio: None,
+                    })
+                }),
+        );
+    }
+    entries
 }
 
 fn value_i64(value: &Value) -> Option<i64> {
@@ -481,15 +544,21 @@ mod tests {
 
     #[test]
     fn overlays_match_crystal_cell_offsets_names_and_self_health() {
-        let entries = overlay_entries(&json!({
-            "sceneView": {"center": {"x": 10, "y": 20}},
-            "playerHp": 9,
-            "playerMaxHp": 18,
-            "entities": [
-                {"objectId": 1, "kind": "selfPlayer", "name": "Hero", "x": 10, "y": 20},
-                {"objectId": 2, "kind": "npc", "name": "Weapon_Smith", "x": 11, "y": 19}
-            ]
-        }));
+        let entries = overlay_entries(
+            &json!({
+                "sceneView": {"center": {"x": 10, "y": 20}},
+                "playerHp": 9,
+                "playerMaxHp": 18,
+                "entities": [
+                    {"objectId": 1, "kind": "selfPlayer", "name": "Hero", "x": 10, "y": 20},
+                    {"objectId": 2, "kind": "npc", "name": "Weapon_Smith", "x": 11, "y": 19}
+                ]
+            }),
+            OverlayVisibility {
+                name_view: true,
+                drop_view: true,
+            },
+        );
         assert_eq!(entries.len(), 2);
         assert_eq!(entries[0].left, 480.0);
         assert_eq!(entries[0].top, 335.0);
@@ -498,6 +567,53 @@ mod tests {
         assert_eq!(entries[1].left, 528.0);
         assert_eq!(entries[1].top, 297.0);
         assert_eq!(entries[1].width, 48.0);
+    }
+
+    #[test]
+    fn name_and_drop_view_are_independent_presentation_gates() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [{"objectId": 1, "kind": "selfPlayer", "name": "Hero", "x": 10, "y": 20}],
+            "groundDrops": [{"objectId": 9, "name": "Potion", "x": 11, "y": 20}]
+        });
+        let names_only = overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: true,
+                drop_view: false,
+            },
+        );
+        assert_eq!(
+            names_only
+                .iter()
+                .map(|entry| entry.name.as_str())
+                .collect::<Vec<_>>(),
+            ["Hero"]
+        );
+
+        let drops_only = overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: true,
+            },
+        );
+        assert_eq!(
+            drops_only
+                .iter()
+                .map(|entry| entry.name.as_str())
+                .collect::<Vec<_>>(),
+            ["Potion"]
+        );
+
+        assert!(overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: false
+            },
+        )
+        .is_empty());
     }
 
     #[test]

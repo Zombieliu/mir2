@@ -8,7 +8,7 @@
 use bevy::prelude::*;
 use bevy::ui::{BackgroundColor, Node, PositionType, Val};
 
-use crate::chat::{ChatLine, ChatModel};
+use crate::chat::{ChatChannel, ChatLine, ChatModel};
 use crate::crystal_ui::overlays::{dispatch_ui_action, NativePlayerUiState, UiEffectQueue};
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_ui_core::action::UiAction;
@@ -371,40 +371,35 @@ fn spawn_chat_root(mut commands: Commands) {
 
 /// Returns true if a channel string matches the given outbound filter.
 pub fn channel_matches_filter(channel: &str, filter: CrystalChatFilter) -> bool {
-    let lower = channel.trim().to_ascii_lowercase();
+    let channel = ChatChannel::parse(channel);
     match filter {
         CrystalChatFilter::All => true,
-        CrystalChatFilter::Shout => matches!(
-            lower.as_str(),
-            "shout" | "shout2" | "shout3" | "announcement" | "line" | "linemessage"
-        ),
+        CrystalChatFilter::Shout => channel == ChatChannel::Shout,
         CrystalChatFilter::Whisper => {
-            matches!(lower.as_str(), "whisperin" | "whisperout" | "whisper")
+            matches!(channel, ChatChannel::WhisperIn | ChatChannel::WhisperOut)
         }
-        CrystalChatFilter::Lover => matches!(lower.as_str(), "relationship" | "lover"),
-        CrystalChatFilter::Mentor => lower == "mentor",
-        CrystalChatFilter::Group => lower == "group",
-        CrystalChatFilter::Guild => lower == "guild",
-        CrystalChatFilter::Trade => {
-            matches!(lower.as_str(), "trade" | "system" | "system2" | "hint")
+        CrystalChatFilter::Lover => {
+            matches!(channel, ChatChannel::Relationship | ChatChannel::Lover)
         }
+        CrystalChatFilter::Mentor => channel == ChatChannel::Mentor,
+        CrystalChatFilter::Group => channel == ChatChannel::Group,
+        CrystalChatFilter::Guild => channel == ChatChannel::Guild,
+        CrystalChatFilter::Trade => channel == ChatChannel::Trade,
     }
 }
 
 /// Returns true if a line should be hidden based on Settings hidden filters.
 pub fn is_line_hidden_by_settings(line: &ChatLine, settings: &UiChatSettings) -> bool {
-    let lower = line.channel.trim().to_ascii_lowercase();
-    match lower.as_str() {
-        "normal" | "linemessage" | "line" | "lineMessage" | "" => settings.filter_normal,
-        "whisperin" | "whisperout" | "whisper" => settings.filter_whisper,
-        "shout" | "shout2" | "shout3" | "announcement" => settings.filter_shout,
-        "system" | "system2" | "hint" | "levelup" => settings.filter_system,
-        "group" => settings.filter_group,
-        "guild" => settings.filter_guild,
-        "relationship" | "lover" => settings.filter_lover,
-        "mentor" => settings.filter_mentor,
-        "trade" => settings.filter_trade,
-        _ => settings.filter_normal,
+    match line.canonical_channel() {
+        ChatChannel::Normal | ChatChannel::LineMessage => settings.filter_normal,
+        ChatChannel::WhisperIn | ChatChannel::WhisperOut => settings.filter_whisper,
+        ChatChannel::Shout => settings.filter_shout,
+        ChatChannel::System | ChatChannel::Hint => settings.filter_system,
+        ChatChannel::Group => settings.filter_group,
+        ChatChannel::Guild => settings.filter_guild,
+        ChatChannel::Relationship | ChatChannel::Lover => settings.filter_lover,
+        ChatChannel::Mentor => settings.filter_mentor,
+        ChatChannel::Trade => settings.filter_trade,
     }
 }
 
@@ -1513,6 +1508,150 @@ pub fn is_z_order_correct() -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn packet_fixture(packet: &str, payload: &str) -> Option<ChatLine> {
+        let value: serde_json::Value = serde_json::from_str(payload).ok()?;
+        let text_field = match packet {
+            "Chat" => "message",
+            "ObjectChat" => "text",
+            _ => return None,
+        };
+        Some(ChatLine {
+            text: value.get(text_field)?.as_str()?.to_owned(),
+            channel: value
+                .get("chatType")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("normal")
+                .to_owned(),
+        })
+    }
+
+    fn settings_hiding(channel: ChatChannel) -> UiChatSettings {
+        let mut settings = UiChatSettings::default();
+        match channel {
+            ChatChannel::Normal | ChatChannel::LineMessage => settings.filter_normal = true,
+            ChatChannel::WhisperIn | ChatChannel::WhisperOut => settings.filter_whisper = true,
+            ChatChannel::Shout => settings.filter_shout = true,
+            ChatChannel::System | ChatChannel::Hint => settings.filter_system = true,
+            ChatChannel::Group => settings.filter_group = true,
+            ChatChannel::Guild => settings.filter_guild = true,
+            ChatChannel::Relationship | ChatChannel::Lover => settings.filter_lover = true,
+            ChatChannel::Mentor => settings.filter_mentor = true,
+            ChatChannel::Trade => settings.filter_trade = true,
+        }
+        settings
+    }
+
+    #[test]
+    fn canonical_chat_channel_fixture_matrix_is_case_insensitive_and_alias_safe() {
+        let fixtures = [
+            ("Normal", ChatChannel::Normal),
+            (" trainer ", ChatChannel::Normal),
+            ("SYSTEM", ChatChannel::System),
+            ("System2", ChatChannel::System),
+            ("server", ChatChannel::System),
+            ("Hint", ChatChannel::Hint),
+            ("LiNeMeSsAgE", ChatChannel::LineMessage),
+            ("line", ChatChannel::LineMessage),
+            ("shout", ChatChannel::Shout),
+            ("ShOuT2", ChatChannel::Shout),
+            ("announcement", ChatChannel::Shout),
+            ("levelup", ChatChannel::Shout),
+            ("WhisperIn", ChatChannel::WhisperIn),
+            ("whisper_out", ChatChannel::WhisperOut),
+            ("whisper", ChatChannel::WhisperIn),
+            ("Relationship", ChatChannel::Relationship),
+            ("lover", ChatChannel::Lover),
+            ("MENTOR", ChatChannel::Mentor),
+            ("Group", ChatChannel::Group),
+            ("guild", ChatChannel::Guild),
+            ("TRADE", ChatChannel::Trade),
+            ("unknown-native-channel", ChatChannel::Normal),
+        ];
+
+        assert_eq!(ChatChannel::all().len(), 13);
+        for (raw, expected) in fixtures {
+            let line = ChatLine {
+                text: raw.to_owned(),
+                channel: raw.to_owned(),
+            };
+            assert_eq!(line.canonical_channel(), expected, "raw channel {raw:?}");
+        }
+    }
+
+    #[test]
+    fn chat_and_object_chat_fixtures_preserve_packet_text_and_canonical_channel() {
+        let direct = packet_fixture("Chat", r#"{"message":"system text","chatType":"System2"}"#)
+            .expect("Chat fixture");
+        assert_eq!(direct.text, "system text");
+        assert_eq!(direct.channel, "System2");
+        assert_eq!(direct.canonical_channel(), ChatChannel::System);
+
+        let object = packet_fixture(
+            "ObjectChat",
+            r#"{"objectId":1001,"text":"group text","chatType":"gRoUp"}"#,
+        )
+        .expect("ObjectChat fixture");
+        assert_eq!(object.text, "group text");
+        assert_eq!(object.channel, "gRoUp");
+        assert_eq!(object.canonical_channel(), ChatChannel::Group);
+
+        assert!(packet_fixture("Chat", r#"{"text":"wrong field"}"#).is_none());
+        assert!(packet_fixture("ObjectChat", r#"{"message":"wrong field"}"#).is_none());
+    }
+
+    #[test]
+    fn control_filters_and_settings_hide_the_same_canonical_channel_families() {
+        let cases = [
+            (ChatChannel::Normal, CrystalChatFilter::All),
+            (ChatChannel::System, CrystalChatFilter::All),
+            (ChatChannel::Hint, CrystalChatFilter::All),
+            (ChatChannel::LineMessage, CrystalChatFilter::All),
+            (ChatChannel::Shout, CrystalChatFilter::Shout),
+            (ChatChannel::WhisperIn, CrystalChatFilter::Whisper),
+            (ChatChannel::WhisperOut, CrystalChatFilter::Whisper),
+            (ChatChannel::Relationship, CrystalChatFilter::Lover),
+            (ChatChannel::Lover, CrystalChatFilter::Lover),
+            (ChatChannel::Mentor, CrystalChatFilter::Mentor),
+            (ChatChannel::Group, CrystalChatFilter::Group),
+            (ChatChannel::Guild, CrystalChatFilter::Guild),
+            (ChatChannel::Trade, CrystalChatFilter::Trade),
+        ];
+
+        for (channel, control_filter) in cases {
+            let raw = format!("{channel:?}");
+            let line = ChatLine {
+                text: raw.clone(),
+                channel: raw,
+            };
+            assert!(
+                channel_matches_filter(&line.channel, control_filter),
+                "{channel:?} should match {control_filter:?}"
+            );
+            assert!(
+                is_line_hidden_by_settings(&line, &settings_hiding(channel)),
+                "{channel:?} should be hidden by its settings family"
+            );
+        }
+
+        assert!(!channel_matches_filter(
+            "lineMessage",
+            CrystalChatFilter::Shout
+        ));
+        assert!(channel_matches_filter(
+            "lineMessage",
+            CrystalChatFilter::All
+        ));
+        assert!(!channel_matches_filter("system", CrystalChatFilter::Trade));
+        assert!(!channel_matches_filter("hint", CrystalChatFilter::Trade));
+        assert!(!is_line_hidden_by_settings(
+            &ChatLine {
+                text: "trade".to_owned(),
+                channel: "trade".to_owned(),
+            },
+            &UiChatSettings::default(),
+        ));
+    }
 
     #[test]
     fn chat_frame_uses_exact_crystal_four_line_geometry() {

@@ -1205,7 +1205,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_shop_model,
                 ingest_pending_game_shop_info,
                 ingest_pending_game_shop_stock,
-                ingest_pending_npc_shop_open,
+                ingest_pending_npc_shop_service,
                 ingest_pending_storage_patch,
                 ingest_pending_storage_items,
                 ingest_pending_storage_model,
@@ -1712,6 +1712,7 @@ fn apply_scene_reset_to_scene_models(
     mut map: ResMut<mir2_client_bevy::map::MapModel>,
     mut entities: ResMut<mir2_client_bevy::entities::EntityModelSet>,
     mut surface_signals: ResMut<mir2_client_bevy::read_model::UiSurfaceSignals>,
+    mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
     mut social: ResMut<mir2_client_bevy::social::SocialModel>,
 ) {
     if tracker.0 == reset.0 {
@@ -1722,6 +1723,7 @@ fn apply_scene_reset_to_scene_models(
     *entities = mir2_client_bevy::entities::EntityModelSet::default();
     social.clear_scene();
     surface_signals.npc_shop_open_requested = false;
+    let _ = shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal::default());
 }
 
 fn apply_session_reset_to_runtime_models(
@@ -1995,16 +1997,37 @@ fn finalize_consumed_game_shop_preservation(
     let _ = preservation.clear_if_consumed(reset.0);
 }
 
-/// Convert the packet-first NPCGoods event into a one-shot UI surface request.
-/// The NPC goods list itself remains in `ShopModel`; this signal can never be
-/// set by GameShopInfo/Stock.
-fn ingest_pending_npc_shop_open(
+/// Apply one packet-authoritative NPC service transition and request the UI
+/// surface. The goods list remains independent so Sell/Repair packets cannot
+/// fabricate a Buy catalogue.
+fn ingest_pending_npc_shop_service(
+    mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
     mut surface_signals: ResMut<mir2_client_bevy::read_model::UiSurfaceSignals>,
     native: Res<native_ingest::NativeInbound>,
 ) {
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::NpcShopOpen),
-        |_| surface_signals.npc_shop_open_requested = true,
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::NpcShopService(_)
+            )
+        },
+        |message| {
+            let native_ingest::NativeInboundMessage::NpcShopService(json) = message else {
+                return;
+            };
+            let Ok(signal) =
+                serde_json::from_str::<mir2_client_bevy::shop::NpcShopServiceSignal>(&json)
+            else {
+                publish_status("native-decode-error", "invalid native NPC service");
+                return;
+            };
+            if shop.apply_service_signal(signal) {
+                surface_signals.npc_shop_open_requested = true;
+            } else {
+                publish_status("native-decode-error", "invalid native NPC service");
+            }
+        },
     );
 }
 
@@ -6035,7 +6058,7 @@ mod native_data_path_tests {
                     ingest_pending_game_shop_info,
                     ingest_pending_game_shop_stock,
                     ingest_pending_game_shop_receipt,
-                    ingest_pending_npc_shop_open,
+                    ingest_pending_npc_shop_service,
                     ingest_pending_storage_patch,
                     ingest_pending_storage_items,
                     ingest_pending_storage_model,
@@ -6130,7 +6153,9 @@ mod native_data_path_tests {
         assert!(native_ingest::push_native_shop_model(
             r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
         ));
-        assert!(native_ingest::push_native_npc_shop_open());
+        assert!(native_ingest::push_native_npc_shop_service(
+            r#"{"mode":"buy","repairRate":null}"#.to_owned()
+        ));
         assert!(native_ingest::push_native_storage_items(
             r#"{"items":[{"key":"sword","name":"Iron Sword","quantity":2,"slot":3,"container":4}]}"#.to_owned()
         ));
@@ -6148,12 +6173,28 @@ mod native_data_path_tests {
                 .selected_id,
             Some(7)
         );
-        assert_eq!(
-            app.world()
-                .resource::<mir2_client_bevy::shop::ShopModel>()
-                .selected_id,
-            Some(9)
-        );
+        {
+            let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
+            assert_eq!(shop.selected_id, None);
+            assert!(shop.allows_buy());
+        }
+        assert!(native_ingest::push_native_npc_shop_service(
+            r#"{"mode":"repair","repairRate":1.5}"#.to_owned()
+        ));
+        app.update();
+        {
+            let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
+            assert!(shop.allows_repair());
+            assert_eq!(shop.repair_rate, Some(1.5));
+        }
+        assert!(native_ingest::push_native_npc_shop_service(
+            r#"{"mode":"specialRepair","repairRate":null}"#.to_owned()
+        ));
+        app.update();
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::shop::ShopModel>()
+            .allows_repair());
         {
             let storage = app
                 .world()
@@ -6184,7 +6225,7 @@ mod native_data_path_tests {
             app.world()
                 .resource::<mir2_client_bevy::shop::ShopModel>()
                 .selected_id,
-            Some(9)
+            None
         );
         assert_eq!(
             app.world()

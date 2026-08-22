@@ -1,12 +1,74 @@
 //! Effects produced by the reducer. The platform adapter turns them into Gateway commands or window actions.
 
-use serde::{Deserialize, Serialize};
+use std::fmt;
+
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::state::{UiChatSettings, UiOptions, UiWindowMode};
+
+/// A transient credential value. It is intentionally redacted from Debug and
+/// serde output because actions/effects may be inspected by host diagnostics.
+/// The host must consume it in memory and hand it to the authoritative gateway
+/// adapter; it must not persist or log it.
+#[derive(Clone, PartialEq, Eq)]
+pub struct SecretText(String);
+
+impl SecretText {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+impl fmt::Debug for SecretText {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("SecretText(REDACTED)")
+    }
+}
+
+impl Serialize for SecretText {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str("[REDACTED]")
+    }
+}
+
+impl<'de> Deserialize<'de> for SecretText {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let _ = String::deserialize(deserializer)?;
+        Ok(Self::new("[REDACTED]"))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum SecurityRequest {
+    /// Request-only: the server decides whether the old credential is valid
+    /// and the host must dispatch `ChangePasswordResult` from its response.
+    ChangePassword {
+        account: String,
+        old_password: SecretText,
+        new_password: SecretText,
+    },
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum UiEffect {
     GatewayCommand(GatewayCommand),
+    /// Shared security seam for hosts whose gateway wire adapter is not yet
+    /// available on this platform. No success is inferred locally.
+    SecurityRequest(SecurityRequest),
     ExitApplication,
     /// The renderer/audio adapter must apply these values at runtime. This is
     /// deliberately typed because ui-core cannot own platform audio APIs.
@@ -15,6 +77,11 @@ pub enum UiEffect {
         music_volume: u8,
         sound_enabled: bool,
         sound_volume: u8,
+    },
+    /// Request-only observation toggle. The host must send Crystal's
+    /// `@ALLOWOBSERVE` request and later dispatch the authoritative result.
+    RequestObserve {
+        allow: bool,
     },
     /// The current Bevy write set does not own the OS window handle. Hosts must
     /// explicitly consume this effect; no fake fullscreen mutation is made.
@@ -141,24 +208,50 @@ pub enum GatewayCommand {
         message: String,
     },
     TownRevive,
-    GroupSwitch { allow_group: bool },
-    GroupAddMember { name: String },
-    GroupRemoveMember { name: String },
-    GroupInvite { accept_invite: bool },
-    GuildRequestInfo { info_type: u8 },
+    GroupSwitch {
+        allow_group: bool,
+    },
+    GroupAddMember {
+        name: String,
+    },
+    GroupRemoveMember {
+        name: String,
+    },
+    GroupInvite {
+        accept_invite: bool,
+    },
+    GuildRequestInfo {
+        info_type: u8,
+    },
     GuildEditMember {
         change_type: u8,
         rank_index: u8,
         name: String,
         rank_name: String,
     },
-    GuildEditNotice { notice: Vec<String> },
-    GuildInvite { accept_invite: bool },
+    GuildEditNotice {
+        notice: Vec<String>,
+    },
+    GuildInvite {
+        accept_invite: bool,
+    },
     TradeRequest,
-    TradeReply { accept_invite: bool },
-    TradeGold { amount: u32 },
-    TradeDepositItem { from: i32, to: i32 },
-    TradeRetrieveItem { from: i32, to: i32 },
-    TradeConfirm { locked: bool },
+    TradeReply {
+        accept_invite: bool,
+    },
+    TradeGold {
+        amount: u32,
+    },
+    TradeDepositItem {
+        from: i32,
+        to: i32,
+    },
+    TradeRetrieveItem {
+        from: i32,
+        to: i32,
+    },
+    TradeConfirm {
+        locked: bool,
+    },
     TradeCancel,
 }

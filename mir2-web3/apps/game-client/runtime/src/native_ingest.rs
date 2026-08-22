@@ -37,6 +37,7 @@ pub(crate) enum NativeInboundMessage {
     WorldState(String),
     EntityRenderState(String),
     EffectRenderState(String),
+    LightingRenderState(String),
     MapRenderState(String),
     UiReadModel(String),
     /// Packet-first authoritative wallet patch. A later world snapshot may
@@ -69,8 +70,8 @@ pub(crate) enum NativeInboundMessage {
     GameShopStock(String),
     /// Correlatable native purchase result; never evicted for snapshots.
     GameShopReceipt(String),
-    /// Open the NPC service surface after an authoritative NPCGoods packet.
-    NpcShopOpen,
+    /// Authoritative NPCGoods/NPCSell/NPCRepair/NPCSRepair service transition.
+    NpcShopService(String),
     StorageModel(String),
     /// Replace only the authoritative storage item list. UserStorage packets
     /// do not carry storage size/password metadata, so they must not replace
@@ -394,6 +395,7 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
         NativeInboundMessage::WorldState(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
+            | NativeInboundMessage::LightingRenderState(_)
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::UiReadModel(_)
             | NativeInboundMessage::MapModel(_)
@@ -418,6 +420,10 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
         | (
             NativeInboundMessage::EffectRenderState(_),
             NativeInboundMessage::EffectRenderState(_),
+        )
+        | (
+            NativeInboundMessage::LightingRenderState(_),
+            NativeInboundMessage::LightingRenderState(_),
         )
         | (NativeInboundMessage::MapRenderState(_), NativeInboundMessage::MapRenderState(_))
         | (NativeInboundMessage::UiReadModel(_), NativeInboundMessage::UiReadModel(_))
@@ -448,7 +454,7 @@ fn is_critical_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::GameShopInfo(_)
             | NativeInboundMessage::GameShopStock(_)
             | NativeInboundMessage::GameShopReceipt(_)
-            | NativeInboundMessage::NpcShopOpen
+            | NativeInboundMessage::NpcShopService(_)
             | NativeInboundMessage::StoragePatch(_)
             | NativeInboundMessage::SocialModel(_)
     )
@@ -463,6 +469,7 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         NativeInboundMessage::WorldState(json)
         | NativeInboundMessage::EntityRenderState(json)
         | NativeInboundMessage::EffectRenderState(json)
+        | NativeInboundMessage::LightingRenderState(json)
         | NativeInboundMessage::MapRenderState(json)
         | NativeInboundMessage::UiReadModel(json)
         | NativeInboundMessage::WalletPatch(json)
@@ -476,6 +483,7 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         | NativeInboundMessage::GameShopInfo(json)
         | NativeInboundMessage::GameShopStock(json)
         | NativeInboundMessage::GameShopReceipt(json)
+        | NativeInboundMessage::NpcShopService(json)
         | NativeInboundMessage::StorageModel(json)
         | NativeInboundMessage::StorageItems(json)
         | NativeInboundMessage::StoragePatch(json)
@@ -487,9 +495,7 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         NativeInboundMessage::DataResetPreservingExactGameShopReceipt(receipt) => {
             serde_json::to_string(receipt).map_or(usize::MAX, |json| json.len())
         }
-        NativeInboundMessage::DataReset
-        | NativeInboundMessage::SceneReset
-        | NativeInboundMessage::NpcShopOpen => 0,
+        NativeInboundMessage::DataReset | NativeInboundMessage::SceneReset => 0,
     }
 }
 
@@ -512,6 +518,13 @@ pub fn push_native_entity_render_state(json: String) -> bool {
 /// shared runtime renders effect sprites identically on Windows and Web.
 pub fn push_native_effect_render_state(json: String) -> bool {
     send_native(NativeInboundMessage::EffectRenderState(json))
+}
+
+/// Native-host entry point: push the bounded Crystal lighting render state.
+/// The runtime owns validation and never lets a producer retain more than 200
+/// map/entity light layers.
+pub fn push_native_lighting_render_state(json: String) -> bool {
+    send_native(NativeInboundMessage::LightingRenderState(json))
 }
 
 /// Native-host entry point: push a map-render-state snapshot JSON.
@@ -620,9 +633,9 @@ pub fn push_native_game_shop_receipt(json: String) -> bool {
     send_native(NativeInboundMessage::GameShopReceipt(json))
 }
 
-/// Native-host entry point: open the NPC shop surface after NPCGoods.
-pub fn push_native_npc_shop_open() -> bool {
-    send_native(NativeInboundMessage::NpcShopOpen)
+/// Native-host entry point: select one authoritative NPC service surface.
+pub fn push_native_npc_shop_service(json: String) -> bool {
+    send_native(NativeInboundMessage::NpcShopService(json))
 }
 
 /// Native-host entry point: push a storage model JSON.
@@ -786,11 +799,12 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
         NativeInboundMessage::WorldState(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
+            | NativeInboundMessage::LightingRenderState(_)
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
-            | NativeInboundMessage::NpcShopOpen
+            | NativeInboundMessage::NpcShopService(_)
     )
 }
 
@@ -800,6 +814,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
         NativeInboundMessage::WorldState(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
+            | NativeInboundMessage::LightingRenderState(_)
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
@@ -814,7 +829,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::GameShopInfo(_)
             | NativeInboundMessage::GameShopStock(_)
             | NativeInboundMessage::GameShopReceipt(_)
-            | NativeInboundMessage::NpcShopOpen
+            | NativeInboundMessage::NpcShopService(_)
             | NativeInboundMessage::StorageModel(_)
             | NativeInboundMessage::StorageItems(_)
             | NativeInboundMessage::StoragePatch(_)
@@ -1250,5 +1265,30 @@ mod tests {
             |message| social.push(message),
         );
         assert_eq!(social.len(), 1, "social state is personal, not scene-local");
+    }
+
+    #[test]
+    fn lighting_snapshot_coalesces_and_scene_reset_drops_only_the_stale_generation() {
+        let inbound = NativeInbound::new();
+        assert!(push_native_lighting_render_state("old-1".to_owned()));
+        assert!(push_native_lighting_render_state("old-2".to_owned()));
+        assert!(push_native_scene_reset());
+        assert!(push_native_lighting_render_state("new".to_owned()));
+
+        inbound.discard_stale_data_before_latest_reset();
+
+        let state = inbound
+            .buffer
+            .lock()
+            .expect("native inbound mutex should not be poisoned");
+        assert_eq!(state.pending.len(), 2);
+        assert!(matches!(
+            state.pending.front(),
+            Some(NativeInboundMessage::SceneReset)
+        ));
+        assert!(matches!(
+            state.pending.back(),
+            Some(NativeInboundMessage::LightingRenderState(json)) if json == "new"
+        ));
     }
 }

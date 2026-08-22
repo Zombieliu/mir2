@@ -8,17 +8,18 @@ pub mod android_input;
 pub mod gateway_bridge;
 
 use android_input::{
+    apply_android_lifecycle_messages, collect_android_back_key, route_android_input_messages,
     AndroidInputMessage, AndroidLifecycleEffects, AndroidLifecycleMessage, AndroidMotionQueue,
-    AndroidShellState, AndroidUiActionQueue, apply_android_lifecycle_messages,
-    collect_android_back_key, route_android_input_messages,
+    AndroidShellState, AndroidUiActionQueue,
 };
 use bevy::app::AppExit;
 use bevy::prelude::*;
 use gateway_bridge::{
-    AndroidGatewayInboundQueue, AndroidGatewayOutboundQueue, clear_bounded_inbound_transaction,
-    drain_bounded_inbound_into_models, enqueue_game_shop_purchase,
+    clear_bounded_inbound_transaction, drain_bounded_inbound_into_models,
+    enqueue_game_shop_purchase, enqueue_security_request, AndroidGatewayInboundQueue,
+    AndroidGatewayOutboundQueue,
 };
-use mir2_bevy_runtime::{RuntimeWindowSpec, build_runtime_app};
+use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 use mir2_ui_core::{effect::UiEffect, reducer::reduce, state::UiState};
 
 #[derive(Debug, Default, Resource)]
@@ -109,6 +110,49 @@ fn apply_queued_ui_actions(
                     // existing FIFO entries remain untouched.
                     let _ = gateway.enqueue(command);
                 }
+                UiEffect::SecurityRequest(request) => {
+                    if enqueue_security_request(&mut gateway, &mut inbound, request).is_err() {
+                        // The reducer already marked this request pending. If
+                        // the bounded transport rejects it, clear that state
+                        // through the same authoritative-result action so the
+                        // form cannot become permanently stuck. Never include
+                        // credentials or adapter internals in the notice.
+                        let failed = reduce(
+                            &ui_state,
+                            mir2_ui_core::action::UiAction::ChangePasswordResult {
+                                success: false,
+                                message: "change-password request could not be queued".to_owned(),
+                            },
+                        );
+                        *ui_state = failed.state;
+                        effects.0.extend(failed.effects);
+                    }
+                }
+                UiEffect::RequestObserve { allow: _ } => {
+                    let authoritative_before_request = ui_state.observe_allowed;
+                    if gateway
+                        .enqueue(mir2_ui_core::effect::GatewayCommand::SendChat {
+                            message: "@ALLOWOBSERVE".to_owned(),
+                        })
+                        .is_err()
+                    {
+                        // A rejected transport enqueue must not leave the
+                        // request-only toggle permanently pending. Restore the
+                        // last authoritative value without pretending the
+                        // requested value was accepted by the server.
+                        let failed = reduce(
+                            &ui_state,
+                            mir2_ui_core::action::UiAction::ObserveAuthoritativeChanged {
+                                allow: authoritative_before_request,
+                            },
+                        );
+                        *ui_state = failed.state;
+                        effects.0.push(UiEffect::ShowNotice {
+                            message: "observe request could not be queued".to_owned(),
+                            is_error: true,
+                        });
+                    }
+                }
                 other => effects.0.push(other),
             }
         }
@@ -190,6 +234,144 @@ mod tests {
     }
 
     #[test]
+    fn change_password_effect_is_consumed_into_the_real_gateway_queue() {
+        use mir2_ui_core::effect::SecretText;
+
+        let mut app = App::new();
+        app.add_plugins(AndroidShellPlugin);
+        app.world_mut().resource_mut::<UiState>().screen = UiScreen::Login;
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::ChangePassword),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::SubmitChangePassword {
+                account: "account".to_owned(),
+                old_password: SecretText::new("old-secret"),
+                new_password: SecretText::new("new-secret"),
+                confirm_password: SecretText::new("new-secret"),
+            }),
+        );
+
+        assert!(take_effects(&mut app).is_empty());
+        assert!(
+            app.world()
+                .resource::<UiState>()
+                .security
+                .change_password_pending
+        );
+        let queue = app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
+        assert_eq!(queue.len(), 1);
+        assert!(queue.change_password_in_flight());
+    }
+
+    #[test]
+    fn rejected_change_password_enqueue_clears_pending_without_leaking_secrets() {
+        use mir2_ui_core::effect::SecretText;
+
+        let mut app = App::new();
+        app.add_plugins(AndroidShellPlugin);
+        app.world_mut().resource_mut::<UiState>().screen = UiScreen::Login;
+        let mut full = gateway_bridge::AndroidGatewayOutboundQueue::with_capacity(1);
+        full.enqueue(mir2_ui_core::effect::GatewayCommand::TownRevive)
+            .unwrap();
+        app.insert_resource(full);
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::ChangePassword),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::SubmitChangePassword {
+                account: "account".to_owned(),
+                old_password: SecretText::new("old-secret"),
+                new_password: SecretText::new("new-secret"),
+                confirm_password: SecretText::new("new-secret"),
+            }),
+        );
+
+        assert!(
+            !app.world()
+                .resource::<UiState>()
+                .security
+                .change_password_pending
+        );
+        let effects = take_effects(&mut app);
+        assert_eq!(effects.len(), 1);
+        let debug = format!("{effects:?}");
+        assert!(debug.contains("could not be queued"));
+        assert!(!debug.contains("old-secret"));
+        assert!(!debug.contains("new-secret"));
+    }
+
+    #[test]
+    fn observe_request_is_consumed_as_the_crystal_chat_command() {
+        let mut app = in_game_app();
+        app.world_mut().resource_mut::<UiState>().panel = UiPanel::Options;
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::RequestObserve { allow: true }),
+        );
+
+        let state = app.world().resource::<UiState>();
+        assert!(
+            !state.observe_allowed,
+            "the client must not accept its own request"
+        );
+        assert_eq!(state.observe_request_pending, Some(true));
+        assert!(take_effects(&mut app).is_empty());
+
+        let mut shell = crate::android_input::AndroidShellState::default();
+        shell.lifecycle = crate::android_input::AndroidLifecycle::Foreground;
+        shell.network = crate::android_input::AndroidNetwork::Available;
+        let outbound = app
+            .world_mut()
+            .resource_mut::<gateway_bridge::AndroidGatewayOutboundQueue>()
+            .drain_ready(&shell, 1);
+        assert_eq!(outbound.len(), 1);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&outbound[0].json).unwrap(),
+            serde_json::json!({"type":"chat","message":"@ALLOWOBSERVE"})
+        );
+    }
+
+    #[test]
+    fn rejected_observe_enqueue_restores_last_authoritative_value() {
+        let mut app = in_game_app();
+        let mut full = gateway_bridge::AndroidGatewayOutboundQueue::with_capacity(1);
+        full.enqueue(mir2_ui_core::effect::GatewayCommand::TownRevive)
+            .unwrap();
+        app.insert_resource(full);
+        {
+            let mut state = app.world_mut().resource_mut::<UiState>();
+            state.panel = UiPanel::Options;
+            state.observe_allowed = false;
+        }
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::RequestObserve { allow: true }),
+        );
+
+        let state = app.world().resource::<UiState>();
+        assert!(!state.observe_allowed);
+        assert_eq!(state.observe_request_pending, None);
+        let effects = take_effects(&mut app);
+        assert_eq!(effects.len(), 1);
+        assert!(matches!(
+            &effects[0],
+            UiEffect::ShowNotice {
+                message,
+                is_error: true
+            } if message == "observe request could not be queued"
+        ));
+    }
+
+    #[test]
     fn android_production_adapter_rolls_back_ui_when_outbound_queue_is_full() {
         let mut app = in_game_app();
         let mut full = gateway_bridge::AndroidGatewayOutboundQueue::with_capacity(1);
@@ -207,12 +389,11 @@ mod tests {
             }),
         );
 
-        assert!(
-            app.world()
-                .resource::<UiState>()
-                .game_shop_pending
-                .is_none()
-        );
+        assert!(app
+            .world()
+            .resource::<UiState>()
+            .game_shop_pending
+            .is_none());
         let queue = app
             .world()
             .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
@@ -251,18 +432,16 @@ mod tests {
         )
         .unwrap();
         app.update();
-        assert!(
-            app.world()
-                .resource::<UiState>()
-                .game_shop_pending
-                .is_some()
-        );
-        assert!(
-            app.world()
-                .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
-                .game_shop_pending()
-                .is_some()
-        );
+        assert!(app
+            .world()
+            .resource::<UiState>()
+            .game_shop_pending
+            .is_some());
+        assert!(app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
+            .game_shop_pending()
+            .is_some());
 
         let exact = format!(
             r#"{{"protocol":"nativeGameShopReceiptV1","requestId":"{}","success":false,"gIndex":31,"quantity":2,"priceType":1,"code":"insufficientCurrency"}}"#,
@@ -276,18 +455,16 @@ mod tests {
         )
         .unwrap();
         app.update();
-        assert!(
-            app.world()
-                .resource::<UiState>()
-                .game_shop_pending
-                .is_none()
-        );
-        assert!(
-            app.world()
-                .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
-                .game_shop_pending()
-                .is_none()
-        );
+        assert!(app
+            .world()
+            .resource::<UiState>()
+            .game_shop_pending
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
+            .game_shop_pending()
+            .is_none());
         assert_eq!(
             app.world()
                 .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
@@ -556,18 +733,16 @@ mod tests {
         .unwrap();
         app.update();
 
-        assert!(
-            app.world()
-                .resource::<UiState>()
-                .game_shop_pending
-                .is_some()
-        );
-        assert!(
-            app.world()
-                .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
-                .game_shop_pending()
-                .is_some()
-        );
+        assert!(app
+            .world()
+            .resource::<UiState>()
+            .game_shop_pending
+            .is_some());
+        assert!(app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
+            .game_shop_pending()
+            .is_some());
         assert_eq!(
             app.world()
                 .resource::<gateway_bridge::AndroidGatewayInboundQueue>()
@@ -589,18 +764,16 @@ mod tests {
                 price_type: 1,
             }),
         );
-        assert!(
-            app.world()
-                .resource::<UiState>()
-                .game_shop_pending
-                .is_some()
-        );
-        assert!(
-            app.world()
-                .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
-                .game_shop_pending()
-                .is_some()
-        );
+        assert!(app
+            .world()
+            .resource::<UiState>()
+            .game_shop_pending
+            .is_some());
+        assert!(app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>()
+            .game_shop_pending()
+            .is_some());
 
         let request_id = app
             .world()
@@ -656,7 +829,7 @@ mod tests {
     }
 
     #[test]
-    fn android_options_semantics_stage_cancel_apply_and_preserve_effects() {
+    fn android_crystal_options_commit_immediately_and_platform_window_mode_is_separate() {
         let mut app = in_game_app();
         {
             let mut state = app.world_mut().resource_mut::<UiState>();
@@ -671,67 +844,18 @@ mod tests {
             },
         );
         assert_eq!(app.world().resource::<UiState>().panel, UiPanel::Options);
-        assert_eq!(
-            app.world().resource::<UiState>().options_draft,
-            Some(app.world().resource::<UiState>().options.clone())
-        );
+        assert!(app.world().resource::<UiState>().options_draft.is_none());
 
         send(
             &mut app,
             AndroidInputEvent::Semantic(UiAction::SetMusicVolume { volume: 12 }),
         );
-        send(
-            &mut app,
-            AndroidInputEvent::Semantic(UiAction::SetWindowMode {
-                mode: UiWindowMode::Fullscreen,
-            }),
-        );
-        let staged = app.world().resource::<UiState>();
-        assert_eq!(staged.options.music_volume, 55);
-        assert_eq!(staged.options.window_mode, UiWindowMode::Windowed);
-        assert_eq!(staged.options_draft.as_ref().unwrap().music_volume, 12);
-        assert_eq!(
-            staged.options_draft.as_ref().unwrap().window_mode,
-            UiWindowMode::Fullscreen
-        );
-        assert!(take_effects(&mut app).is_empty());
-
-        send(&mut app, AndroidInputEvent::Back);
-        let cancelled = app.world().resource::<UiState>();
-        assert_eq!(cancelled.panel, UiPanel::None);
-        assert_eq!(cancelled.options.music_volume, 55);
-        assert_eq!(cancelled.options.window_mode, UiWindowMode::Windowed);
-        assert!(cancelled.options_draft.is_none());
-        assert!(take_effects(&mut app).is_empty());
-
-        send(
-            &mut app,
-            AndroidInputEvent::Tap {
-                target: AndroidUiTarget::Options,
-            },
-        );
-        send(
-            &mut app,
-            AndroidInputEvent::Semantic(UiAction::SetMusicVolume { volume: 12 }),
-        );
-        send(
-            &mut app,
-            AndroidInputEvent::Semantic(UiAction::SetWindowMode {
-                mode: UiWindowMode::Fullscreen,
-            }),
-        );
-        send(
-            &mut app,
-            AndroidInputEvent::Semantic(UiAction::ApplyOptions),
-        );
-
-        let applied = app.world().resource::<UiState>();
-        assert_eq!(applied.panel, UiPanel::None);
-        assert_eq!(applied.options.music_volume, 12);
-        assert_eq!(applied.options.window_mode, UiWindowMode::Fullscreen);
-        assert!(applied.options_draft.is_none());
+        let committed = app.world().resource::<UiState>();
+        assert_eq!(committed.options.music_volume, 12);
+        assert_eq!(committed.options.window_mode, UiWindowMode::Windowed);
+        assert!(committed.options_draft.is_none());
         let effects = take_effects(&mut app);
-        assert_eq!(effects.len(), 3);
+        assert_eq!(effects.len(), 2);
         assert!(effects.iter().any(|effect| matches!(
             effect,
             UiEffect::ApplyAudioSettings {
@@ -743,6 +867,52 @@ mod tests {
         )));
         assert!(effects.iter().any(|effect| matches!(
             effect,
+            UiEffect::PersistOptions { options }
+                if options.music_volume == 12
+                    && options.window_mode == UiWindowMode::Windowed
+        )));
+
+        // Legacy window controls are deliberately inert inside Crystal's
+        // Options panel; the original panel closes without apply/cancel.
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::SetWindowMode {
+                mode: UiWindowMode::Fullscreen,
+            }),
+        );
+        assert!(take_effects(&mut app).is_empty());
+
+        send(&mut app, AndroidInputEvent::Back);
+        let closed = app.world().resource::<UiState>();
+        assert_eq!(closed.panel, UiPanel::None);
+        assert_eq!(closed.options.music_volume, 12);
+        assert_eq!(closed.options.window_mode, UiWindowMode::Windowed);
+        assert!(take_effects(&mut app).is_empty());
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::OpenPlatformSettings),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::SetPlatformWindowMode {
+                mode: UiWindowMode::Fullscreen,
+            }),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::ApplyPlatformSettings),
+        );
+
+        let applied = app.world().resource::<UiState>();
+        assert_eq!(applied.panel, UiPanel::None);
+        assert_eq!(applied.options.music_volume, 12);
+        assert_eq!(applied.options.window_mode, UiWindowMode::Fullscreen);
+        assert!(applied.platform_settings_draft.is_none());
+        let effects = take_effects(&mut app);
+        assert_eq!(effects.len(), 2);
+        assert!(effects.iter().any(|effect| matches!(
+            effect,
             UiEffect::ApplyWindowMode {
                 mode: UiWindowMode::Fullscreen
             }
@@ -750,8 +920,7 @@ mod tests {
         assert!(effects.iter().any(|effect| matches!(
             effect,
             UiEffect::PersistOptions { options }
-                if options.music_volume == 12
-                    && options.window_mode == UiWindowMode::Fullscreen
+                if options.window_mode == UiWindowMode::Fullscreen
         )));
         assert!(take_effects(&mut app).is_empty());
     }

@@ -13,7 +13,43 @@ pub const SHOP_QUANTITY_MAX: u16 = 99;
 pub const SHOP_QUANTITY_STEP: u16 = 1;
 pub const BAG_SLOTS: u32 = 46;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// Authoritative Crystal NPC service currently offered by the NPC dialog.
+/// Opening one service must not implicitly authorize any of the others.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum NpcShopServiceMode {
+    #[default]
+    Closed,
+    Buy,
+    Sell,
+    Repair,
+    SpecialRepair,
+}
+
+/// Packet-first service transition delivered independently from `NPCGoods`.
+/// `repair_rate` is present only for the two Crystal repair services.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct NpcShopServiceSignal {
+    pub mode: NpcShopServiceMode,
+    pub repair_rate: Option<f32>,
+}
+
+impl NpcShopServiceSignal {
+    pub fn is_valid(self) -> bool {
+        match self.mode {
+            NpcShopServiceMode::Closed | NpcShopServiceMode::Buy | NpcShopServiceMode::Sell => {
+                self.repair_rate.is_none()
+            }
+            NpcShopServiceMode::Repair | NpcShopServiceMode::SpecialRepair => self
+                .repair_rate
+                .is_some_and(|rate| rate.is_finite() && rate >= 0.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ShopGood {
     pub unique_id: u64,
     pub name: String,
@@ -21,6 +57,9 @@ pub struct ShopGood {
     pub count: u16,
     pub stock: i32,
     pub panel_type: u8,
+    /// Uses the same Crystal Items atlas exported for carried items.
+    pub icon: u16,
+    pub description: String,
 }
 
 impl ShopGood {
@@ -33,7 +72,7 @@ impl ShopGood {
     }
 }
 
-#[derive(Debug, Clone, Default, Resource, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Resource, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ShopModel {
     pub goods: Vec<ShopGood>,
@@ -42,6 +81,11 @@ pub struct ShopModel {
     pub selected_bag_slot_for_sell: Option<u32>,
     /// NPC repair selection is independent from sell and Warehouse state.
     pub selected_bag_slot_for_repair: Option<u32>,
+    /// Server-selected service surface. This is reset at every session/data
+    /// boundary and changed only by NPCGoods/NPCSell/NPCRepair/NPCSRepair.
+    pub service_mode: NpcShopServiceMode,
+    /// Crystal repair multiplier supplied by NPCRepair/NPCSRepair.
+    pub repair_rate: Option<f32>,
 }
 
 impl ShopModel {
@@ -52,6 +96,34 @@ impl ShopModel {
 
     pub fn find_mut(&mut self, id: u64) -> Option<&mut ShopGood> {
         self.goods.iter_mut().find(|g| g.unique_id == id)
+    }
+
+    pub fn apply_service_signal(&mut self, signal: NpcShopServiceSignal) -> bool {
+        if !signal.is_valid() {
+            return false;
+        }
+        self.service_mode = signal.mode;
+        self.repair_rate = signal.repair_rate;
+        self.selected_id = None;
+        self.selected_bag_slot_for_sell = None;
+        self.selected_bag_slot_for_repair = None;
+        true
+    }
+
+    pub fn allows_buy(&self) -> bool {
+        self.service_mode == NpcShopServiceMode::Buy
+    }
+
+    pub fn allows_sell(&self) -> bool {
+        self.service_mode == NpcShopServiceMode::Sell
+    }
+
+    pub fn allows_repair(&self) -> bool {
+        self.service_mode == NpcShopServiceMode::Repair
+    }
+
+    pub fn allows_special_repair(&self) -> bool {
+        self.service_mode == NpcShopServiceMode::SpecialRepair
     }
 }
 
@@ -122,6 +194,7 @@ mod tests {
             count: 1,
             stock,
             panel_type: 0,
+            ..Default::default()
         }
     }
 
@@ -133,6 +206,7 @@ mod tests {
             quantity: 1,
             slot,
             container: 0,
+            ..ItemModel::default()
         }
     }
 
@@ -179,9 +253,43 @@ mod tests {
             selected_id: Some(1),
             selected_bag_slot_for_sell: Some(2),
             selected_bag_slot_for_repair: Some(3),
+            service_mode: NpcShopServiceMode::Buy,
+            repair_rate: None,
         };
         let json = serde_json::to_string(&model).expect("ser");
         let restored: ShopModel = serde_json::from_str(&json).expect("de");
         assert_eq!(model, restored);
+    }
+
+    #[test]
+    fn service_modes_are_authoritative_and_mutually_exclusive() {
+        let mut model = ShopModel {
+            selected_id: Some(7),
+            selected_bag_slot_for_sell: Some(2),
+            selected_bag_slot_for_repair: Some(3),
+            ..Default::default()
+        };
+        assert!(model.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Repair,
+            repair_rate: Some(1.5),
+        }));
+        assert!(model.allows_repair());
+        assert!(!model.allows_buy());
+        assert!(!model.allows_sell());
+        assert!(!model.allows_special_repair());
+        assert_eq!(model.repair_rate, Some(1.5));
+        assert_eq!(model.selected_id, None);
+        assert_eq!(model.selected_bag_slot_for_sell, None);
+        assert_eq!(model.selected_bag_slot_for_repair, None);
+    }
+
+    #[test]
+    fn malformed_repair_signal_fails_closed() {
+        let mut model = ShopModel::default();
+        assert!(!model.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::SpecialRepair,
+            repair_rate: None,
+        }));
+        assert_eq!(model.service_mode, NpcShopServiceMode::Closed);
     }
 }

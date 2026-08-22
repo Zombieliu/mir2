@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> WN-UI-FUNC-01 R7 non-visual functional closure (2026-08-23): shared UI
+> Core, Windows native, runtime and Android adapters now cover the remaining
+> bounded functional gaps without using desktop visual automation. Login and
+> registration requests use operation-specific in-flight state and redacted
+> diagnostics; storage acknowledgements release one exact transfer only; NPC
+> shop Buy/Sell/Repair/SpecialRepair modes are authoritative and mutually
+> exclusive; all 13 Crystal chat channel families and aliases are filtered
+> independently. Group name invite and Guild recruit, member rank editing,
+> eight canonical permission bits, notice editing, authoritative 112-slot
+> Guild storage, paging and gold deposit/withdraw now share typed intents and
+> bounded packet adapters on Windows and Android. Registry coverage is 173
+> controls. Gates pass: ui-core 36/36, client-bevy default 119/119,
+> client-bevy native-ui 366/366, Windows 275/275, runtime 180/180, Android
+> 45/45 and Web typecheck. This closes the current non-visual code gate only;
+> real-window mouse/keyboard, DPI, device, visual parity and human acceptance
+> remain explicitly open in `docs/WN-UI-FUNCTIONAL-PARITY-CHECKLIST.md`.
+
 > Fresh Web production-build closure (2026-08-22): the current source snapshot
 > passes the complete `apps/web` production pipeline, including both release
 > WASM backends, 9,650 entity frames, the 40,808-entry original-asset manifest,

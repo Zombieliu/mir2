@@ -102,7 +102,12 @@ pub struct GameShopRequest {
 
 impl GameShopRequest {
     pub fn new(request_id: String, g_index: i32, quantity: u8, price_type: i32) -> Option<Self> {
-        let request = Self { request_id, g_index, quantity, price_type };
+        let request = Self {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+        };
         request.is_valid().then_some(request)
     }
 
@@ -203,7 +208,8 @@ mod tests {
             "protocol": NATIVE_GAME_SHOP_RECEIPT_PROTOCOL,
             "requestId": "gs-1", "success": true, "gIndex": 31,
             "quantity": 2, "priceType": 1, "newStockLevel": null, "mailId": 1842
-        })).unwrap();
+        }))
+        .unwrap();
         assert!(receipt.is_valid());
         assert!(receipt.matches_request(&request));
         assert!(!receipt.matches_request(&GameShopRequest::new("gs-2".into(), 31, 2, 1).unwrap()));
@@ -213,7 +219,10 @@ mod tests {
     fn failures_are_stable_printable_codes() {
         let code = GameShopFailureCode::parse("insufficientCurrency").unwrap();
         assert_eq!(code.as_str(), "insufficientCurrency");
-        assert_eq!(serde_json::to_string(&code).unwrap(), "\"insufficientCurrency\"");
+        assert_eq!(
+            serde_json::to_string(&code).unwrap(),
+            "\"insufficientCurrency\""
+        );
         assert!(GameShopFailureCode::parse("bad\ncode").is_none());
         assert!(GameShopFailureCode::parse(&"x".repeat(64)).is_some());
         assert!(GameShopFailureCode::parse(&"x".repeat(65)).is_none());

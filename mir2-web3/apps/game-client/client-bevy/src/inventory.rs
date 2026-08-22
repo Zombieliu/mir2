@@ -21,7 +21,7 @@ pub const SLOT_SIZE: f32 = 40.0;
 pub const SLOTS_PER_ROW: u32 = 8;
 
 /// A single carried item in renderer-neutral form.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemModel {
     /// Stable server-side identity of this concrete item stack/instance.
@@ -34,6 +34,52 @@ pub struct ItemModel {
     pub slot: u32,
     /// 0 = inventory bag, 1 = belt, 2 = equipment (client-side grouping).
     pub container: u8,
+    /// Crystal item image index. `0` is intentionally treated as no image: a
+    /// legacy/incomplete snapshot must not cause the native client to guess an
+    /// icon from the item name.
+    #[serde(default)]
+    pub icon: u16,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub durability_current: Option<u16>,
+    #[serde(default)]
+    pub durability_max: Option<u16>,
+    #[serde(default)]
+    pub sell_value: u32,
+    #[serde(default)]
+    pub equip_slot: Option<String>,
+    #[serde(default)]
+    pub grade: Option<String>,
+    #[serde(default)]
+    pub attack: i32,
+    #[serde(default)]
+    pub defence: i32,
+    #[serde(default)]
+    pub added_attack: i32,
+    #[serde(default)]
+    pub added_defence: i32,
+    #[serde(default)]
+    pub added_luck: i32,
+    #[serde(default)]
+    pub shape: Option<u16>,
+    #[serde(default)]
+    pub socket_slots: u8,
+}
+
+/// Return the canonical exported Crystal icon path, but deliberately do not
+/// manufacture a path for a missing/legacy icon index.
+pub fn item_icon_path(icon: u16) -> Option<String> {
+    (icon != 0).then(|| format!("original-ui/Items/{icon}.png"))
+}
+
+/// Compact durability text for a fixed-size slot. Absence remains absence;
+/// it is not rendered as a misleading `0/0` durability value.
+pub fn item_durability_label(item: &ItemModel) -> Option<String> {
+    match (item.durability_current, item.durability_max) {
+        (Some(current), Some(maximum)) => Some(format!("{current}/{maximum}")),
+        _ => None,
+    }
 }
 
 /// The renderer-neutral inventory read model.
@@ -213,6 +259,7 @@ mod tests {
             quantity: 1,
             slot,
             container,
+            ..ItemModel::default()
         }
     }
 
@@ -276,6 +323,7 @@ mod tests {
                 quantity: 3,
                 slot: 2,
                 container: 0,
+                ..ItemModel::default()
             }],
         };
         app.update();
@@ -287,5 +335,28 @@ mod tests {
             .map(|text| text.0.clone())
             .collect::<Vec<_>>();
         assert!(labels.iter().any(|label| label == "Small HP Potion ×3"));
+    }
+
+    #[test]
+    fn legacy_item_json_and_full_metadata_are_both_compatible() {
+        let legacy: ItemModel = serde_json::from_str(
+            r#"{"key":"potion","name":"Potion","quantity":1,"slot":0,"container":0}"#,
+        )
+        .expect("legacy inventory JSON remains valid");
+        assert_eq!(legacy.icon, 0);
+        assert_eq!(legacy.description, "");
+        assert_eq!(item_icon_path(0), None);
+
+        let full: ItemModel = serde_json::from_str(
+            r#"{"uniqueId":42,"key":"sword","name":"Sword","quantity":1,"slot":2,"container":2,"icon":71,"description":"Sharp","durabilityCurrent":35,"durabilityMax":40,"sellValue":123,"equipSlot":"Weapon","grade":"Rare","attack":7,"defence":2,"addedAttack":3,"addedDefence":4,"addedLuck":1,"shape":9,"socketSlots":2}"#,
+        )
+        .expect("full Crystal item JSON decodes");
+        assert_eq!(
+            item_icon_path(full.icon).as_deref(),
+            Some("original-ui/Items/71.png")
+        );
+        assert_eq!(item_durability_label(&full).as_deref(), Some("35/40"));
+        assert_eq!(full.added_attack, 3);
+        assert_eq!(full.socket_slots, 2);
     }
 }

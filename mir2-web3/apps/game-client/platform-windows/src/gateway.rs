@@ -3035,11 +3035,27 @@ where
                                 serde_json::to_string(&shop).map_err(|error| error.to_string())?;
                             let _ =
                                 mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
-                            // This is a one-shot surface signal. It never
-                            // aliases the cash GameShop model.
-                            let _ = mir2_bevy_runtime::native_ingest::push_native_npc_shop_open();
+                            let signal = npc_shop_service_from_packet(packet, payload)
+                                .ok_or_else(|| "invalid NPCGoods service signal".to_owned())?;
+                            push_native_npc_shop_service(signal)?;
                         }
                     }
+                }
+                "NPCSell" => {
+                    let signal = npc_shop_service_from_packet(packet, &Value::Null)
+                        .ok_or_else(|| "invalid NPCSell service signal".to_owned())?;
+                    push_native_npc_shop_service(signal)?;
+                }
+                "NPCRepair" | "NPCSRepair" => {
+                    let Some(signal) = event
+                        .payload
+                        .as_ref()
+                        .and_then(|payload| npc_shop_service_from_packet(packet, payload))
+                    else {
+                        eprintln!("[gateway-client] ignored malformed {packet} service rate");
+                        return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
+                    };
+                    push_native_npc_shop_service(signal)?;
                 }
                 "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" => {
                     if let Some(payload) = event.payload.as_ref() {
@@ -3796,6 +3812,48 @@ fn transform_game_shop_stock_from_packet(payload: &Value) -> Option<Value> {
 
 /// `NPCGoods` is the ordinary NPC-only catalogue. It must not be folded into
 /// the separately correlated cash GameShop catalogue above.
+fn npc_shop_service_from_packet(
+    packet: &str,
+    payload: &Value,
+) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
+    use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
+    let signal = match packet {
+        "NPCGoods" => NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Buy,
+            repair_rate: None,
+        },
+        "NPCSell" => NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Sell,
+            repair_rate: None,
+        },
+        "NPCRepair" | "NPCSRepair" => NpcShopServiceSignal {
+            mode: if packet == "NPCRepair" {
+                NpcShopServiceMode::Repair
+            } else {
+                NpcShopServiceMode::SpecialRepair
+            },
+            repair_rate: payload
+                .get("rate")
+                .and_then(Value::as_f64)
+                .filter(|rate| rate.is_finite() && *rate >= 0.0)
+                .map(|rate| rate as f32),
+        },
+        _ => return None,
+    };
+    signal.is_valid().then_some(signal)
+}
+
+fn push_native_npc_shop_service(
+    signal: mir2_client_bevy::shop::NpcShopServiceSignal,
+) -> Result<(), String> {
+    if !signal.is_valid() {
+        return Err("invalid NPC shop service signal".to_owned());
+    }
+    let json = serde_json::to_string(&signal).map_err(|error| error.to_string())?;
+    let _ = mir2_bevy_runtime::native_ingest::push_native_npc_shop_service(json);
+    Ok(())
+}
+
 fn transform_shop_model_from_packet(payload: &Value) -> Value {
     let goods: Vec<Value> = payload
         .get("list")
@@ -4146,7 +4204,6 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             "size": value_u32(payload.get("size")).and_then(|value| u16::try_from(value).ok())?,
             "has_expanded": payload.get("hasExpandedStorage").and_then(Value::as_bool)?,
             "expiry": value_i64(payload.get("expiryTimeBinaryDatetime"))?,
-            "ack": { "operation": "expand", "success": true },
         })),
         _ => None,
     }
@@ -4802,6 +4859,42 @@ mod tests {
         .expect("password failure acknowledgement");
         assert_eq!(password_failure["ack"]["operation"], "removePassword");
         assert_eq!(password_failure["ack"]["success"], false);
+
+        let resize = transform_storage_patch_from_packet(
+            "ResizeStorage",
+            &json!({ "size": 42, "hasExpandedStorage": true, "expiryTimeBinaryDatetime": 99 }),
+        )
+        .expect("ResizeStorage metadata-only patch");
+        assert!(
+            resize.get("ack").is_none(),
+            "a snapshot is not an expand ACK"
+        );
+
+        use mir2_client_bevy::shop::NpcShopServiceMode;
+        assert_eq!(
+            npc_shop_service_from_packet("NPCGoods", &json!({}))
+                .unwrap()
+                .mode,
+            NpcShopServiceMode::Buy
+        );
+        assert_eq!(
+            npc_shop_service_from_packet("NPCSell", &json!({}))
+                .unwrap()
+                .mode,
+            NpcShopServiceMode::Sell
+        );
+        let repair = npc_shop_service_from_packet("NPCRepair", &json!({ "rate": 1.5 }))
+            .expect("repair service");
+        assert_eq!(repair.mode, NpcShopServiceMode::Repair);
+        assert_eq!(repair.repair_rate, Some(1.5));
+        assert_eq!(
+            npc_shop_service_from_packet("NPCSRepair", &json!({ "rate": 2.0 }))
+                .unwrap()
+                .mode,
+            NpcShopServiceMode::SpecialRepair
+        );
+        assert!(npc_shop_service_from_packet("NPCRepair", &json!({})).is_none());
+        assert!(npc_shop_service_from_packet("NPCSRepair", &json!({ "rate": -1.0 })).is_none());
     }
 
     async fn receive_wire_type(

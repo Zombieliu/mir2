@@ -5,17 +5,17 @@
 //! the Web/Windows BrowserCommand path, then retains them until an Activity or
 //! websocket host explicitly drains the queue.
 
-use std::collections::VecDeque;
+use std::{collections::VecDeque, fmt};
 
 use bevy::prelude::Resource;
 use mir2_ui_core::action::UiAction;
-use mir2_ui_core::effect::{GatewayCommand, UiEffect};
+use mir2_ui_core::effect::{GatewayCommand, SecurityRequest, UiEffect};
 use mir2_ui_core::game_shop::{
     GameShopReceipt, GameShopRequest, NATIVE_GAME_SHOP_RECEIPT_CAPABILITY,
 };
 use mir2_ui_core::reducer::reduce;
 use mir2_ui_core::state::UiState;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
 use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};
 
@@ -26,6 +26,16 @@ pub const ANDROID_GATEWAY_INBOUND_CAPACITY: usize = 32;
 /// the JNI handoff before any JSON parser or Bevy system sees it.
 pub const ANDROID_GATEWAY_INBOUND_MAX_MESSAGE_BYTES: usize = 16 * 1024;
 pub const ANDROID_GATEWAY_INBOUND_MAX_BYTES: usize = 128 * 1024;
+/// These limits match the bounded Android change-password form's transport
+/// envelope. They are enforced again at the platform boundary because a
+/// caller can construct a shared `SecurityRequest` without going through the
+/// renderer's text-input limits.
+pub const ANDROID_CHANGE_PASSWORD_MAX_ACCOUNT_BYTES: usize = 32;
+pub const ANDROID_CHANGE_PASSWORD_MAX_SECRET_BYTES: usize = 128;
+pub const ANDROID_CHANGE_PASSWORD_SUCCESS_RESULT: i32 = 6;
+const ANDROID_SECURITY_NOTICE_MAX_CHARS: usize = 256;
+pub const ANDROID_GUILD_STORAGE_SLOT_COUNT: i32 = 112;
+const ANDROID_MAX_PROTOCOL_SLOT: i32 = u8::MAX as i32;
 
 /// The Android Activity/transport host sends this envelope when it opens its
 /// WebSocket. This module intentionally does not own or declare a WebSocket.
@@ -54,11 +64,113 @@ pub enum AndroidGatewayOutboundKind {
     LocalOnly { reason: &'static str },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// The two guild-storage BrowserCommand variants currently implemented by
+/// the gateway. `requestGuildStorage` is intentionally absent: the server
+/// uses `guildStorageItemChange` with changeType 3 and coordinates 0,0 to
+/// request the storage list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AndroidGuildStorageCommand {
+    GoldChange { change_type: u8, amount: u32 },
+    ItemChange { change_type: u8, from: i32, to: i32 },
+}
+
+impl AndroidGuildStorageCommand {
+    pub fn gold_change(change_type: u8, amount: u32) -> Option<Self> {
+        (change_type <= 1 && amount > 0).then_some(Self::GoldChange {
+            change_type,
+            amount,
+        })
+    }
+
+    pub fn item_change(change_type: u8, from: i32, to: i32) -> Option<Self> {
+        let valid_slot = |slot: i32| (0..ANDROID_GUILD_STORAGE_SLOT_COUNT).contains(&slot);
+        let valid_protocol_slot = |slot: i32| (0..=ANDROID_MAX_PROTOCOL_SLOT).contains(&slot);
+        let valid = match change_type {
+            0 => valid_protocol_slot(from) && valid_slot(to),
+            1 => valid_slot(from) && valid_protocol_slot(to),
+            2 => valid_slot(from) && valid_slot(to),
+            3 => from == 0 && to == 0,
+            _ => false,
+        };
+        valid.then_some(Self::ItemChange {
+            change_type,
+            from,
+            to,
+        })
+    }
+
+    fn command_type(self) -> &'static str {
+        match self {
+            Self::GoldChange { .. } => "guildStorageGoldChange",
+            Self::ItemChange { .. } => "guildStorageItemChange",
+        }
+    }
+
+    fn to_wire_value(self) -> Value {
+        match self {
+            Self::GoldChange {
+                change_type,
+                amount,
+            } => json!({
+                "type":"guildStorageGoldChange",
+                "changeType":change_type,
+                "amount":amount
+            }),
+            Self::ItemChange {
+                change_type,
+                from,
+                to,
+            } => json!({
+                "type":"guildStorageItemChange",
+                "changeType":change_type,
+                "from":from,
+                "to":to
+            }),
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Eq)]
 pub struct AndroidGatewayOutbound {
     pub sequence: u64,
     pub kind: AndroidGatewayOutboundKind,
     pub json: String,
+}
+
+impl fmt::Debug for AndroidGatewayOutbound {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let json = serde_json::from_str::<Value>(&self.json)
+            .map(|mut value| {
+                redact_wire_secrets(&mut value);
+                serde_json::to_string(&value).unwrap_or_else(|_| "[REDACTED]".to_owned())
+            })
+            .unwrap_or_else(|_| "[REDACTED]".to_owned());
+        formatter
+            .debug_struct("AndroidGatewayOutbound")
+            .field("sequence", &self.sequence)
+            .field("kind", &self.kind)
+            .field("json", &json)
+            .finish()
+    }
+}
+
+fn redact_wire_secrets(value: &mut Value) {
+    match value {
+        Value::Object(object) => {
+            for (key, child) in object.iter_mut() {
+                if matches!(
+                    key.as_str(),
+                    "password" | "currentPassword" | "newPassword" | "secretAnswer" | "credential"
+                ) {
+                    *child = Value::String("[REDACTED]".to_owned());
+                } else {
+                    redact_wire_secrets(child);
+                }
+            }
+        }
+        Value::Array(values) => values.iter_mut().for_each(redact_wire_secrets),
+        _ => {}
+    }
 }
 
 impl AndroidGatewayOutbound {
@@ -86,6 +198,19 @@ pub enum AndroidGatewayEnqueueError {
         command_type: String,
     },
     RequestInFlight,
+    InvalidGuildStorage {
+        command_type: &'static str,
+        reason: &'static str,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AndroidSecurityAdapterError {
+    InvalidField {
+        field: &'static str,
+        reason: &'static str,
+    },
+    Enqueue(AndroidGatewayEnqueueError),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -101,6 +226,111 @@ enum AndroidGatewayInboundMessage {
         json: String,
         exact_for_pending: bool,
     },
+    ChangePasswordResult {
+        result: Option<i32>,
+        banned: bool,
+        message: String,
+        wire_bytes: usize,
+        exact_for_pending: bool,
+    },
+}
+
+/// Safe, already-parsed representation of the server's password result. It
+/// deliberately contains no request credentials and is the only representation
+/// retained by the Android inbound queue.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AndroidChangePasswordResult {
+    pub result: Option<i32>,
+    pub banned: bool,
+    pub message: String,
+}
+
+impl AndroidChangePasswordResult {
+    pub fn success(&self) -> bool {
+        !self.banned && self.result == Some(ANDROID_CHANGE_PASSWORD_SUCCESS_RESULT)
+    }
+}
+
+fn bounded_security_notice(value: &str) -> String {
+    value
+        .chars()
+        .filter(|character| !character.is_control())
+        .take(ANDROID_SECURITY_NOTICE_MAX_CHARS)
+        .collect()
+}
+
+fn change_password_result_message(
+    result: Option<i32>,
+    banned: bool,
+    reason: Option<&str>,
+) -> String {
+    if banned {
+        let reason = reason.map(bounded_security_notice).unwrap_or_default();
+        return if reason.is_empty() {
+            "Password change is temporarily blocked.".to_owned()
+        } else {
+            format!("Password change is temporarily blocked: {reason}")
+        };
+    }
+    match result {
+        Some(ANDROID_CHANGE_PASSWORD_SUCCESS_RESULT) => "Password changed successfully.".to_owned(),
+        Some(1) => "The account ID is invalid.".to_owned(),
+        Some(2) => "The current password is required.".to_owned(),
+        Some(3) => "The new password is invalid.".to_owned(),
+        Some(4) => "The account was not found.".to_owned(),
+        Some(5) => "The current password is incorrect.".to_owned(),
+        _ => "Password change failed.".to_owned(),
+    }
+}
+
+/// Parse the gateway's packet envelope without retaining arbitrary inbound
+/// JSON. The Android host may pass either normal packet responses or the
+/// authoritative `ChangePasswordBanned` response, but unrelated packets are
+/// rejected at this boundary.
+pub fn parse_native_change_password_result(
+    json_text: &str,
+) -> Result<(AndroidChangePasswordResult, usize), String> {
+    let wire_bytes = json_text.len();
+    let root = serde_json::from_str::<Value>(json_text)
+        .map_err(|_| "invalid change-password response JSON".to_owned())?;
+    if root.get("type").and_then(Value::as_str) != Some("packet") {
+        return Err("change-password response is not a packet envelope".to_owned());
+    }
+    let packet = root
+        .get("packet")
+        .and_then(Value::as_str)
+        .ok_or_else(|| "change-password response packet is missing".to_owned())?;
+    let payload = root
+        .get("payload")
+        .and_then(Value::as_object)
+        .ok_or_else(|| "change-password response payload is missing".to_owned())?;
+    let parsed = match packet {
+        "ChangePassword" => {
+            let result = payload
+                .get("result")
+                .and_then(Value::as_i64)
+                .and_then(|value| i32::try_from(value).ok());
+            if result.is_none() {
+                return Err("change-password result code is missing or invalid".to_owned());
+            }
+            AndroidChangePasswordResult {
+                result,
+                banned: false,
+                message: change_password_result_message(result, false, None),
+            }
+        }
+        "ChangePasswordBanned" => AndroidChangePasswordResult {
+            result: None,
+            banned: true,
+            message: change_password_result_message(
+                None,
+                true,
+                payload.get("reason").and_then(Value::as_str),
+            ),
+        },
+        _ => return Err("unrelated packet passed to change-password adapter".to_owned()),
+    };
+    Ok((parsed, wire_bytes))
 }
 
 impl AndroidGatewayInboundMessage {
@@ -115,6 +345,7 @@ impl AndroidGatewayInboundMessage {
     fn byte_len(&self) -> usize {
         match self {
             Self::GameShopReceipt { json, .. } => json.len(),
+            Self::ChangePasswordResult { wire_bytes, .. } => *wire_bytes,
         }
     }
 
@@ -122,12 +353,20 @@ impl AndroidGatewayInboundMessage {
         match self {
             Self::GameShopReceipt { json, .. } => parse_native_game_shop_receipt(json)
                 .is_ok_and(|receipt| receipt.matches_request(request)),
+            Self::ChangePasswordResult { .. } => false,
         }
+    }
+
+    fn is_change_password_result(&self) -> bool {
+        matches!(self, Self::ChangePasswordResult { .. })
     }
 
     fn set_exact_for_pending(&mut self, exact: bool) {
         match self {
             Self::GameShopReceipt {
+                exact_for_pending, ..
+            } => *exact_for_pending = exact,
+            Self::ChangePasswordResult {
                 exact_for_pending, ..
             } => *exact_for_pending = exact,
         }
@@ -139,6 +378,27 @@ impl AndroidGatewayInboundMessage {
                 json,
                 exact_for_pending,
             } => (json, exact_for_pending),
+            Self::ChangePasswordResult { .. } => unreachable!("wrong inbound message kind"),
+        }
+    }
+
+    fn into_change_password_result(self) -> (AndroidChangePasswordResult, bool) {
+        match self {
+            Self::ChangePasswordResult {
+                result,
+                banned,
+                message,
+                exact_for_pending,
+                ..
+            } => (
+                AndroidChangePasswordResult {
+                    result,
+                    banned,
+                    message,
+                },
+                exact_for_pending,
+            ),
+            Self::GameShopReceipt { .. } => unreachable!("wrong inbound message kind"),
         }
     }
 }
@@ -156,6 +416,9 @@ pub enum AndroidGatewayInboundEnqueueError {
     MessageTooLarge {
         max_bytes: usize,
         actual_bytes: usize,
+    },
+    InvalidChangePasswordResult {
+        reason: String,
     },
 }
 
@@ -191,6 +454,9 @@ pub struct AndroidGatewayInboundQueue {
     unmatched_count: u64,
     pending_game_shop: Option<GameShopRequest>,
     exact_receipt_reserved: bool,
+    pending_change_password: bool,
+    exact_change_password_reserved: bool,
+    change_password_overflow_pending: bool,
 }
 
 impl Default for AndroidGatewayInboundQueue {
@@ -235,6 +501,9 @@ impl AndroidGatewayInboundQueue {
             unmatched_count: 0,
             pending_game_shop: None,
             exact_receipt_reserved: false,
+            pending_change_password: false,
+            exact_change_password_reserved: false,
+            change_password_overflow_pending: false,
         }
     }
 
@@ -253,6 +522,7 @@ impl AndroidGatewayInboundQueue {
         if self.queued_bytes.saturating_add(message_bytes) > self.max_bytes {
             self.byte_overflow_count = self.byte_overflow_count.saturating_add(1);
             self.overflow_pending = self.should_mark_pending_unknown();
+            self.change_password_overflow_pending = self.should_mark_change_password_unknown();
             return Err(AndroidGatewayInboundEnqueueError::BytesFull {
                 capacity_bytes: self.max_bytes,
                 queued_bytes: self.queued_bytes,
@@ -265,20 +535,27 @@ impl AndroidGatewayInboundQueue {
             // after a valid receipt is already retained. The receipt remains
             // FIFO-owned and will be consumed on the next Bevy update.
             self.overflow_pending = self.should_mark_pending_unknown();
+            self.change_password_overflow_pending = self.should_mark_change_password_unknown();
             return Err(AndroidGatewayInboundEnqueueError::Full {
                 capacity: self.capacity,
             });
         }
+        let reserves_change_password = !self.exact_change_password_reserved
+            && self.pending_change_password
+            && message.is_change_password_result();
         let reserves_exact_receipt = !self.exact_receipt_reserved
             && self
                 .pending_game_shop
                 .as_ref()
                 .is_some_and(|request| message.matches_game_shop_request(request));
-        message.set_exact_for_pending(reserves_exact_receipt);
+        message.set_exact_for_pending(reserves_exact_receipt || reserves_change_password);
         self.queued_bytes = self.queued_bytes.saturating_add(message_bytes);
         self.entries.push_back(message);
         if reserves_exact_receipt {
             self.exact_receipt_reserved = true;
+        }
+        if reserves_change_password {
+            self.exact_change_password_reserved = true;
         }
         Ok(())
     }
@@ -301,6 +578,7 @@ impl AndroidGatewayInboundQueue {
     fn drain(&mut self) -> Vec<AndroidGatewayInboundMessage> {
         self.queued_bytes = 0;
         self.exact_receipt_reserved = false;
+        self.exact_change_password_reserved = false;
         self.entries.drain(..).collect()
     }
 
@@ -309,6 +587,8 @@ impl AndroidGatewayInboundQueue {
         self.entries.clear();
         self.queued_bytes = 0;
         self.exact_receipt_reserved = false;
+        self.exact_change_password_reserved = false;
+        self.change_password_overflow_pending = false;
     }
 
     fn take_overflow_pending(&mut self) -> bool {
@@ -317,6 +597,14 @@ impl AndroidGatewayInboundQueue {
             return false;
         }
         std::mem::take(&mut self.overflow_pending)
+    }
+
+    fn take_change_password_overflow_pending(&mut self) -> bool {
+        if self.exact_change_password_reserved {
+            self.change_password_overflow_pending = false;
+            return false;
+        }
+        std::mem::take(&mut self.change_password_overflow_pending)
     }
 
     fn bind_game_shop_pending(&mut self, pending: Option<GameShopRequest>) {
@@ -335,8 +623,26 @@ impl AndroidGatewayInboundQueue {
         self.overflow_pending = false;
     }
 
+    fn bind_change_password_pending(&mut self, pending: bool) {
+        if self.pending_change_password != pending {
+            self.pending_change_password = pending;
+            self.exact_change_password_reserved = false;
+            self.change_password_overflow_pending = false;
+        }
+    }
+
+    fn clear_change_password_pending(&mut self) {
+        self.pending_change_password = false;
+        self.exact_change_password_reserved = false;
+        self.change_password_overflow_pending = false;
+    }
+
     fn should_mark_pending_unknown(&self) -> bool {
         self.pending_game_shop.is_some() && !self.exact_receipt_reserved
+    }
+
+    fn should_mark_change_password_unknown(&self) -> bool {
+        self.pending_change_password && !self.exact_change_password_reserved
     }
 
     fn record_malformed(&mut self) {
@@ -358,6 +664,78 @@ pub fn enqueue_native_game_shop_receipt(
         json: json_text.into(),
         exact_for_pending: false,
     })
+}
+
+/// Public transport/JNI-host boundary for the authoritative password result.
+/// Parsing happens before queue insertion, so no raw response (and certainly
+/// no credential) is retained by the Android bridge.
+pub fn enqueue_native_change_password_result(
+    inbound: &mut AndroidGatewayInboundQueue,
+    json_text: &str,
+) -> Result<(), AndroidGatewayInboundEnqueueError> {
+    if json_text.len() > ANDROID_GATEWAY_INBOUND_MAX_MESSAGE_BYTES {
+        return Err(AndroidGatewayInboundEnqueueError::MessageTooLarge {
+            max_bytes: ANDROID_GATEWAY_INBOUND_MAX_MESSAGE_BYTES,
+            actual_bytes: json_text.len(),
+        });
+    }
+    let (result, wire_bytes) =
+        parse_native_change_password_result(json_text).map_err(|reason| {
+            AndroidGatewayInboundEnqueueError::InvalidChangePasswordResult { reason }
+        })?;
+    inbound.enqueue(AndroidGatewayInboundMessage::ChangePasswordResult {
+        result: result.result,
+        banned: result.banned,
+        message: result.message,
+        wire_bytes,
+        exact_for_pending: false,
+    })
+}
+
+fn validate_security_field(
+    field: &'static str,
+    value: &str,
+    max_bytes: usize,
+) -> Result<(), AndroidSecurityAdapterError> {
+    if value.is_empty() {
+        return Err(AndroidSecurityAdapterError::InvalidField {
+            field,
+            reason: "must not be empty",
+        });
+    }
+    if value.len() > max_bytes {
+        return Err(AndroidSecurityAdapterError::InvalidField {
+            field,
+            reason: "exceeds the bounded transport length",
+        });
+    }
+    if value.chars().any(char::is_control) {
+        return Err(AndroidSecurityAdapterError::InvalidField {
+            field,
+            reason: "contains a control character",
+        });
+    }
+    Ok(())
+}
+
+/// Convert the shared request-only security effect to the real gateway JSON
+/// contract. The queue retains the request only in memory until it is drained;
+/// its `Debug` representation redacts all three credential fields and no
+/// persistence or logging is performed here.
+pub fn enqueue_security_request(
+    gateway: &mut AndroidGatewayOutboundQueue,
+    inbound: &mut AndroidGatewayInboundQueue,
+    request: SecurityRequest,
+) -> Result<(), AndroidSecurityAdapterError> {
+    gateway.enqueue_security_request(request)?;
+    inbound.bind_change_password_pending(true);
+    Ok(())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AndroidQueuedSecurityOutcome {
+    Applied,
+    Unmatched,
 }
 
 /// Atomically reduce one shared GameShop action and retain its outbound wire
@@ -443,6 +821,35 @@ fn consume_queued_native_game_shop_receipt(
     }
 }
 
+fn consume_queued_native_change_password_result(
+    ui_state: &mut UiState,
+    gateway: &mut AndroidGatewayOutboundQueue,
+    message: AndroidGatewayInboundMessage,
+) -> AndroidQueuedSecurityOutcome {
+    let (result, exact_for_pending) = message.into_change_password_result();
+    if !exact_for_pending
+        || !ui_state.security.change_password_pending
+        || !gateway.change_password_in_flight()
+    {
+        return AndroidQueuedSecurityOutcome::Unmatched;
+    }
+    if !gateway.apply_change_password_result(&result) {
+        return AndroidQueuedSecurityOutcome::Unmatched;
+    }
+    let transition = reduce(
+        ui_state,
+        UiAction::ChangePasswordResult {
+            success: result.success(),
+            message: result.message,
+        },
+    );
+    if transition.state.security.change_password_pending {
+        return AndroidQueuedSecurityOutcome::Unmatched;
+    }
+    *ui_state = transition.state;
+    AndroidQueuedSecurityOutcome::Applied
+}
+
 /// The Bevy system's only inbound-consumption seam. Raw queue entries and
 /// their frozen qualification remain private to this module; callers provide
 /// only the bounded queue and the two correlation owners.
@@ -452,17 +859,39 @@ pub(crate) fn drain_bounded_inbound_into_models(
     gateway: &mut AndroidGatewayOutboundQueue,
 ) {
     inbound.bind_game_shop_pending(gateway.game_shop_pending().cloned());
+    inbound.bind_change_password_pending(gateway.change_password_in_flight());
     if inbound.take_overflow_pending() {
         gateway.mark_game_shop_unknown();
         ui_state.mark_game_shop_unknown();
         inbound.clear_game_shop_pending();
     }
+    if inbound.take_change_password_overflow_pending() {
+        if ui_state.security.change_password_pending && gateway.change_password_in_flight() {
+            gateway.mark_change_password_unknown();
+            let transition = reduce(
+                ui_state,
+                UiAction::ChangePasswordResult {
+                    success: false,
+                    message: "Password change response was not received.".to_owned(),
+                },
+            );
+            *ui_state = transition.state;
+        }
+        inbound.clear_change_password_pending();
+    }
 
     for message in inbound.drain() {
-        match consume_queued_native_game_shop_receipt(ui_state, gateway, message) {
-            AndroidQueuedReceiptOutcome::Applied => inbound.clear_game_shop_pending(),
-            AndroidQueuedReceiptOutcome::Unmatched => inbound.record_unmatched(),
-            AndroidQueuedReceiptOutcome::Malformed => inbound.record_malformed(),
+        if message.is_change_password_result() {
+            match consume_queued_native_change_password_result(ui_state, gateway, message) {
+                AndroidQueuedSecurityOutcome::Applied => inbound.clear_change_password_pending(),
+                AndroidQueuedSecurityOutcome::Unmatched => inbound.record_unmatched(),
+            }
+        } else {
+            match consume_queued_native_game_shop_receipt(ui_state, gateway, message) {
+                AndroidQueuedReceiptOutcome::Applied => inbound.clear_game_shop_pending(),
+                AndroidQueuedReceiptOutcome::Unmatched => inbound.record_unmatched(),
+                AndroidQueuedReceiptOutcome::Malformed => inbound.record_malformed(),
+            }
         }
     }
 }
@@ -471,6 +900,7 @@ pub(crate) fn drain_bounded_inbound_into_models(
 /// state and only prevents a receipt from qualifying against a closed session.
 pub(crate) fn clear_bounded_inbound_transaction(inbound: &mut AndroidGatewayInboundQueue) {
     inbound.clear_game_shop_pending();
+    inbound.clear_change_password_pending();
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -490,6 +920,8 @@ pub struct AndroidGatewayOutboundQueue {
     last_local_only_type: Option<String>,
     pending_game_shop: Option<GameShopRequest>,
     game_shop_unknown: bool,
+    change_password_in_flight: bool,
+    change_password_unknown: bool,
 }
 
 impl Default for AndroidGatewayOutboundQueue {
@@ -514,6 +946,8 @@ impl AndroidGatewayOutboundQueue {
             last_local_only_type: None,
             pending_game_shop: None,
             game_shop_unknown: false,
+            change_password_in_flight: false,
+            change_password_unknown: false,
         }
     }
 
@@ -547,6 +981,66 @@ impl AndroidGatewayOutboundQueue {
             local_only_count: self.local_only_count,
             last_local_only_type: self.last_local_only_type.clone(),
         }
+    }
+
+    /// Enqueue the shared request-only security effect as the gateway's
+    /// `changePassword` BrowserCommand shape. A single in-flight request is
+    /// retained across transport draining until its authoritative result is
+    /// consumed, which prevents double taps from replaying credentials.
+    pub fn enqueue_security_request(
+        &mut self,
+        request: SecurityRequest,
+    ) -> Result<(), AndroidSecurityAdapterError> {
+        if self.change_password_in_flight {
+            return Err(AndroidSecurityAdapterError::Enqueue(
+                AndroidGatewayEnqueueError::RequestInFlight,
+            ));
+        }
+        let SecurityRequest::ChangePassword {
+            account,
+            old_password,
+            new_password,
+        } = &request;
+        validate_security_field(
+            "account",
+            account,
+            ANDROID_CHANGE_PASSWORD_MAX_ACCOUNT_BYTES,
+        )?;
+        validate_security_field(
+            "oldPassword",
+            old_password.as_str(),
+            ANDROID_CHANGE_PASSWORD_MAX_SECRET_BYTES,
+        )?;
+        validate_security_field(
+            "newPassword",
+            new_password.as_str(),
+            ANDROID_CHANGE_PASSWORD_MAX_SECRET_BYTES,
+        )?;
+        let command_type = "changePassword".to_owned();
+        if self.entries.len() >= self.capacity {
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidSecurityAdapterError::Enqueue(
+                AndroidGatewayEnqueueError::Full {
+                    capacity: self.capacity,
+                    command_type,
+                },
+            ));
+        }
+        let value = security_request_to_wire(&request);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence: self.next_sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json: serde_json::to_string(&value).expect("wire JSON values are serializable"),
+        });
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.change_password_in_flight = true;
+        self.change_password_unknown = false;
+        Ok(())
+    }
+
+    pub(crate) fn change_password_in_flight(&self) -> bool {
+        self.change_password_in_flight
     }
 
     /// Convert and retain one reducer command. A full queue rejects the new
@@ -607,6 +1101,62 @@ impl AndroidGatewayOutboundQueue {
         Ok(())
     }
 
+    /// Enqueue the exact guild-storage BrowserCommand without requiring a
+    /// shared UI enum change. Invalid change types, zero gold amounts, and
+    /// out-of-range slots are rejected before touching the bounded FIFO.
+    pub fn enqueue_guild_storage_gold_change(
+        &mut self,
+        change_type: u8,
+        amount: u32,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        let Some(command) = AndroidGuildStorageCommand::gold_change(change_type, amount) else {
+            return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: "guildStorageGoldChange",
+                reason: "changeType must be 0 or 1 and amount must be non-zero",
+            });
+        };
+        self.enqueue_guild_storage_command(command)
+    }
+
+    pub fn enqueue_guild_storage_item_change(
+        &mut self,
+        change_type: u8,
+        from: i32,
+        to: i32,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        let Some(command) = AndroidGuildStorageCommand::item_change(change_type, from, to) else {
+            return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: "guildStorageItemChange",
+                reason: "changeType or slot coordinates are outside the server contract",
+            });
+        };
+        self.enqueue_guild_storage_command(command)
+    }
+
+    fn enqueue_guild_storage_command(
+        &mut self,
+        command: AndroidGuildStorageCommand,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        let command_type = command.command_type();
+        if self.entries.len() >= self.capacity {
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.to_owned());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type: command_type.to_owned(),
+            });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json: serde_json::to_string(&command.to_wire_value())
+                .expect("guild storage wire JSON is serializable"),
+        });
+        Ok(())
+    }
+
     fn apply_game_shop_receipt(&mut self, receipt: &GameShopReceipt) -> bool {
         let Some(request) = self.pending_game_shop.as_ref() else {
             return false;
@@ -622,6 +1172,17 @@ impl AndroidGatewayOutboundQueue {
         true
     }
 
+    fn apply_change_password_result(&mut self, _result: &AndroidChangePasswordResult) -> bool {
+        if !self.change_password_in_flight {
+            return false;
+        }
+        self.change_password_in_flight = false;
+        self.change_password_unknown = false;
+        self.entries
+            .retain(|entry| !outbound_is_change_password(entry));
+        true
+    }
+
     pub(crate) fn mark_game_shop_unknown(&mut self) {
         if self.pending_game_shop.take().is_some() {
             self.game_shop_unknown = true;
@@ -629,8 +1190,18 @@ impl AndroidGatewayOutboundQueue {
         self.entries.retain(|entry| !outbound_is_game_shop(entry));
     }
 
+    pub(crate) fn mark_change_password_unknown(&mut self) {
+        if self.change_password_in_flight {
+            self.change_password_in_flight = false;
+            self.change_password_unknown = true;
+        }
+        self.entries
+            .retain(|entry| !outbound_is_change_password(entry));
+    }
+
     pub(crate) fn mark_terminal_reset(&mut self) {
         self.mark_game_shop_unknown();
+        self.mark_change_password_unknown();
         self.entries.clear();
     }
 
@@ -670,6 +1241,14 @@ fn outbound_is_game_shop(entry: &AndroidGatewayOutbound) -> bool {
         .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
         .as_deref()
         == Some("gameShopBuy")
+}
+
+fn outbound_is_change_password(entry: &AndroidGatewayOutbound) -> bool {
+    serde_json::from_str::<Value>(&entry.json)
+        .ok()
+        .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
+        .as_deref()
+        == Some("changePassword")
 }
 
 fn outbound_matches_game_shop_request(entry: &AndroidGatewayOutbound, request_id: &str) -> bool {
@@ -729,6 +1308,21 @@ fn command_type(command: &GatewayCommand) -> String {
         GatewayCommand::TradeCancel => "tradeCancel",
     }
     .to_owned()
+}
+
+fn security_request_to_wire(request: &SecurityRequest) -> Value {
+    match request {
+        SecurityRequest::ChangePassword {
+            account,
+            old_password,
+            new_password,
+        } => json!({
+            "type": "changePassword",
+            "accountId": account,
+            "currentPassword": old_password.as_str(),
+            "newPassword": new_password.as_str(),
+        }),
+    }
 }
 
 fn to_wire_value(command: &GatewayCommand) -> (AndroidGatewayOutboundKind, Value) {
@@ -1038,6 +1632,146 @@ mod tests {
         );
     }
 
+    fn change_password_request() -> SecurityRequest {
+        SecurityRequest::ChangePassword {
+            account: "demo".to_owned(),
+            old_password: mir2_ui_core::effect::SecretText::new("old-secret"),
+            new_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+        }
+    }
+
+    #[test]
+    fn change_password_uses_real_gateway_shape_and_redacts_credentials() {
+        let mut queue = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        enqueue_security_request(&mut queue, &mut inbound, change_password_request()).unwrap();
+        let debug = format!("{queue:?}");
+        assert!(debug.contains("[REDACTED]"));
+        assert!(!debug.contains("old-secret"));
+        assert!(!debug.contains("new-secret"));
+
+        let entry = queue
+            .drain_ready(
+                &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+                1,
+            )
+            .pop()
+            .unwrap();
+        assert!(entry.is_sendable());
+        assert_eq!(
+            serde_json::from_str::<Value>(&entry.json).unwrap(),
+            json!({
+                "type": "changePassword",
+                "accountId": "demo",
+                "currentPassword": "old-secret",
+                "newPassword": "new-secret"
+            })
+        );
+        assert!(matches!(
+            enqueue_security_request(&mut queue, &mut inbound, change_password_request()),
+            Err(AndroidSecurityAdapterError::Enqueue(
+                AndroidGatewayEnqueueError::RequestInFlight
+            ))
+        ));
+    }
+
+    #[test]
+    fn change_password_request_is_bounded_without_echoing_secret_values() {
+        let too_long = "x".repeat(ANDROID_CHANGE_PASSWORD_MAX_SECRET_BYTES + 1);
+        let request = SecurityRequest::ChangePassword {
+            account: "demo".to_owned(),
+            old_password: mir2_ui_core::effect::SecretText::new(too_long),
+            new_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+        };
+        let mut queue = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        let error = enqueue_security_request(&mut queue, &mut inbound, request).unwrap_err();
+        assert_eq!(
+            error,
+            AndroidSecurityAdapterError::InvalidField {
+                field: "oldPassword",
+                reason: "exceeds the bounded transport length"
+            }
+        );
+        assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn authoritative_change_password_result_reduces_shared_state_once() {
+        use mir2_ui_core::state::{UiScreen, UiSecurityPanel};
+
+        let mut state = UiState::default();
+        state.screen = UiScreen::Login;
+        state = reduce(&state, UiAction::ChangePassword).state;
+        assert_eq!(state.security.panel, UiSecurityPanel::ChangePassword);
+        let transition = reduce(
+            &state,
+            UiAction::SubmitChangePassword {
+                account: "demo".to_owned(),
+                old_password: mir2_ui_core::effect::SecretText::new("old-secret"),
+                new_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+                confirm_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+            },
+        );
+        let request = match transition.effects.into_iter().next() {
+            Some(UiEffect::SecurityRequest(request)) => request,
+            other => panic!("expected security request, got {other:?}"),
+        };
+        state = transition.state;
+
+        let mut outbound = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        enqueue_security_request(&mut outbound, &mut inbound, request).unwrap();
+        enqueue_native_change_password_result(
+            &mut inbound,
+            r#"{"type":"packet","packet":"ChangePassword","payload":{"result":6}}"#,
+        )
+        .unwrap();
+        drain_bounded_inbound_into_models(&mut inbound, &mut state, &mut outbound);
+
+        assert!(!state.security.change_password_pending);
+        assert_eq!(state.security.panel, UiSecurityPanel::None);
+        assert!(!outbound.change_password_in_flight());
+
+        // A duplicate authoritative packet cannot close or mutate a new
+        // transaction because there is no matching in-flight request.
+        enqueue_native_change_password_result(
+            &mut inbound,
+            r#"{"type":"packet","packet":"ChangePassword","payload":{"result":6}}"#,
+        )
+        .unwrap();
+        drain_bounded_inbound_into_models(&mut inbound, &mut state, &mut outbound);
+        assert!(!state.security.change_password_pending);
+        assert_eq!(inbound.status().unmatched_count, 1);
+    }
+
+    #[test]
+    fn change_password_result_parser_preserves_codes_and_bounds_banned_notice() {
+        let parsed = parse_native_change_password_result(
+            r#"{"type":"packet","packet":"ChangePassword","payload":{"result":5}}"#,
+        )
+        .unwrap()
+        .0;
+        assert_eq!(parsed.result, Some(5));
+        assert!(!parsed.success());
+        assert!(parsed.message.contains("incorrect"));
+
+        let reason = "!".repeat(ANDROID_SECURITY_NOTICE_MAX_CHARS + 10);
+        let banned = parse_native_change_password_result(&format!(
+            r#"{{"type":"packet","packet":"ChangePasswordBanned","payload":{{"reason":"{reason}"}}}}"#
+        ))
+        .unwrap()
+        .0;
+        assert!(banned.banned);
+        assert!(!banned.success());
+        assert!(banned.message.chars().count() <= ANDROID_SECURITY_NOTICE_MAX_CHARS + 40);
+
+        assert!(parse_native_change_password_result(
+            r#"{"type":"packet","packet":"Login","payload":{"result":1}}"#
+        )
+        .is_err());
+    }
+
     #[test]
     fn every_wire_gateway_command_has_exact_browser_shape() {
         one(
@@ -1248,6 +1982,61 @@ mod tests {
             json!({"type":"tradeConfirm","locked":true}),
         );
         one(GatewayCommand::TradeCancel, json!({"type":"tradeCancel"}));
+    }
+
+    #[test]
+    fn guild_storage_commands_have_exact_browser_shapes_and_fail_closed() {
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(4);
+        queue
+            .enqueue_guild_storage_gold_change(0, 250)
+            .expect("guild gold command");
+        queue
+            .enqueue_guild_storage_item_change(2, 4, 7)
+            .expect("guild item command");
+        let entries = queue.drain_ready(
+            &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+            4,
+        );
+        assert_eq!(entries.len(), 2);
+        assert_eq!(
+            serde_json::from_str::<Value>(&entries[0].json).unwrap(),
+            json!({"type":"guildStorageGoldChange","changeType":0,"amount":250})
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(&entries[1].json).unwrap(),
+            json!({"type":"guildStorageItemChange","changeType":2,"from":4,"to":7})
+        );
+
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(2);
+        assert_eq!(
+            queue.enqueue_guild_storage_gold_change(2, 1),
+            Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: "guildStorageGoldChange",
+                reason: "changeType must be 0 or 1 and amount must be non-zero",
+            })
+        );
+        assert_eq!(
+            queue.enqueue_guild_storage_gold_change(0, 0),
+            Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: "guildStorageGoldChange",
+                reason: "changeType must be 0 or 1 and amount must be non-zero",
+            })
+        );
+        assert_eq!(
+            queue.enqueue_guild_storage_item_change(0, -1, 0),
+            Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: "guildStorageItemChange",
+                reason: "changeType or slot coordinates are outside the server contract",
+            })
+        );
+        assert_eq!(
+            queue.enqueue_guild_storage_item_change(0, 0, 112),
+            Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: "guildStorageItemChange",
+                reason: "changeType or slot coordinates are outside the server contract",
+            })
+        );
+        assert!(queue.enqueue_guild_storage_item_change(3, 0, 0).is_ok());
     }
 
     #[test]
@@ -1619,22 +2408,18 @@ mod tests {
         queue
             .enqueue(GatewayCommand::PickUp { object_id: 2 })
             .unwrap();
-        assert!(
-            queue
-                .drain_ready(
-                    &shell(AndroidLifecycle::Background, AndroidNetwork::Available),
-                    2
-                )
-                .is_empty()
-        );
-        assert!(
-            queue
-                .drain_ready(
-                    &shell(AndroidLifecycle::Foreground, AndroidNetwork::Unavailable),
-                    2
-                )
-                .is_empty()
-        );
+        assert!(queue
+            .drain_ready(
+                &shell(AndroidLifecycle::Background, AndroidNetwork::Available),
+                2
+            )
+            .is_empty());
+        assert!(queue
+            .drain_ready(
+                &shell(AndroidLifecycle::Foreground, AndroidNetwork::Unavailable),
+                2
+            )
+            .is_empty());
         let entries = queue.drain_ready(
             &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
             2,

@@ -5,9 +5,61 @@
 //! alongside the authoritative list but is not overwritten by the server.
 
 use bevy::prelude::Resource;
+use serde::de::{self, SeqAccess, Visitor};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 pub const MAX_MAIL_ATTACHMENTS: usize = 5;
+pub const MAX_MAIL_MESSAGES: usize = 256;
+pub const MAIL_PAGE_SIZE: usize = 10;
+
+fn deserialize_bounded<'de, D, T, const MAX: usize>(deserializer: D) -> Result<Vec<T>, D::Error>
+where
+    D: de::Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    struct BoundedVisitor<T, const MAX: usize>(std::marker::PhantomData<T>);
+
+    impl<'de, T, const MAX: usize> Visitor<'de> for BoundedVisitor<T, MAX>
+    where
+        T: Deserialize<'de>,
+    {
+        type Value = Vec<T>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(formatter, "a sequence with at most {MAX} retained entries")
+        }
+
+        fn visit_seq<A>(self, mut sequence: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut values = Vec::with_capacity(MAX.min(sequence.size_hint().unwrap_or(0)));
+            while let Some(value) = sequence.next_element::<T>()? {
+                if values.len() < MAX {
+                    values.push(value);
+                }
+            }
+            Ok(values)
+        }
+    }
+
+    deserializer.deserialize_seq(BoundedVisitor::<T, MAX>(std::marker::PhantomData))
+}
+
+fn deserialize_mail_attachments<'de, D>(deserializer: D) -> Result<Vec<MailAttachment>, D::Error>
+where
+    D: de::Deserializer<'de>,
+{
+    deserialize_bounded::<D, MailAttachment, MAX_MAIL_ATTACHMENTS>(deserializer)
+}
+
+fn deserialize_mail_messages<'de, D>(deserializer: D) -> Result<Vec<MailMessage>, D::Error>
+where
+    D: de::Deserializer<'de>,
+{
+    deserialize_bounded::<D, MailMessage, MAX_MAIL_MESSAGES>(deserializer)
+}
 
 /// A server-owned mail attachment. `unique_id` is optional only for legacy
 /// Stage5 snapshots that contain display names instead of a wire UserItem;
@@ -60,18 +112,23 @@ pub struct MailOperationFeedback {
     pub mail_id: Option<u64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct MailMessage {
+    #[serde(alias = "mailId")]
     pub id: u64,
+    #[serde(alias = "from", alias = "senderName")]
     pub sender: String,
     pub subject: String,
     pub body: String,
     pub gold: u32,
+    #[serde(default, deserialize_with = "deserialize_mail_attachments")]
     pub items: Vec<MailAttachment>,
     #[serde(default)]
     pub operation: Option<MailOperationFeedback>,
     pub claimed: bool,
     pub locked: bool,
+    #[serde(alias = "opened")]
     pub read: bool,
 }
 
@@ -105,14 +162,31 @@ impl MailMessage {
 #[derive(Debug, Clone, Default, Resource, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct MailModel {
+    #[serde(default, deserialize_with = "deserialize_mail_messages")]
     pub mails: Vec<MailMessage>,
     pub selected_id: Option<u64>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(default)]
+pub struct MailPageCursor {
+    pub page: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MailPage<'a> {
+    pub page: usize,
+    pub page_count: usize,
+    pub entries: Vec<&'a MailMessage>,
+}
+
 impl MailModel {
     pub fn selected(&self) -> Option<&MailMessage> {
-        self.selected_id
-            .and_then(|id| self.mails.iter().find(|m| m.id == id))
+        self.selected_id.and_then(|id| {
+            self.mails
+                .iter()
+                .find(|m| m.id == id && m.operation.is_none())
+        })
     }
 
     pub fn unread_count(&self) -> usize {
@@ -128,6 +202,65 @@ impl MailModel {
 
     pub fn operation_feedback(&self) -> Option<&MailOperationFeedback> {
         self.mails.iter().find_map(|mail| mail.operation.as_ref())
+    }
+
+    /// Clamp local pagination and selection after an authoritative refresh.
+    /// A delete is not guessed locally: the next server snapshot determines
+    /// which rows remain, while this method prevents stale UI state.
+    pub fn clamp_after_refresh(&mut self, cursor: &mut MailPageCursor) {
+        self.selected_id = self.selected_id.filter(|id| {
+            self.mails
+                .iter()
+                .any(|mail| mail.id == *id && mail.operation.is_none())
+        });
+        cursor.page = self.clamp_page(cursor.page);
+    }
+
+    pub fn page_count(&self) -> usize {
+        self.page_count_for(MAIL_PAGE_SIZE)
+    }
+
+    pub fn page_count_for(&self, page_size: usize) -> usize {
+        let page_size = page_size.max(1);
+        self.visible_mails().len().div_ceil(page_size).max(1)
+    }
+
+    pub fn clamp_page(&self, page: usize) -> usize {
+        page.min(self.page_count().saturating_sub(1))
+    }
+
+    pub fn page(&self, page: usize) -> MailPage<'_> {
+        self.page_with_size(page, MAIL_PAGE_SIZE)
+    }
+
+    pub fn page_with_size(&self, page: usize, page_size: usize) -> MailPage<'_> {
+        let page_size = page_size.max(1);
+        let page_count = self.page_count_for(page_size);
+        let page = page.min(page_count.saturating_sub(1));
+        let start = page.saturating_mul(page_size);
+        let entries = self
+            .visible_mails()
+            .into_iter()
+            .skip(start)
+            .take(page_size)
+            .collect();
+        MailPage {
+            page,
+            page_count,
+            entries,
+        }
+    }
+
+    /// Selection is identity-based. Unknown or operation-only rows are
+    /// rejected so a stale pressed row cannot address a different message.
+    pub fn select_visible(&mut self, id: u64) -> bool {
+        if self.visible_mails().iter().any(|mail| mail.id == id) {
+            self.selected_id = Some(id);
+            true
+        } else {
+            self.selected_id = None;
+            false
+        }
     }
 }
 
@@ -211,5 +344,55 @@ mod tests {
         let json = serde_json::to_string(&attachment).expect("serialize");
         let restored: MailAttachment = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(restored, attachment);
+    }
+
+    #[test]
+    fn mail_pages_are_ten_rows_and_clamp_after_refresh_delete() {
+        let mut model = MailModel {
+            mails: (0..21).map(|id| msg(id, false, false, 0)).collect(),
+            selected_id: Some(20),
+        };
+        let mut cursor = MailPageCursor { page: 2 };
+        assert_eq!(model.page_count(), 3);
+        assert_eq!(model.page(2).entries.len(), 1);
+
+        model.mails.retain(|mail| mail.id != 20);
+        model.clamp_after_refresh(&mut cursor);
+        assert_eq!(cursor.page, 1);
+        assert_eq!(model.selected_id, None);
+        assert_eq!(model.page(cursor.page).entries.len(), 10);
+    }
+
+    #[test]
+    fn mail_deserialization_is_backward_compatible_and_bounded() {
+        let oversized = serde_json::json!({
+            "mails": (0..(MAX_MAIL_MESSAGES + 7)).map(|id| serde_json::json!({
+                "mailId": id,
+                "from": "System",
+                "subject": "Subject",
+                "body": "Body",
+                "gold": 0,
+                "items": (0..(MAX_MAIL_ATTACHMENTS + 3)).map(|_| serde_json::json!({"name":"Potion"})).collect::<Vec<_>>(),
+                "claimed": false,
+                "locked": false,
+                "opened": false
+            })).collect::<Vec<_>>()
+        });
+        let model: MailModel = serde_json::from_value(oversized).expect("legacy mail");
+        assert_eq!(model.mails.len(), MAX_MAIL_MESSAGES);
+        assert_eq!(model.mails[0].items.len(), MAX_MAIL_ATTACHMENTS);
+        assert_eq!(model.mails[0].sender, "System");
+    }
+
+    #[test]
+    fn stale_mail_selection_fails_closed() {
+        let mut model = MailModel {
+            mails: vec![msg(1, false, false, 0)],
+            selected_id: Some(99),
+        };
+        assert!(!model.select_visible(99));
+        assert_eq!(model.selected_id, None);
+        assert!(model.select_visible(1));
+        assert_eq!(model.selected_id, Some(1));
     }
 }

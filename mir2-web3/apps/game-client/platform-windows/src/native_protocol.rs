@@ -10,8 +10,22 @@ use serde_json::{json, Value};
 
 const INVALID_PACKET_KIND: &str = "invalid";
 
+/// Crystal's guild storage has 112 server-side slots (0..=111). The
+/// inventory side of a store/retrieve request is represented by an i32 in
+/// BrowserCommand and is narrowed to the protocol's u8 slot domain here.
+pub const GUILD_STORAGE_SLOT_COUNT: i32 = 112;
+const MAX_PROTOCOL_SLOT: i32 = u8::MAX as i32;
+
 fn parse_default_selected_item_index() -> i32 {
     -1
+}
+
+fn valid_guild_storage_slot(slot: i32) -> bool {
+    (0..GUILD_STORAGE_SLOT_COUNT).contains(&slot)
+}
+
+fn valid_protocol_slot(slot: i32) -> bool {
+    (0..=MAX_PROTOCOL_SLOT).contains(&slot)
 }
 
 /// Outbound BrowserCommand-compatible payloads used by the Windows visible flow.
@@ -169,6 +183,17 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "heroInventory")]
         hero_inventory: bool,
     },
+    RequestMapInfo {
+        #[serde(rename = "mapIndex")]
+        map_index: i32,
+    },
+    SearchMap {
+        text: String,
+    },
+    TeleportToNpc {
+        #[serde(rename = "objectId")]
+        object_id: u32,
+    },
     MoveItem {
         grid: String,
         from: i32,
@@ -301,6 +326,17 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "infoType")]
         info_type: u8,
     },
+    GuildStorageGoldChange {
+        #[serde(rename = "changeType")]
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItemChange {
+        #[serde(rename = "changeType")]
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     EditGuildMember {
         #[serde(rename = "changeType")]
         change_type: u8,
@@ -362,6 +398,36 @@ impl std::fmt::Debug for NativeOutboundCommand {
 }
 
 impl NativeOutboundCommand {
+    /// Build a guild gold mutation only for the two server-defined mutation
+    /// types. Zero amounts are rejected so a malformed native caller cannot
+    /// enqueue a meaningless request; the server remains authoritative for
+    /// balance, rank, and safe-zone checks.
+    pub fn guild_storage_gold_change(change_type: u8, amount: u32) -> Option<Self> {
+        (change_type <= 1 && amount > 0).then_some(Self::GuildStorageGoldChange {
+            change_type,
+            amount,
+        })
+    }
+
+    /// Build a guild item mutation using the server's exact change-type
+    /// contract: 0 store, 1 retrieve, 2 move, 3 list. The list request uses
+    /// the established zero coordinates. There is no separate
+    /// `requestGuildStorage` BrowserCommand in this repository.
+    pub fn guild_storage_item_change(change_type: u8, from: i32, to: i32) -> Option<Self> {
+        let valid = match change_type {
+            0 => valid_protocol_slot(from) && valid_guild_storage_slot(to),
+            1 => valid_guild_storage_slot(from) && valid_protocol_slot(to),
+            2 => valid_guild_storage_slot(from) && valid_guild_storage_slot(to),
+            3 => from == 0 && to == 0,
+            _ => false,
+        };
+        valid.then_some(Self::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        })
+    }
+
     pub fn command_type(&self) -> &'static str {
         match self {
             Self::ClientVersion => "clientVersion",
@@ -392,6 +458,9 @@ impl NativeOutboundCommand {
             Self::EquipItem { .. } => "equipItem",
             Self::RemoveItem { .. } => "removeItem",
             Self::DropItem { .. } => "dropItem",
+            Self::RequestMapInfo { .. } => "requestMapInfo",
+            Self::SearchMap { .. } => "searchMap",
+            Self::TeleportToNpc { .. } => "teleportToNpc",
             Self::MoveItem { .. } => "moveItem",
             Self::MergeItem { .. } => "mergeItem",
             Self::SplitItem { .. } => "splitItem",
@@ -419,6 +488,8 @@ impl NativeOutboundCommand {
             Self::DelMember { .. } => "delMember",
             Self::GroupInvite { .. } => "groupInvite",
             Self::RequestGuildInfo { .. } => "requestGuildInfo",
+            Self::GuildStorageGoldChange { .. } => "guildStorageGoldChange",
+            Self::GuildStorageItemChange { .. } => "guildStorageItemChange",
             Self::EditGuildMember { .. } => "editGuildMember",
             Self::EditGuildNotice { .. } => "editGuildNotice",
             Self::GuildInvite { .. } => "guildInvite",
@@ -586,6 +657,45 @@ pub struct WorldSnapshot {
     pub payload: Value,
 }
 
+/// Packet payloads that feed the native Big Map read model.  These types are
+/// intentionally transport-only; the renderer never receives a destination
+/// transform or a success acknowledgement from them.
+#[derive(Debug, Clone, PartialEq)]
+pub struct NewMapInfo {
+    pub map_index: i32,
+    pub info: mir2_client_bevy::big_map::BigMapInfo,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct WorldMapSetup {
+    pub enabled: bool,
+    pub icons: Vec<mir2_client_bevy::big_map::BigMapWorldIcon>,
+    pub teleport_to_npc_cost: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchMapResult {
+    pub map_index: i32,
+    pub npc_index: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MapIdentity {
+    pub map_index: i32,
+    pub location: Option<mir2_client_bevy::big_map::BigMapPoint>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserLocation {
+    pub location: mir2_client_bevy::big_map::BigMapPoint,
+    pub direction: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AllowObserve {
+    pub allow: bool,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum PacketEvent {
     NewAccountResult(NewAccountResult),
@@ -601,6 +711,13 @@ pub enum PacketEvent {
     NewQuestInfo(NewQuestInfo),
     ChangeQuest(ChangeQuest),
     CompleteQuest(CompleteQuest),
+    NewMapInfo(NewMapInfo),
+    WorldMapSetup(WorldMapSetup),
+    SearchMapResult(SearchMapResult),
+    MapInformation(MapIdentity),
+    MapChanged(MapIdentity),
+    UserLocation(UserLocation),
+    AllowObserve(AllowObserve),
     Disconnect(Disconnect),
     Other { packet: String, payload: Value },
     WorldSnapshot(WorldSnapshot),
@@ -655,7 +772,7 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
             return Err(ParseInboundError::MissingEnvelopeField {
                 field: "type",
                 detail: "top-level `type` is required".to_owned(),
-            })
+            });
         }
     };
 
@@ -700,12 +817,14 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         "resumeRejected" => Ok(InboundEvent::ResumeRejected(ResumeRejectedEvent {
             code: value.get("code").and_then(Value::as_str).map(str::to_owned),
         })),
-        "gameShopReceipt" => serde_json::from_value::<mir2_client_bevy::game_shop::GameShopReceipt>(value)
-            .map(InboundEvent::GameShopReceipt)
-            .map_err(|error| ParseInboundError::MissingEnvelopeField {
-                field: "gameShopReceipt",
-                detail: format!("invalid receipt: {error}"),
-            }),
+        "gameShopReceipt" => {
+            serde_json::from_value::<mir2_client_bevy::game_shop::GameShopReceipt>(value)
+                .map(InboundEvent::GameShopReceipt)
+                .map_err(|error| ParseInboundError::MissingEnvelopeField {
+                    field: "gameShopReceipt",
+                    detail: format!("invalid receipt: {error}"),
+                })
+        }
         _ => Ok(InboundEvent::Unknown {
             event_type,
             payload,
@@ -721,7 +840,7 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
             return Err(ParseInboundError::MissingEnvelopeField {
                 field: "packet",
                 detail: "`type: \"packet\" requires packet name".to_owned(),
-            })
+            });
         }
     };
 
@@ -844,6 +963,24 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
                 payload,
             },
         ))),
+        "NewMapInfo" => parse_new_map_info(payload),
+        "WorldMapSetup" => parse_world_map_setup(payload),
+        "SearchMapResult" => parse_search_map_result(payload),
+        "MapInformation" => parse_map_identity(payload, false),
+        "MapChanged" => parse_map_identity(payload, true),
+        "UserLocation" => parse_user_location(payload),
+        "AllowObserve" => {
+            let allow = payload
+                .get("allow")
+                .and_then(Value::as_bool)
+                .ok_or_else(|| ParseInboundError::MissingEnvelopeField {
+                    field: "AllowObserve.allow",
+                    detail: "allow must be a boolean".to_owned(),
+                })?;
+            Ok(InboundEvent::Packet(PacketEvent::AllowObserve(
+                AllowObserve { allow },
+            )))
+        }
         "Disconnect" => Ok(InboundEvent::Packet(PacketEvent::Disconnect(Disconnect {
             reason: payload
                 .get("reason")
@@ -856,6 +993,158 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
             payload,
         })),
     }
+}
+
+fn parse_new_map_info(payload: Value) -> Result<InboundEvent, ParseInboundError> {
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Payload {
+        map_index: i32,
+        info: mir2_client_bevy::big_map::BigMapInfo,
+    }
+
+    let decoded = serde_json::from_value::<Payload>(payload.clone()).map_err(|error| {
+        ParseInboundError::MissingEnvelopeField {
+            field: "NewMapInfo",
+            detail: format!("invalid payload: {error}"),
+        }
+    })?;
+    if decoded.map_index <= 0 {
+        return Err(ParseInboundError::MissingEnvelopeField {
+            field: "NewMapInfo.mapIndex",
+            detail: "mapIndex must be positive".to_owned(),
+        });
+    }
+    Ok(InboundEvent::Packet(PacketEvent::NewMapInfo(NewMapInfo {
+        map_index: decoded.map_index,
+        info: decoded.info,
+    })))
+}
+
+fn parse_world_map_setup(payload: Value) -> Result<InboundEvent, ParseInboundError> {
+    #[derive(Default, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Setup {
+        #[serde(default)]
+        enabled: bool,
+        #[serde(default)]
+        icons: Vec<mir2_client_bevy::big_map::BigMapWorldIcon>,
+    }
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Payload {
+        #[serde(default)]
+        setup: Setup,
+        #[serde(default)]
+        teleport_to_npc_cost: i32,
+    }
+
+    let decoded = serde_json::from_value::<Payload>(payload).map_err(|error| {
+        ParseInboundError::MissingEnvelopeField {
+            field: "WorldMapSetup",
+            detail: format!("invalid payload: {error}"),
+        }
+    })?;
+    Ok(InboundEvent::Packet(PacketEvent::WorldMapSetup(
+        WorldMapSetup {
+            enabled: decoded.setup.enabled,
+            icons: decoded.setup.icons,
+            teleport_to_npc_cost: decoded.teleport_to_npc_cost,
+        },
+    )))
+}
+
+fn parse_search_map_result(payload: Value) -> Result<InboundEvent, ParseInboundError> {
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Payload {
+        map_index: i32,
+        #[serde(default)]
+        npc_index: u32,
+    }
+    let decoded = serde_json::from_value::<Payload>(payload).map_err(|error| {
+        ParseInboundError::MissingEnvelopeField {
+            field: "SearchMapResult",
+            detail: format!("invalid payload: {error}"),
+        }
+    })?;
+    if decoded.map_index < -1 {
+        return Err(ParseInboundError::MissingEnvelopeField {
+            field: "SearchMapResult.mapIndex",
+            detail: "mapIndex must be -1 or positive".to_owned(),
+        });
+    }
+    Ok(InboundEvent::Packet(PacketEvent::SearchMapResult(
+        SearchMapResult {
+            map_index: decoded.map_index,
+            npc_index: decoded.npc_index,
+        },
+    )))
+}
+
+fn parse_map_identity(payload: Value, changed: bool) -> Result<InboundEvent, ParseInboundError> {
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Payload {
+        map_index: i32,
+        #[serde(default)]
+        location: Option<mir2_client_bevy::big_map::BigMapPoint>,
+    }
+    let decoded = serde_json::from_value::<Payload>(payload).map_err(|error| {
+        ParseInboundError::MissingEnvelopeField {
+            field: if changed {
+                "MapChanged"
+            } else {
+                "MapInformation"
+            },
+            detail: format!("invalid payload: {error}"),
+        }
+    })?;
+    if decoded.map_index <= 0 {
+        return Err(ParseInboundError::MissingEnvelopeField {
+            field: if changed {
+                "MapChanged.mapIndex"
+            } else {
+                "MapInformation.mapIndex"
+            },
+            detail: "mapIndex must be positive".to_owned(),
+        });
+    }
+    let identity = MapIdentity {
+        map_index: decoded.map_index,
+        location: decoded.location,
+    };
+    Ok(InboundEvent::Packet(if changed {
+        PacketEvent::MapChanged(identity)
+    } else {
+        PacketEvent::MapInformation(identity)
+    }))
+}
+
+fn parse_user_location(payload: Value) -> Result<InboundEvent, ParseInboundError> {
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Payload {
+        x: i32,
+        y: i32,
+        #[serde(default)]
+        direction: Option<String>,
+    }
+    let decoded = serde_json::from_value::<Payload>(payload).map_err(|error| {
+        ParseInboundError::MissingEnvelopeField {
+            field: "UserLocation",
+            detail: format!("invalid payload: {error}"),
+        }
+    })?;
+    Ok(InboundEvent::Packet(PacketEvent::UserLocation(
+        UserLocation {
+            location: mir2_client_bevy::big_map::BigMapPoint {
+                x: decoded.x,
+                y: decoded.y,
+            },
+            direction: decoded.direction,
+        },
+    )))
 }
 
 fn parse_login_characters(payload: &Value) -> Vec<LoginCharacter> {
@@ -1275,6 +1564,26 @@ mod tests {
     }
 
     #[test]
+    fn allow_observe_packet_is_typed_and_requires_a_boolean() {
+        let parsed = parse_inbound_event(
+            r#"{"type":"packet","packet":"AllowObserve","payload":{"allow":true}}"#,
+        )
+        .expect("typed AllowObserve packet");
+        assert!(matches!(
+            parsed,
+            InboundEvent::Packet(PacketEvent::AllowObserve(AllowObserve { allow: true }))
+        ));
+
+        assert!(
+            parse_inbound_event(
+                r#"{"type":"packet","packet":"AllowObserve","payload":{"allow":"true"}}"#,
+            )
+            .is_err(),
+            "a string must not be accepted as authoritative boolean state"
+        );
+    }
+
+    #[test]
     fn social_commands_use_only_real_typed_wire_shapes() {
         assert_serialized(
             NativeOutboundCommand::SwitchGroup { allow_group: false },
@@ -1288,6 +1597,21 @@ mod tests {
                 rank_name: String::new(),
             },
             json!({"type":"editGuildMember","changeType":1,"rankIndex":2,"name":"Miner","rankName":""}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 250,
+            },
+            json!({"type":"guildStorageGoldChange","changeType":0,"amount":250}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::GuildStorageItemChange {
+                change_type: 2,
+                from: 4,
+                to: 7,
+            },
+            json!({"type":"guildStorageItemChange","changeType":2,"from":4,"to":7}),
         );
         assert_serialized(
             NativeOutboundCommand::EditGuildNotice {
@@ -1311,6 +1635,115 @@ mod tests {
             NativeOutboundCommand::TradeCancel,
             json!({"type":"tradeCancel"}),
         );
+    }
+
+    #[test]
+    fn guild_storage_command_builders_fail_closed_at_native_boundary() {
+        assert!(NativeOutboundCommand::guild_storage_gold_change(0, 1).is_some());
+        assert!(NativeOutboundCommand::guild_storage_gold_change(1, u32::MAX).is_some());
+        assert!(NativeOutboundCommand::guild_storage_gold_change(2, 1).is_none());
+        assert!(NativeOutboundCommand::guild_storage_gold_change(0, 0).is_none());
+
+        assert!(NativeOutboundCommand::guild_storage_item_change(0, 255, 111).is_some());
+        assert!(NativeOutboundCommand::guild_storage_item_change(1, 111, 255).is_some());
+        assert!(NativeOutboundCommand::guild_storage_item_change(2, 111, 0).is_some());
+        assert!(NativeOutboundCommand::guild_storage_item_change(3, 0, 0).is_some());
+        assert!(NativeOutboundCommand::guild_storage_item_change(0, -1, 0).is_none());
+        assert!(NativeOutboundCommand::guild_storage_item_change(0, 0, 112).is_none());
+        assert!(NativeOutboundCommand::guild_storage_item_change(2, 112, 0).is_none());
+        assert!(NativeOutboundCommand::guild_storage_item_change(4, 0, 0).is_none());
+    }
+
+    #[test]
+    fn big_map_commands_match_gateway_browser_command_wire_contract() {
+        assert_serialized(
+            NativeOutboundCommand::RequestMapInfo { map_index: 34 },
+            json!({"type":"requestMapInfo","mapIndex":34}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::SearchMap {
+                text: "Natural Cave".into(),
+            },
+            json!({"type":"searchMap","text":"Natural Cave"}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::TeleportToNpc { object_id: 77 },
+            json!({"type":"teleportToNpc","objectId":77}),
+        );
+    }
+
+    #[test]
+    fn big_map_packets_are_typed_bounded_and_reject_invalid_identity() {
+        let new_info = parse_inbound_event(
+            r#"{"type":"packet","packet":"NewMapInfo","payload":{"mapIndex":34,"info":{"title":"Natural Cave","width":120,"height":220,"bigMap":9,"movements":[{"destination":35,"title":"Exit","location":{"x":1,"y":2},"icon":3}],"npcs":[{"index":2,"fileName":"NPC/00","name":"Guide","mapIndex":34,"location":{"x":3,"y":4},"objectId":77,"showOnBigMap":true,"canTeleportTo":true}]}}}"#,
+        )
+        .expect("typed NewMapInfo");
+        match new_info {
+            InboundEvent::Packet(PacketEvent::NewMapInfo(info)) => {
+                assert_eq!(info.map_index, 34);
+                assert_eq!(info.info.big_map, 9);
+                assert_eq!(info.info.npcs[0].object_id, 77);
+            }
+            other => panic!("unexpected packet: {other:?}"),
+        }
+
+        let setup = parse_inbound_event(
+            r#"{"type":"packet","packet":"WorldMapSetup","payload":{"setup":{"enabled":true,"icons":[{"imageIndex":2,"title":"Bichon","mapIndex":34}]},"teleportToNpcCost":3000}}"#,
+        )
+        .expect("typed WorldMapSetup");
+        assert!(matches!(
+            setup,
+            InboundEvent::Packet(PacketEvent::WorldMapSetup(WorldMapSetup {
+                enabled: true,
+                teleport_to_npc_cost: 3_000,
+                ..
+            }))
+        ));
+
+        let result = parse_inbound_event(
+            r#"{"type":"packet","packet":"SearchMapResult","payload":{"mapIndex":34,"npcIndex":77}}"#,
+        )
+        .expect("typed SearchMapResult");
+        assert!(matches!(
+            result,
+            InboundEvent::Packet(PacketEvent::SearchMapResult(SearchMapResult {
+                map_index: 34,
+                npc_index: 77
+            }))
+        ));
+
+        let map_changed = parse_inbound_event(
+            r#"{"type":"packet","packet":"MapChanged","payload":{"mapIndex":34,"location":{"x":40,"y":41}}}"#,
+        )
+        .expect("typed MapChanged");
+        assert!(matches!(
+            map_changed,
+            InboundEvent::Packet(PacketEvent::MapChanged(MapIdentity {
+                map_index: 34,
+                location: Some(mir2_client_bevy::big_map::BigMapPoint { x: 40, y: 41 })
+            }))
+        ));
+
+        let location = parse_inbound_event(
+            r#"{"type":"packet","packet":"UserLocation","payload":{"x":41,"y":42,"direction":"Right"}}"#,
+        )
+        .expect("typed UserLocation");
+        assert!(matches!(
+            location,
+            InboundEvent::Packet(PacketEvent::UserLocation(UserLocation {
+                location: mir2_client_bevy::big_map::BigMapPoint { x: 41, y: 42 },
+                direction: Some(direction),
+            })) if direction == "Right"
+        ));
+
+        assert!(parse_inbound_event(
+            r#"{"type":"packet","packet":"NewMapInfo","payload":{"mapIndex":0,"info":{}}}"#
+        )
+        .is_err());
+        assert!(parse_inbound_event(
+            r#"{"type":"packet","packet":"SearchMapResult","payload":{"mapIndex":-2,"npcIndex":0}}"#
+        )
+        .is_err());
     }
 
     #[test]

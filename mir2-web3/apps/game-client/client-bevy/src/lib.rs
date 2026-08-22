@@ -17,6 +17,7 @@
 
 #[cfg(feature = "native-ui")]
 pub mod audio;
+pub mod big_map;
 #[cfg(feature = "native-ui")]
 pub mod character;
 pub mod chat;
@@ -44,6 +45,9 @@ pub mod quest_model;
 pub mod quest_ui;
 pub mod read_model;
 pub mod shop;
+#[cfg(feature = "native-ui")]
+pub mod skill_binding_persistence;
+pub mod skill_binding_ui;
 pub mod skill_model;
 pub mod social;
 pub mod storage;

@@ -363,7 +363,10 @@ impl ShellNotice {
 pub struct NativeShellModel {
     pub screen: NativeShellScreen,
     pub login: LoginForm,
+    pub login_request_in_flight: bool,
+    pub register_request_in_flight: bool,
     pub character_create: CharacterCreateForm,
+    pub create_character_request_in_flight: bool,
     pub change_password: ChangePasswordForm,
     pub change_password_request_in_flight: bool,
     pub change_password_command_sent: bool,
@@ -371,6 +374,9 @@ pub struct NativeShellModel {
     pub delete_confirm_index: Option<i32>,
     pub delete_request_in_flight: bool,
     pub delete_command_sent: bool,
+    pub start_game_request_in_flight: bool,
+    pub retry_request_in_flight: bool,
+    pub logout_request_in_flight: bool,
     pub notice: Option<ShellNotice>,
     pub characters: Vec<CharacterSummary>,
     pub selected_character_index: Option<i32>,
@@ -383,13 +389,28 @@ impl fmt::Debug for NativeShellModel {
         f.debug_struct("NativeShellModel")
             .field("screen", &self.screen)
             .field("login", &self.login)
+            .field("login_request_in_flight", &self.login_request_in_flight)
+            .field(
+                "register_request_in_flight",
+                &self.register_request_in_flight,
+            )
             .field("character_create", &self.character_create)
+            .field(
+                "create_character_request_in_flight",
+                &self.create_character_request_in_flight,
+            )
             .field("change_password", &self.change_password)
             .field(
                 "change_password_request_in_flight",
                 &self.change_password_request_in_flight,
             )
             .field("safe_key", &self.safe_key)
+            .field(
+                "start_game_request_in_flight",
+                &self.start_game_request_in_flight,
+            )
+            .field("retry_request_in_flight", &self.retry_request_in_flight)
+            .field("logout_request_in_flight", &self.logout_request_in_flight)
             .field("notice", &self.notice)
             .field("characters", &self.characters)
             .field("selected_character_index", &self.selected_character_index)
@@ -411,6 +432,12 @@ impl NativeShellModel {
         self.delete_confirm_index = None;
         self.delete_request_in_flight = false;
         self.delete_command_sent = false;
+        self.login_request_in_flight = false;
+        self.register_request_in_flight = false;
+        self.create_character_request_in_flight = false;
+        self.start_game_request_in_flight = false;
+        self.retry_request_in_flight = false;
+        self.logout_request_in_flight = false;
         self.notice = None;
     }
 
@@ -452,7 +479,7 @@ impl NativeShellModel {
 }
 
 /// User intents from Bevy UI widgets.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum NativeUiIntent {
     Login,
     RegisterAccount,
@@ -492,6 +519,82 @@ pub enum NativeUiIntent {
     StartGame,
     Retry,
     Logout,
+}
+
+impl fmt::Debug for NativeUiIntent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::SubmitChangePassword { account_id, .. } => f
+                .debug_struct("SubmitChangePassword")
+                .field("account_id", account_id)
+                .field("old_password", &"<redacted>")
+                .field("new_password", &"<redacted>")
+                .field("confirm_password", &"<redacted>")
+                .finish(),
+            Self::Login
+            | Self::RegisterAccount
+            | Self::OpenChangePassword
+            | Self::CancelChangePassword
+            | Self::OpenSafeKey
+            | Self::CloseSafeKey
+            | Self::SafeKeyFocusAccount
+            | Self::SafeKeyFocusPassword
+            | Self::SafeKeyDelete
+            | Self::SafeKeyRandom
+            | Self::SafeKeyEnter
+            | Self::OpenCharacterCreate
+            | Self::CancelCharacterCreate
+            | Self::ConfirmDeleteCharacter
+            | Self::CancelDeleteCharacter
+            | Self::StartGame
+            | Self::Retry
+            | Self::Logout => write!(
+                f,
+                "{}",
+                match self {
+                    Self::Login => "Login",
+                    Self::RegisterAccount => "RegisterAccount",
+                    Self::OpenChangePassword => "OpenChangePassword",
+                    Self::CancelChangePassword => "CancelChangePassword",
+                    Self::OpenSafeKey => "OpenSafeKey",
+                    Self::CloseSafeKey => "CloseSafeKey",
+                    Self::SafeKeyFocusAccount => "SafeKeyFocusAccount",
+                    Self::SafeKeyFocusPassword => "SafeKeyFocusPassword",
+                    Self::SafeKeyDelete => "SafeKeyDelete",
+                    Self::SafeKeyRandom => "SafeKeyRandom",
+                    Self::SafeKeyEnter => "SafeKeyEnter",
+                    Self::OpenCharacterCreate => "OpenCharacterCreate",
+                    Self::CancelCharacterCreate => "CancelCharacterCreate",
+                    Self::ConfirmDeleteCharacter => "ConfirmDeleteCharacter",
+                    Self::CancelDeleteCharacter => "CancelDeleteCharacter",
+                    Self::StartGame => "StartGame",
+                    Self::Retry => "Retry",
+                    Self::Logout => "Logout",
+                    _ => unreachable!("covered by the outer match"),
+                }
+            ),
+            Self::SafeKeyPress { key } => f.debug_struct("SafeKeyPress").field("key", key).finish(),
+            Self::CreateCharacter {
+                name,
+                class_name,
+                gender_name,
+            } => f
+                .debug_struct("CreateCharacter")
+                .field("name", name)
+                .field("class_name", class_name)
+                .field("gender_name", gender_name)
+                .finish(),
+            Self::DeleteCharacter { character_index }
+            | Self::SelectCharacter { character_index } => f
+                .debug_struct(match self {
+                    Self::DeleteCharacter { .. } => "DeleteCharacter",
+                    Self::SelectCharacter { .. } => "SelectCharacter",
+                    _ => unreachable!("covered by the outer match"),
+                })
+                .field("character_index", character_index)
+                .finish(),
+        }
+    }
 }
 
 /// Gateway callbacks for shell transitions.
@@ -564,11 +667,16 @@ impl NativeUiIntentQueue {
 
 impl NativeShellModel {
     fn begin_login(&mut self) -> bool {
+        if self.login_request_in_flight {
+            self.set_error("login request is still pending");
+            return false;
+        }
         if !self.login.is_ready() {
             self.set_error("account and password are required");
             return false;
         }
         self.screen = NativeShellScreen::Authenticating;
+        self.login_request_in_flight = true;
         self.notice = None;
         true
     }
@@ -577,10 +685,15 @@ impl NativeShellModel {
         match (self.screen, intent) {
             (NativeShellScreen::Login, NativeUiIntent::Login) => self.begin_login(),
             (NativeShellScreen::Login, NativeUiIntent::RegisterAccount) => {
+                if self.register_request_in_flight {
+                    self.set_error("account creation request is still pending");
+                    return false;
+                }
                 if !self.login.is_ready() {
                     self.set_error("account and password are required");
                     return false;
                 }
+                self.register_request_in_flight = true;
                 self.set_info("account creation requested");
                 true
             }
@@ -614,7 +727,11 @@ impl NativeShellModel {
                 if name.trim().is_empty() {
                     self.set_error("character name is required");
                     false
+                } else if self.create_character_request_in_flight {
+                    self.set_error("character creation request is still pending");
+                    false
                 } else {
+                    self.create_character_request_in_flight = true;
                     self.set_info(format!(
                         "create character requested name={name} class={class_name} gender={gender_name}",
                     ));
@@ -628,9 +745,14 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::StartGame) => {
+                if self.start_game_request_in_flight {
+                    self.set_error("start game request is still pending");
+                    return false;
+                }
                 match self.selected_character_index {
                     Some(index) if self.has_character_index(index) => {
                         self.screen = NativeShellScreen::StartingGame;
+                        self.start_game_request_in_flight = true;
                         self.notice = None;
                         true
                     }
@@ -809,15 +931,25 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::ConnectionLost, NativeUiIntent::Retry) => {
+                if self.retry_request_in_flight {
+                    self.set_error("retry request is still pending");
+                    return false;
+                }
                 self.screen = NativeShellScreen::Connecting;
                 self.clear_session_payload();
+                self.retry_request_in_flight = true;
                 true
             }
             (NativeShellScreen::InGame, NativeUiIntent::Logout)
             | (NativeShellScreen::CharacterSelect, NativeUiIntent::Logout) => {
+                if self.logout_request_in_flight {
+                    self.set_error("logout request is still pending");
+                    return false;
+                }
                 self.screen = NativeShellScreen::Login;
                 self.selected_character_index = None;
                 self.active_character = None;
+                self.logout_request_in_flight = true;
                 self.notice = None;
                 self.login.clear_password();
                 true
@@ -840,14 +972,17 @@ impl NativeShellModel {
             }
             (NativeShellScreen::Connecting, NativeGatewayEvent::Connected) => {
                 self.screen = NativeShellScreen::Login;
+                self.retry_request_in_flight = false;
                 self.notice = None;
                 true
             }
             (NativeShellScreen::Login, NativeGatewayEvent::AccountCreated) => {
+                self.register_request_in_flight = false;
                 self.set_info("account created; use Login to continue");
                 true
             }
             (NativeShellScreen::Login, NativeGatewayEvent::AccountCreationFailed { message }) => {
+                self.register_request_in_flight = false;
                 self.set_error(message);
                 true
             }
@@ -858,6 +993,9 @@ impl NativeShellModel {
                     characters,
                 },
             ) => {
+                self.login_request_in_flight = false;
+                self.register_request_in_flight = false;
+                self.logout_request_in_flight = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.last_account = Some(account);
                 self.selected_character_index = characters.first().map(|character| character.index);
@@ -868,6 +1006,8 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::Authenticating, NativeGatewayEvent::LoginFailure { message }) => {
+                self.login_request_in_flight = false;
+                self.register_request_in_flight = false;
                 self.screen = NativeShellScreen::Login;
                 self.set_error(message);
                 true
@@ -880,6 +1020,7 @@ impl NativeShellModel {
                 NativeShellScreen::CharacterCreate,
                 NativeGatewayEvent::CharacterCreated { character },
             ) => {
+                self.create_character_request_in_flight = false;
                 self.characters.retain(|item| item.index != character.index);
                 self.selected_character_index = Some(character.index);
                 self.characters.insert(0, character);
@@ -914,6 +1055,7 @@ impl NativeShellModel {
                     reason,
                 },
             ) => {
+                self.start_game_request_in_flight = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.set_error(reason.unwrap_or_else(|| "start game rejected".to_owned()));
                 true
@@ -922,6 +1064,7 @@ impl NativeShellModel {
                 NativeShellScreen::StartingGame,
                 NativeGatewayEvent::StartGameAck { accepted: true, .. },
             ) => {
+                self.start_game_request_in_flight = false;
                 self.set_info("start game acknowledged");
                 true
             }
@@ -929,6 +1072,7 @@ impl NativeShellModel {
                 NativeShellScreen::StartingGame,
                 NativeGatewayEvent::PlayerBootstrapped { character },
             ) => {
+                self.start_game_request_in_flight = false;
                 self.screen = NativeShellScreen::InGame;
                 self.active_character = Some(character);
                 self.set_info("entered game");
@@ -996,9 +1140,18 @@ impl NativeShellModel {
             (_, NativeGatewayEvent::OperationFailure { message }) => {
                 match self.screen {
                     NativeShellScreen::Authenticating => {
+                        self.login_request_in_flight = false;
                         self.screen = NativeShellScreen::Login;
                     }
+                    NativeShellScreen::Login => {
+                        self.register_request_in_flight = false;
+                        self.logout_request_in_flight = false;
+                    }
+                    NativeShellScreen::CharacterCreate => {
+                        self.create_character_request_in_flight = false;
+                    }
                     NativeShellScreen::StartingGame => {
+                        self.start_game_request_in_flight = false;
                         self.screen = NativeShellScreen::CharacterSelect;
                     }
                     NativeShellScreen::ChangePassword => {
@@ -1009,12 +1162,25 @@ impl NativeShellModel {
                         self.delete_request_in_flight = false;
                         self.delete_command_sent = false;
                     }
+                    NativeShellScreen::Connecting => {
+                        self.retry_request_in_flight = false;
+                    }
                     _ => {}
                 }
                 self.set_error(message);
                 true
             }
             (_, NativeGatewayEvent::LoggedOut { characters }) => {
+                self.login_request_in_flight = false;
+                self.register_request_in_flight = false;
+                self.create_character_request_in_flight = false;
+                self.start_game_request_in_flight = false;
+                self.retry_request_in_flight = false;
+                self.logout_request_in_flight = false;
+                self.change_password_request_in_flight = false;
+                self.change_password_command_sent = false;
+                self.delete_request_in_flight = false;
+                self.delete_command_sent = false;
                 self.screen = NativeShellScreen::Login;
                 self.characters = characters;
                 self.selected_character_index = None;

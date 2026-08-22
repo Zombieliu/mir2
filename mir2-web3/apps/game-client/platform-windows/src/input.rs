@@ -6,13 +6,14 @@
 //! movement; the client only expresses the request.
 
 use bevy::input::ButtonInput;
-use bevy::prelude::{KeyCode, Query, Res, Window};
-use mir2_client_bevy::crystal_ui::hud::belt_slot_item;
+use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Vec2, Window, With};
+use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
-use mir2_client_bevy::quest_model::CombatTargetModel;
+use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel};
+use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
 
@@ -24,6 +25,15 @@ const UP: &str = "up";
 const DOWN: &str = "down";
 const LEFT: &str = "left";
 const RIGHT: &str = "right";
+const STAGE_WIDTH: f32 = 1024.0;
+const STAGE_HEIGHT: f32 = 768.0;
+const ENTITY_ORIGIN_X: f32 = 480.0;
+const ENTITY_ORIGIN_Y: f32 = 352.0;
+const CELL_WIDTH: f32 = 48.0;
+const CELL_HEIGHT: f32 = 32.0;
+const NPC_HIT_HALF_WIDTH: f32 = 32.0;
+const NPC_HIT_TOP: f32 = 96.0;
+const NPC_HIT_BOTTOM: f32 = 18.0;
 
 /// Bevy resource holding the gateway command sender, injected by the host.
 #[derive(bevy::prelude::Resource)]
@@ -110,6 +120,121 @@ pub fn is_pointer_captured_for_movement(
         ui.blocks_world_click()
             || ui.captures_pointer(is_dragging_window, is_dragging_scrollbar, button_pressed)
     })
+}
+
+fn npc_at_cursor(cursor: Vec2, window_size: Vec2, entities: &EntityModelSet) -> Option<u32> {
+    if window_size.x <= 0.0 || window_size.y <= 0.0 {
+        return None;
+    }
+    let cursor = Vec2::new(
+        cursor.x * STAGE_WIDTH / window_size.x,
+        cursor.y * STAGE_HEIGHT / window_size.y,
+    );
+    let player = entities
+        .entities
+        .iter()
+        .find(|entity| entity.kind == EntityKind::SelfPlayer)?;
+
+    entities
+        .entities
+        .iter()
+        .filter(|entity| entity.kind == EntityKind::Npc)
+        .filter_map(|npc| {
+            let object_id = npc.object_id.parse::<u32>().ok().filter(|id| *id != 0)?;
+            let foot = Vec2::new(
+                ENTITY_ORIGIN_X + (npc.x - player.x) as f32 * CELL_WIDTH,
+                ENTITY_ORIGIN_Y + (npc.y - player.y) as f32 * CELL_HEIGHT,
+            );
+            let local = cursor - foot;
+            if local.x.abs() > NPC_HIT_HALF_WIDTH
+                || local.y < -NPC_HIT_TOP
+                || local.y > NPC_HIT_BOTTOM
+            {
+                return None;
+            }
+
+            // Prefer the NPC whose body centre is closest when tall sprites
+            // overlap. Object id is a deterministic tie-breaker only.
+            let score = local.x * local.x + (local.y + 38.0) * (local.y + 38.0) * 0.35;
+            Some((score, object_id))
+        })
+        .min_by(|(left_score, left_id), (right_score, right_id)| {
+            left_score
+                .total_cmp(right_score)
+                .then_with(|| left_id.cmp(right_id))
+        })
+        .map(|(_, object_id)| object_id)
+}
+
+/// Convert a real left click on an authoritative NPC sprite into the existing
+/// bounded quest/UI intent. This never opens a dialog locally: the gateway and
+/// server must still acknowledge the interaction with NPC dialog data.
+pub fn mouse_npc_interaction_system(
+    mouse: Res<ButtonInput<MouseButton>>,
+    shell: Option<Res<NativeShellModel>>,
+    player_ui: Option<Res<NativePlayerUiState>>,
+    dialog: Option<Res<NpcDialogModel>>,
+    ui_read_model: Option<Res<UiReadModel>>,
+    entities: Option<Res<EntityModelSet>>,
+    windows: Query<&Window>,
+    queue: Option<ResMut<QuestUiIntentQueue>>,
+) {
+    if !mouse.just_pressed(MouseButton::Left) {
+        return;
+    }
+    let (Some(shell), Some(entities), Some(mut queue)) = (shell, entities, queue) else {
+        return;
+    };
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    if !window.focused || shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+
+    let dialog_open = dialog.as_deref().is_some_and(|dialog| dialog.is_open);
+    let dead = ui_read_model
+        .as_deref()
+        .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+    if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
+        return;
+    }
+    let Some(cursor) = window.cursor_position() else {
+        return;
+    };
+    let Some(object_id) = npc_at_cursor(
+        cursor,
+        Vec2::new(window.resolution.width(), window.resolution.height()),
+        &entities,
+    ) else {
+        return;
+    };
+    queue.push_intent(QuestUiIntent::InteractNpc {
+        npc_object_id: object_id,
+    });
+}
+
+/// Reject a stale Bevy `Interaction::Pressed` unless it is paired with the
+/// physical left-button press edge from this frame. This prevents a world key
+/// (notably D) from appearing to reopen the HUD control left under the cursor
+/// after an Options/modal close, while preserving real mouse clicks.
+pub fn sanitize_native_hud_pointer_input(
+    mouse: Res<ButtonInput<MouseButton>>,
+    shell: Option<Res<NativeShellModel>>,
+    mut interactions: Query<&mut Interaction, With<CrystalHudAction>>,
+) {
+    let accept_press = shell
+        .as_deref()
+        .is_some_and(|shell| shell.screen == NativeShellScreen::InGame)
+        && mouse.just_pressed(MouseButton::Left);
+    if accept_press {
+        return;
+    }
+    for mut interaction in &mut interactions {
+        if *interaction == Interaction::Pressed {
+            *interaction = Interaction::None;
+        }
+    }
 }
 
 /// Forward walk intents on WASD / arrow key presses.
@@ -276,7 +401,8 @@ pub fn keyboard_skill_system(
         }
         return;
     }
-    let Some(skill_slot) = skill_shortcut_slot(&keys) else {
+    let skill_mode = player_ui.as_deref().map(|ui| ui.core.options.skill_mode);
+    let Some(skill_slot) = skill_shortcut_slot(&keys, skill_mode) else {
         return;
     };
     let Some(skills) = skills.as_deref() else {
@@ -368,7 +494,18 @@ pub fn keyboard_skill_system(
     }));
 }
 
-fn skill_shortcut_slot(keys: &ButtonInput<KeyCode>) -> Option<u8> {
+fn skill_shortcut_slot(keys: &ButtonInput<KeyCode>, skill_mode: Option<bool>) -> Option<u8> {
+    // Crystal rewrites skill bindings when SkillMode changes: false is Ctrl,
+    // true is tilde. Hosts that do not yet provide shared UI state keep the
+    // legacy direct-F-key bridge instead of becoming unusable.
+    let modifier_active = match skill_mode {
+        Some(false) => keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight),
+        Some(true) => keys.pressed(KeyCode::Backquote),
+        None => true,
+    };
+    if !modifier_active {
+        return None;
+    }
     [
         KeyCode::F1,
         KeyCode::F2,
@@ -461,6 +598,31 @@ mod tests {
             }],
         });
         (app, receiver)
+    }
+
+    fn npc_entities() -> EntityModelSet {
+        EntityModelSet {
+            entities: vec![
+                EntityModel {
+                    object_id: "1000".to_owned(),
+                    kind: EntityKind::SelfPlayer,
+                    name: "Self".to_owned(),
+                    x: 10,
+                    y: 10,
+                    level: Some(7),
+                    direction: Some("right".to_owned()),
+                },
+                EntityModel {
+                    object_id: "77".to_owned(),
+                    kind: EntityKind::Npc,
+                    name: "Teleport Gilbert".to_owned(),
+                    x: 11,
+                    y: 10,
+                    level: None,
+                    direction: Some("left".to_owned()),
+                },
+            ],
+        }
     }
 
     #[derive(Clone, Copy, Debug)]
@@ -599,6 +761,75 @@ mod tests {
     }
 
     #[test]
+    fn npc_hit_test_scales_window_coordinates_and_uses_authoritative_object_id() {
+        let entities = npc_entities();
+        // NPC foot is stage (528, 352); this is the centre of its body in a
+        // 2048x1536 window after the 2x stage conversion.
+        assert_eq!(
+            npc_at_cursor(
+                Vec2::new(1056.0, 628.0),
+                Vec2::new(2048.0, 1536.0),
+                &entities,
+            ),
+            Some(77)
+        );
+        assert_eq!(
+            npc_at_cursor(
+                Vec2::new(1200.0, 628.0),
+                Vec2::new(2048.0, 1536.0),
+                &entities,
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn real_left_click_queues_npc_interact_but_modal_dialog_blocks_click_through() {
+        fn click_app(dialog_open: bool) -> bevy::prelude::App {
+            let mut app = bevy::prelude::App::new();
+            let mut window = Window::default();
+            window.resolution.set(1024.0, 768.0);
+            window.set_cursor_position(Some(Vec2::new(528.0, 314.0)));
+            app.world_mut().spawn(window);
+            app.insert_resource(ButtonInput::<MouseButton>::default());
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+            app.insert_resource(NativePlayerUiState::default());
+            app.insert_resource(NpcDialogModel {
+                is_open: dialog_open,
+                ..Default::default()
+            });
+            app.insert_resource(UiReadModel::default());
+            app.insert_resource(npc_entities());
+            app.init_resource::<QuestUiIntentQueue>();
+            app.add_systems(bevy::prelude::Update, mouse_npc_interaction_system);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Left);
+            app
+        }
+
+        let mut app = click_app(false);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
+
+        let mut blocked = click_app(true);
+        blocked.update();
+        assert!(blocked
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+    }
+
+    #[test]
     fn closing_a_panel_restores_input_and_emits_only_once() {
         let (mut app, receiver) = input_app();
         app.insert_resource(NativePlayerUiState::default());
@@ -718,7 +949,25 @@ mod tests {
     }
 
     #[test]
-    fn login_screen_suppresses_gameplay_movement_intents() {
+    fn crystal_skill_mode_selects_ctrl_or_tilde_modifier() {
+        let mut keys = ButtonInput::<KeyCode>::default();
+        keys.press(KeyCode::F1);
+        assert_eq!(skill_shortcut_slot(&keys, Some(false)), None);
+        assert_eq!(skill_shortcut_slot(&keys, Some(true)), None);
+        assert_eq!(skill_shortcut_slot(&keys, None), Some(1));
+
+        keys.press(KeyCode::ControlLeft);
+        assert_eq!(skill_shortcut_slot(&keys, Some(false)), Some(1));
+        assert_eq!(skill_shortcut_slot(&keys, Some(true)), None);
+
+        keys.release(KeyCode::ControlLeft);
+        keys.press(KeyCode::Backquote);
+        assert_eq!(skill_shortcut_slot(&keys, Some(false)), None);
+        assert_eq!(skill_shortcut_slot(&keys, Some(true)), Some(1));
+    }
+
+    #[test]
+    fn session_transition_to_login_suppresses_live_d_movement_intent() {
         let (mut app, receiver) = input_app();
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::Login;
@@ -726,11 +975,66 @@ mod tests {
         app.add_systems(bevy::prelude::Update, keyboard_walk_system);
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::KeyW);
+            .press(KeyCode::KeyD);
 
         app.update();
 
         assert!(receiver.try_recv().is_err());
+    }
+
+    #[test]
+    fn live_d_moves_right_ingame_without_mutating_ui_state() {
+        let (mut app, receiver) = input_app();
+        app.insert_resource(NativePlayerUiState::default());
+        app.add_systems(bevy::prelude::Update, keyboard_walk_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyD);
+
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+        let ui = app.world().resource::<NativePlayerUiState>();
+        assert!(!ui.options_open());
+    }
+
+    #[test]
+    fn stale_hud_press_is_cleared_on_keyboard_frame_but_real_mouse_edge_is_preserved() {
+        fn app_with_mouse(pressed: bool) -> (bevy::prelude::App, bevy::prelude::Entity) {
+            let mut app = bevy::prelude::App::new();
+            let mut mouse = ButtonInput::<MouseButton>::default();
+            if pressed {
+                mouse.press(MouseButton::Left);
+            }
+            app.insert_resource(mouse)
+                .insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..Default::default()
+                })
+                .add_systems(bevy::prelude::Update, sanitize_native_hud_pointer_input);
+            let entity = app
+                .world_mut()
+                .spawn((CrystalHudAction::Option, Interaction::Pressed))
+                .id();
+            (app, entity)
+        }
+
+        let (mut stale, stale_button) = app_with_mouse(false);
+        stale.update();
+        assert_eq!(
+            stale.world().get::<Interaction>(stale_button),
+            Some(&Interaction::None)
+        );
+
+        let (mut real, real_button) = app_with_mouse(true);
+        real.update();
+        assert_eq!(
+            real.world().get::<Interaction>(real_button),
+            Some(&Interaction::Pressed)
+        );
     }
 
     #[test]
@@ -1172,6 +1476,7 @@ mod tests {
                 quantity: 2,
                 slot: 0,
                 container: 1,
+                ..mir2_client_bevy::inventory::ItemModel::default()
             }],
         });
         app.add_systems(bevy::prelude::Update, keyboard_skill_system);

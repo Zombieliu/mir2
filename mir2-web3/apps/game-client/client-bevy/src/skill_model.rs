@@ -50,7 +50,9 @@ impl<'de> Deserialize<'de> for SkillModel {
             // A top-level binding is an additive compatibility form.  It is
             // authoritative for fields it carries, while fields absent from
             // it remain sourced from the actual known-skill entry.
-            let explicit = raw_bindings.iter().find(|binding| binding.skill_id == skill.id);
+            let explicit = raw_bindings
+                .iter()
+                .find(|binding| binding.skill_id == skill.id);
             bindings.push(SkillBinding {
                 skill_id: skill.id,
                 spell: explicit
@@ -226,9 +228,7 @@ impl SkillModel {
         // Second pass: only entries without an explicit hotkey may fill holes.
         // Duplicate and invalid explicit values are not unbound skills.
         for (index, skill) in self.skills.iter().enumerate() {
-            if explicitly_assigned[index]
-                || self.binding_for(skill.id).hotkey.is_some()
-            {
+            if explicitly_assigned[index] || self.binding_for(skill.id).hotkey.is_some() {
                 continue;
             }
             let Some(empty_slot) = slots.iter().position(|slot| slot.is_none()) else {
@@ -257,7 +257,9 @@ impl SkillModel {
             can_use: binding.can_use,
             offensive: binding.offensive,
             cooldown_remaining_ticks: binding.cooldown_remaining_ticks,
-            mp_cost: binding.mp_cost.or_else(|| (skill.mp_cost > 0).then_some(skill.mp_cost)),
+            mp_cost: binding
+                .mp_cost
+                .or_else(|| (skill.mp_cost > 0).then_some(skill.mp_cost)),
         })
     }
 
@@ -429,7 +431,10 @@ mod tests {
         assert_eq!(model.skill_for_shortcut(1).map(|skill| skill.id), Some(22));
         assert_eq!(model.skill_for_shortcut(2).map(|skill| skill.id), Some(20));
         for slot in 3_u8..=8_u8 {
-            assert_ne!(model.skill_for_shortcut(slot).map(|skill| skill.id), Some(21));
+            assert_ne!(
+                model.skill_for_shortcut(slot).map(|skill| skill.id),
+                Some(21)
+            );
         }
     }
 
@@ -463,7 +468,9 @@ mod tests {
             }]
         }))
         .expect("disabled toggle model");
-        let selection = disabled.selection_for_shortcut(1).expect("toggle selection");
+        let selection = disabled
+            .selection_for_shortcut(1)
+            .expect("toggle selection");
         assert_eq!(selection.cast_kind.as_deref(), Some("toggle"));
         assert_eq!(selection.can_use, Some(false));
 
@@ -533,15 +540,24 @@ mod tests {
         assert_eq!(model.bindings.len(), MAX_LEARNED_SKILLS);
         assert_eq!(model.skills.first().map(|skill| skill.id), Some(0));
         assert_eq!(model.skills.last().map(|skill| skill.id), Some(511));
-        assert_eq!(model.bindings.first().map(|binding| binding.skill_id), Some(0));
-        assert_eq!(model.bindings.last().map(|binding| binding.skill_id), Some(511));
+        assert_eq!(
+            model.bindings.first().map(|binding| binding.skill_id),
+            Some(0)
+        );
+        assert_eq!(
+            model.bindings.last().map(|binding| binding.skill_id),
+            Some(511)
+        );
         assert_eq!(
             model
                 .selection_for_shortcut(1)
                 .and_then(|selection| selection.spell),
             Some("Spell0".to_owned())
         );
-        assert!(model.skills.iter().all(|skill| skill.id < MAX_LEARNED_SKILLS as u32));
+        assert!(model
+            .skills
+            .iter()
+            .all(|skill| skill.id < MAX_LEARNED_SKILLS as u32));
     }
 
     #[test]
@@ -578,8 +594,14 @@ mod tests {
         assert_eq!(model.bindings.len(), MAX_LEARNED_SKILLS);
         assert_eq!(model.skills.first().map(|skill| skill.id), Some(0));
         assert_eq!(model.skills.last().map(|skill| skill.id), Some(511));
-        assert_eq!(model.bindings.first().map(|binding| binding.skill_id), Some(0));
-        assert_eq!(model.bindings.last().map(|binding| binding.skill_id), Some(511));
+        assert_eq!(
+            model.bindings.first().map(|binding| binding.skill_id),
+            Some(0)
+        );
+        assert_eq!(
+            model.bindings.last().map(|binding| binding.skill_id),
+            Some(511)
+        );
         assert_eq!(
             model
                 .selection_for_shortcut(1)

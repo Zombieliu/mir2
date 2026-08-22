@@ -6,7 +6,7 @@
 use bevy::prelude::*;
 use mir2_ui_core::{
     action::UiAction,
-    state::{UiPanel, UiState},
+    state::{UiPanel, UiSecurityPanel, UiState},
 };
 use serde::{Deserialize, Serialize};
 
@@ -195,17 +195,34 @@ pub enum AndroidUiTarget {
     Skill,
     QuestLog,
     Options,
+    OptionToggle {
+        option: mir2_ui_core::state::UiCrystalOption,
+        enabled: bool,
+    },
+    Observe {
+        allow: bool,
+    },
     ChatSettings,
     Menu,
     Mail,
     BigMap,
     Storage,
+    ChangePassword,
+    SafeKey,
     Minimap,
     Chat,
-    InventoryItem { unique_id: u64 },
-    Npc { object_id: u32 },
-    AttackTarget { object_id: u32 },
-    PickUp { object_id: u32 },
+    InventoryItem {
+        unique_id: u64,
+    },
+    Npc {
+        object_id: u32,
+    },
+    AttackTarget {
+        object_id: u32,
+    },
+    PickUp {
+        object_id: u32,
+    },
     TownRevive,
 }
 
@@ -218,11 +235,18 @@ impl AndroidUiTarget {
             Self::Skill => UiAction::OpenSkill,
             Self::QuestLog => UiAction::OpenQuestLog,
             Self::Options => UiAction::OpenOptions,
+            Self::OptionToggle { option, enabled } => UiAction::SetCrystalOption {
+                option: *option,
+                enabled: *enabled,
+            },
+            Self::Observe { allow } => UiAction::RequestObserve { allow: *allow },
             Self::ChatSettings => UiAction::OpenChatSettings,
             Self::Menu => UiAction::OpenMenu,
             Self::Mail => UiAction::OpenMail,
             Self::BigMap => UiAction::OpenBigMap,
             Self::Storage => UiAction::OpenStorage,
+            Self::ChangePassword => UiAction::ChangePassword,
+            Self::SafeKey => UiAction::SafeKey,
             Self::Minimap => UiAction::ToggleMinimap,
             Self::Chat => UiAction::FocusChat,
             Self::InventoryItem { unique_id } => UiAction::UseItem {
@@ -336,6 +360,14 @@ pub fn route_input(event: AndroidInputEvent, state: &UiState) -> Vec<AndroidInpu
         AndroidInputEvent::Back => {
             let action = if state.chat_focused {
                 UiAction::BlurChat
+            } else if state.security.panel == UiSecurityPanel::ChangePassword {
+                UiAction::CancelChangePassword
+            } else if state.security.panel == UiSecurityPanel::SafeKey {
+                UiAction::CloseSafeKey
+            } else if state.panel == UiPanel::Options {
+                // Crystal OptionDialog CloseButton only hides; local changes
+                // were committed at the moment each control was tapped.
+                UiAction::ClosePanel
             } else if state.panel != UiPanel::None {
                 UiAction::ClosePanel
             } else if state.minimap_visible {
@@ -490,14 +522,50 @@ mod tests {
             ),
             vec![AndroidInputRoute::UiAction(UiAction::OpenMail)]
         );
-        assert!(
+        assert!(route_input(
+            AndroidInputEvent::Tap {
+                target: AndroidUiTarget::None
+            },
+            &state
+        )
+        .is_empty());
+        assert_eq!(
             route_input(
                 AndroidInputEvent::Tap {
-                    target: AndroidUiTarget::None
+                    target: AndroidUiTarget::ChangePassword
+                },
+                &UiState {
+                    screen: UiScreen::Login,
+                    ..Default::default()
+                }
+            ),
+            vec![AndroidInputRoute::UiAction(UiAction::ChangePassword)]
+        );
+        assert_eq!(
+            route_input(
+                AndroidInputEvent::Tap {
+                    target: AndroidUiTarget::OptionToggle {
+                        option: mir2_ui_core::state::UiCrystalOption::NewMove,
+                        enabled: true,
+                    }
                 },
                 &state
-            )
-            .is_empty()
+            ),
+            vec![AndroidInputRoute::UiAction(UiAction::SetCrystalOption {
+                option: mir2_ui_core::state::UiCrystalOption::NewMove,
+                enabled: true,
+            })]
+        );
+        assert_eq!(
+            route_input(
+                AndroidInputEvent::Tap {
+                    target: AndroidUiTarget::Observe { allow: true }
+                },
+                &state
+            ),
+            vec![AndroidInputRoute::UiAction(UiAction::RequestObserve {
+                allow: true,
+            })]
         );
     }
 
@@ -555,7 +623,18 @@ mod tests {
             route_input(AndroidInputEvent::Back, &state),
             vec![AndroidInputRoute::UiAction(UiAction::ClosePanel)]
         );
+        state.panel = UiPanel::Options;
+        assert_eq!(
+            route_input(AndroidInputEvent::Back, &state),
+            vec![AndroidInputRoute::UiAction(UiAction::ClosePanel)]
+        );
         state.panel = UiPanel::None;
+        state.security.panel = UiSecurityPanel::SafeKey;
+        assert_eq!(
+            route_input(AndroidInputEvent::Back, &state),
+            vec![AndroidInputRoute::UiAction(UiAction::CloseSafeKey)]
+        );
+        state.security.panel = UiSecurityPanel::None;
         state.minimap_visible = false;
         assert_eq!(
             route_input(AndroidInputEvent::Back, &state),

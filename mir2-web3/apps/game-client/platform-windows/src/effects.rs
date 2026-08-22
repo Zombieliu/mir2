@@ -8,7 +8,7 @@
 //! It never fabricates client game state and never draws a fake/fallback
 //! sprite for a missing asset - a frame whose PNG is absent yields no sprite.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fs;
 use std::sync::OnceLock;
 
@@ -44,7 +44,20 @@ fn fx_trace_event(
     }
     eprintln!(
         "[fx-trace] gen={} seq={} packet={} spell={} srcId={:?} dstId={:?} srcTile={:?} dstTile={:?} phase={} lib={} base={} frame={} startAt={} image={}",
-        generation, sequence, packet, spell, source_id, dest_id, source_tile, dest_tile, phase, library, base, current_frame, start_at, image
+        generation,
+        sequence,
+        packet,
+        spell,
+        source_id,
+        dest_id,
+        source_tile,
+        dest_tile,
+        phase,
+        library,
+        base,
+        current_frame,
+        start_at,
+        image
     );
 }
 
@@ -948,9 +961,21 @@ impl NativeEffects {
                 to_x,
                 to_y,
                 current_for_trace.frames.len(),
-                current_for_trace.frames.first().map(|f| f.path.as_str()).unwrap_or("-"),
-                queued.as_ref().and_then(|a| a.frames.first()).map(|f| f.path.as_str()).unwrap_or("-"),
-                return_queued.as_ref().and_then(|a| a.frames.first()).map(|f| f.path.as_str()).unwrap_or("-"),
+                current_for_trace
+                    .frames
+                    .first()
+                    .map(|f| f.path.as_str())
+                    .unwrap_or("-"),
+                queued
+                    .as_ref()
+                    .and_then(|a| a.frames.first())
+                    .map(|f| f.path.as_str())
+                    .unwrap_or("-"),
+                return_queued
+                    .as_ref()
+                    .and_then(|a| a.frames.first())
+                    .map(|f| f.path.as_str())
+                    .unwrap_or("-"),
                 current_for_trace.offset_x,
                 current_for_trace.offset_y
             );
@@ -1148,6 +1173,15 @@ impl NativeEffects {
     /// Advance the effect clock and build the EffectRenderState JSON. Returns
     /// None when nothing changed since the last emitted state.
     pub(crate) fn tick(&mut self, now_ms: u64) -> Option<String> {
+        self.tick_with_visibility(now_ms, true)
+    }
+
+    /// Advance authoritative effect lifetimes regardless of presentation, but
+    /// gate only the native render payload. Crystal's `Settings.Effect` is a
+    /// local visual preference: turning it off must neither drop packets nor
+    /// mutate the server-owned world. A still-active effect is therefore
+    /// immediately visible again if the option is restored before it expires.
+    pub(crate) fn tick_with_visibility(&mut self, now_ms: u64, visible: bool) -> Option<String> {
         let player_x = self.player_x;
         let player_y = self.player_y;
         let _ = effect_catalog();
@@ -1247,10 +1281,10 @@ impl NativeEffects {
             .retain(|instance| instance_still_active(instance, now_ms));
 
         let state = json!({
-            "enabled": true,
+            "enabled": visible,
             "stageWidth": STAGE_WIDTH,
             "stageHeight": STAGE_HEIGHT,
-            "effects": rendered,
+            "effects": if visible { rendered } else { Vec::new() },
         });
         let json_str = serde_json::to_string(&state).ok()?;
         if self.last_state.as_deref() == Some(&json_str) {
@@ -1434,9 +1468,16 @@ fn spell_number_u32(value: &Value) -> u32 {
 pub(crate) fn tick_native_effects(
     time: bevy::prelude::Res<bevy::prelude::Time>,
     mut effects: bevy::prelude::ResMut<NativeEffects>,
+    player_ui: Option<
+        bevy::prelude::Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    >,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
-    if let Some(json) = effects.tick(now_ms) {
+    let effect_visible = player_ui
+        .as_deref()
+        .map(|state| state.core.options.effect)
+        .unwrap_or(true);
+    if let Some(json) = effects.tick_with_visibility(now_ms, effect_visible) {
         let success =
             mir2_bevy_runtime::native_ingest::push_native_effect_render_state(json.clone());
         if fx_trace_enabled() {
@@ -1593,6 +1634,40 @@ mod tests {
     }
 
     #[test]
+    fn visual_gate_hides_effects_without_discarding_live_instances() {
+        let animation = fake_anim("cast", 50, 4, false);
+        let mut fx = NativeEffects::default();
+        fx.active.push(EffectInstance {
+            key: "visible-after-toggle".to_owned(),
+            kind: EffectKindTag::Cast,
+            tile_x: 1,
+            tile_y: 1,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: 0,
+            start_at: 0,
+            persistent_object_id: None,
+            provenance: EffectProvenance::default(),
+        });
+
+        let hidden = fx.tick_with_visibility(25, false).expect("disabled state");
+        assert!(hidden.contains("\"enabled\":false"));
+        assert!(hidden.contains("\"effects\":[]"));
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "render gate must not clear authoritative lifetime"
+        );
+
+        let restored = fx.tick_with_visibility(50, true).expect("restored state");
+        assert!(restored.contains("\"enabled\":true"));
+        assert!(restored.contains("visible-after-toggle"));
+    }
+
+    #[test]
     fn projectile_midpoint_interpolation_is_precise() {
         let anim = fake_anim("projectile", 50, 2, false);
         let inst = EffectInstance {
@@ -1667,6 +1742,52 @@ mod tests {
                 generation: 0,
                 packet: "ObjectRemove".to_owned(),
                 payload: json!({"objectId": 55}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn real_trap_hexagon_object_spell_remains_until_authoritative_remove() {
+        let mut fx = NativeEffects::default();
+        let zone = HashMap::new();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 1,
+                generation: 1,
+                packet: "ObjectSpell".to_owned(),
+                payload: json!({
+                    "objectId": 90_073,
+                    "location": {"x": 290, "y": 616},
+                    "spell": 73,
+                    "direction": "up",
+                    "param": false
+                }),
+            }],
+            &zone,
+        );
+
+        let initial = fx.tick(0).expect("TrapHexagon should render immediately");
+        assert!(initial.contains("/original-effects/Magic/1390.png"));
+        let later = fx
+            .tick(10_000)
+            .expect("persistent ObjectSpell should continue animating");
+        assert!(later.contains("/original-effects/Magic/1390.png"));
+        assert_eq!(fx.active.len(), 1);
+
+        fx.observe(
+            10_000,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 1,
+                packet: "ObjectRemove".to_owned(),
+                payload: json!({"objectId": 90_073}),
             }],
             &zone,
         );

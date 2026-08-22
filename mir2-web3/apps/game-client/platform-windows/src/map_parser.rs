@@ -10,15 +10,19 @@
 //! - `mapLibraryKeyForIndex` (index -> "WemadeMir2/Tiles" etc.)
 //! - `mapAtlasRectKeyForPath` ("/original-map/<lib>/<frame>.png" -> "<lib>#<frame>")
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
+use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::assets;
+
+#[path = "lighting.rs"]
+pub mod lighting;
 
 const STAGE_WIDTH: f32 = 1024.0;
 const STAGE_HEIGHT: f32 = 768.0;
@@ -43,6 +47,10 @@ pub struct MapCell {
     pub middle_animation_frame: u8,
     #[allow(dead_code)]
     pub middle_animation_tick: u8,
+    /// Crystal type-100 `CellInfo.Light` at byte 25. Values 1..9 are map
+    /// light emitters; values >=10 carry other legacy flags/colour buckets and
+    /// are intentionally skipped by Crystal DrawLights.
+    pub light: u8,
 }
 
 /// A single map tile draw (back, middle, or front layer) resolved to an atlas rect.
@@ -73,6 +81,47 @@ pub struct ParsedMap {
     pub width: u16,
     pub height: u16,
     pub cells: Vec<MapCell>,
+}
+
+/// Parsed maps are immutable and can be shared by the map renderer and native
+/// lighting producer. Keep this deliberately small: a long play session may
+/// cross many maps, but the gateway must never re-read/decompress the current
+/// map for every periodic world snapshot.
+const PARSED_MAP_CACHE_CAPACITY: usize = 8;
+
+#[derive(Default)]
+struct ParsedMapCache {
+    entries: HashMap<String, ParsedMap>,
+    least_recent: VecDeque<String>,
+}
+
+impl ParsedMapCache {
+    fn get(&mut self, key: &str) -> Option<ParsedMap> {
+        let value = self.entries.get(key)?.clone();
+        self.touch(key);
+        Some(value)
+    }
+
+    fn insert(&mut self, key: String, map: ParsedMap) {
+        self.entries.insert(key.clone(), map);
+        self.touch(&key);
+        while self.entries.len() > PARSED_MAP_CACHE_CAPACITY {
+            let Some(oldest) = self.least_recent.pop_front() else {
+                break;
+            };
+            self.entries.remove(&oldest);
+        }
+    }
+
+    fn touch(&mut self, key: &str) {
+        self.least_recent.retain(|entry| entry != key);
+        self.least_recent.push_back(key.to_owned());
+    }
+}
+
+fn parsed_map_cache() -> &'static Mutex<ParsedMapCache> {
+    static CACHE: OnceLock<Mutex<ParsedMapCache>> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(ParsedMapCache::default()))
 }
 
 /// Parse a Crystal type-100 `.map` byte buffer.
@@ -109,6 +158,7 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
             front_animation_tick: bytes[offset + 17],
             middle_animation_frame: bytes[offset + 18],
             middle_animation_tick: bytes[offset + 19],
+            light: bytes[offset + 25],
         });
         offset += 26;
     }
@@ -117,6 +167,105 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
         height,
         cells,
     })
+}
+
+/// A map-cell light conversion hook for the later Windows gateway/main bridge.
+/// The map binary itself has no pixel offset: callers provide the resolved
+/// front-frame offset exported from the Crystal library, which is exactly what
+/// Web's `lightOffsetX/Y` supplies before `DrawLights` placement.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NativeMapLightCell {
+    pub key: String,
+    pub x: i32,
+    pub y: i32,
+    pub light: u8,
+    pub offset_x: i32,
+    pub offset_y: i32,
+}
+
+/// Extract Crystal-renderable map lights in the parser's native x-major cell
+/// order. `frame_offsets` is keyed by map coordinate and can be empty while the
+/// map-frame metadata bridge is not yet attached.
+pub fn native_map_light_cells(
+    map: &ParsedMap,
+    frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
+) -> Vec<NativeMapLightCell> {
+    if map.width == 0 || map.height == 0 {
+        return Vec::new();
+    }
+    let height = i32::from(map.height);
+    map.cells
+        .iter()
+        .take(usize::from(map.width) * usize::from(map.height))
+        .enumerate()
+        .filter_map(|(index, cell)| {
+            let front_image_index = (cell.front_image & 0x7fff) - 1;
+            if !(1..10).contains(&cell.light) || cell.front_index == -1 || front_image_index == -1 {
+                return None;
+            }
+            let index = i32::try_from(index).ok()?;
+            let x = index / height;
+            let y = index % height;
+            let (offset_x, offset_y) = if cell.front_animation_frame > 0 {
+                frame_offsets.get(&(x, y)).copied().unwrap_or((0, 0))
+            } else {
+                (0, 0)
+            };
+            Some(NativeMapLightCell {
+                key: format!("{x}:{y}:{}", cell.light),
+                x,
+                y,
+                light: cell.light,
+                offset_x,
+                offset_y,
+            })
+        })
+        .collect()
+}
+
+/// Resolve the intrinsic X/Y offset of every animated front-frame that can
+/// emit a Crystal map light. This is source metadata from the native keyed
+/// asset manifest, not time-based presentation interpolation. If the export
+/// has no keyed entry, callers intentionally receive an empty map and retain
+/// Crystal's explicit `(0, 0)` default.
+pub fn native_map_light_frame_offsets(map: &ParsedMap) -> HashMap<(i32, i32), (i32, i32)> {
+    let Some(index) = load_native_keyed_index() else {
+        return HashMap::new();
+    };
+    native_map_light_frame_offsets_from_index(map, &index)
+}
+
+fn native_map_light_frame_offsets_from_index(
+    map: &ParsedMap,
+    index: &StandaloneIndex,
+) -> HashMap<(i32, i32), (i32, i32)> {
+    let mut offsets = HashMap::new();
+    let height = i32::from(map.height);
+    if height == 0 {
+        return offsets;
+    }
+    for (index_in_map, cell) in map.cells.iter().enumerate() {
+        if !(1..10).contains(&cell.light) || cell.front_animation_frame == 0 {
+            continue;
+        }
+        let front_frame = (i32::from(cell.front_image) & 0x7fff) - 1;
+        if cell.front_index == -1 || front_frame < 0 {
+            continue;
+        }
+        let Ok(index_in_map) = i32::try_from(index_in_map) else {
+            continue;
+        };
+        let key = atlas_rect_key(&library_key_for_index(cell.front_index), front_frame);
+        let Some(asset) = index.entries.get(&key) else {
+            continue;
+        };
+        offsets.insert(
+            (index_in_map / height, index_in_map % height),
+            (asset.offset_x, asset.offset_y),
+        );
+    }
+    offsets
 }
 
 /// Map a cell library index to a library key (mirrors `mapLibraryKeyForIndex`).
@@ -801,12 +950,37 @@ fn build_map_render_state_with_indexes(
 
 /// Locate + parse a local `.map.gz` for the given map file name.
 pub fn load_map(map_file_name: &str) -> Option<ParsedMap> {
+    let cache_key = map_cache_key(map_file_name)?;
+    if let Ok(mut cache) = parsed_map_cache().lock() {
+        if let Some(map) = cache.get(&cache_key) {
+            return Some(map);
+        }
+    }
     let path = find_map_file(map_file_name)?;
     let compressed = fs::read(&path).ok()?;
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
     let mut bytes = Vec::new();
     decoder.read_to_end(&mut bytes).ok()?;
-    parse_type100_map(&bytes)
+    let map = parse_type100_map(&bytes)?;
+    if let Ok(mut cache) = parsed_map_cache().lock() {
+        cache.insert(cache_key, map.clone());
+    }
+    Some(map)
+}
+
+/// Validate and normalize the map cache key before touching the filesystem.
+/// This mirrors `find_map_file`'s path policy, but turns equivalent `0`,
+/// `0.map`, and `0.map.gz` payload spellings into one retained parse.
+fn map_cache_key(map_file_name: &str) -> Option<String> {
+    let file_name = Path::new(map_file_name).file_name()?.to_str()?;
+    if file_name != map_file_name || file_name.contains("..") {
+        return None;
+    }
+    let stem = file_name
+        .strip_suffix(".map.gz")
+        .or_else(|| file_name.strip_suffix(".map"))
+        .unwrap_or(file_name);
+    (!stem.is_empty()).then(|| stem.to_ascii_lowercase())
 }
 
 /// Whether a local map pack + atlas are available for real map rendering.
@@ -817,6 +991,22 @@ pub fn has_local_map_atlas() -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parsed_map_cache_is_bounded_and_refreshes_the_current_map() {
+        let mut cache = ParsedMapCache::default();
+        let map = || ParsedMap {
+            width: 0,
+            height: 0,
+            cells: Vec::new(),
+        };
+        for index in 0..=PARSED_MAP_CACHE_CAPACITY {
+            cache.insert(index.to_string(), map());
+        }
+        assert_eq!(cache.entries.len(), PARSED_MAP_CACHE_CAPACITY);
+        assert!(cache.get("0").is_none());
+        assert!(cache.get("8").is_some());
+    }
 
     fn middle_cell(library: i16, frame: i16) -> MapCell {
         MapCell {
@@ -830,6 +1020,7 @@ mod tests {
             front_animation_tick: 0,
             middle_animation_frame: 0,
             middle_animation_tick: 0,
+            light: 0,
         }
     }
 
@@ -924,6 +1115,111 @@ mod tests {
         assert_eq!(map.width, 2);
         assert_eq!(map.height, 2);
         assert_eq!(map.cells.len(), 4);
+    }
+
+    #[test]
+    fn type100_light_byte_and_native_conversion_preserve_frame_offsets() {
+        let mut bytes = vec![0x01, 0x00, 0x43, 0x23];
+        bytes.extend_from_slice(&2u16.to_le_bytes());
+        bytes.extend_from_slice(&2u16.to_le_bytes());
+        for index in 0..4 {
+            let mut cell = [0u8; 26];
+            if index == 2 {
+                cell[10..12].copy_from_slice(&0i16.to_le_bytes());
+                cell[12..14].copy_from_slice(&1i16.to_le_bytes());
+                cell[16] = 1;
+                cell[25] = 3;
+            } else {
+                cell[25] = 10;
+            }
+            bytes.extend_from_slice(&cell);
+        }
+        let map = parse_type100_map(&bytes).expect("type-100 map");
+        assert_eq!(map.cells[2].light, 3);
+        let lights = native_map_light_cells(&map, &HashMap::from([((1, 0), (-50, -100))]));
+        assert_eq!(lights.len(), 1, "legacy colour bucket 10 is not a light");
+        assert_eq!(
+            lights[0],
+            NativeMapLightCell {
+                key: "1:0:3".to_owned(),
+                x: 1,
+                y: 0,
+                light: 3,
+                offset_x: -50,
+                offset_y: -100,
+            }
+        );
+    }
+
+    #[test]
+    fn map_light_requires_front_image_and_ignores_static_frame_offsets() {
+        let mut static_cell = middle_cell(0, 0);
+        static_cell.front_index = 0;
+        static_cell.front_image = 1;
+        static_cell.light = 1;
+        let missing_front = MapCell {
+            front_index: -1,
+            front_image: 0,
+            light: 1,
+            ..static_cell.clone()
+        };
+        let map = ParsedMap {
+            width: 2,
+            height: 1,
+            cells: vec![static_cell, missing_front],
+        };
+        let lights = native_map_light_cells(&map, &HashMap::from([((0, 0), (99, -88))]));
+        assert_eq!(lights.len(), 1);
+        assert_eq!((lights[0].offset_x, lights[0].offset_y), (0, 0));
+    }
+
+    #[test]
+    fn animated_map_light_uses_exported_native_frame_offset_without_motion_guessing() {
+        let mut cell = middle_cell(0, 0);
+        cell.front_index = 0;
+        cell.front_image = 1;
+        cell.front_animation_frame = 1;
+        cell.light = 1;
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell],
+        };
+        let index = standalone_index_for_source_offset(
+            "WemadeMir2/Tiles#0",
+            "/original-map/WemadeMir2/Tiles/0.png",
+            48,
+            32,
+            -7,
+            11,
+        );
+        assert_eq!(
+            native_map_light_frame_offsets_from_index(&map, &index),
+            HashMap::from([((0, 0), (-7, 11))])
+        );
+    }
+
+    #[test]
+    fn map_light_uses_offset_for_additive_flag_and_rejects_malformed_dimensions() {
+        let mut additive_cell = middle_cell(0, 0);
+        additive_cell.front_index = 0;
+        additive_cell.front_image = 1;
+        additive_cell.front_animation_frame = 0x80;
+        additive_cell.light = 2;
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![additive_cell],
+        };
+        let lights = native_map_light_cells(&map, &HashMap::from([((0, 0), (7, -9))]));
+        assert_eq!((lights[0].offset_x, lights[0].offset_y), (7, -9));
+
+        let malformed = ParsedMap {
+            width: 1,
+            height: 0,
+            cells: map.cells,
+        };
+        assert!(native_map_light_cells(&malformed, &HashMap::new()).is_empty());
     }
 
     #[test]
@@ -1080,6 +1376,7 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    light: 0,
                 },
                 MapCell {
                     back_index: 0,
@@ -1092,6 +1389,7 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    light: 0,
                 },
                 MapCell {
                     back_index: 0,
@@ -1104,6 +1402,7 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    light: 0,
                 },
                 MapCell {
                     back_index: 0,
@@ -1116,6 +1415,7 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    light: 0,
                 },
             ],
         };
@@ -1262,6 +1562,7 @@ mod tests {
                 front_animation_tick: 0,
                 middle_animation_frame: 0,
                 middle_animation_tick: 0,
+                light: 0,
             }],
         };
         let rect_key = atlas_rect_key("WemadeMir2/Objects", 1);

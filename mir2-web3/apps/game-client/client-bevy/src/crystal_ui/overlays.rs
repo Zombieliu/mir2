@@ -38,7 +38,7 @@ use crate::quest_model::NpcDialogModel;
 use crate::read_model::{UiReadModel, UiSurfaceSignals};
 use crate::shop::{
     shop_buy_enabled, shop_quantity_clamped, shop_quantity_dec, shop_quantity_inc,
-    shop_sell_enabled, ShopModel,
+    shop_sell_enabled, NpcShopServiceMode, NpcShopServiceSignal, ShopModel,
 };
 use crate::skill_binding_persistence::{
     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
@@ -82,6 +82,7 @@ const BUTTON_BG: Color = Color::srgba(0.28, 0.18, 0.08, 0.95);
 const BUTTON_DISABLED: Color = Color::srgba(0.30, 0.24, 0.16, 0.45);
 const MAX_QUEUED: usize = 24;
 const BAG_SLOTS: u32 = 46;
+const GUILD_NOTICE_MAX_CHARS_PER_LINE: usize = 32;
 
 /// Pages exposed by Crystal's CharacterDialog.  The page is local UI state;
 /// values shown on each page still come from the authoritative read models.
@@ -99,6 +100,8 @@ pub enum GuildLeftPage {
     #[default]
     Notice,
     Members,
+    Storage,
+    Ranks,
 }
 
 pub const BIGMAP_ZOOM_MIN: f32 = 0.5;
@@ -157,6 +160,107 @@ pub fn bigmap_zoom_out(zoom: f32) -> f32 {
     bigmap_zoom_clamped(zoom - BIGMAP_ZOOM_STEP)
 }
 
+fn guild_notice_lines(draft: &str) -> Option<Vec<String>> {
+    let mut lines = draft
+        .split('\n')
+        .map(|line| line.trim_end_matches('\r').trim_end().to_owned())
+        .collect::<Vec<_>>();
+    while lines.last().is_some_and(String::is_empty) {
+        lines.pop();
+    }
+    if lines.len() > crate::social::MAX_NOTICE_LINES
+        || lines
+            .iter()
+            .any(|line| line.chars().count() > GUILD_NOTICE_MAX_CHARS_PER_LINE)
+    {
+        return None;
+    }
+    lines.retain(|line| !line.is_empty());
+    Some(lines)
+}
+
+fn push_guild_notice_text(draft: &mut String, text: &str) {
+    for ch in text.chars() {
+        if ch == '\n' {
+            if draft.split('\n').count() < crate::social::MAX_NOTICE_LINES {
+                draft.push('\n');
+            }
+        } else if !ch.is_control()
+            && draft
+                .rsplit('\n')
+                .next()
+                .map(str::chars)
+                .map(Iterator::count)
+                .unwrap_or_default()
+                < GUILD_NOTICE_MAX_CHARS_PER_LINE
+        {
+            draft.push(ch);
+        }
+    }
+}
+
+fn valid_social_name(name: &str) -> bool {
+    let trimmed = name.trim();
+    !trimmed.is_empty()
+        && trimmed == name
+        && trimmed.chars().count() <= 32
+        && trimmed.chars().all(|ch| !ch.is_control())
+}
+
+fn push_social_name_text(draft: &mut String, text: &str) {
+    for ch in text.chars() {
+        if !ch.is_control() && draft.chars().count() < 32 {
+            draft.push(ch);
+        }
+    }
+}
+
+fn social_has_permission(guild: &crate::social::GuildModel, key: &str) -> bool {
+    guild.permissions.iter().any(|permission| {
+        let without_can = permission
+            .get(..3)
+            .filter(|prefix| prefix.eq_ignore_ascii_case("can"))
+            .and_then(|_| permission.get(3..));
+        permission.eq_ignore_ascii_case(key)
+            || without_can.is_some_and(|permission| permission.eq_ignore_ascii_case(key))
+            || (key.eq_ignore_ascii_case("notice")
+                && (permission.eq_ignore_ascii_case("changeNotice")
+                    || permission.eq_ignore_ascii_case("CanChangeNotice")))
+            || (key.eq_ignore_ascii_case("changeRank")
+                && (permission.eq_ignore_ascii_case("rank")
+                    || permission.eq_ignore_ascii_case("CanChangeRank")))
+    })
+}
+
+fn queue_group_invite_by_name(
+    intents: &mut NativePlayerUiIntentQueue,
+    social: &mut crate::social::SocialModel,
+    name: String,
+) -> bool {
+    if !valid_social_name(&name) {
+        return false;
+    }
+    let add = NativePlayerUiIntent::GroupAddMember { name: name.clone() };
+    if intents.intents.iter().any(|queued| queued == &add) {
+        return false;
+    }
+    let enable = NativePlayerUiIntent::GroupSwitch { allow_group: true };
+    let needs_enable =
+        !social.group.allow_invites && !intents.intents.iter().any(|queued| queued == &enable);
+    let required = usize::from(needs_enable) + 1;
+    if intents.intents.len().saturating_add(required) > MAX_QUEUED
+        || !social
+            .begin_pending(crate::social::SocialPendingOperation::GroupAdd { name: name.clone() })
+    {
+        return false;
+    }
+    if needs_enable {
+        intents.intents.push_back(enable);
+    }
+    intents.intents.push_back(add);
+    true
+}
+
 #[derive(Debug, Clone, Resource, PartialEq)]
 pub struct NativePlayerUiState {
     /// The single authoritative core UI state used by the native adapter.
@@ -184,8 +288,28 @@ pub struct NativePlayerUiState {
     pub skill_page: usize,
     pub drop_confirmation: Option<InventoryDropConfirmation>,
     pub selected_group_member: Option<u8>,
+    /// Crystal's group window accepts a player name independently of the
+    /// current combat target.  This renderer-owned draft is bounded and is
+    /// never copied into the authoritative social model.
+    pub group_invite_draft: String,
+    pub group_invite_focused: bool,
     pub selected_guild_member: Option<u8>,
+    /// Same boundary for guild recruitment: local text until one typed
+    /// EditGuildMember request is accepted by the outbound queue.
+    pub guild_recruit_draft: String,
+    pub guild_recruit_focused: bool,
+    pub guild_gold_draft: String,
+    pub guild_gold_focused: bool,
+    pub guild_storage_page: usize,
+    pub selected_guild_rank: Option<u8>,
+    pub guild_rank_name_draft: String,
+    pub guild_rank_name_focused: bool,
     pub guild_left_page: GuildLeftPage,
+    /// Renderer-owned Guild Notice editor. The authoritative notice remains
+    /// in `SocialModel`; this draft is never copied there optimistically.
+    pub guild_notice_editing: bool,
+    pub guild_notice_draft: String,
+    pub guild_notice_submission: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -267,8 +391,21 @@ impl Default for NativePlayerUiState {
             skill_page: 0,
             drop_confirmation: None,
             selected_group_member: None,
+            group_invite_draft: String::new(),
+            group_invite_focused: false,
             selected_guild_member: None,
+            guild_recruit_draft: String::new(),
+            guild_recruit_focused: false,
+            guild_gold_draft: String::new(),
+            guild_gold_focused: false,
+            guild_storage_page: 0,
+            selected_guild_rank: None,
+            guild_rank_name_draft: String::new(),
+            guild_rank_name_focused: false,
             guild_left_page: GuildLeftPage::Notice,
+            guild_notice_editing: false,
+            guild_notice_draft: String::new(),
+            guild_notice_submission: None,
         }
     }
 }
@@ -446,7 +583,17 @@ impl NativePlayerUiState {
         self.game_shop_page = 0;
         self.split_count = 1;
         self.selected_group_member = None;
+        self.group_invite_draft.clear();
+        self.group_invite_focused = false;
         self.selected_guild_member = None;
+        self.guild_recruit_draft.clear();
+        self.guild_recruit_focused = false;
+        self.guild_gold_draft.clear();
+        self.guild_gold_focused = false;
+        self.guild_storage_page = 0;
+        self.selected_guild_rank = None;
+        self.guild_rank_name_draft.clear();
+        self.guild_rank_name_focused = false;
         self.guild_left_page = GuildLeftPage::Notice;
     }
     pub fn reset_session(&mut self) {
@@ -838,6 +985,15 @@ pub enum NativePlayerUiIntent {
     GuildInvite {
         accept_invite: bool,
     },
+    GuildStorageGoldChange {
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItemChange {
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     TradeRequest,
     TradeReply {
         accept_invite: bool,
@@ -960,6 +1116,8 @@ impl NativePlayerUiIntent {
             | Self::GuildEditMember { .. }
             | Self::GuildEditNotice { .. }
             | Self::GuildInvite { .. }
+            | Self::GuildStorageGoldChange { .. }
+            | Self::GuildStorageItemChange { .. }
             | Self::TradeRequest
             | Self::TradeReply { .. }
             | Self::TradeGold { .. }
@@ -1030,19 +1188,56 @@ impl NativePlayerUiIntentQueue {
             }
             NativePlayerUiIntent::GroupInvite {
                 accept_invite: true,
-            } => Some(crate::social::SocialPendingOperation::GroupInviteAccept),
+            } => {
+                let Some(inviter) = social.group.pending_invite_from.clone() else {
+                    return false;
+                };
+                Some(crate::social::SocialPendingOperation::GroupInviteAccept {
+                    inviter,
+                    invite_epoch: social.group.pending_invite_epoch,
+                })
+            }
             NativePlayerUiIntent::GuildRequestInfo { .. } => {
                 Some(crate::social::SocialPendingOperation::GuildInfo)
             }
             NativePlayerUiIntent::GuildEditMember { name, .. } => {
                 Some(crate::social::SocialPendingOperation::GuildMember { name: name.clone() })
             }
-            NativePlayerUiIntent::GuildEditNotice { .. } => {
-                Some(crate::social::SocialPendingOperation::GuildNotice)
+            NativePlayerUiIntent::GuildEditNotice { notice } => {
+                Some(crate::social::SocialPendingOperation::GuildNotice {
+                    notice: notice.clone(),
+                })
             }
             NativePlayerUiIntent::GuildInvite {
                 accept_invite: true,
-            } => Some(crate::social::SocialPendingOperation::GuildInviteAccept),
+            } => {
+                let Some(inviter) = social.guild.pending_invite_from.clone() else {
+                    return false;
+                };
+                Some(crate::social::SocialPendingOperation::GuildInviteAccept {
+                    inviter,
+                    invite_epoch: social.guild.pending_invite_epoch,
+                })
+            }
+            NativePlayerUiIntent::GuildStorageGoldChange {
+                change_type,
+                amount,
+            } => Some(crate::social::SocialPendingOperation::GuildStorageGold {
+                change_type: *change_type,
+                amount: *amount,
+            }),
+            NativePlayerUiIntent::GuildStorageItemChange {
+                change_type,
+                from,
+                to,
+            } if *change_type <= 2 => {
+                Some(crate::social::SocialPendingOperation::GuildStorageItem {
+                    change_type: *change_type,
+                    from: *from,
+                    to: *to,
+                })
+            }
+            NativePlayerUiIntent::GuildStorageItemChange { .. } => None,
             NativePlayerUiIntent::TradeRequest => {
                 Some(crate::social::SocialPendingOperation::TradeRequest)
             }
@@ -1283,16 +1478,33 @@ enum OverlayButton {
     GroupSwitch,
     GroupLeave,
     GroupAddSelected,
+    GroupInviteNameFocus,
+    GroupInviteNameSubmit,
     GroupRemoveSelected,
     SelectGroupMember(u8),
     GuildRequestInfo,
     SelectGuildLeftPage(GuildLeftPage),
     GuildInviteAccept,
     GuildInviteDecline,
+    GuildRecruitNameFocus,
+    GuildRecruitNameSubmit,
+    GuildBeginNoticeEdit,
     GuildPublishNotice,
+    GuildCancelNoticeEdit,
     SelectGuildMember(u8),
     GuildKickMember(u8),
     GuildKickSelected,
+    GuildAssignPreviousRank,
+    GuildAssignNextRank,
+    GuildGoldFocus,
+    GuildGoldDeposit,
+    GuildGoldWithdraw,
+    GuildStoragePreviousPage,
+    GuildStorageNextPage,
+    SelectGuildRank(u8),
+    GuildRankNameFocus,
+    GuildRankNameSave,
+    GuildRankTogglePermission(u8),
     TradeRequest,
     TradeAccept,
     TradeDecline,
@@ -2016,6 +2228,7 @@ pub(crate) fn process_overlay_keyboard(
     mut pending: ResMut<PendingOperations>,
     mut shell_intents: ResMut<NativeUiIntentQueue>,
     mut shell: ResMut<NativeShellModel>,
+    mut social: Option<ResMut<crate::social::SocialModel>>,
     keys: Res<ButtonInput<KeyCode>>,
     mut typed: MessageReader<KeyboardInput>,
     inventory: Res<InventoryModel>,
@@ -2043,6 +2256,169 @@ pub(crate) fn process_overlay_keyboard(
         skills: mut skills,
         skill_persistence: mut skill_persistence,
     } = big_map_controls;
+
+    if state.group_open() && state.group_invite_focused {
+        let Some(social) = social.as_deref_mut() else {
+            return;
+        };
+        if keys.just_pressed(KeyCode::Escape) {
+            state.group_invite_focused = false;
+            state.group_invite_draft.clear();
+            return;
+        }
+        if keys.just_pressed(KeyCode::Backspace) {
+            state.group_invite_draft.pop();
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            let name = state.group_invite_draft.trim().to_owned();
+            if valid_social_name(&name) && queue_group_invite_by_name(&mut intents, social, name) {
+                state.group_invite_focused = false;
+                state.group_invite_draft.clear();
+            }
+            return;
+        }
+        for event in typed.read() {
+            if event.state == ButtonState::Pressed {
+                if let Some(text) = &event.text {
+                    push_social_name_text(&mut state.group_invite_draft, text);
+                }
+            }
+        }
+        return;
+    }
+
+    if state.guild_open() && state.guild_recruit_focused {
+        let Some(social) = social.as_deref_mut() else {
+            return;
+        };
+        if keys.just_pressed(KeyCode::Escape) {
+            state.guild_recruit_focused = false;
+            state.guild_recruit_draft.clear();
+            return;
+        }
+        if keys.just_pressed(KeyCode::Backspace) {
+            state.guild_recruit_draft.pop();
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            let name = state.guild_recruit_draft.trim().to_owned();
+            if valid_social_name(&name)
+                && social_has_permission(&social.guild, "recruit")
+                && intents.push_social_pending(
+                    social,
+                    NativePlayerUiIntent::GuildEditMember {
+                        change_type: 0,
+                        rank_index: 0,
+                        name,
+                        rank_name: String::new(),
+                    },
+                )
+            {
+                state.guild_recruit_focused = false;
+                state.guild_recruit_draft.clear();
+            }
+            return;
+        }
+        for event in typed.read() {
+            if event.state == ButtonState::Pressed {
+                if let Some(text) = &event.text {
+                    push_social_name_text(&mut state.guild_recruit_draft, text);
+                }
+            }
+        }
+        return;
+    }
+
+    if state.guild_open()
+        && state.guild_left_page == GuildLeftPage::Storage
+        && state.guild_gold_focused
+    {
+        if keys.just_pressed(KeyCode::Escape) {
+            state.guild_gold_focused = false;
+            state.guild_gold_draft.clear();
+            return;
+        }
+        if keys.just_pressed(KeyCode::Backspace) {
+            state.guild_gold_draft.pop();
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            state.guild_gold_focused = false;
+            return;
+        }
+        for event in typed.read() {
+            if event.state != ButtonState::Pressed {
+                continue;
+            }
+            if let Some(text) = &event.text {
+                for ch in text.chars().filter(char::is_ascii_digit) {
+                    if state.guild_gold_draft.len() < 10 {
+                        state.guild_gold_draft.push(ch);
+                    }
+                }
+            }
+        }
+        return;
+    }
+
+    if state.guild_open()
+        && state.guild_left_page == GuildLeftPage::Ranks
+        && state.guild_rank_name_focused
+    {
+        if keys.just_pressed(KeyCode::Escape) {
+            state.guild_rank_name_focused = false;
+            state.guild_rank_name_draft.clear();
+            return;
+        }
+        if keys.just_pressed(KeyCode::Backspace) {
+            state.guild_rank_name_draft.pop();
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            state.guild_rank_name_focused = false;
+            return;
+        }
+        for event in typed.read() {
+            if event.state == ButtonState::Pressed {
+                if let Some(text) = &event.text {
+                    for ch in text.chars().filter(|ch| !ch.is_control()) {
+                        if state.guild_rank_name_draft.chars().count() < 20 {
+                            state.guild_rank_name_draft.push(ch);
+                        }
+                    }
+                }
+            }
+        }
+        return;
+    }
+
+    if state.guild_open()
+        && state.guild_left_page == GuildLeftPage::Notice
+        && state.guild_notice_editing
+    {
+        if state.guild_notice_submission.is_some() {
+            // A submitted draft stays immutable until an authoritative result
+            // resolves the matching social pending operation.
+            return;
+        }
+        if keys.just_pressed(KeyCode::Escape) {
+            state.guild_notice_editing = false;
+            state.guild_notice_draft.clear();
+            return;
+        }
+        if keys.just_pressed(KeyCode::Backspace) {
+            state.guild_notice_draft.pop();
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            push_guild_notice_text(&mut state.guild_notice_draft, "\n");
+        }
+        for event in typed.read() {
+            if event.state != ButtonState::Pressed {
+                continue;
+            }
+            if let Some(text) = &event.text {
+                push_guild_notice_text(&mut state.guild_notice_draft, text);
+            }
+        }
+        return;
+    }
 
     if state.core.mail_compose_open() {
         if keys.just_pressed(KeyCode::Escape) {
@@ -2420,6 +2796,42 @@ fn process_overlay_buttons(
     let mut fallback_effects = UiEffectQueue::default();
     let mut effects = effects.as_deref_mut().unwrap_or(&mut fallback_effects);
     let mut game_shop = game_shop;
+    if let Some(expected) = state.guild_notice_submission.clone() {
+        let still_pending = social.pending.iter().any(|operation| {
+            matches!(
+                operation,
+                crate::social::SocialPendingOperation::GuildNotice { notice }
+                    if notice == &expected
+            )
+        });
+        if !still_pending {
+            let explicit_result = social.last_event.as_ref().and_then(|event| {
+                matches!(
+                    event.packet.as_str(),
+                    "GuildNoticeChange" | "GuildNoticeResult"
+                )
+                .then_some(event.success)
+                .flatten()
+            });
+            let succeeded = explicit_result == Some(true) || social.guild.notice == expected;
+            state.guild_notice_submission = None;
+            if succeeded {
+                state.guild_notice_editing = false;
+                state.guild_notice_draft.clear();
+                // The edit receipt does not contain the replacement body.
+                // Request the authoritative page rather than copying the
+                // submitted draft into SocialModel.
+                let _ = intents.push_social_pending(
+                    &mut social,
+                    NativePlayerUiIntent::GuildRequestInfo { info_type: 0 },
+                );
+            } else {
+                // An explicit failure keeps the exact draft editable so the
+                // player can correct it and retry.
+                state.guild_notice_editing = true;
+            }
+        }
+    }
     let (gold, credit, player_class) = ui
         .as_deref()
         .map(|model| {
@@ -2471,6 +2883,7 @@ fn process_overlay_buttons(
                 state.shop_quantity = 1;
                 state.shop_repair_container = 0;
                 state.shop_repair_slot = None;
+                let _ = shop.apply_service_signal(NpcShopServiceSignal::default());
             }
             OverlayButton::CloseGameShop => {
                 if state.shop_open() {
@@ -2576,6 +2989,19 @@ fn process_overlay_buttons(
                 if state.group_open() || state.guild_open() || state.trade_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
+                if state.guild_notice_submission.is_none() {
+                    state.guild_notice_editing = false;
+                    state.guild_notice_draft.clear();
+                }
+                state.group_invite_focused = false;
+                state.group_invite_draft.clear();
+                state.guild_recruit_focused = false;
+                state.guild_recruit_draft.clear();
+                state.guild_gold_focused = false;
+                state.guild_gold_draft.clear();
+                state.selected_guild_rank = None;
+                state.guild_rank_name_focused = false;
+                state.guild_rank_name_draft.clear();
             }
             OverlayButton::GroupInviteAccept => {
                 intents.push_social_pending(
@@ -2617,12 +3043,19 @@ fn process_overlay_buttons(
                 if name.is_empty() || name.chars().count() > 32 {
                     continue;
                 }
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::GroupAddMember {
-                        name: name.to_owned(),
-                    },
-                );
+                queue_group_invite_by_name(&mut intents, &mut social, name.to_owned());
+            }
+            OverlayButton::GroupInviteNameFocus => {
+                state.group_invite_focused = true;
+            }
+            OverlayButton::GroupInviteNameSubmit => {
+                let name = state.group_invite_draft.trim().to_owned();
+                if valid_social_name(&name)
+                    && queue_group_invite_by_name(&mut intents, &mut social, name)
+                {
+                    state.group_invite_focused = false;
+                    state.group_invite_draft.clear();
+                }
             }
             OverlayButton::SelectGroupMember(index) => {
                 state.selected_group_member = Some(index);
@@ -2652,12 +3085,32 @@ fn process_overlay_buttons(
             OverlayButton::SelectGuildLeftPage(page) => {
                 state.guild_left_page = page;
                 state.selected_guild_member = None;
-                if matches!(page, GuildLeftPage::Notice | GuildLeftPage::Members) {
+                state.guild_recruit_focused = false;
+                state.guild_gold_focused = false;
+                if page != GuildLeftPage::Ranks {
+                    state.selected_guild_rank = None;
+                    state.guild_rank_name_draft.clear();
+                    state.guild_rank_name_focused = false;
+                }
+                if page != GuildLeftPage::Notice && state.guild_notice_submission.is_none() {
+                    state.guild_notice_editing = false;
+                    state.guild_notice_draft.clear();
+                }
+                if matches!(
+                    page,
+                    GuildLeftPage::Notice | GuildLeftPage::Members | GuildLeftPage::Ranks
+                ) {
                     let info_type = if page == GuildLeftPage::Notice { 0 } else { 1 };
                     intents.push_social_pending(
                         &mut social,
                         NativePlayerUiIntent::GuildRequestInfo { info_type },
                     );
+                } else if page == GuildLeftPage::Storage {
+                    intents.push_transient_unique(NativePlayerUiIntent::GuildStorageItemChange {
+                        change_type: 3,
+                        from: 0,
+                        to: 0,
+                    });
                 }
             }
             OverlayButton::GuildInviteAccept => {
@@ -2673,13 +3126,61 @@ fn process_overlay_buttons(
                     accept_invite: false,
                 });
             }
-            OverlayButton::GuildPublishNotice => {
-                if !social.guild.notice.is_empty() {
-                    let notice = social.guild.notice.clone();
-                    intents.push_social_pending(
+            OverlayButton::GuildRecruitNameFocus => {
+                if social_has_permission(&social.guild, "recruit") {
+                    state.guild_recruit_focused = true;
+                }
+            }
+            OverlayButton::GuildRecruitNameSubmit => {
+                let name = state.guild_recruit_draft.trim().to_owned();
+                if valid_social_name(&name)
+                    && social_has_permission(&social.guild, "recruit")
+                    && intents.push_social_pending(
                         &mut social,
-                        NativePlayerUiIntent::GuildEditNotice { notice },
-                    );
+                        NativePlayerUiIntent::GuildEditMember {
+                            change_type: 0,
+                            rank_index: 0,
+                            name,
+                            rank_name: String::new(),
+                        },
+                    )
+                {
+                    state.guild_recruit_focused = false;
+                    state.guild_recruit_draft.clear();
+                }
+            }
+            OverlayButton::GuildBeginNoticeEdit => {
+                let can_edit =
+                    social.guild.name.is_some() && social_has_permission(&social.guild, "notice");
+                if can_edit && state.guild_notice_submission.is_none() {
+                    state.guild_notice_draft = social.guild.notice.join("\n");
+                    state.guild_notice_editing = true;
+                }
+            }
+            OverlayButton::GuildPublishNotice => {
+                let can_edit =
+                    social.guild.name.is_some() && social_has_permission(&social.guild, "notice");
+                let Some(notice) = guild_notice_lines(&state.guild_notice_draft) else {
+                    continue;
+                };
+                if can_edit
+                    && state.guild_notice_editing
+                    && state.guild_notice_submission.is_none()
+                    && notice != social.guild.notice
+                    && intents.push_social_pending(
+                        &mut social,
+                        NativePlayerUiIntent::GuildEditNotice {
+                            notice: notice.clone(),
+                        },
+                    )
+                {
+                    state.guild_notice_submission = Some(notice);
+                }
+            }
+            OverlayButton::GuildCancelNoticeEdit => {
+                if state.guild_notice_submission.is_none() {
+                    state.guild_notice_editing = false;
+                    state.guild_notice_draft.clear();
                 }
             }
             OverlayButton::SelectGuildMember(index) => {
@@ -2689,13 +3190,7 @@ fn process_overlay_buttons(
                 let Some(member) = social.guild.members.get(usize::from(index)) else {
                     continue;
                 };
-                if member.name.trim().is_empty()
-                    || !social
-                        .guild
-                        .permissions
-                        .iter()
-                        .any(|permission| permission.eq_ignore_ascii_case("kick"))
-                {
+                if member.name.trim().is_empty() || !social_has_permission(&social.guild, "kick") {
                     continue;
                 }
                 state.selected_guild_member = Some(index);
@@ -2718,13 +3213,7 @@ fn process_overlay_buttons(
                 let Some(member) = social.guild.members.get(usize::from(index)) else {
                     continue;
                 };
-                if member.name.trim().is_empty()
-                    || !social
-                        .guild
-                        .permissions
-                        .iter()
-                        .any(|permission| permission.eq_ignore_ascii_case("kick"))
-                {
+                if member.name.trim().is_empty() || !social_has_permission(&social.guild, "kick") {
                     continue;
                 }
                 let name = member.name.clone();
@@ -2736,6 +3225,158 @@ fn process_overlay_buttons(
                         rank_index,
                         name,
                         rank_name: String::new(),
+                    },
+                );
+            }
+            OverlayButton::GuildAssignPreviousRank | OverlayButton::GuildAssignNextRank => {
+                let Some(index) = state.selected_guild_member else {
+                    continue;
+                };
+                let Some(member) = social.guild.members.get(usize::from(index)) else {
+                    continue;
+                };
+                if !social_has_permission(&social.guild, "changeRank") {
+                    continue;
+                }
+                let mut ranks = social
+                    .guild
+                    .ranks
+                    .iter()
+                    .filter_map(|rank| u8::try_from(rank.index).ok())
+                    .collect::<Vec<_>>();
+                ranks.sort_unstable();
+                ranks.dedup();
+                if ranks.is_empty() {
+                    continue;
+                }
+                let current = member.rank_index.unwrap_or(ranks[0]);
+                let current_position = ranks.iter().position(|rank| *rank == current).unwrap_or(0);
+                let next_position = if *button == OverlayButton::GuildAssignPreviousRank {
+                    current_position.checked_sub(1).unwrap_or(ranks.len() - 1)
+                } else {
+                    (current_position + 1) % ranks.len()
+                };
+                let name = member.name.clone();
+                intents.push_social_pending(
+                    &mut social,
+                    NativePlayerUiIntent::GuildEditMember {
+                        change_type: 4,
+                        rank_index: ranks[next_position],
+                        name,
+                        rank_name: String::new(),
+                    },
+                );
+            }
+            OverlayButton::GuildGoldFocus => {
+                state.guild_gold_focused = true;
+            }
+            OverlayButton::GuildGoldDeposit | OverlayButton::GuildGoldWithdraw => {
+                let Ok(amount) = state.guild_gold_draft.parse::<u32>() else {
+                    continue;
+                };
+                let change_type = if *button == OverlayButton::GuildGoldDeposit {
+                    0
+                } else {
+                    1
+                };
+                let permission = if change_type == 0 {
+                    "storeItem"
+                } else {
+                    "retrieveItem"
+                };
+                if amount > 0
+                    && social_has_permission(&social.guild, permission)
+                    && intents.push_social_pending(
+                        &mut social,
+                        NativePlayerUiIntent::GuildStorageGoldChange {
+                            change_type,
+                            amount,
+                        },
+                    )
+                {
+                    state.guild_gold_focused = false;
+                    state.guild_gold_draft.clear();
+                }
+            }
+            OverlayButton::GuildStoragePreviousPage => {
+                state.guild_storage_page = state.guild_storage_page.saturating_sub(1);
+            }
+            OverlayButton::GuildStorageNextPage => {
+                let page_count = crate::social::MAX_GUILD_STORAGE_ITEMS.div_ceil(28);
+                state.guild_storage_page =
+                    (state.guild_storage_page + 1).min(page_count.saturating_sub(1));
+            }
+            OverlayButton::SelectGuildRank(rank_index) => {
+                let Some(rank) = social
+                    .guild
+                    .ranks
+                    .iter()
+                    .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
+                else {
+                    continue;
+                };
+                state.selected_guild_rank = Some(rank_index);
+                state.guild_rank_name_draft = rank.name.clone();
+                state.guild_rank_name_focused = false;
+            }
+            OverlayButton::GuildRankNameFocus => {
+                if state.selected_guild_rank.is_some()
+                    && social_has_permission(&social.guild, "changeRank")
+                {
+                    state.guild_rank_name_focused = true;
+                }
+            }
+            OverlayButton::GuildRankNameSave => {
+                let Some(rank_index) = state.selected_guild_rank else {
+                    continue;
+                };
+                let rank_name = state.guild_rank_name_draft.trim().to_owned();
+                let changed = social
+                    .guild
+                    .ranks
+                    .iter()
+                    .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
+                    .is_some_and(|rank| rank.name != rank_name);
+                if changed
+                    && !rank_name.is_empty()
+                    && rank_name.chars().count() <= 20
+                    && social_has_permission(&social.guild, "changeRank")
+                    && intents.push_social_pending(
+                        &mut social,
+                        NativePlayerUiIntent::GuildEditMember {
+                            change_type: 2,
+                            rank_index,
+                            name: String::new(),
+                            rank_name,
+                        },
+                    )
+                {
+                    state.guild_rank_name_focused = false;
+                }
+            }
+            OverlayButton::GuildRankTogglePermission(option) => {
+                let Some(rank_index) = state.selected_guild_rank else {
+                    continue;
+                };
+                let Some(rank) = social
+                    .guild
+                    .ranks
+                    .iter()
+                    .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
+                else {
+                    continue;
+                };
+                if option > 7 || !social_has_permission(&social.guild, "changeRank") {
+                    continue;
+                }
+                let enabled = rank.options & (1_u8 << option) != 0;
+                intents.push_social_pending(
+                    &mut social,
+                    NativePlayerUiIntent::GuildEditMember {
+                        change_type: 5,
+                        rank_index,
+                        name: (!enabled).to_string(),
+                        rank_name: option.to_string(),
                     },
                 );
             }
@@ -3321,12 +3962,14 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::SelectShopGood(id) => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open() && shop.allows_buy() {
                     shop.selected_id = Some(id);
                 }
             }
             OverlayButton::ShopBuy => {
-                if state.npc_shop_open() && shop_buy_enabled(&shop, &inventory, state.shop_quantity)
+                if state.npc_shop_open()
+                    && shop.allows_buy()
+                    && shop_buy_enabled(&shop, &inventory, state.shop_quantity)
                 {
                     let id = shop.selected_id.unwrap();
                     intents.push_pending_intent(
@@ -3339,7 +3982,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopSell => {
-                if !state.npc_shop_open() {
+                if !state.npc_shop_open() || !shop.allows_sell() {
                     continue;
                 }
                 if let Some(slot) = shop.selected_bag_slot_for_sell {
@@ -3361,7 +4004,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopRepair => {
-                if !state.npc_shop_open() {
+                if !state.npc_shop_open() || !shop.allows_repair() {
                     continue;
                 }
                 if let Some(item) = selected_repair_item(&state, &inventory) {
@@ -3376,7 +4019,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopSRepair => {
-                if !state.npc_shop_open() {
+                if !state.npc_shop_open() || !shop.allows_special_repair() {
                     continue;
                 }
                 if let Some(item) = selected_repair_item(&state, &inventory) {
@@ -3391,23 +4034,33 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopQuantityInc => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open()
+                    && matches!(
+                        shop.service_mode,
+                        NpcShopServiceMode::Buy | NpcShopServiceMode::Sell
+                    )
+                {
                     state.shop_quantity_inc();
                 }
             }
             OverlayButton::ShopQuantityDec => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open()
+                    && matches!(
+                        shop.service_mode,
+                        NpcShopServiceMode::Buy | NpcShopServiceMode::Sell
+                    )
+                {
                     state.shop_quantity_dec();
                 }
             }
             OverlayButton::ShopPageUp => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open() && shop.allows_buy() {
                     shop_ui.start_index = shop_ui.start_index.saturating_sub(1);
                     shop.selected_id = None;
                 }
             }
             OverlayButton::ShopPageDown => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open() && shop.allows_buy() {
                     shop_ui.start_index =
                         (shop_ui.start_index + 1).min(shop.goods.len().saturating_sub(8));
                     shop.selected_id = None;
@@ -3417,19 +4070,40 @@ fn process_overlay_buttons(
                 if !state.npc_shop_open() {
                     continue;
                 }
-                // Confirm is same as Buy when buy enabled, else Sell etc based on mode
-                if state.shop_repair_mode {
+                if shop.allows_repair() || shop.allows_special_repair() {
                     if let Some(item) = selected_repair_item(&state, &inventory) {
                         if let Some(uid) = item_unique_id(item) {
                             if repair_selection_enabled(&state, &inventory) {
+                                let intent = if shop.allows_special_repair() {
+                                    NativePlayerUiIntent::SRepairItem { unique_id: uid }
+                                } else {
+                                    NativePlayerUiIntent::RepairItem { unique_id: uid }
+                                };
+                                intents.push_pending_intent(&mut pending, intent);
+                            }
+                        }
+                    }
+                } else if shop.allows_sell() {
+                    if let Some(slot) = shop.selected_bag_slot_for_sell {
+                        if let Some(item) = inventory
+                            .items
+                            .iter()
+                            .find(|item| item.container == 0 && item.slot == slot)
+                        {
+                            if let Some(unique_id) = item_unique_id(item) {
                                 intents.push_pending_intent(
                                     &mut pending,
-                                    NativePlayerUiIntent::RepairItem { unique_id: uid },
+                                    NativePlayerUiIntent::SellItem {
+                                        unique_id,
+                                        count: shop_quantity_clamped(state.shop_quantity),
+                                    },
                                 );
                             }
                         }
                     }
-                } else if shop_buy_enabled(&shop, &inventory, state.shop_quantity) {
+                } else if shop.allows_buy()
+                    && shop_buy_enabled(&shop, &inventory, state.shop_quantity)
+                {
                     let id = shop.selected_id.unwrap();
                     intents.push_pending_intent(
                         &mut pending,
@@ -3450,21 +4124,22 @@ fn process_overlay_buttons(
                 shop.selected_bag_slot_for_repair = None;
                 state.shop_repair_container = 0;
                 state.shop_repair_slot = None;
+                let _ = shop.apply_service_signal(NpcShopServiceSignal::default());
             }
             OverlayButton::SelectBagForSell(slot) => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open() && shop.allows_sell() {
                     shop.selected_bag_slot_for_sell = Some(slot);
                 }
             }
             OverlayButton::SelectBagForRepair(slot) => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair()) {
                     shop.selected_bag_slot_for_repair = Some(slot);
                     state.shop_repair_container = 0;
                     state.shop_repair_slot = Some(slot);
                 }
             }
             OverlayButton::SelectEquipForRepair(slot) => {
-                if state.npc_shop_open() {
+                if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair()) {
                     state.shop_repair_container = 2;
                     state.shop_repair_slot = Some(slot);
                 }
@@ -4948,6 +5623,29 @@ fn render_group_panel(
             OverlayButton::GroupInviteDecline,
             true,
         );
+    } else {
+        let draft = if state.group_invite_focused {
+            format!("Name: {}|", state.group_invite_draft)
+        } else if state.group_invite_draft.is_empty() {
+            "Name: <invite player>".to_owned()
+        } else {
+            format!("Name: {}", state.group_invite_draft)
+        };
+        overlay_clickable_text_at(
+            parent,
+            &draft,
+            CrystalRect::new(rect.left + 16.0, rect.top + 191.0, 144.0, 18.0),
+            OverlayButton::GroupInviteNameFocus,
+            state.group_invite_focused,
+            true,
+        );
+        overlay_absolute_button(
+            parent,
+            "Invite",
+            CrystalRect::new(rect.left + 162.0, rect.top + 191.0, 48.0, 18.0),
+            OverlayButton::GroupInviteNameSubmit,
+            valid_social_name(state.group_invite_draft.trim()),
+        );
     }
 
     let switch_index = if group.allow_invites { 117 } else { 114 };
@@ -5059,6 +5757,20 @@ fn render_guild_panel(
         state.guild_left_page == GuildLeftPage::Members,
         OverlayButton::SelectGuildLeftPage(GuildLeftPage::Members),
     );
+    overlay_absolute_button(
+        parent,
+        "Storage",
+        CrystalRect::new(rect.left + 162.0, rect.top + 38.0, 68.0, 24.0),
+        OverlayButton::SelectGuildLeftPage(GuildLeftPage::Storage),
+        true,
+    );
+    overlay_absolute_button(
+        parent,
+        "Ranks",
+        CrystalRect::new(rect.left + 233.0, rect.top + 38.0, 62.0, 24.0),
+        OverlayButton::SelectGuildLeftPage(GuildLeftPage::Ranks),
+        true,
+    );
     spawn_static_overlay_sprite(
         parent,
         asset_server,
@@ -5067,8 +5779,10 @@ fn render_guild_panel(
     );
 
     match state.guild_left_page {
-        GuildLeftPage::Notice => render_guild_notice(parent, asset_server, guild, rect),
+        GuildLeftPage::Notice => render_guild_notice(parent, asset_server, guild, state, rect),
         GuildLeftPage::Members => render_guild_members(parent, asset_server, guild, state, rect),
+        GuildLeftPage::Storage => render_guild_storage(parent, guild, state, rect),
+        GuildLeftPage::Ranks => render_guild_ranks(parent, guild, state, rect),
     }
     render_guild_status(parent, asset_server, guild, rect);
 }
@@ -5100,10 +5814,17 @@ fn render_guild_notice(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
     guild: &crate::social::GuildModel,
+    state: &NativePlayerUiState,
     rect: CrystalRect,
 ) {
     let notice = if guild.name.is_none() {
         "You are not in a guild.".to_owned()
+    } else if state.guild_notice_editing {
+        if state.guild_notice_draft.is_empty() {
+            "|".to_owned()
+        } else {
+            format!("{}|", state.guild_notice_draft)
+        }
     } else if guild.notice.is_empty() {
         String::new()
     } else {
@@ -5116,13 +5837,18 @@ fn render_guild_notice(
         9.0,
         TEXT,
     );
-    if !guild.notice.is_empty()
-        && guild
-            .permissions
-            .iter()
-            .any(|permission| permission.eq_ignore_ascii_case("notice"))
-    {
-        spawn_overlay_crystal_button(
+    let can_edit = guild.name.is_some() && social_has_permission(guild, "notice");
+    if can_edit {
+        let action = if state.guild_notice_editing {
+            OverlayButton::GuildPublishNotice
+        } else {
+            OverlayButton::GuildBeginNoticeEdit
+        };
+        let publish_enabled = !state.guild_notice_editing
+            || (state.guild_notice_submission.is_none()
+                && guild_notice_lines(&state.guild_notice_draft)
+                    .is_some_and(|notice| notice != guild.notice));
+        spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
             "Prguse",
@@ -5130,7 +5856,26 @@ fn render_guild_notice(
             561,
             562,
             CrystalRect::new(rect.left + 20.0, rect.top + 402.0, 28.0, 25.0),
-            OverlayButton::GuildPublishNotice,
+            action,
+            publish_enabled,
+        );
+        if state.guild_notice_editing {
+            overlay_absolute_button(
+                parent,
+                "Cancel",
+                CrystalRect::new(rect.left + 54.0, rect.top + 405.0, 58.0, 20.0),
+                OverlayButton::GuildCancelNoticeEdit,
+                state.guild_notice_submission.is_none(),
+            );
+        }
+    }
+    if state.guild_notice_submission.is_some() {
+        overlay_text_at(
+            parent,
+            "Waiting for authoritative notice receipt...",
+            CrystalRect::new(rect.left + 122.0, rect.top + 407.0, 260.0, 16.0),
+            9.0,
+            GOLD,
         );
     }
     if let Some(inviter) = guild.pending_invite_from.as_deref() {
@@ -5171,10 +5916,7 @@ fn render_guild_members(
         "original-ui/Prguse/1852.png".to_owned(),
         CrystalRect::new(rect.left + 13.0, rect.top + 61.0, 324.0, 332.0),
     );
-    let can_kick = guild
-        .permissions
-        .iter()
-        .any(|permission| permission.eq_ignore_ascii_case("kick"));
+    let can_kick = social_has_permission(guild, "kick");
     for (index, member) in guild.members.iter().take(18).enumerate() {
         let top = rect.top + 90.0 + index as f32 * 15.0;
         overlay_clickable_text_at(
@@ -5217,6 +5959,244 @@ fn render_guild_members(
                 917,
                 CrystalRect::new(rect.left + 210.0, top, 16.0, 14.0),
                 OverlayButton::GuildKickMember(index as u8),
+            );
+        }
+    }
+
+    let can_recruit = social_has_permission(guild, "recruit");
+    if can_recruit {
+        let draft = if state.guild_recruit_focused {
+            format!("Recruit: {}|", state.guild_recruit_draft)
+        } else if state.guild_recruit_draft.is_empty() {
+            "Recruit: <player name>".to_owned()
+        } else {
+            format!("Recruit: {}", state.guild_recruit_draft)
+        };
+        overlay_clickable_text_at(
+            parent,
+            &draft,
+            CrystalRect::new(rect.left + 20.0, rect.top + 364.0, 220.0, 18.0),
+            OverlayButton::GuildRecruitNameFocus,
+            state.guild_recruit_focused,
+            true,
+        );
+        overlay_absolute_button(
+            parent,
+            "Add",
+            CrystalRect::new(rect.left + 244.0, rect.top + 364.0, 52.0, 18.0),
+            OverlayButton::GuildRecruitNameSubmit,
+            valid_social_name(state.guild_recruit_draft.trim()),
+        );
+    }
+
+    let can_change_rank = social_has_permission(guild, "changeRank")
+        && state.selected_guild_member.is_some()
+        && guild.ranks.len() > 1;
+    overlay_absolute_button(
+        parent,
+        "Rank -",
+        CrystalRect::new(rect.left + 20.0, rect.top + 386.0, 58.0, 18.0),
+        OverlayButton::GuildAssignPreviousRank,
+        can_change_rank,
+    );
+    overlay_absolute_button(
+        parent,
+        "Rank +",
+        CrystalRect::new(rect.left + 82.0, rect.top + 386.0, 58.0, 18.0),
+        OverlayButton::GuildAssignNextRank,
+        can_change_rank,
+    );
+}
+
+fn render_guild_storage(
+    parent: &mut ChildSpawnerCommands,
+    guild: &crate::social::GuildModel,
+    state: &NativePlayerUiState,
+    rect: CrystalRect,
+) {
+    const PAGE_SIZE: usize = 28;
+    let page_count = crate::social::MAX_GUILD_STORAGE_ITEMS.div_ceil(PAGE_SIZE);
+    let page = state.guild_storage_page.min(page_count.saturating_sub(1));
+    let start = page * PAGE_SIZE;
+    overlay_text_at(
+        parent,
+        &format!("Guild Gold: {}", guild.gold),
+        CrystalRect::new(rect.left + 20.0, rect.top + 70.0, 220.0, 18.0),
+        10.0,
+        GOLD,
+    );
+    let draft = if state.guild_gold_focused {
+        format!("Amount: {}|", state.guild_gold_draft)
+    } else if state.guild_gold_draft.is_empty() {
+        "Amount: 0".to_owned()
+    } else {
+        format!("Amount: {}", state.guild_gold_draft)
+    };
+    overlay_clickable_text_at(
+        parent,
+        &draft,
+        CrystalRect::new(rect.left + 20.0, rect.top + 91.0, 150.0, 18.0),
+        OverlayButton::GuildGoldFocus,
+        state.guild_gold_focused,
+        true,
+    );
+    let amount_valid = state
+        .guild_gold_draft
+        .parse::<u32>()
+        .is_ok_and(|amount| amount > 0);
+    overlay_absolute_button(
+        parent,
+        "Deposit",
+        CrystalRect::new(rect.left + 176.0, rect.top + 91.0, 62.0, 18.0),
+        OverlayButton::GuildGoldDeposit,
+        amount_valid && social_has_permission(guild, "storeItem"),
+    );
+    overlay_absolute_button(
+        parent,
+        "Withdraw",
+        CrystalRect::new(rect.left + 242.0, rect.top + 91.0, 68.0, 18.0),
+        OverlayButton::GuildGoldWithdraw,
+        amount_valid && social_has_permission(guild, "retrieveItem"),
+    );
+
+    for offset in 0..PAGE_SIZE {
+        let slot = start + offset;
+        let column = offset % 4;
+        let row = offset / 4;
+        let label = guild
+            .storage_items
+            .get(slot)
+            .and_then(Option::as_ref)
+            .map_or_else(
+                || format!("{slot}: -"),
+                |item| format!("{slot}: #{} x{}", item.item_index, item.count),
+            );
+        overlay_text_at(
+            parent,
+            &label,
+            CrystalRect::new(
+                rect.left + 20.0 + column as f32 * 75.0,
+                rect.top + 121.0 + row as f32 * 31.0,
+                72.0,
+                28.0,
+            ),
+            8.0,
+            TEXT,
+        );
+    }
+    overlay_absolute_button(
+        parent,
+        "Prev",
+        CrystalRect::new(rect.left + 20.0, rect.top + 352.0, 52.0, 18.0),
+        OverlayButton::GuildStoragePreviousPage,
+        page > 0,
+    );
+    overlay_text_at(
+        parent,
+        &format!("{}/{}", page + 1, page_count),
+        CrystalRect::new(rect.left + 80.0, rect.top + 352.0, 50.0, 18.0),
+        9.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        "Next",
+        CrystalRect::new(rect.left + 130.0, rect.top + 352.0, 52.0, 18.0),
+        OverlayButton::GuildStorageNextPage,
+        page + 1 < page_count,
+    );
+}
+
+fn render_guild_ranks(
+    parent: &mut ChildSpawnerCommands,
+    guild: &crate::social::GuildModel,
+    state: &NativePlayerUiState,
+    rect: CrystalRect,
+) {
+    for (row, rank) in guild.ranks.iter().take(12).enumerate() {
+        let permissions = [
+            (0x01, "Rank"),
+            (0x02, "Recruit"),
+            (0x04, "Kick"),
+            (0x08, "Store"),
+            (0x10, "Take"),
+            (0x20, "Ally"),
+            (0x40, "Notice"),
+            (0x80, "Buff"),
+        ]
+        .into_iter()
+        .filter_map(|(bit, label)| (rank.options & bit != 0).then_some(label))
+        .collect::<Vec<_>>()
+        .join("/");
+        let Ok(rank_index) = u8::try_from(rank.index) else {
+            continue;
+        };
+        overlay_clickable_text_at(
+            parent,
+            &format!("{}  {}  [{}]", rank.index, rank.name, permissions),
+            CrystalRect::new(
+                rect.left + 20.0,
+                rect.top + 75.0 + row as f32 * 19.0,
+                300.0,
+                18.0,
+            ),
+            OverlayButton::SelectGuildRank(rank_index),
+            state.selected_guild_rank == Some(rank_index),
+            true,
+        );
+    }
+
+    let can_change = social_has_permission(guild, "changeRank");
+    if let Some(rank_index) = state.selected_guild_rank {
+        let draft = if state.guild_rank_name_focused {
+            format!("Rank name: {}|", state.guild_rank_name_draft)
+        } else {
+            format!("Rank name: {}", state.guild_rank_name_draft)
+        };
+        overlay_clickable_text_at(
+            parent,
+            &draft,
+            CrystalRect::new(rect.left + 20.0, rect.top + 315.0, 205.0, 18.0),
+            OverlayButton::GuildRankNameFocus,
+            state.guild_rank_name_focused,
+            can_change,
+        );
+        let name_changed = guild
+            .ranks
+            .iter()
+            .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
+            .is_some_and(|rank| rank.name != state.guild_rank_name_draft.trim());
+        overlay_absolute_button(
+            parent,
+            "Save",
+            CrystalRect::new(rect.left + 232.0, rect.top + 315.0, 52.0, 18.0),
+            OverlayButton::GuildRankNameSave,
+            can_change && name_changed && !state.guild_rank_name_draft.trim().is_empty(),
+        );
+        let rank_options = guild
+            .ranks
+            .iter()
+            .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
+            .map(|rank| rank.options)
+            .unwrap_or(0);
+        for (option, label) in [
+            "Rank", "Recruit", "Kick", "Store", "Take", "Ally", "Notice", "Buff",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let enabled = rank_options & (1_u8 << option) != 0;
+            overlay_absolute_button(
+                parent,
+                &format!("{} {}", if enabled { "[x]" } else { "[ ]" }, label),
+                CrystalRect::new(
+                    rect.left + 20.0 + (option % 4) as f32 * 72.0,
+                    rect.top + 340.0 + (option / 4) as f32 * 22.0,
+                    68.0,
+                    18.0,
+                ),
+                OverlayButton::GuildRankTogglePermission(option as u8),
+                can_change,
             );
         }
     }
@@ -5273,6 +6253,41 @@ fn render_guild_status(
             ),
             CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 14.0),
             9.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            "Rank",
+            CrystalRect::new(rect.left + 362.0, rect.top + 185.0, 75.0, 14.0),
+            9.0,
+            Color::srgb(0.55, 0.55, 0.55),
+        );
+        overlay_text_at(
+            parent,
+            guild.rank_name.as_deref().unwrap_or("-"),
+            CrystalRect::new(rect.left + 437.0, rect.top + 185.0, 120.0, 14.0),
+            9.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            "Gold",
+            CrystalRect::new(rect.left + 362.0, rect.top + 211.0, 75.0, 14.0),
+            9.0,
+            Color::srgb(0.55, 0.55, 0.55),
+        );
+        overlay_text_at(
+            parent,
+            &guild.gold.to_string(),
+            CrystalRect::new(rect.left + 437.0, rect.top + 211.0, 120.0, 14.0),
+            9.0,
+            GOLD,
+        );
+        overlay_text_at(
+            parent,
+            &format!("Rights: {}", guild.permissions.join("/")),
+            CrystalRect::new(rect.left + 362.0, rect.top + 237.0, 195.0, 52.0),
+            8.0,
             TEXT,
         );
     }
@@ -6494,12 +7509,11 @@ fn render_shop(
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
 ) {
+    if shop.service_mode != NpcShopServiceMode::Buy {
+        render_npc_item_service(parent, asset_server, shop, inventory, state);
+        return;
+    }
     let buy_enabled = shop_buy_enabled(shop, inventory, state.shop_quantity);
-    let sell_enabled = shop
-        .selected_bag_slot_for_sell
-        .map(|s| shop_sell_enabled(inventory, Some(s)))
-        .unwrap_or(false);
-    let repair_enabled = repair_selection_enabled(state, inventory);
 
     if let Some(asset_server) = asset_server {
         // Crystal's NPCGoodsDialog frame is Prguse/1000.  The extracted
@@ -6660,96 +7674,156 @@ fn render_shop(
         OverlayButton::ShopQuantityInc,
         state.shop_quantity < SHOP_QUANTITY_MAX,
     );
+}
 
-    // Sell and repair are separate Crystal service modes.  Keep their real
-    // gateway operations reachable in a clearly auxiliary panel instead of
-    // overlaying fake controls on the confirmed NPCGoodsDialog art.
+fn render_npc_item_service(
+    parent: &mut ChildSpawnerCommands,
+    _asset_server: Option<&AssetServer>,
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
+) {
+    let title = match shop.service_mode {
+        NpcShopServiceMode::Closed => "NPC service unavailable",
+        NpcShopServiceMode::Sell => "Sell items",
+        NpcShopServiceMode::Repair => "Repair items",
+        NpcShopServiceMode::SpecialRepair => "Special repair",
+        NpcShopServiceMode::Buy => return,
+    };
+    let sell_mode = shop.allows_sell();
+    let repair_mode = shop.allows_repair() || shop.allows_special_repair();
+    let sell_enabled = sell_mode && shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell);
+    let repair_enabled = repair_mode && repair_selection_enabled(state, inventory);
+
     parent
         .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(250.0),
+                left: Val::Px(0.0),
                 top: Val::Px(0.0),
                 width: Val::Px(360.0),
-                height: Val::Px(330.0),
+                height: Val::Px(360.0),
                 display: Display::Flex,
                 flex_direction: FlexDirection::Column,
                 padding: UiRect::all(Val::Px(8.0)),
                 row_gap: Val::Px(3.0),
+                overflow: Overflow::clip(),
                 ..default()
             },
             BackgroundColor(PANEL_BG),
         ))
-        .with_children(|aux| {
-            body(aux, "Bag sell / repair");
-            for item in inventory.items_in(0).into_iter().take(8) {
-                let selected_for_sell = shop.selected_bag_slot_for_sell == Some(item.slot);
-                let selected_for_repair = shop.selected_bag_slot_for_repair == Some(item.slot);
-                aux.spawn(Node {
+        .with_children(|panel| {
+            panel
+                .spawn(Node {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(3.0),
+                    justify_content: JustifyContent::SpaceBetween,
                     ..default()
                 })
-                .with_children(|row| {
-                    overlay_button(
-                        row,
-                        &format!(
-                            "{}Sell {}",
-                            if selected_for_sell { "▶" } else { "" },
-                            short_name(&item.name, &item.key)
-                        ),
-                        OverlayButton::SelectBagForSell(item.slot),
-                        true,
-                    );
-                    overlay_button(
-                        row,
-                        &format!("{}Repair", if selected_for_repair { "▶" } else { "" }),
-                        OverlayButton::SelectBagForRepair(item.slot),
-                        true,
-                    );
+                .with_children(|header| {
+                    body(header, title);
+                    overlay_button(header, "Close", OverlayButton::ShopCancel, true);
                 });
+
+            if let Some(rate) = shop.repair_rate.filter(|_| repair_mode) {
+                body(panel, &format!("Repair rate x{rate:.2}"));
             }
-            aux.spawn(Node {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Row,
-                column_gap: Val::Px(4.0),
-                ..default()
-            })
-            .with_children(|row| {
-                overlay_button(row, "Sell", OverlayButton::ShopSell, sell_enabled);
-                overlay_button(row, "Repair", OverlayButton::ShopRepair, repair_enabled);
-                overlay_button(row, "S.Repair", OverlayButton::ShopSRepair, repair_enabled);
-            });
-            body(aux, "Equipment repair");
-            aux.spawn(Node {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Row,
-                flex_wrap: bevy::ui::FlexWrap::Wrap,
-                column_gap: Val::Px(2.0),
-                row_gap: Val::Px(2.0),
-                ..default()
-            })
-            .with_children(|grid| {
-                for slot in 0..14 {
-                    let item = inventory
-                        .items_in(2)
-                        .into_iter()
-                        .find(|item| item.slot == slot);
-                    let selected =
-                        state.shop_repair_container == 2 && state.shop_repair_slot == Some(slot);
-                    overlay_button(
-                        grid,
-                        &format!(
-                            "{}{}",
-                            if selected { "▶" } else { "" },
-                            equipment_slot_name(slot)
-                        ),
-                        OverlayButton::SelectEquipForRepair(slot),
-                        item.is_some(),
-                    );
-                }
-            });
+
+            for item in inventory.items_in(0).into_iter().take(10) {
+                let selected = if sell_mode {
+                    shop.selected_bag_slot_for_sell == Some(item.slot)
+                } else {
+                    state.shop_repair_container == 0 && state.shop_repair_slot == Some(item.slot)
+                };
+                overlay_button(
+                    panel,
+                    &format!(
+                        "{}{} x{}",
+                        if selected { "▶ " } else { "" },
+                        short_name(&item.name, &item.key),
+                        item.quantity
+                    ),
+                    if sell_mode {
+                        OverlayButton::SelectBagForSell(item.slot)
+                    } else {
+                        OverlayButton::SelectBagForRepair(item.slot)
+                    },
+                    sell_mode || repair_mode,
+                );
+            }
+
+            if repair_mode {
+                body(panel, "Equipment");
+                panel
+                    .spawn(Node {
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Row,
+                        flex_wrap: bevy::ui::FlexWrap::Wrap,
+                        column_gap: Val::Px(2.0),
+                        row_gap: Val::Px(2.0),
+                        ..default()
+                    })
+                    .with_children(|grid| {
+                        for slot in 0..14 {
+                            let item = inventory
+                                .items_in(2)
+                                .into_iter()
+                                .find(|item| item.slot == slot);
+                            let selected = state.shop_repair_container == 2
+                                && state.shop_repair_slot == Some(slot);
+                            overlay_button(
+                                grid,
+                                &format!(
+                                    "{}{}",
+                                    if selected { "▶" } else { "" },
+                                    equipment_slot_name(slot)
+                                ),
+                                OverlayButton::SelectEquipForRepair(slot),
+                                item.is_some(),
+                            );
+                        }
+                    });
+            }
+
+            panel
+                .spawn(Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    column_gap: Val::Px(4.0),
+                    ..default()
+                })
+                .with_children(|actions| {
+                    if sell_mode {
+                        overlay_button(
+                            actions,
+                            "−",
+                            OverlayButton::ShopQuantityDec,
+                            state.shop_quantity > SHOP_QUANTITY_MIN,
+                        );
+                        body(actions, &format!("x{}", state.shop_quantity));
+                        overlay_button(
+                            actions,
+                            "+",
+                            OverlayButton::ShopQuantityInc,
+                            state.shop_quantity < SHOP_QUANTITY_MAX,
+                        );
+                        overlay_button(actions, "Sell", OverlayButton::ShopSell, sell_enabled);
+                    } else if shop.allows_repair() {
+                        overlay_button(
+                            actions,
+                            "Repair",
+                            OverlayButton::ShopRepair,
+                            repair_enabled,
+                        );
+                    } else if shop.allows_special_repair() {
+                        overlay_button(
+                            actions,
+                            "Special repair",
+                            OverlayButton::ShopSRepair,
+                            repair_enabled,
+                        );
+                    }
+                });
         });
 }
 
@@ -7700,6 +8774,7 @@ mod tests {
     use crate::mail::MailMessage;
     use crate::shop::ShopGood;
     use bevy::asset::{AssetApp, AssetPlugin};
+    use bevy::input::keyboard::Key;
 
     #[test]
     fn compact_labels_use_supported_ascii_and_bag_cells_hide_durability() {
@@ -8078,6 +9153,203 @@ mod tests {
             .any(|intent| matches!(
                 intent,
                 NativePlayerUiIntent::GuildRequestInfo { info_type: 1 }
+            )));
+    }
+
+    #[test]
+    fn guild_notice_draft_is_bounded_by_lines_and_characters() {
+        let mut draft = String::new();
+        push_guild_notice_text(&mut draft, &"x".repeat(40));
+        assert_eq!(draft.chars().count(), GUILD_NOTICE_MAX_CHARS_PER_LINE);
+        for _ in 0..20 {
+            push_guild_notice_text(&mut draft, "\nnext");
+        }
+        assert_eq!(draft.split('\n').count(), crate::social::MAX_NOTICE_LINES);
+        assert!(guild_notice_lines(&draft).is_some());
+        assert!(guild_notice_lines(&format!(
+            "{}\nextra",
+            (0..crate::social::MAX_NOTICE_LINES)
+                .map(|_| "line")
+                .collect::<Vec<_>>()
+                .join("\n")
+        ))
+        .is_none());
+    }
+
+    #[test]
+    fn guild_notice_editor_consumes_real_keyboard_messages_before_chat() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<KeyboardInput>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, process_overlay_keyboard);
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Guild;
+            state.guild_left_page = GuildLeftPage::Notice;
+            state.guild_notice_editing = true;
+        }
+        app.world_mut().write_message(KeyboardInput {
+            key_code: KeyCode::KeyN,
+            logical_key: Key::Character("New notice".into()),
+            state: ButtonState::Pressed,
+            text: Some("New notice".into()),
+            repeat: false,
+            window: Entity::PLACEHOLDER,
+        });
+        app.update();
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert_eq!(state.guild_notice_draft, "New notice");
+        assert!(!state.chat_focused());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+    }
+
+    #[test]
+    fn guild_notice_edit_publish_failure_retry_and_receipt_stay_authoritative() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+        init_overlay_button_test_resources(&mut app);
+        app.add_systems(Update, process_overlay_buttons);
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Guild;
+            state.guild_left_page = GuildLeftPage::Notice;
+        }
+        {
+            let mut social = app.world_mut().resource_mut::<crate::social::SocialModel>();
+            social.guild.name = Some("TestGuild".into());
+            social.guild.permissions = vec!["notice".into()];
+            social.guild.notice = vec!["Old".into()];
+        }
+        fn press(app: &mut App, button: OverlayButton) {
+            let entity = app
+                .world_mut()
+                .spawn((Interaction::Pressed, button, Button))
+                .id();
+            app.update();
+            app.world_mut().despawn(entity);
+        }
+
+        press(&mut app, OverlayButton::GuildBeginNoticeEdit);
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            assert!(state.guild_notice_editing);
+            assert_eq!(state.guild_notice_draft, "Old");
+            state.guild_notice_draft = "New line\nSecond".into();
+        }
+        press(&mut app, OverlayButton::GuildPublishNotice);
+        assert_eq!(
+            app.world()
+                .resource::<crate::social::SocialModel>()
+                .guild
+                .notice,
+            vec!["Old"],
+            "submitting a draft must not mutate the authoritative notice"
+        );
+        assert!(matches!(
+            app.world()
+                .resource::<crate::social::SocialModel>()
+                .pending
+                .as_slice(),
+            [crate::social::SocialPendingOperation::GuildNotice { notice }]
+                if notice == &vec!["New line".to_owned(), "Second".to_owned()]
+        ));
+        let first = app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents();
+        assert!(matches!(
+            first.as_slice(),
+            [NativePlayerUiIntent::GuildEditNotice { notice }]
+                if notice == &vec!["New line".to_owned(), "Second".to_owned()]
+        ));
+
+        {
+            let current = app.world().resource::<crate::social::SocialModel>().clone();
+            let mut incoming = current.clone();
+            incoming.pending.clear();
+            assert!(
+                incoming.apply_packet("GuildNoticeResult", &serde_json::json!({"success":false}))
+            );
+            app.world_mut()
+                .resource_mut::<crate::social::SocialModel>()
+                .apply_authoritative(incoming);
+        }
+        app.update();
+        {
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.guild_notice_editing);
+            assert!(state.guild_notice_submission.is_none());
+            assert_eq!(state.guild_notice_draft, "New line\nSecond");
+        }
+
+        press(&mut app, OverlayButton::GuildPublishNotice);
+        let retry = app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents();
+        assert!(matches!(
+            retry.as_slice(),
+            [NativePlayerUiIntent::GuildEditNotice { .. }]
+        ));
+        {
+            let current = app.world().resource::<crate::social::SocialModel>().clone();
+            let mut incoming = current.clone();
+            incoming.pending.clear();
+            assert!(incoming.apply_packet(
+                "GuildNoticeChange",
+                &serde_json::json!({"update":-1,"notice":[]})
+            ));
+            app.world_mut()
+                .resource_mut::<crate::social::SocialModel>()
+                .apply_authoritative(incoming);
+        }
+        app.update();
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.guild_notice_editing);
+        assert!(state.guild_notice_submission.is_none());
+        assert_eq!(
+            app.world()
+                .resource::<crate::social::SocialModel>()
+                .guild
+                .notice,
+            vec!["Old"]
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .iter()
+            .any(|intent| matches!(
+                intent,
+                NativePlayerUiIntent::GuildRequestInfo { info_type: 0 }
             )));
     }
 
@@ -9307,6 +10579,10 @@ mod tests {
             let mut shop = app.world_mut().resource_mut::<ShopModel>();
             shop.goods.push(shop_good(100, "Potion", 100, 10));
             shop.goods.push(shop_good(101, "Sword", 500, 5));
+            assert!(shop.apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Buy,
+                repair_rate: None,
+            }));
         }
         {
             let mut storage = app.world_mut().resource_mut::<StorageModel>();
@@ -9349,6 +10625,21 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
             .drain_intents();
+        // A Buy service must not authorize Sell.
+        press(&mut app, OverlayButton::SelectBagForSell(0));
+        press(&mut app, OverlayButton::ShopSell);
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert!(app
+            .world_mut()
+            .resource_mut::<ShopModel>()
+            .apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Sell,
+                repair_rate: None,
+            }));
         // Select bag for sell
         press(&mut app, OverlayButton::SelectBagForSell(0));
         assert_eq!(
@@ -9381,6 +10672,13 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
             .drain_intents();
+        assert!(app
+            .world_mut()
+            .resource_mut::<ShopModel>()
+            .apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Repair,
+                repair_rate: Some(1.0),
+            }));
         // Repair does nothing without its own selection, then uses only that selection.
         press(&mut app, OverlayButton::ShopRepair);
         assert!(app
@@ -9396,11 +10694,32 @@ mod tests {
             .drain_intents()
             .iter()
             .any(|intent| matches!(intent, NativePlayerUiIntent::RepairItem { unique_id: 2 })));
+        assert!(app
+            .world_mut()
+            .resource_mut::<ShopModel>()
+            .apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::SpecialRepair,
+                repair_rate: Some(2.0),
+            }));
+        press(&mut app, OverlayButton::SelectBagForRepair(1));
+        press(&mut app, OverlayButton::ShopRepair);
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        press(&mut app, OverlayButton::ShopSRepair);
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .iter()
+            .any(|intent| matches!(intent, NativePlayerUiIntent::SRepairItem { unique_id: 2 })));
         assert_eq!(
             app.world()
                 .resource::<ShopModel>()
                 .selected_bag_slot_for_sell,
-            Some(0)
+            None
         );
         assert_eq!(
             app.world()
@@ -9418,6 +10737,13 @@ mod tests {
             state.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
             state.shop_quantity = 1;
         }
+        assert!(app
+            .world_mut()
+            .resource_mut::<ShopModel>()
+            .apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Sell,
+                repair_rate: None,
+            }));
         press(&mut app, OverlayButton::ShopQuantityInc);
         assert_eq!(
             app.world().resource::<NativePlayerUiState>().shop_quantity,
@@ -9831,5 +11157,120 @@ mod tests {
             modal_priority_for_state(&state, false, false),
             Some(OverlayModalPriority::NpcDialog)
         );
+    }
+
+    #[test]
+    fn group_invite_name_is_bounded_ordered_and_authoritative() {
+        let mut queue = NativePlayerUiIntentQueue::default();
+        let mut social = crate::social::SocialModel::default();
+
+        assert!(!valid_social_name(""));
+        assert!(!valid_social_name(" leading"));
+        assert!(!valid_social_name(&"x".repeat(33)));
+        assert!(valid_social_name("PlayerOne"));
+
+        assert!(queue_group_invite_by_name(
+            &mut queue,
+            &mut social,
+            "PlayerOne".to_owned()
+        ));
+        assert_eq!(
+            social.pending,
+            vec![crate::social::SocialPendingOperation::GroupAdd {
+                name: "PlayerOne".to_owned()
+            }]
+        );
+        assert_eq!(
+            queue.drain_intents(),
+            vec![
+                NativePlayerUiIntent::GroupSwitch { allow_group: true },
+                NativePlayerUiIntent::GroupAddMember {
+                    name: "PlayerOne".to_owned()
+                }
+            ]
+        );
+        assert!(social.group.members.is_empty());
+        assert!(!queue_group_invite_by_name(
+            &mut queue,
+            &mut social,
+            "PlayerOne".to_owned()
+        ));
+    }
+
+    #[test]
+    fn guild_permission_aliases_accept_authoritative_bit_names() {
+        let mut guild = crate::social::GuildModel {
+            permissions: vec![
+                "CanRecruit".to_owned(),
+                "CanKick".to_owned(),
+                "CanChangeRank".to_owned(),
+                "CanChangeNotice".to_owned(),
+            ],
+            ..Default::default()
+        };
+        assert!(social_has_permission(&guild, "recruit"));
+        assert!(social_has_permission(&guild, "kick"));
+        assert!(social_has_permission(&guild, "changeRank"));
+        assert!(social_has_permission(&guild, "notice"));
+        assert!(!social_has_permission(&guild, "retrieveItem"));
+
+        guild.permissions = vec!["changeNotice".to_owned()];
+        assert!(social_has_permission(&guild, "notice"));
+    }
+
+    #[test]
+    fn guild_storage_and_rank_intents_register_exact_authoritative_pending_keys() {
+        let mut queue = NativePlayerUiIntentQueue::default();
+        let mut social = crate::social::SocialModel::default();
+
+        assert!(queue.push_social_pending(
+            &mut social,
+            NativePlayerUiIntent::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 500,
+            }
+        ));
+        assert!(queue.push_social_pending(
+            &mut social,
+            NativePlayerUiIntent::GuildStorageItemChange {
+                change_type: 2,
+                from: 3,
+                to: 4,
+            }
+        ));
+        assert!(queue.push_social_pending(
+            &mut social,
+            NativePlayerUiIntent::GuildEditMember {
+                change_type: 4,
+                rank_index: 2,
+                name: "Member".to_owned(),
+                rank_name: String::new(),
+            }
+        ));
+        assert_eq!(
+            social.pending,
+            vec![
+                crate::social::SocialPendingOperation::GuildStorageGold {
+                    change_type: 0,
+                    amount: 500,
+                },
+                crate::social::SocialPendingOperation::GuildStorageItem {
+                    change_type: 2,
+                    from: 3,
+                    to: 4,
+                },
+                crate::social::SocialPendingOperation::GuildMember {
+                    name: "Member".to_owned(),
+                },
+            ]
+        );
+        assert_eq!(queue.drain_intents().len(), 3);
+        assert!(!queue.push_social_pending(
+            &mut social,
+            NativePlayerUiIntent::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 500,
+            }
+        ));
     }
 }

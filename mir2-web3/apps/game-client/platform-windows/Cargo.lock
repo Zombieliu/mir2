@@ -3166,6 +3166,7 @@ dependencies = [
  "futures-util",
  "mir2-bevy-runtime",
  "mir2-client-bevy",
+ "mir2-ui-core",
  "png",
  "serde",
  "serde_json",

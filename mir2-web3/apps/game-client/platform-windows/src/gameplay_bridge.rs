@@ -11,6 +11,9 @@ use std::sync::{mpsc, Mutex};
 
 use bevy::input::ButtonInput;
 use bevy::prelude::{Commands, KeyCode, Res, ResMut, Resource};
+use mir2_client_bevy::big_map::{
+    BigMapGatewayIntent, BigMapGatewayIntentQueue, BigMapModel, BigMapPoint,
+};
 use mir2_client_bevy::entities::EntityKind;
 use mir2_client_bevy::entities::EntityModelSet;
 use mir2_client_bevy::game_shop::GameShopModel;
@@ -66,6 +69,8 @@ pub struct NativeGameplayAdapter {
     zone_entities: HashMap<u32, serde_json::Map<String, Value>>,
     zone_ground_drops: HashMap<u32, serde_json::Map<String, Value>>,
     zone_tombstones: HashSet<u32>,
+    big_map: BigMapModel,
+    authoritative_observe_allowed: Option<bool>,
     generation: u64,
 }
 
@@ -140,6 +145,9 @@ pub struct NativeWorldClickState {
     pub dazed: Option<bool>,
     pub fishing: Option<bool>,
     pub targets: HashMap<u32, CrystalWorldClickTarget>,
+    /// Last server-authoritative observation preference carried alongside the
+    /// packet-first gameplay snapshot for the shared Options reducer.
+    pub observe_allowed: Option<bool>,
 }
 
 impl NativeWorldClickState {
@@ -338,6 +346,9 @@ pub const MAX_BUFFERED_EFFECT_EVENTS: usize = 96;
 /// One complete replacement of native gameplay presentation state.
 #[derive(Debug, Clone, Default)]
 pub struct NativeGameplaySnapshot {
+    /// A map-protocol-only update must not replace unrelated quest, entity, or
+    /// HUD read models merely to clear/update the Big Map resource.
+    pub big_map_only: bool,
     pub quests: QuestTracker,
     pub dialog: NpcDialogModel,
     pub nearby_npcs: NearbyNpcModel,
@@ -352,6 +363,9 @@ pub struct NativeGameplaySnapshot {
     /// projectile source/destination, ObjectEffect target tiles). Derived from
     /// zone packets, never fabricated by the client.
     pub zone_entity_tiles: std::collections::HashMap<u32, (i32, i32)>,
+    /// Complete authoritative Big Map read state.  It is replaced as one
+    /// snapshot so map packets cannot be observed as partially-updated UI.
+    pub big_map: BigMapModel,
 }
 
 impl NativeGameplayAdapter {
@@ -370,9 +384,118 @@ impl NativeGameplayAdapter {
             }
             PacketEvent::UserInformation(info) => {
                 self.clear_zone_state();
+                // Crystal sends MapInformation immediately before
+                // UserInformation during StartGame. UserInformation is not a
+                // session boundary and may also be resent as an authoritative
+                // player refresh, so clearing BigMapModel here discards the
+                // current map index before the UI can request NewMapInfo.
+                // Generation/logout/disconnect remain the true reset paths.
+                self.authoritative_observe_allowed = info
+                    .payload
+                    .get("allowObserve")
+                    .or_else(|| info.payload.get("allow_observe"))
+                    .and_then(Value::as_bool);
                 if let Some(transform) = transform_from_payload(&info.payload) {
+                    let point = BigMapPoint {
+                        x: transform.x,
+                        y: transform.y,
+                    };
                     self.authoritative_player_transform = Some(transform);
+                    self.big_map.set_player_location(None, point);
                 }
+                false
+            }
+            PacketEvent::MapInformation(identity) => {
+                // Some authoritative paths use MapInformation for an actual
+                // transfer. A changed identity must invalidate old per-map
+                // NPC object ids and queued teleport requests even if no
+                // separate MapChanged packet follows.
+                match self.big_map.current_map_index {
+                    Some(current) if current != identity.map_index => self
+                        .big_map
+                        .reset_for_map(identity.map_index, identity.location),
+                    // NewMapInfo may legitimately arrive before the first
+                    // MapInformation bootstrap. With no prior map identity,
+                    // adopting that identity must not discard the definition
+                    // that was just received for the same map.
+                    _ => {
+                        self.big_map.set_current_map(identity.map_index);
+                        if let Some(location) = identity.location {
+                            self.big_map
+                                .set_player_location(Some(identity.map_index), location);
+                        }
+                    }
+                }
+                false
+            }
+            PacketEvent::MapChanged(identity) => {
+                // A map transfer invalidates cached per-map NPC object ids.
+                // Preserve only the connection-scoped WorldMapSetup metadata.
+                self.big_map
+                    .reset_for_map(identity.map_index, identity.location);
+                self.clear_zone_state();
+                self.record_effect(
+                    "MapChanged",
+                    &serde_json::json!({
+                        "mapIndex": identity.map_index,
+                        "location": identity.location,
+                    }),
+                );
+                if let Some(location) = identity.location {
+                    self.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+                        x: location.x,
+                        y: location.y,
+                        direction: None,
+                    });
+                }
+                false
+            }
+            PacketEvent::WorldMapSetup(setup) => {
+                self.big_map.apply_world_map_setup(
+                    setup.enabled,
+                    setup.icons.clone(),
+                    setup.teleport_to_npc_cost,
+                );
+                false
+            }
+            PacketEvent::NewMapInfo(info) => {
+                self.big_map
+                    .apply_new_map_info(info.map_index, info.info.clone());
+                false
+            }
+            PacketEvent::SearchMapResult(result) => {
+                self.big_map
+                    .apply_search_result(result.map_index, result.npc_index);
+                false
+            }
+            PacketEvent::UserLocation(location) => {
+                let transform = AuthoritativePlayerTransform {
+                    x: location.location.x,
+                    y: location.location.y,
+                    direction: location.direction.clone(),
+                };
+                let movement_action =
+                    self.authoritative_player_transform
+                        .as_ref()
+                        .and_then(|previous| {
+                            movement_action(previous.x, previous.y, transform.x, transform.y)
+                        });
+                self.authoritative_player_transform = Some(transform);
+                if let Some(action) = movement_action {
+                    self.authoritative_player_animation = Some(self.next_animation_hint(action));
+                }
+                self.big_map.set_player_location(None, location.location);
+                true
+            }
+            PacketEvent::AllowObserve(update) => {
+                self.authoritative_observe_allowed = Some(update.allow);
+                true
+            }
+            PacketEvent::Disconnect(_) => {
+                self.authoritative_player_transform = None;
+                self.authoritative_observe_allowed = None;
+                self.clear_zone_state();
+                self.big_map.reset_for_session();
                 false
             }
             PacketEvent::Other { packet, payload } => match packet.as_str() {
@@ -392,9 +515,20 @@ impl NativeGameplayAdapter {
                     }
                     true
                 }
+                // Compatibility for focused callers that still construct the
+                // legacy catch-all event directly. WebSocket parsing produces
+                // the typed MapChanged variant above.
                 "MapChanged" => {
-                    // The new buffered effect queue is empty; the MapChanged
-                    // event itself acts as a clear signal to the effect system.
+                    let map_index = payload.get("mapIndex").and_then(value_i32);
+                    let location = transform_from_payload(payload).map(|transform| BigMapPoint {
+                        x: transform.x,
+                        y: transform.y,
+                    });
+                    if let Some(map_index) = map_index.filter(|index| *index > 0) {
+                        self.big_map.reset_for_map(map_index, location);
+                    } else {
+                        self.big_map.reset_for_session();
+                    }
                     self.clear_zone_state();
                     self.record_effect("MapChanged", payload);
                     if let Some(transform) = transform_from_payload(payload) {
@@ -404,8 +538,17 @@ impl NativeGameplayAdapter {
                 }
                 "LogOutSuccess" => {
                     self.authoritative_player_transform = None;
+                    self.authoritative_observe_allowed = None;
+                    self.big_map.reset_for_session();
                     self.clear_zone_state();
                     self.record_effect("LogOutSuccess", payload);
+                    false
+                }
+                "ReturnToLogin" => {
+                    self.authoritative_player_transform = None;
+                    self.authoritative_observe_allowed = None;
+                    self.clear_zone_state();
+                    self.big_map.reset_for_session();
                     false
                 }
                 "Death" => {
@@ -595,6 +738,8 @@ impl NativeGameplayAdapter {
             self.animation_sequence = 0;
             self.damage_sequence = 0;
             self.clear_zone_state();
+            self.big_map.reset_for_session();
+            self.authoritative_observe_allowed = None;
         }
     }
 
@@ -791,19 +936,43 @@ impl NativeGameplayAdapter {
         true
     }
 
+    pub fn observe_world_snapshot(&mut self, payload: &Value) {
+        let map_index = payload
+            .get("mapIndex")
+            .or_else(|| payload.get("map_index"))
+            .and_then(value_i32)
+            .filter(|index| *index > 0);
+        if let Some((x, y)) = authoritative_player_position(payload) {
+            self.big_map
+                .set_player_location(map_index, BigMapPoint { x, y });
+        }
+    }
+
     pub fn snapshot(&self, payload: &Value) -> NativeGameplaySnapshot {
         let (player_x, player_y) = authoritative_player_position(payload).unwrap_or((0, 0));
+        let mut world_click_state = world_click_state_from_payload(payload);
+        world_click_state.observe_allowed = self.authoritative_observe_allowed;
         NativeGameplaySnapshot {
+            big_map_only: false,
             quests: transform_quest_tracker(payload, &self.quest_definitions),
             dialog: transform_npc_dialog(payload),
             nearby_npcs: transform_nearby_npcs(payload, player_x, player_y),
             combat_target: transform_combat_target(payload, player_x, player_y),
-            world_click_state: world_click_state_from_payload(payload),
+            world_click_state,
             ground_pickups: transform_ground_pickups(payload, player_x, player_y),
             entity_render_payload: Some(payload.clone()),
             damage_events: self.damage_events.iter().cloned().collect(),
             effect_events: self.effect_events.iter().cloned().collect(),
             zone_entity_tiles: self.zone_entity_tiles(payload),
+            big_map: self.big_map.clone(),
+        }
+    }
+
+    pub fn big_map_snapshot(&self) -> NativeGameplaySnapshot {
+        NativeGameplaySnapshot {
+            big_map_only: true,
+            big_map: self.big_map.clone(),
+            ..Default::default()
         }
     }
 
@@ -867,6 +1036,21 @@ pub(crate) fn should_apply_gameplay_snapshot(screen: NativeShellScreen) -> bool 
     )
 }
 
+fn apply_authoritative_observe_state(
+    player_ui: Option<&mut NativePlayerUiState>,
+    allow: Option<bool>,
+) {
+    let (Some(player_ui), Some(allow)) = (player_ui, allow) else {
+        return;
+    };
+    let transition = mir2_ui_core::reducer::reduce(
+        &player_ui.core,
+        mir2_ui_core::action::UiAction::ObserveAuthoritativeChanged { allow },
+    );
+    player_ui.core = transition.state;
+    debug_assert!(transition.effects.is_empty());
+}
+
 pub fn drain_gameplay_events(
     shell: Res<NativeShellModel>,
     inbox: Res<GameplayEventInbox>,
@@ -878,6 +1062,7 @@ pub fn drain_gameplay_events(
     mut entity_presentation: ResMut<crate::entity_presentation::NativeEntityPresentation>,
     mut entity_overlays: ResMut<crate::entity_overlays::NativeEntityOverlays>,
     mut effects: ResMut<crate::effects::NativeEffects>,
+    big_map: Option<ResMut<BigMapModel>>,
     mut revisions: ResMut<AuthoritativeModelRevisions>,
     mut pending: ResMut<PendingOperations>,
     click_state: Option<ResMut<NativeWorldClickState>>,
@@ -897,11 +1082,20 @@ pub fn drain_gameplay_events(
         entity_presentation.reset_session();
         entity_overlays.reset_session();
         effects.reset_session();
+        if let Some(mut big_map) = big_map {
+            big_map.reset_for_session();
+        }
         return;
     }
     let Some(snapshot) = inbox.latest() else {
         return;
     };
+    if let Some(mut big_map) = big_map {
+        *big_map = snapshot.big_map.clone();
+    }
+    if snapshot.big_map_only {
+        return;
+    }
     reconcile_quest_refresh(&mut pending, &quests, &snapshot.quests);
     mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Quest);
     *quests = snapshot.quests;
@@ -930,6 +1124,69 @@ pub fn drain_gameplay_events(
     }
 }
 
+///
+/// These two helpers are intentionally kept at the native gameplay boundary
+/// as the shared UI command enum does not yet expose guild-storage actions.
+/// Callers receive `false` for invalid coordinates/change types or a failed
+/// bounded gateway enqueue; no malformed packet is produced.
+pub fn send_guild_storage_gold_change(
+    commands: &GatewayCommands,
+    change_type: u8,
+    amount: u32,
+) -> bool {
+    let Some(command) = NativeOutboundCommand::guild_storage_gold_change(change_type, amount)
+    else {
+        return false;
+    };
+    commands.send_command(GatewayCommand::Wire(command))
+}
+
+pub fn send_guild_storage_item_change(
+    commands: &GatewayCommands,
+    change_type: u8,
+    from: i32,
+    to: i32,
+) -> bool {
+    let Some(command) = NativeOutboundCommand::guild_storage_item_change(change_type, from, to)
+    else {
+        return false;
+    };
+    commands.send_command(GatewayCommand::Wire(command))
+}
+
+/// Drain Big Map renderer requests into exact BrowserCommand-compatible wire
+/// commands. The model queue has already applied local bounds and cooldowns;
+/// this bridge only preserves the InGame boundary and never turns a request
+/// into a local map/position mutation.
+pub fn forward_big_map_intents(
+    shell: Res<NativeShellModel>,
+    model: Res<BigMapModel>,
+    mut intents: ResMut<BigMapGatewayIntentQueue>,
+    commands: Res<GatewayCommands>,
+) {
+    if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+
+    // Preserve requests until the legitimate in-game gateway boundary, but
+    // discard any request whose model epoch was invalidated by a map/session
+    // reset before it can reach the wire.
+    intents.sync_model(&model);
+    let pending = intents.drain_intents();
+    for intent in pending {
+        let command = match intent {
+            BigMapGatewayIntent::RequestMapInfo { map_index } => {
+                NativeOutboundCommand::RequestMapInfo { map_index }
+            }
+            BigMapGatewayIntent::SearchMap { text } => NativeOutboundCommand::SearchMap { text },
+            BigMapGatewayIntent::TeleportToNpc { object_id } => {
+                NativeOutboundCommand::TeleportToNpc { object_id }
+            }
+        };
+        let _ = commands.send_command(GatewayCommand::Wire(command));
+    }
+}
+
 /// Convert presentation intents into exact Gateway commands. The shell state
 /// gate prevents stale button events from crossing login/character screens.
 pub fn forward_quest_ui_intents(
@@ -955,6 +1212,13 @@ pub fn forward_quest_ui_intents(
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
+
+    apply_authoritative_observe_state(
+        player_ui_state.as_deref_mut(),
+        click_state
+            .as_deref()
+            .and_then(|state| state.observe_allowed),
+    );
 
     let dialog_open = dialog.as_deref().is_some_and(|model| model.is_open);
     let dead = read_model
@@ -1266,6 +1530,29 @@ pub fn forward_quest_ui_intents(
             }
             NativePlayerUiIntent::GuildInvite { accept_invite } => {
                 NativeOutboundCommand::GuildInvite { accept_invite }
+            }
+            NativePlayerUiIntent::GuildStorageGoldChange {
+                change_type,
+                amount,
+            } => {
+                let Some(command) =
+                    NativeOutboundCommand::guild_storage_gold_change(change_type, amount)
+                else {
+                    continue;
+                };
+                command
+            }
+            NativePlayerUiIntent::GuildStorageItemChange {
+                change_type,
+                from,
+                to,
+            } => {
+                let Some(command) =
+                    NativeOutboundCommand::guild_storage_item_change(change_type, from, to)
+                else {
+                    continue;
+                };
+                command
             }
             NativePlayerUiIntent::TradeRequest => NativeOutboundCommand::TradeRequest,
             NativePlayerUiIntent::TradeReply { accept_invite } => {
@@ -2085,7 +2372,39 @@ fn strip_crystal_markup(text: &str) -> String {
 mod tests {
     use super::*;
     use bevy::prelude::App;
+    use mir2_client_bevy::big_map::{BigMapInfo, BigMapNpc};
     use serde_json::json;
+
+    #[test]
+    fn guild_storage_helpers_map_typed_commands_and_reject_invalid_input() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let commands = GatewayCommands::new(sender);
+
+        assert!(send_guild_storage_gold_change(&commands, 0, 125));
+        assert!(send_guild_storage_item_change(&commands, 2, 4, 7));
+        assert!(!send_guild_storage_gold_change(&commands, 2, 125));
+        assert!(!send_guild_storage_gold_change(&commands, 0, 0));
+        assert!(!send_guild_storage_item_change(&commands, 0, -1, 0));
+        assert!(!send_guild_storage_item_change(&commands, 0, 0, 112));
+
+        let commands = receiver.try_iter().collect::<Vec<_>>();
+        assert!(matches!(
+            &commands[0],
+            GatewayCommand::Wire(NativeOutboundCommand::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 125
+            })
+        ));
+        assert!(matches!(
+            &commands[1],
+            GatewayCommand::Wire(NativeOutboundCommand::GuildStorageItemChange {
+                change_type: 2,
+                from: 4,
+                to: 7
+            })
+        ));
+        assert_eq!(commands.len(), 2);
+    }
 
     #[test]
     fn inventory_ui_intents_map_to_exact_native_commands() {
@@ -2649,6 +2968,57 @@ mod tests {
         assert_eq!(quest.objectives[0].text, "Deliver leaves");
         assert_eq!(quest.rewards.len(), 2);
         assert_eq!(quest.status, QuestStatus::NotStarted);
+    }
+
+    #[test]
+    fn allow_observe_is_authoritative_through_adapter_and_shared_ui_state() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::AllowObserve(
+            crate::native_protocol::AllowObserve { allow: true },
+        )));
+        let snapshot = adapter.snapshot(&gameplay_payload());
+        assert_eq!(snapshot.world_click_state.observe_allowed, Some(true));
+
+        let mut ui = NativePlayerUiState::default();
+        ui.core.observe_allowed = false;
+        ui.core.observe_request_pending = Some(true);
+        apply_authoritative_observe_state(
+            Some(&mut ui),
+            snapshot.world_click_state.observe_allowed,
+        );
+        assert!(ui.core.observe_allowed);
+        assert_eq!(ui.core.observe_request_pending, None);
+
+        adapter.set_generation(7);
+        assert_eq!(
+            adapter
+                .snapshot(&gameplay_payload())
+                .world_click_state
+                .observe_allowed,
+            None
+        );
+    }
+
+    #[test]
+    fn user_information_bootstraps_authoritative_observe_state() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(!adapter.observe_packet(&PacketEvent::UserInformation(
+            crate::native_protocol::UserInformation {
+                object_id: Some(1000),
+                name: Some("Hero".to_owned()),
+                class_name: Some("Wizard".to_owned()),
+                gender: Some("Male".to_owned()),
+                level: Some(7),
+                payload: json!({"allowObserve": true}),
+            },
+        )));
+        assert_eq!(
+            adapter
+                .snapshot(&gameplay_payload())
+                .world_click_state
+                .observe_allowed,
+            Some(true)
+        );
     }
 
     #[test]
@@ -3409,5 +3779,244 @@ mod tests {
             mutate(&mut context);
             assert!(resolve_crystal_world_click(&context).is_none());
         }
+    }
+
+    #[test]
+    fn big_map_packets_replace_duplicate_data_track_position_and_reset_boundaries() {
+        use crate::native_protocol::{
+            MapIdentity, NewMapInfo, SearchMapResult, UserLocation, WorldMapSetup,
+        };
+        use mir2_client_bevy::big_map::{BigMapInfo, BigMapMovement, BigMapNpc, BigMapWorldIcon};
+
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(
+            !adapter.observe_packet(&PacketEvent::WorldMapSetup(WorldMapSetup {
+                enabled: true,
+                icons: vec![BigMapWorldIcon {
+                    image_index: 2,
+                    title: "Bichon".into(),
+                    map_index: 1,
+                }],
+                teleport_to_npc_cost: 3_000,
+            }))
+        );
+        assert!(
+            !adapter.observe_packet(&PacketEvent::NewMapInfo(NewMapInfo {
+                map_index: 1,
+                info: BigMapInfo {
+                    title: "Bichon".into(),
+                    width: 700,
+                    height: 700,
+                    big_map: 101,
+                    movements: vec![BigMapMovement {
+                        destination: 2,
+                        title: "Cave".into(),
+                        location: BigMapPoint { x: 4, y: 5 },
+                        icon: 1,
+                    }],
+                    npcs: vec![BigMapNpc {
+                        index: 1,
+                        file_name: "NPC/00".into(),
+                        name: "Guide".into(),
+                        map_index: 1,
+                        location: BigMapPoint { x: 6, y: 7 },
+                        image: 0,
+                        rate: 0,
+                        show_on_big_map: true,
+                        big_map_icon: 0,
+                        object_id: 77,
+                        icon: 0,
+                        can_teleport_to: true,
+                    }],
+                },
+            }))
+        );
+        // A duplicate authoritative NewMapInfo replaces, rather than appends,
+        // the NPC rows from the same map index.
+        assert!(
+            !adapter.observe_packet(&PacketEvent::NewMapInfo(NewMapInfo {
+                map_index: 1,
+                info: BigMapInfo {
+                    title: "Bichon Revised".into(),
+                    width: 700,
+                    height: 700,
+                    big_map: 101,
+                    movements: Vec::new(),
+                    npcs: Vec::new(),
+                },
+            }))
+        );
+        assert!(
+            !adapter.observe_packet(&PacketEvent::MapInformation(MapIdentity {
+                map_index: 1,
+                location: Some(BigMapPoint { x: 12, y: 13 }),
+            }))
+        );
+        assert!(
+            adapter.observe_packet(&PacketEvent::UserLocation(UserLocation {
+                location: BigMapPoint { x: 13, y: 13 },
+                direction: Some("Right".into()),
+            }))
+        );
+        assert!(
+            !adapter.observe_packet(&PacketEvent::SearchMapResult(SearchMapResult {
+                map_index: 1,
+                npc_index: 0,
+            },))
+        );
+
+        let snapshot = adapter.snapshot(&gameplay_payload());
+        assert_eq!(snapshot.big_map.maps.len(), 1);
+        assert_eq!(snapshot.big_map.maps[&1].info.title, "Bichon Revised");
+        assert_eq!(
+            snapshot.big_map.player_location,
+            Some(BigMapPoint { x: 13, y: 13 })
+        );
+        assert_eq!(snapshot.big_map.world.teleport_to_npc_cost, 3_000);
+
+        assert!(
+            !adapter.observe_packet(&PacketEvent::MapChanged(MapIdentity {
+                map_index: 2,
+                location: Some(BigMapPoint { x: 40, y: 41 }),
+            }))
+        );
+        let changed = adapter.snapshot(&gameplay_payload());
+        assert!(changed.big_map.maps.is_empty());
+        assert_eq!(changed.big_map.current_map_index, Some(2));
+        assert_eq!(
+            changed.big_map.player_location,
+            Some(BigMapPoint { x: 40, y: 41 })
+        );
+        assert!(changed.big_map.world.enabled);
+
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "LogOutSuccess".into(),
+            payload: json!({}),
+        }));
+        let after_logout = adapter.snapshot(&gameplay_payload()).big_map;
+        assert!(after_logout.maps.is_empty());
+        assert_eq!(after_logout.current_map_index, None);
+        assert_eq!(after_logout.player_location, None);
+        assert!(!after_logout.world.enabled);
+
+        adapter.set_generation(2);
+        let after_generation = adapter.snapshot(&gameplay_payload()).big_map;
+        assert!(after_generation.maps.is_empty());
+        assert_eq!(after_generation.current_map_index, None);
+        assert_eq!(after_generation.player_location, None);
+    }
+
+    #[test]
+    fn crystal_start_order_preserves_map_information_through_user_information() {
+        use crate::native_protocol::{MapIdentity, UserInformation};
+
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(
+            !adapter.observe_packet(&PacketEvent::MapInformation(MapIdentity {
+                map_index: 1,
+                location: Some(BigMapPoint { x: 257, y: 594 }),
+            }))
+        );
+        assert!(
+            !adapter.observe_packet(&PacketEvent::UserInformation(UserInformation {
+                object_id: Some(1_000),
+                name: Some("Player".to_owned()),
+                class_name: Some("Warrior".to_owned()),
+                gender: Some("Male".to_owned()),
+                level: Some(7),
+                payload: json!({
+                    "objectId": 1_000,
+                    "location": {"x": 257, "y": 594},
+                    "direction": "Down"
+                }),
+            }))
+        );
+
+        let model = &adapter.snapshot(&gameplay_payload()).big_map;
+        assert_eq!(model.current_map_index, Some(1));
+        assert_eq!(model.active_map_index, Some(1));
+        assert_eq!(model.player_location, Some(BigMapPoint { x: 257, y: 594 }));
+    }
+
+    #[test]
+    fn big_map_intents_cross_only_the_ingame_gateway_boundary() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<BigMapModel>()
+        .init_resource::<BigMapGatewayIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_big_map_intents);
+        {
+            let mut model = app.world_mut().resource_mut::<BigMapModel>();
+            model.apply_new_map_info(
+                1,
+                BigMapInfo {
+                    title: "Bichon".into(),
+                    width: 1,
+                    height: 1,
+                    big_map: 1,
+                    movements: Vec::new(),
+                    npcs: vec![BigMapNpc {
+                        index: 1,
+                        file_name: "NPC/00".into(),
+                        name: "Guide".into(),
+                        map_index: 1,
+                        location: BigMapPoint::default(),
+                        image: 0,
+                        rate: 0,
+                        show_on_big_map: true,
+                        big_map_icon: 0,
+                        object_id: 77,
+                        icon: 0,
+                        can_teleport_to: true,
+                    }],
+                },
+            );
+            model.set_current_map(1);
+            model.apply_world_map_setup(true, Vec::new(), 3_000);
+            assert!(model.select_npc(77));
+        }
+        app.world_mut().resource_scope(
+            |world, mut model: bevy::ecs::change_detection::Mut<BigMapModel>| {
+                let mut queue = world.resource_mut::<BigMapGatewayIntentQueue>();
+                assert!(queue.request_map_info(&model, 1));
+                model.set_search_draft("Natural Cave");
+                assert_eq!(queue.search(&mut model, 0, 500), Ok(()));
+                // Editing/submitting a search deliberately clears the old
+                // visual NPC selection. A teleport needs a fresh selection
+                // from the still-authoritative map rows.
+                assert!(model.select_npc(77));
+                assert!(queue.teleport_selected(&model));
+            },
+        );
+        app.update();
+        let commands = receiver.try_iter().collect::<Vec<_>>();
+        assert_eq!(commands.len(), 3);
+        assert!(matches!(
+            commands.first(),
+            Some(GatewayCommand::Wire(
+                NativeOutboundCommand::RequestMapInfo { map_index: 1 }
+            ))
+        ));
+        assert!(matches!(
+            commands.get(1),
+            Some(GatewayCommand::Wire(NativeOutboundCommand::SearchMap { text }))
+                if text == "natural cave"
+        ));
+        assert!(matches!(
+            commands.get(2),
+            Some(GatewayCommand::Wire(NativeOutboundCommand::TeleportToNpc {
+                object_id: 77
+            }))
+        ));
+        assert_eq!(
+            app.world().resource::<BigMapModel>().current_map_index,
+            Some(1),
+            "transport intent must not change local map"
+        );
     }
 }

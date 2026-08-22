@@ -10,9 +10,10 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
+use bevy::text::{Justify, LineBreak, TextLayout};
 use bevy::ui::{
-    AlignItems, BackgroundColor, Display, FlexDirection, Interaction, JustifyContent, Node,
-    PositionType, UiRect, Val,
+    widget::NodeImageMode, AlignItems, BackgroundColor, Display, FlexDirection, FocusPolicy,
+    Interaction, JustifyContent, Node, Overflow, PositionType, UiRect, Val,
 };
 use serde::{Deserialize, Serialize};
 
@@ -38,6 +39,14 @@ const BUTTON_DISABLED: Color = Color::srgba(0.30, 0.24, 0.16, 0.45);
 const FEEDBACK_OK: Color = Color::srgb(0.34, 0.92, 0.34);
 const FEEDBACK_ERR: Color = Color::srgb(0.96, 0.36, 0.36);
 const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+const BUTTON_HOVER: Color = Color::srgba(0.42, 0.31, 0.12, 0.98);
+const BUTTON_PRESSED: Color = Color::srgba(0.58, 0.40, 0.12, 0.98);
+const DISABLED_TEXT: Color = Color::srgba(0.74, 0.69, 0.58, 0.58);
+
+// Existing Crystal frame. There is no dedicated quest frame in the current
+// asset registry, so use the verified panel texture instead of inventing an
+// asset path or fabricating a quest illustration.
+const CRYSTAL_PANEL_ASSET: &str = "original-ui/Prguse/1084.png";
 
 const MAX_PANEL_QUESTS: usize = 2;
 const MAX_DIALOG_LINES: usize = 4;
@@ -266,6 +275,17 @@ struct NativeQuickBagPanel;
 #[derive(Component)]
 struct QuestLogPanel;
 
+/// A transparent full-stage Button used only while a quest/NPC surface is
+/// modal. It sits below the actual panel controls and above the world, so a
+/// click outside the window cannot reach movement/ground interaction.
+#[derive(Component)]
+struct QuestUiModalBlocker;
+
+#[derive(Component, Clone, Copy)]
+struct QuestUiButtonVisual {
+    enabled: bool,
+}
+
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
 enum QuestUiButton {
     SelectNpcDialog {
@@ -431,11 +451,18 @@ impl Plugin for Mir2QuestUiPlugin {
                     .after(crate::crystal_ui::overlays::process_overlay_keyboard)
                     .in_set(NativePlayerUiSet::Mutate),
             )
-            .add_systems(Update, render_quest_ui.in_set(NativePlayerUiSet::Read));
+            .add_systems(Update, render_quest_ui.in_set(NativePlayerUiSet::Read))
+            .add_systems(
+                Update,
+                sync_quest_ui_button_visuals
+                    .after(render_quest_ui)
+                    .in_set(NativePlayerUiSet::Read),
+            );
     }
 }
 
-fn spawn_quest_ui_panels(mut commands: Commands) {
+fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetServer>>) {
+    let panel_skin = asset_server.map(|server| server.load::<Image>(CRYSTAL_PANEL_ASSET));
     commands
         .spawn((
             QuestUiRoot,
@@ -455,6 +482,24 @@ fn spawn_quest_ui_panels(mut commands: Commands) {
             GlobalZIndex(980),
         ))
         .with_children(|root| {
+            // Full-stage modal capture. Actual quest/dialog controls are
+            // spawned after this sibling and therefore remain clickable.
+            root.spawn((
+                QuestUiModalBlocker,
+                Button,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    display: Display::None,
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
+                FocusPolicy::Block,
+            ));
+
             root.spawn((
                 QuestTrackerPanel,
                 Node {
@@ -472,7 +517,7 @@ fn spawn_quest_ui_panels(mut commands: Commands) {
                 BackgroundColor(Color::NONE),
             ));
 
-            root.spawn((
+            let mut dialog_panel = root.spawn((
                 NpcDialogPanel,
                 Node {
                     position_type: PositionType::Absolute,
@@ -487,10 +532,19 @@ fn spawn_quest_ui_panels(mut commands: Commands) {
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(6.0),
                     padding: UiRect::all(Val::Px(8.0)),
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 BackgroundColor(PANEL_BG),
+                FocusPolicy::Block,
             ));
+            if let Some(panel_skin) = panel_skin.as_ref() {
+                dialog_panel.insert(ImageNode {
+                    image: panel_skin.clone(),
+                    image_mode: NodeImageMode::Stretch,
+                    ..default()
+                });
+            }
 
             root.spawn((
                 CombatTargetPanel,
@@ -581,7 +635,7 @@ fn spawn_quest_ui_panels(mut commands: Commands) {
                 BackgroundColor(PANEL_BG),
             ));
 
-            root.spawn((
+            let mut quest_log_panel = root.spawn((
                 QuestLogPanel,
                 Node {
                     position_type: PositionType::Absolute,
@@ -595,10 +649,19 @@ fn spawn_quest_ui_panels(mut commands: Commands) {
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(6.0),
                     padding: UiRect::all(Val::Px(10.0)),
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 BackgroundColor(QUEST_LOG_BG),
+                FocusPolicy::Block,
             ));
+            if let Some(panel_skin) = panel_skin.as_ref() {
+                quest_log_panel.insert(ImageNode {
+                    image: panel_skin.clone(),
+                    image_mode: NodeImageMode::Stretch,
+                    ..default()
+                });
+            }
         });
 }
 
@@ -644,16 +707,42 @@ fn process_quest_ui_input(
         }
         match action.clone() {
             QuestUiButton::SelectNpcDialog { target } => {
-                // Save history for service return
-                if dialog.is_open {
-                    npc_nav.push(dialog.clone());
+                let option_enabled = dialog
+                    .is_open
+                    .then(|| {
+                        dialog
+                            .options
+                            .iter()
+                            .find(|option| option.option_id == target)
+                            .map(|option| option.enabled)
+                    })
+                    .flatten();
+                match option_enabled {
+                    Some(true) => {
+                        // Save history for service return only when the current server page
+                        // still exposes this enabled target. This keeps a stale pointer event
+                        // from navigating after a dialog refresh.
+                        npc_nav.push(dialog.clone());
+                        queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                            target: target.clone(),
+                        });
+                        quest_state.set_feedback(format!("Selected dialog {target}"), false);
+                    }
+                    Some(false) => {
+                        quest_state.set_feedback("That dialog option is unavailable", true);
+                    }
+                    None if dialog.is_open => {
+                        quest_state.set_feedback("That dialog option is no longer available", true);
+                    }
+                    None => {
+                        quest_state.set_feedback("NPC dialog is closed", true);
+                    }
                 }
-                queue.push_intent(QuestUiIntent::SelectNpcDialog {
-                    target: target.clone(),
-                });
-                quest_state.set_feedback(format!("Selected dialog {target}"), false);
             }
             QuestUiButton::CloseNpcDialog => {
+                queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                    target: "@Exit".to_owned(),
+                });
                 dialog.close();
                 npc_nav.clear();
                 quest_state.set_feedback("Dialog closed", false);
@@ -698,34 +787,44 @@ fn process_quest_ui_input(
                 npc_index,
                 quest_index,
             } => {
+                if npc_index == 0 {
+                    quest_state.set_feedback("Quest has no valid NPC source", true);
+                    continue;
+                }
                 if let Some(quest) = tracker
                     .active_quests
                     .iter()
                     .find(|q| q.quest_index == quest_index)
                 {
                     if can_accept_quest(quest) {
-                        queue.push_pending_intent(
+                        if queue.push_pending_intent(
                             &mut pending,
                             QuestUiIntent::AcceptQuest {
                                 npc_index,
                                 quest_index,
                             },
-                        );
-                        quest_state.set_feedback(format!("Accepting {}", quest.title), false);
+                        ) {
+                            quest_state.set_feedback(format!("Accepting {}", quest.title), false);
+                        } else {
+                            quest_state.set_feedback("Quest request is already pending", true);
+                        }
                     } else {
                         quest_state.set_feedback("Quest cannot be accepted", true);
                     }
                 } else {
                     // Allow accept even if quest not yet in tracker but offered via NPC dialog
                     // Still require npc_index valid (non-zero or present)
-                    queue.push_pending_intent(
+                    if queue.push_pending_intent(
                         &mut pending,
                         QuestUiIntent::AcceptQuest {
                             npc_index,
                             quest_index,
                         },
-                    );
-                    quest_state.set_feedback("Accepting quest", false);
+                    ) {
+                        quest_state.set_feedback("Accepting quest", false);
+                    } else {
+                        quest_state.set_feedback("Quest request is already pending", true);
+                    }
                 }
             }
             QuestUiButton::FinishQuest {
@@ -748,14 +847,17 @@ fn process_quest_ui_input(
                         quest_state.set_feedback("Select a reward first", true);
                         continue;
                     }
-                    queue.push_pending_intent(
+                    if queue.push_pending_intent(
                         &mut pending,
                         QuestUiIntent::FinishQuest {
                             quest_index,
                             selected_item_index,
                         },
-                    );
-                    quest_state.set_feedback(format!("Delivering {}", quest.title), false);
+                    ) {
+                        quest_state.set_feedback(format!("Delivering {}", quest.title), false);
+                    } else {
+                        quest_state.set_feedback("Quest request is already pending", true);
+                    }
                 } else {
                     quest_state.set_feedback("Quest not found", true);
                 }
@@ -772,6 +874,8 @@ fn process_quest_ui_input(
                             QuestUiIntent::AbandonQuest { quest_index },
                         ) {
                             quest_state.set_feedback(format!("Abandoning {}", quest.title), false);
+                        } else {
+                            quest_state.set_feedback("Quest request is already pending", true);
                         }
                     } else {
                         quest_state
@@ -812,13 +916,28 @@ fn process_quest_ui_input(
                 // Keep feedback about close? Clear to avoid stale message.
             }
             QuestUiButton::AttackTarget { object_id } => {
-                queue.push_intent(QuestUiIntent::AttackTarget { object_id });
+                if target_is_attackable(target.as_deref(), object_id) {
+                    queue.push_intent(QuestUiIntent::AttackTarget { object_id });
+                    quest_state.set_feedback("Attacking target", false);
+                } else {
+                    quest_state.set_feedback("Target is no longer attackable", true);
+                }
             }
             QuestUiButton::PickUpObject { object_id } => {
-                queue.push_intent(QuestUiIntent::PickUpObject { object_id });
+                if let Some(label) = pickup_label(pickups.as_deref(), object_id) {
+                    queue.push_intent(QuestUiIntent::PickUpObject { object_id });
+                    quest_state.set_feedback(format!("Picking up {label}"), false);
+                } else {
+                    quest_state.set_feedback("That ground item is no longer available", true);
+                }
             }
             QuestUiButton::PickUpTile => {
-                queue.push_intent(QuestUiIntent::PickUpTile);
+                if pickup_tile_is_current(pickups.as_deref()) {
+                    queue.push_intent(QuestUiIntent::PickUpTile);
+                    quest_state.set_feedback("Checking the current tile for ground items", false);
+                } else {
+                    quest_state.set_feedback("That pickup is no longer available", true);
+                }
             }
         }
     }
@@ -828,7 +947,9 @@ fn process_quest_ui_input(
     let is_modal = quest_log_open || dialog_open || blocks_gameplay_keys;
 
     if is_modal {
-        if keys.just_pressed(KeyCode::Escape) {
+        if keys.just_pressed(KeyCode::Escape)
+            || (quest_log_open && keys.just_pressed(KeyCode::KeyQ))
+        {
             if quest_log_open {
                 dispatch_ui_action(
                     &mut player_ui.core,
@@ -838,6 +959,9 @@ fn process_quest_ui_input(
                 quest_state.clear_selection();
                 quest_state.clear_feedback();
             } else if dialog_open {
+                queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                    target: "@Exit".to_owned(),
+                });
                 dialog.close();
                 npc_nav.clear();
                 quest_state.set_feedback("Dialog closed", false);
@@ -878,11 +1002,28 @@ fn process_quest_ui_input(
 
     if keys.just_pressed(KeyCode::KeyR) {
         match pickups {
-            Some(pickups) => match pickups.recent.front().and_then(|pickup| pickup.object_id) {
-                Some(object_id) => queue.push_intent(QuestUiIntent::PickUpObject { object_id }),
-                None => queue.push_intent(QuestUiIntent::PickUpTile),
+            Some(pickups) => match pickups.recent.front() {
+                Some(pickup) => match pickup.object_id {
+                    Some(object_id) => {
+                        queue.push_intent(QuestUiIntent::PickUpObject { object_id });
+                        quest_state
+                            .set_feedback(format!("Picking up {}", pickup.compact_label()), false);
+                    }
+                    None => {
+                        queue.push_intent(QuestUiIntent::PickUpTile);
+                        quest_state
+                            .set_feedback("Checking the current tile for ground items", false);
+                    }
+                },
+                None => {
+                    queue.push_intent(QuestUiIntent::PickUpTile);
+                    quest_state.set_feedback("Checking the current tile for ground items", false);
+                }
             },
-            None => queue.push_intent(QuestUiIntent::PickUpTile),
+            None => {
+                queue.push_intent(QuestUiIntent::PickUpTile);
+                quest_state.set_feedback("Checking the current tile for ground items", false);
+            }
         }
     }
 
@@ -922,6 +1063,7 @@ fn render_quest_ui(
     pickups: Res<GroundPickupModel>,
     ui_model: Res<UiReadModel>,
     inventory: Res<InventoryModel>,
+    pending: Res<PendingOperations>,
     quest_state: Res<QuestUiState>,
     npc_nav: Res<NpcDialogNav>,
     player_ui: Res<NativePlayerUiState>,
@@ -939,6 +1081,7 @@ fn render_quest_ui(
                 Option<&NativePlayerHudPanel>,
                 Option<&NativeControlHintPanel>,
                 Option<&NativeQuickBagPanel>,
+                Option<&QuestUiModalBlocker>,
             ),
             (
                 Without<QuestUiRoot>,
@@ -950,6 +1093,7 @@ fn render_quest_ui(
                     With<NativePlayerHudPanel>,
                     With<NativeControlHintPanel>,
                     With<NativeQuickBagPanel>,
+                    With<QuestUiModalBlocker>,
                 )>,
             ),
         >,
@@ -988,6 +1132,7 @@ fn render_quest_ui(
         && !pickups.is_changed()
         && !ui_model.is_changed()
         && !inventory.is_changed()
+        && !pending.is_changed()
         && !shell.is_changed()
         && !quest_state.is_changed()
         && !npc_nav.is_changed()
@@ -1009,9 +1154,12 @@ fn render_quest_ui(
         is_player_hud,
         is_control_hint,
         is_quick_bag,
+        is_modal_blocker,
     ) in all.p1().iter_mut()
     {
-        let visible = if is_dialog.is_some() {
+        let visible = if is_modal_blocker.is_some() {
+            quest_log_open || has_dialog_content
+        } else if is_dialog.is_some() {
             has_dialog_content
         } else if is_target.is_some() {
             CRYSTAL_TARGET_PANEL_VISIBLE && target.target.is_some()
@@ -1040,7 +1188,7 @@ fn render_quest_ui(
             } else if is_target.is_some() {
                 render_combat_target_panel(panel, target.target.as_ref());
             } else if is_pickup.is_some() {
-                render_pickup_panel(panel, &pickups);
+                render_pickup_panel(panel, &pickups, &quest_state);
             } else if is_player_hud.is_some() {
                 render_player_hud_panel(panel, &ui_model);
             } else if is_control_hint.is_some() {
@@ -1060,9 +1208,9 @@ fn render_quest_ui(
         };
         commands.entity(entity).despawn_children();
         if quest_log_open {
-            commands
-                .entity(entity)
-                .with_children(|panel| render_quest_log_panel(panel, &tracker, &quest_state));
+            commands.entity(entity).with_children(|panel| {
+                render_quest_log_panel(panel, &tracker, &quest_state, &pending)
+            });
         }
     }
 }
@@ -1110,21 +1258,7 @@ fn render_dialog_panel(
         body_line(parent, line);
     }
 
-    if let Some(feedback) = &quest_state.feedback {
-        let color = if feedback.is_error {
-            FEEDBACK_ERR
-        } else {
-            FEEDBACK_OK
-        };
-        parent.spawn((
-            Text::new(feedback.message.clone()),
-            TextFont {
-                font_size: FontSize::Px(10.0),
-                ..default()
-            },
-            TextColor(color),
-        ));
-    }
+    feedback_line(parent, quest_state.feedback.as_ref(), 10.0);
 
     for option in dialog.options.iter().take(4) {
         action_button(
@@ -1152,24 +1286,11 @@ fn render_quest_log_panel(
     parent: &mut ChildSpawnerCommands,
     tracker: &QuestTracker,
     state: &QuestUiState,
+    pending: &PendingOperations,
 ) {
-    title_line(parent, "Quest Log");
+    quest_log_title_spacer(parent);
 
-    if let Some(feedback) = &state.feedback {
-        let color = if feedback.is_error {
-            FEEDBACK_ERR
-        } else {
-            FEEDBACK_OK
-        };
-        parent.spawn((
-            Text::new(feedback.message.clone()),
-            TextFont {
-                font_size: FontSize::Px(11.0),
-                ..default()
-            },
-            TextColor(color),
-        ));
-    }
+    feedback_line(parent, state.feedback.as_ref(), 11.0);
 
     if tracker.active_quests.is_empty() {
         body_line(parent, "No quests. Talk to NPCs to begin.");
@@ -1271,12 +1392,31 @@ fn render_quest_log_panel(
 
         // Action buttons row
         let can_track = can_track_quest(quest);
-        let can_accept = can_accept_quest(quest);
-        let can_finish = quest_finish_enabled(quest, state.selected_reward_index);
         let npc_index = quest
             .accept_npc_index
             .or(quest.finish_npc_index)
             .unwrap_or(0);
+        let accept_pending = pending.contains(&PendingOperationKey::QuestAccept {
+            npc_index,
+            quest_index: quest.quest_index,
+        });
+        let finish_item = if quest.rewards.is_empty() {
+            -1
+        } else if quest.rewards.len() == 1 {
+            0
+        } else {
+            state.selected_reward_index.unwrap_or(-1)
+        };
+        let finish_pending = pending.contains(&PendingOperationKey::QuestFinish {
+            quest_index: quest.quest_index,
+            selected_item_index: finish_item,
+        });
+        let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon {
+            quest_index: quest.quest_index,
+        });
+        let can_accept = quest_accept_enabled(quest) && npc_index != 0 && !accept_pending;
+        let can_finish =
+            quest_finish_enabled(quest, state.selected_reward_index) && !finish_pending;
         // Track
         action_button(
             parent,
@@ -1293,7 +1433,11 @@ fn render_quest_log_panel(
         // Accept
         action_button(
             parent,
-            "Accept",
+            if accept_pending {
+                "Accepting..."
+            } else {
+                "Accept"
+            },
             QuestUiButton::AcceptQuest {
                 npc_index,
                 quest_index: quest.quest_index,
@@ -1301,16 +1445,13 @@ fn render_quest_log_panel(
             can_accept,
         );
         // Deliver / Finish
-        let finish_item = if quest.rewards.is_empty() {
-            -1
-        } else if quest.rewards.len() == 1 {
-            0
-        } else {
-            state.selected_reward_index.unwrap_or(-1)
-        };
         action_button(
             parent,
-            "Deliver",
+            if finish_pending {
+                "Delivering..."
+            } else {
+                "Deliver"
+            },
             QuestUiButton::FinishQuest {
                 quest_index: quest.quest_index,
                 selected_item_index: finish_item,
@@ -1319,11 +1460,15 @@ fn render_quest_log_panel(
         );
         action_button(
             parent,
-            "Abandon",
+            if abandon_pending {
+                "Abandoning..."
+            } else {
+                "Abandon"
+            },
             QuestUiButton::AbandonQuest {
                 quest_index: quest.quest_index,
             },
-            can_abandon_quest(quest),
+            can_abandon_quest(quest) && !abandon_pending,
         );
     } else {
         body_line(parent, "Select a quest to view details");
@@ -1384,8 +1529,16 @@ fn combat_target_health(target: &crate::quest_model::CombatTarget) -> Option<(f3
     (target.max_hp > 0).then(|| (target.hp_ratio().clamp(0.0, 1.0), target.hp_label()))
 }
 
-fn render_pickup_panel(parent: &mut ChildSpawnerCommands, pickups: &GroundPickupModel) {
+fn render_pickup_panel(
+    parent: &mut ChildSpawnerCommands,
+    pickups: &GroundPickupModel,
+    quest_state: &QuestUiState,
+) {
     title_line(parent, "Recent Ground Pickups");
+
+    // This is an acknowledgement of a local request, not a fabricated pickup
+    // success. The inventory/read model remains the authoritative result.
+    feedback_line(parent, quest_state.feedback.as_ref(), 10.0);
 
     if pickups.recent.is_empty() {
         body_line(parent, "No recent pickups.");
@@ -1409,6 +1562,31 @@ fn render_pickup_panel(parent: &mut ChildSpawnerCommands, pickups: &GroundPickup
             );
         }
     }
+}
+
+fn pickup_label(pickups: Option<&GroundPickupModel>, object_id: u32) -> Option<String> {
+    pickups?
+        .recent
+        .iter()
+        .find(|pickup| pickup.object_id == Some(object_id))
+        .map(|pickup| pickup.compact_label())
+}
+
+fn pickup_tile_is_current(pickups: Option<&GroundPickupModel>) -> bool {
+    pickups.is_some_and(|model| {
+        model
+            .recent
+            .front()
+            .is_some_and(|pickup| pickup.object_id.is_none())
+    })
+}
+
+fn target_is_attackable(target: Option<&CombatTargetModel>, object_id: u32) -> bool {
+    target
+        .and_then(|model| model.target.as_ref())
+        .is_some_and(|target| {
+            target.object_id == object_id && target.max_hp > 0 && !target.is_dead()
+        })
 }
 
 fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
@@ -1596,68 +1774,94 @@ fn truncate_chars(text: &str, max_chars: usize) -> String {
 }
 
 fn title_line(parent: &mut ChildSpawnerCommands, text: &str) {
-    parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(18.0),
-            ..default()
-        },
-        TextColor(PANEL_HIGHLIGHT),
-    ));
+    panel_text(parent, text, 18.0, PANEL_HIGHLIGHT, Justify::Left);
+}
+
+/// The Crystal quest panel skin already paints its own `Quest Log` header.
+/// Reserve that strip for the bitmap instead of drawing a duplicate title.
+fn quest_log_title_spacer(parent: &mut ChildSpawnerCommands) {
+    parent.spawn(Node {
+        width: Val::Percent(100.0),
+        height: Val::Px(18.0),
+        flex_shrink: 0.0,
+        ..default()
+    });
 }
 
 fn detail_title(parent: &mut ChildSpawnerCommands, text: &str) {
-    parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(14.0),
-            ..default()
-        },
-        TextColor(PANEL_HIGHLIGHT),
-    ));
+    panel_text(parent, text, 14.0, PANEL_HIGHLIGHT, Justify::Left);
 }
 
 fn body_line(parent: &mut ChildSpawnerCommands, text: &str) {
-    parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(12.0),
-            ..default()
-        },
-        TextColor(PANEL_TEXT),
-    ));
+    panel_text(parent, text, 12.0, PANEL_TEXT, Justify::Left);
 }
 
 fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
-    parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(10.0),
-            ..default()
-        },
-        TextColor(Color::srgb(0.10, 1.0, 0.05)),
-    ));
+    panel_text(
+        parent,
+        text,
+        10.0,
+        Color::srgb(0.10, 1.0, 0.05),
+        Justify::Left,
+    );
 }
 
 fn tracker_body_line(parent: &mut ChildSpawnerCommands, text: &str) {
-    parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(9.0),
-            ..default()
-        },
-        TextColor(Color::WHITE),
-    ));
+    panel_text(parent, text, 9.0, Color::WHITE, Justify::Left);
 }
 
 fn highlight_line(parent: &mut ChildSpawnerCommands, text: &str) {
+    panel_text(parent, text, 12.0, PANEL_HIGHLIGHT, Justify::Left);
+}
+
+fn feedback_line(
+    parent: &mut ChildSpawnerCommands,
+    feedback: Option<&QuestFeedback>,
+    font_size: f32,
+) {
+    let Some(feedback) = feedback else {
+        return;
+    };
+    panel_text(
+        parent,
+        &feedback.message,
+        font_size,
+        if feedback.is_error {
+            FEEDBACK_ERR
+        } else {
+            FEEDBACK_OK
+        },
+        Justify::Left,
+    );
+}
+
+/// Text nodes always receive a concrete width and Crystal-style shadow. This
+/// makes authoritative text from either translated or unbroken-script sources
+/// wrap inside its owning panel instead of leaking over nearby world controls.
+fn panel_text(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+) {
     parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(12.0),
+        Node {
+            width: Val::Percent(100.0),
+            min_width: Val::Px(0.0),
             ..default()
         },
-        TextColor(PANEL_HIGHLIGHT),
+        Text::new(text.to_owned()),
+        TextFont {
+            font_size: FontSize::Px(font_size),
+            ..default()
+        },
+        TextColor(color),
+        TextLayout::new(justify, LineBreak::WordOrCharacter),
+        TextShadow {
+            offset: Vec2::splat(1.0),
+            color: Color::BLACK,
+        },
     ));
 }
 
@@ -1672,15 +1876,21 @@ fn action_button(
     let mut button = parent.spawn((
         Node {
             width: Val::Percent(100.0),
-            height: Val::Px(28.0),
+            min_width: Val::Px(0.0),
+            min_height: Val::Px(28.0),
             display: Display::Flex,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             margin: UiRect::top(Val::Px(2.0)),
+            padding: UiRect::axes(Val::Px(6.0), Val::Px(4.0)),
             ..default()
         },
         BackgroundColor(color),
         TextColor(PANEL_TEXT),
+        QuestUiButtonVisual { enabled },
+        // Disabled controls still own their rectangle so a world click cannot
+        // pass through a visibly unavailable action.
+        FocusPolicy::Block,
     ));
 
     if enabled {
@@ -1689,14 +1899,40 @@ fn action_button(
 
     button.with_children(|line| {
         line.spawn((
+            Node {
+                width: Val::Percent(100.0),
+                min_width: Val::Px(0.0),
+                ..default()
+            },
             Text::new(text.to_owned()),
             TextFont {
                 font_size: FontSize::Px(12.0),
                 ..default()
             },
-            TextColor(PANEL_TEXT),
+            TextColor(if enabled { PANEL_TEXT } else { DISABLED_TEXT }),
+            TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+            TextShadow {
+                offset: Vec2::splat(1.0),
+                color: Color::BLACK,
+            },
         ));
     });
+}
+
+fn sync_quest_ui_button_visuals(
+    mut buttons: Query<(&Interaction, &QuestUiButtonVisual, &mut BackgroundColor)>,
+) {
+    for (interaction, visual, mut background) in &mut buttons {
+        background.0 = if !visual.enabled {
+            BUTTON_DISABLED
+        } else {
+            match interaction {
+                Interaction::Pressed => BUTTON_PRESSED,
+                Interaction::Hovered => BUTTON_HOVER,
+                Interaction::None => BUTTON_BG,
+            }
+        };
+    }
 }
 
 fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
@@ -2039,6 +2275,7 @@ mod tests {
             quantity: 5,
             slot: 0,
             container: 0,
+            ..ItemModel::default()
         };
         assert_eq!(quick_item_label(&item), "Red Potion x5");
         let truncated = truncate_chars("abcdefghijklmnopqrstuvwxyz", 10);
@@ -2071,6 +2308,7 @@ mod tests {
                 quantity: 3,
                 slot: 0,
                 container: 0,
+                ..ItemModel::default()
             });
         app.update();
 
@@ -2544,6 +2782,14 @@ mod tests {
         app.update();
         assert!(!app.world().resource::<NpcDialogModel>().is_open);
         assert!(!app.world().resource::<NpcDialogNav>().can_return());
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::SelectNpcDialog {
+                target: "@Exit".to_owned(),
+            }]
+        );
         app.world_mut().despawn(e3);
     }
 
@@ -2631,12 +2877,77 @@ mod tests {
             .resource_mut::<ButtonInput<KeyCode>>()
             .clear();
 
-        // Press Escape to close
+        // Press Q again to close while the quest panel itself is modal.
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyQ);
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().quest_open());
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::KeyQ);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .clear();
+
+        // Re-open and verify Escape remains an equivalent close path.
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyQ);
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().quest_open());
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::KeyQ);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .clear();
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::Escape);
         app.update();
         assert!(!app.world().resource::<NativePlayerUiState>().quest_open());
+    }
+
+    #[test]
+    fn escape_closes_npc_dialog_and_queues_authoritative_exit() {
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(QuestTracker::default());
+        app.insert_resource(NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(1),
+            npc_name: Some("Teleporter Gilbert".to_owned()),
+            lines: vec![],
+            options: vec![],
+        });
+        app.init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NearbyNpcModel>()
+            .init_resource::<CombatTargetModel>()
+            .init_resource::<GroundPickupModel>();
+        let mut keys = ButtonInput::<KeyCode>::default();
+        keys.press(KeyCode::Escape);
+        app.insert_resource(keys);
+        app.add_systems(Update, process_quest_ui_input);
+
+        app.update();
+
+        assert!(!app.world().resource::<NpcDialogModel>().is_open);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::SelectNpcDialog {
+                target: "@Exit".to_owned(),
+            }]
+        );
     }
 
     #[test]
@@ -2763,5 +3074,198 @@ mod tests {
             None
         );
         app.world_mut().despawn(close);
+    }
+
+    #[test]
+    fn disabled_npc_option_rejects_a_stale_button_event() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(QuestTracker::default());
+        app.insert_resource(NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(99),
+            npc_name: Some("Village Guide".to_owned()),
+            lines: vec![],
+            options: vec![crate::quest_model::NpcDialogOption {
+                option_id: "locked".to_owned(),
+                label: "Locked service".to_owned(),
+                enabled: false,
+            }],
+        });
+        app.init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NearbyNpcModel>()
+            .init_resource::<CombatTargetModel>()
+            .init_resource::<GroundPickupModel>();
+        app.world_mut().spawn((
+            Button,
+            QuestUiButton::SelectNpcDialog {
+                target: "locked".to_owned(),
+            },
+            Interaction::Pressed,
+        ));
+        app.add_systems(Update, process_quest_ui_input);
+
+        app.update();
+
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert!(app.world().resource::<NpcDialogNav>().history.is_empty());
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .feedback
+            .as_ref()
+            .is_some_and(|feedback| feedback.is_error));
+    }
+
+    #[test]
+    fn pickup_button_requires_a_current_authoritative_ground_object() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(QuestTracker::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(NpcDialogNav::default());
+        app.init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NearbyNpcModel>()
+            .init_resource::<CombatTargetModel>()
+            .init_resource::<GroundPickupModel>();
+        let button = app
+            .world_mut()
+            .spawn((
+                Button,
+                QuestUiButton::PickUpObject { object_id: 44 },
+                Interaction::Pressed,
+            ))
+            .id();
+        app.add_systems(Update, process_quest_ui_input);
+
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .feedback
+            .as_ref()
+            .is_some_and(|feedback| feedback.is_error));
+
+        app.world_mut().resource_mut::<GroundPickupModel>().upsert(
+            crate::quest_model::RecentPickup {
+                object_id: Some(44),
+                key: "drop-44".to_owned(),
+                label: "Red Potion".to_owned(),
+                amount: 2,
+                from_npc: None,
+            },
+        );
+        app.world_mut().entity_mut(button).insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpObject { object_id: 44 }]
+        );
+        assert_eq!(
+            app.world()
+                .resource::<QuestUiState>()
+                .feedback
+                .as_ref()
+                .map(|feedback| feedback.message.as_str()),
+            Some("Picking up Red Potion x2")
+        );
+    }
+
+    #[test]
+    fn wrapped_text_and_disabled_action_hitboxes_keep_their_bounds() {
+        let layout = TextLayout::new(Justify::Center, LineBreak::WordOrCharacter);
+        assert_eq!(layout.linebreak, LineBreak::WordOrCharacter);
+        assert_eq!(layout.justify, Justify::Center);
+        assert_eq!(FocusPolicy::default(), FocusPolicy::Pass);
+        assert_eq!(FocusPolicy::Block, FocusPolicy::Block);
+    }
+
+    #[test]
+    fn stale_target_click_cannot_emit_attack_intent() {
+        let target = CombatTargetModel::default();
+        assert!(!target_is_attackable(Some(&target), 44));
+
+        let mut target = CombatTargetModel::default();
+        target.apply(crate::quest_model::CombatTargetUpdate {
+            object_id: 44,
+            name: "Scarecrow".to_owned(),
+            hp: 8,
+            max_hp: 20,
+            is_player: false,
+        });
+        assert!(target_is_attackable(Some(&target), 44));
+        assert!(!target_is_attackable(Some(&target), 45));
+
+        target.apply(crate::quest_model::CombatTargetUpdate {
+            object_id: 44,
+            name: "Scarecrow".to_owned(),
+            hp: 0,
+            max_hp: 20,
+            is_player: false,
+        });
+        assert!(!target_is_attackable(Some(&target), 44));
+    }
+
+    #[test]
+    fn tile_pickup_button_requires_an_authoritative_tile_entry() {
+        let empty = GroundPickupModel::default();
+        assert!(!pickup_tile_is_current(Some(&empty)));
+
+        let mut tile_pickup = GroundPickupModel::default();
+        tile_pickup.upsert(crate::quest_model::RecentPickup {
+            object_id: None,
+            key: "tile-drop".to_owned(),
+            label: "Unknown drop".to_owned(),
+            amount: 1,
+            from_npc: None,
+        });
+        assert!(pickup_tile_is_current(Some(&tile_pickup)));
+
+        tile_pickup.upsert(crate::quest_model::RecentPickup {
+            object_id: Some(99),
+            key: "object-drop".to_owned(),
+            label: "Red Potion".to_owned(),
+            amount: 1,
+            from_npc: None,
+        });
+        assert!(!pickup_tile_is_current(Some(&tile_pickup)));
+    }
+
+    #[test]
+    fn crystal_panel_skin_is_an_existing_non_placeholder_asset() {
+        assert_eq!(CRYSTAL_PANEL_ASSET, "original-ui/Prguse/1084.png");
+        assert!(!CRYSTAL_PANEL_ASSET.contains("missing"));
+        assert!(!CRYSTAL_PANEL_ASSET.contains("placeholder"));
     }
 }

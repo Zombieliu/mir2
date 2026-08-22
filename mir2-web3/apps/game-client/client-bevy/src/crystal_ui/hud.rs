@@ -8,7 +8,7 @@
 use bevy::prelude::*;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
 
-use crate::inventory::{InventoryModel, ItemModel};
+use crate::inventory::{item_durability_label, item_icon_path, InventoryModel, ItemModel};
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use crate::read_model::UiReadModel;
@@ -104,6 +104,8 @@ pub enum CrystalHudAction {
     Mail,
     BigMap,
     MinimapToggle,
+    /// An authoritative use request for a currently populated belt slot.
+    BeltUse(u8),
 }
 
 /// Root marker for the native-only Crystal HUD.
@@ -130,6 +132,15 @@ pub struct CrystalHudHpText;
 
 #[derive(Component, Debug)]
 pub struct CrystalHudMpText;
+
+/// Crystal's alternate HP/MP presentation when `Settings.HPView` is disabled.
+/// The original client keeps the orbs, but replaces compact labels with two
+/// stacked raw-value labels.
+#[derive(Component, Debug)]
+pub struct CrystalHudHpAlternateTopText;
+
+#[derive(Component, Debug)]
+pub struct CrystalHudHpAlternateBottomText;
 
 #[derive(Component, Debug)]
 pub struct CrystalHudExperienceBar;
@@ -165,6 +176,18 @@ pub struct CrystalHudBeltItem {
     pub slot: u8,
 }
 
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalHudBeltIcon {
+    pub slot: u8,
+}
+
+/// Stable slot hit target. The `Button` component is synchronized after each
+/// inventory snapshot, so startup with an empty belt remains operable later.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalHudBeltHitTarget {
+    pub slot: u8,
+}
+
 /// Belt geometry follows `Prguse/1932` and keeps six fixed 40-pixel slots.
 pub const BELT_FRAME: CrystalRect = CrystalRect::new(230.0, 618.0, 240.0, 38.0);
 pub const BELT_SLOT_STEP: f32 = 35.0;
@@ -197,6 +220,15 @@ impl Plugin for Mir2CrystalHudPlugin {
             .add_systems(
                 Update,
                 update_hud_read_model.run_if(resource_changed::<UiReadModel>),
+            )
+            .add_systems(
+                Update,
+                update_hud_hp_alternate_text.run_if(resource_changed::<UiReadModel>),
+            )
+            .add_systems(Update, update_hud_option_presentation)
+            .add_systems(
+                Update,
+                sync_belt_hit_targets.run_if(resource_changed::<InventoryModel>),
             )
             .add_systems(
                 Update,
@@ -297,6 +329,24 @@ fn spawn_crystal_hud(
             );
             spawn_text(
                 root,
+                CrystalHudHpAlternateTopText,
+                &hp_view_alternate_top(&ui_model),
+                HP_TEXT_RECT,
+                8.0,
+                WHITE,
+                Justify::Center,
+            );
+            spawn_text(
+                root,
+                CrystalHudHpAlternateBottomText,
+                &hp_view_alternate_bottom(&ui_model),
+                MP_TEXT_RECT,
+                8.0,
+                WHITE,
+                Justify::Center,
+            );
+            spawn_text(
+                root,
                 CrystalHudLevel,
                 &ui_model.player.level.to_string(),
                 LEVEL_RECT,
@@ -360,7 +410,7 @@ fn spawn_crystal_hud(
                 Color::srgba(1.0, 1.0, 1.0, 0.5),
             );
             for slot in 0..BELT_SLOT_COUNT {
-                spawn_belt_labels(root, slot, &belt_item_label(&inventory, slot));
+                spawn_belt_slot(root, &asset_server, &inventory, slot);
             }
 
             spawn_minimap_frame(root, &asset_server);
@@ -590,8 +640,42 @@ fn spawn_hud_button(
     );
 }
 
-fn spawn_belt_labels(parent: &mut ChildSpawnerCommands, slot: u8, item_label: &str) {
+fn spawn_belt_slot(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    inventory: &InventoryModel,
+    slot: u8,
+) {
     let slot_rect = spec::belt_slot(slot as usize);
+    let item = belt_slot_item(inventory, slot);
+    // A stale or legacy stack without its server instance id may be displayed,
+    // but cannot issue an ambiguous use command.
+    let mut hit_target = parent.spawn((
+        absolute_node(CrystalRect::new(slot_rect.left, slot_rect.top, 32.0, 32.0)),
+        CrystalHudBeltHitTarget { slot },
+        CrystalHudAction::BeltUse(slot),
+    ));
+    hit_target.with_children(|button| {
+        let path = item.and_then(|item| item_icon_path(item.icon));
+        button.spawn((
+            CrystalHudBeltIcon { slot },
+            Node {
+                width: Val::Px(32.0),
+                height: Val::Px(32.0),
+                display: if path.is_some() {
+                    Display::Flex
+                } else {
+                    Display::None
+                },
+                ..default()
+            },
+            ImageNode {
+                image: path.map(|path| asset_server.load(path)).unwrap_or_default(),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            },
+        ));
+    });
     spawn_text(
         parent,
         CrystalHudBeltKey { slot },
@@ -604,7 +688,7 @@ fn spawn_belt_labels(parent: &mut ChildSpawnerCommands, slot: u8, item_label: &s
     spawn_text(
         parent,
         CrystalHudBeltItem { slot },
-        item_label,
+        &belt_item_label(inventory, slot),
         CrystalRect::new(slot_rect.left, slot_rect.top + 19.0, slot_rect.width, 12.0),
         7.0,
         WHITE,
@@ -736,6 +820,74 @@ fn update_hud_read_model(
     );
 }
 
+/// Keep alternate HP/MP labels in a separate system because Bevy's `ParamSet`
+/// supports eight queries. It shares the same change gate as the primary HUD
+/// update and still reads only authoritative player values.
+fn update_hud_hp_alternate_text(
+    model: Res<UiReadModel>,
+    mut texts: ParamSet<(
+        Query<&mut Text, With<CrystalHudHpAlternateTopText>>,
+        Query<&mut Text, With<CrystalHudHpAlternateBottomText>>,
+    )>,
+) {
+    set_text(&mut texts.p0(), hp_view_alternate_top(&model));
+    set_text(&mut texts.p1(), hp_view_alternate_bottom(&model));
+}
+
+/// `MainDialog` switches from compact HP/MP labels to two raw-value rows when
+/// `Settings.HPView` is off. Keeping this pure makes the alternate rendering
+/// independently testable from the Bevy node wiring.
+pub fn hp_view_alternate_top(model: &UiReadModel) -> String {
+    format!("{}    {}", model.player.hp, model.player.mp)
+}
+
+pub fn hp_view_alternate_bottom(model: &UiReadModel) -> String {
+    format!("{}    {}", model.player.max_hp, model.player.max_mp)
+}
+
+/// Apply the presentation choices this HUD owns. The state is read directly
+/// from `NativePlayerUiState.core.options`; this system never copies options
+/// into a local source of truth and never changes authoritative player state.
+/// Re-enabling a mode exposes the latest render nodes again.
+fn update_hud_option_presentation(
+    shell: Res<NativeShellModel>,
+    state: Option<Res<crate::crystal_ui::overlays::NativePlayerUiState>>,
+    mut nodes: ParamSet<(
+        Query<&mut Node, With<CrystalHudHpText>>,
+        Query<&mut Node, With<CrystalHudMpText>>,
+        Query<&mut Node, With<CrystalHudHpAlternateTopText>>,
+        Query<&mut Node, With<CrystalHudHpAlternateBottomText>>,
+    )>,
+) {
+    let in_game = shell.screen == NativeShellScreen::InGame;
+    let hp_view = state
+        .as_deref()
+        .map(|state| state.core.options.hp_view)
+        .unwrap_or(true);
+    let compact_display = if in_game && hp_view {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    let alternate_display = if in_game && !hp_view {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    for mut node in nodes.p0().iter_mut() {
+        node.display = compact_display;
+    }
+    for mut node in nodes.p1().iter_mut() {
+        node.display = compact_display;
+    }
+    for mut node in nodes.p2().iter_mut() {
+        node.display = alternate_display;
+    }
+    for mut node in nodes.p3().iter_mut() {
+        node.display = alternate_display;
+    }
+}
+
 fn sync_orb_half<T>(
     query: &mut Query<(&mut Node, &mut ImageNode), With<T>>,
     side: OrbSide,
@@ -797,10 +949,12 @@ fn sync_weight_bar<T>(
 
 fn update_hud_inventory(
     inventory: Res<InventoryModel>,
+    asset_server: Res<AssetServer>,
     mut text_queries: ParamSet<(
         Query<(&CrystalHudBeltItem, &mut Text)>,
         Query<&mut Text, With<CrystalHudSpaceText>>,
     )>,
+    mut icons: Query<(&CrystalHudBeltIcon, &mut ImageNode, &mut Node)>,
 ) {
     for (marker, mut text) in &mut text_queries.p0() {
         text.0 = belt_item_label(&inventory, marker.slot);
@@ -809,6 +963,39 @@ fn update_hud_inventory(
         &mut text_queries.p1(),
         free_inventory_slots(&inventory).to_string(),
     );
+    for (marker, mut image, mut node) in &mut icons {
+        if let Some(path) =
+            belt_slot_item(&inventory, marker.slot).and_then(|item| item_icon_path(item.icon))
+        {
+            image.image = asset_server.load(path);
+            node.display = Display::Flex;
+        } else {
+            node.display = Display::None;
+        }
+    }
+}
+
+/// Add/remove the actual UI hit component from the live authoritative belt
+/// model. Dropping `Button` also removes the stale interaction state.
+fn sync_belt_hit_targets(
+    mut commands: Commands,
+    inventory: Res<InventoryModel>,
+    targets: Query<(Entity, &CrystalHudBeltHitTarget, Option<&Button>)>,
+) {
+    for (entity, marker, button) in &targets {
+        let enabled =
+            belt_slot_item(&inventory, marker.slot).is_some_and(|item| item.unique_id.is_some());
+        match (enabled, button.is_some()) {
+            (true, false) => {
+                commands.entity(entity).insert((Button, Interaction::None));
+            }
+            (false, true) => {
+                commands.entity(entity).remove::<Button>();
+                commands.entity(entity).remove::<Interaction>();
+            }
+            _ => {}
+        }
+    }
 }
 
 fn update_hud_map_model(
@@ -895,17 +1082,11 @@ pub fn belt_item_label(model: &InventoryModel, slot: u8) -> String {
     let Some(item) = belt_slot_item(model, slot) else {
         return String::new();
     };
-    let raw = if item.name.trim().is_empty() {
-        item.key.as_str()
-    } else {
-        item.name.as_str()
-    };
-    let suffix = if item.quantity > 1 {
+    if item.quantity > 1 {
         format!("x{}", item.quantity)
     } else {
-        String::new()
-    };
-    bounded_belt_label(&format!("{raw}{suffix}"), 5)
+        item_durability_label(item).unwrap_or_default()
+    }
 }
 
 pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
@@ -948,7 +1129,45 @@ mod tests {
             quantity,
             slot,
             container,
+            ..ItemModel::default()
         }
+    }
+
+    #[test]
+    fn belt_hit_target_tracks_late_population_and_clear() {
+        let mut app = App::new();
+        app.init_resource::<InventoryModel>()
+            .add_systems(Update, sync_belt_hit_targets);
+        let target = app
+            .world_mut()
+            .spawn((
+                CrystalHudBeltHitTarget { slot: 0 },
+                CrystalHudAction::BeltUse(0),
+            ))
+            .id();
+
+        app.update();
+        assert!(!app.world().entity(target).contains::<Button>());
+
+        app.world_mut().resource_mut::<InventoryModel>().items = vec![ItemModel {
+            unique_id: Some(77),
+            key: "potion".to_owned(),
+            name: "Potion".to_owned(),
+            quantity: 2,
+            slot: 0,
+            container: 1,
+            icon: 7,
+            ..ItemModel::default()
+        }];
+        app.update();
+        assert!(app.world().entity(target).contains::<Button>());
+
+        app.world_mut()
+            .resource_mut::<InventoryModel>()
+            .items
+            .clear();
+        app.update();
+        assert!(!app.world().entity(target).contains::<Button>());
     }
 
     #[test]
@@ -983,6 +1202,106 @@ mod tests {
     }
 
     #[test]
+    fn hp_view_alternate_labels_keep_authoritative_current_and_max_values() {
+        let model = UiReadModel {
+            player: crate::read_model::PlayerStats {
+                hp: 12,
+                max_hp: 15,
+                mp: 4,
+                max_mp: 11,
+                ..default()
+            },
+        };
+        assert_eq!(hp_view_alternate_top(&model), "12    4");
+        assert_eq!(hp_view_alternate_bottom(&model), "15    11");
+    }
+
+    #[test]
+    fn hp_view_ecs_gate_swaps_presentation_without_mutating_options() {
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::InGame;
+        let mut player_ui = crate::crystal_ui::overlays::NativePlayerUiState::default();
+        player_ui.core.options.hp_view = false;
+        let mut app = App::new();
+        app.insert_resource(shell)
+            .insert_resource(player_ui)
+            .add_systems(Update, update_hud_option_presentation);
+        let hp = app
+            .world_mut()
+            .spawn((Node::default(), CrystalHudHpText))
+            .id();
+        let mp = app
+            .world_mut()
+            .spawn((Node::default(), CrystalHudMpText))
+            .id();
+        let alternate_top = app
+            .world_mut()
+            .spawn((Node::default(), CrystalHudHpAlternateTopText))
+            .id();
+        let alternate_bottom = app
+            .world_mut()
+            .spawn((Node::default(), CrystalHudHpAlternateBottomText))
+            .id();
+
+        app.update();
+        assert_eq!(
+            app.world().entity(hp).get::<Node>().unwrap().display,
+            Display::None
+        );
+        assert_eq!(
+            app.world().entity(mp).get::<Node>().unwrap().display,
+            Display::None
+        );
+        assert_eq!(
+            app.world()
+                .entity(alternate_top)
+                .get::<Node>()
+                .unwrap()
+                .display,
+            Display::Flex
+        );
+        assert_eq!(
+            app.world()
+                .entity(alternate_bottom)
+                .get::<Node>()
+                .unwrap()
+                .display,
+            Display::Flex
+        );
+
+        app.world_mut()
+            .resource_mut::<crate::crystal_ui::overlays::NativePlayerUiState>()
+            .core
+            .options
+            .hp_view = true;
+        app.update();
+        assert_eq!(
+            app.world().entity(hp).get::<Node>().unwrap().display,
+            Display::Flex
+        );
+        assert_eq!(
+            app.world().entity(mp).get::<Node>().unwrap().display,
+            Display::Flex
+        );
+        assert_eq!(
+            app.world()
+                .entity(alternate_top)
+                .get::<Node>()
+                .unwrap()
+                .display,
+            Display::None
+        );
+        assert_eq!(
+            app.world()
+                .entity(alternate_bottom)
+                .get::<Node>()
+                .unwrap()
+                .display,
+            Display::None
+        );
+    }
+
+    #[test]
     fn belt_mapping_uses_container_one_and_exact_slot() {
         let model = InventoryModel {
             gold: 7,
@@ -998,8 +1317,8 @@ mod tests {
             Some("slot0")
         );
         assert_eq!(belt_slot_item(&model, 1), None);
-        assert_eq!(belt_item_label(&model, 2), "Seco…");
-        assert_eq!(belt_item_label(&model, 0), "First");
+        assert_eq!(belt_item_label(&model, 2), "");
+        assert_eq!(belt_item_label(&model, 0), "");
     }
 
     #[test]

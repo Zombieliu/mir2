@@ -74,6 +74,18 @@ pub fn drain_gateway_events(
     mut auto_login: ResMut<NativeAutoLoginFlow>,
 ) {
     for event in inbox.drain() {
+        // A password response is correlated to the one in-flight request in
+        // NativeShellModel.  Never let a delayed response mutate a later
+        // Login/Character/InGame state after the request was already closed.
+        if matches!(
+            &event,
+            NativeGatewayEvent::ChangePasswordResult { .. }
+                | NativeGatewayEvent::ChangePasswordBanned { .. }
+        ) && !(shell.screen == NativeShellScreen::ChangePassword
+            && shell.change_password_request_in_flight)
+        {
+            continue;
+        }
         let connected = matches!(&event, NativeGatewayEvent::Connected);
         let login_succeeded = matches!(&event, NativeGatewayEvent::LoginSuccess { .. });
         let reconnect_bootstrap = match &event {
@@ -149,10 +161,15 @@ pub fn forward_native_ui_intents(
 ) {
     let pending = intents.drain().collect::<Vec<_>>();
     let mut login_command_sent = false;
+    let mut register_command_sent = false;
+    let mut create_character_command_sent = false;
+    let mut start_game_command_sent = false;
+    let mut retry_command_sent = false;
+    let mut logout_command_sent = false;
     for intent in pending {
         let command = match intent {
             NativeUiIntent::Login | NativeUiIntent::SafeKeyEnter
-                if shell.screen == NativeShellScreen::Authenticating && !login_command_sent =>
+                if shell.login_request_in_flight && !login_command_sent =>
             {
                 login_command_sent = true;
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
@@ -161,7 +178,10 @@ pub fn forward_native_ui_intents(
                     password: shell.login.password.clone(),
                 })
             }
-            NativeUiIntent::RegisterAccount if shell.screen == NativeShellScreen::Login => {
+            NativeUiIntent::RegisterAccount
+                if shell.register_request_in_flight && !register_command_sent =>
+            {
+                register_command_sent = true;
                 let account_id = shell.login.account.trim().to_owned();
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
                 Some(NativeOutboundCommand::NewAccount {
@@ -178,7 +198,8 @@ pub fn forward_native_ui_intents(
                 name,
                 class_name,
                 gender_name,
-            } if shell.screen == NativeShellScreen::CharacterCreate => {
+            } if shell.create_character_request_in_flight && !create_character_command_sent => {
+                create_character_command_sent = true;
                 Some(NativeOutboundCommand::NewCharacter {
                     name: name.trim().to_owned(),
                     gender: gender_name,
@@ -207,14 +228,21 @@ pub fn forward_native_ui_intents(
                     character_index: idx,
                 })
             }
-            NativeUiIntent::StartGame if shell.screen == NativeShellScreen::StartingGame => shell
-                .selected_character_index
-                .map(|character_index| NativeOutboundCommand::StartGame { character_index }),
-            NativeUiIntent::Retry if shell.screen == NativeShellScreen::Connecting => {
+            NativeUiIntent::StartGame
+                if shell.start_game_request_in_flight && !start_game_command_sent =>
+            {
+                start_game_command_sent = true;
+                shell
+                    .selected_character_index
+                    .map(|character_index| NativeOutboundCommand::StartGame { character_index })
+            }
+            NativeUiIntent::Retry if shell.retry_request_in_flight && !retry_command_sent => {
+                retry_command_sent = true;
                 commands.send_command(GatewayCommand::Connect);
                 None
             }
-            NativeUiIntent::Logout if shell.screen == NativeShellScreen::Login => {
+            NativeUiIntent::Logout if shell.logout_request_in_flight && !logout_command_sent => {
+                logout_command_sent = true;
                 Some(NativeOutboundCommand::LogOut)
             }
             NativeUiIntent::OpenCharacterCreate
@@ -300,6 +328,71 @@ mod tests {
     }
 
     #[test]
+    fn distinct_register_and_login_commands_are_not_dropped_by_final_screen_state() {
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::Authenticating;
+        shell.login.account = "player".to_owned();
+        shell.login.password = "secret".to_owned();
+        shell.register_request_in_flight = true;
+        shell.login_request_in_flight = true;
+
+        let (commands, _) = forward(
+            shell,
+            [NativeUiIntent::RegisterAccount, NativeUiIntent::Login],
+        );
+        assert_eq!(
+            commands
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::NewAccount { .. })
+                ))
+                .count(),
+            1
+        );
+        assert_eq!(
+            commands
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::Login { .. })
+                ))
+                .count(),
+            1
+        );
+        assert_eq!(
+            commands
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::ClientVersion)
+                ))
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn duplicate_manual_intents_still_forward_once_per_logical_operation() {
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::Authenticating;
+        shell.login.account = "player".to_owned();
+        shell.login.password = "secret".to_owned();
+        shell.login_request_in_flight = true;
+        let (commands, _) = forward(shell, [NativeUiIntent::Login, NativeUiIntent::Login]);
+        assert_eq!(
+            commands
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::Login { .. })
+                ))
+                .count(),
+            1
+        );
+    }
+
+    #[test]
     fn delete_confirmation_forwards_exactly_once_for_selected_index() {
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::CharacterSelect;
@@ -360,6 +453,109 @@ mod tests {
         assert_eq!(change_password[0].0.as_str(), "account");
         assert_eq!(change_password[0].1.as_str(), "oldpw");
         assert_eq!(change_password[0].2.as_str(), "newpw");
+    }
+
+    fn apply_gateway_event_to_shell(
+        shell: NativeShellModel,
+        event: NativeGatewayEvent,
+    ) -> NativeShellModel {
+        let (event_sender, event_receiver) = mpsc::channel();
+        event_sender
+            .send(event)
+            .expect("gateway event should queue");
+        let (command_sender, _command_receiver) = mpsc::channel();
+        let mut app = bevy::prelude::App::new();
+        app.insert_resource(shell);
+        app.insert_resource(GatewayEventInbox::new(event_receiver));
+        app.insert_resource(crate::input::GatewayCommands::new(command_sender));
+        app.insert_resource(NativeAutoLoginFlow::default());
+        app.add_systems(bevy::prelude::Update, drain_gateway_events);
+        app.update();
+        app.world().resource::<NativeShellModel>().clone()
+    }
+
+    fn pending_change_password_shell() -> NativeShellModel {
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::ChangePassword;
+        assert!(shell.apply_ui_intent(NativeUiIntent::SubmitChangePassword {
+            account_id: "account".to_owned(),
+            old_password: "oldpw".to_owned(),
+            new_password: "newpw".to_owned(),
+            confirm_password: "newpw".to_owned(),
+        }));
+        shell.mark_change_password_command_sent();
+        shell
+    }
+
+    #[test]
+    fn change_password_success_clears_pending_and_returns_to_login() {
+        let shell = apply_gateway_event_to_shell(
+            pending_change_password_shell(),
+            NativeGatewayEvent::ChangePasswordResult { result: 6 },
+        );
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.change_password_request_in_flight);
+        assert!(!shell.change_password_command_sent);
+        assert!(shell.change_password.old_password.is_empty());
+        assert!(shell.change_password.new_password.is_empty());
+        assert!(shell
+            .notice
+            .as_ref()
+            .is_some_and(|notice| notice.message.contains("success")));
+    }
+
+    #[test]
+    fn change_password_failure_clears_pending_and_keeps_form_without_secret_notice() {
+        let shell = apply_gateway_event_to_shell(
+            pending_change_password_shell(),
+            NativeGatewayEvent::ChangePasswordResult { result: 2 },
+        );
+        assert_eq!(shell.screen, NativeShellScreen::ChangePassword);
+        assert!(!shell.change_password_request_in_flight);
+        assert!(!shell.change_password_command_sent);
+        let notice = shell.notice.expect("failure notice");
+        assert!(notice.message.contains("current password"));
+        assert!(!notice.message.contains("oldpw"));
+        assert!(!notice.message.contains("newpw"));
+    }
+
+    #[test]
+    fn change_password_banned_clears_pending_and_returns_to_login_without_secret_notice() {
+        let shell = apply_gateway_event_to_shell(
+            pending_change_password_shell(),
+            NativeGatewayEvent::ChangePasswordBanned {
+                reason: "manual review".to_owned(),
+                expiry: Some("2030-01-01".to_owned()),
+            },
+        );
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.change_password_request_in_flight);
+        assert!(!shell.change_password_command_sent);
+        let notice = shell.notice.expect("banned notice");
+        assert!(notice.message.contains("manual review"));
+        assert!(notice.message.contains("2030-01-01"));
+        assert!(!notice.message.contains("oldpw"));
+        assert!(!notice.message.contains("newpw"));
+    }
+
+    #[test]
+    fn late_change_password_reply_without_pending_request_is_ignored_fail_closed() {
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::Login;
+        shell.notice = Some(mir2_client_bevy::native_shell::ShellNotice::info(
+            "still on login",
+        ));
+        let shell = apply_gateway_event_to_shell(
+            shell,
+            NativeGatewayEvent::ChangePasswordResult { result: 6 },
+        );
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.change_password_request_in_flight);
+        assert!(!shell.change_password_command_sent);
+        assert_eq!(
+            shell.notice.as_ref().map(|notice| notice.message.as_str()),
+            Some("still on login")
+        );
     }
 
     #[test]

@@ -7,8 +7,24 @@ pub enum UiAction {
     // Login / Connection
     Login,
     RegisterAccount,
+    /// Opens the shared change-password flow. Credentials are supplied only
+    /// by `SubmitChangePassword`; they are never staged in `UiState`.
     ChangePassword,
+    /// Opens Crystal's local Safe Key flow. Safe Key is a local input aid,
+    /// not a fabricated server command.
     SafeKey,
+    SubmitChangePassword {
+        account: String,
+        old_password: crate::effect::SecretText,
+        new_password: crate::effect::SecretText,
+        confirm_password: crate::effect::SecretText,
+    },
+    ChangePasswordResult {
+        success: bool,
+        message: String,
+    },
+    CancelChangePassword,
+    CloseSafeKey,
     CancelLogin,
     RetryConnection,
     // Character select / create
@@ -77,11 +93,41 @@ pub enum UiAction {
     SetSoundVolume {
         volume: u8,
     },
+    /// Stage one of Crystal OptionDialog's seven persisted local switches.
+    SetCrystalOption {
+        option: crate::state::UiCrystalOption,
+        enabled: bool,
+    },
+    /// Ask the authoritative server to change observation permission. The
+    /// reducer does not optimistically change `observe_allowed`.
+    RequestObserve {
+        allow: bool,
+    },
+    /// Host notification sourced from the authoritative AllowObserve packet.
+    ObserveAuthoritativeChanged {
+        allow: bool,
+    },
+    /// Opens the separate native-host settings surface. This is deliberately
+    /// not reachable through Crystal's HUD OptionDialog.
+    OpenPlatformSettings,
+    /// Native-only staged extension, intentionally outside Crystal's seven
+    /// immediate OptionDialog switches.
+    SetPlatformWindowMode {
+        mode: crate::state::UiWindowMode,
+    },
+    ApplyPlatformSettings,
+    CancelPlatformSettings,
+    ResetPlatformSettingsToDefaults,
+    /// Legacy renderer compatibility only. It must not be registered as a
+    /// Crystal OptionDialog control; use `SetPlatformWindowMode` instead.
     SetWindowMode {
         mode: crate::state::UiWindowMode,
     },
+    /// Legacy renderer compatibility only. Crystal has no Apply button.
     ApplyOptions,
+    /// Legacy renderer compatibility only. Crystal Close simply hides.
     CancelOptions,
+    /// Legacy renderer compatibility only. Crystal has no Defaults button.
     ResetOptionsToDefaults,
     // In-game panels
     ClosePanel,

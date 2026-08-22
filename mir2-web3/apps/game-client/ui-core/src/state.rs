@@ -27,6 +27,9 @@ pub enum UiPanel {
     Skill,
     QuestLog,
     Options,
+    /// Native host extension. This is deliberately not Crystal's
+    /// `OptionDialog` and has its own staged Apply/Cancel contract.
+    PlatformSettings,
     Menu,
     GameShop,
     NpcShop,
@@ -43,19 +46,103 @@ pub enum UiPanel {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub enum UiSecurityPanel {
+    #[default]
+    None,
+    ChangePassword,
+    SafeKey,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct UiSecurityState {
+    pub panel: UiSecurityPanel,
+    /// Held until an authoritative result arrives. No credential is stored.
+    pub change_password_pending: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum UiWindowMode {
     #[default]
     Windowed,
     Fullscreen,
 }
 
+/// Settings that belong to the native host rather than Crystal's
+/// `OptionDialog`. Keeping this separate prevents a platform window toggle
+/// from changing the semantics of Crystal's immediate local controls.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct UiPlatformSettings {
+    pub window_mode: UiWindowMode,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UiOptions {
+    /// Crystal `Settings.SkillMode`: `false` selects Ctrl skill bindings and
+    /// `true` selects tilde skill bindings.
+    #[serde(default)]
+    pub skill_mode: bool,
+    #[serde(default = "default_true")]
+    pub skill_bar: bool,
+    #[serde(default = "default_true")]
+    pub effect: bool,
+    #[serde(default = "default_true")]
+    pub drop_view: bool,
+    #[serde(default = "default_true")]
+    pub name_view: bool,
+    #[serde(default = "default_true")]
+    pub hp_view: bool,
+    #[serde(default)]
+    pub new_move: bool,
     pub music_enabled: bool,
     pub music_volume: u8,
     pub sound_enabled: bool,
     pub sound_volume: u8,
+    /// Compatibility mirror for older renderers. The canonical native window
+    /// setting lives in [`UiPlatformSettings`]; Crystal controls never mutate
+    /// this field.
     pub window_mode: UiWindowMode,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+/// The seven persisted local switches owned by Crystal's OptionDialog.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum UiCrystalOption {
+    SkillMode,
+    SkillBar,
+    Effect,
+    DropView,
+    NameView,
+    HpView,
+    NewMove,
+}
+
+/// Runtime/persistence payload for Crystal OptionDialog's exact local fields.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalClientOptions {
+    pub skill_mode: bool,
+    pub skill_bar: bool,
+    pub effect: bool,
+    pub drop_view: bool,
+    pub name_view: bool,
+    pub hp_view: bool,
+    pub new_move: bool,
+}
+
+impl Default for CrystalClientOptions {
+    fn default() -> Self {
+        Self {
+            skill_mode: false,
+            skill_bar: true,
+            effect: true,
+            drop_view: true,
+            name_view: true,
+            hp_view: true,
+            new_move: false,
+        }
+    }
 }
 
 pub const MAIL_MAX_ATTACHMENTS: usize = 5;
@@ -90,6 +177,13 @@ impl MailComposeDraft {
 impl Default for UiOptions {
     fn default() -> Self {
         Self {
+            skill_mode: false,
+            skill_bar: true,
+            effect: true,
+            drop_view: true,
+            name_view: true,
+            hp_view: true,
+            new_move: false,
             music_enabled: true,
             music_volume: 80,
             sound_enabled: true,
@@ -104,6 +198,42 @@ impl UiOptions {
 
     pub fn clamp_volume(volume: u8) -> u8 {
         volume.min(Self::MAX_VOLUME)
+    }
+
+    pub fn set_crystal_option(&mut self, option: UiCrystalOption, enabled: bool) {
+        match option {
+            UiCrystalOption::SkillMode => self.skill_mode = enabled,
+            UiCrystalOption::SkillBar => self.skill_bar = enabled,
+            UiCrystalOption::Effect => self.effect = enabled,
+            UiCrystalOption::DropView => self.drop_view = enabled,
+            UiCrystalOption::NameView => self.name_view = enabled,
+            UiCrystalOption::HpView => self.hp_view = enabled,
+            UiCrystalOption::NewMove => self.new_move = enabled,
+        }
+    }
+
+    pub fn crystal_option(&self, option: UiCrystalOption) -> bool {
+        match option {
+            UiCrystalOption::SkillMode => self.skill_mode,
+            UiCrystalOption::SkillBar => self.skill_bar,
+            UiCrystalOption::Effect => self.effect,
+            UiCrystalOption::DropView => self.drop_view,
+            UiCrystalOption::NameView => self.name_view,
+            UiCrystalOption::HpView => self.hp_view,
+            UiCrystalOption::NewMove => self.new_move,
+        }
+    }
+
+    pub fn crystal(&self) -> CrystalClientOptions {
+        CrystalClientOptions {
+            skill_mode: self.skill_mode,
+            skill_bar: self.skill_bar,
+            effect: self.effect,
+            drop_view: self.drop_view,
+            name_view: self.name_view,
+            hp_view: self.hp_view,
+            new_move: self.new_move,
+        }
     }
 }
 
@@ -256,13 +386,30 @@ pub struct UiState {
     pub panel: UiPanel,
     pub login_account: String,
     pub login_password: String,
+    #[serde(default)]
+    pub security: UiSecurityState,
     pub selected_character: Option<i32>,
     pub chat_focused: bool,
     pub minimap_visible: bool,
     /// Last applied settings. Adapters persist these through `UiEffect`.
     pub options: UiOptions,
-    /// Working copy used only while the Options panel is open.
+    /// Crystal OptionDialog is immediate: it has no staged draft.
     pub options_draft: Option<UiOptions>,
+    /// Native-only settings are isolated from Crystal's OptionDialog.
+    #[serde(default)]
+    pub platform_settings: UiPlatformSettings,
+    /// The only staged settings draft. It exists solely for the separate
+    /// native Platform Settings surface.
+    #[serde(skip)]
+    pub platform_settings_draft: Option<UiPlatformSettings>,
+    /// Last server-authoritative `AllowObserve` value. OptionDialog may only
+    /// request a change; it never commits this value optimistically.
+    #[serde(default)]
+    pub observe_allowed: bool,
+    /// Desired value awaiting an authoritative server update. This is
+    /// transient session state and is deliberately excluded from persistence.
+    #[serde(skip)]
+    pub observe_request_pending: Option<bool>,
     /// Last applied local chat settings.
     pub chat_settings: UiChatSettings,
     /// Working copy used only while the Chat Settings panel is open.
@@ -292,12 +439,17 @@ impl Default for UiState {
             panel: UiPanel::default(),
             login_account: String::new(),
             login_password: String::new(),
+            security: UiSecurityState::default(),
             selected_character: None,
             chat_focused: false,
             // Crystal's native HUD starts with the minimap visible.
             minimap_visible: true,
             options: UiOptions::default(),
             options_draft: None,
+            platform_settings: UiPlatformSettings::default(),
+            platform_settings_draft: None,
+            observe_allowed: false,
+            observe_request_pending: None,
             chat_settings: UiChatSettings::default(),
             chat_settings_draft: None,
             mail_compose: None,
@@ -505,5 +657,13 @@ impl UiState {
 
     pub fn mail_compose_open(&self) -> bool {
         self.mail_compose.is_some()
+    }
+
+    pub fn change_password_open(&self) -> bool {
+        self.security.panel == UiSecurityPanel::ChangePassword
+    }
+
+    pub fn safe_key_open(&self) -> bool {
+        self.security.panel == UiSecurityPanel::SafeKey
     }
 }

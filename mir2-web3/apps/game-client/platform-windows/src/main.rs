@@ -115,6 +115,11 @@ fn main() {
     app.insert_resource(mir2_client_bevy::native_shell::NativeUiIntentQueue::default());
     app.insert_resource(shell_bridge::GatewayEventInbox::new(event_rx));
     app.insert_resource(gameplay_bridge::GameplayEventInbox::new(gameplay_rx));
+    // The Big Map model and its bounded request queue are renderer-neutral.
+    // Crystal UI wiring can consume these resources later without owning
+    // gateway state or fabricating transport results.
+    app.init_resource::<mir2_client_bevy::big_map::BigMapModel>();
+    app.init_resource::<mir2_client_bevy::big_map::BigMapGatewayIntentQueue>();
     app.init_resource::<entity_presentation::NativeEntityPresentation>();
     app.init_resource::<entity_overlays::NativeEntityOverlays>();
     app.init_resource::<effects::NativeEffects>();
@@ -122,10 +127,28 @@ fn main() {
         session.auto_login.as_ref(),
     ));
     app.insert_resource(input::GatewayCommands::new(command_tx.clone()));
+    // Apply network session transitions before UI or world input. A queued
+    // disconnect/login transition must win over a same-frame D/click event.
+    app.add_systems(
+        bevy::app::Update,
+        shell_bridge::drain_gateway_events
+            .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
+    app.add_systems(
+        bevy::app::Update,
+        input::sanitize_native_hud_pointer_input
+            .after(shell_bridge::drain_gateway_events)
+            .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
+    app.add_systems(
+        bevy::app::Update,
+        input::mouse_npc_interaction_system
+            .before(gameplay_bridge::forward_quest_ui_intents)
+            .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
     app.add_systems(
         bevy::app::Update,
         (
-            shell_bridge::drain_gateway_events,
             shell_bridge::forward_native_ui_intents,
             gameplay_bridge::forward_quest_ui_intents,
             input::keyboard_walk_system,
@@ -145,6 +168,13 @@ fn main() {
             effects::tick_native_effects,
         )
             .chain(),
+    );
+    // Flush packet-authoritative map state first. A same-frame map reset must
+    // invalidate stale NPC object ids before any queued Big Map request can
+    // cross the Windows gateway boundary.
+    app.add_systems(
+        bevy::app::Update,
+        gameplay_bridge::forward_big_map_intents.after(gameplay_bridge::drain_gameplay_events),
     );
 
     eprintln!("[platform-windows] native window opened; runtime running");

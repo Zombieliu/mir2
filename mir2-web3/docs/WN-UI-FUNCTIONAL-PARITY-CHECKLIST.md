@@ -52,6 +52,16 @@
 > `StoreItem`、`TakeBackItem`、`StorageUnlockResult`、`StoragePasswordResult` 与
 > `ResizeStorage` 均产生可关联 ACK/NACK；失败结果只结束对应 pending，不在客户端
 > 伪造物品或仓库状态。频道过滤与 NPC Sell/Repair 专用服务模式仍为 OPEN。
+>
+> 2026-08-23 R7 非视觉功能收口：登录/注册已采用独立 in-flight 状态、逐轮去重和
+> 脱敏诊断；Storage ACK 只释放一个精确关联操作；NPC Buy/Sell/Repair/
+> SpecialRepair 使用互斥的服务端权威模式；聊天已覆盖 Crystal 13 类频道及别名。
+> Group 已支持名称输入邀请，Guild 已支持名称招募、公告编辑、成员等级调整、8 个
+> 权限位、112 格权威仓库、翻页以及金币存取；Windows 与 Android 均走共享 typed
+> intent/command 边界。Registry 为 173。自动化门禁：ui-core 36/36、client-bevy
+> default 119/119、native-ui 366/366、Windows 275/275、runtime 180/180、Android
+> 45/45，Web typecheck 通过。本轮按用户要求没有控制桌面做视觉验收，因此这里只
+> 关闭非视觉代码门禁；真实窗口、真人输入、DPI、Android 真机和逐像素签署仍 OPEN。
 
 ## 0. Candidate 硬门禁
 
@@ -85,14 +95,14 @@
 | 游戏 HUD | Quest | 独立 QuestLog 状态，三条权威任务，Q 开关 | 真实窗口基础视觉/导航通过 |
 | 游戏 HUD | Option | 七项 Options runtime hooks、窗口模式、配置持久化及真实 WAV 音频后端已接线；Crystal 立即提交语义保留 | 代码门禁通过；待真人听感/设备验收 |
 | 游戏 HUD | Menu | 打开 Crystal 纵向菜单；Escape 关闭 | 真实窗口基础视觉/导航通过 |
-| 游戏 HUD | Group | Crystal 232x249 原始框体、成员视口、Switch/Add/Delete/Close 与权威状态 | 基础视觉与 Switch/Close 实机通过；邀请文本输入、职业/HP 图标、会长转让仍 OPEN |
-| 游戏 HUD | Guild | Crystal 590x432 原始框体、Notice/Members/Stats、成员视口与权威状态 | 基础视觉与页签切换实机通过；权限、等级、仓库及非空成员动作仍 OPEN |
+| 游戏 HUD | Group | Crystal 232x249 原始框体、成员视口、Switch/Add/Delete/Close、名称输入邀请与权威状态 | 非视觉功能门禁通过；职业/HP 图标、会长转让和真人输入仍 OPEN |
+| 游戏 HUD | Guild | Crystal 590x432 原始框体、Notice/Members/Storage/Ranks、名称招募、公告、成员等级、8 权限位、112 格仓库与金币存取 | 非视觉功能门禁通过；非空真实公会、视觉和真人动作仍 OPEN |
 | 游戏 HUD | Game Shop | 105 条权威商品、4x2 分页、选择与禁用购买状态 | 真实窗口基础视觉/导航通过 |
 | 游戏 HUD | Mail | 已接严格 Mail 数据状态 | 空邮箱真实窗口通过；非空操作待验 |
 | 游戏 HUD | Big Map | map 101、玩家位置、40 NPC 与标记延迟后真实显示 | 真实窗口基础视觉/导航通过；加载态待优化 |
 | 游戏 HUD | Minimap Toggle | 独立可见状态 | 待真人点击验收 |
-| 聊天栏 | 接收、滚动、频道过滤、Resize、Settings | `Chat`/`ObjectChat` 双形态接收已接；共享状态、消费、Apply/Cancel/Defaults 与本地持久化已接线 | 普通/系统接收代码门禁通过；过滤与真人输入仍 OPEN |
-| NPC/任务 | 对话选项、Attack、PickUp | 已有命令桥 | 待 UI 点击与服务端结果验收 |
+| 聊天栏 | 接收、滚动、频道过滤、Resize、Settings | `Chat`/`ObjectChat` 双形态接收；13 类频道及别名独立过滤；共享状态、Apply/Cancel/Defaults 与本地持久化已接线 | 非视觉代码门禁通过；真人输入仍 OPEN |
+| NPC/任务 | 对话选项、Attack、PickUp、Buy/Sell/Repair/SpecialRepair | 已有命令桥；商店服务模式由服务端互斥驱动，按钮按模式 fail-closed | 非视觉代码门禁通过；待 UI 点击与服务端结果验收 |
 | 物品弹窗 | Use / Equip / Unequip | 已有命令桥 | 待成功与失败路径验收 |
 
 代码证据入口：

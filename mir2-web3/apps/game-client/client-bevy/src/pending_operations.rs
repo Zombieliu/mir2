@@ -293,7 +293,7 @@ pub fn apply_storage_operation_ack(
     pending: &mut PendingOperations,
     ack: &StorageOperationAck,
 ) -> usize {
-    pending.release_matching(|key| match (ack, key) {
+    pending.release_one_matching(|key| match (ack, key) {
         (
             StorageOperationAck::Deposit { from, to, .. },
             PendingOperationKey::StorageDeposit {
@@ -328,9 +328,21 @@ pub struct PendingOperations {
 }
 
 impl PendingOperations {
-    /// Register a logical operation. Returns `false` for an exact duplicate.
+    /// Register a logical operation.
+    ///
+    /// Crystal's storage transfer ACKs do not contain the source item id. A
+    /// deposit/withdraw pair therefore acts as an indistinguishable protocol
+    /// slot: allowing two item ids in the same slot would make a later ACK
+    /// impossible to correlate safely. Other operation families retain their
+    /// exact-key de-duplication semantics.
     pub fn try_begin(&mut self, key: PendingOperationKey) -> bool {
-        if self.entries.contains(&key) || self.entries.len() >= MAX_PENDING_OPERATIONS {
+        if self.entries.contains(&key)
+            || self
+                .entries
+                .iter()
+                .any(|pending| storage_transfer_slot_conflicts(pending, &key))
+            || self.entries.len() >= MAX_PENDING_OPERATIONS
+        {
             return false;
         }
         self.entries.insert(key)
@@ -391,6 +403,52 @@ impl PendingOperations {
         let before = self.entries.len();
         self.entries.retain(|key| !proven(key));
         before - self.entries.len()
+    }
+
+    /// Release at most one entry for protocol receipts that lack a request
+    /// id. The registration invariant normally guarantees there is only one
+    /// candidate, while this method also keeps a malformed/legacy queue from
+    /// turning one ACK into a bulk release.
+    fn release_one_matching(
+        &mut self,
+        mut proven: impl FnMut(&PendingOperationKey) -> bool,
+    ) -> usize {
+        let key = self.entries.iter().find(|key| proven(key)).cloned();
+        key.map(|key| if self.entries.remove(&key) { 1 } else { 0 })
+            .unwrap_or_default()
+    }
+}
+
+fn storage_transfer_slot_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    match (pending, candidate) {
+        (
+            PendingOperationKey::StorageDeposit {
+                from: pending_from,
+                to: pending_to,
+                ..
+            },
+            PendingOperationKey::StorageDeposit {
+                from: candidate_from,
+                to: candidate_to,
+                ..
+            },
+        )
+        | (
+            PendingOperationKey::StorageWithdraw {
+                from: pending_from,
+                to: pending_to,
+                ..
+            },
+            PendingOperationKey::StorageWithdraw {
+                from: candidate_from,
+                to: candidate_to,
+                ..
+            },
+        ) => pending_from == candidate_from && pending_to == candidate_to,
+        _ => false,
     }
 }
 
@@ -1401,6 +1459,173 @@ mod tests {
         assert!(!pending.contains(&unlock));
         assert!(pending.contains(&remove));
         assert!(!StorageOperationAck::Unlock { success: false }.success());
+    }
+
+    #[test]
+    fn storage_transfer_registration_rejects_same_coordinates_with_different_ids() {
+        let mut pending = PendingOperations::default();
+        let first = PendingOperationKey::StorageDeposit {
+            unique_id: 55,
+            from: 3,
+            to: 9,
+        };
+        let indistinguishable = PendingOperationKey::StorageDeposit {
+            unique_id: 56,
+            from: 3,
+            to: 9,
+        };
+
+        assert!(pending.try_begin(first.clone()));
+        assert!(!pending.try_begin(indistinguishable.clone()));
+        assert!(pending.contains(&first));
+        assert!(!pending.contains(&indistinguishable));
+
+        // Deposit and withdraw remain distinct protocol operations even when
+        // they happen to use the same source/destination pair.
+        assert!(pending.try_begin(PendingOperationKey::StorageWithdraw {
+            unique_id: 56,
+            from: 3,
+            to: 9,
+        }));
+    }
+
+    #[test]
+    fn storage_transfer_slot_reuse_after_ack_releases_only_the_current_pending() {
+        let mut pending = PendingOperations::default();
+        let first = PendingOperationKey::StorageDeposit {
+            unique_id: 55,
+            from: 3,
+            to: 9,
+        };
+        let reused = PendingOperationKey::StorageDeposit {
+            unique_id: 56,
+            from: 3,
+            to: 9,
+        };
+        let unrelated = PendingOperationKey::StorageDeposit {
+            unique_id: 57,
+            from: 4,
+            to: 10,
+        };
+
+        assert!(pending.try_begin(first));
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Deposit {
+                    from: 3,
+                    to: 9,
+                    success: true,
+                },
+            ),
+            1
+        );
+        assert!(pending.try_begin(reused.clone()));
+        assert!(pending.try_begin(unrelated.clone()));
+
+        // A delayed/duplicate receipt can consume only the one currently
+        // registered for that protocol slot; it cannot release the unrelated
+        // transfer or more than one entry.
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Deposit {
+                    from: 3,
+                    to: 9,
+                    success: true,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&reused));
+        assert!(pending.contains(&unrelated));
+    }
+
+    #[test]
+    fn storage_ack_releases_at_most_one_legacy_duplicate_slot() {
+        let mut pending = PendingOperations::default();
+        let first = PendingOperationKey::StorageDeposit {
+            unique_id: 61,
+            from: 5,
+            to: 12,
+        };
+        let legacy_duplicate = PendingOperationKey::StorageDeposit {
+            unique_id: 62,
+            from: 5,
+            to: 12,
+        };
+
+        // Simulate a queue persisted or assembled by a pre-fix client. New
+        // registrations cannot create this state, but ACK handling must still
+        // be bounded if it is encountered during recovery.
+        assert!(pending.entries.insert(first.clone()));
+        assert!(pending.entries.insert(legacy_duplicate.clone()));
+
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Deposit {
+                    from: 5,
+                    to: 12,
+                    success: true,
+                },
+            ),
+            1
+        );
+        assert_eq!(pending.len(), 1);
+        assert!(pending.contains(&first) ^ pending.contains(&legacy_duplicate));
+    }
+
+    #[test]
+    fn storage_failed_ack_releases_one_and_repeated_ack_is_noop() {
+        let mut pending = PendingOperations::default();
+        let withdraw = PendingOperationKey::StorageWithdraw {
+            unique_id: 80,
+            from: 11,
+            to: 2,
+        };
+        assert!(pending.try_begin(withdraw));
+
+        let failed = StorageOperationAck::Withdraw {
+            from: 11,
+            to: 2,
+            success: false,
+        };
+        assert_eq!(apply_storage_operation_ack(&mut pending, &failed), 1);
+        assert!(pending.is_empty());
+        assert_eq!(apply_storage_operation_ack(&mut pending, &failed), 0);
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn storage_ack_never_releases_the_other_transfer_kind() {
+        let mut pending = PendingOperations::default();
+        let deposit = PendingOperationKey::StorageDeposit {
+            unique_id: 91,
+            from: 1,
+            to: 7,
+        };
+        let withdraw = PendingOperationKey::StorageWithdraw {
+            unique_id: 92,
+            from: 1,
+            to: 7,
+        };
+        assert!(pending.try_begin(deposit.clone()));
+        assert!(pending.try_begin(withdraw.clone()));
+
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Deposit {
+                    from: 1,
+                    to: 7,
+                    success: false,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&deposit));
+        assert!(pending.contains(&withdraw));
     }
 
     #[test]

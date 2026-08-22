@@ -116,19 +116,6 @@ pub fn spawn_crystal_image_button<T: Component>(
                 ..default()
             },
         ));
-        if !enabled {
-            button.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.0),
-                    top: Val::Px(0.0),
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    ..default()
-                },
-                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.32)),
-            ));
-        }
     });
 }
 

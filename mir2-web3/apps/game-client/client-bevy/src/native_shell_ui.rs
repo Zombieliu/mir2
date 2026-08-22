@@ -235,11 +235,11 @@ fn apply_and_queue(
     intent: NativeUiIntent,
 ) -> bool {
     let ok = model.apply_ui_intent(intent.clone());
-    // The host drains this queue asynchronously.  A double click/Enter press
-    // must not enqueue a second wire command before the first one is handed
-    // to the gateway; the model's in-flight flags provide the stronger guard
-    // for destructive/password operations.
-    if ok && is_gateway_intent(&intent) && queue.is_empty() {
+    // The model owns logical-operation in-flight state.  Do not use the
+    // queue's global emptiness as a gate: a pending Register must not swallow
+    // a distinct Login, and draining the queue must not reopen a request
+    // before its ACK/failure arrives.
+    if ok && is_gateway_intent(&intent) {
         queue.push(intent);
     }
     ok
@@ -1914,6 +1914,7 @@ fn body_font(size: f32) -> TextFont {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::native_shell::{CharacterSummary, NativeGatewayEvent};
 
     fn keyboard_event(
         key_code: KeyCode,
@@ -2237,8 +2238,135 @@ mod tests {
         let mut queue = NativeUiIntentQueue::default();
 
         assert!(apply_and_queue(&mut model, &mut queue, intent.clone()));
+        assert!(!apply_and_queue(&mut model, &mut queue, intent));
+        assert_eq!(queue.drain().count(), 1);
+    }
+
+    #[test]
+    fn different_gateway_commands_are_not_swallowed_by_a_nonempty_queue() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Login;
+        model.login.account = "hero".to_owned();
+        model.login.password = "secret".to_owned();
+        let mut queue = NativeUiIntentQueue::default();
+
+        assert!(apply_and_queue(
+            &mut model,
+            &mut queue,
+            NativeUiIntent::RegisterAccount,
+        ));
+        assert!(apply_and_queue(
+            &mut model,
+            &mut queue,
+            NativeUiIntent::Login
+        ));
+
+        assert_eq!(
+            queue.drain().collect::<Vec<_>>(),
+            vec![NativeUiIntent::RegisterAccount, NativeUiIntent::Login]
+        );
+        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.register_request_in_flight);
+        assert!(model.login_request_in_flight);
+    }
+
+    #[test]
+    fn draining_does_not_reopen_a_request_before_its_ack() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterCreate;
+        model.character_create.name = "Hero".to_owned();
+        let intent = NativeUiIntent::CreateCharacter {
+            name: "Hero".to_owned(),
+            class_name: "Warrior".to_owned(),
+            gender_name: "Male".to_owned(),
+        };
+        let mut queue = NativeUiIntentQueue::default();
+
+        assert!(apply_and_queue(&mut model, &mut queue, intent.clone()));
+        assert_eq!(queue.drain().count(), 1);
+        assert!(!apply_and_queue(&mut model, &mut queue, intent.clone()));
+        assert!(queue.is_empty());
+        assert!(model.create_character_request_in_flight);
+
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::CharacterCreated {
+                character: CharacterSummary::new(1, "Hero", 1, "Warrior", "Male"),
+            })
+        );
+        assert!(!model.create_character_request_in_flight);
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenCharacterCreate));
         assert!(apply_and_queue(&mut model, &mut queue, intent));
         assert_eq!(queue.drain().count(), 1);
+    }
+
+    #[test]
+    fn operation_failure_releases_register_and_login_for_recovery() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Login;
+        model.login.account = "hero".to_owned();
+        model.login.password = "secret".to_owned();
+        let mut queue = NativeUiIntentQueue::default();
+
+        assert!(apply_and_queue(
+            &mut model,
+            &mut queue,
+            NativeUiIntent::RegisterAccount,
+        ));
+        queue.drain().for_each(drop);
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+                message: "already exists".to_owned(),
+            })
+        );
+        assert!(!model.register_request_in_flight);
+        assert!(apply_and_queue(
+            &mut model,
+            &mut queue,
+            NativeUiIntent::RegisterAccount,
+        ));
+        queue.drain().for_each(drop);
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect {
+            reason: Some("network lost".to_owned()),
+        }));
+        assert!(model.apply_ui_intent(NativeUiIntent::Retry));
+        assert!(model.retry_request_in_flight);
+        assert!(model.apply_gateway_event(NativeGatewayEvent::Connected));
+        assert!(!model.retry_request_in_flight);
+        assert_eq!(model.screen, NativeShellScreen::Login);
+    }
+
+    #[test]
+    fn duplicate_register_click_is_rejected_after_queue_drain_without_logging_password() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Login;
+        model.login.account = "hero".to_owned();
+        model.login.password = "super-secret".to_owned();
+        let mut queue = NativeUiIntentQueue::default();
+
+        assert!(apply_and_queue(
+            &mut model,
+            &mut queue,
+            NativeUiIntent::RegisterAccount,
+        ));
+        queue.drain().for_each(drop);
+        assert!(!apply_and_queue(
+            &mut model,
+            &mut queue,
+            NativeUiIntent::RegisterAccount,
+        ));
+        assert!(queue.is_empty());
+        assert!(!format!("{model:?}").contains("super-secret"));
+        assert!(!format!(
+            "{:?}",
+            NativeUiIntent::SubmitChangePassword {
+                account_id: "hero".to_owned(),
+                old_password: "super-secret".to_owned(),
+                new_password: "new-secret".to_owned(),
+                confirm_password: "new-secret".to_owned(),
+            }
+        )
+        .contains("super-secret"));
     }
 
     #[test]

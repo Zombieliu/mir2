@@ -1,8 +1,10 @@
 //! Pure reducer: (state, action) -> (state, effects). No I/O, no Bevy.
 
 use crate::action::UiAction;
-use crate::effect::{GatewayCommand, UiEffect};
-use crate::state::{UiChatSettings, UiOptions, UiPanel, UiScreen, UiState};
+use crate::effect::{GatewayCommand, SecurityRequest, UiEffect};
+use crate::state::{
+    UiChatSettings, UiOptions, UiPanel, UiPlatformSettings, UiScreen, UiSecurityPanel, UiState,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Transition {
@@ -18,13 +20,20 @@ fn panel(next: &mut UiState, panel: UiPanel) {
     if next.panel == panel {
         next.panel = UiPanel::None;
         next.options_draft = None;
+        next.platform_settings_draft = None;
         next.chat_settings_draft = None;
     } else {
         next.options_draft = None;
+        next.platform_settings_draft = None;
         next.chat_settings_draft = None;
         next.panel = panel;
         match panel {
-            UiPanel::Options => next.options_draft = Some(next.options.clone()),
+            // Crystal OptionDialog changes Settings immediately. There is no
+            // draft to commit or discard when it closes.
+            UiPanel::Options => {}
+            UiPanel::PlatformSettings => {
+                next.platform_settings_draft = Some(next.platform_settings);
+            }
             UiPanel::ChatSettings => {
                 next.chat_settings_draft = Some(next.chat_settings);
             }
@@ -36,17 +45,30 @@ fn panel(next: &mut UiState, panel: UiPanel) {
 fn close_panels(next: &mut UiState) {
     next.panel = UiPanel::None;
     next.options_draft = None;
+    next.platform_settings_draft = None;
     next.chat_settings_draft = None;
 }
 
-fn draft(next: &mut UiState) -> Option<&mut UiOptions> {
-    if next.panel != UiPanel::Options {
+fn platform_draft(next: &mut UiState) -> Option<&mut UiPlatformSettings> {
+    if next.panel != UiPanel::PlatformSettings {
         return None;
     }
-    if next.options_draft.is_none() {
-        next.options_draft = Some(next.options.clone());
+    if next.platform_settings_draft.is_none() {
+        next.platform_settings_draft = Some(next.platform_settings);
     }
-    next.options_draft.as_mut()
+    next.platform_settings_draft.as_mut()
+}
+
+fn persist_crystal_options(effects: &mut Vec<UiEffect>, options: UiOptions, apply_audio: bool) {
+    if apply_audio {
+        effects.push(UiEffect::ApplyAudioSettings {
+            music_enabled: options.music_enabled,
+            music_volume: options.music_volume,
+            sound_enabled: options.sound_enabled,
+            sound_volume: options.sound_volume,
+        });
+    }
+    effects.push(UiEffect::PersistOptions { options });
 }
 
 fn chat_draft(next: &mut UiState) -> Option<&mut UiChatSettings> {
@@ -61,6 +83,13 @@ fn chat_draft(next: &mut UiState) -> Option<&mut UiChatSettings> {
 
 fn noop(effects: &mut Vec<UiEffect>) {
     effects.push(UiEffect::Noop);
+}
+
+fn security_notice(effects: &mut Vec<UiEffect>, message: &str) {
+    effects.push(UiEffect::ShowNotice {
+        message: message.to_owned(),
+        is_error: true,
+    });
 }
 
 pub fn reduce(state: &UiState, action: UiAction) -> Transition {
@@ -92,8 +121,79 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 }));
             }
         }
-        UiAction::ChangePassword => noop(&mut effects),
-        UiAction::SafeKey => noop(&mut effects),
+        UiAction::ChangePassword => {
+            if state.screen == UiScreen::Login {
+                next.security.panel = UiSecurityPanel::ChangePassword;
+                next.security.change_password_pending = false;
+            }
+        }
+        UiAction::SafeKey => {
+            if state.screen == UiScreen::Login {
+                next.security.panel = UiSecurityPanel::SafeKey;
+                next.security.change_password_pending = false;
+            }
+        }
+        UiAction::SubmitChangePassword {
+            account,
+            old_password,
+            new_password,
+            confirm_password,
+        } => {
+            if state.screen != UiScreen::Login
+                || state.security.panel != UiSecurityPanel::ChangePassword
+            {
+                return Transition {
+                    state: next,
+                    effects,
+                };
+            }
+            if state.security.change_password_pending {
+                return Transition {
+                    state: next,
+                    effects,
+                };
+            }
+            if account.trim().is_empty() {
+                security_notice(&mut effects, "account is required");
+            } else if old_password.is_empty() || new_password.is_empty() {
+                security_notice(&mut effects, "password fields are required");
+            } else if new_password != confirm_password {
+                security_notice(&mut effects, "new passwords do not match");
+            } else {
+                next.security.change_password_pending = true;
+                effects.push(UiEffect::SecurityRequest(SecurityRequest::ChangePassword {
+                    account,
+                    old_password,
+                    new_password,
+                }));
+            }
+        }
+        UiAction::ChangePasswordResult { success, message } => {
+            if !state.security.change_password_pending {
+                return Transition {
+                    state: next,
+                    effects,
+                };
+            }
+            next.security.change_password_pending = false;
+            if success {
+                next.security.panel = UiSecurityPanel::None;
+            }
+            effects.push(UiEffect::ShowNotice {
+                message,
+                is_error: !success,
+            });
+        }
+        UiAction::CancelChangePassword => {
+            if state.security.panel == UiSecurityPanel::ChangePassword {
+                next.security.panel = UiSecurityPanel::None;
+            }
+        }
+        UiAction::CloseSafeKey => {
+            if state.security.panel == UiSecurityPanel::SafeKey {
+                next.security.panel = UiSecurityPanel::None;
+            }
+        }
         UiAction::CancelLogin => {
             if state.screen == UiScreen::Authenticating {
                 next.screen = UiScreen::Login;
@@ -275,7 +375,10 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
         UiAction::SubmitMail => {
             let Some(compose) = state.mail_compose.as_ref() else {
                 noop(&mut effects);
-                return Transition { state: next, effects };
+                return Transition {
+                    state: next,
+                    effects,
+                };
             };
             let recipient = compose.recipient.trim();
             let message = compose.message.trim();
@@ -309,58 +412,94 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
             }
         }
         UiAction::SetMusicEnabled { enabled } => {
-            if let Some(o) = draft(&mut next) {
-                o.music_enabled = enabled;
+            if state.panel == UiPanel::Options && state.options.music_enabled != enabled {
+                next.options.music_enabled = enabled;
+                persist_crystal_options(&mut effects, next.options.clone(), true);
             }
         }
         UiAction::SetMusicVolume { volume } => {
-            if let Some(o) = draft(&mut next) {
-                o.music_volume = UiOptions::clamp_volume(volume);
+            let volume = UiOptions::clamp_volume(volume);
+            if state.panel == UiPanel::Options && state.options.music_volume != volume {
+                next.options.music_volume = volume;
+                persist_crystal_options(&mut effects, next.options.clone(), true);
             }
         }
         UiAction::SetSoundEnabled { enabled } => {
-            if let Some(o) = draft(&mut next) {
-                o.sound_enabled = enabled;
+            if state.panel == UiPanel::Options && state.options.sound_enabled != enabled {
+                next.options.sound_enabled = enabled;
+                persist_crystal_options(&mut effects, next.options.clone(), true);
             }
         }
         UiAction::SetSoundVolume { volume } => {
-            if let Some(o) = draft(&mut next) {
-                o.sound_volume = UiOptions::clamp_volume(volume);
+            let volume = UiOptions::clamp_volume(volume);
+            if state.panel == UiPanel::Options && state.options.sound_volume != volume {
+                next.options.sound_volume = volume;
+                persist_crystal_options(&mut effects, next.options.clone(), true);
             }
         }
-        UiAction::SetWindowMode { mode } => {
-            if let Some(o) = draft(&mut next) {
-                o.window_mode = mode;
+        UiAction::SetCrystalOption { option, enabled } => {
+            if state.panel == UiPanel::Options && state.options.crystal_option(option) != enabled {
+                next.options.set_crystal_option(option, enabled);
+                persist_crystal_options(&mut effects, next.options.clone(), false);
             }
         }
-        UiAction::ApplyOptions => {
-            if state.panel == UiPanel::Options {
-                if let Some(options) = next.options_draft.take() {
-                    next.options = options.clone();
+        UiAction::RequestObserve { allow } => {
+            if state.panel == UiPanel::Options
+                && state.observe_allowed != allow
+                && state.observe_request_pending.is_none()
+            {
+                next.observe_request_pending = Some(allow);
+                effects.push(UiEffect::RequestObserve { allow });
+            }
+        }
+        UiAction::ObserveAuthoritativeChanged { allow } => {
+            next.observe_allowed = allow;
+            next.observe_request_pending = None;
+        }
+        UiAction::OpenPlatformSettings => {
+            if in_game(state) {
+                panel(&mut next, UiPanel::PlatformSettings);
+            }
+        }
+        UiAction::SetPlatformWindowMode { mode } => {
+            if let Some(settings) = platform_draft(&mut next) {
+                settings.window_mode = mode;
+            }
+        }
+        UiAction::ApplyPlatformSettings => {
+            if state.panel == UiPanel::PlatformSettings {
+                if let Some(settings) = next.platform_settings_draft.take() {
+                    next.platform_settings = settings;
+                    // Keep old renderers compiling without allowing Crystal
+                    // controls to mutate the platform setting.
+                    next.options.window_mode = settings.window_mode;
                     next.panel = UiPanel::None;
-                    effects.push(UiEffect::ApplyAudioSettings {
-                        music_enabled: options.music_enabled,
-                        music_volume: options.music_volume,
-                        sound_enabled: options.sound_enabled,
-                        sound_volume: options.sound_volume,
-                    });
                     effects.push(UiEffect::ApplyWindowMode {
-                        mode: options.window_mode,
+                        mode: settings.window_mode,
                     });
-                    effects.push(UiEffect::PersistOptions { options });
+                    effects.push(UiEffect::PersistOptions {
+                        options: next.options.clone(),
+                    });
                 }
             }
         }
-        UiAction::CancelOptions => {
-            if state.panel == UiPanel::Options {
+        UiAction::CancelPlatformSettings => {
+            if state.panel == UiPanel::PlatformSettings {
                 close_panels(&mut next);
             }
         }
-        UiAction::ResetOptionsToDefaults => {
-            if let Some(o) = draft(&mut next) {
-                *o = UiOptions::default();
+        UiAction::ResetPlatformSettingsToDefaults => {
+            if let Some(settings) = platform_draft(&mut next) {
+                *settings = UiPlatformSettings::default();
             }
         }
+        // These names remain only so an older renderer can compile while its
+        // non-Crystal settings surface is migrated. They are deliberately
+        // inert from Crystal's Options panel: Close is Hide, never Apply.
+        UiAction::SetWindowMode { .. }
+        | UiAction::ApplyOptions
+        | UiAction::CancelOptions
+        | UiAction::ResetOptionsToDefaults => {}
         UiAction::SetChatFilterVisibility { channel, visible } => {
             if let Some(settings) = chat_draft(&mut next) {
                 settings.set_filter_visible(channel, visible);
@@ -411,7 +550,8 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 && (1..=99).contains(&quantity)
                 && matches!(price_type, 0 | 1)
             {
-                if let Some(request) = next.begin_game_shop_purchase(g_index, quantity, price_type) {
+                if let Some(request) = next.begin_game_shop_purchase(g_index, quantity, price_type)
+                {
                     effects.push(UiEffect::GatewayCommand(GatewayCommand::GameShopBuy {
                         request_id: request.request_id,
                         g_index,
@@ -628,6 +768,18 @@ mod tests {
             UiAction::RegisterAccount,
             UiAction::ChangePassword,
             UiAction::SafeKey,
+            UiAction::SubmitChangePassword {
+                account: "account".into(),
+                old_password: crate::effect::SecretText::new("old"),
+                new_password: crate::effect::SecretText::new("new"),
+                confirm_password: crate::effect::SecretText::new("new"),
+            },
+            UiAction::ChangePasswordResult {
+                success: false,
+                message: "rejected".into(),
+            },
+            UiAction::CancelChangePassword,
+            UiAction::CloseSafeKey,
             UiAction::CancelLogin,
             UiAction::RetryConnection,
             UiAction::SelectCharacter { index: 0 },
@@ -660,6 +812,19 @@ mod tests {
             UiAction::SetMusicVolume { volume: 20 },
             UiAction::SetSoundEnabled { enabled: false },
             UiAction::SetSoundVolume { volume: 20 },
+            UiAction::SetCrystalOption {
+                option: crate::state::UiCrystalOption::Effect,
+                enabled: false,
+            },
+            UiAction::RequestObserve { allow: true },
+            UiAction::ObserveAuthoritativeChanged { allow: true },
+            UiAction::OpenPlatformSettings,
+            UiAction::SetPlatformWindowMode {
+                mode: UiWindowMode::Fullscreen,
+            },
+            UiAction::ApplyPlatformSettings,
+            UiAction::CancelPlatformSettings,
+            UiAction::ResetPlatformSettingsToDefaults,
             UiAction::SetWindowMode {
                 mode: UiWindowMode::Fullscreen,
             },
@@ -831,8 +996,10 @@ mod tests {
                 price_type: 1,
             },
         );
-        assert_eq!(first.state.game_shop_pending.as_ref().unwrap().request_id,
-            "gs-18446744073709551615");
+        assert_eq!(
+            first.state.game_shop_pending.as_ref().unwrap().request_id,
+            "gs-18446744073709551615"
+        );
         assert_eq!(first.state.game_shop_next_request_id, 0);
         let second = reduce(
             &first.state,
@@ -843,7 +1010,10 @@ mod tests {
             },
         );
         assert!(second.effects.is_empty());
-        assert_eq!(second.state.game_shop_pending, first.state.game_shop_pending);
+        assert_eq!(
+            second.state.game_shop_pending,
+            first.state.game_shop_pending
+        );
     }
 
     #[test]
@@ -1004,9 +1174,12 @@ mod tests {
             screen: UiScreen::CharacterSelect,
             ..Default::default()
         };
-        assert!(reduce(&character_select, UiAction::AbandonQuest { quest_index: 42 })
-            .effects
-            .is_empty());
+        assert!(reduce(
+            &character_select,
+            UiAction::AbandonQuest { quest_index: 42 }
+        )
+        .effects
+        .is_empty());
     }
 
     #[test]
@@ -1042,54 +1215,301 @@ mod tests {
     }
 
     #[test]
-    fn options_cancel_and_defaults_keep_committed_values_untouched() {
+    fn crystal_options_commit_immediately_and_close_never_rolls_them_back() {
         let mut state = game();
         state.options.music_volume = 55;
         let opened = reduce(&state, UiAction::OpenOptions).state;
-        let edited = reduce(&opened, UiAction::SetMusicVolume { volume: 12 }).state;
-        assert_eq!(edited.options.music_volume, 55);
-        let reset = reduce(&edited, UiAction::ResetOptionsToDefaults).state;
-        assert_eq!(reset.options.music_volume, 55);
-        assert_eq!(reset.options_draft.unwrap().music_volume, 80);
-        let cancelled = reduce(&edited, UiAction::CancelOptions);
-        assert_eq!(cancelled.state.options.music_volume, 55);
-        assert_eq!(cancelled.state.panel, UiPanel::None);
+        assert!(opened.options_draft.is_none());
+
+        let volume = reduce(&opened, UiAction::SetMusicVolume { volume: 12 });
+        assert_eq!(volume.state.options.music_volume, 12);
+        assert!(matches!(
+            volume.effects.as_slice(),
+            [
+                UiEffect::ApplyAudioSettings {
+                    music_volume: 12,
+                    ..
+                },
+                UiEffect::PersistOptions { .. }
+            ]
+        ));
+        let edited = reduce(
+            &volume.state,
+            UiAction::SetCrystalOption {
+                option: crate::state::UiCrystalOption::Effect,
+                enabled: false,
+            },
+        );
+        assert_eq!(edited.state.options.music_volume, 12);
+        assert!(!edited.state.options.effect);
+        assert!(matches!(
+            edited.effects.as_slice(),
+            [UiEffect::PersistOptions { options }] if !options.effect
+        ));
+
+        // Crystal's CloseButton calls Hide(), not Apply/Cancel. Closing must
+        // retain settings that have already been written.
+        let closed = reduce(&edited.state, UiAction::ClosePanel);
+        assert_eq!(closed.state.options.music_volume, 12);
+        assert!(!closed.state.options.effect);
+        assert_eq!(closed.state.panel, UiPanel::None);
+        assert!(closed.state.options_draft.is_none());
+        assert!(closed.effects.is_empty());
     }
 
     #[test]
-    fn options_apply_commits_and_emits_typed_runtime_and_persistence_effects() {
+    fn every_crystal_switch_persists_at_click_time() {
         let opened = reduce(&game(), UiAction::OpenOptions).state;
-        let edited = reduce(
+        let mut edited = opened;
+        for option in [
+            crate::state::UiCrystalOption::SkillMode,
+            crate::state::UiCrystalOption::SkillBar,
+            crate::state::UiCrystalOption::Effect,
+            crate::state::UiCrystalOption::DropView,
+            crate::state::UiCrystalOption::NameView,
+            crate::state::UiCrystalOption::HpView,
+            crate::state::UiCrystalOption::NewMove,
+        ] {
+            let value = !edited.options.crystal_option(option);
+            let transition = reduce(
+                &edited,
+                UiAction::SetCrystalOption {
+                    option,
+                    enabled: value,
+                },
+            );
+            assert!(matches!(
+                transition.effects.as_slice(),
+                [UiEffect::PersistOptions { options }]
+                    if options.crystal_option(option) == value
+            ));
+            edited = transition.state;
+        }
+        assert!(edited.options.skill_mode);
+        assert!(!edited.options.skill_bar);
+        assert!(!edited.options.effect);
+        assert!(!edited.options.drop_view);
+        assert!(!edited.options.name_view);
+        assert!(!edited.options.hp_view);
+        assert!(edited.options.new_move);
+    }
+
+    #[test]
+    fn platform_settings_are_the_only_staged_window_extension() {
+        let opened = reduce(&game(), UiAction::OpenPlatformSettings).state;
+        assert_eq!(opened.panel, UiPanel::PlatformSettings);
+        assert_eq!(
+            opened.platform_settings_draft,
+            Some(opened.platform_settings)
+        );
+
+        let staged = reduce(
             &opened,
-            UiAction::SetWindowMode {
+            UiAction::SetPlatformWindowMode {
                 mode: UiWindowMode::Fullscreen,
             },
         )
         .state;
-        let applied = reduce(&edited, UiAction::ApplyOptions);
-        assert_eq!(applied.state.options.window_mode, UiWindowMode::Fullscreen);
-        assert_eq!(applied.state.panel, UiPanel::None);
-        assert_eq!(applied.effects.len(), 3);
-        assert!(applied
-            .effects
-            .iter()
-            .any(|effect| matches!(effect, UiEffect::ApplyAudioSettings { .. })));
-        assert!(applied.effects.iter().any(|effect| matches!(
-            effect,
-            UiEffect::ApplyWindowMode {
-                mode: UiWindowMode::Fullscreen
-            }
-        )));
-        assert!(applied
-            .effects
-            .iter()
-            .any(|effect| matches!(effect, UiEffect::PersistOptions { .. })));
-        assert!(
-            reduce(&applied.state, UiAction::ApplyOptions)
-                .effects
-                .is_empty(),
-            "the successor state must not replay option side effects"
+        assert_eq!(staged.platform_settings.window_mode, UiWindowMode::Windowed);
+        assert_eq!(
+            staged
+                .platform_settings_draft
+                .map(|settings| settings.window_mode),
+            Some(UiWindowMode::Fullscreen)
         );
+        let cancelled = reduce(&staged, UiAction::CancelPlatformSettings);
+        assert_eq!(
+            cancelled.state.platform_settings.window_mode,
+            UiWindowMode::Windowed
+        );
+        assert_eq!(cancelled.state.panel, UiPanel::None);
+
+        let reopened = reduce(&cancelled.state, UiAction::OpenPlatformSettings).state;
+        let applied = reduce(
+            &reduce(
+                &reopened,
+                UiAction::SetPlatformWindowMode {
+                    mode: UiWindowMode::Fullscreen,
+                },
+            )
+            .state,
+            UiAction::ApplyPlatformSettings,
+        );
+        assert_eq!(
+            applied.state.platform_settings.window_mode,
+            UiWindowMode::Fullscreen
+        );
+        assert_eq!(applied.state.options.window_mode, UiWindowMode::Fullscreen);
+        assert!(matches!(
+            applied.effects.as_slice(),
+            [UiEffect::ApplyWindowMode { mode: UiWindowMode::Fullscreen }, UiEffect::PersistOptions { options }]
+                if options.window_mode == UiWindowMode::Fullscreen
+        ));
+    }
+
+    #[test]
+    fn observe_is_request_only_until_authoritative_state_arrives() {
+        let opened = reduce(&game(), UiAction::OpenOptions).state;
+        let requested = reduce(&opened, UiAction::RequestObserve { allow: true });
+        assert!(!requested.state.observe_allowed);
+        assert_eq!(requested.state.observe_request_pending, Some(true));
+        assert_eq!(
+            requested.effects,
+            vec![UiEffect::RequestObserve { allow: true }]
+        );
+
+        let duplicate = reduce(&requested.state, UiAction::RequestObserve { allow: true });
+        assert!(duplicate.effects.is_empty());
+        assert!(!duplicate.state.observe_allowed);
+
+        let authoritative = reduce(
+            &requested.state,
+            UiAction::ObserveAuthoritativeChanged { allow: true },
+        );
+        assert!(authoritative.state.observe_allowed);
+        assert_eq!(authoritative.state.observe_request_pending, None);
+        assert!(authoritative.effects.is_empty());
+
+        let already_equal = reduce(
+            &authoritative.state,
+            UiAction::RequestObserve { allow: true },
+        );
+        assert!(already_equal.effects.is_empty());
+    }
+
+    #[test]
+    fn security_flows_are_explicit_and_never_stage_credentials() {
+        let login = UiState {
+            screen: UiScreen::Login,
+            login_account: "account".into(),
+            ..Default::default()
+        };
+
+        let opened = reduce(&login, UiAction::ChangePassword);
+        assert_eq!(
+            opened.state.security.panel,
+            crate::state::UiSecurityPanel::ChangePassword
+        );
+        assert!(opened.effects.is_empty());
+
+        let request = reduce(
+            &opened.state,
+            UiAction::SubmitChangePassword {
+                account: "account".into(),
+                old_password: crate::effect::SecretText::new("old-secret"),
+                new_password: crate::effect::SecretText::new("new-secret"),
+                confirm_password: crate::effect::SecretText::new("new-secret"),
+            },
+        );
+        assert!(request.state.security.change_password_pending);
+        assert!(request.state.login_password.is_empty());
+        assert!(matches!(
+            &request.effects[..],
+            [UiEffect::SecurityRequest(SecurityRequest::ChangePassword {
+                account,
+                old_password,
+                new_password,
+            })] if account == "account"
+                && old_password.as_str() == "old-secret"
+                && new_password.as_str() == "new-secret"
+        ));
+        let debug = format!("{request:?}");
+        assert!(!debug.contains("old-secret"));
+        assert!(!debug.contains("new-secret"));
+        let encoded = serde_json::to_string(&request.effects).expect("security effect serializes");
+        assert!(!encoded.contains("old-secret"));
+        assert!(!encoded.contains("new-secret"));
+        assert!(encoded.contains("REDACTED"));
+
+        let duplicate = reduce(
+            &request.state,
+            UiAction::SubmitChangePassword {
+                account: "account".into(),
+                old_password: crate::effect::SecretText::new("old-secret"),
+                new_password: crate::effect::SecretText::new("new-secret"),
+                confirm_password: crate::effect::SecretText::new("new-secret"),
+            },
+        );
+        assert!(duplicate.effects.is_empty());
+        assert!(duplicate.state.security.change_password_pending);
+
+        let rejected = reduce(
+            &request.state,
+            UiAction::ChangePasswordResult {
+                success: false,
+                message: "server rejected".into(),
+            },
+        );
+        assert!(!rejected.state.security.change_password_pending);
+        assert_eq!(
+            rejected.state.security.panel,
+            crate::state::UiSecurityPanel::ChangePassword
+        );
+        assert!(matches!(
+            rejected.effects.as_slice(),
+            [UiEffect::ShowNotice {
+                message,
+                is_error: true
+            }] if message == "server rejected"
+        ));
+
+        let accepted = reduce(
+            &request.state,
+            UiAction::ChangePasswordResult {
+                success: true,
+                message: "changed".into(),
+            },
+        );
+        assert_eq!(
+            accepted.state.security.panel,
+            crate::state::UiSecurityPanel::None
+        );
+        assert!(!accepted.state.security.change_password_pending);
+    }
+
+    #[test]
+    fn safe_key_is_local_and_credits_remains_intentional_noop() {
+        let login = UiState {
+            screen: UiScreen::Login,
+            ..Default::default()
+        };
+        let safe_key = reduce(&login, UiAction::SafeKey);
+        assert_eq!(
+            safe_key.state.security.panel,
+            crate::state::UiSecurityPanel::SafeKey
+        );
+        assert!(safe_key.effects.is_empty());
+        let closed = reduce(&safe_key.state, UiAction::CloseSafeKey);
+        assert_eq!(
+            closed.state.security.panel,
+            crate::state::UiSecurityPanel::None
+        );
+
+        let credits = reduce(
+            &UiState {
+                screen: UiScreen::CharacterSelect,
+                ..Default::default()
+            },
+            UiAction::OpenCredits,
+        );
+        assert_eq!(credits.effects, vec![UiEffect::Noop]);
+    }
+
+    #[test]
+    fn legacy_apply_cancel_and_defaults_are_inert_from_crystal_options() {
+        let opened = reduce(&game(), UiAction::OpenOptions).state;
+        for action in [
+            UiAction::SetWindowMode {
+                mode: UiWindowMode::Fullscreen,
+            },
+            UiAction::ApplyOptions,
+            UiAction::CancelOptions,
+            UiAction::ResetOptionsToDefaults,
+        ] {
+            let transition = reduce(&opened, action);
+            assert_eq!(transition.state, opened);
+            assert!(transition.effects.is_empty());
+        }
     }
 
     #[test]

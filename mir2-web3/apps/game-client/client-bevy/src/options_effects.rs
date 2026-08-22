@@ -18,11 +18,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::crystal_ui::overlays::{NativePlayerUiState, UiEffectQueue};
 use mir2_ui_core::effect::UiEffect;
-use mir2_ui_core::state::{UiOptions, UiWindowMode};
+use mir2_ui_core::state::{UiOptions, UiPlatformSettings, UiWindowMode};
 
 pub const MAX_OPTIONS_EFFECTS_PER_TICK: usize = 8;
 
-const OPTIONS_SCHEMA_VERSION: u8 = 1;
+/// Version 2 adds the seven local switches owned by Crystal's OptionDialog.
+/// Version 1 remains readable so an existing local audio/window configuration
+/// is upgraded with Crystal's defaults rather than discarded.
+const OPTIONS_SCHEMA_VERSION: u8 = 2;
+const LEGACY_OPTIONS_SCHEMA_VERSION: u8 = 1;
 const OPTIONS_DIRECTORY: &str = "mir2-web3";
 const OPTIONS_FILE: &str = "options.json";
 
@@ -120,6 +124,20 @@ impl OptionsRuntime {
 #[serde(deny_unknown_fields)]
 struct PersistedOptions {
     version: u8,
+    #[serde(default)]
+    skill_mode: bool,
+    #[serde(default = "default_true")]
+    skill_bar: bool,
+    #[serde(default = "default_true")]
+    effect: bool,
+    #[serde(default = "default_true")]
+    drop_view: bool,
+    #[serde(default = "default_true")]
+    name_view: bool,
+    #[serde(default = "default_true")]
+    hp_view: bool,
+    #[serde(default)]
+    new_move: bool,
     music_enabled: bool,
     music_volume: u8,
     sound_enabled: bool,
@@ -127,10 +145,21 @@ struct PersistedOptions {
     window_mode: UiWindowMode,
 }
 
+fn default_true() -> bool {
+    true
+}
+
 impl From<&UiOptions> for PersistedOptions {
     fn from(options: &UiOptions) -> Self {
         Self {
             version: OPTIONS_SCHEMA_VERSION,
+            skill_mode: options.skill_mode,
+            skill_bar: options.skill_bar,
+            effect: options.effect,
+            drop_view: options.drop_view,
+            name_view: options.name_view,
+            hp_view: options.hp_view,
+            new_move: options.new_move,
             music_enabled: options.music_enabled,
             music_volume: options.music_volume,
             sound_enabled: options.sound_enabled,
@@ -144,13 +173,22 @@ impl TryFrom<PersistedOptions> for UiOptions {
     type Error = ();
 
     fn try_from(value: PersistedOptions) -> Result<Self, Self::Error> {
-        if value.version != OPTIONS_SCHEMA_VERSION
-            || value.music_volume > UiOptions::MAX_VOLUME
+        if !matches!(
+            value.version,
+            LEGACY_OPTIONS_SCHEMA_VERSION | OPTIONS_SCHEMA_VERSION
+        ) || value.music_volume > UiOptions::MAX_VOLUME
             || value.sound_volume > UiOptions::MAX_VOLUME
         {
             return Err(());
         }
         Ok(UiOptions {
+            skill_mode: value.skill_mode,
+            skill_bar: value.skill_bar,
+            effect: value.effect,
+            drop_view: value.drop_view,
+            name_view: value.name_view,
+            hp_view: value.hp_view,
+            new_move: value.new_move,
             music_enabled: value.music_enabled,
             music_volume: value.music_volume,
             sound_enabled: value.sound_enabled,
@@ -314,6 +352,10 @@ pub fn load_persisted_options(
     let loaded = load_options_from_path(&runtime.config_path);
     state.core.options = loaded.options.clone();
     state.core.options_draft = None;
+    state.core.platform_settings = UiPlatformSettings {
+        window_mode: loaded.options.window_mode,
+    };
+    state.core.platform_settings_draft = None;
     runtime.audio = AppliedAudioSettings::from_options(&loaded.options);
     runtime.window_mode = loaded.options.window_mode;
     runtime.window_available = apply_bevy_window_mode(&mut windows, loaded.options.window_mode);
@@ -434,6 +476,13 @@ mod tests {
 
     fn sample_options() -> UiOptions {
         UiOptions {
+            skill_mode: true,
+            skill_bar: false,
+            effect: false,
+            drop_view: false,
+            name_view: false,
+            hp_view: false,
+            new_move: true,
             music_enabled: false,
             music_volume: 35,
             sound_enabled: true,
@@ -619,8 +668,15 @@ mod tests {
         assert_eq!(
             keys,
             vec![
+                "drop_view",
+                "effect",
+                "hp_view",
                 "music_enabled",
                 "music_volume",
+                "name_view",
+                "new_move",
+                "skill_bar",
+                "skill_mode",
                 "sound_enabled",
                 "sound_volume",
                 "version",
@@ -633,6 +689,45 @@ mod tests {
                 !lower.contains(secret_name),
                 "secret field leaked: {secret_name}"
             );
+        }
+    }
+
+    #[test]
+    fn version_one_options_upgrade_with_crystal_defaults() {
+        let legacy = br#"{
+            "version": 1,
+            "music_enabled": false,
+            "music_volume": 25,
+            "sound_enabled": true,
+            "sound_volume": 75,
+            "window_mode": "Fullscreen"
+        }"#;
+        let options = decode_options(legacy).expect("legacy options should load");
+        assert_eq!(options.crystal(), UiOptions::default().crystal());
+        assert!(!options.music_enabled);
+        assert_eq!(options.music_volume, 25);
+        assert_eq!(options.window_mode, UiWindowMode::Fullscreen);
+    }
+
+    #[test]
+    fn all_crystal_option_fields_round_trip_through_persistence() {
+        let test_path = TestPath::new("crystal-fields");
+        let expected = sample_options();
+        persist_options_to_path(&test_path.file, &expected).expect("persist options");
+        let loaded = load_options_from_path(&test_path.file);
+        assert_eq!(loaded.source, OptionsLoadSource::Primary);
+        assert_eq!(loaded.options, expected);
+        let payload = fs::read_to_string(&test_path.file).expect("options json");
+        for field in [
+            "skill_mode",
+            "skill_bar",
+            "effect",
+            "drop_view",
+            "name_view",
+            "hp_view",
+            "new_move",
+        ] {
+            assert!(payload.contains(field), "missing persisted field: {field}");
         }
     }
 }

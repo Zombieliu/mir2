@@ -29,7 +29,7 @@ pub(crate) enum NativeInboundMessage {
     GameShopInfo(String),
     GameShopStock(String),
     GameShopReceipt(String),
-    NpcShopOpen,
+    NpcShopService(String),
     StorageModel(String),
     StorageItems(String),
     StoragePatch(String),

@@ -26,6 +26,83 @@ pub struct ChatLine {
     pub channel: String,
 }
 
+/// The renderer-neutral canonical chat categories used by the native and Web
+/// presentation layers.
+///
+/// Crystal emits a few historical aliases (`Shout2`, `System2`,
+/// `LineMessage`, and so on).  Keep those aliases at the boundary and reduce
+/// them to this single vocabulary before applying either the control-bar
+/// filter or the settings visibility filter.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ChatChannel {
+    Normal,
+    System,
+    Hint,
+    LineMessage,
+    Shout,
+    WhisperIn,
+    WhisperOut,
+    Relationship,
+    Lover,
+    Mentor,
+    Group,
+    Guild,
+    Trade,
+}
+
+impl ChatChannel {
+    pub const ALL: [Self; 13] = [
+        Self::Normal,
+        Self::System,
+        Self::Hint,
+        Self::LineMessage,
+        Self::Shout,
+        Self::WhisperIn,
+        Self::WhisperOut,
+        Self::Relationship,
+        Self::Lover,
+        Self::Mentor,
+        Self::Group,
+        Self::Guild,
+        Self::Trade,
+    ];
+
+    pub const fn all() -> &'static [Self] {
+        &Self::ALL
+    }
+
+    /// Parse a Crystal/backend channel name case-insensitively.
+    ///
+    /// The aliases intentionally follow the Web client's visibility policy:
+    /// shout variants and announcement/level-up notices belong to the Shout
+    /// family, while LineMessage remains part of the Normal settings family.
+    pub fn parse(value: &str) -> Self {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "system" | "system2" | "server" => Self::System,
+            "hint" => Self::Hint,
+            "linemessage" | "line" => Self::LineMessage,
+            "shout" | "shout2" | "shout3" | "announcement" | "levelup" => Self::Shout,
+            "whisperin" | "whisper_in" => Self::WhisperIn,
+            "whisperout" | "whisper_out" => Self::WhisperOut,
+            "whisper" => Self::WhisperIn,
+            "relationship" => Self::Relationship,
+            "lover" => Self::Lover,
+            "mentor" => Self::Mentor,
+            "group" => Self::Group,
+            "guild" => Self::Guild,
+            "trade" => Self::Trade,
+            "normal" | "trainer" | "" => Self::Normal,
+            _ => Self::Normal,
+        }
+    }
+}
+
+impl ChatLine {
+    pub fn canonical_channel(&self) -> ChatChannel {
+        ChatChannel::parse(&self.channel)
+    }
+}
+
 /// The renderer-neutral chat read model (most recent last).
 #[derive(Debug, Clone, Default, Resource, Serialize, Deserialize)]
 pub struct ChatModel {
