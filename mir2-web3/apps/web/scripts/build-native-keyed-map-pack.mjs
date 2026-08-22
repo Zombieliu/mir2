@@ -45,7 +45,51 @@ export const { alphaKeyMapObjectPixels } = loadTypeScriptModule(
   new URL("../lib/scene-alpha-key.ts", import.meta.url),
 );
 
+function mapMir3LibraryKey(index, baseIndex, root) {
+  const offset = index - baseIndex;
+  if (offset < 0 || offset >= 75) return null;
+
+  const stateIndex = Math.floor(offset / 15);
+  const slot = offset % 15;
+  const names = [
+    "Tilesc",
+    "Tiles30c",
+    "Tiles5c",
+    "SmTilesc",
+    "Housesc",
+    "Cliffsc",
+    "Dungeonsc",
+    "Innersc",
+    "Furnituresc",
+    "Wallsc",
+    "SmObjectsc",
+    "Animationsc",
+    "Object1c",
+    "Object2c",
+  ];
+  const name = names[slot];
+  if (!name) return null;
+
+  if (root === "WemadeMir3" && (name === "Object1c" || name === "Object2c")) {
+    return `${root}/${name}`;
+  }
+
+  if (root === "WemadeMir3") {
+    const folders = ["", "Wood", "Sand", "Snow", "Forest"];
+    const folder = folders[stateIndex];
+    return folder ? `${root}/${folder}/${name}` : `${root}/${name}`;
+  }
+
+  const suffixes = ["", "wood", "sand", "snow", "forest"];
+  return `${root}/${name}${suffixes[stateIndex] ?? ""}`;
+}
+
 export function mapLibraryKeyForIndex(index) {
+  const wemadeMir3 = mapMir3LibraryKey(index, 200, "WemadeMir3");
+  if (wemadeMir3) return wemadeMir3;
+  const shandaMir3 = mapMir3LibraryKey(index, 300, "ShandaMir3");
+  if (shandaMir3) return shandaMir3;
+
   switch (index) {
     case 0:
       return "WemadeMir2/Tiles";
@@ -275,6 +319,11 @@ export function collectStandaloneMapReferences(parsedMap) {
           });
         }
       };
+
+      const backFrame = cell.backImage === 0 ? -1 : (cell.backImage & 0x1fffffff) - 1;
+      if (cell.backIndex >= 0 && backFrame >= 0) {
+        add(mapLibraryKeyForIndex(cell.backIndex), backFrame, false, "back");
+      }
 
       const middleFrame = cell.middleImage - 1;
       if (cell.middleIndex >= 0 && middleFrame >= 0) {

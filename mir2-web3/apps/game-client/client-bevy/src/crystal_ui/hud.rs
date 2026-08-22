@@ -832,9 +832,11 @@ fn update_hud_map_model(
 fn update_hud_minimap_visibility(
     shell: Res<NativeShellModel>,
     state: Option<Res<crate::crystal_ui::overlays::NativePlayerUiState>>,
-    mut minimap_nodes: Query<&mut Node, With<CrystalHudMinimap>>,
-    mut title_nodes: Query<&mut Node, With<CrystalHudMapTitle>>,
-    mut coord_nodes: Query<&mut Node, With<CrystalHudMapCoordinate>>,
+    mut node_queries: ParamSet<(
+        Query<&mut Node, With<CrystalHudMinimap>>,
+        Query<&mut Node, With<CrystalHudMapTitle>>,
+        Query<&mut Node, With<CrystalHudMapCoordinate>>,
+    )>,
 ) {
     let in_game = shell.screen == NativeShellScreen::InGame;
     let visible = in_game
@@ -847,13 +849,13 @@ fn update_hud_minimap_visibility(
     } else {
         Display::None
     };
-    for mut node in minimap_nodes.iter_mut() {
+    for mut node in node_queries.p0().iter_mut() {
         node.display = display;
     }
-    for mut node in title_nodes.iter_mut() {
+    for mut node in node_queries.p1().iter_mut() {
         node.display = display;
     }
-    for mut node in coord_nodes.iter_mut() {
+    for mut node in node_queries.p2().iter_mut() {
         node.display = display;
     }
 }
@@ -932,6 +934,19 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 mod tests {
     use super::*;
     use crate::inventory::ItemModel;
+
+    #[test]
+    fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel::default());
+        app.add_systems(Update, update_hud_minimap_visibility);
+        app.world_mut()
+            .spawn((Node::default(), CrystalHudMinimap, CrystalHudMapTitle));
+        app.world_mut()
+            .spawn((Node::default(), CrystalHudMapCoordinate));
+
+        app.update();
+    }
 
     fn item(key: &str, name: &str, container: u8, slot: u32, quantity: u32) -> ItemModel {
         ItemModel {

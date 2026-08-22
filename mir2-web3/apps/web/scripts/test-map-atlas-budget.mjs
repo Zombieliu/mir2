@@ -4,11 +4,14 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
 import {
   DEFAULT_MAX_PAGE_PIXELS,
   MAX_SIZE,
+  findUniformOpaqueNearBlackPlaceholderSources,
   isRemoteReleaseBuild,
+  reportMapAtlasSourceQuality,
   mapAtlasLibrarySupportsRawUpload,
   mapAtlasManifestFitsBudget,
   packIntoPages,
@@ -24,6 +27,16 @@ const MANIFEST_PATH = path.resolve(
 const requireManifest =
   process.argv.includes("--requireManifest") ||
   process.env.npm_lifecycle_event === "verify:map-atlas-budget";
+
+async function writeFixturePng(directory, name, background) {
+  const filePath = path.join(directory, name);
+  await sharp({
+    create: { width: 4, height: 4, channels: 4, background },
+  })
+    .png()
+    .toFile(filePath);
+  return filePath;
+}
 
 test("floor atlases are split into bounded streaming pages", () => {
   const sources = Array.from({ length: 630 }, (_, index) => ({
@@ -70,6 +83,79 @@ test("the packed index contains only raw-upload-safe floor libraries", () => {
   assert.equal(mapAtlasLibrarySupportsRawUpload("WemadeMir3/Sand/Tiles5c"), true);
   assert.equal(mapAtlasLibrarySupportsRawUpload("WemadeMir2/Objects"), false);
   assert.equal(mapAtlasLibrarySupportsRawUpload("WemadeMir3/Sand/Dungeonsc"), false);
+});
+
+test("detects uniform opaque near-black source PNGs without flagging real or transparent art", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-map-atlas-quality-"));
+  try {
+    const placeholderPath = await writeFixturePng(root, "placeholder.png", {
+      r: 8,
+      g: 0,
+      b: 0,
+      alpha: 1,
+    });
+    const transparentPath = await writeFixturePng(root, "transparent.png", {
+      r: 8,
+      g: 0,
+      b: 0,
+      alpha: 0,
+    });
+    const realPath = await writeFixturePng(root, "real.png", {
+      r: 40,
+      g: 0,
+      b: 0,
+      alpha: 1,
+    });
+
+    const findings = await findUniformOpaqueNearBlackPlaceholderSources([
+      { filePath: placeholderPath, frame: "1", width: 4, height: 4 },
+      { filePath: transparentPath, frame: "2", width: 4, height: 4 },
+      { filePath: realPath, frame: "3", width: 4, height: 4 },
+    ]);
+    assert.deepEqual(
+      findings.map(({ filePath, rgba }) => ({ filePath, rgba })),
+      [{ filePath: placeholderPath, rgba: [8, 0, 0, 255] }],
+    );
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("ground-tile placeholders are actionable and non-ground placeholders stay non-fatal", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-map-atlas-quality-"));
+  try {
+    const filePath = await writeFixturePng(root, "placeholder.png", {
+      r: 8,
+      g: 0,
+      b: 0,
+      alpha: 1,
+    });
+    const [finding] = await findUniformOpaqueNearBlackPlaceholderSources([
+      { filePath, frame: "1950", width: 4, height: 4 },
+    ]);
+
+    assert.throws(
+      () =>
+        reportMapAtlasSourceQuality([
+          { ...finding, libraryKey: "WemadeMir2/Tiles" },
+        ], root, true),
+      /ground-tile quality check failed[\s\S]*placeholder\.png[\s\S]*RGBA 8,0,0,255/,
+    );
+    assert.doesNotThrow(() =>
+      reportMapAtlasSourceQuality(
+        [{ ...finding, libraryKey: "WemadeMir2/Objects" }],
+        root,
+      ),
+    );
+    assert.doesNotThrow(() =>
+      reportMapAtlasSourceQuality(
+        [{ ...finding, libraryKey: "WemadeMir2/Tiles" }],
+        root,
+      ),
+    );
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
 });
 
 test("remote production builds require a verified content-addressed map atlas", async () => {

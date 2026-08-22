@@ -414,7 +414,9 @@ impl Plugin for Mir2QuestUiPlugin {
             .add_systems(Startup, spawn_quest_ui_panels)
             .add_systems(
                 Update,
-                process_quest_ui_input.in_set(NativePlayerUiSet::Mutate),
+                process_quest_ui_input
+                    .after(crate::crystal_ui::overlays::process_overlay_keyboard)
+                    .in_set(NativePlayerUiSet::Mutate),
             )
             .add_systems(Update, render_quest_ui.in_set(NativePlayerUiSet::Read));
     }
@@ -2583,6 +2585,54 @@ mod tests {
             .press(KeyCode::Escape);
         app.update();
         assert!(!app.world().resource::<NativePlayerUiState>().quest_open());
+    }
+
+    #[test]
+    fn escape_closes_quest_without_falling_through_to_menu() {
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        let mut player_ui = NativePlayerUiState::default();
+        player_ui.core.panel = mir2_ui_core::state::UiPanel::QuestLog;
+        app.insert_resource(player_ui);
+        app.init_resource::<QuestTracker>()
+            .init_resource::<NpcDialogModel>()
+            .init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NearbyNpcModel>()
+            .init_resource::<CombatTargetModel>()
+            .init_resource::<GroundPickupModel>()
+            .init_resource::<crate::crystal_ui::overlays::MailComposeUi>()
+            .init_resource::<crate::crystal_ui::overlays::NativePlayerUiIntentQueue>()
+            .init_resource::<crate::native_shell::NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<crate::mail::MailModel>()
+            .init_resource::<crate::map::MapModel>()
+            .init_resource::<crate::shop::ShopModel>()
+            .init_resource::<crate::storage::StorageModel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_systems(
+                Update,
+                (
+                    crate::crystal_ui::overlays::process_overlay_keyboard,
+                    process_quest_ui_input,
+                )
+                    .chain(),
+            );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.quest_open());
+        assert!(!state.menu_open());
     }
 
     #[test]

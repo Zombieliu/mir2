@@ -167,6 +167,8 @@ struct RuntimeMapRenderAtlases {
     images: HashMap<String, Handle<Image>>,
     url_image_keys: HashSet<String>,
     layouts: HashMap<String, (Handle<TextureAtlasLayout>, HashMap<String, usize>)>,
+    layout_rects: HashMap<String, HashMap<String, URect>>,
+    layout_sizes: HashMap<String, UVec2>,
     revision: u64,
 }
 
@@ -609,6 +611,24 @@ fn map_render_active_image_keys(snapshot: &MapRenderState) -> HashSet<String> {
                 .map(|tile| tile.image_key.clone()),
         )
         .chain(snapshot.retained_image_keys.iter().cloned())
+        .collect()
+}
+
+fn map_render_url_image_sources(snapshot: &MapRenderState) -> Vec<(String, String)> {
+    snapshot
+        .atlases
+        .iter()
+        .filter_map(|atlas| {
+            atlas
+                .image_url
+                .as_deref()
+                .map(|url| (atlas.key.clone(), browser_asset_path(url)))
+        })
+        .chain(snapshot.standalone_tiles.iter().filter_map(|tile| {
+            tile.image_url
+                .as_deref()
+                .map(|url| (tile.image_key.clone(), browser_asset_path(url)))
+        }))
         .collect()
 }
 
@@ -2682,6 +2702,7 @@ fn sync_map_render(
         &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
     >,
     mut transform_query: Query<&mut Transform>,
+    mut native_trace_state: Local<Option<String>>,
 ) {
     let active = map_state
         .snapshot
@@ -2696,6 +2717,8 @@ fn sync_map_render(
             atlas_assets.images.clear();
             atlas_assets.url_image_keys.clear();
             atlas_assets.layouts.clear();
+            atlas_assets.layout_rects.clear();
+            atlas_assets.layout_sizes.clear();
             atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
         }
         presentation_poses.set_applied_map_provenance(None, None);
@@ -2719,6 +2742,10 @@ fn sync_map_render(
         .and_then(|entity_snapshot| entity_snapshot.center_x.zip(entity_snapshot.center_y))
         .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
     if matches!((map_center, entity_center), (Some(map), Some(entity)) if map != entity) {
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("waiting-center map={map_center:?} entity={entity_center:?}"),
+        );
         return;
     }
 
@@ -2767,6 +2794,10 @@ fn sync_map_render(
         }
     });
     if let Some((key, error)) = failed_url_asset {
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("asset-failed key={key} error={error}"),
+        );
         publish_map_status(
             "map-render-asset-error",
             &format!("Failed to load map atlas {key}: {error}"),
@@ -2776,6 +2807,25 @@ fn sync_map_render(
         return;
     }
     if !atlases_ready {
+        let states = snapshot
+            .atlases
+            .iter()
+            .map(|atlas| {
+                let state = atlas_assets.images.get(&atlas.key).map_or_else(
+                    || "missing-handle".to_owned(),
+                    |image| format!("{:?}", asset_server.load_state(image.id())),
+                );
+                format!("{}={state}", atlas.key)
+            })
+            .collect::<Vec<_>>()
+            .join(",");
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!(
+                "waiting-atlases center={map_center:?} count={} states=[{states}]",
+                snapshot.atlases.len()
+            ),
+        );
         return;
     }
 
@@ -2786,6 +2836,17 @@ fn sync_map_render(
         .iter()
         .all(|tile| atlas_assets.images.contains_key(&tile.image_key));
     if !standalone_images_ready {
+        let missing = snapshot
+            .standalone_tiles
+            .iter()
+            .filter(|tile| !atlas_assets.images.contains_key(&tile.image_key))
+            .map(|tile| tile.image_key.as_str())
+            .collect::<Vec<_>>()
+            .join(",");
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("waiting-standalone missing=[{missing}]"),
+        );
         return;
     }
 
@@ -2796,8 +2857,26 @@ fn sync_map_render(
         .iter()
         .all(|key| atlas_assets.images.contains_key(key));
     if !retained_images_ready {
+        let missing = snapshot
+            .retained_image_keys
+            .iter()
+            .filter(|key| !atlas_assets.images.contains_key(*key))
+            .map(String::as_str)
+            .collect::<Vec<_>>()
+            .join(",");
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("waiting-retained missing=[{missing}]"),
+        );
         return;
     }
+
+    // A loaded atlas page does not guarantee that every draw can bind: stale
+    // manifests or an incorrect library-index mapping can still omit a layout
+    // or rect. Keep rendering the valid subset, but surface exact coverage in
+    // the native trace instead of silently turning skipped draws into black
+    // background holes.
+    let missing_bindings = map_render_missing_bindings(snapshot, &atlas_assets);
 
     // The producer uses the fold-in model (`cameraOffset` stays (0, 0); sub-cell
     // motion is already baked into `left`/`top`), so this offset is normally a
@@ -2982,6 +3061,12 @@ fn sync_map_render(
     atlas_assets
         .layouts
         .retain(|key, _| active_atlas_keys.contains(key));
+    atlas_assets
+        .layout_rects
+        .retain(|key, _| active_atlas_keys.contains(key));
+    atlas_assets
+        .layout_sizes
+        .retain(|key, _| active_atlas_keys.contains(key));
     if atlas_assets.images.len() != previous_image_count
         || atlas_assets.layouts.len() != previous_layout_count
     {
@@ -3019,6 +3104,32 @@ fn sync_map_render(
         &snapshot.ack_key,
         &presented_image_keys,
     );
+    trace_native_map_state(
+        &mut native_trace_state,
+        format!(
+            "synced center={map_center:?} tiles={} standalone={} live={live_count} missingBindings={} sample=[{}]",
+            snapshot.tiles.len(),
+            snapshot.standalone_tiles.len(),
+            missing_bindings.len(),
+            missing_bindings.iter().take(8).cloned().collect::<Vec<_>>().join(",")
+        ),
+    );
+}
+
+fn trace_native_map_state(last: &mut Option<String>, message: String) {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if (std::env::var_os("MIR2_NATIVE_TRACE_MAP").is_some()
+            || std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some())
+            && last.as_ref() != Some(&message)
+        {
+            eprintln!("[runtime-map] {message}");
+            *last = Some(message);
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    let _ = (last, message);
 }
 
 /// Build the `TextureAtlasLayout` for each map atlas page not already cached.
@@ -3032,34 +3143,88 @@ fn sync_map_render_atlas_layouts(
     atlas_assets: &mut RuntimeMapRenderAtlases,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
 ) {
-    for atlas in &snapshot.atlases {
-        if !atlas_assets.images.contains_key(&atlas.key) {
-            if let Some(image_url) = &atlas.image_url {
-                let asset_path = browser_asset_path(image_url);
-                atlas_assets
-                    .images
-                    .insert(atlas.key.clone(), asset_server.load(asset_path));
-                atlas_assets.url_image_keys.insert(atlas.key.clone());
-                atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
-            }
-        }
-        if atlas_assets.layouts.contains_key(&atlas.key) {
+    // Native MapRenderState carries URL-backed standalone images in the same
+    // JSON as the atlas descriptors. WASM may upload those pixels through the
+    // separate setMir2MapRenderAtlas channel, but the Windows host has no such
+    // uploader. Queue every URL-backed image here so the atomic readiness gate
+    // below can complete instead of waiting forever on standalone foregrounds.
+    for (key, asset_path) in map_render_url_image_sources(snapshot) {
+        if atlas_assets.images.contains_key(&key) {
             continue;
         }
-        let mut layout = TextureAtlasLayout::new_empty(UVec2::new(atlas.width, atlas.height));
+        atlas_assets
+            .images
+            .insert(key.clone(), asset_server.load(asset_path));
+        atlas_assets.url_image_keys.insert(key);
+        atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
+    }
+
+    for atlas in &snapshot.atlases {
+        // The producer sends only the rects used by the current viewport. The
+        // atlas page key remains stable as the player moves, so retaining the
+        // first layout forever makes every newly encountered rect fail binding
+        // and exposes the black window background as grid-aligned holes. Grow a
+        // page's known rect set monotonically and rebuild only when it changes.
+        let merged = merge_map_render_atlas_rects(atlas, atlas_assets);
+        if merged.is_none() && atlas_assets.layouts.contains_key(&atlas.key) {
+            continue;
+        }
+        let (size, known_rects) = merged.unwrap_or_else(|| {
+            (
+                UVec2::new(atlas.width, atlas.height),
+                atlas_assets
+                    .layout_rects
+                    .get(&atlas.key)
+                    .cloned()
+                    .unwrap_or_default(),
+            )
+        });
+
+        let mut layout = TextureAtlasLayout::new_empty(size);
         let mut rects = HashMap::new();
-        for rect in &atlas.rects {
-            let index = layout.add_texture(URect {
-                min: UVec2::new(rect.x, rect.y),
-                max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
-            });
-            rects.insert(rect.key.clone(), index);
+        let mut known_rects = known_rects.into_iter().collect::<Vec<_>>();
+        known_rects.sort_by(|left, right| left.0.cmp(&right.0));
+        for (key, geometry) in known_rects {
+            let index = layout.add_texture(geometry);
+            rects.insert(key, index);
         }
         let layout = texture_atlas_layouts.add(layout);
-        atlas_assets
+        if let Some((stale_layout, _)) = atlas_assets
             .layouts
-            .insert(atlas.key.clone(), (layout, rects));
+            .insert(atlas.key.clone(), (layout, rects))
+        {
+            texture_atlas_layouts.remove(stale_layout.id());
+        }
+        atlas_assets.layout_sizes.insert(atlas.key.clone(), size);
+        atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
     }
+}
+
+fn merge_map_render_atlas_rects(
+    atlas: &MapRenderAtlas,
+    atlas_assets: &mut RuntimeMapRenderAtlases,
+) -> Option<(UVec2, HashMap<String, URect>)> {
+    let size = UVec2::new(atlas.width, atlas.height);
+    let size_changed = atlas_assets.layout_sizes.get(&atlas.key) != Some(&size);
+    if size_changed {
+        atlas_assets.layout_rects.remove(&atlas.key);
+    }
+    let known = atlas_assets
+        .layout_rects
+        .entry(atlas.key.clone())
+        .or_default();
+    let mut changed = size_changed;
+    for rect in &atlas.rects {
+        let geometry = URect {
+            min: UVec2::new(rect.x, rect.y),
+            max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+        };
+        if known.get(&rect.key) != Some(&geometry) {
+            known.insert(rect.key.clone(), geometry);
+            changed = true;
+        }
+    }
+    changed.then(|| (size, known.clone()))
 }
 
 /// Resolve a tile to its atlas page image + `TextureAtlas` (layout + sub-rect
@@ -3079,6 +3244,28 @@ fn map_render_image_binding(
             index,
         },
     ))
+}
+
+fn map_render_missing_bindings(
+    snapshot: &MapRenderState,
+    atlas_assets: &RuntimeMapRenderAtlases,
+) -> Vec<String> {
+    snapshot
+        .tiles
+        .iter()
+        .filter_map(|tile| {
+            let reason = match atlas_assets.layouts.get(&tile.atlas_key) {
+                None => "layout",
+                Some((_, rects)) if !rects.contains_key(&tile.atlas_rect_key) => "rect",
+                Some(_) if !atlas_assets.images.contains_key(&tile.atlas_key) => "image",
+                Some(_) => return None,
+            };
+            Some(format!(
+                "{}:{}#{}:{reason}",
+                tile.key, tile.atlas_key, tile.atlas_rect_key
+            ))
+        })
+        .collect()
 }
 
 fn sync_map_scene(
@@ -4678,6 +4865,122 @@ mod entity_atlas_tests {
             state.standalone_tiles[0].image_url.as_deref(),
             Some("/generated/native-map-keyed/pages/hash.png")
         );
+        assert_eq!(
+            map_render_url_image_sources(&state),
+            vec![(
+                "standalone:WemadeMir2/Objects#7112".to_owned(),
+                "generated/native-map-keyed/pages/hash.png".to_owned()
+            )]
+        );
+    }
+
+    #[test]
+    fn map_render_url_sources_include_atlases_and_standalone_tiles() {
+        let state: MapRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "map:page",
+                    "width": 512,
+                    "height": 512,
+                    "imageUrl": "/generated/map-atlas/page.png?rev=1"
+                }],
+                "standaloneTiles": [{
+                    "key": "standalone:tree",
+                    "imageKey": "standalone:tree:image",
+                    "imageUrl": "/generated/native-map-keyed/tree.png",
+                    "left": 0,
+                    "top": 0,
+                    "width": 64,
+                    "height": 96,
+                    "z": 1
+                }]
+            }"#,
+        )
+        .expect("URL-backed map state should deserialize");
+
+        assert_eq!(
+            map_render_url_image_sources(&state),
+            vec![
+                (
+                    "map:page".to_owned(),
+                    "generated/map-atlas/page.png".to_owned()
+                ),
+                (
+                    "standalone:tree:image".to_owned(),
+                    "generated/native-map-keyed/tree.png".to_owned()
+                ),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_render_binding_coverage_reports_missing_rects() {
+        let state: MapRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "tiles": [
+                    {"key":"ok","atlasKey":"map:page","rectKey":"tiles#1","left":0,"top":0,"width":96,"height":64,"z":0},
+                    {"key":"hole","atlasKey":"map:page","rectKey":"tiles#2","left":96,"top":0,"width":96,"height":64,"z":0}
+                ]
+            }"#,
+        )
+        .expect("map render state should deserialize");
+        let atlases = RuntimeMapRenderAtlases {
+            images: HashMap::from([("map:page".to_owned(), Handle::<Image>::default())]),
+            layouts: HashMap::from([(
+                "map:page".to_owned(),
+                (
+                    Handle::<TextureAtlasLayout>::default(),
+                    HashMap::from([("tiles#1".to_owned(), 0)]),
+                ),
+            )]),
+            ..default()
+        };
+
+        assert_eq!(
+            map_render_missing_bindings(&state, &atlases),
+            ["hole:map:page#tiles#2:rect"]
+        );
+    }
+
+    #[test]
+    fn map_atlas_layout_accumulates_rects_across_viewports() {
+        let atlas = |rect_key: &str, width: u32| MapRenderAtlas {
+            key: "map:page".to_owned(),
+            width,
+            height: 512,
+            image_url: None,
+            rects: vec![MapRenderAtlasRect {
+                key: rect_key.to_owned(),
+                x: if rect_key == "tiles#1" { 0 } else { 96 },
+                y: 0,
+                width: 96,
+                height: 64,
+            }],
+        };
+        let mut assets = RuntimeMapRenderAtlases::default();
+
+        let (size, first) = merge_map_render_atlas_rects(&atlas("tiles#1", 512), &mut assets)
+            .expect("first viewport creates a layout");
+        assets.layout_sizes.insert("map:page".to_owned(), size);
+        assert_eq!(first.len(), 1);
+
+        let (_, second) = merge_map_render_atlas_rects(&atlas("tiles#2", 512), &mut assets)
+            .expect("a later viewport grows the stable page layout");
+        assert_eq!(second.len(), 2);
+        assert!(second.contains_key("tiles#1"));
+        assert!(second.contains_key("tiles#2"));
+        assert!(merge_map_render_atlas_rects(&atlas("tiles#2", 512), &mut assets).is_none());
+
+        let (_, resized) = merge_map_render_atlas_rects(&atlas("tiles#2", 1024), &mut assets)
+            .expect("page dimension changes rebuild from a clean rect set");
+        assert_eq!(resized.len(), 1);
+        assert!(!resized.contains_key("tiles#1"));
     }
 
     #[test]

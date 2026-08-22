@@ -121,6 +121,13 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
 
 /// Map a cell library index to a library key (mirrors `mapLibraryKeyForIndex`).
 pub fn library_key_for_index(index: i16) -> String {
+    if let Some(key) = mir3_library_key(index, 200, "WemadeMir3") {
+        return key;
+    }
+    if let Some(key) = mir3_library_key(index, 300, "ShandaMir3") {
+        return key;
+    }
+
     match index {
         0 => "WemadeMir2/Tiles".to_owned(),
         1 => "WemadeMir2/SmTiles".to_owned(),
@@ -136,6 +143,48 @@ pub fn library_key_for_index(index: i16) -> String {
         190 => "ShandaMir2/AniTiles1".to_owned(),
         _ => "WemadeMir2/Tiles".to_owned(),
     }
+}
+
+fn mir3_library_key(index: i16, base_index: i16, root: &str) -> Option<String> {
+    let offset = i32::from(index) - i32::from(base_index);
+    if !(0..75).contains(&offset) {
+        return None;
+    }
+
+    let state_index = usize::try_from(offset / 15).ok()?;
+    let slot = usize::try_from(offset % 15).ok()?;
+    let name = [
+        "Tilesc",
+        "Tiles30c",
+        "Tiles5c",
+        "SmTilesc",
+        "Housesc",
+        "Cliffsc",
+        "Dungeonsc",
+        "Innersc",
+        "Furnituresc",
+        "Wallsc",
+        "SmObjectsc",
+        "Animationsc",
+        "Object1c",
+        "Object2c",
+    ]
+    .get(slot)?;
+
+    if root == "WemadeMir3" {
+        if matches!(*name, "Object1c" | "Object2c") {
+            return Some(format!("{root}/{name}"));
+        }
+        let folder = ["", "Wood", "Sand", "Snow", "Forest"].get(state_index)?;
+        return Some(if folder.is_empty() {
+            format!("{root}/{name}")
+        } else {
+            format!("{root}/{folder}/{name}")
+        });
+    }
+
+    let suffix = ["", "wood", "sand", "snow", "forest"].get(state_index)?;
+    Some(format!("{root}/{name}{suffix}"))
 }
 
 /// Build the atlas-rect key for a library + frame index (mirrors
@@ -885,6 +934,15 @@ mod tests {
         assert_eq!(library_key_for_index(5), "WemadeMir2/Objects4");
         assert_eq!(library_key_for_index(100), "ShandaMir2/Tiles");
         assert_eq!(library_key_for_index(120), "ShandaMir2/Objects");
+        assert_eq!(library_key_for_index(200), "WemadeMir3/Tilesc");
+        assert_eq!(library_key_for_index(215), "WemadeMir3/Wood/Tilesc");
+        assert_eq!(library_key_for_index(251), "WemadeMir3/Snow/Dungeonsc");
+        assert_eq!(library_key_for_index(257), "WemadeMir3/Object1c");
+        assert_eq!(library_key_for_index(272), "WemadeMir3/Object1c");
+        assert_eq!(library_key_for_index(300), "ShandaMir3/Tilesc");
+        assert_eq!(library_key_for_index(346), "ShandaMir3/Tiles30csnow");
+        assert_eq!(library_key_for_index(374), "WemadeMir2/Tiles");
+        assert_eq!(library_key_for_index(i16::MIN), "WemadeMir2/Tiles");
     }
 
     #[test]

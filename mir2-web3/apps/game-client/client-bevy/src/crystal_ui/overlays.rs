@@ -27,6 +27,7 @@ use crate::pending_operations::{
     OverlayResetTracker, PendingLifecycleSet, PendingOperationKey, PendingOperations,
     SessionResetGameShopPreservation, SessionResetRevision,
 };
+use crate::quest_model::NpcDialogModel;
 use crate::read_model::{UiReadModel, UiSurfaceSignals};
 use crate::shop::{
     shop_buy_enabled, shop_quantity_clamped, shop_quantity_dec, shop_quantity_inc,
@@ -1717,7 +1718,7 @@ fn consume_mail_operation_feedback(
     mail.mails.retain(|message| message.operation.is_none());
 }
 
-fn process_overlay_keyboard(
+pub(crate) fn process_overlay_keyboard(
     mut state: ResMut<NativePlayerUiState>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
     mut pending: ResMut<PendingOperations>,
@@ -1730,6 +1731,7 @@ fn process_overlay_keyboard(
     mut game_shop: Option<ResMut<GameShopModel>>,
     mut storage: ResMut<StorageModel>,
     chat_state: Option<Res<crate::crystal_ui::chat::CrystalChatState>>,
+    npc_dialog: Option<Res<NpcDialogModel>>,
     mut surface_signals: Option<ResMut<UiSurfaceSignals>>,
 ) {
     if shell.screen != NativeShellScreen::InGame {
@@ -1905,6 +1907,15 @@ fn process_overlay_keyboard(
 
     if keys.just_pressed(KeyCode::Enter) {
         state.set_chat_focused(true);
+        return;
+    }
+    // Quest/NPC surfaces own Escape. This system is ordered before the quest
+    // input system so returning here preserves the pre-key modal state for the
+    // dedicated handler and prevents the same key from opening Menu after it
+    // closes Quest/Dialog later in this update.
+    if keys.just_pressed(KeyCode::Escape)
+        && (state.quest_open() || npc_dialog.as_deref().is_some_and(|dialog| dialog.is_open))
+    {
         return;
     }
     if keys.just_pressed(KeyCode::KeyI) {
@@ -3118,6 +3129,7 @@ fn repair_selection_enabled(state: &NativePlayerUiState, inventory: &InventoryMo
 }
 
 fn render_overlays(
+    asset_server: Option<Res<AssetServer>>,
     shell: Option<Res<NativeShellModel>>,
     state: Res<NativePlayerUiState>,
     inventory: Res<InventoryModel>,
@@ -3211,7 +3223,7 @@ fn render_overlays(
             &mut commands,
             &mut secondary.p1(),
             state.bigmap_open(),
-            |parent| render_bigmap(parent, &map, &ui, &state),
+            |parent| render_bigmap(parent, asset_server.as_deref(), &map, &ui, &state),
         );
         fill_panel(
             &mut commands,
@@ -3982,6 +3994,7 @@ fn render_mail_compose(
 
 fn render_bigmap(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     map: &MapModel,
     ui: &UiReadModel,
     state: &NativePlayerUiState,
@@ -3993,11 +4006,10 @@ fn render_bigmap(
         &format!("Position: {}, {}", map.center_x, map.center_y),
     );
     body(parent, &format!("Zoom: {:.2}x", state.bigmap_zoom));
-    if let Some(asset) = bigmap_asset_path(Some(map_name)) {
-        // Authoritative map image – rendered as a colored viewport with player dot.
-        // In production this would be an `ImageNode` via `asset_server.load(asset)`;
-        // for the test-friendly path we render a viewport box with the asset name
-        // and a player indicator so the panel is not just text.
+    if let (Some(asset), Some(asset_server)) = (bigmap_asset_path(Some(map_name)), asset_server) {
+        // Render the same exported Crystal minimap image used by the native HUD.
+        // The previous green placeholder only printed this path and therefore
+        // could pass state tests while remaining visibly incomplete.
         parent
             .spawn(Node {
                 width: Val::Px(BIGMAP_WIDTH),
@@ -4006,27 +4018,18 @@ fn render_bigmap(
                 ..default()
             })
             .with_children(|viewport| {
-                viewport
-                    .spawn((
-                        Node {
-                            width: Val::Percent(100.0),
-                            height: Val::Percent(100.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgba(0.12, 0.18, 0.10, 0.9)),
-                    ))
-                    .with_children(|inner| {
-                        inner.spawn((
-                            Text::new(asset.clone()),
-                            TextFont {
-                                font_size: bevy::prelude::FontSize::Px(9.0),
-                                ..default()
-                            },
-                            TextColor(Color::srgba(0.8, 0.9, 0.75, 0.8)),
-                        ));
-                    });
+                viewport.spawn((
+                    Node {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        ..default()
+                    },
+                    ImageNode {
+                        image: asset_server.load(asset),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
                 let (px, py) = bigmap_player_position(map, state.bigmap_zoom);
                 viewport.spawn((
                     Node {
@@ -4040,11 +4043,6 @@ fn render_bigmap(
                     BackgroundColor(Color::srgb(1.0, 0.2, 0.2)),
                 ));
             });
-        body(parent, &format!("Map image: {}", asset));
-        let (px, py) = bigmap_player_position(map, state.bigmap_zoom);
-        body(parent, &format!("Player on big map: {:.0}, {:.0}", px, py));
-        // Also show terrain patch count as proof of MapModel usage
-        body(parent, &format!("Terrain patches: {}", map.patches.len()));
     } else {
         body(parent, "No big map image for this region.");
         body(parent, &format!("Fallback world size: {}x{}", 700, 700));

@@ -1,5 +1,27 @@
 # Windows 原生 Crystal 视觉复刻执行设计
 
+> 2026-08-22 live current-source revalidation: status is **Visual Validation In
+> Progress — not Accepted**. Same-coordinate Crystal/native captures at
+> `BichonProvince 288,616` disproved the older “only P2/P3 remains” summary.
+> The current-source client first crashed with Bevy `B0001` (overlapping mutable
+> minimap queries), then rendered an entirely black world because native
+> `standaloneTiles.imageUrl` assets were never queued. Both code-path defects are
+> fixed in the working branch. A later same-coordinate pass traced the remaining
+> grid-aligned black holes to stable atlas-page keys retaining only the first
+> viewport's partial rect layout. Runtime layouts now accumulate rects across
+> viewports; live `288,616` evidence reports `657 + 125 = 782` draws,
+> `missingBindings=0`, and no black holes. Runtime/native-ui suites pass 169/169
+> and 256/256. The same run also fixed Quest Escape fallthrough and replaced Big
+> Map's green placeholder with the real MMap image; its outer frame still needs
+> Crystal parity. Windows 231/231, keyed-map parity tests, map-source quality
+> tests and Web typecheck also pass; the final diagnostic release binary is
+> 65,077,760 bytes with SHA-256
+> `22BF02AABB42ED34D32B3BE5578B4005CD1824CF5200626150CD33C300A45E8F`.
+> Treat the baseline map P0 as closed but Quest, Options, Mail,
+> Menu, HUD data/layout and the remaining secondary-panel gaps as P1. See
+> `docs/NATIVE-WINDOWS-VISUAL-VALIDATION-REPORT.md`; do not reuse the old 88/100
+> HUD score as evidence for the current full scene.
+
 > 2026-08-19 V6 alternate-class/combat update: native entity composition now
 > routes Archer `ARArmour`/`ARHair`/`ARWeapon` action families and Assassin
 > `AArmour`/`AHair`/directional dual-`AWeapon*` action families with Web-equivalent

@@ -52,6 +52,43 @@ function makeType100MapBytes(cells) {
 }
 
 {
+  const mir3Names = [
+    "Tilesc",
+    "Tiles30c",
+    "Tiles5c",
+    "SmTilesc",
+    "Housesc",
+    "Cliffsc",
+    "Dungeonsc",
+    "Innersc",
+    "Furnituresc",
+    "Wallsc",
+    "SmObjectsc",
+    "Animationsc",
+    "Object1c",
+    "Object2c",
+  ];
+  const wemadeMir3Folders = ["", "Wood", "Sand", "Snow", "Forest"];
+  const shandaMir3Suffixes = ["", "wood", "sand", "snow", "forest"];
+  for (let state = 0; state < 5; state += 1) {
+    for (let slot = 0; slot < mir3Names.length; slot += 1) {
+      const name = mir3Names[slot];
+      const wemadeFolder =
+        name === "Object1c" || name === "Object2c" ? "" : wemadeMir3Folders[state];
+      const wemadePrefix = wemadeFolder ? `WemadeMir3/${wemadeFolder}/` : "WemadeMir3/";
+      assert.equal(mapLibraryKeyForIndex(200 + state * 15 + slot), `${wemadePrefix}${name}`);
+      assert.equal(
+        mapLibraryKeyForIndex(300 + state * 15 + slot),
+        `ShandaMir3/${name}${shandaMir3Suffixes[state]}`,
+      );
+    }
+  }
+  assert.equal(mapLibraryKeyForIndex(214), "WemadeMir2/Tiles");
+  assert.equal(mapLibraryKeyForIndex(299), "WemadeMir2/Tiles");
+  assert.equal(mapLibraryKeyForIndex(373), "ShandaMir3/Object2cforest");
+  assert.equal(mapLibraryKeyForIndex(374), "WemadeMir2/Tiles");
+  assert.equal(mapLibraryKeyForIndex(375), "WemadeMir2/Tiles");
+
   assert.equal(mapLibraryKeyForIndex(0), "WemadeMir2/Tiles");
   assert.equal(mapLibraryKeyForIndex(2), "WemadeMir2/Objects");
   assert.equal(mapLibraryKeyForIndex(5), "WemadeMir2/Objects4");
@@ -105,6 +142,36 @@ function makeType100MapBytes(cells) {
   assert.equal(refs.length, 1, "same frame should dedupe");
   assert.equal(refs[0].key, "WemadeMir2/Objects#1");
   assert.equal(refs[0].additive, true, "additive reference must win during dedupe");
+}
+
+{
+  const bytes = makeType100MapBytes([
+    (target, base) => {
+      target.writeInt16LE(206, base);
+      target.writeInt32LE(2, base + 2); // WemadeMir3/Dungeonsc frame 1 -> alpha-key
+    },
+    (target, base) => {
+      target.writeInt16LE(200, base + 6);
+      target.writeInt16LE(3, base + 8); // WemadeMir3/Tilesc frame 2 -> additive
+      target[base + 18] = 8;
+    },
+    (target, base) => {
+      target.writeInt16LE(212, base + 10);
+      target.writeInt16LE(4, base + 12); // WemadeMir3/Object1c frame 3 -> additive
+      target[base + 16] = 0x81;
+    },
+  ]);
+  const parsed = parseType100Map(bytes);
+  assert.ok(parsed);
+  const refs = collectStandaloneMapReferences(parsed);
+  assert.deepEqual(
+    refs.map(({ key, additive, layer }) => ({ key, additive, layer })),
+    [
+      { key: "WemadeMir3/Dungeonsc#1", additive: false, layer: "back" },
+      { key: "WemadeMir3/Object1c#3", additive: true, layer: "front" },
+      { key: "WemadeMir3/Tilesc#2", additive: true, layer: "middle" },
+    ],
+  );
 }
 
 {
