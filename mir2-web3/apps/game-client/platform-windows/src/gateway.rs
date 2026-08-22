@@ -3811,7 +3811,10 @@ fn transform_game_shop_stock_from_packet(payload: &Value) -> Option<Value> {
 }
 
 /// `NPCGoods` is the ordinary NPC-only catalogue. It must not be folded into
-/// the separately correlated cash GameShop catalogue above.
+/// the separately correlated cash GameShop catalogue above. `NPCGoods` and
+/// `NPCSell` remain separate packet signals; the shared ShopModel folds that
+/// ordered pair into one BUYSELL capability set, while a lone NPCSell stays
+/// sell-only.
 fn npc_shop_service_from_packet(
     packet: &str,
     payload: &Value,
@@ -4895,6 +4898,40 @@ mod tests {
         );
         assert!(npc_shop_service_from_packet("NPCRepair", &json!({})).is_none());
         assert!(npc_shop_service_from_packet("NPCSRepair", &json!({ "rate": -1.0 })).is_none());
+    }
+
+    #[test]
+    fn npc_goods_then_npc_sell_preserves_buy_and_sell_for_one_service_session() {
+        use mir2_client_bevy::shop::{NpcShopServiceMode, ShopModel};
+
+        let mut combined = ShopModel::default();
+        for (packet, payload) in [
+            ("NPCGoods", json!({ "list": [] })),
+            ("NPCSell", Value::Null),
+        ] {
+            let signal =
+                npc_shop_service_from_packet(packet, &payload).expect("valid NPC service packet");
+            assert!(combined.apply_service_signal(signal));
+        }
+        assert_eq!(combined.service_mode, NpcShopServiceMode::Sell);
+        assert!(combined.allows_buy(), "NPCGoods capability was lost");
+        assert!(combined.allows_sell(), "NPCSell capability was not added");
+
+        let mut sell_only = ShopModel::default();
+        let signal = npc_shop_service_from_packet("NPCSell", &Value::Null)
+            .expect("standalone NPCSell service packet");
+        assert!(sell_only.apply_service_signal(signal));
+        assert!(!sell_only.allows_buy());
+        assert!(sell_only.allows_sell());
+
+        assert!(combined.apply_service_signal(
+            npc_shop_service_from_packet("NPCRepair", &json!({ "rate": 1.25 }))
+                .expect("valid repair service packet")
+        ));
+        assert!(!combined.allows_buy());
+        assert!(!combined.allows_sell());
+        assert!(combined.allows_repair());
+        assert!(!combined.allows_special_repair());
     }
 
     async fn receive_wire_type(

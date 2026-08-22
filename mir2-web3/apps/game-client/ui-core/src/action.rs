@@ -60,6 +60,22 @@ pub enum UiAction {
     OpenStorage,
     OpenGroup,
     OpenGuild,
+    /// Requests the authoritative guild-storage listing. The Android and
+    /// other hosts serialize the resulting typed gateway command; no local
+    /// inventory is fabricated.
+    RequestGuildStorage,
+    /// Deposits (type 0) or withdraws (type 1) guild gold.
+    GuildStorageGoldChange {
+        change_type: u8,
+        amount: u32,
+    },
+    /// Moves an item between the player's inventory and guild storage, or
+    /// requests the storage list with the protocol's type-3 sentinel.
+    GuildStorageItemChange {
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     OpenTrade,
     ToggleMinimap,
     OpenMailCompose,

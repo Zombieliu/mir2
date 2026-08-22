@@ -73,15 +73,16 @@ impl ChatChannel {
 
     /// Parse a Crystal/backend channel name case-insensitively.
     ///
-    /// The aliases intentionally follow the Web client's visibility policy:
+    /// The aliases intentionally preserve Crystal's presentation families:
     /// shout variants and announcement/level-up notices belong to the Shout
-    /// family, while LineMessage remains part of the Normal settings family.
+    /// family for styling/control-bar purposes, while the settings filter is
+    /// resolved separately by [`Self::settings_filter_channel`].
     pub fn parse(value: &str) -> Self {
         match value.trim().to_ascii_lowercase().as_str() {
-            "system" | "system2" | "server" => Self::System,
+            "system" | "system1" | "system2" | "server" => Self::System,
             "hint" => Self::Hint,
             "linemessage" | "line" => Self::LineMessage,
-            "shout" | "shout2" | "shout3" | "announcement" | "levelup" => Self::Shout,
+            "shout" | "shout1" | "shout2" | "shout3" | "announcement" | "levelup" => Self::Shout,
             "whisperin" | "whisper_in" => Self::WhisperIn,
             "whisperout" | "whisper_out" => Self::WhisperOut,
             "whisper" => Self::WhisperIn,
@@ -93,6 +94,26 @@ impl ChatChannel {
             "trade" => Self::Trade,
             "normal" | "trainer" | "" => Self::Normal,
             _ => Self::Normal,
+        }
+    }
+
+    /// Resolve the exact channel families controlled by Crystal's settings
+    /// visibility flags. This mirrors Web `filteredByCrystalSettings`:
+    /// `Hint`, `Announcement`, `LevelUp`, `Trainer`, `Mentor`,
+    /// `Relationship`, and other unlisted types are intentionally not
+    /// settings-filterable, even when [`Self::parse`] maps them into a shared
+    /// presentation family.
+    pub fn settings_filter_channel(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "normal" => Some(Self::Normal),
+            "linemessage" | "line" => Some(Self::LineMessage),
+            "whisperin" | "whisper_in" | "whisper" => Some(Self::WhisperIn),
+            "whisperout" | "whisper_out" => Some(Self::WhisperOut),
+            "shout" | "shout1" | "shout2" | "shout3" => Some(Self::Shout),
+            "system" | "system1" | "system2" => Some(Self::System),
+            "group" => Some(Self::Group),
+            "guild" => Some(Self::Guild),
+            _ => None,
         }
     }
 }
@@ -228,5 +249,27 @@ mod tests {
         }
         assert_eq!(model.recent_text(3), vec!["m2", "m3", "m4"]);
         assert_eq!(model.recent_text(10).len(), 5);
+    }
+
+    #[test]
+    fn settings_filter_channel_keeps_presentation_aliases_separate() {
+        assert_eq!(ChatChannel::all().len(), 13);
+        assert_eq!(ChatChannel::parse("Announcement"), ChatChannel::Shout);
+        assert_eq!(ChatChannel::parse("LevelUp"), ChatChannel::Shout);
+        assert_eq!(ChatChannel::parse("Hint"), ChatChannel::Hint);
+        assert_eq!(ChatChannel::parse("Shout1"), ChatChannel::Shout);
+        assert_eq!(ChatChannel::parse("System1"), ChatChannel::System);
+
+        assert_eq!(ChatChannel::settings_filter_channel("Announcement"), None);
+        assert_eq!(ChatChannel::settings_filter_channel("LevelUp"), None);
+        assert_eq!(ChatChannel::settings_filter_channel("Hint"), None);
+        assert_eq!(
+            ChatChannel::settings_filter_channel("Shout1"),
+            Some(ChatChannel::Shout)
+        );
+        assert_eq!(
+            ChatChannel::settings_filter_channel("System1"),
+            Some(ChatChannel::System)
+        );
     }
 }

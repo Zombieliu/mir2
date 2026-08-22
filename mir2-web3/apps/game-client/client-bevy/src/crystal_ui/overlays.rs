@@ -1200,9 +1200,16 @@ impl NativePlayerUiIntentQueue {
             NativePlayerUiIntent::GuildRequestInfo { .. } => {
                 Some(crate::social::SocialPendingOperation::GuildInfo)
             }
-            NativePlayerUiIntent::GuildEditMember { name, .. } => {
-                Some(crate::social::SocialPendingOperation::GuildMember { name: name.clone() })
-            }
+            NativePlayerUiIntent::GuildEditMember {
+                change_type,
+                rank_index,
+                name,
+                ..
+            } => Some(crate::social::SocialPendingOperation::GuildMember {
+                change_type: *change_type,
+                rank_index: *rank_index,
+                name: name.clone(),
+            }),
             NativePlayerUiIntent::GuildEditNotice { notice } => {
                 Some(crate::social::SocialPendingOperation::GuildNotice {
                     notice: notice.clone(),
@@ -11260,6 +11267,8 @@ mod tests {
                     to: 4,
                 },
                 crate::social::SocialPendingOperation::GuildMember {
+                    change_type: 4,
+                    rank_index: 2,
                     name: "Member".to_owned(),
                 },
             ]

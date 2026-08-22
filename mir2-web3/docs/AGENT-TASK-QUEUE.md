@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> WN-UI-FUNC-01 R7.1 independent-review remediation (2026-08-23): a
+> `gpt-5.6-sol high` read-only review of `e32caf2cc` found no P0 and six P1;
+> all six are now fixed. Login/register receipts are operation-scoped;
+> NPCGoods followed by NPCSell retains combined Buy+Sell capabilities;
+> Guild gold failures return exact non-mutating type 3/4 receipts while type 2
+> applies authoritative guild expenditure; rank-name/permission receipts use
+> `changeType + rankIndex`; and Android Guild storage is reachable through the
+> shared `UiAction -> GatewayCommand -> wire` path. The adjacent chat P2 was
+> also closed: Announcement/LevelUp/Hint no longer inherit Shout/System
+> visibility. Updated gates pass ui-core 37/37, native-ui 374/374, Windows
+> 276/276, runtime 180/180, Android 48/48, plus the focused Simulation Guild
+> receipt test. One protocol-level P2 remains explicit: ordinary Storage
+> StoreItem/TakeBackItem ACKs do not carry a request ID, so a delayed duplicate
+> ACK is indistinguishable from a later identical operation. This requires a
+> coordinated protocol version upgrade and is not disguised with an unsafe
+> client-only generation heuristic.
+
 > WN-UI-FUNC-01 R7 non-visual functional closure (2026-08-23): shared UI
 > Core, Windows native, runtime and Android adapters now cover the remaining
 > bounded functional gaps without using desktop visual automation. Login and

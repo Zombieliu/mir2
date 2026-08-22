@@ -84,6 +84,13 @@ pub struct ShopModel {
     /// Server-selected service surface. This is reset at every session/data
     /// boundary and changed only by NPCGoods/NPCSell/NPCRepair/NPCSRepair.
     pub service_mode: NpcShopServiceMode,
+    /// Authoritative capabilities of the current NPC service session. Crystal
+    /// can send NPCGoods followed by NPCSell for one BUYSELL NPC; keeping the
+    /// capabilities separate from `service_mode` prevents the latter packet
+    /// from erasing the former. These fields are additive so older JSON that
+    /// only contains `serviceMode` remains valid through `allows_*` fallbacks.
+    pub supports_buy: bool,
+    pub supports_sell: bool,
     /// Crystal repair multiplier supplied by NPCRepair/NPCSRepair.
     pub repair_rate: Option<f32>,
 }
@@ -102,6 +109,31 @@ impl ShopModel {
         if !signal.is_valid() {
             return false;
         }
+        match signal.mode {
+            NpcShopServiceMode::Closed => {
+                self.supports_buy = false;
+                self.supports_sell = false;
+            }
+            NpcShopServiceMode::Buy => {
+                self.supports_buy = true;
+                self.supports_sell = false;
+            }
+            NpcShopServiceMode::Sell => {
+                // NPCGoods -> NPCSell is the two-packet representation of a
+                // single BUYSELL service session. A standalone NPCSell still
+                // remains sell-only because a fresh/default model has no buy
+                // capability to preserve.
+                self.supports_sell = true;
+                self.supports_buy =
+                    self.service_mode == NpcShopServiceMode::Buy || self.supports_buy;
+            }
+            NpcShopServiceMode::Repair | NpcShopServiceMode::SpecialRepair => {
+                // Repair services are deliberately fail-closed: neither
+                // trade capability may leak from an earlier shop session.
+                self.supports_buy = false;
+                self.supports_sell = false;
+            }
+        }
         self.service_mode = signal.mode;
         self.repair_rate = signal.repair_rate;
         self.selected_id = None;
@@ -111,11 +143,11 @@ impl ShopModel {
     }
 
     pub fn allows_buy(&self) -> bool {
-        self.service_mode == NpcShopServiceMode::Buy
+        self.supports_buy || self.service_mode == NpcShopServiceMode::Buy
     }
 
     pub fn allows_sell(&self) -> bool {
-        self.service_mode == NpcShopServiceMode::Sell
+        self.supports_sell || self.service_mode == NpcShopServiceMode::Sell
     }
 
     pub fn allows_repair(&self) -> bool {
@@ -254,6 +286,8 @@ mod tests {
             selected_bag_slot_for_sell: Some(2),
             selected_bag_slot_for_repair: Some(3),
             service_mode: NpcShopServiceMode::Buy,
+            supports_buy: true,
+            supports_sell: false,
             repair_rate: None,
         };
         let json = serde_json::to_string(&model).expect("ser");
@@ -262,7 +296,25 @@ mod tests {
     }
 
     #[test]
-    fn service_modes_are_authoritative_and_mutually_exclusive() {
+    fn legacy_service_mode_json_keeps_default_capability_fallbacks() {
+        let mut legacy = serde_json::to_value(ShopModel {
+            service_mode: NpcShopServiceMode::Buy,
+            ..Default::default()
+        })
+        .expect("legacy source model serializes");
+        let object = legacy.as_object_mut().expect("shop model object");
+        object.remove("supportsBuy");
+        object.remove("supportsSell");
+
+        let restored: ShopModel = serde_json::from_value(legacy).expect("legacy shop model");
+        assert!(!restored.supports_buy);
+        assert!(!restored.supports_sell);
+        assert!(restored.allows_buy());
+        assert!(!restored.allows_sell());
+    }
+
+    #[test]
+    fn service_modes_are_authoritative_and_buy_sell_can_be_combined() {
         let mut model = ShopModel {
             selected_id: Some(7),
             selected_bag_slot_for_sell: Some(2),
@@ -281,6 +333,38 @@ mod tests {
         assert_eq!(model.selected_id, None);
         assert_eq!(model.selected_bag_slot_for_sell, None);
         assert_eq!(model.selected_bag_slot_for_repair, None);
+
+        // A standalone sell packet is sell-only.
+        assert!(model.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Sell,
+            repair_rate: None,
+        }));
+        assert!(!model.allows_buy());
+        assert!(model.allows_sell());
+
+        // The normal BUYSELL sequence retains both capabilities.
+        assert!(model.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Buy,
+            repair_rate: None,
+        }));
+        assert!(model.allows_buy());
+        assert!(!model.allows_sell());
+        assert!(model.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Sell,
+            repair_rate: None,
+        }));
+        assert!(model.allows_buy());
+        assert!(model.allows_sell());
+
+        // A repair transition closes both trade capabilities, even after the
+        // combined session, and keeps the two repair modes exact.
+        assert!(model.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::SpecialRepair,
+            repair_rate: Some(2.0),
+        }));
+        assert!(!model.allows_buy());
+        assert!(!model.allows_sell());
+        assert!(model.allows_special_repair());
     }
 
     #[test]

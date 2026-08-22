@@ -1,7 +1,10 @@
 //! Pure reducer: (state, action) -> (state, effects). No I/O, no Bevy.
 
 use crate::action::UiAction;
-use crate::effect::{GatewayCommand, SecurityRequest, UiEffect};
+use crate::effect::{
+    valid_guild_storage_gold_change, valid_guild_storage_item_change, GatewayCommand,
+    SecurityRequest, UiEffect,
+};
 use crate::state::{
     UiChatSettings, UiOptions, UiPanel, UiPlatformSettings, UiScreen, UiSecurityPanel, UiState,
 };
@@ -334,6 +337,43 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
         UiAction::OpenGuild => {
             if in_game(state) {
                 panel(&mut next, UiPanel::Guild);
+            }
+        }
+        UiAction::RequestGuildStorage => {
+            if in_game(state) {
+                effects.push(UiEffect::GatewayCommand(GatewayCommand::GuildStorageList));
+            }
+        }
+        UiAction::GuildStorageGoldChange {
+            change_type,
+            amount,
+        } => {
+            if in_game(state) && valid_guild_storage_gold_change(change_type, amount) {
+                effects.push(UiEffect::GatewayCommand(
+                    GatewayCommand::GuildStorageGoldChange {
+                        change_type,
+                        amount,
+                    },
+                ));
+            }
+        }
+        UiAction::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        } => {
+            if in_game(state) && valid_guild_storage_item_change(change_type, from, to) {
+                if change_type == crate::effect::GUILD_STORAGE_LIST_CHANGE_TYPE {
+                    effects.push(UiEffect::GatewayCommand(GatewayCommand::GuildStorageList));
+                } else {
+                    effects.push(UiEffect::GatewayCommand(
+                        GatewayCommand::GuildStorageItemChange {
+                            change_type,
+                            from,
+                            to,
+                        },
+                    ));
+                }
             }
         }
         UiAction::OpenTrade => {
@@ -807,6 +847,18 @@ mod tests {
             UiAction::OpenMail,
             UiAction::OpenBigMap,
             UiAction::OpenStorage,
+            UiAction::OpenGroup,
+            UiAction::OpenGuild,
+            UiAction::RequestGuildStorage,
+            UiAction::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 1,
+            },
+            UiAction::GuildStorageItemChange {
+                change_type: 2,
+                from: 0,
+                to: 1,
+            },
             UiAction::ToggleMinimap,
             UiAction::SetMusicEnabled { enabled: false },
             UiAction::SetMusicVolume { volume: 20 },
@@ -932,6 +984,92 @@ mod tests {
             assert!(
                 transition.effects.is_empty(),
                 "opening a panel emits no I/O"
+            );
+        }
+    }
+
+    #[test]
+    fn guild_storage_actions_emit_shared_typed_commands_and_enforce_bounds() {
+        let state = game();
+        assert_eq!(
+            reduce(&state, UiAction::RequestGuildStorage).effects,
+            vec![UiEffect::GatewayCommand(GatewayCommand::GuildStorageList)]
+        );
+        assert_eq!(
+            reduce(
+                &state,
+                UiAction::GuildStorageGoldChange {
+                    change_type: 1,
+                    amount: 250,
+                }
+            )
+            .effects,
+            vec![UiEffect::GatewayCommand(
+                GatewayCommand::GuildStorageGoldChange {
+                    change_type: 1,
+                    amount: 250,
+                }
+            )]
+        );
+        assert_eq!(
+            reduce(
+                &state,
+                UiAction::GuildStorageItemChange {
+                    change_type: 2,
+                    from: 4,
+                    to: 7,
+                }
+            )
+            .effects,
+            vec![UiEffect::GatewayCommand(
+                GatewayCommand::GuildStorageItemChange {
+                    change_type: 2,
+                    from: 4,
+                    to: 7,
+                }
+            )]
+        );
+        assert_eq!(
+            reduce(
+                &state,
+                UiAction::GuildStorageItemChange {
+                    change_type: crate::effect::GUILD_STORAGE_LIST_CHANGE_TYPE,
+                    from: 0,
+                    to: 0,
+                }
+            )
+            .effects,
+            vec![UiEffect::GatewayCommand(GatewayCommand::GuildStorageList)]
+        );
+
+        for action in [
+            UiAction::GuildStorageGoldChange {
+                change_type: 2,
+                amount: 1,
+            },
+            UiAction::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 0,
+            },
+            UiAction::GuildStorageItemChange {
+                change_type: 2,
+                from: -1,
+                to: 0,
+            },
+            UiAction::GuildStorageItemChange {
+                change_type: 2,
+                from: 0,
+                to: crate::effect::GUILD_STORAGE_SLOT_COUNT,
+            },
+            UiAction::GuildStorageItemChange {
+                change_type: crate::effect::GUILD_STORAGE_LIST_CHANGE_TYPE,
+                from: 1,
+                to: 0,
+            },
+        ] {
+            assert!(
+                reduce(&state, action).effects.is_empty(),
+                "invalid guild storage input must not reach the gateway"
             );
         }
     }

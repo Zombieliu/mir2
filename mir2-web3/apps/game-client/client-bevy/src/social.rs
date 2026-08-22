@@ -153,28 +153,65 @@ pub struct SocialAuthoritativeEvent {
     #[serde(default)]
     pub change_type: Option<u8>,
     #[serde(default)]
+    pub rank_index: Option<u8>,
+    #[serde(default)]
     pub amount: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "kind", content = "value")]
 pub enum SocialPendingOperation {
-    GroupSwitch { allow_group: bool },
-    GroupAdd { name: String },
-    GroupRemove { name: String },
-    GroupInviteAccept { inviter: String, invite_epoch: u64 },
+    GroupSwitch {
+        allow_group: bool,
+    },
+    GroupAdd {
+        name: String,
+    },
+    GroupRemove {
+        name: String,
+    },
+    GroupInviteAccept {
+        inviter: String,
+        invite_epoch: u64,
+    },
     GuildInfo,
-    GuildMember { name: String },
-    GuildNotice { notice: Vec<String> },
-    GuildInviteAccept { inviter: String, invite_epoch: u64 },
-    GuildStorageGold { change_type: u8, amount: u32 },
-    GuildStorageItem { change_type: u8, from: i32, to: i32 },
+    GuildMember {
+        change_type: u8,
+        rank_index: u8,
+        name: String,
+    },
+    GuildNotice {
+        notice: Vec<String>,
+    },
+    GuildInviteAccept {
+        inviter: String,
+        invite_epoch: u64,
+    },
+    GuildStorageGold {
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItem {
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     TradeRequest,
     TradeReply,
-    TradeGold { amount: u32 },
-    TradeDeposit { from: i32, to: i32 },
-    TradeRetrieve { from: i32, to: i32 },
-    TradeConfirm { locked: bool },
+    TradeGold {
+        amount: u32,
+    },
+    TradeDeposit {
+        from: i32,
+        to: i32,
+    },
+    TradeRetrieve {
+        from: i32,
+        to: i32,
+    },
+    TradeConfirm {
+        locked: bool,
+    },
     TradeCancel,
 }
 
@@ -335,6 +372,7 @@ impl SocialModel {
                         from: None,
                         to: None,
                         change_type: None,
+                        rank_index: None,
                         amount: None,
                     });
                     self.normalize();
@@ -456,15 +494,18 @@ impl SocialModel {
                 let Some(amount) = value_u32(payload.get("amount")) else {
                     return false;
                 };
-                if amount == 0 || change_type > 1 {
+                if amount == 0 || change_type > 4 {
                     return false;
                 }
-                self.guild.gold = if change_type == 0 {
-                    self.guild.gold.saturating_add(amount)
-                } else {
-                    self.guild.gold.saturating_sub(amount)
-                };
-                success = Some(true);
+                match change_type {
+                    0 => self.guild.gold = self.guild.gold.saturating_add(amount),
+                    1 | 2 => self.guild.gold = self.guild.gold.saturating_sub(amount),
+                    // 3/4 are exact failure receipts for requests 0/1. They
+                    // intentionally leave the authoritative balance alone.
+                    3 | 4 => {}
+                    _ => unreachable!("bounded above"),
+                }
+                success = Some(change_type <= 2);
                 changed = true;
             }
             "GuildStorageList" => {
@@ -651,6 +692,7 @@ impl SocialModel {
                 from,
                 to,
                 change_type: value_u8(payload.get("changeType")),
+                rank_index: value_u8(payload.get("rankIndex")),
                 amount: value_u32(payload.get("amount")),
             });
             self.normalize();
@@ -732,8 +774,15 @@ impl SocialModel {
             }
             SocialPendingOperation::GuildInfo => event
                 .is_some_and(|e| matches!(e.packet.as_str(), "GuildStatus" | "GuildMemberChange")),
-            SocialPendingOperation::GuildMember { name } => event.is_some_and(|e| {
-                e.packet == "GuildMemberChange" && e.subject.as_deref() == Some(name.as_str())
+            SocialPendingOperation::GuildMember {
+                change_type,
+                rank_index,
+                name,
+            } => event.is_some_and(|event| {
+                event.packet == "GuildMemberChange"
+                    && event.change_type == Some(*change_type)
+                    && event.rank_index == Some(*rank_index)
+                    && (name.is_empty() || event.subject.as_deref() == Some(name.as_str()))
             }),
             SocialPendingOperation::GuildNotice { notice } => event.is_some_and(|event| {
                 (event.packet == "GuildNoticeChange" && event.success == Some(true))
@@ -770,8 +819,9 @@ impl SocialModel {
                 amount,
             } => event.is_some_and(|event| {
                 event.packet == "GuildStorageGoldChange"
-                    && event.success == Some(true)
-                    && event.change_type == Some(*change_type)
+                    && event.success.is_some()
+                    && (event.change_type == Some(*change_type)
+                        || event.change_type == Some(change_type.saturating_add(3)))
                     && event.amount == Some(*amount)
             }),
             SocialPendingOperation::GuildStorageItem {
@@ -1187,6 +1237,35 @@ mod tests {
         assert_eq!(model.guild.gold, 125);
         assert!(model.pending.is_empty());
 
+        assert!(
+            model.begin_pending(SocialPendingOperation::GuildStorageGold {
+                change_type: 1,
+                amount: 40,
+            })
+        );
+        reconcile_packet(
+            &mut model,
+            "GuildStorageGoldChange",
+            json!({"changeType":4,"amount":40,"name":"Me"}),
+        );
+        assert_eq!(model.guild.gold, 125, "a NACK must not mutate gold");
+        assert!(model.pending.is_empty(), "a matching NACK permits retry");
+
+        assert!(
+            model.begin_pending(SocialPendingOperation::GuildStorageGold {
+                change_type: 0,
+                amount: 7,
+            })
+        );
+        reconcile_packet(
+            &mut model,
+            "GuildStorageGoldChange",
+            json!({"changeType":2,"amount":25,"name":"War"}),
+        );
+        assert_eq!(model.guild.gold, 100, "type 2 is authoritative guild spend");
+        assert_eq!(model.pending.len(), 1, "type 2 cannot ACK a user request");
+        model.pending.clear();
+
         assert!(model.apply_packet("GuildStorageList", &json!({"items":[item.clone(), null]})));
         assert_eq!(model.guild.storage_items.len(), MAX_GUILD_STORAGE_ITEMS);
         assert_eq!(
@@ -1239,6 +1318,38 @@ mod tests {
             "GuildStorageList",
             &json!({"items": vec![Value::Null; MAX_GUILD_STORAGE_ITEMS + 1]})
         ));
+    }
+
+    #[test]
+    fn guild_rank_change_with_empty_member_name_releases_exact_pending() {
+        let mut model = SocialModel::default();
+        assert!(model.begin_pending(SocialPendingOperation::GuildMember {
+            change_type: 2,
+            rank_index: 3,
+            name: String::new(),
+        }));
+        reconcile_packet(
+            &mut model,
+            "GuildMemberChange",
+            json!({
+                "changeType": 2,
+                "rankIndex": 2,
+                "name": "",
+                "ranks": [{"name":"Wrong","index":2,"options":0,"members":[]}]
+            }),
+        );
+        assert_eq!(model.pending.len(), 1);
+        reconcile_packet(
+            &mut model,
+            "GuildMemberChange",
+            json!({
+                "changeType": 2,
+                "rankIndex": 3,
+                "name": "",
+                "ranks": [{"name":"Renamed","index":3,"options":0,"members":[]}]
+            }),
+        );
+        assert!(model.pending.is_empty());
     }
 
     #[test]
@@ -1319,18 +1430,20 @@ mod tests {
 
         let mut member = SocialModel::default();
         member.begin_pending(SocialPendingOperation::GuildMember {
+            change_type: 4,
+            rank_index: 2,
             name: "Miner".into(),
         });
         reconcile_packet(
             &mut member,
             "GuildMemberChange",
-            json!({"name":"Other","ranks":[]}),
+            json!({"changeType":4,"rankIndex":2,"name":"Other","ranks":[]}),
         );
         assert_eq!(member.pending.len(), 1);
         reconcile_packet(
             &mut member,
             "GuildMemberChange",
-            json!({"name":"Miner","ranks":[]}),
+            json!({"changeType":4,"rankIndex":2,"name":"Miner","ranks":[]}),
         );
         assert!(member.pending.is_empty());
 
@@ -1595,6 +1708,7 @@ mod tests {
             from: None,
             to: None,
             change_type: None,
+            rank_index: None,
             amount: None,
         });
         model.clear_scene();

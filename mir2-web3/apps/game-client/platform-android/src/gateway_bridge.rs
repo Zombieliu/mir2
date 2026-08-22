@@ -9,7 +9,10 @@ use std::{collections::VecDeque, fmt};
 
 use bevy::prelude::Resource;
 use mir2_ui_core::action::UiAction;
-use mir2_ui_core::effect::{GatewayCommand, SecurityRequest, UiEffect};
+use mir2_ui_core::effect::{
+    valid_guild_storage_gold_change, valid_guild_storage_item_change, GatewayCommand,
+    SecurityRequest, UiEffect, GUILD_STORAGE_LIST_CHANGE_TYPE, GUILD_STORAGE_SLOT_COUNT,
+};
 use mir2_ui_core::game_shop::{
     GameShopReceipt, GameShopRequest, NATIVE_GAME_SHOP_RECEIPT_CAPABILITY,
 };
@@ -34,8 +37,7 @@ pub const ANDROID_CHANGE_PASSWORD_MAX_ACCOUNT_BYTES: usize = 32;
 pub const ANDROID_CHANGE_PASSWORD_MAX_SECRET_BYTES: usize = 128;
 pub const ANDROID_CHANGE_PASSWORD_SUCCESS_RESULT: i32 = 6;
 const ANDROID_SECURITY_NOTICE_MAX_CHARS: usize = 256;
-pub const ANDROID_GUILD_STORAGE_SLOT_COUNT: i32 = 112;
-const ANDROID_MAX_PROTOCOL_SLOT: i32 = u8::MAX as i32;
+pub const ANDROID_GUILD_STORAGE_SLOT_COUNT: i32 = GUILD_STORAGE_SLOT_COUNT;
 
 /// The Android Activity/transport host sends this envelope when it opens its
 /// WebSocket. This module intentionally does not own or declare a WebSocket.
@@ -62,72 +64,6 @@ pub enum AndroidGatewayOutboundKind {
     /// A shared command with no BrowserCommand/server equivalent. It remains
     /// observable to the host, but must not be sent as a fabricated packet.
     LocalOnly { reason: &'static str },
-}
-
-/// The two guild-storage BrowserCommand variants currently implemented by
-/// the gateway. `requestGuildStorage` is intentionally absent: the server
-/// uses `guildStorageItemChange` with changeType 3 and coordinates 0,0 to
-/// request the storage list.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AndroidGuildStorageCommand {
-    GoldChange { change_type: u8, amount: u32 },
-    ItemChange { change_type: u8, from: i32, to: i32 },
-}
-
-impl AndroidGuildStorageCommand {
-    pub fn gold_change(change_type: u8, amount: u32) -> Option<Self> {
-        (change_type <= 1 && amount > 0).then_some(Self::GoldChange {
-            change_type,
-            amount,
-        })
-    }
-
-    pub fn item_change(change_type: u8, from: i32, to: i32) -> Option<Self> {
-        let valid_slot = |slot: i32| (0..ANDROID_GUILD_STORAGE_SLOT_COUNT).contains(&slot);
-        let valid_protocol_slot = |slot: i32| (0..=ANDROID_MAX_PROTOCOL_SLOT).contains(&slot);
-        let valid = match change_type {
-            0 => valid_protocol_slot(from) && valid_slot(to),
-            1 => valid_slot(from) && valid_protocol_slot(to),
-            2 => valid_slot(from) && valid_slot(to),
-            3 => from == 0 && to == 0,
-            _ => false,
-        };
-        valid.then_some(Self::ItemChange {
-            change_type,
-            from,
-            to,
-        })
-    }
-
-    fn command_type(self) -> &'static str {
-        match self {
-            Self::GoldChange { .. } => "guildStorageGoldChange",
-            Self::ItemChange { .. } => "guildStorageItemChange",
-        }
-    }
-
-    fn to_wire_value(self) -> Value {
-        match self {
-            Self::GoldChange {
-                change_type,
-                amount,
-            } => json!({
-                "type":"guildStorageGoldChange",
-                "changeType":change_type,
-                "amount":amount
-            }),
-            Self::ItemChange {
-                change_type,
-                from,
-                to,
-            } => json!({
-                "type":"guildStorageItemChange",
-                "changeType":change_type,
-                "from":from,
-                "to":to
-            }),
-        }
-    }
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -1046,6 +982,28 @@ impl AndroidGatewayOutboundQueue {
     /// Convert and retain one reducer command. A full queue rejects the new
     /// command and records the rejection; existing FIFO entries are untouched.
     pub fn enqueue(&mut self, command: GatewayCommand) -> Result<(), AndroidGatewayEnqueueError> {
+        match &command {
+            GatewayCommand::GuildStorageGoldChange {
+                change_type,
+                amount,
+            } if !valid_guild_storage_gold_change(*change_type, *amount) => {
+                return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                    command_type: "guildStorageGoldChange",
+                    reason: "changeType must be 0 or 1 and amount must be non-zero",
+                });
+            }
+            GatewayCommand::GuildStorageItemChange {
+                change_type,
+                from,
+                to,
+            } if !valid_guild_storage_item_change(*change_type, *from, *to) => {
+                return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                    command_type: "guildStorageItemChange",
+                    reason: "changeType or slot coordinates are outside the server contract",
+                });
+            }
+            _ => {}
+        }
         if let GatewayCommand::GameShopBuy {
             request_id,
             g_index,
@@ -1101,21 +1059,17 @@ impl AndroidGatewayOutboundQueue {
         Ok(())
     }
 
-    /// Enqueue the exact guild-storage BrowserCommand without requiring a
-    /// shared UI enum change. Invalid change types, zero gold amounts, and
-    /// out-of-range slots are rejected before touching the bounded FIFO.
+    /// Compatibility helper for Android hosts that still call the adapter
+    /// directly. The actual UI path uses the shared typed GatewayCommand.
     pub fn enqueue_guild_storage_gold_change(
         &mut self,
         change_type: u8,
         amount: u32,
     ) -> Result<(), AndroidGatewayEnqueueError> {
-        let Some(command) = AndroidGuildStorageCommand::gold_change(change_type, amount) else {
-            return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
-                command_type: "guildStorageGoldChange",
-                reason: "changeType must be 0 or 1 and amount must be non-zero",
-            });
-        };
-        self.enqueue_guild_storage_command(command)
+        self.enqueue(GatewayCommand::GuildStorageGoldChange {
+            change_type,
+            amount,
+        })
     }
 
     pub fn enqueue_guild_storage_item_change(
@@ -1124,37 +1078,11 @@ impl AndroidGatewayOutboundQueue {
         from: i32,
         to: i32,
     ) -> Result<(), AndroidGatewayEnqueueError> {
-        let Some(command) = AndroidGuildStorageCommand::item_change(change_type, from, to) else {
-            return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
-                command_type: "guildStorageItemChange",
-                reason: "changeType or slot coordinates are outside the server contract",
-            });
-        };
-        self.enqueue_guild_storage_command(command)
-    }
-
-    fn enqueue_guild_storage_command(
-        &mut self,
-        command: AndroidGuildStorageCommand,
-    ) -> Result<(), AndroidGatewayEnqueueError> {
-        let command_type = command.command_type();
-        if self.entries.len() >= self.capacity {
-            self.overflow_count = self.overflow_count.saturating_add(1);
-            self.last_overflow_type = Some(command_type.to_owned());
-            return Err(AndroidGatewayEnqueueError::Full {
-                capacity: self.capacity,
-                command_type: command_type.to_owned(),
-            });
-        }
-        let sequence = self.next_sequence;
-        self.next_sequence = self.next_sequence.saturating_add(1);
-        self.entries.push_back(AndroidGatewayOutbound {
-            sequence,
-            kind: AndroidGatewayOutboundKind::Wire,
-            json: serde_json::to_string(&command.to_wire_value())
-                .expect("guild storage wire JSON is serializable"),
-        });
-        Ok(())
+        self.enqueue(GatewayCommand::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        })
     }
 
     fn apply_game_shop_receipt(&mut self, receipt: &GameShopReceipt) -> bool {
@@ -1299,6 +1227,9 @@ fn command_type(command: &GatewayCommand) -> String {
         GatewayCommand::GuildEditMember { .. } => "editGuildMember",
         GatewayCommand::GuildEditNotice { .. } => "editGuildNotice",
         GatewayCommand::GuildInvite { .. } => "guildInvite",
+        GatewayCommand::GuildStorageList => "guildStorageItemChange",
+        GatewayCommand::GuildStorageGoldChange { .. } => "guildStorageGoldChange",
+        GatewayCommand::GuildStorageItemChange { .. } => "guildStorageItemChange",
         GatewayCommand::TradeRequest => "tradeRequest",
         GatewayCommand::TradeReply { .. } => "tradeReply",
         GatewayCommand::TradeGold { .. } => "tradeGold",
@@ -1560,6 +1491,39 @@ fn to_wire_value(command: &GatewayCommand) -> (AndroidGatewayOutboundKind, Value
         GatewayCommand::GuildInvite { accept_invite } => (
             AndroidGatewayOutboundKind::Wire,
             json!({"type":"guildInvite","acceptInvite":accept_invite}),
+        ),
+        GatewayCommand::GuildStorageList => (
+            AndroidGatewayOutboundKind::Wire,
+            json!({
+                "type":"guildStorageItemChange",
+                "changeType":GUILD_STORAGE_LIST_CHANGE_TYPE,
+                "from":0,
+                "to":0
+            }),
+        ),
+        GatewayCommand::GuildStorageGoldChange {
+            change_type,
+            amount,
+        } => (
+            AndroidGatewayOutboundKind::Wire,
+            json!({
+                "type":"guildStorageGoldChange",
+                "changeType":change_type,
+                "amount":amount
+            }),
+        ),
+        GatewayCommand::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        } => (
+            AndroidGatewayOutboundKind::Wire,
+            json!({
+                "type":"guildStorageItemChange",
+                "changeType":change_type,
+                "from":from,
+                "to":to
+            }),
         ),
         GatewayCommand::TradeRequest => (
             AndroidGatewayOutboundKind::Wire,
@@ -1958,6 +1922,25 @@ mod tests {
             },
             json!({"type":"guildInvite","acceptInvite":false}),
         );
+        one(
+            GatewayCommand::GuildStorageList,
+            json!({"type":"guildStorageItemChange","changeType":3,"from":0,"to":0}),
+        );
+        one(
+            GatewayCommand::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 250,
+            },
+            json!({"type":"guildStorageGoldChange","changeType":0,"amount":250}),
+        );
+        one(
+            GatewayCommand::GuildStorageItemChange {
+                change_type: 2,
+                from: 4,
+                to: 7,
+            },
+            json!({"type":"guildStorageItemChange","changeType":2,"from":4,"to":7}),
+        );
         one(GatewayCommand::TradeRequest, json!({"type":"tradeRequest"}));
         one(
             GatewayCommand::TradeReply {
@@ -2037,6 +2020,65 @@ mod tests {
             })
         );
         assert!(queue.enqueue_guild_storage_item_change(3, 0, 0).is_ok());
+    }
+
+    #[test]
+    fn shared_guild_storage_actions_have_deterministic_android_wire_shapes() {
+        use mir2_ui_core::action::UiAction;
+        use mir2_ui_core::state::UiScreen;
+
+        let state = UiState {
+            screen: UiScreen::InGame,
+            ..Default::default()
+        };
+        let cases = [
+            (
+                UiAction::RequestGuildStorage,
+                json!({"type":"guildStorageItemChange","changeType":3,"from":0,"to":0}),
+            ),
+            (
+                UiAction::GuildStorageGoldChange {
+                    change_type: 1,
+                    amount: 250,
+                },
+                json!({"type":"guildStorageGoldChange","changeType":1,"amount":250}),
+            ),
+            (
+                UiAction::GuildStorageItemChange {
+                    change_type: 2,
+                    from: 4,
+                    to: 7,
+                },
+                json!({"type":"guildStorageItemChange","changeType":2,"from":4,"to":7}),
+            ),
+        ];
+
+        for (action, expected) in cases {
+            let transition = reduce(&state, action);
+            let command = transition
+                .effects
+                .into_iter()
+                .find_map(|effect| match effect {
+                    UiEffect::GatewayCommand(command) => Some(command),
+                    _ => None,
+                })
+                .expect("shared reducer must emit a gateway command");
+            let mut queue = AndroidGatewayOutboundQueue::default();
+            queue
+                .enqueue(command)
+                .expect("Android consumes shared command");
+            let entry = queue
+                .drain_ready(
+                    &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+                    1,
+                )
+                .pop()
+                .expect("wire entry");
+            assert_eq!(
+                serde_json::from_str::<Value>(&entry.json).unwrap(),
+                expected
+            );
+        }
     }
 
     #[test]

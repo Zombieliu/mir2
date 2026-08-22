@@ -390,16 +390,15 @@ pub fn channel_matches_filter(channel: &str, filter: CrystalChatFilter) -> bool 
 
 /// Returns true if a line should be hidden based on Settings hidden filters.
 pub fn is_line_hidden_by_settings(line: &ChatLine, settings: &UiChatSettings) -> bool {
-    match line.canonical_channel() {
-        ChatChannel::Normal | ChatChannel::LineMessage => settings.filter_normal,
-        ChatChannel::WhisperIn | ChatChannel::WhisperOut => settings.filter_whisper,
-        ChatChannel::Shout => settings.filter_shout,
-        ChatChannel::System | ChatChannel::Hint => settings.filter_system,
-        ChatChannel::Group => settings.filter_group,
-        ChatChannel::Guild => settings.filter_guild,
-        ChatChannel::Relationship | ChatChannel::Lover => settings.filter_lover,
-        ChatChannel::Mentor => settings.filter_mentor,
-        ChatChannel::Trade => settings.filter_trade,
+    match ChatChannel::settings_filter_channel(&line.channel) {
+        Some(ChatChannel::Normal | ChatChannel::LineMessage) => settings.filter_normal,
+        Some(ChatChannel::WhisperIn | ChatChannel::WhisperOut) => settings.filter_whisper,
+        Some(ChatChannel::Shout) => settings.filter_shout,
+        Some(ChatChannel::System) => settings.filter_system,
+        Some(ChatChannel::Group) => settings.filter_group,
+        Some(ChatChannel::Guild) => settings.filter_guild,
+        None => false,
+        Some(_) => false,
     }
 }
 
@@ -1526,22 +1525,6 @@ mod tests {
         })
     }
 
-    fn settings_hiding(channel: ChatChannel) -> UiChatSettings {
-        let mut settings = UiChatSettings::default();
-        match channel {
-            ChatChannel::Normal | ChatChannel::LineMessage => settings.filter_normal = true,
-            ChatChannel::WhisperIn | ChatChannel::WhisperOut => settings.filter_whisper = true,
-            ChatChannel::Shout => settings.filter_shout = true,
-            ChatChannel::System | ChatChannel::Hint => settings.filter_system = true,
-            ChatChannel::Group => settings.filter_group = true,
-            ChatChannel::Guild => settings.filter_guild = true,
-            ChatChannel::Relationship | ChatChannel::Lover => settings.filter_lover = true,
-            ChatChannel::Mentor => settings.filter_mentor = true,
-            ChatChannel::Trade => settings.filter_trade = true,
-        }
-        settings
-    }
-
     #[test]
     fn canonical_chat_channel_fixture_matrix_is_case_insensitive_and_alias_safe() {
         let fixtures = [
@@ -1628,10 +1611,6 @@ mod tests {
                 channel_matches_filter(&line.channel, control_filter),
                 "{channel:?} should match {control_filter:?}"
             );
-            assert!(
-                is_line_hidden_by_settings(&line, &settings_hiding(channel)),
-                "{channel:?} should be hidden by its settings family"
-            );
         }
 
         assert!(!channel_matches_filter(
@@ -1651,6 +1630,99 @@ mod tests {
             },
             &UiChatSettings::default(),
         ));
+    }
+
+    fn settings_with_filter(index: usize) -> UiChatSettings {
+        let mut settings = UiChatSettings::default();
+        match index {
+            0 => settings.filter_normal = true,
+            1 => settings.filter_whisper = true,
+            2 => settings.filter_shout = true,
+            3 => settings.filter_system = true,
+            4 => settings.filter_group = true,
+            5 => settings.filter_guild = true,
+            _ => unreachable!("Web Crystal settings has six visibility filters"),
+        }
+        settings
+    }
+
+    #[test]
+    fn web_filtered_by_crystal_settings_complete_type_matrix() {
+        // This is the Web filteredByCrystalSettings switch expressed as a
+        // table. The numeric index names the one filter that should hide the
+        // line; None means the Web implementation never hides that type via
+        // Settings, even if its presentation style shares another family.
+        let matrix = [
+            ("Normal", Some(0)),
+            ("Shout", Some(2)),
+            ("System", Some(3)),
+            ("Hint", None),
+            ("Announcement", None),
+            ("Group", Some(4)),
+            ("WhisperIn", Some(1)),
+            ("WhisperOut", Some(1)),
+            ("Guild", Some(5)),
+            ("Trainer", None),
+            ("LevelUp", None),
+            ("System2", Some(3)),
+            ("Relationship", None),
+            ("Mentor", None),
+            ("Shout2", Some(2)),
+            ("Shout3", Some(2)),
+            ("LineMessage", Some(0)),
+        ];
+
+        for (raw, hidden_by) in matrix {
+            let line = ChatLine {
+                text: raw.to_owned(),
+                channel: raw.to_owned(),
+            };
+            for filter_index in 0..6 {
+                let hidden = is_line_hidden_by_settings(&line, &settings_with_filter(filter_index));
+                assert_eq!(
+                    hidden,
+                    hidden_by == Some(filter_index),
+                    "Web settings matrix mismatch for {raw} with filter {filter_index}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn settings_filter_alias_matrix_keeps_shout_and_system_variants_only() {
+        let settings = UiChatSettings {
+            filter_shout: true,
+            filter_system: true,
+            ..UiChatSettings::default()
+        };
+
+        for raw in ["Shout", "Shout1", "Shout2", "Shout3"] {
+            assert!(is_line_hidden_by_settings(
+                &ChatLine {
+                    text: raw.to_owned(),
+                    channel: raw.to_owned(),
+                },
+                &settings
+            ));
+        }
+        for raw in ["System", "System1", "System2"] {
+            assert!(is_line_hidden_by_settings(
+                &ChatLine {
+                    text: raw.to_owned(),
+                    channel: raw.to_owned(),
+                },
+                &settings
+            ));
+        }
+        for raw in ["Announcement", "LevelUp", "Hint"] {
+            assert!(!is_line_hidden_by_settings(
+                &ChatLine {
+                    text: raw.to_owned(),
+                    channel: raw.to_owned(),
+                },
+                &settings
+            ));
+        }
     }
 
     #[test]

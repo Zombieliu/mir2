@@ -53686,6 +53686,25 @@ fn guild_packets_update_notice_members_and_storage_like_crystal() {
         25
     );
 
+    let before_failed_withdraw = session.world_snapshot();
+    let failed_withdraw = session.handle_packet(ClientPacket::GuildStorageGoldChange {
+        change_type: 1,
+        amount: 26,
+    });
+    assert!(failed_withdraw.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageGoldChange {
+            amount: 26,
+            change_type: 4,
+            name,
+        } if name == "Scout"
+    )));
+    assert_eq!(session.world_snapshot().gold, before_failed_withdraw.gold);
+    assert_eq!(
+        session.world_snapshot().stage5_systems.guild.storage_gold,
+        before_failed_withdraw.stage5_systems.guild.storage_gold
+    );
+
     let store_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
         change_type: 0,
         from: 4,

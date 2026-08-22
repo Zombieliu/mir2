@@ -2841,6 +2841,12 @@ fn stage5_guild_storage_gold_packet(
     if !is_in_world(world) {
         return Vec::new();
     }
+    let player_name = current_stage5_character_name(world);
+    let failure_receipt = || ServerPacket::GuildStorageGoldChange {
+        amount,
+        change_type: change_type.saturating_add(3),
+        name: player_name.clone(),
+    };
     if world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -2848,19 +2854,21 @@ fn stage5_guild_storage_gold_packet(
         .name
         .is_empty()
     {
-        return vec![stage5_guild_not_in_guild_chat(world)];
+        return vec![stage5_guild_not_in_guild_chat(world), failure_receipt()];
     }
     if !stage5_guild_player_in_safe_zone(world) {
-        return vec![system_message_key(
-            world,
-            "server.CannotUseGuildStorageOutsideSafezones",
-        )];
+        return vec![
+            system_message_key(world, "server.CannotUseGuildStorageOutsideSafezones"),
+            failure_receipt(),
+        ];
     }
-    let player_name = current_stage5_character_name(world);
     match change_type {
         0 => {
             if world.resource::<PlayerRuntimeResource>().gold < amount {
-                return vec![system_message_key(world, "server.InsufficientGold")];
+                return vec![
+                    system_message_key(world, "server.InsufficientGold"),
+                    failure_receipt(),
+                ];
             }
             if world
                 .resource::<Stage5SystemsResource>()
@@ -2869,7 +2877,10 @@ fn stage5_guild_storage_gold_packet(
                 .storage_gold
                 > u32::MAX.saturating_sub(amount)
             {
-                return vec![system_message_key(world, "server.GuildGoldLimitReached")];
+                return vec![
+                    system_message_key(world, "server.GuildGoldLimitReached"),
+                    failure_receipt(),
+                ];
             }
             world.resource_mut::<PlayerRuntimeResource>().gold -= amount;
             {
@@ -2889,20 +2900,29 @@ fn stage5_guild_storage_gold_packet(
                 },
             ]
         }
-        _ => {
+        1 => {
             let guild_gold = world
                 .resource::<Stage5SystemsResource>()
                 .stage5_systems
                 .guild
                 .storage_gold;
             if guild_gold < amount {
-                return vec![system_message_key(world, "server.InsufficientGold")];
+                return vec![
+                    system_message_key(world, "server.InsufficientGold"),
+                    failure_receipt(),
+                ];
             }
             if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), amount) {
-                return vec![system_message_key(world, "server.GoldLimitReached")];
+                return vec![
+                    system_message_key(world, "server.GoldLimitReached"),
+                    failure_receipt(),
+                ];
             }
             if stage5_current_guild_rank_index(world) != 0 {
-                return vec![system_message_key(world, "server.InsufficientRank")];
+                return vec![
+                    system_message_key(world, "server.InsufficientRank"),
+                    failure_receipt(),
+                ];
             }
             world.resource_mut::<PlayerRuntimeResource>().gold += amount;
             world
@@ -2919,6 +2939,7 @@ fn stage5_guild_storage_gold_packet(
                 },
             ]
         }
+        _ => Vec::new(),
     }
 }
 

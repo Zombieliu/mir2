@@ -207,6 +207,16 @@ pub enum AndroidUiTarget {
     Mail,
     BigMap,
     Storage,
+    GuildStorageList,
+    GuildStorageGoldChange {
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItemChange {
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     ChangePassword,
     SafeKey,
     Minimap,
@@ -245,6 +255,23 @@ impl AndroidUiTarget {
             Self::Mail => UiAction::OpenMail,
             Self::BigMap => UiAction::OpenBigMap,
             Self::Storage => UiAction::OpenStorage,
+            Self::GuildStorageList => UiAction::RequestGuildStorage,
+            Self::GuildStorageGoldChange {
+                change_type,
+                amount,
+            } => UiAction::GuildStorageGoldChange {
+                change_type: *change_type,
+                amount: *amount,
+            },
+            Self::GuildStorageItemChange {
+                change_type,
+                from,
+                to,
+            } => UiAction::GuildStorageItemChange {
+                change_type: *change_type,
+                from: *from,
+                to: *to,
+            },
             Self::ChangePassword => UiAction::ChangePassword,
             Self::SafeKey => UiAction::SafeKey,
             Self::Minimap => UiAction::ToggleMinimap,
@@ -566,6 +593,56 @@ mod tests {
             vec![AndroidInputRoute::UiAction(UiAction::RequestObserve {
                 allow: true,
             })]
+        );
+    }
+
+    #[test]
+    fn guild_storage_targets_route_to_shared_typed_actions() {
+        let state = game_state();
+        assert_eq!(
+            route_input(
+                AndroidInputEvent::Tap {
+                    target: AndroidUiTarget::GuildStorageList,
+                },
+                &state,
+            ),
+            vec![AndroidInputRoute::UiAction(UiAction::RequestGuildStorage)]
+        );
+        assert_eq!(
+            route_input(
+                AndroidInputEvent::Tap {
+                    target: AndroidUiTarget::GuildStorageGoldChange {
+                        change_type: 0,
+                        amount: 250,
+                    },
+                },
+                &state,
+            ),
+            vec![AndroidInputRoute::UiAction(
+                UiAction::GuildStorageGoldChange {
+                    change_type: 0,
+                    amount: 250,
+                }
+            )]
+        );
+        assert_eq!(
+            route_input(
+                AndroidInputEvent::Tap {
+                    target: AndroidUiTarget::GuildStorageItemChange {
+                        change_type: 2,
+                        from: 4,
+                        to: 7,
+                    },
+                },
+                &state,
+            ),
+            vec![AndroidInputRoute::UiAction(
+                UiAction::GuildStorageItemChange {
+                    change_type: 2,
+                    from: 4,
+                    to: 7,
+                }
+            )]
         );
     }
 

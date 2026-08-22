@@ -976,25 +976,26 @@ impl NativeShellModel {
                 self.notice = None;
                 true
             }
-            (NativeShellScreen::Login, NativeGatewayEvent::AccountCreated) => {
+            (_, NativeGatewayEvent::AccountCreated) if self.register_request_in_flight => {
                 self.register_request_in_flight = false;
                 self.set_info("account created; use Login to continue");
                 true
             }
-            (NativeShellScreen::Login, NativeGatewayEvent::AccountCreationFailed { message }) => {
+            (_, NativeGatewayEvent::AccountCreationFailed { message })
+                if self.register_request_in_flight =>
+            {
                 self.register_request_in_flight = false;
                 self.set_error(message);
                 true
             }
             (
-                NativeShellScreen::Authenticating,
+                _,
                 NativeGatewayEvent::LoginSuccess {
                     account,
                     characters,
                 },
-            ) => {
+            ) if self.login_request_in_flight => {
                 self.login_request_in_flight = false;
-                self.register_request_in_flight = false;
                 self.logout_request_in_flight = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.last_account = Some(account);
@@ -1005,13 +1006,16 @@ impl NativeShellModel {
                 self.notice = None;
                 true
             }
-            (NativeShellScreen::Authenticating, NativeGatewayEvent::LoginFailure { message }) => {
+            (_, NativeGatewayEvent::LoginFailure { message }) if self.login_request_in_flight => {
                 self.login_request_in_flight = false;
-                self.register_request_in_flight = false;
                 self.screen = NativeShellScreen::Login;
                 self.set_error(message);
                 true
             }
+            (_, NativeGatewayEvent::AccountCreated)
+            | (_, NativeGatewayEvent::AccountCreationFailed { .. })
+            | (_, NativeGatewayEvent::LoginSuccess { .. })
+            | (_, NativeGatewayEvent::LoginFailure { .. }) => false,
             (
                 NativeShellScreen::CharacterSelect,
                 NativeGatewayEvent::CharacterCreated { character },
@@ -1269,14 +1273,173 @@ mod tests {
         );
 
         assert!(
-            model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+            !model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
                 message: "account already exists".to_owned(),
             })
         );
         assert_eq!(
             model.notice.as_ref().map(|notice| notice.message.as_str()),
+            Some("account created; use Login to continue")
+        );
+    }
+
+    #[test]
+    fn registration_and_login_receipts_are_operation_scoped_in_either_order() {
+        let mut register_then_login = model_with_valid_login();
+        assert!(register_then_login.apply_ui_intent(NativeUiIntent::RegisterAccount));
+        assert!(register_then_login.apply_ui_intent(NativeUiIntent::Login));
+        assert!(register_then_login.login_request_in_flight);
+        assert!(register_then_login.register_request_in_flight);
+
+        assert!(register_then_login.apply_gateway_event(NativeGatewayEvent::AccountCreated));
+        assert!(!register_then_login.register_request_in_flight);
+        assert!(register_then_login.login_request_in_flight);
+        assert_eq!(
+            register_then_login.screen,
+            NativeShellScreen::Authenticating
+        );
+
+        assert!(
+            register_then_login.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: starter_characters(),
+            })
+        );
+        assert!(!register_then_login.login_request_in_flight);
+        assert!(!register_then_login.register_request_in_flight);
+        assert_eq!(
+            register_then_login.screen,
+            NativeShellScreen::CharacterSelect
+        );
+
+        let mut login_then_register = model_with_valid_login();
+        assert!(login_then_register.apply_ui_intent(NativeUiIntent::RegisterAccount));
+        assert!(login_then_register.apply_ui_intent(NativeUiIntent::Login));
+
+        assert!(
+            login_then_register.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: starter_characters(),
+            })
+        );
+        assert!(!login_then_register.login_request_in_flight);
+        assert!(login_then_register.register_request_in_flight);
+        assert_eq!(
+            login_then_register.screen,
+            NativeShellScreen::CharacterSelect
+        );
+
+        assert!(login_then_register.apply_gateway_event(NativeGatewayEvent::AccountCreated));
+        assert!(!login_then_register.login_request_in_flight);
+        assert!(!login_then_register.register_request_in_flight);
+        assert_eq!(
+            login_then_register.screen,
+            NativeShellScreen::CharacterSelect
+        );
+    }
+
+    #[test]
+    fn registration_and_login_failure_receipts_are_operation_scoped_in_either_order() {
+        let mut registration_first = model_with_valid_login();
+        assert!(registration_first.apply_ui_intent(NativeUiIntent::RegisterAccount));
+        assert!(registration_first.apply_ui_intent(NativeUiIntent::Login));
+
+        assert!(registration_first.apply_gateway_event(
+            NativeGatewayEvent::AccountCreationFailed {
+                message: "account already exists".to_owned(),
+            },
+        ));
+        assert!(!registration_first.register_request_in_flight);
+        assert!(registration_first.login_request_in_flight);
+        assert_eq!(registration_first.screen, NativeShellScreen::Authenticating);
+
+        assert!(
+            registration_first.apply_gateway_event(NativeGatewayEvent::LoginFailure {
+                message: "bad account".to_owned(),
+            })
+        );
+        assert!(!registration_first.login_request_in_flight);
+        assert!(!registration_first.register_request_in_flight);
+        assert_eq!(registration_first.screen, NativeShellScreen::Login);
+        assert_eq!(
+            registration_first
+                .notice
+                .as_ref()
+                .map(|notice| notice.message.as_str()),
+            Some("bad account")
+        );
+
+        let mut login_first = model_with_valid_login();
+        assert!(login_first.apply_ui_intent(NativeUiIntent::RegisterAccount));
+        assert!(login_first.apply_ui_intent(NativeUiIntent::Login));
+
+        assert!(
+            login_first.apply_gateway_event(NativeGatewayEvent::LoginFailure {
+                message: "bad account".to_owned(),
+            })
+        );
+        assert!(!login_first.login_request_in_flight);
+        assert!(login_first.register_request_in_flight);
+        assert_eq!(login_first.screen, NativeShellScreen::Login);
+
+        assert!(
+            login_first.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+                message: "account already exists".to_owned(),
+            },)
+        );
+        assert!(!login_first.login_request_in_flight);
+        assert!(!login_first.register_request_in_flight);
+        assert_eq!(login_first.screen, NativeShellScreen::Login);
+        assert_eq!(
+            login_first
+                .notice
+                .as_ref()
+                .map(|notice| notice.message.as_str()),
             Some("account already exists")
         );
+    }
+
+    #[test]
+    fn duplicate_and_late_login_registration_receipts_are_ignored() {
+        let mut model = model_with_valid_login();
+        assert!(model.apply_ui_intent(NativeUiIntent::RegisterAccount));
+        assert!(model.apply_ui_intent(NativeUiIntent::Login));
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            account: "test-account".to_owned(),
+            characters: starter_characters(),
+        }));
+        let screen = model.screen;
+        let characters = model.characters.clone();
+        let notice = model.notice.clone();
+        assert!(model.register_request_in_flight);
+
+        assert!(
+            !model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+                account: "stale-account".to_owned(),
+                characters: vec![CharacterSummary::new(9, "stale", 99, "Wizard", "Male")],
+            })
+        );
+        assert!(
+            !model.apply_gateway_event(NativeGatewayEvent::LoginFailure {
+                message: "stale login failure".to_owned(),
+            })
+        );
+        assert_eq!(model.screen, screen);
+        assert_eq!(model.characters, characters);
+        assert_eq!(model.notice, notice);
+        assert!(model.register_request_in_flight);
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::AccountCreated));
+        let notice = model.notice.clone();
+        assert!(!model.apply_gateway_event(NativeGatewayEvent::AccountCreated));
+        assert!(
+            !model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+                message: "late registration failure".to_owned(),
+            })
+        );
+        assert_eq!(model.notice, notice);
+        assert!(!model.register_request_in_flight);
     }
 
     #[test]

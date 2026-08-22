@@ -6,6 +6,28 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::state::{UiChatSettings, UiOptions, UiWindowMode};
 
+/// Shared guild-storage protocol bounds. Hosts may apply stricter transport
+/// limits, but must not widen these authoritative server coordinates.
+pub const GUILD_STORAGE_SLOT_COUNT: i32 = 112;
+pub const GUILD_STORAGE_LIST_CHANGE_TYPE: u8 = 3;
+pub const GUILD_STORAGE_MAX_PROTOCOL_SLOT: i32 = u8::MAX as i32;
+
+pub fn valid_guild_storage_gold_change(change_type: u8, amount: u32) -> bool {
+    change_type <= 1 && amount > 0
+}
+
+pub fn valid_guild_storage_item_change(change_type: u8, from: i32, to: i32) -> bool {
+    let valid_slot = |slot: i32| (0..GUILD_STORAGE_SLOT_COUNT).contains(&slot);
+    let valid_protocol_slot = |slot: i32| (0..=GUILD_STORAGE_MAX_PROTOCOL_SLOT).contains(&slot);
+    match change_type {
+        0 => valid_protocol_slot(from) && valid_slot(to),
+        1 => valid_slot(from) && valid_protocol_slot(to),
+        2 => valid_slot(from) && valid_slot(to),
+        GUILD_STORAGE_LIST_CHANGE_TYPE => from == 0 && to == 0,
+        _ => false,
+    }
+}
+
 /// A transient credential value. It is intentionally redacted from Debug and
 /// serde output because actions/effects may be inspected by host diagnostics.
 /// The host must consume it in memory and hand it to the authoritative gateway
@@ -234,6 +256,16 @@ pub enum GatewayCommand {
     },
     GuildInvite {
         accept_invite: bool,
+    },
+    GuildStorageList,
+    GuildStorageGoldChange {
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItemChange {
+        change_type: u8,
+        from: i32,
+        to: i32,
     },
     TradeRequest,
     TradeReply {

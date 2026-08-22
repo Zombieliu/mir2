@@ -234,6 +234,45 @@ mod tests {
     }
 
     #[test]
+    fn shared_guild_storage_actions_reach_android_queue_through_semantic_input() {
+        let mut app = in_game_app();
+        for action in [
+            UiAction::RequestGuildStorage,
+            UiAction::GuildStorageGoldChange {
+                change_type: 0,
+                amount: 250,
+            },
+            UiAction::GuildStorageItemChange {
+                change_type: 2,
+                from: 4,
+                to: 7,
+            },
+        ] {
+            send(&mut app, AndroidInputEvent::Semantic(action));
+        }
+
+        let mut shell = crate::android_input::AndroidShellState::default();
+        shell.lifecycle = crate::android_input::AndroidLifecycle::Foreground;
+        shell.network = crate::android_input::AndroidNetwork::Available;
+        let outbound = app
+            .world_mut()
+            .resource_mut::<gateway_bridge::AndroidGatewayOutboundQueue>()
+            .drain_ready(&shell, 3);
+        let wire = outbound
+            .iter()
+            .map(|entry| serde_json::from_str::<serde_json::Value>(&entry.json).unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            wire,
+            vec![
+                serde_json::json!({"type":"guildStorageItemChange","changeType":3,"from":0,"to":0}),
+                serde_json::json!({"type":"guildStorageGoldChange","changeType":0,"amount":250}),
+                serde_json::json!({"type":"guildStorageItemChange","changeType":2,"from":4,"to":7}),
+            ]
+        );
+    }
+
+    #[test]
     fn change_password_effect_is_consumed_into_the_real_gateway_queue() {
         use mir2_ui_core::effect::SecretText;
 

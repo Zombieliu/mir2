@@ -62,6 +62,17 @@
 > default 119/119、native-ui 366/366、Windows 275/275、runtime 180/180、Android
 > 45/45，Web typecheck 通过。本轮按用户要求没有控制桌面做视觉验收，因此这里只
 > 关闭非视觉代码门禁；真实窗口、真人输入、DPI、Android 真机和逐像素签署仍 OPEN。
+>
+> 2026-08-23 R7.1 独立审查返工：frontier 只读审查 `e32caf2cc` 未发现 P0，
+> 发现的 6 个 P1 已全部修复并补交错/失败/跨平台测试。登录与注册回执不再串扰；
+> BUYSELL NPC 保留 Buy+Sell 双能力；Guild Gold 失败使用 3/4 精确 NACK、不改余额，
+> type 2 权威支出正常扣减；等级名和权限回执按 changeType+rankIndex 关联；Android
+> Guild Storage 已有可达的共享 UiAction→GatewayCommand→wire 链。聊天设置的相邻
+> P2 也已关闭，Announcement/LevelUp/Hint 不受 Shout/System 开关误伤。最新门禁：
+> ui-core 37/37、native-ui 374/374、Windows 276/276、runtime 180/180、Android
+> 48/48，Simulation Guild 回执精确测试通过。仍保留一个非阻断协议 P2：普通
+> StoreItem/TakeBackItem ACK 尚无 requestId，延迟重复 ACK 与新同坐标 ACK 无法由
+> 客户端正确区分；必须在协议版本升级中端到端解决，不能以本地代际猜测冒充完成。
 
 ## 0. Candidate 硬门禁
 
