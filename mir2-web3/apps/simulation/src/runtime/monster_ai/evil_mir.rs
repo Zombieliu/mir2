@@ -43,8 +43,8 @@ use mir2_protocol::{MirDirection, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    current_player_is_dead, entity_object_id, player_entity, Facing, Monster, MonsterAgent,
-    MonsterAiState, MonsterVitals,
+    Facing, Monster, MonsterAgent, MonsterAiState, MonsterVitals, current_player_is_dead,
+    entity_object_id, player_entity,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
@@ -350,8 +350,8 @@ fn evil_mir_set_direction(dir: MirDirection) -> MirDirection {
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        entity_object_id, entity_position, player_entity, DisplayName, Facing, Monster,
-        MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
+        DisplayName, Facing, Monster, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId,
+        Position, WorldObject, entity_object_id, entity_position, player_entity,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, crystal_respawn_can_wander, is_hidden_or_sleeping_target,

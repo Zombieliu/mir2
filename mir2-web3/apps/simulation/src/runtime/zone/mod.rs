@@ -21,6 +21,7 @@ pub use replication::{ZoneReplicaCheckpoint, ZoneStandbyReplica};
 pub use runtime::ZoneRuntime;
 pub use types::{
     PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile, ZoneCommand, ZoneJoin,
-    ZoneKey, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
-    ZoneOutbound, ZonePlayerCombatStats,
+    ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
+    ZonePlayerCombatStats,
 };

@@ -1,11 +1,11 @@
 use crate::config::{BuffSnapshot, BuffStatSnapshot};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    localized_text_or_fallback, starter_server_data, CrystalItemTemplate, LanguageCode,
+    CrystalItemTemplate, LanguageCode, localized_text_or_fallback, starter_server_data,
 };
-use mir2_protocol::{crystal_stat_label, ClientBuff, ServerPacket, UserItemStat};
+use mir2_protocol::{ClientBuff, ServerPacket, UserItemStat, crystal_stat_label};
 
-use super::components::{current_player_is_dead, hero_entity, player_entity, PlayerVitals};
+use super::components::{PlayerVitals, current_player_is_dead, hero_entity, player_entity};
 use super::crystal_compat::*;
 use super::items::{crystal_item_stat_value, user_item_stat_total};
 use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};

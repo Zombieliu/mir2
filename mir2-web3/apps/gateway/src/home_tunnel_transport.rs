@@ -38,6 +38,27 @@ const DEFAULT_MAX_AGENT_CONNECTIONS: usize = 4_096;
 const DEFAULT_MAX_GATEWAY_CONNECTIONS: usize = 16_384;
 const DEFAULT_MAX_STREAMS_PER_NODE: usize = 512;
 
+#[cfg(windows)]
+fn make_listener_non_inheritable(listener: &TcpListener) -> Result<(), String> {
+    use std::os::windows::io::AsRawSocket;
+    use windows_sys::Win32::Foundation::{SetHandleInformation, HANDLE_FLAG_INHERIT};
+
+    let result =
+        unsafe { SetHandleInformation(listener.as_raw_socket() as _, HANDLE_FLAG_INHERIT, 0) };
+    if result == 0 {
+        return Err(format!(
+            "mark Home Tunnel gateway listener non-inheritable: {}",
+            std::io::Error::last_os_error()
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(not(windows))]
+fn make_listener_non_inheritable(_listener: &TcpListener) -> Result<(), String> {
+    Ok(())
+}
+
 #[derive(Clone)]
 pub struct HomeTunnelTlsMaterial {
     pub ca_certificate_der: Vec<u8>,
@@ -408,11 +429,21 @@ impl HomeTunnelRelay {
     pub async fn bind(config: HomeTunnelRelayConfig) -> Result<Self, String> {
         config.validate()?;
         let server_config = quic_server_config(&config.tls)?;
-        let endpoint = Endpoint::server(server_config, config.quic_bind)
-            .map_err(|error| format!("bind Home Tunnel QUIC Relay: {error}"))?;
+        let endpoint = Endpoint::server(server_config, config.quic_bind).map_err(|error| {
+            format!(
+                "bind Home Tunnel QUIC Relay at {}: {error}",
+                config.quic_bind
+            )
+        })?;
         let gateway_listener = TcpListener::bind(config.gateway_bind)
             .await
-            .map_err(|error| format!("bind Home Tunnel gateway listener: {error}"))?;
+            .map_err(|error| {
+                format!(
+                    "bind Home Tunnel gateway listener at {}: {error}",
+                    config.gateway_bind
+                )
+            })?;
+        make_listener_non_inheritable(&gateway_listener)?;
         let configured_placements = if let Some(path) = &config.placements_file {
             read_relay_placements(path)?
         } else {
@@ -461,7 +492,27 @@ impl HomeTunnelRelay {
             tokio::select! {
                 changed = shutdown.changed() => {
                     if changed.is_err() || *shutdown.borrow() {
+                        // Release the public TCP listener before waiting for
+                        // QUIC connections to drain. On Windows, retaining the
+                        // listener for the whole drain window can keep the
+                        // advertised reconnect address unavailable even after
+                        // `serve` has otherwise begun shutting down.
+                        drop(self.gateway_listener);
                         self.endpoint.close(0_u32.into(), b"relay shutdown");
+                        let shutdown_timeout = self
+                            .shared
+                            .config
+                            .io_timeout
+                            .max(Duration::from_secs(1))
+                            .min(Duration::from_secs(5));
+                        tokio::time::timeout(shutdown_timeout, self.endpoint.wait_idle())
+                            .await
+                            .map_err(|_| {
+                                format!(
+                                    "Home Tunnel QUIC Relay shutdown exceeded {} ms",
+                                    shutdown_timeout.as_millis()
+                                )
+                            })?;
                         return Ok(());
                     }
                 }

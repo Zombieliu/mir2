@@ -12,8 +12,8 @@ use super::{
     mark_crystal_packet_action, offset_point, player_entity, point_in_data_range,
     respawn_tick_for_schedule, runtime_tick, set_crystal_npc_flag, spawn_positions_for_rule,
     spawn_runtime_monster, start_game_visible_respawn_spawns, tile_distance, BuffResource,
-    BuffState, CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing,
-    FishingResource, HarvestMonsterState, InventoryResource, ItemState, MapRuntimeResource,
+    BuffState, CharacterBody, CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName,
+    Facing, FishingResource, HarvestMonsterState, InventoryResource, ItemState, MapRuntimeResource,
     Monster, MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterPoisonState,
     MonsterRespawnSchedule, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals,
     MountResource, NpcInteractionContext, NpcStateResource, ObjectId, PlayerActionKind,
@@ -22,13 +22,15 @@ use super::{
     SpawnSlotRef, Stage5SystemsResource, SummonedMonster, WoomaTaurusState, WorldObject,
     YimoogiState, BASE_STORAGE_SLOTS, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
 };
-use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
+use crate::config::{
+    AccountStoreTransactionFault, CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource,
+};
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage,
     SharedAccountInventoryTransactionKind, SimulationConfig, Stage5AuctionListing,
-    Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord, WorldEntityDisposition,
-    WorldEntityKind,
+    Stage5MailDelivery, Stage5MailMessage, Stage5MailTargetKind, VisibleNpcRecord,
+    WorldEntityDisposition, WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -430,6 +432,23 @@ fn set_active_character_class_gender_level(
     character.level = level;
 }
 
+fn set_active_character_and_body_class_gender_level(
+    session: &mut SimulationSession,
+    class: MirClass,
+    gender: MirGender,
+    level: u16,
+) {
+    set_active_character_class_gender_level(session, class, gender, level);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let mut entity = session.app.world_mut().entity_mut(player);
+    let mut body = entity
+        .get_mut::<CharacterBody>()
+        .expect("player character body");
+    body.class = class;
+    body.gender = gender;
+    body.level = level;
+}
+
 fn activate_storage_service(session: &mut SimulationSession) {
     const STORAGE_NPC_OBJECT_ID: u32 = 4_991;
 
@@ -556,6 +575,127 @@ fn add_inventory_crystal_item(session: &mut SimulationSession, template_name: &s
 
 fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot: EquipmentSlot) {
     equip_crystal_item_with_quantity(session, template_name, slot, 1);
+}
+
+fn grant_real_crystal_item(
+    session: &mut SimulationSession,
+    template_name: &str,
+    preferred_slot: u8,
+) -> u64 {
+    let template = mir2_game_data::crystal_item_by_name(template_name)
+        .expect("Crystal item template should exist");
+    let key = super::crystal_item_key_for_template(&template);
+    let item = super::add_or_increment_item(
+        session.app.world_mut(),
+        ItemContainer::Bag1,
+        &key,
+        &template.name,
+        template.tooltip.as_deref().unwrap_or_default(),
+        preferred_slot,
+        1,
+        u16::from(template.weight),
+    );
+    item.unique_id
+}
+
+fn equip_crystal_bells_to_mount(session: &mut SimulationSession, bells_id: u64) -> u64 {
+    let bells_id = grant_real_crystal_item(session, "BronzeBell", bells_id as u8);
+    let equip_bells = session.handle_packet(ClientPacket::EquipSlotItem {
+        grid: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 1,
+        grid_to: MirGridType::Mount,
+        to_unique_id: 13,
+    });
+    assert!(equip_bells.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipSlotItem {
+            grid_to: MirGridType::Mount,
+            to: 1,
+            success: true,
+            ..
+        }
+    )), "real Bells equip failed: {equip_bells:?}");
+    bells_id
+}
+
+fn equip_crystal_mount_with_optional_bells_and_ride(
+    session: &mut SimulationSession,
+    with_bells: bool,
+) -> Option<u64> {
+    let mount_id = grant_real_crystal_item(session, "RedTiger", 30);
+    let equip_mount = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: mount_id,
+        to: 13,
+    });
+    assert!(equip_mount.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipItem { to: 13, success: true, .. }
+    )));
+
+    let bells_id = with_bells.then(|| equip_crystal_bells_to_mount(session, 31));
+
+    let ride = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 13,
+        grid: MirGridType::Equipment,
+    });
+    assert!(ride.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate { riding_mount: true, .. }
+    )));
+    bells_id
+}
+
+fn collect_item_tree_unique_ids(items: &[ItemState], ids: &mut Vec<u64>) {
+    for item in items {
+        ids.push(super::item_unique_id(item));
+        collect_item_tree_unique_ids(&item.socketed, ids);
+    }
+}
+
+fn equipment_embedded_unique_ids(session: &SimulationSession) -> Vec<u64> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut ids = Vec::new();
+    for equipment in &resources.equipment_items {
+        collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
+    }
+    ids
+}
+
+fn collect_item_tree_key_ids(items: &[ItemState], values: &mut Vec<(String, u64)>) {
+    for item in items {
+        values.push((item.key.clone(), super::item_unique_id(item)));
+        collect_item_tree_key_ids(&item.socketed, values);
+    }
+}
+
+fn equipment_embedded_key_ids(session: &SimulationSession) -> Vec<(String, u64)> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut values = Vec::new();
+    for equipment in &resources.equipment_items {
+        collect_item_tree_key_ids(&equipment.socketed, &mut values);
+    }
+    values.sort();
+    values
+}
+
+fn top_level_and_equipment_parent_unique_ids(session: &SimulationSession) -> std::collections::BTreeSet<u64> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut ids = resources
+        .belt_items
+        .iter()
+        .chain(resources.inventory_items.iter())
+        .chain(resources.storage_items.iter())
+        .map(super::item_unique_id)
+        .collect::<std::collections::BTreeSet<_>>();
+    ids.extend(
+        resources
+            .equipment_items
+            .iter()
+            .filter_map(|equipment| super::equipment_slot_unique_id(equipment.slot)),
+    );
+    ids
 }
 
 fn equip_crystal_item_with_quantity(
@@ -1186,6 +1326,16 @@ fn register_test_account(session: &SimulationSession, account_id: &str) {
     let _ = config.save_account_store_account(account_id);
 }
 
+fn login_demo_account_for_persistence_test(session: &mut SimulationSession) {
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
 fn add_rental_mail_target(config: &SimulationConfig, name: &str, index: i32) {
     let character = CharacterRecord {
         index,
@@ -1225,6 +1375,89 @@ fn stage5_systems_for_character(
         .as_deref()
         .and_then(|state| serde_json::from_str(state).ok())
         .unwrap_or_default()
+}
+
+fn stage5_systems_for_account_character(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+) -> crate::config::Stage5SystemsState {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let save = store
+        .accounts
+        .get(account_id)
+        .and_then(|account| account.saves.get(&character_index))
+        .expect("character save should exist");
+    save.stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str(state).ok())
+        .unwrap_or_default()
+}
+
+fn unique_mail_transaction_store(label: &str) -> (std::path::PathBuf, SimulationConfig) {
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("system clock should be after epoch")
+        .as_nanos();
+    let dir = std::env::temp_dir().join(format!(
+        "mir2-mail-transaction-{label}-{}-{unique}",
+        std::process::id()
+    ));
+    let path = dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(path);
+    let target = CharacterRecord {
+        index: 0,
+        name: "AtomicTarget".to_string(),
+        level: 7,
+        class: MirClass::Wizard,
+        gender: MirGender::Female,
+    };
+    config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .insert(
+            "atomic-target-account".to_string(),
+            crate::config::AccountRecord::new(target),
+        );
+    config
+        .save_account_store()
+        .expect("mail transaction fixture should persist");
+    (dir, config)
+}
+
+fn prepare_atomic_mail_sender(config: &SimulationConfig) -> (SimulationSession, u64) {
+    let mut sender = SimulationSession::new(config.clone());
+    assert!(sender
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    sender.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    sender
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 3_000;
+    let dagger_unique_id = {
+        let mut inventory = sender.app.world_mut().resource_mut::<InventoryResource>();
+        let dagger = inventory
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.key == "dagger")
+            .expect("seed dagger should exist");
+        dagger.durability_current = Some(13);
+        dagger.added_attack = 7;
+        super::item_unique_id(dagger)
+    };
+    sender.save_active_character();
+    (sender, dagger_unique_id)
 }
 
 fn set_entity_position(session: &mut SimulationSession, entity: Entity, position: Point) {
@@ -2388,6 +2621,66 @@ fn disconnect_persists_character_state_for_reconnect() {
 }
 
 #[test]
+fn unauthenticated_active_character_save_does_not_pollute_demo_account() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    let _ = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SessionResource>()
+        .account_id = None;
+    let before = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should serialize");
+
+    set_player_position(&mut session, Point { x: 401, y: 402 });
+    session.save_active_character();
+
+    let after = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should serialize");
+    assert_eq!(after, before);
+}
+
+#[test]
+fn authenticated_active_character_save_still_persists_to_its_account() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    let _ = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_position(&mut session, Point { x: 403, y: 404 });
+
+    session.save_active_character();
+
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .expect("authenticated character save should exist");
+    assert_eq!(save.position, Point { x: 403, y: 404 });
+}
+
+#[test]
 fn new_character_is_added_and_returned() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let packets = session.handle_packet(ClientPacket::NewCharacter {
@@ -3123,6 +3416,72 @@ fn direct_attack_dead_monster_rejects_without_runtime_chat() {
     let packets = session.attack(super::FIELD_WASP_ID);
 
     assert!(packets.is_empty());
+}
+
+#[test]
+fn personal_melee_rejects_neutral_monster_without_consuming_attack_cooldown() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 330, y: 270 };
+    set_player_position(&mut session, origin.clone());
+    let neutral_id = 98_772;
+    let neutral = spawn_crystal_monster_for_test(
+        &mut session,
+        neutral_id,
+        "Royal_Guard",
+        Point { x: 331, y: 270 },
+        MirDirection::Left,
+        false,
+    );
+    sync_visible_objects(&mut session);
+    let neutral_hp_before = session
+        .app
+        .world()
+        .entity(neutral)
+        .get::<MonsterVitals>()
+        .expect("neutral vitals")
+        .hp;
+
+    let rejected = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+    assert!(matches!(
+        rejected.as_slice(),
+        [ServerPacket::UserLocation { .. }]
+    ));
+    assert!(!rejected
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+
+    set_entity_position(&mut session, neutral, Point { x: 340, y: 270 });
+    let hostile_id = 98_773;
+    spawn_crystal_monster_for_test(
+        &mut session,
+        hostile_id,
+        "Yob",
+        Point { x: 331, y: 270 },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+    let accepted = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+    assert!(accepted
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(neutral)
+            .get::<MonsterVitals>()
+            .expect("neutral vitals")
+            .hp,
+        neutral_hp_before
+    );
 }
 
 #[test]
@@ -5056,6 +5415,13 @@ fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
 fn crystal_range_attack_packet_uses_target_id_bridge() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Archer,
+        MirGender::Male,
+        7,
+    );
+    equip_crystal_item(&mut session, "WoodenBow", EquipmentSlot::Weapon);
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
@@ -5123,6 +5489,898 @@ fn crystal_range_attack_packet_uses_target_id_bridge() {
         ServerPacket::ObjectStruck { info }
             if info.object_id == monster_object_id && info.attacker_id == player_object_id
     )));
+}
+
+fn native_range_attack_case(
+    class: MirClass,
+    weapon_name: &str,
+    riding_mount: bool,
+    fishing: bool,
+    target_distance: i32,
+    supplied_target_location: Point,
+) -> (SimulationSession, Entity, Vec<ServerPacket>) {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(&mut session, class, MirGender::Male, 20);
+    equip_crystal_item(&mut session, weapon_name, EquipmentSlot::Weapon);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MountResource>()
+        .riding_mount = riding_mount;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .fishing = fishing;
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let target = spawn_crystal_monster_for_test(
+        &mut session,
+        98_868,
+        "Yob",
+        Point {
+            x: origin.x + target_distance,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+    let packets = session.handle_packet(ClientPacket::RangeAttack {
+        direction: MirDirection::Right,
+        location: origin,
+        target_id: 98_868,
+        target_location: supplied_target_location,
+    });
+    (session, target, packets)
+}
+
+#[test]
+fn native_range_attack_authority_rejects_wrong_class_weapon_and_mount() {
+    for (class, weapon, riding_mount) in [
+        (MirClass::Warrior, "WoodenSword", false),
+        (MirClass::Archer, "WoodenSword", false),
+        (MirClass::Archer, "WoodenBow", true),
+    ] {
+        let (mut session, target, packets) = native_range_attack_case(
+            class,
+            weapon,
+            riding_mount,
+            false,
+            1,
+            Point { x: 334, y: 267 },
+        );
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+            )),
+            "unauthorized range attack escaped: class={class:?} weapon={weapon} mounted={riding_mount}: {packets:?}"
+        );
+        let hp_before = session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp;
+        for _ in 0..8 {
+            let _ = session.tick();
+        }
+        assert_eq!(
+            session
+                .app
+                .world()
+                .entity(target)
+                .get::<MonsterVitals>()
+                .expect("target vitals")
+                .hp,
+            hp_before,
+            "rejected intent must not schedule damage"
+        );
+    }
+
+    let (mut session, target, packets) = native_range_attack_case(
+        MirClass::Archer,
+        "WoodenBow",
+        false,
+        true,
+        1,
+        Point { x: 334, y: 267 },
+    );
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+    )));
+    let hp_before = session
+        .app
+        .world()
+        .entity(target)
+        .get::<MonsterVitals>()
+        .expect("target vitals")
+        .hp;
+    for _ in 0..8 {
+        let _ = session.tick();
+    }
+
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp,
+        hp_before,
+        "forged RangeAttack while fishing must not schedule damage"
+    );
+}
+
+#[test]
+fn native_range_attack_uses_actual_target_position_and_crystal_nine_tile_limit() {
+    let (_session, _target, packets) = native_range_attack_case(
+        MirClass::Archer,
+        "WoodenBow",
+        false,
+        false,
+        10,
+        Point { x: 334, y: 267 },
+    );
+    assert!(
+        !packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+        )),
+        "a forged near targetLocation must not authorize an actual ten-tile target"
+    );
+
+    let (_session, _target, packets) = native_range_attack_case(
+        MirClass::Archer,
+        "WoodenBow",
+        false,
+        false,
+        9,
+        Point { x: 334, y: 267 },
+    );
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { target, .. } if *target == Point { x: 342, y: 267 }
+        )),
+        "nine-tile ranged intent should succeed with authoritative target: {packets:?}"
+    );
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info } if info.target == Point { x: 342, y: 267 }
+    )));
+}
+
+#[test]
+fn personal_melee_enforces_fishing_and_crystal_can_ride_attack() {
+    for (label, riding_mount, mount_type, has_bells, fishing, accepted) in [
+        ("fishing", false, -1, false, true, false),
+        ("mounted without bells", true, 5, false, false, false),
+        ("dismounted without bells", false, -1, false, false, true),
+    ] {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_and_body_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            20,
+        );
+        let origin = Point { x: 333, y: 267 };
+        set_player_position(&mut session, origin.clone());
+        let object_id = 98_900;
+        let target = spawn_crystal_monster_for_test(
+            &mut session,
+            object_id,
+            "Yob",
+            Point {
+                x: origin.x + 1,
+                y: origin.y,
+            },
+            MirDirection::Left,
+            true,
+        );
+        {
+            let mut mount = session.app.world_mut().resource_mut::<MountResource>();
+            mount.riding_mount = riding_mount;
+            mount.mount_type = mount_type;
+            mount.has_bells = has_bells;
+        }
+        session
+            .app
+            .world_mut()
+            .resource_mut::<FishingResource>()
+            .fishing = fishing;
+        sync_visible_objects(&mut session);
+        let hp_before = session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp;
+
+        let packets = session.attack(object_id);
+        assert_eq!(
+            packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })),
+            accepted,
+            "{label}: {packets:?}"
+        );
+        if !accepted {
+            assert!(packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+            for _ in 0..8 {
+                let _ = session.tick();
+            }
+            assert_eq!(
+                session
+                    .app
+                    .world()
+                    .entity(target)
+                    .get::<MonsterVitals>()
+                    .expect("target vitals")
+                    .hp,
+                hp_before,
+                "{label} must schedule zero damage"
+            );
+        }
+    }
+}
+
+#[test]
+fn mounted_melee_uses_real_bells_equipment_and_unequip_revokes_next_attack() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    assert!(session.app.world().resource::<MountResource>().has_bells);
+
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let object_id = 98_901;
+    let _first_target = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Yob",
+        Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+    let allowed = session.attack(object_id);
+    assert!(allowed
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    for _ in 0..8 {
+        let _ = session.tick();
+    }
+
+    let second_object_id = 98_902;
+    let target = spawn_crystal_monster_for_test(
+        &mut session,
+        second_object_id,
+        "Yob",
+        Point {
+            x: origin.x,
+            y: origin.y + 1,
+        },
+        MirDirection::Up,
+        true,
+    );
+
+    let removed = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(removed.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            success: true,
+            ..
+        }
+    )));
+    assert!(!session.app.world().resource::<MountResource>().has_bells);
+    let hp_before = session
+        .app
+        .world()
+        .entity(target)
+        .get::<MonsterVitals>()
+        .expect("target vitals")
+        .hp;
+    sync_visible_objects(&mut session);
+    let rejected = session.attack(second_object_id);
+    assert!(!rejected
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    assert!(rejected
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    for _ in 0..8 {
+        let _ = session.tick();
+    }
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp,
+        hp_before
+    );
+}
+
+#[test]
+fn mount_bells_curse_requires_unlock_and_consumes_it_only_after_success() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+            .expect("equipped mount")
+            .socketed
+            .iter_mut()
+            .find(|item| item.unique_id == bells_id)
+            .expect("embedded Bells")
+            .cursed = true;
+    }
+
+    let blocked = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert_eq!(
+        blocked,
+        vec![ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            grid_to: MirGridType::Inventory,
+            unique_id: bells_id,
+            to: 32,
+            success: false,
+        }]
+    );
+    assert!(!session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .unlock_curse);
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerPermissionResource>()
+        .unlock_curse = true;
+    let occupied_failure = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 0,
+        from_unique_id: 13,
+    });
+    assert!(occupied_failure.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem { success: false, .. }
+    )));
+    assert!(session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .unlock_curse);
+
+    let removed = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(removed.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem { success: true, .. }
+    )));
+    assert!(!session
+        .app
+        .world()
+        .resource::<PlayerPermissionResource>()
+        .unlock_curse);
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == bells_id && item.slot == 32 && item.cursed));
+}
+
+#[test]
+fn mount_bells_dont_store_rejects_storage_but_allows_inventory() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+            .expect("equipped mount")
+            .socketed
+            .iter_mut()
+            .find(|item| item.unique_id == bells_id)
+            .expect("embedded Bells")
+            .rental_binding_flags = super::CRYSTAL_BIND_DONT_STORE;
+    }
+    activate_storage_service(&mut session);
+
+    let storage_reject = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Storage,
+        unique_id: bells_id,
+        to: 5,
+        from_unique_id: 13,
+    });
+    assert_eq!(
+        storage_reject,
+        vec![ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            grid_to: MirGridType::Storage,
+            unique_id: bells_id,
+            to: 5,
+            success: false,
+        }]
+    );
+    assert!(session.app.world().resource::<MountResource>().has_bells);
+    assert!(!session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .storage_items
+        .iter()
+        .any(|item| item.unique_id == bells_id));
+
+    let inventory_success = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(inventory_success.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem { success: true, .. }
+    )));
+    assert!(!session.app.world().resource::<MountResource>().has_bells);
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| {
+            item.unique_id == bells_id
+                && item.slot == 32
+                && item.rental_binding_flags == super::CRYSTAL_BIND_DONT_STORE
+        }));
+}
+
+#[test]
+fn world_snapshot_serializes_authoritative_native_combat_predicates() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Archer,
+        MirGender::Female,
+        30,
+    );
+    equip_crystal_item(&mut session, "WoodenBow", EquipmentSlot::Weapon);
+
+    let snapshot = session.world_snapshot();
+    let player = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(player.riding_mount, Some(false));
+    assert_eq!(player.can_mount_attack, Some(true));
+    assert_eq!(player.has_class_weapon, Some(true));
+    assert_eq!(player.dazed, Some(false));
+    assert_eq!(player.fishing, Some(false));
+
+    let gateway_frame = serde_json::json!({
+        "type": "worldSnapshot",
+        "payload": snapshot,
+    });
+    let player_json = gateway_frame["payload"]["entities"]
+        .as_array()
+        .expect("entities array")
+        .iter()
+        .find(|entity| entity["kind"] == "selfPlayer")
+        .expect("serialized self player");
+    assert_eq!(player_json["ridingMount"], false);
+    assert_eq!(player_json["canMountAttack"], true);
+    assert_eq!(player_json["hasClassWeapon"], true);
+    assert_eq!(player_json["dazed"], false);
+    assert_eq!(player_json["fishing"], false);
+
+    assert!(!session.app.world().resource::<MountResource>().has_bells);
+    assert_eq!(
+        equip_crystal_mount_with_optional_bells_and_ride(&mut session, false),
+        None
+    );
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .fishing = true;
+    let dazed_expiry = runtime_tick(session.app.world()).saturating_add(10);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: super::HELL_KEEPER_DAZED_BUFF_KEY.to_string(),
+            name: "Dazed".to_string(),
+            description: String::new(),
+            expires_at_tick: dazed_expiry,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        });
+    let changed = session.world_snapshot();
+    let changed_player = changed
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(changed_player.riding_mount, Some(true));
+    assert_eq!(changed_player.can_mount_attack, Some(false));
+    assert_eq!(changed_player.dazed, Some(true));
+    assert_eq!(changed_player.fishing, Some(true));
+
+    let _ = equip_crystal_bells_to_mount(&mut session, 31);
+    let with_bells = session.world_snapshot();
+    let with_bells_player = with_bells
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(with_bells_player.can_mount_attack, Some(true));
+    assert!(with_bells
+        .entities
+        .iter()
+        .filter(|entity| entity.kind != WorldEntityKind::SelfPlayer)
+        .all(|entity| entity.can_mount_attack.is_none()));
+
+    let mut old_host_json = serde_json::to_value(with_bells_player).expect("serialize player");
+    old_host_json
+        .as_object_mut()
+        .expect("player object")
+        .remove("canMountAttack");
+    let old_host: crate::WorldEntitySnapshot =
+        serde_json::from_value(old_host_json).expect("deserialize old host snapshot");
+    assert_eq!(old_host.can_mount_attack, None);
+}
+
+#[test]
+fn real_mount_bells_survive_save_reload_and_start_equipment_snapshot() {
+    let temp_dir = unique_runtime_temp_dir("mount-bells-persistence");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    register_test_account(&session, "mount-bells-persistence");
+    session.handle_packet(ClientPacket::Login {
+        account_id: "mount-bells-persistence".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    equip_crystal_mount_with_optional_bells_and_ride(&mut session, true);
+    assert!(session.app.world().resource::<MountResource>().has_bells);
+    session.save_active_character();
+    drop(session);
+
+    let mut reloaded = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path),
+    );
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "mount-bells-persistence".to_string(),
+        password: "demo".to_string(),
+    });
+    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(reloaded.app.world().resource::<MountResource>().has_bells);
+    let equipment = reloaded
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .clone();
+    let start_slots = super::user_equipment_slots(&equipment);
+    let mount = start_slots[13]
+        .as_ref()
+        .expect("reloaded StartGame equipment must contain the mount");
+    assert_eq!(
+        mount.slots.get(1).and_then(Option::as_ref).map(|item| item.item_index),
+        Some(778),
+        "Crystal MountSlot.Bells must be present in the StartGame equipment payload"
+    );
+
+    let ride = reloaded.handle_packet(ClientPacket::UseItem {
+        unique_id: 13,
+        grid: MirGridType::Equipment,
+    });
+    assert!(ride.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate { riding_mount: true, .. }
+    )));
+    let self_player = reloaded
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(self_player.can_mount_attack, Some(true));
+}
+
+#[test]
+fn equipment_embedded_unique_ids_are_preserved_across_save_load() {
+    let temp_dir = unique_runtime_temp_dir("embedded-id-preserve");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    register_test_account(&session, "embedded-id-preserve");
+    session.handle_packet(ClientPacket::Login {
+        account_id: "embedded-id-preserve".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    let socket_id = 88_001;
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let mut socket = socket_test_item_state("preserved-equipment-socket", socket_id);
+        socket.slot = 7;
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("starter weapon")
+            .socketed
+            .push(socket);
+    }
+    session.save_active_character();
+    drop(session);
+
+    let mut reloaded = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path.clone()),
+    );
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "embedded-id-preserve".to_string(),
+        password: "demo".to_string(),
+    });
+    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let first_ids = equipment_embedded_key_ids(&reloaded);
+    assert!(first_ids.iter().any(|(key, id)| {
+        key == "crystal-item-778" && *id == bells_id
+    }));
+    assert!(first_ids.iter().any(|(key, id)| {
+        key == "preserved-equipment-socket" && *id == socket_id
+    }));
+
+    reloaded.save_active_character();
+    drop(reloaded);
+    let mut second_reload = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path),
+    );
+    second_reload.handle_packet(ClientPacket::Login {
+        account_id: "embedded-id-preserve".to_string(),
+        password: "demo".to_string(),
+    });
+    second_reload.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(equipment_embedded_key_ids(&second_reload), first_ids);
+}
+
+#[test]
+fn legacy_zero_and_duplicate_embedded_unique_ids_normalize_deterministically() {
+    let temp_dir = unique_runtime_temp_dir("embedded-id-normalize");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    register_test_account(&session, "embedded-id-normalize");
+    session.handle_packet(ClientPacket::Login {
+        account_id: "embedded-id-normalize".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true);
+    let conflicting_top_level_id = 77_000;
+    let preserved_embedded_id = 88_002;
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources
+            .inventory_items
+            .first_mut()
+            .expect("starter inventory item")
+            .unique_id = conflicting_top_level_id;
+        let mount = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+            .expect("equipped mount");
+        mount.socketed[0].unique_id = 0;
+
+        let mut duplicate = socket_test_item_state(
+            "duplicate-equipment-socket",
+            conflicting_top_level_id,
+        );
+        duplicate.slot = 8;
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("starter weapon")
+            .socketed
+            .push(duplicate);
+
+        let mut preserved =
+            socket_test_item_state("preserved-normalized-socket", preserved_embedded_id);
+        preserved.slot = 9;
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Armour)
+            .expect("starter armour")
+            .socketed
+            .push(preserved);
+    }
+    session.save_active_character();
+    drop(session);
+
+    let mut reloaded = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path.clone()),
+    );
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "embedded-id-normalize".to_string(),
+        password: "demo".to_string(),
+    });
+    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let first_mapping = equipment_embedded_key_ids(&reloaded);
+    let embedded_ids = equipment_embedded_unique_ids(&reloaded);
+    let embedded_set = embedded_ids
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(embedded_set.len(), embedded_ids.len());
+    assert!(embedded_ids.iter().all(|id| *id != 0));
+    let reserved = top_level_and_equipment_parent_unique_ids(&reloaded);
+    assert!(embedded_ids.iter().all(|id| !reserved.contains(id)));
+    assert!(first_mapping.iter().any(|(key, id)| {
+        key == "preserved-normalized-socket" && *id == preserved_embedded_id
+    }));
+    assert!(first_mapping.iter().any(|(key, id)| {
+        key == "duplicate-equipment-socket" && *id != conflicting_top_level_id
+    }));
+
+    reloaded.save_active_character();
+    drop(reloaded);
+    let mut second_reload = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path),
+    );
+    second_reload.handle_packet(ClientPacket::Login {
+        account_id: "embedded-id-normalize".to_string(),
+        password: "demo".to_string(),
+    });
+    second_reload.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(equipment_embedded_key_ids(&second_reload), first_mapping);
+}
+
+#[test]
+fn bells_unload_preserves_unique_id_without_creating_a_duplicate() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    let other_id = grant_real_crystal_item(&mut session, "MysteryWater", 31);
+    assert_ne!(other_id, bells_id, "allocator must scan embedded Bells IDs");
+
+    let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            success: true,
+            ..
+        }
+    )));
+
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut all_item_ids = Vec::new();
+    collect_item_tree_unique_ids(&resources.belt_items, &mut all_item_ids);
+    collect_item_tree_unique_ids(&resources.inventory_items, &mut all_item_ids);
+    collect_item_tree_unique_ids(&resources.storage_items, &mut all_item_ids);
+    for equipment in &resources.equipment_items {
+        collect_item_tree_unique_ids(&equipment.socketed, &mut all_item_ids);
+    }
+    assert_eq!(
+        all_item_ids.iter().filter(|id| **id == bells_id).count(),
+        1
+    );
+    assert!(resources.inventory_items.iter().any(|item| {
+        item.key == "crystal-item-778" && item.unique_id == bells_id && item.slot == 32
+    }));
 }
 
 #[test]
@@ -6921,7 +8179,9 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
         agent.ai = 9;
         agent.can_wander = false;
-        agent.hostile_to_player = false;
+        // Keep the corpse source attackable. `tracking_player = false` below is
+        // sufficient to keep this harvest fixture passive.
+        agent.hostile_to_player = true;
         agent.tracking_player = false;
         drop(agent);
         entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
@@ -7008,6 +8268,66 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
 }
 
 #[test]
+fn forged_harvest_packet_is_rejected_while_riding_mount() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let object_id = 3001_u32;
+    let target =
+        entity_by_object_id(session.app.world(), object_id).expect("training dummy entity");
+    {
+        let mut entry = session.app.world_mut().entity_mut(target);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
+        agent.ai = 9;
+        agent.can_wander = false;
+        // The forged-harvest assertion is about the mounted player. The
+        // precondition still needs an authoritative hostile corpse source.
+        agent.hostile_to_player = true;
+        agent.tracking_player = false;
+        drop(agent);
+        entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
+    }
+    set_player_position(&mut session, Point { x: 337, y: 273 });
+    let death_packets = attack_until_monster_dies(&mut session, object_id, 10);
+    assert!(packet_has_object_died(&death_packets, object_id));
+    let before = session
+        .app
+        .world()
+        .entity(target)
+        .get::<super::HarvestMonsterState>()
+        .expect("harvest state")
+        .remaining_skin_count;
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MountResource>()
+        .riding_mount = true;
+    let packets = session.handle_packet(ClientPacket::Harvest {
+        direction: MirDirection::Right,
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectHarvest { .. } | ServerPacket::ObjectHarvested { .. }
+    )));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(target)
+            .get::<super::HarvestMonsterState>()
+            .expect("harvest state")
+            .remaining_skin_count,
+        before,
+        "forged Harvest while mounted must not mutate the corpse"
+    );
+}
+
+#[test]
 fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
@@ -7035,7 +8355,9 @@ fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
         let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
         agent.ai = 9;
         agent.can_wander = false;
-        agent.hostile_to_player = false;
+        // Keep the harvest fixture passive via `tracking_player`, while still
+        // allowing the player to create the corpse through normal combat.
+        agent.hostile_to_player = true;
         agent.tracking_player = false;
         drop(agent);
         entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
@@ -7831,7 +9153,7 @@ fn crystal_harvest_monster_subclasses_use_corpse_passes() {
                     ServerPacket::ObjectHarvested { movement }
                         if movement.object_id == object_id
                 )
-            }));
+            }), "{template_name} ({object_id}) transfer packets: {transfer_packets:?}");
         }
         let state = session
             .app
@@ -12588,8 +13910,10 @@ fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
         agent.image = template.monster_image;
         agent.ai = 36;
         agent.dead = false;
-        agent.disposition = WorldEntityDisposition::Neutral;
-        agent.hostile_to_player = false;
+        // Keep the boss player-attackable while making the fixture passive.
+        // The drop assertion is independent of target tracking.
+        agent.disposition = WorldEntityDisposition::Hostile;
+        agent.hostile_to_player = true;
         agent.tracking_player = false;
         agent.can_wander = false;
         agent.next_attack_tick = 100;
@@ -25752,6 +27076,7 @@ fn crystal_npc_sell_updates_buy_back_goods_for_active_service() {
 #[test]
 fn crystal_npc_buy_back_persists_across_save_and_reload() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -25775,6 +27100,7 @@ fn crystal_npc_buy_back_persists_across_save_and_reload() {
         .account_store
         .clone();
     let mut reloaded = SimulationSession::new(reloaded_config);
+    login_demo_account_for_persistence_test(&mut reloaded);
     reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let context = NpcInteractionContext {
@@ -26729,11 +28055,13 @@ fn crystal_npc_givegold_checkclass_and_gender_execute_expected_branch() {
 fn crystal_npc_flags_persist_across_save_and_reload() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_crystal_npc_flag(first.app.world_mut(), 993, true);
     first.save_active_character();
 
     let mut second = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(evaluate_crystal_npc_condition(
@@ -27613,16 +28941,17 @@ fn crystal_npc_stage5_conquest_and_guild_territory_commands_have_stateful_baseli
     ));
 
     let resolved = super::resolve_crystal_npc_runtime_tokens(
-            session.app.world(),
-            "<$CONQUESTRATE(1)> <$CONQUESTGUARD(1,2)> <$CONQUESTWALL(1,3)> <$CONQUESTGATE(1,1)> <$GUILDGTRENTALDAYSLEFT>",
-            &CrystalNpcExecutionState::default(),
-        );
+        session.app.world(),
+        "<$CONQUESTRATE(1)> <$CONQUESTGUARD(1,2)> <$CONQUESTWALL(1,3)> <$CONQUESTGATE(1,1)> <$GUILDGTRENTALDAYSLEFT>",
+        &CrystalNpcExecutionState::default(),
+    );
     assert_eq!(resolved, "15 Alive Repaired Open 14");
 }
 
 #[test]
 fn crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execute() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27693,6 +29022,7 @@ fn crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execut
 #[test]
 fn crystal_npc_giveexp_updates_runtime_and_user_information() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27733,6 +29063,7 @@ fn crystal_npc_savevalue_and_loadvalue_persist_across_reload() {
 
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut first = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27749,6 +29080,7 @@ fn crystal_npc_savevalue_and_loadvalue_persist_across_reload() {
 
     let reloaded_config = SimulationConfig::default().with_account_store_path(store_path);
     let mut second = SimulationSession::new(reloaded_config);
+    login_demo_account_for_persistence_test(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(
@@ -28935,6 +30267,295 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
 }
 
 #[test]
+fn abandon_quest_packet_rejects_every_non_in_progress_state_without_side_effects() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::ensure_runtime_quest(session.app.world_mut(), super::GUIDE_QUEST_ID);
+
+    for stage in [
+        QuestStage::Available,
+        QuestStage::ReadyToTurnIn,
+        QuestStage::Completed,
+    ] {
+        {
+            let mut quests = session.app.world_mut().resource_mut::<QuestResource>();
+            let quest = quests
+                .quests
+                .iter_mut()
+                .find(|quest| quest.quest_id == super::GUIDE_QUEST_ID)
+                .expect("guide quest state");
+            quest.stage = stage;
+            quest.current = 3;
+            quest.task_progress.clear();
+            quest.task_progress.insert("guard:unchanged".to_string(), 3);
+        }
+        let before_quest = {
+            let quests = session.app.world().resource::<QuestResource>();
+            let quest = quests
+                .quests
+                .iter()
+                .find(|quest| quest.quest_id == super::GUIDE_QUEST_ID)
+                .expect("guide quest state");
+            (quest.stage, quest.current, quest.task_progress.clone())
+        };
+        let before_items = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .map(|item| {
+                (
+                    item.key.clone(),
+                    item.container,
+                    item.slot,
+                    item.quantity,
+                    item.unique_id,
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let packets = session.handle_packet(ClientPacket::AbandonQuest {
+            quest_index: super::GUIDE_QUEST_ID,
+        });
+
+        assert!(packets.is_empty(), "{stage:?} must be rejected");
+        let after_quest = {
+            let quests = session.app.world().resource::<QuestResource>();
+            let quest = quests
+                .quests
+                .iter()
+                .find(|quest| quest.quest_id == super::GUIDE_QUEST_ID)
+                .expect("guide quest state");
+            (quest.stage, quest.current, quest.task_progress.clone())
+        };
+        let after_items = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .map(|item| {
+                (
+                    item.key.clone(),
+                    item.container,
+                    item.slot,
+                    item.quantity,
+                    item.unique_id,
+                )
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(after_quest, before_quest, "{stage:?} mutated quest state");
+        assert_eq!(after_items, before_items, "{stage:?} mutated inventory");
+    }
+
+    let quest_count = session.app.world().resource::<QuestResource>().quests.len();
+    let item_count = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .len();
+    assert!(session
+        .handle_packet(ClientPacket::AbandonQuest {
+            quest_index: i32::MAX,
+        })
+        .is_empty());
+    assert_eq!(
+        session.app.world().resource::<QuestResource>().quests.len(),
+        quest_count
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .len(),
+        item_count
+    );
+}
+
+#[test]
+fn abandon_crystal_quest_clears_progress_and_carry_items_before_reaccept() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let template = mir2_game_data::crystal_quest_packet_manifest()
+        .quests
+        .into_iter()
+        .find(|quest| quest.index == 151)
+        .expect("Crystal q151 carry-item quest");
+    assert!(!template.carry_items.is_empty());
+    assert!(!template.kill_tasks.is_empty());
+
+    super::ensure_runtime_quest(session.app.world_mut(), template.index);
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), template.index),
+        QuestStage::InProgress
+    );
+    let carry = template
+        .carry_items
+        .iter()
+        .map(|task| {
+            let item = mir2_game_data::crystal_item_by_index(task.item_index)
+                .expect("carry item template");
+            (
+                super::crystal_item_key_for_template(&item),
+                u32::from(task.count.max(1)),
+            )
+        })
+        .collect::<Vec<_>>();
+    for (key, expected) in &carry {
+        let quantity = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.container == ItemContainer::Quest && item.key == *key)
+            .map(|item| item.quantity)
+            .sum::<u32>();
+        assert_eq!(quantity, *expected, "initial carry grant for {key}");
+    }
+    {
+        let mut quests = session.app.world_mut().resource_mut::<QuestResource>();
+        let quest = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == template.index)
+            .expect("q151 runtime state");
+        quest.current = 1;
+        quest
+            .task_progress
+            .insert(format!("kill:{}", template.kill_tasks[0].monster_index), 1);
+    }
+
+    let packets = session.handle_packet(ClientPacket::AbandonQuest {
+        quest_index: template.index,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            quest_state: 2,
+            taken: false,
+            completed: false,
+            ..
+        } if *quest_id == template.index
+    )));
+    {
+        let quests = session.app.world().resource::<QuestResource>();
+        let quest = quests
+            .quests
+            .iter()
+            .find(|quest| quest.quest_id == template.index)
+            .expect("q151 runtime state");
+        assert_eq!(quest.stage, QuestStage::Available);
+        assert_eq!(quest.current, 0);
+        assert!(quest.task_progress.is_empty());
+    }
+    for (key, _) in &carry {
+        assert!(!session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .any(|item| item.container == ItemContainer::Quest && item.key == *key));
+    }
+
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), template.index),
+        QuestStage::InProgress
+    );
+    for (key, expected) in &carry {
+        let quantity = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.container == ItemContainer::Quest && item.key == *key)
+            .map(|item| item.quantity)
+            .sum::<u32>();
+        assert_eq!(quantity, *expected, "reaccept carry grant for {key}");
+    }
+    let quests = session.app.world().resource::<QuestResource>();
+    let quest = quests
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == template.index)
+        .expect("q151 runtime state");
+    assert_eq!(quest.current, 0);
+    assert!(quest.task_progress.is_empty());
+}
+
+#[test]
+fn abandon_crystal_quest_removes_item_task_inventory() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let template = mir2_game_data::crystal_quest_packet_manifest()
+        .quests
+        .into_iter()
+        .find(|quest| !quest.item_tasks.is_empty())
+        .expect("Crystal item-task quest");
+    let task = template.item_tasks.first().expect("item task");
+    let item = mir2_game_data::crystal_item_by_index(task.item_index).expect("task item template");
+    let key = super::crystal_item_key_for_template(&item);
+
+    super::ensure_runtime_quest(session.app.world_mut(), template.index);
+    super::set_quest_stage(
+        session.app.world_mut(),
+        template.index,
+        QuestStage::InProgress,
+    );
+    super::add_or_increment_item(
+        session.app.world_mut(),
+        ItemContainer::Quest,
+        &key,
+        &item.name,
+        "task item",
+        0,
+        1,
+        u16::from(item.weight.max(1)),
+    );
+    {
+        let mut quests = session.app.world_mut().resource_mut::<QuestResource>();
+        let quest = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == template.index)
+            .expect("item quest runtime state");
+        quest.current = 1;
+        quest
+            .task_progress
+            .insert(format!("item:{}", task.item_index), 1);
+    }
+
+    let packets = session.handle_packet(ClientPacket::AbandonQuest {
+        quest_index: template.index,
+    });
+
+    assert!(!packets.is_empty());
+    assert!(!session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.container == ItemContainer::Quest && item.key == key));
+    let quests = session.app.world().resource::<QuestResource>();
+    let quest = quests
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == template.index)
+        .expect("item quest runtime state");
+    assert_eq!(quest.stage, QuestStage::Available);
+    assert_eq!(quest.current, 0);
+    assert!(quest.task_progress.is_empty());
+}
+
+#[test]
 fn original_crystal_normal_quest_manifest_covers_level_1_to_45_range() {
     let infos = super::crystal_normal_quest_infos_1_to_45();
     let manifest = mir2_game_data::crystal_quest_packet_manifest();
@@ -29127,6 +30748,7 @@ fn original_crystal_quest_structured_kill_and_item_tasks_progress() {
 fn world_snapshot_restores_structured_multi_task_quest_progress() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::ensure_runtime_quest(first.app.world_mut(), 5);
     super::set_quest_stage(first.app.world_mut(), 5, QuestStage::InProgress);
@@ -29140,6 +30762,7 @@ fn world_snapshot_restores_structured_multi_task_quest_progress() {
     first.save_active_character();
 
     let mut restored = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut restored);
     restored.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = restored.world_snapshot();
     let quest = snapshot
@@ -33557,6 +35180,7 @@ fn crystal_credit_token_use_adds_credit_and_emits_packet() {
 #[test]
 fn crystal_credit_persists_and_updates_user_information() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "credit-token-save");
     let _ = session.handle_packet(ClientPacket::Login {
         account_id: "credit-token-save".to_string(),
         password: "demo".to_string(),
@@ -35389,6 +37013,7 @@ fn use_item_packet_mystery_water_when_already_unlocked_ack_fails_and_keeps_item(
 #[test]
 fn mystery_water_unlock_does_not_survive_logout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryWater", 31);
     {
@@ -36954,6 +38579,258 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
         defence: 0,
         heal_hp: 0,
         heal_mp: 0,
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum IncomingItemTreePath {
+    SharedTrade,
+    RentalRetrieve,
+    RentalCancel,
+    HeroTakeBack,
+    GuildStorageRetrieve,
+}
+
+impl IncomingItemTreePath {
+    fn label(self) -> &'static str {
+        match self {
+            Self::SharedTrade => "shared-trade",
+            Self::RentalRetrieve => "rental-retrieve",
+            Self::RentalCancel => "rental-cancel",
+            Self::HeroTakeBack => "hero-takeback",
+            Self::GuildStorageRetrieve => "guild-storage",
+        }
+    }
+}
+
+fn malformed_incoming_item_tree(label: &str) -> ItemState {
+    let mut root = socket_test_item_state(&format!("{label}-root"), 0);
+    root.slot = 30;
+    let global_conflict = socket_test_item_state(&format!("{label}-global-conflict"), 88_000);
+    let mut internal_first =
+        socket_test_item_state(&format!("{label}-internal-first"), 77_001);
+    internal_first.socketed.push(socket_test_item_state(
+        &format!("{label}-internal-duplicate"),
+        77_001,
+    ));
+    let preserved = socket_test_item_state(&format!("{label}-preserved"), 99_123);
+    root.socketed = vec![global_conflict, internal_first, preserved];
+    root
+}
+
+fn incoming_tree_key_ids(session: &SimulationSession, root_key: &str) -> Vec<(String, u64)> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let root = resources
+        .inventory_items
+        .iter()
+        .find(|item| item.key == root_key)
+        .expect("returned incoming item tree should be in player inventory");
+    let mut values = Vec::new();
+    collect_item_tree_key_ids(std::slice::from_ref(root), &mut values);
+    values.sort();
+    values
+}
+
+fn inventory_global_item_id_occurrences(session: &SimulationSession, unique_id: u64) -> usize {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut ids = Vec::new();
+    collect_item_tree_unique_ids(&resources.belt_items, &mut ids);
+    collect_item_tree_unique_ids(&resources.inventory_items, &mut ids);
+    collect_item_tree_unique_ids(&resources.storage_items, &mut ids);
+    for equipment in &resources.equipment_items {
+        if let Some(parent_id) = super::equipment_slot_unique_id(equipment.slot) {
+            ids.push(parent_id);
+        }
+        collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
+    }
+    ids.into_iter().filter(|candidate| *candidate == unique_id).count()
+}
+
+fn return_incoming_item_tree_through_path(
+    session: &mut SimulationSession,
+    path: IncomingItemTreePath,
+    item: ItemState,
+) {
+    match path {
+        IncomingItemTreePath::SharedTrade => {
+            let offer = super::SharedTradeOffer {
+                account_id: "sender-account".to_string(),
+                character_index: 0,
+                character_name: "Sender".to_string(),
+                partner_name: "Scout".to_string(),
+                gold: 0,
+                items: vec![super::SharedTradeOfferItem {
+                    item_state_json: serde_json::to_string(&item).expect("incoming trade item"),
+                    key: item.key.clone(),
+                    unique_id: item.unique_id,
+                }],
+            };
+            let packets = session.apply_shared_trade_delivery(&offer);
+            assert!(packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+        }
+        IncomingItemTreePath::RentalRetrieve | IncomingItemTreePath::RentalCancel => {
+            let deposited_from = matches!(path, IncomingItemTreePath::RentalCancel).then_some(30);
+            session
+                .app
+                .world_mut()
+                .resource_mut::<super::ItemRentalResource>()
+                .active = Some(super::super::resources::ActiveItemRentalState {
+                partner_name: "Rental Partner".to_string(),
+                fee: 0,
+                days: 1,
+                deposited_item: Some(item),
+                deposited_from,
+                gold_locked: false,
+                item_locked: false,
+            });
+            let packets = if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                session.handle_packet(ClientPacket::RetrieveRentalItem { from: 0, to: 30 })
+            } else {
+                session.handle_packet(ClientPacket::CancelItemRental)
+            };
+            assert!(packets.iter().any(|packet| match (path, packet) {
+                (
+                    IncomingItemTreePath::RentalRetrieve,
+                    ServerPacket::RetrieveRentalItem { success: true, .. },
+                ) | (
+                    IncomingItemTreePath::RentalCancel,
+                    ServerPacket::CancelItemRental,
+                ) => true,
+                _ => false,
+            }));
+        }
+        IncomingItemTreePath::HeroTakeBack => {
+            session.handle_packet(ClientPacket::NewHero {
+                name: "TreeCarrier".to_string(),
+                gender: MirGender::Female,
+                class: MirClass::Warrior,
+            });
+            let mut hero_item = item;
+            hero_item.slot = 3;
+            session
+                .app
+                .world_mut()
+                .resource_mut::<super::HeroInventoryResource>()
+                .items
+                .push(hero_item);
+            assert!(matches!(
+                session
+                    .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                    .as_slice(),
+                [ServerPacket::TakeBackHeroItem { success: true, .. }]
+            ));
+        }
+        IncomingItemTreePath::GuildStorageRetrieve => {
+            session.stage5_command("guild.create", vec!["TreeGuild".to_string()]);
+            let encoded = serde_json::to_string(&item).expect("guild storage item");
+            {
+                let mut stage5 = session
+                    .app
+                    .world_mut()
+                    .resource_mut::<Stage5SystemsResource>();
+                stage5
+                    .stage5_systems
+                    .guild
+                    .storage_items
+                    .insert(0, item.key.clone());
+                stage5
+                    .stage5_systems
+                    .guild
+                    .storage_item_states
+                    .insert(0, encoded);
+            }
+            let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                change_type: 1,
+                from: 0,
+                to: 30,
+            });
+            assert!(packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::GuildStorageItemChange {
+                    change_type: 1,
+                    item: None,
+                    ..
+                }
+            )));
+        }
+    }
+}
+
+#[test]
+fn incoming_item_tree_paths_normalize_nested_ids_and_remain_save_load_stable() {
+    for path in [
+        IncomingItemTreePath::SharedTrade,
+        IncomingItemTreePath::RentalRetrieve,
+        IncomingItemTreePath::RentalCancel,
+        IncomingItemTreePath::HeroTakeBack,
+        IncomingItemTreePath::GuildStorageRetrieve,
+    ] {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        login_demo_account_for_persistence_test(&mut session);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let label = path.label();
+        let root_key = format!("{label}-root");
+        {
+            let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+            resources
+                .equipment_items
+                .iter_mut()
+                .find(|equipment| equipment.slot == EquipmentSlot::Weapon)
+                .expect("default weapon")
+                .socketed
+                .push(socket_test_item_state("global-reserved-socket", 88_000));
+        }
+
+        return_incoming_item_tree_through_path(
+            &mut session,
+            path,
+            malformed_incoming_item_tree(label),
+        );
+
+        let before_reload = incoming_tree_key_ids(&session, &root_key);
+        let ids = before_reload
+            .iter()
+            .map(|(_, unique_id)| *unique_id)
+            .collect::<Vec<_>>();
+        assert!(ids.iter().all(|unique_id| *unique_id != 0), "{path:?}");
+        assert_eq!(
+            ids.iter().copied().collect::<std::collections::BTreeSet<_>>().len(),
+            ids.len(),
+            "{path:?} incoming tree must be internally unique"
+        );
+        assert!(ids.iter().all(|unique_id| {
+            inventory_global_item_id_occurrences(&session, *unique_id) == 1
+        }), "{path:?} incoming IDs must be globally unique after insertion");
+        assert_eq!(
+            before_reload
+                .iter()
+                .find(|(key, _)| key == &format!("{label}-internal-first"))
+                .map(|(_, unique_id)| *unique_id),
+            Some(77_001),
+            "{path:?} must preserve the first legal internal ID"
+        );
+        assert_eq!(
+            before_reload
+                .iter()
+                .find(|(key, _)| key == &format!("{label}-preserved"))
+                .map(|(_, unique_id)| *unique_id),
+            Some(99_123),
+            "{path:?} must preserve a legal non-conflicting ID"
+        );
+
+        session.save_active_character();
+        let mut reloaded = SimulationSession::new(config);
+        login_demo_account_for_persistence_test(&mut reloaded);
+        reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(
+            incoming_tree_key_ids(&reloaded, &root_key),
+            before_reload,
+            "{path:?} IDs must remain stable across save/load"
+        );
     }
 }
 
@@ -39340,6 +41217,7 @@ fn locked_storage_blocks_store_and_take_back_until_unlock() {
 #[test]
 fn locked_storage_blocks_storage_reorder_split_and_merge() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "storage-lock-grid");
     let _ = session.handle_packet(ClientPacket::Login {
         account_id: "storage-lock-grid".to_string(),
         password: "demo".to_string(),
@@ -46710,6 +48588,20 @@ fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
         .expect("FireBall snapshot");
     assert_eq!(fireball.cast_kind, "target");
     assert!(fireball.offensive);
+    let fireball_magic = mir2_game_data::crystal_magic_by_spell("FireBall")
+        .expect("authoritative FireBall metadata");
+    assert_eq!(
+        fireball.mp_cost,
+        Some(
+            u32::from(fireball_magic.base_cost)
+                + u32::from(fireball_magic.level_cost) * u32::from(fireball.level)
+        )
+    );
+    let fireball_json = serde_json::to_value(fireball).expect("serialize FireBall snapshot");
+    assert_eq!(
+        fireball_json["mpCost"].as_u64(),
+        fireball.mp_cost.map(u64::from)
+    );
     let shield = snapshot
         .known_skills
         .iter()
@@ -46717,6 +48609,29 @@ fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
         .expect("MagicShield snapshot");
     assert_eq!(shield.cast_kind, "self");
     assert!(!shield.offensive);
+}
+
+#[test]
+fn skill_snapshot_mp_cost_uses_the_same_starter_override_as_casting() {
+    let healing = super::crystal_skill_state("Healing", 2).expect("Healing skill");
+    let definition = super::skill_definition(&healing.key).expect("starter skill definition");
+    let crystal_magic = super::crystal_magic_for_skill_key(&healing.key)
+        .expect("underlying Crystal magic metadata");
+    let crystal_formula = i32::from(crystal_magic.base_cost)
+        + i32::from(crystal_magic.level_cost) * i32::from(healing.level);
+    let snapshot = healing.snapshot(0, mir2_game_data::LanguageCode::English);
+
+    assert_eq!(snapshot.mp_cost, u32::try_from(definition.mana_cost).ok());
+    assert_ne!(
+        definition.mana_cost, crystal_formula,
+        "fixture must prove starter metadata takes precedence over the Crystal fallback"
+    );
+    let json = serde_json::to_value(&snapshot).expect("serialize authoritative skill snapshot");
+    assert_eq!(
+        json["mpCost"].as_i64(),
+        Some(i64::from(definition.mana_cost))
+    );
+    assert!(json.get("mp_cost").is_none());
 }
 
 #[test]
@@ -47630,7 +49545,13 @@ fn magic_packet_crystal_flaming_sword_and_slaying_attach_attack_spells() {
 fn magic_packet_crystal_focus_marks_range_attack_and_delays_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Archer,
+        MirGender::Female,
+        40,
+    );
+    equip_crystal_item(&mut session, "WoodenBow", EquipmentSlot::Weapon);
     let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target_location = Point {
@@ -51611,6 +53532,7 @@ fn stage5_social_group_guild_mail_persist_across_reload() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
+    register_test_account(&session, "stage5-social");
     session.handle_packet(ClientPacket::Login {
         account_id: "stage5-social".to_string(),
         password: "demo".to_string(),
@@ -51693,7 +53615,7 @@ fn stage5_social_group_guild_mail_persist_across_reload() {
         .any(|message| message.contains("ready")));
     assert_eq!(snapshot.stage5_systems.social.friends, vec!["Miner"]);
     assert_eq!(snapshot.stage5_systems.social.blocked, vec!["Spammer"]);
-    assert_eq!(snapshot.stage5_systems.mail[0].gold, 33);
+    assert_eq!(snapshot.stage5_systems.mail[0].gold, 0);
     assert!(snapshot.stage5_systems.mail[0].claimed);
     assert_eq!(snapshot.gold, 1313);
 }
@@ -52567,6 +54489,7 @@ fn guild_alliance_runtime_state_does_not_rehydrate_from_save_like_crystal() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
+    register_test_account(&session, "guild-alliance-runtime");
     session.handle_packet(ClientPacket::Login {
         account_id: "guild-alliance-runtime".to_string(),
         password: "demo".to_string(),
@@ -53154,6 +55077,10 @@ fn stage5_credit_shop_mails_purchase_and_claim_transfers_attachment() {
 #[test]
 fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -53168,6 +55095,16 @@ fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 220 })));
+    let purchases_sent_message = mir2_game_data::localized_text_or_fallback(
+        mir2_game_data::LanguageCode::English,
+        "server.PurchasesSentMailbox",
+        "server.PurchasesSentMailbox",
+    );
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat { message, chat_type: ChatType::Hint }
+            if message == &purchases_sent_message
+    )));
     assert_eq!(snapshot.credit, 280);
     assert!(snapshot.stage5_systems.mail.iter().any(|mail| {
         mail.from == "Gameshop"
@@ -53178,6 +55115,581 @@ fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
         .inventory_items
         .iter()
         .any(|item| item.key == "crystal-item-1268"));
+}
+
+fn started_game_shop_session(gold: u32, credit: u32) -> SimulationSession {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut player = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        player.gold = gold;
+        player.credit = credit;
+    }
+    session
+}
+
+fn game_shop_mail_states(mail: &Stage5MailMessage) -> Vec<ItemState> {
+    mail.item_states_json
+        .iter()
+        .map(|state| serde_json::from_str::<ItemState>(state).expect("valid game-shop item state"))
+        .collect()
+}
+
+fn assert_game_shop_economy_unchanged(before: &crate::WorldSnapshot, after: &crate::WorldSnapshot) {
+    assert_eq!(after.gold, before.gold);
+    assert_eq!(after.credit, before.credit);
+    assert_eq!(after.inventory_items, before.inventory_items);
+    assert_eq!(after.stage5_systems.mail, before.stage5_systems.mail);
+}
+
+#[test]
+fn game_shop_packet_credit_and_gold_mail_product_count_times_quantity() {
+    // Manifest gIndex 31: product.count=5, stack_size=20, credit=110, gold=165000.
+    let mut credit_session = started_game_shop_session(0, 500);
+    let credit_packets = credit_session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 0,
+    });
+    let credit_snapshot = credit_session.world_snapshot();
+    assert!(credit_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 220 })));
+    assert_eq!(credit_snapshot.credit, 280);
+    assert!(!credit_snapshot
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "crystal-item-1288"));
+    let credit_mail = credit_snapshot
+        .stage5_systems
+        .mail
+        .first()
+        .expect("credit purchase mail");
+    let credit_states = game_shop_mail_states(credit_mail);
+    assert_eq!(credit_mail.items.len(), credit_mail.item_states_json.len());
+    assert_eq!(credit_states.len(), 1);
+    assert_eq!(credit_states[0].quantity, 10);
+
+    credit_session.stage5_command("mail.claim", vec![credit_mail.id.to_string()]);
+    assert_eq!(
+        credit_session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "crystal-item-1288")
+            .map(|item| item.quantity)
+            .sum::<u32>(),
+        10
+    );
+
+    let mut gold_session = started_game_shop_session(500_000, 0);
+    fill_all_bag_slots(&mut gold_session);
+    let bag_before = gold_session.world_snapshot().inventory_items;
+    let gold_packets = gold_session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 1,
+    });
+    let gold_snapshot = gold_session.world_snapshot();
+    assert!(gold_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 330_000 })));
+    assert_eq!(gold_snapshot.gold, 170_000);
+    assert_eq!(gold_snapshot.inventory_items, bag_before);
+    let gold_mail = gold_snapshot
+        .stage5_systems
+        .mail
+        .first()
+        .expect("gold purchase mail even with a full bag");
+    let gold_states = game_shop_mail_states(gold_mail);
+    assert_eq!(gold_mail.items.len(), gold_mail.item_states_json.len());
+    assert_eq!(gold_states.len(), 1);
+    assert_eq!(gold_states[0].quantity, 10);
+}
+
+#[test]
+fn game_shop_five_stack_boundary_claims_exact_total_and_sixth_stack_rejects() {
+    let mut session = started_game_shop_session(0, 5_000);
+    let packets = session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 20,
+        price_type: 0,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 2_200 })));
+    let mail_id = {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let mail = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("five-stack purchase mail");
+        let mut states = game_shop_mail_states(mail);
+        assert_eq!(mail.items.len(), 5);
+        assert_eq!(mail.item_states_json.len(), 5);
+        assert!(states.iter().all(|state| state.quantity == 20));
+        assert_eq!(states.iter().map(|state| state.quantity).sum::<u32>(), 100);
+        for state in &mut states {
+            state.slot = 39;
+            state.unique_id = 9_999;
+        }
+        states[0].added_attack = 17;
+        states[0].added_stats = vec![UserItemStat { stat: 5, value: 42 }];
+        states[0].rental_binding_flags = 3;
+        states[0].rental_owner_name = "MailOwner".to_string();
+        states[0].rental_expiry_binary_datetime = 638_000_000_000_000_000;
+        states[0].rental_locked = true;
+        mail.item_states_json = states
+            .iter()
+            .map(|state| serde_json::to_string(state).expect("exact item state should encode"))
+            .collect();
+        mail.id
+    };
+
+    let claim_packets = session.handle_packet(ClientPacket::CollectParcel {
+        mail_id: u64::from(mail_id),
+    });
+    assert_eq!(
+        claim_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::GainedItem { .. }))
+            .count(),
+        5
+    );
+    assert!(claim_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    let claimed_snapshot = session.world_snapshot();
+    assert_eq!(
+        claimed_snapshot
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "crystal-item-1288")
+            .map(|item| item.quantity)
+            .sum::<u32>(),
+        100
+    );
+    let inventory = session.app.world().resource::<InventoryResource>();
+    let claimed_items = inventory
+        .inventory_items
+        .iter()
+        .filter(|item| item.key == "crystal-item-1288")
+        .collect::<Vec<_>>();
+    assert_eq!(claimed_items.len(), 5);
+    assert!(claimed_items.iter().all(|item| item.unique_id != 9_999));
+    let mut assigned_ids = claimed_items
+        .iter()
+        .map(|item| item.unique_id)
+        .collect::<Vec<_>>();
+    assigned_ids.sort_unstable();
+    assigned_ids.dedup();
+    assert_eq!(
+        assigned_ids.len(),
+        5,
+        "server-assigned unique IDs must be unique"
+    );
+    let preserved = claimed_items
+        .iter()
+        .find(|item| item.rental_owner_name == "MailOwner")
+        .expect("exact rental item metadata should be preserved");
+    assert_eq!(preserved.added_attack, 17);
+    assert_eq!(
+        preserved.added_stats,
+        vec![UserItemStat { stat: 5, value: 42 }]
+    );
+    assert_eq!(preserved.rental_binding_flags, 3);
+    assert_eq!(
+        preserved.rental_expiry_binary_datetime,
+        638_000_000_000_000_000
+    );
+    assert!(preserved.rental_locked);
+    let claimed_mail = claimed_snapshot
+        .stage5_systems
+        .mail
+        .iter()
+        .find(|candidate| candidate.id == mail_id)
+        .expect("claimed game-shop mail should remain in mailbox history");
+    assert!(claimed_mail.claimed);
+    assert_eq!(claimed_mail.gold, 0);
+    assert!(claimed_mail.items.is_empty());
+    assert!(claimed_mail.item_states_json.is_empty());
+
+    let before_duplicate = session.world_snapshot();
+    assert_eq!(
+        session.handle_packet(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(session.world_snapshot(), before_duplicate);
+
+    let before = session.world_snapshot();
+    let packets = session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 21,
+        price_type: 0,
+    });
+    assert!(
+        packets.is_empty(),
+        "six attachment stacks are silently rejected"
+    );
+    let after = session.world_snapshot();
+    assert_game_shop_economy_unchanged(&before, &after);
+}
+
+#[test]
+fn collect_parcel_rejects_partially_corrupt_exact_payload_with_only_four_slots_atomically() {
+    let mut session = started_game_shop_session(0, 5_000);
+    session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 20,
+        price_type: 0,
+    });
+    let mail_id = {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let mail = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("five-stack game-shop mail");
+        assert_eq!(mail.item_states_json.len(), 5);
+        mail.gold = 777;
+        mail.item_states_json[2] = "{partially-corrupt-json".to_string();
+        mail.id
+    };
+    fill_all_bag_slots(&mut session);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .truncate(76);
+    let before = session.world_snapshot();
+
+    let rejected = session.handle_packet(ClientPacket::CollectParcel {
+        mail_id: u64::from(mail_id),
+    });
+    assert_eq!(rejected, vec![ServerPacket::ParcelCollected { result: -1 }]);
+    let after_rejection = session.world_snapshot();
+    assert_eq!(after_rejection.gold, before.gold);
+    assert_eq!(after_rejection.inventory_items, before.inventory_items);
+    assert_eq!(
+        after_rejection.stage5_systems.mail,
+        before.stage5_systems.mail
+    );
+}
+
+#[test]
+fn collect_parcel_rejects_fully_corrupt_exact_payload_without_key_fallback() {
+    let mut session = started_game_shop_session(0, 500);
+    session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 0,
+    });
+    let mail_id = {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let mail = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("single-stack game-shop mail");
+        assert_eq!(mail.item_states_json.len(), 1);
+        mail.gold = 333;
+        mail.item_states_json[0] = "not-json".to_string();
+        mail.id
+    };
+    let before = session.world_snapshot();
+
+    for _ in 0..2 {
+        let rejected = session.handle_packet(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        });
+        assert_eq!(rejected, vec![ServerPacket::ParcelCollected { result: -1 }]);
+        let after = session.world_snapshot();
+        assert_eq!(after.gold, before.gold);
+        assert_eq!(after.inventory_items, before.inventory_items);
+        assert_eq!(after.stage5_systems.mail, before.stage5_systems.mail);
+        assert!(!after.stage5_systems.mail[0].claimed);
+        assert_eq!(after.stage5_systems.mail[0].gold, 333);
+        assert_eq!(
+            after.stage5_systems.mail[0].items,
+            before.stage5_systems.mail[0].items
+        );
+        assert_eq!(
+            after.stage5_systems.mail[0].item_states_json,
+            before.stage5_systems.mail[0].item_states_json
+        );
+    }
+}
+
+#[test]
+fn collect_parcel_rejects_unknown_zero_and_overstack_exact_items_atomically() {
+    for invalid_case in ["unknown", "zero", "overstack"] {
+        let mut session = started_game_shop_session(0, 500);
+        session.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 2,
+            price_type: 0,
+        });
+        let mail_id = {
+            let mut stage5 = session
+                .app
+                .world_mut()
+                .resource_mut::<Stage5SystemsResource>();
+            let mail = stage5
+                .stage5_systems
+                .mail
+                .first_mut()
+                .expect("single-stack game-shop mail");
+            let mut state = game_shop_mail_states(mail)
+                .into_iter()
+                .next()
+                .expect("exact item state");
+            match invalid_case {
+                "unknown" => state.key = "not-a-crystal-item".to_string(),
+                "zero" => state.quantity = 0,
+                "overstack" => state.quantity = 21,
+                _ => unreachable!(),
+            }
+            mail.gold = 444;
+            mail.item_states_json =
+                vec![serde_json::to_string(&state)
+                    .expect("invalid semantic state remains valid JSON")];
+            mail.id
+        };
+        let before = session.world_snapshot();
+
+        assert_eq!(
+            session.handle_packet(ClientPacket::CollectParcel {
+                mail_id: u64::from(mail_id),
+            }),
+            vec![ServerPacket::ParcelCollected { result: -1 }],
+            "{invalid_case} exact state must be rejected"
+        );
+        assert_eq!(
+            session.world_snapshot(),
+            before,
+            "{invalid_case} rejection must be a zero-change transaction"
+        );
+    }
+}
+
+#[test]
+fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
+    let mut packet_credit = started_game_shop_session(0, 500);
+    let mut stage5_credit = started_game_shop_session(0, 500);
+    let packet_credit_packets = packet_credit.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 0,
+    });
+    let stage5_credit_packets = stage5_credit.stage5_command(
+        "gameShop.buyCredit",
+        vec!["31".to_string(), "2".to_string()],
+    );
+    assert_eq!(packet_credit_packets, stage5_credit_packets);
+    let mut packet_credit_snapshot = packet_credit.world_snapshot();
+    let mut stage5_credit_snapshot = stage5_credit.world_snapshot();
+    for mail in &mut packet_credit_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    for mail in &mut stage5_credit_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    assert_eq!(packet_credit_snapshot, stage5_credit_snapshot);
+
+    let mut packet_gold = started_game_shop_session(500_000, 0);
+    let mut stage5_gold = started_game_shop_session(500_000, 0);
+    let packet_gold_packets = packet_gold.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 1,
+    });
+    let stage5_gold_packets =
+        stage5_gold.stage5_command("gameShop.buyGold", vec!["31".to_string(), "2".to_string()]);
+    assert_eq!(packet_gold_packets, stage5_gold_packets);
+    let mut packet_gold_snapshot = packet_gold.world_snapshot();
+    let mut stage5_gold_snapshot = stage5_gold.world_snapshot();
+    for mail in &mut packet_gold_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    for mail in &mut stage5_gold_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    assert_eq!(packet_gold_snapshot, stage5_gold_snapshot);
+}
+
+#[test]
+fn game_shop_invalid_packet_and_stage5_quantities_have_zero_side_effects() {
+    let mut session = started_game_shop_session(1_000_000, 10_000);
+    let before = session.world_snapshot();
+    for packet in [
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 0,
+            price_type: 0,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 100,
+            price_type: 0,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 0,
+            price_type: 1,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 100,
+            price_type: 1,
+        },
+    ] {
+        assert!(
+            session.handle_packet(packet).is_empty(),
+            "invalid Crystal quantity must be rejected silently"
+        );
+    }
+    for action in ["gameShop.buyCredit", "gameShop.buyGold"] {
+        for quantity in ["0", "100"] {
+            assert!(
+                session
+                    .stage5_command(action, vec!["31".to_string(), quantity.to_string()])
+                    .is_empty(),
+                "legacy game-shop invalid quantity must also be silent"
+            );
+        }
+    }
+    for packet in [
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: -1,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: 2,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: i32::MAX,
+            quantity: 1,
+            price_type: 0,
+        },
+    ] {
+        assert!(!session.handle_packet(packet).is_empty());
+    }
+    assert_game_shop_economy_unchanged(&before, &session.world_snapshot());
+}
+
+#[test]
+fn game_shop_disabled_authoritative_payment_flags_have_zero_side_effects() {
+    // The authoritative GameShopInfo payload for gIndex 42 disables both
+    // CanBuyCredit and CanBuyGold even though it carries display prices.
+    let mut session = started_game_shop_session(1_000_000, 10_000);
+    let before = session.world_snapshot();
+    for price_type in [0, 1] {
+        session.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 42,
+            quantity: 1,
+            price_type,
+        });
+    }
+    session.stage5_command(
+        "gameShop.buyCredit",
+        vec!["42".to_string(), "1".to_string()],
+    );
+    session.stage5_command("gameShop.buyGold", vec!["42".to_string(), "1".to_string()]);
+    assert_game_shop_economy_unchanged(&before, &session.world_snapshot());
+}
+
+#[test]
+fn game_shop_balance_mail_capacity_and_world_phase_rejections_are_atomic() {
+    for price_type in [0, 1] {
+        let mut low_balance = started_game_shop_session(0, 0);
+        let before = low_balance.world_snapshot();
+        low_balance.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type,
+        });
+        assert_game_shop_economy_unchanged(&before, &low_balance.world_snapshot());
+    }
+
+    let mut full_mail = started_game_shop_session(1_000_000, 10_000);
+    full_mail
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .mail = (1..=100)
+        .map(|id| Stage5MailMessage {
+            id,
+            delivery_nonce: format!("mail-capacity-{id}"),
+            from: "System".to_string(),
+            to: "Scout".to_string(),
+            subject: format!("mail-{id}"),
+            body: String::new(),
+            gold: 0,
+            items: Vec::new(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked: false,
+            claimed: false,
+            deleted: false,
+        })
+        .collect();
+    let before_full_mail = full_mail.world_snapshot();
+    for price_type in [0, 1] {
+        full_mail.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type,
+        });
+    }
+    assert_game_shop_economy_unchanged(&before_full_mail, &full_mail.world_snapshot());
+
+    let mut character_select = SimulationSession::new(SimulationConfig::default());
+    character_select
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 10_000;
+    let before_select = character_select.world_snapshot();
+    character_select.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    assert_game_shop_economy_unchanged(&before_select, &character_select.world_snapshot());
+
+    let mut logged_out = started_game_shop_session(0, 10_000);
+    logged_out.handle_packet(ClientPacket::LogOut);
+    let before_logout_buy = logged_out.world_snapshot();
+    logged_out.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    assert_game_shop_economy_unchanged(&before_logout_buy, &logged_out.world_snapshot());
 }
 
 #[test]
@@ -53517,6 +56029,7 @@ fn stage5_trade_disconnect_before_accept_preserves_gold() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
+    register_test_account(&session, "stage5-trade-disconnect");
     session.handle_packet(ClientPacket::Login {
         account_id: "stage5-trade-disconnect".to_string(),
         password: "demo".to_string(),
@@ -56523,10 +59036,209 @@ fn trade_confirm_revalidates_offered_items_before_escrow_lock() {
         .is_some_and(|trade| !trade.completed && !trade.locked));
 }
 
+fn authenticated_demo_mail_session() -> SimulationSession {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+}
+
+fn assert_mail_send_rejected_atomically(
+    session: &mut SimulationSession,
+    name: String,
+    message: String,
+    items_idx: [u64; 5],
+    stamped: bool,
+) {
+    let before = session.world_snapshot();
+    assert_eq!(
+        session.handle_packet(ClientPacket::SendMail {
+            name,
+            message,
+            gold: 250,
+            items_idx,
+            stamped,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(session.world_snapshot(), before);
+}
+
+#[test]
+fn send_mail_requires_real_account_and_active_character_without_demo_scout_fallback() {
+    let mut unauthenticated = SimulationSession::new(SimulationConfig::default());
+    assert_mail_send_rejected_atomically(
+        &mut unauthenticated,
+        "Scout".to_string(),
+        "anonymous".to_string(),
+        [0; 5],
+        false,
+    );
+
+    let mut authenticated_only = SimulationSession::new(SimulationConfig::default());
+    assert!(authenticated_only
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    assert_mail_send_rejected_atomically(
+        &mut authenticated_only,
+        "Scout".to_string(),
+        "before StartGame".to_string(),
+        [0; 5],
+        false,
+    );
+
+    let mut selected_without_account = SimulationSession::new(SimulationConfig::default());
+    selected_without_account.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_mail_send_rejected_atomically(
+        &mut selected_without_account,
+        "Scout".to_string(),
+        "no demo fallback".to_string(),
+        [0; 5],
+        false,
+    );
+}
+
+#[test]
+fn send_mail_client_stamp_never_waives_postage() {
+    let mut session = authenticated_demo_mail_session();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 2_000;
+    session.save_active_character();
+
+    assert_eq!(
+        session.handle_packet(ClientPacket::MailCost {
+            gold: 1_500,
+            items_idx: [0; 5],
+            stamped: true,
+        }),
+        vec![ServerPacket::MailCost { cost: 100 }]
+    );
+    let packets = session.handle_packet(ClientPacket::SendMail {
+        name: "Scout".to_string(),
+        message: "forged stamp".to_string(),
+        gold: 1_500,
+        items_idx: [0; 5],
+        stamped: true,
+    });
+    assert!(matches!(
+        packets.as_slice(),
+        [
+            ServerPacket::LoseGold { gold: 1_600 },
+            ServerPacket::MailSent { result: 1 },
+            ServerPacket::ReceiveMail { .. }
+        ]
+    ));
+    assert_eq!(session.world_snapshot().gold, 400);
+
+    let mut overflow = authenticated_demo_mail_session();
+    overflow
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = u32::MAX;
+    let before_overflow = overflow.world_snapshot();
+    assert_eq!(
+        overflow.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "overflow".to_string(),
+            gold: u32::MAX,
+            items_idx: [0; 5],
+            stamped: true,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(overflow.world_snapshot(), before_overflow);
+}
+
+#[test]
+fn send_mail_rejects_invalid_text_and_every_ambiguous_or_ineligible_attachment_atomically() {
+    for (name, message) in [
+        (
+            "X".repeat(super::super::packets::MAX_MAIL_RECIPIENT_CHARS + 1),
+            "body".to_string(),
+        ),
+        ("Scout\n".to_string(), "body".to_string()),
+        ("Scout".to_string(), "bad\nbody".to_string()),
+        (
+            "Scout".to_string(),
+            "X".repeat(super::super::packets::MAX_MAIL_MESSAGE_CHARS + 1),
+        ),
+    ] {
+        let mut session = authenticated_demo_mail_session();
+        assert_mail_send_rejected_atomically(&mut session, name, message, [0; 5], false);
+    }
+
+    let mut duplicate = authenticated_demo_mail_session();
+    let duplicate_id = {
+        let inventory = duplicate.app.world().resource::<InventoryResource>();
+        super::item_unique_id(
+            inventory
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "dagger")
+                .expect("seed dagger"),
+        )
+    };
+    assert_mail_send_rejected_atomically(
+        &mut duplicate,
+        "Scout".to_string(),
+        "duplicate".to_string(),
+        [duplicate_id, duplicate_id, 0, 0, 0],
+        false,
+    );
+
+    let mut missing = authenticated_demo_mail_session();
+    assert_mail_send_rejected_atomically(
+        &mut missing,
+        "Scout".to_string(),
+        "missing".to_string(),
+        [u64::MAX, 0, 0, 0, 0],
+        false,
+    );
+
+    for mutation in 0..3 {
+        let mut session = authenticated_demo_mail_session();
+        let unique_id = {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            let dagger = inventory
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "dagger")
+                .expect("seed dagger");
+            match mutation {
+                0 => dagger.container = ItemContainer::Storage,
+                1 => dagger.rental_locked = true,
+                2 => dagger.rental_binding_flags = super::CRYSTAL_BIND_DONT_TRADE,
+                _ => unreachable!(),
+            }
+            super::item_unique_id(dagger)
+        };
+        assert_mail_send_rejected_atomically(
+            &mut session,
+            "Scout".to_string(),
+            "ineligible".to_string(),
+            [unique_id, 0, 0, 0, 0],
+            false,
+        );
+    }
+}
+
 #[test]
 fn mail_friend_packets_preserve_crystal_ack_surface() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_mail_session();
     session
         .app
         .world_mut()
@@ -56562,7 +59274,7 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
         sent_packets.as_slice(),
         [
             ServerPacket::LoseGold { gold: 250 },
-            ServerPacket::MailSent { result: 0 },
+            ServerPacket::MailSent { result: 1 },
             ServerPacket::ReceiveMail { mail }
         ] if mail.len() == 1
             && mail[0].mail_id == 1
@@ -56603,14 +59315,14 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
         collected_packets.as_slice(),
         [
             ServerPacket::GainedGold { gold: 250 },
-            ServerPacket::ParcelCollected { result: 0 },
+            ServerPacket::ParcelCollected { result: 1 },
             ServerPacket::ReceiveMail { mail }
         ] if mail.len() == 1
             && mail[0].mail_id == 1
             && mail[0].sender_name == "Scout"
             && mail[0].message == "Delivery"
             && mail[0].collected
-            && mail[0].gold == 250
+            && mail[0].gold == 0
             && mail[0].items.is_empty()
             && mail[0].date_sent_binary_datetime != 0
     ));
@@ -56671,8 +59383,7 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
 
 #[test]
 fn mail_send_to_blocked_friend_uses_crystal_blacklist_rejection() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_mail_session();
     session
         .app
         .world_mut()
@@ -56696,19 +59407,7 @@ fn mail_send_to_blocked_friend_uses_crystal_blacklist_rejection() {
         items_idx: [0; 5],
         stamped: false,
     });
-    let blacklist_message = super::localized_text_or_fallback(
-        super::LanguageCode::English,
-        "server.CannotMailPlayerOnBlacklist",
-        "server.CannotMailPlayerOnBlacklist",
-    );
-
-    assert_eq!(
-        packets,
-        vec![ServerPacket::Chat {
-            message: blacklist_message,
-            chat_type: ChatType::System,
-        }]
-    );
+    assert_eq!(packets, vec![ServerPacket::MailSent { result: -1 }]);
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.gold, 1_000);
     assert!(snapshot.stage5_systems.mail.is_empty());
@@ -56719,6 +59418,13 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
     let config = SimulationConfig::default();
     add_rental_mail_target(&config, "ParcelTarget", 81);
     let mut sender = SimulationSession::new(config.clone());
+    assert!(sender
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     sender.handle_packet(ClientPacket::StartGame { character_index: 0 });
     sender
         .app
@@ -56736,6 +59442,7 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
         dagger.added_attack = 7;
         super::item_unique_id(dagger)
     };
+    sender.save_active_character();
 
     let sent_packets = sender.handle_packet(ClientPacket::SendMail {
         name: "ParcelTarget".to_string(),
@@ -56756,7 +59463,7 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
     )));
     assert!(sent_packets
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 0 })));
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
     let sender_snapshot = sender.world_snapshot();
     assert_eq!(sender_snapshot.gold, 1_400);
     assert!(!sender_snapshot
@@ -56803,23 +59510,1485 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
     )));
     assert!(claim_packets
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 0 })));
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
     let recipient_snapshot = recipient.world_snapshot();
     assert_eq!(recipient_snapshot.gold, 2_780);
     assert!(recipient_snapshot.inventory_items.iter().any(|item| {
         item.key == "dagger" && item.durability_current == Some(13) && item.added_attack == 7
     }));
-    assert!(recipient_snapshot
+    assert!(recipient_snapshot.stage5_systems.mail.iter().any(|mail| {
+        mail.id == 1
+            && mail.claimed
+            && mail.gold == 0
+            && mail.items.is_empty()
+            && mail.item_states_json.is_empty()
+    }));
+}
+
+#[test]
+fn cross_account_send_mail_faults_leave_live_store_and_file_unchanged() {
+    for (label, fault) in [
+        (
+            "before-persist",
+            AccountStoreTransactionFault::BeforePersist,
+        ),
+        ("persist", AccountStoreTransactionFault::Persist),
+    ] {
+        let (dir, config) = unique_mail_transaction_store(label);
+        let path = dir.join("accounts.json");
+        let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+        let before_world = sender.world_snapshot();
+        let before_store = serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned"),
+        )
+        .expect("account store should encode");
+        let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+
+        config.inject_account_store_transaction_fault(fault);
+        assert_eq!(
+            sender.handle_packet(ClientPacket::SendMail {
+                name: "AtomicTarget".to_string(),
+                message: format!("fault injection {label}"),
+                gold: 1_500,
+                items_idx: [dagger_unique_id, 0, 0, 0, 0],
+                stamped: false,
+            }),
+            vec![ServerPacket::MailSent { result: -1 }]
+        );
+
+        assert_eq!(sender.world_snapshot(), before_world);
+        assert_eq!(
+            serde_json::to_string(
+                &*config
+                    .account_store
+                    .lock()
+                    .expect("account store mutex should not be poisoned")
+            )
+            .expect("account store should encode"),
+            before_store
+        );
+        assert_eq!(
+            std::fs::read(&path).expect("mail fixture file should remain readable"),
+            before_file
+        );
+
+        let reloaded = SimulationConfig::default().with_account_store_path(path);
+        let store = reloaded
+            .account_store
+            .lock()
+            .expect("reloaded account store mutex should not be poisoned");
+        let sender_save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("reloaded sender save should exist");
+        assert_eq!(sender_save.gold, 3_000);
+        assert!(sender_save.inventory_items_json.iter().any(|state| {
+            serde_json::from_str::<ItemState>(state)
+                .ok()
+                .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+        }));
+        let recipient_mail = store
+            .accounts
+            .get("atomic-target-account")
+            .and_then(|account| account.saves.get(&0))
+            .and_then(|save| save.stage5_systems_json.as_deref())
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .map(|systems| systems.mail)
+            .unwrap_or_default();
+        assert!(recipient_mail.is_empty());
+        drop(store);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+}
+
+#[test]
+fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
+    let (dir, config) = unique_mail_transaction_store("success");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+
+    let packets = sender.handle_packet(ClientPacket::SendMail {
+        name: "AtomicTarget".to_string(),
+        message: "one atomic delivery".to_string(),
+        gold: 1_500,
+        items_idx: [dagger_unique_id, 0, 0, 0, 0],
+        stamped: false,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { gold } if *gold == 1_600
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DeleteItem { unique_id, count }
+            if *unique_id == dagger_unique_id && *count == 1
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert_eq!(sender.world_snapshot().gold, 1_400);
+    assert!(!sender
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == dagger_unique_id));
+
+    for persisted in [
+        config.clone(),
+        SimulationConfig::default().with_account_store_path(path),
+    ] {
+        let store = persisted
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let sender_save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("sender save should exist");
+        assert_eq!(sender_save.gold, 1_400);
+        assert!(!sender_save.inventory_items_json.iter().any(|state| {
+            serde_json::from_str::<ItemState>(state)
+                .ok()
+                .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+        }));
+        let recipient_save = store
+            .accounts
+            .get("atomic-target-account")
+            .and_then(|account| account.saves.get(&0))
+            .expect("recipient save should exist");
+        let systems = recipient_save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .expect("recipient systems should decode");
+        assert_eq!(
+            systems.mail.len(),
+            1,
+            "one call must write exactly one mail"
+        );
+        let mail = &systems.mail[0];
+        assert_eq!(mail.from, "Scout");
+        assert_eq!(mail.to, "AtomicTarget");
+        assert_eq!(mail.gold, 1_500);
+        assert_eq!(mail.item_states_json.len(), 1);
+        let attachment = serde_json::from_str::<ItemState>(&mail.item_states_json[0])
+            .expect("attachment should decode");
+        assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
+        assert_eq!(attachment.durability_current, Some(13));
+        assert_eq!(attachment.added_attack, 7);
+    }
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance() {
+    let (dir, config) = unique_mail_transaction_store("same-account-stale-sender");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+
+    let mut stale = SimulationSession::new(config.clone());
+    assert!(stale
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(stale.world_snapshot().gold, 3_000);
+    assert!(stale
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == dagger_unique_id));
+
+    assert!(first
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "first removes exact attachment".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    assert!(stale
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "stale sender without attachment".to_string(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert!(
+        super::super::save::persist_active_character_save(stale.app.world())
+            .expect_err("stale full save must fail closed")
+            .contains("stale full character save rejected")
+    );
+    assert!(matches!(
+        stale
+            .handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .as_slice(),
+        [ServerPacket::StartGame { result: 2, .. }]
+    ));
+    assert!(stale
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .is_some());
+    assert_eq!(
+        stale.handle_packet(ClientPacket::Disconnect),
+        vec![ServerPacket::Disconnect { reason: 0 }]
+    );
+    assert!(stale.handle_packet(ClientPacket::LogOut).is_empty());
+    assert!(stale
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .is_some());
+
+    for durable in [
+        config.clone(),
+        SimulationConfig::default().with_account_store_path(path),
+    ] {
+        let store = durable
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let sender_save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("sender save should remain durable");
+        assert_eq!(sender_save.revision, 3);
+        assert_eq!(sender_save.gold, 1_400, "stale balance must not win");
+        assert!(
+            !sender_save.inventory_items_json.iter().any(|state| {
+                serde_json::from_str::<ItemState>(state)
+                    .ok()
+                    .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+            }),
+            "the sent exact attachment must not be resurrected"
+        );
+
+        let recipient_save = store
+            .accounts
+            .get("atomic-target-account")
+            .and_then(|account| account.saves.get(&0))
+            .expect("recipient save should remain durable");
+        assert_eq!(recipient_save.revision, 2);
+        let recipient_mail = recipient_save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .map(|systems| systems.mail)
+            .unwrap_or_default();
+        assert_eq!(recipient_mail.len(), 2);
+        assert!(recipient_mail
+            .iter()
+            .any(|mail| mail.body == "first removes exact attachment"));
+        assert!(recipient_mail
+            .iter()
+            .any(|mail| mail.body == "stale sender without attachment"));
+    }
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_sender_cannot_mail_attachment_missing_from_authoritative_save() {
+    let (dir, config) = unique_mail_transaction_store("stale-authoritative-attachment");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    let mut stale = SimulationSession::new(config.clone());
+    stale.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(first
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "authoritative owner sends once".to_string(),
+            gold: 0,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let before_world = stale.world_snapshot();
+    let before_store = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should encode");
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+    assert_eq!(
+        stale.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "stale duplicate attachment".to_string(),
+            gold: 0,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(stale.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+        )
+        .expect("account store should encode"),
+        before_store
+    );
+    assert_eq!(
+        std::fs::read(&path).expect("rejected stale attachment must preserve file"),
+        before_file
+    );
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item() {
+    let (dir, config) = unique_mail_transaction_store("same-account-stale-gameshop");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    first
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 500_000;
+    first.save_active_character();
+
+    let mut stale = SimulationSession::new(config.clone());
+    stale.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(first
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "attachment before stale shop".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    assert!(stale
+        .handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: 1,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 165_000 })));
+    assert_eq!(stale.world_snapshot().gold, 333_400);
+    assert!(!stale
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == dagger_unique_id));
+    assert!(stale.handle_packet(ClientPacket::LogOut).is_empty());
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let store = reloaded
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let sender_save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .expect("sender save should remain durable");
+    assert_eq!(sender_save.revision, 4);
+    assert_eq!(sender_save.gold, 333_400);
+    assert!(!sender_save.inventory_items_json.iter().any(|state| {
+        serde_json::from_str::<ItemState>(state)
+            .ok()
+            .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+    }));
+    let sender_systems = sender_save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+        .unwrap_or_default();
+    assert_eq!(sender_systems.mail.len(), 1);
+    assert_eq!(sender_systems.mail[0].from, "Gameshop");
+    let target_systems = store
+        .accounts
+        .get("atomic-target-account")
+        .and_then(|account| account.saves.get(&0))
+        .and_then(|save| save.stage5_systems_json.as_deref())
+        .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+        .unwrap_or_default();
+    assert_eq!(target_systems.mail.len(), 1);
+    assert_eq!(target_systems.mail[0].body, "attachment before stale shop");
+    drop(store);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn concurrent_same_account_mail_transactions_have_no_lost_update() {
+    let (dir, config) = unique_mail_transaction_store("same-account-concurrent");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    let mut second = SimulationSession::new(config.clone());
+    second.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    second.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let barrier = std::sync::Arc::new(std::sync::Barrier::new(3));
+    let first_barrier = barrier.clone();
+    let first_thread = std::thread::spawn(move || {
+        first_barrier.wait();
+        let packets = first.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "concurrent exact attachment".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        });
+        (first, packets)
+    });
+    let second_barrier = barrier.clone();
+    let second_thread = std::thread::spawn(move || {
+        second_barrier.wait();
+        let packets = second.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "concurrent no attachment".to_string(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        (second, packets)
+    });
+    barrier.wait();
+    let (mut first, first_packets) = first_thread.join().expect("first sender should join");
+    let (mut second, second_packets) = second_thread.join().expect("second sender should join");
+    for packets in [&first_packets, &second_packets] {
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    }
+
+    // Whichever session committed first is stale after the second commit. Its
+    // logout must fail closed instead of rewriting the final durable image.
+    let _ = first.handle_packet(ClientPacket::LogOut);
+    let _ = second.handle_packet(ClientPacket::LogOut);
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let store = reloaded
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let sender_save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .expect("sender save should remain durable");
+    assert_eq!(sender_save.revision, 3);
+    assert_eq!(sender_save.gold, 1_400);
+    assert!(!sender_save.inventory_items_json.iter().any(|state| {
+        serde_json::from_str::<ItemState>(state)
+            .ok()
+            .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+    }));
+    let target_save = store
+        .accounts
+        .get("atomic-target-account")
+        .and_then(|account| account.saves.get(&0))
+        .expect("target save should remain durable");
+    assert_eq!(target_save.revision, 2);
+    let target_mail = target_save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+        .map(|systems| systems.mail)
+        .unwrap_or_default();
+    assert_eq!(target_mail.len(), 2);
+    let nonces = target_mail
+        .iter()
+        .map(|mail| mail.delivery_nonce.as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(nonces.len(), 2);
+    assert!(nonces.iter().all(|nonce| !nonce.is_empty()));
+    assert!(target_mail
+        .iter()
+        .any(|mail| mail.body == "concurrent exact attachment"));
+    assert!(target_mail
+        .iter()
+        .any(|mail| mail.body == "concurrent no attachment"));
+    drop(store);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_online_recipient_save_cannot_overwrite_committed_external_mail() {
+    let (dir, config) = unique_mail_transaction_store("online-recipient");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(recipient.world_snapshot().stage5_systems.mail.is_empty());
+
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "survive stale online save".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    // The recipient World predates the delivery. Saving it directly must merge
+    // the externally committed mailbox instead of overwriting it.
+    assert!(recipient.world_snapshot().stage5_systems.mail.is_empty());
+    recipient.save_active_character();
+    let systems = stage5_systems_for_account_character(&config, "atomic-target-account", 0);
+    assert_eq!(systems.mail.len(), 1);
+    assert_eq!(systems.mail[0].body, "survive stale online save");
+    assert_eq!(systems.mail[0].gold, 1_500);
+    assert_eq!(systems.mail[0].item_states_json.len(), 1);
+
+    let reloaded = SimulationConfig::default().with_account_store_path(dir.join("accounts.json"));
+    let reloaded_systems =
+        stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0);
+    assert_eq!(reloaded_systems.mail.len(), 1);
+    assert_eq!(reloaded_systems.mail[0].body, "survive stale online save");
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status() {
+    let (dir, config) = unique_mail_transaction_store("online-gameshop-collision");
+    let path = dir.join("accounts.json");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    recipient
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 500;
+    let recipient_before_shop_failure = recipient.world_snapshot();
+    let file_before_shop_failure = std::fs::read(&path).expect("mail fixture file should exist");
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    let rejected_shop_packets = recipient.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    assert!(!rejected_shop_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { .. })));
+    assert_eq!(recipient.world_snapshot(), recipient_before_shop_failure);
+    assert_eq!(
+        std::fs::read(&path).expect("failed game-shop transaction must preserve file"),
+        file_before_shop_failure
+    );
+
+    assert!(recipient
+        .handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 110 })));
+    {
+        let mut stage5 = recipient
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let local = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("game-shop purchase should create local mail");
+        assert_eq!(local.id, 1);
+        local.opened = true;
+        local.locked = true;
+    }
+
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    let sender_before_failure = sender.world_snapshot();
+    let recipient_before_failure = recipient.world_snapshot();
+    let file_before_failure = std::fs::read(&path).expect("mail fixture file should exist");
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert_eq!(
+        sender.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "must not partially arrive".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(sender.world_snapshot(), sender_before_failure);
+    assert_eq!(recipient.world_snapshot(), recipient_before_failure);
+    assert_eq!(
+        std::fs::read(&path).expect("failed transaction must preserve file"),
+        file_before_failure
+    );
+
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "external parcel with gold".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let persisted_before_recipient_save =
+        stage5_systems_for_account_character(&config, "atomic-target-account", 0);
+    assert_eq!(persisted_before_recipient_save.mail.len(), 2);
+    assert_eq!(persisted_before_recipient_save.mail[0].id, 1);
+    let persisted_external = persisted_before_recipient_save
+        .mail
+        .iter()
+        .find(|mail| mail.body == "external parcel with gold")
+        .expect("external delivery should be durably appended");
+    assert_eq!(persisted_external.id, 2);
+
+    recipient.save_active_character();
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let systems = stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0);
+    assert_eq!(
+        systems.mail.len(),
+        2,
+        "both distinct deliveries must survive"
+    );
+    let ids = systems
+        .mail
+        .iter()
+        .map(|mail| mail.id)
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(ids.len(), 2, "mail IDs must be unique after save/reload");
+
+    let game_shop_mail = systems
+        .mail
+        .iter()
+        .find(|mail| mail.from == "Gameshop")
+        .expect("game-shop attachment mail must survive");
+    assert!(game_shop_mail.opened, "local opened state must not regress");
+    assert!(game_shop_mail.locked, "local locked state must not regress");
+    assert_eq!(game_shop_mail.item_states_json.len(), 1);
+
+    let external_mail = systems
+        .mail
+        .iter()
+        .find(|mail| mail.body == "external parcel with gold")
+        .expect("external player mail must survive");
+    assert_eq!(external_mail.gold, 1_500);
+    assert_eq!(external_mail.item_states_json.len(), 1);
+    let attachment = serde_json::from_str::<ItemState>(&external_mail.item_states_json[0])
+        .expect("external exact attachment should decode");
+    assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
+    assert_eq!(sender.world_snapshot().gold, 1_400);
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
+    let local_attachment = r#"{"key":"crystal-item-1288","uniqueId":91}"#.to_string();
+    let external_attachment = r#"{"key":"dagger","uniqueId":92}"#.to_string();
+    let mut local_mail = vec![Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "local-delivery".to_string(),
+        from: "Gameshop".to_string(),
+        to: "AtomicTarget".to_string(),
+        subject: "Game shop purchase".to_string(),
+        body: "local purchase".to_string(),
+        gold: 0,
+        items: vec!["crystal-item-1288".to_string()],
+        item_states_json: vec![local_attachment],
+        opened: true,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    }];
+    let external = Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "external-delivery".to_string(),
+        from: "Scout".to_string(),
+        to: "AtomicTarget".to_string(),
+        subject: String::new(),
+        body: "external parcel".to_string(),
+        gold: 1_500,
+        items: vec!["dagger".to_string()],
+        item_states_json: vec![external_attachment],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    };
+
+    assert!(super::super::save::merge_external_stage5_mail(
+        &mut local_mail,
+        vec![external.clone()]
+    )
+    .expect("collision should be repairable"));
+    assert_eq!(local_mail.len(), 2);
+    assert_eq!(local_mail[0].id, 1, "active local ID must remain stable");
+    assert_eq!(
+        local_mail[1].id, 2,
+        "incoming external entry is deterministically re-keyed"
+    );
+    assert_eq!(local_mail[1].body, external.body);
+    assert_eq!(local_mail[1].gold, external.gold);
+    assert_eq!(local_mail[1].item_states_json, external.item_states_json);
+    assert!(local_mail[0].opened);
+    assert_eq!(
+        local_mail
+            .iter()
+            .map(|mail| mail.id)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        2
+    );
+    assert!(
+        !super::super::save::merge_external_stage5_mail(&mut local_mail, vec![external])
+            .expect("same external delivery should remain identifiable after re-key")
+    );
+    assert_eq!(local_mail.len(), 2);
+}
+
+#[test]
+fn identical_mail_content_with_distinct_delivery_nonces_is_never_deduplicated() {
+    let first = Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "delivery-a".to_string(),
+        from: "Scout".to_string(),
+        to: "AtomicTarget".to_string(),
+        subject: String::new(),
+        body: "same content".to_string(),
+        gold: 500,
+        items: vec!["dagger".to_string()],
+        item_states_json: vec![r#"{"key":"dagger","uniqueId":92}"#.to_string()],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    };
+    let mut second = first.clone();
+    second.delivery_nonce = "delivery-b".to_string();
+    let mut local_mail = vec![first];
+
+    assert!(
+        super::super::save::merge_external_stage5_mail(&mut local_mail, vec![second.clone()])
+            .expect("distinct delivery should append")
+    );
+    assert_eq!(local_mail.len(), 2);
+    assert_eq!(local_mail[0].id, 1);
+    assert_eq!(local_mail[1].id, 2);
+    assert_eq!(local_mail[0].body, local_mail[1].body);
+    assert_ne!(local_mail[0].delivery_nonce, local_mail[1].delivery_nonce);
+
+    assert!(
+        !super::super::save::merge_external_stage5_mail(&mut local_mail, vec![second])
+            .expect("repeated external delivery should be idempotent")
+    );
+    assert_eq!(local_mail.len(), 2);
+}
+
+#[test]
+fn legacy_same_header_claimed_external_consumes_local_and_prevents_second_claim() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let exact_item = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item.key == "dagger")
+        .expect("starter dagger should exist")
+        .clone();
+    let local_legacy = Stage5MailMessage {
+        id: 41,
+        delivery_nonce: String::new(),
+        from: "Legacy Sender".to_string(),
+        to: "Scout".to_string(),
+        subject: "Legacy parcel".to_string(),
+        body: "Stable header identity".to_string(),
+        gold: 777,
+        items: vec![exact_item.key.clone()],
+        item_states_json: vec![
+            serde_json::to_string(&exact_item).expect("exact legacy item should encode")
+        ],
+        opened: false,
+        locked: true,
+        claimed: false,
+        deleted: false,
+    };
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .mail = vec![local_legacy.clone()];
+
+    let mut external_claimed = local_legacy;
+    external_claimed.gold = 0;
+    external_claimed.items.clear();
+    external_claimed.item_states_json.clear();
+    external_claimed.opened = true;
+    external_claimed.locked = false;
+    external_claimed.claimed = true;
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("demo character save should exist");
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<crate::config::Stage5SystemsState>)
+            .transpose()
+            .expect("persisted stage5 systems should decode")
+            .unwrap_or_default();
+        systems.mail = vec![external_claimed];
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("claimed legacy mail should encode"));
+    }
+    config
+        .save_account_store_account("demo")
+        .expect("claimed legacy mail should persist");
+
+    assert!(session.refresh_active_external_mail());
+    let merged_snapshot = session.world_snapshot();
+    let merged = &merged_snapshot.stage5_systems.mail;
+    assert_eq!(merged.len(), 1);
+    assert_eq!(merged[0].id, 41, "visible legacy ID must remain stable");
+    assert!(merged[0].delivery_nonce.starts_with("legacy-"));
+    assert!(merged[0].claimed);
+    assert_eq!(merged[0].gold, 0);
+    assert!(merged[0].items.is_empty());
+    assert!(merged[0].item_states_json.is_empty());
+
+    let before = session.world_snapshot();
+    assert_eq!(
+        session.handle_packet(ClientPacket::CollectParcel { mail_id: 41 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(session.world_snapshot(), before);
+}
+
+#[test]
+fn legacy_identical_headers_with_different_ids_remain_distinct() {
+    let first = Stage5MailMessage {
+        id: 1,
+        delivery_nonce: String::new(),
+        from: "Legacy Sender".to_string(),
+        to: "Scout".to_string(),
+        subject: "Repeated parcel".to_string(),
+        body: "Same legacy content".to_string(),
+        gold: 500,
+        items: vec!["dagger".to_string()],
+        item_states_json: vec![r#"{"key":"dagger","uniqueId":92}"#.to_string()],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    };
+    let mut second = first.clone();
+    second.id = 2;
+    let mut local_mail = vec![first];
+
+    assert!(
+        super::super::save::merge_external_stage5_mail(&mut local_mail, vec![second])
+            .expect("different legacy IDs should remain separate")
+    );
+    assert_eq!(local_mail.len(), 2);
+    assert_eq!(local_mail[0].id, 1);
+    assert_eq!(local_mail[1].id, 2);
+    assert_ne!(local_mail[0].delivery_nonce, local_mail[1].delivery_nonce);
+}
+
+#[test]
+fn collision_refresh_keeps_visible_local_id_and_claim_targets_original_mail() {
+    let (dir, config) = unique_mail_transaction_store("visible-mail-id-collision");
+    let path = dir.join("accounts.json");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    recipient
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 500;
+    recipient.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    recipient.handle_packet(ClientPacket::LockMail {
+        mail_id: 1,
+        lock: true,
+    });
+    let visible_local = recipient.world_snapshot().stage5_systems.mail[0].clone();
+    assert_eq!(visible_local.id, 1);
+    assert_eq!(visible_local.from, "Gameshop");
+    assert!(visible_local.locked);
+
+    // Recreate the legacy/crash-window state under review: the active client
+    // has already seen local id=1, but its durable mailbox does not contain it.
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get_mut("atomic-target-account")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("recipient save should exist");
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .expect("recipient systems should decode");
+        systems.mail.clear();
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("legacy collision fixture should encode"));
+    }
+    config
+        .save_account_store_account("atomic-target-account")
+        .expect("legacy collision fixture should persist");
+
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "external id one".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert_eq!(
+        stage5_systems_for_account_character(&config, "atomic-target-account", 0).mail[0].id,
+        1
+    );
+
+    assert!(recipient.refresh_active_external_mail());
+    // Repeating refresh before save must be idempotent even though durable mail
+    // still carries its pre-merge id=1.
+    assert!(!recipient.refresh_active_external_mail());
+    let merged = recipient.world_snapshot().stage5_systems.mail;
+    assert_eq!(merged.len(), 2);
+    let local = merged
+        .iter()
+        .find(|mail| mail.from == "Gameshop")
+        .expect("visible local mail should remain present");
+    assert_eq!(local.id, 1);
+    assert!(local.locked);
+    let external = merged
+        .iter()
+        .find(|mail| mail.body == "external id one")
+        .expect("incoming external mail should be appended");
+    assert_eq!(external.id, 2);
+    assert!(!external.claimed);
+
+    let claim_packets = recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 });
+    assert!(!claim_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedGold { gold } if *gold == 1_500
+    )));
+    let after_claim = recipient.world_snapshot();
+    assert!(after_claim
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "crystal-item-1288"));
+    assert!(!after_claim
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "dagger" && item.added_attack == 7));
+    assert!(after_claim
         .stage5_systems
         .mail
         .iter()
-        .any(|mail| mail.id == 1 && mail.claimed));
+        .find(|mail| mail.id == 1)
+        .is_some_and(|mail| mail.claimed && mail.from == "Gameshop"));
+    assert!(after_claim
+        .stage5_systems
+        .mail
+        .iter()
+        .find(|mail| mail.id == 2)
+        .is_some_and(|mail| !mail.claimed && mail.gold == 1_500));
+
+    recipient.save_active_character();
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let reloaded_mail =
+        stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0).mail;
+    assert_eq!(reloaded_mail.len(), 2);
+    assert_eq!(
+        reloaded_mail
+            .iter()
+            .map(|mail| mail.id)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        2
+    );
+    assert!(reloaded_mail
+        .iter()
+        .any(|mail| mail.id == 1 && mail.claimed && mail.from == "Gameshop"));
+    assert!(reloaded_mail.iter().any(|mail| {
+        mail.id == 2 && !mail.claimed && mail.gold == 1_500 && mail.item_states_json.len() == 1
+    }));
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn unlocked_active_mail_stays_unlocked_after_save_and_reload() {
+    let (dir, config) = unique_mail_transaction_store("mail-unlock-save");
+    let path = dir.join("accounts.json");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    recipient
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 500;
+    recipient.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+
+    recipient.handle_packet(ClientPacket::LockMail {
+        mail_id: 1,
+        lock: true,
+    });
+    recipient.save_active_character();
+    assert!(
+        stage5_systems_for_account_character(&config, "atomic-target-account", 0).mail[0].locked
+    );
+
+    recipient.handle_packet(ClientPacket::LockMail {
+        mail_id: 1,
+        lock: false,
+    });
+    assert!(!recipient.world_snapshot().stage5_systems.mail[0].locked);
+    recipient.save_active_character();
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let mail = stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0)
+        .mail
+        .into_iter()
+        .find(|mail| mail.id == 1)
+        .expect("game-shop mail should survive reload");
+    assert!(
+        !mail.locked,
+        "active unlock must win over stale durable lock"
+    );
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn self_send_mail_is_all_or_nothing_and_persists_once() {
+    let (dir, config) = unique_mail_transaction_store("self-send");
+    let path = dir.join("accounts.json");
+    let (mut sender, _) = prepare_atomic_mail_sender(&config);
+    let before_world = sender.world_snapshot();
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert_eq!(
+        sender.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "self fail".to_string(),
+            gold: 250,
+            items_idx: [0; 5],
+            stamped: false,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(sender.world_snapshot(), before_world);
+    assert_eq!(
+        std::fs::read(&path).expect("mail fixture file should remain readable"),
+        before_file
+    );
+
+    let packets = sender.handle_packet(ClientPacket::SendMail {
+        name: "Scout".to_string(),
+        message: "self success".to_string(),
+        gold: 250,
+        items_idx: [0; 5],
+        stamped: false,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert_eq!(sender.world_snapshot().gold, 2_750);
+    assert_eq!(sender.world_snapshot().stage5_systems.mail.len(), 1);
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let systems = stage5_systems_for_account_character(&reloaded, "demo", 0);
+    assert_eq!(systems.mail.len(), 1);
+    assert_eq!(systems.mail[0].body, "self success");
+    assert_eq!(systems.mail[0].gold, 250);
+    let reloaded_gold = reloaded
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .map(|save| save.gold);
+    assert_eq!(reloaded_gold, Some(2_750));
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_parcel_persist_failure_leaves_world_store_and_file_unchanged() {
+    let (dir, config) = unique_mail_transaction_store("claim-persist-failure");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "claim must persist first".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let mut recipient = SimulationSession::new(config.clone());
+    recipient.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before_world = recipient.world_snapshot();
+    let before_store = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should encode");
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert_eq!(
+        recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(recipient.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+        )
+        .expect("account store should encode"),
+        before_store
+    );
+    assert_eq!(
+        std::fs::read(&path).expect("failed claim must preserve file"),
+        before_file
+    );
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let mail = stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0)
+        .mail
+        .into_iter()
+        .find(|mail| mail.id == 1)
+        .expect("failed claim mail should remain");
+    assert!(!mail.claimed);
+    assert_eq!(mail.gold, 1_500);
+    assert_eq!(mail.item_states_json.len(), 1);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_external_parcel_is_durable_before_ack_and_cannot_be_claimed_twice() {
+    let (dir, config) = unique_mail_transaction_store("claim-durable-success");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "durable exact parcel".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let mut recipient = SimulationSession::new(config.clone());
+    recipient.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let gold_before = recipient.world_snapshot().gold;
+    let packets = recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedGold { gold } if *gold == 1_500
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    let after = recipient.world_snapshot();
+    assert_eq!(after.gold, gold_before + 1_500);
+    assert!(after.inventory_items.iter().any(|item| {
+        item.key == "dagger" && item.durability_current == Some(13) && item.added_attack == 7
+    }));
+    assert!(after
+        .stage5_systems
+        .mail
+        .iter()
+        .any(|mail| mail.id == 1 && mail.claimed && mail.gold == 0));
+
+    let before_repeat = recipient.world_snapshot();
+    assert_eq!(
+        recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(recipient.world_snapshot(), before_repeat);
+
+    let reloaded_config = SimulationConfig::default().with_account_store_path(path);
+    let mut reloaded = SimulationSession::new(reloaded_config);
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let reloaded_before_repeat = reloaded.world_snapshot();
+    assert_eq!(
+        reloaded.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(reloaded.world_snapshot(), reloaded_before_repeat);
+    assert_eq!(reloaded_before_repeat.gold, gold_before + 1_500);
+    assert!(reloaded_before_repeat.inventory_items.iter().any(|item| {
+        item.key == "dagger" && item.durability_current == Some(13) && item.added_attack == 7
+    }));
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn concurrent_sessions_cannot_claim_the_same_durable_mail_twice() {
+    let (dir, config) = unique_mail_transaction_store("claim-concurrent");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    sender.handle_packet(ClientPacket::SendMail {
+        name: "AtomicTarget".to_string(),
+        message: "single winner".to_string(),
+        gold: 1_500,
+        items_idx: [dagger_unique_id, 0, 0, 0, 0],
+        stamped: false,
+    });
+
+    let mut first = SimulationSession::new(config.clone());
+    let mut second = SimulationSession::new(config.clone());
+    for recipient in [&mut first, &mut second] {
+        recipient.handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        });
+        recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    }
+    assert!(first
+        .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    let second_before = second.world_snapshot();
+    assert_eq!(
+        second.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(second.world_snapshot(), second_before);
+    let durable = stage5_systems_for_account_character(&config, "atomic-target-account", 0);
+    assert_eq!(durable.mail.len(), 1);
+    assert!(durable.mail[0].claimed);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_self_mail_is_durable_before_success() {
+    let (dir, config) = unique_mail_transaction_store("claim-self");
+    let path = dir.join("accounts.json");
+    let (mut sender, _) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "self durable claim".to_string(),
+            gold: 250,
+            items_idx: [0; 5],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert!(sender
+        .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let systems = stage5_systems_for_account_character(&reloaded, "demo", 0);
+    assert_eq!(systems.mail.len(), 1);
+    assert!(systems.mail[0].claimed);
+    assert_eq!(systems.mail[0].gold, 0);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_parcel_bad_exact_json_is_atomic() {
+    let (dir, config) = unique_mail_transaction_store("claim-bad-json");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    sender.handle_packet(ClientPacket::SendMail {
+        name: "AtomicTarget".to_string(),
+        message: "corrupt exact parcel".to_string(),
+        gold: 1_500,
+        items_idx: [dagger_unique_id, 0, 0, 0, 0],
+        stamped: false,
+    });
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get_mut("atomic-target-account")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("recipient save should exist");
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .expect("recipient systems should decode");
+        systems.mail[0].item_states_json = vec!["{not-json".to_string()];
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("corrupt fixture envelope should encode"));
+    }
+    config
+        .save_account_store_account("atomic-target-account")
+        .expect("corrupt fixture should persist");
+
+    let mut recipient = SimulationSession::new(config.clone());
+    recipient.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before_world = recipient.world_snapshot();
+    let before_store = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should encode");
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+    assert_eq!(
+        recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
+    assert_eq!(recipient.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+        )
+        .expect("account store should encode"),
+        before_store
+    );
+    assert_eq!(
+        std::fs::read(&path).expect("bad JSON claim must preserve file"),
+        before_file
+    );
+    let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]
 fn mail_send_rejection_preserves_attachment_and_gold() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_mail_session();
     session
         .app
         .world_mut()
@@ -58278,8 +62447,12 @@ fn request_info_packets_return_crystal_map_monster_and_npc_data() {
     let map = crystal_respawn_manifest()
         .maps
         .into_iter()
-        .find(|map| map.map_index >= 0)
-        .expect("crystal respawn manifest should include maps");
+        .find(|map| {
+            map.map_index > 0
+                && map.big_map > 0
+                && crate::runtime::big_map::client_map_info(map.map_index).is_some()
+        })
+        .expect("crystal respawn manifest should include a usable Big Map");
     let monster = crystal_monster_manifest()
         .monsters
         .into_iter()
@@ -58294,10 +62467,13 @@ fn request_info_packets_return_crystal_map_monster_and_npc_data() {
     let map_packets = session.handle_packet(ClientPacket::RequestMapInfo {
         map_index: map.map_index,
     });
+    assert!(map_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::WorldMapSetup { .. })));
     assert!(map_packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::MapInformation { info }
-            if info.map_index == map.map_index && info.file_name == map.map_file_name
+        ServerPacket::NewMapInfo { map_index, info }
+            if *map_index == map.map_index && info.title == map.map_title
     )));
 
     let monster_packets = session.handle_packet(ClientPacket::RequestMonsterInfo {
@@ -58609,6 +62785,7 @@ fn item_rental_cancel_returns_deposit_and_refunds_locked_fee() {
 fn item_rental_records_persist_across_restart() {
     let config = SimulationConfig::default();
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::ItemRentalRequest);
     session.handle_packet(ClientPacket::ItemRentalPeriod { days: 3 });
@@ -58620,6 +62797,7 @@ fn item_rental_records_persist_across_restart() {
     session.save_active_character();
 
     let mut reloaded = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut reloaded);
     reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let packets = reloaded.handle_packet(ClientPacket::GetRentedItems);
 
@@ -61649,6 +65827,7 @@ fn city_currency_give_take_npc_commands_update_wallet_and_snapshot() {
 fn city_currency_persists_across_save_and_reload() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     execute_crystal_npc_action_line(
@@ -61660,6 +65839,7 @@ fn city_currency_persists_across_save_and_reload() {
     first.save_active_character();
 
     let mut second = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(city_currency_balance(&second, "feitian"), 420);
 }

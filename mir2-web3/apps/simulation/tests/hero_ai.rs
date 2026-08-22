@@ -937,6 +937,13 @@ fn hero_inventory_book_magic_key_save_loop_enables_hero_ai_spell() {
     }
     let saved_config = config.clone();
     let mut session = SimulationSession::new(config);
+    let login_packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let learn_packets = session.handle_packet(ClientPacket::UseItem {

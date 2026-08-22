@@ -1,7 +1,9 @@
 use bevy_ecs::prelude::World;
 use mir2_protocol::{ItemRentalInformation, ServerPacket, UserItemRentalInformation};
 
-use crate::config::{CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState};
+use crate::config::{
+    CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState, new_stage5_mail_delivery_nonce,
+};
 
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_DROP, CRYSTAL_BIND_DONT_SELL, CRYSTAL_BIND_DONT_STORE,
@@ -12,6 +14,7 @@ use super::equipment::{equipment_slot_unique_id, item_state_from_equipment_state
 use super::inventory::{
     add_minutes_to_binary_datetime, binary_datetime_ticks, current_binary_datetime,
     future_binary_datetime, inventory_container_and_slot_for_index,
+    normalize_incoming_item_tree_unique_ids,
 };
 use super::items::{
     crystal_item_has_bind_flag, item_has_rental_bind_flag, item_unique_id,
@@ -322,6 +325,7 @@ fn push_rental_return_mail(
         .saturating_add(1);
     systems.mail.push(Stage5MailMessage {
         id,
+        delivery_nonce: new_stage5_mail_delivery_nonce(),
         from: borrower_name.to_string(),
         to: owner_name.to_string(),
         subject: "Rental item returned".to_string(),
@@ -519,7 +523,11 @@ pub(super) fn retrieve_rental_item_impl(
     };
     item.container = container;
     item.slot = slot;
-    item.unique_id = super::items::default_item_unique_id(container, slot);
+    normalize_incoming_item_tree_unique_ids(
+        world.resource::<InventoryResource>(),
+        &mut item,
+        &[],
+    );
     world
         .resource_mut::<InventoryResource>()
         .inventory_items
@@ -579,7 +587,11 @@ pub(super) fn cancel_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
         if let Some((container, slot)) = destination {
             item.container = container;
             item.slot = slot;
-            item.unique_id = super::items::default_item_unique_id(container, slot);
+            normalize_incoming_item_tree_unique_ids(
+                world.resource::<InventoryResource>(),
+                &mut item,
+                &[],
+            );
             world
                 .resource_mut::<InventoryResource>()
                 .inventory_items

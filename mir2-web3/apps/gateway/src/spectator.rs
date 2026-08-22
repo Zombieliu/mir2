@@ -34,6 +34,7 @@ const MAX_EVENTS_PER_FRAME: usize = 512;
 #[derive(Debug, Clone)]
 pub struct SpectatorConfig {
     pub enabled: bool,
+    pub recording_enabled: bool,
     pub public_enabled: bool,
     pub public_maps: Vec<String>,
     pub director_token: Option<String>,
@@ -59,6 +60,7 @@ impl SpectatorConfig {
             .collect();
         Self {
             enabled: bool_env("MIR2_SPECTATOR_ENABLED", true),
+            recording_enabled: bool_env("MIR2_SPECTATOR_RECORDING_ENABLED", true),
             public_enabled: bool_env("MIR2_SPECTATOR_PUBLIC", true),
             public_maps,
             director_token: env::var("MIR2_SPECTATOR_DIRECTOR_TOKEN")
@@ -339,6 +341,7 @@ pub struct SpectatorRecording {
 pub struct SpectatorMetrics {
     pub active_viewers: usize,
     pub active_maps: usize,
+    pub recording_enabled: bool,
     pub buffered_frames: usize,
     pub published_frames_total: u64,
     pub persisted_frames_total: u64,
@@ -391,7 +394,7 @@ impl SpectatorHub {
     }
 
     pub fn new(config: SpectatorConfig) -> Self {
-        if config.enabled {
+        if config.enabled && config.recording_enabled {
             if let Err(error) = fs::create_dir_all(&config.data_dir) {
                 eprintln!(
                     "spectator recording directory {} unavailable: {error}",
@@ -522,11 +525,15 @@ impl SpectatorHub {
             stream.frames.pop_front();
         }
         state.published_frames_total = state.published_frames_total.saturating_add(1);
-        match append_frame(&self.config.data_dir, &frame) {
-            Ok(()) => state.persisted_frames_total = state.persisted_frames_total.saturating_add(1),
-            Err(error) => {
-                state.recording_errors_total = state.recording_errors_total.saturating_add(1);
-                eprintln!("spectator recording append failed: {error}");
+        if self.config.recording_enabled {
+            match append_frame(&self.config.data_dir, &frame) {
+                Ok(()) => {
+                    state.persisted_frames_total = state.persisted_frames_total.saturating_add(1)
+                }
+                Err(error) => {
+                    state.recording_errors_total = state.recording_errors_total.saturating_add(1);
+                    eprintln!("spectator recording append failed: {error}");
+                }
             }
         }
         Ok(Some(frame))
@@ -584,6 +591,9 @@ impl SpectatorHub {
     }
 
     pub fn recordings(&self, director: bool) -> Vec<SpectatorRecording> {
+        if !self.config.recording_enabled {
+            return Vec::new();
+        }
         let Ok(entries) = fs::read_dir(&self.config.data_dir) else {
             return Vec::new();
         };
@@ -623,6 +633,9 @@ impl SpectatorHub {
         director: bool,
         public_visible_at_ms: u64,
     ) -> Result<Vec<SpectatorFrame>, String> {
+        if !self.config.recording_enabled {
+            return Err("spectator recordings are disabled".to_string());
+        }
         validate_recording_id(recording_id)?;
         let map = map_from_recording_id(recording_id)
             .ok_or_else(|| "invalid spectator recording id".to_string())?;
@@ -659,6 +672,7 @@ impl SpectatorHub {
         SpectatorMetrics {
             active_viewers: self.active_viewers.load(Ordering::Relaxed),
             active_maps: state.maps.len(),
+            recording_enabled: self.config.recording_enabled,
             buffered_frames: state.maps.values().map(|stream| stream.frames.len()).sum(),
             published_frames_total: state.published_frames_total,
             persisted_frames_total: state.persisted_frames_total,
@@ -1139,6 +1153,7 @@ mod tests {
     fn test_config(data_dir: PathBuf) -> SpectatorConfig {
         SpectatorConfig {
             enabled: true,
+            recording_enabled: true,
             public_enabled: true,
             public_maps: vec!["0".to_string()],
             director_token: Some("director-secret".to_string()),
@@ -1201,6 +1216,39 @@ mod tests {
         assert_eq!(replay.len(), 1);
         assert_eq!(replay[0].digest, frame.digest);
         fs::remove_dir_all(data_dir).ok();
+    }
+
+    #[test]
+    fn recording_disabled_keeps_live_ring_but_does_not_touch_disk() {
+        let root = temp_dir("recording-disabled");
+        let data_dir = root.join("recordings");
+        let mut config = test_config(data_dir.clone());
+        config.recording_enabled = false;
+        let hub = SpectatorHub::new(config);
+        let mut session = SimulationSession::new(GatewayConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let frame = hub.publish(&session.world_snapshot()).unwrap().unwrap();
+        let metrics = hub.metrics();
+        assert_eq!(metrics.recording_enabled, false);
+        assert_eq!(
+            serde_json::to_value(&metrics).unwrap()["recordingEnabled"],
+            false
+        );
+        assert_eq!(metrics.published_frames_total, 1);
+        assert_eq!(metrics.persisted_frames_total, 0);
+        assert_eq!(metrics.buffered_frames, 1);
+        assert!(!data_dir.exists());
+        assert!(hub.recordings(true).is_empty());
+        let error = hub
+            .load_replay(&frame.recording_id, true, u64::MAX)
+            .unwrap_err();
+        assert_eq!(error, "spectator recordings are disabled");
+        assert!(!root
+            .read_dir()
+            .unwrap()
+            .any(|entry| entry.unwrap().path().extension().is_some()));
+        fs::remove_dir_all(root).ok();
     }
 
     #[test]

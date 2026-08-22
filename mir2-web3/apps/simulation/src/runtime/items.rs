@@ -5,8 +5,8 @@ use crate::config::{
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_item_by_index, crystal_item_by_name, crystal_recipes, localized_text_or_fallback,
-    CrystalItemTemplate, LanguageCode,
+    CrystalItemTemplate, LanguageCode, crystal_item_by_index, crystal_item_by_name,
+    crystal_recipes, localized_text_or_fallback,
 };
 use mir2_protocol::{
     ChatType, ClientMagic, ItemInfo, MirClass, MirGender, MirGridType, ServerPacket, UserItem,
@@ -14,28 +14,27 @@ use mir2_protocol::{
 };
 
 use super::buffs::{
-    apply_crystal_template_consumable_buffs, buff_attack_bonus, buff_defence_bonus,
+    BuffState, apply_crystal_template_consumable_buffs, buff_attack_bonus, buff_defence_bonus,
     queue_crystal_normal_potion_restore, queue_crystal_normal_potion_restore_amounts,
-    restore_current_player_vitals, BuffState,
+    restore_current_player_vitals,
 };
 use super::combat::deterministic_chance_roll;
 use super::components::{
-    current_player_is_dead, current_player_object_id, player_entity, PlayerVitals,
+    PlayerVitals, current_player_is_dead, current_player_object_id, player_entity,
 };
 use super::crystal_compat::*;
 use super::drops::drop_item_packet;
 use super::equipment::{
-    equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
-    repair_equipped_durability, repair_equipped_weapon_with_oil, slugify_name,
-    toggle_mount_ride_from_use_item, try_equip_item, try_luck_weapon, CrystalLuckWeaponOutcome,
-    EquipmentState,
+    CrystalLuckWeaponOutcome, EquipmentState, equip_item_impl, equipment_slot_index,
+    feed_mount_with_crystal_food, repair_equipped_durability, repair_equipped_weapon_with_oil,
+    slugify_name, toggle_mount_ride_from_use_item, try_equip_item, try_luck_weapon,
 };
 use super::inventory::{
-    add_minutes_to_binary_datetime, add_or_increment_item_with_durability_and_stats,
-    binary_datetime_ticks, can_gain_item_quantity, consume_item_at_use_location,
-    crystal_duration_label_from_minutes, crystal_duration_label_from_seconds,
-    current_binary_datetime, find_use_item_location, future_binary_datetime_minutes,
-    item_at_use_location, UseItemLocation,
+    UseItemLocation, add_minutes_to_binary_datetime,
+    add_or_increment_item_with_durability_and_stats, binary_datetime_ticks, can_gain_item_quantity,
+    consume_item_at_use_location, crystal_duration_label_from_minutes,
+    crystal_duration_label_from_seconds, current_binary_datetime, find_use_item_location,
+    future_binary_datetime_minutes, item_at_use_location,
 };
 use super::map::{
     current_map_disallows_drug, current_map_disallows_escape,
@@ -56,11 +55,11 @@ use super::resources::{
     Stage5SystemsResource,
 };
 use super::session::{
-    current_language, hint_chat_key, hint_chat_key_args, is_in_world, runtime_tick,
-    system_message_key, SimulationSession,
+    SimulationSession, current_language, hint_chat_key, hint_chat_key_args, is_in_world,
+    runtime_tick, system_message_key,
 };
 use super::skills::{
-    client_magic_for_skill_state, crystal_book_skill_state, crystal_magic_for_skill_key, SkillState,
+    SkillState, client_magic_for_skill_state, crystal_book_skill_state, crystal_magic_for_skill_key,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -336,6 +335,21 @@ pub(super) fn user_item_from_item_state(item: &ItemState) -> UserItem {
         None,
     );
 
+    let mut slots = vec![None; usize::from(item.socket_slots)];
+    if crystal_item_template_for_item_key(&item.key)
+        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT)
+    {
+        for embedded in &item.socketed {
+            if crystal_item_template_for_item_key(&embedded.key)
+                .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            {
+                if let Some(slot) = slots.get_mut(1) {
+                    *slot = Some(user_item_from_item_state(embedded));
+                }
+            }
+        }
+    }
+
     UserItem {
         unique_id: item_unique_id(item),
         item_index: crystal_item_index_for_item_state(item),
@@ -345,7 +359,7 @@ pub(super) fn user_item_from_item_state(item: &ItemState) -> UserItem {
         soul_bound_id: item_state_soul_bound_id(item),
         identified: item_state_identified(item),
         cursed: item.cursed,
-        slots: vec![None; usize::from(item.socket_slots)],
+        slots,
         gem_count: item.gem_count,
         added_stats,
         awake_type: 0,

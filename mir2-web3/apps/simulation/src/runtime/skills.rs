@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-use crate::config::SkillSnapshot;
 use crate::EquipmentSlot;
+use crate::config::SkillSnapshot;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_magic_by_spell, crystal_magic_manifest, crystal_monster_by_name,
-    localized_text_or_fallback, starter_server_data, CrystalItemTemplate, CrystalMagicTemplate,
-    CrystalRespawnTemplate, LanguageCode, SkillEffectTemplate, SkillTemplate,
+    CrystalItemTemplate, CrystalMagicTemplate, CrystalRespawnTemplate, LanguageCode,
+    SkillEffectTemplate, SkillTemplate, crystal_magic_by_spell, crystal_magic_manifest,
+    crystal_monster_by_name, localized_text_or_fallback, starter_server_data,
 };
 use mir2_protocol::{
     ClientBuff, ClientMagic, MirClass, MirDirection, ObjectAttackInfo, ObjectEffectInfo,
@@ -15,19 +15,19 @@ use mir2_protocol::{
 };
 
 use super::buffs::{
-    apply_or_refresh_buff, buff_metadata, client_buff_packet_for_state, crystal_buff_type_for_key,
-    BuffState,
+    BuffState, apply_or_refresh_buff, buff_metadata, client_buff_packet_for_state,
+    crystal_buff_type_for_key,
 };
 use super::combat::{
-    apply_player_monster_poison, combat_delay_ticks, damage_monster_entity,
-    damage_player_owned_monster_entity, queue_due_packet, queued_before_world_tick_due_tick,
-    ranged_attack_delay_ticks, schedule_damage_to_monster, schedule_damage_to_player,
-    schedule_heal_to_player, set_cast_defence, CrystalDefence, PendingMonsterDefeatAction,
+    CrystalDefence, PendingMonsterDefeatAction, apply_player_monster_poison, combat_delay_ticks,
+    damage_monster_entity, damage_player_owned_monster_entity, queue_due_packet,
+    queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
+    schedule_damage_to_player, schedule_heal_to_player, set_cast_defence,
 };
 use super::components::{
-    current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
-    entity_player_vitals, entity_position, hero_entity, player_entity, CharacterBody, DisplayName,
-    Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
+    CharacterBody, DisplayName, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    SummonedMonster, current_player_object_id, entity_by_object_id, entity_facing, entity_name,
+    entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
 };
 use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_AGILITY,
@@ -50,9 +50,8 @@ use super::map::{
 };
 use super::monster_ai::nearby_opposing_monster_targets;
 use super::monsters::{
-    active_summoned_monster_count, allocate_runtime_monster_object_id,
+    PendingMonsterSpawnAction, active_summoned_monster_count, allocate_runtime_monster_object_id,
     crystal_dynamic_monster_template, deterministic_roll, queue_pending_monster_spawn,
-    PendingMonsterSpawnAction,
 };
 use super::movement::{
     can_occupy, direction_toward, is_blocked_tile, offset_point, rotated_direction,
@@ -63,9 +62,9 @@ use super::packets::{
     object_struck_packet,
 };
 use super::resources::{
-    is_in_world, BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
+    BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
     PlayerRuntimeResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
-    SkillResource, Stage5SystemsResource,
+    SkillResource, Stage5SystemsResource, is_in_world,
 };
 use super::session::SimulationSession;
 
@@ -90,6 +89,7 @@ pub(super) struct SkillState {
 impl SkillState {
     pub(super) fn snapshot(&self, tick: u64, language: LanguageCode) -> SkillSnapshot {
         let metadata = skill_cast_metadata_for_skill_key(&self.key);
+        let mp_cost = authoritative_skill_mana_cost(self).and_then(|cost| u32::try_from(cost).ok());
         SkillSnapshot {
             key: self.key.clone(),
             name: localized_skill_name(language, &self.key, &self.name),
@@ -97,6 +97,7 @@ impl SkillState {
             spell: metadata.spell.map(str::to_string),
             cast_kind: metadata.cast_kind.as_str().to_string(),
             offensive: metadata.offensive,
+            mp_cost,
             level: self.level,
             experience: self.experience,
             hotkey: self.hotkey,
@@ -510,6 +511,32 @@ pub(super) fn crystal_magic_for_skill_key(key: &str) -> Option<CrystalMagicTempl
         .magics
         .into_iter()
         .find(|magic| normalize_crystal_skill_key(&magic.spell) == key)
+}
+
+fn skill_mana_cost_from_authoritative_metadata(
+    definition: Option<&SkillTemplate>,
+    crystal_magic: Option<&CrystalMagicTemplate>,
+    level: u8,
+) -> Option<i32> {
+    let cost = definition
+        .map(|definition| definition.mana_cost)
+        .or_else(|| {
+            crystal_magic.map(|magic| {
+                i32::from(magic.base_cost)
+                    .saturating_add(i32::from(magic.level_cost).saturating_mul(i32::from(level)))
+            })
+        })?;
+    (cost >= 0).then_some(cost)
+}
+
+fn authoritative_skill_mana_cost(skill: &SkillState) -> Option<i32> {
+    let definition = skill_definition(&skill.key);
+    let crystal_magic = crystal_magic_for_skill_key(&skill.key);
+    skill_mana_cost_from_authoritative_metadata(
+        definition.as_ref(),
+        crystal_magic.as_ref(),
+        skill.level,
+    )
 }
 
 pub(super) fn client_magic_for_skill_state(skill: &SkillState, tick: u64) -> Option<ClientMagic> {
@@ -938,15 +965,11 @@ pub(super) fn cast_skill_with_context(
     });
     let manifest_handles_magic_progression = crystal_spell
         .is_some_and(|spell| matches!(spell, "BackStep" | "ShoulderDash" | "FlashDash"));
-    let Some(mana_cost) = definition
-        .as_ref()
-        .map(|definition| definition.mana_cost)
-        .or_else(|| {
-            crystal_magic.as_ref().map(|magic| {
-                i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(skill.level)
-            })
-        })
-    else {
+    let Some(mana_cost) = skill_mana_cost_from_authoritative_metadata(
+        definition.as_ref(),
+        crystal_magic.as_ref(),
+        skill.level,
+    ) else {
         return Vec::new();
     };
     let Some(player) = player_entity(world) else {

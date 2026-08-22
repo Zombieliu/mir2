@@ -14,11 +14,11 @@ use super::crystal_compat::{
     DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
 };
 use super::items::{
-    crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
+    ItemState, crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
     crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
     crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
     default_item_unique_id, item_has_rental_bind_flag, item_icon_for_key, item_unique_id,
-    user_item_from_item_state, ItemState,
+    user_item_from_item_state,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
@@ -1043,13 +1043,72 @@ pub(super) fn item_index_for_client_reference(
         .position(|item| item_matches_client_reference(item, grid, unique_id))
 }
 
-fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
+pub(super) fn item_tree_unique_id_is_used(item: &ItemState, unique_id: u64) -> bool {
+    item_unique_id(item) == unique_id
+        || item
+            .socketed
+            .iter()
+            .any(|embedded| item_tree_unique_id_is_used(embedded, unique_id))
+}
+
+pub(super) fn item_list_unique_id_is_used(items: &[ItemState], unique_id: u64) -> bool {
+    items
+        .iter()
+        .any(|item| item_tree_unique_id_is_used(item, unique_id))
+}
+
+pub(super) fn inventory_unique_id_is_used(
+    resources: &InventoryResource,
+    unique_id: u64,
+) -> bool {
+    item_list_unique_id_is_used(&resources.belt_items, unique_id)
+        || item_list_unique_id_is_used(&resources.inventory_items, unique_id)
+        || item_list_unique_id_is_used(&resources.storage_items, unique_id)
+        || resources
+            .equipment_items
+            .iter()
+            .any(|equipment| item_list_unique_id_is_used(&equipment.socketed, unique_id))
+}
+
+fn item_tree_max_unique_id(item: &ItemState) -> u64 {
+    item.socketed
+        .iter()
+        .map(item_tree_max_unique_id)
+        .fold(item_unique_id(item), u64::max)
+}
+
+fn collect_item_tree_unique_ids(items: &[ItemState], seen: &mut BTreeSet<u64>) {
+    for item in items {
+        seen.insert(item_unique_id(item));
+        collect_item_tree_unique_ids(&item.socketed, seen);
+    }
+}
+
+fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeSet<u64>) {
+    collect_item_tree_unique_ids(&resources.belt_items, seen);
+    collect_item_tree_unique_ids(&resources.inventory_items, seen);
+    collect_item_tree_unique_ids(&resources.storage_items, seen);
+    for equipment in &resources.equipment_items {
+        collect_item_tree_unique_ids(&equipment.socketed, seen);
+    }
+}
+
+fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
     resources
         .belt_items
         .iter()
         .chain(resources.inventory_items.iter())
         .chain(resources.storage_items.iter())
-        .any(|item| item_unique_id(item) == unique_id)
+        .map(item_tree_max_unique_id)
+        .chain(
+            resources
+                .equipment_items
+                .iter()
+                .flat_map(|equipment| equipment.socketed.iter())
+                .map(item_tree_max_unique_id),
+        )
+        .max()
+        .unwrap_or(0)
 }
 
 fn next_available_unique_id(resources: &InventoryResource, minimum: u64) -> u64 {
@@ -1065,20 +1124,99 @@ pub(super) fn allocate_item_unique_id(
     container: ItemContainer,
     slot: u8,
 ) -> u64 {
+    allocate_item_unique_id_avoiding(resources, container, slot, &[])
+}
+
+pub(super) fn allocate_item_unique_id_avoiding(
+    resources: &InventoryResource,
+    container: ItemContainer,
+    slot: u8,
+    reserved_items: &[ItemState],
+) -> u64 {
     let preferred = default_item_unique_id(container, slot);
-    if !inventory_unique_id_is_used(resources, preferred) {
+    if !inventory_unique_id_is_used(resources, preferred)
+        && !item_list_unique_id_is_used(reserved_items, preferred)
+    {
         return preferred;
     }
 
-    let max_existing = resources
-        .belt_items
+    let max_existing = reserved_items
         .iter()
-        .chain(resources.inventory_items.iter())
-        .chain(resources.storage_items.iter())
-        .map(item_unique_id)
+        .map(item_tree_max_unique_id)
+        .fold(inventory_max_unique_id(resources), u64::max);
+    let mut unique_id = next_available_unique_id(resources, max_existing.saturating_add(1));
+    while item_list_unique_id_is_used(reserved_items, unique_id) {
+        unique_id = next_available_unique_id(resources, unique_id.saturating_add(1));
+    }
+    unique_id
+}
+
+/// Normalize an externally returned item tree before inserting it into the
+/// active inventory. Existing global IDs and `reserved_items` are immutable;
+/// the incoming parent and every socket are visited parent-first DFS. Valid,
+/// non-conflicting IDs are preserved, while zeroes, global conflicts and
+/// internal duplicates are reassigned deterministically above the complete
+/// recursive high-water mark.
+pub(super) fn normalize_incoming_item_tree_unique_ids(
+    resources: &InventoryResource,
+    item: &mut ItemState,
+    reserved_items: &[ItemState],
+) {
+    let mut seen = BTreeSet::new();
+    collect_inventory_unique_ids(resources, &mut seen);
+    collect_item_tree_unique_ids(reserved_items, &mut seen);
+
+    let incoming_max = item_tree_max_unique_id(item);
+    let reserved_max = reserved_items
+        .iter()
+        .map(item_tree_max_unique_id)
         .max()
         .unwrap_or(0);
-    next_available_unique_id(resources, max_existing.saturating_add(1))
+    let mut next_unique_id = inventory_max_unique_id(resources)
+        .max(reserved_max)
+        .max(incoming_max)
+        .saturating_add(1)
+        .max(1);
+
+    fn normalize_tree(
+        item: &mut ItemState,
+        seen: &mut BTreeSet<u64>,
+        next_unique_id: &mut u64,
+    ) {
+        let current_unique_id = item.unique_id;
+        if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
+                *next_unique_id = next_unique_id.saturating_add(1);
+            }
+            item.unique_id = *next_unique_id;
+            seen.insert(item.unique_id);
+            *next_unique_id = next_unique_id.saturating_add(1);
+        }
+        for socketed in &mut item.socketed {
+            normalize_tree(socketed, seen, next_unique_id);
+        }
+    }
+
+    normalize_tree(item, &mut seen, &mut next_unique_id);
+}
+
+/// Assign new server identities to an entire delivered item tree. Exact mail
+/// and GameShop attachments are grants, not returning inventory objects, so
+/// sender-provided parent and embedded IDs must never survive collection.
+pub(super) fn normalize_fresh_item_tree_unique_ids(
+    resources: &InventoryResource,
+    item: &mut ItemState,
+    reserved_items: &[ItemState],
+) {
+    fn clear_tree(item: &mut ItemState) {
+        item.unique_id = 0;
+        for socketed in &mut item.socketed {
+            clear_tree(socketed);
+        }
+    }
+
+    clear_tree(item);
+    normalize_incoming_item_tree_unique_ids(resources, item, reserved_items);
 }
 
 fn normalize_item_list_unique_ids(
@@ -1106,6 +1244,25 @@ fn normalize_item_list_unique_ids(
         };
         item.unique_id = normalized_unique_id;
         seen.insert(normalized_unique_id);
+    }
+}
+
+fn normalize_embedded_item_unique_ids(
+    items: &mut [ItemState],
+    seen: &mut BTreeSet<u64>,
+    next_unique_id: &mut u64,
+) {
+    for item in items {
+        let current_unique_id = item.unique_id;
+        if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
+                *next_unique_id = next_unique_id.saturating_add(1);
+            }
+            item.unique_id = *next_unique_id;
+            seen.insert(item.unique_id);
+            *next_unique_id = next_unique_id.saturating_add(1);
+        }
+        normalize_embedded_item_unique_ids(&mut item.socketed, seen, next_unique_id);
     }
 }
 
@@ -1143,6 +1300,39 @@ pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) 
         .unwrap_or(0)
         .saturating_add(1);
     normalize_item_list_unique_ids(&mut resources.storage_items, &mut seen, &mut next_unique_id);
+
+    // Equipment parent IDs are Crystal slot sentinels, not inventory object
+    // identities. Embedded items (ordinary sockets and MountSlot.Bells) are
+    // real objects and must remain unique against every top-level item and
+    // earlier embedded item.
+    let mut seen = BTreeSet::new();
+    for item in resources
+        .belt_items
+        .iter()
+        .chain(resources.inventory_items.iter())
+        .chain(resources.storage_items.iter())
+    {
+        seen.insert(item_unique_id(item));
+    }
+    let mut next_unique_id = inventory_max_unique_id(resources)
+        .saturating_add(1)
+        .max(1);
+    for item in &mut resources.belt_items {
+        normalize_embedded_item_unique_ids(&mut item.socketed, &mut seen, &mut next_unique_id);
+    }
+    for item in &mut resources.inventory_items {
+        normalize_embedded_item_unique_ids(&mut item.socketed, &mut seen, &mut next_unique_id);
+    }
+    for item in &mut resources.storage_items {
+        normalize_embedded_item_unique_ids(&mut item.socketed, &mut seen, &mut next_unique_id);
+    }
+    for equipment in &mut resources.equipment_items {
+        normalize_embedded_item_unique_ids(
+            &mut equipment.socketed,
+            &mut seen,
+            &mut next_unique_id,
+        );
+    }
 }
 
 pub(super) fn item_heal_values_for_key(key: &str) -> (i32, i32) {
@@ -2320,6 +2510,9 @@ pub(super) fn split_item_impl(
             resources.storage_items[index].quantity -= u32::from(count);
             let mut split = resources.storage_items[index].clone();
             split.slot = next_slot;
+            // Crystal's storage item identity is scoped by the Storage grid;
+            // the empty slot is therefore the canonical ID even when another
+            // grid uses the same numeric value.
             split.unique_id = default_item_unique_id(split.container, next_slot);
             split.quantity = u32::from(count);
             let split_packet_item = user_item_from_item_state(&split);

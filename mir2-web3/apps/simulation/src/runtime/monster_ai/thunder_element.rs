@@ -6,8 +6,8 @@ use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    entity_facing, entity_name, entity_object_id, Facing, Monster, MonsterAgent, MonsterAiState,
-    Position,
+    Facing, Monster, MonsterAgent, MonsterAiState, Position, entity_facing, entity_name,
+    entity_object_id,
 };
 use super::super::monsters::*;
 use super::super::movement::*;

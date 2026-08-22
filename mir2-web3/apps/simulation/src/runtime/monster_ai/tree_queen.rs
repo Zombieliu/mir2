@@ -32,8 +32,8 @@ use mir2_protocol::{
 
 use super::super::combat::*;
 use super::super::components::{
-    entity_name, entity_object_id, entity_position, player_entity, Facing, MonsterAgent,
-    MonsterAiState,
+    Facing, MonsterAgent, MonsterAiState, entity_name, entity_object_id, entity_position,
+    player_entity,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
@@ -602,8 +602,8 @@ fn deterministic_chance_roll_nonzero(
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        entity_object_id, DisplayName, Monster, MonsterCombatStats, MonsterVitals, ObjectId,
-        Position, WorldObject,
+        DisplayName, Monster, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
+        entity_object_id,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, crystal_respawn_can_wander,

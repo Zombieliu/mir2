@@ -1,0 +1,3404 @@
+//! Authoritative Gateway -> native Bevy gameplay read-model bridge.
+//!
+//! The async Gateway owner folds static `NewQuestInfo` definitions together
+//! with each authoritative `worldSnapshot`, then sends renderer-neutral models
+//! to the Bevy main thread. UI actions travel in the opposite direction as
+//! exact BrowserCommand intents; this module never grants rewards, advances a
+//! quest, changes HP, or moves an entity locally.
+
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::sync::{mpsc, Mutex};
+
+use bevy::input::ButtonInput;
+use bevy::prelude::{Commands, KeyCode, Res, ResMut, Resource};
+use mir2_client_bevy::entities::EntityKind;
+use mir2_client_bevy::entities::EntityModelSet;
+use mir2_client_bevy::game_shop::GameShopModel;
+use mir2_client_bevy::inventory::InventoryModel;
+use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+use mir2_client_bevy::pending_operations::{
+    mark_authoritative_refresh, reconcile_quest_refresh, AuthoritativeModelDomain,
+    AuthoritativeModelRevisions, PendingOperations,
+};
+use mir2_client_bevy::quest_model::{
+    CombatTargetModel, CombatTargetUpdate, GroundPickupModel, NearbyNpc, NearbyNpcModel,
+    NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestObjective, QuestReward,
+    QuestStatus, QuestTracker, RecentPickup,
+};
+use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
+use mir2_client_bevy::read_model::UiReadModel;
+use serde_json::Value;
+
+use crate::gateway::GatewayCommand;
+use crate::input::GatewayCommands;
+use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
+use mir2_client_bevy::crystal_ui::overlays::{
+    NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
+};
+
+const MAX_NEARBY_NPCS: usize = 8;
+const MAX_GROUND_DROPS: usize = 4;
+const MAX_NEARBY_DISTANCE: u32 = 18;
+
+#[derive(Debug, Clone, Default)]
+struct QuestDefinition {
+    title: String,
+    accept_npc_index: Option<u32>,
+    finish_npc_index: Option<u32>,
+    objectives: Vec<String>,
+    rewards: Vec<QuestReward>,
+    description: Option<String>,
+}
+
+/// Stateful protocol adapter. Static quest definitions arrive as packets and
+/// are intentionally retained across periodic world snapshots.
+#[derive(Debug, Default)]
+pub struct NativeGameplayAdapter {
+    quest_definitions: HashMap<i32, QuestDefinition>,
+    authoritative_player_transform: Option<AuthoritativePlayerTransform>,
+    authoritative_player_dead: Option<bool>,
+    authoritative_player_animation: Option<NativeAnimationHint>,
+    animation_sequence: u64,
+    damage_sequence: u64,
+    damage_events: VecDeque<NativeDamageEvent>,
+    effect_sequence: u64,
+    effect_events: VecDeque<NativeEffectEvent>,
+    zone_entities: HashMap<u32, serde_json::Map<String, Value>>,
+    zone_ground_drops: HashMap<u32, serde_json::Map<String, Value>>,
+    zone_tombstones: HashSet<u32>,
+    generation: u64,
+}
+
+#[derive(Debug, Clone)]
+struct AuthoritativePlayerTransform {
+    x: i32,
+    y: i32,
+    direction: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+struct NativeAnimationHint {
+    sequence: u64,
+    action: &'static str,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NativeDamageEvent {
+    pub sequence: u64,
+    pub object_id: u32,
+    pub damage: i32,
+    pub damage_type: i32,
+}
+
+/// Authoritative target data available at the native world-click boundary.
+/// `dead`, `ai`, `harvestable`, and the player combat-state options are
+/// intentionally optional: an absent value must block the client-only branch
+/// that depends on it instead of being guessed from a sprite or name.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalWorldClickTarget {
+    pub kind: EntityKind,
+    pub object_id: u32,
+    pub x: i32,
+    pub y: i32,
+    pub dead: Option<bool>,
+    pub ai: Option<u8>,
+    pub harvestable: Option<bool>,
+}
+
+/// Input-independent context for the Crystal `GameScene` map-click branch.
+/// The target and player tiles come from authoritative read models; this
+/// function never derives a target from screen coordinates.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CrystalWorldClickContext {
+    pub in_game: bool,
+    pub world_actions_blocked: bool,
+    pub player_hp: Option<i32>,
+    pub player_max_hp: Option<i32>,
+    pub player_x: i32,
+    pub player_y: i32,
+    pub target: Option<CrystalWorldClickTarget>,
+    pub alt: bool,
+    pub shift: bool,
+    pub class: Option<String>,
+    pub has_class_weapon: Option<bool>,
+    pub riding_mount: Option<bool>,
+    pub dazed: Option<bool>,
+    pub fishing: Option<bool>,
+    pub target_in_range: Option<bool>,
+}
+
+/// Packet-derived state used by the existing `QuestUiIntent::AttackTarget`
+/// forwarding edge. It is separate from `EntityModelSet`, whose
+/// renderer-neutral shape does not carry AI/dead/mount/weapon predicates.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Resource)]
+pub struct NativeWorldClickState {
+    pub player_x: i32,
+    pub player_y: i32,
+    pub class: Option<String>,
+    pub has_class_weapon: Option<bool>,
+    pub riding_mount: Option<bool>,
+    pub dazed: Option<bool>,
+    pub fishing: Option<bool>,
+    pub targets: HashMap<u32, CrystalWorldClickTarget>,
+}
+
+impl NativeWorldClickState {
+    fn context_for(
+        &self,
+        object_id: u32,
+        alt: bool,
+        shift: bool,
+        entities: Option<&EntityModelSet>,
+        read_model: Option<&UiReadModel>,
+    ) -> Option<CrystalWorldClickContext> {
+        let entities = entities?;
+        let player = entities
+            .entities
+            .iter()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)?;
+        let target = self.targets.get(&object_id).copied()?;
+        let target_entity = entities.entities.iter().find(|entity| {
+            entity.object_id.parse::<u32>().ok() == Some(object_id)
+                && entity.kind == target.kind
+                && entity.x == target.x
+                && entity.y == target.y
+        })?;
+        Some(CrystalWorldClickContext {
+            in_game: true,
+            world_actions_blocked: false,
+            player_hp: read_model.map(|model| model.player.hp),
+            player_max_hp: read_model.map(|model| model.player.max_hp),
+            player_x: player.x,
+            player_y: player.y,
+            target: Some(target),
+            alt,
+            shift,
+            class: self
+                .class
+                .clone()
+                .or_else(|| read_model.and_then(|model| model.player.class_name.clone())),
+            has_class_weapon: self.has_class_weapon,
+            riding_mount: self.riding_mount,
+            dazed: self.dazed,
+            fishing: self.fishing,
+            target_in_range: Some(
+                tile_distance(player.x, player.y, target_entity.x, target_entity.y) <= 9,
+            ),
+        })
+    }
+}
+
+/// Resolve only the combat/harvest actions that Crystal emits from a map
+/// left-click. This is a pure boundary function: it emits an intent, never
+/// damage or loot, and returns `None` whenever the native read model lacks a
+/// state required by the corresponding Crystal branch.
+pub fn resolve_crystal_world_click(
+    context: &CrystalWorldClickContext,
+) -> Option<NativeOutboundCommand> {
+    if !context.in_game
+        || context.world_actions_blocked
+        || context.player_max_hp? <= 0
+        || context.player_hp? <= 0
+    {
+        return None;
+    }
+    let target = context.target?;
+    let direction =
+        crystal_direction_from_tiles(context.player_x, context.player_y, target.x, target.y)?;
+
+    // GameScene.cs:11562-11565: Alt is evaluated before Shift and emits
+    // Harvest for any permitted map target while the player is not mounted;
+    // the server remains authoritative about whether a corpse is harvestable.
+    if context.alt {
+        if target.kind != EntityKind::Monster
+            || target.object_id == 0
+            || target.ai == Some(70)
+            || target.ai.is_none()
+            || context.riding_mount != Some(false)
+        {
+            return None;
+        }
+        return Some(NativeOutboundCommand::Harvest {
+            direction: direction.to_owned(),
+        });
+    }
+
+    // GameScene.cs:11594-11624: Shift is the explicit attack branch. The
+    // native adapter intentionally keeps the mounted/dazed/weapon/class
+    // predicates authoritative; it does not bind this action to a key.
+    if context.shift {
+        if context.dazed != Some(false) {
+            return None;
+        }
+        if target.kind != EntityKind::Monster
+            || target.object_id == 0
+            || target.ai == Some(70)
+            || target.ai.is_none()
+        {
+            return None;
+        }
+
+        let is_archer = context
+            .class
+            .as_deref()
+            .is_some_and(|class| class.eq_ignore_ascii_case("Archer"));
+        if is_archer {
+            // GameScene.cs:11601-11613: an Archer with a class weapon and no
+            // mount uses ranged attack; missing any required state is blocked.
+            if context.has_class_weapon != Some(true)
+                || context.riding_mount != Some(false)
+                || context.target_in_range != Some(true)
+            {
+                return None;
+            }
+            return Some(NativeOutboundCommand::RangeAttack {
+                direction: direction.to_owned(),
+                x: context.player_x,
+                y: context.player_y,
+                target_id: target.object_id,
+                target_x: target.x,
+                target_y: target.y,
+            });
+        }
+
+        return Some(NativeOutboundCommand::AttackDirection {
+            direction: direction.to_owned(),
+            spell: None,
+        });
+    }
+
+    // Crystal's ordinary target-click Archer branch becomes ranged only for an
+    // Archer with class weapon, no mount, and not fishing. Unlike the preceding
+    // Shift branch, Crystal does not add a local Dazed gate here; the server
+    // still applies its authoritative CanAttack/status validation.
+    if target.kind != EntityKind::Monster
+        || target.object_id == 0
+        || target.dead != Some(false)
+        || target.ai == Some(70)
+        || target.ai.is_none()
+        || !context
+            .class
+            .as_deref()
+            .is_some_and(|class| class.eq_ignore_ascii_case("Archer"))
+        || context.has_class_weapon != Some(true)
+        || context.riding_mount != Some(false)
+        || context.fishing != Some(false)
+        || context.target_in_range != Some(true)
+    {
+        return None;
+    }
+    Some(NativeOutboundCommand::RangeAttack {
+        direction: direction.to_owned(),
+        x: context.player_x,
+        y: context.player_y,
+        target_id: target.object_id,
+        target_x: target.x,
+        target_y: target.y,
+    })
+}
+
+fn crystal_direction_from_tiles(
+    player_x: i32,
+    player_y: i32,
+    target_x: i32,
+    target_y: i32,
+) -> Option<&'static str> {
+    let dx = (target_x - player_x).signum();
+    let dy = (target_y - player_y).signum();
+    match (dx, dy) {
+        (0, -1) => Some("up"),
+        (1, -1) => Some("upright"),
+        (1, 0) => Some("right"),
+        (1, 1) => Some("downright"),
+        (0, 1) => Some("down"),
+        (-1, 1) => Some("downleft"),
+        (-1, 0) => Some("left"),
+        (-1, -1) => Some("upleft"),
+        _ => None,
+    }
+}
+
+/// One authoritative effect packet captured by the gameplay adapter and
+/// forwarded (bounded, monotonic) to the native effect system. The native
+/// effect system never fabricates client game state: spell/projectile/target
+/// positions, directions, casters and removal all come from these packets.
+#[derive(Debug, Clone)]
+pub struct NativeEffectEvent {
+    pub sequence: u64,
+    pub generation: u64,
+    pub packet: String,
+    pub payload: Value,
+}
+
+/// Upper bound on buffered transient effect events. Too many simultaneous
+/// casts could otherwise grow the queue without limit; the newest events are
+/// kept and the oldest dropped.
+pub const MAX_BUFFERED_EFFECT_EVENTS: usize = 96;
+
+/// One complete replacement of native gameplay presentation state.
+#[derive(Debug, Clone, Default)]
+pub struct NativeGameplaySnapshot {
+    pub quests: QuestTracker,
+    pub dialog: NpcDialogModel,
+    pub nearby_npcs: NearbyNpcModel,
+    pub combat_target: CombatTargetModel,
+    pub world_click_state: NativeWorldClickState,
+    pub ground_pickups: GroundPickupModel,
+    pub entity_render_payload: Option<Value>,
+    pub damage_events: Vec<NativeDamageEvent>,
+    /// Monotonic authoritative effect events since the last drain, in order.
+    pub effect_events: Vec<NativeEffectEvent>,
+    /// Authoritative objectId -> (x, y) tile map for effect anchoring (caster,
+    /// projectile source/destination, ObjectEffect target tiles). Derived from
+    /// zone packets, never fabricated by the client.
+    pub zone_entity_tiles: std::collections::HashMap<u32, (i32, i32)>,
+}
+
+impl NativeGameplayAdapter {
+    /// Fold packet-first shared-Zone state into the adapter. Returns `true`
+    /// when the last personal snapshot should be re-emitted to render the
+    /// authoritative incremental change immediately.
+    pub fn observe_packet(&mut self, packet: &PacketEvent) -> bool {
+        match packet {
+            PacketEvent::NewQuestInfo(info) => {
+                if let Some(quest_index) = info.quest_id.and_then(|value| i32::try_from(value).ok())
+                {
+                    self.quest_definitions
+                        .insert(quest_index, parse_quest_definition(&info.payload));
+                }
+                false
+            }
+            PacketEvent::UserInformation(info) => {
+                self.clear_zone_state();
+                if let Some(transform) = transform_from_payload(&info.payload) {
+                    self.authoritative_player_transform = Some(transform);
+                }
+                false
+            }
+            PacketEvent::Other { packet, payload } => match packet.as_str() {
+                "UserLocation" => {
+                    if let Some(transform) = transform_from_payload(payload) {
+                        let movement_action = self
+                            .authoritative_player_transform
+                            .as_ref()
+                            .and_then(|previous| {
+                                movement_action(previous.x, previous.y, transform.x, transform.y)
+                            });
+                        self.authoritative_player_transform = Some(transform);
+                        if let Some(action) = movement_action {
+                            self.authoritative_player_animation =
+                                Some(self.next_animation_hint(action));
+                        }
+                    }
+                    true
+                }
+                "MapChanged" => {
+                    // The new buffered effect queue is empty; the MapChanged
+                    // event itself acts as a clear signal to the effect system.
+                    self.clear_zone_state();
+                    self.record_effect("MapChanged", payload);
+                    if let Some(transform) = transform_from_payload(payload) {
+                        self.authoritative_player_transform = Some(transform);
+                    }
+                    false
+                }
+                "LogOutSuccess" => {
+                    self.authoritative_player_transform = None;
+                    self.clear_zone_state();
+                    self.record_effect("LogOutSuccess", payload);
+                    false
+                }
+                "Death" => {
+                    self.authoritative_player_dead = Some(true);
+                    self.authoritative_player_animation = Some(self.next_animation_hint("die"));
+                    true
+                }
+                "Revived" => {
+                    self.authoritative_player_dead = Some(false);
+                    self.authoritative_player_animation = Some(self.next_animation_hint("revive"));
+                    true
+                }
+                "ObjectMonster" | "NewMonsterInfo" => {
+                    self.upsert_zone_entity(payload, "monster", "hostile")
+                }
+                "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc", "neutral"),
+                "ObjectPlayer" | "ObjectHero" => {
+                    self.upsert_zone_entity(payload, "player", "friendly")
+                }
+                "ObjectWalk" => self.patch_zone_entity_transform(payload, Some("walking")),
+                "ObjectRun" => self.patch_zone_entity_transform(payload, Some("running")),
+                "ObjectTurn" => self.patch_zone_entity_transform(payload, None),
+                "ObjectAttack" => self.patch_zone_entity_action(payload, "attack1", true),
+                "ObjectRangeAttack" => self.patch_zone_entity_action(payload, "attackRange1", true),
+                "ObjectMagic" => {
+                    // Keep the existing entity action hint for the caster, then
+                    // hand the authoritative cast packet to the effect system.
+                    let changed = self.patch_zone_entity_action(payload, "spell", false);
+                    self.record_effect("ObjectMagic", payload);
+                    changed
+                }
+                "ObjectSpell" => {
+                    let changed = self.patch_zone_entity_action(payload, "spell", false);
+                    self.record_effect("ObjectSpell", payload);
+                    changed
+                }
+                "ObjectProjectile" => {
+                    self.record_effect("ObjectProjectile", payload);
+                    true
+                }
+                "ObjectEffect" => {
+                    self.record_effect("ObjectEffect", payload);
+                    true
+                }
+                "MapEffect" => {
+                    self.record_effect("MapEffect", payload);
+                    true
+                }
+                "ObjectStruck" => {
+                    let changed = self.patch_zone_entity_action(payload, "struck", true);
+                    // Crystal carries the struck pose and the numeric damage in
+                    // separate packets. Keep accepting coalesced compatibility
+                    // payloads, but the authoritative path is DamageIndicator.
+                    self.record_damage_event(payload);
+                    changed
+                }
+                "DamageIndicator" => {
+                    self.record_damage_event(payload);
+                    true
+                }
+                "ObjectHealth" => self.patch_zone_entity_health(payload),
+                "ObjectDied" => self.patch_zone_entity_death(payload, true),
+                "ObjectRevived" => self.patch_zone_entity_death(payload, false),
+                "ObjectRemove" | "ObjectHide" => {
+                    let changed = self.remove_zone_object(payload);
+                    // ObjectRemove/ObjectHide clears any persistent spell keyed by
+                    // the same object id in the effect system.
+                    self.record_effect(packet.as_str(), payload);
+                    changed
+                }
+                "ObjectItem" => self.upsert_zone_ground_drop(payload, false),
+                "ObjectGold" => self.upsert_zone_ground_drop(payload, true),
+                _ => false,
+            },
+            _ => false,
+        }
+    }
+
+    /// Merge packet-authoritative self movement into the periodic personal
+    /// session snapshot. Shared-zone movement is acknowledged by
+    /// `UserLocation`; the personal snapshot may otherwise retain its pre-zone
+    /// transform until save/disconnect.
+    pub fn apply_authoritative_overlay(&self, payload: &mut Value) {
+        let player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        if let Some(transform) = &self.authoritative_player_transform {
+            if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
+                if let Some(player) = entities.iter_mut().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || (player_object_id.is_some()
+                            && entity.get("objectId").and_then(value_u32) == player_object_id)
+                }) {
+                    player["x"] = Value::from(transform.x);
+                    player["y"] = Value::from(transform.y);
+                    if let Some(direction) = &transform.direction {
+                        player["direction"] = Value::from(direction.clone());
+                    }
+                }
+            }
+            if let Some(center) = payload
+                .get_mut("sceneView")
+                .and_then(|view| view.get_mut("center"))
+            {
+                center["x"] = Value::from(transform.x);
+                center["y"] = Value::from(transform.y);
+            }
+        }
+
+        if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
+            entities.retain(|entity| {
+                entity
+                    .get("objectId")
+                    .and_then(value_u32)
+                    .is_none_or(|object_id| !self.zone_tombstones.contains(&object_id))
+            });
+            for (object_id, overlay) in &self.zone_entities {
+                if self.zone_tombstones.contains(object_id) {
+                    continue;
+                }
+                if let Some(entity) = entities
+                    .iter_mut()
+                    .find(|entity| entity.get("objectId").and_then(value_u32) == Some(*object_id))
+                {
+                    merge_zone_entity(entity, overlay);
+                } else if overlay.get("kind").is_some() {
+                    let mut entity = Value::Object(overlay.clone());
+                    normalize_packet_health(&mut entity);
+                    entities.push(entity);
+                }
+            }
+        }
+
+        apply_authoritative_player_vitals(
+            payload,
+            player_object_id,
+            self.authoritative_player_dead,
+            player_object_id.and_then(|object_id| self.zone_entities.get(&object_id)),
+        );
+
+        if let Some(hint) = &self.authoritative_player_animation {
+            if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
+                if let Some(player) = entities.iter_mut().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || (player_object_id.is_some()
+                            && entity.get("objectId").and_then(value_u32) == player_object_id)
+                }) {
+                    apply_animation_hint(player, hint);
+                }
+            }
+        }
+
+        if let Some(drops) = payload.get_mut("groundDrops").and_then(Value::as_array_mut) {
+            drops.retain(|drop| {
+                drop.get("objectId")
+                    .and_then(value_u32)
+                    .is_none_or(|object_id| !self.zone_tombstones.contains(&object_id))
+            });
+            for (object_id, overlay) in &self.zone_ground_drops {
+                if self.zone_tombstones.contains(object_id) {
+                    continue;
+                }
+                if let Some(drop) = drops
+                    .iter_mut()
+                    .find(|drop| drop.get("objectId").and_then(value_u32) == Some(*object_id))
+                {
+                    merge_object_fields(drop, overlay);
+                } else {
+                    drops.push(Value::Object(overlay.clone()));
+                }
+            }
+        }
+    }
+
+    fn clear_zone_state(&mut self) {
+        self.authoritative_player_dead = None;
+        self.authoritative_player_animation = None;
+        self.zone_entities.clear();
+        self.zone_ground_drops.clear();
+        self.zone_tombstones.clear();
+        self.damage_events.clear();
+        self.effect_events.clear();
+    }
+
+    pub(crate) fn set_generation(&mut self, generation: u64) {
+        if self.generation != generation {
+            self.generation = generation;
+            self.effect_sequence = 0;
+            self.animation_sequence = 0;
+            self.damage_sequence = 0;
+            self.clear_zone_state();
+        }
+    }
+
+    /// Record one authoritative effect packet into the bounded, monotonic
+    /// event buffer forwarded to the native effect system.
+    fn record_effect(&mut self, packet: &str, payload: &Value) {
+        self.effect_sequence = self.effect_sequence.saturating_add(1);
+        self.effect_events.push_back(NativeEffectEvent {
+            sequence: self.effect_sequence,
+            generation: self.generation,
+            packet: packet.to_owned(),
+            payload: payload.clone(),
+        });
+        while self.effect_events.len() > MAX_BUFFERED_EFFECT_EVENTS {
+            self.effect_events.pop_front();
+        }
+    }
+
+    fn upsert_zone_entity(&mut self, payload: &Value, kind: &str, disposition: &str) -> bool {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        self.zone_tombstones.remove(&object_id);
+        self.zone_ground_drops.remove(&object_id);
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        overlay.insert("kind".to_owned(), Value::from(kind));
+        overlay.insert("disposition".to_owned(), Value::from(disposition));
+        copy_packet_fields(
+            body,
+            overlay,
+            &[
+                "name",
+                "direction",
+                "class",
+                "gender",
+                "level",
+                "image",
+                "light",
+                "nameColourArgb",
+                "dead",
+                "hp",
+                "maxHp",
+                "questIds",
+            ],
+        );
+        patch_location_fields(body, overlay);
+        true
+    }
+
+    fn patch_zone_entity_transform(
+        &mut self,
+        payload: &Value,
+        action: Option<&'static str>,
+    ) -> bool {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        let hint = action.map(|action| self.next_animation_hint(action));
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        patch_location_fields(body, overlay);
+        copy_packet_fields(body, overlay, &["direction"]);
+        if let Some(hint) = &hint {
+            apply_animation_hint_to_map(overlay, hint);
+        }
+        true
+    }
+
+    fn patch_zone_entity_action(
+        &mut self,
+        payload: &Value,
+        action: &'static str,
+        patch_transform: bool,
+    ) -> bool {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        let hint = self.next_animation_hint(action);
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        if patch_transform {
+            patch_location_fields(body, overlay);
+        }
+        copy_packet_fields(body, overlay, &["direction"]);
+        apply_animation_hint_to_map(overlay, &hint);
+        true
+    }
+
+    fn patch_zone_entity_health(&mut self, payload: &Value) -> bool {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        copy_packet_fields(body, overlay, &["hp", "maxHp"]);
+        if let Some(percent) = body.get("percent").and_then(value_i32) {
+            overlay.insert(
+                "_packetHealthPercent".to_owned(),
+                Value::from(percent.clamp(0, 100)),
+            );
+            overlay.insert("dead".to_owned(), Value::from(percent <= 0));
+        }
+        true
+    }
+
+    fn patch_zone_entity_death(&mut self, payload: &Value, dead: bool) -> bool {
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        let hint = self.next_animation_hint(if dead { "die" } else { "revive" });
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        overlay.insert("dead".to_owned(), Value::from(dead));
+        if dead {
+            overlay.insert("hp".to_owned(), Value::from(0));
+            overlay.insert("_packetHealthPercent".to_owned(), Value::from(0));
+        }
+        apply_animation_hint_to_map(overlay, &hint);
+        true
+    }
+
+    fn next_animation_hint(&mut self, action: &'static str) -> NativeAnimationHint {
+        self.animation_sequence = self.animation_sequence.saturating_add(1);
+        NativeAnimationHint {
+            sequence: self.animation_sequence,
+            action,
+        }
+    }
+
+    fn record_damage_event(&mut self, payload: &Value) {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return;
+        };
+        if body.get("damage").is_none() && body.get("damageType").is_none() {
+            return;
+        }
+        self.damage_sequence = self.damage_sequence.saturating_add(1);
+        self.damage_events.push_back(NativeDamageEvent {
+            sequence: self.damage_sequence,
+            object_id,
+            damage: body.get("damage").and_then(value_i32).unwrap_or(0),
+            damage_type: body.get("damageType").and_then(value_i32).unwrap_or(0),
+        });
+        while self.damage_events.len() > 48 {
+            self.damage_events.pop_front();
+        }
+    }
+
+    fn remove_zone_object(&mut self, payload: &Value) -> bool {
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        self.zone_entities.remove(&object_id);
+        self.zone_ground_drops.remove(&object_id);
+        self.zone_tombstones.insert(object_id);
+        true
+    }
+
+    fn upsert_zone_ground_drop(&mut self, payload: &Value, is_gold: bool) -> bool {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        self.zone_tombstones.remove(&object_id);
+        self.zone_entities.remove(&object_id);
+        let overlay = self.zone_ground_drops.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        patch_location_fields(body, overlay);
+        copy_packet_fields(
+            body,
+            overlay,
+            &["name", "nameColourArgb", "image", "sourceMonster"],
+        );
+        let quantity = if is_gold {
+            body.get("gold").and_then(value_u32)
+        } else {
+            body.get("quantity").and_then(value_u32)
+        }
+        .unwrap_or(1)
+        .max(1);
+        overlay.insert("quantity".to_owned(), Value::from(quantity));
+        if overlay.get("name").is_none() {
+            overlay.insert(
+                "name".to_owned(),
+                Value::from(if is_gold { "Gold" } else { "Item" }),
+            );
+        }
+        true
+    }
+
+    pub fn snapshot(&self, payload: &Value) -> NativeGameplaySnapshot {
+        let (player_x, player_y) = authoritative_player_position(payload).unwrap_or((0, 0));
+        NativeGameplaySnapshot {
+            quests: transform_quest_tracker(payload, &self.quest_definitions),
+            dialog: transform_npc_dialog(payload),
+            nearby_npcs: transform_nearby_npcs(payload, player_x, player_y),
+            combat_target: transform_combat_target(payload, player_x, player_y),
+            world_click_state: world_click_state_from_payload(payload),
+            ground_pickups: transform_ground_pickups(payload, player_x, player_y),
+            entity_render_payload: Some(payload.clone()),
+            damage_events: self.damage_events.iter().cloned().collect(),
+            effect_events: self.effect_events.iter().cloned().collect(),
+            zone_entity_tiles: self.zone_entity_tiles(payload),
+        }
+    }
+
+    /// Authoritative objectId -> (x, y) tile map merging the authoritative world
+    /// payload entities (including selfPlayer / playerObjectId) with the incremental
+    /// zone entity overlay. The overlay wins for objects that were moved by
+    /// packet deltas. Consumed by the effect system to anchor ObjectEffect/ObjectSpell
+    /// and the ObjectProjectile source/destination by object id without inventing state.
+    fn zone_entity_tiles(&self, payload: &Value) -> std::collections::HashMap<u32, (i32, i32)> {
+        let mut tiles = std::collections::HashMap::new();
+        if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
+            for entity in entities {
+                if let (Some(object_id), Some(x), Some(y)) = (
+                    entity.get("objectId").and_then(value_u32),
+                    entity.get("x").and_then(value_i32),
+                    entity.get("y").and_then(value_i32),
+                ) {
+                    tiles.insert(object_id, (x, y));
+                }
+            }
+        }
+        for (object_id, overlay) in &self.zone_entities {
+            if let (Some(x), Some(y)) = (
+                overlay.get("x").and_then(value_i32),
+                overlay.get("y").and_then(value_i32),
+            ) {
+                tiles.insert(*object_id, (x, y));
+            }
+        }
+        tiles
+    }
+}
+
+/// Thread-safe receiver wrapper consumed by Bevy on its main thread.
+#[derive(Resource)]
+pub struct GameplayEventInbox {
+    receiver: Mutex<mpsc::Receiver<NativeGameplaySnapshot>>,
+}
+
+impl GameplayEventInbox {
+    pub fn new(receiver: mpsc::Receiver<NativeGameplaySnapshot>) -> Self {
+        Self {
+            receiver: Mutex::new(receiver),
+        }
+    }
+
+    fn latest(&self) -> Option<NativeGameplaySnapshot> {
+        let receiver = self
+            .receiver
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        receiver.try_iter().last()
+    }
+}
+
+/// Replace presentation resources with the newest authoritative snapshot.
+pub(crate) fn should_apply_gameplay_snapshot(screen: NativeShellScreen) -> bool {
+    matches!(
+        screen,
+        NativeShellScreen::InGame | NativeShellScreen::StartingGame
+    )
+}
+
+pub fn drain_gameplay_events(
+    shell: Res<NativeShellModel>,
+    inbox: Res<GameplayEventInbox>,
+    mut quests: ResMut<QuestTracker>,
+    mut dialog: ResMut<NpcDialogModel>,
+    mut nearby_npcs: ResMut<NearbyNpcModel>,
+    mut combat_target: ResMut<CombatTargetModel>,
+    mut ground_pickups: ResMut<GroundPickupModel>,
+    mut entity_presentation: ResMut<crate::entity_presentation::NativeEntityPresentation>,
+    mut entity_overlays: ResMut<crate::entity_overlays::NativeEntityOverlays>,
+    mut effects: ResMut<crate::effects::NativeEffects>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    click_state: Option<ResMut<NativeWorldClickState>>,
+    mut ecs_commands: Commands,
+    time: Res<bevy::prelude::Time>,
+) {
+    if !should_apply_gameplay_snapshot(shell.screen) {
+        let _ = inbox.latest();
+        *quests = QuestTracker::default();
+        *dialog = NpcDialogModel::default();
+        *nearby_npcs = NearbyNpcModel::default();
+        *combat_target = CombatTargetModel::default();
+        *ground_pickups = GroundPickupModel::default();
+        if let Some(mut click_state) = click_state {
+            *click_state = NativeWorldClickState::default();
+        }
+        entity_presentation.reset_session();
+        entity_overlays.reset_session();
+        effects.reset_session();
+        return;
+    }
+    let Some(snapshot) = inbox.latest() else {
+        return;
+    };
+    reconcile_quest_refresh(&mut pending, &quests, &snapshot.quests);
+    mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Quest);
+    *quests = snapshot.quests;
+    *dialog = snapshot.dialog;
+    *nearby_npcs = snapshot.nearby_npcs;
+    *combat_target = snapshot.combat_target;
+    *ground_pickups = snapshot.ground_pickups;
+    if let Some(mut click_state) = click_state {
+        *click_state = snapshot.world_click_state;
+    } else {
+        ecs_commands.insert_resource(snapshot.world_click_state);
+    }
+    let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    entity_overlays.observe_damage_events(&snapshot.damage_events, now_ms);
+    if let Some(payload) = snapshot.entity_render_payload {
+        let (player_x, player_y) = authoritative_player_position(&payload).unwrap_or((0, 0));
+        effects.observe(
+            now_ms,
+            player_x,
+            player_y,
+            &snapshot.effect_events,
+            &snapshot.zone_entity_tiles,
+        );
+        entity_presentation.replace_payload(payload.clone());
+        entity_overlays.replace_payload(payload);
+    }
+}
+
+/// Convert presentation intents into exact Gateway commands. The shell state
+/// gate prevents stale button events from crossing login/character screens.
+pub fn forward_quest_ui_intents(
+    shell: Res<NativeShellModel>,
+    mut intents: ResMut<QuestUiIntentQueue>,
+    player_ui_intents: Option<ResMut<NativePlayerUiIntentQueue>>,
+    commands: Res<GatewayCommands>,
+    keys: Option<Res<ButtonInput<KeyCode>>>,
+    entities: Option<Res<EntityModelSet>>,
+    click_state: Option<Res<NativeWorldClickState>>,
+    mut player_ui_state: Option<ResMut<NativePlayerUiState>>,
+    mut game_shop: Option<ResMut<GameShopModel>>,
+    mut operation_pending: Option<ResMut<PendingOperations>>,
+    dialog: Option<Res<NpcDialogModel>>,
+    read_model: Option<Res<UiReadModel>>,
+    tracker: Option<Res<QuestTracker>>,
+    inventory: Option<Res<InventoryModel>>,
+) {
+    let pending = intents.drain_intents();
+    let player_pending = player_ui_intents
+        .map(|mut queue| queue.drain_intents())
+        .unwrap_or_default();
+    if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+
+    let dialog_open = dialog.as_deref().is_some_and(|model| model.is_open);
+    let dead = read_model
+        .as_deref()
+        .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+    let world_actions_blocked = player_ui_state
+        .as_deref()
+        .map(|state| state.blocks_world_action(dialog_open, dead))
+        .unwrap_or(dialog_open || dead);
+
+    for intent in pending {
+        let command = match intent {
+            QuestUiIntent::InteractNpc { npc_object_id } => {
+                if world_actions_blocked {
+                    continue;
+                }
+                NativeOutboundCommand::Interact {
+                    object_id: npc_object_id,
+                }
+            }
+            QuestUiIntent::SelectNpcDialog { target } => {
+                NativeOutboundCommand::SelectNpcDialog { target }
+            }
+            QuestUiIntent::AcceptQuest {
+                npc_index,
+                quest_index,
+            } => NativeOutboundCommand::AcceptQuest {
+                npc_index,
+                quest_index,
+            },
+            QuestUiIntent::FinishQuest {
+                quest_index,
+                selected_item_index,
+            } => NativeOutboundCommand::FinishQuest {
+                quest_index,
+                selected_item_index,
+            },
+            QuestUiIntent::AbandonQuest { quest_index } => {
+                let allowed = tracker.as_deref().is_some_and(|tracker| {
+                    tracker.active_quests.iter().any(|quest| {
+                        quest.quest_index == quest_index && quest.status == QuestStatus::InProgress
+                    })
+                });
+                if !allowed {
+                    continue;
+                }
+                NativeOutboundCommand::AbandonQuest { quest_index }
+            }
+            QuestUiIntent::AttackTarget { object_id } => {
+                if world_actions_blocked {
+                    continue;
+                }
+                let alt = keys.as_deref().is_some_and(|keys| {
+                    keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight)
+                });
+                let shift = keys.as_deref().is_some_and(|keys| {
+                    keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight)
+                });
+                if alt || shift {
+                    let Some(click_state) = click_state.as_deref() else {
+                        continue;
+                    };
+                    let Some(context) = click_state.context_for(
+                        object_id,
+                        alt,
+                        shift,
+                        entities.as_deref(),
+                        read_model.as_deref(),
+                    ) else {
+                        continue;
+                    };
+                    let Some(command) = resolve_crystal_world_click(&context) else {
+                        continue;
+                    };
+                    command
+                } else if let (Some(click_state), Some(entities)) =
+                    (click_state.as_deref(), entities.as_deref())
+                {
+                    // Ordinary Crystal monster click keeps the existing
+                    // AttackTarget fallback, but upgrades to RangeAttack only
+                    // when every Archer/weapon/mount predicate is
+                    // authoritative and the target is in range.
+                    let context = click_state.context_for(
+                        object_id,
+                        false,
+                        false,
+                        Some(entities),
+                        read_model.as_deref(),
+                    );
+                    context
+                        .and_then(|context| resolve_crystal_world_click(&context))
+                        .unwrap_or(NativeOutboundCommand::Attack { object_id })
+                } else {
+                    NativeOutboundCommand::Attack { object_id }
+                }
+            }
+            QuestUiIntent::PickUpObject { object_id } => {
+                if world_actions_blocked {
+                    continue;
+                }
+                NativeOutboundCommand::PickUp { object_id }
+            }
+            QuestUiIntent::PickUpTile => {
+                if world_actions_blocked {
+                    continue;
+                }
+                NativeOutboundCommand::PickUpTile
+            }
+        };
+        commands.send_command(GatewayCommand::Wire(command));
+    }
+
+    for intent in player_pending {
+        let command = match intent {
+            NativePlayerUiIntent::UseItem {
+                key,
+                unique_id,
+                slot,
+                grid,
+            } => NativeOutboundCommand::UseItem {
+                key,
+                unique_id,
+                slot,
+                grid,
+            },
+            NativePlayerUiIntent::EquipItem {
+                unique_id,
+                grid,
+                to,
+            } => NativeOutboundCommand::EquipItem {
+                unique_id,
+                grid,
+                to,
+            },
+            NativePlayerUiIntent::RemoveItem {
+                unique_id,
+                grid,
+                to,
+            } => NativeOutboundCommand::RemoveItem {
+                unique_id,
+                grid,
+                to,
+            },
+            NativePlayerUiIntent::DropItem {
+                key,
+                unique_id,
+                count,
+                hero_inventory,
+            } => NativeOutboundCommand::DropItem {
+                key,
+                unique_id,
+                count,
+                hero_inventory,
+            },
+            NativePlayerUiIntent::MoveItem { grid, from, to, .. } => {
+                NativeOutboundCommand::MoveItem { grid, from, to }
+            }
+            NativePlayerUiIntent::MergeItem {
+                grid_from,
+                grid_to,
+                id_from,
+                id_to,
+            } => NativeOutboundCommand::MergeItem {
+                grid_from,
+                grid_to,
+                id_from,
+                id_to,
+            },
+            NativePlayerUiIntent::SplitItem {
+                unique_id,
+                grid,
+                count,
+            } => NativeOutboundCommand::SplitItem {
+                unique_id,
+                grid,
+                count,
+            },
+            NativePlayerUiIntent::Chat { message } => NativeOutboundCommand::Chat { message },
+            NativePlayerUiIntent::BuyItem { item_index, count } => NativeOutboundCommand::BuyItem {
+                item_index,
+                count,
+                panel_type: 0,
+            },
+            NativePlayerUiIntent::GameShopBuy {
+                request_id,
+                g_index,
+                quantity,
+                price_type,
+            } => NativeOutboundCommand::GameShopBuy {
+                request_id,
+                g_index,
+                quantity,
+                price_type,
+            },
+            NativePlayerUiIntent::SellItem { unique_id, count } => {
+                NativeOutboundCommand::SellItem { unique_id, count }
+            }
+            NativePlayerUiIntent::RepairItem { unique_id } => {
+                NativeOutboundCommand::RepairItem { unique_id }
+            }
+            NativePlayerUiIntent::SRepairItem { unique_id } => {
+                NativeOutboundCommand::SpecialRepairItem { unique_id }
+            }
+            NativePlayerUiIntent::StoreItem { from, to, .. } => {
+                NativeOutboundCommand::StoreItem { from, to }
+            }
+            NativePlayerUiIntent::TakeBackItem { from, to, .. } => {
+                NativeOutboundCommand::TakeBackItem { from, to }
+            }
+            NativePlayerUiIntent::UnlockStorage { password } => {
+                NativeOutboundCommand::UnlockStorage { password }
+            }
+            NativePlayerUiIntent::SetStoragePassword {
+                current,
+                new_password,
+            } => NativeOutboundCommand::SetStoragePassword {
+                current_password: current,
+                new_password,
+            },
+            NativePlayerUiIntent::RemoveStoragePassword { current } => {
+                NativeOutboundCommand::RemoveStoragePassword {
+                    current_password: current,
+                }
+            }
+            NativePlayerUiIntent::ExpandStorage => NativeOutboundCommand::Chat {
+                message: "@ADDSTORAGE".to_owned(),
+            },
+            NativePlayerUiIntent::ReadMail { mail_id } => {
+                NativeOutboundCommand::ReadMail { mail_id }
+            }
+            NativePlayerUiIntent::ClaimMail { mail_id } => {
+                NativeOutboundCommand::CollectParcel { mail_id }
+            }
+            NativePlayerUiIntent::DeleteMail { mail_id } => {
+                NativeOutboundCommand::DeleteMail { mail_id }
+            }
+            NativePlayerUiIntent::SendMail {
+                recipient,
+                message,
+                gold,
+                attachment_unique_ids,
+            } => {
+                let mut items_idx = [0_u64; 5];
+                if attachment_unique_ids.len() > 5
+                    || attachment_unique_ids.iter().any(|id| *id == 0)
+                    || attachment_unique_ids
+                        .iter()
+                        .enumerate()
+                        .any(|(index, id)| attachment_unique_ids[..index].contains(id))
+                {
+                    continue;
+                }
+                let Some(inventory) = inventory.as_deref() else {
+                    continue;
+                };
+                for (index, id) in attachment_unique_ids.iter().enumerate() {
+                    if !inventory
+                        .items
+                        .iter()
+                        .any(|item| item.container == 0 && item.unique_id == Some(*id))
+                    {
+                        continue;
+                    }
+                    items_idx[index] = *id;
+                }
+                if attachment_unique_ids
+                    .iter()
+                    .enumerate()
+                    .any(|(index, id)| items_idx[index] != *id)
+                {
+                    continue;
+                }
+                NativeOutboundCommand::SendMail {
+                    name: recipient,
+                    message,
+                    gold,
+                    items_idx,
+                    stamped: false,
+                }
+            }
+            NativePlayerUiIntent::GroupSwitch { allow_group } => {
+                NativeOutboundCommand::SwitchGroup { allow_group }
+            }
+            NativePlayerUiIntent::GroupAddMember { name } => {
+                NativeOutboundCommand::AddMember { name }
+            }
+            NativePlayerUiIntent::GroupRemoveMember { name } => {
+                NativeOutboundCommand::DelMember { name }
+            }
+            NativePlayerUiIntent::GroupInvite { accept_invite } => {
+                NativeOutboundCommand::GroupInvite { accept_invite }
+            }
+            NativePlayerUiIntent::GuildRequestInfo { info_type } => {
+                NativeOutboundCommand::RequestGuildInfo { info_type }
+            }
+            NativePlayerUiIntent::GuildEditMember {
+                change_type,
+                rank_index,
+                name,
+                rank_name,
+            } => NativeOutboundCommand::EditGuildMember {
+                change_type,
+                rank_index,
+                name,
+                rank_name,
+            },
+            NativePlayerUiIntent::GuildEditNotice { notice } => {
+                NativeOutboundCommand::EditGuildNotice { notice }
+            }
+            NativePlayerUiIntent::GuildInvite { accept_invite } => {
+                NativeOutboundCommand::GuildInvite { accept_invite }
+            }
+            NativePlayerUiIntent::TradeRequest => NativeOutboundCommand::TradeRequest,
+            NativePlayerUiIntent::TradeReply { accept_invite } => {
+                NativeOutboundCommand::TradeReply { accept_invite }
+            }
+            NativePlayerUiIntent::TradeGold { amount } => {
+                NativeOutboundCommand::TradeGold { amount }
+            }
+            NativePlayerUiIntent::TradeDepositItem { from, to } => {
+                NativeOutboundCommand::DepositTradeItem { from, to }
+            }
+            NativePlayerUiIntent::TradeRetrieveItem { from, to } => {
+                NativeOutboundCommand::RetrieveTradeItem { from, to }
+            }
+            NativePlayerUiIntent::TradeConfirm { locked } => {
+                NativeOutboundCommand::TradeConfirm { locked }
+            }
+            NativePlayerUiIntent::TradeCancel => NativeOutboundCommand::TradeCancel,
+        };
+        let game_shop_request_id = match &command {
+            NativeOutboundCommand::GameShopBuy { request_id, .. } => Some(request_id.clone()),
+            _ => None,
+        };
+        if !commands.send_command(GatewayCommand::Wire(command)) {
+            if let Some(request_id) = game_shop_request_id {
+                if let Some(pending) = operation_pending.as_mut() {
+                    pending.release(
+                        &mir2_client_bevy::pending_operations::PendingOperationKey::GameShop(
+                            request_id.clone(),
+                        ),
+                    );
+                }
+                if let Some(game_shop) = game_shop.as_mut() {
+                    game_shop.cancel_purchase_reservation(&request_id);
+                }
+                if let Some(player_ui_state) = player_ui_state.as_mut() {
+                    player_ui_state.core.cancel_game_shop_purchase(&request_id);
+                }
+            }
+        }
+    }
+}
+
+fn packet_body(payload: &Value) -> &Value {
+    payload
+        .get("info")
+        .filter(|info| info.is_object())
+        .unwrap_or(payload)
+}
+
+fn packet_object_id(payload: &Value) -> Option<u32> {
+    let body = packet_body(payload);
+    body.get("objectId")
+        .or_else(|| body.get("object_id"))
+        .and_then(value_u32)
+}
+
+fn movement_action(from_x: i32, from_y: i32, to_x: i32, to_y: i32) -> Option<&'static str> {
+    let distance = from_x.abs_diff(to_x).max(from_y.abs_diff(to_y));
+    match distance {
+        0 => None,
+        1 => Some("walking"),
+        _ => Some("running"),
+    }
+}
+
+fn apply_animation_hint(target: &mut Value, hint: &NativeAnimationHint) {
+    if target
+        .get("_nativeAnimationSequence")
+        .and_then(Value::as_u64)
+        .is_some_and(|sequence| sequence > hint.sequence)
+    {
+        return;
+    }
+    target["_nativeAnimationAction"] = Value::from(hint.action);
+    target["_nativeAnimationSequence"] = Value::from(hint.sequence);
+}
+
+fn apply_animation_hint_to_map(
+    target: &mut serde_json::Map<String, Value>,
+    hint: &NativeAnimationHint,
+) {
+    target.insert(
+        "_nativeAnimationAction".to_owned(),
+        Value::from(hint.action),
+    );
+    target.insert(
+        "_nativeAnimationSequence".to_owned(),
+        Value::from(hint.sequence),
+    );
+}
+
+fn copy_packet_fields(
+    source: &Value,
+    target: &mut serde_json::Map<String, Value>,
+    fields: &[&str],
+) {
+    for field in fields {
+        if let Some(value) = source.get(*field).filter(|value| !value.is_null()) {
+            target.insert((*field).to_owned(), value.clone());
+        }
+    }
+}
+
+fn patch_location_fields(source: &Value, target: &mut serde_json::Map<String, Value>) {
+    let location = source
+        .get("location")
+        .filter(|location| location.is_object())
+        .unwrap_or(source);
+    for field in ["x", "y"] {
+        if let Some(value) = location.get(field).and_then(value_i32) {
+            target.insert(field.to_owned(), Value::from(value));
+        }
+    }
+}
+
+fn merge_object_fields(target: &mut Value, overlay: &serde_json::Map<String, Value>) {
+    let Some(target) = target.as_object_mut() else {
+        return;
+    };
+    for (field, value) in overlay {
+        target.insert(field.clone(), value.clone());
+    }
+}
+
+fn merge_zone_entity(target: &mut Value, overlay: &serde_json::Map<String, Value>) {
+    merge_object_fields(target, overlay);
+    normalize_packet_health(target);
+}
+
+/// `ObjectHealth` always carries an authoritative percentage, while exact HP
+/// fields are optional. Preserve exact max HP when known; otherwise expose the
+/// authoritative percentage on a normalized 0..100 scale to the UI.
+fn normalize_packet_health(entity: &mut Value) {
+    let Some(object) = entity.as_object_mut() else {
+        return;
+    };
+    let Some(percent) = object
+        .remove("_packetHealthPercent")
+        .as_ref()
+        .and_then(value_i32)
+    else {
+        return;
+    };
+    let max_hp = object.get("maxHp").and_then(value_i32).unwrap_or(0);
+    if max_hp > 0 {
+        object.insert(
+            "hp".to_owned(),
+            Value::from(((max_hp as f32) * (percent as f32 / 100.0)).round() as i32),
+        );
+    } else {
+        object.insert("hp".to_owned(), Value::from(percent));
+        object.insert("maxHp".to_owned(), Value::from(100));
+    }
+    object.insert("dead".to_owned(), Value::from(percent <= 0));
+}
+
+/// Fold shared-Zone self health/death packets into the personal snapshot fields
+/// consumed by the HUD. The personal session snapshot can lag behind Zone
+/// combat, while `ObjectHealth` and `Death` are already authoritative on the
+/// WebSocket. Without this overlay a dead player can still render as full HP.
+fn apply_authoritative_player_vitals(
+    payload: &mut Value,
+    player_object_id: Option<u32>,
+    explicit_dead: Option<bool>,
+    overlay: Option<&serde_json::Map<String, Value>>,
+) {
+    let packet_percent = overlay
+        .and_then(|overlay| overlay.get("_packetHealthPercent"))
+        .and_then(value_i32)
+        .map(|percent| percent.clamp(0, 100));
+    let overlay_dead = overlay
+        .and_then(|overlay| overlay.get("dead"))
+        .and_then(Value::as_bool);
+    let dead = explicit_dead.or(overlay_dead);
+    let max_hp = payload
+        .get("playerMaxHp")
+        .and_then(value_i32)
+        .unwrap_or(0)
+        .max(0);
+    let hp = if dead == Some(true) {
+        Some(0)
+    } else {
+        packet_percent.map(|percent| health_from_percent(max_hp, percent))
+    };
+
+    if let Some(hp) = hp {
+        payload["playerHp"] = Value::from(hp);
+    }
+
+    let Some(player_object_id) = player_object_id else {
+        return;
+    };
+    let Some(player) = payload
+        .get_mut("entities")
+        .and_then(Value::as_array_mut)
+        .and_then(|entities| {
+            entities.iter_mut().find(|entity| {
+                entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                    || entity.get("objectId").and_then(value_u32) == Some(player_object_id)
+            })
+        })
+    else {
+        return;
+    };
+    if let Some(hp) = hp {
+        player["hp"] = Value::from(hp);
+    }
+    if max_hp > 0 {
+        player["maxHp"] = Value::from(max_hp);
+    }
+    if let Some(dead) = dead.or_else(|| packet_percent.map(|percent| percent <= 0)) {
+        player["dead"] = Value::from(dead);
+    }
+}
+
+fn health_from_percent(max_hp: i32, percent: i32) -> i32 {
+    if max_hp <= 0 || percent <= 0 {
+        return 0;
+    }
+    (max_hp.saturating_mul(percent).saturating_add(99) / 100).clamp(1, max_hp)
+}
+
+fn parse_quest_definition(payload: &Value) -> QuestDefinition {
+    let info = payload.get("info");
+    let title = string_at(payload, "name")
+        .or_else(|| info.and_then(|value| string_at(value, "name")))
+        .unwrap_or_default();
+    let accept_npc_index = info
+        .and_then(|value| value.get("npc_index").or_else(|| value.get("npcIndex")))
+        .and_then(value_u32);
+    let finish_npc_index = info
+        .and_then(|value| {
+            value
+                .get("finish_npc_index")
+                .or_else(|| value.get("finishNpcIndex"))
+        })
+        .and_then(value_u32)
+        .or(accept_npc_index);
+    let objectives = payload
+        .get("objectives")
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| string_at(item, "text"))
+                .map(|text| strip_crystal_markup(&text))
+                .filter(|text| !text.trim().is_empty())
+                .collect()
+        })
+        .unwrap_or_default();
+    let description = payload
+        .get("descriptionLines")
+        .and_then(string_array)
+        .filter(|lines| !lines.is_empty())
+        .map(|lines| strip_crystal_markup(&lines.join("\n")));
+
+    QuestDefinition {
+        title: strip_crystal_markup(&title),
+        accept_npc_index,
+        finish_npc_index,
+        objectives,
+        rewards: parse_quest_rewards(payload.get("rewards")),
+        description,
+    }
+}
+
+fn transform_quest_tracker(
+    payload: &Value,
+    definitions: &HashMap<i32, QuestDefinition>,
+) -> QuestTracker {
+    let entities = payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or(&[]);
+    let active_quests = payload
+        .get("questLog")
+        .and_then(Value::as_array)
+        .map(|quests| {
+            quests
+                .iter()
+                .filter_map(|quest| {
+                    let quest_index = quest.get("questId").and_then(value_i32)?;
+                    let definition = definitions.get(&quest_index).cloned().unwrap_or_default();
+                    let status = quest_status(quest.get("stage").and_then(Value::as_str));
+                    let npc_index = if status == QuestStatus::ReadyToTurnIn {
+                        definition.finish_npc_index
+                    } else {
+                        definition.accept_npc_index
+                    };
+                    let npc_name = npc_index.and_then(|npc_index| {
+                        entities
+                            .iter()
+                            .find(|entity| {
+                                entity.get("objectId").and_then(value_u32) == Some(npc_index)
+                            })
+                            .and_then(|entity| string_at(entity, "name"))
+                            .map(|name| display_npc_name(&name))
+                    });
+                    let objectives = transform_quest_objectives(quest, quest_index, &definition);
+                    let rewards = if definition.rewards.is_empty() {
+                        string_at(quest, "rewardPreview")
+                            .filter(|label| !label.trim().is_empty())
+                            .map(|label| vec![QuestReward::Unknown { label }])
+                            .unwrap_or_default()
+                    } else {
+                        definition.rewards.clone()
+                    };
+                    let title = string_at(quest, "title")
+                        .filter(|title| !title.trim().is_empty())
+                        .unwrap_or_else(|| {
+                            if definition.title.is_empty() {
+                                format!("Quest {quest_index}")
+                            } else {
+                                definition.title.clone()
+                            }
+                        });
+                    let unknown_text = string_at(quest, "summary")
+                        .filter(|text| !text.trim().is_empty())
+                        .or(definition.description.clone());
+
+                    Some(Quest {
+                        quest_index,
+                        accept_npc_index: definition.accept_npc_index,
+                        finish_npc_index: definition.finish_npc_index,
+                        title: strip_crystal_markup(&title),
+                        npc_name,
+                        status,
+                        objectives,
+                        rewards,
+                        unknown_text,
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    QuestTracker { active_quests }
+}
+
+fn transform_quest_objectives(
+    quest: &Value,
+    quest_index: i32,
+    definition: &QuestDefinition,
+) -> Vec<QuestObjective> {
+    let current_total = quest.get("current").and_then(value_u32).unwrap_or(0);
+    let required_total = quest.get("required").and_then(value_u32).unwrap_or(0);
+    let from_snapshot = quest
+        .get("objectives")
+        .and_then(Value::as_array)
+        .map(|objectives| {
+            objectives
+                .iter()
+                .enumerate()
+                .map(|(index, objective)| QuestObjective {
+                    objective_id: format!("{quest_index}:{index}"),
+                    text: string_at(objective, "label")
+                        .map(|text| strip_crystal_markup(&text))
+                        .or_else(|| definition.objectives.get(index).cloned())
+                        .unwrap_or_else(|| format!("Objective {}", index + 1)),
+                    current: objective
+                        .get("current")
+                        .and_then(value_u32)
+                        .unwrap_or(current_total),
+                    target: objective
+                        .get("required")
+                        .and_then(value_u32)
+                        .unwrap_or(required_total),
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if !from_snapshot.is_empty() {
+        return from_snapshot;
+    }
+
+    let text = string_at(quest, "objective")
+        .map(|text| strip_crystal_markup(&text))
+        .or_else(|| definition.objectives.first().cloned())
+        .unwrap_or_default();
+    if text.trim().is_empty() && required_total == 0 {
+        Vec::new()
+    } else {
+        vec![QuestObjective {
+            objective_id: format!("{quest_index}:0"),
+            text,
+            current: current_total,
+            target: required_total,
+        }]
+    }
+}
+
+fn parse_quest_rewards(value: Option<&Value>) -> Vec<QuestReward> {
+    let Some(rewards) = value.and_then(Value::as_object) else {
+        return Vec::new();
+    };
+    let mut parsed = Vec::new();
+    if let Some(amount) = rewards
+        .get("gold")
+        .and_then(value_u32)
+        .filter(|amount| *amount > 0)
+    {
+        parsed.push(QuestReward::Gold { amount });
+    }
+    if let Some(amount) = rewards
+        .get("experience")
+        .and_then(value_u32)
+        .filter(|amount| *amount > 0)
+    {
+        parsed.push(QuestReward::Experience { amount });
+    }
+    if let Some(amount) = rewards
+        .get("credit")
+        .and_then(value_u32)
+        .filter(|amount| *amount > 0)
+    {
+        parsed.push(QuestReward::Unknown {
+            label: format!("{amount} Credit"),
+        });
+    }
+    for field in ["items", "selectItems"] {
+        if let Some(items) = rewards.get(field).and_then(Value::as_array) {
+            for item in items {
+                let item_id = item
+                    .get("itemIndex")
+                    .and_then(value_i32)
+                    .map(|value| value.to_string())
+                    .unwrap_or_default();
+                let name = string_at(item, "name").unwrap_or_else(|| "Item".to_owned());
+                let quantity = item.get("count").and_then(value_u32).unwrap_or(1).max(1);
+                parsed.push(QuestReward::Item {
+                    item_id,
+                    name: strip_crystal_markup(&name),
+                    quantity,
+                });
+            }
+        }
+    }
+    parsed
+}
+
+fn transform_npc_dialog(payload: &Value) -> NpcDialogModel {
+    let Some(dialog) = payload
+        .get("activeNpcDialog")
+        .filter(|value| !value.is_null())
+    else {
+        return NpcDialogModel::default();
+    };
+    let Some(npc_object_id) = dialog.get("npcObjectId").and_then(value_u32) else {
+        return NpcDialogModel::default();
+    };
+    let mut lines = Vec::new();
+    if let Some(title) = string_at(dialog, "title").filter(|title| !title.trim().is_empty()) {
+        lines.push(strip_crystal_markup(&title));
+    }
+    if let Some(body) = dialog.get("body").and_then(string_array) {
+        lines.extend(body.into_iter().map(|line| strip_crystal_markup(&line)));
+    }
+    if let Some(footer) = string_at(dialog, "footer").filter(|footer| !footer.trim().is_empty()) {
+        lines.push(strip_crystal_markup(&footer));
+    }
+    let options = dialog
+        .get("links")
+        .and_then(Value::as_array)
+        .map(|links| {
+            links
+                .iter()
+                .filter_map(|link| {
+                    let target = string_at(link, "target")?;
+                    Some(NpcDialogOption {
+                        option_id: target,
+                        label: string_at(link, "text")
+                            .map(|text| strip_crystal_markup(&text))
+                            .unwrap_or_else(|| "Continue".to_owned()),
+                        enabled: true,
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let mut model = NpcDialogModel::default();
+    model.apply(NpcDialogUpdate {
+        npc_object_id,
+        npc_name: string_at(dialog, "npcName").map(|name| display_npc_name(&name)),
+        lines,
+        options,
+        open: true,
+        replace: true,
+    });
+    model
+}
+
+fn transform_nearby_npcs(payload: &Value, player_x: i32, player_y: i32) -> NearbyNpcModel {
+    let mut npcs = payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .map(|entities| {
+            entities
+                .iter()
+                .filter(|entity| entity.get("kind").and_then(Value::as_str) == Some("npc"))
+                .filter_map(|entity| {
+                    let object_id = entity.get("objectId").and_then(value_u32)?;
+                    let x = entity.get("x").and_then(value_i32)?;
+                    let y = entity.get("y").and_then(value_i32)?;
+                    let distance = tile_distance(player_x, player_y, x, y);
+                    (distance <= MAX_NEARBY_DISTANCE).then(|| NearbyNpc {
+                        object_id,
+                        name: string_at(entity, "name")
+                            .map(|name| display_npc_name(&name))
+                            .unwrap_or_else(|| format!("NPC {object_id}")),
+                        x,
+                        y,
+                        quest_indexes: entity
+                            .get("questIds")
+                            .and_then(Value::as_array)
+                            .map(|ids| ids.iter().filter_map(value_i32).collect())
+                            .unwrap_or_default(),
+                        distance,
+                    })
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    npcs.sort_by_key(|npc| (npc.distance, npc.object_id));
+    npcs.truncate(MAX_NEARBY_NPCS);
+    NearbyNpcModel { npcs }
+}
+
+fn transform_combat_target(payload: &Value, player_x: i32, player_y: i32) -> CombatTargetModel {
+    let entities = payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or(&[]);
+    let selected = payload.get("selectedObjectId").and_then(value_u32);
+    let entity = entities
+        .iter()
+        .filter(|entity| is_attackable_entity(entity))
+        .min_by_key(|entity| {
+            let object_id = entity.get("objectId").and_then(value_u32);
+            (
+                !entity_name_matches_active_quest(payload, entity),
+                tile_distance(
+                    player_x,
+                    player_y,
+                    entity.get("x").and_then(value_i32).unwrap_or(i32::MAX),
+                    entity.get("y").and_then(value_i32).unwrap_or(i32::MAX),
+                ),
+                object_id != selected,
+            )
+        });
+
+    let Some(entity) = entity else {
+        return CombatTargetModel::default();
+    };
+    let Some(object_id) = entity.get("objectId").and_then(value_u32) else {
+        return CombatTargetModel::default();
+    };
+    let mut model = CombatTargetModel::default();
+    model.apply(CombatTargetUpdate {
+        object_id,
+        name: string_at(entity, "name").unwrap_or_else(|| format!("Object {object_id}")),
+        hp: entity.get("hp").and_then(value_i32).unwrap_or(0),
+        max_hp: entity.get("maxHp").and_then(value_i32).unwrap_or(0),
+        is_player: matches!(
+            entity.get("kind").and_then(Value::as_str),
+            Some("player" | "selfPlayer")
+        ),
+    });
+    model
+}
+
+fn world_click_state_from_payload(payload: &Value) -> NativeWorldClickState {
+    let mut state = NativeWorldClickState::default();
+    let Some(entities) = payload.get("entities").and_then(Value::as_array) else {
+        return state;
+    };
+
+    for entity in entities.iter().take(512) {
+        let Some(object_id) = entity.get("objectId").and_then(value_u32) else {
+            continue;
+        };
+        let Some(kind) = entity
+            .get("kind")
+            .and_then(Value::as_str)
+            .and_then(|kind| match kind {
+                "selfPlayer" | "self_player" => Some(EntityKind::SelfPlayer),
+                "player" => Some(EntityKind::Player),
+                "monster" => Some(EntityKind::Monster),
+                "npc" => Some(EntityKind::Npc),
+                _ => None,
+            })
+        else {
+            continue;
+        };
+        let Some(x) = entity.get("x").and_then(value_i32) else {
+            continue;
+        };
+        let Some(y) = entity.get("y").and_then(value_i32) else {
+            continue;
+        };
+
+        if kind == EntityKind::SelfPlayer {
+            state.player_x = x;
+            state.player_y = y;
+            state.class = entity
+                .get("class")
+                .or_else(|| entity.get("className"))
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            state.has_class_weapon = entity.get("hasClassWeapon").and_then(Value::as_bool);
+            state.riding_mount = entity.get("ridingMount").and_then(Value::as_bool);
+            state.dazed = entity.get("dazed").and_then(Value::as_bool);
+            state.fishing = entity.get("fishing").and_then(Value::as_bool);
+        }
+
+        state.targets.insert(
+            object_id,
+            CrystalWorldClickTarget {
+                kind,
+                object_id,
+                x,
+                y,
+                dead: entity.get("dead").and_then(Value::as_bool),
+                ai: entity
+                    .get("ai")
+                    .and_then(value_u32)
+                    .and_then(|value| u8::try_from(value).ok()),
+                harvestable: entity.get("harvestable").and_then(Value::as_bool),
+            },
+        );
+    }
+    state
+}
+
+fn entity_name_matches_active_quest(payload: &Value, entity: &Value) -> bool {
+    let Some(name) = entity.get("name").and_then(Value::as_str) else {
+        return false;
+    };
+    let normalized_name = name.trim().to_ascii_lowercase();
+    if normalized_name.is_empty() {
+        return false;
+    }
+
+    payload
+        .get("questLog")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter(|quest| {
+            matches!(
+                quest.get("stage").and_then(Value::as_str),
+                Some("inProgress" | "readyToTurnIn")
+            )
+        })
+        .flat_map(|quest| {
+            let mut text = Vec::new();
+            for field in ["title", "objective", "description"] {
+                if let Some(value) = quest.get(field).and_then(Value::as_str) {
+                    text.push(value);
+                }
+            }
+            if let Some(objectives) = quest.get("objectives").and_then(Value::as_array) {
+                for objective in objectives {
+                    for field in ["text", "name", "targetName"] {
+                        if let Some(value) = objective.get(field).and_then(Value::as_str) {
+                            text.push(value);
+                        }
+                    }
+                }
+            }
+            text
+        })
+        .any(|text| text.to_ascii_lowercase().contains(&normalized_name))
+}
+
+fn is_attackable_entity(entity: &Value) -> bool {
+    if entity.get("kind").and_then(Value::as_str) != Some("monster")
+        || entity.get("disposition").and_then(Value::as_str) != Some("hostile")
+        || entity.get("dead").and_then(Value::as_bool) == Some(true)
+        || entity.get("maxHp").and_then(value_i32).unwrap_or(0) <= 0
+    {
+        return false;
+    }
+
+    // Crystal sends town guards through the monster packet family even though
+    // they are neutral/protected world actors. Some packet-first overlays do
+    // not carry disposition, so never turn these exact guard actors into an
+    // attack button merely because they were the last selected object.
+    let normalized_name = entity
+        .get("name")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_ascii_lowercase()
+        .replace(['_', ' '], "");
+    !matches!(
+        normalized_name.as_str(),
+        "guard" | "guard1" | "guard2" | "guard3" | "royalguard" | "archerguard" | "archerguard3"
+    )
+}
+
+fn transform_ground_pickups(payload: &Value, player_x: i32, player_y: i32) -> GroundPickupModel {
+    let mut pickups = payload
+        .get("groundDrops")
+        .and_then(Value::as_array)
+        .map(|drops| {
+            drops
+                .iter()
+                .filter_map(|drop| {
+                    let object_id = drop.get("objectId").and_then(value_u32)?;
+                    let x = drop.get("x").and_then(value_i32).unwrap_or(player_x);
+                    let y = drop.get("y").and_then(value_i32).unwrap_or(player_y);
+                    Some((
+                        tile_distance(player_x, player_y, x, y),
+                        RecentPickup {
+                            object_id: Some(object_id),
+                            key: format!("object:{object_id}"),
+                            label: string_at(drop, "name")
+                                .unwrap_or_else(|| "Ground item".to_owned()),
+                            amount: drop.get("quantity").and_then(value_u32).unwrap_or(1).max(1),
+                            from_npc: string_at(drop, "sourceMonster")
+                                .filter(|source| !source.trim().is_empty()),
+                        },
+                    ))
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    pickups.sort_by_key(|(distance, pickup)| (*distance, pickup.object_id.unwrap_or_default()));
+    let recent = pickups
+        .into_iter()
+        .take(MAX_GROUND_DROPS)
+        .map(|(_, pickup)| pickup)
+        .collect::<VecDeque<_>>();
+    GroundPickupModel { recent }
+}
+
+fn authoritative_player_position(payload: &Value) -> Option<(i32, i32)> {
+    let player_object_id = payload.get("playerObjectId").and_then(value_u32);
+    payload
+        .get("entities")
+        .and_then(Value::as_array)?
+        .iter()
+        .find(|entity| {
+            entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                || (player_object_id.is_some()
+                    && entity.get("objectId").and_then(value_u32) == player_object_id)
+        })
+        .and_then(|entity| {
+            Some((
+                entity.get("x").and_then(value_i32)?,
+                entity.get("y").and_then(value_i32)?,
+            ))
+        })
+}
+
+fn transform_from_payload(payload: &Value) -> Option<AuthoritativePlayerTransform> {
+    let location = payload.get("location").unwrap_or(payload);
+    Some(AuthoritativePlayerTransform {
+        x: location.get("x").and_then(value_i32)?,
+        y: location.get("y").and_then(value_i32)?,
+        direction: payload
+            .get("direction")
+            .and_then(Value::as_str)
+            .map(str::to_owned),
+    })
+}
+
+fn quest_status(stage: Option<&str>) -> QuestStatus {
+    match stage.unwrap_or_default().to_ascii_lowercase().as_str() {
+        "available" | "notstarted" | "not_started" => QuestStatus::NotStarted,
+        "inprogress" | "in_progress" | "active" => QuestStatus::InProgress,
+        "readytoturnin" | "ready_to_turn_in" => QuestStatus::ReadyToTurnIn,
+        "completed" => QuestStatus::Completed,
+        "failed" => QuestStatus::Failed,
+        "aborted" => QuestStatus::Aborted,
+        other => QuestStatus::Unknown(other.to_owned()),
+    }
+}
+
+fn value_u32(value: &Value) -> Option<u32> {
+    value
+        .as_u64()
+        .and_then(|number| u32::try_from(number).ok())
+        .or_else(|| value.as_str()?.parse::<u32>().ok())
+}
+
+fn value_i32(value: &Value) -> Option<i32> {
+    value
+        .as_i64()
+        .and_then(|number| i32::try_from(number).ok())
+        .or_else(|| value.as_str()?.parse::<i32>().ok())
+}
+
+fn string_at(value: &Value, field: &str) -> Option<String> {
+    value.get(field).and_then(Value::as_str).map(str::to_owned)
+}
+
+fn string_array(value: &Value) -> Option<Vec<String>> {
+    Some(
+        value
+            .as_array()?
+            .iter()
+            .filter_map(Value::as_str)
+            .map(str::to_owned)
+            .collect(),
+    )
+}
+
+fn tile_distance(ax: i32, ay: i32, bx: i32, by: i32) -> u32 {
+    ax.abs_diff(bx).max(ay.abs_diff(by))
+}
+
+fn display_npc_name(name: &str) -> String {
+    name.replace('_', " - ")
+}
+
+/// Crystal text markup is `{label/Colour}`. Native Bevy text currently uses a
+/// single colour, so preserve the label and discard only the colour directive.
+fn strip_crystal_markup(text: &str) -> String {
+    let mut output = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+    while let Some(character) = chars.next() {
+        if character != '{' {
+            output.push(character);
+            continue;
+        }
+        let mut token = String::new();
+        let mut closed = false;
+        for next in chars.by_ref() {
+            if next == '}' {
+                closed = true;
+                break;
+            }
+            token.push(next);
+        }
+        if closed {
+            output.push_str(token.split('/').next().unwrap_or_default());
+        } else {
+            output.push('{');
+            output.push_str(&token);
+        }
+    }
+    output
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::prelude::App;
+    use serde_json::json;
+
+    #[test]
+    fn inventory_ui_intents_map_to_exact_native_commands() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        {
+            let mut queue = app.world_mut().resource_mut::<NativePlayerUiIntentQueue>();
+            queue.push_intent(NativePlayerUiIntent::DropItem {
+                key: "small-hp-drug".into(),
+                unique_id: 10,
+                count: 2,
+                hero_inventory: false,
+            });
+            queue.push_intent(NativePlayerUiIntent::MoveItem {
+                grid: "inventory".into(),
+                unique_id: 10,
+                from: 0,
+                to: 1,
+            });
+            queue.push_intent(NativePlayerUiIntent::MergeItem {
+                grid_from: "inventory".into(),
+                grid_to: "inventory".into(),
+                id_from: 10,
+                id_to: 11,
+            });
+            queue.push_intent(NativePlayerUiIntent::SplitItem {
+                unique_id: 12,
+                grid: "inventory".into(),
+                count: 1,
+            });
+        }
+        app.update();
+
+        let commands = receiver.try_iter().collect::<Vec<_>>();
+        assert_eq!(commands.len(), 4);
+        assert!(matches!(
+            &commands[0],
+            GatewayCommand::Wire(NativeOutboundCommand::DropItem {
+                key,
+                unique_id: 10,
+                count: 2,
+                hero_inventory: false,
+            }) if key == "small-hp-drug"
+        ));
+        assert!(matches!(
+            &commands[1],
+            GatewayCommand::Wire(NativeOutboundCommand::MoveItem {
+                grid,
+                from: 0,
+                to: 1,
+            }) if grid == "inventory"
+        ));
+        assert!(matches!(
+            &commands[2],
+            GatewayCommand::Wire(NativeOutboundCommand::MergeItem {
+                grid_from,
+                grid_to,
+                id_from: 10,
+                id_to: 11,
+            }) if grid_from == "inventory" && grid_to == "inventory"
+        ));
+        assert!(matches!(
+            &commands[3],
+            GatewayCommand::Wire(NativeOutboundCommand::SplitItem {
+                unique_id: 12,
+                grid,
+                count: 1,
+            }) if grid == "inventory"
+        ));
+    }
+
+    #[test]
+    fn occupied_transaction_lane_rolls_back_all_game_shop_pending_state() {
+        let (sender, _receiver) = crate::gateway::command_channel(8);
+        sender
+            .send(GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
+                request_id: "gs-occupied".into(),
+                g_index: 1,
+                quantity: 1,
+                price_type: 1,
+            }))
+            .expect("occupy transaction lane");
+
+        let mut player_ui = NativePlayerUiState::default();
+        let mut game_shop = GameShopModel::default();
+        let mut pending = PendingOperations::default();
+        let mut queue = NativePlayerUiIntentQueue::default();
+        let request = queue
+            .enqueue_game_shop_purchase(&mut player_ui.core, &mut game_shop, &mut pending, 31, 2, 1)
+            .expect("reserve local transaction");
+
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<QuestUiIntentQueue>()
+        .insert_resource(queue)
+        .insert_resource(player_ui)
+        .insert_resource(game_shop)
+        .insert_resource(pending)
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        app.update();
+
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .game_shop_pending
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<GameShopModel>()
+            .pending_purchase
+            .is_none());
+        assert!(app.world().resource::<PendingOperations>().is_empty());
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert_ne!(request.request_id, "gs-occupied");
+    }
+
+    fn quest_gate_app(
+        player_ui: NativePlayerUiState,
+        dialog: NpcDialogModel,
+    ) -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .insert_resource(player_ui)
+        .insert_resource(dialog)
+        .insert_resource(UiReadModel::default())
+        .insert_resource(QuestTracker {
+            active_quests: vec![Quest {
+                quest_index: 11,
+                accept_npc_index: Some(3),
+                finish_npc_index: Some(3),
+                title: "Quest 11".to_owned(),
+                npc_name: None,
+                status: QuestStatus::InProgress,
+                objectives: Vec::new(),
+                rewards: Vec::new(),
+                unknown_text: None,
+            }],
+        })
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        (app, receiver)
+    }
+
+    fn quest_gate_app_without_player_ui(
+        dialog: NpcDialogModel,
+        read_model: UiReadModel,
+    ) -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .insert_resource(dialog)
+        .insert_resource(read_model)
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        (app, receiver)
+    }
+
+    fn forward_attack_target(
+        mut state: NativeWorldClickState,
+        modifier: Option<KeyCode>,
+    ) -> GatewayCommand {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        let mut keys = ButtonInput::<KeyCode>::default();
+        if let Some(modifier) = modifier {
+            keys.press(modifier);
+        }
+        state.player_x = 10;
+        state.player_y = 10;
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .insert_resource(NativePlayerUiState::default())
+        .insert_resource(NpcDialogModel::default())
+        .insert_resource(UiReadModel {
+            player: mir2_client_bevy::read_model::PlayerStats {
+                hp: 18,
+                max_hp: 20,
+                ..Default::default()
+            },
+        })
+        .insert_resource(keys)
+        .insert_resource(EntityModelSet {
+            entities: vec![
+                mir2_client_bevy::entities::EntityModel {
+                    object_id: "1000".to_owned(),
+                    kind: EntityKind::SelfPlayer,
+                    name: "Hero".to_owned(),
+                    x: 10,
+                    y: 10,
+                    level: Some(1),
+                    direction: Some("right".to_owned()),
+                },
+                mir2_client_bevy::entities::EntityModel {
+                    object_id: "2001".to_owned(),
+                    kind: EntityKind::Monster,
+                    name: "Scarecrow".to_owned(),
+                    x: 11,
+                    y: 10,
+                    level: Some(1),
+                    direction: Some("left".to_owned()),
+                },
+            ],
+        })
+        .insert_resource(state)
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
+        app.update();
+        receiver.try_recv().expect("attack target command")
+    }
+
+    #[test]
+    fn attack_target_forwarding_applies_crystal_alt_shift_and_normal_click_order() {
+        let mut alt_state = NativeWorldClickState {
+            riding_mount: Some(false),
+            dazed: Some(false),
+            ..Default::default()
+        };
+        alt_state.targets.insert(
+            2001,
+            CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 11,
+                y: 10,
+                dead: None,
+                ai: Some(0),
+                harvestable: None,
+            },
+        );
+        assert!(matches!(
+            forward_attack_target(alt_state, Some(KeyCode::AltLeft)),
+            GatewayCommand::Wire(NativeOutboundCommand::Harvest { direction })
+                if direction == "right"
+        ));
+
+        let mut shift_state = NativeWorldClickState {
+            class: Some("Warrior".to_owned()),
+            riding_mount: Some(false),
+            dazed: Some(false),
+            ..Default::default()
+        };
+        shift_state.targets.insert(
+            2001,
+            CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 11,
+                y: 10,
+                dead: None,
+                ai: Some(0),
+                harvestable: None,
+            },
+        );
+        assert!(matches!(
+            forward_attack_target(shift_state, Some(KeyCode::ShiftLeft)),
+            GatewayCommand::Wire(NativeOutboundCommand::AttackDirection { direction, spell: None })
+                if direction == "right"
+        ));
+
+        let mut normal_state = NativeWorldClickState {
+            class: Some("Archer".to_owned()),
+            has_class_weapon: Some(true),
+            riding_mount: Some(false),
+            fishing: Some(false),
+            // Crystal's ordinary Archer branch (GameScene.cs:11605-11624)
+            // does not gate on Dazed; the server still enforces CanAttack.
+            dazed: Some(true),
+            ..Default::default()
+        };
+        normal_state.targets.insert(
+            2001,
+            CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 11,
+                y: 10,
+                dead: Some(false),
+                ai: Some(0),
+                harvestable: None,
+            },
+        );
+        assert!(matches!(
+            forward_attack_target(normal_state, None),
+            GatewayCommand::Wire(NativeOutboundCommand::RangeAttack {
+                target_id: 2001,
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn world_click_state_preserves_authoritative_predicates_without_inference() {
+        let state = world_click_state_from_payload(&json!({
+            "entities": [
+                {
+                    "objectId": 1000,
+                    "kind": "selfPlayer",
+                    "x": 10,
+                    "y": 10,
+                    "class": "Archer",
+                    "ridingMount": false
+                },
+                {
+                    "objectId": 2001,
+                    "kind": "monster",
+                    "x": 11,
+                    "y": 10,
+                    "dead": true,
+                    "ai": 0
+                }
+            ]
+        }));
+        assert_eq!((state.player_x, state.player_y), (10, 10));
+        assert_eq!(state.class.as_deref(), Some("Archer"));
+        assert_eq!(state.riding_mount, Some(false));
+        assert_eq!(state.has_class_weapon, None);
+        assert_eq!(state.dazed, None);
+        assert_eq!(state.fishing, None);
+        assert_eq!(state.targets[&2001].dead, Some(true));
+        assert_eq!(state.targets[&2001].ai, Some(0));
+        assert_eq!(state.targets[&2001].harvestable, None);
+    }
+
+    #[test]
+    fn gateway_world_snapshot_shape_parses_and_resolves_native_combat_intents() {
+        let mut frame = json!({
+            "type": "worldSnapshot",
+            "payload": {
+                "entities": [
+                    {
+                        "objectId": 1000,
+                        "kind": "selfPlayer",
+                        "x": 10,
+                        "y": 10,
+                        "class": "Archer",
+                        "ridingMount": false,
+                        "hasClassWeapon": true,
+                        "dazed": false,
+                        "fishing": false
+                    },
+                    {
+                        "objectId": 2001,
+                        "kind": "monster",
+                        "x": 11,
+                        "y": 10,
+                        "dead": false,
+                        "ai": 0
+                    }
+                ]
+            }
+        });
+
+        let parsed = world_click_state_from_payload(&frame["payload"]);
+        assert!(matches!(
+            forward_attack_target(parsed.clone(), Some(KeyCode::AltLeft)),
+            GatewayCommand::Wire(NativeOutboundCommand::Harvest { direction })
+                if direction == "right"
+        ));
+        assert!(matches!(
+            forward_attack_target(parsed, None),
+            GatewayCommand::Wire(NativeOutboundCommand::RangeAttack {
+                target_id: 2001,
+                ..
+            })
+        ));
+
+        frame["payload"]["entities"][0]["class"] = json!("Warrior");
+        frame["payload"]["entities"][0]["hasClassWeapon"] = json!(false);
+        let parsed = world_click_state_from_payload(&frame["payload"]);
+        assert!(matches!(
+            forward_attack_target(parsed, Some(KeyCode::ShiftLeft)),
+            GatewayCommand::Wire(NativeOutboundCommand::AttackDirection { direction, spell: None })
+                if direction == "right"
+        ));
+    }
+
+    #[test]
+    fn modal_gate_blocks_world_origins_but_keeps_modal_quest_actions_functional() {
+        let mut dialog = NpcDialogModel::default();
+        dialog.is_open = true;
+        let (mut app, receiver) = quest_gate_app(NativePlayerUiState::default(), dialog);
+        {
+            let mut queue = app.world_mut().resource_mut::<QuestUiIntentQueue>();
+            queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id: 7 });
+            queue.push_intent(QuestUiIntent::AttackTarget { object_id: 8 });
+            queue.push_intent(QuestUiIntent::PickUpObject { object_id: 9 });
+            queue.push_intent(QuestUiIntent::PickUpTile);
+            queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                target: "@AcceptQuest".to_owned(),
+            });
+            queue.push_intent(QuestUiIntent::AcceptQuest {
+                npc_index: 3,
+                quest_index: 11,
+            });
+            queue.push_intent(QuestUiIntent::FinishQuest {
+                quest_index: 11,
+                selected_item_index: -1,
+            });
+            queue.push_intent(QuestUiIntent::AbandonQuest { quest_index: 11 });
+        }
+        app.update();
+
+        let commands = receiver.try_iter().collect::<Vec<_>>();
+        assert_eq!(
+            commands.len(),
+            4,
+            "only modal actions should cross the gate"
+        );
+        assert!(commands.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::SelectNpcDialog { target })
+                if target == "@AcceptQuest"
+        )));
+        assert!(commands.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::AcceptQuest {
+                npc_index: 3,
+                quest_index: 11,
+            })
+        )));
+        assert!(commands.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::FinishQuest {
+                quest_index: 11,
+                selected_item_index: -1,
+            })
+        )));
+        assert!(commands.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::AbandonQuest { quest_index: 11 })
+        )));
+    }
+
+    #[test]
+    fn chat_gate_drops_blocked_world_intent_and_closing_allows_one_new_action() {
+        let mut player_ui = NativePlayerUiState::default();
+        player_ui.set_chat_focused(true);
+        let (mut app, receiver) = quest_gate_app(player_ui, NpcDialogModel::default());
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        app.update();
+        assert_eq!(receiver.try_iter().count(), 0);
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .set_chat_focused(false);
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        app.update();
+        assert_eq!(receiver.try_iter().count(), 1);
+        app.update();
+        assert_eq!(
+            receiver.try_iter().count(),
+            0,
+            "closing must not duplicate the action"
+        );
+    }
+
+    #[test]
+    fn missing_native_ui_resource_still_fails_closed_for_dialog_and_dead_state() {
+        let mut dialog = NpcDialogModel::default();
+        dialog.is_open = true;
+        let mut read_model = UiReadModel::default();
+        read_model.player.hp = 0;
+        read_model.player.max_hp = 100;
+        let (mut app, receiver) = quest_gate_app_without_player_ui(dialog, read_model);
+        {
+            let mut queue = app.world_mut().resource_mut::<QuestUiIntentQueue>();
+            queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id: 7 });
+            queue.push_intent(QuestUiIntent::PickUpTile);
+        }
+        app.update();
+        assert_eq!(receiver.try_iter().count(), 0);
+    }
+
+    fn gameplay_payload() -> Value {
+        json!({
+            "playerObjectId": 1000,
+            "selectedObjectId": 2001,
+            "sceneView":{"center":{"x":288,"y":616},"width":19,"height":15},
+            "entities": [
+                {"objectId":1000,"kind":"selfPlayer","name":"Hero","x":288,"y":616},
+                {"objectId":3,"kind":"npc","name":"Assistant_Jane","x":284,"y":606,"questIds":[1]},
+                {"objectId":4,"kind":"npc","name":"CraftsLady_Jude","x":294,"y":619,"questIds":[1]},
+                {"objectId":2001,"kind":"monster","name":"Scarecrow","x":289,"y":616,"hp":8,"maxHp":20,"dead":false,"disposition":"hostile"}
+            ],
+            "questLog": [{
+                "questId":1,"title":"Assistant's Request","stage":"available",
+                "current":0,"required":1,"objective":"Deliver leaves"
+            }],
+            "activeNpcDialog": {
+                "npcObjectId":3,"npcName":"Assistant_Jane","title":"Assistant's Request",
+                "body":["Please help."],"footer":"","links":[{"text":"Accept","target":"@AcceptQuest"}]
+            },
+            "groundDrops": [{"objectId":9001,"name":"GingerTea","quantity":1,"x":288,"y":616,"sourceMonster":"Scarecrow"}]
+        })
+    }
+
+    fn definition_packet() -> PacketEvent {
+        PacketEvent::NewQuestInfo(crate::native_protocol::NewQuestInfo {
+            quest_id: Some(1),
+            payload: json!({
+                "id":1,
+                "name":"Assistant's Request",
+                "descriptionLines":["Welcome to {Border Village/Yellow}"],
+                "objectives":[{"text":"Transport {CannibalLeaves/LightSteelBlue}"}],
+                "rewards":{"experience":10,"items":[{"itemIndex":658,"name":"(HP)DrugSmall"}]},
+                "info":{"index":1,"npc_index":3,"finish_npc_index":4}
+            }),
+        })
+    }
+
+    #[test]
+    fn adapter_merges_definition_with_authoritative_snapshot() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_packet(&definition_packet());
+        let snapshot = adapter.snapshot(&gameplay_payload());
+
+        let quest = &snapshot.quests.active_quests[0];
+        assert_eq!(quest.quest_index, 1);
+        assert_eq!(quest.accept_npc_index, Some(3));
+        assert_eq!(quest.finish_npc_index, Some(4));
+        assert_eq!(quest.npc_name.as_deref(), Some("Assistant - Jane"));
+        assert_eq!(quest.objectives[0].text, "Deliver leaves");
+        assert_eq!(quest.rewards.len(), 2);
+        assert_eq!(quest.status, QuestStatus::NotStarted);
+    }
+
+    #[test]
+    fn snapshot_exposes_real_dialog_target_combat_and_drop_ids() {
+        let snapshot = NativeGameplayAdapter::default().snapshot(&gameplay_payload());
+        assert_eq!(snapshot.dialog.npc_object_id, Some(3));
+        assert_eq!(snapshot.dialog.options[0].option_id, "@AcceptQuest");
+        assert_eq!(
+            snapshot.nearby_npcs.nearest().map(|npc| npc.object_id),
+            Some(4)
+        );
+        assert_eq!(
+            snapshot
+                .combat_target
+                .target
+                .as_ref()
+                .map(|target| target.object_id),
+            Some(2001)
+        );
+        assert_eq!(snapshot.ground_pickups.recent[0].object_id, Some(9001));
+    }
+
+    #[test]
+    fn fallback_target_uses_only_live_hostile_entities() {
+        let mut payload = gameplay_payload();
+        payload["selectedObjectId"] = Value::Null;
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId":2002,"kind":"monster","name":"Guard","x":288,"y":615,
+                "hp":9999,"maxHp":9999,"dead":false,"disposition":"friendly"
+            }));
+        let snapshot = NativeGameplayAdapter::default().snapshot(&payload);
+        assert_eq!(
+            snapshot
+                .combat_target
+                .target
+                .as_ref()
+                .map(|target| target.object_id),
+            Some(2001)
+        );
+    }
+
+    #[test]
+    fn stale_selected_target_does_not_override_a_nearer_hostile() {
+        let mut payload = gameplay_payload();
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId":2003,"kind":"monster","name":"Deer","x":288,"y":616,
+                "hp":25,"maxHp":25,"dead":false,"disposition":"hostile"
+            }));
+
+        let snapshot = NativeGameplayAdapter::default().snapshot(&payload);
+        assert_eq!(
+            snapshot
+                .combat_target
+                .target
+                .as_ref()
+                .map(|target| target.object_id),
+            Some(2003),
+            "the native F-key target should follow the nearest live hostile instead of a stale server selection"
+        );
+    }
+
+    #[test]
+    fn selected_town_guard_is_not_exposed_as_a_combat_target() {
+        let mut payload = gameplay_payload();
+        payload["selectedObjectId"] = json!(2002);
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId":2002,"kind":"monster","name":"Guard","x":288,"y":615,
+                "hp":9999,"maxHp":9999,"dead":false,"disposition":"hostile"
+            }));
+
+        let snapshot = NativeGameplayAdapter::default().snapshot(&payload);
+        assert_eq!(
+            snapshot
+                .combat_target
+                .target
+                .as_ref()
+                .map(|target| target.object_id),
+            Some(2001),
+            "the nearest real hostile should replace a protected selected guard"
+        );
+    }
+
+    #[test]
+    fn active_quest_monster_is_preferred_over_a_nearer_unrelated_hostile() {
+        let mut payload = gameplay_payload();
+        payload["selectedObjectId"] = Value::Null;
+        payload["questLog"] = json!([{
+            "questId": 2,
+            "title": "CraftsLady's Request",
+            "stage": "inProgress",
+            "objective": "Obtain Ginger Tea from Scarecrows."
+        }]);
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId":2003,"kind":"monster","name":"Deer","x":288,"y":616,
+                "hp":25,"maxHp":25,"dead":false,"disposition":"hostile"
+            }));
+
+        let snapshot = NativeGameplayAdapter::default().snapshot(&payload);
+        assert_eq!(
+            snapshot
+                .combat_target
+                .target
+                .as_ref()
+                .map(|target| target.object_id),
+            Some(2001)
+        );
+    }
+
+    #[test]
+    fn user_location_overlays_stale_personal_snapshot() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserLocation".to_owned(),
+            payload: json!({"x":289,"y":615,"direction":"UpRight"}),
+        });
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+
+        assert_eq!(payload["entities"][0]["x"], json!(289));
+        assert_eq!(payload["entities"][0]["y"], json!(615));
+        assert_eq!(payload["entities"][0]["direction"], json!("UpRight"));
+        assert_eq!(payload["sceneView"]["center"]["x"], json!(289));
+        assert_eq!(payload["sceneView"]["center"]["y"], json!(615));
+    }
+
+    #[test]
+    fn set_generation_clears_zone_and_resets_sequences() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2001,
+                "location": {"x": 10, "y": 10},
+                "name": "Scarecrow"
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "DamageIndicator".to_owned(),
+            payload: json!({
+                "objectId": 2001,
+                "damage": 3,
+                "damageType": 0,
+                "typed": true
+            }),
+        }));
+        assert!(!adapter.zone_entities.is_empty());
+        assert!(!adapter.damage_events.is_empty());
+        adapter.set_generation(7);
+        assert_eq!(adapter.generation, 7);
+        assert!(adapter.zone_entities.is_empty());
+        assert!(adapter.damage_events.is_empty());
+        assert!(adapter.effect_events.is_empty());
+        assert_eq!(adapter.effect_sequence, 0);
+        assert_eq!(adapter.animation_sequence, 0);
+        assert_eq!(adapter.damage_sequence, 0);
+        assert!(!should_apply_gameplay_snapshot(
+            NativeShellScreen::ConnectionLost
+        ));
+        assert!(!should_apply_gameplay_snapshot(NativeShellScreen::Login));
+        assert!(should_apply_gameplay_snapshot(NativeShellScreen::InGame));
+        assert!(should_apply_gameplay_snapshot(
+            NativeShellScreen::StartingGame
+        ));
+    }
+
+    #[test]
+    fn movement_and_combat_packets_emit_monotonic_animation_hints() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+            x: 288,
+            y: 616,
+            direction: Some("Down".to_owned()),
+        });
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserLocation".to_owned(),
+            payload: json!({"x":289,"y":616,"direction":"Right"}),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".to_owned(),
+            payload: json!({
+                "objectId":2001,
+                "location":{"x":289,"y":615},
+                "direction":"Down"
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectStruck".to_owned(),
+            payload: json!({
+                "objectId":2001,
+                "location":{"x":289,"y":615},
+                "direction":"Down"
+            }),
+        }));
+
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(
+            payload["entities"][0]["_nativeAnimationAction"],
+            json!("walking")
+        );
+        assert_eq!(payload["entities"][0]["_nativeAnimationSequence"], json!(1));
+        let monster = payload["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2001))
+            .expect("monster");
+        assert_eq!(monster["_nativeAnimationAction"], json!("struck"));
+        assert_eq!(monster["_nativeAnimationSequence"], json!(3));
+    }
+
+    #[test]
+    fn damage_indicator_preserves_authoritative_damage_fields_once() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectStruck".to_owned(),
+            payload: json!({
+                "objectId":2001,
+                "location":{"x":289,"y":615},
+                "direction":"Down"
+            }),
+        }));
+        assert!(adapter
+            .snapshot(&gameplay_payload())
+            .damage_events
+            .is_empty());
+
+        let packet = PacketEvent::Other {
+            packet: "DamageIndicator".to_owned(),
+            payload: json!({
+                "objectId":2001,
+                "damage":7,
+                "damageType":2,
+                "typed":true
+            }),
+        };
+        assert!(adapter.observe_packet(&packet));
+        let snapshot = adapter.snapshot(&gameplay_payload());
+        assert_eq!(
+            snapshot.damage_events,
+            vec![NativeDamageEvent {
+                sequence: 1,
+                object_id: 2001,
+                damage: 7,
+                damage_type: 2,
+            }]
+        );
+        assert_eq!(adapter.snapshot(&gameplay_payload()).damage_events.len(), 1);
+    }
+
+    #[test]
+    fn self_run_death_and_revive_keep_distinct_animation_sequences() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+            x: 288,
+            y: 616,
+            direction: Some("Down".to_owned()),
+        });
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserLocation".to_owned(),
+            payload: json!({"x":290,"y":616,"direction":"Right"}),
+        }));
+        let mut running = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut running);
+        assert_eq!(
+            running["entities"][0]["_nativeAnimationAction"],
+            json!("running")
+        );
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "Death".to_owned(),
+            payload: json!({"location":{"x":290,"y":616},"direction":"Right"}),
+        }));
+        let mut dead = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut dead);
+        assert_eq!(dead["entities"][0]["_nativeAnimationAction"], json!("die"));
+        assert_eq!(dead["entities"][0]["_nativeAnimationSequence"], json!(2));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "Revived".to_owned(),
+            payload: json!({"location":{"x":288,"y":616},"direction":"Down"}),
+        }));
+        let mut revived = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut revived);
+        assert_eq!(
+            revived["entities"][0]["_nativeAnimationAction"],
+            json!("revive")
+        );
+        assert_eq!(revived["entities"][0]["_nativeAnimationSequence"], json!(3));
+    }
+
+    #[test]
+    fn newer_self_combat_packet_overrides_older_movement_hint() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+            x: 288,
+            y: 616,
+            direction: Some("Down".to_owned()),
+        });
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserLocation".to_owned(),
+            payload: json!({"x":289,"y":616,"direction":"Right"}),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".to_owned(),
+            payload: json!({
+                "objectId":1000,
+                "location":{"x":289,"y":616},
+                "direction":"Right"
+            }),
+        }));
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(
+            payload["entities"][0]["_nativeAnimationAction"],
+            json!("attack1")
+        );
+        assert_eq!(payload["entities"][0]["_nativeAnimationSequence"], json!(2));
+    }
+
+    #[test]
+    fn packet_first_monster_health_and_tombstone_override_stale_snapshot() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHealth".to_owned(),
+            payload: json!({"objectId":2001,"percent":25}),
+        }));
+        let mut damaged = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut damaged);
+        let monster = damaged["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2001))
+            .expect("monster");
+        assert_eq!(monster["hp"], json!(5));
+        assert_eq!(monster["maxHp"], json!(20));
+        assert_eq!(monster["dead"], json!(false));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRemove".to_owned(),
+            payload: json!({"objectId":2001}),
+        }));
+        let mut stale = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut stale);
+        assert!(!stale["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .any(|entity| entity["objectId"] == json!(2001)));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId":2001,"name":"Scarecrow","location":{"x":300,"y":598},
+                "direction":"DownRight","dead":false
+            }),
+        }));
+        adapter.apply_authoritative_overlay(&mut stale);
+        let respawned = stale["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2001))
+            .expect("packet respawn");
+        assert_eq!(respawned["kind"], json!("monster"));
+        assert_eq!(respawned["x"], json!(300));
+        assert_eq!(respawned["y"], json!(598));
+    }
+
+    #[test]
+    fn packet_first_self_health_updates_hud_fields_and_self_entity() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHealth".to_owned(),
+            payload: json!({"objectId":1000,"percent":50}),
+        }));
+        let mut payload = gameplay_payload();
+        payload["playerHp"] = json!(18);
+        payload["playerMaxHp"] = json!(18);
+        adapter.apply_authoritative_overlay(&mut payload);
+
+        assert_eq!(payload["playerHp"], json!(9));
+        assert_eq!(payload["entities"][0]["hp"], json!(9));
+        assert_eq!(payload["entities"][0]["maxHp"], json!(18));
+        assert_eq!(payload["entities"][0]["dead"], json!(false));
+    }
+
+    #[test]
+    fn self_death_packet_overrides_stale_full_health_snapshot() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "Death".to_owned(),
+            payload: json!({"location":{"x":288,"y":616},"direction":"Down"}),
+        }));
+        let mut payload = gameplay_payload();
+        payload["playerHp"] = json!(18);
+        payload["playerMaxHp"] = json!(18);
+        adapter.apply_authoritative_overlay(&mut payload);
+
+        assert_eq!(payload["playerHp"], json!(0));
+        assert_eq!(payload["entities"][0]["hp"], json!(0));
+        assert_eq!(payload["entities"][0]["dead"], json!(true));
+    }
+
+    #[test]
+    fn packet_first_ground_drop_spawn_and_remove_override_snapshot() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectGold".to_owned(),
+            payload: json!({"objectId":9100,"gold":7,"location":{"x":289,"y":616}}),
+        }));
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        let gold = payload["groundDrops"]
+            .as_array()
+            .expect("drops")
+            .iter()
+            .find(|drop| drop["objectId"] == json!(9100))
+            .expect("packet gold");
+        assert_eq!(gold["name"], json!("Gold"));
+        assert_eq!(gold["quantity"], json!(7));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRemove".to_owned(),
+            payload: json!({"objectId":9100}),
+        }));
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert!(!payload["groundDrops"]
+            .as_array()
+            .expect("drops")
+            .iter()
+            .any(|drop| drop["objectId"] == json!(9100)));
+    }
+
+    #[test]
+    fn crystal_markup_keeps_visible_label() {
+        assert_eq!(
+            strip_crystal_markup("Take {CannibalLeaves/LightSteelBlue} to {CraftLady/LimeGreen}"),
+            "Take CannibalLeaves to CraftLady"
+        );
+    }
+
+    #[test]
+    fn zone_entity_tiles_merges_world_payload_and_zone_overlay() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let payload = json!({
+            "playerObjectId": 1000,
+            "entities": [
+                {"objectId": 1000, "kind": "selfPlayer", "x": 10, "y": 10},
+                {"objectId": 2001, "kind": "monster", "x": 12, "y": 10}
+            ]
+        });
+        let snapshot = adapter.snapshot(&payload);
+        assert_eq!(snapshot.zone_entity_tiles.get(&1000), Some(&(10, 10)));
+        assert_eq!(snapshot.zone_entity_tiles.get(&2001), Some(&(12, 10)));
+
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectWalk".to_owned(),
+            payload: json!({"objectId": 2001, "location": {"x": 20, "y": 20}, "direction": "Down"}),
+        });
+        let snapshot2 = adapter.snapshot(&payload);
+        assert_eq!(snapshot2.zone_entity_tiles.get(&2001), Some(&(20, 20)));
+        assert_eq!(snapshot2.zone_entity_tiles.get(&1000), Some(&(10, 10)));
+    }
+
+    #[test]
+    fn zone_entity_tiles_supports_player_object_id_without_zone_packet() {
+        let adapter = NativeGameplayAdapter::default();
+        let payload = json!({
+            "playerObjectId": 1000,
+            "entities": [
+                {"objectId": 1000, "kind": "player", "x": 5, "y": 5},
+                {"objectId": 2001, "kind": "monster", "x": 7, "y": 5}
+            ]
+        });
+        let snapshot = adapter.snapshot(&payload);
+        assert!(snapshot.zone_entity_tiles.contains_key(&1000));
+        assert!(snapshot.zone_entity_tiles.contains_key(&2001));
+    }
+
+    fn click_context() -> CrystalWorldClickContext {
+        CrystalWorldClickContext {
+            in_game: true,
+            world_actions_blocked: false,
+            player_hp: Some(18),
+            player_max_hp: Some(20),
+            player_x: 10,
+            player_y: 11,
+            target: Some(CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 12,
+                y: 13,
+                dead: Some(false),
+                ai: Some(0),
+                harvestable: Some(false),
+            }),
+            alt: false,
+            shift: false,
+            class: Some("Archer".to_owned()),
+            has_class_weapon: Some(true),
+            riding_mount: Some(false),
+            dazed: Some(false),
+            fishing: Some(false),
+            target_in_range: Some(true),
+        }
+    }
+
+    #[test]
+    fn crystal_click_semantics_match_shift_and_normal_archer_range_branches() {
+        let mut context = click_context();
+        assert!(matches!(
+            resolve_crystal_world_click(&context),
+            Some(NativeOutboundCommand::RangeAttack {
+                direction,
+                x: 10,
+                y: 11,
+                target_id: 2001,
+                target_x: 12,
+                target_y: 13,
+            }) if direction == "downright"
+        ));
+
+        context.shift = true;
+        assert!(matches!(
+            resolve_crystal_world_click(&context),
+            Some(NativeOutboundCommand::RangeAttack {
+                target_id: 2001,
+                ..
+            })
+        ));
+
+        context.class = Some("Warrior".to_owned());
+        assert!(matches!(
+            resolve_crystal_world_click(&context),
+            Some(NativeOutboundCommand::AttackDirection { direction, spell: None })
+                if direction == "downright"
+        ));
+    }
+
+    #[test]
+    fn crystal_alt_click_delegates_corpse_validation_and_requires_monster_ai_and_no_mount() {
+        let mut context = click_context();
+        context.alt = true;
+        // GameScene.cs:11559-11565 does not inspect corpse/dead locally;
+        // Harvest is sent and the server decides whether the target is valid.
+        context.target.as_mut().unwrap().dead = None;
+        context.target.as_mut().unwrap().harvestable = None;
+        assert!(matches!(
+            resolve_crystal_world_click(&context),
+            Some(NativeOutboundCommand::Harvest { direction })
+                if direction == "downright"
+        ));
+
+        context.riding_mount = None;
+        assert!(resolve_crystal_world_click(&context).is_none());
+        context.riding_mount = Some(false);
+        context.target.as_mut().unwrap().ai = None;
+        assert!(resolve_crystal_world_click(&context).is_none());
+    }
+
+    #[test]
+    fn crystal_normal_range_click_fails_closed_when_authoritative_state_is_unknown() {
+        let cases: [(&str, fn(&mut CrystalWorldClickContext)); 4] = [
+            ("class", |context: &mut CrystalWorldClickContext| {
+                context.class = None;
+            }),
+            ("class weapon", |context: &mut CrystalWorldClickContext| {
+                context.has_class_weapon = None;
+            }),
+            ("mount", |context: &mut CrystalWorldClickContext| {
+                context.riding_mount = None;
+            }),
+            ("fishing", |context: &mut CrystalWorldClickContext| {
+                context.fishing = None;
+            }),
+        ];
+        for (label, mutate) in cases {
+            let mut context = click_context();
+            mutate(&mut context);
+            assert!(
+                resolve_crystal_world_click(&context).is_none(),
+                "missing {label} state leaked range intent"
+            );
+        }
+    }
+
+    #[test]
+    fn crystal_shift_checks_dazed_but_normal_archer_branch_does_not() {
+        let mut context = click_context();
+        context.dazed = Some(true);
+        assert!(matches!(
+            resolve_crystal_world_click(&context),
+            Some(NativeOutboundCommand::RangeAttack {
+                target_id: 2001,
+                ..
+            })
+        ));
+
+        context.shift = true;
+        assert!(resolve_crystal_world_click(&context).is_none());
+        context.dazed = None;
+        assert!(resolve_crystal_world_click(&context).is_none());
+    }
+
+    #[test]
+    fn crystal_normal_archer_blocks_fishing_but_shift_keeps_crystal_semantics() {
+        let mut context = click_context();
+        context.fishing = Some(true);
+        assert!(resolve_crystal_world_click(&context).is_none());
+
+        context.shift = true;
+        assert!(matches!(
+            resolve_crystal_world_click(&context),
+            Some(NativeOutboundCommand::RangeAttack {
+                target_id: 2001,
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn crystal_archer_range_boundary_allows_nine_tiles_and_blocks_ten() {
+        for (distance, expected_in_range) in [(9, true), (10, false)] {
+            let target_x = 10 + distance;
+            let mut state = NativeWorldClickState {
+                player_x: 10,
+                player_y: 10,
+                class: Some("Archer".to_owned()),
+                has_class_weapon: Some(true),
+                riding_mount: Some(false),
+                dazed: Some(false),
+                fishing: Some(false),
+                ..Default::default()
+            };
+            state.targets.insert(
+                2001,
+                CrystalWorldClickTarget {
+                    kind: EntityKind::Monster,
+                    object_id: 2001,
+                    x: target_x,
+                    y: 10,
+                    dead: Some(false),
+                    ai: Some(0),
+                    harvestable: None,
+                },
+            );
+            let entities = EntityModelSet {
+                entities: vec![
+                    mir2_client_bevy::entities::EntityModel {
+                        object_id: "1000".to_owned(),
+                        kind: EntityKind::SelfPlayer,
+                        name: "Archer".to_owned(),
+                        x: 10,
+                        y: 10,
+                        level: Some(20),
+                        direction: Some("right".to_owned()),
+                    },
+                    mir2_client_bevy::entities::EntityModel {
+                        object_id: "2001".to_owned(),
+                        kind: EntityKind::Monster,
+                        name: "Range target".to_owned(),
+                        x: target_x,
+                        y: 10,
+                        level: Some(1),
+                        direction: Some("left".to_owned()),
+                    },
+                ],
+            };
+            let read_model = UiReadModel {
+                player: mir2_client_bevy::read_model::PlayerStats {
+                    hp: 20,
+                    max_hp: 20,
+                    ..Default::default()
+                },
+            };
+            let context = state
+                .context_for(2001, false, false, Some(&entities), Some(&read_model))
+                .expect("authoritative player and target should form click context");
+            assert_eq!(context.target_in_range, Some(expected_in_range));
+            assert_eq!(
+                matches!(
+                    resolve_crystal_world_click(&context),
+                    Some(NativeOutboundCommand::RangeAttack {
+                        target_id: 2001,
+                        ..
+                    })
+                ),
+                expected_in_range,
+                "distance {distance} must follow Crystal MaxAttackRange=9"
+            );
+        }
+    }
+
+    #[test]
+    fn crystal_click_keeps_modal_dead_and_non_ingame_gates() {
+        for mutate in [
+            |context: &mut CrystalWorldClickContext| context.world_actions_blocked = true,
+            |context: &mut CrystalWorldClickContext| context.in_game = false,
+            |context: &mut CrystalWorldClickContext| context.player_hp = Some(0),
+            |context: &mut CrystalWorldClickContext| context.player_max_hp = Some(0),
+        ] {
+            let mut context = click_context();
+            mutate(&mut context);
+            assert!(resolve_crystal_world_click(&context).is_none());
+        }
+    }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { playOriginalSoundId } from "../../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
@@ -67,11 +67,6 @@ type DisplayWorld = {
   };
 };
 
-export type SystemMenuTransferOption = {
-  key: string;
-  label: string;
-};
-
 type SystemMenuButtonDefinition = {
   key: keyof typeof ORIGINAL_UI.menu.buttons;
   label: string;
@@ -85,11 +80,9 @@ export type SystemMenuSurfacePanel = SystemMenuFeaturePanelKey | SystemMenuSocia
 export function SystemMenuPanel({
   t,
   playerName,
-  playerPosition,
   mapTitle,
   mapFileName,
   inSafeZone,
-  transferOptions,
   inputProfile,
   gamepadFamily,
   questLogOpen,
@@ -98,16 +91,13 @@ export function SystemMenuPanel({
   onOpenPanel,
   onClose,
   onLogout,
-  onTransferMap,
   isPlatinum176 = false,
 }: {
   t: TranslateFn;
   playerName: string | null;
-  playerPosition: { x: number; y: number } | null;
   mapTitle: string | null;
   mapFileName: string | null;
   inSafeZone: boolean;
-  transferOptions: SystemMenuTransferOption[];
   inputProfile: Mir2InputProfile;
   gamepadFamily: Mir2GamepadFamily;
   questLogOpen: boolean;
@@ -116,12 +106,8 @@ export function SystemMenuPanel({
   onOpenPanel: (panel: SystemMenuSurfacePanel) => void;
   onClose: () => void;
   onLogout: () => void;
-  onTransferMap: (transferKey: string) => void;
   isPlatinum176?: boolean;
 }) {
-  const [qaMap, setQaMap] = useState(() => normalizeMapInput(mapFileName ?? "0"));
-  const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
-  const [qaY, setQaY] = useState(() => String(playerPosition?.y ?? 270));
   // Local reference overlay. The original options screen exposes a key list +
   // quick help next to the menu; this version also links back to the active
   // input profile's interactive tutorial.
@@ -158,19 +144,6 @@ export function SystemMenuPanel({
   const lateSystemButtons = allLateSystemButtons.filter(
     (button) => !isPlatinum176 || button.panel === "trade",
   );
-
-  function submitQaTransfer(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const map = normalizeMapInput(qaMap);
-    const x = parseFiniteInteger(qaX);
-    const y = parseFiniteInteger(qaY);
-    if (!map || x === null || y === null) {
-      return;
-    }
-
-    onTransferMap(`crystal:${map}:${x}:${y}`);
-  }
 
   return (
     <>
@@ -214,53 +187,12 @@ export function SystemMenuPanel({
         <button type="button" className="system-menu-close-hit" onClick={onClose} aria-label={t("ui.close")} />
       </section>
       {!isPlatinum176 ? (
-      <section className="system-menu-qa-panel" aria-label={t("ui.transfer", [], "Transfer controls")}>
+      <section className="system-menu-qa-panel" aria-label={t("ui.lateSystems", [], "Systems")}>
         <div className="system-menu-meta">
           <span>{playerName ?? "-"}</span>
           <span>{mapTitle ?? t("ui.map")}{mapFileName ? ` [${mapFileName}]` : ""}</span>
           <span>{inSafeZone ? t("ui.safeZone", [], "Safe Zone") : t("ui.combatZone", [], "Combat Zone")}</span>
         </div>
-        <div className="system-menu-transfer-list">
-          <div className="system-menu-transfer-title">{t("ui.transfer", [], "Transfer")}</div>
-          {transferOptions.map((option) => (
-            <button key={option.key} type="button" onClick={() => onTransferMap(option.key)}>
-              {option.label}
-            </button>
-          ))}
-        </div>
-        <form className="system-menu-qa-transfer" onSubmit={submitQaTransfer}>
-          <div className="system-menu-transfer-title">{t("ui.quickJump", [], "Quick Jump")}</div>
-          <label>
-            <span>{t("ui.map")}</span>
-            <input
-              value={qaMap}
-              onChange={(event) => setQaMap(event.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
-          <div className="system-menu-qa-transfer-coords">
-            <label>
-              <span>X</span>
-              <input
-                type="number"
-                value={qaX}
-                onChange={(event) => setQaX(event.target.value)}
-                inputMode="numeric"
-              />
-            </label>
-            <label>
-              <span>Y</span>
-              <input
-                type="number"
-                value={qaY}
-                onChange={(event) => setQaY(event.target.value)}
-                inputMode="numeric"
-              />
-            </label>
-            <button type="submit">{t("ui.go", [], "Go")}</button>
-          </div>
-        </form>
         <div className="system-menu-late-actions" aria-label="Late systems">
           <div className="system-menu-transfer-title">{t("ui.lateSystems", [], "Systems")}</div>
           {lateSystemButtons.map((button) => (
@@ -400,7 +332,6 @@ export function SystemMenuFeaturePanel({
   feature,
   playerName,
   world,
-  onRunStage5Command,
   onSendClientCommand,
   onClose,
 }: {
@@ -408,7 +339,6 @@ export function SystemMenuFeaturePanel({
   feature: SystemMenuSurfacePanel;
   playerName: string | null;
   world: DisplayWorld;
-  onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   onClose: () => void;
 }) {
@@ -457,7 +387,6 @@ export function SystemMenuFeaturePanel({
           panel={feature}
           playerName={playerName}
           world={world}
-          onRunStage5Command={onRunStage5Command}
           onSendClientCommand={onSendClientCommand}
         />
       )}
@@ -699,15 +628,6 @@ const infoStyle: Record<string, CSSProperties> = {
     textShadow: "1px 1px 0 #000",
   },
 };
-
-function normalizeMapInput(value: string) {
-  return value.trim().replace(/\.map$/i, "") || "0";
-}
-
-function parseFiniteInteger(value: string) {
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
 
 function stringRecordValue(record: Record<string, unknown> | null | undefined, keys: string[]) {
   if (!record) return null;

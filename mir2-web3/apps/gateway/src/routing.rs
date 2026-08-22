@@ -12,20 +12,20 @@ use mir2_game_data::crystal_monster_by_name;
 use mir2_protocol::{
     decode_server_packet, encode_server_packet, ClientPacket, MirDirection, MonsterInfo, NpcInfo,
     ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectPlayerInfo, Point,
-    ServerPacket, Spell,
+    ServerPacket, Spell, UserLocation,
 };
 use mir2_simulation::{
     intelligent_creature_allows_ground_drop, zone_ground_drop_snapshots_for_monster_at_tick,
-    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropLootSnapshot,
-    GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
-    SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
-    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
-    SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
-    WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
-    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
-    ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
-    ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
+    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GameShopPurchaseOutcome,
+    GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime, SessionId,
+    SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
+    SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
+    WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
+    WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneBossRewardAudit, ZoneCommand,
+    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
@@ -220,6 +220,37 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String>;
 
+    /// Execute one native-receipt purchase only after proving that this exact
+    /// command path can return the authoritative typed transaction outcome.
+    /// Generic Web/Crystal purchases intentionally continue through
+    /// `execute`, including against rolling old Zone Hosts.
+    fn execute_requiring_typed_game_shop_purchase_outcome(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        if !matches!(
+            request.command(),
+            WorldCommand::NativeGameShopPurchase(_)
+        ) {
+            return Err(
+                "typed GameShop outcome execution requires a native idempotent purchase"
+                    .to_string(),
+            );
+        }
+        if !self.supports_typed_game_shop_purchase_outcome(runtime) {
+            return Err(
+                "typed GameShop purchase outcome capability is unavailable before execution"
+                    .to_string(),
+            );
+        }
+        self.execute(runtime, request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        runtime.supports_typed_game_shop_purchase_outcome()
+    }
+
     fn world_snapshot(&self, runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         Ok(runtime.world_snapshot())
     }
@@ -290,6 +321,32 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String>;
 
+    fn execute_requiring_typed_game_shop_purchase_outcome(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        if !matches!(
+            request.command(),
+            WorldCommand::NativeGameShopPurchase(_)
+        ) {
+            return Err(
+                "typed GameShop outcome execution requires a native idempotent purchase"
+                    .to_string(),
+            );
+        }
+        if !self.supports_typed_game_shop_purchase_outcome() {
+            return Err(
+                "typed GameShop purchase outcome capability is unavailable before execution"
+                    .to_string(),
+            );
+        }
+        self.execute(request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        false
+    }
+
     fn world_snapshot(&self) -> Result<WorldSnapshot, String>;
 
     fn active_identity(&self) -> Result<Option<ActiveSessionIdentity>, String>;
@@ -357,6 +414,19 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
         self.transport.execute(request)
+    }
+
+    fn execute_requiring_typed_game_shop_purchase_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        self.transport
+            .execute_requiring_typed_game_shop_purchase_outcome(request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.transport.supports_typed_game_shop_purchase_outcome()
     }
 
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
@@ -733,6 +803,18 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         self.execute_request(request)
     }
 
+    fn supports_typed_game_shop_purchase_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.runtime
+            .lock()
+            .ok()
+            .and_then(|runtime| {
+                runtime
+                    .as_ref()
+                    .map(|runtime| runtime.supports_typed_game_shop_purchase_outcome())
+            })
+            .unwrap_or(false)
+    }
+
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         HostedZoneOwnerCommandClient::world_snapshot(self)
     }
@@ -792,6 +874,18 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
         self.execute_request(request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        self.runtime
+            .lock()
+            .ok()
+            .and_then(|runtime| {
+                runtime
+                    .as_ref()
+                    .map(|runtime| runtime.supports_typed_game_shop_purchase_outcome())
+            })
+            .unwrap_or(false)
     }
 
     fn world_snapshot(&self) -> Result<WorldSnapshot, String> {
@@ -2488,6 +2582,10 @@ impl SharedInProcessZoneState {
                             .insert(key, (position, direction));
                     }
                 }
+                ZoneOutbound::NpcTeleportCommit { .. } => {
+                    // Consumed atomically by execute_zone_npc_teleport before
+                    // ordinary outbound dispatch. It must never reach a socket.
+                }
                 ZoneOutbound::ConsumeShoutPermission {
                     session_id,
                     map_shout,
@@ -2836,6 +2934,12 @@ impl SharedInProcessZoneState {
             .values()
             .map(|presence| (presence.zone_object_id, presence.entity.name.clone()))
             .collect::<BTreeMap<_, _>>();
+        let native_monsters_by_object_id = self
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map(map_file_name))
+            .into_iter()
+            .map(|monster| (monster.object_id, monster))
+            .collect::<BTreeMap<_, _>>();
         let map = self.maps.entry(map_file_name.to_string()).or_default();
         for packet in packets {
             match packet {
@@ -2999,6 +3103,14 @@ impl SharedInProcessZoneState {
                             if entity.owner_name.is_none() {
                                 entity.owner_name = existing.owner_name.clone();
                             }
+                        }
+                        // ObjectMonster has no relationship field. Rehydrate
+                        // only from the live Zone authority; without one the
+                        // legacy packet remains Neutral/fail-closed.
+                        if let Some(monster) =
+                            native_monsters_by_object_id.get(&info.object_id)
+                        {
+                            reconcile_shared_entity_with_native_monster(map, &mut entity, monster);
                         }
                         if let Some(dead) = map.dead_entity_ids.get(&info.object_id) {
                             entity.dead = true;
@@ -4467,6 +4579,9 @@ fn reconcile_shared_entity_with_native_monster(
     entity.hp = Some(monster.hp.max(0));
     entity.max_hp = Some(monster.max_hp.max(1));
     entity.dead = monster.dead || monster.hp <= 0;
+    entity.disposition = monster
+        .disposition
+        .unwrap_or(WorldEntityDisposition::Neutral);
 
     if entity.dead {
         entity.hp = Some(0);
@@ -4545,12 +4660,20 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         class: None,
         gender: None,
         level: None,
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: None,
         max_hp: None,
         light: info.light,
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
-        disposition: world_entity_disposition_for_monster_ai(info.ai),
+        // ObjectMonster carries behaviour AI but no authoritative relationship.
+        // Keep legacy/missing producers fail-closed until a retained native
+        // snapshot supplies explicit disposition.
+        disposition: WorldEntityDisposition::Neutral,
         sprite: Some(simple_world_entity_sprite_snapshot(
             "Monster", info.image, 3,
         )),
@@ -4574,25 +4697,25 @@ fn world_entity_from_zone_monster_spawn(
         class: None,
         gender: None,
         level: Some(spawn.level),
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: Some(monster.hp),
         max_hp: Some(monster.max_hp),
         light: 0,
         name_colour_argb: spawn.name_colour_argb,
         dead: monster.dead,
-        disposition: world_entity_disposition_for_monster_ai(spawn.ai),
+        disposition: monster
+            .disposition
+            .unwrap_or(WorldEntityDisposition::Neutral),
         sprite: Some(simple_world_entity_sprite_snapshot(
             "Monster",
             spawn.image,
             3,
         )),
         quest_ids: Vec::new(),
-    }
-}
-
-fn world_entity_disposition_for_monster_ai(ai: u8) -> WorldEntityDisposition {
-    match ai {
-        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113 => WorldEntityDisposition::Neutral,
-        _ => WorldEntityDisposition::Hostile,
     }
 }
 
@@ -4648,6 +4771,7 @@ fn zone_monster_spawn_from_shared_entity(
             entity,
             entity.ai.or_else(|| template_ref.map(|monster| monster.ai)),
         ),
+        disposition: Some(entity.disposition),
         level: entity
             .level
             .or_else(|| template_ref.map(|monster| monster.level))
@@ -4694,6 +4818,13 @@ fn world_entity_from_object_player_info(
         class: Some(info.class),
         gender: Some(info.gender),
         level: Some(info.level),
+        // ObjectPlayerInfo does not carry these authoritative combat flags.
+        // Keep them unknown rather than fabricating a permissive `false`.
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: None,
         max_hp: None,
         light: info.light,
@@ -4718,6 +4849,11 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         class: None,
         gender: None,
         level: None,
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: None,
         max_hp: None,
         light: 10,
@@ -5530,6 +5666,9 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             local_ground_drop_zone_ids: BTreeMap::new(),
             retired_local_ground_drop_ids: BTreeSet::new(),
             owner_dead_entity_ids: BTreeSet::new(),
+            last_game_shop_purchase_outcome: None,
+            #[cfg(test)]
+            fail_next_npc_teleport_checkpoint_restore: false,
         })
     }
 }
@@ -5926,6 +6065,7 @@ fn shared_zone_owner_loop(
                     execution.map(|execution| WorldCommandExecution {
                         packets: execution.packets,
                         outcome: execution.outcome,
+                        game_shop_purchase_outcome: None,
                     })
                 });
                 let _ = request.response_sender.send(result);
@@ -6079,6 +6219,9 @@ struct SharedInProcessZoneSessionRuntime {
     local_ground_drop_zone_ids: BTreeMap<(String, u32), u32>,
     retired_local_ground_drop_ids: BTreeSet<(String, u32)>,
     owner_dead_entity_ids: BTreeSet<u32>,
+    last_game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
+    #[cfg(test)]
+    fail_next_npc_teleport_checkpoint_restore: bool,
 }
 
 pub(crate) fn shared_zone_movement_ingress(
@@ -6844,6 +6987,70 @@ impl SharedInProcessZoneSessionRuntime {
             }
         }
         Some(self_entity)
+    }
+
+    fn authoritative_zone_owner_correction(&self) -> Vec<ServerPacket> {
+        let snapshot = self.inner.world_snapshot();
+        let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
+            return Vec::new();
+        };
+        vec![ServerPacket::UserLocation {
+            location: UserLocation {
+                position: Point {
+                    x: self_entity.x,
+                    y: self_entity.y,
+                },
+                direction: self_entity.direction,
+            },
+        }]
+    }
+
+    /// Refresh one attack admission from the authenticated personal session at
+    /// the command boundary. This internal command has no BrowserCommand or
+    /// raw ClientPacket representation.
+    fn sync_authoritative_zone_combat_state(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Option<Vec<ServerPacket>> {
+        // `inner` is the authenticated personal SimulationSession runtime. Its
+        // WorldSnapshot is rebuilt from current ECS/resources on every call;
+        // optional predicates stay fail-closed rather than becoming `false`.
+        let snapshot = self.inner.world_snapshot();
+        let self_entity = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)?;
+        let class = self_entity.class?;
+        let has_class_weapon = self_entity.has_class_weapon?;
+        let riding_mount = self_entity.riding_mount?;
+        let mount_attack_allowed = self_entity.can_mount_attack?;
+        let fishing = self_entity.fishing?;
+        let dead = self_entity.dead || snapshot.player_hp? <= 0;
+        // Mirrors Simulation combat's complete attack-blocking set. These are
+        // authoritative active player buffs, not client-provided snapshot data.
+        let attack_blocked = snapshot.active_buffs.iter().any(|buff| {
+            matches!(
+                buff.key.as_str(),
+                "crystal-paralysis"
+                    | "crystal-dazed"
+                    | "crystal-stun"
+                    | "crystal-frozen"
+                    | "crystal-blindness"
+            )
+        });
+        Some(self.dispatch_zone_player_command(
+            ZoneCommand::sync_player_combat_state(
+                session_id.clone(),
+                class,
+                has_class_weapon,
+                riding_mount,
+                mount_attack_allowed,
+                dead,
+                attack_blocked,
+                fishing,
+            ),
+            false,
+        ))
     }
 
     fn sync_current_shared_ground_drops_to_zone(&mut self, session_id: &SessionId) {
@@ -7753,20 +7960,44 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
+        if matches!(
+            &attack.kind,
+            ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
+        )
+            && !is_player_target
+            && !attack
+                .monster
+                .as_ref()
+                .is_some_and(ZoneMonsterSpawn::is_authoritatively_hostile_to_player)
+        {
+            return self.authoritative_zone_owner_correction();
+        }
         let now_ms = Self::zone_now_ms();
-        let mut packets = if let Some(monster) = attack.monster.as_ref() {
-            self.dispatch_zone_player_command(
-                ZoneCommand::SpawnMonster {
-                    session_id: session_id.clone(),
-                    monster: monster.clone(),
-                    now_ms,
-                },
-                false,
-            )
+        let mut packets = if matches!(
+            &attack.kind,
+            ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
+        ) {
+            let Some(packets) = self.sync_authoritative_zone_combat_state(&session_id) else {
+                return self.authoritative_zone_owner_correction();
+            };
+            packets
         } else {
             Vec::new()
         };
+        let materialized_monster = attack.monster.take();
         if let ZoneNativePlayerAttackKind::Magic { spell, .. } = &attack.kind {
+            // Magic remains on its existing lifecycle. Only melee/range use
+            // the new admission+materialization atomic Zone transaction.
+            if let Some(monster) = materialized_monster.as_ref() {
+                packets.extend(self.dispatch_zone_player_command(
+                    ZoneCommand::SpawnMonster {
+                        session_id: session_id.clone(),
+                        monster: monster.clone(),
+                        now_ms,
+                    },
+                    false,
+                ));
+            }
             if gateway_zone_magic_requires_item_preflight_only(*spell)
                 && self
                     .inner
@@ -7814,32 +8045,63 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let command = match attack.kind {
             ZoneNativePlayerAttackKind::Melee { spell, attack_type } => {
-                ZoneCommand::PlayerAttackObject {
-                    session_id,
-                    object_id: attack.object_id,
-                    direction: attack.direction,
-                    spell,
-                    level: attack.level,
-                    attack_type,
-                    damage: attack.damage,
-                    now_ms,
+                if is_player_target {
+                    ZoneCommand::PlayerAttackObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        direction: attack.direction,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
+                } else {
+                    ZoneCommand::PlayerAttackMaterializedObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        monster: materialized_monster,
+                        direction: attack.direction,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
                 }
             }
             ZoneNativePlayerAttackKind::Range {
                 target,
                 spell,
                 attack_type,
-            } => ZoneCommand::PlayerRangeAttackObject {
-                session_id,
-                object_id: attack.object_id,
-                direction: attack.direction,
-                target,
-                spell,
-                level: attack.level,
-                attack_type,
-                damage: attack.damage,
-                now_ms,
-            },
+            } => {
+                if is_player_target {
+                    ZoneCommand::PlayerRangeAttackObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        direction: attack.direction,
+                        target,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
+                } else {
+                    ZoneCommand::PlayerRangeAttackMaterializedObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        monster: materialized_monster,
+                        direction: attack.direction,
+                        target,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
+                }
+            }
             ZoneNativePlayerAttackKind::Magic {
                 target,
                 spell,
@@ -8216,6 +8478,127 @@ impl SharedInProcessZoneSessionRuntime {
             .unwrap_or_default()
     }
 
+    fn execute_zone_npc_teleport(
+        &mut self,
+        session_id: SessionId,
+        object_id: u32,
+    ) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let Some(mut checkpoint) = self.inner.active_character_checkpoint() else {
+            return Vec::new();
+        };
+        let available_gold = self.inner.world_snapshot().gold;
+        if checkpoint.gold != available_gold {
+            return Vec::new();
+        }
+
+        let zone_state_handle = Arc::clone(&self.zone_state);
+        let mut zone_state = zone_state_handle
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(old_transform) = zone_state.zone_manager.player_transform(&session_id) else {
+            return Vec::new();
+        };
+        let mut outbounds = zone_state.zone_manager.handle(ZoneCommand::TeleportToNpc {
+            session_id: session_id.clone(),
+            object_id,
+            available_gold,
+        });
+        let commit = outbounds.iter().find_map(|outbound| match outbound {
+            ZoneOutbound::NpcTeleportCommit {
+                session_id: committed_session,
+                gold_cost,
+                map,
+            } if committed_session == &session_id => Some((*gold_cost, map.clone())),
+            _ => None,
+        });
+        let Some((gold_cost, map)) = commit else {
+            return Vec::new();
+        };
+        let Some(proposed_transform) = outbounds.iter().find_map(|outbound| match outbound {
+            ZoneOutbound::SaveTransform {
+                session_id: transformed_session,
+                position,
+                direction,
+            } if transformed_session == &session_id => Some((position.clone(), *direction)),
+            _ => None,
+        }) else {
+            let _ = zone_state
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: old_transform.0,
+                    direction: old_transform.1,
+                });
+            return Vec::new();
+        };
+        let Some(remaining_gold) = checkpoint.gold.checked_sub(gold_cost) else {
+            let _ = zone_state
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: old_transform.0,
+                    direction: old_transform.1,
+                });
+            return Vec::new();
+        };
+        checkpoint.gold = remaining_gold;
+        #[cfg(test)]
+        let force_checkpoint_failure =
+            std::mem::take(&mut self.fail_next_npc_teleport_checkpoint_restore);
+        #[cfg(not(test))]
+        let force_checkpoint_failure = false;
+        if force_checkpoint_failure
+            || self
+                .inner
+                .restore_active_character_checkpoint(&checkpoint)
+                .is_err()
+        {
+            let _ = zone_state
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: old_transform.0,
+                    direction: old_transform.1,
+                });
+            return Vec::new();
+        }
+        outbounds.retain(|outbound| !matches!(outbound, ZoneOutbound::NpcTeleportCommit { .. }));
+        let (zone_packets, transform, _, _, _, _, _) =
+            zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
+        drop(zone_state);
+
+        debug_assert_eq!(transform, Some(proposed_transform.clone()));
+        let (position, direction) = transform.unwrap_or(proposed_transform);
+        self.apply_zone_transform(Some((position.clone(), direction)));
+        let mut packets = vec![
+            ServerPacket::LoseGold { gold: gold_cost },
+            ServerPacket::MapChanged {
+                map_index: map.map_index,
+                file_name: map.file_name,
+                title: map.title,
+                mini_map: map.mini_map,
+                big_map: map.big_map,
+                lights: map.lights,
+                location: position.clone(),
+                direction,
+                map_dark_light: map.map_dark_light,
+                music: map.music,
+                weather: map.weather,
+            },
+            ServerPacket::UserLocation {
+                location: UserLocation {
+                    position,
+                    direction,
+                },
+            },
+        ];
+        packets.extend(zone_packets);
+        packets
+    }
+
     fn execute_zone_player_packet(&mut self, packet: &ClientPacket) -> Option<Vec<ServerPacket>> {
         let session_id = self.current_zone_session_id()?;
         match packet {
@@ -8241,6 +8624,9 @@ impl SharedInProcessZoneSessionRuntime {
                     packets.extend(self.apply_zone_current_position_map_transfer());
                 }
                 Some(packets)
+            }
+            ClientPacket::TeleportToNpc { object_id } => {
+                Some(self.execute_zone_npc_teleport(session_id, *object_id))
             }
             ClientPacket::Chat {
                 message,
@@ -8881,6 +9267,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        self.last_game_shop_purchase_outcome = None;
         let removes_presence = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::Disconnect | ClientPacket::LogOut)
@@ -8927,6 +9314,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
         );
         let is_world_tick = matches!(&command, WorldCommand::Tick);
+        let is_game_shop_buy = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. })
+                | WorldCommand::NativeGameShopPurchase(_)
+        );
         let skip_tail_zone_snapshot = is_low_latency_zone_packet || is_world_tick;
         let forwards_delayed_player_action_packets = matches!(&command, WorldCommand::Tick);
         let is_trade_cancel = matches!(
@@ -9061,7 +9453,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             ) => self.local_self_object_id(),
             _ => None,
         };
-        let unavailable_shared_target = !routes_zone_native_player_attack
+        let mut unavailable_shared_target = !routes_zone_native_player_attack
             && match &command {
                 WorldCommand::Attack { object_id } => {
                     !self.shared_action_target_available(*object_id)
@@ -9118,6 +9510,32 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             // disagree with the Zone snapshot.
             self.force_inner_to_current_zone_vitals();
         }
+        // Harvest is admitted by the shared Zone from freshly synchronized,
+        // trusted session state before any corpse is materialized in the
+        // private compatibility runtime. Missing identity/state fails closed.
+        let shared_harvest_rejected = if shared_harvest_direction.is_some() {
+            match self.current_zone_session_id() {
+                Some(session_id) => {
+                    let synced = self
+                        .sync_authoritative_zone_combat_state(&session_id)
+                        .map(|sync_packets| {
+                            packets.extend(sync_packets);
+                        })
+                        .is_some();
+                    !synced
+                        || !self
+                            .zone_state
+                            .lock()
+                            .expect("shared zone presence mutex should not be poisoned")
+                            .zone_manager
+                            .player_harvest_admitted(&session_id, Self::zone_now_ms())
+                }
+                None => true,
+            }
+        } else {
+            false
+        };
+        unavailable_shared_target |= shared_harvest_rejected;
         if is_world_tick
             && self.recent_zone_player_movement_input_window_active(Self::zone_now_ms())
         {
@@ -9159,7 +9577,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             None
         };
         let mut command_packets = if unavailable_shared_target {
-            Vec::new()
+            if shared_harvest_direction.is_some() {
+                self.authoritative_zone_owner_correction()
+            } else {
+                Vec::new()
+            }
         } else if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
         } else if is_trade_cancel {
@@ -9196,8 +9618,14 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             } else {
                 shared_packets
             }
+        } else if shared_harvest_direction.is_some() {
+            self.inner.execute(command)?
         } else if let Some(attack) = zone_native_player_attack {
             self.execute_zone_native_player_attack(attack)
+        } else if is_game_shop_buy {
+            let execution = self.inner.execute_with_outcome(command)?;
+            self.last_game_shop_purchase_outcome = execution.game_shop_purchase_outcome;
+            execution.packets
         } else if let WorldCommand::ClientPacket(packet) = &command {
             if let Some(zone_packets) = self.execute_zone_player_packet(packet) {
                 zone_packets
@@ -9340,6 +9768,42 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }
         self.filter_stale_owner_dead_entity_packets(&mut packets);
         Ok(packets)
+    }
+
+    fn execute_with_outcome(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let command_kind = command.kind();
+        let skips_snapshot = matches!(
+            &command,
+            WorldCommand::ClientPacket(
+                ClientPacket::KeepAlive { .. }
+                    | ClientPacket::Turn { .. }
+                    | ClientPacket::Walk { .. }
+                    | ClientPacket::Run { .. }
+            ) | WorldCommand::Tick
+        );
+        let packets = self.execute(command)?;
+        let packet_count = packets.len();
+        Ok(WorldCommandExecution {
+            packets,
+            outcome: WorldCommandOutcome {
+                command_kind,
+                packet_count,
+                snapshot_tick: if skips_snapshot {
+                    0
+                } else {
+                    self.world_snapshot().tick
+                },
+                active_identity: self.active_identity(),
+            },
+            game_shop_purchase_outcome: self.last_game_shop_purchase_outcome.take(),
+        })
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        self.inner.supports_typed_game_shop_purchase_outcome()
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {
@@ -9859,8 +10323,9 @@ mod tests {
         SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
         SharedNpcSavedValue, SharedTradeOffer, WorldCommand, WorldEntityDisposition,
         WorldEntityKind, WorldEntitySnapshot, WorldRuntime, ZoneBossRewardAudit, ZoneChatProfile,
-        ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-        ZoneOutbound, ZonePlayerCombatStats, ZoneRuntimeHandle,
+        ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense,
+        ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination,
+        ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime, ZoneRuntimeHandle,
     };
     use std::{
         collections::{BTreeMap, BTreeSet},
@@ -11087,7 +11552,7 @@ mod tests {
     }
 
     #[test]
-    fn world_entity_from_monster_info_preserves_neutral_ai_disposition() {
+    fn world_entity_from_monster_info_fails_closed_without_explicit_disposition() {
         let mut guard_info = shared_monster_info(9003, 0);
         guard_info.name = "Royal_Guard".to_string();
         guard_info.ai = 6;
@@ -11098,8 +11563,8 @@ mod tests {
         let mut hostile_info = shared_monster_info(9004, 0);
         hostile_info.ai = 0;
 
-        let hostile = world_entity_from_monster_info(&hostile_info);
-        assert_eq!(hostile.disposition, WorldEntityDisposition::Hostile);
+        let unknown = world_entity_from_monster_info(&hostile_info);
+        assert_eq!(unknown.disposition, WorldEntityDisposition::Neutral);
     }
 
     #[test]
@@ -11225,9 +11690,8 @@ mod tests {
         assert_eq!(entity.kind, WorldEntityKind::Monster);
         assert_eq!((entity.x, entity.y), (331, 270));
         assert_eq!(entity.direction, MirDirection::Down);
-        // ai 6 is a Crystal Neutral AI (see monster_disposition_for_ai /
-        // world_entity_disposition_for_monster_ai); the shared-zone packet path
-        // must record it as Neutral, matching world_entity_from_monster_info.
+        // ObjectMonster has no authoritative relationship field, so the
+        // shared-zone packet path remains fail-closed.
         assert_eq!(entity.disposition, WorldEntityDisposition::Neutral);
         assert_eq!(
             entity
@@ -11248,6 +11712,7 @@ mod tests {
             name_colour_argb: -1,
             image: 29,
             ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile),
             level: 30,
             max_hp: 285,
             hp: 285,
@@ -11319,6 +11784,7 @@ mod tests {
             name_colour_argb: -1,
             image: 29,
             ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile),
             level: 30,
             max_hp: 285,
             hp: 285,
@@ -15628,6 +16094,22 @@ mod tests {
             MirDirection::Left,
         );
 
+        let unrelated_private_ai_before = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .filter(|entity| {
+                entity.kind == WorldEntityKind::Monster && entity.object_id != corpse.object_id
+            })
+            .map(|entity| {
+                (
+                    entity.object_id,
+                    (entity.x, entity.y, entity.hp, entity.dead),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+
         let packets = runtime
             .execute(WorldCommand::ClientPacket(ClientPacket::Harvest {
                 direction: MirDirection::Left,
@@ -15658,6 +16140,35 @@ mod tests {
                 .any(|entity| entity.object_id == unrelated_shared_monster.object_id),
             "Harvest must not materialize and tick unrelated shared monsters"
         );
+        let unrelated_private_ai_after = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .filter(|entity| {
+                entity.kind == WorldEntityKind::Monster && entity.object_id != corpse.object_id
+            })
+            .map(|entity| {
+                (
+                    entity.object_id,
+                    (entity.x, entity.y, entity.hp, entity.dead),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        for (object_id, before) in &unrelated_private_ai_before {
+            assert_eq!(
+                unrelated_private_ai_after.get(object_id),
+                Some(before),
+                "Harvest must not advance unrelated private monster AI {object_id}"
+            );
+            assert!(!packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectWalk { movement }
+                    | ServerPacket::ObjectRun { movement }
+                    | ServerPacket::ObjectTurn { movement }
+                    if movement.object_id == *object_id
+            )));
+        }
 
         let mut all_packets = packets;
         for _ in 0..6 {
@@ -16916,7 +17427,12 @@ mod tests {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
         let mut second = shared_session_runtime(zone_state.clone());
-        start_demo_runtime(&mut first);
+        start_new_runtime_with_class(&mut first, "first-range", "Arrow", MirClass::Archer);
+        equip_runtime_crystal_items_for_class(
+            &mut first,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
         start_new_runtime(&mut second, "second-range", "Blade");
         let target = first
             .inner
@@ -16924,7 +17440,9 @@ mod tests {
             .entities
             .into_iter()
             .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
         let attacker_position = Point {
@@ -16988,7 +17506,12 @@ mod tests {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
         let mut second = shared_session_runtime(zone_state.clone());
-        start_demo_runtime(&mut first);
+        start_new_runtime_with_class(&mut first, "first-range-window", "Arrow", MirClass::Archer);
+        equip_runtime_crystal_items_for_class(
+            &mut first,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
         start_new_runtime(&mut second, "second-range-window", "Blade");
         let target = first
             .inner
@@ -16996,7 +17519,9 @@ mod tests {
             .entities
             .into_iter()
             .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
         let attacker_position = Point {
@@ -17058,6 +17583,512 @@ mod tests {
     }
 
     #[test]
+    fn gateway_refreshes_trusted_range_admission_and_rejects_unauthorized_sessions() {
+        for (case, account_id, name, class, weapon) in [
+            (
+                "warrior",
+                "range-war",
+                "DenyWar",
+                MirClass::Warrior,
+                "WoodenSword",
+            ),
+            (
+                "archer-without-class-weapon",
+                "range-bow",
+                "DenyBow",
+                MirClass::Archer,
+                "WoodenSword",
+            ),
+        ] {
+            let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+            let mut runtime = shared_session_runtime(zone_state);
+            start_new_runtime_with_class(&mut runtime, account_id, name, class);
+            equip_runtime_crystal_items_for_class(
+                &mut runtime,
+                class,
+                &[(weapon, mir2_simulation::EquipmentSlot::Weapon, 1)],
+            );
+            let (target, attacker_position) = prepare_gateway_range_fixture(&mut runtime, 3);
+            let packets = runtime
+                .execute(gateway_range_attack_command(&target, attacker_position))
+                .expect("unauthorized range intent should be handled");
+
+            assert!(
+                packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })),
+                "{case} should receive an owner correction: {packets:?}"
+            );
+            assert!(
+                !packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+                )),
+                "{case} must not launch a shared range attack: {packets:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn gateway_unauthorized_materialized_range_is_atomic() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime_with_class(
+            &mut runtime,
+            "range-atomic-warrior",
+            "AtomicWarrior",
+            MirClass::Warrior,
+        );
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        let mut target = shared_monster_entity(260_901);
+        target.name = "RakingCat0".to_string();
+        target.x = 331;
+        target.y = 270;
+        target.disposition = WorldEntityDisposition::Hostile;
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("shared monster should materialize");
+        let before = zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .checkpoint_bytes()
+            .expect("Zone checkpoint");
+
+        let packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::Right,
+            level: 0,
+            damage: 999,
+            monster: Some(monster.clone()),
+            kind: ZoneNativePlayerAttackKind::Range {
+                target: Point { x: target.x, y: target.y },
+                spell: Spell::None,
+                attack_type: 0,
+            },
+        });
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { .. }
+                | ServerPacket::RangeAttack { .. }
+                | ServerPacket::ObjectRangeAttack { .. }
+        )));
+        let state = zone_state.lock().expect("Zone state should lock");
+        assert!(state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .iter()
+            .all(|monster| monster.object_id != target.object_id));
+        assert_eq!(
+            state
+                .zone_manager
+                .checkpoint_bytes()
+                .expect("Zone checkpoint"),
+            before
+        );
+    }
+
+    #[test]
+    fn gateway_legal_archer_cannot_materialize_neutral_range_target() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime_with_class(
+            &mut runtime,
+            "range-neutral-archer",
+            "NeutralArrow",
+            MirClass::Archer,
+        );
+        equip_runtime_crystal_items_for_class(
+            &mut runtime,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        runtime.inner.force_authoritative_player_transform(
+            Point { x: 330, y: 270 },
+            MirDirection::Right,
+        );
+        let target = shared_monster_entity(260_902);
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("neutral shared monster should be representable");
+        assert_eq!(monster.ai, 1);
+        let before = zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .checkpoint_bytes()
+            .expect("Zone checkpoint");
+
+        let packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::Right,
+            level: 0,
+            damage: 999,
+            monster: Some(monster),
+            kind: ZoneNativePlayerAttackKind::Range {
+                target: Point { x: target.x, y: target.y },
+                spell: Spell::None,
+                attack_type: 0,
+            },
+        });
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { .. }
+                | ServerPacket::RangeAttack { .. }
+                | ServerPacket::ObjectRangeAttack { .. }
+        )));
+        let state = zone_state.lock().expect("Zone state should lock");
+        assert!(state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .iter()
+            .all(|monster| monster.object_id != target.object_id));
+        assert_eq!(
+            state
+                .zone_manager
+                .checkpoint_bytes()
+                .expect("Zone checkpoint"),
+            before
+        );
+    }
+
+    #[test]
+    fn gateway_prefilter_uses_explicit_disposition_for_friendly_and_hostile_ai0() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "explicit-disposition-warrior", "DispositionBlade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        runtime.inner.force_authoritative_player_transform(
+            Point { x: 330, y: 270 },
+            MirDirection::UpLeft,
+        );
+        let mut target = shared_monster_entity(260_903);
+        target.ai = Some(0);
+        target.disposition = WorldEntityDisposition::Friendly;
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("friendly shared monster should be representable");
+        assert_eq!(monster.ai, 0);
+        assert_eq!(monster.disposition, Some(WorldEntityDisposition::Friendly));
+        let before = zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .checkpoint_bytes()
+            .expect("Zone checkpoint");
+
+        let melee_packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(monster.clone()),
+            kind: ZoneNativePlayerAttackKind::Melee {
+                spell: Spell::None as u8,
+                attack_type: 0,
+            },
+        });
+
+        assert!(matches!(
+            melee_packets.as_slice(),
+            [ServerPacket::UserLocation { .. }]
+        ));
+        assert!(!melee_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { .. }
+                | ServerPacket::ObjectAttack { .. }
+                | ServerPacket::DamageIndicator { .. }
+        )));
+
+        let range_packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(monster.clone()),
+            kind: ZoneNativePlayerAttackKind::Range {
+                target: Point {
+                    x: target.x,
+                    y: target.y,
+                },
+                spell: Spell::None,
+                attack_type: 0,
+            },
+        });
+        assert!(matches!(
+            range_packets.as_slice(),
+            [ServerPacket::UserLocation { .. }]
+        ));
+
+        let mut incomplete = monster.clone();
+        incomplete.object_id = target.object_id + 10;
+        incomplete.disposition = None;
+        let incomplete_packets =
+            runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+                object_id: incomplete.object_id,
+                is_player_target: false,
+                is_red_player_target: false,
+                direction: MirDirection::UpLeft,
+                level: 0,
+                damage: 999,
+                monster: Some(incomplete),
+                kind: ZoneNativePlayerAttackKind::Melee {
+                    spell: Spell::None as u8,
+                    attack_type: 0,
+                },
+            });
+        assert!(matches!(
+            incomplete_packets.as_slice(),
+            [ServerPacket::UserLocation { .. }]
+        ));
+        {
+            let state = zone_state.lock().expect("Zone state should lock");
+            assert!(state
+                .zone_manager
+                .native_monster_snapshots(&ZoneKey::for_map("0"))
+                .iter()
+                .all(|monster| monster.object_id != target.object_id));
+            assert_eq!(
+                state
+                    .zone_manager
+                    .checkpoint_bytes()
+                    .expect("Zone checkpoint"),
+                before
+            );
+        }
+
+        let hostile_object_id = target.object_id + 1;
+        let mut hostile = target;
+        hostile.object_id = hostile_object_id;
+        hostile.disposition = WorldEntityDisposition::Hostile;
+        let hostile_spawn = zone_monster_spawn_from_shared_entity(&hostile, 0)
+            .expect("hostile AI0 monster should be representable");
+        assert_eq!(hostile_spawn.ai, 0);
+        assert_eq!(
+            hostile_spawn.disposition,
+            Some(WorldEntityDisposition::Hostile)
+        );
+        let accepted = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: hostile_object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(hostile_spawn),
+            kind: ZoneNativePlayerAttackKind::Melee {
+                spell: Spell::None as u8,
+                attack_type: 0,
+            },
+        });
+        assert!(accepted
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    }
+
+    #[test]
+    fn gateway_refreshes_changed_combat_state_before_the_next_range_intent() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut attacker = shared_session_runtime(zone_state.clone());
+        let mut observer = shared_session_runtime(zone_state);
+        start_new_runtime_with_class(
+            &mut attacker,
+            "range-stale-a",
+            "FreshArrow",
+            MirClass::Archer,
+        );
+        equip_runtime_crystal_items_for_class(
+            &mut attacker,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
+        start_new_runtime(&mut observer, "range-stale-o", "Watcher");
+        let (target, attacker_position) = prepare_gateway_range_fixture(&mut attacker, 3);
+        observer.sync_zone_snapshot();
+
+        let session_id = attacker
+            .current_zone_session_id()
+            .expect("attacker should have a Zone session");
+        assert!(attacker
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        equip_runtime_crystal_items_for_class(
+            &mut attacker,
+            MirClass::Archer,
+            &[("WoodenSword", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
+        // Seed the Zone with the previously valid record to prove that the
+        // Gateway refreshes instead of trusting stale admission.
+        let _ = attacker.dispatch_zone_player_command(
+            ZoneCommand::sync_player_combat_state(
+                session_id,
+                MirClass::Archer,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+            ),
+            false,
+        );
+
+        let packets = attacker
+            .execute(gateway_range_attack_command(&target, attacker_position))
+            .expect("changed-state range intent should be handled");
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+        )));
+        let observer_packets = observer
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 1,
+            }))
+            .expect("observer should drain pending packets");
+        assert!(!observer_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectRangeAttack { .. })));
+    }
+
+    #[test]
+    fn gateway_refreshes_mount_attack_capability_before_each_melee_intent() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_new_runtime(&mut runtime, "mount-melee", "MountedBlade");
+        equip_runtime_crystal_items_for_class(
+            &mut runtime,
+            MirClass::Warrior,
+            &[("RedTiger", mir2_simulation::EquipmentSlot::Mount, 1)],
+        );
+        let ride_packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+                unique_id: 13,
+                grid: MirGridType::Equipment,
+            }))
+            .expect("mount ride should execute");
+        assert!(ride_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MountUpdate {
+                riding_mount: true,
+                ..
+            }
+        )));
+        let (target, attacker_position) = prepare_gateway_range_fixture(&mut runtime, 1);
+        let mounted = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("self snapshot");
+        assert_eq!(mounted.riding_mount, Some(true));
+        assert_eq!(mounted.can_mount_attack, Some(false));
+
+        // Seed a previously permissive trusted state. The attack boundary must
+        // replace it from the authenticated personal snapshot before admission.
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should have a Zone session");
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::sync_player_combat_state(
+                session_id,
+                MirClass::Warrior,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+            ),
+            false,
+        );
+        runtime.inner.force_authoritative_player_transform(
+            attacker_position,
+            MirDirection::Right,
+        );
+
+        let packets = runtime
+            .execute(WorldCommand::Attack {
+                object_id: target.object_id,
+            })
+            .expect("mounted melee intent should be handled");
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    }
+
+    #[test]
+    fn gateway_shared_range_uses_crystal_nine_tile_boundary() {
+        for (distance, accepted) in [(9, true), (10, false)] {
+            let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+            let mut runtime = shared_session_runtime(zone_state);
+            start_new_runtime_with_class(
+                &mut runtime,
+                &format!("range-b-{distance}"),
+                &format!("Range{distance}"),
+                MirClass::Archer,
+            );
+            equip_runtime_crystal_items_for_class(
+                &mut runtime,
+                MirClass::Archer,
+                &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+            );
+            let (target, attacker_position) = prepare_gateway_range_fixture(&mut runtime, distance);
+            let packets = runtime
+                .execute(gateway_range_attack_command(&target, attacker_position))
+                .expect("boundary range intent should execute");
+            let launched = packets.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectRangeAttack { info }
+                        if info.target_id == target.object_id
+                )
+            });
+            assert_eq!(launched, accepted, "distance={distance}: {packets:?}");
+            if !accepted {
+                assert!(packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+            }
+        }
+    }
+
+    #[test]
     fn shared_in_process_runtime_routes_magic_through_shared_zone() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
@@ -17071,7 +18102,9 @@ mod tests {
             .entities
             .into_iter()
             .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
         let attacker_position = Point {
@@ -17339,7 +18372,7 @@ mod tests {
             }))
             .expect("observer keepalive should execute");
 
-        assert!(observer_packets
+        assert!(!observer_packets
             .iter()
             .any(|packet| packet == &attack_packet));
         assert!(observer_packets.iter().any(|packet| matches!(
@@ -18975,6 +20008,292 @@ mod tests {
         assert_eq!(session.world_snapshot().free_bag_slots, 0);
     }
 
+    #[test]
+    fn shared_runtime_npc_teleport_routes_protocol_atomically_and_persists_transform() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let map = ZoneMapMetadata {
+            map_index: 1,
+            file_name: "0".to_string(),
+            title: "BichonProvince".to_string(),
+            mini_map: 1,
+            big_map: 101,
+            lights: 2,
+            map_dark_light: 0,
+            music: 0,
+            weather: 0,
+        };
+        let configured_zone = ZoneRuntime::new_with_collision_and_npc_teleport_config(
+            ZoneKey::for_map("0"),
+            ZoneCollision::unbounded(),
+            ZoneNpcTeleportConfig {
+                enabled: true,
+                cost: 3_000,
+                maps: BTreeMap::from([("0".to_string(), map)]),
+                destinations: vec![ZoneNpcTeleportDestination {
+                    map_file_name: "0".to_string(),
+                    object_id: 900,
+                }],
+            },
+        );
+        assert!(zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .install_empty_zone(configured_zone));
+
+        let mut runtime = shared_session_runtime(Arc::clone(&zone_state));
+        start_demo_runtime(&mut runtime);
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.gold = 9_000;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .handle(ZoneCommand::SyncSharedObjects {
+                session_id,
+                packets: vec![ServerPacket::ObjectNpc {
+                    info: NpcInfo {
+                        object_id: 900,
+                        name: "Teleport Guide".to_string(),
+                        name_colour_argb: -1,
+                        image: 12,
+                        colour_argb: -1,
+                        location: Point { x: 40, y: 40 },
+                        direction: MirDirection::Down,
+                        quest_ids: Vec::new(),
+                    },
+                }],
+                include_owner: false,
+                now_ms: 1,
+            });
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+
+        assert!(matches!(
+            packets.first(),
+            Some(ServerPacket::LoseGold { gold: 3_000 })
+        ));
+        assert!(matches!(
+            packets.get(1),
+            Some(ServerPacket::MapChanged {
+                map_index: 1,
+                file_name,
+                location,
+                ..
+            }) if file_name == "0" && location == &Point { x: 40, y: 41 }
+        ));
+        assert!(matches!(
+            packets.get(2),
+            Some(ServerPacket::UserLocation { location })
+                if location.position == Point { x: 40, y: 41 }
+        ));
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+        let self_entity = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!((self_entity.x, self_entity.y), (40, 41));
+
+        let second_attempt = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+        assert!(second_attempt.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
+            .unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .unwrap();
+        let saved_entity = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!((saved_entity.x, saved_entity.y), (40, 41));
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+    }
+
+    #[test]
+    fn shared_runtime_npc_teleport_checkpoint_failure_rolls_back_before_dispatch() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let map = ZoneMapMetadata {
+            map_index: 1,
+            file_name: "0".to_string(),
+            title: "BichonProvince".to_string(),
+            mini_map: 1,
+            big_map: 101,
+            lights: 2,
+            map_dark_light: 0,
+            music: 0,
+            weather: 0,
+        };
+        assert!(zone_state.lock().unwrap().zone_manager.install_empty_zone(
+            ZoneRuntime::new_with_collision_and_npc_teleport_config(
+                ZoneKey::for_map("0"),
+                ZoneCollision::unbounded(),
+                ZoneNpcTeleportConfig {
+                    enabled: true,
+                    cost: 3_000,
+                    maps: BTreeMap::from([("0".to_string(), map)]),
+                    destinations: vec![ZoneNpcTeleportDestination {
+                        map_file_name: "0".to_string(),
+                        object_id: 900,
+                    }],
+                },
+            )
+        ));
+
+        let mut runtime = shared_session_runtime(Arc::clone(&zone_state));
+        start_demo_runtime(&mut runtime);
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.gold = 9_000;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        let old_zone_transform = zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .player_transform(&session_id)
+            .unwrap();
+        zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .handle(ZoneCommand::SyncSharedObjects {
+                session_id: session_id.clone(),
+                packets: vec![ServerPacket::ObjectNpc {
+                    info: NpcInfo {
+                        object_id: 900,
+                        name: "Teleport Guide".to_string(),
+                        name_colour_argb: -1,
+                        image: 12,
+                        colour_argb: -1,
+                        location: Point { x: 40, y: 40 },
+                        direction: MirDirection::Down,
+                        quest_ids: Vec::new(),
+                    },
+                }],
+                include_owner: false,
+                now_ms: 1,
+            });
+
+        runtime.fail_next_npc_teleport_checkpoint_restore = true;
+        let rejected = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+
+        assert!(rejected.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, 9_000);
+        assert_eq!(
+            zone_state
+                .lock()
+                .unwrap()
+                .zone_manager
+                .player_transform(&session_id),
+            Some(old_zone_transform.clone())
+        );
+        let private_player = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (private_player.x, private_player.y, private_player.direction),
+            (
+                old_zone_transform.0.x,
+                old_zone_transform.0.y,
+                old_zone_transform.1
+            )
+        );
+
+        let retry = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+        assert!(matches!(
+            retry.first(),
+            Some(ServerPacket::LoseGold { gold: 3_000 })
+        ));
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+        assert_eq!(
+            zone_state
+                .lock()
+                .unwrap()
+                .zone_manager
+                .player_transform(&session_id),
+            Some((Point { x: 40, y: 41 }, MirDirection::Down))
+        );
+    }
+
+    #[test]
+    fn shared_runtime_real_disabled_npc_teleport_is_silent_and_zero_mutation() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.gold = 5_000;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let before = runtime.world_snapshot();
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 1,
+            }))
+            .unwrap();
+        let after = runtime.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert_eq!(after.gold, before.gold);
+        let before_player = before
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        let after_player = after
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (after_player.x, after_player.y, after_player.direction),
+            (before_player.x, before_player.y, before_player.direction)
+        );
+    }
+
     fn started_shared_zone_sessions() -> (GatewaySession, GatewaySession) {
         let registry = ZoneRegistry::in_process();
         let config = GatewayConfig::default();
@@ -19031,7 +20350,41 @@ mod tests {
             local_ground_drop_zone_ids: Default::default(),
             retired_local_ground_drop_ids: Default::default(),
             owner_dead_entity_ids: Default::default(),
+            last_game_shop_purchase_outcome: None,
+            fail_next_npc_teleport_checkpoint_restore: false,
         }
+    }
+
+    #[test]
+    fn shared_in_process_runtime_delegates_typed_game_shop_outcome() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("login should execute");
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("StartGame should execute");
+
+        let execution = runtime
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::GameShopBuy {
+                g_index: 31,
+                quantity: 1,
+                price_type: 1,
+            }))
+            .expect("shared game-shop command should execute once");
+        let outcome = execution
+            .game_shop_purchase_outcome
+            .expect("shared runtime must retain the typed purchase outcome");
+        assert_eq!(
+            (outcome.g_index, outcome.quantity, outcome.price_type),
+            (31, 1, 1)
+        );
     }
 
     fn start_demo_character(session: &mut GatewaySession) {
@@ -19178,6 +20531,14 @@ mod tests {
         runtime: &mut SharedInProcessZoneSessionRuntime,
         items: &[(&str, mir2_simulation::EquipmentSlot, u32)],
     ) {
+        equip_runtime_crystal_items_for_class(runtime, MirClass::Taoist, items);
+    }
+
+    fn equip_runtime_crystal_items_for_class(
+        runtime: &mut SharedInProcessZoneSessionRuntime,
+        class: MirClass,
+        items: &[(&str, mir2_simulation::EquipmentSlot, u32)],
+    ) {
         let snapshot = runtime.inner.world_snapshot();
         let identity = runtime
             .inner
@@ -19213,7 +20574,7 @@ mod tests {
             "character": {
                 "name": identity.character_name,
                 "level": 35,
-                "class": "Taoist",
+                "class": class,
                 "gender": "Male"
             },
             "mapFileName": snapshot.map_file_name.unwrap_or_else(|| "0".to_string()),
@@ -19241,6 +20602,55 @@ mod tests {
             .expect("equipment fixture should apply through the test runtime");
     }
 
+    fn prepare_gateway_range_fixture(
+        runtime: &mut SharedInProcessZoneSessionRuntime,
+        distance: i32,
+    ) -> (WorldEntitySnapshot, Point) {
+        let target = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+            })
+            .expect("starter scene should expose a live range target");
+        let attacker_position = Point {
+            x: target.x.saturating_sub(distance),
+            y: target.y,
+        };
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("range fixture should have a Zone session");
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: attacker_position.clone(),
+                direction: MirDirection::Right,
+            },
+            false,
+        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(attacker_position.clone(), MirDirection::Right);
+        (target, attacker_position)
+    }
+
+    fn gateway_range_attack_command(
+        target: &WorldEntitySnapshot,
+        attacker_position: Point,
+    ) -> WorldCommand {
+        WorldCommand::ClientPacket(ClientPacket::RangeAttack {
+            direction: MirDirection::Right,
+            location: attacker_position,
+            target_id: target.object_id,
+            target_location: Point {
+                x: target.x,
+                y: target.y,
+            },
+        })
+    }
+
     fn shared_monster_entity(object_id: u32) -> WorldEntitySnapshot {
         WorldEntitySnapshot {
             object_id,
@@ -19254,6 +20664,11 @@ mod tests {
             class: None,
             gender: None,
             level: None,
+            riding_mount: None,
+            can_mount_attack: None,
+            has_class_weapon: None,
+            dazed: None,
+            fishing: None,
             hp: Some(12),
             max_hp: Some(12),
             light: 0,
@@ -19338,6 +20753,11 @@ mod tests {
             class: Some(MirClass::Warrior),
             gender: Some(MirGender::Male),
             level: Some(7),
+            riding_mount: None,
+            can_mount_attack: None,
+            has_class_weapon: None,
+            dazed: None,
+            fishing: None,
             hp: None,
             max_hp: None,
             light: 3,

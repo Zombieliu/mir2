@@ -5,7 +5,7 @@ use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_protocol::{Point, ServerPacket};
 
 use super::super::components::{
-    entity_object_id, Monster, MonsterAgent, MonsterAiState, ObjectId, Position,
+    Monster, MonsterAgent, MonsterAiState, ObjectId, Position, entity_object_id,
 };
 use super::super::monsters::*;
 use super::super::movement::*;

@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::{EquipmentItemSnapshot, EquipmentSlot, ItemContainer, ItemGrade};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_npc_info_by_script_key, crystal_npc_script_by_key, localized_text_or_fallback,
-    CrystalItemTemplate, EquipmentTemplate, LanguageCode,
+    CrystalItemTemplate, EquipmentTemplate, LanguageCode, crystal_npc_info_by_script_key,
+    crystal_npc_script_by_key, localized_text_or_fallback,
 };
 use mir2_protocol::{
     ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemSealedInfo,
@@ -18,27 +18,29 @@ use super::components::{
 };
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_REPAIR, CRYSTAL_BIND_DONT_STORE, CRYSTAL_BIND_NO_SREPAIR,
-    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
+    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_ITEM_TYPE_BELLS, CRYSTAL_ITEM_TYPE_MOUNT,
+    CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
 };
 use super::inventory::{
-    collection_slot_occupied, equipment_index_for_client_reference,
-    item_index_for_client_reference, item_matches_inventory_unique_id, remove_item_destination,
-    storage_locked,
+    allocate_item_unique_id_avoiding, collection_slot_occupied,
+    equipment_index_for_client_reference, item_index_for_client_reference,
+    item_matches_inventory_unique_id, remove_item_destination, storage_locked,
 };
 use super::items::{
-    crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
+    ItemState, crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
     crystal_item_needs_identify, crystal_item_requirement_rejection_key, crystal_item_stat_value,
     crystal_item_template_for_dynamic_key, crystal_item_template_for_item_key,
     default_item_unique_id, equipment_has_crystal_or_rental_bind_flag, item_is_socket_type,
+    item_has_crystal_or_rental_bind_flag,
     item_state_can_equip_to_slot, item_state_identified, item_state_soul_bound_id,
     merged_user_item_stats, upsert_user_item_stat, user_item_from_item_state,
-    user_item_rental_information, ItemState,
+    user_item_rental_information,
 };
 use super::map::{current_map_disallows_mount, current_map_requires_bridle};
 use super::monsters::deterministic_roll;
 use super::npc::{
-    active_crystal_storage_service, crystal_npc_script_item_types,
-    current_crystal_npc_service_in_range, ActiveNpcServiceState,
+    ActiveNpcServiceState, active_crystal_storage_service, crystal_npc_script_item_types,
+    current_crystal_npc_service_in_range,
 };
 use super::resources::{
     BuffResource, InventoryResource, MountResource, PlayerPermissionResource, PlayerRuntimeResource,
@@ -639,6 +641,19 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
         Some(item.added_luck),
     );
 
+    let mut slots = vec![None; usize::from(item.socket_slots)];
+    if item.slot == EquipmentSlot::Mount {
+        for embedded in &item.socketed {
+            if crystal_item_template_for_item_key(&embedded.key)
+                .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            {
+                if let Some(slot) = slots.get_mut(1) {
+                    *slot = Some(user_item_from_item_state(embedded));
+                }
+            }
+        }
+    }
+
     Some(UserItem {
         unique_id: equipment_slot_unique_id(item.slot)?,
         item_index: template.item_index,
@@ -648,7 +663,7 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
         soul_bound_id: equipment_state_soul_bound_id(item),
         identified: equipment_state_identified(item),
         cursed: item.cursed,
-        slots: vec![None; usize::from(item.socket_slots)],
+        slots,
         gem_count: item.gem_count,
         added_stats,
         awake_type: item.awake_type,
@@ -686,7 +701,37 @@ pub(super) fn replace_equipment(world: &mut World, next: EquipmentState) {
             resources.equipment_items.push(next);
         }
     }
+    refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
+}
+
+/// Rebuild Crystal `MountInfo.CanAttack` input from the authoritative equipped
+/// mount and its embedded `MountSlot.Bells` item. The client never supplies this
+/// predicate directly.
+pub(super) fn refresh_mount_resource_from_equipment(world: &mut World) {
+    let (mount_type, has_bells) = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Mount)
+        .map(|mount| {
+            let mount_type = mount
+                .shape
+                .and_then(|shape| i16::try_from(shape).ok())
+                .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+            let has_bells = mount.socketed.iter().any(|item| {
+                crystal_item_template_for_item_key(&item.key)
+                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            });
+            (mount_type, has_bells)
+        })
+        .unwrap_or((-1, false));
+    let mut mount = world.resource_mut::<MountResource>();
+    mount.mount_type = mount_type;
+    mount.has_bells = has_bells;
+    if mount_type < 0 {
+        mount.riding_mount = false;
+    }
 }
 
 pub(super) fn item_state_from_equipment_state(
@@ -1218,7 +1263,14 @@ pub(super) fn try_equip_item(
         resources.equipment_items.push(next_equipment);
 
         if let Some(existing) = replaced {
-            let returned = item_state_from_equipment_state(existing, source_container, source_slot);
+            let mut returned =
+                item_state_from_equipment_state(existing, source_container, source_slot);
+            returned.unique_id = allocate_item_unique_id_avoiding(
+                &resources,
+                source_container,
+                source_slot,
+                &returned.socketed,
+            );
             match source_container {
                 ItemContainer::Bag1 | ItemContainer::Bag2 => {
                     resources.inventory_items.push(returned)
@@ -1233,6 +1285,7 @@ pub(super) fn try_equip_item(
             .resource_mut::<PlayerPermissionResource>()
             .unlock_curse = false;
     }
+    refresh_mount_resource_from_equipment(world);
 
     Some(EquipItemMutationResult { refresh_packets })
 }
@@ -1263,6 +1316,7 @@ pub(super) fn equip_item_impl(
         to,
         success: true,
     });
+    refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
     packets
 }
@@ -1304,12 +1358,12 @@ pub(super) fn remove_equipped_item_impl(
             return vec![failed_packet];
         };
         let equipment = &resources.equipment_items[index];
-        if equipment.cursed && !world.resource::<PlayerPermissionResource>().unlock_curse {
-            return vec![failed_packet];
-        }
-        if matches!(grid, MirGridType::Storage)
-            && equipment_has_crystal_or_rental_bind_flag(equipment, CRYSTAL_BIND_DONT_STORE)
-        {
+        if !crystal_item_removal_allowed(
+            world,
+            equipment.cursed,
+            grid,
+            equipment_has_crystal_or_rental_bind_flag(equipment, CRYSTAL_BIND_DONT_STORE),
+        ) {
             return vec![failed_packet];
         }
         destination
@@ -1322,21 +1376,24 @@ pub(super) fn remove_equipped_item_impl(
         };
         let equipment = resources.equipment_items.remove(index);
         let removed_cursed = equipment.cursed;
-        let item =
+        let mut item =
             item_state_from_equipment_state(equipment, destination_container, destination_slot);
+        item.unique_id = allocate_item_unique_id_avoiding(
+            &resources,
+            destination_container,
+            destination_slot,
+            &item.socketed,
+        );
         match destination_container {
             ItemContainer::Bag1 | ItemContainer::Bag2 => resources.inventory_items.push(item),
             ItemContainer::Storage => resources.storage_items.push(item),
             _ => {}
         }
         drop(resources);
-        if removed_cursed {
-            world
-                .resource_mut::<PlayerPermissionResource>()
-                .unlock_curse = false;
-        }
+        consume_curse_unlock_after_success(world, removed_cursed);
     }
 
+    refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
     vec![ServerPacket::RemoveItem {
         grid,
@@ -1344,6 +1401,107 @@ pub(super) fn remove_equipped_item_impl(
         to,
         success: true,
     }]
+}
+
+fn crystal_item_removal_allowed(
+    world: &World,
+    cursed: bool,
+    destination_grid: MirGridType,
+    dont_store: bool,
+) -> bool {
+    (!cursed || world.resource::<PlayerPermissionResource>().unlock_curse)
+        && !(destination_grid == MirGridType::Storage && dont_store)
+}
+
+fn consume_curse_unlock_after_success(world: &mut World, removed_cursed: bool) {
+    if removed_cursed {
+        world
+            .resource_mut::<PlayerPermissionResource>()
+            .unlock_curse = false;
+    }
+}
+
+fn equip_mount_slot_item_impl(
+    world: &mut World,
+    grid: MirGridType,
+    unique_id: u64,
+    to: i32,
+    to_unique_id: u64,
+) -> bool {
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage)
+        || to != 1
+        || Some(to_unique_id) != equipment_slot_unique_id(EquipmentSlot::Mount)
+        || (grid == MirGridType::Storage
+            && (!active_crystal_storage_service(world) || storage_locked(world)))
+    {
+        return false;
+    }
+
+    {
+        let resources = world.resource::<InventoryResource>();
+        let source_items = match grid {
+            MirGridType::Inventory => &resources.inventory_items,
+            MirGridType::Storage => &resources.storage_items,
+            _ => unreachable!("mount accessory source was validated"),
+        };
+        let Some(source_index) = item_index_for_client_reference(source_items, grid, unique_id)
+        else {
+            return false;
+        };
+        let source = &source_items[source_index];
+        let Some(source_template) = crystal_item_template_for_item_key(&source.key) else {
+            return false;
+        };
+        if source_template.item_type != CRYSTAL_ITEM_TYPE_BELLS
+            || crystal_item_requirement_rejection_key(world, resources, &source_template).is_some()
+        {
+            return false;
+        }
+        let soul_bound_id = item_state_soul_bound_id(source);
+        if soul_bound_id != -1 && soul_bound_id != current_character_index(world).unwrap_or(-1) {
+            return false;
+        }
+        let Some(mount) = resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+        else {
+            return false;
+        };
+        if !crystal_item_template_for_item_key(&mount.key)
+            .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT)
+            || mount.socket_slots <= 1
+            || mount.socketed.iter().any(|item| {
+                crystal_item_template_for_item_key(&item.key)
+                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            })
+        {
+            return false;
+        }
+    }
+
+    let mut resources = world.resource_mut::<InventoryResource>();
+    let source_items = match grid {
+        MirGridType::Inventory => &mut resources.inventory_items,
+        MirGridType::Storage => &mut resources.storage_items,
+        _ => unreachable!("mount accessory source was validated"),
+    };
+    let Some(source_index) = item_index_for_client_reference(source_items, grid, unique_id) else {
+        return false;
+    };
+    let bells = source_items.remove(source_index);
+    let Some(mount) = resources
+        .equipment_items
+        .iter_mut()
+        .find(|item| item.slot == EquipmentSlot::Mount)
+    else {
+        return false;
+    };
+    mount.socketed.push(bells);
+    drop(resources);
+    refresh_mount_resource_from_equipment(world);
+    super::stats::refresh_player_stats(world);
+    true
 }
 
 /// Insert a socket gem (Crystal `ItemType.Socket`) from the inventory into a
@@ -1368,6 +1526,18 @@ pub(super) fn equip_slot_item_impl(
     };
     if !super::resources::is_in_world(world) {
         return vec![failed];
+    }
+    if grid_to == MirGridType::Mount {
+        if !equip_mount_slot_item_impl(world, grid, unique_id, to, to_unique_id) {
+            return vec![failed];
+        }
+        return vec![ServerPacket::EquipSlotItem {
+            grid,
+            unique_id,
+            to,
+            grid_to,
+            success: true,
+        }];
     }
     if grid != MirGridType::Inventory || grid_to != MirGridType::Inventory {
         return vec![failed];
@@ -1441,6 +1611,83 @@ pub(super) fn remove_equipped_slot_item_impl(
     ) {
         return vec![failed_packet];
     }
+    if grid == MirGridType::Mount {
+        if !matches!(grid_to, MirGridType::Inventory | MirGridType::Storage)
+            || Some(from_unique_id) != equipment_slot_unique_id(EquipmentSlot::Mount)
+            || (grid_to == MirGridType::Storage
+                && (!active_crystal_storage_service(world) || storage_locked(world)))
+        {
+            return vec![failed_packet];
+        }
+        let destination = {
+            let resources = world.resource::<InventoryResource>();
+            let Some(destination) = remove_item_destination(&resources, grid_to, to) else {
+                return vec![failed_packet];
+            };
+            if collection_slot_occupied(&resources, destination.0, destination.1) {
+                return vec![failed_packet];
+            }
+            let Some(mount) = resources
+                .equipment_items
+                .iter()
+                .find(|item| item.slot == EquipmentSlot::Mount)
+            else {
+                return vec![failed_packet];
+            };
+            let Some(bells) = mount.socketed.iter().find(|item| {
+                item.unique_id == unique_id
+                    && crystal_item_template_for_item_key(&item.key)
+                        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            }) else {
+                return vec![failed_packet];
+            };
+            if !crystal_item_removal_allowed(
+                world,
+                bells.cursed,
+                grid_to,
+                item_has_crystal_or_rental_bind_flag(bells, CRYSTAL_BIND_DONT_STORE),
+            ) {
+                return vec![failed_packet];
+            }
+            destination
+        };
+
+        let removed_cursed = {
+            let mut resources = world.resource_mut::<InventoryResource>();
+            let mount = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Mount)
+                .expect("validated mount remains equipped");
+            let index = mount
+                .socketed
+                .iter()
+                .position(|item| item.unique_id == unique_id)
+                .expect("validated Bells remains embedded");
+            let mut bells = mount.socketed.remove(index);
+            let removed_cursed = bells.cursed;
+            bells.container = destination.0;
+            bells.slot = destination.1;
+            match destination.0 {
+                ItemContainer::Bag1 | ItemContainer::Bag2 => {
+                    resources.inventory_items.push(bells)
+                }
+                ItemContainer::Storage => resources.storage_items.push(bells),
+                _ => unreachable!("mount slot destination was validated"),
+            }
+            removed_cursed
+        };
+        consume_curse_unlock_after_success(world, removed_cursed);
+        refresh_mount_resource_from_equipment(world);
+        super::stats::refresh_player_stats(world);
+        return vec![ServerPacket::RemoveSlotItem {
+            grid,
+            grid_to,
+            unique_id,
+            to,
+            success: true,
+        }];
+    }
     // Extract a socketed gem from an inventory host back into the inventory
     // (Crystal `PlayerObject.RemoveSlotItem`); cursed gems cannot be removed.
     if super::resources::is_in_world(world)
@@ -1486,7 +1733,7 @@ pub(super) fn remove_equipped_slot_item_impl(
         return vec![failed_packet];
     }
 
-    // Mount/fishing embedded slot items are not modeled yet; keep Crystal's
+    // Fishing embedded slot items are not modeled yet; keep Crystal's
     // RemoveSlotItem envelope without falling through to whole-item removal.
     vec![failed_packet]
 }

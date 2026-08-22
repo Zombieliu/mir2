@@ -3,8 +3,9 @@ use std::collections::BTreeSet;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
-    crystal_monster_by_name, crystal_starter_region_respawns, starter_server_data,
     CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
+    MonsterSpawnDispositionTemplate, crystal_monster_by_name, crystal_starter_region_respawns,
+    starter_server_data,
 };
 use mir2_protocol::{
     MirDirection, MonsterInfo, ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo,
@@ -17,15 +18,15 @@ use crate::config::{
 };
 
 use super::combat::{
-    combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
-    ranged_attack_delay_ticks, PendingPlayerStatusEffect,
+    PendingPlayerStatusEffect, combat_delay_ticks, deterministic_chance_roll,
+    melee_attack_delay_ticks, ranged_attack_delay_ticks,
 };
 use super::combat::{crystal_player_rolled_armour, crystal_player_rolled_magic_armour};
 use super::components::{
-    entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
-    HarvestMonsterState, HarvestOwnership, Monster, MonsterAgent, MonsterAiState,
-    MonsterCombatStats, MonsterVitals, ObjectId, PlayerVitals, Position, RouteStep, SpawnSlotRef,
-    SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
+    DisplayName, Facing, GeneralMeowMeowState, HarvestMonsterState, HarvestOwnership, Monster,
+    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, PlayerVitals,
+    Position, RouteStep, SpawnSlotRef, SummonedMonster, WoomaTaurusState, WorldObject,
+    YimoogiState, entity_facing, entity_object_id, entity_position,
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
@@ -37,8 +38,8 @@ use super::map::{
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
 use super::packets::object_movement;
 use super::resources::{
-    runtime_tick, MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource,
-    RuntimeQueueResource,
+    MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource, RuntimeQueueResource,
+    runtime_tick,
 };
 use super::stats::deterministic_range_roll;
 
@@ -460,12 +461,21 @@ pub(super) fn build_starter_spawn_table(config: &SimulationConfig) -> MonsterSpa
                     random_delay_ticks: spawn.random_delay_ticks,
                 },
                 ai: 0,
-                disposition: if spawn.can_wander {
-                    WorldEntityDisposition::Hostile
-                } else {
-                    WorldEntityDisposition::Neutral
+                disposition: match spawn.disposition {
+                    Some(MonsterSpawnDispositionTemplate::Friendly) => {
+                        WorldEntityDisposition::Friendly
+                    }
+                    Some(MonsterSpawnDispositionTemplate::Hostile) => {
+                        WorldEntityDisposition::Hostile
+                    }
+                    Some(MonsterSpawnDispositionTemplate::Neutral) | None => {
+                        WorldEntityDisposition::Neutral
+                    }
                 },
-                hostile_to_player: spawn.can_wander,
+                hostile_to_player: matches!(
+                    spawn.disposition,
+                    Some(MonsterSpawnDispositionTemplate::Hostile)
+                ),
                 view_range: if spawn.can_wander { 4 } else { 0 },
                 can_wander: spawn.can_wander,
                 move_interval_ticks: 1,

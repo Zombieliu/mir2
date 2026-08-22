@@ -15,7 +15,7 @@ use bevy_ecs::prelude::World;
 
 use mir2_protocol::ServerPacket;
 
-use super::components::{player_entity, CharacterBody, PlayerVitals};
+use super::components::{CharacterBody, PlayerVitals, player_entity};
 use super::packets::object_health_info_for_entity;
 use super::resources::{PlayerRuntimeResource, SessionResource};
 

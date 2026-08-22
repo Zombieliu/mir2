@@ -1,3 +1,4 @@
+mod big_map;
 mod buffs;
 mod combat;
 mod components;
@@ -50,11 +51,13 @@ pub use session::{
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedSkillItemConsumptionComponent,
     SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
 };
+pub use stage5::{GameShopPurchaseExecution, GameShopPurchaseFailure, GameShopPurchaseOutcome};
 pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
     ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward,
-    ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
+    ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata, ZoneMonsterDefense,
+    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
+    ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
     ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };

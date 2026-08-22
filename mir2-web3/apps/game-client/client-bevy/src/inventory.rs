@@ -4,7 +4,11 @@
 //! renderer-neutral [`InventoryModel`] so every host shows the same bag. The
 //! panel is presentational: item grants/consumption stay server-authoritative.
 
+#[cfg(not(feature = "native-ui"))]
+use bevy::prelude::Resource;
+#[cfg(feature = "native-ui")]
 use bevy::prelude::*;
+#[cfg(feature = "native-ui")]
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, JustifyContent, Node, PositionType,
     UiRect, Val,
@@ -20,6 +24,10 @@ pub const SLOTS_PER_ROW: u32 = 8;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemModel {
+    /// Stable server-side identity of this concrete item stack/instance.
+    /// Template `key` values are not instance identities and may be non-numeric.
+    #[serde(default)]
+    pub unique_id: Option<u64>,
     pub key: String,
     pub name: String,
     pub quantity: u32,
@@ -49,22 +57,27 @@ impl InventoryModel {
 }
 
 /// Marker on the inventory panel root.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct InventoryPanelRoot;
 
 /// Marker on the gold label.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct GoldLabel;
 
 /// Text rendered inside one bag slot.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 struct InventorySlotLabel {
     slot: u32,
 }
 
 /// Build the shared Mir2 inventory panel.
+#[cfg(feature = "native-ui")]
 pub struct Mir2InventoryPlugin;
 
+#[cfg(feature = "native-ui")]
 impl Plugin for Mir2InventoryPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InventoryModel>()
@@ -76,6 +89,7 @@ impl Plugin for Mir2InventoryPlugin {
     }
 }
 
+#[cfg(feature = "native-ui")]
 fn spawn_inventory_panel(mut commands: Commands) {
     commands
         .spawn((
@@ -141,6 +155,7 @@ fn spawn_inventory_panel(mut commands: Commands) {
         });
 }
 
+#[cfg(feature = "native-ui")]
 fn update_inventory_panel(
     model: Res<InventoryModel>,
     golds: Query<&mut Text, With<GoldLabel>>,
@@ -154,6 +169,7 @@ fn update_inventory_panel(
     }
 }
 
+#[cfg(feature = "native-ui")]
 fn bag_slot_label(model: &InventoryModel, slot: u32) -> String {
     model
         .items
@@ -191,6 +207,7 @@ mod tests {
 
     fn item(key: &str, container: u8, slot: u32) -> ItemModel {
         ItemModel {
+            unique_id: None,
             key: key.to_owned(),
             name: key.to_owned(),
             quantity: 1,
@@ -232,12 +249,28 @@ mod tests {
     }
 
     #[test]
+    fn legacy_item_json_without_instance_id_remains_compatible_but_unaddressable() {
+        let item: ItemModel = serde_json::from_value(serde_json::json!({
+            "key": "small-hp-drug",
+            "name": "Small HP Drug",
+            "quantity": 1,
+            "slot": 0,
+            "container": 0
+        }))
+        .expect("legacy item");
+        assert_eq!(item.key, "small-hp-drug");
+        assert_eq!(item.unique_id, None);
+    }
+
+    #[cfg(feature = "native-ui")]
+    #[test]
     fn panel_renders_bag_item_names_and_quantities() {
         let mut app = App::new();
         app.add_plugins(Mir2InventoryPlugin);
         *app.world_mut().resource_mut::<InventoryModel>() = InventoryModel {
             gold: 500,
             items: vec![ItemModel {
+                unique_id: Some(42),
                 key: "potion".to_owned(),
                 name: "Small HP Potion".to_owned(),
                 quantity: 3,

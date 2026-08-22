@@ -2,22 +2,22 @@ use std::env;
 use std::sync::Arc;
 use std::time::Duration;
 
+use axum::Json;
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
-use axum::Json;
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, TimeZone, Timelike, Utc};
 use postgres::Row;
 use reqwest::blocking::Client as HttpClient;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 use super::{
-    admin_is_production_env, build_dashboard_read_model, clickhouse_password,
-    fetch_clickhouse_gameplay_event_summary, now_ms, operator_from_headers, post_clickhouse_query,
-    require_operator_permission, url_component, AdminApiState, AdminError, ApiError,
-    GameplayEventCommandSummary, GameplayEventSummaryQuery, ParsedClickHouseUrl, Permission,
-    PostgresAdminRepository,
+    AdminApiState, AdminError, ApiError, GameplayEventCommandSummary, GameplayEventSummaryQuery,
+    ParsedClickHouseUrl, Permission, PostgresAdminRepository, admin_is_production_env,
+    build_dashboard_read_model, clickhouse_password, fetch_clickhouse_gameplay_event_summary,
+    now_ms, operator_from_headers, post_clickhouse_query, require_operator_permission,
+    url_component,
 };
 
 const PROMPT_VERSION: &str = "mir2.daily-report.v1";

@@ -608,11 +608,6 @@ type GatewayNpcScriptDiagnostic = {
   message: string;
 };
 
-type QuickTransferOption = {
-  key: string;
-  label: string;
-};
-
 type GatewayWorldSnapshot = {
   tick: number;
   mapTitle: string | null;
@@ -1236,18 +1231,6 @@ const BEVY_RUNTIME_ASSET_BASE_URL =
 // Allow enough headroom for the ~6 MiB compressed WASM on slower mobile/Asian
 // routes instead of aborting at the exact boundary of an otherwise valid load.
 const BEVY_RUNTIME_BOOT_TIMEOUT_MS = 120_000;
-const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
-  { key: "crystal:0:330:270", label: "Bichon Province (0)" },
-  { key: "crystal:1:315:82", label: "Woomyon Woods S (1)" },
-  { key: "crystal:2:503:483", label: "Serpent Valley (2)" },
-  { key: "crystal:n0:200:200", label: "n0 (QA)" },
-  { key: "crystal:HF1:200:200", label: "HellFire 1F (HF1)" },
-  { key: "crystal:HF2:200:200", label: "HellFire 2F (HF2)" },
-  { key: "crystal:HF3:200:200", label: "HellFire 3F (HF3)" },
-  { key: "crystal:D1801:200:200", label: "Penal Cavern (D1801)" },
-  { key: "crystal:HKR:200:200", label: "HellFire Kings Room (HKR)" },
-];
-
 function isLocalWebHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
@@ -7368,30 +7351,23 @@ export default function HomePage() {
   }
 
   function claimMail(mailId: number) {
-    // Real protocol packets first (ReadMail marks the mail opened, CollectParcel
-    // pulls the gold/items), then the stage5 action channel as a fallback for the
-    // dev gateway's in-process mailbox. Field shapes match BrowserCommand::ReadMail
-    // / CollectParcel (`mailId`) in apps/gateway/src/web.rs.
+    // The dedicated Crystal packets operate on the same authoritative mailbox
+    // as GameShop delivery. Normal players must never need generic Stage5 access.
     send({ type: "readMail", mailId }, { quiet: true });
-    send({ type: "collectParcel", mailId }, { quiet: true });
-    send({ type: "stage5Command", action: "mail.claim", args: [String(mailId)] });
+    send({ type: "collectParcel", mailId });
   }
 
   function deleteMail(mailId: number) {
-    send({ type: "deleteMail", mailId }, { quiet: true });
-    send({ type: "stage5Command", action: "mail.delete", args: [String(mailId)] });
+    send({ type: "deleteMail", mailId });
   }
 
   function buyGameShopItem(gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") {
     send({
-      type: "stage5Command",
-      action: paymentType === "credit" ? "gameShop.buyCredit" : "gameShop.buyGold",
-      args: [String(gameShopIndex), String(quantity)],
+      type: "gameShopBuy",
+      gIndex: gameShopIndex,
+      quantity,
+      priceType: paymentType === "credit" ? 0 : 1,
     });
-  }
-
-  function runStage5Command(action: string, args: string[] = []) {
-    send({ type: "stage5Command", action, args });
   }
 
   function sendClientCommand(command: Record<string, unknown>) {
@@ -7593,27 +7569,15 @@ export default function HomePage() {
 
   // Leaving / disbanding the group rides ClientPacket::SwitchGroup with
   // allowGroup=false, which the simulation maps to clearing the roster +
-  // DeleteGroup. The stage-5 group.leave channel is kept as a dev fallback.
+  // DeleteGroup. Normal players never require a generic Stage5 fallback.
   function groupLeave() {
-    send({ type: "switchGroup", allowGroup: false }, { quiet: true });
-    send({ type: "stage5Command", action: "group.leave" });
+    send({ type: "switchGroup", allowGroup: false });
   }
 
   // Toggling whether the player accepts group invites rides SwitchGroup's
   // allowGroup flag directly.
   function groupToggleAllowInvites(allow: boolean) {
     send({ type: "switchGroup", allowGroup: allow });
-  }
-
-  // Loot mode has no dedicated ClientPacket; it stays on the stage-5 channel.
-  function groupToggleLootMode() {
-    const current = world.stage5Systems.group?.lootMode;
-    const next = current === "group" ? "solo" : "group";
-    send({ type: "stage5Command", action: "group.loot", args: [next] });
-  }
-
-  function conquestStartWar() {
-    send({ type: "stage5Command", action: "conquest.start" });
   }
 
   // Quest log actions. The window's "track" button shares the quest with the
@@ -13837,13 +13801,10 @@ export default function HomePage() {
       onRepairItem={repairItem}
       onSpecialRepairItem={specialRepairItem}
       onCastSkill={castSkill}
-      onTransferMap={transferMap}
       onClaimMail={claimMail}
       onDeleteMail={deleteMail}
       onBuyGameShopItem={buyGameShopItem}
-      onRunStage5Command={runStage5Command}
       onSendClientCommand={sendClientCommand}
-      transferOptions={QUICK_TRANSFER_OPTIONS}
       onStartTutorial={startTutorial}
       onToggleCharacter={toggleCharacterWindow}
       onToggleInventory={toggleInventoryWindow}
@@ -13881,12 +13842,12 @@ export default function HomePage() {
       questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: localizedQuestLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest, onAcceptQuest: acceptQuest, onFinishQuest: finishQuest }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
-      group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
+      group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}
       friends={{ open: showFriends, onClose: () => setShowFriends(false), social: extraWindowData.friends, onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
       bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: extraWindowData.relationship, mentor: extraWindowData.mentor, onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: extraWindowData.rankingTab, page: extraWindowData.rankingPage, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: extraWindowData.marketListings, gold: world.gold, cityCurrencies: world.cityCurrencies, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
-      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
+      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
       trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
       mail={{ open: showMail, onClose: () => setShowMail(false), mail: extraWindowData.mail, gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}

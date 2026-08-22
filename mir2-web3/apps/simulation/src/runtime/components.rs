@@ -1,7 +1,7 @@
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
-use mir2_game_data::{localized_text_or_fallback, LanguageCode};
+use mir2_game_data::{LanguageCode, localized_text_or_fallback};
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point};
 
 use crate::config::WorldEntityDisposition;

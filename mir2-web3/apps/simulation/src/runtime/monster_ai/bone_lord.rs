@@ -5,8 +5,8 @@ use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_protocol::{MirDirection, Point, ServerPacket};
 
 use super::super::components::{
-    entity_facing, entity_object_id, player_entity, Facing, MonsterAgent, MonsterAiState,
-    MonsterVitals,
+    Facing, MonsterAgent, MonsterAiState, MonsterVitals, entity_facing, entity_object_id,
+    player_entity,
 };
 use super::super::crystal_compat::*;
 use super::super::monsters::*;

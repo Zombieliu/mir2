@@ -735,6 +735,7 @@ mod tests {
         systems.guild.name = "Heroes".to_string();
         systems.mail.push(crate::config::Stage5MailMessage {
             id: 1,
+            delivery_nonce: "projection-fixture-mail-1".to_string(),
             from: "GM".to_string(),
             to: "Hero".to_string(),
             subject: "Welcome".to_string(),
@@ -813,14 +814,17 @@ mod tests {
         assert_eq!(projection.auctions.len(), 1);
         assert_eq!(projection.auctions[0].item_key, "iron-sword");
         assert_eq!(projection.auctions[0].price, 1200);
-        assert!(projection
-            .npc_state
-            .iter()
-            .any(|row| row.kind == "flag" && row.state_key == "42" && row.state_value == "true"));
-        assert!(projection
-            .npc_state
-            .iter()
-            .any(|row| row.kind == "value" && row.state_key == "start|main|progress"));
+        assert!(
+            projection.npc_state.iter().any(|row| row.kind == "flag"
+                && row.state_key == "42"
+                && row.state_value == "true")
+        );
+        assert!(
+            projection
+                .npc_state
+                .iter()
+                .any(|row| row.kind == "value" && row.state_key == "start|main|progress")
+        );
     }
 
     #[test]

@@ -142,8 +142,10 @@ impl ZoneManager {
             | ZoneCommand::Walk { session_id, .. }
             | ZoneCommand::Run { session_id, .. }
             | ZoneCommand::Turn { session_id, .. }
+            | ZoneCommand::TeleportToNpc { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
             | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+            | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
@@ -154,7 +156,9 @@ impl ZoneManager {
             | ZoneCommand::SpawnMonster { session_id, .. }
             | ZoneCommand::SyncNativeMonsters { session_id, .. }
             | ZoneCommand::PlayerAttackObject { session_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }
             | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
             | ZoneCommand::ResolveReincarnation { session_id, .. }
@@ -246,6 +250,18 @@ impl ZoneManager {
         self.zones.get(key)
     }
 
+    /// Install caller-configured policy before any session joins the Zone.
+    /// Used by deterministic fixtures and trusted bootstrap configuration;
+    /// replacing an active Zone is deliberately rejected.
+    pub fn install_empty_zone(&mut self, zone: ZoneRuntime) -> bool {
+        let key = zone.key().clone();
+        if self.session_zones.values().any(|active| active == &key) {
+            return false;
+        }
+        self.zones.insert(key, zone);
+        true
+    }
+
     pub fn native_monster_snapshots(&self, key: &ZoneKey) -> Vec<ZoneNativeMonsterSnapshot> {
         self.zones
             .get(key)
@@ -303,6 +319,17 @@ impl ZoneManager {
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_vitals(session_id)
+    }
+
+    /// Trusted server-only Harvest admission query for the player's active
+    /// Zone. No raw client command can synchronize the predicates it reads.
+    pub fn player_harvest_admitted(&self, session_id: &SessionId, now_ms: u64) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.player_harvest_admitted(session_id, now_ms))
     }
 
     pub fn can_player_cast_magic(

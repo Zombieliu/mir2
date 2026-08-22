@@ -6,13 +6,14 @@ use mir2_game_data::CrystalRespawnTemplate;
 use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket};
 
 use super::super::components::{
-    entity_facing, entity_name, entity_object_id, player_entity, DisplayName, Facing, Monster,
-    MonsterAgent, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject, YimoogiState,
+    DisplayName, Facing, Monster, MonsterAgent, MonsterCombatStats, MonsterVitals, ObjectId,
+    Position, WorldObject, YimoogiState, entity_facing, entity_name, entity_object_id,
+    player_entity,
 };
 use super::super::crystal_compat::*;
 use super::super::monsters::*;
 use super::super::movement::*;
-use super::super::resources::{runtime_tick, MapRuntimeResource};
+use super::super::resources::{MapRuntimeResource, runtime_tick};
 
 pub(in crate::runtime) fn update_yimoogi_state(
     world: &mut World,

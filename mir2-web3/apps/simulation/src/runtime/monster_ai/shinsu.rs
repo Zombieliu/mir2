@@ -6,7 +6,7 @@ use mir2_game_data::crystal_monster_by_name;
 use mir2_protocol::{Point, ServerPacket};
 
 use super::super::combat::*;
-use super::super::components::{entity_object_id, Monster, MonsterAgent, MonsterAiState};
+use super::super::components::{Monster, MonsterAgent, MonsterAiState, entity_object_id};
 
 use super::common::*;
 

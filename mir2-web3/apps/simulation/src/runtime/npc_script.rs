@@ -8,8 +8,8 @@ use crate::config::{
     CurrencyKind, ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition,
 };
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_npc_info_manifest, crystal_npc_script_by_key,
-    CrystalNpcInfoTemplate, CrystalNpcScript, CrystalNpcSection,
+    CrystalNpcInfoTemplate, CrystalNpcScript, CrystalNpcSection, crystal_map_respawns_by_file_name,
+    crystal_npc_info_manifest, crystal_npc_script_by_key,
 };
 use mir2_protocol::{
     ChatType, MapInformation, MirClass, MirDirection, MirGender, Point, ServerPacket,
@@ -17,9 +17,10 @@ use mir2_protocol::{
 
 use super::buffs::*;
 use super::components::{
+    CharacterBody, DisplayName, Facing, Monster, MonsterAgent, MonsterVitals, Npc, NpcAgent,
+    NpcPetState, ObjectId, Position, RemotePlayer, SummonedMonster, WorldObject,
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_position,
-    player_entity, CharacterBody, DisplayName, Facing, Monster, MonsterAgent, MonsterVitals, Npc,
-    NpcAgent, NpcPetState, ObjectId, Position, RemotePlayer, SummonedMonster, WorldObject,
+    player_entity,
 };
 use super::crystal_compat::*;
 use super::inventory::*;
@@ -1009,7 +1010,7 @@ pub(super) fn crystal_npc_named_token_value(world: &World, token: &str) -> Optio
                     .guild_territory
                     .rental_days_left
                     .to_string(),
-            )
+            );
         }
         "GUILDEXTENDFEE" => return Some("1000000".to_string()),
         _ => {}

@@ -6,14 +6,13 @@ use serde::{Deserialize, Serialize};
 use crate::config::{ItemContainer, QuestObjectiveSnapshot, QuestSnapshot, QuestStage};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_item_by_index, crystal_item_by_name, crystal_npc_info_manifest,
-    crystal_quest_packet_manifest, localized_text_or_fallback, starter_server_data,
     CrystalQuestItemTaskTemplate, CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy,
-    QuestTemplate,
+    QuestTemplate, crystal_item_by_index, crystal_item_by_name, crystal_npc_info_manifest,
+    crystal_quest_packet_manifest, localized_text_or_fallback, starter_server_data,
 };
 use mir2_protocol::{
-    decode_server_packet, encode_frame, ChatType, ClientQuestInfo, ItemInfo, MirClass,
-    QuestItemReward, ServerPacket, ServerPacketId,
+    ChatType, ClientQuestInfo, ItemInfo, MirClass, QuestItemReward, ServerPacket, ServerPacketId,
+    decode_server_packet, encode_frame,
 };
 
 use super::crystal_compat::GUIDE_QUEST_ID;
@@ -25,7 +24,7 @@ use super::inventory::{
 use super::items::{
     crystal_item_key_for_template, item_info_from_crystal_template, normalize_crystal_item_key,
 };
-use super::npc::{localized_npc_dialog_base_key, npc_script_for_object_id, NpcDialogLinkState};
+use super::npc::{NpcDialogLinkState, localized_npc_dialog_base_key, npc_script_for_object_id};
 use super::npc_script::{NpcInteractionContext, NpcQuestDialog};
 use super::resources::{
     InventoryResource, PlayerRuntimeResource, QuestResource, RuntimeConfigResource, SessionResource,
@@ -1040,6 +1039,40 @@ fn take_crystal_quest_task_items(world: &mut World, template: &CrystalQuestPacke
         .resource_mut::<InventoryResource>()
         .inventory_items
         .retain(|item| item.container != ItemContainer::Quest || !keys.contains(&item.key));
+}
+
+pub(super) fn abandon_quest(world: &mut World, quest_id: i32) -> bool {
+    if quest_stage(world, quest_id) != Some(QuestStage::InProgress) {
+        return false;
+    }
+
+    let legacy_quest_item_key =
+        quest_template_by_id(quest_id).map(|template| template.quest_item.key);
+    let crystal_template = crystal_quest_template_by_id(quest_id);
+    {
+        let mut quests = world.resource_mut::<QuestResource>();
+        let Some(quest) = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == quest_id)
+        else {
+            return false;
+        };
+        quest.stage = QuestStage::Available;
+        quest.current = 0;
+        quest.task_progress.clear();
+    }
+
+    if let Some(key) = legacy_quest_item_key {
+        world
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .retain(|item| item.container != ItemContainer::Quest || item.key != key);
+    }
+    if let Some(template) = crystal_template.as_ref() {
+        take_crystal_quest_task_items(world, template);
+    }
+    true
 }
 
 pub(super) fn can_accept_quest(world: &World, quest_id: i32) -> bool {

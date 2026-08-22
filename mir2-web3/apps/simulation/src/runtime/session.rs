@@ -6,17 +6,17 @@ use serde::{Deserialize, Serialize};
 
 use super::combat::{apply_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state};
 use super::components::{
-    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    Facing, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position, entity_by_object_id,
+    entity_name, entity_object_id, player_entity,
 };
 use super::crystal_compat::*;
 use super::drops::{
-    drop_player_death_penalty, zone_ground_drop_snapshots_for_monster,
-    SharedAccountInventoryTransactionReceipt,
+    SharedAccountInventoryTransactionReceipt, drop_player_death_penalty,
+    zone_ground_drop_snapshots_for_monster,
 };
 use super::equipment::*;
 use super::inventory::*;
-use super::items::{item_unique_id, user_item_from_item_state, ItemState};
+use super::items::{ItemState, item_unique_id, user_item_from_item_state};
 use super::map::*;
 use super::monsters::{
     apply_shared_monster_death_state, apply_shared_monster_revive_state,
@@ -26,13 +26,13 @@ use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
 use super::resources::{
-    advance_runtime_tick, BuffResource, ElementalResource, FishingResource, GroupResource,
-    HeroInventoryResource, InventoryResource, ItemRentalRecordState, ItemRentalResource,
-    MapRuntimeResource, MountResource, NpcStateResource, ObjectIdAllocatorResource,
-    PlayerActionTimingResource, PlayerMovementTimingResource, PlayerPermissionResource,
-    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeClockResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
-    Stage5SystemsResource,
+    BuffResource, ElementalResource, FishingResource, GroupResource, HeroInventoryResource,
+    InventoryResource, ItemRentalRecordState, ItemRentalResource, MapRuntimeResource,
+    MountResource, NpcStateResource, ObjectIdAllocatorResource, PlayerActionTimingResource,
+    PlayerMovementTimingResource, PlayerPermissionResource, PlayerRuntimeResource,
+    PotionRecoveryResource, QuestResource, RuntimeClockResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
+    advance_runtime_tick,
 };
 use super::save::*;
 use super::skills::*;
@@ -45,7 +45,7 @@ use crate::config::{
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
 };
-use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
+use mir2_game_data::{CrystalMonsterTemplate, LanguageCode, crystal_monster_by_name};
 use mir2_protocol::{
     ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
     UserItemRentalInformation,
@@ -251,7 +251,9 @@ impl SimulationSession {
     }
 
     pub fn save_active_character(&self) {
-        persist_active_character_save(self.app.world());
+        if let Err(error) = persist_active_character_save(self.app.world()) {
+            eprintln!("failed to save active character: {error}");
+        }
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
@@ -389,6 +391,7 @@ impl SimulationSession {
         // selected character into another account: StartGame persists any active
         // character before loading the requested slot.
         session.selected_character = None;
+        session.clear_active_save_revision();
         vec![ServerPacket::LoginSuccess {
             characters: session
                 .characters
@@ -973,6 +976,7 @@ impl SimulationSession {
             name_colour_argb: -1,
             image: agent.image,
             ai: agent.ai,
+            disposition: Some(agent.disposition),
             level: template.as_ref().map(|monster| monster.level).unwrap_or(1),
             max_hp,
             hp: vitals.hp.clamp(0, max_hp),
@@ -1158,23 +1162,11 @@ fn apply_shared_trade_offer(
         };
         item.container = container;
         item.slot = slot;
-        let unique_id = item_unique_id(&item);
-        if staged_inventory
-            .iter()
-            .any(|existing| item_unique_id(existing) == unique_id)
-        {
-            let mut next_unique_id =
-                allocate_item_unique_id(world.resource::<InventoryResource>(), container, slot);
-            while staged_inventory
-                .iter()
-                .any(|existing| item_unique_id(existing) == next_unique_id)
-            {
-                next_unique_id = next_unique_id.saturating_add(1);
-            }
-            item.unique_id = next_unique_id;
-        } else {
-            item.unique_id = unique_id;
-        }
+        normalize_incoming_item_tree_unique_ids(
+            world.resource::<InventoryResource>(),
+            &mut item,
+            &staged_inventory,
+        );
         staged_inventory.push(item.clone());
         delivered_items.push(item);
     }
@@ -1286,6 +1278,11 @@ fn apply_shared_item_rental_delivery(
             item.rental_owner_name = agreement.item.character_name.clone();
             item.rental_expiry_binary_datetime = expiry;
             item.rental_locked = false;
+            normalize_incoming_item_tree_unique_ids(
+                world.resource::<InventoryResource>(),
+                &mut item,
+                &[],
+            );
 
             let mut loan_item = user_item_from_item_state(&item);
             loan_item.rental_information = Some(UserItemRentalInformation {

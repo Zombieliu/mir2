@@ -25,7 +25,7 @@ use super::items::{crystal_item_key_for_template, crystal_item_template_for_item
 use super::monsters::deterministic_roll;
 use super::movement::offset_point;
 use super::resources::{
-    runtime_tick, InventoryResource, MapRuntimeResource, RuntimeConfigResource,
+    InventoryResource, MapRuntimeResource, RuntimeConfigResource, runtime_tick,
 };
 use crate::config::{EquipmentSlot, ItemContainer};
 

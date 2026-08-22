@@ -4,7 +4,11 @@
 //! [`ChatModel`] so messages render identically. The panel is presentational;
 //! chat authorization and delivery stay server-authoritative.
 
+#[cfg(not(feature = "native-ui"))]
+use bevy::prelude::Resource;
+#[cfg(feature = "native-ui")]
 use bevy::prelude::*;
+#[cfg(feature = "native-ui")]
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, Node, PositionType, UiRect, Val,
 };
@@ -49,16 +53,20 @@ impl ChatModel {
 }
 
 /// Marker on the chat panel root.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct ChatPanelRoot;
 
 /// Marker on the chat text node.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct ChatText;
 
 /// Build the shared Mir2 chat panel.
+#[cfg(feature = "native-ui")]
 pub struct Mir2ChatPlugin;
 
+#[cfg(feature = "native-ui")]
 impl Plugin for Mir2ChatPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChatModel>()
@@ -70,6 +78,7 @@ impl Plugin for Mir2ChatPlugin {
     }
 }
 
+#[cfg(feature = "native-ui")]
 fn spawn_chat_panel(mut commands: Commands) {
     commands
         .spawn((
@@ -102,6 +111,7 @@ fn spawn_chat_panel(mut commands: Commands) {
         });
 }
 
+#[cfg(feature = "native-ui")]
 fn update_chat_panel(model: Res<ChatModel>, texts: Query<&mut Text, With<ChatText>>) {
     let joined = model.recent_text(6).join("\n");
     for mut text in texts {

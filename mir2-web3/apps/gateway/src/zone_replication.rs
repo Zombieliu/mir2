@@ -195,14 +195,7 @@ impl ZoneBaseSnapshotStore {
                     self.path.display()
                 )
             })?;
-            File::open(parent)
-                .and_then(|directory| directory.sync_all())
-                .map_err(|error| {
-                    format!(
-                        "failed to fsync Zone base snapshot directory {}: {error}",
-                        parent.display()
-                    )
-                })?;
+            sync_parent_directory(parent, "Zone base snapshot")?;
             Ok(())
         })();
         if write_result.is_err() {
@@ -255,7 +248,10 @@ impl ZoneMutationWal {
             })?;
         }
         let mut options = OpenOptions::new();
-        options.create(true).read(true).write(true).append(true);
+        // Do not request append-only access here. On Windows an append-only
+        // handle cannot be truncated with `File::set_len`, which is required
+        // when repairing a partial final WAL record after a crash.
+        options.create(true).read(true).write(true);
         #[cfg(unix)]
         {
             use std::os::unix::fs::OpenOptionsExt;
@@ -345,6 +341,12 @@ impl ZoneMutationWal {
         };
         let encoded = serde_json::to_vec(&record)
             .map_err(|error| format!("failed to encode Zone mutation WAL record: {error}"))?;
+        self.file.seek(SeekFrom::End(0)).map_err(|error| {
+            format!(
+                "failed to seek Zone mutation WAL {} before append: {error}",
+                self.path.display()
+            )
+        })?;
         self.file.write_all(&encoded).map_err(|error| {
             format!(
                 "failed to append Zone mutation WAL {}: {error}",
@@ -517,18 +519,25 @@ fn replay_wal(
 
 fn open_wal_file(path: &Path) -> Result<File, String> {
     let mut options = OpenOptions::new();
-    options.create(true).read(true).write(true).append(true);
+    options.create(true).read(true).write(true);
     #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
     }
-    options.open(path).map_err(|error| {
+    let mut file = options.open(path).map_err(|error| {
         format!(
             "failed to reopen Zone mutation WAL {}: {error}",
             path.display()
         )
-    })
+    })?;
+    file.seek(SeekFrom::End(0)).map_err(|error| {
+        format!(
+            "failed to seek reopened Zone mutation WAL {}: {error}",
+            path.display()
+        )
+    })?;
+    Ok(file)
 }
 
 fn replace_wal_atomically(path: &Path, bytes: &[u8]) -> Result<(), String> {
@@ -585,19 +594,32 @@ fn replace_wal_atomically(path: &Path, bytes: &[u8]) -> Result<(), String> {
                 path.display()
             )
         })?;
-        File::open(parent)
-            .and_then(|directory| directory.sync_all())
-            .map_err(|error| {
-                format!(
-                    "failed to fsync Zone mutation WAL directory {}: {error}",
-                    parent.display()
-                )
-            })
+        sync_parent_directory(parent, "Zone mutation WAL")
     })();
     if write_result.is_err() {
         let _ = fs::remove_file(&temp_path);
     }
     write_result
+}
+
+#[cfg(unix)]
+fn sync_parent_directory(parent: &Path, label: &str) -> Result<(), String> {
+    File::open(parent)
+        .and_then(|directory| directory.sync_all())
+        .map_err(|error| {
+            format!(
+                "failed to fsync {label} directory {}: {error}",
+                parent.display()
+            )
+        })
+}
+
+#[cfg(not(unix))]
+fn sync_parent_directory(_parent: &Path, _label: &str) -> Result<(), String> {
+    // `std::fs::File::open` cannot open a directory for `sync_all` on
+    // Windows. The temporary file itself is flushed before the atomic rename;
+    // directory durability remains a Unix-only strengthening here.
+    Ok(())
 }
 
 fn validate_wal_digest(value: &str) -> Result<(), String> {

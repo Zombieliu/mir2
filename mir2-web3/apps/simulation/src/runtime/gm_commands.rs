@@ -26,8 +26,8 @@ use crate::config::{ItemContainer, QuestStage, WorldEntityDisposition};
 
 use super::buffs::crystal_buff_type_for_key;
 use super::components::{
-    current_player_is_dead, current_player_object_id, entity_name, entity_position, player_entity,
     Facing, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
+    current_player_is_dead, current_player_object_id, entity_name, entity_position, player_entity,
 };
 use super::equipment::user_item_from_equipment_state;
 use super::inventory::{
@@ -52,9 +52,9 @@ use super::skills::{
     client_magic_for_skill_state, crystal_skill_state, skill_key_for_crystal_spell,
 };
 use bevy_ecs::prelude::{Entity, World};
+use mir2_game_data::CrystalItemTemplate;
 use mir2_game_data::crystal_item_by_index;
 use mir2_game_data::crystal_item_by_name;
-use mir2_game_data::CrystalItemTemplate;
 
 /// Crystal awakening constants (`Shared/Data/ItemData.cs`, `Awake`).
 const AWAKE_MAX_LEVEL: usize = 5;

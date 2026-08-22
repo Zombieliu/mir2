@@ -40,8 +40,8 @@ wasm-bindgen = "0.2.95"
 
 [profile.wasm-release]
 inherits = "release"
-opt-level = "s"
-lto = "thin"
+opt-level = "z"
+lto = "fat"
 codegen-units = 1
 panic = "abort"
 strip = "debuginfo"

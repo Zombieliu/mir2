@@ -41,8 +41,8 @@ pub(in crate::runtime) fn update_football_state(agent: &mut MonsterAgent, tick: 
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        entity_object_id, entity_position, player_entity, DisplayName, Facing, Monster,
-        MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
+        DisplayName, Facing, Monster, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId,
+        Position, WorldObject, entity_object_id, entity_position, player_entity,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, crystal_respawn_can_wander,

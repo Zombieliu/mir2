@@ -161,6 +161,7 @@ mod tests {
                 level: 3,
                 name: Some("Demo".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
+                ..default()
             },
         };
         let label = hud_text_label(&model);

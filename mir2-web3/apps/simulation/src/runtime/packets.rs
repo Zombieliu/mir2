@@ -3,13 +3,13 @@ use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::World;
+use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
-    crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_index,
-    crystal_monster_by_name, crystal_npc_info_manifest, crystal_recipe_bootstrap_packets,
-    format_localized_text, localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
+    crystal_map_respawns_by_file_name, crystal_monster_by_index, crystal_monster_by_name,
+    crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
+    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientAuction, ClientBuff,
@@ -23,17 +23,24 @@ use mir2_protocol::{
 };
 
 use crate::config::{
-    CharacterRecord, CharacterSaveRecord, EquipmentSlot, GroundDropLootSnapshot,
-    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, MonsterSpawnSource,
-    NpcScriptDiagnosticSnapshot, QuestStage, SimulationConfig, Stage5AuctionListing,
-    Stage5HeroState, Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
-    Stage5SystemsState, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
-    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
+    new_stage5_mail_delivery_nonce, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
+    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, MapTransferSnapshot,
+    MonsterSpawnSource, NpcScriptDiagnosticSnapshot, QuestStage, SimulationConfig,
+    Stage5AuctionListing, Stage5HeroState, Stage5ItemRentalRecordSnapshot,
+    Stage5ItemRentalSnapshot, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
+    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
+    WorldSnapshot,
 };
 
+use super::big_map::{
+    client_map_info, search as search_big_map, teleport_to_npc_cost, world_map_setup, SearchMapHit,
+};
 use super::combat::{
-    crystal_player_attack_blocked_by_status, crystal_player_magic_blocked_by_status,
+    crystal_player_attack_blocked_by_status, crystal_player_can_mount_attack,
+    crystal_player_has_class_weapon, crystal_player_is_dazed,
+    crystal_player_magic_blocked_by_status,
     crystal_player_movement_blocked_by_status, crystal_player_slowed_by_status,
+    melee_target_is_authoritatively_hostile_in_direction,
 };
 use super::components::{
     current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
@@ -90,9 +97,9 @@ use super::npc::{
     sell_item_impl,
 };
 use super::quests::{
-    begin_quest, can_accept_quest, complete_quest_with_selection, completed_quest_ids,
-    crystal_quest_reward_selection_missing, crystal_quest_task_list, ensure_runtime_quest,
-    quest_definition_exists, quest_log_snapshots, quest_template_by_id,
+    abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
+    completed_quest_ids, crystal_quest_reward_selection_missing, crystal_quest_task_list,
+    ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -104,11 +111,11 @@ use super::resources::{
     crystal_packet_action_ready, crystal_packet_attack_delay_ticks,
     crystal_packet_move_delay_ticks, crystal_packet_spell_delay_ticks,
     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
-    queue_crystal_movement_retry, BuffResource, GmRuntimeResource, HeroInventoryResource,
-    InventoryResource, ItemRentalResource, MapRuntimeResource, MountResource, NpcStateResource,
-    PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource,
-    QuestResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
-    Stage5SystemsResource,
+    queue_crystal_movement_retry, BuffResource, FishingResource, GmRuntimeResource,
+    HeroInventoryResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
+    MountResource, NpcStateResource, PlayerActionKind, PlayerPermissionResource,
+    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::save::*;
 use super::session::SimulationSession;
@@ -119,9 +126,21 @@ use super::social_economy::{
     social_blocks_outgoing_mail, stage5_market_sale_price, stage5_market_settlement,
     stage5_trade_item_can_enter,
 };
-use super::stage5::{push_unique, push_unique_u8, stage5_item_name, stage5_player_name};
+use super::stage5::{
+    exact_mail_item_state_is_valid, game_shop_stock_level, push_unique, push_unique_u8,
+    stage5_claim_mail_authoritative, stage5_item_name, stage5_player_name, Stage5MailClaimOutcome,
+};
 
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
+const CRYSTAL_MAIL_CAPACITY: usize = 100;
+pub(super) const MAX_MAIL_RECIPIENT_CHARS: usize = 20;
+pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 1_000;
+
+#[derive(Resource, Debug, Default)]
+struct BigMapConnectionState {
+    world_map_setup_sent: bool,
+    sent_map_indexes: BTreeSet<i32>,
+}
 
 pub(super) fn system_message(message: &str) -> ServerPacket {
     ServerPacket::Chat {
@@ -181,11 +200,67 @@ fn current_stage5_character_index(world: &World) -> i32 {
 }
 
 fn stage5_mail_cost(gold: u32, stamped: bool) -> u32 {
-    if stamped {
-        0
-    } else {
-        (gold / 1_000) * 100
+    // `stamped` is client-controlled. Until a server-side stamp inventory and
+    // consume operation exists, it must never authorize free postage.
+    let _ = stamped;
+    (gold / 1_000) * 100
+}
+
+#[derive(Debug, Clone)]
+struct Stage5MailSender {
+    account_id: String,
+    character_index: i32,
+    character_name: String,
+}
+
+fn stage5_mail_sender(world: &World) -> Option<Stage5MailSender> {
+    if !is_in_world(world) {
+        return None;
     }
+    let session = world.resource::<SessionResource>();
+    let account_id = session
+        .account_id
+        .as_deref()
+        .map(str::trim)
+        .filter(|account_id| !account_id.is_empty())?;
+    let character = session.selected_character.as_ref()?;
+    let character_name = character.name.trim();
+    if character_name.is_empty() {
+        return None;
+    }
+    Some(Stage5MailSender {
+        account_id: account_id.to_string(),
+        character_index: character.index,
+        character_name: character_name.to_string(),
+    })
+}
+
+fn stage5_mail_sender_exists(config: &SimulationConfig, sender: &Stage5MailSender) -> bool {
+    config
+        .account_store
+        .lock()
+        .ok()
+        .and_then(|store| {
+            store.accounts.get(&sender.account_id).map(|account| {
+                account.characters.iter().any(|character| {
+                    character.index == sender.character_index
+                        && character.name == sender.character_name
+                })
+            })
+        })
+        .unwrap_or(false)
+}
+
+fn stage5_mail_recipient_is_valid(name: &str) -> bool {
+    let trimmed = name.trim();
+    !trimmed.is_empty()
+        && trimmed == name
+        && trimmed.chars().count() <= MAX_MAIL_RECIPIENT_CHARS
+        && !trimmed.chars().any(char::is_control)
+}
+
+fn stage5_mail_message_is_valid(message: &str) -> bool {
+    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS && !message.chars().any(char::is_control)
 }
 
 #[derive(Debug, Clone)]
@@ -215,58 +290,22 @@ fn stage5_mail_target_for_name(config: &SimulationConfig, name: &str) -> Option<
     None
 }
 
-fn stage5_mail_target_is_current(world: &World, target: &Stage5MailTarget) -> bool {
-    let session = world.resource::<SessionResource>();
-    let account_id = session.account_id.as_deref().unwrap_or("demo");
-    account_id == target.account_id
-        && session
-            .selected_character
-            .as_ref()
-            .is_some_and(|character| character.index == target.character_index)
-}
-
-fn stage5_push_mail_to_local_world(world: &mut World, mut mail: Stage5MailMessage) {
-    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-    let id = stage5
-        .stage5_systems
-        .mail
-        .iter()
-        .map(|mail| mail.id)
-        .max()
-        .unwrap_or(0)
-        .saturating_add(1);
-    mail.id = id;
-    stage5.stage5_systems.mail.push(mail);
-}
-
-fn stage5_push_mail_to_saved_character(
-    config: &SimulationConfig,
-    target: &Stage5MailTarget,
+pub(super) fn stage5_append_mail_to_save(
+    save: &mut CharacterSaveRecord,
+    recipient_name: &str,
     mut mail: Stage5MailMessage,
-) -> Result<(), String> {
-    let mut store = config
-        .account_store
-        .lock()
-        .map_err(|_| "account store mutex poisoned".to_string())?;
-    let account = store
-        .accounts
-        .get_mut(&target.account_id)
-        .ok_or_else(|| format!("mail target account {} not found", target.account_id))?;
-    let character = account
-        .characters
-        .iter()
-        .find(|character| character.index == target.character_index)
-        .cloned()
-        .ok_or_else(|| format!("mail target character {} not found", target.character_name))?;
-    let save = account
-        .saves
-        .entry(character.index)
-        .or_insert_with(|| CharacterSaveRecord::new(character.clone()));
-    let mut systems = save
-        .stage5_systems_json
-        .as_deref()
-        .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
-        .unwrap_or_default();
+) -> Result<Stage5MailMessage, String> {
+    if mail.delivery_nonce.is_empty() {
+        mail.delivery_nonce = new_stage5_mail_delivery_nonce();
+    }
+    let mut systems = match save.stage5_systems_json.as_deref() {
+        Some(state) => serde_json::from_str::<Stage5SystemsState>(state)
+            .map_err(|error| format!("failed to decode stage5 mail: {error}"))?,
+        None => Stage5SystemsState::default(),
+    };
+    if systems.mail.iter().filter(|mail| !mail.deleted).count() >= CRYSTAL_MAIL_CAPACITY {
+        return Err("mailbox is full".to_string());
+    }
     mail.id = systems
         .mail
         .iter()
@@ -274,14 +313,201 @@ fn stage5_push_mail_to_saved_character(
         .max()
         .unwrap_or(0)
         .saturating_add(1);
-    mail.to = character.name;
-    systems.mail.push(mail);
+    mail.to = recipient_name.to_string();
+    systems.mail.push(mail.clone());
     save.stage5_systems_json = Some(
         serde_json::to_string(&systems)
             .map_err(|error| format!("failed to encode stage5 mail: {error}"))?,
     );
-    drop(store);
-    config.save_account_store()
+    Ok(mail)
+}
+
+fn stage5_take_mail_attachments_from_save(
+    save: &mut CharacterSaveRecord,
+    attachment_ids: &[u64],
+    expected_states_json: &[String],
+) -> Result<Vec<ItemState>, String> {
+    if attachment_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    if attachment_ids.len() != expected_states_json.len() {
+        return Err("mail attachment snapshot length changed before commit".to_string());
+    }
+    let attachment_id_set = attachment_ids.iter().copied().collect::<BTreeSet<_>>();
+    let mut removed = BTreeSet::new();
+    let mut authoritative = Vec::with_capacity(attachment_ids.len());
+    let mut retained = Vec::with_capacity(save.inventory_items_json.len());
+    for state in save.inventory_items_json.drain(..) {
+        let item = serde_json::from_str::<ItemState>(&state)
+            .map_err(|error| format!("failed to decode sender inventory: {error}"))?;
+        let unique_id = item_unique_id(&item);
+        if attachment_id_set.contains(&unique_id) {
+            if !removed.insert(unique_id)
+                || !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                || !exact_mail_item_state_is_valid(&item)
+                || !stage5_trade_item_can_enter(&item)
+            {
+                return Err("mail attachment changed before commit".to_string());
+            }
+            authoritative.push(item);
+        } else {
+            retained.push(state);
+        }
+    }
+    if removed != attachment_id_set {
+        return Err("mail attachment missing from sender save".to_string());
+    }
+    authoritative.sort_by_key(|item| {
+        attachment_ids
+            .iter()
+            .position(|unique_id| *unique_id == item_unique_id(item))
+            .unwrap_or(usize::MAX)
+    });
+    for (item, expected) in authoritative.iter().zip(expected_states_json) {
+        let encoded = serde_json::to_string(item)
+            .map_err(|error| format!("failed to encode authoritative attachment: {error}"))?;
+        if &encoded != expected {
+            return Err("mail attachment differs from authoritative persisted item".to_string());
+        }
+    }
+    save.inventory_items_json = retained;
+    Ok(authoritative)
+}
+
+struct Stage5MailCommit {
+    sender_gold: u32,
+    sender_inventory_items: Vec<ItemState>,
+    sender_mail: Vec<Stage5MailMessage>,
+    sender_baseline_revision: u64,
+    sender_committed_revision: u64,
+}
+
+fn stage5_commit_mail_transaction(
+    config: &SimulationConfig,
+    sender: &Stage5MailSender,
+    target: &Stage5MailTarget,
+    mut mail: Stage5MailMessage,
+    total: u32,
+    attachment_ids: &[u64],
+    expected_attachment_states_json: &[String],
+) -> Result<Stage5MailCommit, String> {
+    let self_mail =
+        sender.account_id == target.account_id && sender.character_index == target.character_index;
+    let touched_accounts = vec![sender.account_id.clone(), target.account_id.clone()];
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let sender_character = store
+            .accounts
+            .get(&sender.account_id)
+            .and_then(|account| {
+                account.characters.iter().find(|character| {
+                    character.index == sender.character_index
+                        && character.name == sender.character_name
+                })
+            })
+            .ok_or_else(|| "mail sender changed before commit".to_string())?;
+        let mut sender_save = store
+            .accounts
+            .get(&sender.account_id)
+            .and_then(|account| account.saves.get(&sender.character_index))
+            .cloned()
+            .ok_or_else(|| "mail sender durable save changed before commit".to_string())?;
+        if sender_save.character.index != sender_character.index
+            || sender_save.character.name != sender_character.name
+        {
+            return Err("mail sender save identity mismatch".to_string());
+        }
+        let sender_baseline_revision = sender_save.revision;
+        sender_save.gold = sender_save
+            .gold
+            .checked_sub(total)
+            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        let removed_attachments = stage5_take_mail_attachments_from_save(
+            &mut sender_save,
+            attachment_ids,
+            expected_attachment_states_json,
+        )?;
+        mail.items = removed_attachments
+            .iter()
+            .map(|item| item.key.clone())
+            .collect();
+        mail.item_states_json = removed_attachments
+            .iter()
+            .map(serde_json::to_string)
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("failed to encode authoritative mail attachment: {error}"))?;
+
+        let _committed_mail = if self_mail {
+            stage5_append_mail_to_save(&mut sender_save, &target.character_name, mail)?
+        } else {
+            let target_account = store
+                .accounts
+                .get(&target.account_id)
+                .ok_or_else(|| format!("mail target account {} not found", target.account_id))?;
+            let target_character = target_account
+                .characters
+                .iter()
+                .find(|character| {
+                    character.index == target.character_index
+                        && character.name == target.character_name
+                })
+                .cloned()
+                .ok_or_else(|| {
+                    format!("mail target character {} not found", target.character_name)
+                })?;
+            let mut target_save = target_account
+                .saves
+                .get(&target.character_index)
+                .cloned()
+                .unwrap_or_else(|| CharacterSaveRecord::new(target_character));
+            let committed =
+                stage5_append_mail_to_save(&mut target_save, &target.character_name, mail)?;
+            target_save.revision = target_save
+                .revision
+                .checked_add(1)
+                .ok_or_else(|| "mail target revision exhausted".to_string())?;
+            store
+                .accounts
+                .get_mut(&target.account_id)
+                .expect("validated mail target account should exist")
+                .saves
+                .insert(target.character_index, target_save);
+            committed
+        };
+
+        let sender_committed_revision = sender_baseline_revision
+            .checked_add(1)
+            .ok_or_else(|| "mail sender revision exhausted".to_string())?;
+        sender_save.revision = sender_committed_revision;
+        let sender_gold = sender_save.gold;
+        let sender_inventory_items = sender_save
+            .inventory_items_json
+            .iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("failed to decode committed sender inventory: {error}"))?;
+        let sender_mail = sender_save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>)
+            .transpose()
+            .map_err(|error| format!("failed to decode committed sender mailbox: {error}"))?
+            .unwrap_or_default()
+            .mail;
+        store
+            .accounts
+            .get_mut(&sender.account_id)
+            .expect("validated mail sender account should exist")
+            .saves
+            .insert(sender.character_index, sender_save);
+
+        Ok(Stage5MailCommit {
+            sender_gold,
+            sender_inventory_items,
+            sender_mail,
+            sender_baseline_revision,
+            sender_committed_revision,
+        })
+    })
 }
 
 fn stage5_mail_attachment_ids(items_idx: &[u64; 5]) -> Option<Vec<u64>> {
@@ -304,31 +530,46 @@ fn stage5_mail_attachment_states(world: &World, unique_ids: &[u64]) -> Option<Ve
     let inventory = world.resource::<InventoryResource>();
     let mut items = Vec::with_capacity(unique_ids.len());
     for unique_id in unique_ids {
-        let item = inventory
+        let matches = inventory
             .inventory_items
             .iter()
-            .find(|item| item_matches_inventory_unique_id(item, *unique_id))?
-            .clone();
+            .filter(|item| item_matches_inventory_unique_id(item, *unique_id))
+            .collect::<Vec<_>>();
+        let [item] = matches.as_slice() else {
+            return None;
+        };
+        if !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            || !exact_mail_item_state_is_valid(item)
+            || !stage5_trade_item_can_enter(item)
+        {
+            return None;
+        }
+        let item = (*item).clone();
         items.push(item);
     }
     Some(items)
 }
 
 fn stage5_mail_attachment_user_items(mail: &Stage5MailMessage) -> Vec<UserItem> {
-    let mut items = mail
-        .item_states_json
-        .iter()
-        .filter_map(|state| serde_json::from_str::<ItemState>(state).ok())
-        .map(|item| user_item_from_item_state(&item))
-        .collect::<Vec<_>>();
-    if !items.is_empty() {
-        return items;
+    if !mail.item_states_json.is_empty() {
+        let Ok(items) = mail
+            .item_states_json
+            .iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+        else {
+            return Vec::new();
+        };
+        return items.iter().map(user_item_from_item_state).collect();
     }
-    items.extend(mail.items.iter().enumerate().map(|(index, key)| {
-        let unique_id = (u64::from(mail.id) << 32) | u64::try_from(index + 1).unwrap_or(1);
-        stage5_guild_user_item_for_key(key, unique_id)
-    }));
-    items
+    mail.items
+        .iter()
+        .enumerate()
+        .map(|(index, key)| {
+            let unique_id = (u64::from(mail.id) << 32) | u64::try_from(index + 1).unwrap_or(1);
+            stage5_guild_user_item_for_key(key, unique_id)
+        })
+        .collect()
 }
 
 fn stage5_mail_to_client_mail(mail: &Stage5MailMessage) -> ClientMail {
@@ -373,7 +614,10 @@ fn stage5_send_mail_packet(
     items_idx: [u64; 5],
     stamped: bool,
 ) -> Vec<ServerPacket> {
-    if name.trim().is_empty() {
+    let Some(sender) = stage5_mail_sender(world) else {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    };
+    if !stage5_mail_recipient_is_valid(&name) || !stage5_mail_message_is_valid(&message) {
         return vec![ServerPacket::MailSent { result: -1 }];
     }
     let Some(attachment_ids) = stage5_mail_attachment_ids(&items_idx) else {
@@ -386,12 +630,12 @@ fn stage5_send_mail_packet(
             .social,
         &name,
     ) {
-        return vec![system_message_key(
-            world,
-            "server.CannotMailPlayerOnBlacklist",
-        )];
+        return vec![ServerPacket::MailSent { result: -1 }];
     }
     let config = world.resource::<RuntimeConfigResource>().config.clone();
+    if !stage5_mail_sender_exists(&config, &sender) {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    }
     let Some(target) = stage5_mail_target_for_name(&config, &name) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
@@ -399,10 +643,15 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     let cost = stage5_mail_cost(gold, stamped);
-    let total = gold.saturating_add(cost);
+    let Some(total) = gold.checked_add(cost) else {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    };
     if world.resource::<PlayerRuntimeResource>().gold < total {
         return vec![ServerPacket::MailSent { result: -1 }];
     }
+    let Some(sender_save) = snapshot_active_character_save(world) else {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    };
 
     let item_states_json = match attachment_states
         .iter()
@@ -414,49 +663,77 @@ fn stage5_send_mail_packet(
     };
     let mail = Stage5MailMessage {
         id: 0,
-        from: current_stage5_character_name(world),
+        delivery_nonce: new_stage5_mail_delivery_nonce(),
+        from: sender.character_name.clone(),
         to: target.character_name.clone(),
         subject: String::new(),
         body: message,
         gold,
-        items: attachment_states
-            .iter()
-            .map(|item| item.key.clone())
-            .collect(),
-        item_states_json,
+        items: Vec::new(),
+        item_states_json: Vec::new(),
         opened: false,
         locked: false,
         claimed: false,
         deleted: false,
     };
-    if stage5_mail_target_is_current(world, &target) {
-        stage5_push_mail_to_local_world(world, mail);
-    } else if stage5_push_mail_to_saved_character(&config, &target, mail).is_err() {
-        return vec![ServerPacket::MailSent { result: -1 }];
+    let committed = match stage5_commit_mail_transaction(
+        &config,
+        &sender,
+        &target,
+        mail,
+        total,
+        &attachment_ids,
+        &item_states_json,
+    ) {
+        Ok(committed) => committed,
+        Err(error) => {
+            eprintln!("mail transaction failed: {error}");
+            return vec![ServerPacket::MailSent { result: -1 }];
+        }
+    };
+
+    if committed.sender_baseline_revision == sender_save.revision {
+        world
+            .resource::<SessionResource>()
+            .advance_active_save_revision(
+                sender_save.revision,
+                committed.sender_committed_revision,
+            );
     }
 
-    if total > 0 {
-        world.resource_mut::<PlayerRuntimeResource>().gold -= total;
-    }
-    if !attachment_ids.is_empty() {
-        let attachment_id_set = attachment_ids.iter().copied().collect::<BTreeSet<_>>();
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .retain(|item| !attachment_id_set.contains(&item_unique_id(item)));
-    }
+    // The durable sender image is authoritative. A stale same-account session
+    // is fully synchronized for the fields this transaction can affect, so an
+    // attachment removed by another session cannot remain in this World.
+    let committed_ids = committed
+        .sender_inventory_items
+        .iter()
+        .map(item_unique_id)
+        .collect::<BTreeSet<_>>();
+    let removed_from_live = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .filter(|item| !committed_ids.contains(&item_unique_id(item)))
+        .cloned()
+        .collect::<Vec<_>>();
+    world.resource_mut::<PlayerRuntimeResource>().gold = committed.sender_gold;
+    world.resource_mut::<InventoryResource>().inventory_items = committed.sender_inventory_items;
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .mail = committed.sender_mail;
 
     let mut packets = Vec::new();
     if total > 0 {
         packets.push(ServerPacket::LoseGold { gold: total });
     }
-    for item in attachment_states {
+    for item in removed_from_live {
         packets.push(ServerPacket::DeleteItem {
             unique_id: item_unique_id(&item),
             count: item.quantity.min(u32::from(u16::MAX)) as u16,
         });
     }
-    packets.push(ServerPacket::MailSent { result: 0 });
+    packets.push(ServerPacket::MailSent { result: 1 });
     packets.push(stage5_receive_mail_packet(world));
     packets
 }
@@ -465,154 +742,208 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
     let Some(mail_id) = u32::try_from(mail_id).ok() else {
         return vec![ServerPacket::ParcelCollected { result: -1 }];
     };
-    let (mail_index, gold, items, item_states_json) = {
-        let stage5 = world.resource::<Stage5SystemsResource>();
-        let Some(mail_index) = stage5
-            .stage5_systems
-            .mail
-            .iter()
-            .position(|mail| mail.id == mail_id && !mail.deleted)
-        else {
-            return vec![ServerPacket::ParcelCollected { result: -1 }];
-        };
-        let mail = &stage5.stage5_systems.mail[mail_index];
-        if mail.claimed {
-            return vec![ServerPacket::ParcelCollected { result: 0 }];
-        }
-        (
-            mail_index,
-            mail.gold,
-            mail.items.clone(),
-            mail.item_states_json.clone(),
-        )
-    };
-    let item_states = item_states_json
-        .iter()
-        .filter_map(|state| serde_json::from_str::<ItemState>(state).ok())
-        .collect::<Vec<_>>();
-    let keyed_items = if item_states.is_empty() {
-        items
-    } else {
-        Vec::new()
-    };
-    {
-        let inventory = world.resource::<InventoryResource>();
-        let free_slots =
-            empty_slots_for_inventory_container(&inventory.inventory_items, ItemContainer::Bag1)
-                .len();
-        if item_states.len() > free_slots {
-            return vec![ServerPacket::ParcelCollected { result: -1 }];
-        }
-        for item_key in &keyed_items {
-            if !can_gain_item_quantity(inventory, ItemContainer::Bag1, item_key, 1) {
-                return vec![ServerPacket::ParcelCollected { result: -1 }];
-            }
-        }
-    }
-
-    if gold > 0 {
-        world.resource_mut::<PlayerRuntimeResource>().gold = world
-            .resource::<PlayerRuntimeResource>()
-            .gold
-            .saturating_add(gold);
-    }
-    let mut gained_items = Vec::new();
-    for mut item in item_states {
-        let Some((container, slot)) = find_empty_inventory_item_slot(
-            &world.resource::<InventoryResource>().inventory_items,
-            ItemContainer::Bag1,
-        ) else {
-            return vec![ServerPacket::ParcelCollected { result: -1 }];
-        };
-        item.container = container;
-        item.slot = slot;
-        item.unique_id = allocate_item_unique_id(
-            world.resource::<InventoryResource>(),
-            item.container,
-            item.slot,
-        );
-        gained_items.push(user_item_from_item_state(&item));
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .push(item);
-    }
-    for item_key in keyed_items {
-        let item = add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item_key,
-            &stage5_item_name(&item_key),
-            "Crystal mail attachment.",
-            20,
-            1,
-            1,
-        );
-        gained_items.push(user_item_from_item_state(&item));
-    }
-    world
-        .resource_mut::<Stage5SystemsResource>()
+    let base_inventory = world.resource::<InventoryResource>().clone();
+    let base_player = world.resource::<PlayerRuntimeResource>().clone();
+    let base_mail = world
+        .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .mail[mail_index]
-        .claimed = true;
+        .mail
+        .clone();
+    let committed = commit_active_character_save_transaction(world, move |save| {
+        let mut staged_inventory = base_inventory;
+        staged_inventory.inventory_items =
+            decode_mail_claim_item_states(&save.inventory_items_json, "active inventory")?;
+        staged_inventory.belt_items =
+            decode_mail_claim_item_states(&save.belt_items_json, "active belt")?;
+        staged_inventory.storage_items =
+            decode_mail_claim_item_states(&save.storage_items_json, "active storage")?;
+
+        let mut staged_player = base_player;
+        staged_player.gold = save.gold;
+        staged_player.credit = save.credit;
+        let mut staged_systems = save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>)
+            .transpose()
+            .map_err(|error| format!("failed to decode staged claim mailbox: {error}"))?
+            .unwrap_or_default();
+        let mut visible_mail = base_mail;
+        merge_external_stage5_mail(&mut visible_mail, std::mem::take(&mut staged_systems.mail))?;
+        staged_systems.mail = visible_mail;
+
+        let mut staged_world = World::new();
+        staged_world.insert_resource(staged_inventory);
+        staged_world.insert_resource(staged_player);
+        staged_world.insert_resource(Stage5SystemsResource {
+            stage5_systems: staged_systems,
+        });
+        let claim = stage5_claim_mail_authoritative(&mut staged_world, mail_id)
+            .map_err(|error| format!("mail claim rejected: {error:?}"))?;
+
+        let staged_inventory = staged_world.resource::<InventoryResource>().clone();
+        let staged_player = staged_world.resource::<PlayerRuntimeResource>();
+        let committed_gold = staged_player.gold;
+        let committed_credit = staged_player.credit;
+        let staged_systems = staged_world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .clone();
+        save.gold = committed_gold;
+        save.credit = committed_credit;
+        save.inventory_items_json = encode_state_vec(&staged_inventory.inventory_items);
+        save.belt_items_json = encode_state_vec(&staged_inventory.belt_items);
+        save.stage5_systems_json = Some(
+            serde_json::to_string(&staged_systems)
+                .map_err(|error| format!("failed to encode staged claim mailbox: {error}"))?,
+        );
+
+        Ok(Stage5MailClaimCommit {
+            claim,
+            gold: committed_gold,
+            inventory_items: staged_inventory.inventory_items,
+            belt_items: staged_inventory.belt_items,
+            stage5_systems: staged_systems,
+        })
+    });
+    let Ok(committed) = committed else {
+        if let Err(error) = committed {
+            eprintln!("mail claim transaction failed: {error}");
+        }
+        return vec![ServerPacket::ParcelCollected { result: -1 }];
+    };
+
+    // The durable account-store transaction is authoritative. Only after it
+    // succeeds do we mirror the exact staged result into the active World and
+    // emit currency/item/success packets.
+    world.resource_mut::<PlayerRuntimeResource>().gold = committed.gold;
+    {
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        inventory.inventory_items = committed.inventory_items;
+        inventory.belt_items = committed.belt_items;
+    }
+    world.resource_mut::<Stage5SystemsResource>().stage5_systems = committed.stage5_systems;
 
     let mut packets = Vec::new();
-    if gold > 0 {
-        packets.push(ServerPacket::GainedGold { gold });
+    if committed.claim.gold > 0 {
+        packets.push(ServerPacket::GainedGold {
+            gold: committed.claim.gold,
+        });
     }
-    for item in gained_items {
-        packets.push(ServerPacket::GainedItem { item });
+    for item in committed.claim.items {
+        packets.push(ServerPacket::GainedItem {
+            item: user_item_from_item_state(&item),
+        });
     }
-    packets.push(ServerPacket::ParcelCollected { result: 0 });
+    packets.push(ServerPacket::ParcelCollected { result: 1 });
     packets.push(stage5_receive_mail_packet(world));
     packets
 }
 
-fn stage5_read_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
-    if let Ok(mail_id) = u32::try_from(mail_id) {
-        if let Some(mail) = world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .mail
-            .iter_mut()
-            .find(|mail| mail.id == mail_id && !mail.deleted)
-        {
-            mail.opened = true;
-        }
-    }
-    vec![stage5_receive_mail_packet(world)]
+#[derive(Debug, Clone)]
+struct Stage5MailClaimCommit {
+    claim: Stage5MailClaimOutcome,
+    gold: u32,
+    inventory_items: Vec<ItemState>,
+    belt_items: Vec<ItemState>,
+    stage5_systems: Stage5SystemsState,
 }
 
-fn stage5_lock_mail_packet(world: &mut World, mail_id: u64, lock: bool) -> Vec<ServerPacket> {
-    if let Ok(mail_id) = u32::try_from(mail_id) {
-        if let Some(mail) = world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .mail
-            .iter_mut()
-            .find(|mail| mail.id == mail_id && !mail.deleted)
-        {
-            mail.locked = lock;
-        }
-    }
-    vec![stage5_receive_mail_packet(world)]
+fn decode_mail_claim_item_states(states: &[String], label: &str) -> Result<Vec<ItemState>, String> {
+    states
+        .iter()
+        .map(|state| {
+            serde_json::from_str::<ItemState>(state)
+                .map_err(|error| format!("failed to decode {label} for mail claim: {error}"))
+        })
+        .collect()
 }
 
-fn stage5_delete_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
-    if let Ok(mail_id) = u32::try_from(mail_id) {
-        if let Some(mail) = world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
+#[derive(Debug, Clone, Copy)]
+enum Stage5MailStatusMutation {
+    Read,
+    Lock { locked: bool },
+    Delete,
+}
+
+/// Mutate mailbox status from the lock-held, latest durable character save.
+///
+/// The live ECS mailbox is deliberately not touched by the transaction
+/// closure.  That makes malformed/missing/deleted/locked requests and any
+/// persistence failure observationally atomic: the account store, file and
+/// World all remain unchanged unless the durable commit succeeds.
+fn stage5_commit_mail_status_transaction(
+    world: &World,
+    mail_id: u64,
+    mutation: Stage5MailStatusMutation,
+) -> Result<Stage5SystemsState, String> {
+    let exact_mail_id = u32::try_from(mail_id)
+        .map_err(|_| "mail status request has an invalid mail identity".to_string())?;
+
+    commit_active_character_save_transaction(world, move |save| {
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>)
+            .transpose()
+            .map_err(|error| format!("failed to decode durable mailbox: {error}"))?
+            .unwrap_or_default();
+        let mail = systems
             .mail
             .iter_mut()
-            .find(|mail| mail.id == mail_id)
-        {
-            if !mail.locked {
+            .find(|mail| mail.id == exact_mail_id && u64::from(mail.id) == mail_id)
+            .ok_or_else(|| "mail identity not found in durable mailbox".to_string())?;
+        if mail.deleted {
+            return Err("mail status request targets deleted mail".to_string());
+        }
+        match mutation {
+            Stage5MailStatusMutation::Read => mail.opened = true,
+            Stage5MailStatusMutation::Lock { locked } => mail.locked = locked,
+            Stage5MailStatusMutation::Delete => {
+                if mail.locked {
+                    return Err("locked mail cannot be deleted".to_string());
+                }
                 mail.deleted = true;
             }
         }
+        save.stage5_systems_json = Some(
+            serde_json::to_string(&systems)
+                .map_err(|error| format!("failed to encode durable mailbox: {error}"))?,
+        );
+        Ok(systems)
+    })
+}
+
+fn stage5_mail_status_packet(
+    world: &mut World,
+    mail_id: u64,
+    mutation: Stage5MailStatusMutation,
+) -> Vec<ServerPacket> {
+    match stage5_commit_mail_status_transaction(world, mail_id, mutation) {
+        Ok(committed_mailbox) => {
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = committed_mailbox;
+        }
+        Err(error) => {
+            eprintln!("mail status transaction rejected: {error}");
+        }
     }
     vec![stage5_receive_mail_packet(world)]
+}
+
+fn stage5_read_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
+    stage5_mail_status_packet(world, mail_id, Stage5MailStatusMutation::Read)
+}
+
+fn stage5_lock_mail_packet(world: &mut World, mail_id: u64, lock: bool) -> Vec<ServerPacket> {
+    stage5_mail_status_packet(
+        world,
+        mail_id,
+        Stage5MailStatusMutation::Lock { locked: lock },
+    )
+}
+
+fn stage5_delete_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
+    stage5_mail_status_packet(world, mail_id, Stage5MailStatusMutation::Delete)
 }
 
 fn stage5_friend_entries(world: &World) -> Vec<ClientFriend> {
@@ -801,15 +1132,6 @@ fn stage5_hero_ready_for_inventory(world: &World) -> bool {
         && current_hero_object_id(world).is_some()
 }
 
-fn player_item_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
-    resources
-        .belt_items
-        .iter()
-        .chain(resources.inventory_items.iter())
-        .chain(resources.storage_items.iter())
-        .any(|item| item_unique_id(item) == unique_id)
-}
-
 fn transfer_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
     let failed_packet = ServerPacket::TransferHeroItem {
         from,
@@ -930,9 +1252,7 @@ fn take_back_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<Serv
     item.container = to_container;
     {
         let mut inventory = world.resource_mut::<InventoryResource>();
-        if player_item_unique_id_is_used(&inventory, item_unique_id(&item)) {
-            item.unique_id = allocate_item_unique_id(&inventory, item.container, item.slot);
-        }
+        normalize_incoming_item_tree_unique_ids(&inventory, &mut item, &[]);
         inventory.inventory_items.push(item);
     }
 
@@ -2750,19 +3070,11 @@ fn stage5_guild_storage_item_packet(
                 {
                     item.container = container;
                     item.slot = slot;
-                    if item.unique_id == 0
-                        || world
-                            .resource::<InventoryResource>()
-                            .inventory_items
-                            .iter()
-                            .any(|candidate| item_unique_id(candidate) == item_unique_id(&item))
-                    {
-                        item.unique_id = allocate_item_unique_id(
-                            world.resource::<InventoryResource>(),
-                            container,
-                            slot,
-                        );
-                    }
+                    normalize_incoming_item_tree_unique_ids(
+                        world.resource::<InventoryResource>(),
+                        &mut item,
+                        &[],
+                    );
                     world
                         .resource_mut::<InventoryResource>()
                         .inventory_items
@@ -2976,30 +3288,8 @@ fn stage5_abandon_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPa
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(stage) = stage5_quest_stage(world, quest_id) else {
+    if !abandon_quest(world, quest_id) {
         return Vec::new();
-    };
-    if matches!(stage, QuestStage::Available | QuestStage::Completed) {
-        return Vec::new();
-    }
-    {
-        let mut quests = world.resource_mut::<QuestResource>();
-        if let Some(quest) = quests
-            .quests
-            .iter_mut()
-            .find(|quest| quest.quest_id == quest_id)
-        {
-            quest.stage = QuestStage::Available;
-            quest.current = 0;
-        }
-    }
-    if let Some(template) = quest_template_by_id(quest_id) {
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .retain(|item| {
-                item.container != ItemContainer::Quest || item.key != template.quest_item.key
-            });
     }
     vec![stage5_quest_remove_packet(quest_id, false)]
 }
@@ -3905,19 +4195,81 @@ fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacke
     packets
 }
 
-fn request_map_info_packet(world: &World, map_index: i32) -> Vec<ServerPacket> {
-    let mut info = world.resource::<MapRuntimeResource>().current_map.clone();
-    if let Some(map) = crystal_map_respawns_by_index(map_index) {
-        info.map_index = map.map_index;
-        info.file_name = map.map_file_name;
-        info.title = map.map_title;
-        info.mini_map = map.mini_map;
-        info.big_map = map.big_map;
-        info.lights = map.light;
-        info.map_dark_light = map.map_dark_light;
-        info.weather_particles = map.weather_particles;
+fn request_map_info_packet(world: &mut World, map_index: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) || map_index <= 0 {
+        return Vec::new();
     }
-    vec![ServerPacket::MapInformation { info }]
+
+    let Some(info) = client_map_info(map_index) else {
+        return Vec::new();
+    };
+
+    if !world.contains_resource::<BigMapConnectionState>() {
+        world.insert_resource(BigMapConnectionState::default());
+    }
+
+    let (send_setup, send_map_info) = {
+        let mut state = world.resource_mut::<BigMapConnectionState>();
+        let send_setup = !state.world_map_setup_sent;
+        state.world_map_setup_sent = true;
+        let send_map_info = state.sent_map_indexes.insert(map_index);
+        (send_setup, send_map_info)
+    };
+
+    let mut packets = Vec::with_capacity(2);
+    if send_setup {
+        packets.push(ServerPacket::WorldMapSetup {
+            setup: world_map_setup(),
+            teleport_to_npc_cost: teleport_to_npc_cost(),
+        });
+    }
+    if send_map_info {
+        packets.push(ServerPacket::NewMapInfo { map_index, info });
+    }
+    packets
+}
+
+fn search_map_packets(world: &mut World, text: &str) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+
+    let Ok(hit) = search_big_map(text) else {
+        return Vec::new();
+    };
+
+    let Some(hit) = hit else {
+        return vec![ServerPacket::SearchMapResult {
+            map_index: -1,
+            npc_index: 0,
+        }];
+    };
+
+    let (map_index, npc_index) = match hit {
+        SearchMapHit::Map { map_index } => (map_index, 0),
+        SearchMapHit::Npc {
+            map_index,
+            object_id,
+        } => (map_index, object_id),
+    };
+    let mut packets = request_map_info_packet(world, map_index);
+    packets.push(ServerPacket::SearchMapResult {
+        map_index,
+        npc_index,
+    });
+    packets
+}
+
+fn teleport_to_npc_packets(world: &World, object_id: u32) -> Vec<ServerPacket> {
+    if !is_in_world(world) || object_id == 0 {
+        return Vec::new();
+    }
+
+    // Crystal silently rejects an unknown/ineligible NPC, insufficient gold,
+    // or an invalid destination. The imported WorldMap.ini is disabled and the
+    // authoritative NPC catalog has zero CanTeleportTo entries. BM-BE-01 must
+    // therefore preserve transform and currency and emit no fabricated success.
+    Vec::new()
 }
 
 fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
@@ -5628,6 +5980,52 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
+fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+    let individual_purchases = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .game_shop_individual_purchases
+        .clone();
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let global_purchases = config
+        .account_store
+        .lock()
+        .map(|store| store.game_shop_global_purchases.clone())
+        .ok();
+
+    for packet in packets {
+        let ServerPacket::GameShopInfo { item, stock_level } = packet else {
+            continue;
+        };
+        // Preserve the checked-in unlimited catalog byte-for-byte. Only a
+        // future finite row is projected from durable counters.
+        if item.stock == 0 {
+            continue;
+        }
+        let purchases = if item.i_stock {
+            individual_purchases
+                .get(&item.g_index)
+                .copied()
+                .unwrap_or_default()
+        } else {
+            global_purchases
+                .as_ref()
+                .and_then(|purchases| purchases.get(&item.g_index))
+                .copied()
+                // A poisoned shared store must not expose finite stock as
+                // available. Purchase remains authoritative in the commit.
+                .unwrap_or_else(|| {
+                    if global_purchases.is_some() {
+                        0
+                    } else {
+                        u64::MAX
+                    }
+                })
+        };
+        *stock_level = game_shop_stock_level(item.stock, purchases);
+    }
+}
+
 pub(super) fn start_game_base_stats_packet(class: MirClass) -> Vec<ServerPacket> {
     let mut packets = Vec::new();
     if let Some(payload) = crystal_base_stats_info_packet_payload(class) {
@@ -6032,6 +6430,30 @@ pub(super) fn collect_world_entities(
         .get_resource::<MountResource>()
         .filter(|mount| mount.riding_mount)
         .map(|mount| mount.mount_type);
+    // These predicates are emitted only for the local player because their
+    // authoritative sources live in this personal SimulationSession. Shared
+    // remote players remain `None` until Zone state models the same fields.
+    let self_riding_mount = world
+        .get_resource::<MountResource>()
+        .map(|mount| mount.riding_mount);
+    let self_can_mount_attack = world
+        .get_resource::<MountResource>()
+        .map(|_| crystal_player_can_mount_attack(world));
+    let self_has_class_weapon = player_entity(world).and_then(|player| {
+        (world.entity(player).contains::<CharacterBody>()
+            && world.get_resource::<InventoryResource>().is_some())
+        .then(|| crystal_player_has_class_weapon(world))
+    });
+    let self_dazed = player_entity(world).and_then(|_| {
+        world
+            .get_resource::<BuffResource>()
+            .map(|_| crystal_player_is_dazed(world))
+    });
+    let self_fishing = player_entity(world).and_then(|_| {
+        world
+            .get_resource::<FishingResource>()
+            .map(|fishing| fishing.fishing)
+    });
     for entity in world.iter_entities() {
         let Some(object_id) = entity.get::<ObjectId>() else {
             continue;
@@ -6174,6 +6596,17 @@ pub(super) fn collect_world_entities(
             light,
             name_colour_argb,
             dead,
+            riding_mount: self_marker.is_some().then_some(self_riding_mount).flatten(),
+            can_mount_attack: self_marker
+                .is_some()
+                .then_some(self_can_mount_attack)
+                .flatten(),
+            has_class_weapon: self_marker
+                .is_some()
+                .then_some(self_has_class_weapon)
+                .flatten(),
+            dazed: self_marker.is_some().then_some(self_dazed).flatten(),
+            fishing: self_marker.is_some().then_some(self_fishing).flatten(),
             disposition,
             sprite,
             quest_ids,
@@ -6958,7 +7391,9 @@ fn stage5_get_ranking_packet(
 impl SimulationSession {
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
         if let ClientPacket::StartGame { character_index } = packet {
-            return self.start_game(character_index);
+            let mut packets = self.start_game(character_index);
+            apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
+            return packets;
         }
 
         let packets = self.handle_packet_impl(packet);
@@ -6975,7 +7410,9 @@ impl SimulationSession {
                 vec![ServerPacket::ClientVersion { result: 1 }]
             }
             ClientPacket::Disconnect => {
-                persist_active_character_save(self.app.world());
+                if let Err(error) = persist_active_character_save(self.app.world()) {
+                    eprintln!("disconnect save rejected: {error}");
+                }
                 vec![ServerPacket::Disconnect { reason: 0 }]
             }
             ClientPacket::KeepAlive { time } => vec![ServerPacket::KeepAlive { time }],
@@ -7103,8 +7540,6 @@ impl SimulationSession {
             // and replies with `S.Revived` + broadcast `S.ObjectRevived`.
             ClientPacket::TownRevive => town_revive_packets(self.app.world_mut()),
             ClientPacket::ReplaceWedRing { .. }
-            | ClientPacket::TeleportToNpc { .. }
-            | ClientPacket::SearchMap { .. }
             | ClientPacket::Inspect { .. }
             | ClientPacket::Observe { .. }
             | ClientPacket::ChangeTrade { .. }
@@ -7120,8 +7555,12 @@ impl SimulationSession {
             | ClientPacket::DowngradeAwakening { .. }
             | ClientPacket::ResetAddedItem { .. }
             | ClientPacket::GuildBuffUpdate { .. }
-            | ClientPacket::GameShopBuy { .. }
             | ClientPacket::ReportIssue { .. } => Vec::new(),
+            ClientPacket::GameShopBuy {
+                g_index,
+                quantity,
+                price_type,
+            } => self.game_shop_buy_packet(g_index, quantity, price_type),
             ClientPacket::GetRanking {
                 rank_type,
                 rank_index,
@@ -7219,7 +7658,11 @@ impl SimulationSession {
                 stage5_open_door_packet(self.app.world_mut(), door_index)
             }
             ClientPacket::RequestMapInfo { map_index } => {
-                request_map_info_packet(self.app.world(), map_index)
+                request_map_info_packet(self.app.world_mut(), map_index)
+            }
+            ClientPacket::SearchMap { text } => search_map_packets(self.app.world_mut(), &text),
+            ClientPacket::TeleportToNpc { object_id } => {
+                teleport_to_npc_packets(self.app.world(), object_id)
             }
             ClientPacket::RequestMonsterInfo { monster_index } => {
                 request_monster_info_packet(monster_index)
@@ -7400,6 +7843,8 @@ impl SimulationSession {
                 let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                 session.account_id = Some(account_id);
                 session.characters = characters;
+                session.selected_character = None;
+                session.clear_active_save_revision();
                 vec![ServerPacket::LoginSuccess {
                     characters: session
                         .characters
@@ -7470,7 +7915,16 @@ impl SimulationSession {
             }
             ClientPacket::StartGame { character_index } => self.start_game(character_index),
             ClientPacket::LogOut => {
-                persist_active_character_save(self.app.world());
+                if let Err(error) = persist_active_character_save(self.app.world()) {
+                    eprintln!("logout save rejected; retaining active session: {error}");
+                    return Vec::new();
+                }
+                // Map metadata de-duplication is scoped to one in-world
+                // connection. A later StartGame must receive setup/map info
+                // again even when the SimulationSession object is reused.
+                self.app
+                    .world_mut()
+                    .remove_resource::<BigMapConnectionState>();
                 {
                     let config = self
                         .app
@@ -7481,6 +7935,7 @@ impl SimulationSession {
                     {
                         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                         session.selected_character = None;
+                        session.clear_active_save_revision();
                         if let Some(account_id) = session.account_id.clone() {
                             session.characters = account_characters(&config, &account_id);
                         }
@@ -7697,6 +8152,17 @@ impl SimulationSession {
             ClientPacket::Attack { direction, spell } => {
                 if current_player_is_dead(self.app.world())
                     || crystal_player_attack_blocked_by_status(self.app.world())
+                {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
+                if is_in_world(self.app.world())
+                    && melee_target_is_authoritatively_hostile_in_direction(
+                        self.app.world(),
+                        direction,
+                        spell,
+                    ) == Some(false)
                 {
                     return vec![ServerPacket::UserLocation {
                         location: current_location(self.app.world()),
@@ -7958,5 +8424,240 @@ impl SimulationSession {
 
         self.visible_objects = next_object_ids;
         final_packets
+    }
+}
+
+#[cfg(test)]
+mod game_shop_start_stock_tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_store_path() -> std::path::PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or_default();
+        std::env::temp_dir()
+            .join(format!(
+                "mir2-game-shop-start-stock-{}-{unique}",
+                std::process::id()
+            ))
+            .join("accounts.json")
+    }
+
+    fn product(game_shop_index: i32) -> mir2_protocol::GameShopItem {
+        crystal_game_shop_info_packet_payloads()
+            .into_iter()
+            .find_map(|payload| {
+                match decode_crystal_payload(ServerPacketId::GameShopInfo, payload) {
+                    ServerPacket::GameShopInfo { item, .. } if item.g_index == game_shop_index => {
+                        Some(item)
+                    }
+                    _ => None,
+                }
+            })
+            .expect("game-shop fixture product should exist")
+    }
+
+    #[test]
+    fn reloaded_start_world_projects_individual_and_global_finite_stock() {
+        let path = temp_store_path();
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            store.game_shop_global_purchases.insert(2, 7);
+            let save = store
+                .accounts
+                .get_mut("demo")
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("demo save should exist");
+            let mut systems = Stage5SystemsState::default();
+            systems.game_shop_individual_purchases.insert(1, 4);
+            save.stage5_systems_json =
+                Some(serde_json::to_string(&systems).expect("stage5 systems should encode"));
+        }
+        config
+            .save_account_store()
+            .expect("stock fixture should persist");
+
+        let reloaded = SimulationConfig::default().with_account_store_path(path.clone());
+        let mut session = SimulationSession::new(reloaded);
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let mut individual = product(1);
+        individual.stock = 10;
+        individual.i_stock = true;
+        let mut global = product(2);
+        global.stock = 10;
+        global.i_stock = false;
+        let mut packets = vec![
+            ServerPacket::GameShopInfo {
+                item: individual,
+                stock_level: 10,
+            },
+            ServerPacket::GameShopInfo {
+                item: global,
+                stock_level: 10,
+            },
+        ];
+        apply_start_game_dynamic_game_shop_stock(session.app.world(), &mut packets);
+        assert!(matches!(
+            &packets[0],
+            ServerPacket::GameShopInfo { stock_level: 6, .. }
+        ));
+        assert!(matches!(
+            &packets[1],
+            ServerPacket::GameShopInfo { stock_level: 3, .. }
+        ));
+
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::remove_dir_all(parent);
+        }
+    }
+
+    #[test]
+    fn checked_in_unlimited_start_packets_remain_byte_identical() {
+        let session = SimulationSession::new(SimulationConfig::default());
+        let mut packets = start_game_account_social_and_shop_packets();
+        let before = packets
+            .iter()
+            .map(mir2_protocol::encode_server_packet)
+            .collect::<Result<Vec<_>, _>>()
+            .expect("start packets should encode");
+        apply_start_game_dynamic_game_shop_stock(session.app.world(), &mut packets);
+        let after = packets
+            .iter()
+            .map(mir2_protocol::encode_server_packet)
+            .collect::<Result<Vec<_>, _>>()
+            .expect("start packets should encode");
+        assert_eq!(after, before);
+        assert!(packets.iter().all(|packet| match packet {
+            ServerPacket::GameShopInfo { item, stock_level } => {
+                item.stock == 0 && *stock_level == 0
+            }
+            _ => true,
+        }));
+    }
+}
+
+#[cfg(test)]
+mod mail_status_transaction_tests {
+    use super::*;
+    use crate::config::{
+        deliver_stage5_system_mail, AccountStoreTransactionFault, Stage5MailDelivery,
+        Stage5MailTargetKind,
+    };
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn test_config(label: &str) -> (SimulationConfig, u32) {
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "mir2-mail-status-unit-{label}-{}-{suffix}.json",
+            std::process::id()
+        ));
+        let config = SimulationConfig::default().with_account_store_path(path);
+        let receipt = deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "System".to_string(),
+                subject: "Failure test".to_string(),
+                body: "Must remain unchanged".to_string(),
+                gold: 0,
+                items: Vec::new(),
+            },
+        )
+        .expect("mail fixture should persist");
+        (config, receipt.mail_ids[0])
+    }
+
+    fn start_test_session(config: SimulationConfig) -> SimulationSession {
+        let mut session = SimulationSession::new(config);
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        assert!(session
+            .handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        session
+    }
+
+    fn receive_mail_flags(packets: &[ServerPacket], mail_id: u32) -> (bool, bool) {
+        let mail = packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::ReceiveMail { mail } => {
+                    mail.iter().find(|mail| mail.mail_id == u64::from(mail_id))
+                }
+                _ => None,
+            })
+            .expect("ReceiveMail should contain fixture mail");
+        (mail.opened, mail.locked)
+    }
+
+    #[test]
+    fn status_persist_failure_does_not_mutate_world_store_or_file() {
+        let (config, mail_id) = test_config("persist-failure");
+        let mut session = start_test_session(config.clone());
+        let before = session.handle_packet(ClientPacket::ReadMail {
+            mail_id: u64::from(mail_id),
+        });
+        let before_flags = receive_mail_flags(&before, mail_id);
+        let before_store_mailbox = config
+            .account_store
+            .lock()
+            .expect("account store should not be poisoned")
+            .accounts["demo"]
+            .saves[&0]
+            .stage5_systems_json
+            .clone();
+        let before_file = std::fs::read(
+            config
+                .account_store_path
+                .as_deref()
+                .expect("test config should have a file store"),
+        )
+        .expect("account-store file should exist");
+
+        config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+        let after = session.handle_packet(ClientPacket::LockMail {
+            mail_id: u64::from(mail_id),
+            lock: true,
+        });
+        assert_eq!(receive_mail_flags(&after, mail_id), before_flags);
+        assert_eq!(
+            config
+                .account_store
+                .lock()
+                .expect("account store should not be poisoned")
+                .accounts["demo"]
+                .saves[&0]
+                .stage5_systems_json,
+            before_store_mailbox
+        );
+        let after_file = std::fs::read(
+            config
+                .account_store_path
+                .as_deref()
+                .expect("test config should have a file store"),
+        )
+        .expect("account-store file should still exist");
+        assert_eq!(after_file, before_file);
     }
 }

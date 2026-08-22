@@ -1191,8 +1191,18 @@ pub struct MonsterSpawnTemplate {
     pub spread: u16,
     pub respawn_delay_ticks: u64,
     pub random_delay_ticks: u64,
+    #[serde(default)]
+    pub disposition: Option<MonsterSpawnDispositionTemplate>,
     pub can_wander: bool,
     pub max_hp: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum MonsterSpawnDispositionTemplate {
+    Friendly,
+    Neutral,
+    Hostile,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2847,7 +2857,7 @@ mod tests {
         localization_bundle, localized_text, platinum_176_profile, platinum_176_profile_bundle,
         starter_map_collision, starter_scene, starter_server_data, validate_content_profile,
         ContentLevelRate, ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
-        SkillEffectTemplate,
+        MonsterSpawnDispositionTemplate, SkillEffectTemplate,
     };
     use mir2_protocol::{MirClass, Point};
 
@@ -3152,6 +3162,10 @@ mod tests {
         assert_eq!(data.npc_scripts.len(), 1);
         assert_eq!(data.buffs.len(), 1);
         assert_eq!(data.monster_spawns[0].count, 1);
+        assert_eq!(
+            data.monster_spawns[0].disposition,
+            Some(MonsterSpawnDispositionTemplate::Hostile)
+        );
         assert_eq!(data.skills[0].mana_cost, 6);
         assert!(matches!(
             data.skills[1].effect,

@@ -131,6 +131,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
         name_colour_argb: -1,
         image: 29,
         ai: 0,
+        disposition: Some(mir2_simulation::WorldEntityDisposition::Hostile),
         level: 30,
         max_hp: 285,
         hp: 285,

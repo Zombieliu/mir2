@@ -14,7 +14,7 @@ use super::combat::apply_damage_to_current_player;
 use super::components::{current_player_object_id, entity_position, player_entity};
 use super::monsters::{allocate_runtime_monster_object_id, deterministic_roll};
 use super::movement::point_in_bounds;
-use super::resources::{is_in_world, MapRuntimeResource, RuntimeConfigResource};
+use super::resources::{MapRuntimeResource, RuntimeConfigResource, is_in_world};
 use super::session::SimulationSession;
 
 impl SimulationSession {

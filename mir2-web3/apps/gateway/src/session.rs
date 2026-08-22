@@ -423,6 +423,27 @@ impl GatewaySession {
         self.execute_zone_owner_command(ZoneOwnerCommandRequest::direct(owner_lease, command))
     }
 
+    /// Native GameShop receipt execution. Unlike the ordinary Web path, this
+    /// requires typed outcome support on the exact local/remote command path
+    /// before the purchase is allowed to execute.
+    pub fn execute_requiring_typed_game_shop_purchase_outcome(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let owner_lease = self.zone_owner_lease.clone();
+        self.execute_zone_owner_command_inner(
+            ZoneOwnerCommandRequest::direct(owner_lease, command),
+            true,
+        )
+    }
+
+    /// Preflight used by native GameShop receipt clients. Returning false is
+    /// terminal for that request and guarantees the purchase is not executed.
+    pub fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        self.zone_owner_command_client
+            .supports_typed_game_shop_purchase_outcome(&self.runtime)
+    }
+
     pub fn execute_with_zone_owner_lease(
         &mut self,
         zone_owner_lease: &ZoneOwnerLease,
@@ -445,6 +466,18 @@ impl GatewaySession {
             authenticated,
             command,
         ))
+    }
+
+    pub fn execute_production_player_command_requiring_typed_game_shop_purchase_outcome(
+        &mut self,
+        authenticated: bool,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let owner_lease = self.zone_owner_lease.clone();
+        self.execute_zone_owner_command_inner(
+            ZoneOwnerCommandRequest::production_player(owner_lease, authenticated, command),
+            true,
+        )
     }
 
     pub fn execute_production_player_command_with_zone_owner_lease(
@@ -621,16 +654,34 @@ impl GatewaySession {
         &mut self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
+        self.execute_zone_owner_command_inner(request, false)
+    }
+
+    fn execute_zone_owner_command_inner(
+        &mut self,
+        request: ZoneOwnerCommandRequest,
+        require_typed_game_shop_purchase_outcome: bool,
+    ) -> Result<WorldCommandExecution, String> {
         self.validate_zone_owner_lease(request.owner_lease())?;
+        // Native purchases must never reach the generic transport method. This
+        // is a session-level invariant as well as an RPC transport invariant,
+        // so alternate/custom command clients cannot bypass typed V2 execution.
+        let require_typed_game_shop_purchase_outcome =
+            require_typed_game_shop_purchase_outcome
+                || matches!(request.command(), WorldCommand::NativeGameShopPurchase(_));
         let may_change_map = command_may_change_map(request.command());
         let previous_snapshot = if may_change_map && self.active_identity().is_some() {
             Some(self.world_snapshot())
         } else {
             None
         };
-        let mut execution = self
-            .zone_owner_command_client
-            .execute(&mut self.runtime, request)?;
+        let mut execution = if require_typed_game_shop_purchase_outcome {
+            self.zone_owner_command_client
+                .execute_requiring_typed_game_shop_purchase_outcome(&mut self.runtime, request)?
+        } else {
+            self.zone_owner_command_client
+                .execute(&mut self.runtime, request)?
+        };
         self.publish_gameplay_event(&execution);
         self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
         if may_change_map {
@@ -997,13 +1048,15 @@ mod tests {
     };
     use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
     use mir2_simulation::{
-        WorldCommand, WorldCommandExecution, WorldCommandKind, ZoneRuntimeHandle,
+        NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandKind,
+        ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
     };
     use std::sync::{Arc, Mutex};
 
     #[derive(Debug, Default)]
     struct RecordingZoneOwnerCommandClient {
         calls: Mutex<Vec<(ZoneOwnerLease, ZoneOwnerCommandMode)>>,
+        typed_game_shop_calls: Mutex<usize>,
     }
 
     impl RecordingZoneOwnerCommandClient {
@@ -1012,6 +1065,13 @@ mod tests {
                 .lock()
                 .expect("recording command client mutex should not be poisoned")
                 .clone()
+        }
+
+        fn typed_game_shop_calls(&self) -> usize {
+            *self
+                .typed_game_shop_calls
+                .lock()
+                .expect("typed GameShop call counter mutex should not be poisoned")
         }
     }
 
@@ -1026,6 +1086,22 @@ mod tests {
                 .expect("recording command client mutex should not be poisoned")
                 .push((request.owner_lease().clone(), request.mode()));
             ZoneOwnerCommandClient::execute(
+                &InProcessZoneOwnerCommandClient::new(),
+                runtime,
+                request,
+            )
+        }
+
+        fn execute_requiring_typed_game_shop_purchase_outcome(
+            &self,
+            runtime: &mut ZoneRuntimeHandle,
+            request: ZoneOwnerCommandRequest,
+        ) -> Result<WorldCommandExecution, String> {
+            *self
+                .typed_game_shop_calls
+                .lock()
+                .expect("typed GameShop call counter mutex should not be poisoned") += 1;
+            ZoneOwnerCommandClient::execute_requiring_typed_game_shop_purchase_outcome(
                 &InProcessZoneOwnerCommandClient::new(),
                 runtime,
                 request,
@@ -1136,6 +1212,32 @@ mod tests {
                     authenticated: true
                 }
             )]
+        );
+    }
+
+    #[test]
+    fn gateway_session_generic_execute_auto_forces_native_typed_path() {
+        let client = Arc::new(RecordingZoneOwnerCommandClient::default());
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        session.zone_owner_command_client = client.clone() as SharedZoneOwnerCommandClient;
+        let command = WorldCommand::NativeGameShopPurchase(NativeGameShopPurchaseRequest {
+            protocol_version: NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+            server_idempotency_key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".to_string(),
+            gateway_session_id: "generic-session-native-shop".to_string(),
+            account_id: "demo".to_string(),
+            character_index: 0,
+            client_request_id: "gs-generic-session".to_string(),
+            g_index: 31,
+            quantity: 1,
+            price_type: 1,
+        });
+
+        let _ = session.execute_with_outcome(command);
+
+        assert_eq!(client.typed_game_shop_calls(), 1);
+        assert!(
+            client.calls().is_empty(),
+            "Native purchase must not reach the generic command-client method"
         );
     }
 

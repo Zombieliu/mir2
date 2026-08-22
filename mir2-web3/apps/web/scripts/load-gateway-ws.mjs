@@ -7,6 +7,30 @@ import path from "node:path";
 import tls from "node:tls";
 import { promisify } from "node:util";
 
+import {
+  isNewAccountTerminalOutcome,
+  newAccountTerminalOutcome,
+} from "./load-gateway-ws-outcome.mjs";
+import {
+  assertSafeHandshakeHeaderValue,
+  loadAccountId,
+  loadHarnessClientIdentity,
+} from "./load-gateway-ws-client-identity.mjs";
+import {
+  parseListenBindings,
+  parseWindowsGatewayIdentity,
+  parseWindowsGatewayProcessSample,
+} from "./load-gateway-ws-process.mjs";
+import {
+  evaluateCandidateClientActivity,
+  evaluateCandidateCapacityHealth,
+  evaluateCandidateCapacityHealthPair,
+  evaluateCandidateResourceSamples,
+  isCandidateClientIndices,
+  isHealthyGatewaySnapshot,
+  validateLoadProfile,
+} from "./load-gateway-ws-profile.mjs";
+
 const execFileAsync = promisify(execFile);
 
 const WS_URL = process.env.MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws";
@@ -26,6 +50,7 @@ const POOL = numberFromEnv("MIR2_WS_LOAD_POOL", Math.min(32, CLIENTS));
 const ACTIONS = numberFromEnv("MIR2_WS_LOAD_ACTIONS", 20);
 const THINK_MS = numberFromEnv("MIR2_WS_LOAD_THINK_MS", 20);
 const HOLD_OPEN_MS = numberFromEnv("MIR2_WS_LOAD_HOLD_OPEN_MS", 250);
+const HOLD_ACTION_INTERVAL_MS = numberFromEnv("MIR2_WS_LOAD_HOLD_ACTION_INTERVAL_MS", 0);
 const PRE_PLAY_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_PRE_PLAY_SETTLE_MS", 0);
 const ACCOUNT_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_ACCOUNT_SETTLE_MS", 100);
 const CHAT_EVERY = numberFromEnv("MIR2_WS_LOAD_CHAT_EVERY", 10);
@@ -57,22 +82,83 @@ const REUSE_EXISTING_ACCOUNTS = booleanFromEnv(
   false,
 );
 const SKIP_ACCOUNT_CREATE = booleanFromEnv("MIR2_WS_LOAD_SKIP_ACCOUNT_CREATE", false);
+const SIMULATE_DISTINCT_CLIENTS = booleanFromEnv(
+  "MIR2_WS_LOAD_SIMULATE_DISTINCT_CLIENTS",
+  false,
+);
 const BOOTSTRAP_ONLY = booleanFromEnv("MIR2_WS_LOAD_BOOTSTRAP_ONLY", false);
 const ACCOUNT_PREFIX = process.env.MIR2_WS_LOAD_ACCOUNT_PREFIX ?? null;
+const ACCOUNT_INDEX_WIDTH = numberFromEnv("MIR2_WS_LOAD_ACCOUNT_INDEX_WIDTH", 0);
 const CHARACTER_INDEX = optionalNumberFromEnv("MIR2_WS_LOAD_CHARACTER_INDEX");
 const CHARACTER_INDICES = integerListFromEnv("MIR2_WS_LOAD_CHARACTER_INDICES");
 const MAP_TARGETS = mapTargetsFromEnv("MIR2_WS_LOAD_MAP_TARGETS");
 const CHECKPOINT_MS = numberFromEnv("MIR2_WS_LOAD_CHECKPOINT_MS", 0);
+const RESOURCE_SAMPLE_MS = numberFromEnv("MIR2_WS_LOAD_RESOURCE_SAMPLE_MS", 500);
+const REQUIRE_METRICS = booleanFromEnv("MIR2_WS_LOAD_REQUIRE_METRICS", false);
+const LOAD_PROFILE = process.env.MIR2_WS_LOAD_PROFILE?.trim() || null;
 const PARTIAL_OUTPUT_PATH = OUTPUT_PATH.endsWith(".json")
   ? OUTPUT_PATH.replace(/\.json$/, ".partial.json")
   : `${OUTPUT_PATH}.partial.json`;
 
 async function main() {
+  if (!Number.isSafeInteger(ACCOUNT_INDEX_WIDTH) || ACCOUNT_INDEX_WIDTH < 0 || ACCOUNT_INDEX_WIDTH > 12) {
+    throw new Error("MIR2_WS_LOAD_ACCOUNT_INDEX_WIDTH must be an integer between 0 and 12");
+  }
+  if (SIMULATE_DISTINCT_CLIENTS && (!REUSE_EXISTING_ACCOUNTS || !SKIP_ACCOUNT_CREATE)) {
+    throw new Error(
+      "distinct-client simulation requires pre-seeded accounts (set reuse-existing and skip-account-create)",
+    );
+  }
+  const profileValidation = validateLoadProfile({
+    env: process.env,
+    wsUrl: WS_URL,
+    healthUrl: GATEWAY_HEALTH_URL,
+    clients: CLIENTS,
+    pool: POOL,
+    holdOpenMs: HOLD_OPEN_MS,
+    holdActionIntervalMs: HOLD_ACTION_INTERVAL_MS,
+    chatEvery: CHAT_EVERY,
+    readyBarrier: READY_BARRIER,
+    reuseExistingAccounts: REUSE_EXISTING_ACCOUNTS,
+    skipAccountCreate: SKIP_ACCOUNT_CREATE,
+    simulatedDistinctClients: SIMULATE_DISTINCT_CLIENTS,
+    bootstrapOnly: BOOTSTRAP_ONLY,
+    stage5CommandsEnabled: ENABLE_STAGE5_COMMANDS,
+    mapTargets: MAP_TARGETS,
+    expectedReady: EXPECT_READY,
+    expectedRejected: EXPECT_REJECTED,
+    checkpointMs: CHECKPOINT_MS,
+    resourceSampleMs: RESOURCE_SAMPLE_MS,
+    accountPrefix: ACCOUNT_PREFIX,
+    accountIndexWidth: ACCOUNT_INDEX_WIDTH,
+    characterIndex: CHARACTER_INDEX,
+    gatewayPid: GATEWAY_PID,
+    expectedKeepAliveAckRatio: EXPECT_KEEPALIVE_ACK_RATIO,
+    sendKeepAlive: SEND_KEEPALIVE,
+    sendMovement: SEND_MOVEMENT,
+    sendChat: SEND_CHAT,
+  });
+  if (profileValidation.errors.length > 0) {
+    throw new Error(`load profile ${profileValidation.profile} is invalid:\n- ${profileValidation.errors.join("\n- ")}`);
+  }
+  const socketOwnershipBefore = LOAD_PROFILE
+    ? await inspectCandidateGatewaySocketOwnership(WS_URL, GATEWAY_PID)
+    : null;
+  if (socketOwnershipBefore && !socketOwnershipBefore.ok) {
+    throw new Error(`candidate Gateway socket ownership preflight failed: ${socketOwnershipBefore.error}`);
+  }
+  const gatewayExecutable = LOAD_PROFILE ? await windowsGatewayExecutableIdentity(GATEWAY_PID) : null;
+  if (LOAD_PROFILE && !gatewayExecutable) {
+    throw new Error("candidate Gateway executable identity preflight failed");
+  }
   const runId = `${Date.now().toString(36)}-${process.pid}`;
   const clientIndices =
     CLIENT_INDICES.length > 0
       ? CLIENT_INDICES
       : Array.from({ length: CLIENTS }, (_, index) => index);
+  if (LOAD_PROFILE && !isCandidateClientIndices(clientIndices)) {
+    throw new Error("candidate profile requires the unique client indices 0..63 in order");
+  }
   const metrics = {
     type: "websocket",
     wsUrl: WS_URL,
@@ -84,6 +170,9 @@ async function main() {
     actionsPerClient: ACTIONS,
     thinkMs: THINK_MS,
     holdOpenMs: HOLD_OPEN_MS,
+    holdActionIntervalMs: HOLD_ACTION_INTERVAL_MS,
+    holdActionCycles: 0,
+    clientActivity: [],
     prePlaySettleMs: PRE_PLAY_SETTLE_MS,
     readyBarrierEnabled: READY_BARRIER,
     readyBarrierTimeoutMs: READY_BARRIER_TIMEOUT_MS,
@@ -101,10 +190,15 @@ async function main() {
     stage5CommandsEnabled: ENABLE_STAGE5_COMMANDS,
     reuseExistingAccounts: REUSE_EXISTING_ACCOUNTS,
     skipAccountCreate: SKIP_ACCOUNT_CREATE,
+    simulatedDistinctClients: SIMULATE_DISTINCT_CLIENTS,
+    profile: LOAD_PROFILE,
+    requireMetrics: REQUIRE_METRICS,
     bootstrapOnly: BOOTSTRAP_ONLY,
     accountPrefix: ACCOUNT_PREFIX,
+    accountIndexWidth: ACCOUNT_INDEX_WIDTH,
     characterIndex: CHARACTER_INDEX,
     checkpointMs: CHECKPOINT_MS,
+    resourceSampleMs: RESOURCE_SAMPLE_MS,
     characterIndices: CHARACTER_INDICES,
     mapTargets: MAP_TARGETS,
     startedAt: new Date().toISOString(),
@@ -120,6 +214,7 @@ async function main() {
     targetMapsReady: 0,
     targetMapReadyCounts: {},
     closed: 0,
+    unexpectedReadyClosures: 0,
     errors: 0,
     failedBeforeReady: 0,
     capacityRejected: 0,
@@ -155,11 +250,31 @@ async function main() {
       healthUrl: GATEWAY_HEALTH_URL,
       metricsBefore: await fetchJsonSnapshot(GATEWAY_METRICS_URL),
       metricsAfter: null,
+      healthBefore: await fetchJsonSnapshot(GATEWAY_HEALTH_URL),
       healthAfter: null,
+      socketOwnershipBefore,
+      socketOwnershipAfter: null,
+      executable: gatewayExecutable,
     },
     assertions: null,
     ok: false,
   };
+
+  if (!isHealthyGatewaySnapshot(metrics.gateway.healthBefore)) {
+    throw new Error("Gateway health preflight failed before WebSocket load started");
+  }
+  if (REQUIRE_METRICS && metrics.gateway.metricsBefore?.ok !== true) {
+    throw new Error("Gateway metrics preflight failed before WebSocket load started");
+  }
+  if (LOAD_PROFILE) {
+    const capacityPreflight = evaluateCandidateCapacityHealth(metrics.gateway.healthBefore);
+    metrics.gateway.candidateCapacityPreflight = capacityPreflight;
+    if (!capacityPreflight.ok) {
+      throw new Error(
+        `candidate profile capacity preflight failed: ${JSON.stringify(capacityPreflight.values)}`,
+      );
+    }
+  }
 
   let sampling = true;
   let checkpointing = CHECKPOINT_MS > 0;
@@ -213,9 +328,47 @@ async function main() {
     metrics.keepAliveCommandsSent - metrics.keepAliveLatenciesMs.length,
   );
   metrics.rss = summarize(metrics.rssSamples.map((sample) => sample.workingSetBytes));
+  metrics.privateBytes = summarize(metrics.rssSamples.map((sample) => sample.privateBytes));
+  metrics.threadCount = summarize(metrics.rssSamples.map((sample) => sample.threadCount));
+  metrics.cpuTimeMs = summarize(metrics.rssSamples.map((sample) => sample.cpuTimeMs));
   metrics.cpuPercent = summarize(metrics.rssSamples.map((sample) => sample.cpuPercent));
   metrics.gateway.metricsAfter = await fetchJsonSnapshot(GATEWAY_METRICS_URL);
   metrics.gateway.healthAfter = await fetchJsonSnapshot(GATEWAY_HEALTH_URL);
+  metrics.gateway.socketOwnershipAfter = LOAD_PROFILE
+    ? await inspectCandidateGatewaySocketOwnership(WS_URL, GATEWAY_PID)
+    : null;
+  metrics.clientActivity.sort((left, right) => left.index - right.index);
+  for (const entry of metrics.clientActivity) {
+    entry.keepAliveAckRatio = entry.keepAliveSent === 0
+      ? 0
+      : Math.round((entry.keepAliveAcknowledged / entry.keepAliveSent) * 10_000) / 10_000;
+    entry.holdKeepAliveAckRatio = entry.holdKeepAliveSent === 0
+      ? 0
+      : Math.round((entry.holdKeepAliveAcknowledged / entry.holdKeepAliveSent) * 10_000) / 10_000;
+  }
+  const candidateCapacity = LOAD_PROFILE
+    ? evaluateCandidateCapacityHealthPair(metrics.gateway.healthBefore, metrics.gateway.healthAfter)
+    : null;
+  const candidateResources = LOAD_PROFILE
+    ? evaluateCandidateResourceSamples(metrics.rssSamples, {
+        gatewayPid: GATEWAY_PID,
+        holdOpenMs: HOLD_OPEN_MS,
+        resourceSampleMs: RESOURCE_SAMPLE_MS,
+      })
+    : null;
+  const candidateClients = LOAD_PROFILE
+    ? evaluateCandidateClientActivity(metrics.clientActivity, {
+        clients: metrics.expectedReady,
+        holdOpenMs: HOLD_OPEN_MS,
+        holdActionIntervalMs: HOLD_ACTION_INTERVAL_MS,
+        minimumAckRatio: EXPECT_KEEPALIVE_ACK_RATIO,
+      })
+    : null;
+  if (candidateCapacity) {
+    metrics.gateway.candidateCapacity = candidateCapacity;
+  }
+  if (candidateResources) metrics.candidateResources = candidateResources;
+  if (candidateClients) metrics.candidateClients = candidateClients;
   if (metrics.ready > 0 && metrics.network.playDurationMs > 0) {
     metrics.network.avgPlayBytesPerSecondPerReadyClient =
       Math.round(
@@ -234,7 +387,11 @@ async function main() {
     capacityRejectedMatchesExpectation:
       metrics.capacityRejected === metrics.expectedCapacityRejected,
     noUnexpectedErrors: metrics.errors === 0,
+    noServerErrors: metrics.serverErrors.length === 0,
     noUnexpectedClientFailures: metrics.clientFailures.length === 0,
+    noUnexpectedReadyClosures: metrics.unexpectedReadyClosures === 0,
+    startedGamesMatchExpectation: !LOAD_PROFILE || metrics.startedGames === metrics.expectedReady,
+    durationMeetsCandidateProfile: !LOAD_PROFILE || metrics.durationMs >= HOLD_OPEN_MS,
     gameplayCommandsSentWhenReady:
       BOOTSTRAP_ONLY ||
       metrics.ready === 0 ||
@@ -251,7 +408,21 @@ async function main() {
     keepAliveP95MatchesExpectation:
       EXPECT_KEEPALIVE_P95_MAX_MS === null ||
       (metrics.keepAlive.p95 !== null && metrics.keepAlive.p95 <= EXPECT_KEEPALIVE_P95_MAX_MS),
+    healthBeforeAvailable: isHealthyGatewaySnapshot(metrics.gateway.healthBefore),
+    healthAfterAvailable: isHealthyGatewaySnapshot(metrics.gateway.healthAfter),
+    metricsBeforeAvailable: !REQUIRE_METRICS || metrics.gateway.metricsBefore?.ok === true,
+    metricsAfterAvailable: !REQUIRE_METRICS || metrics.gateway.metricsAfter?.ok === true,
   };
+  if (candidateCapacity) {
+    Object.assign(metrics.assertions, candidateCapacity.assertions);
+  }
+  if (candidateResources) Object.assign(metrics.assertions, candidateResources.assertions);
+  if (candidateClients) Object.assign(metrics.assertions, candidateClients.assertions);
+  if (LOAD_PROFILE) {
+    metrics.assertions.socketOwnershipBeforeVerified = socketOwnershipBefore?.ok === true;
+    metrics.assertions.socketOwnershipAfterVerified = metrics.gateway.socketOwnershipAfter?.ok === true;
+    metrics.assertions.gatewayExecutableIdentityRecorded = gatewayExecutable !== null;
+  }
   metrics.ok = Object.values(metrics.assertions).every(Boolean);
 
   await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
@@ -306,7 +477,7 @@ async function runClient(index, runId, metrics) {
   const accountId =
     ACCOUNT_PREFIX === null
       ? `load-ws-${runId}-${index}`
-      : `${ACCOUNT_PREFIX}${index}`;
+      : loadAccountId(ACCOUNT_PREFIX, index, ACCOUNT_INDEX_WIDTH);
   const characterName = `Load${index}${runId.replace(/[^a-z0-9]/gi, "").slice(-6)}`.slice(
     0,
     10,
@@ -322,9 +493,30 @@ async function runClient(index, runId, metrics) {
   let capacityError = null;
   let serverError = null;
   let countedReady = false;
+  let intentionalClose = false;
   let currentMapFileName = null;
   let mapInformationCount = 0;
+  const clientActivity = {
+    index,
+    keepAliveSent: 0,
+    keepAliveAcknowledged: 0,
+    keepAliveAckRatio: 0,
+    holdKeepAliveSent: 0,
+    holdKeepAliveAcknowledged: 0,
+    holdKeepAliveAckRatio: 0,
+    holdActionCycles: 0,
+    holdDurationMs: 0,
+    completed: false,
+    unexpectedClosure: false,
+  };
+  metrics.clientActivity.push(clientActivity);
 
+  const clientIdentity = loadHarnessClientIdentity({
+    index,
+    runId,
+    simulateDistinctClients: SIMULATE_DISTINCT_CLIENTS,
+    wsUrl: WS_URL,
+  });
   const ws = new RawWebSocketClient(
     WS_URL,
     (text) => {
@@ -398,10 +590,15 @@ async function runClient(index, runId, metrics) {
       }
       const keepAliveTime = payload.payload?.time;
       if (payload.packet === "KeepAlive" && pendingKeepAlives.has(keepAliveTime)) {
+        const pendingKeepAlive = pendingKeepAlives.get(keepAliveTime);
         metrics.keepAliveLatenciesMs.push(
-          Date.now() - pendingKeepAlives.get(keepAliveTime),
+          Date.now() - pendingKeepAlive.sentAt,
         );
         pendingKeepAlives.delete(keepAliveTime);
+        clientActivity.keepAliveAcknowledged += 1;
+        if (pendingKeepAlive.phase === "hold") {
+          clientActivity.holdKeepAliveAcknowledged += 1;
+        }
       }
     },
     () => {
@@ -409,6 +606,16 @@ async function runClient(index, runId, metrics) {
     },
     () => {
       metrics.closed += 1;
+      if (countedReady && !intentionalClose) {
+        metrics.unexpectedReadyClosures += 1;
+        clientActivity.unexpectedClosure = true;
+      }
+    },
+    {
+      "User-Agent": clientIdentity.userAgent,
+      ...(clientIdentity.clientIp === null
+        ? {}
+        : { "CF-Connecting-IP": clientIdentity.clientIp }),
     },
   );
 
@@ -432,10 +639,29 @@ async function runClient(index, runId, metrics) {
         emailAddress: "",
       });
       await waitFor(
-        () => newAccountProcessed,
+        () =>
+          isNewAccountTerminalOutcome({
+            newAccountProcessed,
+            capacityRejected,
+            serverError,
+          }),
         READY_TIMEOUT_MS,
         `newAccount ${index}`,
       );
+      const outcome = newAccountTerminalOutcome({
+        newAccountProcessed,
+        capacityRejected,
+        serverError,
+      });
+      if (outcome === "capacity") {
+        return {
+          index,
+          ready: false,
+          capacityRejected: true,
+          error: capacityError,
+        };
+      }
+      if (outcome === "serverError") throw new Error(serverError);
       if (ACCOUNT_SETTLE_MS > 0) {
         await delay(ACCOUNT_SETTLE_MS);
       }
@@ -558,40 +784,31 @@ async function runClient(index, runId, metrics) {
 
     const directions = ["Right", "Down", "Left", "Up"];
     for (let action = 0; action < ACTIONS; action += 1) {
-      const time = Date.now() * 1000 + index * 100 + action;
-      if (SEND_KEEPALIVE) {
-        pendingKeepAlives.set(time, Date.now());
-      }
-      if (SEND_KEEPALIVE && send(ws, metrics, { type: "keepAlive", time })) {
-        metrics.keepAliveCommandsSent += 1;
-      }
-      if (
-        SEND_MOVEMENT &&
-        send(ws, metrics, {
-          type: action % 3 === 0 ? "run" : "walk",
-          direction: directions[action % directions.length],
-        })
-      ) {
-        metrics.movementCommandsSent += 1;
-      }
-      if (SEND_CHAT && action % CHAT_EVERY === 0) {
-        if (send(ws, metrics, { type: "chat", message: `load ${index}:${action}` })) {
-          metrics.chatCommandsSent += 1;
-        }
-      }
-      if (ENABLE_STAGE5_COMMANDS && action % 15 === 0) {
-        if (send(ws, metrics, {
-          type: "stage5Command",
-          action: "social.friend",
-          args: [`load-peer-${action}`],
-        })) {
-          metrics.stage5CommandsSent += 1;
-        }
-      }
+      assertLoadSocketOpen(ws, index, "initial gameplay actions");
+      sendGameplayAction(ws, metrics, clientActivity, index, action, pendingKeepAlives, directions, true, "initial");
       await delay(THINK_MS);
     }
 
-    await delay(HOLD_OPEN_MS);
+    const holdStartedAt = Date.now();
+    if (HOLD_ACTION_INTERVAL_MS > 0 && HOLD_OPEN_MS > 0) {
+      const holdDeadline = Date.now() + HOLD_OPEN_MS;
+      let holdAction = 0;
+      while (Date.now() < holdDeadline) {
+        assertLoadSocketOpen(ws, index, "active hold");
+        sendGameplayAction(ws, metrics, clientActivity, index, ACTIONS + holdAction, pendingKeepAlives, directions, false, "hold");
+        metrics.holdActionCycles += 1;
+        clientActivity.holdActionCycles += 1;
+        holdAction += 1;
+        const remainingMs = holdDeadline - Date.now();
+        if (remainingMs <= 0) break;
+        await delay(Math.min(HOLD_ACTION_INTERVAL_MS, remainingMs));
+      }
+    } else {
+      await delay(HOLD_OPEN_MS);
+    }
+    assertLoadSocketOpen(ws, index, "hold completion");
+    clientActivity.holdDurationMs = Math.max(0, Date.now() - holdStartedAt);
+    clientActivity.completed = true;
     recordClientNetworkMetrics(metrics, ws, {
       bytesSentAtReady,
       bytesReceivedAtReady,
@@ -604,9 +821,45 @@ async function runClient(index, runId, metrics) {
       metrics.currentReady = Math.max(0, metrics.currentReady - 1);
     }
     if (!ws.closed) {
+      intentionalClose = true;
       ws.close();
       await waitFor(() => ws.closed, CLOSE_TIMEOUT_MS, `close ${index}`).catch(() => {});
     }
+  }
+}
+
+function assertLoadSocketOpen(ws, index, phase) {
+  if (!ws.open || ws.closed) {
+    throw new Error(`load client ${index} WebSocket closed during ${phase}`);
+  }
+}
+
+function sendGameplayAction(ws, metrics, clientActivity, index, action, pendingKeepAlives, directions, includeStage5, phase) {
+  const time = Date.now() * 1000 + index * 100 + action;
+  if (SEND_KEEPALIVE && send(ws, metrics, { type: "keepAlive", time })) {
+    pendingKeepAlives.set(time, { sentAt: Date.now(), phase });
+    metrics.keepAliveCommandsSent += 1;
+    clientActivity.keepAliveSent += 1;
+    if (phase === "hold") clientActivity.holdKeepAliveSent += 1;
+  }
+  if (SEND_MOVEMENT && send(ws, metrics, {
+    type: action % 3 === 0 ? "run" : "walk",
+    direction: directions[action % directions.length],
+  })) {
+    metrics.movementCommandsSent += 1;
+  }
+  if (SEND_CHAT && action % CHAT_EVERY === 0 && send(ws, metrics, {
+    type: "chat",
+    message: `load ${index}:${action}`,
+  })) {
+    metrics.chatCommandsSent += 1;
+  }
+  if (includeStage5 && ENABLE_STAGE5_COMMANDS && action % 15 === 0 && send(ws, metrics, {
+    type: "stage5Command",
+    action: "social.friend",
+    args: [`load-peer-${action}`],
+  })) {
+    metrics.stage5CommandsSent += 1;
   }
 }
 
@@ -648,7 +901,7 @@ function send(ws, metrics, command) {
 }
 
 class RawWebSocketClient {
-  constructor(url, onMessage, onError, onClose) {
+  constructor(url, onMessage, onError, onClose, headers = {}) {
     this.url = new URL(url);
     if (this.url.protocol !== "ws:" && this.url.protocol !== "wss:") {
       throw new Error(`Unsupported WebSocket protocol for load harness: ${this.url.protocol}`);
@@ -656,6 +909,10 @@ class RawWebSocketClient {
     this.onMessage = onMessage;
     this.onError = onError;
     this.onClose = onClose;
+    this.headers = Object.entries(headers).map(([name, value]) => [
+      assertSafeHandshakeHeaderValue(name, "header name"),
+      assertSafeHandshakeHeaderValue(value, name),
+    ]);
     this.socket = null;
     this.buffer = Buffer.alloc(0);
     this.open = false;
@@ -703,6 +960,7 @@ class RawWebSocketClient {
       "Connection: Upgrade",
       `Sec-WebSocket-Key: ${key}`,
       "Sec-WebSocket-Version: 13",
+      ...this.headers.map(([name, value]) => `${name}: ${value}`),
       "\r\n",
     ].join("\r\n");
     this.socket.write(request);
@@ -871,7 +1129,7 @@ async function sampleGatewayRss(metrics, keepGoing) {
   while (keepGoing()) {
     const sample = await gatewayRssSample();
     if (sample) metrics.rssSamples.push(sample);
-    await delay(500);
+    await delay(RESOURCE_SAMPLE_MS);
   }
   const sample = await gatewayRssSample();
   if (sample) metrics.rssSamples.push(sample);
@@ -914,17 +1172,17 @@ async function checkpointGatewayLoad(metrics, keepGoing) {
 
 async function gatewayRssSample() {
   if (process.platform !== "win32") return gatewayProcessSample();
+  if (!GATEWAY_PID) return null;
   const command = [
-    "$p = Get-Process -Name mir2-gateway -ErrorAction SilentlyContinue | Sort-Object StartTime -Descending | Select-Object -First 1;",
+    `$p = Get-Process -Id ${GATEWAY_PID} -ErrorAction SilentlyContinue;`,
     "if ($p) {",
-    "  [Console]::WriteLine(($p.Id.ToString() + ',' + $p.WorkingSet64.ToString() + ',' + $p.HandleCount.ToString()))",
+    "  [Console]::WriteLine(($p.Id.ToString() + ',' + $p.WorkingSet64.ToString() + ',' + $p.PrivateMemorySize64.ToString() + ',' + $p.HandleCount.ToString() + ',' + $p.Threads.Count.ToString() + ',' + $p.TotalProcessorTime.TotalMilliseconds.ToString([Globalization.CultureInfo]::InvariantCulture)))",
     "}",
   ].join(" ");
   try {
     const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", command], { windowsHide: true });
-    const [pid, workingSetBytes, handleCount] = stdout.trim().split(",").map((value) => Number(value));
-    if (!pid || !workingSetBytes) return null;
-    return { atUnixMs: Date.now(), pid, workingSetBytes, handleCount };
+    const sample = parseWindowsGatewayProcessSample(stdout);
+    return sample ? { ...sample, atUnixMs: Date.now() } : null;
   } catch {
     return null;
   }
@@ -950,8 +1208,68 @@ async function gatewayProcessSample() {
       atUnixMs: Date.now(),
       pid: samplePid,
       workingSetBytes: rssKb * 1024,
+      privateBytes: null,
+      threadCount: null,
+      cpuTimeMs: null,
       cpuPercent: Number.isFinite(cpuPercent) ? cpuPercent : null,
     };
+  } catch {
+    return null;
+  }
+}
+
+async function inspectCandidateGatewaySocketOwnership(wsUrl, gatewayPid) {
+  if (process.platform !== "win32") {
+    return { ok: false, error: "candidate socket ownership verification currently requires Windows" };
+  }
+  if (!Number.isSafeInteger(gatewayPid) || gatewayPid <= 0) {
+    return { ok: false, error: "candidate profile requires a positive MIR2_GATEWAY_PID" };
+  }
+  const url = new URL(wsUrl);
+  const port = Number(url.port || (url.protocol === "wss:" ? 443 : 80));
+  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+    return { ok: false, error: "candidate profile WebSocket URL must contain a valid port" };
+  }
+  const expectedAddress = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  const command = [
+    `$connections = Get-NetTCPConnection -State Listen -LocalPort ${port} -ErrorAction SilentlyContinue;`,
+    "if ($connections) { $connections | ForEach-Object { [Console]::WriteLine(($_.LocalAddress.ToString() + '|' + $_.OwningProcess.ToString())) } }",
+  ].join(" ");
+  try {
+    const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", command], { windowsHide: true });
+    const bindings = parseListenBindings(stdout);
+    const matchingAddress = bindings.filter(
+      (binding) => binding.localAddress.replace(/^\[|\]$/g, "").toLowerCase() === expectedAddress,
+    );
+    const ok = matchingAddress.length > 0 &&
+      matchingAddress.every((binding) => binding.pid === gatewayPid);
+    return {
+      ok,
+      expectedAddress,
+      port,
+      gatewayPid,
+      bindings,
+      error: ok ? null : `WebSocket ${expectedAddress}:${port} is not exclusively owned by PID ${gatewayPid}`,
+    };
+  } catch (error) {
+    return { ok: false, error: `unable to verify candidate WebSocket port ownership: ${String(error?.message ?? error)}` };
+  }
+}
+
+async function windowsGatewayExecutableIdentity(gatewayPid) {
+  if (process.platform !== "win32") return null;
+  const command = [
+    `$p = Get-Process -Id ${gatewayPid} -ErrorAction SilentlyContinue;`,
+    "if ($p) {",
+    "  $item = Get-Item -LiteralPath $p.Path;",
+    "  $stream = [IO.File]::OpenRead($p.Path);",
+    "  try { $sha = [Security.Cryptography.SHA256]::Create(); try { $hash = ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '') } finally { $sha.Dispose() } } finally { $stream.Dispose() }",
+    "  [pscustomobject]@{ pid=$p.Id; path=$p.Path; bytes=$item.Length; sha256=$hash } | ConvertTo-Json -Compress",
+    "}",
+  ].join(" ");
+  try {
+    const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", command], { windowsHide: true });
+    return parseWindowsGatewayIdentity(stdout);
   } catch {
     return null;
   }

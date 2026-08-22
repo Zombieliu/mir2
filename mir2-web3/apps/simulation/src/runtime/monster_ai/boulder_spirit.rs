@@ -26,8 +26,8 @@ use mir2_protocol::{Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    current_player_is_dead, entity_name, entity_object_id, entity_position, player_entity, Monster,
-    MonsterAgent, MonsterAiState,
+    Monster, MonsterAgent, MonsterAiState, current_player_is_dead, entity_name, entity_object_id,
+    entity_position, player_entity,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
@@ -202,8 +202,8 @@ fn detonate_boulder_spirit(
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        entity_object_id, player_entity, DisplayName, Facing, MonsterCombatStats, MonsterVitals,
-        ObjectId, Position, WorldObject,
+        DisplayName, Facing, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
+        entity_object_id, player_entity,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, initial_monster_ai_state_for_object,

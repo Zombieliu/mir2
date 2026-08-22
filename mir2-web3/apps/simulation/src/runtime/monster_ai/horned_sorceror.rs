@@ -23,13 +23,13 @@ use mir2_protocol::{
 
 use super::super::combat::*;
 use super::super::components::{
-    entity_name, entity_object_id, entity_position, player_entity, Facing, Monster, MonsterAgent,
-    MonsterAiState, MonsterVitals, Position,
+    Facing, Monster, MonsterAgent, MonsterAiState, MonsterVitals, Position, entity_name,
+    entity_object_id, entity_position, player_entity,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
 use super::super::packets::*;
-use super::super::resources::{current_language, PendingGroundSpellAction, RuntimeQueueResource};
+use super::super::resources::{PendingGroundSpellAction, RuntimeQueueResource, current_language};
 
 use super::common::*;
 

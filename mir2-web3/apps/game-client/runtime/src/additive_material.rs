@@ -100,6 +100,20 @@ impl CrystalAdditiveMaterialCache {
         self.materials.insert(cache_key.to_owned(), handle.clone());
         handle
     }
+
+    pub(crate) fn evict(
+        &mut self,
+        cache_key: &str,
+        materials: &mut Assets<CrystalAdditiveMaterial>,
+    ) {
+        if let Some(handle) = self.materials.remove(cache_key) {
+            materials.remove(handle.id());
+        }
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.materials.len()
+    }
 }
 
 fn crystal_additive_blend_state() -> BlendState {
@@ -142,5 +156,31 @@ mod tests {
         let shader = include_str!("crystal_additive_material.wgsl");
         assert!(shader.contains("let coverage = source_alpha * brightness;"));
         assert!(shader.contains("sampled.rgb * tint.rgb * source_alpha"));
+    }
+
+    #[test]
+    fn effect_material_cache_evicts_stale_entries_and_remains_bounded() {
+        let mut cache = CrystalAdditiveMaterialCache::default();
+        let mut materials = Assets::<CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let dummy_image = images.add(Image::default());
+        for i in 0..120 {
+            let key = format!("fx-{i}");
+            cache.material(&key, dummy_image.clone(), 1.0, &mut materials);
+        }
+        assert_eq!(cache.len(), 120);
+        assert_eq!(materials.len(), 120);
+        for i in 0..100 {
+            let key = format!("fx-{i}");
+            cache.evict(&key, &mut materials);
+        }
+        assert_eq!(cache.len(), 20);
+        assert_eq!(materials.len(), 20);
+        for i in 120..200 {
+            let key = format!("fx-{i}");
+            cache.material(&key, dummy_image.clone(), 1.0, &mut materials);
+        }
+        assert!(cache.len() <= 100);
+        assert_eq!(cache.len(), materials.len());
     }
 }

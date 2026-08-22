@@ -29,7 +29,6 @@ import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
   type SystemMenuSurfacePanel,
-  type SystemMenuTransferOption,
 } from "./original-client-system-menu";
 import type {
   DisplayEntity,
@@ -95,13 +94,10 @@ type GameUiSceneProps = {
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
-  onTransferMap: (transferKey: string) => void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
-  onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
-  transferOptions: SystemMenuTransferOption[];
   inputProfile: Mir2InputProfile;
   gamepadFamily: Mir2GamepadFamily;
   onStartTutorial: () => void;
@@ -158,13 +154,10 @@ function GameUiSceneInner({
   onRepairItem,
   onSpecialRepairItem,
   onCastSkill,
-  onTransferMap,
   onClaimMail,
   onDeleteMail,
   onBuyGameShopItem,
-  onRunStage5Command,
   onSendClientCommand,
-  transferOptions,
   inputProfile,
   gamepadFamily,
   onStartTutorial,
@@ -362,11 +355,9 @@ function GameUiSceneInner({
         <SystemMenuPanel
           t={t}
           playerName={player?.name ?? null}
-          playerPosition={player ? { x: player.x, y: player.y } : null}
           mapTitle={world.mapTitle}
           mapFileName={world.mapFileName}
           inSafeZone={world.inSafeZone}
-          transferOptions={transferOptions}
           inputProfile={inputProfile}
           gamepadFamily={gamepadFamily}
           questLogOpen={showQuestLog}
@@ -384,10 +375,6 @@ function GameUiSceneInner({
           }}
           onClose={() => setShowSystemMenu(false)}
           onLogout={onLogout}
-          onTransferMap={(transferKey) => {
-            onTransferMap(transferKey);
-            setShowSystemMenu(false);
-          }}
           isPlatinum176={IS_PLATINUM_176_PROFILE}
         />
       ) : null}
@@ -397,7 +384,6 @@ function GameUiSceneInner({
           feature={showSystemMenuFeaturePanel}
           playerName={player?.name ?? null}
           world={world}
-          onRunStage5Command={onRunStage5Command}
           onSendClientCommand={onSendClientCommand}
           onClose={() => {
             setShowSystemMenuFeaturePanel(null);

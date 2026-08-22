@@ -245,6 +245,13 @@ impl ZoneRuntime {
         runtime.removed_object_ids = checkpoint.removed_object_ids;
         runtime.harvested_object_ids = checkpoint.harvested_object_ids;
         runtime.native_monsters = checkpoint.native_monsters;
+        for monster in runtime.native_monsters.values_mut() {
+            // Legacy checkpoints had only the AI-derived boolean. Without the
+            // explicit authoritative disposition they must remain untargetable
+            // and must not target players.
+            monster.hostile_to_player = monster.disposition
+                == Some(crate::config::WorldEntityDisposition::Hostile);
+        }
         runtime.pending_native_hits = checkpoint.pending_native_hits;
         runtime.pending_native_projectiles = checkpoint.pending_native_projectiles;
         runtime.pending_native_player_hits = checkpoint.pending_native_player_hits;
@@ -403,6 +410,7 @@ mod tests {
             name_colour_argb: -1,
             image: 135,
             ai: 2,
+            disposition: Some(crate::config::WorldEntityDisposition::Hostile),
             level: 24,
             max_hp: 500,
             hp: 500,
@@ -428,6 +436,52 @@ mod tests {
             restored.canonical_state_root().unwrap(),
             runtime.canonical_state_root().unwrap()
         );
+    }
+
+    #[test]
+    fn legacy_checkpoint_missing_monster_disposition_fails_closed() {
+        use crate::runtime::zone::types::{ZoneMonsterDefense, ZoneMonsterSpawn};
+
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("D022"));
+        let spawn = ZoneMonsterSpawn {
+            object_id: 9_100_099,
+            name: "LegacyHostile".to_string(),
+            name_colour_argb: -1,
+            image: 0,
+            ai: 0,
+            disposition: Some(crate::config::WorldEntityDisposition::Hostile),
+            level: 1,
+            max_hp: 10,
+            hp: 10,
+            experience: 0,
+            move_speed_ms: 0,
+            attack_speed_ms: 0,
+            friendly_guild: None,
+            position: Point { x: 30, y: 30 },
+            direction: MirDirection::Down,
+            defense: ZoneMonsterDefense::default(),
+            drops: Vec::new(),
+        };
+        assert!(runtime.spawn_world_event_monster(&spawn, 0).0);
+        let mut checkpoint: serde_json::Value = serde_json::from_slice(
+            &runtime.checkpoint_bytes().expect("checkpoint bytes"),
+        )
+        .expect("checkpoint JSON");
+        checkpoint["native_monsters"][spawn.object_id.to_string()]
+            .as_object_mut()
+            .expect("retained native monster")
+            .remove("disposition");
+
+        let legacy_bytes = serde_json::to_vec(&checkpoint).expect("legacy checkpoint bytes");
+        let restored = ZoneRuntime::restore_verified_world_checkpoint(&legacy_bytes)
+            .expect("verified legacy checkpoint should restore");
+        let monster = restored
+            .native_monster_snapshots()
+            .into_iter()
+            .find(|monster| monster.object_id == spawn.object_id)
+            .expect("legacy monster");
+        assert_eq!(monster.disposition, None);
+        assert!(!monster.hostile_to_player);
     }
 
     #[test]
@@ -461,6 +515,7 @@ mod tests {
             name_colour_argb: -65_281,
             image: 139,
             ai: 58,
+            disposition: Some(crate::config::WorldEntityDisposition::Hostile),
             level: 40,
             max_hp: 10_000,
             hp: 10_000,

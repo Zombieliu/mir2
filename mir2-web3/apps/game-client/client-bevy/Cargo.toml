@@ -14,11 +14,20 @@ license = "MIT"
 [lib]
 path = "src/lib.rs"
 
+[features]
+default = []
+native-ui = [
+  "bevy/bevy_ui",
+  "bevy/bevy_text",
+  "bevy/bevy_ui_render",
+  "bevy/default_font",
+  "bevy/audio",
+  "bevy/wav",
+]
+
 [dependencies]
 bevy = { version = "0.19.0", default-features = false, features = [
   "bevy_asset",
-  "bevy_ui",
-  "bevy_text",
   "bevy_core_pipeline",
   "bevy_render",
   "bevy_sprite",
@@ -27,5 +36,9 @@ bevy = { version = "0.19.0", default-features = false, features = [
   "png"
 ] }
 mir2-client-core = { path = "../client-core" }
+mir2-ui-core = { path = "../ui-core" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[dev-dependencies]
+mir2-protocol = { path = "../../../packages/protocol" }

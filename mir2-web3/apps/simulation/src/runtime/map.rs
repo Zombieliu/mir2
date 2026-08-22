@@ -7,37 +7,38 @@ use std::sync::{Arc, Mutex, OnceLock};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{With, Without, World};
 use mir2_game_data::{
-    crystal_map_respawns_by_index, crystal_map_respawns_ref, crystal_npc_info_manifest,
-    localized_text_or_fallback, starter_map_collision, BlockedMapCellTemplate, DecorKind,
-    DecorObjectTemplate, DoorMapCellTemplate, FishingCellTemplate, MapBounds, MapCellAttribute,
-    SceneView, StarterMapCollision, TerrainKind, TerrainPatchTemplate,
+    BlockedMapCellTemplate, DecorKind, DecorObjectTemplate, DoorMapCellTemplate,
+    FishingCellTemplate, MapBounds, MapCellAttribute, SceneView, StarterMapCollision, TerrainKind,
+    TerrainPatchTemplate, crystal_map_respawns_by_index, crystal_map_respawns_ref,
+    crystal_npc_info_manifest, localized_text_or_fallback, starter_map_collision,
 };
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
 
 use super::components::{
-    current_player_object_id, entity_position, player_entity, CharacterBody, DisplayName, Facing,
-    Hero, Monster, MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId,
-    PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
+    CharacterBody, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterCombatStats,
+    MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
+    SpawnSlotRef, WorldObject, current_player_object_id, entity_position, player_entity,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::monsters::{
+    MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable,
     build_crystal_current_map_full_spawn_table, build_crystal_current_map_visible_spawn_table,
     build_spawn_table, initial_general_meow_meow_state, initial_monster_ai_state_for_object,
-    initial_yimoogi_state, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable,
+    initial_yimoogi_state,
 };
 use super::movement::{current_location, point_in_bounds, summon_spawn_position_near, tile_key};
 use super::packets::{
     localized_monster_name_key, localized_npc_name_key, localized_visible_player_name_key,
 };
 use super::resources::{
-    current_language, is_in_world, reset_crystal_player_movement_timing, MapRuntimeResource,
-    MountResource, NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, Stage5SystemsResource,
+    MapRuntimeResource, MountResource, NpcStateResource, PlayerRuntimeResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, Stage5SystemsResource,
+    current_language, is_in_world, reset_crystal_player_movement_timing,
 };
-use super::save::{active_character_runtime_state, ActiveCharacterRuntimeState};
-use super::session::{system_message, SimulationSession};
-use crate::config::{MapDropRuleRecord, MonsterSpawnSource, SimulationConfig};
+use super::save::{ActiveCharacterRuntimeState, active_character_runtime_state};
+use super::session::{SimulationSession, system_message};
 use crate::MapTransferRecord;
+use crate::config::{MapDropRuleRecord, MonsterSpawnSource, SimulationConfig};
 
 #[derive(Debug, Clone)]
 pub(super) struct RuntimeMapCollisionData {
@@ -538,9 +539,21 @@ pub(super) fn filter_decor_objects(
 }
 
 pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPacket> {
-    if let Some((map_file_name, position)) = parse_debug_crystal_transfer_key(key) {
-        let map_info = super::npc_script::crystal_npc_move_map_information(world, &map_file_name);
-        return relocate_player_to_map(world, map_info, position, MirDirection::Down, None);
+    match crate::world_runtime::parse_debug_crystal_transfer_key(key) {
+        Ok(Some((map_file_name, position))) => {
+            let map_info =
+                super::npc_script::crystal_npc_move_map_information(world, &map_file_name);
+            return relocate_player_to_map(world, map_info, position, MirDirection::Down, None);
+        }
+        Err(_) => {
+            let language = super::session::current_language(world);
+            return vec![super::session::system_message(&localized_text_or_fallback(
+                language,
+                "server.InvalidPacketReceived",
+                "server.InvalidPacketReceived",
+            ))];
+        }
+        Ok(None) => {}
     }
 
     let Some(transfer) = transfer_for_key(
@@ -722,17 +735,6 @@ fn dismount_for_no_mount_map(world: &mut World, packets: &mut Vec<ServerPacket>)
         ),
         chat_type: ChatType::System,
     });
-}
-
-pub(super) fn parse_debug_crystal_transfer_key(key: &str) -> Option<(String, Point)> {
-    let mut parts = key.split(':');
-    if parts.next()? != "crystal" {
-        return None;
-    }
-    let map_file_name = parts.next()?.trim().trim_end_matches(".map").to_string();
-    let x = parts.next()?.parse::<i32>().ok()?;
-    let y = parts.next()?.parse::<i32>().ok()?;
-    Some((map_file_name, Point { x, y }))
 }
 
 pub(super) fn clear_non_player_world_entities(world: &mut World) {

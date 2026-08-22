@@ -33,8 +33,8 @@ use mir2_protocol::{MirDirection, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    current_player_is_dead, entity_facing, entity_name, entity_object_id, entity_position,
-    player_entity, Facing, Monster, MonsterAgent, MonsterAiState,
+    Facing, Monster, MonsterAgent, MonsterAiState, current_player_is_dead, entity_facing,
+    entity_name, entity_object_id, entity_position, player_entity,
 };
 use super::super::monsters::*;
 use super::super::movement::*;

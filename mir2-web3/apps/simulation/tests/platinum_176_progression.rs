@@ -107,6 +107,16 @@ fn platinum_config() -> SimulationConfig {
     SimulationConfig::default().with_platinum_176_profile()
 }
 
+fn login_demo_account(session: &mut SimulationSession) {
+    let packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
 fn create_and_start_level_one_character(
     session: &mut SimulationSession,
     name: &str,
@@ -743,6 +753,7 @@ fn all_three_classes_progress_level_by_level_through_source_backed_hunting_route
 fn natural_level_and_experience_survive_logout_and_fresh_session_reload() {
     let config = platinum_config();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account(&mut first);
     let character_index =
         create_and_start_level_one_character(&mut first, "PersistentLevel", MirClass::Taoist);
 
@@ -753,6 +764,7 @@ fn natural_level_and_experience_survive_logout_and_fresh_session_reload() {
     let _ = first.handle_packet(ClientPacket::LogOut);
 
     let mut second = SimulationSession::new(config);
+    login_demo_account(&mut second);
     let _ = second.handle_packet(ClientPacket::StartGame { character_index });
 
     assert_eq!(self_player_level(&second), 2);
@@ -865,6 +877,7 @@ fn deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment()
 fn pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     first.apply_zone_unlawful_player_kill(2);
     for _ in 0..30 {
@@ -878,6 +891,7 @@ fn pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay() {
     first.save_active_character();
 
     let mut second = SimulationSession::new(config);
+    login_demo_account(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(second.world_snapshot().player_pk_points, 2);
     assert_eq!(

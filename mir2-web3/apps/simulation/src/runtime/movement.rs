@@ -5,9 +5,9 @@ use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket, UserLocat
 
 use super::combat::crystal_player_movement_blocked_by_status;
 use super::components::{
-    current_player_is_dead, current_player_object_id, entity_facing, entity_position,
-    player_entity, Facing, GroundDrop, Hero, MonsterAgent, MonsterAiState, Npc, ObjectId,
-    PlayerVitals, Position, RemotePlayer, SelfPlayer,
+    Facing, GroundDrop, Hero, MonsterAgent, MonsterAiState, Npc, ObjectId, PlayerVitals, Position,
+    RemotePlayer, SelfPlayer, current_player_is_dead, current_player_object_id, entity_facing,
+    entity_position, player_entity,
 };
 use super::map::{
     apply_current_player_position_map_transfer, is_current_map_transfer_source,
@@ -18,8 +18,8 @@ use super::npc::dismiss_dialog;
 use super::packets::{object_health_info_for_entity, object_revived_info_for_entity};
 use super::pathfind;
 use super::resources::{
-    crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
-    PlayerRuntimeResource, RuntimeConfigResource,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource, crystal_player_can_run,
+    is_in_world, mark_crystal_player_move,
 };
 use super::session::SimulationSession;
 
@@ -434,11 +434,7 @@ pub(super) fn follow_player_with_stage5_hero(
 }
 
 pub(super) fn move_distance_for_mode(running: bool) -> i32 {
-    if running {
-        2
-    } else {
-        1
-    }
+    if running { 2 } else { 1 }
 }
 
 /// Choose the next tile to step onto when routing from `from` toward `to`,

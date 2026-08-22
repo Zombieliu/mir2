@@ -1,9 +1,9 @@
 use std::any::Any;
 
 use crate::runtime::{
-    SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
-    SharedItemRentalItemOffer, SharedNpcSavedValue, SharedSkillItemConsumptionComponent,
-    SharedTradeOffer, ZoneMonsterSpawn,
+    GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -13,10 +13,37 @@ use crate::{
 use mir2_protocol::{
     client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
 };
+use serde::{Deserialize, Serialize};
+
+pub const NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2: u16 = 2;
+
+/// Server-generated identity for one native GameShop transaction.
+///
+/// `client_request_id` is receipt correlation only. The opaque 256-bit
+/// `server_idempotency_key` is the authoritative replay key and is bound to
+/// the authenticated account, character, and Gateway session before entering
+/// the Simulation transaction.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NativeGameShopPurchaseRequest {
+    pub protocol_version: u16,
+    pub server_idempotency_key: String,
+    pub gateway_session_id: String,
+    pub account_id: String,
+    pub character_index: i32,
+    pub client_request_id: String,
+    pub g_index: i32,
+    pub quantity: u8,
+    pub price_type: i32,
+}
 
 #[derive(Debug, Clone)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
+    /// Trusted native receipt purchase. Raw clients cannot construct this
+    /// command; Gateway binds the server idempotency key to authenticated
+    /// identity before the Zone/Simulation path sees it.
+    NativeGameShopPurchase(NativeGameShopPurchaseRequest),
     PasskeyLogin {
         account_id: String,
     },
@@ -113,7 +140,9 @@ pub fn validate_production_player_command(
         WorldCommand::GrantOnchainOre { .. } | WorldCommand::CreditGoldFromOre { .. } => Err(
             "on-chain command injection is not allowed on the production player path".to_string(),
         ),
-        WorldCommand::TransferMap { key } if is_debug_crystal_transfer_key(key) => {
+        WorldCommand::TransferMap { key }
+            if !matches!(parse_debug_crystal_transfer_key(key), Ok(None)) =>
+        {
             Err("debug crystal transfer is not allowed on the production player path".to_string())
         }
         WorldCommand::ClientPacket(
@@ -123,17 +152,47 @@ pub fn validate_production_player_command(
         ) if !authenticated => {
             Err("authenticated account is required for character lifecycle commands".to_string())
         }
+        WorldCommand::ClientPacket(ClientPacket::SendMail { .. }) if !authenticated => {
+            Err("authenticated account is required to send mail".to_string())
+        }
+        WorldCommand::NativeGameShopPurchase(_) if !authenticated => Err(
+            "authenticated account is required for native GameShop purchases".to_string(),
+        ),
         _ => Ok(()),
     }
 }
 
-fn is_debug_crystal_transfer_key(key: &str) -> bool {
+pub(crate) fn parse_debug_crystal_transfer_key(
+    key: &str,
+) -> Result<Option<(String, Point)>, &'static str> {
     let mut parts = key.split(':');
-    matches!(parts.next(), Some("crystal"))
-        && parts.next().is_some()
-        && parts.next().is_some()
-        && parts.next().is_some()
-        && parts.next().is_none()
+    if parts.next() != Some("crystal") {
+        return Ok(None);
+    }
+    let map_file_name = parts
+        .next()
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+        .ok_or("debug crystal transfer requires a map")?
+        .trim_end_matches(".map")
+        .to_string();
+    if map_file_name.is_empty() {
+        return Err("debug crystal transfer requires a map");
+    }
+    let x = parts
+        .next()
+        .ok_or("debug crystal transfer requires x")?
+        .parse::<i32>()
+        .map_err(|_| "debug crystal transfer x is invalid")?;
+    let y = parts
+        .next()
+        .ok_or("debug crystal transfer requires y")?
+        .parse::<i32>()
+        .map_err(|_| "debug crystal transfer y is invalid")?;
+    if parts.next().is_some() {
+        return Err("debug crystal transfer has extra segments");
+    }
+    Ok(Some((map_file_name, Point { x, y })))
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -166,6 +225,7 @@ impl WorldCommand {
             Self::ClientPacket(packet) => {
                 WorldCommandKind::ClientPacket(client_packet_name(packet))
             }
+            Self::NativeGameShopPurchase(_) => WorldCommandKind::ClientPacket("GameShopBuy"),
             Self::PasskeyLogin { .. } => WorldCommandKind::PasskeyLogin,
             Self::MoveTo { .. } => WorldCommandKind::MoveTo,
             Self::Attack { .. } => WorldCommandKind::Attack,
@@ -213,6 +273,12 @@ pub struct WorldCommandOutcome {
 pub struct WorldCommandExecution {
     pub packets: Vec<ServerPacket>,
     pub outcome: WorldCommandOutcome,
+    /// Typed transaction result for a real Crystal `GameShopBuy` command.
+    ///
+    /// This is deliberately separate from `ServerPacket`: native transports
+    /// must never infer purchase success, mail identity, or stock from the
+    /// compatibility packet stream.
+    pub game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
 }
 
 pub trait WorldRuntime: Send + Sync {
@@ -242,7 +308,16 @@ pub trait WorldRuntime: Send + Sync {
                 snapshot_tick,
                 active_identity: self.active_identity(),
             },
+            game_shop_purchase_outcome: None,
         })
+    }
+
+    /// Whether this runtime can execute `GameShopBuy` while returning the
+    /// authoritative typed transaction result in `WorldCommandExecution`.
+    /// Unsupported runtimes default to fail-closed so native receipt callers
+    /// can reject the command before any purchase mutation occurs.
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        false
     }
 
     fn execute_production_player_command(
@@ -618,6 +693,10 @@ impl WorldRuntime for InProcessWorldRuntime {
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
         let packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.handle_packet(packet),
+            WorldCommand::NativeGameShopPurchase(request) => self
+                .session
+                .game_shop_buy_packet_idempotent(request)?
+                .packets,
             WorldCommand::PasskeyLogin { account_id } => self.session.passkey_login(&account_id),
             WorldCommand::MoveTo { position, running } => {
                 self.session.move_to_with_mode(position, running)
@@ -680,6 +759,51 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::Tick => self.session.tick(),
         };
         Ok(packets)
+    }
+
+    fn execute_with_outcome(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let command_kind = command.kind();
+        let skip_snapshot = command.skips_outcome_snapshot();
+        let (packets, game_shop_purchase_outcome) = match command {
+            WorldCommand::NativeGameShopPurchase(request) => {
+                let execution = self.session.game_shop_buy_packet_idempotent(request)?;
+                (execution.packets, Some(execution.outcome))
+            }
+            WorldCommand::ClientPacket(ClientPacket::GameShopBuy {
+                g_index,
+                quantity,
+                price_type,
+            }) => {
+                let execution = self
+                    .session
+                    .game_shop_buy_packet_with_outcome(g_index, quantity, price_type);
+                (execution.packets, Some(execution.outcome))
+            }
+            command => (self.execute(command)?, None),
+        };
+        let snapshot_tick = if skip_snapshot {
+            0
+        } else {
+            self.world_snapshot().tick
+        };
+        let packet_count = packets.len();
+        Ok(WorldCommandExecution {
+            packets,
+            outcome: WorldCommandOutcome {
+                command_kind,
+                packet_count,
+                snapshot_tick,
+                active_identity: self.active_identity(),
+            },
+            game_shop_purchase_outcome,
+        })
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        true
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {
@@ -817,6 +941,33 @@ mod tests {
     }
 
     #[test]
+    fn in_process_world_runtime_propagates_typed_game_shop_outcome_only_for_purchase() {
+        let mut runtime = started_runtime();
+        assert!(runtime.supports_typed_game_shop_purchase_outcome());
+
+        let execution = runtime
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::GameShopBuy {
+                g_index: 31,
+                quantity: 1,
+                price_type: 1,
+            }))
+            .expect("game-shop command should execute once");
+        let outcome = execution
+            .game_shop_purchase_outcome
+            .expect("game-shop command must expose its typed outcome");
+        assert_eq!(outcome.g_index, 31);
+        assert_eq!(outcome.quantity, 1);
+        assert_eq!(outcome.price_type, 1);
+
+        let ordinary = runtime
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 7,
+            }))
+            .expect("ordinary command should execute");
+        assert!(ordinary.game_shop_purchase_outcome.is_none());
+    }
+
+    #[test]
     fn world_runtime_skips_snapshot_for_low_latency_movement_outcome() {
         let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
         runtime
@@ -937,6 +1088,59 @@ mod tests {
             idempotency_key: "TX:5".to_string(),
         };
         assert!(super::validate_production_player_command(true, &credit).is_err());
+    }
+
+    #[test]
+    fn debug_crystal_transfer_parser_and_production_guard_are_strictly_identical() {
+        let valid = "crystal:0:330:270";
+        assert!(matches!(
+            super::parse_debug_crystal_transfer_key(valid),
+            Ok(Some((map, point))) if map == "0" && point.x == 330 && point.y == 270
+        ));
+
+        for malformed in [
+            "crystal",
+            "crystal:0",
+            "crystal:0:330",
+            "crystal::330:270",
+            "crystal:.map:330:270",
+            "crystal:0:not-x:270",
+            "crystal:0:330:not-y",
+            "crystal:0:330:270:",
+            "crystal:0:330:270:extra",
+        ] {
+            assert!(
+                super::parse_debug_crystal_transfer_key(malformed).is_err(),
+                "{malformed} must be rejected by the shared parser"
+            );
+        }
+
+        for key in [valid, "crystal:0:330", "crystal:0:330:270:extra"] {
+            assert!(
+                super::validate_production_player_command(
+                    true,
+                    &WorldCommand::TransferMap {
+                        key: key.to_string(),
+                    },
+                )
+                .is_err(),
+                "production must reject the entire debug crystal namespace: {key}"
+            );
+        }
+        assert!(matches!(
+            super::parse_debug_crystal_transfer_key("npc-transfer:west-gate"),
+            Ok(None)
+        ));
+
+        let anonymous_mail = WorldCommand::ClientPacket(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "anonymous".to_string(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        assert!(super::validate_production_player_command(false, &anonymous_mail).is_err());
+        assert!(super::validate_production_player_command(true, &anonymous_mail).is_ok());
     }
 
     /// Runtime whose config maps on-chain mine 1 to a vein cell on the test map, plus the

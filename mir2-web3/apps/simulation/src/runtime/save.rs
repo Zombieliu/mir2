@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
 };
 use sha2::{Digest, Sha256};
 
@@ -13,15 +13,17 @@ use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    apply_crystal_map_metadata, crystal_base_vitals, AccountBanStatus, AccountRecord,
-    CharacterRecord, CharacterSaveRecord, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    AccountBanStatus, AccountRecord, CharacterRecord, CharacterSaveRecord, SimulationConfig,
+    Stage5MailMessage, Stage5SystemsState, apply_crystal_map_metadata, crystal_base_vitals,
 };
 
 use super::components::{
-    entity_facing, entity_player_vitals, entity_position, player_entity, PlayerVitals,
+    PlayerVitals, entity_facing, entity_player_vitals, entity_position, player_entity,
 };
 use super::crystal_compat::BASE_STORAGE_SLOTS;
-use super::equipment::{seed_equipment_items_for_character, EquipmentState};
+use super::equipment::{
+    EquipmentState, refresh_mount_resource_from_equipment, seed_equipment_items_for_character,
+};
 use super::inventory::{
     crystal_start_inventory_items, normalize_inventory_known_item_metadata,
     normalize_inventory_unique_ids, refresh_storage_password_state, seed_belt_items,
@@ -33,16 +35,17 @@ use super::map::{
     spawn_config_visible_npcs, spawn_visible_world_for_current_map,
 };
 use super::packets::*;
-use super::quests::{effective_crystal_quest_info_packets, QuestState};
+use super::quests::{QuestState, effective_crystal_quest_info_packets};
 use super::resources::{
-    current_language, runtime_tick, set_runtime_tick, BuffResource, HeroInventoryResource,
-    InventoryResource, ItemRentalResource, MapRuntimeResource, NpcStateResource,
-    ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
+    BuffResource, HeroInventoryResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
+    NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
     PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
-    SessionResource, SkillResource, Stage5SystemsResource,
+    SessionResource, SkillResource, Stage5SystemsResource, current_language, runtime_tick,
+    set_runtime_tick,
 };
 use super::session::SimulationSession;
 use super::skills::seed_skills;
+use super::stage5::merge_native_game_shop_ledger_mail;
 
 #[derive(Debug, Clone)]
 pub(super) struct ActiveCharacterRuntimeState {
@@ -139,16 +142,16 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let npc_state = world.resource::<NpcStateResource>();
     let rental = world.resource::<ItemRentalResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
-    let character = world
-        .resource::<SessionResource>()
-        .selected_character
-        .clone()?;
+    let session = world.resource::<SessionResource>();
+    let character = session.selected_character.clone()?;
+    let revision = session.active_save_revision()?;
     let player = player_entity(world)?;
     let position = entity_position(world, player)?;
     let direction = entity_facing(world, player)?;
     let vitals = entity_player_vitals(world, player)?;
 
     Some(CharacterSaveRecord {
+        revision,
         character,
         map_file_name: map.current_map.file_name.clone(),
         map_title: map.current_map.title.clone(),
@@ -187,16 +190,130 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     })
 }
 
-pub(super) fn persist_active_character_save(world: &World) {
+pub(super) fn persist_active_character_save(world: &World) -> Result<(), String> {
     let Some(save) = snapshot_active_character_save(world) else {
-        return;
+        return Ok(());
     };
-    let account_id = world
+    let Some(account_id) = world
         .resource::<SessionResource>()
         .account_id
-        .clone()
-        .unwrap_or_else(|| "demo".to_string());
-    persist_character_save(world, &account_id, save);
+        .as_deref()
+        .map(str::trim)
+        .filter(|account_id| !account_id.is_empty())
+        .map(str::to_owned)
+    else {
+        eprintln!("refusing to persist active character without an authenticated account identity");
+        return Ok(());
+    };
+    let expected_revision = save.revision;
+    match persist_character_save(world, &account_id, save)? {
+        PersistCharacterSaveResult::Full(committed_revision) => {
+            if !world
+                .resource::<SessionResource>()
+                .advance_active_save_revision(expected_revision, committed_revision)
+            {
+                return Err(
+                    "active character revision changed while completing full-save CAS".to_string(),
+                );
+            }
+            Ok(())
+        }
+        PersistCharacterSaveResult::StaleMailStatusOnly => Err(
+            "stale full character save rejected after preserving safe mailbox status deltas"
+                .to_string(),
+        ),
+    }
+}
+
+/// Commit a mutation of the active character's durable private state before
+/// exposing the corresponding change through the live World mirror.
+///
+/// Mail-producing economy paths use this helper so the mailbox ID allocation
+/// and its currency debit share the account-store transaction.  The active
+/// snapshot is merged with mail delivered by other sessions while the store is
+/// locked, then persisted exactly once.  Callers must update World resources
+/// only after this function returns `Ok`.
+pub(super) fn commit_active_character_save_transaction<T, F>(
+    world: &World,
+    transaction: F,
+) -> Result<T, String>
+where
+    F: FnOnce(&mut CharacterSaveRecord) -> Result<T, String>,
+{
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let session = world.resource::<SessionResource>();
+    let account_id = session
+        .account_id
+        .as_deref()
+        .map(str::trim)
+        .filter(|account_id| !account_id.is_empty())
+        .ok_or_else(|| "active character transaction requires an account identity".to_string())?
+        .to_string();
+    let active_character = session
+        .selected_character
+        .as_ref()
+        .ok_or_else(|| "active character transaction requires a selected character".to_string())?
+        .clone();
+    let active_save = snapshot_active_character_save(world)
+        .ok_or_else(|| "active character transaction requires an in-world snapshot".to_string())?;
+    let expected_revision = active_save.revision;
+    let touched_accounts = vec![account_id.clone()];
+
+    let (result, baseline_revision, committed_revision) =
+        config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let account = store
+            .accounts
+            .get(&account_id)
+            .ok_or_else(|| "active character account changed before commit".to_string())?;
+        let persisted_character = account
+            .characters
+            .iter()
+            .find(|character| character.index == active_character.index)
+            .ok_or_else(|| "active character changed before commit".to_string())?;
+        if persisted_character.name != active_character.name
+            || active_save.character.index != active_character.index
+            || active_save.character.name != active_character.name
+        {
+            return Err("active character transaction identity mismatch".to_string());
+        }
+        let persisted_save = account
+            .saves
+            .get(&active_character.index)
+            .cloned()
+            .ok_or_else(|| "active character save changed before commit".to_string())?;
+        let baseline_revision = persisted_save.revision;
+
+        // A current session may atomically include its own unsaved World state.
+        // A stale session must instead mutate the lock-held persisted baseline,
+        // never its old full snapshot.
+        let mut staged_save = if baseline_revision == expected_revision {
+            let mut current = active_save;
+            merge_persisted_mail_into_character_save(&mut current, &persisted_save)?;
+            current
+        } else {
+            persisted_save
+        };
+
+        let result = transaction(&mut staged_save)?;
+        let committed_revision = baseline_revision
+            .checked_add(1)
+            .ok_or_else(|| "active character revision exhausted".to_string())?;
+        staged_save.revision = committed_revision;
+        store
+            .accounts
+            .get_mut(&account_id)
+            .expect("validated active account should exist")
+            .saves
+            .insert(active_character.index, staged_save);
+        Ok((result, baseline_revision, committed_revision))
+    })?;
+
+    if baseline_revision == expected_revision {
+        world
+            .resource::<SessionResource>()
+            .advance_active_save_revision(expected_revision, committed_revision);
+    }
+    Ok(result)
 }
 
 impl SimulationSession {
@@ -283,60 +400,385 @@ pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
     }
 
     let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-    merge_external_stage5_mail(&mut stage5.stage5_systems.mail, external_mail)
+    match merge_external_stage5_mail(&mut stage5.stage5_systems.mail, external_mail) {
+        Ok(changed) => changed,
+        Err(error) => {
+            eprintln!("failed to refresh externally delivered mail: {error}");
+            false
+        }
+    }
 }
 
 pub(super) fn merge_external_stage5_mail(
     local_mail: &mut Vec<Stage5MailMessage>,
-    external_mail: Vec<Stage5MailMessage>,
-) -> bool {
-    let mut changed = false;
-    for external in external_mail {
-        if let Some(local) = local_mail.iter_mut().find(|mail| mail.id == external.id) {
+    mut external_mail: Vec<Stage5MailMessage>,
+) -> Result<bool, String> {
+    let mut changed = normalize_stage5_mail_delivery_nonces(local_mail)?;
+    normalize_stage5_mail_delivery_nonces(&mut external_mail)?;
+    let mut used_ids = local_mail
+        .iter()
+        .map(|mail| mail.id)
+        .chain(external_mail.iter().map(|mail| mail.id))
+        .collect::<BTreeSet<_>>();
+    for mut external in external_mail {
+        // Match the same delivery across the whole active mailbox before
+        // looking at IDs. A previous refresh may already have re-keyed this
+        // incoming durable entry; matching by immutable content makes repeated
+        // refreshes idempotent while preserving the ID visible to the client.
+        if let Some(local_index) = local_mail
+            .iter()
+            .position(|local| stage5_mail_same_delivery(local, &external))
+        {
+            let local = &mut local_mail[local_index];
+            if let Some(ledger_changed) =
+                merge_native_game_shop_ledger_mail(local, &external)?
+            {
+                changed |= ledger_changed;
+                continue;
+            }
+            let external_claim_payload_is_authoritative =
+                external.claimed && stage5_mail_payload_is_consumed(&external);
+            // Mail content is immutable after delivery. The active copy is the
+            // command input and must not be silently repaired from storage;
+            // otherwise corrupt exact attachment JSON could bypass rejection.
+            // The sole payload exception is a durably claimed entry whose
+            // consumed payload must prevent a stale session from claiming it.
+            let mut merged = local.clone();
+            if external_claim_payload_is_authoritative {
+                merged.gold = external.gold;
+                merged.items = external.items.clone();
+                merged.item_states_json = external.item_states_json.clone();
+            }
+            // Read/claim/delete are monotonic. Lock is explicitly reversible,
+            // so the active local value wins when a live snapshot is merged
+            // for refresh or save.
             let merged = Stage5MailMessage {
+                id: local.id,
+                opened: local.opened || external.opened,
+                locked: local.locked,
                 claimed: local.claimed || external.claimed,
                 deleted: local.deleted || external.deleted,
-                ..external
+                ..merged
             };
             if local != &merged {
                 *local = merged;
                 changed = true;
             }
         } else {
+            if local_mail.iter().any(|local| local.id == external.id) {
+                // Active IDs may already be referenced by in-flight client
+                // Read/Claim/Delete packets. Keep the local ID stable and
+                // deterministically re-key the not-yet-exposed incoming mail.
+                external.id = next_available_mail_id(&used_ids).ok_or_else(|| {
+                    "mail ID space exhausted while resolving collision".to_string()
+                })?;
+            }
+            used_ids.insert(external.id);
             local_mail.push(external);
             changed = true;
         }
     }
-    changed
+    Ok(changed)
 }
 
-pub(super) fn persist_character_save(world: &World, account_id: &str, save: CharacterSaveRecord) {
+fn stage5_mail_same_delivery(local: &Stage5MailMessage, external: &Stage5MailMessage) -> bool {
+    if !local.delivery_nonce.is_empty() || !external.delivery_nonce.is_empty() {
+        return !local.delivery_nonce.is_empty() && local.delivery_nonce == external.delivery_nonce;
+    }
+
+    // Defensive legacy fallback. Normal merge inputs are upgraded first, but
+    // if a caller ever compares two raw legacy entries, use only the stable
+    // address/header identity. Payload and status fields change when a parcel
+    // is read, locked or claimed and therefore cannot identify a delivery.
+    local.id == external.id
+        && local.from == external.from
+        && local.to == external.to
+        && local.subject == external.subject
+        && local.body == external.body
+}
+
+fn normalize_stage5_mail_delivery_nonces(mail: &mut [Stage5MailMessage]) -> Result<bool, String> {
+    let mut changed = false;
+    for message in mail {
+        if message.delivery_nonce.is_empty() {
+            message.delivery_nonce = legacy_stage5_mail_delivery_nonce(message)?;
+            changed = true;
+        }
+    }
+    Ok(changed)
+}
+
+fn legacy_stage5_mail_delivery_nonce(mail: &Stage5MailMessage) -> Result<String, String> {
+    // Legacy rows have no true delivery identity. Use the client-visible ID
+    // plus immutable header fields so the identity remains stable after a
+    // different session claims the parcel and clears gold/items. Two legacy
+    // rows with the same ID and header are intentionally treated as one
+    // delivery: where history is ambiguous, preventing a duplicate claim is
+    // safer than preserving a possibly duplicated entry.
+    let identity = serde_json::to_vec(&(
+        mail.id,
+        &mail.from,
+        &mail.to,
+        &mail.subject,
+        &mail.body,
+    ))
+    .map_err(|error| format!("failed to encode legacy mail identity: {error}"))?;
+    let digest = Sha256::digest(identity);
+    let mut nonce = String::with_capacity(7 + digest.len() * 2);
+    nonce.push_str("legacy-");
+    for byte in digest {
+        use std::fmt::Write as _;
+        write!(&mut nonce, "{byte:02x}")
+            .map_err(|error| format!("failed to format legacy mail identity: {error}"))?;
+    }
+    Ok(nonce)
+}
+
+fn stage5_mail_payload_is_consumed(mail: &Stage5MailMessage) -> bool {
+    mail.gold == 0 && mail.items.is_empty() && mail.item_states_json.is_empty()
+}
+
+fn next_available_mail_id(used_ids: &BTreeSet<u32>) -> Option<u32> {
+    let after_max = used_ids
+        .iter()
+        .next_back()
+        .copied()
+        .unwrap_or(0)
+        .checked_add(1);
+    if let Some(candidate) = after_max.filter(|candidate| !used_ids.contains(candidate)) {
+        return Some(candidate);
+    }
+    (1..=u32::MAX).find(|candidate| !used_ids.contains(candidate))
+}
+
+pub(super) enum PersistCharacterSaveResult {
+    Full(u64),
+    StaleMailStatusOnly,
+}
+
+fn merge_stale_mail_status_into_persisted(
+    persisted_save: &mut CharacterSaveRecord,
+    stale_save: &CharacterSaveRecord,
+) -> Result<bool, String> {
+    let Some(stale_state) = stale_save.stage5_systems_json.as_deref() else {
+        return Ok(false);
+    };
+    let mut stale_systems = serde_json::from_str::<Stage5SystemsState>(stale_state)
+        .map_err(|error| format!("failed to decode stale mailbox status: {error}"))?;
+    let mut persisted_systems = persisted_save
+        .stage5_systems_json
+        .as_deref()
+        .map(serde_json::from_str::<Stage5SystemsState>)
+        .transpose()
+        .map_err(|error| format!("failed to decode persisted mailbox status: {error}"))?
+        .unwrap_or_default();
+    normalize_stage5_mail_delivery_nonces(&mut stale_systems.mail)?;
+    let mut changed = normalize_stage5_mail_delivery_nonces(&mut persisted_systems.mail)?;
+
+    for persisted in &mut persisted_systems.mail {
+        let Some(stale) = stale_systems
+            .mail
+            .iter()
+            .find(|stale| stage5_mail_same_delivery(stale, persisted))
+        else {
+            continue;
+        };
+        let opened = persisted.opened || stale.opened;
+        // Locking is a protection boundary, so a stale full-World snapshot
+        // may add a lock but must never remove a newer durable lock. A current
+        // session can still unlock through the normal revision-matched save.
+        let locked = persisted.locked || stale.locked;
+        let claimed = persisted.claimed || stale.claimed;
+        // Deletion is protected by the effective lock as well. Otherwise an
+        // old unlocked session could mark the message deleted after another
+        // session locked the durable copy.
+        let deleted = persisted.deleted || (!locked && stale.deleted);
+        if persisted.opened != opened
+            || persisted.locked != locked
+            || persisted.claimed != claimed
+            || persisted.deleted != deleted
+        {
+            persisted.opened = opened;
+            persisted.locked = locked;
+            persisted.claimed = claimed;
+            persisted.deleted = deleted;
+            changed = true;
+        }
+    }
+    if changed {
+        persisted_save.stage5_systems_json = Some(
+            serde_json::to_string(&persisted_systems)
+                .map_err(|error| format!("failed to encode persisted mailbox status: {error}"))?,
+        );
+    }
+    Ok(changed)
+}
+
+#[cfg(test)]
+mod stale_mail_status_merge_tests {
+    use super::*;
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn save_with_mail(locked: bool, deleted: bool) -> CharacterSaveRecord {
+        let mut save = CharacterSaveRecord::new(CharacterRecord {
+            index: 0,
+            name: "LockOwner".to_string(),
+            level: 1,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+        });
+        let mut systems = Stage5SystemsState::default();
+        systems.mail.push(Stage5MailMessage {
+            id: 7,
+            delivery_nonce: "00112233445566778899aabbccddeeff".to_string(),
+            from: "Sender".to_string(),
+            to: "LockOwner".to_string(),
+            subject: "Protected".to_string(),
+            body: "mail".to_string(),
+            gold: 0,
+            items: Vec::new(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked,
+            claimed: false,
+            deleted,
+        });
+        save.stage5_systems_json = Some(serde_json::to_string(&systems).unwrap());
+        save
+    }
+
+    #[test]
+    fn stale_snapshot_cannot_remove_newer_durable_mail_lock() {
+        let mut persisted = save_with_mail(true, false);
+        let stale = save_with_mail(false, false);
+
+        assert!(!merge_stale_mail_status_into_persisted(&mut persisted, &stale).unwrap());
+        let systems: Stage5SystemsState =
+            serde_json::from_str(persisted.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(systems.mail[0].locked);
+    }
+
+    #[test]
+    fn stale_snapshot_can_only_strengthen_mail_lock() {
+        let mut persisted = save_with_mail(false, false);
+        let stale = save_with_mail(true, false);
+
+        assert!(merge_stale_mail_status_into_persisted(&mut persisted, &stale).unwrap());
+        let systems: Stage5SystemsState =
+            serde_json::from_str(persisted.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(systems.mail[0].locked);
+    }
+
+    #[test]
+    fn stale_unlocked_snapshot_cannot_delete_newer_durable_locked_mail() {
+        let mut persisted = save_with_mail(true, false);
+        let stale = save_with_mail(false, true);
+
+        assert!(!merge_stale_mail_status_into_persisted(&mut persisted, &stale).unwrap());
+        let systems: Stage5SystemsState =
+            serde_json::from_str(persisted.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(systems.mail[0].locked);
+        assert!(!systems.mail[0].deleted);
+    }
+}
+
+pub(super) fn persist_character_save(
+    world: &World,
+    account_id: &str,
+    mut save: CharacterSaveRecord,
+) -> Result<PersistCharacterSaveResult, String> {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(AccountRecord::empty);
+    let account_id = account_id.to_string();
+    let expected_revision = save.revision;
+    let character_index = save.character.index;
+    let character_name = save.character.name.clone();
+    let touched_accounts = vec![account_id.clone()];
 
-    if let Some(character) = account
-        .characters
-        .iter_mut()
-        .find(|character| character.index == save.character.index)
-    {
-        *character = save.character.clone();
-    } else {
-        account.characters.push(save.character.clone());
-        account.characters.sort_by_key(|character| character.index);
-    }
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let account = store
+            .accounts
+            .get(&account_id)
+            .ok_or_else(|| "full character save requires an existing account".to_string())?;
+        let persisted_character = account
+            .characters
+            .iter()
+            .find(|character| character.index == character_index)
+            .ok_or_else(|| "full character save requires an existing character".to_string())?;
+        if persisted_character.name != character_name || save.character.name != character_name {
+            return Err("full character save identity mismatch".to_string());
+        }
+        let persisted_save = account
+            .saves
+            .get(&character_index)
+            .cloned()
+            .ok_or_else(|| "full character save requires an existing durable save".to_string())?;
+        if persisted_save.revision != expected_revision {
+            let durable_revision = persisted_save.revision;
+            let mut durable_save = persisted_save;
+            if !merge_stale_mail_status_into_persisted(&mut durable_save, &save)? {
+                return Err(format!(
+                    "stale full character save rejected: expected revision {expected_revision}, durable revision {durable_revision}"
+                ));
+            }
+            durable_save.revision = durable_revision
+                .checked_add(1)
+                .ok_or_else(|| "mail-status revision exhausted".to_string())?;
+            store
+                .accounts
+                .get_mut(&account_id)
+                .expect("validated stale-save account should exist")
+                .saves
+                .insert(character_index, durable_save);
+            return Ok(PersistCharacterSaveResult::StaleMailStatusOnly);
+        }
 
-    account.saves.insert(save.character.index, save);
-    drop(store);
-    if let Err(error) = config.save_account_store_account(account_id) {
-        eprintln!("failed to persist account store: {error}");
+        merge_persisted_mail_into_character_save(&mut save, &persisted_save)?;
+        let committed_revision = expected_revision
+            .checked_add(1)
+            .ok_or_else(|| "full character save revision exhausted".to_string())?;
+        save.revision = committed_revision;
+
+        let account = store
+            .accounts
+            .get_mut(&account_id)
+            .expect("validated full-save account should exist");
+        if let Some(character) = account
+            .characters
+            .iter_mut()
+            .find(|character| character.index == character_index)
+        {
+            *character = save.character.clone();
+        }
+        account.saves.insert(character_index, save);
+        Ok(PersistCharacterSaveResult::Full(committed_revision))
+    })
+}
+
+pub(super) fn merge_persisted_mail_into_character_save(
+    save: &mut CharacterSaveRecord,
+    persisted_save: &CharacterSaveRecord,
+) -> Result<bool, String> {
+    let Some(persisted_state) = persisted_save.stage5_systems_json.as_deref() else {
+        return Ok(false);
+    };
+    let persisted_systems = serde_json::from_str::<Stage5SystemsState>(persisted_state)
+        .map_err(|error| format!("failed to decode persisted stage5 mail: {error}"))?;
+    if persisted_systems.mail.is_empty() {
+        return Ok(false);
     }
+    let mut systems = match save.stage5_systems_json.as_deref() {
+        Some(state) => serde_json::from_str::<Stage5SystemsState>(state)
+            .map_err(|error| format!("failed to decode active stage5 mail: {error}"))?,
+        None => Stage5SystemsState::default(),
+    };
+    if !merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)? {
+        return Ok(false);
+    }
+    save.stage5_systems_json = Some(
+        serde_json::to_string(&systems)
+            .map_err(|error| format!("failed to encode merged stage5 mail: {error}"))?,
+    );
+    Ok(true)
 }
 
 pub(super) fn account_characters(
@@ -1049,7 +1491,11 @@ where
 }
 
 pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord) {
-    world.resource_mut::<SessionResource>().selected_character = Some(save.character.clone());
+    {
+        let mut session = world.resource_mut::<SessionResource>();
+        session.selected_character = Some(save.character.clone());
+        session.bind_active_save_revision(save.revision);
+    }
     world
         .resource_mut::<PlayerPermissionResource>()
         .unlock_curse = false;
@@ -1167,13 +1613,18 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     normalize_inventory_known_item_metadata(&mut resources);
     normalize_inventory_unique_ids(&mut resources);
     drop(resources);
+    refresh_mount_resource_from_equipment(world);
     world.resource_mut::<HeroInventoryResource>().items =
         decode_state_vec(&save.hero_inventory_items_json).unwrap_or_default();
-    world.resource_mut::<Stage5SystemsResource>().stage5_systems = save
+    let mut stage5_systems = save
         .stage5_systems_json
         .as_deref()
         .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
         .unwrap_or_default();
+    if let Err(error) = normalize_stage5_mail_delivery_nonces(&mut stage5_systems.mail) {
+        eprintln!("failed to normalize legacy mail identities: {error}");
+    }
+    world.resource_mut::<Stage5SystemsResource>().stage5_systems = stage5_systems;
     {
         let mut npc_state = world.resource_mut::<NpcStateResource>();
         npc_state.npc_flags = if save.npc_flag_states_json.is_empty() {
@@ -1284,6 +1735,7 @@ impl SimulationSession {
                     .is_some_and(|character| character.index == character_index)
                 {
                     session.selected_character = None;
+                    session.clear_active_save_revision();
                     drop(session);
                     self.app
                         .world_mut()
@@ -1308,7 +1760,13 @@ impl SimulationSession {
 
 impl SimulationSession {
     pub(super) fn start_game(&mut self, character_index: i32) -> Vec<ServerPacket> {
-        persist_active_character_save(self.app.world());
+        if let Err(error) = persist_active_character_save(self.app.world()) {
+            eprintln!("character switch save rejected; retaining active session: {error}");
+            return vec![ServerPacket::StartGame {
+                result: 2,
+                resolution: 0,
+            }];
+        }
         let save = {
             let config = self
                 .app

@@ -1,4 +1,4 @@
-use mir2_protocol::{ClientPacket, MirDirection};
+use mir2_protocol::{ClientPacket, MirDirection, ServerPacket};
 use mir2_simulation::{
     CharacterSaveRecord, ItemContainer, SimulationConfig, SimulationSession, Stage5MailMessage,
     Stage5SystemsState,
@@ -80,15 +80,22 @@ fn config_with_mail_parcel(filled_slots: u8) -> SimulationConfig {
     let mut systems = Stage5SystemsState::default();
     systems.mail.push(Stage5MailMessage {
         id: 1,
+        delivery_nonce: "social-economy-fixture-mail-1".to_string(),
         from: "Bichon Administrator".to_string(),
         to: "Scout".to_string(),
         subject: "Collected parcel".to_string(),
         body: "Two exact items.".to_string(),
         gold: 77,
-        items: vec!["parcel-a".to_string(), "parcel-b".to_string()],
+        items: vec!["dagger".to_string(), "wooden-sword".to_string()],
         item_states_json: vec![
-            item_state_json("parcel-a", "Parcel A", ItemContainer::Bag1, 0, 77_001),
-            item_state_json("parcel-b", "Parcel B", ItemContainer::Bag1, 1, 77_002),
+            item_state_json("dagger", "Dagger", ItemContainer::Bag1, 0, 77_001),
+            item_state_json(
+                "wooden-sword",
+                "Wooden Sword",
+                ItemContainer::Bag1,
+                1,
+                77_002,
+            ),
         ],
         opened: true,
         locked: false,
@@ -115,6 +122,10 @@ fn social_friend_and_blacklist_keep_crystal_single_entry_semantics() {
     let config = SimulationConfig::default();
     let player_name = config.default_character.name.clone();
     let mut session = SimulationSession::new(config.clone());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     session.stage5_command("social.friend", vec!["Jina".to_string()]);
@@ -134,6 +145,10 @@ fn social_friend_and_blacklist_keep_crystal_single_entry_semantics() {
 
     session.save_active_character();
     let mut reloaded = SimulationSession::new(config);
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let social = reloaded.world_snapshot().stage5_systems.social;
     assert!(social.friends.is_empty());
@@ -143,20 +158,29 @@ fn social_friend_and_blacklist_keep_crystal_single_entry_semantics() {
 #[test]
 fn mail_claim_exact_parcel_rolls_back_when_all_attachments_do_not_fit() {
     let mut session = SimulationSession::new(config_with_mail_parcel(79));
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let before = session.world_snapshot();
     assert_eq!(before.free_bag_slots, 1);
 
-    session.stage5_command("mail.claim", vec!["1".to_string()]);
+    assert_eq!(
+        session.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        vec![ServerPacket::ParcelCollected { result: -1 }]
+    );
     let after = session.world_snapshot();
 
     assert_eq!(after.gold, 10);
     assert_eq!(after.inventory_items.len(), before.inventory_items.len());
-    assert!(!after
-        .inventory_items
-        .iter()
-        .any(|item| item.key == "parcel-a" || item.key == "parcel-b"));
+    assert!(
+        !after
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "dagger" || item.key == "wooden-sword")
+    );
     let mail = after
         .stage5_systems
         .mail
@@ -167,7 +191,7 @@ fn mail_claim_exact_parcel_rolls_back_when_all_attachments_do_not_fit() {
     assert_eq!(mail.gold, 77);
     assert_eq!(
         mail.items,
-        vec!["parcel-a".to_string(), "parcel-b".to_string()]
+        vec!["dagger".to_string(), "wooden-sword".to_string()]
     );
     assert_eq!(mail.item_states_json.len(), 2);
 }
@@ -176,20 +200,34 @@ fn mail_claim_exact_parcel_rolls_back_when_all_attachments_do_not_fit() {
 fn mail_claim_exact_parcel_consumes_payload_and_persists_collected_state() {
     let config = config_with_mail_parcel(78);
     let mut session = SimulationSession::new(config.clone());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    session.stage5_command("mail.claim", vec!["1".to_string()]);
+    assert!(
+        session
+            .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 }))
+    );
     let after = session.world_snapshot();
 
     assert_eq!(after.gold, 87);
-    assert!(after
+    let claimed_items = after
         .inventory_items
         .iter()
-        .any(|item| item.key == "parcel-a"));
-    assert!(after
-        .inventory_items
-        .iter()
-        .any(|item| item.key == "parcel-b"));
+        .filter(|item| item.key == "dagger" || item.key == "wooden-sword")
+        .collect::<Vec<_>>();
+    assert_eq!(claimed_items.len(), 2);
+    assert!(claimed_items.iter().any(|item| item.key == "dagger"));
+    assert!(claimed_items.iter().any(|item| item.key == "wooden-sword"));
+    assert!(
+        claimed_items
+            .iter()
+            .all(|item| item.unique_id != 77_001 && item.unique_id != 77_002)
+    );
     let mail = after
         .stage5_systems
         .mail
@@ -201,8 +239,11 @@ fn mail_claim_exact_parcel_consumes_payload_and_persists_collected_state() {
     assert!(mail.items.is_empty());
     assert!(mail.item_states_json.is_empty());
 
-    session.save_active_character();
     let mut reloaded = SimulationSession::new(config);
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let reloaded_mail = reloaded
         .world_snapshot()

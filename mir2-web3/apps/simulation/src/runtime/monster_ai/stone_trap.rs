@@ -4,7 +4,7 @@
 use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_protocol::Point;
 
-use super::super::components::{entity_object_id, Monster, MonsterAgent, Position};
+use super::super::components::{Monster, MonsterAgent, Position, entity_object_id};
 use super::super::movement::*;
 
 pub(in crate::runtime) fn update_stone_trap_state(
