@@ -5,12 +5,15 @@
 //! world/map packet data plus explicit presentation-motion offsets and emits
 //! the JSON contract accepted by `push_native_lighting_render_state`.
 
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
+use std::sync::{Mutex, OnceLock};
 
 use serde_json::{json, Value};
 
 use super::{native_map_light_cells, MapViewport, ParsedMap};
+use crate::effects::{native_effect_light_snapshots, NativeEffectLightSnapshot};
 
 pub const STAGE_WIDTH: f32 = 1024.0;
 pub const STAGE_HEIGHT: f32 = 768.0;
@@ -72,6 +75,130 @@ pub struct NativeLightingBridge {
     time_of_day_light_setting: Option<i32>,
     map_light_setting: Option<i32>,
     map_dark_light: i32,
+}
+
+#[derive(Debug, Clone)]
+struct EntityLightCandidate {
+    priority: u8,
+    key: String,
+    draw_x: f32,
+    draw_y: f32,
+    kind: String,
+    light: i32,
+    dead: bool,
+    is_self: bool,
+}
+
+fn entity_candidate_cmp(left: &EntityLightCandidate, right: &EntityLightCandidate) -> Ordering {
+    left.priority
+        .cmp(&right.priority)
+        .then_with(|| left.key.cmp(&right.key))
+        .then_with(|| left.draw_x.total_cmp(&right.draw_x))
+        .then_with(|| left.draw_y.total_cmp(&right.draw_y))
+        .then_with(|| left.kind.cmp(&right.kind))
+        .then_with(|| left.light.cmp(&right.light))
+        .then_with(|| left.dead.cmp(&right.dead))
+        .then_with(|| left.is_self.cmp(&right.is_self))
+}
+
+fn retain_best_entity_candidate(
+    candidates: &mut Vec<EntityLightCandidate>,
+    candidate: EntityLightCandidate,
+) {
+    if candidates.len() < MAX_NATIVE_LIGHTS {
+        candidates.push(candidate);
+        return;
+    }
+    let Some((worst_index, worst)) = candidates
+        .iter()
+        .enumerate()
+        .max_by(|left, right| entity_candidate_cmp(left.1, right.1))
+    else {
+        return;
+    };
+    if entity_candidate_cmp(&candidate, worst) == Ordering::Less {
+        candidates[worst_index] = candidate;
+    }
+}
+
+#[derive(Debug, Clone)]
+struct EffectLightingContext {
+    generation: Option<u64>,
+    bridge: NativeLightingBridge,
+    payload: Value,
+    map: Option<ParsedMap>,
+    map_frame_offsets: HashMap<(i32, i32), (i32, i32)>,
+    motion: NativeLightingMotion,
+    assets: NativeLightAssets,
+}
+
+static EFFECT_LIGHTING_CONTEXT: OnceLock<Mutex<Option<EffectLightingContext>>> = OnceLock::new();
+
+fn effect_lighting_context() -> &'static Mutex<Option<EffectLightingContext>> {
+    EFFECT_LIGHTING_CONTEXT.get_or_init(|| Mutex::new(None))
+}
+
+fn remember_effect_lighting_context(
+    bridge: &NativeLightingBridge,
+    payload: &Value,
+    map: Option<&ParsedMap>,
+    map_frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
+    motion: &NativeLightingMotion,
+    assets: &NativeLightAssets,
+) {
+    let context = EffectLightingContext {
+        generation: bridge.generation,
+        bridge: bridge.clone(),
+        payload: payload.clone(),
+        map: map.cloned(),
+        map_frame_offsets: map_frame_offsets.clone(),
+        motion: motion.clone(),
+        assets: assets.clone(),
+    };
+    let mut current = effect_lighting_context()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    *current = Some(context);
+}
+
+/// Rebuild and enqueue the current lighting state from the latest gateway
+/// context plus the per-frame effect snapshot. The generation check prevents a
+/// reconnect from combining the old lighting context with a new effect list.
+pub(crate) fn publish_effect_lighting_frame(
+    generation: u64,
+    effect_lights: Vec<NativeEffectLightSnapshot>,
+) {
+    let Some(state) = render_effect_lighting_frame(generation, &effect_lights) else {
+        return;
+    };
+    let Ok(json) = serde_json::to_string(&state) else {
+        return;
+    };
+    let _ = mir2_bevy_runtime::native_ingest::push_native_lighting_render_state(json);
+}
+
+fn render_effect_lighting_frame(
+    generation: u64,
+    effect_lights: &[NativeEffectLightSnapshot],
+) -> Option<Value> {
+    let context = effect_lighting_context()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clone();
+    let Some(context) = context else {
+        return None;
+    };
+    if context.generation != Some(generation) {
+        return None;
+    }
+    Some(context.bridge.build_render_state_with_effects(
+        &context.payload,
+        context.map.as_ref(),
+        &context.map_frame_offsets,
+        &context.motion,
+        &context.assets,
+        &effect_lights,
+    ))
 }
 
 impl NativeLightingBridge {
@@ -172,6 +299,32 @@ impl NativeLightingBridge {
         motion: &NativeLightingMotion,
         assets: &NativeLightAssets,
     ) -> Value {
+        let effect_lights = if self.generation.is_some() {
+            native_effect_light_snapshots()
+        } else {
+            Vec::new()
+        };
+        let state = self.build_render_state_with_effects(
+            payload,
+            map,
+            map_frame_offsets,
+            motion,
+            assets,
+            &effect_lights,
+        );
+        remember_effect_lighting_context(self, payload, map, map_frame_offsets, motion, assets);
+        state
+    }
+
+    fn build_render_state_with_effects(
+        &self,
+        payload: &Value,
+        map: Option<&ParsedMap>,
+        map_frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
+        motion: &NativeLightingMotion,
+        assets: &NativeLightAssets,
+        effect_lights: &[NativeEffectLightSnapshot],
+    ) -> Value {
         let viewport = MapViewport::from_gateway_payload(payload);
         let payload_map = payload.get("mapFileName").and_then(Value::as_str);
         let map_matches = payload_map.is_some_and(|payload| {
@@ -189,13 +342,14 @@ impl NativeLightingBridge {
             return disabled_state();
         }
 
-        let mut entity_lights = Vec::new();
+        // Entity lights are authoritative and always outrank transient effect
+        // lights. Keep only the best 200 candidates while scanning, so a large
+        // gateway snapshot cannot create an unbounded clone/sort buffer.
+        let mut entity_candidates: Vec<EntityLightCandidate> =
+            Vec::with_capacity(MAX_NATIVE_LIGHTS);
         let player_object_id = payload.get("playerObjectId").and_then(object_id_string);
         if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
             for entity in entities {
-                if entity_lights.len() == MAX_NATIVE_LIGHTS {
-                    break;
-                }
                 let Some(key) = entity.get("objectId").and_then(object_id_string) else {
                     continue;
                 };
@@ -247,16 +401,86 @@ impl NativeLightingBridge {
                 if !draw_x.is_finite() || !draw_y.is_finite() {
                     continue;
                 }
-                entity_lights.push(json!({
-                    "key": key,
-                    "drawX": draw_x,
-                    "drawY": draw_y,
-                    "kind": kind,
-                    "light": raw_light,
-                    "dead": entity.get("dead").and_then(Value::as_bool).unwrap_or(false),
-                    "isSelf": is_self,
-                }));
+                let priority = if is_self {
+                    0
+                } else if kind.eq_ignore_ascii_case("npc") || kind.eq_ignore_ascii_case("merchant")
+                {
+                    1
+                } else {
+                    2
+                };
+                retain_best_entity_candidate(
+                    &mut entity_candidates,
+                    EntityLightCandidate {
+                        priority,
+                        key,
+                        draw_x,
+                        draw_y,
+                        kind: kind.to_owned(),
+                        light: raw_light,
+                        dead: entity.get("dead").and_then(Value::as_bool).unwrap_or(false),
+                        is_self,
+                    },
+                );
             }
+        }
+
+        entity_candidates.sort_by(entity_candidate_cmp);
+        let mut entity_lights = entity_candidates
+            .into_iter()
+            .map(|candidate| {
+                json!({
+                    "key": candidate.key,
+                    "drawX": candidate.draw_x,
+                    "drawY": candidate.draw_y,
+                    "kind": candidate.kind,
+                    "light": candidate.light,
+                    "dead": candidate.dead,
+                    "isSelf": candidate.is_self,
+                })
+            })
+            .collect::<Vec<_>>();
+
+        // Effect snapshots are published by NativeEffects after every event
+        // and animation tick. They are tile anchored or fractional projectile
+        // positions, so they share the exact viewport/camera transform as map
+        // and entity lights. Their stable key and explicit sort make the
+        // result deterministic even when snapshots arrive in another order.
+        let mut effect_candidates = effect_lights
+            .iter()
+            .cloned()
+            .into_iter()
+            .filter(|effect| {
+                effect.light > 0
+                    && effect.key.len() <= 128
+                    && !effect.key.chars().any(char::is_control)
+                    && effect.tile_x.is_finite()
+                    && effect.tile_y.is_finite()
+                    && self
+                        .generation
+                        .map_or(true, |generation| effect.generation == generation)
+                    && assets.contains(entity_light_range(effect.light))
+            })
+            .collect::<Vec<_>>();
+        effect_candidates.sort_by(|left, right| left.key.cmp(&right.key));
+        let effect_capacity = MAX_NATIVE_LIGHTS.saturating_sub(entity_lights.len());
+        for effect in effect_candidates.into_iter().take(effect_capacity) {
+            let dx = effect.tile_x - viewport.center_x as f32;
+            let dy = effect.tile_y - viewport.center_y as f32;
+            let draw_x = ENTITY_ORIGIN_X + dx * CELL_WIDTH + motion.camera_offset_x;
+            let draw_y = ENTITY_ORIGIN_Y + dy * CELL_HEIGHT + motion.camera_offset_y;
+            if !draw_x.is_finite() || !draw_y.is_finite() {
+                continue;
+            }
+            entity_lights.push(json!({
+                "key": format!("effect:{}", effect.key),
+                "drawX": draw_x,
+                "drawY": draw_y,
+                "kind": "effect",
+                "light": effect.light,
+                "dead": false,
+                "isSelf": false,
+            }));
         }
 
         let remaining = MAX_NATIVE_LIGHTS.saturating_sub(entity_lights.len());
@@ -550,6 +774,71 @@ mod tests {
     }
 
     #[test]
+    fn entity_candidates_are_bounded_and_order_independent() {
+        let mut payload = world();
+        let mut entities: Vec<Value> = (0..500)
+            .map(|index| {
+                json!({
+                    "objectId": index + 1,
+                    "kind": "monster",
+                    "x": 10,
+                    "y": 20,
+                    "light": 1,
+                })
+            })
+            .collect();
+        entities.push(json!({
+            "objectId": 800_000,
+            "kind": "npc",
+            "x": 10,
+            "y": 20,
+        }));
+        entities.push(json!({
+            "objectId": 900_000,
+            "kind": "selfPlayer",
+            "x": 10,
+            "y": 20,
+        }));
+        payload["playerObjectId"] = json!(900_000);
+
+        let mut first = payload.clone();
+        first["entities"] = Value::Array(entities.clone());
+        let mut reversed = payload;
+        entities.reverse();
+        reversed["entities"] = Value::Array(entities);
+
+        let mut bridge = NativeLightingBridge::default();
+        bridge.observe_world_snapshot(&first);
+        let state_first = bridge.build_render_state(
+            &first,
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+        );
+        let state_reversed = bridge.build_render_state(
+            &reversed,
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+        );
+        let keys = |state: &Value| {
+            state["entityLights"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|light| light["key"].as_str().unwrap().to_owned())
+                .collect::<Vec<_>>()
+        };
+        let first_keys = keys(&state_first);
+        assert_eq!(first_keys.len(), MAX_NATIVE_LIGHTS);
+        assert!(first_keys.iter().any(|key| key == "800000"));
+        assert!(first_keys.iter().any(|key| key == "900000"));
+        assert_eq!(first_keys, keys(&state_reversed));
+    }
+
+    #[test]
     fn dead_object_flood_cannot_suppress_the_self_light() {
         let mut payload = world();
         let mut entities: Vec<Value> = (0..250)
@@ -584,5 +873,180 @@ mod tests {
         assert_eq!(state["entityLights"].as_array().unwrap().len(), 1);
         assert_eq!(state["entityLights"][0]["key"], "1000");
         assert_eq!(state["entityLights"][0]["light"], 3);
+    }
+
+    #[test]
+    fn effect_lights_merge_after_entities_and_follow_fractional_tile() {
+        let mut bridge = NativeLightingBridge::default();
+        bridge.observe_world_snapshot(&world());
+        let effects = vec![NativeEffectLightSnapshot {
+            generation: 0,
+            key: "fx-proj-1".to_owned(),
+            tile_x: 12.5,
+            tile_y: 20.0,
+            light: 6,
+        }];
+        let state = bridge.build_render_state_with_effects(
+            &world(),
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+            &effects,
+        );
+        let lights = state["entityLights"].as_array().unwrap();
+        assert_eq!(lights.len(), 3);
+        assert_eq!(lights[2]["key"], "effect:fx-proj-1");
+        assert_eq!(lights[2]["drawX"], 600.0);
+        assert_eq!(lights[2]["drawY"], 352.0);
+    }
+
+    #[test]
+    fn effect_lighting_frame_is_generation_bound_and_rebuilt_per_frame() {
+        let mut bridge = NativeLightingBridge::default();
+        bridge.set_generation(44);
+        bridge.observe_world_snapshot(&world());
+        let _ = bridge.build_render_state(
+            &world(),
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+        );
+
+        let frame = |tile_x: f32| NativeEffectLightSnapshot {
+            generation: 44,
+            key: "fx-proj-frame".to_owned(),
+            tile_x,
+            tile_y: 20.0,
+            light: 6,
+        };
+        let first = render_effect_lighting_frame(44, &[frame(10.5)]).expect("first frame");
+        let second = render_effect_lighting_frame(44, &[frame(11.5)]).expect("second frame");
+        let first_light = first["entityLights"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|light| light["key"] == "effect:fx-proj-frame")
+            .unwrap();
+        let second_light = second["entityLights"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|light| light["key"] == "effect:fx-proj-frame")
+            .unwrap();
+        assert_eq!(first_light["drawX"], 504.0);
+        assert_eq!(second_light["drawX"], 552.0);
+        assert!(render_effect_lighting_frame(43, &[frame(12.0)]).is_none());
+    }
+
+    #[test]
+    fn effect_lights_respect_assets_cap_and_entity_priority() {
+        let mut payload = world();
+        payload["entities"] = Value::Array(
+            (0..199)
+                .map(|index| {
+                    json!({
+                        "objectId": index + 1,
+                        "kind": "monster",
+                        "x": 10,
+                        "y": 20,
+                        "light": 1,
+                    })
+                })
+                .collect(),
+        );
+        let mut bridge = NativeLightingBridge::default();
+        bridge.observe_world_snapshot(&payload);
+        let effects = vec![
+            NativeEffectLightSnapshot {
+                generation: 0,
+                key: "fx-a".to_owned(),
+                tile_x: 10.0,
+                tile_y: 20.0,
+                light: 6,
+            },
+            NativeEffectLightSnapshot {
+                generation: 0,
+                key: "fx-invalid-range".to_owned(),
+                tile_x: 10.0,
+                tile_y: 20.0,
+                light: 6,
+            },
+        ];
+        let state = bridge.build_render_state_with_effects(
+            &payload,
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+            &effects,
+        );
+        let lights = state["entityLights"].as_array().unwrap();
+        assert_eq!(lights.len(), MAX_NATIVE_LIGHTS);
+        assert_eq!(lights[0]["key"], "1");
+        assert_eq!(lights.last().unwrap()["key"], "effect:fx-a");
+        assert!(lights
+            .iter()
+            .all(|value| value["key"] != "effect:fx-invalid-range"));
+
+        let missing = NativeLightAssets {
+            ranges: [
+                true, false, false, false, false, false, false, false, false, false,
+            ],
+        };
+        let state = bridge.build_render_state_with_effects(
+            &world(),
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &missing,
+            &[NativeEffectLightSnapshot {
+                generation: 0,
+                key: "fx-no-range".to_owned(),
+                tile_x: 10.0,
+                tile_y: 20.0,
+                light: 6,
+            }],
+        );
+        assert!(state["entityLights"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|value| value["kind"] != "effect"));
+    }
+
+    #[test]
+    fn zero_or_negative_effect_light_is_ignored() {
+        let mut bridge = NativeLightingBridge::default();
+        bridge.observe_world_snapshot(&world());
+        let state = bridge.build_render_state_with_effects(
+            &world(),
+            None,
+            &HashMap::new(),
+            &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(),
+            &[
+                NativeEffectLightSnapshot {
+                    generation: 0,
+                    key: "fx-zero".to_owned(),
+                    tile_x: 10.0,
+                    tile_y: 20.0,
+                    light: 0,
+                },
+                NativeEffectLightSnapshot {
+                    generation: 0,
+                    key: "fx-negative".to_owned(),
+                    tile_x: 10.0,
+                    tile_y: 20.0,
+                    light: -1,
+                },
+            ],
+        );
+        assert!(state["entityLights"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|value| value["kind"] != "effect"));
     }
 }

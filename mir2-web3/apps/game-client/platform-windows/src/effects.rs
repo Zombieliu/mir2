@@ -10,7 +10,7 @@
 
 use std::collections::HashMap;
 use std::fs;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 
 use bevy::prelude::Resource;
 use serde::Deserialize;
@@ -147,6 +147,8 @@ struct SubSpec {
     #[serde(default)]
     blend: Option<bool>,
     #[serde(default)]
+    light: Option<i32>,
+    #[serde(default)]
     repeat: Option<bool>,
     #[serde(default)]
     offset: Option<EffectOffset>,
@@ -254,6 +256,8 @@ pub(crate) struct Animation {
     pub offset_x: f32,
     pub offset_y: f32,
     pub duration_ms: u64,
+    /// Crystal manifest light intensity for this animation phase.
+    pub light: Option<i32>,
 }
 
 impl Animation {
@@ -403,6 +407,7 @@ impl EffectCatalog {
             offset_x: offset.x,
             offset_y: offset.y,
             duration_ms: interval * frame_count,
+            light: sub.light,
         })
     }
 
@@ -449,6 +454,7 @@ impl EffectCatalog {
             offset_x: offset.x,
             offset_y: offset.y,
             duration_ms: interval * frame_count,
+            light: entry.light,
         })
     }
 
@@ -716,6 +722,44 @@ struct EffectProvenance {
     spell: String,
 }
 
+/// Renderer-neutral light emitted by one currently-active effect phase.
+///
+/// The lighting producer runs on the gateway task while effect animation runs
+/// on Bevy's main thread. A small process-local snapshot keeps that boundary
+/// explicit without adding a second transport contract. Fractional tiles are
+/// intentional: projectile lights follow the same interpolated tile as the
+/// visible projectile, while impact/cast lights remain tile anchored.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct NativeEffectLightSnapshot {
+    pub generation: u64,
+    pub key: String,
+    pub tile_x: f32,
+    pub tile_y: f32,
+    pub light: i32,
+}
+
+static ACTIVE_EFFECT_LIGHTS: OnceLock<Mutex<Vec<NativeEffectLightSnapshot>>> = OnceLock::new();
+
+fn active_effect_lights() -> &'static Mutex<Vec<NativeEffectLightSnapshot>> {
+    ACTIVE_EFFECT_LIGHTS.get_or_init(|| Mutex::new(Vec::new()))
+}
+
+fn publish_effect_lights(snapshots: Vec<NativeEffectLightSnapshot>) {
+    let mut current = active_effect_lights()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    *current = snapshots;
+}
+
+/// Read the latest still-active effect light snapshot for the native lighting
+/// producer. A clone keeps the lock out of the render-state construction path.
+pub(crate) fn native_effect_light_snapshots() -> Vec<NativeEffectLightSnapshot> {
+    active_effect_lights()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clone()
+}
+
 /// Bevy resource holding the authoritative effect event buffer and the active
 /// effect set. The catalog is a lazily-loaded shared singleton.
 #[derive(Resource)]
@@ -746,6 +790,44 @@ impl Default for NativeEffects {
 }
 
 impl NativeEffects {
+    fn current_light_snapshots(&self, now_ms: u64) -> Vec<NativeEffectLightSnapshot> {
+        let mut snapshots = self
+            .active
+            .iter()
+            .filter_map(|instance| {
+                if !instance_still_active(instance, now_ms) {
+                    return None;
+                }
+                let (animation, started_at) = advance_instance(instance, now_ms)?;
+                let light = animation.light.filter(|value| *value > 0)?;
+                let (tile_x, tile_y) =
+                    instance_current_tile(instance, animation, started_at, now_ms);
+                if !tile_x.is_finite() || !tile_y.is_finite() {
+                    return None;
+                }
+                Some(NativeEffectLightSnapshot {
+                    generation: self.last_generation,
+                    key: instance.key.clone(),
+                    tile_x,
+                    tile_y,
+                    light,
+                })
+            })
+            .collect::<Vec<_>>();
+        snapshots.sort_by(|left, right| left.key.cmp(&right.key));
+        snapshots
+    }
+
+    fn publish_current_light_snapshots(&self, now_ms: u64, visible: bool) {
+        let snapshots = if visible {
+            self.current_light_snapshots(now_ms)
+        } else {
+            Vec::new()
+        };
+        publish_effect_lights(snapshots.clone());
+        crate::map_parser::lighting::publish_effect_lighting_frame(self.last_generation, snapshots);
+    }
+
     /// Forward authoritative effect events + player/anchor data. Events are
     /// deduplicated by their monotonic sequence, so re-delivered snapshots
     /// never replay an already-seen event.
@@ -814,12 +896,18 @@ impl NativeEffects {
         while self.active.len() > MAX_ACTIVE_EFFECTS {
             self.active.remove(0);
         }
+        self.publish_current_light_snapshots(self.now_ms, true);
     }
 
     pub(crate) fn reset_for_new_connection(&mut self) {
         self.last_generation = self.last_generation.wrapping_add(1);
         self.last_effect_sequence = 0;
         self.active.clear();
+        publish_effect_lights(Vec::new());
+        crate::map_parser::lighting::publish_effect_lighting_frame(
+            self.last_generation,
+            Vec::new(),
+        );
     }
 
     pub(crate) fn reset_session(&mut self) {
@@ -1280,6 +1368,8 @@ impl NativeEffects {
         self.active
             .retain(|instance| instance_still_active(instance, now_ms));
 
+        self.publish_current_light_snapshots(now_ms, visible);
+
         let state = json!({
             "enabled": visible,
             "stageWidth": STAGE_WIDTH,
@@ -1527,6 +1617,7 @@ mod tests {
             offset_x: 0.0,
             offset_y: 0.0,
             duration_ms: interval * count,
+            light: None,
         }
     }
 
@@ -1547,6 +1638,7 @@ mod tests {
         assert_eq!(cast.frames.len(), 10);
         assert_eq!(cast.interval, 60);
         assert_eq!(cast.duration_ms, 600);
+        assert_eq!(cast.light, Some(6));
     }
 
     #[test]
@@ -1583,6 +1675,7 @@ mod tests {
         assert_eq!(projectile.kind, "projectile");
         assert_eq!(projectile.frames.len(), 6);
         assert_eq!(projectile.interval, 30);
+        assert_eq!(projectile.light, Some(6));
         let impact = catalog
             .spell_impact_animation("FireBall")
             .expect("impact via resolve_sub");
@@ -1593,6 +1686,146 @@ mod tests {
         );
         assert_eq!(impact.frames.len(), 10);
         assert_eq!(impact.interval, 60);
+        assert_eq!(impact.light, Some(6));
+    }
+
+    #[test]
+    fn fireball_effect_light_tracks_cast_projectile_and_impact() {
+        let mut fx = NativeEffects::default();
+        let zone = HashMap::from([(100_u32, (10, 10)), (200_u32, (14, 10))]);
+        fx.observe(
+            0,
+            10,
+            10,
+            &[NativeEffectEvent {
+                sequence: 1,
+                generation: 0,
+                packet: "ObjectMagic".to_owned(),
+                payload: json!({
+                    "location": {"x": 10, "y": 10},
+                    "spell": "FireBall",
+                    "direction": "down"
+                }),
+            }],
+            &zone,
+        );
+        let cast = fx.current_light_snapshots(0);
+        assert_eq!(cast.len(), 1);
+        assert_eq!(cast[0].generation, 0);
+        assert_eq!(cast[0].light, 6);
+        assert_eq!((cast[0].tile_x, cast[0].tile_y), (10.0, 10.0));
+
+        fx.observe(
+            0,
+            10,
+            10,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 0,
+                packet: "ObjectProjectile".to_owned(),
+                payload: json!({
+                    "spell": "FireBall",
+                    "sourceId": 100,
+                    "destinationId": 200
+                }),
+            }],
+            &zone,
+        );
+        let moving = fx
+            .current_light_snapshots(90)
+            .into_iter()
+            .find(|snapshot| snapshot.key.starts_with("fx-proj-"))
+            .expect("projectile light");
+        assert!(moving.tile_x > 10.0 && moving.tile_x < 14.0);
+        let later = fx
+            .current_light_snapshots(120)
+            .into_iter()
+            .find(|snapshot| snapshot.key.starts_with("fx-proj-"))
+            .expect("later projectile light");
+        assert!(later.tile_x > moving.tile_x);
+
+        let impact = fx
+            .current_light_snapshots(180)
+            .into_iter()
+            .find(|snapshot| snapshot.key.starts_with("fx-proj-"))
+            .expect("impact light");
+        assert_eq!((impact.tile_x, impact.tile_y), (14.0, 10.0));
+    }
+
+    #[test]
+    fn effect_light_snapshot_expires_and_clears_on_scene_reset() {
+        let mut fx = NativeEffects::default();
+        let mut animation = fake_anim("cast", 50, 2, false);
+        animation.light = Some(6);
+        fx.active.push(EffectInstance {
+            key: "expiring-light".to_owned(),
+            kind: EffectKindTag::Cast,
+            tile_x: 2,
+            tile_y: 3,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: 0,
+            start_at: 0,
+            persistent_object_id: None,
+            provenance: EffectProvenance::default(),
+        });
+        assert_eq!(fx.current_light_snapshots(49).len(), 1);
+        fx.publish_current_light_snapshots(0, true);
+        assert!(native_effect_light_snapshots()
+            .iter()
+            .any(|snapshot| snapshot.key == "expiring-light"));
+        assert!(fx.current_light_snapshots(100).is_empty());
+        let _ = fx.tick(100);
+        assert!(native_effect_light_snapshots().is_empty());
+        fx.reset_for_new_connection();
+        assert!(fx.current_light_snapshots(100).is_empty());
+        assert!(native_effect_light_snapshots().is_empty());
+    }
+
+    #[test]
+    fn effect_light_snapshot_publishes_across_threads_and_keeps_generation() {
+        let snapshot = NativeEffectLightSnapshot {
+            generation: 700_001,
+            key: "cross-thread-light".to_owned(),
+            tile_x: 12.5,
+            tile_y: 20.0,
+            light: 6,
+        };
+        let writer = std::thread::spawn(move || publish_effect_lights(vec![snapshot]));
+        writer.join().expect("effect light publisher thread");
+        let current = native_effect_light_snapshots();
+        let published = current
+            .iter()
+            .find(|snapshot| snapshot.key == "cross-thread-light")
+            .expect("cross-thread effect light snapshot");
+        assert_eq!(published.generation, 700_001);
+        assert_eq!((published.tile_x, published.tile_y), (12.5, 20.0));
+        publish_effect_lights(Vec::new());
+    }
+
+    #[test]
+    fn effect_without_manifest_light_emits_no_light_snapshot() {
+        let mut fx = NativeEffects::default();
+        let animation = fake_anim("cast", 50, 2, false);
+        fx.active.push(EffectInstance {
+            key: "no-light".to_owned(),
+            kind: EffectKindTag::Cast,
+            tile_x: 2,
+            tile_y: 3,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: 0,
+            start_at: 0,
+            persistent_object_id: None,
+            provenance: EffectProvenance::default(),
+        });
+        assert!(fx.current_light_snapshots(0).is_empty());
     }
 
     #[test]
