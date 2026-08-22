@@ -141,6 +141,11 @@ pub enum InventoryOperationAck {
         count: u16,
         success: bool,
     },
+    Sell {
+        unique_id: u64,
+        count: u16,
+        success: bool,
+    },
 }
 
 impl InventoryOperationAck {
@@ -149,7 +154,8 @@ impl InventoryOperationAck {
             Self::Drop { success, .. }
             | Self::Move { success, .. }
             | Self::Merge { success, .. }
-            | Self::Split { success, .. } => *success,
+            | Self::Split { success, .. }
+            | Self::Sell { success, .. } => *success,
         }
     }
 
@@ -159,6 +165,7 @@ impl InventoryOperationAck {
             Self::Move { .. } => "Move",
             Self::Merge { .. } => "Merge",
             Self::Split { .. } => "Split",
+            Self::Sell { .. } => "Sell",
         }
     }
 }
@@ -236,10 +243,82 @@ pub fn apply_inventory_operation_ack(
                 && unique_id == pending_id
                 && count == pending_count
         }
+        (
+            InventoryOperationAck::Sell {
+                unique_id, count, ..
+            },
+            PendingOperationKey::Sell {
+                unique_id: pending_id,
+                count: pending_count,
+            },
+        ) => unique_id == pending_id && count == pending_count,
         _ => false,
     });
     feedback.last = Some(ack);
     released
+}
+
+/// Correlatable Crystal warehouse acknowledgement. Store/TakeBack packets do
+/// not echo the item id, so their strongest available identity is the exact
+/// source/destination pair. Password result packets identify their operation
+/// explicitly through the packet kind and `removing` flag.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "operation", rename_all = "camelCase")]
+pub enum StorageOperationAck {
+    Deposit { from: i32, to: i32, success: bool },
+    Withdraw { from: i32, to: i32, success: bool },
+    Unlock { success: bool },
+    SetPassword { success: bool },
+    RemovePassword { success: bool },
+    Expand { success: bool },
+}
+
+impl StorageOperationAck {
+    pub fn success(&self) -> bool {
+        match self {
+            Self::Deposit { success, .. }
+            | Self::Withdraw { success, .. }
+            | Self::Unlock { success }
+            | Self::SetPassword { success }
+            | Self::RemovePassword { success }
+            | Self::Expand { success } => *success,
+        }
+    }
+}
+
+/// ACK and NACK both terminate only the matching warehouse operation. Model
+/// contents remain server-authoritative and are updated by the subsequent
+/// storage/inventory refresh rather than by this acknowledgement.
+pub fn apply_storage_operation_ack(
+    pending: &mut PendingOperations,
+    ack: &StorageOperationAck,
+) -> usize {
+    pending.release_matching(|key| match (ack, key) {
+        (
+            StorageOperationAck::Deposit { from, to, .. },
+            PendingOperationKey::StorageDeposit {
+                from: pending_from,
+                to: pending_to,
+                ..
+            },
+        ) => from == pending_from && to == pending_to,
+        (
+            StorageOperationAck::Withdraw { from, to, .. },
+            PendingOperationKey::StorageWithdraw {
+                from: pending_from,
+                to: pending_to,
+                ..
+            },
+        ) => from == pending_from && to == pending_to,
+        (StorageOperationAck::Unlock { .. }, PendingOperationKey::StorageUnlock)
+        | (StorageOperationAck::SetPassword { .. }, PendingOperationKey::StorageSetPassword)
+        | (
+            StorageOperationAck::RemovePassword { .. },
+            PendingOperationKey::StorageRemovePassword,
+        )
+        | (StorageOperationAck::Expand { .. }, PendingOperationKey::StorageExpand) => true,
+        _ => false,
+    })
 }
 
 /// Bounded set of operations awaiting authoritative completion evidence.
@@ -939,6 +1018,7 @@ mod tests {
             quantity,
             slot,
             container,
+            ..crate::inventory::ItemModel::default()
         }
     }
 
@@ -1129,6 +1209,41 @@ mod tests {
     }
 
     #[test]
+    fn sell_nack_releases_only_matching_item_and_count() {
+        let mut pending = PendingOperations::default();
+        let exact = PendingOperationKey::Sell {
+            unique_id: 88,
+            count: 2,
+        };
+        let other_count = PendingOperationKey::Sell {
+            unique_id: 88,
+            count: 1,
+        };
+        assert!(pending.try_begin(exact.clone()));
+        assert!(pending.try_begin(other_count.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Sell {
+                    unique_id: 88,
+                    count: 2,
+                    success: false,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&exact));
+        assert!(pending.contains(&other_count));
+        assert_eq!(
+            feedback.last.as_ref().map(InventoryOperationAck::label),
+            Some("Sell")
+        );
+    }
+
+    #[test]
     fn inventory_refresh_releases_only_exact_drop_move_merge_split_and_sell_evidence() {
         let old = crate::inventory::InventoryModel {
             gold: 100,
@@ -1194,6 +1309,7 @@ mod tests {
             count: 1,
             stock,
             panel_type: 0,
+            ..crate::shop::ShopGood::default()
         };
         let old = crate::shop::ShopModel {
             goods: vec![good(1, 5), good(2, -1)],
@@ -1235,6 +1351,56 @@ mod tests {
 
         mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::GameShop);
         assert_eq!(revisions.get(AuthoritativeModelDomain::GameShop), 3);
+    }
+
+    #[test]
+    fn storage_ack_and_nack_release_only_the_correlatable_operation() {
+        let mut pending = PendingOperations::default();
+        let deposit = PendingOperationKey::StorageDeposit {
+            unique_id: 55,
+            from: 3,
+            to: 9,
+        };
+        let other_deposit = PendingOperationKey::StorageDeposit {
+            unique_id: 56,
+            from: 4,
+            to: 10,
+        };
+        let unlock = PendingOperationKey::StorageUnlock;
+        let remove = PendingOperationKey::StorageRemovePassword;
+        for key in [
+            deposit.clone(),
+            other_deposit.clone(),
+            unlock.clone(),
+            remove.clone(),
+        ] {
+            assert!(pending.try_begin(key));
+        }
+
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Deposit {
+                    from: 3,
+                    to: 9,
+                    success: false,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&deposit));
+        assert!(pending.contains(&other_deposit));
+
+        assert_eq!(
+            apply_storage_operation_ack(
+                &mut pending,
+                &StorageOperationAck::Unlock { success: false },
+            ),
+            1
+        );
+        assert!(!pending.contains(&unlock));
+        assert!(pending.contains(&remove));
+        assert!(!StorageOperationAck::Unlock { success: false }.success());
     }
 
     #[test]

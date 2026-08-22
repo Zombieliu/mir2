@@ -1,6 +1,6 @@
 # WN-UI-FUNC-01 — Windows Native 全页面与按钮功能验收
 
-> 状态：`[ ] OPEN`
+> 状态：`[ ] OPEN — non-visual implementation gates green; human/real-window acceptance pending`
 > 目标：Windows 原生客户端中每个可见页面、按钮、输入框、列表项和快捷键都与 Crystal 原版具有一致的可见结果与服务端结果。
 > 原则：页面能显示不等于功能完成；按钮有贴图不等于按钮可用；自动登录、环境变量和直接发包不能替代真实鼠标/键盘验收。
 
@@ -17,6 +17,15 @@
 > Map 页面、光照、截图和真人鼠标验收按用户要求暂停，本清单仍保持 OPEN。
 > 详见 `docs/generated/player-qa/native-ui-controls/R2-INTEGRATION-REPORT.md`。
 
+> 2026-08-22 R4 非视觉收口：本轮已接入 BigMap native adapter、七项 Options
+> runtime hooks、authoritative Observe、Change Password 服务端 ack、native
+> lighting，以及 skill binding 原子持久化。当前自动化门禁为：ui-core 36/36、
+> client default 101/101、client native 318/318、Windows 264/264、runtime
+> 179/179、Android 44/44、Web typecheck 与 component controls 2/2。当前
+> registry 为 141，placeholder 为 0；3 条 no-op 仅对应 Credits、Light frame
+> visual，以及 9 个 Crystal source-disabled menu family，不能按缺失功能计数。
+> 证据仍只证明代码/数据流门禁，不证明真实窗口视觉或真人接受。
+
 > 2026-08-21 R3 非视觉收口：Windows Options 已接真实 Bevy/WAV 音频后端，
 > 音乐、音效开关和 0..100 音量独立生效；发布包显式校验并携带合法的
 > `Login2.wav`/`Select2.wav` 回退素材。World Map 改为运行时读取权威
@@ -25,6 +34,24 @@
 > 导入数据中 `CanTeleportTo=0`，所以真实配置下仍必须安全拒绝，不能人为
 > 制造一个可传送目标。视觉、截图、真人听感和设备验收仍暂停，本清单保持
 > OPEN。详见 `docs/generated/player-qa/native-ui-controls/R3-AUDIO-WORLDMAP-ZONE-REPORT.md`。
+
+> 2026-08-22 R5 真实 Windows Release 复验：默认安全区蓝柱已消失；Character、
+> Inventory、Skill、Quest、Options、Menu、Game Shop、Mail 与 Big Map 均通过
+> 可见窗口打开/关闭检查。Inventory 的耐久叠字、Game Shop 的 U+2026 缺字框、
+> Quest 皮肤双标题已修复并在重建后的 Release 中复验；Big Map 在约 1-2 秒内
+> 收到并显示 map 101、玩家位置和 40 个 NPC。client-bevy native 330/330、
+> platform-windows 270/270。后续输入审计已修复 Ctrl/Super 携带 composed text
+> 时污染字段及空 text 不回退的问题，client-bevy native 333/333；Windows
+> 批量 `type_text` 只落首字符目前更像自动化注入/winit 边界，仍需脱敏事件
+> trace 与真人键盘证据区分。Group/Guild 的基础面板已切换到 Crystal 原始
+> 几何与素材并完成真实 Release 窗口复验；高级邀请、转让、权限、仓库与非空
+> 成员动作仍未收口。登录输入链路与最终 Crystal 逐像素签署未完成。
+>
+> 2026-08-22 R6：Windows 网关已接收服务端直接 `Chat` 与 `ObjectChat` 两种
+> 消息形态，系统/私聊/公会消息不再因只识别 `ObjectChat` 而丢失。`SellItem`、
+> `StoreItem`、`TakeBackItem`、`StorageUnlockResult`、`StoragePasswordResult` 与
+> `ResizeStorage` 均产生可关联 ACK/NACK；失败结果只结束对应 pending，不在客户端
+> 伪造物品或仓库状态。频道过滤与 NPC Sell/Repair 专用服务模式仍为 OPEN。
 
 ## 0. Candidate 硬门禁
 
@@ -43,8 +70,8 @@
 
 | 页面/区域 | 控件 | 当前状态 | 判定 |
 |---|---|---|---|
-| 登录 | Account / Password | 可聚焦、输入、退格、Tab | 待真人鼠标验收 |
-| 登录 | Login | 已连接 `NativeUiIntent::Login` | 待端到端验收 |
+| 登录 | Account / Password | 可聚焦、逐键输入、退格、Tab；Ctrl/Super 文本污染与空 text 回退已修；自动化批量注入仍需 trace/真人区分 | **OPEN：真人输入与事件边界待验** |
+| 登录 | Login | 已连接 `NativeUiIntent::Login`，本地真实登录进入选角 | 成功路径实机通过；错误路径待验 |
 | 登录 | New Account | 已连接 `RegisterAccount` | 待完整账号创建页面/结果验收 |
 | 登录 | Change Password | 已接真实命令、结果、校验和去重 | 待真实服务端成功/失败验收 |
 | 登录 | Safe Key | 已按 Crystal 本地随机软键盘语义实现并导出真实素材 | 待真人鼠标验收 |
@@ -52,17 +79,19 @@
 | 选角 | 角色槽 / Start / New / Delete / Exit | 有处理器 | 待真实鼠标与确认流程验收 |
 | 选角 | Credits | 空处理器 | 待对照原版；原版若 no-op 才可接受 |
 | 创建角色 | Name / Class / Gender / Create / Cancel | 功能存在，但为通用面板 | **P2 视觉；P1 流程待验** |
-| 游戏 HUD | Character | 打开装备窗口 | Partial |
-| 游戏 HUD | Inventory | 打开背包 | Partial |
-| 游戏 HUD | Skill | 只切换当前技能面板状态 | Partial |
-| 游戏 HUD | Quest | 独立 QuestLog 状态 | 待任务数据与真人点击验收 |
-| 游戏 HUD | Option | 独立 draft/apply/cancel/default；窗口模式、配置持久化及真实 WAV 音频后端已接线 | 代码门禁通过；待真人听感/设备验收 |
-| 游戏 HUD | Menu | 打开简化菜单 | Partial |
-| 游戏 HUD | Game Shop | 已接严格 Shop 数据状态 | 待真实服务端与鼠标验收 |
-| 游戏 HUD | Mail | 已接严格 Mail 数据状态 | 待真实服务端与鼠标验收 |
-| 游戏 HUD | Big Map | 服务端 setup/map/search 已就绪；原生页仍为简化占位 | **P1 Placeholder** |
+| 游戏 HUD | Character | 打开装备窗口 | 真实窗口基础视觉/导航通过 |
+| 游戏 HUD | Inventory | 打开背包；图标与格位实机无叠字 | 真实窗口基础视觉/导航通过 |
+| 游戏 HUD | Skill | 打开独立 Crystal 技能面板 | 空技能权威状态实机通过 |
+| 游戏 HUD | Quest | 独立 QuestLog 状态，三条权威任务，Q 开关 | 真实窗口基础视觉/导航通过 |
+| 游戏 HUD | Option | 七项 Options runtime hooks、窗口模式、配置持久化及真实 WAV 音频后端已接线；Crystal 立即提交语义保留 | 代码门禁通过；待真人听感/设备验收 |
+| 游戏 HUD | Menu | 打开 Crystal 纵向菜单；Escape 关闭 | 真实窗口基础视觉/导航通过 |
+| 游戏 HUD | Group | Crystal 232x249 原始框体、成员视口、Switch/Add/Delete/Close 与权威状态 | 基础视觉与 Switch/Close 实机通过；邀请文本输入、职业/HP 图标、会长转让仍 OPEN |
+| 游戏 HUD | Guild | Crystal 590x432 原始框体、Notice/Members/Stats、成员视口与权威状态 | 基础视觉与页签切换实机通过；权限、等级、仓库及非空成员动作仍 OPEN |
+| 游戏 HUD | Game Shop | 105 条权威商品、4x2 分页、选择与禁用购买状态 | 真实窗口基础视觉/导航通过 |
+| 游戏 HUD | Mail | 已接严格 Mail 数据状态 | 空邮箱真实窗口通过；非空操作待验 |
+| 游戏 HUD | Big Map | map 101、玩家位置、40 NPC 与标记延迟后真实显示 | 真实窗口基础视觉/导航通过；加载态待优化 |
 | 游戏 HUD | Minimap Toggle | 独立可见状态 | 待真人点击验收 |
-| 聊天栏 | 滚动、频道过滤、Resize、Settings | 共享状态、消费、Apply/Cancel/Defaults 与本地持久化已接线 | 待真人输入验收 |
+| 聊天栏 | 接收、滚动、频道过滤、Resize、Settings | `Chat`/`ObjectChat` 双形态接收已接；共享状态、消费、Apply/Cancel/Defaults 与本地持久化已接线 | 普通/系统接收代码门禁通过；过滤与真人输入仍 OPEN |
 | NPC/任务 | 对话选项、Attack、PickUp | 已有命令桥 | 待 UI 点击与服务端结果验收 |
 | 物品弹窗 | Use / Equip / Unequip | 已有命令桥 | 待成功与失败路径验收 |
 
@@ -199,9 +228,13 @@
 - [ ] 增加 GameShop/Mail/BigMap/MinimapToggle 非静默 no-op 测试。
 - [ ] 增加登录页 Change Password / Safe Key 不得返回 placeholder 的测试。
 - [ ] 增加删除角色、购买、丢弃、领取附件的幂等/双击测试。
-- [ ] 运行 client-bevy、platform-windows、runtime 全测试和 Web typecheck，禁止破坏 Web。
+- [x] 运行 client-bevy、platform-windows、runtime 全测试和 Web typecheck，禁止破坏 Web。
 
-验收：测试从枚举/注册表生成覆盖报告，`unhandledVisibleControlCount=0`、`wrongDestinationCount=0`、`placeholderCount=0`。
+当前自动化门禁证据：ui-core `36/36`、client-bevy default `101/101`、
+client-bevy `native-ui` `318/318`、platform-windows `264/264`、runtime `179/179`、
+Android `44/44`、Web typecheck 与 component controls `2/2`；registry `141`、
+`placeholderCount=0`。`no-op=3` 仅对应 Credits、Light frame visual 和 9 个
+Crystal source-disabled menu family。以上不替代真实窗口、DPI、重连或真人验收。
 
 ## Goal UI-8 — 原版对照与最终签署
 

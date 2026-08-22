@@ -312,10 +312,13 @@ const CORE_ACTIONS: &[&str] = &[
     "SetMusicVolume",
     "SetSoundEnabled",
     "SetSoundVolume",
-    "SetWindowMode",
-    "ApplyOptions",
-    "CancelOptions",
-    "ResetOptionsToDefaults",
+    "SetCrystalOption",
+    "RequestObserve",
+    "OpenPlatformSettings",
+    "SetPlatformWindowMode",
+    "ApplyPlatformSettings",
+    "CancelPlatformSettings",
+    "ResetPlatformSettingsToDefaults",
 ];
 const OVERLAY_ACTIONS: &[&str] = &[
     "InspectBag",
@@ -326,8 +329,41 @@ const OVERLAY_ACTIONS: &[&str] = &[
     "SelectMail",
     "ClaimMail",
     "DeleteMail",
-    "BigMapZoomIn",
-    "BigMapZoomOut",
+    "MailPagePrev",
+    "MailPageNext",
+    "OpenMailCompose",
+    "ReadMail",
+    "AddMailAttachment",
+    "RemoveMailAttachment",
+    "SubmitMail",
+    "CancelMailCompose",
+    "SelectSkill",
+    "AssignSkillKey",
+    "ClearSkillBinding",
+    "CloseSkillAssign",
+    "BigMapScrollUp",
+    "BigMapScrollDown",
+    "BigMapWorld",
+    "BigMapMyLocation",
+    "BigMapSearchFocus",
+    "BigMapSearchSubmit",
+    "BigMapTeleport",
+    "BigMapSelectNpc",
+    "ToggleGroup",
+    "ToggleGuild",
+    "OpenGroup",
+    "SelectGroupMember",
+    "GroupSwitch",
+    "GroupAddSelected",
+    "GroupRemoveSelected",
+    "GroupInviteAccept",
+    "CloseSocial",
+    "OpenGuild",
+    "SelectGuildLeftPage",
+    "SelectGuildMember",
+    "GuildKickMember",
+    "GuildPublishNotice",
+    "GuildInviteAccept",
     "SelectShopGood",
     "SelectGameShopGood",
     "GameShopPaymentCredit",
@@ -407,7 +443,7 @@ const KEYBOARD_ACTIONS: &[&str] = &[
     "TownRevive",
     "TalkToNearestNpc",
 ];
-const VISUAL_ACTIONS: &[&str] = &["ShowLightSetting"];
+const VISUAL_ACTIONS: &[&str] = &["ShowLightSetting", "DisabledSourceControl"];
 
 pub fn action_mapping(action: &str) -> Option<ActionMapping> {
     if SHELL_ACTIONS.contains(&action) {
@@ -451,7 +487,7 @@ pub fn typed_action_contract(action: &str) -> Option<TypedActionContract> {
     let repeat_policy = match action {
         // These submissions advance/close state before emitting effects, so
         // replaying them against the successor UiState is effect-free.
-        "ConfirmDeleteCharacter" | "ApplyOptions" | "ApplyChatSettings" => {
+        "ConfirmDeleteCharacter" | "ApplyPlatformSettings" | "ApplyChatSettings" => {
             RepeatPolicy::ReducerStateGuarded
         }
         // The rest of these submissions require an adapter/server result to
@@ -607,9 +643,9 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("CREATE.CANCEL", "CharacterCreate", "Character Create", "CancelButton", "Cancel", "button", None, "single", 1, "CharacterCreate screen", "CancelCharacterCreate", "CharacterSelect", "CancelCharacterCreate", "implemented", SHELL, None, false),
         c!("CHANGE_PASSWORD.SCREEN", "ChangePassword", "Change Password", "Screen", "Change Password", "screen", None, "single", 1, "opened from Login", "ShowChangePassword", "Password form", "CancelChangePassword", "implemented", SHELL, None, false),
         c!("CHANGE_PASSWORD.FIELDS", "ChangePassword", "Change Password", "Fields", "Account/Old/New/Confirm", "input_family", None, "four fields", 4, "ChangePassword screen", "FocusAccountId", "Keyboard-focused password form", "CancelChangePassword", "implemented_keyboard_only", SHELL, None, false),
-        c!("CHANGE_PASSWORD.SUBMIT", "ChangePassword", "Change Password", "SubmitButton", "Submit", "button", None, "single", 1, "valid form", "SubmitChangePassword", "Gateway result", "CancelChangePassword", "implemented", SHELL, None, false),
+        c!("CHANGE_PASSWORD.SUBMIT", "ChangePassword", "Change Password", "SubmitButton", "Submit", "button", None, "single", 1, "valid form and no request pending", "SubmitChangePassword", "Waits for the authoritative gateway success/failure/banned response; late or unsolicited replies are ignored", "CancelChangePassword", "implemented_backend_acknowledged", SHELL, None, false),
         c!("CHANGE_PASSWORD.CANCEL", "ChangePassword", "Change Password", "CancelButton", "Cancel", "button", None, "single", 1, "ChangePassword screen", "CancelChangePassword", "Login", "CancelChangePassword", "implemented", SHELL, None, false),
-        c!("SAFE_KEY.SCREEN", "SafeKey", "Safe Key", "Screen", "Safe Key", "screen", None, "single", 1, "opened from Login", "ShowSafeKey", "Safe-key screen with unavailable notice", "CloseSafeKey", "partial_unavailable_flow", SHELL, None, false),
+        c!("SAFE_KEY.SCREEN", "SafeKey", "Safe Key", "Screen", "Safe Key", "screen", None, "single", 1, "opened from Login", "ShowSafeKey", "Local Crystal Safe Key input; no fabricated server success", "CloseSafeKey", "implemented_local_only", SHELL, None, false),
         c!("SAFE_KEY.BACK", "SafeKey", "Safe Key", "BackButton", "Back", "button", None, "single", 1, "SafeKey screen", "CloseSafeKey", "Login", "CloseSafeKey", "implemented", SHELL, None, false),
         c!("DELETE_CONFIRM.SCREEN", "DeleteConfirm", "Delete Confirm", "Screen", "Delete Character", "screen", None, "single", 1, "delete requested", "ShowDeleteConfirm", "Confirmation modal", "CancelDeleteCharacter", "implemented", SHELL, None, false),
         c!("DELETE_CONFIRM.ACTIONS", "DeleteConfirm", "Delete Confirm", "Actions", "Confirm Delete/Cancel", "button_family", None, "two buttons", 2, "DeleteConfirm screen", "ConfirmDeleteCharacter", "Delete or CharacterSelect", "CancelDeleteCharacter", "implemented", SHELL, None, false),
@@ -621,7 +657,7 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("HUD.INVENTORY", "InGame", "HUD", "InventoryButton", "Inventory", "button", rect(928.0,692.0,20.0,20.0), "single", 1, "InGame", "OpenInventory", "Inventory panel", "ClosePanel", "implemented", HUD, None, false),
         c!("HUD.SKILL", "InGame", "HUD", "SkillButton", "Skill", "button", rect(951.0,692.0,20.0,20.0), "single", 1, "InGame", "OpenSkill", "Skills panel", "ClosePanel", "implemented", HUD, None, false),
         c!("HUD.QUEST", "InGame", "HUD", "QuestButton", "Quest", "button", rect(974.0,692.0,20.0,20.0), "single", 1, "InGame", "OpenQuestLog", "Quest log", "CloseQuestLog", "implemented", HUD, None, false),
-        c!("HUD.OPTION", "InGame", "HUD", "OptionButton", "Option", "button", rect(997.0,692.0,20.0,20.0), "single", 1, "InGame", "OpenOptions", "Options panel with staged controls", "CancelOptions/Escape", "implemented", HUD, None, false),
+        c!("HUD.OPTION", "InGame", "HUD", "OptionButton", "Option", "button", rect(997.0,692.0,20.0,20.0), "single", 1, "InGame", "OpenOptions", "Crystal OptionDialog with immediate local Settings changes", "ClosePanel/Escape", "implemented", HUD, None, false),
         c!("HUD.MENU", "InGame", "HUD", "MenuButton", "Menu", "button", rect(969.0,651.0,40.0,40.0), "single", 1, "InGame", "OpenMenu", "System menu", "CloseWindows", "implemented", HUD, None, false),
         c!("HUD.GAME_SHOP", "InGame", "HUD", "GameShopButton", "Game Shop", "button", rect(919.0,651.0,40.0,38.0), "single", 1, "InGame", "OpenGameShop", "Cash-shop panel", "CloseGameShop", "implemented", HUD, None, false),
         c!("HUD.MAIL", "InGame", "HUD", "MailButton", "Mail", "button", rect(902.0,131.0,20.0,20.0), "single", 1, "InGame", "OpenMail", "Mail panel", "CloseMail", "implemented", HUD, None, false),
@@ -634,7 +670,11 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("INVENTORY.ACTIONS", "InGame", "Item Inspect", "ItemActions", "Use/Equip/Unequip/Drop/Split/Move/Merge", "button_family", None, "context-sensitive actions", 9, "item inspected; mutations require explicit uniqueId", "UseInspected", "Server-authoritative item intents with exact pending keys", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("INVENTORY.CLOSE", "InGame", "Inventory", "CloseButton", "Close", "button", None, "single", 1, "Inventory open", "CloseWindows", "Inventory closes", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("CHARACTER.EQUIPMENT", "InGame", "Character", "EquipmentSlots", "Equipment slot", "dynamic_button_family", None, "slots 0..13", 14, "OpenCharacter", "InspectEquip", "Item inspection", "EscapeClose", "implemented", OVERLAY, None, false),
-        c!("SKILL.PANEL", "InGame", "Skills", "Panel", "Skills", "panel", rect(16.0,80.0,280.0,520.0), "single", 1, "OpenSkill", "OpenSkill", "Text/status list; no clickable skill rows", "EscapeClose", "implemented_text_only", OVERLAY, None, false),
+        c!("SKILL.PANEL", "InGame", "Skills", "Panel", "Skills", "panel", rect(16.0,80.0,280.0,520.0), "single", 1, "OpenSkill", "OpenSkill", "Learned-skill rows and Crystal AssignKey surface", "EscapeClose", "implemented_persisted_adapter", OVERLAY, None, false),
+        c!("SKILL.SELECT", "InGame", "Skills", "SkillRows", "Learned skill", "dynamic_button_family", None, "per learned skill", 0, "authoritative learned skill exists", "SelectSkill", "Selects the learned skill and opens AssignKey", "EscapeClose", "implemented", OVERLAY, None, false),
+        c!("SKILL.ASSIGN_KEY", "InGame", "Skills", "FunctionKeyButtons", "F1-F8", "button_family", None, "eight slots", 8, "AssignKey open and learned skill selected", "AssignSkillKey", "Rebinds the selected skill and atomically persists the bounded local binding set", "CloseSkillAssign", "implemented_persisted_adapter", OVERLAY, None, false),
+        c!("SKILL.CLEAR_BINDING", "InGame", "Skills", "ClearBindingButton", "None", "button", None, "single", 1, "selected skill has a binding", "ClearSkillBinding", "Clears and atomically persists the selected skill binding", "CloseSkillAssign", "implemented_persisted_adapter", OVERLAY, None, false),
+        c!("SKILL.CLOSE_ASSIGN", "InGame", "Skills", "AssignCloseButton", "Close", "button", None, "single", 1, "AssignKey open", "CloseSkillAssign", "Closes AssignKey without changing bindings", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("SKILL.CLOSE", "InGame", "Skills", "CloseButton", "Close", "button", None, "single", 1, "Skills open", "CloseWindows", "Skills closes", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("QUEST.PANEL", "InGame", "Quest Log", "Panel", "Quest Log", "panel", rect(212.0,80.0,600.0,520.0), "single", 1, "OpenQuestLog", "OpenQuestLog", "Quest list/detail", "CloseQuestLog", "implemented", QUEST, None, false),
         c!("QUEST.LIST", "InGame", "Quest Log", "QuestRows", "Quest", "dynamic_button_family", None, "active quest list", 0, "active quests", "SelectQuest", "Quest detail", "CloseQuestLog", "implemented", QUEST, None, false),
@@ -646,24 +686,49 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("NPC.TALK", "InGame", "World", "TalkShortcut", "Talk", "keyboard_shortcut", None, "single", 1, "KeyT + NPC in range", "TalkToNearestNpc", "InteractNpc intent", "EscapeClose", "implemented_keyboard_only", QUEST, None, false),
         c!("COMBAT.ATTACK", "InGame", "Combat Target", "AttackButton", "Attack", "button", None, "single", 1, "target alive", "AttackTarget", "Attack intent", "EscapeClose", "implemented", QUEST, None, false),
         c!("PICKUP.RECENT", "InGame", "Pickup Feedback", "PickupRows", "Pickup", "dynamic_button_family", None, "up to three rows", 3, "recent pickup exists", "PickUpObject", "Pickup intent", "EscapeClose", "implemented", QUEST, None, false),
-        entry("OPTIONS.PANEL", "InGame", "Options", "Panel", "Options", "panel", rect(212.0,100.0,600.0,480.0), "single", 1, "OpenOptions", "OpenOptions", "Creates a staged UiOptions draft; Apply reaches the Bevy window/persistence adapter", "CancelOptions/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.MUSIC_TOGGLE", "InGame", "Options", "MusicToggleButton", "Music: On/Off", "button", None, "single", 1, "Options open", "SetMusicEnabled", "Toggles music_enabled in the staged draft; Apply controls the native Bevy music sink when a real Crystal WAV is available", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.MUSIC_VOLUME_DOWN", "InGame", "Options", "MusicVolumeDownButton", "Music -", "button", None, "single", 1, "music_volume > 0", "SetMusicVolume", "Subtracts 10 from staged music volume with saturation; Apply updates the native Bevy music sink", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.MUSIC_VOLUME_UP", "InGame", "Options", "MusicVolumeUpButton", "Music +", "button", None, "single", 1, "music_volume < 100", "SetMusicVolume", "Adds 10 to staged music volume, capped at 100; Apply updates the native Bevy music sink", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.SOUND_TOGGLE", "InGame", "Options", "SoundToggleButton", "Sound: On/Off", "button", None, "single", 1, "Options open", "SetSoundEnabled", "Toggles sound_enabled in the staged draft; Apply gates the native Crystal UI sound sink", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.SOUND_VOLUME_DOWN", "InGame", "Options", "SoundVolumeDownButton", "Sound -", "button", None, "single", 1, "sound_volume > 0", "SetSoundVolume", "Subtracts 10 from staged sound volume with saturation; Apply updates the native Crystal UI sound sink", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.SOUND_VOLUME_UP", "InGame", "Options", "SoundVolumeUpButton", "Sound +", "button", None, "single", 1, "sound_volume < 100", "SetSoundVolume", "Adds 10 to staged sound volume, capped at 100; Apply updates the native Crystal UI sound sink", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.WINDOWED", "InGame", "Options", "WindowedButton", "Windowed", "button", None, "single", 1, "draft mode is not Windowed", "SetWindowMode", "Sets staged window mode to Windowed; Apply changes the Bevy main window and persists it", "CancelOptions/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.FULLSCREEN", "InGame", "Options", "FullscreenButton", "Fullscreen", "button", None, "single", 1, "draft mode is not Fullscreen", "SetWindowMode", "Sets staged window mode to Fullscreen; Apply changes the Bevy main window and persists it", "CancelOptions/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.APPLY", "InGame", "Options", "ApplyButton", "Apply", "button", None, "single", 1, "Options open", "ApplyOptions", "Commits UiState options, applies Bevy window mode, persists options, and updates real Crystal WAV music/sound sinks when assets are present", "ApplyOptions", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.CANCEL", "InGame", "Options", "CancelButton", "Cancel", "button", None, "single", 1, "Options open", "CancelOptions", "Discards the staged draft and closes Options without effects", "CancelOptions", "implemented", "source_and_unit_tests", OPTIONS, None, false),
-        entry("OPTIONS.DEFAULTS", "InGame", "Options", "DefaultsButton", "Defaults", "button", None, "single", 1, "Options open", "ResetOptionsToDefaults", "Resets the staged draft to UiOptions defaults; Apply is still required", "CancelOptions/Escape", "implemented_staged_draft", "source_and_unit_tests", OPTIONS, None, false),
-        c!("MENU.ACTIONS", "InGame", "System Menu", "MenuActions", "Bag/Character/Shop/Warehouse/Logout/Close", "button_family", None, "six buttons", 6, "Menu open", "ToggleInventory", "Mapped menu actions; Resume/Exit are not rendered", "CloseWindows", "implemented", OVERLAY, None, false),
+        entry("OPTIONS.PANEL", "InGame", "Options", "Panel", "Options", "panel", rect(382.0,207.0,259.0,354.0), "single", 1, "OpenOptions", "OpenOptions", "Crystal OptionDialog: every local control writes Settings immediately; Close only hides", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.SKILL_MODE", "InGame", "Options", "SkillModeButtons", "Tilde/Ctrl skill mode", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists Crystal SkillMode and updates the native skill modifier gate", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.SKILL_BAR", "InGame", "Options", "SkillBarButtons", "Skill bar On/Off", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists and gates native skill-bar visibility", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.EFFECT", "InGame", "Options", "EffectButtons", "Effect On/Off", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists and gates native effect presentation without mutating effect lifetimes", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.DROP_VIEW", "InGame", "Options", "DropViewButtons", "Drop view On/Off", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists and gates authoritative ground-drop labels", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.NAME_VIEW", "InGame", "Options", "NameViewButtons", "Name view On/Off", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists and gates authoritative entity-name labels", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.HP_VIEW", "InGame", "Options", "HpViewButtons", "HP/MP view On/Off", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists and switches the native HUD HP/MP presentation", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.NEW_MOVE", "InGame", "Options", "NewMoveButtons", "Movement style New/Old", "button_pair", None, "single pair", 2, "Options open", "SetCrystalOption", "Immediately persists and selects the native pointer-movement intent mode", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.OBSERVE", "InGame", "Options", "ObserveButtons", "Observe On/Off", "button_pair", None, "single pair", 2, "Options open and desired value differs from authoritative value", "RequestObserve", "Sends @ALLOWOBSERVE and changes state only after authoritative AllowObserve", "ClosePanel/Escape", "implemented_authoritative_request", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.SOUND_VOLUME", "InGame", "Options", "SoundBar", "Sound volume", "drag_bar", rect(541.0,425.0,76.0,19.0), "single", 1, "Options open", "SetSoundVolume", "Immediately applies and persists Crystal SoundBar volume", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        entry("OPTIONS.MUSIC_VOLUME", "InGame", "Options", "MusicSoundBar", "Music volume", "drag_bar", rect(541.0,451.0,76.0,19.0), "single", 1, "Options open", "SetMusicVolume", "Immediately applies and persists Crystal MusicSoundBar volume", "ClosePanel/Escape", "implemented_runtime_adapter", "source_and_unit_tests", OPTIONS, None, false),
+        c!("MENU.EXIT", "InGame", "System Menu", "ExitButton", "Exit", "button", None, "single", 1, "Menu open", "ExitApplication", "Requests application exit", "CloseWindows", "implemented", OVERLAY, None, false),
+        c!("MENU.LOGOUT", "InGame", "System Menu", "LogoutButton", "Logout", "button", None, "single", 1, "Menu open", "Logout", "Authoritative logout request", "CloseWindows", "implemented", OVERLAY, None, false),
+        c!("MENU.GROUP", "InGame", "System Menu", "GroupButton", "Group", "button", None, "single", 1, "Menu open", "ToggleGroup", "Opens the native group panel", "CloseWindows", "implemented", OVERLAY, None, false),
+        c!("MENU.GUILD", "InGame", "System Menu", "GuildButton", "Guild", "button", None, "single", 1, "Menu open", "ToggleGuild", "Opens the native guild panel", "CloseWindows", "implemented", OVERLAY, None, false),
+        c!("GROUP.PANEL", "InGame", "Group", "Panel", "Group", "panel", rect(396.0,259.0,232.0,249.0), "single", 1, "OpenGroup", "OpenGroup", "Crystal Prguse/120 group panel", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
+        c!("GROUP.MEMBERS", "InGame", "Group", "MemberRows", "Group member", "dynamic_button_family", None, "up to fifteen members", 15, "authoritative member exists", "SelectGroupMember", "Selects the exact authoritative group member", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
+        c!("GROUP.SWITCH", "InGame", "Group", "SwitchButton", "Allow group", "button", rect(421.0,478.0,28.0,25.0), "single", 1, "Group open", "GroupSwitch", "Requests the inverse authoritative allow-group state", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GROUP.ADD", "InGame", "Group", "AddButton", "Add", "button", rect(466.0,478.0,60.0,25.0), "single", 1, "current target is a named player", "GroupAddSelected", "Invites the exact current player target", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GROUP.REMOVE", "InGame", "Group", "RemoveButton", "Remove", "button", rect(536.0,478.0,60.0,25.0), "single", 1, "non-leader member selected", "GroupRemoveSelected", "Removes the exact selected authoritative member", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GROUP.INVITE", "InGame", "Group", "InviteButtons", "Accept/Decline", "button_pair", None, "single pair", 2, "authoritative pending invite exists", "GroupInviteAccept", "Accepts or declines the authoritative invitation", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GROUP.CLOSE", "InGame", "Group", "CloseButton", "Close", "button", rect(602.0,262.0,24.0,21.0), "single", 1, "Group open", "CloseSocial", "Group closes", "CloseSocial", "implemented", OVERLAY, None, false),
+        c!("GUILD.PANEL", "InGame", "Guild", "Panel", "Guild", "panel", rect(217.0,168.0,590.0,432.0), "single", 1, "OpenGuild", "OpenGuild", "Crystal Prguse/180 guild panel", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
+        c!("GUILD.TABS", "InGame", "Guild", "NoticeMembersTabs", "Notice/Members", "button_pair", None, "single pair", 2, "Guild open", "SelectGuildLeftPage", "Requests authoritative Guild info type 0 or 1", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GUILD.MEMBERS", "InGame", "Guild", "MemberRows", "Guild member", "dynamic_button_family", None, "eighteen visible rows", 18, "authoritative member exists", "SelectGuildMember", "Selects a bounded authoritative member row", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
+        c!("GUILD.KICK", "InGame", "Guild", "KickButtons", "Remove member", "dynamic_button_family", None, "per visible member row", 18, "server permission contains kick", "GuildKickMember", "Requests removal of the exact authoritative member", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GUILD.NOTICE", "InGame", "Guild", "Notice", "Notice", "dynamic_text", None, "up to eight authoritative lines", 8, "Notice tab open", "GuildPublishNotice", "Displays authoritative notice and exposes publish only with permission", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
+        c!("GUILD.INVITE", "InGame", "Guild", "InviteButtons", "Accept/Decline", "button_pair", None, "single pair", 2, "authoritative pending invite exists", "GuildInviteAccept", "Accepts or declines the authoritative invitation", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
+        c!("GUILD.CLOSE", "InGame", "Guild", "CloseButton", "Close", "button", rect(782.0,172.0,24.0,21.0), "single", 1, "Guild open", "CloseSocial", "Guild closes", "CloseSocial", "implemented", OVERLAY, None, false),
+        c!("MENU.DISABLED_SOURCE", "InGame", "System Menu", "DisabledSourceButtons", "Help/Keyboard/Ranking/Creature/Ride/Fishing/Friend/Mentor/Relationship", "disabled_button_family", None, "nine visible source controls", 9, "always disabled", "DisabledSourceControl", "Rendered from Crystal sprites but deliberately non-interactive because no native/backend surface exists", "CloseWindows", "disabled_source_control", OVERLAY, None, true),
         c!("MAIL.PANEL", "InGame", "Mail", "Panel", "Mail", "panel", rect(212.0,80.0,600.0,520.0), "single", 1, "OpenMail", "OpenMail", "Mail list/detail", "CloseMail", "implemented", OVERLAY, None, false),
         c!("MAIL.ACTIONS", "InGame", "Mail", "MailRows", "Read/Claim/Delete", "dynamic_button_family", None, "per message id", 0, "mail exists", "SelectMail", "Mail detail/claim/delete intents", "CloseMail", "implemented", OVERLAY, None, false),
+        c!("MAIL.PAGING", "InGame", "Mail", "PageButtons", "Previous/Next", "button_pair", None, "single pair", 2, "another authoritative page exists", "MailPageNext", "Changes the bounded ten-row local page cursor", "CloseMail", "implemented", OVERLAY, None, false),
+        c!("MAIL.COMPOSE", "InGame", "Mail", "ComposeControls", "Write/Recipient/Message/Gold/Attachment/Send/Cancel", "dynamic_control_family", None, "compose form plus up to five attachments", 0, "compose open", "OpenMailCompose", "Produces bounded authoritative SendMail intent; no optimistic delivery", "CancelMailCompose", "implemented", OVERLAY, None, false),
+        c!("MAIL.READ", "InGame", "Mail", "ReadButton", "Read", "button", None, "single", 1, "selected unread mail", "ReadMail", "Produces authoritative ReadMail intent", "CloseMail", "implemented", OVERLAY, None, false),
         c!("MAIL.CLOSE", "InGame", "Mail", "CloseButton", "Close", "button", None, "single", 1, "Mail open", "CloseMail", "Mail closes", "CloseMail", "implemented", OVERLAY, None, false),
-        c!("BIGMAP.PANEL", "InGame", "Big Map", "Panel", "Big Map", "panel", rect(112.0,80.0,800.0,500.0), "single", 1, "OpenBigMap", "OpenBigMap", "Native map canvas remains a placeholder; backend WorldMapSetup/NewMapInfo and SearchMap are implemented", "CloseBigMap", "placeholder", BIGMAP, None, false),
-        c!("BIGMAP.ACTIONS", "InGame", "Big Map", "MapActions", "Search/Teleport", "button_family", None, "backend actions", 0, "Big Map open", "OpenBigMap", "Backend search is available; TeleportToNpc is a safe no-op because WorldMap is disabled and has zero eligible NPCs; native controls remain placeholder", "CloseBigMap", "placeholder_backend_ready", BIGMAP, None, false),
+        c!("BIGMAP.PANEL", "InGame", "Big Map", "Panel", "Big Map", "panel", rect(112.0,80.0,800.0,500.0), "single", 1, "OpenBigMap", "OpenBigMap", "Crystal map canvas, authoritative NPC markers, player location and map list", "CloseBigMap", "implemented_runtime_adapter", BIGMAP, None, false),
+        c!("BIGMAP.SCROLL", "InGame", "Big Map", "NpcScrollButtons", "NPC Up/Down", "button_pair", None, "single pair", 2, "more than eighteen filtered NPC rows", "BigMapScrollDown", "Moves the bounded NPC row window", "CloseBigMap", "implemented", BIGMAP, None, false),
+        c!("BIGMAP.SEARCH", "InGame", "Big Map", "SearchControls", "Search field/button", "control_pair", None, "single pair", 2, "Big Map open and cooldown elapsed", "BigMapSearchSubmit", "Sends bounded SearchMap request; local state rolls back if the gateway queue rejects it", "CloseBigMap", "implemented_authoritative_request", BIGMAP, None, false),
+        c!("BIGMAP.WORLD", "InGame", "Big Map", "WorldMapButton", "World", "button", None, "single", 1, "authoritative world map is enabled", "BigMapWorld", "Switches to the authoritative world-map entry", "CloseBigMap", "implemented_fail_closed", BIGMAP, None, false),
+        c!("BIGMAP.MY_LOCATION", "InGame", "Big Map", "MyLocationButton", "My Location", "button", None, "single", 1, "current map index is known", "BigMapMyLocation", "Returns to the authoritative current map/player marker", "CloseBigMap", "implemented", BIGMAP, None, false),
+        c!("BIGMAP.SELECT_NPC", "InGame", "Big Map", "NpcRows", "NPC", "dynamic_button_family", None, "up to eighteen visible rows", 18, "authoritative NPC is visible", "BigMapSelectNpc", "Selects an authoritative NPC marker", "CloseBigMap", "implemented", BIGMAP, None, false),
+        c!("BIGMAP.TELEPORT", "InGame", "Big Map", "TeleportButton", "Teleport", "button", None, "single", 1, "server marks selected NPC teleport eligible", "BigMapTeleport", "Sends server-gated teleport intent and never mutates the local map optimistically", "CloseBigMap", "implemented_authoritative_request", BIGMAP, None, false),
         c!("BIGMAP.CLOSE", "InGame", "Big Map", "CloseButton", "Close", "button", None, "single", 1, "Big Map open", "CloseBigMap", "Big Map closes", "CloseBigMap", "implemented", BIGMAP, None, false),
         c!("GAME_SHOP.PANEL", "InGame", "Game Shop", "Panel", "Cash Shop", "panel", rect(112.0,80.0,620.0,520.0), "single", 1, "OpenGameShop", "OpenGameShop", "Server catalog/quantity/payment/Buy/Close", "CloseGameShop", "implemented_nonvisual", OVERLAY, None, false),
         c!("NPC_SHOP.PANEL", "InGame", "NPC Shop", "Panel", "Shop (NPC)", "panel", rect(112.0,80.0,620.0,520.0), "single", 1, "NPCGoods", "OpenNpcShop", "NPC goods buy/sell/repair", "CloseShop", "implemented_nonvisual", OVERLAY, None, false),
@@ -871,44 +936,6 @@ pub fn all_controls() -> Vec<ControlEntry> {
             "CloseMail",
             "implemented",
             OVERLAY,
-            None,
-            false
-        ),
-        c!(
-            "BIGMAP.ZOOM_IN",
-            "InGame",
-            "Big Map",
-            "ZoomInButton",
-            "Zoom In (+)",
-            "button",
-            None,
-            "single",
-            1,
-            "zoom below max",
-            "BigMapZoomIn",
-            "Crystal has no zoom control; native Big Map remains a placeholder",
-            "CloseBigMap",
-            "placeholder",
-            BIGMAP,
-            None,
-            false
-        ),
-        c!(
-            "BIGMAP.ZOOM_OUT",
-            "InGame",
-            "Big Map",
-            "ZoomOutButton",
-            "Zoom Out (-)",
-            "button",
-            None,
-            "single",
-            1,
-            "zoom above min",
-            "BigMapZoomOut",
-            "Crystal has no zoom control; native Big Map remains a placeholder",
-            "CloseBigMap",
-            "placeholder",
-            BIGMAP,
             None,
             false
         ),
@@ -1325,7 +1352,7 @@ mod tests {
         let controls = all_controls();
         assert_eq!(
             controls.len(),
-            128,
+            155,
             "the Candidate control inventory changed; update its typed-action contract deliberately"
         );
         validate_registry(&controls).unwrap_or_else(|errors| panic!("{errors:?}"));
@@ -1348,13 +1375,11 @@ mod tests {
             "QUEST.ACTIONS",
             "NPC.DIALOG",
             "OPTIONS.PANEL",
-            "OPTIONS.MUSIC_TOGGLE",
-            "OPTIONS.APPLY",
-            "OPTIONS.CANCEL",
-            "OPTIONS.DEFAULTS",
-            "MENU.ACTIONS",
-            "MAIL.ACTIONS",
-            "BIGMAP.ACTIONS",
+            "OPTIONS.SOUND_VOLUME",
+            "OPTIONS.MUSIC_VOLUME",
+            "MENU.DISABLED_SOURCE",
+            "MAIL.COMPOSE",
+            "BIGMAP.SEARCH",
             "GAME_SHOP.PANEL",
             "NPC_SHOP.PANEL",
             "SHOP.ACTIONS",
@@ -1443,7 +1468,7 @@ mod tests {
     fn dangerous_action_contracts_distinguish_reducer_and_host_guards() {
         for action in [
             "ConfirmDeleteCharacter",
-            "ApplyOptions",
+            "ApplyPlatformSettings",
             "ApplyChatSettings",
         ] {
             assert_eq!(
@@ -1494,24 +1519,48 @@ mod tests {
         );
         assert!(!chat_settings.is_noop);
 
-        let options_apply = find("OPTIONS.APPLY");
+        let options_panel = find("OPTIONS.PANEL");
         assert_eq!(
-            options_apply.implementation_status,
+            options_panel.implementation_status,
             "implemented_runtime_adapter"
         );
-        assert!(options_apply.result.contains("real Crystal WAV"));
+        assert!(options_panel.result.contains("immediately"));
+        assert!(controls
+            .iter()
+            .all(|control| !control.id.starts_with("OPTIONS.APPLY")));
 
-        assert_eq!(find("BIGMAP.PANEL").implementation_status, "placeholder");
         assert_eq!(
-            find("BIGMAP.ACTIONS").implementation_status,
-            "placeholder_backend_ready"
+            find("BIGMAP.PANEL").implementation_status,
+            "implemented_runtime_adapter"
         );
-        assert_eq!(find("BIGMAP.ZOOM_IN").implementation_status, "placeholder");
-        assert_eq!(find("BIGMAP.ZOOM_OUT").implementation_status, "placeholder");
+        assert!(controls
+            .iter()
+            .all(|control| !control.id.starts_with("BIGMAP.ZOOM")));
         assert_eq!(
             find("HUD.LIGHT_SETTING").implementation_status,
             "visual_only"
         );
+    }
+
+    #[test]
+    fn security_statuses_do_not_claim_backend_success_or_safe_key_wire_support() {
+        let controls = all_controls();
+        let change_password = controls
+            .iter()
+            .find(|control| control.id == "CHANGE_PASSWORD.SUBMIT")
+            .expect("change-password submit registry entry");
+        assert_eq!(
+            change_password.implementation_status,
+            "implemented_backend_acknowledged"
+        );
+        assert!(change_password.result.contains("authoritative gateway"));
+
+        let safe_key = controls
+            .iter()
+            .find(|control| control.id == "SAFE_KEY.SCREEN")
+            .expect("safe-key registry entry");
+        assert_eq!(safe_key.implementation_status, "implemented_local_only");
+        assert!(safe_key.result.contains("no fabricated server success"));
     }
 
     #[test]

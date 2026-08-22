@@ -5,7 +5,13 @@ use bevy::ui::{
     widget::NodeImageMode, AlignItems, Display, FlexDirection, JustifyContent, Node, PositionType,
     UiRect, Val,
 };
-use bevy::{input::keyboard::KeyboardInput, prelude::*};
+use bevy::{
+    input::{
+        keyboard::{Key, KeyboardInput},
+        ButtonState,
+    },
+    prelude::*,
+};
 
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
@@ -14,7 +20,8 @@ use crate::crystal_ui::select::{
 };
 use crate::crystal_ui::spec::{self, CrystalButtonSpec};
 use crate::crystal_ui::widget::{
-    sync_crystal_image_buttons, CrystalImageButton, CrystalImageButtonSprite,
+    spawn_crystal_image_button, sync_crystal_image_buttons, CrystalImageButton,
+    CrystalImageButtonSprite,
 };
 use crate::native_shell::{
     ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen,
@@ -36,6 +43,120 @@ const MAX_CHANGE_PASSWORD: usize = 15;
 const MAX_NAME: usize = 18;
 const CLASSES: [&str; 3] = ["Warrior", "Wizard", "Taoist"];
 const GENDERS: [&str; 2] = ["Male", "Female"];
+
+const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+    spec::CrystalRect::new(348.0, 224.0, 328.0, 350.0);
+const AUX_CONFIRM_PANEL: spec::CrystalRect = spec::CrystalRect::new(348.0, 286.0, 328.0, 196.0);
+
+const NEW_CHARACTER_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0);
+const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165.0, 187.0, 20.0);
+const NEW_CHARACTER_NAME_FIELD: spec::CrystalRect =
+    spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0);
+const NEW_CHARACTER_PREVIEW: spec::CrystalRect = spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0);
+const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 3] = [
+    spec::CrystalRect::new(541.0, 450.0, 44.0, 42.0),
+    spec::CrystalRect::new(591.0, 450.0, 44.0, 42.0),
+    spec::CrystalRect::new(641.0, 450.0, 44.0, 42.0),
+];
+const NEW_CHARACTER_GENDER_BUTTONS: [spec::CrystalRect; 2] = [
+    spec::CrystalRect::new(541.0, 497.0, 44.0, 42.0),
+    spec::CrystalRect::new(591.0, 497.0, 44.0, 42.0),
+];
+const NEW_CHARACTER_CREATE: spec::CrystalRect = spec::CrystalRect::new(378.0, 579.0, 100.0, 25.0);
+const NEW_CHARACTER_CANCEL: spec::CrystalRect = spec::CrystalRect::new(643.0, 579.0, 100.0, 25.0);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
+enum NativeShellField {
+    CharacterName,
+    ChangePassword(ChangePasswordFocus),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum DeleteConfirmFocus {
+    #[default]
+    Confirm,
+    Cancel,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Resource)]
+struct NativeShellAuxFocus {
+    delete_confirm: DeleteConfirmFocus,
+    connection_retry: bool,
+}
+
+#[derive(Debug, Clone, Copy, Default, Resource)]
+struct NativeShellTextModifiers {
+    control: bool,
+    alt: bool,
+    super_key: bool,
+}
+
+impl NativeShellTextModifiers {
+    fn observe(&mut self, event: &KeyboardInput) {
+        let pressed = event.state == ButtonState::Pressed;
+        match event.key_code {
+            KeyCode::ControlLeft | KeyCode::ControlRight => self.control = pressed,
+            KeyCode::AltLeft | KeyCode::AltRight => self.alt = pressed,
+            KeyCode::SuperLeft | KeyCode::SuperRight => self.super_key = pressed,
+            _ => {}
+        }
+    }
+
+    fn command_modified(self) -> bool {
+        self.control || self.alt || self.super_key
+    }
+
+    fn suppresses_composed_text(self) -> bool {
+        // Ctrl/Super shortcuts must never become editable-field contents even
+        // when winit supplies `KeyboardInput::text`. Alt is deliberately not
+        // included because AltGr/dead-key layouts rely on composed text.
+        self.control || self.super_key
+    }
+}
+
+fn collect_typed_text<'a>(
+    events: impl IntoIterator<Item = &'a KeyboardInput>,
+    modifiers: &mut NativeShellTextModifiers,
+) -> String {
+    let mut typed = String::new();
+    for event in events {
+        modifiers.observe(event);
+        if event.state != ButtonState::Pressed {
+            continue;
+        }
+
+        if modifiers.suppresses_composed_text() {
+            continue;
+        }
+
+        if let Some(text) = event.text.as_deref().filter(|text| !text.is_empty()) {
+            // Composed text is winit's authoritative human-input result. This
+            // preserves AltGr/dead-key layouts. Ctrl/Super shortcuts are
+            // filtered above because Windows may still attach composed text.
+            typed.push_str(text);
+        } else if !modifiers.command_modified() {
+            let Key::Character(text) = &event.logical_key else {
+                continue;
+            };
+            // SendInput-style automation may provide the logical character but
+            // omit winit's composed `text`. Human keyboard input normally uses
+            // `text`; this fallback keeps both paths lossless without turning
+            // Ctrl/Alt/Super shortcuts into field contents.
+            typed.push_str(text);
+        }
+    }
+    typed
+}
+
+fn cycle_delete_focus(current: DeleteConfirmFocus, _reverse: bool) -> DeleteConfirmFocus {
+    // This dialog has exactly two focus targets. Forward and reverse traversal
+    // therefore both move to the other target; direction only becomes
+    // meaningful once a third focusable control exists.
+    match current {
+        DeleteConfirmFocus::Confirm => DeleteConfirmFocus::Cancel,
+        DeleteConfirmFocus::Cancel => DeleteConfirmFocus::Confirm,
+    }
+}
 
 pub fn password_mask(password: &str) -> String {
     "*".repeat(password.chars().count())
@@ -114,7 +235,11 @@ fn apply_and_queue(
     intent: NativeUiIntent,
 ) -> bool {
     let ok = model.apply_ui_intent(intent.clone());
-    if ok && is_gateway_intent(&intent) {
+    // The host drains this queue asynchronously.  A double click/Enter press
+    // must not enqueue a second wire command before the first one is handed
+    // to the gateway; the model's in-flight flags provide the stronger guard
+    // for destructive/password operations.
+    if ok && is_gateway_intent(&intent) && queue.is_empty() {
         queue.push(intent);
     }
     ok
@@ -159,6 +284,8 @@ struct NativeShellContent;
 enum NativeShellButton {
     CancelCreate,
     SubmitCreate,
+    SelectCreateClass(u8),
+    SelectCreateGender(u8),
     Retry,
     CycleClass,
     CycleGender,
@@ -180,6 +307,8 @@ pub struct Mir2NativeShellUiPlugin;
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<NativeUiIntentQueue>()
+            .init_resource::<NativeShellAuxFocus>()
+            .init_resource::<NativeShellTextModifiers>()
             .add_systems(Startup, spawn_shell_ui)
             .add_systems(
                 Update,
@@ -285,11 +414,16 @@ fn shell_pointer_input(
         (&Interaction, &CrystalSelectAction),
         (Changed<Interaction>, With<Button>),
     >,
+    field_interactions: Query<
+        (&Interaction, &NativeShellField),
+        (Changed<Interaction>, With<Button>),
+    >,
     shell: Option<ResMut<NativeShellModel>>,
     queue: Option<ResMut<NativeUiIntentQueue>>,
+    aux_focus: Option<ResMut<NativeShellAuxFocus>>,
     mut app_exit: MessageWriter<AppExit>,
 ) {
-    let (Some(mut shell), Some(mut queue)) = (shell, queue) else {
+    let (Some(mut shell), Some(mut queue), Some(mut aux_focus)) = (shell, queue, aux_focus) else {
         return;
     };
 
@@ -363,11 +497,13 @@ fn shell_pointer_input(
             }
             CrystalSelectAction::DeleteCharacter => {
                 if let Some(character_index) = shell.selected_character_index {
-                    apply_and_queue(
+                    if apply_and_queue(
                         &mut shell,
                         &mut queue,
                         NativeUiIntent::DeleteCharacter { character_index },
-                    );
+                    ) {
+                        aux_focus.delete_confirm = DeleteConfirmFocus::Confirm;
+                    }
                 }
             }
             // Crystal's SelectScene credits handler is intentionally empty.
@@ -375,6 +511,26 @@ fn shell_pointer_input(
             CrystalSelectAction::Exit => {
                 app_exit.write(AppExit::Success);
             }
+        }
+    }
+
+    for (interaction, field) in field_interactions.iter() {
+        if *interaction != Interaction::Pressed {
+            continue;
+        }
+        match field {
+            NativeShellField::CharacterName
+                if shell.screen == NativeShellScreen::CharacterCreate =>
+            {
+                shell.character_create.focus = CharacterCreateFocus::Name;
+            }
+            NativeShellField::ChangePassword(focus)
+                if shell.screen == NativeShellScreen::ChangePassword
+                    && !shell.change_password_request_in_flight =>
+            {
+                shell.change_password.focus = *focus;
+            }
+            _ => {}
         }
     }
 
@@ -395,18 +551,34 @@ fn shell_pointer_input(
                 };
                 apply_and_queue(&mut shell, &mut queue, intent);
             }
+            NativeShellButton::SelectCreateClass(class_index) => {
+                if let Some(class_name) = CLASSES.get(*class_index as usize) {
+                    shell.character_create.focus = CharacterCreateFocus::Class;
+                    shell.character_create.class_name = (*class_name).to_owned();
+                }
+            }
+            NativeShellButton::SelectCreateGender(gender_index) => {
+                if let Some(gender_name) = GENDERS.get(*gender_index as usize) {
+                    shell.character_create.focus = CharacterCreateFocus::Gender;
+                    shell.character_create.gender_name = (*gender_name).to_owned();
+                }
+            }
             NativeShellButton::Retry => {
+                aux_focus.connection_retry = true;
                 apply_and_queue(&mut shell, &mut queue, NativeUiIntent::Retry);
             }
             NativeShellButton::CycleClass => {
+                shell.character_create.focus = CharacterCreateFocus::Class;
                 shell.character_create.class_name =
                     rotate_choice(&shell.character_create.class_name, &CLASSES, false);
             }
             NativeShellButton::CycleGender => {
+                shell.character_create.focus = CharacterCreateFocus::Gender;
                 shell.character_create.gender_name =
                     rotate_choice(&shell.character_create.gender_name, &GENDERS, false);
             }
             NativeShellButton::ConfirmDelete => {
+                aux_focus.delete_confirm = DeleteConfirmFocus::Confirm;
                 apply_and_queue(
                     &mut shell,
                     &mut queue,
@@ -414,6 +586,7 @@ fn shell_pointer_input(
                 );
             }
             NativeShellButton::CancelDelete => {
+                aux_focus.delete_confirm = DeleteConfirmFocus::Cancel;
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelDeleteCharacter);
             }
             NativeShellButton::SubmitChangePassword => {
@@ -453,20 +626,26 @@ fn shell_keyboard_input(
     mut keyboard_inputs: MessageReader<KeyboardInput>,
     shell: Option<ResMut<NativeShellModel>>,
     queue: Option<ResMut<NativeUiIntentQueue>>,
+    aux_focus: Option<ResMut<NativeShellAuxFocus>>,
+    modifiers: Option<ResMut<NativeShellTextModifiers>>,
 ) {
-    let (Some(mut shell), Some(mut queue)) = (shell, queue) else {
+    let (Some(mut shell), Some(mut queue), Some(mut aux_focus), Some(mut modifiers)) =
+        (shell, queue, aux_focus, modifiers)
+    else {
         return;
     };
+
+    // Drain the complete ordered queue every frame. Rapid SendInput bursts can
+    // place several characters in one Bevy update; consuming a single event or
+    // relying only on `KeyboardInput::text` loses synthetic characters.
+    let typed_text = collect_typed_text(keyboard_inputs.read(), &mut modifiers);
+    modifiers.control = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
+    modifiers.alt = keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight);
+    modifiers.super_key = keys.pressed(KeyCode::SuperLeft) || keys.pressed(KeyCode::SuperRight);
 
     if shell.screen == NativeShellScreen::InGame {
         return;
     }
-
-    let typed_text = keyboard_inputs
-        .read()
-        .filter(|event| event.state.is_pressed())
-        .filter_map(|event| event.text.as_deref())
-        .collect::<String>();
     let shifted = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
 
     match shell.screen {
@@ -568,7 +747,7 @@ fn shell_keyboard_input(
 
             if matches!(shell.character_create.focus, CharacterCreateFocus::Name) {
                 for c in typed_text.chars() {
-                    append_editable_field(&mut shell.character_create.name, c, MAX_NAME);
+                    append_name_field(&mut shell.character_create.name, c, MAX_NAME);
                 }
             }
         }
@@ -625,22 +804,22 @@ fn shell_keyboard_input(
             }
             for c in typed_text.chars() {
                 match shell.change_password.focus {
-                    ChangePasswordFocus::AccountId => append_editable_field(
+                    ChangePasswordFocus::AccountId => append_alphanumeric_field(
                         &mut shell.change_password.account_id,
                         c,
                         MAX_CHANGE_ACCOUNT,
                     ),
-                    ChangePasswordFocus::OldPassword => append_editable_field(
+                    ChangePasswordFocus::OldPassword => append_alphanumeric_field(
                         &mut shell.change_password.old_password,
                         c,
                         MAX_CHANGE_PASSWORD,
                     ),
-                    ChangePasswordFocus::NewPassword => append_editable_field(
+                    ChangePasswordFocus::NewPassword => append_alphanumeric_field(
                         &mut shell.change_password.new_password,
                         c,
                         MAX_CHANGE_PASSWORD,
                     ),
-                    ChangePasswordFocus::ConfirmPassword => append_editable_field(
+                    ChangePasswordFocus::ConfirmPassword => append_alphanumeric_field(
                         &mut shell.change_password.confirm_password,
                         c,
                         MAX_CHANGE_PASSWORD,
@@ -671,21 +850,35 @@ fn shell_keyboard_input(
             }
         }
         NativeShellScreen::DeleteConfirm { .. } => {
+            if keys.just_pressed(KeyCode::Tab) {
+                aux_focus.delete_confirm = cycle_delete_focus(aux_focus.delete_confirm, shifted);
+                return;
+            }
             if keys.just_pressed(KeyCode::Escape) {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelDeleteCharacter);
                 return;
             }
             if keys.just_pressed(KeyCode::Enter) {
-                apply_and_queue(
-                    &mut shell,
-                    &mut queue,
-                    NativeUiIntent::ConfirmDeleteCharacter,
-                );
+                match aux_focus.delete_confirm {
+                    DeleteConfirmFocus::Confirm => apply_and_queue(
+                        &mut shell,
+                        &mut queue,
+                        NativeUiIntent::ConfirmDeleteCharacter,
+                    ),
+                    DeleteConfirmFocus::Cancel => {
+                        shell.apply_ui_intent(NativeUiIntent::CancelDeleteCharacter)
+                    }
+                };
                 return;
             }
         }
         NativeShellScreen::ConnectionLost => {
+            if keys.just_pressed(KeyCode::Tab) {
+                aux_focus.connection_retry = true;
+                return;
+            }
             if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::Escape) {
+                aux_focus.connection_retry = true;
                 apply_and_queue(&mut shell, &mut queue, NativeUiIntent::Retry);
             }
         }
@@ -704,12 +897,31 @@ fn append_editable_field(text: &mut String, c: char, max: usize) {
     text.push(c);
 }
 
+fn append_name_field(text: &mut String, c: char, max: usize) {
+    if !is_printable_char(c) || c.is_whitespace() {
+        return;
+    }
+    if text.chars().count() >= max {
+        return;
+    }
+    text.push(c);
+}
+
+fn append_alphanumeric_field(text: &mut String, c: char, max: usize) {
+    if !c.is_ascii_alphanumeric() {
+        return;
+    }
+    append_editable_field(text, c, max);
+}
+
 fn render_shell_ui(
     mut commands: Commands,
     model: Option<Res<NativeShellModel>>,
     asset_server: Res<AssetServer>,
+    aux_focus: Option<Res<NativeShellAuxFocus>>,
     content_nodes: Query<Entity, With<NativeShellContent>>,
     mut last_rendered_model: Local<Option<NativeShellModel>>,
+    mut last_rendered_aux_focus: Local<Option<NativeShellAuxFocus>>,
 ) {
     let Some(model) = model else {
         return;
@@ -719,10 +931,15 @@ fn render_shell_ui(
         return;
     }
 
-    if last_rendered_model.as_ref() == Some(model.as_ref()) {
+    let current_aux_focus = aux_focus.as_deref().copied().unwrap_or_default();
+
+    if last_rendered_model.as_ref() == Some(model.as_ref())
+        && last_rendered_aux_focus.as_ref() == Some(&current_aux_focus)
+    {
         return;
     }
     *last_rendered_model = Some(model.clone());
+    *last_rendered_aux_focus = Some(current_aux_focus);
 
     let Ok(content) = content_nodes.single() else {
         return;
@@ -759,12 +976,12 @@ fn render_shell_ui(
             NativeShellScreen::CharacterSelect => {
                 spawn_character_select_screen(screen, &asset_server, &model);
             }
-            NativeShellScreen::CharacterCreate => with_generic_panel(screen, |panel| {
-                render_character_create(panel, &model);
-            }),
-            NativeShellScreen::ChangePassword => with_generic_panel(screen, |panel| {
-                render_change_password(panel, &model);
-            }),
+            NativeShellScreen::CharacterCreate => {
+                render_character_create(screen, &asset_server, &model);
+            }
+            NativeShellScreen::ChangePassword => {
+                render_change_password(screen, &asset_server, &model);
+            }
             NativeShellScreen::SafeKey => {
                 spawn_login_screen(
                     screen,
@@ -774,12 +991,12 @@ fn render_shell_ui(
                 );
                 render_safe_key(screen, &asset_server, &model);
             }
-            NativeShellScreen::DeleteConfirm { index } => with_generic_panel(screen, |panel| {
-                render_delete_confirm(panel, &model, index);
-            }),
-            NativeShellScreen::ConnectionLost => with_generic_panel(screen, |panel| {
-                render_connection_lost(panel, &model);
-            }),
+            NativeShellScreen::DeleteConfirm { index } => {
+                render_delete_confirm(screen, &asset_server, &model, index, current_aux_focus);
+            }
+            NativeShellScreen::ConnectionLost => {
+                render_connection_lost(screen, &asset_server, &model, current_aux_focus);
+            }
             NativeShellScreen::InGame => {}
         });
 }
@@ -814,123 +1031,255 @@ fn info_block(parent: &mut ChildSpawnerCommands, title: &str, detail: &str) {
     text_line(parent, detail);
 }
 
-fn render_character_create(parent: &mut ChildSpawnerCommands, model: &NativeShellModel) {
-    title_line(parent, "Create Character");
-    input_line(
+fn render_character_create(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    model: &NativeShellModel,
+) {
+    // Crystal's NewCharacterDialog is a 588x460 modal at (218,154).  The
+    // frame already contains the input border and the five class/two gender
+    // slots, so the native overlay must be anchored to that frame rather than
+    // recreating a second generic panel beside it.
+    parent.spawn((
+        absolute_node(NEW_CHARACTER_FRAME),
+        ImageNode {
+            image: asset_server.load("original-ui/Prguse/73.png"),
+            image_mode: NodeImageMode::Stretch,
+            ..default()
+        },
+    ));
+    spawn_native_image(
         parent,
-        "Name",
+        asset_server,
+        "original-ui/Title/20.png",
+        NEW_CHARACTER_TITLE,
+    );
+    spawn_native_image(
+        parent,
+        asset_server,
+        character_preview_asset(
+            &model.character_create.class_name,
+            &model.character_create.gender_name,
+        ),
+        NEW_CHARACTER_PREVIEW,
+    );
+    spawn_aux_text(
+        parent,
+        character_description(&model.character_create.class_name),
+        spec::CrystalRect::new(497.0, 224.0, 278.0, 170.0),
+        13.0,
+        CREAM,
+        Justify::Left,
+    );
+    spawn_crystal_name_field(
+        parent,
+        NEW_CHARACTER_NAME_FIELD,
         &model.character_create.name,
         model.character_create.focus == CharacterCreateFocus::Name,
-    );
-    input_line(
-        parent,
-        "Class",
-        &model.character_create.class_name,
-        model.character_create.focus == CharacterCreateFocus::Class,
-    );
-    input_line(
-        parent,
-        "Gender",
-        &model.character_create.gender_name,
-        model.character_create.focus == CharacterCreateFocus::Gender,
+        true,
+        NativeShellField::CharacterName,
     );
 
-    parent
-        .spawn((Node {
-            width: Val::Percent(100.0),
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(10.0),
-            ..default()
-        },))
-        .with_children(|row| {
-            action_button(row, "Class", NativeShellButton::CycleClass, true, false);
-            action_button(row, "Gender", NativeShellButton::CycleGender, true, false);
-        });
-
-    if let Some(notice) = &model.notice {
-        text_line(parent, &notice.message);
+    for (index, rect) in NEW_CHARACTER_CLASS_BUTTONS.into_iter().enumerate() {
+        let selected = character_class_index(&model.character_create.class_name) == index as u16;
+        let normal = 2426 + index as u16 * 3 + if selected { 1 } else { 0 };
+        let class_spec = CrystalButtonSpec::new(
+            "Prguse",
+            normal,
+            normal + if selected { 0 } else { 1 },
+            2428 + index as u16 * 3,
+            rect,
+            44.0,
+            42.0,
+        );
+        spawn_crystal_image_button(
+            parent,
+            asset_server,
+            class_spec,
+            CrystalButtonAssetSet::from_spec(class_spec),
+            NativeShellButton::SelectCreateClass(index as u8),
+            model.character_create.focus == CharacterCreateFocus::Class && selected,
+            true,
+        );
+    }
+    for (index, rect) in NEW_CHARACTER_GENDER_BUTTONS.into_iter().enumerate() {
+        let selected = character_gender_index(&model.character_create.gender_name) == index as u16;
+        let base = if index == 0 { 2420 } else { 2423 };
+        let normal = base + if selected { 1 } else { 0 };
+        let gender_spec = CrystalButtonSpec::new(
+            "Prguse",
+            normal,
+            normal + if selected { 0 } else { 1 },
+            base + 2,
+            rect,
+            44.0,
+            42.0,
+        );
+        spawn_crystal_image_button(
+            parent,
+            asset_server,
+            gender_spec,
+            CrystalButtonAssetSet::from_spec(gender_spec),
+            NativeShellButton::SelectCreateGender(index as u8),
+            model.character_create.focus == CharacterCreateFocus::Gender && selected,
+            true,
+        );
     }
 
-    parent
-        .spawn((Node {
-            width: Val::Percent(100.0),
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(10.0),
-            ..default()
-        },))
-        .with_children(|row| {
-            action_button(
-                row,
-                "Create",
-                NativeShellButton::SubmitCreate,
-                true,
-                model.character_create.focus == CharacterCreateFocus::CreateButton,
-            );
-            action_button(
-                row,
-                "Cancel",
-                NativeShellButton::CancelCreate,
-                true,
-                model.character_create.focus == CharacterCreateFocus::CancelButton,
-            );
-        });
+    if let Some(notice) = &model.notice {
+        spawn_aux_notice(
+            parent,
+            &notice.message,
+            notice.kind,
+            spec::CrystalRect::new(628.0, 610.0, 304.0, 28.0),
+        );
+    }
+    let create_spec =
+        CrystalButtonSpec::new("Title", 360, 361, 362, NEW_CHARACTER_CREATE, 100.0, 25.0);
+    let cancel_spec = spec::login::CANCEL;
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        create_spec,
+        CrystalButtonAssetSet::from_spec(create_spec),
+        NativeShellButton::SubmitCreate,
+        model.character_create.focus == CharacterCreateFocus::CreateButton,
+        model.character_create.is_ready(),
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        CrystalButtonSpec::new(
+            cancel_spec.library,
+            cancel_spec.normal,
+            cancel_spec.hover,
+            cancel_spec.pressed,
+            NEW_CHARACTER_CANCEL,
+            100.0,
+            25.0,
+        ),
+        CrystalButtonAssetSet::from_spec(cancel_spec),
+        NativeShellButton::CancelCreate,
+        model.character_create.focus == CharacterCreateFocus::CancelButton,
+        true,
+    );
 }
 
-fn render_change_password(parent: &mut ChildSpawnerCommands, model: &NativeShellModel) {
-    title_line(parent, "Change Password");
-    input_line(
+fn render_change_password(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    model: &NativeShellModel,
+) {
+    spawn_auxiliary_panel(parent, asset_server, AUX_CHANGE_PASSWORD_PANEL);
+    spawn_aux_text(
         parent,
-        "Account ID",
-        &model.change_password.account_id,
-        model.change_password.focus == ChangePasswordFocus::AccountId,
+        "Change Password",
+        spec::CrystalRect::new(366.0, 240.0, 292.0, 28.0),
+        19.0,
+        GOLD,
+        Justify::Center,
     );
-    input_line(
-        parent,
-        "Current Password",
-        &password_mask(&model.change_password.old_password),
-        model.change_password.focus == ChangePasswordFocus::OldPassword,
-    );
-    input_line(
-        parent,
-        "New Password",
-        &password_mask(&model.change_password.new_password),
-        model.change_password.focus == ChangePasswordFocus::NewPassword,
-    );
-    input_line(
-        parent,
-        "Confirm Password",
-        &password_mask(&model.change_password.confirm_password),
-        model.change_password.focus == ChangePasswordFocus::ConfirmPassword,
-    );
-    if let Some(notice) = &model.notice {
-        text_line(parent, &notice.message);
+    let old_password = password_mask(&model.change_password.old_password);
+    let new_password = password_mask(&model.change_password.new_password);
+    let confirm_password = password_mask(&model.change_password.confirm_password);
+    let fields = [
+        (
+            "Account ID",
+            model.change_password.account_id.as_str(),
+            ChangePasswordFocus::AccountId,
+            282.0,
+        ),
+        (
+            "Current Password",
+            old_password.as_str(),
+            ChangePasswordFocus::OldPassword,
+            322.0,
+        ),
+        (
+            "New Password",
+            new_password.as_str(),
+            ChangePasswordFocus::NewPassword,
+            362.0,
+        ),
+        (
+            "Confirm Password",
+            confirm_password.as_str(),
+            ChangePasswordFocus::ConfirmPassword,
+            402.0,
+        ),
+    ];
+    for (label, value, focus, top) in fields {
+        spawn_aux_text(
+            parent,
+            label,
+            spec::CrystalRect::new(366.0, top, 112.0, 26.0),
+            12.0,
+            CREAM,
+            Justify::Left,
+        );
+        spawn_aux_field(
+            parent,
+            spec::CrystalRect::new(482.0, top - 2.0, 160.0, 28.0),
+            value,
+            model.change_password.focus == focus,
+            !model.change_password_request_in_flight,
+            NativeShellField::ChangePassword(focus),
+        );
     }
-    parent
-        .spawn((Node {
-            width: Val::Percent(100.0),
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(10.0),
-            ..default()
-        },))
-        .with_children(|row| {
-            action_button(
-                row,
-                "Submit",
-                NativeShellButton::SubmitChangePassword,
-                !model.change_password_request_in_flight,
-                model.change_password.focus == ChangePasswordFocus::SubmitButton,
-            );
-            action_button(
-                row,
-                "Cancel",
-                NativeShellButton::CancelChangePassword,
-                !model.change_password_request_in_flight,
-                model.change_password.focus == ChangePasswordFocus::CancelButton,
-            );
-        });
+    if let Some(notice) = &model.notice {
+        spawn_aux_notice(
+            parent,
+            &notice.message,
+            notice.kind,
+            spec::CrystalRect::new(366.0, 466.0, 292.0, 20.0),
+        );
+    }
+    let submit_spec = CrystalButtonSpec::new(
+        "Title",
+        320,
+        321,
+        322,
+        spec::CrystalRect::new(575.0, 492.0, 42.0, 42.0),
+        48.0,
+        48.0,
+    );
+    let cancel_spec = CrystalButtonSpec::new(
+        "Title",
+        329,
+        330,
+        331,
+        spec::CrystalRect::new(458.0, 501.0, 100.0, 25.0),
+        100.0,
+        25.0,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        submit_spec,
+        CrystalButtonAssetSet::from_spec(submit_spec),
+        NativeShellButton::SubmitChangePassword,
+        model.change_password.focus == ChangePasswordFocus::SubmitButton,
+        !model.change_password_request_in_flight,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        cancel_spec,
+        CrystalButtonAssetSet::from_spec(cancel_spec),
+        NativeShellButton::CancelChangePassword,
+        model.change_password.focus == ChangePasswordFocus::CancelButton,
+        !model.change_password_request_in_flight,
+    );
+    if model.change_password_request_in_flight {
+        spawn_aux_text(
+            parent,
+            "Submitting...",
+            spec::CrystalRect::new(366.0, 540.0, 292.0, 20.0),
+            12.0,
+            GOLD,
+            Justify::Center,
+        );
+    }
 }
 
 fn render_safe_key(
@@ -1070,61 +1419,374 @@ fn safe_key_image_button(
         });
 }
 
-fn render_delete_confirm(parent: &mut ChildSpawnerCommands, model: &NativeShellModel, index: i32) {
+fn render_delete_confirm(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    model: &NativeShellModel,
+    index: i32,
+    aux_focus: NativeShellAuxFocus,
+) {
     let name = model
         .characters
         .iter()
         .find(|c| c.index == index)
         .map(|c| c.name.as_str())
         .unwrap_or("Unknown");
-    title_line(parent, "Delete Character");
-    text_line(
+    spawn_auxiliary_panel(parent, asset_server, AUX_CONFIRM_PANEL);
+    spawn_aux_text(
         parent,
-        &format!(
-            "Are you sure you want to delete '{}' (index {})? This cannot be undone.",
-            name, index
-        ),
+        "Delete Character",
+        spec::CrystalRect::new(366.0, 304.0, 292.0, 28.0),
+        19.0,
+        GOLD,
+        Justify::Center,
+    );
+    spawn_aux_text(
+        parent,
+        &format!("Delete '{}' (slot {})?", name, index),
+        spec::CrystalRect::new(366.0, 350.0, 292.0, 25.0),
+        14.0,
+        CREAM,
+        Justify::Center,
     );
     if let Some(notice) = &model.notice {
-        text_line(parent, &notice.message);
+        spawn_aux_notice(
+            parent,
+            &notice.message,
+            notice.kind,
+            spec::CrystalRect::new(366.0, 374.0, 292.0, 20.0),
+        );
     }
-    parent
-        .spawn((Node {
-            width: Val::Percent(100.0),
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(10.0),
-            ..default()
-        },))
-        .with_children(|row| {
-            action_button(
-                row,
-                if model.delete_request_in_flight {
-                    "Deleting..."
-                } else {
-                    "Confirm Delete"
-                },
-                NativeShellButton::ConfirmDelete,
-                !model.delete_request_in_flight,
-                false,
-            );
-            action_button(
-                row,
-                "Cancel",
-                NativeShellButton::CancelDelete,
-                !model.delete_request_in_flight,
-                false,
-            );
-        });
+    let confirm_spec = CrystalButtonSpec::new(
+        "Title",
+        320,
+        321,
+        322,
+        spec::CrystalRect::new(458.0, 398.0, 42.0, 42.0),
+        48.0,
+        48.0,
+    );
+    let cancel_spec = CrystalButtonSpec::new(
+        "Title",
+        329,
+        330,
+        331,
+        spec::CrystalRect::new(514.0, 407.0, 100.0, 25.0),
+        100.0,
+        25.0,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        confirm_spec,
+        CrystalButtonAssetSet::from_spec(confirm_spec),
+        NativeShellButton::ConfirmDelete,
+        aux_focus.delete_confirm == DeleteConfirmFocus::Confirm,
+        !model.delete_request_in_flight,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        cancel_spec,
+        CrystalButtonAssetSet::from_spec(cancel_spec),
+        NativeShellButton::CancelDelete,
+        aux_focus.delete_confirm == DeleteConfirmFocus::Cancel,
+        !model.delete_request_in_flight,
+    );
+    if model.delete_request_in_flight {
+        spawn_aux_text(
+            parent,
+            "Deleting...",
+            spec::CrystalRect::new(366.0, 454.0, 292.0, 20.0),
+            12.0,
+            GOLD,
+            Justify::Center,
+        );
+    }
 }
 
-fn render_connection_lost(parent: &mut ChildSpawnerCommands, model: &NativeShellModel) {
-    title_line(parent, "Connection Lost");
-    text_line(parent, "Press Enter or Escape to retry.");
+fn render_connection_lost(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    model: &NativeShellModel,
+    aux_focus: NativeShellAuxFocus,
+) {
+    spawn_auxiliary_panel(parent, asset_server, AUX_CONFIRM_PANEL);
+    spawn_aux_text(
+        parent,
+        "Connection Lost",
+        spec::CrystalRect::new(366.0, 304.0, 292.0, 28.0),
+        19.0,
+        GOLD,
+        Justify::Center,
+    );
+    spawn_aux_text(
+        parent,
+        "Press Enter, Escape, or Retry to reconnect.",
+        spec::CrystalRect::new(366.0, 350.0, 292.0, 25.0),
+        13.0,
+        CREAM,
+        Justify::Center,
+    );
     if let Some(notice) = &model.notice {
-        text_line(parent, &notice.message);
+        spawn_aux_notice(
+            parent,
+            &notice.message,
+            notice.kind,
+            spec::CrystalRect::new(366.0, 374.0, 292.0, 20.0),
+        );
     }
-    action_button(parent, "Retry", NativeShellButton::Retry, true, false);
+    let retry_spec = CrystalButtonSpec::new(
+        "Title",
+        320,
+        321,
+        322,
+        spec::CrystalRect::new(575.0, 398.0, 42.0, 42.0),
+        48.0,
+        48.0,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        retry_spec,
+        CrystalButtonAssetSet::from_spec(retry_spec),
+        NativeShellButton::Retry,
+        aux_focus.connection_retry,
+        true,
+    );
+    spawn_aux_text(
+        parent,
+        "Retry",
+        spec::CrystalRect::new(524.0, 444.0, 144.0, 20.0),
+        12.0,
+        CREAM,
+        Justify::Center,
+    );
+}
+
+fn character_class_index(class_name: &str) -> u16 {
+    CLASSES
+        .iter()
+        .position(|candidate| candidate.eq_ignore_ascii_case(class_name))
+        .unwrap_or(0) as u16
+}
+
+fn character_gender_index(gender_name: &str) -> u16 {
+    GENDERS
+        .iter()
+        .position(|candidate| candidate.eq_ignore_ascii_case(gender_name))
+        .unwrap_or(0) as u16
+}
+
+fn character_preview_asset(class_name: &str, gender_name: &str) -> String {
+    let class_index = character_class_index(class_name);
+    let gender_index = character_gender_index(gender_name);
+    let frame = match (class_index, gender_index) {
+        (0, 0) => 20,
+        (0, 1) => 300,
+        (1, 0) => 40,
+        (1, 1) => 320,
+        (2, 0) => 60,
+        (2, 1) => 340,
+        _ => 20,
+    };
+    format!("original-ui/ChrSel/{frame}.png")
+}
+
+fn character_description(class_name: &str) -> &'static str {
+    match character_class_index(class_name) {
+        0 => "Warriors are resilient frontline fighters.\nThey favor close combat and heavy weapons.",
+        1 => "Wizards command powerful elemental magic.\nThey favor ranged spells and careful positioning.",
+        2 => "Taoists support allies and master spiritual arts.\nThey balance healing, buffs, and combat.",
+        _ => "",
+    }
+}
+
+fn spawn_native_image(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    path: impl Into<String>,
+    rect: spec::CrystalRect,
+) {
+    let path = path.into();
+    parent.spawn((
+        absolute_node(rect),
+        ImageNode {
+            image: asset_server.load(path),
+            image_mode: NodeImageMode::Stretch,
+            ..default()
+        },
+    ));
+}
+
+fn spawn_auxiliary_panel(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    rect: spec::CrystalRect,
+) {
+    parent.spawn((
+        absolute_node(rect),
+        BackgroundColor(PANEL_BG),
+        ImageNode {
+            image: asset_server.load("original-ui/Prguse/1084.png"),
+            image_mode: NodeImageMode::Stretch,
+            ..default()
+        },
+    ));
+    parent.spawn((
+        absolute_node(rect),
+        BackgroundColor(Color::srgba(0.04, 0.025, 0.015, 0.42)),
+    ));
+}
+
+fn absolute_node(rect: spec::CrystalRect) -> Node {
+    Node {
+        position_type: PositionType::Absolute,
+        left: Val::Px(rect.left),
+        top: Val::Px(rect.top),
+        width: Val::Px(rect.width),
+        height: Val::Px(rect.height),
+        ..default()
+    }
+}
+
+fn spawn_aux_text(
+    parent: &mut ChildSpawnerCommands,
+    value: &str,
+    rect: spec::CrystalRect,
+    size: f32,
+    color: Color,
+    justify: Justify,
+) {
+    parent.spawn((
+        absolute_node(rect),
+        Text::new(value.to_owned()),
+        body_font(size),
+        TextColor(color),
+        TextLayout::justify(justify),
+        TextShadow {
+            offset: Vec2::splat(1.0),
+            color: Color::BLACK,
+        },
+    ));
+}
+
+fn spawn_aux_notice(
+    parent: &mut ChildSpawnerCommands,
+    message: &str,
+    kind: crate::native_shell::ShellNoticeKind,
+    rect: spec::CrystalRect,
+) {
+    let color = match kind {
+        crate::native_shell::ShellNoticeKind::Info => CREAM,
+        crate::native_shell::ShellNoticeKind::Warn => GOLD,
+        crate::native_shell::ShellNoticeKind::Error => Color::srgb(0.95, 0.38, 0.30),
+    };
+    spawn_aux_text(parent, message, rect, 12.0, color, Justify::Center);
+}
+
+fn spawn_aux_field(
+    parent: &mut ChildSpawnerCommands,
+    rect: spec::CrystalRect,
+    value: &str,
+    focused: bool,
+    enabled: bool,
+    field: NativeShellField,
+) {
+    let mut entity = parent.spawn((
+        absolute_node(rect),
+        BackgroundColor(if focused {
+            BUTTON_HIGHLIGHT
+        } else {
+            Color::BLACK
+        }),
+        field,
+    ));
+    if enabled {
+        entity.insert(Button);
+    }
+    entity.with_children(|input| {
+        input.spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                padding: UiRect::horizontal(Val::Px(8.0)),
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            Text::new(value.to_owned()),
+            body_font(14.0),
+            TextColor(CREAM),
+        ));
+    });
+}
+
+fn spawn_crystal_name_field(
+    parent: &mut ChildSpawnerCommands,
+    rect: spec::CrystalRect,
+    value: &str,
+    _focused: bool,
+    enabled: bool,
+    field: NativeShellField,
+) {
+    let mut entity = parent.spawn((
+        absolute_node(rect),
+        // The Prguse/73 frame supplies the gold border.  Keep the input's
+        // interior black so focus does not paint over Crystal's border art.
+        BackgroundColor(Color::BLACK),
+        field,
+    ));
+    if enabled {
+        entity.insert(Button);
+    }
+    entity.with_children(|input| {
+        input.spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                padding: UiRect::horizontal(Val::Px(2.0)),
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            Text::new(value.to_owned()),
+            body_font(14.0),
+            TextColor(CREAM),
+        ));
+    });
+}
+
+fn spawn_aux_text_button(
+    parent: &mut ChildSpawnerCommands,
+    rect: spec::CrystalRect,
+    label: String,
+    action: NativeShellButton,
+    enabled: bool,
+    focused: bool,
+) {
+    let mut entity = parent.spawn((
+        absolute_node(rect),
+        BackgroundColor(if focused { BUTTON_HIGHLIGHT } else { BUTTON_BG }),
+        action,
+    ));
+    if enabled {
+        entity.insert(Button);
+    }
+    entity.with_children(|button| {
+        button.spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            Text::new(label),
+            body_font(12.0),
+            TextColor(CREAM),
+            TextLayout::justify(Justify::Center),
+        ));
+    });
 }
 
 fn title_line(parent: &mut ChildSpawnerCommands, text: &str) {
@@ -1253,6 +1915,22 @@ fn body_font(size: f32) -> TextFont {
 mod tests {
     use super::*;
 
+    fn keyboard_event(
+        key_code: KeyCode,
+        logical_key: Key,
+        state: ButtonState,
+        text: Option<&str>,
+    ) -> KeyboardInput {
+        KeyboardInput {
+            key_code,
+            logical_key,
+            state,
+            text: text.map(Into::into),
+            repeat: false,
+            window: Entity::PLACEHOLDER,
+        }
+    }
+
     #[test]
     fn masks_password_without_plain_chars() {
         assert_eq!(password_mask(""), "");
@@ -1265,6 +1943,170 @@ mod tests {
         assert!(is_printable_char('a'));
         assert!(is_printable_char(' '));
         assert!(!is_printable_char('\n'));
+    }
+
+    #[test]
+    fn rapid_keyboard_batch_consumes_text_and_logical_character_fallbacks_in_order() {
+        let characters = [
+            (KeyCode::KeyV, "v", Some("v")),
+            (KeyCode::KeyI, "i", None),
+            (KeyCode::KeyS, "s", Some("s")),
+            (KeyCode::KeyU, "u", None),
+            (KeyCode::KeyA, "a", Some("a")),
+            (KeyCode::KeyL, "l", None),
+            (KeyCode::KeyQ, "q", Some("q")),
+            (KeyCode::KeyA, "a", None),
+            (KeyCode::Digit1, "1", Some("1")),
+        ];
+        let events = characters
+            .into_iter()
+            .map(|(key_code, logical, text)| {
+                keyboard_event(
+                    key_code,
+                    Key::Character(logical.into()),
+                    ButtonState::Pressed,
+                    text,
+                )
+            })
+            .collect::<Vec<_>>();
+        let mut modifiers = NativeShellTextModifiers::default();
+
+        assert_eq!(
+            collect_typed_text(events.iter(), &mut modifiers),
+            "visualqa1"
+        );
+    }
+
+    #[test]
+    fn single_event_can_carry_multiple_composed_characters() {
+        let event = keyboard_event(
+            KeyCode::KeyV,
+            Key::Character("vqa0822r".into()),
+            ButtonState::Pressed,
+            Some("vqa0822r"),
+        );
+        let mut modifiers = NativeShellTextModifiers::default();
+
+        assert_eq!(collect_typed_text([&event], &mut modifiers), "vqa0822r");
+    }
+
+    #[test]
+    fn empty_composed_text_uses_logical_character_fallback() {
+        let event = keyboard_event(
+            KeyCode::KeyQ,
+            Key::Character("q".into()),
+            ButtonState::Pressed,
+            Some(""),
+        );
+        let mut modifiers = NativeShellTextModifiers::default();
+
+        assert_eq!(collect_typed_text([&event], &mut modifiers), "q");
+    }
+
+    #[test]
+    fn logical_character_fallback_does_not_turn_control_shortcuts_into_text() {
+        let events = [
+            keyboard_event(
+                KeyCode::ControlLeft,
+                Key::Control,
+                ButtonState::Pressed,
+                None,
+            ),
+            keyboard_event(
+                KeyCode::KeyV,
+                Key::Character("v".into()),
+                ButtonState::Pressed,
+                None,
+            ),
+            keyboard_event(
+                KeyCode::ControlLeft,
+                Key::Control,
+                ButtonState::Released,
+                None,
+            ),
+            keyboard_event(
+                KeyCode::KeyA,
+                Key::Character("a".into()),
+                ButtonState::Pressed,
+                None,
+            ),
+        ];
+        let mut modifiers = NativeShellTextModifiers::default();
+
+        assert_eq!(collect_typed_text(events.iter(), &mut modifiers), "a");
+    }
+
+    #[test]
+    fn composed_text_does_not_turn_control_shortcuts_into_text() {
+        let events = [
+            keyboard_event(
+                KeyCode::ControlLeft,
+                Key::Control,
+                ButtonState::Pressed,
+                None,
+            ),
+            keyboard_event(
+                KeyCode::KeyA,
+                Key::Character("a".into()),
+                ButtonState::Pressed,
+                Some("a"),
+            ),
+            keyboard_event(
+                KeyCode::ControlLeft,
+                Key::Control,
+                ButtonState::Released,
+                None,
+            ),
+            keyboard_event(
+                KeyCode::KeyA,
+                Key::Character("a".into()),
+                ButtonState::Pressed,
+                Some("a"),
+            ),
+        ];
+        let mut modifiers = NativeShellTextModifiers::default();
+
+        assert_eq!(collect_typed_text(events.iter(), &mut modifiers), "a");
+    }
+
+    #[test]
+    fn login_system_applies_an_entire_rapid_character_batch_in_one_update() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default())
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::Login,
+                ..Default::default()
+            })
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<NativeShellAuxFocus>()
+            .init_resource::<NativeShellTextModifiers>()
+            .add_message::<KeyboardInput>()
+            .add_systems(Update, shell_keyboard_input);
+
+        for (key_code, character, with_text) in [
+            (KeyCode::KeyV, "v", true),
+            (KeyCode::KeyI, "i", false),
+            (KeyCode::KeyS, "s", true),
+            (KeyCode::KeyU, "u", false),
+            (KeyCode::KeyA, "a", true),
+            (KeyCode::KeyL, "l", false),
+            (KeyCode::KeyQ, "q", true),
+            (KeyCode::KeyA, "a", false),
+            (KeyCode::Digit1, "1", true),
+        ] {
+            app.world_mut().write_message(keyboard_event(
+                key_code,
+                Key::Character(character.into()),
+                ButtonState::Pressed,
+                with_text.then_some(character),
+            ));
+        }
+
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().login.account,
+            "visualqa1"
+        );
     }
 
     #[test]
@@ -1290,6 +2132,113 @@ mod tests {
             cycle_create_focus(CharacterCreateFocus::CancelButton, true),
             CharacterCreateFocus::CreateButton
         ));
+        assert_eq!(
+            cycle_delete_focus(DeleteConfirmFocus::Confirm, false),
+            DeleteConfirmFocus::Cancel
+        );
+        assert_eq!(
+            cycle_delete_focus(DeleteConfirmFocus::Cancel, true),
+            DeleteConfirmFocus::Confirm
+        );
+    }
+
+    #[test]
+    fn new_character_uses_crystal_geometry_assets_and_supported_control_bounds() {
+        assert_eq!(
+            NEW_CHARACTER_FRAME,
+            spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0)
+        );
+        assert_eq!(
+            NEW_CHARACTER_TITLE,
+            spec::CrystalRect::new(424.0, 165.0, 187.0, 20.0)
+        );
+        assert_eq!(
+            NEW_CHARACTER_NAME_FIELD,
+            spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0)
+        );
+        assert_eq!(
+            NEW_CHARACTER_PREVIEW,
+            spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0)
+        );
+        assert_eq!(
+            NEW_CHARACTER_CREATE,
+            spec::CrystalRect::new(378.0, 579.0, 100.0, 25.0)
+        );
+        assert_eq!(
+            NEW_CHARACTER_CANCEL,
+            spec::CrystalRect::new(643.0, 579.0, 100.0, 25.0)
+        );
+        assert_eq!(NEW_CHARACTER_CLASS_BUTTONS.len(), CLASSES.len());
+        assert_eq!(NEW_CHARACTER_GENDER_BUTTONS.len(), GENDERS.len());
+        assert!(NEW_CHARACTER_CLASS_BUTTONS
+            .into_iter()
+            .chain(NEW_CHARACTER_GENDER_BUTTONS)
+            .all(|rect| rect.is_valid_hit_target()));
+        assert!(NEW_CHARACTER_CLASS_BUTTONS
+            .into_iter()
+            .chain(NEW_CHARACTER_GENDER_BUTTONS)
+            .all(|rect| NEW_CHARACTER_FRAME.contains(rect.left, rect.top)));
+        assert_eq!(
+            character_preview_asset("Warrior", "Male"),
+            "original-ui/ChrSel/20.png"
+        );
+        assert_eq!(
+            character_preview_asset("Wizard", "Female"),
+            "original-ui/ChrSel/320.png"
+        );
+        assert_eq!(
+            character_preview_asset("Taoist", "Male"),
+            "original-ui/ChrSel/60.png"
+        );
+        assert_eq!(
+            spec::CrystalFrameSpec::new("Prguse", 73, NEW_CHARACTER_FRAME).asset_path(),
+            "original-ui/Prguse/73.png"
+        );
+        assert_eq!(
+            spec::CrystalFrameSpec::new("Title", 20, NEW_CHARACTER_TITLE).asset_path(),
+            "original-ui/Title/20.png"
+        );
+    }
+
+    #[test]
+    fn new_character_class_and_gender_choices_are_limited_to_existing_backend_flow() {
+        assert_eq!(CLASSES, ["Warrior", "Wizard", "Taoist"]);
+        assert_eq!(GENDERS, ["Male", "Female"]);
+        assert!(!CLASSES.contains(&"Assassin"));
+        assert!(!CLASSES.contains(&"Archer"));
+        assert_eq!(character_description("Warrior").is_empty(), false);
+    }
+
+    #[test]
+    fn auxiliary_fields_reject_invalid_name_and_password_characters() {
+        let mut name = String::new();
+        append_name_field(&mut name, ' ', MAX_NAME);
+        append_name_field(&mut name, '\n', MAX_NAME);
+        append_name_field(&mut name, '勇', MAX_NAME);
+        assert_eq!(name, "勇");
+
+        let mut password = String::new();
+        append_alphanumeric_field(&mut password, 'a', MAX_CHANGE_PASSWORD);
+        append_alphanumeric_field(&mut password, '@', MAX_CHANGE_PASSWORD);
+        append_alphanumeric_field(&mut password, '7', MAX_CHANGE_PASSWORD);
+        assert_eq!(password, "a7");
+    }
+
+    #[test]
+    fn repeated_character_create_submission_is_not_queued_twice() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterCreate;
+        model.character_create.name = "Hero".to_owned();
+        let intent = NativeUiIntent::CreateCharacter {
+            name: "Hero".to_owned(),
+            class_name: "Warrior".to_owned(),
+            gender_name: "Male".to_owned(),
+        };
+        let mut queue = NativeUiIntentQueue::default();
+
+        assert!(apply_and_queue(&mut model, &mut queue, intent.clone()));
+        assert!(apply_and_queue(&mut model, &mut queue, intent));
+        assert_eq!(queue.drain().count(), 1);
     }
 
     #[test]

@@ -2,6 +2,7 @@ mod additive_material;
 pub mod entity_animation;
 mod entity_animation_bridge;
 mod interpolation;
+mod lighting;
 mod local_motion;
 mod motion;
 mod movement_shadow;
@@ -17,6 +18,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 
 use bevy::asset::{AssetMetaCheck, AssetPlugin, LoadState, RenderAssetUsages};
+use bevy::camera::{visibility::RenderLayers, ClearColorConfig, RenderTarget};
 use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
 use bevy::math::{URect, UVec2};
 use bevy::prelude::*;
@@ -24,12 +26,13 @@ use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
 use mir2_client_bevy::pending_operations::{
-    apply_inventory_operation_ack, mark_authoritative_refresh, reconcile_inventory_refresh,
-    reconcile_mail_refresh, reconcile_shop_refresh, reconcile_storage_refresh,
-    request_session_reset, request_session_reset_preserving_exact_game_shop_receipt,
-    AuthoritativeModelDomain, AuthoritativeModelRevisions, InventoryOperationAck,
-    InventoryOperationFeedback, PendingLifecycleSet, PendingOperationKey, PendingOperations,
-    SessionResetGameShopPreservation, SessionResetRevision,
+    apply_inventory_operation_ack, apply_storage_operation_ack, mark_authoritative_refresh,
+    reconcile_inventory_refresh, reconcile_mail_refresh, reconcile_shop_refresh,
+    reconcile_storage_refresh, request_session_reset,
+    request_session_reset_preserving_exact_game_shop_receipt, AuthoritativeModelDomain,
+    AuthoritativeModelRevisions, InventoryOperationAck, InventoryOperationFeedback,
+    PendingLifecycleSet, PendingOperationKey, PendingOperations, SessionResetGameShopPreservation,
+    SessionResetRevision, StorageOperationAck,
 };
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
@@ -68,6 +71,7 @@ thread_local! {
     static PENDING_MAP_RENDER_IMAGE_OPS: RefCell<Vec<PendingMapRenderImageOp>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_CAMERA_OFFSET: Cell<(f32, f32)> = const { Cell::new((0.0, 0.0)) };
     static PENDING_EFFECT_RENDER_STATE: RefCell<Option<EffectRenderState>> = const { RefCell::new(None) };
+    static PENDING_LIGHTING_RENDER_STATE: RefCell<Option<lighting::LightingRenderState>> = const { RefCell::new(None) };
     static PENDING_SCENE_RESET: Cell<bool> = const { Cell::new(false) };
     // Optional self-player motion window (from_x, from_y, to_x, to_y, started_ms,
     // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
@@ -100,6 +104,14 @@ struct RuntimeMapRenderState {
 struct RuntimeEffectRenderState {
     snapshot: Option<EffectRenderState>,
 }
+
+#[derive(Resource, Default, Clone)]
+struct RuntimeLightingRenderState {
+    snapshot: Option<lighting::LightingRenderState>,
+}
+
+#[derive(Resource, Default)]
+struct RuntimeLightingSceneResetTracker(u64);
 
 #[derive(Resource, Default)]
 struct RuntimeSessionResetTracker(u64);
@@ -193,6 +205,9 @@ struct SceneRegistry {
     effect_render_masks: HashMap<String, EffectRenderLayerHandle>,
     effect_render_shadows: HashMap<String, Entity>,
     effect_render_images: HashMap<String, Handle<Image>>,
+    lighting_layers: HashMap<String, EffectRenderLayerHandle>,
+    lighting_images: Vec<Handle<Image>>,
+    lighting_darkness: Option<LightingDarknessHandle>,
     map: MapSceneCache,
     map_render: MapRenderSceneCache,
     mine_nodes: HashMap<(i32, i32), MineNodeHandles>,
@@ -269,6 +284,15 @@ struct EffectRenderLayerHandle {
     additive: bool,
 }
 
+#[derive(Clone)]
+struct LightingDarknessHandle {
+    composite_entity: Entity,
+    buffer_camera: Entity,
+    buffer_image: Handle<Image>,
+    stage_size: UVec2,
+    material: Handle<lighting::CrystalMultiplyMaterial>,
+}
+
 struct PendingEntityRenderAtlasImage {
     key: String,
     width: u32,
@@ -287,6 +311,15 @@ struct MirEntityRenderLayer;
 
 #[derive(Component)]
 struct MirEffectRenderLayer;
+
+#[derive(Component)]
+struct MirLightingBufferLayer;
+
+#[derive(Component)]
+struct MirLightingBufferCamera;
+
+#[derive(Component)]
+struct MirLightingComposite;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -893,6 +926,20 @@ pub fn set_mir2_effect_render_state(json: String) {
     }
 }
 
+/// Replace the retained native lighting snapshot. The schema is shared with
+/// the Windows ingress and intentionally remains usable by a future WASM host.
+#[wasm_bindgen(js_name = setMir2LightingRenderState)]
+pub fn set_mir2_lighting_render_state(json: String) {
+    match serde_json::from_str::<lighting::LightingRenderState>(&json) {
+        Ok(snapshot) => {
+            PENDING_LIGHTING_RENDER_STATE.with(|pending| {
+                *pending.borrow_mut() = Some(snapshot);
+            });
+        }
+        Err(error) => publish_status("lighting-render-decode-error", &error.to_string()),
+    }
+}
+
 #[wasm_bindgen(js_name = setMir2MapRenderAtlas)]
 pub fn set_mir2_map_render_atlas(key: String, width: u32, height: u32, pixels: Vec<u8>) {
     if width == 0 || height == 0 {
@@ -1037,6 +1084,8 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeMapRenderState::default())
         .insert_resource(RuntimeMapRenderAtlases::default())
         .insert_resource(RuntimeEffectRenderState::default())
+        .insert_resource(RuntimeLightingRenderState::default())
+        .insert_resource(RuntimeLightingSceneResetTracker::default())
         .insert_resource(RuntimeMapCameraOffset::default())
         .insert_resource(SceneRegistry::default())
         .insert_resource(interpolation::SnapshotBuffer::default())
@@ -1089,6 +1138,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
+            lighting::CrystalMultiplyMaterialPlugin,
             motion::CrystalMoveClockPlugin,
             local_motion::LocalMotionPresentationShadowPlugin,
             movement_shadow::MovementShadowPlugin,
@@ -1103,6 +1153,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             Update,
             (
                 apply_scene_reset_to_runtime,
+                apply_scene_reset_to_lighting,
                 apply_scene_reset_to_scene_models,
                 ingest_pending_world_state,
             )
@@ -1127,6 +1178,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             (
                 ingest_pending_map_render_images,
                 ingest_pending_effect_render_state,
+                ingest_pending_lighting_render_state,
             )
                 .chain()
                 .after(ingest_pending_map_render_state)
@@ -1171,6 +1223,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 sync_map_render,
                 sync_map_scene,
                 sync_effect_render,
+                sync_lighting_render,
                 sync_entities,
                 sync_mine_nodes,
                 begin_presentation_pose_frame,
@@ -1596,6 +1649,7 @@ fn discard_pending_scene_thread_locals() {
     PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| pending.borrow_mut().clear());
     PENDING_MAP_CAMERA_OFFSET.with(|offset| offset.set((0.0, 0.0)));
     PENDING_EFFECT_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
+    PENDING_LIGHTING_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
 }
 
 fn apply_scene_reset_to_runtime(
@@ -1638,6 +1692,18 @@ fn apply_scene_reset_to_runtime(
         &mut additive_cache,
         &mut additive_materials,
     );
+}
+
+fn apply_scene_reset_to_lighting(
+    reset: Res<SceneResetRevision>,
+    mut tracker: ResMut<RuntimeLightingSceneResetTracker>,
+    mut state: ResMut<RuntimeLightingRenderState>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+    state.snapshot = None;
 }
 
 fn apply_scene_reset_to_scene_models(
@@ -1950,6 +2016,7 @@ struct StorageModelPatch {
     unlocked: Option<bool>,
     has_expanded: Option<bool>,
     expiry: Option<i64>,
+    ack: Option<StorageOperationAck>,
 }
 
 impl StorageModelPatch {
@@ -1959,9 +2026,10 @@ impl StorageModelPatch {
             && self.unlocked.is_none()
             && self.has_expanded.is_none()
             && self.expiry.is_none()
+            && self.ack.is_none()
     }
 
-    fn apply_to(self, storage: &mut mir2_client_bevy::storage::StorageModel) {
+    fn apply_to(&self, storage: &mut mir2_client_bevy::storage::StorageModel) {
         if let Some(size) = self.size {
             storage.size = size;
         }
@@ -1999,6 +2067,9 @@ fn ingest_pending_storage_patch(
                 match serde_json::from_str::<StorageModelPatch>(&json) {
                     Ok(patch) if !patch.is_empty() => {
                         let old = storage.clone();
+                        if let Some(ack) = patch.ack.as_ref() {
+                            apply_storage_operation_ack(&mut pending, ack);
+                        }
                         patch.apply_to(&mut storage);
                         reconcile_storage_refresh(&mut pending, &inventory, &old, &storage);
                         mark_authoritative_refresh(
@@ -2267,6 +2338,265 @@ fn ingest_pending_effect_render_state(
             }
         },
     );
+}
+
+fn ingest_pending_lighting_render_state(
+    mut state: ResMut<RuntimeLightingRenderState>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    PENDING_LIGHTING_RENDER_STATE.with(|pending| {
+        if let Some(snapshot) = pending.borrow_mut().take() {
+            state.snapshot = Some(snapshot);
+        }
+    });
+    #[cfg(not(target_arch = "wasm32"))]
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::LightingRenderState(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::LightingRenderState(json) = message {
+                if let Ok(snapshot) = serde_json::from_str::<lighting::LightingRenderState>(&json) {
+                    state.snapshot = Some(snapshot);
+                } else {
+                    publish_status(
+                        "native-decode-error",
+                        "invalid native lighting render state",
+                    );
+                }
+            }
+        },
+    );
+    #[cfg(target_arch = "wasm32")]
+    let _ = native;
+}
+
+/// Retained Crystal light buffer. A dedicated camera clears an offscreen image
+/// to Crystal's darkness colour and adds every `Lighting/N.png` source on an
+/// isolated render layer. A full-stage main-pass mesh then multiplies the
+/// completed light-buffer RGB with the world. This preserves Crystal's
+/// `scene * (darkness + lights)` equation instead of the visibly-wrong
+/// `scene * darkness + lights` approximation. Day has no light pass.
+fn sync_lighting_render(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    state: Res<RuntimeLightingRenderState>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut images: ResMut<Assets<Image>>,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
+    mut multiply_materials: ResMut<Assets<lighting::CrystalMultiplyMaterial>>,
+    mut registry: ResMut<SceneRegistry>,
+    mut additive_material_query: Query<
+        &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
+    >,
+    mut transform_query: Query<&mut Transform>,
+    mut camera_query: Query<&mut Camera, With<MirLightingBufferCamera>>,
+) {
+    macro_rules! clear_lighting {
+        () => {
+            clear_lighting_render_layers(
+                &mut commands,
+                &mut registry,
+                &mut additive_cache,
+                &mut additive_materials,
+                &mut multiply_materials,
+                &mut images,
+            )
+        };
+    }
+    let Some(snapshot) = state.snapshot.as_ref() else {
+        clear_lighting!();
+        return;
+    };
+    let Some(setting) = lighting::effective_light_setting(snapshot) else {
+        clear_lighting!();
+        return;
+    };
+    let Some(darkness) = lighting::darkness_color(setting, snapshot.map_dark_light) else {
+        clear_lighting!();
+        return;
+    };
+    let Some(stage_size) = snapshot
+        .enabled
+        .then(|| lighting::validated_stage_size(snapshot))
+        .flatten()
+    else {
+        clear_lighting!();
+        return;
+    };
+
+    if registry
+        .lighting_darkness
+        .as_ref()
+        .is_some_and(|handle| handle.stage_size != stage_size)
+    {
+        clear_lighting!();
+    }
+
+    // Preload all ten native light textures once. Crystal owns ten range slots;
+    // retaining these handles prevents source churn while the player walks.
+    if registry.lighting_images.len() != lighting::LIGHT_TEXTURE_COUNT {
+        registry.lighting_images = (0..lighting::LIGHT_TEXTURE_COUNT)
+            .map(|range| asset_server.load(lighting::light_texture_path(range)))
+            .collect();
+    }
+
+    let dark_position = Vec3::new(0.0, 0.0, 500.0);
+    if let Some(handle) = registry.lighting_darkness.as_mut() {
+        if let Ok(mut camera) = camera_query.get_mut(handle.buffer_camera) {
+            camera.clear_color = ClearColorConfig::Custom(darkness);
+        }
+        if let Ok(mut transform) = transform_query.get_mut(handle.composite_entity) {
+            transform.translation = dark_position;
+            transform.scale = Vec3::new(snapshot.stage_width, snapshot.stage_height, 1.0);
+        }
+    } else {
+        let buffer_image = images.add(Image::new_target_texture(
+            stage_size.x,
+            stage_size.y,
+            TextureFormat::Rgba8Unorm,
+            Some(TextureFormat::Rgba8UnormSrgb),
+        ));
+        let buffer_camera = commands
+            .spawn((
+                Camera2d,
+                Camera {
+                    order: -1,
+                    clear_color: ClearColorConfig::Custom(darkness),
+                    ..default()
+                },
+                RenderTarget::Image(buffer_image.clone().into()),
+                Msaa::Off,
+                RenderLayers::layer(lighting::LIGHT_BUFFER_RENDER_LAYER),
+                MirLightingBufferCamera,
+            ))
+            .id();
+        let mesh = additive_cache.unit_quad(&mut meshes);
+        let material = multiply_materials.add(lighting::CrystalMultiplyMaterial {
+            light_buffer: buffer_image.clone(),
+        });
+        let composite_entity = commands
+            .spawn((
+                Mesh2d(mesh),
+                MeshMaterial2d(material.clone()),
+                Transform::from_translation(dark_position).with_scale(Vec3::new(
+                    snapshot.stage_width,
+                    snapshot.stage_height,
+                    1.0,
+                )),
+                MirLightingComposite,
+            ))
+            .id();
+        registry.lighting_darkness = Some(LightingDarknessHandle {
+            composite_entity,
+            buffer_camera,
+            buffer_image,
+            stage_size,
+            material,
+        });
+    }
+
+    let mut alive = HashSet::new();
+    for light in lighting::resolved_lights(snapshot) {
+        alive.insert(light.key.clone());
+        let image = registry.lighting_images[light.range].clone();
+        let position = lighting_layer_position(snapshot, &light);
+        if let Some(handle) = registry.lighting_layers.get_mut(&light.key) {
+            let image_key = lighting::light_texture_path(light.range);
+            let cache_key = lighting_material_cache_key(&light.key);
+            let material =
+                additive_cache.material(&cache_key, image, light.opacity, &mut additive_materials);
+            if handle.image_key != image_key {
+                if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                    *binding = MeshMaterial2d(material);
+                }
+                handle.image_key = image_key;
+            }
+            if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                transform.translation = position;
+                transform.scale = Vec3::new(light.width, light.height, 1.0);
+            }
+        } else {
+            let mesh = additive_cache.unit_quad(&mut meshes);
+            let cache_key = lighting_material_cache_key(&light.key);
+            let material =
+                additive_cache.material(&cache_key, image, light.opacity, &mut additive_materials);
+            let entity = commands
+                .spawn((
+                    Mesh2d(mesh),
+                    MeshMaterial2d(material),
+                    Transform::from_translation(position).with_scale(Vec3::new(
+                        light.width,
+                        light.height,
+                        1.0,
+                    )),
+                    RenderLayers::layer(lighting::LIGHT_BUFFER_RENDER_LAYER),
+                    MirLightingBufferLayer,
+                ))
+                .id();
+            registry.lighting_layers.insert(
+                light.key.clone(),
+                EffectRenderLayerHandle {
+                    entity,
+                    image_key: lighting::light_texture_path(light.range),
+                    additive: true,
+                },
+            );
+        }
+    }
+
+    let stale: Vec<String> = registry
+        .lighting_layers
+        .keys()
+        .filter(|key| !alive.contains(*key))
+        .cloned()
+        .collect();
+    for key in stale {
+        if let Some(handle) = registry.lighting_layers.remove(&key) {
+            commands.entity(handle.entity).despawn();
+            additive_cache.evict(&lighting_material_cache_key(&key), &mut additive_materials);
+        }
+    }
+}
+
+fn lighting_material_cache_key(source_key: &str) -> String {
+    format!("native-lighting:{source_key}")
+}
+
+fn lighting_layer_position(
+    snapshot: &lighting::LightingRenderState,
+    light: &lighting::ResolvedLight,
+) -> Vec3 {
+    Vec3::new(
+        light.left + light.width * 0.5 - snapshot.stage_width * 0.5,
+        snapshot.stage_height * 0.5 - (light.top + light.height * 0.5),
+        0.0,
+    )
+}
+
+fn clear_lighting_render_layers(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+    multiply_materials: &mut Assets<lighting::CrystalMultiplyMaterial>,
+    images: &mut Assets<Image>,
+) {
+    for (key, handle) in registry.lighting_layers.drain() {
+        commands.entity(handle.entity).despawn();
+        additive_cache.evict(&lighting_material_cache_key(&key), additive_materials);
+    }
+    if let Some(handle) = registry.lighting_darkness.take() {
+        commands.entity(handle.composite_entity).despawn();
+        commands.entity(handle.buffer_camera).despawn();
+        multiply_materials.remove(handle.material.id());
+        images.remove(handle.buffer_image.id());
+    }
+    registry.lighting_images.clear();
 }
 
 /// RETAIN-IN-PLACE renderer for authoritative scene-effect sprites (map/
@@ -5153,13 +5483,26 @@ mod effect_mask_shadow_tests {
             .init_asset::<Image>()
             .init_asset::<Mesh>()
             .init_asset::<crate::additive_material::CrystalAdditiveMaterial>()
+            .init_asset::<crate::lighting::CrystalMultiplyMaterial>()
             .init_resource::<SceneRegistry>()
             .init_resource::<RuntimeEffectRenderState>()
+            .init_resource::<RuntimeLightingRenderState>()
+            .init_resource::<SceneResetRevision>()
+            .init_resource::<RuntimeLightingSceneResetTracker>()
             .init_resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
             .init_resource::<Assets<Image>>()
             .init_resource::<Assets<Mesh>>()
             .init_resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
-            .add_systems(Update, sync_effect_render);
+            .init_resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .add_systems(
+                Update,
+                (
+                    apply_scene_reset_to_lighting,
+                    sync_effect_render,
+                    sync_lighting_render,
+                )
+                    .chain(),
+            );
         app
     }
 
@@ -5441,6 +5784,187 @@ mod effect_mask_shadow_tests {
             .world()
             .resource::<crate::additive_material::CrystalAdditiveMaterialCache>();
         assert_eq!(cache.len(), 0, "materials recycled on disable");
+    }
+
+    #[test]
+    fn sync_lighting_is_bounded_and_clears_on_map_logout_or_reconnect_reset() {
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(lighting::LightingRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            time_of_day_light_setting: Some(4),
+            map_light_setting: None,
+            light_setting: None,
+            map_dark_light: 2,
+            map_lights: (0..220)
+                .map(|index| lighting::MapLightSource {
+                    key: format!("map-{index}"),
+                    draw_x: index as f32,
+                    draw_y: index as f32,
+                    light: 1,
+                    offset_x: 0.0,
+                    offset_y: 0.0,
+                })
+                .collect(),
+            entity_lights: Vec::new(),
+        });
+        app.update();
+        let (buffer_camera, buffer_image, composite_entity, multiply_material, first_layer) = {
+            let registry = app.world().resource::<SceneRegistry>();
+            assert_eq!(registry.lighting_layers.len(), lighting::MAX_NATIVE_LIGHTS);
+            assert_eq!(
+                registry.lighting_images.len(),
+                lighting::LIGHT_TEXTURE_COUNT
+            );
+            let darkness = registry
+                .lighting_darkness
+                .as_ref()
+                .expect("offscreen darkness buffer spawned");
+            (
+                darkness.buffer_camera,
+                darkness.buffer_image.clone(),
+                darkness.composite_entity,
+                darkness.material.clone(),
+                registry.lighting_layers.values().next().unwrap().entity,
+            )
+        };
+        assert!(
+            app.world()
+                .get::<MirLightingBufferCamera>(buffer_camera)
+                .is_some(),
+            "one isolated light-buffer camera exists"
+        );
+        assert!(
+            app.world()
+                .get::<MirLightingComposite>(composite_entity)
+                .is_some(),
+            "one main-pass multiply composite exists"
+        );
+        assert!(
+            app.world()
+                .get::<MirLightingBufferLayer>(first_layer)
+                .is_some(),
+            "light sprites live in the isolated buffer"
+        );
+        assert!(
+            app.world().get::<RenderLayers>(first_layer).is_some(),
+            "light sprite cannot leak into the main scene pass"
+        );
+        assert!(
+            app.world()
+                .resource::<Assets<Image>>()
+                .get(&buffer_image)
+                .is_some(),
+            "offscreen target is retained while active"
+        );
+        assert!(
+            app.world()
+                .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+                .get(&multiply_material)
+                .is_some(),
+            "multiply material samples the retained target"
+        );
+
+        // Map change, logout and reconnect all advance SceneResetRevision. Run
+        // the real reset system, not a manually-cleared snapshot, and require
+        // the renderer resources to disappear in that same update.
+        app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert!(registry.lighting_layers.is_empty());
+        assert!(registry.lighting_images.is_empty());
+        assert!(registry.lighting_darkness.is_none());
+        assert!(app.world().get_entity(buffer_camera).is_err());
+        assert!(app.world().get_entity(composite_entity).is_err());
+        assert!(app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&buffer_image)
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .get(&multiply_material)
+            .is_none());
+        assert_eq!(
+            app.world()
+                .resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
+    fn sync_lighting_stage_resize_rebuilds_without_leaking_old_targets() {
+        let mut app = sync_test_app();
+        let state = |width, height| lighting::LightingRenderState {
+            enabled: true,
+            stage_width: width,
+            stage_height: height,
+            time_of_day_light_setting: Some(4),
+            map_light_setting: None,
+            light_setting: None,
+            map_dark_light: 0,
+            map_lights: Vec::new(),
+            entity_lights: vec![lighting::EntityLightSource {
+                key: "self".to_owned(),
+                draw_x: width * 0.5,
+                draw_y: height * 0.5,
+                kind: "selfPlayer".to_owned(),
+                light: Some(3),
+                dead: false,
+                is_self: true,
+            }],
+        };
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(state(1024.0, 768.0));
+        app.update();
+        let (old_camera, old_composite, old_image, old_material) = {
+            let registry = app.world().resource::<SceneRegistry>();
+            let darkness = registry.lighting_darkness.as_ref().unwrap();
+            (
+                darkness.buffer_camera,
+                darkness.composite_entity,
+                darkness.buffer_image.clone(),
+                darkness.material.clone(),
+            )
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(state(800.0, 600.0));
+        app.update();
+
+        let registry = app.world().resource::<SceneRegistry>();
+        let rebuilt = registry.lighting_darkness.as_ref().unwrap();
+        assert_eq!(rebuilt.stage_size, UVec2::new(800, 600));
+        assert_ne!(rebuilt.buffer_camera, old_camera);
+        assert_ne!(rebuilt.composite_entity, old_composite);
+        assert_ne!(rebuilt.buffer_image, old_image);
+        assert_ne!(rebuilt.material, old_material);
+        assert_eq!(registry.lighting_layers.len(), 1);
+        assert_eq!(
+            app.world()
+                .resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1
+        );
+        assert!(app.world().get_entity(old_camera).is_err());
+        assert!(app.world().get_entity(old_composite).is_err());
+        assert!(app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&old_image)
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .get(&old_material)
+            .is_none());
     }
 }
 
@@ -5729,6 +6253,43 @@ mod native_data_path_tests {
                 .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
                 .npc_shop_open_requested
         );
+    }
+
+    #[test]
+    fn native_storage_nacks_release_exact_pending_operations_without_mutating_models() {
+        let mut app = ingest_app();
+        let unlock = PendingOperationKey::StorageUnlock;
+        let remove = PendingOperationKey::StorageRemovePassword;
+        let deposit = PendingOperationKey::StorageDeposit {
+            unique_id: 77,
+            from: 3,
+            to: 9,
+        };
+        {
+            let mut pending = app.world_mut().resource_mut::<PendingOperations>();
+            assert!(pending.try_begin(unlock.clone()));
+            assert!(pending.try_begin(remove.clone()));
+            assert!(pending.try_begin(deposit.clone()));
+        }
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"unlock","success":false}}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"deposit","from":3,"to":9,"success":false}}"#.to_owned()
+        ));
+        app.update();
+
+        let pending = app.world().resource::<PendingOperations>();
+        assert!(!pending.contains(&unlock));
+        assert!(!pending.contains(&deposit));
+        assert!(pending.contains(&remove));
+        let storage = app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>();
+        assert!(!storage.has_password);
+        assert!(!storage.unlocked);
+        assert!(storage.items.is_empty());
     }
 
     #[test]
@@ -6085,6 +6646,7 @@ mod native_data_path_tests {
                     quantity: 5,
                     slot: 0,
                     container: 0,
+                    ..mir2_client_bevy::inventory::ItemModel::default()
                 }],
             };
         let key = mir2_client_bevy::pending_operations::PendingOperationKey::Split {

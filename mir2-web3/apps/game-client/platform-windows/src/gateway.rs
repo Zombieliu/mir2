@@ -10,7 +10,7 @@
 //! combat, NPC/quest/item intents, and authoritative world/read-model forwarding.
 
 use std::{
-    collections::VecDeque,
+    collections::{HashMap, VecDeque},
     sync::{Arc, Mutex},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
@@ -26,6 +26,7 @@ use serde_json::{json, Value};
 use tokio_tungstenite::tungstenite::Message;
 
 use crate::gameplay_bridge::{NativeGameplayAdapter, NativeGameplaySnapshot};
+use crate::map_parser::lighting::{NativeLightAssets, NativeLightingBridge, NativeLightingMotion};
 use crate::native_protocol::{
     parse_inbound_event, InboundEvent, NativeOutboundCommand, PacketEvent,
 };
@@ -38,6 +39,17 @@ const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 const MAX_CREDENTIAL_LENGTH: usize = 43;
 const MAX_COMMANDS_PER_POLL: usize = 256;
 const MAX_GATEWAY_FRAME_BYTES: usize = 16 * 1024 * 1024;
+
+/// There is no packet-authoritative presentation interpolation stream yet.
+/// Keep the fallback explicit and stationary rather than inventing wall-clock
+/// movement a second time in the network gateway.
+fn native_lighting_default_motion() -> NativeLightingMotion {
+    NativeLightingMotion {
+        camera_offset_x: 0.0,
+        camera_offset_y: 0.0,
+        entity_offsets: HashMap::new(),
+    }
+}
 
 /// Connection-owner correlation for the sole native GameShop transaction.
 ///
@@ -395,6 +407,143 @@ struct GatewayEnvelope {
     packet: Option<String>,
     #[serde(default)]
     payload: Option<Value>,
+}
+
+/// Per-WebSocket lighting producer. It owns the lifecycle generation and the
+/// last successfully submitted snapshot, so a full native-ingest queue never
+/// advances local dirty state or suppresses the required retry.
+struct NativeLightingPublisher {
+    bridge: NativeLightingBridge,
+    assets: NativeLightAssets,
+    /// This deliberately stays empty until real map frame/presentation data is
+    /// exposed by the renderer. Empty means Crystal's static-frame offset of
+    /// (0, 0), not a guessed animation position.
+    map_frame_offsets: HashMap<(i32, i32), (i32, i32)>,
+    last_pushed_json: Option<String>,
+}
+
+impl NativeLightingPublisher {
+    fn for_connection(generation: u64) -> Self {
+        let assets = crate::assets::asset_root()
+            .map(|root| NativeLightAssets::from_asset_root(&root))
+            .unwrap_or_default();
+        let mut bridge = NativeLightingBridge::default();
+        bridge.set_generation(generation);
+        Self {
+            bridge,
+            assets,
+            map_frame_offsets: HashMap::new(),
+            last_pushed_json: None,
+        }
+    }
+
+    fn reset_scene(&mut self) {
+        self.bridge.reset_scene();
+        self.map_frame_offsets.clear();
+        self.last_pushed_json = None;
+    }
+
+    fn reset_session(&mut self) {
+        self.bridge.reset_session();
+        self.map_frame_offsets.clear();
+        self.last_pushed_json = None;
+    }
+
+    fn push_clear_state(&mut self) {
+        let state = self.bridge.build_render_state(
+            &Value::Null,
+            None,
+            &self.map_frame_offsets,
+            &native_lighting_default_motion(),
+            &self.assets,
+        );
+        self.publish(state);
+    }
+
+    fn observe_envelope(&mut self, event: &GatewayEnvelope) {
+        self.observe_envelope_with(event, |json| {
+            mir2_bevy_runtime::native_ingest::push_native_lighting_render_state(json)
+        });
+    }
+
+    fn observe_envelope_with(
+        &mut self,
+        event: &GatewayEnvelope,
+        mut push: impl FnMut(String) -> bool,
+    ) {
+        match event.kind.as_str() {
+            "worldSnapshot" => {
+                let payload = event.payload.as_ref().unwrap_or(&Value::Null);
+                self.bridge.observe_world_snapshot(payload);
+                let map = payload
+                    .get("mapFileName")
+                    .and_then(Value::as_str)
+                    .and_then(crate::map_parser::load_map);
+                self.map_frame_offsets = map
+                    .as_ref()
+                    .map(crate::map_parser::native_map_light_frame_offsets)
+                    .unwrap_or_default();
+                let state = self.bridge.build_render_state(
+                    payload,
+                    map.as_ref(),
+                    &self.map_frame_offsets,
+                    &native_lighting_default_motion(),
+                    &self.assets,
+                );
+                self.publish_with(state, &mut push);
+            }
+            "packet" => {
+                let Some(packet) = event.packet.as_deref() else {
+                    return;
+                };
+                let payload = event.payload.as_ref().unwrap_or(&Value::Null);
+                match packet {
+                    "MapChanged" => self.reset_scene(),
+                    "LogOutSuccess" | "ReturnToLogin" | "Disconnect" => self.reset_session(),
+                    _ => {}
+                }
+                self.bridge.observe_packet(packet, payload);
+                if matches!(
+                    packet,
+                    "MapChanged" | "LogOutSuccess" | "ReturnToLogin" | "Disconnect"
+                ) {
+                    // A reset must be visible immediately rather than waiting
+                    // for the next snapshot (which can belong to a new map).
+                    let state = self.bridge.build_render_state(
+                        &Value::Null,
+                        None,
+                        &self.map_frame_offsets,
+                        &native_lighting_default_motion(),
+                        &self.assets,
+                    );
+                    self.publish_with(state, &mut push);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn publish(&mut self, state: Value) {
+        let Ok(json) = serde_json::to_string(&state) else {
+            return;
+        };
+        if self.last_pushed_json.as_deref() == Some(json.as_str()) {
+            return;
+        }
+        // Only a successful enqueue commits the producer's dirty state. On
+        // backpressure the identical authoritative state is retried on the
+        // next matching packet/snapshot.
+        if mir2_bevy_runtime::native_ingest::push_native_lighting_render_state(json.clone()) {
+            self.last_pushed_json = Some(json);
+        }
+    }
+
+    fn publish_with(&mut self, state: Value, mut push: impl FnMut(String) -> bool) {
+        let json = serde_json::to_string(&state).expect("lighting state serializes");
+        if self.last_pushed_json.as_deref() != Some(json.as_str()) && push(json.clone()) {
+            self.last_pushed_json = Some(json);
+        }
+    }
 }
 
 /// Outbound login command, matching the Web client's `{type:"login",…}`.
@@ -2028,6 +2177,10 @@ where
     let mut context = GatewaySessionContext::default();
     let mut gameplay_adapter = NativeGameplayAdapter::default();
     gameplay_adapter.set_generation(generation);
+    // Every WebSocket generation owns an isolated lighting lifecycle. A
+    // reconnect must never retain the previous map's darkness or emitters.
+    let mut lighting_publisher = NativeLightingPublisher::for_connection(generation);
+    lighting_publisher.push_clear_state();
     let mut last_world_payload: Option<Value> = None;
     let mut last_wallet: Option<WalletState> = None;
     let mut ui_cursor = NativeUiPlayerCursor::default();
@@ -2151,6 +2304,12 @@ where
                     }
                     if explicit_leave {
                         resume_state.clear();
+                        // Do not leave stale darkness visible while the
+                        // server processes logout/disconnect. The eventual
+                        // packet reset is idempotent and will retry if this
+                        // enqueue was backpressured.
+                        lighting_publisher.reset_session();
+                        lighting_publisher.push_clear_state();
                     }
                     if let Err(error) = socket
                         .send(Message::Text(payload.to_string().into()))
@@ -2187,7 +2346,7 @@ where
                             &text,
                             game_shop_receipt_gate,
                             |text, gate| {
-                                handle_gateway_text_for_connection(
+                                let disposition = handle_gateway_text_for_connection(
                                     text,
                                     &mut snapshot_log_counter,
                                     &context,
@@ -2207,7 +2366,17 @@ where
                                     resume_scene_reset_sent,
                                     gate,
                                     push_world_state,
-                                )
+                                )?;
+                                // Consume exactly the same authoritative
+                                // envelope that drove the gameplay bridge.
+                                // Quarantined pre-resume frames are forbidden
+                                // from leaking into the new render generation.
+                                if disposition == InboundDisposition::Applied {
+                                    if let Ok(envelope) = serde_json::from_str::<GatewayEnvelope>(text) {
+                                        lighting_publisher.observe_envelope(&envelope);
+                                    }
+                                }
+                                Ok(disposition)
                             },
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
                         )?;
@@ -2642,6 +2811,14 @@ where
     } else {
         false
     };
+    if let InboundEvent::Packet(packet) = &parsed {
+        if packet_updates_big_map(packet) {
+            // Static Big Map packets often arrive between periodic world
+            // snapshots. Forward a map-only snapshot immediately so the
+            // native resource cannot keep a stale NPC/object-id cache.
+            let _ = gameplay_events.send(gameplay_adapter.big_map_snapshot());
+        }
+    }
     if let Some(scope) = event.packet.as_deref().and_then(packet_native_reset_scope) {
         if scope == NativeResetScope::Session {
             reset_native_data_models();
@@ -2696,6 +2873,7 @@ where
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
+            gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);
             let _ = gameplay_events.send(gameplay_adapter.snapshot(&payload));
             let runtime_snapshot = transform_world_snapshot(&payload);
@@ -2841,9 +3019,9 @@ where
                         eprintln!("[gateway-client] packet UserLocation");
                     }
                 }
-                "ObjectChat" => {
+                "Chat" | "ObjectChat" => {
                     if let Some(payload) = event.payload.as_ref() {
-                        if let Some(chat) = transform_chat_line(payload) {
+                        if let Some(chat) = transform_chat_line(packet, payload) {
                             let _ = mir2_bevy_runtime::native_ingest::push_native_chat_line(
                                 serde_json::to_string(&chat).map_err(|e| e.to_string())?,
                             );
@@ -2863,7 +3041,7 @@ where
                         }
                     }
                 }
-                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" => {
+                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(ack) = transform_inventory_operation_ack(packet, payload) {
                             if let Ok(json) = serde_json::to_string(&ack) {
@@ -2961,7 +3139,11 @@ where
                         }
                     }
                 }
-                "StorageUnlockResult" | "StoragePasswordResult" | "ResizeStorage" => {
+                "StoreItem"
+                | "TakeBackItem"
+                | "StorageUnlockResult"
+                | "StoragePasswordResult"
+                | "ResizeStorage" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(patch) = transform_storage_patch_from_packet(packet, payload) {
                             let json =
@@ -3045,6 +3227,19 @@ fn correlate_and_deliver_game_shop_receipt(
     gate.clear_terminal();
     let _ = push_terminal_reset();
     Ok(false)
+}
+
+fn packet_updates_big_map(packet: &PacketEvent) -> bool {
+    matches!(
+        packet,
+        PacketEvent::NewMapInfo(_)
+            | PacketEvent::WorldMapSetup(_)
+            | PacketEvent::SearchMapResult(_)
+            | PacketEvent::MapInformation(_)
+            | PacketEvent::MapChanged(_)
+            | PacketEvent::UserLocation(_)
+            | PacketEvent::Disconnect(_)
+    )
 }
 
 /// Re-render the latest personal snapshot after folding packet-authoritative
@@ -3156,6 +3351,26 @@ fn dispatch_shell_event(
                 )
             });
             Some(ShellGatewayEvent::LoginFailure { message })
+        }
+        InboundEvent::Packet(PacketEvent::ChangePasswordResult(result)) => {
+            // Preserve the authoritative Crystal result code.  A missing
+            // result is an explicit transport failure, never a success.
+            Some(ShellGatewayEvent::ChangePasswordResult {
+                result: result.result.unwrap_or(-1),
+            })
+        }
+        InboundEvent::Packet(PacketEvent::ChangePasswordBanned(banned)) => {
+            let reason = banned
+                .reason
+                .clone()
+                .filter(|reason| !reason.trim().is_empty())
+                .unwrap_or_else(|| "account is banned".to_owned());
+            let expiry = banned.expiry.as_ref().and_then(|value| match value {
+                Value::String(value) if !value.is_empty() => Some(value.clone()),
+                Value::Null => None,
+                value => Some(value.to_string()),
+            });
+            Some(ShellGatewayEvent::ChangePasswordBanned { reason, expiry })
         }
         InboundEvent::Packet(PacketEvent::NewCharacterSuccess(success)) => {
             match success
@@ -3508,6 +3723,11 @@ fn transform_inventory_operation_ack(
             count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
             success,
         }),
+        "SellItem" => Some(InventoryOperationAck::Sell {
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
+            success,
+        }),
         _ => None,
     }
 }
@@ -3633,6 +3853,8 @@ fn shop_good_json(item: &Value, fallback: usize) -> Option<Value> {
         "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
             .and_then(|value| u8::try_from(value).ok())
             .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
+        "icon": value_u32(item.get("icon")).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "description": value_string(item.get("description")).unwrap_or_default(),
     }))
 }
 
@@ -3859,24 +4081,45 @@ fn storage_items_json(entries: &[Value]) -> Option<Vec<Value>> {
                 return None;
             }
             let key = unique_id.map(|value| value.to_string()).or_else(|| item_index.map(|value| value.to_string()))?;
-            Some(json!({
+            let mut mapped = json!({
                 "uniqueId": unique_id,
                 "key": key,
                 "name": value_string(item.get("name")).unwrap_or_else(|| item_index.map(|value| format!("Item #{value}")).unwrap_or_default()),
                 "quantity": value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1),
                 "slot": normalized_slot(item.get("slot"), u32::try_from(slot).unwrap_or_default()),
                 "container": 4,
-            }))
+            });
+            extend_item_metadata(&mut mapped, item);
+            Some(mapped)
         })
         .collect()
 }
 
 fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<Value> {
     match packet {
+        "StoreItem" => Some(json!({
+            "ack": {
+                "operation": "deposit",
+                "from": value_i32(payload.get("from"))?,
+                "to": value_i32(payload.get("to"))?,
+                "success": payload.get("success").and_then(Value::as_bool)?,
+            }
+        })),
+        "TakeBackItem" => Some(json!({
+            "ack": {
+                "operation": "withdraw",
+                "from": value_i32(payload.get("from"))?,
+                "to": value_i32(payload.get("to"))?,
+                "success": payload.get("success").and_then(Value::as_bool)?,
+            }
+        })),
         "StorageUnlockResult" => {
             let result = value_i32(payload.get("result"))?;
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
-            let mut patch = json!({ "has_password": has_password });
+            let mut patch = json!({
+                "has_password": has_password,
+                "ack": { "operation": "unlock", "success": result == 0 }
+            });
             if result == 0 || !has_password {
                 patch["unlocked"] = json!(true);
             }
@@ -3884,10 +4127,15 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
         }
         "StoragePasswordResult" => {
             let result = value_i32(payload.get("result"))?;
+            let removing = payload.get("removing").and_then(Value::as_bool)?;
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
                 "expiry": value_i64(payload.get("lastSetBinaryDatetime"))?,
+                "ack": {
+                    "operation": if removing { "removePassword" } else { "setPassword" },
+                    "success": result == 4,
+                },
             });
             if result == 4 || !has_password {
                 patch["unlocked"] = json!(true);
@@ -3898,6 +4146,7 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             "size": value_u32(payload.get("size")).and_then(|value| u16::try_from(value).ok())?,
             "has_expanded": payload.get("hasExpandedStorage").and_then(Value::as_bool)?,
             "expiry": value_i64(payload.get("expiryTimeBinaryDatetime"))?,
+            "ack": { "operation": "expand", "success": true },
         })),
         _ => None,
     }
@@ -4043,11 +4292,18 @@ fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
     }
 }
 
-/// Transform a gateway `ObjectChat` packet payload into a shared
-/// `mir2-client-bevy::chat::ChatLine`. Returns `None` when the text is absent.
-fn transform_chat_line(payload: &Value) -> Option<mir2_client_bevy::chat::ChatLine> {
+/// Transform gateway `Chat` and `ObjectChat` packet payloads into the shared
+/// renderer-neutral chat line. Crystal uses `message` for direct/system chat
+/// and `text` for object chat, so the packet kind selects the authoritative
+/// field instead of accepting an unrelated similarly named property.
+fn transform_chat_line(packet: &str, payload: &Value) -> Option<mir2_client_bevy::chat::ChatLine> {
+    let text_field = match packet {
+        "Chat" => "message",
+        "ObjectChat" => "text",
+        _ => return None,
+    };
     let text = payload
-        .get("text")
+        .get(text_field)
         .and_then(Value::as_str)
         .map(str::to_owned)?;
     let channel = payload
@@ -4082,14 +4338,16 @@ fn transform_inventory_model(payload: &Value) -> Value {
                             .or_else(|| value_string(item.get("item_index")))
                             .or_else(|| unique_id.map(|id| id.to_string()))
                             .unwrap_or_else(|| index.to_string());
-                        json!({
+                        let mut mapped = json!({
                             "uniqueId": unique_id,
                             "key": key,
                             "name": value_string(item.get("name")).unwrap_or_default(),
-                            "quantity": value_u32_or(item.get("quantity"), 1),
+                            "quantity": value_u32(item.get("quantity").or_else(|| item.get("count"))).unwrap_or(1),
                             "slot": normalized_slot(item.get("slot"), fallback_slot),
                             "container": container,
-                        })
+                        });
+                        extend_item_metadata(&mut mapped, item);
+                        mapped
                     })
                     .collect()
             })
@@ -4102,6 +4360,56 @@ fn transform_inventory_model(payload: &Value) -> Value {
     items.extend(map_items(payload.get("equipmentItems"), 2));
 
     json!({ "gold": gold, "items": items })
+}
+
+/// Copy the item fields that the simulation already exposes into the shared
+/// native read model.  Keep this schema tolerant of both packet-style snake
+/// case and web snapshot camel case: native sessions can receive either while
+/// reconnecting or applying a storage patch.
+fn extend_item_metadata(mapped: &mut Value, item: &Value) {
+    let metadata = [
+        ("icon", &["icon"][..]),
+        ("description", &["description"][..]),
+        (
+            "durabilityCurrent",
+            &[
+                "durabilityCurrent",
+                "durability_current",
+                "currentDura",
+                "current_dura",
+            ][..],
+        ),
+        (
+            "durabilityMax",
+            &["durabilityMax", "durability_max", "maxDura", "max_dura"][..],
+        ),
+        ("sellValue", &["sellValue", "sell_value", "price"][..]),
+        ("equipSlot", &["equipSlot", "equip_slot"][..]),
+        ("grade", &["grade"][..]),
+        ("attack", &["attack"][..]),
+        ("defence", &["defence", "defense"][..]),
+        ("addedAttack", &["addedAttack", "added_attack"][..]),
+        (
+            "addedDefence",
+            &[
+                "addedDefence",
+                "added_defence",
+                "addedDefense",
+                "added_defense",
+            ][..],
+        ),
+        ("addedLuck", &["addedLuck", "added_luck"][..]),
+        ("shape", &["shape"][..]),
+        ("socketSlots", &["socketSlots", "socket_slots"][..]),
+    ];
+    let Some(target) = mapped.as_object_mut() else {
+        return;
+    };
+    for (target_name, candidates) in metadata {
+        if let Some(value) = candidates.iter().find_map(|name| item.get(*name)).cloned() {
+            target.insert(target_name.to_owned(), value);
+        }
+    }
 }
 
 /// Transform a gateway `worldSnapshot` payload into the shared
@@ -4303,6 +4611,79 @@ mod tests {
     use tokio_tungstenite::accept_async;
 
     #[test]
+    fn native_lighting_publisher_retries_backpressure_and_clears_per_generation() {
+        let mut bridge = NativeLightingBridge::default();
+        bridge.set_generation(7);
+        let mut publisher = NativeLightingPublisher {
+            bridge,
+            assets: NativeLightAssets::complete_fixture(),
+            map_frame_offsets: HashMap::new(),
+            last_pushed_json: None,
+        };
+        let state = json!({"enabled": false, "mapLights": [], "entityLights": []});
+        let mut attempts = 0;
+        publisher.publish_with(state.clone(), |_| {
+            attempts += 1;
+            false
+        });
+        assert!(publisher.last_pushed_json.is_none());
+        publisher.publish_with(state.clone(), |_| {
+            attempts += 1;
+            true
+        });
+        assert_eq!(attempts, 2, "failed enqueue must remain dirty");
+        assert!(publisher.last_pushed_json.is_some());
+        publisher.publish_with(state, |_| {
+            attempts += 1;
+            true
+        });
+        assert_eq!(attempts, 2, "accepted identical state is coalesced");
+
+        let snapshot = GatewayEnvelope {
+            kind: "worldSnapshot".to_owned(),
+            packet: None,
+            payload: Some(json!({
+                "mapFileName":"lighting-test-map",
+                "lightSetting":4,
+                "playerObjectId":1000,
+                "sceneView":{"center":{"x":10,"y":20}},
+                "entities":[{"objectId":1000,"kind":"selfPlayer","x":10,"y":20}]
+            })),
+        };
+        publisher.last_pushed_json = None;
+        let mut snapshot_pushes = 0;
+        publisher.observe_envelope_with(&snapshot, |_| {
+            snapshot_pushes += 1;
+            true
+        });
+        publisher.observe_envelope_with(&snapshot, |_| {
+            snapshot_pushes += 1;
+            true
+        });
+        assert_eq!(
+            snapshot_pushes, 1,
+            "an unchanged repeated world snapshot must not enqueue lighting twice"
+        );
+
+        publisher.bridge.observe_packet(
+            "MapInformation",
+            &json!({"fileName":"0", "lights":4, "mapDarkLight":2}),
+        );
+        publisher.reset_scene();
+        assert_eq!(
+            publisher.bridge.build_render_state(
+                &Value::Null,
+                None,
+                &publisher.map_frame_offsets,
+                &native_lighting_default_motion(),
+                &publisher.assets,
+            )["enabled"],
+            json!(false)
+        );
+        assert!(publisher.last_pushed_json.is_none());
+    }
+
+    #[test]
     fn recovered_npc_goods_populates_only_the_independent_npc_shop_model() {
         let model = try_transform_shop_model_from_packet(&json!({
             "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20 }],
@@ -4360,7 +4741,9 @@ mod tests {
     #[test]
     fn recovered_storage_packets_decode_only_correlatable_items_and_metadata() {
         let items = transform_storage_items_from_packet(&json!({
-            "storage": [null, { "unique_id": 55, "item_index": 321, "count": 3, "slot": 1 }]
+            "storage": [null, { "unique_id": 55, "item_index": 321, "count": 3, "slot": 1,
+                "icon": 24, "description": "Stored", "current_dura": 8, "max_dura": 10,
+                "sell_value": 99, "equip_slot": "Boots", "added_attack": 2, "shape": 4 }]
         }))
         .expect("UserStorage payload");
         let storage = serde_json::from_value::<mir2_client_bevy::storage::StorageModel>(items)
@@ -4368,6 +4751,13 @@ mod tests {
         assert_eq!(storage.items.len(), 1);
         assert_eq!(storage.items[0].key, "55");
         assert_eq!(storage.items[0].quantity, 3);
+        assert_eq!(storage.items[0].icon, 24);
+        assert_eq!(storage.items[0].durability_current, Some(8));
+        assert_eq!(storage.items[0].durability_max, Some(10));
+        assert_eq!(storage.items[0].sell_value, 99);
+        assert_eq!(storage.items[0].equip_slot.as_deref(), Some("Boots"));
+        assert_eq!(storage.items[0].added_attack, 2);
+        assert_eq!(storage.items[0].shape, Some(4));
         assert!(transform_storage_items_from_packet(&json!({
             "storage": [{ "count": 1 }]
         }))
@@ -4381,6 +4771,37 @@ mod tests {
             .expect("ResizeStorage metadata")["size"],
             json!(42)
         );
+
+        let deposit = transform_storage_patch_from_packet(
+            "StoreItem",
+            &json!({ "from": 3, "to": 9, "success": false }),
+        )
+        .expect("StoreItem acknowledgement");
+        let deposit_ack = serde_json::from_value::<
+            mir2_client_bevy::pending_operations::StorageOperationAck,
+        >(deposit["ack"].clone())
+        .expect("typed deposit acknowledgement");
+        assert_eq!(
+            deposit_ack,
+            mir2_client_bevy::pending_operations::StorageOperationAck::Deposit {
+                from: 3,
+                to: 9,
+                success: false,
+            }
+        );
+
+        let password_failure = transform_storage_patch_from_packet(
+            "StoragePasswordResult",
+            &json!({
+                "result": 1,
+                "removing": true,
+                "hasPassword": true,
+                "lastSetBinaryDatetime": 123
+            }),
+        )
+        .expect("password failure acknowledgement");
+        assert_eq!(password_failure["ack"]["operation"], "removePassword");
+        assert_eq!(password_failure["ack"]["success"], false);
     }
 
     async fn receive_wire_type(
@@ -5492,7 +5913,10 @@ mod tests {
     fn inventory_transform_groups_items_by_container() {
         let mut payload = gateway_payload();
         payload["inventoryItems"] = json!([
-            { "key": "small-hp-drug", "uniqueId": 42, "name": "Red Potion", "quantity": 5, "slot": 0 }
+            { "key": "small-hp-drug", "uniqueId": 42, "name": "Red Potion", "quantity": 5, "slot": 0,
+              "icon": 7, "description": "Restores HP", "durabilityCurrent": 4, "durabilityMax": 5,
+              "sellValue": 12, "equipSlot": "Weapon", "grade": "Rare", "attack": 3, "defence": 2,
+              "addedAttack": 1, "addedDefence": 4, "addedLuck": 2, "shape": 9, "socketSlots": 3 }
         ]);
         payload["beltItems"] = json!([
             { "key": "blue-potion", "uniqueId": 43, "name": "Blue Potion", "quantity": 2, "slot": 0 }
@@ -5520,6 +5944,15 @@ mod tests {
         assert_eq!(model.items.len(), 3);
         assert_eq!(model.items[0].key, "small-hp-drug");
         assert_eq!(model.items[0].unique_id, Some(42));
+        assert_eq!(model.items[0].icon, 7);
+        assert_eq!(model.items[0].description, "Restores HP");
+        assert_eq!(model.items[0].durability_current, Some(4));
+        assert_eq!(model.items[0].durability_max, Some(5));
+        assert_eq!(model.items[0].sell_value, 12);
+        assert_eq!(model.items[0].equip_slot.as_deref(), Some("Weapon"));
+        assert_eq!(model.items[0].added_defence, 4);
+        assert_eq!(model.items[0].shape, Some(9));
+        assert_eq!(model.items[0].socket_slots, 3);
     }
 
     #[test]
@@ -5638,14 +6071,28 @@ mod tests {
     }
 
     #[test]
-    fn chat_line_transform_extracts_text_and_channel() {
+    fn object_chat_line_transform_extracts_text_and_channel() {
         let payload = json!({ "objectId": 1001, "text": "hello world", "chatType": "Normal" });
-        let chat = transform_chat_line(&payload).expect("chat line");
+        let chat = transform_chat_line("ObjectChat", &payload).expect("chat line");
         assert_eq!(chat.text, "hello world");
         assert_eq!(chat.channel, "Normal");
 
         let missing = json!({ "objectId": 1001 });
-        assert!(transform_chat_line(&missing).is_none());
+        assert!(transform_chat_line("ObjectChat", &missing).is_none());
+    }
+
+    #[test]
+    fn direct_chat_line_transform_preserves_system_message_and_channel() {
+        let payload = json!({
+            "message": "server.CannotPickupNotOwner",
+            "chatType": "System"
+        });
+        let chat = transform_chat_line("Chat", &payload).expect("direct chat line");
+        assert_eq!(chat.text, "server.CannotPickupNotOwner");
+        assert_eq!(chat.channel, "System");
+
+        assert!(transform_chat_line("Chat", &json!({ "text": "wrong field" })).is_none());
+        assert!(transform_chat_line("NPCSay", &payload).is_none());
     }
 
     async fn assert_cancelled_resume_closes_without_replay(
@@ -6493,6 +6940,28 @@ mod tests {
     }
 
     #[test]
+    fn typed_big_map_packets_forward_an_immediate_model_only_snapshot() {
+        use crate::native_protocol::{MapIdentity, SearchMapResult};
+
+        assert!(packet_updates_big_map(&PacketEvent::MapChanged(
+            MapIdentity {
+                map_index: 1,
+                location: None,
+            }
+        )));
+        assert!(packet_updates_big_map(&PacketEvent::SearchMapResult(
+            SearchMapResult {
+                map_index: -1,
+                npc_index: 0,
+            },
+        )));
+        assert!(!packet_updates_big_map(&PacketEvent::Other {
+            packet: "ObjectMonster".into(),
+            payload: json!({}),
+        }));
+    }
+
+    #[test]
     fn inventory_ack_transform_requires_complete_correlatable_fields() {
         assert_eq!(
             transform_inventory_operation_ack(
@@ -6552,6 +7021,17 @@ mod tests {
                 unique_id: 3,
                 count: 2,
                 success: true,
+            })
+        );
+        assert_eq!(
+            transform_inventory_operation_ack(
+                "SellItem",
+                &json!({"uniqueId":88,"count":2,"success":false})
+            ),
+            Some(InventoryOperationAck::Sell {
+                unique_id: 88,
+                count: 2,
+                success: false,
             })
         );
         assert!(transform_inventory_operation_ack(
@@ -6727,6 +7207,64 @@ mod tests {
                 other => panic!("unexpected event: {other:?}"),
             }
         }
+    }
+
+    #[test]
+    fn shell_dispatch_maps_change_password_success_and_failure_without_credentials() {
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+
+        for result in [6, 2] {
+            let event = parse_inbound_event(&format!(
+                r#"{{"type":"packet","packet":"ChangePassword","payload":{{"result":{result}}}}}"#
+            ))
+            .expect("change-password event");
+            dispatch_shell_event(&event, &context, &sender);
+            assert_eq!(
+                receiver.try_recv().expect("shell change-password event"),
+                ShellGatewayEvent::ChangePasswordResult { result }
+            );
+        }
+
+        let missing_result =
+            parse_inbound_event(r#"{"type":"packet","packet":"ChangePassword","payload":{}}"#)
+                .expect("missing-result change-password event");
+        dispatch_shell_event(&missing_result, &context, &sender);
+        assert_eq!(
+            receiver.try_recv().expect("missing-result shell event"),
+            ShellGatewayEvent::ChangePasswordResult { result: -1 }
+        );
+    }
+
+    #[test]
+    fn shell_dispatch_maps_change_password_banned_reason_and_expiry_without_credentials() {
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let event = parse_inbound_event(
+            r#"{"type":"packet","packet":"ChangePasswordBanned","payload":{"reason":"manual review","expiryDate":"2030-01-01T00:00:00Z"}}"#,
+        )
+        .expect("banned change-password event");
+        dispatch_shell_event(&event, &context, &sender);
+        assert_eq!(
+            receiver.try_recv().expect("banned shell event"),
+            ShellGatewayEvent::ChangePasswordBanned {
+                reason: "manual review".to_owned(),
+                expiry: Some("2030-01-01T00:00:00Z".to_owned()),
+            }
+        );
+
+        let empty = parse_inbound_event(
+            r#"{"type":"packet","packet":"ChangePasswordBanned","payload":{}}"#,
+        )
+        .expect("empty banned change-password event");
+        dispatch_shell_event(&empty, &context, &sender);
+        assert_eq!(
+            receiver.try_recv().expect("default banned shell event"),
+            ShellGatewayEvent::ChangePasswordBanned {
+                reason: "account is banned".to_owned(),
+                expiry: None,
+            }
+        );
     }
 
     fn terminal_game_shop_receipt(request: &GameShopRequest, success: bool) -> GameShopReceipt {

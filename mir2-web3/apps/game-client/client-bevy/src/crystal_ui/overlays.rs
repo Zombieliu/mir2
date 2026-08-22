@@ -3,21 +3,27 @@
 use std::collections::VecDeque;
 
 use bevy::app::AppExit;
+use bevy::ecs::system::SystemParam;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
+use bevy::text::{Justify, LineBreak, TextLayout};
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, Interaction, JustifyContent, Node,
     PositionType, UiRect, Val,
 };
 
-use crate::game_shop::{
-    game_shop_page_count, game_shop_page_entries, game_shop_page_for_index, GameShopModel,
-    GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX, GAME_SHOP_QUANTITY_MIN,
+use crate::big_map::{
+    BigMapGatewayIntentQueue, BigMapModel, BigMapPoint, BigMapView, BIG_MAP_NPC_ROW_COUNT,
 };
-use crate::inventory::{InventoryModel, ItemModel};
+use crate::game_shop::{
+    GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+    GAME_SHOP_QUANTITY_MIN,
+};
+use crate::inventory::{item_icon_path, InventoryModel, ItemModel};
 use crate::mail::{
-    mail_claim_enabled, mail_delete_enabled, MailModel, MailOperationKind, MAX_MAIL_ATTACHMENTS,
+    mail_claim_enabled, mail_delete_enabled, MailModel, MailOperationKind, MailPageCursor,
+    MAX_MAIL_ATTACHMENTS,
 };
 use crate::map::MapModel;
 use crate::native_shell::{
@@ -34,17 +40,32 @@ use crate::shop::{
     shop_buy_enabled, shop_quantity_clamped, shop_quantity_dec, shop_quantity_inc,
     shop_sell_enabled, ShopModel,
 };
+use crate::skill_binding_persistence::{
+    persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+};
+use crate::skill_binding_ui::SkillBindingUi;
 use crate::skill_model::SkillModel;
 use crate::storage::{
-    storage_deposit_enabled, storage_expand_enabled, storage_password_display,
+    inventory_selection_for_slot, storage_deposit_enabled_for_selection, storage_expand_enabled,
     storage_remove_password_enabled, storage_set_password_enabled, storage_unlock_enabled,
-    storage_withdraw_enabled, StorageModel,
+    storage_withdraw_enabled_for_selection, StorageItemSelection, StorageModel, StoragePageCursor,
 };
+#[cfg(test)]
+use crate::storage::{storage_deposit_enabled, storage_withdraw_enabled};
 
 use super::assets::CrystalButtonAssetSet;
 use super::hud::CrystalHudAction;
+use super::panel_layouts::{
+    GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    INVENTORY_CELL_SIZE, INVENTORY_GRID_ORIGIN, INVENTORY_GRID_STEP, INVENTORY_PAGE_COLUMNS,
+    INVENTORY_PAGE_SIZE, INVENTORY_PANEL_SIZE, SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN,
+    SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+};
 use super::spec::{CrystalButtonSpec, CrystalRect};
 use super::widget::spawn_crystal_image_button;
+
+const BIG_MAP_SEARCH_COOLDOWN_MS: u64 = 1_000;
 
 /// Overlay mutation must run before any `Res<NativePlayerUiState>` readers in
 /// the same Update. Unordered Res + ResMut on this resource panics Bevy B0001.
@@ -62,6 +83,24 @@ const BUTTON_DISABLED: Color = Color::srgba(0.30, 0.24, 0.16, 0.45);
 const MAX_QUEUED: usize = 24;
 const BAG_SLOTS: u32 = 46;
 
+/// Pages exposed by Crystal's CharacterDialog.  The page is local UI state;
+/// values shown on each page still come from the authoritative read models.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CharacterPage {
+    #[default]
+    Character,
+    Stats1,
+    Stats2,
+    Spells,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum GuildLeftPage {
+    #[default]
+    Notice,
+    Members,
+}
+
 pub const BIGMAP_ZOOM_MIN: f32 = 0.5;
 pub const BIGMAP_ZOOM_MAX: f32 = 3.0;
 pub const BIGMAP_ZOOM_STEP: f32 = 0.25;
@@ -70,6 +109,8 @@ pub const BIGMAP_HEIGHT: f32 = 380.0;
 pub const CRYSTAL_MENU_PANEL_RECT: CrystalRect = CrystalRect::new(988.0, 349.0, 36.0, 282.0);
 pub const CRYSTAL_OPTIONS_PANEL_RECT: CrystalRect = CrystalRect::new(382.0, 207.0, 259.0, 354.0);
 pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0, 760.0, 500.0);
+pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
+pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
 
 // Re-export shop/storage constants for external consumers that import via overlays.
 pub use crate::shop::{SHOP_QUANTITY_MAX, SHOP_QUANTITY_MIN, SHOP_QUANTITY_STEP};
@@ -93,6 +134,17 @@ pub enum InventoryOperationDraft {
     Merge { source_slot: u32, unique_id: u64 },
 }
 
+/// A destructive bag-drop must be confirmed against the latest authoritative
+/// inventory snapshot.  Keeping the exact instance id, slot, and quantity
+/// prevents a stale confirmation from dropping a replacement stack.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InventoryDropConfirmation {
+    key: String,
+    unique_id: u64,
+    slot: u32,
+    count: u16,
+}
+
 pub fn bigmap_zoom_clamped(zoom: f32) -> f32 {
     zoom.clamp(BIGMAP_ZOOM_MIN, BIGMAP_ZOOM_MAX)
 }
@@ -103,30 +155,6 @@ pub fn bigmap_zoom_in(zoom: f32) -> f32 {
 
 pub fn bigmap_zoom_out(zoom: f32) -> f32 {
     bigmap_zoom_clamped(zoom - BIGMAP_ZOOM_STEP)
-}
-
-pub fn bigmap_asset_path(map_name: Option<&str>) -> Option<String> {
-    let map_name = map_name?.trim();
-    if map_name.eq_ignore_ascii_case("BichonProvince")
-        || map_name.eq_ignore_ascii_case("Bichon Province")
-    {
-        return Some("original-ui/MMap/101.png".to_owned());
-    }
-    None
-}
-
-pub fn bigmap_player_position(map: &MapModel, zoom: f32) -> (f32, f32) {
-    // For overlay panel we place player dot relative to BigMap viewport center.
-    // The viewport is BIGMAP_WIDTH x BIGMAP_HEIGHT centered at (0,0) in panel space.
-    // Player logical position is scaled by zoom.
-    let zoom = bigmap_zoom_clamped(zoom);
-    // Normalized position within viewport: center is (BIGMAP_WIDTH/2, BIGMAP_HEIGHT/2)
-    // We add small offset based on center_x/y to prove correctness.
-    let x = BIGMAP_WIDTH * 0.5
-        + (map.center_x as f32 * zoom * 0.5).clamp(-BIGMAP_WIDTH * 0.4, BIGMAP_WIDTH * 0.4);
-    let y = BIGMAP_HEIGHT * 0.5
-        + (map.center_y as f32 * zoom * 0.5).clamp(-BIGMAP_HEIGHT * 0.4, BIGMAP_HEIGHT * 0.4);
-    (x, y)
 }
 
 #[derive(Debug, Clone, Resource, PartialEq)]
@@ -150,8 +178,14 @@ pub struct NativePlayerUiState {
     pub game_shop_page: usize,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
+    pub selected_skill_id: Option<u32>,
+    pub character_page: CharacterPage,
+    pub inventory_page: u8,
+    pub skill_page: usize,
+    pub drop_confirmation: Option<InventoryDropConfirmation>,
     pub selected_group_member: Option<u8>,
     pub selected_guild_member: Option<u8>,
+    pub guild_left_page: GuildLeftPage,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -166,6 +200,43 @@ pub enum MailComposeFocus {
 pub struct MailComposeUi {
     pub focus: MailComposeFocus,
     pub last_notice: Option<String>,
+}
+
+/// Renderer-only state for the Crystal BigMap search field. Authoritative map,
+/// NPC, search result and teleport eligibility remain in [`BigMapModel`].
+#[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
+pub struct BigMapUiState {
+    pub search_focused: bool,
+    last_reset_epoch: Option<u64>,
+    requested_epoch_map: Option<(u64, i32)>,
+}
+
+#[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
+pub struct MailUiState {
+    pub cursor: MailPageCursor,
+}
+
+#[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
+pub struct StorageUiState {
+    pub cursor: StoragePageCursor,
+    pub bag_selection: Option<StorageItemSelection>,
+    pub storage_selection: Option<StorageItemSelection>,
+}
+
+#[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
+pub struct ShopUiState {
+    pub start_index: usize,
+}
+
+#[derive(SystemParam)]
+pub(crate) struct BigMapControls<'w> {
+    model: Option<ResMut<'w, BigMapModel>>,
+    intents: Option<ResMut<'w, BigMapGatewayIntentQueue>>,
+    ui: Option<ResMut<'w, BigMapUiState>>,
+    time: Option<Res<'w, Time>>,
+    skill_binding: Option<ResMut<'w, SkillBindingUi>>,
+    skills: Option<ResMut<'w, SkillModel>>,
+    skill_persistence: Option<ResMut<'w, SkillBindingPersistenceRuntime>>,
 }
 
 impl Eq for NativePlayerUiState {}
@@ -190,8 +261,14 @@ impl Default for NativePlayerUiState {
             game_shop_page: 0,
             split_count: 1,
             inventory_operation: None,
+            selected_skill_id: None,
+            character_page: CharacterPage::Character,
+            inventory_page: 0,
+            skill_page: 0,
+            drop_confirmation: None,
             selected_group_member: None,
             selected_guild_member: None,
+            guild_left_page: GuildLeftPage::Notice,
         }
     }
 }
@@ -356,12 +433,21 @@ impl NativePlayerUiState {
         self.core.chat_settings_draft = None;
         self.inspect = None;
         self.inventory_operation = None;
+        self.selected_skill_id = None;
+        self.character_page = CharacterPage::Character;
+        self.inventory_page = 0;
+        self.skill_page = 0;
+        self.character_page = CharacterPage::Character;
+        self.inventory_page = 0;
+        self.skill_page = 0;
+        self.drop_confirmation = None;
         self.shop_repair_container = 0;
         self.shop_repair_slot = None;
         self.game_shop_page = 0;
         self.split_count = 1;
         self.selected_group_member = None;
         self.selected_guild_member = None;
+        self.guild_left_page = GuildLeftPage::Notice;
     }
     pub fn reset_session(&mut self) {
         let options = self.core.options.clone();
@@ -457,6 +543,16 @@ impl UiEffectQueue {
                     | mir2_ui_core::effect::UiEffect::PersistChatSettings { .. }
             )
         })
+    }
+
+    fn drain_observe_bounded(&mut self, max: usize) -> usize {
+        self.drain_matching_bounded(max, |effect| {
+            matches!(
+                effect,
+                mir2_ui_core::effect::UiEffect::RequestObserve { .. }
+            )
+        })
+        .len()
     }
 
     fn take_exit_application(&mut self) -> bool {
@@ -1112,11 +1208,40 @@ struct OverlayMail;
 #[derive(Component)]
 struct OverlayBigMap;
 
+/// Testable ECS provenance markers for the Big Map-only render tree. They
+/// intentionally retain the authoritative renderer projection rather than
+/// deriving values back from UI text or asset names.
+#[derive(Debug, Clone, Component, PartialEq, Eq)]
+struct BigMapImageEntity {
+    url: String,
+}
+
+#[derive(Debug, Clone, Copy, Component, PartialEq, Eq)]
+struct BigMapPlayerEntity {
+    location: BigMapPoint,
+}
+
+#[derive(Debug, Clone, Component, PartialEq, Eq)]
+struct BigMapNpcRowEntity {
+    object_id: u32,
+    name: String,
+    location: BigMapPoint,
+}
+
 #[derive(Component)]
 struct OverlayShop;
 
 #[derive(Component)]
 struct OverlayGameShop;
+
+#[derive(Component)]
+struct OverlayInventoryGridViewport;
+
+#[derive(Component)]
+struct OverlaySkillListViewport;
+
+#[derive(Component)]
+struct OverlayGameShopProduct;
 
 #[derive(Component)]
 struct OverlayStorage;
@@ -1131,23 +1256,19 @@ struct OverlaySocial;
 enum OverlayButton {
     ExitApplication,
     CloseWindows,
+    CloseInspect,
     CloseMail,
     CloseBigMap,
     CloseShop,
     CloseGameShop,
     CloseStorage,
     CloseOptions,
-    OptionsMusicToggle,
+    SetCrystalOption(mir2_ui_core::state::UiCrystalOption, bool),
+    OptionsObserve(bool),
     OptionsMusicVolumeDown,
     OptionsMusicVolumeUp,
-    OptionsSoundToggle,
     OptionsSoundVolumeDown,
     OptionsSoundVolumeUp,
-    OptionsWindowed,
-    OptionsFullscreen,
-    OptionsApply,
-    OptionsCancel,
-    OptionsDefaults,
     ToggleInventory,
     ToggleEquipment,
     ToggleShop,
@@ -1159,15 +1280,18 @@ enum OverlayButton {
     CloseSocial,
     GroupInviteAccept,
     GroupInviteDecline,
+    GroupSwitch,
     GroupLeave,
     GroupAddSelected,
     GroupRemoveSelected,
     SelectGroupMember(u8),
     GuildRequestInfo,
+    SelectGuildLeftPage(GuildLeftPage),
     GuildInviteAccept,
     GuildInviteDecline,
     GuildPublishNotice,
     SelectGuildMember(u8),
+    GuildKickMember(u8),
     GuildKickSelected,
     TradeRequest,
     TradeAccept,
@@ -1181,6 +1305,8 @@ enum OverlayButton {
     EquipInspected,
     UnequipInspected,
     DropInspected,
+    ConfirmDropInspected,
+    CancelDropInspected,
     SplitInspected,
     SplitCountDec,
     SplitCountInc,
@@ -1189,7 +1315,18 @@ enum OverlayButton {
     CancelInventoryOperation,
     InspectBag(u32),
     InspectEquip(u32),
+    SelectCharacterPage(CharacterPage),
+    SelectInventoryPage(u8),
+    SelectSkill(u32),
+    AssignSkillKey(u8),
+    ClearSkillBinding,
+    CloseSkillAssign,
+    SkillPagePrev,
+    SkillPageNext,
     SelectMail(u64),
+    MailPagePrev,
+    MailPageNext,
+    ReadMail(u64),
     ClaimMail(u64),
     DeleteMail(u64),
     OpenMailCompose,
@@ -1201,8 +1338,14 @@ enum OverlayButton {
     RemoveMailAttachment(u64),
     SubmitMail,
     CancelMailCompose,
-    BigMapZoomIn,
-    BigMapZoomOut,
+    BigMapScrollUp,
+    BigMapScrollDown,
+    BigMapWorld,
+    BigMapMyLocation,
+    BigMapSearchFocus,
+    BigMapSearchSubmit,
+    BigMapTeleport,
+    SelectBigMapNpc(u32),
     // NPC shop
     SelectShopGood(u64),
     ShopBuy,
@@ -1211,6 +1354,8 @@ enum OverlayButton {
     ShopSRepair,
     ShopQuantityInc,
     ShopQuantityDec,
+    ShopPageUp,
+    ShopPageDown,
     ShopConfirm,
     ShopCancel,
     SelectBagForSell(u32),
@@ -1228,12 +1373,46 @@ enum OverlayButton {
     // Storage
     SelectBagForStore(u32),
     SelectStorage(u32),
+    StoragePage(usize),
     StorageDeposit,
     StorageWithdraw,
     StorageUnlock,
     StorageSetPassword,
     StorageRemovePassword,
     StorageExpand,
+}
+
+#[derive(SystemParam)]
+struct OverlayButtonControls<'w, 's> {
+    big_map: BigMapControls<'w>,
+    mail_ui: ResMut<'w, MailUiState>,
+    storage_ui: ResMut<'w, StorageUiState>,
+    shop_ui: ResMut<'w, ShopUiState>,
+    buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
+}
+
+#[derive(SystemParam)]
+struct OverlayRenderModels<'w> {
+    asset_server: Option<Res<'w, AssetServer>>,
+    shell: Option<Res<'w, NativeShellModel>>,
+    state: Res<'w, NativePlayerUiState>,
+    inventory: Res<'w, InventoryModel>,
+    inventory_feedback: Res<'w, InventoryOperationFeedback>,
+    mail: Res<'w, MailModel>,
+    mail_ui: Res<'w, MailUiState>,
+    big_map: Res<'w, BigMapModel>,
+    big_map_ui: Res<'w, BigMapUiState>,
+    ui: Res<'w, UiReadModel>,
+    shop: Res<'w, ShopModel>,
+    shop_ui: Res<'w, ShopUiState>,
+    game_shop: Res<'w, GameShopModel>,
+    storage: Res<'w, StorageModel>,
+    storage_ui: Res<'w, StorageUiState>,
+    skills: Res<'w, SkillModel>,
+    skill_binding: Res<'w, SkillBindingUi>,
+    skill_persistence: Res<'w, SkillBindingPersistenceRuntime>,
+    social: Res<'w, crate::social::SocialModel>,
+    combat_target: Option<Res<'w, crate::quest_model::CombatTargetModel>>,
 }
 
 pub struct Mir2CrystalOverlayPlugin;
@@ -1253,6 +1432,14 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<InventoryModel>()
             .init_resource::<MailModel>()
             .init_resource::<MailComposeUi>()
+            .init_resource::<BigMapModel>()
+            .init_resource::<BigMapGatewayIntentQueue>()
+            .init_resource::<BigMapUiState>()
+            .init_resource::<SkillBindingUi>()
+            .init_resource::<SkillBindingPersistenceRuntime>()
+            .init_resource::<MailUiState>()
+            .init_resource::<StorageUiState>()
+            .init_resource::<ShopUiState>()
             .init_resource::<MapModel>()
             .init_resource::<UiReadModel>()
             .init_resource::<UiSurfaceSignals>()
@@ -1269,6 +1456,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .add_systems(
                 Startup,
                 (
+                    crate::skill_binding_persistence::load_persisted_skill_bindings,
                     crate::options_effects::load_persisted_options,
                     crate::audio::initialize_native_audio,
                 )
@@ -1289,6 +1477,13 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             )
             .add_systems(
                 Update,
+                (sync_big_map_ui, sync_local_panel_models)
+                    .chain()
+                    .in_set(NativePlayerUiSet::Mutate)
+                    .before(process_overlay_keyboard),
+            )
+            .add_systems(
+                Update,
                 (
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
@@ -1304,6 +1499,81 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     .in_set(NativePlayerUiSet::Mutate),
             )
             .add_systems(Update, render_overlays.in_set(NativePlayerUiSet::Read));
+    }
+}
+
+/// Keep renderer-local BigMap focus and pending requests inside the current
+/// authoritative map/session epoch. Opening the panel requests the current
+/// map definition once; it never fabricates a map record locally.
+fn sync_big_map_ui(
+    state: Res<NativePlayerUiState>,
+    model: Res<BigMapModel>,
+    mut intents: ResMut<BigMapGatewayIntentQueue>,
+    mut ui: ResMut<BigMapUiState>,
+) {
+    intents.sync_model(&model);
+    if ui.last_reset_epoch != Some(model.reset_epoch) {
+        ui.search_focused = false;
+        ui.last_reset_epoch = Some(model.reset_epoch);
+        ui.requested_epoch_map = None;
+    }
+
+    let open = state.bigmap_open();
+    if open {
+        // MapInformation may arrive after the panel became visible. Queue the
+        // request as soon as that authoritative identity exists instead of
+        // tying it only to the first open frame. Never request a map that is
+        // already present in the authoritative NewMapInfo cache.
+        if let Some(map_index) = model.missing_current_map_index() {
+            let request_key = (model.reset_epoch, map_index);
+            if ui.requested_epoch_map != Some(request_key)
+                && intents.request_map_info(&model, map_index)
+            {
+                ui.requested_epoch_map = Some(request_key);
+            }
+        }
+    }
+    if !open {
+        ui.search_focused = false;
+    }
+}
+
+fn sync_local_panel_models(
+    shell: Res<NativeShellModel>,
+    mut mail: ResMut<MailModel>,
+    mut mail_ui: ResMut<MailUiState>,
+    inventory: Res<InventoryModel>,
+    storage: Res<StorageModel>,
+    mut storage_ui: ResMut<StorageUiState>,
+    shop: Res<ShopModel>,
+    mut shop_ui: ResMut<ShopUiState>,
+    mut skill_binding: ResMut<SkillBindingUi>,
+    mut skills: ResMut<SkillModel>,
+) {
+    mail.clamp_after_refresh(&mut mail_ui.cursor);
+    storage.clamp_after_refresh(&mut storage_ui.cursor);
+    storage_ui.bag_selection = storage_ui.bag_selection.filter(|selection| {
+        inventory_selection_for_slot(&inventory, selection.slot) == Some(*selection)
+    });
+    storage_ui.storage_selection = storage_ui
+        .storage_selection
+        .filter(|selection| storage.item_for_selection(*selection).is_some());
+    shop_ui.start_index = shop_ui.start_index.min(shop.goods.len().saturating_sub(8));
+
+    skill_binding.refresh(&skills);
+    let merged = skill_binding.merge_skill_model(&skills);
+    if skills.skills != merged.skills || skills.bindings != merged.bindings {
+        *skills = merged;
+    }
+
+    if shell.screen != NativeShellScreen::InGame {
+        mail_ui.cursor = MailPageCursor::default();
+        storage_ui.cursor = StoragePageCursor::default();
+        storage_ui.bag_selection = None;
+        storage_ui.storage_selection = None;
+        shop_ui.start_index = 0;
+        skill_binding.clear_selection();
+        skill_binding.set_assign_key(false);
     }
 }
 
@@ -1418,6 +1688,19 @@ pub fn belt_use_intent(slot: u8) -> NativePlayerUiIntent {
     }
 }
 
+/// Resolve a mouse click against the current server-derived belt model. This
+/// rejects an empty/legacy slot rather than sending a slot-only request that
+/// could consume a newer stack after a snapshot refresh.
+pub fn belt_item_use_intent(inventory: &InventoryModel, slot: u8) -> Option<NativePlayerUiIntent> {
+    let item = crate::crystal_ui::hud::belt_slot_item(inventory, slot)?;
+    Some(NativePlayerUiIntent::UseItem {
+        key: Some(item.key.clone()),
+        unique_id: Some(item.unique_id?),
+        slot: Some(slot),
+        grid: Some("belt".to_owned()),
+    })
+}
+
 fn spawn_overlay_root(mut commands: Commands) {
     commands
         .spawn((
@@ -1439,31 +1722,28 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayInventory,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(16.0),
-                    top: Val::Px(170.0),
-                    width: Val::Px(360.0),
+                    left: Val::Px(410.0),
+                    top: Val::Px(86.0),
+                    width: Val::Px(INVENTORY_PANEL_SIZE.width as f32),
+                    height: Val::Px(INVENTORY_PANEL_SIZE.height as f32),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(8.0)),
-                    row_gap: Val::Px(4.0),
+                    overflow: Overflow::clip(),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayEquipment,
                 Node {
                     position_type: PositionType::Absolute,
-                    right: Val::Px(150.0),
-                    top: Val::Px(170.0),
-                    width: Val::Px(280.0),
+                    left: Val::Px(742.0),
+                    top: Val::Px(17.0),
+                    width: Val::Px(264.0),
+                    height: Val::Px(380.0),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(8.0)),
-                    row_gap: Val::Px(4.0),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayMenu,
@@ -1485,14 +1765,13 @@ fn spawn_overlay_root(mut commands: Commands) {
                     position_type: PositionType::Absolute,
                     left: Val::Px(16.0),
                     top: Val::Px(80.0),
-                    width: Val::Px(280.0),
+                    width: Val::Px(650.0),
+                    height: Val::Px(SKILL_PANEL_SIZE.height as f32),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(8.0)),
-                    row_gap: Val::Px(3.0),
+                    overflow: Overflow::clip(),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayInspect,
@@ -1544,10 +1823,10 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayMail,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(212.0),
-                    top: Val::Px(80.0),
-                    width: Val::Px(600.0),
-                    max_height: Val::Px(520.0),
+                    left: Val::Px(562.0),
+                    top: Val::Px(5.0),
+                    width: Val::Px(312.0),
+                    height: Val::Px(444.0),
                     display: Display::None,
                     flex_direction: FlexDirection::Column,
                     padding: UiRect::all(Val::Px(10.0)),
@@ -1573,33 +1852,28 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayShop,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(112.0),
-                    top: Val::Px(80.0),
+                    left: Val::Px(0.0),
+                    top: Val::Px(224.0),
                     width: Val::Px(620.0),
-                    max_height: Val::Px(520.0),
+                    height: Val::Px(344.0),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(6.0),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayGameShop,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(112.0),
-                    top: Val::Px(80.0),
-                    width: Val::Px(620.0),
-                    max_height: Val::Px(520.0),
+                    left: Val::Px((1024.0 - GAME_SHOP_PANEL_SIZE.width as f32) / 2.0),
+                    top: Val::Px((768.0 - GAME_SHOP_PANEL_SIZE.height as f32) / 2.0),
+                    width: Val::Px(GAME_SHOP_PANEL_SIZE.width as f32),
+                    height: Val::Px(GAME_SHOP_PANEL_SIZE.height as f32),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(6.0),
+                    overflow: Overflow::clip(),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayStorage,
@@ -1608,7 +1882,7 @@ fn spawn_overlay_root(mut commands: Commands) {
                     left: Val::Px(150.0),
                     top: Val::Px(100.0),
                     width: Val::Px(640.0),
-                    max_height: Val::Px(520.0),
+                    height: Val::Px(344.0),
                     display: Display::None,
                     flex_direction: FlexDirection::Column,
                     padding: UiRect::all(Val::Px(10.0)),
@@ -1634,17 +1908,14 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlaySocial,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(172.0),
-                    top: Val::Px(80.0),
-                    width: Val::Px(680.0),
-                    max_height: Val::Px(560.0),
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(5.0),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
         });
 }
@@ -1653,6 +1924,8 @@ fn consume_hud_buttons(
     mut state: ResMut<NativePlayerUiState>,
     buttons: Query<(&Interaction, &CrystalHudAction), Changed<Interaction>>,
     shell: Option<Res<NativeShellModel>>,
+    inventory: Res<InventoryModel>,
+    mut intents: ResMut<NativePlayerUiIntentQueue>,
 ) {
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame) {
         return;
@@ -1666,6 +1939,8 @@ fn consume_hud_buttons(
                 state.toggle_inventory();
                 if !state.inventory_open() {
                     state.inspect = None;
+                    state.inventory_operation = None;
+                    state.drop_confirmation = None;
                 }
             }
             CrystalHudAction::Character => {
@@ -1676,6 +1951,9 @@ fn consume_hud_buttons(
             }
             CrystalHudAction::Skill => {
                 state.toggle_skill();
+                if !state.skill_open() {
+                    state.selected_skill_id = None;
+                }
             }
             CrystalHudAction::Quest => {
                 state.toggle_quest();
@@ -1696,6 +1974,11 @@ fn consume_hud_buttons(
                 state.toggle_shop();
                 if !state.shop_open() {
                     state.shop_quantity = 1;
+                }
+            }
+            CrystalHudAction::BeltUse(slot) => {
+                if let Some(intent) = belt_item_use_intent(&inventory, *slot) {
+                    intents.push_transient_unique(intent);
                 }
             }
         }
@@ -1739,6 +2022,7 @@ pub(crate) fn process_overlay_keyboard(
     mut compose_ui: ResMut<MailComposeUi>,
     mut game_shop: Option<ResMut<GameShopModel>>,
     mut storage: ResMut<StorageModel>,
+    big_map_controls: BigMapControls,
     chat_state: Option<Res<crate::crystal_ui::chat::CrystalChatState>>,
     npc_dialog: Option<Res<NpcDialogModel>>,
     mut surface_signals: Option<ResMut<UiSurfaceSignals>>,
@@ -1750,6 +2034,15 @@ pub(crate) fn process_overlay_keyboard(
         // correlation after runtime receipt ingest.
         return;
     }
+    let BigMapControls {
+        model: mut big_map,
+        intents: mut big_map_intents,
+        ui: mut big_map_ui,
+        time,
+        skill_binding: mut skill_binding,
+        skills: mut skills,
+        skill_persistence: mut skill_persistence,
+    } = big_map_controls;
 
     if state.core.mail_compose_open() {
         if keys.just_pressed(KeyCode::Escape) {
@@ -1832,6 +2125,77 @@ pub(crate) fn process_overlay_keyboard(
             }
             signals.npc_shop_open_requested = false;
         }
+    }
+
+    if state.skill_open()
+        && skill_binding
+            .as_deref()
+            .is_some_and(SkillBindingUi::is_assign_key_enabled)
+    {
+        let pressed = [
+            KeyCode::F1,
+            KeyCode::F2,
+            KeyCode::F3,
+            KeyCode::F4,
+            KeyCode::F5,
+            KeyCode::F6,
+            KeyCode::F7,
+            KeyCode::F8,
+        ]
+        .into_iter()
+        .enumerate()
+        .find_map(|(index, key)| keys.just_pressed(key).then_some(index as u8 + 1));
+        if let Some(hotkey) = pressed {
+            if let (Some(skill_binding), Some(skills), Some(skill_persistence)) = (
+                skill_binding.as_deref_mut(),
+                skills.as_deref_mut(),
+                skill_persistence.as_deref_mut(),
+            ) {
+                if skill_binding.assign_selected_key(hotkey, skills) {
+                    skill_binding.apply_to_skill_model(skills);
+                    skill_persistence.mark_dirty();
+                    persist_skill_bindings_if_changed(skill_persistence, skill_binding);
+                }
+            }
+            return;
+        }
+    }
+
+    if state.bigmap_open() && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused) {
+        let (Some(big_map), Some(big_map_intents), Some(big_map_ui)) = (
+            big_map.as_deref_mut(),
+            big_map_intents.as_deref_mut(),
+            big_map_ui.as_deref_mut(),
+        ) else {
+            return;
+        };
+        if keys.just_pressed(KeyCode::Backspace) {
+            let mut value = big_map.search.draft.clone();
+            value.pop();
+            big_map.set_search_draft(value);
+        }
+        for event in typed.read() {
+            if event.state != ButtonState::Pressed {
+                continue;
+            }
+            if let Some(text) = &event.text {
+                let mut value = big_map.search.draft.clone();
+                value.extend(text.chars().filter(|ch| !ch.is_control()));
+                big_map.set_search_draft(value);
+            }
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            let now_ms = time
+                .as_deref()
+                .map(|clock| clock.elapsed().as_millis() as u64)
+                .unwrap_or_default();
+            let _ = big_map_intents.search(big_map, now_ms, BIG_MAP_SEARCH_COOLDOWN_MS);
+            return;
+        }
+        if !keys.just_pressed(KeyCode::Escape) {
+            return;
+        }
+        big_map_ui.search_focused = false;
     }
 
     if state.chat_focused() {
@@ -1932,6 +2296,8 @@ pub(crate) fn process_overlay_keyboard(
         state.toggle_inventory();
         if !state.inventory_open() {
             state.inspect = None;
+            state.inventory_operation = None;
+            state.drop_confirmation = None;
         } else if was_open {
             // already handled
         }
@@ -1965,6 +2331,10 @@ pub(crate) fn process_overlay_keyboard(
             // If shop/storage open, Escape acts as Cancel
             state.close_windows();
             state.shop_quantity = 1;
+            if let Some(skill_binding) = skill_binding.as_deref_mut() {
+                skill_binding.clear_selection();
+                skill_binding.set_assign_key(false);
+            }
             storage.password_draft.clear();
             storage.new_password_draft.clear();
             storage.confirm_password_draft.clear();
@@ -1972,15 +2342,6 @@ pub(crate) fn process_overlay_keyboard(
             state.toggle_menu();
         }
         return;
-    }
-    // BigMap zoom handling
-    if state.bigmap_open() {
-        if keys.just_pressed(KeyCode::Equal) || keys.just_pressed(KeyCode::NumpadAdd) {
-            state.zoom_in();
-        }
-        if keys.just_pressed(KeyCode::Minus) || keys.just_pressed(KeyCode::NumpadSubtract) {
-            state.zoom_out();
-        }
     }
     if keys.just_pressed(KeyCode::KeyU) {
         if let Some(intent) = inspected_use_intent(&state, &inventory) {
@@ -2035,11 +2396,27 @@ fn process_overlay_buttons(
     ui: Option<Res<UiReadModel>>,
     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
     mut pending: ResMut<PendingOperations>,
-    buttons: Query<(&Interaction, &OverlayButton), Changed<Interaction>>,
+    button_controls: OverlayButtonControls,
 ) {
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
+    let OverlayButtonControls {
+        big_map:
+            BigMapControls {
+                model: mut big_map,
+                intents: mut big_map_intents,
+                ui: mut big_map_ui,
+                time,
+                skill_binding: mut skill_binding,
+                skills: mut skills,
+                skill_persistence: mut skill_persistence,
+            },
+        mut mail_ui,
+        mut storage_ui,
+        mut shop_ui,
+        buttons,
+    } = button_controls;
     let mut fallback_effects = UiEffectQueue::default();
     let mut effects = effects.as_deref_mut().unwrap_or(&mut fallback_effects);
     let mut game_shop = game_shop;
@@ -2064,6 +2441,15 @@ fn process_overlay_buttons(
             OverlayButton::CloseWindows => {
                 state.close_windows();
                 state.shop_quantity = 1;
+                if let Some(skill_binding) = skill_binding.as_deref_mut() {
+                    skill_binding.clear_selection();
+                    skill_binding.set_assign_key(false);
+                }
+            }
+            OverlayButton::CloseInspect => {
+                state.inspect = None;
+                state.inventory_operation = None;
+                state.drop_confirmation = None;
             }
             OverlayButton::CloseMail => {
                 if state.mail_open() {
@@ -2073,6 +2459,9 @@ fn process_overlay_buttons(
             OverlayButton::CloseBigMap => {
                 if state.bigmap_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
+                }
+                if let Some(big_map_ui) = big_map_ui.as_deref_mut() {
+                    big_map_ui.search_focused = false;
                 }
             }
             OverlayButton::CloseShop => {
@@ -2095,37 +2484,39 @@ fn process_overlay_buttons(
                 storage.password_draft.clear();
                 storage.new_password_draft.clear();
                 storage.confirm_password_draft.clear();
+                storage_ui.bag_selection = None;
+                storage_ui.storage_selection = None;
             }
             OverlayButton::CloseOptions => {
                 if state.options_open() {
                     dispatch_ui_action(
                         &mut state.core,
                         &mut effects,
-                        mir2_ui_core::action::UiAction::CancelOptions,
+                        mir2_ui_core::action::UiAction::ClosePanel,
                     );
                 }
             }
-            OverlayButton::OptionsMusicToggle => {
-                let value = !state
-                    .core
-                    .options_draft
-                    .as_ref()
-                    .unwrap_or(&state.core.options)
-                    .music_enabled;
+            OverlayButton::SetCrystalOption(option, enabled) => {
                 dispatch_ui_action(
                     &mut state.core,
                     &mut effects,
-                    mir2_ui_core::action::UiAction::SetMusicEnabled { enabled: value },
+                    mir2_ui_core::action::UiAction::SetCrystalOption { option, enabled },
                 );
             }
+            OverlayButton::OptionsObserve(allow) => {
+                dispatch_ui_action(
+                    &mut state.core,
+                    &mut effects,
+                    mir2_ui_core::action::UiAction::RequestObserve { allow },
+                );
+                if effects.drain_observe_bounded(1) == 1 {
+                    let _ = intents.push_transient_unique(NativePlayerUiIntent::Chat {
+                        message: "@ALLOWOBSERVE".to_owned(),
+                    });
+                }
+            }
             OverlayButton::OptionsMusicVolumeDown => {
-                let value = state
-                    .core
-                    .options_draft
-                    .as_ref()
-                    .unwrap_or(&state.core.options)
-                    .music_volume
-                    .saturating_sub(10);
+                let value = state.core.options.music_volume.saturating_sub(10);
                 dispatch_ui_action(
                     &mut state.core,
                     &mut effects,
@@ -2133,41 +2524,15 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::OptionsMusicVolumeUp => {
-                let value = state
-                    .core
-                    .options_draft
-                    .as_ref()
-                    .unwrap_or(&state.core.options)
-                    .music_volume
-                    .saturating_add(10)
-                    .min(100);
+                let value = state.core.options.music_volume.saturating_add(10).min(100);
                 dispatch_ui_action(
                     &mut state.core,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetMusicVolume { volume: value },
                 );
             }
-            OverlayButton::OptionsSoundToggle => {
-                let value = !state
-                    .core
-                    .options_draft
-                    .as_ref()
-                    .unwrap_or(&state.core.options)
-                    .sound_enabled;
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::SetSoundEnabled { enabled: value },
-                );
-            }
             OverlayButton::OptionsSoundVolumeDown => {
-                let value = state
-                    .core
-                    .options_draft
-                    .as_ref()
-                    .unwrap_or(&state.core.options)
-                    .sound_volume
-                    .saturating_sub(10);
+                let value = state.core.options.sound_volume.saturating_sub(10);
                 dispatch_ui_action(
                     &mut state.core,
                     &mut effects,
@@ -2175,57 +2540,11 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::OptionsSoundVolumeUp => {
-                let value = state
-                    .core
-                    .options_draft
-                    .as_ref()
-                    .unwrap_or(&state.core.options)
-                    .sound_volume
-                    .saturating_add(10)
-                    .min(100);
+                let value = state.core.options.sound_volume.saturating_add(10).min(100);
                 dispatch_ui_action(
                     &mut state.core,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetSoundVolume { volume: value },
-                );
-            }
-            OverlayButton::OptionsWindowed => {
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::SetWindowMode {
-                        mode: mir2_ui_core::state::UiWindowMode::Windowed,
-                    },
-                );
-            }
-            OverlayButton::OptionsFullscreen => {
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::SetWindowMode {
-                        mode: mir2_ui_core::state::UiWindowMode::Fullscreen,
-                    },
-                );
-            }
-            OverlayButton::OptionsApply => {
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::ApplyOptions,
-                );
-            }
-            OverlayButton::OptionsCancel => {
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::CancelOptions,
-                );
-            }
-            OverlayButton::OptionsDefaults => {
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::ResetOptionsToDefaults,
                 );
             }
             OverlayButton::ToggleInventory => {
@@ -2270,6 +2589,13 @@ fn process_overlay_buttons(
                 intents.push_transient_unique(NativePlayerUiIntent::GroupInvite {
                     accept_invite: false,
                 });
+            }
+            OverlayButton::GroupSwitch => {
+                let allow_group = !social.group.allow_invites;
+                intents.push_social_pending(
+                    &mut social,
+                    NativePlayerUiIntent::GroupSwitch { allow_group },
+                );
             }
             OverlayButton::GroupLeave => {
                 if social.group.active {
@@ -2323,6 +2649,17 @@ fn process_overlay_buttons(
                     NativePlayerUiIntent::GuildRequestInfo { info_type: 0 },
                 );
             }
+            OverlayButton::SelectGuildLeftPage(page) => {
+                state.guild_left_page = page;
+                state.selected_guild_member = None;
+                if matches!(page, GuildLeftPage::Notice | GuildLeftPage::Members) {
+                    let info_type = if page == GuildLeftPage::Notice { 0 } else { 1 };
+                    intents.push_social_pending(
+                        &mut social,
+                        NativePlayerUiIntent::GuildRequestInfo { info_type },
+                    );
+                }
+            }
             OverlayButton::GuildInviteAccept => {
                 intents.push_social_pending(
                     &mut social,
@@ -2347,6 +2684,32 @@ fn process_overlay_buttons(
             }
             OverlayButton::SelectGuildMember(index) => {
                 state.selected_guild_member = Some(index);
+            }
+            OverlayButton::GuildKickMember(index) => {
+                let Some(member) = social.guild.members.get(usize::from(index)) else {
+                    continue;
+                };
+                if member.name.trim().is_empty()
+                    || !social
+                        .guild
+                        .permissions
+                        .iter()
+                        .any(|permission| permission.eq_ignore_ascii_case("kick"))
+                {
+                    continue;
+                }
+                state.selected_guild_member = Some(index);
+                let name = member.name.clone();
+                let rank_index = member.rank_index.unwrap_or(0);
+                intents.push_social_pending(
+                    &mut social,
+                    NativePlayerUiIntent::GuildEditMember {
+                        change_type: 1,
+                        rank_index,
+                        name,
+                        rank_name: String::new(),
+                    },
+                );
             }
             OverlayButton::GuildKickSelected => {
                 let Some(index) = state.selected_guild_member else {
@@ -2454,23 +2817,27 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::DropInspected => {
-                if let Some(item) = inspected_inventory_item(&state, &inventory) {
-                    if let (Some(unique_id), Ok(count)) =
-                        (item_unique_id(item), u16::try_from(item.quantity))
-                    {
-                        if count != 0 {
-                            intents.push_pending_intent(
-                                &mut pending,
-                                NativePlayerUiIntent::DropItem {
-                                    key: item.key.clone(),
-                                    unique_id,
-                                    count,
-                                    hero_inventory: false,
-                                },
-                            );
-                        }
-                    }
+                state.drop_confirmation = inspected_drop_confirmation(&state, &inventory);
+            }
+            OverlayButton::ConfirmDropInspected => {
+                let Some(confirmation) = state.drop_confirmation.take() else {
+                    continue;
+                };
+                if !drop_confirmation_is_current(&confirmation, &inventory) {
+                    continue;
                 }
+                intents.push_pending_intent(
+                    &mut pending,
+                    NativePlayerUiIntent::DropItem {
+                        key: confirmation.key,
+                        unique_id: confirmation.unique_id,
+                        count: confirmation.count,
+                        hero_inventory: false,
+                    },
+                );
+            }
+            OverlayButton::CancelDropInspected => {
+                state.drop_confirmation = None;
             }
             OverlayButton::SplitInspected => {
                 if let Some(item) = inspected_inventory_item(&state, &inventory) {
@@ -2577,6 +2944,7 @@ fn process_overlay_buttons(
                         .find(|item| item.slot == slot)
                         .map(inspect_from_item);
                     state.split_count = 1;
+                    state.drop_confirmation = None;
                 }
             },
             OverlayButton::InspectEquip(slot) => {
@@ -2585,13 +2953,94 @@ fn process_overlay_buttons(
                     .into_iter()
                     .find(|item| item.slot == slot)
                     .map(inspect_from_item);
+                state.drop_confirmation = None;
+            }
+            OverlayButton::SelectSkill(skill_id) => {
+                if let (Some(skill_binding), Some(skills)) =
+                    (skill_binding.as_deref_mut(), skills.as_deref())
+                {
+                    if skill_binding.select_skill(skill_id, skills) {
+                        state.selected_skill_id = Some(skill_id);
+                        skill_binding.set_assign_key(true);
+                    }
+                }
+            }
+            OverlayButton::AssignSkillKey(hotkey) => {
+                if state.skill_open() {
+                    if let (Some(skill_binding), Some(skills), Some(skill_persistence)) = (
+                        skill_binding.as_deref_mut(),
+                        skills.as_deref_mut(),
+                        skill_persistence.as_deref_mut(),
+                    ) {
+                        if skill_binding.assign_selected_key(hotkey, skills) {
+                            skill_binding.apply_to_skill_model(skills);
+                            skill_persistence.mark_dirty();
+                            persist_skill_bindings_if_changed(skill_persistence, skill_binding);
+                        }
+                    }
+                }
+            }
+            OverlayButton::ClearSkillBinding => {
+                if let (Some(skill_binding), Some(skills), Some(skill_persistence)) = (
+                    skill_binding.as_deref_mut(),
+                    skills.as_deref_mut(),
+                    skill_persistence.as_deref_mut(),
+                ) {
+                    if let Some(skill_id) = skill_binding.selected_skill_id() {
+                        if skill_binding.unassign_skill(skill_id) {
+                            skill_binding.apply_to_skill_model(skills);
+                            skill_persistence.mark_dirty();
+                            persist_skill_bindings_if_changed(skill_persistence, skill_binding);
+                        }
+                    }
+                }
+            }
+            OverlayButton::CloseSkillAssign => {
+                if let Some(skill_binding) = skill_binding.as_deref_mut() {
+                    skill_binding.set_assign_key(false);
+                }
+            }
+            OverlayButton::SelectCharacterPage(page) => {
+                state.character_page = page;
+                state.inspect = None;
+            }
+            OverlayButton::SelectInventoryPage(page) => {
+                if page <= 2 {
+                    state.inventory_page = page;
+                    state.inspect = None;
+                    state.inventory_operation = None;
+                    state.drop_confirmation = None;
+                }
+            }
+            OverlayButton::SkillPagePrev => {
+                state.skill_page = state.skill_page.saturating_sub(1);
+                state.selected_skill_id = None;
+            }
+            OverlayButton::SkillPageNext => {
+                let page_count = skills
+                    .as_deref()
+                    .map(|model| native_skill_page_count(model.skills.len()))
+                    .unwrap_or(1);
+                state.skill_page = (state.skill_page + 1).min(page_count.saturating_sub(1));
+                state.selected_skill_id = None;
             }
             OverlayButton::SelectMail(id) => {
-                mail.selected_id = Some(id);
+                let _ = mail.select_visible(id);
+            }
+            OverlayButton::MailPagePrev => {
+                mail_ui.cursor.page = mail_ui.cursor.page.saturating_sub(1);
+                mail.selected_id = None;
+            }
+            OverlayButton::MailPageNext => {
+                mail_ui.cursor.page =
+                    (mail_ui.cursor.page + 1).min(mail.page_count().saturating_sub(1));
+                mail.selected_id = None;
+            }
+            OverlayButton::ReadMail(id) => {
                 if mail
                     .mails
                     .iter()
-                    .any(|message| message.id == id && !message.read)
+                    .any(|message| message.id == id && message.operation.is_none() && !message.read)
                 {
                     intents.push_pending_intent(
                         &mut pending,
@@ -2713,8 +3162,81 @@ fn process_overlay_buttons(
                 );
                 compose_ui.last_notice = None;
             }
-            OverlayButton::BigMapZoomIn => state.zoom_in(),
-            OverlayButton::BigMapZoomOut => state.zoom_out(),
+            OverlayButton::BigMapScrollUp => {
+                if state.bigmap_open() {
+                    let Some(big_map) = big_map.as_deref_mut() else {
+                        continue;
+                    };
+                    let row = big_map.npc_scroll_row.saturating_sub(1);
+                    big_map.set_npc_scroll_row(row);
+                }
+            }
+            OverlayButton::BigMapScrollDown => {
+                if state.bigmap_open() {
+                    let Some(big_map) = big_map.as_deref_mut() else {
+                        continue;
+                    };
+                    let row = big_map.npc_scroll_row.saturating_add(1);
+                    big_map.set_npc_scroll_row(row);
+                }
+            }
+            OverlayButton::BigMapWorld => {
+                if state.bigmap_open() {
+                    let Some(big_map) = big_map.as_deref_mut() else {
+                        continue;
+                    };
+                    big_map.set_view(BigMapView::WorldMap);
+                }
+            }
+            OverlayButton::BigMapMyLocation => {
+                if state.bigmap_open() {
+                    let Some(big_map) = big_map.as_deref_mut() else {
+                        continue;
+                    };
+                    big_map.set_view(BigMapView::CurrentMap);
+                    if let (Some(map_index), Some(big_map_intents)) =
+                        (big_map.current_map_index, big_map_intents.as_deref_mut())
+                    {
+                        let _ = big_map_intents.request_map_info(big_map, map_index);
+                    }
+                }
+            }
+            OverlayButton::BigMapSearchFocus => {
+                if state.bigmap_open() {
+                    if let Some(big_map_ui) = big_map_ui.as_deref_mut() {
+                        big_map_ui.search_focused = true;
+                    }
+                }
+            }
+            OverlayButton::BigMapSearchSubmit => {
+                if state.bigmap_open() {
+                    let now_ms = time
+                        .as_deref()
+                        .map(|clock| clock.elapsed().as_millis() as u64)
+                        .unwrap_or_default();
+                    if let (Some(big_map), Some(big_map_intents)) =
+                        (big_map.as_deref_mut(), big_map_intents.as_deref_mut())
+                    {
+                        let _ = big_map_intents.search(big_map, now_ms, BIG_MAP_SEARCH_COOLDOWN_MS);
+                    }
+                }
+            }
+            OverlayButton::BigMapTeleport => {
+                if state.bigmap_open() {
+                    if let (Some(big_map), Some(big_map_intents)) =
+                        (big_map.as_deref(), big_map_intents.as_deref_mut())
+                    {
+                        let _ = big_map_intents.teleport_selected(big_map);
+                    }
+                }
+            }
+            OverlayButton::SelectBigMapNpc(object_id) => {
+                if state.bigmap_open() {
+                    if let Some(big_map) = big_map.as_deref_mut() {
+                        let _ = big_map.select_npc(object_id);
+                    }
+                }
+            }
             // Shop
             OverlayButton::SelectGameShopGood(id) => {
                 if state.shop_open() {
@@ -2722,7 +3244,7 @@ fn process_overlay_buttons(
                         continue;
                     };
                     game_shop.selected_game_shop_index = Some(id);
-                    if let Some(page) = game_shop_page_for_index(game_shop, id) {
+                    if let Some(page) = native_game_shop_page_for_index(game_shop, id) {
                         state.game_shop_page = page;
                     }
                 }
@@ -2768,7 +3290,7 @@ fn process_overlay_buttons(
                 if state.shop_open() {
                     let page_count = game_shop
                         .as_deref()
-                        .map(|model| game_shop_page_count(model.items.len()))
+                        .map(|model| native_game_shop_page_count(model.items.len()))
                         .unwrap_or(1);
                     state.game_shop_page =
                         (state.game_shop_page + 1).min(page_count.saturating_sub(1));
@@ -2878,6 +3400,19 @@ fn process_overlay_buttons(
                     state.shop_quantity_dec();
                 }
             }
+            OverlayButton::ShopPageUp => {
+                if state.npc_shop_open() {
+                    shop_ui.start_index = shop_ui.start_index.saturating_sub(1);
+                    shop.selected_id = None;
+                }
+            }
+            OverlayButton::ShopPageDown => {
+                if state.npc_shop_open() {
+                    shop_ui.start_index =
+                        (shop_ui.start_index + 1).min(shop.goods.len().saturating_sub(8));
+                    shop.selected_id = None;
+                }
+            }
             OverlayButton::ShopConfirm => {
                 if !state.npc_shop_open() {
                     continue;
@@ -2936,24 +3471,29 @@ fn process_overlay_buttons(
             }
             // Storage
             OverlayButton::SelectBagForStore(slot) => {
-                storage.selected_bag_slot = Some(slot);
+                storage_ui.bag_selection = inventory_selection_for_slot(&inventory, slot);
+                storage.selected_bag_slot = storage_ui.bag_selection.map(|value| value.slot);
                 storage.selected_storage_slot = None;
+                storage_ui.storage_selection = None;
             }
             OverlayButton::SelectStorage(slot) => {
-                storage.selected_storage_slot = Some(slot);
+                storage_ui.storage_selection = storage.selection_for_slot(slot);
+                storage.selected_storage_slot =
+                    storage_ui.storage_selection.map(|value| value.slot);
                 storage.selected_bag_slot = None;
+                storage_ui.bag_selection = None;
+            }
+            OverlayButton::StoragePage(page) => {
+                storage_ui.cursor.page = storage.clamp_page(page);
+                storage.selected_storage_slot = None;
+                storage_ui.storage_selection = None;
             }
             OverlayButton::StorageDeposit => {
-                if storage_deposit_enabled(&storage, &inventory) {
-                    let from = storage.selected_bag_slot.unwrap() as i32;
-                    let Some(unique_id) = inventory
-                        .items
-                        .iter()
-                        .find(|item| item.container == 0 && item.slot as i32 == from)
-                        .and_then(item_unique_id)
-                    else {
-                        continue;
-                    };
+                if let Some(selection) = storage_ui.bag_selection.filter(|selection| {
+                    storage_deposit_enabled_for_selection(&storage, &inventory, *selection)
+                }) {
+                    let from = selection.slot as i32;
+                    let unique_id = selection.unique_id;
                     // find first free storage slot
                     let used: std::collections::HashSet<u32> = storage
                         .items
@@ -2979,16 +3519,11 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::StorageWithdraw => {
-                if storage_withdraw_enabled(&storage, &inventory) {
-                    let from = storage.selected_storage_slot.unwrap() as i32;
-                    let Some(unique_id) = storage
-                        .items
-                        .iter()
-                        .find(|item| item.container == 4 && item.slot as i32 == from)
-                        .and_then(item_unique_id)
-                    else {
-                        continue;
-                    };
+                if let Some(selection) = storage_ui.storage_selection.filter(|selection| {
+                    storage_withdraw_enabled_for_selection(&storage, &inventory, *selection)
+                }) {
+                    let from = selection.slot as i32;
+                    let unique_id = selection.unique_id;
                     let occupied: std::collections::HashSet<u32> = inventory
                         .items
                         .iter()
@@ -3133,6 +3668,33 @@ fn inspected_remove_intent(
     })
 }
 
+fn inspected_drop_confirmation(
+    state: &NativePlayerUiState,
+    inventory: &InventoryModel,
+) -> Option<InventoryDropConfirmation> {
+    let item = inspected_inventory_item(state, inventory)?;
+    let count = u16::try_from(item.quantity).ok()?;
+    Some(InventoryDropConfirmation {
+        key: item.key.clone(),
+        unique_id: item_unique_id(item)?,
+        slot: item.slot,
+        count: (count > 0).then_some(count)?,
+    })
+}
+
+fn drop_confirmation_is_current(
+    confirmation: &InventoryDropConfirmation,
+    inventory: &InventoryModel,
+) -> bool {
+    inventory.items.iter().any(|item| {
+        item.container == 0
+            && item.slot == confirmation.slot
+            && item.key == confirmation.key
+            && item_unique_id(item) == Some(confirmation.unique_id)
+            && item.quantity == u32::from(confirmation.count)
+    })
+}
+
 fn selected_repair_item<'a>(
     state: &NativePlayerUiState,
     inventory: &'a InventoryModel,
@@ -3150,20 +3712,7 @@ fn repair_selection_enabled(state: &NativePlayerUiState, inventory: &InventoryMo
 }
 
 fn render_overlays(
-    asset_server: Option<Res<AssetServer>>,
-    shell: Option<Res<NativeShellModel>>,
-    state: Res<NativePlayerUiState>,
-    inventory: Res<InventoryModel>,
-    inventory_feedback: Res<InventoryOperationFeedback>,
-    mail: Res<MailModel>,
-    map: Res<MapModel>,
-    ui: Res<UiReadModel>,
-    shop: Res<ShopModel>,
-    game_shop: Res<GameShopModel>,
-    storage: Res<StorageModel>,
-    skills: Res<SkillModel>,
-    social: Res<crate::social::SocialModel>,
-    combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+    models: OverlayRenderModels,
     mut panels: ParamSet<(
         ParamSet<(
             Query<&mut Node, With<OverlayRoot>>,
@@ -3187,6 +3736,28 @@ fn render_overlays(
     )>,
     mut commands: Commands,
 ) {
+    let OverlayRenderModels {
+        asset_server,
+        shell,
+        state,
+        inventory,
+        inventory_feedback,
+        mail,
+        mail_ui,
+        big_map,
+        big_map_ui,
+        ui,
+        shop,
+        shop_ui,
+        game_shop,
+        storage,
+        storage_ui,
+        skills,
+        skill_binding,
+        skill_persistence,
+        social,
+        combat_target,
+    } = models;
     let in_game = shell.is_some_and(|model| model.screen == NativeShellScreen::InGame);
     {
         let mut all = panels.p0();
@@ -3205,19 +3776,44 @@ fn render_overlays(
             &mut commands,
             &mut all.p1(),
             state.inventory_open(),
-            |parent| render_inventory(parent, &inventory, &state, &inventory_feedback),
+            |parent| {
+                render_inventory(
+                    parent,
+                    asset_server.as_deref(),
+                    &inventory,
+                    &state,
+                    &inventory_feedback,
+                )
+            },
         );
         fill_panel(
             &mut commands,
             &mut all.p2(),
             state.equipment_open(),
-            |parent| render_equipment(parent, &inventory),
+            |parent| {
+                render_equipment(
+                    parent,
+                    asset_server.as_deref(),
+                    &inventory,
+                    &ui,
+                    &state,
+                    &skills,
+                )
+            },
         );
         fill_panel(&mut commands, &mut all.p3(), state.menu_open(), |parent| {
             render_menu(parent, asset_server.as_deref())
         });
         fill_panel(&mut commands, &mut all.p4(), state.skill_open(), |parent| {
-            render_skills(parent, &skills)
+            render_skills(
+                parent,
+                asset_server.as_deref(),
+                &skills,
+                &skill_binding,
+                &skill_persistence,
+                &state,
+                &ui,
+            )
         });
         fill_panel(
             &mut commands,
@@ -3240,31 +3836,58 @@ fn render_overlays(
             &mut commands,
             &mut secondary.p0(),
             state.mail_open(),
-            |parent| render_mail(parent, &mail, &inventory, &state),
+            |parent| {
+                render_mail(
+                    parent,
+                    asset_server.as_deref(),
+                    &mail,
+                    &mail_ui,
+                    &inventory,
+                    &state,
+                )
+            },
         );
         fill_panel(
             &mut commands,
             &mut secondary.p1(),
             state.bigmap_open(),
-            |parent| render_bigmap(parent, asset_server.as_deref(), &map, &ui, &state),
+            |parent| render_bigmap(parent, asset_server.as_deref(), &big_map, &big_map_ui, &ui),
         );
         fill_panel(
             &mut commands,
             &mut secondary.p2(),
             state.npc_shop_open(),
-            |parent| render_shop(parent, &shop, &inventory, &state),
+            |parent| {
+                render_shop(
+                    parent,
+                    asset_server.as_deref(),
+                    &shop,
+                    &shop_ui,
+                    &inventory,
+                    &state,
+                )
+            },
         );
         fill_panel(
             &mut commands,
             &mut secondary.p3(),
             state.shop_open(),
-            |parent| render_game_shop(parent, &game_shop, &ui, &state),
+            |parent| render_game_shop(parent, asset_server.as_deref(), &game_shop, &ui, &state),
         );
         fill_panel(
             &mut commands,
             &mut secondary.p4(),
             state.storage_open(),
-            |parent| render_storage(parent, &storage, &inventory, &state),
+            |parent| {
+                render_storage(
+                    parent,
+                    asset_server.as_deref(),
+                    &storage,
+                    &storage_ui,
+                    &inventory,
+                    &state,
+                )
+            },
         );
         fill_panel(
             &mut commands,
@@ -3279,6 +3902,7 @@ fn render_overlays(
             |parent| {
                 render_social(
                     parent,
+                    asset_server.as_deref(),
                     &social,
                     &state,
                     &inventory,
@@ -3311,10 +3935,147 @@ fn fill_panel<C: Component>(
 
 fn render_inventory(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
     feedback: &InventoryOperationFeedback,
 ) {
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(
+            parent,
+            asset_server,
+            "original-ui/Title/196.png",
+            INVENTORY_PANEL_SIZE.width as f32,
+            INVENTORY_PANEL_SIZE.height as f32,
+        );
+        spawn_inventory_tab(
+            parent,
+            asset_server,
+            6.0,
+            7.0,
+            197,
+            737,
+            state.inventory_page == 0,
+            OverlayButton::SelectInventoryPage(0),
+        );
+        spawn_inventory_tab(
+            parent,
+            asset_server,
+            76.0,
+            7.0,
+            168,
+            738,
+            state.inventory_page == 1,
+            OverlayButton::SelectInventoryPage(1),
+        );
+        spawn_inventory_tab(
+            parent,
+            asset_server,
+            146.0,
+            7.0,
+            198,
+            739,
+            state.inventory_page == 2,
+            OverlayButton::SelectInventoryPage(2),
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(289.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseWindows,
+        );
+        overlay_text_at(
+            parent,
+            &format!("Gold {}", inventory.gold),
+            CrystalRect::new(40.0, 213.0, 150.0, 15.0),
+            10.0,
+            TEXT,
+        );
+        if state.inventory_page == 2 {
+            overlay_text_at(
+                parent,
+                "Quest inventory is server-backed",
+                CrystalRect::new(24.0, 104.0, 268.0, 18.0),
+                11.0,
+                TEXT,
+            );
+        } else {
+            let page_offset = usize::from(state.inventory_page) * INVENTORY_PAGE_SIZE;
+            parent
+                .spawn((
+                    OverlayInventoryGridViewport,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(INVENTORY_GRID_ORIGIN.x as f32),
+                        top: Val::Px(INVENTORY_GRID_ORIGIN.y as f32),
+                        width: Val::Px(
+                            (INVENTORY_GRID_STEP.x as usize * (INVENTORY_PAGE_COLUMNS - 1)
+                                + INVENTORY_CELL_SIZE.width as usize)
+                                as f32,
+                        ),
+                        height: Val::Px(
+                            (INVENTORY_GRID_STEP.y as usize
+                                * (INVENTORY_PAGE_SIZE / INVENTORY_PAGE_COLUMNS - 1)
+                                + INVENTORY_CELL_SIZE.height as usize)
+                                as f32,
+                        ),
+                        overflow: Overflow::clip(),
+                        ..default()
+                    },
+                    BackgroundColor(Color::NONE),
+                ))
+                .with_children(|grid| {
+                    let bag_items = inventory.items_in(0);
+                    for local_slot in 0..INVENTORY_PAGE_SIZE {
+                        let slot = (page_offset + local_slot) as u32;
+                        let item = bag_items.iter().copied().find(|item| item.slot == slot);
+                        let enabled = match &state.inventory_operation {
+                            Some(InventoryOperationDraft::Move { source_slot, .. }) => {
+                                *source_slot != slot
+                            }
+                            Some(InventoryOperationDraft::Merge { source_slot, .. }) => {
+                                *source_slot != slot && item.and_then(item_unique_id).is_some()
+                            }
+                            None => item.is_some(),
+                        };
+                        let x = (local_slot % INVENTORY_PAGE_COLUMNS) as f32
+                            * INVENTORY_GRID_STEP.x as f32;
+                        let y = (local_slot / INVENTORY_PAGE_COLUMNS) as f32
+                            * INVENTORY_GRID_STEP.y as f32;
+                        let rect = CrystalRect::new(
+                            x,
+                            y,
+                            INVENTORY_CELL_SIZE.width as f32,
+                            INVENTORY_CELL_SIZE.height as f32,
+                        );
+                        if let Some(item) = item {
+                            overlay_absolute_item_button(
+                                grid,
+                                asset_server,
+                                item,
+                                rect,
+                                OverlayButton::InspectBag(slot),
+                                enabled,
+                            );
+                        } else {
+                            overlay_absolute_button(
+                                grid,
+                                "",
+                                rect,
+                                OverlayButton::InspectBag(slot),
+                                enabled,
+                            );
+                        }
+                    }
+                });
+        }
+        return;
+    }
+
     title(parent, "Bag");
     body(parent, &format!("{} Gold", inventory.gold));
     if let Some(draft) = &state.inventory_operation {
@@ -3379,13 +4140,244 @@ fn render_inventory(
     overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
 }
 
-fn render_equipment(parent: &mut ChildSpawnerCommands, inventory: &InventoryModel) {
+fn render_equipment(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    inventory: &InventoryModel,
+    ui: &UiReadModel,
+    state: &NativePlayerUiState,
+    skills: &SkillModel,
+) {
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(
+            parent,
+            asset_server,
+            "original-ui/Title/504.png",
+            264.0,
+            380.0,
+        );
+        let (page_index, page_rect) = match state.character_page {
+            CharacterPage::Character => (340, CrystalRect::new(8.0, 90.0, 248.0, 280.0)),
+            CharacterPage::Stats1 => (506, CrystalRect::new(8.0, 90.0, 248.0, 280.0)),
+            CharacterPage::Stats2 => (507, CrystalRect::new(8.0, 90.0, 248.0, 280.0)),
+            CharacterPage::Spells => (508, CrystalRect::new(8.0, 90.0, 248.0, 280.0)),
+        };
+        let page_library = if matches!(state.character_page, CharacterPage::Character) {
+            "Prguse"
+        } else {
+            "Title"
+        };
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            format!("original-ui/{page_library}/{page_index}.png"),
+            page_rect,
+        );
+
+        for (page, left, index) in [
+            (CharacterPage::Character, 8.0, 500),
+            (CharacterPage::Stats1, 70.0, 501),
+            (CharacterPage::Stats2, 132.0, 502),
+            (CharacterPage::Spells, 194.0, 503),
+        ] {
+            spawn_invisible_overlay_button(
+                parent,
+                CrystalRect::new(left, 70.0, 64.0, 20.0),
+                OverlayButton::SelectCharacterPage(page),
+            );
+            if state.character_page == page {
+                spawn_static_overlay_sprite(
+                    parent,
+                    asset_server,
+                    format!("original-ui/Title/{index}.png"),
+                    CrystalRect::new(left, 70.0, 64.0, 20.0),
+                );
+            }
+        }
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(241.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseWindows,
+        );
+        overlay_text_at(
+            parent,
+            ui.player.name.as_deref().unwrap_or(""),
+            CrystalRect::new(0.0, 12.0, 264.0, 20.0),
+            12.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            &format!(
+                "{}  Lv{}",
+                ui.player.class_name.as_deref().unwrap_or("-"),
+                ui.player.level
+            ),
+            CrystalRect::new(38.0, 34.0, 210.0, 18.0),
+            10.0,
+            TEXT,
+        );
+
+        match state.character_page {
+            CharacterPage::Character => {
+                let slots = [
+                    (0, 123.0, 97.0),
+                    (1, 163.0, 97.0),
+                    (2, 203.0, 97.0),
+                    (13, 203.0, 152.0),
+                    (4, 203.0, 188.0),
+                    (3, 203.0, 224.0),
+                    (5, 8.0, 260.0),
+                    (6, 203.0, 260.0),
+                    (7, 8.0, 296.0),
+                    (8, 203.0, 296.0),
+                    (9, 8.0, 332.0),
+                    (11, 48.0, 332.0),
+                    (10, 88.0, 332.0),
+                    (12, 128.0, 332.0),
+                ];
+                for (slot, left, top) in slots {
+                    let item = inventory
+                        .items_in(2)
+                        .into_iter()
+                        .find(|item| item.slot == slot);
+                    if let Some(item) = item {
+                        overlay_absolute_item_button(
+                            parent,
+                            asset_server,
+                            item,
+                            CrystalRect::new(left, top, 32.0, 32.0),
+                            OverlayButton::InspectEquip(slot),
+                            true,
+                        );
+                    }
+                }
+            }
+            CharacterPage::Stats1 => {
+                for (text, top) in [
+                    (ui.player.hp_label(), 110.0),
+                    (ui.player.mp_label(), 128.0),
+                    (format!("0-{}", ui.player.current_weight), 146.0),
+                    (format!("{}%", ui.player.experience_percent_label()), 254.0),
+                ] {
+                    overlay_text_at(
+                        parent,
+                        &text,
+                        CrystalRect::new(134.0, top, 105.0, 16.0),
+                        10.0,
+                        TEXT,
+                    );
+                }
+            }
+            CharacterPage::Stats2 => {
+                for (text, top) in [
+                    (ui.player.experience_percent_label(), 110.0),
+                    (
+                        format!("{}/{}", ui.player.current_weight, ui.player.max_weight),
+                        128.0,
+                    ),
+                    (ui.player.gold_label(), 146.0),
+                ] {
+                    overlay_text_at(
+                        parent,
+                        &text,
+                        CrystalRect::new(134.0, top, 105.0, 16.0),
+                        10.0,
+                        TEXT,
+                    );
+                }
+            }
+            CharacterPage::Spells => {
+                let start = state.skill_page * 7;
+                for (row, skill) in skills.skills.iter().skip(start).take(7).enumerate() {
+                    let binding = skills.binding_for(skill.id);
+                    let enabled = binding.can_use != Some(false)
+                        && binding.cast_kind.as_deref() != Some("passive")
+                        && binding
+                            .spell
+                            .as_deref()
+                            .is_some_and(|spell| !spell.is_empty());
+                    overlay_absolute_button(
+                        parent,
+                        &format!(
+                            "{} Lv{}",
+                            short_name(&skill.name, skill.key.as_deref().unwrap_or("")),
+                            skill.level
+                        ),
+                        CrystalRect::new(16.0, 98.0 + row as f32 * 33.0, 210.0, 28.0),
+                        OverlayButton::SelectSkill(skill.id),
+                        enabled,
+                    );
+                }
+                let has_previous = state.skill_page > 0;
+                let has_next = (state.skill_page + 1) * 7 < skills.skills.len();
+                spawn_overlay_crystal_button_enabled(
+                    parent,
+                    asset_server,
+                    "Prguse",
+                    398,
+                    399,
+                    399,
+                    CrystalRect::new(90.0, 340.0, 32.0, 24.0),
+                    OverlayButton::SkillPagePrev,
+                    has_previous,
+                );
+                spawn_overlay_crystal_button_enabled(
+                    parent,
+                    asset_server,
+                    "Prguse",
+                    396,
+                    397,
+                    397,
+                    CrystalRect::new(140.0, 340.0, 32.0, 24.0),
+                    OverlayButton::SkillPageNext,
+                    has_next,
+                );
+            }
+        }
+        return;
+    }
+
     title(parent, "Character / Equipment");
+    let player = &ui.player;
+    body(
+        parent,
+        &format!(
+            "{}  {}  Lv{}",
+            player.name.as_deref().unwrap_or("-"),
+            player.class_name.as_deref().unwrap_or("-"),
+            player.level
+        ),
+    );
+    body(
+        parent,
+        &format!(
+            "HP {}  MP {}  EXP {}",
+            player.hp_label(),
+            player.mp_label(),
+            player.experience_percent_label()
+        ),
+    );
+    body(
+        parent,
+        &format!(
+            "Weight {}/{}  Gold {}",
+            player.current_weight,
+            player.max_weight,
+            player.gold_label()
+        ),
+    );
     for slot in 0..14 {
-        let line = inventory
+        let item = inventory
             .items_in(2)
             .into_iter()
-            .find(|item| item.slot == slot)
+            .find(|item| item.slot == slot);
+        let line = item
             .map(|item| {
                 format!(
                     "{}: {}",
@@ -3394,8 +4386,14 @@ fn render_equipment(parent: &mut ChildSpawnerCommands, inventory: &InventoryMode
                 )
             })
             .unwrap_or_else(|| format!("{}: --", equipment_slot_name(slot)));
-        overlay_button(parent, &line, OverlayButton::InspectEquip(slot), true);
+        overlay_button(
+            parent,
+            &line,
+            OverlayButton::InspectEquip(slot),
+            item.is_some(),
+        );
     }
+    overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
 }
 
 fn spawn_overlay_frame(
@@ -3419,6 +4417,287 @@ fn spawn_overlay_frame(
             ..default()
         },
     ));
+}
+
+fn spawn_inventory_tab(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    left: f32,
+    top: f32,
+    active_index: u16,
+    idle_index: u16,
+    active: bool,
+    action: OverlayButton,
+) {
+    let index = if active { active_index } else { idle_index };
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Title",
+        index,
+        index,
+        index,
+        CrystalRect::new(left, top, 72.0, 23.0),
+        action,
+    );
+}
+
+fn overlay_text_at(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    rect: CrystalRect,
+    font_size: f32,
+    color: Color,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        Text::new(text.to_owned()),
+        TextFont {
+            font_size: FontSize::Px(font_size),
+            ..default()
+        },
+        TextColor(color),
+        TextLayout::new(Justify::Left, LineBreak::NoWrap),
+    ));
+}
+
+fn overlay_absolute_button(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    rect: CrystalRect,
+    action: OverlayButton,
+    enabled: bool,
+) {
+    let mut entity = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            padding: UiRect::all(Val::Px(2.0)),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(if enabled {
+            Color::srgba(0.10, 0.07, 0.03, 0.62)
+        } else {
+            Color::srgba(0.25, 0.20, 0.12, 0.28)
+        }),
+    ));
+    if enabled {
+        entity.insert((Button, action));
+    }
+    if !label.is_empty() {
+        entity.with_children(|button| {
+            button.spawn((
+                Text::new(label.to_owned()),
+                TextFont {
+                    font_size: FontSize::Px(9.0),
+                    ..default()
+                },
+                TextColor(if enabled {
+                    TEXT
+                } else {
+                    Color::srgba(0.75, 0.70, 0.60, 0.45)
+                }),
+                TextLayout::new(Justify::Center, LineBreak::NoWrap),
+            ));
+        });
+    }
+}
+
+/// Crystal inventory/equipment cells are image-led. Text remains only as a
+/// fail-closed fallback for old snapshots that do not carry an icon index.
+/// Only stack counts are drawn over bag icons: full durability values such as
+/// `400/400` do not fit a 32-pixel Crystal cell and belong in item details.
+fn overlay_absolute_item_button(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    item: &ItemModel,
+    rect: CrystalRect,
+    action: OverlayButton,
+    enabled: bool,
+) {
+    let mut entity = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            padding: UiRect::all(Val::Px(1.0)),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(if enabled {
+            Color::srgba(0.10, 0.07, 0.03, 0.20)
+        } else {
+            Color::srgba(0.25, 0.20, 0.12, 0.28)
+        }),
+    ));
+    if enabled {
+        entity.insert((Button, action));
+    }
+    entity.with_children(|cell| {
+        if let Some(path) = item_icon_path(item.icon) {
+            cell.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(rect.width),
+                    height: Val::Px(rect.height),
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load(path),
+                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
+                    ..default()
+                },
+            ));
+        } else {
+            overlay_text_at(
+                cell,
+                &short_slot_name(&item.name, &item.key),
+                CrystalRect::new(1.0, 9.0, rect.width - 2.0, 12.0),
+                8.0,
+                TEXT,
+            );
+        }
+        let detail = inventory_cell_stack_label(item);
+        if !detail.is_empty() {
+            overlay_text_at(
+                cell,
+                &detail,
+                CrystalRect::new(1.0, rect.height - 11.0, rect.width - 2.0, 10.0),
+                7.0,
+                TEXT,
+            );
+        }
+    });
+}
+
+/// One authoritative NPC-shop row. `ShopGood` is intentionally not coerced
+/// into an `ItemModel`: its catalogue index, stock, and selection identity
+/// belong to the server-provided shop snapshot rather than the player's bag.
+fn overlay_absolute_shop_good_button(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    icon: u16,
+    label: &str,
+    rect: CrystalRect,
+    action: OverlayButton,
+) {
+    let mut entity = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            padding: UiRect::axes(Val::Px(2.0), Val::Px(1.0)),
+            align_items: AlignItems::Center,
+            column_gap: Val::Px(4.0),
+            ..default()
+        },
+        BackgroundColor(Color::srgba(0.10, 0.07, 0.03, 0.36)),
+        Button,
+        action,
+    ));
+    entity.with_children(|row| {
+        if let (Some(asset_server), Some(path)) = (asset_server, item_icon_path(icon)) {
+            row.spawn((
+                Node {
+                    width: Val::Px(28.0),
+                    height: Val::Px(28.0),
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load(path),
+                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
+                    ..default()
+                },
+            ));
+        }
+        row.spawn((
+            Text::new(label.to_owned()),
+            TextFont {
+                font_size: FontSize::Px(9.0),
+                ..default()
+            },
+            TextColor(TEXT),
+        ));
+    });
+}
+
+/// Compact row cell used by the still-provisional Shop/Warehouse panels. It
+/// uses the same authoritative icon path without inventing an icon when the
+/// source record has none.
+fn overlay_compact_item_button(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    icon: u16,
+    label: &str,
+    action: OverlayButton,
+    enabled: bool,
+) {
+    let mut entity = parent.spawn((
+        Node {
+            min_height: Val::Px(28.0),
+            display: Display::Flex,
+            align_items: AlignItems::Center,
+            column_gap: Val::Px(4.0),
+            padding: UiRect::axes(Val::Px(3.0), Val::Px(2.0)),
+            ..default()
+        },
+        BackgroundColor(if enabled {
+            Color::srgba(0.12, 0.08, 0.04, 0.60)
+        } else {
+            Color::srgba(0.25, 0.20, 0.12, 0.28)
+        }),
+    ));
+    if enabled {
+        entity.insert((Button, action));
+    }
+    entity.with_children(|row| {
+        if let (Some(asset_server), Some(path)) = (asset_server, item_icon_path(icon)) {
+            row.spawn((
+                Node {
+                    width: Val::Px(24.0),
+                    height: Val::Px(24.0),
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load(path),
+                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
+                    ..default()
+                },
+            ));
+        }
+        row.spawn((
+            Text::new(label.to_owned()),
+            TextFont {
+                font_size: FontSize::Px(10.0),
+                ..default()
+            },
+            TextColor(if enabled {
+                TEXT
+            } else {
+                Color::srgba(0.75, 0.70, 0.60, 0.45)
+            }),
+        ));
+    });
 }
 
 fn spawn_static_overlay_sprite(
@@ -3453,6 +4732,30 @@ fn spawn_overlay_crystal_button(
     rect: CrystalRect,
     action: OverlayButton,
 ) {
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        library,
+        normal,
+        hover,
+        pressed,
+        rect,
+        action,
+        true,
+    );
+}
+
+fn spawn_overlay_crystal_button_enabled(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    library: &'static str,
+    normal: u16,
+    hover: u16,
+    pressed: u16,
+    rect: CrystalRect,
+    action: OverlayButton,
+    enabled: bool,
+) {
     let spec = CrystalButtonSpec::new(
         library,
         normal,
@@ -3469,7 +4772,7 @@ fn spawn_overlay_crystal_button(
         CrystalButtonAssetSet::from_spec(spec),
         action,
         false,
-        true,
+        enabled,
     );
 }
 
@@ -3509,22 +4812,27 @@ fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
         OverlayButton::Logout,
     );
 
-    for (library, index, top) in [
-        ("Prguse", 1970, 50.0),
-        ("Prguse", 1973, 69.0),
-        ("Prguse", 2000, 88.0),
-        ("Prguse2", 431, 126.0),
-        ("Prguse", 1976, 145.0),
-        ("Prguse", 1979, 164.0),
-        ("Prguse", 1982, 183.0),
-        ("Prguse", 1985, 202.0),
-        ("Prguse", 1988, 221.0),
+    for (library, normal, hover, pressed, top) in [
+        ("Prguse", 1970, 1971, 1972, 50.0),
+        ("Prguse", 1973, 1974, 1975, 69.0),
+        ("Prguse", 2000, 2001, 2002, 88.0),
+        ("Prguse2", 431, 432, 433, 126.0),
+        ("Prguse", 1976, 1977, 1978, 145.0),
+        ("Prguse", 1979, 1980, 1981, 164.0),
+        ("Prguse", 1982, 1983, 1984, 183.0),
+        ("Prguse", 1985, 1986, 1987, 202.0),
+        ("Prguse", 1988, 1989, 1990, 221.0),
     ] {
-        spawn_static_overlay_sprite(
+        spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
-            format!("original-ui/{library}/{index}.png"),
+            library,
+            normal,
+            hover,
+            pressed,
             CrystalRect::new(3.0, top, 32.0, 20.0),
+            OverlayButton::CloseWindows,
+            false,
         );
     }
     spawn_overlay_crystal_button(
@@ -3551,253 +4859,899 @@ fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
 
 fn render_social(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     social: &crate::social::SocialModel,
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
     combat_target: Option<&crate::quest_model::CombatTargetModel>,
 ) {
     if state.group_open() {
-        title(parent, "Group");
-        let group = &social.group;
-        body(
-            parent,
-            &format!(
-                "Leader: {}  Members: {}/{}",
-                group.leader_name.as_deref().unwrap_or("-"),
-                group.members.len(),
-                crate::social::MAX_GROUP_MEMBERS
-            ),
-        );
-        if let Some(inviter) = group.pending_invite_from.as_deref() {
-            body(parent, &format!("Incoming group invite from {inviter}"));
-            overlay_button(parent, "Accept", OverlayButton::GroupInviteAccept, true);
-            overlay_button(parent, "Decline", OverlayButton::GroupInviteDecline, true);
-        }
-        for (index, member) in group.members.iter().enumerate() {
-            overlay_button(
-                parent,
-                &format!(
-                    "{}{}  {}  Lv{}",
-                    if member.leader { "[Leader] " } else { "" },
-                    member.name,
-                    if member.online { "Online" } else { "Offline" },
-                    member.level.unwrap_or(0)
-                ),
-                OverlayButton::SelectGroupMember(index.min(255) as u8),
-                true,
-            );
-        }
-        overlay_button(
-            parent,
-            "Kick selected",
-            OverlayButton::GroupRemoveSelected,
-            state.selected_group_member.is_some(),
-        );
-        body(
-            parent,
-            &format!("Pending operations: {}", social.pending.len()),
-        );
-        if combat_target
-            .and_then(|model| model.target.as_ref())
-            .is_some_and(|target| target.is_player)
-        {
-            overlay_button(
-                parent,
-                "Invite current player",
-                OverlayButton::GroupAddSelected,
-                true,
-            );
-        }
-        overlay_button(
-            parent,
-            "Leave group",
-            OverlayButton::GroupLeave,
-            group.active,
-        );
+        render_group_panel(parent, asset_server, social, state, combat_target);
     } else if state.guild_open() {
-        title(parent, "Guild");
-        let guild = &social.guild;
-        body(
+        render_guild_panel(parent, asset_server, social, state);
+    } else {
+        render_trade_panel(parent, social, inventory);
+    }
+}
+
+fn render_group_panel(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    social: &crate::social::SocialModel,
+    state: &NativePlayerUiState,
+    combat_target: Option<&crate::quest_model::CombatTargetModel>,
+) {
+    let rect = CRYSTAL_GROUP_PANEL_RECT;
+    let group = &social.group;
+    let Some(asset_server) = asset_server else {
+        return;
+    };
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Prguse/120.png".to_owned(),
+        rect,
+    );
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Title/5.png".to_owned(),
+        CrystalRect::new(rect.left + 18.0, rect.top + 8.0, 55.0, 15.0),
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        CrystalRect::new(rect.left + 206.0, rect.top + 3.0, 24.0, 21.0),
+        OverlayButton::CloseSocial,
+    );
+
+    for (index, member) in group
+        .members
+        .iter()
+        .take(crate::social::MAX_GROUP_MEMBERS)
+        .enumerate()
+    {
+        let (left, top) = group_member_position(index);
+        overlay_clickable_text_at(
             parent,
-            &format!(
-                "{}  Lv{}  Gold {}",
-                guild.name.as_deref().unwrap_or("No guild"),
-                guild.level,
-                guild.gold
-            ),
+            &member.name,
+            CrystalRect::new(rect.left + left, rect.top + top, 96.0, 16.0),
+            OverlayButton::SelectGroupMember(index as u8),
+            state.selected_group_member == Some(index as u8),
+            member.online,
         );
-        body(
+    }
+
+    if let Some(inviter) = group.pending_invite_from.as_deref() {
+        overlay_text_at(
             parent,
-            &format!(
-                "Rank: {}  Members: {}/{}",
-                guild.rank_name.as_deref().unwrap_or("-"),
-                guild.members.len(),
-                guild.max_members
-            ),
+            &format!("Invite: {inviter}"),
+            CrystalRect::new(rect.left + 16.0, rect.top + 192.0, 190.0, 16.0),
+            9.0,
+            GOLD,
         );
-        if let Some(inviter) = guild.pending_invite_from.as_deref() {
-            body(parent, &format!("Incoming guild invite from {inviter}"));
-            overlay_button(parent, "Accept", OverlayButton::GuildInviteAccept, true);
-            overlay_button(parent, "Decline", OverlayButton::GuildInviteDecline, true);
-        }
-        body(
+        overlay_absolute_button(
             parent,
-            &format!(
-                "Notice: {}",
-                if guild.notice.is_empty() {
-                    "-".to_owned()
-                } else {
-                    guild.notice.join(" / ")
-                }
-            ),
-        );
-        for (index, member) in guild
-            .members
-            .iter()
-            .take(crate::social::MAX_GUILD_MEMBERS)
-            .enumerate()
-        {
-            overlay_button(
-                parent,
-                &format!(
-                    "{}  {}",
-                    member.name,
-                    if member.online { "Online" } else { "Offline" }
-                ),
-                OverlayButton::SelectGuildMember(index.min(255) as u8),
-                true,
-            );
-        }
-        overlay_button(
-            parent,
-            "Kick selected",
-            OverlayButton::GuildKickSelected,
-            state.selected_guild_member.is_some()
-                && guild
-                    .permissions
-                    .iter()
-                    .any(|permission| permission.eq_ignore_ascii_case("kick")),
-        );
-        overlay_button(
-            parent,
-            "Publish current notice",
-            OverlayButton::GuildPublishNotice,
-            !guild.notice.is_empty(),
-        );
-        overlay_button(
-            parent,
-            "Refresh guild info",
-            OverlayButton::GuildRequestInfo,
+            "Accept",
+            CrystalRect::new(rect.left + 16.0, rect.top + 207.0, 52.0, 18.0),
+            OverlayButton::GroupInviteAccept,
             true,
         );
+        overlay_absolute_button(
+            parent,
+            "Decline",
+            CrystalRect::new(rect.left + 72.0, rect.top + 207.0, 52.0, 18.0),
+            OverlayButton::GroupInviteDecline,
+            true,
+        );
+    }
+
+    let switch_index = if group.allow_invites { 117 } else { 114 };
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        switch_index,
+        switch_index + 1,
+        switch_index + 2,
+        CrystalRect::new(rect.left + 25.0, rect.top + 219.0, 28.0, 25.0),
+        OverlayButton::GroupSwitch,
+    );
+    let can_add_target = combat_target
+        .and_then(|model| model.target.as_ref())
+        .is_some_and(|target| target.is_player && !target.name.trim().is_empty());
+    let add_base = if group.active { 133 } else { 130 };
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Title",
+        add_base,
+        add_base + 1,
+        add_base + 2,
+        CrystalRect::new(rect.left + 70.0, rect.top + 219.0, 60.0, 25.0),
+        OverlayButton::GroupAddSelected,
+        can_add_target,
+    );
+    let can_remove = state.selected_group_member.is_some_and(|index| {
+        group
+            .members
+            .get(usize::from(index))
+            .is_some_and(|member| !member.leader)
+    });
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Title",
+        136,
+        137,
+        138,
+        CrystalRect::new(rect.left + 140.0, rect.top + 219.0, 60.0, 25.0),
+        OverlayButton::GroupRemoveSelected,
+        can_remove,
+    );
+}
+
+fn group_member_position(index: usize) -> (f32, f32) {
+    if index == 0 {
+        (16.0, 33.0)
     } else {
-        title(parent, "Trade");
-        let trade = &social.trade;
-        body(
+        (
+            (((index + 1) % 2) * 100 + 16) as f32,
+            (55 + ((index - 1) / 2) * 20) as f32,
+        )
+    }
+}
+
+fn render_guild_panel(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    social: &crate::social::SocialModel,
+    state: &NativePlayerUiState,
+) {
+    let rect = CRYSTAL_GUILD_PANEL_RECT;
+    let guild = &social.guild;
+    let Some(asset_server) = asset_server else {
+        return;
+    };
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Prguse/180.png".to_owned(),
+        rect,
+    );
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Title/25.png".to_owned(),
+        CrystalRect::new(rect.left + 18.0, rect.top + 9.0, 49.0, 15.0),
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        CrystalRect::new(rect.left + 565.0, rect.top + 4.0, 24.0, 21.0),
+        OverlayButton::CloseSocial,
+    );
+    spawn_guild_tab(
+        parent,
+        asset_server,
+        rect.left + 20.0,
+        rect.top + 38.0,
+        93,
+        94,
+        state.guild_left_page == GuildLeftPage::Notice,
+        OverlayButton::SelectGuildLeftPage(GuildLeftPage::Notice),
+    );
+    spawn_guild_tab(
+        parent,
+        asset_server,
+        rect.left + 91.0,
+        rect.top + 38.0,
+        99,
+        100,
+        state.guild_left_page == GuildLeftPage::Members,
+        OverlayButton::SelectGuildLeftPage(GuildLeftPage::Members),
+    );
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Title/104.png".to_owned(),
+        CrystalRect::new(rect.left + 501.0, rect.top + 38.0, 72.0, 24.0),
+    );
+
+    match state.guild_left_page {
+        GuildLeftPage::Notice => render_guild_notice(parent, asset_server, guild, rect),
+        GuildLeftPage::Members => render_guild_members(parent, asset_server, guild, state, rect),
+    }
+    render_guild_status(parent, asset_server, guild, rect);
+}
+
+fn spawn_guild_tab(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    left: f32,
+    top: f32,
+    idle: u16,
+    active: u16,
+    selected: bool,
+    action: OverlayButton,
+) {
+    let normal = if selected { active } else { idle };
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Title",
+        normal,
+        active,
+        active,
+        CrystalRect::new(left, top, 72.0, 24.0),
+        action,
+    );
+}
+
+fn render_guild_notice(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    guild: &crate::social::GuildModel,
+    rect: CrystalRect,
+) {
+    let notice = if guild.name.is_none() {
+        "You are not in a guild.".to_owned()
+    } else if guild.notice.is_empty() {
+        String::new()
+    } else {
+        guild.notice.join("\n")
+    };
+    overlay_text_at(
+        parent,
+        &notice,
+        CrystalRect::new(rect.left + 13.0, rect.top + 61.0, 322.0, 330.0),
+        9.0,
+        TEXT,
+    );
+    if !guild.notice.is_empty()
+        && guild
+            .permissions
+            .iter()
+            .any(|permission| permission.eq_ignore_ascii_case("notice"))
+    {
+        spawn_overlay_crystal_button(
             parent,
-            &format!(
-                "State: {}  Partner: {}",
-                if trade.state.is_empty() {
-                    "idle"
-                } else {
-                    &trade.state
-                },
-                trade.partner.as_deref().unwrap_or("-")
-            ),
+            asset_server,
+            "Prguse",
+            560,
+            561,
+            562,
+            CrystalRect::new(rect.left + 20.0, rect.top + 402.0, 28.0, 25.0),
+            OverlayButton::GuildPublishNotice,
         );
-        body(
+    }
+    if let Some(inviter) = guild.pending_invite_from.as_deref() {
+        overlay_text_at(
             parent,
-            &format!(
-                "Partner gold: {}  Items: {}  Confirmed: {}",
-                trade.partner_gold,
-                trade.partner_items.len(),
-                trade.partner_confirmed
-            ),
+            &format!("Invite: {inviter}"),
+            CrystalRect::new(rect.left + 20.0, rect.top + 360.0, 230.0, 16.0),
+            9.0,
+            GOLD,
         );
-        for item in &trade.partner_items {
-            body(
+        overlay_absolute_button(
+            parent,
+            "Accept",
+            CrystalRect::new(rect.left + 20.0, rect.top + 378.0, 52.0, 18.0),
+            OverlayButton::GuildInviteAccept,
+            true,
+        );
+        overlay_absolute_button(
+            parent,
+            "Decline",
+            CrystalRect::new(rect.left + 76.0, rect.top + 378.0, 52.0, 18.0),
+            OverlayButton::GuildInviteDecline,
+            true,
+        );
+    }
+}
+
+fn render_guild_members(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    guild: &crate::social::GuildModel,
+    state: &NativePlayerUiState,
+    rect: CrystalRect,
+) {
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Prguse/1852.png".to_owned(),
+        CrystalRect::new(rect.left + 13.0, rect.top + 61.0, 324.0, 332.0),
+    );
+    let can_kick = guild
+        .permissions
+        .iter()
+        .any(|permission| permission.eq_ignore_ascii_case("kick"));
+    for (index, member) in guild.members.iter().take(18).enumerate() {
+        let top = rect.top + 90.0 + index as f32 * 15.0;
+        overlay_clickable_text_at(
+            parent,
+            member.rank_name.as_deref().unwrap_or("-"),
+            CrystalRect::new(rect.left + 24.0, top, 100.0, 14.0),
+            OverlayButton::SelectGuildMember(index as u8),
+            state.selected_guild_member == Some(index as u8),
+            member.online,
+        );
+        overlay_text_at(
+            parent,
+            &member.name,
+            CrystalRect::new(rect.left + 125.0, top, 84.0, 14.0),
+            8.0,
+            if member.online {
+                TEXT
+            } else {
+                Color::srgb(0.5, 0.5, 0.5)
+            },
+        );
+        overlay_text_at(
+            parent,
+            if member.online { "Online" } else { "Offline" },
+            CrystalRect::new(rect.left + 225.0, top, 96.0, 14.0),
+            8.0,
+            if member.online {
+                TEXT
+            } else {
+                Color::srgb(0.5, 0.5, 0.5)
+            },
+        );
+        if can_kick {
+            spawn_overlay_crystal_button(
                 parent,
-                &format!(
-                    "  {} x{}",
-                    item.name
-                        .as_deref()
-                        .or_else(|| item.item_index.map(|_| "Item #"))
-                        .unwrap_or("Item"),
-                    item.count
-                ),
+                asset_server,
+                "Prguse",
+                917,
+                917,
+                917,
+                CrystalRect::new(rect.left + 210.0, top, 16.0, 14.0),
+                OverlayButton::GuildKickMember(index as u8),
             );
         }
-        if trade.state == "requested" {
-            overlay_button(parent, "Accept trade", OverlayButton::TradeAccept, true);
-            overlay_button(parent, "Decline trade", OverlayButton::TradeDecline, true);
-        } else if trade.state == "open" {
-            overlay_button(
+    }
+}
+
+fn render_guild_status(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    guild: &crate::social::GuildModel,
+    rect: CrystalRect,
+) {
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Prguse/1850.png".to_owned(),
+        CrystalRect::new(rect.left + 365.0, rect.top + 62.0, 208.0, 316.0),
+    );
+    for (label, value, top) in [
+        ("Guild", guild.name.as_deref().unwrap_or(""), 107.0),
+        ("Level", if guild.name.is_some() { "" } else { "" }, 133.0),
+        ("Members", "", 159.0),
+    ] {
+        overlay_text_at(
+            parent,
+            label,
+            CrystalRect::new(rect.left + 362.0, rect.top + top, 75.0, 14.0),
+            9.0,
+            Color::srgb(0.55, 0.55, 0.55),
+        );
+        if !value.is_empty() {
+            overlay_text_at(
                 parent,
-                "Offer 100 gold",
-                OverlayButton::TradeGoldOffer,
-                true,
+                value,
+                CrystalRect::new(rect.left + 437.0, rect.top + top, 120.0, 14.0),
+                9.0,
+                TEXT,
             );
-            for item in inventory
-                .items
-                .iter()
-                .filter(|item| {
-                    item.container == 0 && item.slot < 10 && item_unique_id(item).is_some()
-                })
-                .take(10)
-            {
-                overlay_button(
-                    parent,
+        }
+    }
+    if guild.name.is_some() {
+        overlay_text_at(
+            parent,
+            &guild.level.to_string(),
+            CrystalRect::new(rect.left + 437.0, rect.top + 133.0, 120.0, 14.0),
+            9.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            &format!(
+                "{}/{}",
+                guild.member_count.max(guild.members.len() as u16),
+                guild.max_members
+            ),
+            CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 14.0),
+            9.0,
+            TEXT,
+        );
+    }
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Prguse2/423.png".to_owned(),
+        CrystalRect::new(rect.left + 322.0, rect.top + 403.0, 260.0, 22.0),
+    );
+    let percent = if guild.max_experience > 0 {
+        ((guild.experience.max(0) as f64 / guild.max_experience as f64) * 100.0).clamp(0.0, 100.0)
+    } else {
+        0.0
+    };
+    overlay_text_at(
+        parent,
+        &format!("{percent:.0}%"),
+        CrystalRect::new(rect.left + 322.0, rect.top + 405.0, 260.0, 15.0),
+        9.0,
+        TEXT,
+    );
+}
+
+fn overlay_clickable_text_at(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    rect: CrystalRect,
+    action: OverlayButton,
+    selected: bool,
+    online: bool,
+) {
+    let mut row = parent.spawn((
+        Button,
+        action,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(if selected {
+            Color::srgba(0.45, 0.28, 0.05, 0.72)
+        } else {
+            Color::NONE
+        }),
+    ));
+    row.with_children(|cell| {
+        cell.spawn((
+            Text::new(text.to_owned()),
+            TextFont {
+                font_size: FontSize::Px(9.0),
+                ..default()
+            },
+            TextColor(if online {
+                TEXT
+            } else {
+                Color::srgb(0.5, 0.5, 0.5)
+            }),
+            TextLayout::new(Justify::Left, LineBreak::NoWrap),
+        ));
+    });
+}
+
+fn render_trade_panel(
+    parent: &mut ChildSpawnerCommands,
+    social: &crate::social::SocialModel,
+    inventory: &InventoryModel,
+) {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(172.0),
+                top: Val::Px(80.0),
+                width: Val::Px(680.0),
+                max_height: Val::Px(560.0),
+                flex_direction: FlexDirection::Column,
+                padding: UiRect::all(Val::Px(10.0)),
+                row_gap: Val::Px(5.0),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ))
+        .with_children(|trade_parent| {
+            title(trade_parent, "Trade");
+            let trade = &social.trade;
+            body(
+                trade_parent,
+                &format!(
+                    "State: {}  Partner: {}",
+                    if trade.state.is_empty() {
+                        "idle"
+                    } else {
+                        &trade.state
+                    },
+                    trade.partner.as_deref().unwrap_or("-")
+                ),
+            );
+            body(
+                trade_parent,
+                &format!(
+                    "Partner gold: {}  Items: {}  Confirmed: {}",
+                    trade.partner_gold,
+                    trade.partner_items.len(),
+                    trade.partner_confirmed
+                ),
+            );
+            for item in &trade.partner_items {
+                body(
+                    trade_parent,
                     &format!(
-                        "Offer {} x{}",
-                        short_name(&item.name, &item.key),
-                        item.quantity
+                        "  {} x{}",
+                        item.name
+                            .as_deref()
+                            .or_else(|| item.item_index.map(|_| "Item #"))
+                            .unwrap_or("Item"),
+                        item.count
                     ),
-                    OverlayButton::TradeDepositItem(item.slot.min(9) as u8),
+                );
+            }
+            if trade.state == "requested" {
+                overlay_button(
+                    trade_parent,
+                    "Accept trade",
+                    OverlayButton::TradeAccept,
+                    true,
+                );
+                overlay_button(
+                    trade_parent,
+                    "Decline trade",
+                    OverlayButton::TradeDecline,
+                    true,
+                );
+            } else if trade.state == "open" {
+                overlay_button(
+                    trade_parent,
+                    "Offer 100 gold",
+                    OverlayButton::TradeGoldOffer,
+                    true,
+                );
+                for item in inventory
+                    .items
+                    .iter()
+                    .filter(|item| {
+                        item.container == 0 && item.slot < 10 && item_unique_id(item).is_some()
+                    })
+                    .take(10)
+                {
+                    overlay_button(
+                        trade_parent,
+                        &format!(
+                            "Offer {} x{}",
+                            short_name(&item.name, &item.key),
+                            item.quantity
+                        ),
+                        OverlayButton::TradeDepositItem(item.slot.min(9) as u8),
+                        true,
+                    );
+                }
+                overlay_button(
+                    trade_parent,
+                    "Confirm trade",
+                    OverlayButton::TradeConfirm,
+                    !trade.my_confirmed,
+                );
+                overlay_button(
+                    trade_parent,
+                    "Cancel trade",
+                    OverlayButton::TradeCancel,
+                    true,
+                );
+            } else {
+                overlay_button(
+                    trade_parent,
+                    "Request trade",
+                    OverlayButton::TradeRequest,
                     true,
                 );
             }
-            overlay_button(
-                parent,
-                "Confirm trade",
-                OverlayButton::TradeConfirm,
-                !trade.my_confirmed,
-            );
-            overlay_button(parent, "Cancel trade", OverlayButton::TradeCancel, true);
-        } else {
-            overlay_button(parent, "Request trade", OverlayButton::TradeRequest, true);
-        }
-    }
-    body(parent, &format!("Pending: {}", social.pending.len()));
-    overlay_button(parent, "Close", OverlayButton::CloseSocial, true);
+            body(trade_parent, &format!("Pending: {}", social.pending.len()));
+            overlay_button(trade_parent, "Close", OverlayButton::CloseSocial, true);
+        });
 }
 
-fn render_skills(parent: &mut ChildSpawnerCommands, skills: &SkillModel) {
-    title(parent, "Skills");
-    if skills.skills.is_empty() {
-        body(parent, "No skills learned yet.");
-        body(
+fn render_skills(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    skills: &SkillModel,
+    skill_binding: &SkillBindingUi,
+    skill_persistence: &SkillBindingPersistenceRuntime,
+    state: &NativePlayerUiState,
+    ui: &UiReadModel,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
+            width: Val::Px(SKILL_PANEL_SIZE.width as f32),
+            height: Val::Px(SKILL_PANEL_SIZE.height as f32),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(PANEL_BG),
+    ));
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(
             parent,
-            "Learn an active skill from the appropriate trainer.",
+            asset_server,
+            "original-ui/Title/504.png",
+            SKILL_PANEL_SIZE.width as f32,
+            SKILL_PANEL_SIZE.height as f32,
         );
-        body(parent, "1-6  Use belt item");
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            "original-ui/Title/508.png".to_owned(),
+            CrystalRect::new(8.0, 90.0, 248.0, 284.0),
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(241.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseWindows,
+        );
     } else {
-        for skill in &skills.skills {
-            let key_label = skill
-                .key
-                .as_deref()
-                .filter(|k| !k.is_empty())
-                .unwrap_or("-");
-            let line = format!(
-                "{}  Lv{}  [{}]  CD:{}ms",
-                skill.name, skill.level, key_label, skill.cooldown_ms
-            );
-            body(parent, &line);
-        }
-        if skills.skills.len() < 6 {
-            body(parent, "1-6  Use belt item for remaining slots");
-        }
+        overlay_absolute_button(
+            parent,
+            "X",
+            CrystalRect::new(241.0, 3.0, 22.0, 20.0),
+            OverlayButton::CloseWindows,
+            true,
+        );
     }
-    overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
+
+    let page_count = native_skill_page_count(skills.skills.len());
+    let page = state.skill_page.min(page_count.saturating_sub(1));
+    parent
+        .spawn((
+            OverlaySkillListViewport,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(8.0),
+                top: Val::Px(90.0),
+                width: Val::Px(248.0),
+                height: Val::Px(284.0),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|viewport| {
+            if skills.skills.is_empty() {
+                overlay_text_at(
+                    viewport,
+                    "No skills learned",
+                    CrystalRect::new(18.0, 28.0, 212.0, 18.0),
+                    11.0,
+                    GOLD,
+                );
+                overlay_text_at(
+                    viewport,
+                    "Learn skills from a trainer.",
+                    CrystalRect::new(18.0, 52.0, 212.0, 16.0),
+                    9.0,
+                    TEXT,
+                );
+                return;
+            }
+
+            let start = page * SKILL_PAGE_SIZE;
+            for (row, skill) in skills
+                .skills
+                .iter()
+                .skip(start)
+                .take(SKILL_PAGE_SIZE)
+                .enumerate()
+            {
+                let binding = skills.binding_for(skill.id);
+                let shortcut = skill_binding
+                    .binding_for_skill(skill.id)
+                    .map(|binding| format!("F{}", binding.hotkey))
+                    .unwrap_or_else(|| "--".to_owned());
+                let status = if binding.can_use == Some(false) {
+                    "locked"
+                } else if binding.cooldown_remaining_ticks > 0 {
+                    "cooldown"
+                } else if binding.mp_cost.unwrap_or(skill.mp_cost) > ui.player.mp.max(0) as u32 {
+                    "low MP"
+                } else if binding.cast_kind.as_deref() == Some("passive") {
+                    "passive"
+                } else {
+                    "ready"
+                };
+                let selected = skill_binding.selected_skill_id() == Some(skill.id);
+                let label = format!(
+                    "{}{} Lv{}  {}  {}",
+                    if selected { "▶ " } else { "" },
+                    short_name(&skill.name, skill.key.as_deref().unwrap_or("")),
+                    skill.level,
+                    shortcut,
+                    status,
+                );
+                overlay_absolute_button(
+                    viewport,
+                    &label,
+                    CrystalRect::new(
+                        (SKILL_ROW_ORIGIN.x - 8) as f32,
+                        (SKILL_ROW_ORIGIN.y - 90 + row as i32 * SKILL_ROW_STEP_Y) as f32,
+                        SKILL_ROW_SIZE.width as f32,
+                        SKILL_ROW_SIZE.height as f32,
+                    ),
+                    OverlayButton::SelectSkill(skill.id),
+                    true,
+                );
+            }
+        });
+
+    let has_previous = page > 0;
+    let has_next = page + 1 < page_count;
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse",
+            398,
+            399,
+            399,
+            CrystalRect::new(90.0, 340.0, 32.0, 24.0),
+            OverlayButton::SkillPagePrev,
+            has_previous,
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse",
+            396,
+            397,
+            397,
+            CrystalRect::new(140.0, 340.0, 32.0, 24.0),
+            OverlayButton::SkillPageNext,
+            has_next,
+        );
+    } else {
+        overlay_absolute_button(
+            parent,
+            "<",
+            CrystalRect::new(90.0, 340.0, 32.0, 24.0),
+            OverlayButton::SkillPagePrev,
+            has_previous,
+        );
+        overlay_absolute_button(
+            parent,
+            ">",
+            CrystalRect::new(140.0, 340.0, 32.0, 24.0),
+            OverlayButton::SkillPageNext,
+            has_next,
+        );
+    }
+    overlay_text_at(
+        parent,
+        &format!("{}/{}", page + 1, page_count),
+        CrystalRect::new(116.0, 343.0, 24.0, 14.0),
+        8.0,
+        TEXT,
+    );
+    if skill_binding.is_assign_key_enabled() {
+        parent
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(286.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(360.0),
+                    height: Val::Px(145.0),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+            ))
+            .with_children(|assign| {
+                if let Some(asset_server) = asset_server {
+                    spawn_overlay_frame(
+                        assign,
+                        asset_server,
+                        "original-ui/Prguse/710.png",
+                        360.0,
+                        145.0,
+                    );
+                }
+                let selected_name = skill_binding
+                    .selected_skill_id()
+                    .and_then(|id| skills.skills.iter().find(|skill| skill.id == id))
+                    .map(|skill| skill.name.as_str())
+                    .unwrap_or("No skill selected");
+                overlay_text_at(
+                    assign,
+                    selected_name,
+                    CrystalRect::new(16.0, 16.0, 250.0, 20.0),
+                    11.0,
+                    TEXT,
+                );
+                for hotkey in 1..=8_u8 {
+                    let selected = skill_binding.selected_skill_id().is_some()
+                        && skill_binding.skill_for_hotkey(hotkey)
+                            == skill_binding.selected_skill_id();
+                    let rect = CrystalRect::new(
+                        17.0 + 32.0 * f32::from(hotkey - 1) + 5.0 * f32::from((hotkey - 1) / 4),
+                        58.0,
+                        28.0,
+                        30.0,
+                    );
+                    if let Some(asset_server) = asset_server {
+                        spawn_overlay_crystal_button(
+                            assign,
+                            asset_server,
+                            "Prguse",
+                            if selected { 1658 } else { 1656 },
+                            1657,
+                            1658,
+                            rect,
+                            OverlayButton::AssignSkillKey(hotkey),
+                        );
+                    } else {
+                        overlay_absolute_button(
+                            assign,
+                            &format!("F{hotkey}"),
+                            rect,
+                            OverlayButton::AssignSkillKey(hotkey),
+                            true,
+                        );
+                    }
+                    overlay_text_at(
+                        assign,
+                        &format!("F{hotkey}"),
+                        CrystalRect::new(rect.left, rect.top + 8.0, rect.width, 12.0),
+                        8.0,
+                        if selected { GOLD } else { TEXT },
+                    );
+                }
+                if let Some(asset_server) = asset_server {
+                    spawn_overlay_crystal_button(
+                        assign,
+                        asset_server,
+                        "Title",
+                        287,
+                        288,
+                        289,
+                        CrystalRect::new(284.0, 64.0, 64.0, 28.0),
+                        OverlayButton::ClearSkillBinding,
+                    );
+                    spawn_overlay_crystal_button(
+                        assign,
+                        asset_server,
+                        "Title",
+                        156,
+                        157,
+                        158,
+                        CrystalRect::new(284.0, 101.0, 64.0, 28.0),
+                        OverlayButton::CloseSkillAssign,
+                    );
+                }
+                if skill_persistence.dirty {
+                    overlay_text_at(
+                        assign,
+                        "Session binding active; disk save failed",
+                        CrystalRect::new(16.0, 112.0, 260.0, 16.0),
+                        8.0,
+                        GOLD,
+                    );
+                }
+            });
+    }
 }
 
 fn render_inspect(
@@ -3821,11 +5775,22 @@ fn render_inspect(
                 inspect.slot
             ),
         );
-        overlay_button(parent, "Use (U)", OverlayButton::UseInspected, true);
+        let use_enabled = inspected_use_intent(state, inventory).is_some();
+        overlay_button(parent, "Use (U)", OverlayButton::UseInspected, use_enabled);
         if inspect.container == 2 {
-            overlay_button(parent, "Unequip (G)", OverlayButton::UnequipInspected, true);
+            overlay_button(
+                parent,
+                "Unequip (G)",
+                OverlayButton::UnequipInspected,
+                inspected_remove_intent(state, inventory).is_some(),
+            );
         } else {
-            overlay_button(parent, "Equip (G)", OverlayButton::EquipInspected, true);
+            overlay_button(
+                parent,
+                "Equip (G)",
+                OverlayButton::EquipInspected,
+                inspected_equip_intent(state, inventory).is_some(),
+            );
         }
         if let Some(item) = inspected_inventory_item(state, inventory) {
             let valid_id = item_unique_id(item).is_some();
@@ -3870,6 +5835,25 @@ fn render_inspect(
                         split_max > 0 && state.split_count < split_max,
                     );
                 });
+            if let Some(confirmation) = state.drop_confirmation.as_ref() {
+                let current = drop_confirmation_is_current(confirmation, inventory);
+                body(
+                    parent,
+                    &format!("Drop {} x{}?", confirmation.key, confirmation.count),
+                );
+                overlay_button(
+                    parent,
+                    "Confirm drop",
+                    OverlayButton::ConfirmDropInspected,
+                    current,
+                );
+                overlay_button(
+                    parent,
+                    "Cancel drop",
+                    OverlayButton::CancelDropInspected,
+                    true,
+                );
+            }
             overlay_button(
                 parent,
                 "Move source",
@@ -3891,6 +5875,7 @@ fn render_inspect(
                 );
             }
         }
+        overlay_button(parent, "Close", OverlayButton::CloseInspect, true);
     }
 }
 
@@ -3933,122 +5918,173 @@ fn valid_mail_attachment_ids(inventory: &InventoryModel, ids: &[u64]) -> Option<
 
 fn render_mail(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     mail: &MailModel,
+    mail_ui: &MailUiState,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
 ) {
-    let visible = mail.visible_mails();
-    let unread = visible.iter().filter(|mail| !mail.read).count();
-    title(parent, &format!("Mail ({} / {})", unread, visible.len()));
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(
+            parent,
+            asset_server,
+            "original-ui/Title/670.png",
+            312.0,
+            444.0,
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(288.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseMail,
+        );
+        // Help has no native/backend page yet. Rendering it disabled avoids a
+        // source-looking control with an empty click handler.
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            257,
+            258,
+            259,
+            CrystalRect::new(262.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseMail,
+            false,
+        );
+    }
     if let Some(compose) = state.core.mail_compose.as_ref() {
         render_mail_compose(parent, compose, inventory);
         overlay_button(parent, "Cancel", OverlayButton::CancelMailCompose, true);
         return;
     }
-    if visible.is_empty() {
-        body(parent, "No mail.");
-        overlay_button(parent, "Write mail", OverlayButton::OpenMailCompose, true);
-        overlay_button(parent, "Close", OverlayButton::CloseMail, true);
-        return;
-    }
-    // List header
-    body(
+    let page = mail.page(mail_ui.cursor.page);
+    overlay_text_at(
         parent,
-        &format!("Unread: {}  Total: {}", unread, visible.len()),
+        &format!(
+            "Unread {} / Total {}",
+            mail.unread_count(),
+            mail.visible_mails().len()
+        ),
+        CrystalRect::new(10.0, 31.0, 290.0, 18.0),
+        10.0,
+        TEXT,
     );
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(2.0),
-            ..default()
-        })
-        .with_children(|list| {
-            for msg in visible {
-                let is_selected = mail.selected_id == Some(msg.id);
-                let claim_enabled = mail_claim_enabled(msg);
-                let delete_enabled = mail_delete_enabled(msg);
-                let read_label = if msg.read { "[Old]" } else { "[New]" };
-                let claimed_label = if msg.claimed { " [Claimed]" } else { "" };
-                let locked_label = if msg.locked { " [Locked]" } else { "" };
-                let has_attach = if msg.has_attachment() {
-                    " [Attachment]"
-                } else {
-                    ""
-                };
-                let line = format!(
-                    "{} {}: {}{}{}{} {}",
-                    read_label,
-                    msg.sender,
-                    short_name(&msg.subject, "Mail"),
-                    claimed_label,
-                    locked_label,
-                    has_attach,
-                    if msg.gold > 0 || !msg.items.is_empty() {
-                        format!("({})", msg.attachment_summary())
-                    } else {
-                        String::new()
-                    }
-                );
-                // Row container with select and action buttons
-                list.spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(2.0),
-                    align_items: AlignItems::Center,
-                    ..default()
-                })
-                .with_children(|row| {
-                    let label = if is_selected {
-                        format!("▶ {}", line)
-                    } else {
-                        line
-                    };
-                    overlay_button(row, &label, OverlayButton::SelectMail(msg.id), true);
-                    overlay_button(
-                        row,
-                        "Claim",
-                        OverlayButton::ClaimMail(msg.id),
-                        claim_enabled,
-                    );
-                    overlay_button(
-                        row,
-                        "Delete",
-                        OverlayButton::DeleteMail(msg.id),
-                        delete_enabled,
-                    );
-                });
-            }
-        });
-    // Detail pane for selected
-    if let Some(selected) = mail.selected() {
-        body(parent, &format!("From: {}", selected.sender));
-        body(parent, &format!("Subject: {}", selected.subject));
-        if selected.body.trim().is_empty() {
-            body(parent, "(No message body.)");
-        } else {
-            for line in selected.body.lines().take(4) {
-                body(parent, line);
-            }
-        }
-        if selected.has_attachment() {
-            let status = if selected.claimed {
-                "Claimed"
-            } else if selected.locked {
-                "Locked"
-            } else {
-                "Unclaimed"
-            };
-            body(
-                parent,
-                &format!("Attachment: {} [{}]", selected.attachment_summary(), status),
-            );
-        }
-    } else {
-        body(parent, "Select a message to read.");
+    for (row, msg) in page.entries.iter().enumerate() {
+        let flags = format!(
+            "{}{}{}",
+            if msg.read { "" } else { "[New] " },
+            if msg.has_attachment() { "[+] " } else { "" },
+            if msg.locked { "[Lock] " } else { "" },
+        );
+        let selected = mail.selected_id == Some(msg.id);
+        let label = format!(
+            "{}{}{}: {}",
+            if selected { "▶ " } else { "" },
+            flags,
+            short_name(&msg.sender, "Unknown"),
+            short_name(&msg.subject, "Mail")
+        );
+        overlay_absolute_button(
+            parent,
+            &label,
+            CrystalRect::new(10.0, 55.0 + row as f32 * 33.0, 290.0, 33.0),
+            OverlayButton::SelectMail(msg.id),
+            true,
+        );
     }
-    overlay_button(parent, "Write mail", OverlayButton::OpenMailCompose, true);
-    overlay_button(parent, "Close", OverlayButton::CloseMail, true);
+
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            240,
+            241,
+            242,
+            CrystalRect::new(102.0, 389.0, 24.0, 21.0),
+            OverlayButton::MailPagePrev,
+            page.page > 0,
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            243,
+            244,
+            245,
+            CrystalRect::new(192.0, 389.0, 24.0, 21.0),
+            OverlayButton::MailPageNext,
+            page.page + 1 < page.page_count,
+        );
+    }
+    overlay_text_at(
+        parent,
+        &format!("{}/{}", page.page + 1, page.page_count),
+        CrystalRect::new(120.0, 389.0, 67.0, 15.0),
+        9.0,
+        TEXT,
+    );
+
+    let selected = mail.selected();
+    let selected_id = selected.map(|message| message.id).unwrap_or_default();
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse",
+            563,
+            564,
+            565,
+            CrystalRect::new(75.0, 414.0, 27.0, 25.0),
+            OverlayButton::OpenMailCompose,
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse",
+            569,
+            570,
+            571,
+            CrystalRect::new(102.0, 414.0, 27.0, 25.0),
+            OverlayButton::OpenMailCompose,
+            false,
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse",
+            572,
+            573,
+            574,
+            CrystalRect::new(129.0, 414.0, 27.0, 25.0),
+            OverlayButton::ReadMail(selected_id),
+            selected.is_some_and(|message| !message.read),
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse",
+            557,
+            558,
+            559,
+            CrystalRect::new(156.0, 414.0, 27.0, 25.0),
+            OverlayButton::DeleteMail(selected_id),
+            selected.is_some_and(mail_delete_enabled),
+        );
+    }
+    if let Some(message) = selected.filter(|message| mail_claim_enabled(message)) {
+        overlay_absolute_button(
+            parent,
+            "Claim",
+            CrystalRect::new(215.0, 414.0, 55.0, 24.0),
+            OverlayButton::ClaimMail(message.id),
+            true,
+        );
+    }
 }
 
 fn render_mail_compose(
@@ -4147,17 +6183,31 @@ fn render_mail_compose(
     );
 }
 
+fn big_map_view_position(point: BigMapPoint, width: i32, height: i32) -> (f32, f32) {
+    if width <= 0 || height <= 0 {
+        return (BIGMAP_WIDTH * 0.5, BIGMAP_HEIGHT * 0.5);
+    }
+    let x = (point.x.max(0) as f32 / width as f32).clamp(0.0, 1.0) * BIGMAP_WIDTH;
+    let y = (point.y.max(0) as f32 / height as f32).clamp(0.0, 1.0) * BIGMAP_HEIGHT;
+    (x, y)
+}
+
 fn render_bigmap(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
-    map: &MapModel,
+    model: &BigMapModel,
+    renderer: &BigMapUiState,
     ui: &UiReadModel,
-    state: &NativePlayerUiState,
 ) {
     let Some(asset_server) = asset_server else {
         return;
     };
-    let map_name = ui.player.map_name.as_deref().unwrap_or("");
+    let rendered = model.render_snapshot();
+    let map_name = rendered
+        .title
+        .as_deref()
+        .or(ui.player.map_name.as_deref())
+        .unwrap_or("");
     spawn_overlay_frame(
         parent,
         asset_server,
@@ -4194,8 +6244,10 @@ fn render_bigmap(
             ..default()
         })
         .with_children(|viewport| {
-            if let Some(asset) = bigmap_asset_path(Some(map_name)) {
+            let asset = rendered.map_image_url.clone();
+            if let Some(asset) = asset {
                 viewport.spawn((
+                    BigMapImageEntity { url: asset.clone() },
                     Node {
                         position_type: PositionType::Absolute,
                         left: Val::Px(0.0),
@@ -4220,23 +6272,86 @@ fn render_bigmap(
                     BackgroundColor(Color::srgb(0.02, 0.015, 0.01)),
                 ));
             }
-            let (px, py) = bigmap_player_position(map, state.bigmap_zoom);
-            viewport.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(px - 6.0),
-                    top: Val::Px(py - 5.0),
-                    width: Val::Px(12.0),
-                    height: Val::Px(10.0),
-                    ..default()
-                },
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse2/1350.png"),
-                    ..default()
-                },
-            ));
+
+            if model.view == BigMapView::WorldMap && model.world.enabled {
+                for index in [1365_u16, 1366_u16] {
+                    viewport.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(0.0),
+                            top: Val::Px(0.0),
+                            width: Val::Px(BIGMAP_WIDTH),
+                            height: Val::Px(BIGMAP_HEIGHT),
+                            ..default()
+                        },
+                        ImageNode {
+                            image: asset_server.load(format!("original-ui/Prguse2/{index}.png")),
+                            image_mode: NodeImageMode::Stretch,
+                            ..default()
+                        },
+                    ));
+                }
+            } else if let Some(entry) = model.active_map() {
+                for movement in &entry.info.movements {
+                    let (x, y) = big_map_view_position(
+                        movement.location,
+                        entry.info.width,
+                        entry.info.height,
+                    );
+                    viewport.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(x - 2.0),
+                            top: Val::Px(y - 2.0),
+                            width: Val::Px(4.0),
+                            height: Val::Px(4.0),
+                            ..default()
+                        },
+                        BackgroundColor(GOLD),
+                    ));
+                }
+                for npc in entry.info.npcs.iter().filter(|npc| npc.show_on_big_map) {
+                    let (x, y) =
+                        big_map_view_position(npc.location, entry.info.width, entry.info.height);
+                    viewport.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(x - 2.0),
+                            top: Val::Px(y - 2.0),
+                            width: Val::Px(5.0),
+                            height: Val::Px(5.0),
+                            ..default()
+                        },
+                        BackgroundColor(if model.selected_npc_object_id == Some(npc.object_id) {
+                            Color::srgb(1.0, 0.35, 0.12)
+                        } else {
+                            Color::srgb(0.25, 0.95, 0.35)
+                        }),
+                    ));
+                }
+                if let Some(location) = rendered.player_location {
+                    let (px, py) =
+                        big_map_view_position(location, entry.info.width, entry.info.height);
+                    viewport.spawn((
+                        BigMapPlayerEntity { location },
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(px - 6.0),
+                            top: Val::Px(py - 5.0),
+                            width: Val::Px(12.0),
+                            height: Val::Px(10.0),
+                            ..default()
+                        },
+                        ImageNode {
+                            image: asset_server.load("original-ui/Prguse2/1350.png"),
+                            ..default()
+                        },
+                    ));
+                }
+            }
         });
 
+    let location = model.player_location.unwrap_or_default();
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -4246,7 +6361,7 @@ fn render_bigmap(
             height: Val::Px(15.0),
             ..default()
         },
-        Text::new(format!("[ {}, {} ]", map.center_x, map.center_y)),
+        Text::new(format!("[ {}, {} ]", location.x, location.y)),
         TextFont {
             font_size: FontSize::Px(11.0),
             ..default()
@@ -4264,321 +6379,526 @@ fn render_bigmap(
         CrystalRect::new(735.0, 3.0, 24.0, 21.0),
         OverlayButton::CloseBigMap,
     );
-    for (path, rect) in [
-        (
-            "original-ui/Prguse2/197.png",
-            CrystalRect::new(739.0, 48.0, 16.0, 16.0),
-        ),
-        (
-            "original-ui/Prguse2/205.png",
-            CrystalRect::new(739.0, 61.0, 16.0, 16.0),
-        ),
-        (
-            "original-ui/Prguse2/207.png",
-            CrystalRect::new(739.0, 417.0, 16.0, 16.0),
-        ),
-        (
-            "original-ui/Title/827.png",
-            CrystalRect::new(250.0, 467.0, 80.0, 25.0),
-        ),
-        (
-            "original-ui/Title/824.png",
-            CrystalRect::new(400.0, 467.0, 80.0, 25.0),
-        ),
-        (
-            "original-ui/Title/821.png",
-            CrystalRect::new(638.0, 432.0, 72.0, 25.0),
-        ),
-        (
-            "original-ui/Prguse2/1340.png",
-            CrystalRect::new(23.0, 464.0, 32.0, 30.0),
-        ),
-    ] {
-        spawn_static_overlay_sprite(parent, asset_server, path.to_owned(), rect);
+
+    let filtered_count = model.filtered_npcs().len();
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Prguse2",
+        197,
+        198,
+        199,
+        CrystalRect::new(739.0, 48.0, 16.0, 16.0),
+        OverlayButton::BigMapScrollUp,
+        model.npc_scroll_row > 0,
+    );
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Prguse2/205.png".to_owned(),
+        CrystalRect::new(739.0, 61.0, 16.0, 16.0),
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Prguse2",
+        207,
+        208,
+        209,
+        CrystalRect::new(739.0, 417.0, 16.0, 16.0),
+        OverlayButton::BigMapScrollDown,
+        model.npc_scroll_row.saturating_add(BIG_MAP_NPC_ROW_COUNT) < filtered_count,
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Title",
+        827,
+        828,
+        829,
+        CrystalRect::new(250.0, 467.0, 80.0, 25.0),
+        OverlayButton::BigMapWorld,
+        model.world.enabled,
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Title",
+        824,
+        825,
+        826,
+        CrystalRect::new(400.0, 467.0, 80.0, 25.0),
+        OverlayButton::BigMapMyLocation,
+        model.current_map_index.is_some(),
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Title",
+        821,
+        822,
+        823,
+        CrystalRect::new(638.0, 432.0, 72.0, 25.0),
+        OverlayButton::BigMapTeleport,
+        model.selected_teleport_intent().is_some(),
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        1340,
+        1341,
+        1342,
+        CrystalRect::new(23.0, 464.0, 32.0, 30.0),
+        OverlayButton::BigMapSearchSubmit,
+    );
+    overlay_absolute_button(
+        parent,
+        &model.search.draft,
+        CrystalRect::new(59.0, 468.0, 130.0, 20.0),
+        OverlayButton::BigMapSearchFocus,
+        true,
+    );
+    if renderer.search_focused {
+        overlay_text_at(
+            parent,
+            "|",
+            CrystalRect::new(183.0, 470.0, 4.0, 12.0),
+            10.0,
+            GOLD,
+        );
+    }
+
+    for (row, npc) in rendered.npcs.iter().enumerate() {
+        let label = format!("{} [{},{}]", npc.name, npc.location.x, npc.location.y);
+        overlay_absolute_button(
+            parent,
+            &label,
+            CrystalRect::new(590.0, 50.0 + row as f32 * 21.0, 140.0, 25.0),
+            OverlayButton::SelectBigMapNpc(npc.object_id),
+            npc.object_id != 0,
+        );
+        parent.spawn(BigMapNpcRowEntity {
+            object_id: npc.object_id,
+            name: npc.name.clone(),
+            location: npc.location,
+        });
     }
 }
 
 fn render_shop(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     shop: &ShopModel,
+    shop_ui: &ShopUiState,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
 ) {
-    title(parent, "Shop (NPC)");
-    body(
-        parent,
-        &format!(
-            "Gold: {}  Quantity: {}",
-            inventory.gold, state.shop_quantity
-        ),
-    );
-    if shop.goods.is_empty() {
-        body(parent, "No goods. Talk to a shop NPC.");
-    } else {
-        parent
-            .spawn(Node {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(2.0),
-                ..default()
-            })
-            .with_children(|list| {
-                for good in &shop.goods {
-                    let is_selected = shop.selected_id == Some(good.unique_id);
-                    let label = format!(
-                        "{}  Price:{}  Stock:{} {}{}",
-                        short_name(&good.name, &good.unique_id.to_string()),
-                        good.price,
-                        good.stock_label(),
-                        if is_selected { "◀" } else { "" },
-                        if good.count > 1 {
-                            format!(" x{}", good.count)
-                        } else {
-                            String::new()
-                        }
-                    );
-                    overlay_button(
-                        list,
-                        &label,
-                        OverlayButton::SelectShopGood(good.unique_id),
-                        true,
-                    );
-                }
-            });
-    }
-    // Quantity selector
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            align_items: AlignItems::Center,
-            ..default()
-        })
-        .with_children(|row| {
-            let qty = shop_quantity_clamped(state.shop_quantity);
-            let can_dec = qty > SHOP_QUANTITY_MIN;
-            let can_inc = qty < SHOP_QUANTITY_MAX;
-            overlay_button(row, "-", OverlayButton::ShopQuantityDec, can_dec);
-            body(row, &format!("x{}", qty));
-            overlay_button(row, "+", OverlayButton::ShopQuantityInc, can_inc);
-        });
-    // Bag items for sell/repair selection
-    body(parent, "Select bag item independently for Sell or Repair:");
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            flex_wrap: bevy::ui::FlexWrap::Wrap,
-            column_gap: Val::Px(2.0),
-            row_gap: Val::Px(2.0),
-            ..default()
-        })
-        .with_children(|grid| {
-            for slot in 0..8 {
-                if let Some(item) = inventory.items_in(0).iter().find(|i| i.slot == slot) {
-                    let label = format!("{} x{}", short_name(&item.name, &item.key), item.quantity);
-                    let sell_label = if shop.selected_bag_slot_for_sell == Some(slot) {
-                        format!("S▶{}", label)
-                    } else {
-                        format!("Sell {}", label)
-                    };
-                    let repair_label = if shop.selected_bag_slot_for_repair == Some(slot) {
-                        format!("R▶{}", label)
-                    } else {
-                        format!("Repair {}", label)
-                    };
-                    overlay_button(
-                        grid,
-                        &sell_label,
-                        OverlayButton::SelectBagForSell(slot),
-                        true,
-                    );
-                    overlay_button(
-                        grid,
-                        &repair_label,
-                        OverlayButton::SelectBagForRepair(slot),
-                        true,
-                    );
-                } else {
-                    overlay_button(grid, "--", OverlayButton::SelectBagForSell(slot), false);
-                    overlay_button(grid, "--", OverlayButton::SelectBagForRepair(slot), false);
-                }
-            }
-        });
-    body(parent, "Equipment repair (container 2):");
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            flex_wrap: bevy::ui::FlexWrap::Wrap,
-            column_gap: Val::Px(2.0),
-            row_gap: Val::Px(2.0),
-            ..default()
-        })
-        .with_children(|grid| {
-            for slot in 0..14 {
-                let item = inventory
-                    .items_in(2)
-                    .into_iter()
-                    .find(|item| item.slot == slot);
-                let selected =
-                    state.shop_repair_container == 2 && state.shop_repair_slot == Some(slot);
-                let label = item
-                    .map(|item| {
-                        format!(
-                            "{}{} {}",
-                            if selected { "R▶" } else { "Repair " },
-                            equipment_slot_name(slot),
-                            short_name(&item.name, &item.key)
-                        )
-                    })
-                    .unwrap_or_else(|| format!("{} --", equipment_slot_name(slot)));
-                overlay_button(
-                    grid,
-                    &label,
-                    OverlayButton::SelectEquipForRepair(slot),
-                    item.is_some(),
-                );
-            }
-        });
-    // Action buttons with disabled states
     let buy_enabled = shop_buy_enabled(shop, inventory, state.shop_quantity);
     let sell_enabled = shop
         .selected_bag_slot_for_sell
         .map(|s| shop_sell_enabled(inventory, Some(s)))
         .unwrap_or(false);
     let repair_enabled = repair_selection_enabled(state, inventory);
-    let s_repair_enabled = repair_enabled;
 
+    if let Some(asset_server) = asset_server {
+        // Crystal's NPCGoodsDialog frame is Prguse/1000.  The extracted
+        // layout does not declare its intrinsic size; derive the occupied
+        // bounds from the furthest confirmed control instead of stretching
+        // the art to the old provisional 620x520 panel.
+        spawn_overlay_frame(
+            parent,
+            asset_server,
+            "original-ui/Prguse/1000.png",
+            242.0,
+            330.0,
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(217.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseShop,
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            197,
+            198,
+            199,
+            CrystalRect::new(219.0, 35.0, 12.0, 12.0),
+            OverlayButton::ShopPageUp,
+            shop_ui.start_index > 0,
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            207,
+            208,
+            209,
+            CrystalRect::new(219.0, 284.0, 12.0, 12.0),
+            OverlayButton::ShopPageDown,
+            shop_ui.start_index.saturating_add(8) < shop.goods.len(),
+        );
+        let max_start = shop.goods.len().saturating_sub(8);
+        let scroll_top = if max_start == 0 {
+            49.0
+        } else {
+            49.0 + 217.0 * shop_ui.start_index as f32 / max_start as f32
+        };
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            "original-ui/Prguse2/205.png".to_owned(),
+            CrystalRect::new(219.0, scroll_top, 12.0, 18.0),
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Title",
+            312,
+            313,
+            314,
+            CrystalRect::new(77.0, 304.0, 80.0, 22.0),
+            OverlayButton::ShopBuy,
+            buy_enabled,
+        );
+    } else {
+        overlay_absolute_button(
+            parent,
+            "Close",
+            CrystalRect::new(217.0, 3.0, 24.0, 21.0),
+            OverlayButton::CloseShop,
+            true,
+        );
+        overlay_absolute_button(
+            parent,
+            "↑",
+            CrystalRect::new(219.0, 35.0, 12.0, 12.0),
+            OverlayButton::ShopPageUp,
+            shop_ui.start_index > 0,
+        );
+        overlay_absolute_button(
+            parent,
+            "↓",
+            CrystalRect::new(219.0, 284.0, 12.0, 12.0),
+            OverlayButton::ShopPageDown,
+            shop_ui.start_index.saturating_add(8) < shop.goods.len(),
+        );
+        overlay_absolute_button(
+            parent,
+            "Buy",
+            CrystalRect::new(77.0, 304.0, 80.0, 22.0),
+            OverlayButton::ShopBuy,
+            buy_enabled,
+        );
+    }
+
+    for (row, good) in shop
+        .goods
+        .iter()
+        .skip(shop_ui.start_index)
+        .take(8)
+        .enumerate()
+    {
+        let selected = shop.selected_id == Some(good.unique_id);
+        let label = format!(
+            "{}{}  {}  {}",
+            if selected { "▶ " } else { "" },
+            short_name(&good.name, &good.unique_id.to_string()),
+            good.price,
+            good.stock_label(),
+        );
+        overlay_absolute_shop_good_button(
+            parent,
+            asset_server,
+            good.icon,
+            &label,
+            CrystalRect::new(10.0, 34.0 + row as f32 * 33.0, 202.0, 30.0),
+            OverlayButton::SelectShopGood(good.unique_id),
+        );
+    }
+    if shop.goods.is_empty() {
+        overlay_text_at(
+            parent,
+            "No goods",
+            CrystalRect::new(12.0, 40.0, 195.0, 18.0),
+            10.0,
+            TEXT,
+        );
+    }
+    overlay_text_at(
+        parent,
+        &format!("Gold {}", inventory.gold),
+        CrystalRect::new(10.0, 8.0, 150.0, 16.0),
+        10.0,
+        GOLD,
+    );
+    overlay_absolute_button(
+        parent,
+        "−",
+        CrystalRect::new(12.0, 304.0, 20.0, 22.0),
+        OverlayButton::ShopQuantityDec,
+        state.shop_quantity > SHOP_QUANTITY_MIN,
+    );
+    overlay_text_at(
+        parent,
+        &format!("x{}", shop_quantity_clamped(state.shop_quantity)),
+        CrystalRect::new(34.0, 306.0, 36.0, 18.0),
+        10.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        "+",
+        CrystalRect::new(58.0, 304.0, 18.0, 22.0),
+        OverlayButton::ShopQuantityInc,
+        state.shop_quantity < SHOP_QUANTITY_MAX,
+    );
+
+    // Sell and repair are separate Crystal service modes.  Keep their real
+    // gateway operations reachable in a clearly auxiliary panel instead of
+    // overlaying fake controls on the confirmed NPCGoodsDialog art.
     parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(row, "Buy", OverlayButton::ShopBuy, buy_enabled);
-            overlay_button(row, "Sell", OverlayButton::ShopSell, sell_enabled);
-            overlay_button(row, "Repair", OverlayButton::ShopRepair, repair_enabled);
-            overlay_button(
-                row,
-                "S.Repair",
-                OverlayButton::ShopSRepair,
-                s_repair_enabled,
-            );
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(250.0),
+                top: Val::Px(0.0),
+                width: Val::Px(360.0),
+                height: Val::Px(330.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                padding: UiRect::all(Val::Px(8.0)),
+                row_gap: Val::Px(3.0),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ))
+        .with_children(|aux| {
+            body(aux, "Bag sell / repair");
+            for item in inventory.items_in(0).into_iter().take(8) {
+                let selected_for_sell = shop.selected_bag_slot_for_sell == Some(item.slot);
+                let selected_for_repair = shop.selected_bag_slot_for_repair == Some(item.slot);
+                aux.spawn(Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    column_gap: Val::Px(3.0),
+                    ..default()
+                })
+                .with_children(|row| {
+                    overlay_button(
+                        row,
+                        &format!(
+                            "{}Sell {}",
+                            if selected_for_sell { "▶" } else { "" },
+                            short_name(&item.name, &item.key)
+                        ),
+                        OverlayButton::SelectBagForSell(item.slot),
+                        true,
+                    );
+                    overlay_button(
+                        row,
+                        &format!("{}Repair", if selected_for_repair { "▶" } else { "" }),
+                        OverlayButton::SelectBagForRepair(item.slot),
+                        true,
+                    );
+                });
+            }
+            aux.spawn(Node {
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                column_gap: Val::Px(4.0),
+                ..default()
+            })
+            .with_children(|row| {
+                overlay_button(row, "Sell", OverlayButton::ShopSell, sell_enabled);
+                overlay_button(row, "Repair", OverlayButton::ShopRepair, repair_enabled);
+                overlay_button(row, "S.Repair", OverlayButton::ShopSRepair, repair_enabled);
+            });
+            body(aux, "Equipment repair");
+            aux.spawn(Node {
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                flex_wrap: bevy::ui::FlexWrap::Wrap,
+                column_gap: Val::Px(2.0),
+                row_gap: Val::Px(2.0),
+                ..default()
+            })
+            .with_children(|grid| {
+                for slot in 0..14 {
+                    let item = inventory
+                        .items_in(2)
+                        .into_iter()
+                        .find(|item| item.slot == slot);
+                    let selected =
+                        state.shop_repair_container == 2 && state.shop_repair_slot == Some(slot);
+                    overlay_button(
+                        grid,
+                        &format!(
+                            "{}{}",
+                            if selected { "▶" } else { "" },
+                            equipment_slot_name(slot)
+                        ),
+                        OverlayButton::SelectEquipForRepair(slot),
+                        item.is_some(),
+                    );
+                }
+            });
         });
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            let confirm_enabled = if state.shop_repair_mode {
-                repair_enabled
-            } else {
-                buy_enabled
-            };
-            overlay_button(row, "Confirm", OverlayButton::ShopConfirm, confirm_enabled);
-            overlay_button(row, "Cancel", OverlayButton::ShopCancel, true);
-        });
-    overlay_button(parent, "Close", OverlayButton::CloseShop, true);
+}
+
+fn native_skill_page_count(item_count: usize) -> usize {
+    item_count
+        .saturating_add(SKILL_PAGE_SIZE.saturating_sub(1))
+        .checked_div(SKILL_PAGE_SIZE)
+        .unwrap_or(0)
+        .max(1)
+}
+
+fn native_game_shop_page_count(item_count: usize) -> usize {
+    item_count
+        .saturating_add(CRYSTAL_GAME_SHOP_PAGE_SIZE.saturating_sub(1))
+        .checked_div(CRYSTAL_GAME_SHOP_PAGE_SIZE)
+        .unwrap_or(0)
+        .max(1)
+}
+
+fn native_game_shop_page_for_index(
+    game_shop: &GameShopModel,
+    game_shop_index: i32,
+) -> Option<usize> {
+    game_shop
+        .items
+        .iter()
+        .position(|entry| entry.game_shop_index == game_shop_index)
+        .map(|position| position / CRYSTAL_GAME_SHOP_PAGE_SIZE)
+}
+
+fn native_game_shop_page_entries(
+    game_shop: &GameShopModel,
+    page: usize,
+) -> &[crate::game_shop::GameShopEntry] {
+    let start = page.saturating_mul(CRYSTAL_GAME_SHOP_PAGE_SIZE);
+    let end = (start + CRYSTAL_GAME_SHOP_PAGE_SIZE).min(game_shop.items.len());
+    game_shop.items.get(start..end).unwrap_or(&[])
 }
 
 fn render_game_shop(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     game_shop: &GameShopModel,
     ui: &UiReadModel,
     state: &NativePlayerUiState,
 ) {
-    title(parent, "Cash Shop");
-    body(
-        parent,
-        &format!(
-            "Gold: {}  Credit: {}  Quantity: {}",
-            ui.player.gold, ui.player.credit, game_shop.quantity
-        ),
-    );
-    body(
-        parent,
-        &format!(
-            "Products: {}  Page {}/{}",
-            game_shop.items.len(),
-            state
-                .game_shop_page
-                .min(game_shop_page_count(game_shop.items.len()).saturating_sub(1))
-                + 1,
-            game_shop_page_count(game_shop.items.len())
-        ),
-    );
-    if game_shop.pending_purchase.is_some() {
-        body(
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
+            width: Val::Px(GAME_SHOP_PANEL_SIZE.width as f32),
+            height: Val::Px(GAME_SHOP_PANEL_SIZE.height as f32),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(PANEL_BG),
+    ));
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(
             parent,
-            "Purchase pending; waiting for authoritative receipt.",
+            asset_server,
+            "original-ui/Title/749.png",
+            GAME_SHOP_PANEL_SIZE.width as f32,
+            GAME_SHOP_PANEL_SIZE.height as f32,
         );
-    } else if game_shop.purchase_unknown {
-        body(
+        spawn_overlay_crystal_button(
             parent,
-            "Purchase status unknown; refresh wallet, mail, and stock before retrying.",
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(671.0, 4.0, 24.0, 21.0),
+            OverlayButton::CloseGameShop,
+        );
+    } else {
+        overlay_absolute_button(
+            parent,
+            "X",
+            CrystalRect::new(671.0, 4.0, 24.0, 21.0),
+            OverlayButton::CloseGameShop,
+            true,
         );
     }
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(2.0),
-            ..default()
-        })
-        .with_children(|list| {
-            let class = ui.player.class_name.as_deref().unwrap_or("");
-            let page = state
-                .game_shop_page
-                .min(game_shop_page_count(game_shop.items.len()).saturating_sub(1));
-            for entry in game_shop_page_entries(game_shop, page) {
-                let selected = game_shop.selected_game_shop_index == Some(entry.game_shop_index);
-                let enabled = entry.visible_for_class(class);
-                let label = format!(
-                    "g#{} {}  G:{} C:{}  Stock:{}{}",
-                    entry.game_shop_index,
-                    short_name(&entry.item_name, &entry.item_index.to_string()),
-                    entry.gold_price,
-                    entry.credit_price,
-                    entry.stock_label(),
-                    if selected { " ◀" } else { "" },
-                );
-                overlay_button(
-                    list,
-                    &label,
-                    OverlayButton::SelectGameShopGood(entry.game_shop_index),
-                    enabled,
-                );
-            }
-        });
 
-    let page = state
-        .game_shop_page
-        .min(game_shop_page_count(game_shop.items.len()).saturating_sub(1));
-    let page_count = game_shop_page_count(game_shop.items.len());
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(row, "Previous", OverlayButton::GameShopPagePrev, page > 0);
-            body(row, &format!("Page {}/{}", page + 1, page_count));
-            overlay_button(
-                row,
-                "Next",
-                OverlayButton::GameShopPageNext,
-                page + 1 < page_count,
-            );
-        });
+    let page_count = native_game_shop_page_count(game_shop.items.len());
+    let page = state.game_shop_page.min(page_count.saturating_sub(1));
+    overlay_text_at(
+        parent,
+        "Game Shop",
+        CrystalRect::new(18.0, 9.0, 180.0, 18.0),
+        12.0,
+        GOLD,
+    );
+    overlay_text_at(
+        parent,
+        &format!("Products: {}", game_shop.items.len()),
+        CrystalRect::new(15.0, 72.0, 120.0, 16.0),
+        9.0,
+        TEXT,
+    );
+    overlay_text_at(
+        parent,
+        &format!("Page {}/{}", page + 1, page_count),
+        CrystalRect::new(15.0, 88.0, 120.0, 16.0),
+        9.0,
+        TEXT,
+    );
+    if game_shop.pending_purchase.is_some() {
+        overlay_text_at(
+            parent,
+            "Purchase pending; waiting for authoritative receipt.",
+            CrystalRect::new(152.0, 92.0, 510.0, 16.0),
+            9.0,
+            GOLD,
+        );
+    } else if game_shop.purchase_unknown {
+        overlay_text_at(
+            parent,
+            "Purchase status unknown; refresh wallet, mail and stock before retry.",
+            CrystalRect::new(152.0, 92.0, 510.0, 16.0),
+            9.0,
+            GOLD,
+        );
+    }
+
+    let class = ui.player.class_name.as_deref().unwrap_or("");
+    for (offset, entry) in native_game_shop_page_entries(game_shop, page)
+        .iter()
+        .enumerate()
+    {
+        let column = offset % GAME_SHOP_PAGE_COLUMNS;
+        let row = offset / GAME_SHOP_PAGE_COLUMNS;
+        let rect = CrystalRect::new(
+            (GAME_SHOP_GRID_ORIGIN.x + column as i32 * GAME_SHOP_COLUMN_STEP) as f32,
+            (GAME_SHOP_GRID_ORIGIN.y + row as i32 * GAME_SHOP_ROW_STEP) as f32,
+            GAME_SHOP_CELL_SIZE.width as f32,
+            GAME_SHOP_CELL_SIZE.height as f32,
+        );
+        spawn_game_shop_product(
+            parent,
+            asset_server,
+            entry,
+            rect,
+            game_shop.selected_game_shop_index == Some(entry.game_shop_index),
+            entry.visible_for_class(class),
+        );
+    }
 
     let selected = game_shop.selected();
     if let Some(entry) = selected {
@@ -4590,277 +6910,415 @@ fn render_game_shop(
             .total_price(game_shop.payment, game_shop.quantity)
             .map(|value| value.to_string())
             .unwrap_or_else(|| "disabled".to_owned());
-        body(
+        overlay_text_at(
             parent,
-            &format!(
-                "Selected: {}  Pay: {}  Total: {}  Stock: {}",
-                entry.item_name,
-                payment,
-                price,
-                entry.stock_label()
-            ),
+            "Selected",
+            CrystalRect::new(15.0, 122.0, 120.0, 15.0),
+            9.0,
+            GOLD,
+        );
+        overlay_text_at(
+            parent,
+            &short_name(&entry.item_name, &entry.item_index.to_string()),
+            CrystalRect::new(15.0, 140.0, 120.0, 15.0),
+            9.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            &format!("{payment} {price}"),
+            CrystalRect::new(15.0, 158.0, 120.0, 15.0),
+            9.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            &format!("Stock {}", entry.stock_label()),
+            CrystalRect::new(15.0, 176.0, 120.0, 15.0),
+            9.0,
+            TEXT,
         );
     } else {
-        body(parent, "Select a product");
+        overlay_text_at(
+            parent,
+            "Select a product",
+            CrystalRect::new(15.0, 122.0, 120.0, 15.0),
+            9.0,
+            TEXT,
+        );
     }
 
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                "Credit",
-                OverlayButton::GameShopPaymentCredit,
-                game_shop.payment != GameShopPaymentType::Credit,
-            );
-            overlay_button(
-                row,
-                "Gold",
-                OverlayButton::GameShopPaymentGold,
-                game_shop.payment != GameShopPaymentType::Gold,
-            );
-            overlay_button(
-                row,
-                "-",
-                OverlayButton::GameShopQuantityDec,
-                game_shop.quantity > GAME_SHOP_QUANTITY_MIN,
-            );
-            body(row, &format!("x{}", game_shop.quantity));
-            overlay_button(
-                row,
-                "+",
-                OverlayButton::GameShopQuantityInc,
-                game_shop.quantity < GAME_SHOP_QUANTITY_MAX,
-            );
-        });
+    overlay_text_at(
+        parent,
+        &format!("Credit {}", ui.player.credit),
+        CrystalRect::new(5.0, 449.0, 110.0, 18.0),
+        9.0,
+        TEXT,
+    );
+    overlay_text_at(
+        parent,
+        &format!("Gold {}", ui.player.gold),
+        CrystalRect::new(123.0, 449.0, 105.0, 18.0),
+        9.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        "Credit",
+        CrystalRect::new(250.0, 446.0, 78.0, 22.0),
+        OverlayButton::GameShopPaymentCredit,
+        game_shop.payment != GameShopPaymentType::Credit,
+    );
+    overlay_absolute_button(
+        parent,
+        "Gold",
+        CrystalRect::new(332.0, 446.0, 68.0, 22.0),
+        OverlayButton::GameShopPaymentGold,
+        game_shop.payment != GameShopPaymentType::Gold,
+    );
+    overlay_absolute_button(
+        parent,
+        "-",
+        CrystalRect::new(404.0, 446.0, 22.0, 22.0),
+        OverlayButton::GameShopQuantityDec,
+        game_shop.quantity > GAME_SHOP_QUANTITY_MIN,
+    );
+    overlay_text_at(
+        parent,
+        &format!("x{}", game_shop.quantity),
+        CrystalRect::new(429.0, 450.0, 32.0, 14.0),
+        9.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        "+",
+        CrystalRect::new(464.0, 446.0, 22.0, 22.0),
+        OverlayButton::GameShopQuantityInc,
+        game_shop.quantity < GAME_SHOP_QUANTITY_MAX,
+    );
 
-    let class = ui.player.class_name.as_deref().unwrap_or("");
     let buy_enabled = game_shop.buy_enabled(ui.player.gold, ui.player.credit, class);
-    overlay_button(parent, "Buy", OverlayButton::GameShopBuy, buy_enabled);
+    overlay_absolute_button(
+        parent,
+        "Buy",
+        CrystalRect::new(492.0, 446.0, 82.0, 22.0),
+        OverlayButton::GameShopBuy,
+        buy_enabled,
+    );
     if let Some(reason) = game_shop.buy_disabled_reason(ui.player.gold, ui.player.credit, class) {
-        body(parent, &format!("Buy disabled: {reason}"));
+        overlay_text_at(
+            parent,
+            &format!("Buy: {reason}"),
+            CrystalRect::new(15.0, 198.0, 120.0, 32.0),
+            8.0,
+            Color::srgba(0.85, 0.65, 0.35, 1.0),
+        );
     }
-    overlay_button(parent, "Close", OverlayButton::CloseGameShop, true);
+    overlay_absolute_button(
+        parent,
+        "<",
+        CrystalRect::new(600.0, 446.0, 24.0, 22.0),
+        OverlayButton::GameShopPagePrev,
+        page > 0,
+    );
+    overlay_text_at(
+        parent,
+        &format!("{}/{}", page + 1, page_count),
+        CrystalRect::new(626.0, 450.0, 32.0, 14.0),
+        8.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        ">",
+        CrystalRect::new(660.0, 446.0, 24.0, 22.0),
+        OverlayButton::GameShopPageNext,
+        page + 1 < page_count,
+    );
+}
+
+fn spawn_game_shop_product(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    entry: &crate::game_shop::GameShopEntry,
+    rect: CrystalRect,
+    selected: bool,
+    enabled: bool,
+) {
+    let mut card = parent.spawn((
+        OverlayGameShopProduct,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(if selected {
+            Color::srgba(0.42, 0.28, 0.08, 0.92)
+        } else if enabled {
+            Color::srgba(0.12, 0.08, 0.04, 0.86)
+        } else {
+            BUTTON_DISABLED
+        }),
+    ));
+    if enabled {
+        card.insert((
+            Button,
+            OverlayButton::SelectGameShopGood(entry.game_shop_index),
+        ));
+    }
+    card.with_children(|cell| {
+        overlay_text_at(
+            cell,
+            &short_name(&entry.item_name, &entry.item_index.to_string()),
+            CrystalRect::new(5.0, 5.0, 115.0, 15.0),
+            9.0,
+            if selected { GOLD } else { TEXT },
+        );
+        if let (Some(asset_server), Ok(icon)) = (asset_server, u16::try_from(entry.image)) {
+            if let Some(path) = item_icon_path(icon) {
+                spawn_static_overlay_sprite(
+                    cell,
+                    asset_server,
+                    path,
+                    CrystalRect::new(42.0, 27.0, 40.0, 40.0),
+                );
+            }
+        }
+        overlay_text_at(
+            cell,
+            &format!("Gold {}", entry.gold_price),
+            CrystalRect::new(6.0, 78.0, 113.0, 14.0),
+            8.0,
+            TEXT,
+        );
+        overlay_text_at(
+            cell,
+            &format!("Credit {}", entry.credit_price),
+            CrystalRect::new(6.0, 94.0, 113.0, 14.0),
+            8.0,
+            TEXT,
+        );
+        overlay_text_at(
+            cell,
+            &format!("Stock {}  x{}", entry.stock_label(), entry.count.max(1)),
+            CrystalRect::new(6.0, 110.0, 113.0, 14.0),
+            8.0,
+            TEXT,
+        );
+        if selected {
+            overlay_text_at(
+                cell,
+                "SELECTED",
+                CrystalRect::new(6.0, 128.0, 113.0, 13.0),
+                8.0,
+                GOLD,
+            );
+        }
+    });
 }
 
 fn render_storage(
     parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
     storage: &StorageModel,
+    storage_ui: &StorageUiState,
     inventory: &InventoryModel,
     _state: &NativePlayerUiState,
 ) {
-    title(parent, "Warehouse (Storage)");
-    let size = if storage.size == 0 {
-        STORAGE_BASE_SIZE
-    } else {
-        storage.size
+    let Some(asset_server) = asset_server else {
+        return;
     };
-    body(
+    spawn_overlay_frame(
         parent,
-        &format!(
-            "Bag Gold: {}  Storage: {}/{}  Expanded: {}",
-            inventory.gold,
-            storage.storage_occupied(),
-            size,
-            if storage.has_expanded { "Yes" } else { "No" }
-        ),
+        asset_server,
+        "original-ui/Prguse/586.png",
+        388.0,
+        330.0,
     );
-    if storage.has_expanded && storage.expiry != 0 {
-        body(parent, &format!("Expanded expiry: {}", storage.expiry));
-    }
-    if storage.has_password {
-        let status = if storage.unlocked {
-            "Unlocked"
-        } else {
-            "Locked"
-        };
-        body(parent, &format!("Password: {} [{}]", "*".repeat(4), status));
-        if !storage.unlocked {
-            body(
+    let page = storage.page(storage_ui.cursor.page);
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Title",
+        if page.page == 0 { 743 } else { 744 },
+        if page.page == 0 { 743 } else { 744 },
+        744,
+        CrystalRect::new(8.0, 36.0, 72.0, 20.0),
+        OverlayButton::StoragePage(0),
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Title",
+        if page.page == 1 { 745 } else { 746 },
+        if page.page == 1 { 745 } else { 746 },
+        746,
+        CrystalRect::new(80.0, 36.0, 72.0, 20.0),
+        OverlayButton::StoragePage(1),
+        storage.has_expanded,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        CrystalRect::new(363.0, 3.0, 24.0, 21.0),
+        OverlayButton::CloseStorage,
+    );
+
+    for (offset, slot) in page.slots.iter().enumerate() {
+        let column = offset % 10;
+        let row = offset / 10;
+        let rect = CrystalRect::new(
+            9.0 + column as f32 * 37.0,
+            60.0 + row as f32 * 33.0,
+            32.0,
+            30.0,
+        );
+        if let Some(item) = slot.item {
+            let selected = storage_ui.storage_selection
+                == slot.unique_id.map(|unique_id| StorageItemSelection {
+                    slot: slot.slot,
+                    unique_id,
+                });
+            overlay_absolute_item_button(
                 parent,
-                &format!(
-                    "Enter password: {}",
-                    storage_password_display(&storage.password_draft)
-                ),
+                asset_server,
+                item,
+                rect,
+                OverlayButton::SelectStorage(slot.slot),
+                !slot.locked && item.unique_id.is_some(),
             );
-            let unlock_enabled = storage_unlock_enabled(storage);
-            parent
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(4.0),
+            if selected {
+                overlay_text_at(parent, "▶", rect, 10.0, GOLD);
+            }
+        } else {
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(rect.left),
+                    top: Val::Px(rect.top),
+                    width: Val::Px(rect.width),
+                    height: Val::Px(rect.height),
                     ..default()
-                })
-                .with_children(|row| {
-                    overlay_button(row, "Unlock", OverlayButton::StorageUnlock, unlock_enabled);
-                });
-            body(parent, "Locked: deposit/withdraw disabled until unlocked.");
+                },
+                BackgroundColor(if slot.locked {
+                    Color::srgba(0.20, 0.16, 0.11, 0.70)
+                } else {
+                    Color::srgba(0.06, 0.04, 0.02, 0.35)
+                }),
+            ));
         }
-    } else {
-        body(parent, "No password set.");
     }
-    // Bag section for deposit
-    body(parent, "Bag (Deposit):");
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            flex_wrap: bevy::ui::FlexWrap::Wrap,
-            column_gap: Val::Px(2.0),
-            row_gap: Val::Px(2.0),
-            ..default()
-        })
-        .with_children(|grid| {
-            for slot in 0..8 {
-                let label_opt = inventory
-                    .items_in(0)
-                    .iter()
-                    .find(|i| i.slot == slot)
-                    .map(|item| {
-                        let l = short_name(&item.name, &item.key);
-                        if item.quantity > 1 {
-                            format!("{} x{}", l, item.quantity)
-                        } else {
-                            l
-                        }
-                    });
-                if let Some(label) = label_opt {
-                    let is_selected = storage.selected_bag_slot == Some(slot);
-                    let display = if is_selected {
-                        format!("▶{}", label)
-                    } else {
-                        label
-                    };
-                    overlay_button(grid, &display, OverlayButton::SelectBagForStore(slot), true);
-                } else {
-                    overlay_button(grid, "--", OverlayButton::SelectBagForStore(slot), false);
-                }
-            }
-        });
-    // Storage grid
-    body(
-        parent,
-        format!("Storage (Withdraw) {} slots:", size).as_str(),
-    );
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            flex_wrap: bevy::ui::FlexWrap::Wrap,
-            column_gap: Val::Px(2.0),
-            row_gap: Val::Px(2.0),
-            ..default()
-        })
-        .with_children(|grid| {
-            for slot in 0..size.min(16) as u32 {
-                let label_opt = storage.item_in_storage(slot).map(|item| {
-                    let l = short_name(&item.name, &item.key);
-                    if item.quantity > 1 {
-                        format!("{} x{}", l, item.quantity)
-                    } else {
-                        l
-                    }
-                });
-                if let Some(label) = label_opt {
-                    let is_selected = storage.selected_storage_slot == Some(slot);
-                    let display = if is_selected {
-                        format!("▶{}", label)
-                    } else {
-                        label
-                    };
-                    overlay_button(grid, &display, OverlayButton::SelectStorage(slot), true);
-                } else {
-                    overlay_button(grid, "--", OverlayButton::SelectStorage(slot), true);
-                }
-            }
-            if size > 16 {
-                body(grid, &format!("... +{} slots", size - 16));
-            }
-        });
-    // Deposit / Withdraw buttons
-    let deposit_enabled = storage_deposit_enabled(storage, inventory);
-    let withdraw_enabled = storage_withdraw_enabled(storage, inventory);
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                "Deposit →",
-                OverlayButton::StorageDeposit,
-                deposit_enabled,
-            );
-            overlay_button(
-                row,
-                "← Withdraw",
-                OverlayButton::StorageWithdraw,
-                withdraw_enabled,
-            );
-        });
-    // Password management
-    body(parent, "Password Management:");
-    body(
+
+    overlay_text_at(
         parent,
         &format!(
-            "New: {}  Confirm: {}",
-            storage_password_display(&storage.new_password_draft),
-            storage_password_display(&storage.confirm_password_draft)
+            "{}/{}  Page {}/{}",
+            storage.storage_occupied(),
+            storage.effective_size(),
+            page.page + 1,
+            page.page_count
         ),
+        CrystalRect::new(8.0, 310.0, 240.0, 16.0),
+        9.0,
+        TEXT,
     );
-    let set_enabled = storage_set_password_enabled(storage);
-    let remove_enabled = storage_remove_password_enabled(storage);
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                "Set Password",
-                OverlayButton::StorageSetPassword,
-                set_enabled,
-            );
-            overlay_button(
-                row,
-                "Remove Password",
-                OverlayButton::StorageRemovePassword,
-                remove_enabled,
-            );
-        });
-    // Expansion
-    let expand_enabled = storage_expand_enabled(storage, inventory.gold);
-    body(
+
+    overlay_text_at(
         parent,
-        &format!("Expand Cost: {} Gold", STORAGE_EXPAND_COST),
+        "Bag items",
+        CrystalRect::new(400.0, 8.0, 200.0, 18.0),
+        11.0,
+        GOLD,
     );
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            overlay_button(
-                row,
-                "Expand (10 days)",
-                OverlayButton::StorageExpand,
-                expand_enabled,
-            );
-        });
-    overlay_button(parent, "Close", OverlayButton::CloseStorage, true);
+    for (row, item) in inventory
+        .items_in(0)
+        .into_iter()
+        .filter(|item| item.unique_id.is_some())
+        .take(8)
+        .enumerate()
+    {
+        let selected = storage_ui.bag_selection
+            == item.unique_id.map(|unique_id| StorageItemSelection {
+                slot: item.slot,
+                unique_id,
+            });
+        overlay_compact_item_button(
+            parent,
+            Some(asset_server),
+            item.icon,
+            &format!(
+                "{}{} x{}",
+                if selected { "▶" } else { "" },
+                short_name(&item.name, &item.key),
+                item.quantity
+            ),
+            OverlayButton::SelectBagForStore(item.slot),
+            true,
+        );
+        let _ = row;
+    }
+
+    let deposit_enabled = storage_ui.bag_selection.is_some_and(|selection| {
+        storage_deposit_enabled_for_selection(storage, inventory, selection)
+    });
+    let withdraw_enabled = storage_ui.storage_selection.is_some_and(|selection| {
+        storage_withdraw_enabled_for_selection(storage, inventory, selection)
+    });
+    overlay_absolute_button(
+        parent,
+        "Deposit →",
+        CrystalRect::new(400.0, 280.0, 90.0, 24.0),
+        OverlayButton::StorageDeposit,
+        deposit_enabled,
+    );
+    overlay_absolute_button(
+        parent,
+        "← Withdraw",
+        CrystalRect::new(495.0, 280.0, 90.0, 24.0),
+        OverlayButton::StorageWithdraw,
+        withdraw_enabled,
+    );
+    overlay_absolute_button(
+        parent,
+        if storage.has_password && !storage.unlocked {
+            "Unlock"
+        } else if storage.has_password {
+            "Remove password"
+        } else {
+            "Set password"
+        },
+        CrystalRect::new(400.0, 310.0, 130.0, 24.0),
+        if storage.has_password && !storage.unlocked {
+            OverlayButton::StorageUnlock
+        } else if storage.has_password {
+            OverlayButton::StorageRemovePassword
+        } else {
+            OverlayButton::StorageSetPassword
+        },
+        if storage.has_password && !storage.unlocked {
+            storage_unlock_enabled(storage)
+        } else if storage.has_password {
+            storage_remove_password_enabled(storage)
+        } else {
+            storage_set_password_enabled(storage)
+        },
+    );
+    overlay_absolute_button(
+        parent,
+        &format!("Expand {}G", STORAGE_EXPAND_COST),
+        CrystalRect::new(535.0, 310.0, 100.0, 24.0),
+        OverlayButton::StorageExpand,
+        storage_expand_enabled(storage, inventory.gold),
+    );
 }
 
 fn spawn_invisible_overlay_button(
@@ -4941,7 +7399,7 @@ fn render_options(
     let Some(asset_server) = asset_server else {
         return;
     };
-    let options = core.options_draft.as_ref().unwrap_or(&core.options);
+    let options = &core.options;
     spawn_overlay_frame(
         parent,
         asset_server,
@@ -4957,38 +7415,156 @@ fn render_options(
         361,
         362,
         CrystalRect::new(233.0, 5.0, 24.0, 21.0),
-        // Crystal applies local option changes immediately. The shared reducer
-        // stages them, so the source close button commits the draft.
-        OverlayButton::OptionsApply,
+        OverlayButton::CloseOptions,
     );
 
-    // These rows are part of Crystal's exact option frame. Their backing
-    // preferences do not exist in the shared cross-platform UiState yet, so
-    // render the source-default state without attaching a deceptive hit box.
-    // Audio remains live below because it is already shared and persisted.
-    for (library, left_index, right_index, top) in [
-        ("Prguse2", 450, 455, 68.0),  // skill activation mode
-        ("Prguse2", 458, 459, 93.0),  // skill bar
-        ("Prguse2", 458, 459, 118.0), // effects
-        ("Prguse2", 458, 459, 143.0), // drop names
-        ("Prguse2", 458, 459, 168.0), // actor names
-        ("Prguse2", 464, 465, 193.0), // HP display mode
-        ("Prguse2", 456, 461, 271.0), // observer mode
-        ("Title", 853, 848, 296.0),   // movement style
+    use mir2_ui_core::state::UiCrystalOption;
+    for (
+        option,
+        value,
+        library,
+        selected_on,
+        unselected_on,
+        selected_off,
+        unselected_off,
+        on_pressed,
+        off_pressed,
+        top,
+    ) in [
+        (
+            UiCrystalOption::SkillMode,
+            options.skill_mode,
+            "Prguse2",
+            452,
+            450,
+            453,
+            455,
+            451,
+            454,
+            68.0,
+        ),
+        (
+            UiCrystalOption::SkillBar,
+            options.skill_bar,
+            "Prguse2",
+            458,
+            456,
+            459,
+            461,
+            457,
+            460,
+            93.0,
+        ),
+        (
+            UiCrystalOption::Effect,
+            options.effect,
+            "Prguse2",
+            458,
+            456,
+            459,
+            461,
+            457,
+            460,
+            118.0,
+        ),
+        (
+            UiCrystalOption::DropView,
+            options.drop_view,
+            "Prguse2",
+            458,
+            456,
+            459,
+            461,
+            457,
+            460,
+            143.0,
+        ),
+        (
+            UiCrystalOption::NameView,
+            options.name_view,
+            "Prguse2",
+            458,
+            456,
+            459,
+            461,
+            457,
+            460,
+            168.0,
+        ),
+        (
+            UiCrystalOption::HpView,
+            options.hp_view,
+            "Prguse2",
+            464,
+            462,
+            465,
+            467,
+            463,
+            466,
+            193.0,
+        ),
+        (
+            UiCrystalOption::NewMove,
+            options.new_move,
+            "Title",
+            853,
+            851,
+            848,
+            850,
+            853,
+            850,
+            296.0,
+        ),
     ] {
-        spawn_static_overlay_sprite(
+        let on_index = if value { selected_on } else { unselected_on };
+        let off_index = if value { selected_off } else { unselected_off };
+        spawn_overlay_crystal_button(
             parent,
             asset_server,
-            format!("original-ui/{library}/{left_index}.png"),
+            library,
+            on_index,
+            on_index,
+            on_pressed,
             CrystalRect::new(159.0, top, 36.0, 17.0),
+            OverlayButton::SetCrystalOption(option, true),
         );
-        spawn_static_overlay_sprite(
+        spawn_overlay_crystal_button(
             parent,
             asset_server,
-            format!("original-ui/{library}/{right_index}.png"),
+            library,
+            off_index,
+            off_index,
+            off_pressed,
             CrystalRect::new(201.0, top, 36.0, 17.0),
+            OverlayButton::SetCrystalOption(option, false),
         );
     }
+
+    let observe_enabled = core.observe_request_pending.is_none();
+    let observe_on = if core.observe_allowed { 458 } else { 456 };
+    let observe_off = if core.observe_allowed { 459 } else { 461 };
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Prguse2",
+        observe_on,
+        observe_on,
+        457,
+        CrystalRect::new(159.0, 271.0, 36.0, 17.0),
+        OverlayButton::OptionsObserve(true),
+        observe_enabled,
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Prguse2",
+        observe_off,
+        observe_off,
+        460,
+        CrystalRect::new(201.0, 271.0, 36.0, 17.0),
+        OverlayButton::OptionsObserve(false),
+        observe_enabled,
+    );
 
     let sound_volume = if options.sound_enabled {
         options.sound_volume
@@ -5033,10 +7609,29 @@ fn short_name(name: &str, key: &str) -> String {
     let mut chars = source.chars();
     let taken: String = chars.by_ref().take(8).collect();
     if chars.next().is_some() {
-        format!("{taken}…")
+        // The bundled Crystal bitmap font has no U+2026 glyph. Keep the
+        // truncation marker ASCII so product names never end in a tofu box.
+        format!("{taken}..")
     } else {
         taken
     }
+}
+
+fn short_slot_name(name: &str, key: &str) -> String {
+    let source = if name.trim().is_empty() { key } else { name };
+    let mut chars = source.chars();
+    let taken: String = chars.by_ref().take(4).collect();
+    if chars.next().is_some() {
+        format!("{taken}.")
+    } else {
+        taken
+    }
+}
+
+fn inventory_cell_stack_label(item: &ItemModel) -> String {
+    (item.quantity > 1)
+        .then(|| format!("x{}", item.quantity))
+        .unwrap_or_default()
 }
 
 fn title(parent: &mut ChildSpawnerCommands, text: &str) {
@@ -5074,6 +7669,7 @@ fn overlay_button(
             padding: UiRect::all(Val::Px(3.0)),
             justify_content: JustifyContent::FlexStart,
             align_items: AlignItems::Center,
+            overflow: Overflow::clip(),
             ..default()
         },
         BackgroundColor(if enabled { BUTTON_BG } else { BUTTON_DISABLED }),
@@ -5093,6 +7689,7 @@ fn overlay_button(
             } else {
                 Color::srgba(0.8, 0.8, 0.8, 0.5)
             }),
+            TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ));
     });
 }
@@ -5102,9 +7699,30 @@ mod tests {
     use super::*;
     use crate::mail::MailMessage;
     use crate::shop::ShopGood;
+    use bevy::asset::{AssetApp, AssetPlugin};
 
     #[test]
-    fn options_adapter_dispatch_queues_typed_apply_effects() {
+    fn compact_labels_use_supported_ascii_and_bag_cells_hide_durability() {
+        assert_eq!(short_name("DestructionDrug", "fallback"), "Destruct..");
+        assert_eq!(short_slot_name("Potion", "fallback"), "Poti.");
+
+        let durable = ItemModel {
+            quantity: 1,
+            durability_current: Some(400),
+            durability_max: Some(400),
+            ..default()
+        };
+        assert_eq!(inventory_cell_stack_label(&durable), "");
+
+        let stacked = ItemModel {
+            quantity: 12,
+            ..default()
+        };
+        assert_eq!(inventory_cell_stack_label(&stacked), "x12");
+    }
+
+    #[test]
+    fn options_adapter_applies_immediately_and_close_does_not_roll_back() {
         let mut state = NativePlayerUiState::default();
         let mut effects = UiEffectQueue::default();
         dispatch_ui_action(
@@ -5120,22 +7738,18 @@ mod tests {
         dispatch_ui_action(
             &mut state.core,
             &mut effects,
-            mir2_ui_core::action::UiAction::ApplyOptions,
+            mir2_ui_core::action::UiAction::ClosePanel,
         );
         assert_eq!(state.core.options.music_volume, 25);
         assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::None);
         let effects = effects.drain();
-        assert_eq!(effects.len(), 3);
+        assert_eq!(effects.len(), 2);
         assert!(effects.iter().any(|effect| matches!(
             effect,
             mir2_ui_core::effect::UiEffect::ApplyAudioSettings {
                 music_volume: 25,
                 ..
             }
-        )));
-        assert!(effects.iter().any(|effect| matches!(
-            effect,
-            mir2_ui_core::effect::UiEffect::ApplyWindowMode { .. }
         )));
         assert!(effects.iter().any(|effect| matches!(
             effect,
@@ -5169,7 +7783,60 @@ mod tests {
             quantity: 1,
             slot,
             container,
+            ..ItemModel::default()
         }
+    }
+
+    fn init_overlay_button_test_resources(app: &mut App) {
+        let test_name = std::thread::current()
+            .name()
+            .unwrap_or("unnamed")
+            .replace(|character: char| !character.is_ascii_alphanumeric(), "-");
+        let skill_bindings_path = std::env::temp_dir().join(format!(
+            "mir2-overlay-skill-bindings-{}-{test_name}.json",
+            std::process::id()
+        ));
+        app.init_resource::<MailUiState>()
+            .init_resource::<StorageUiState>()
+            .init_resource::<ShopUiState>()
+            .init_resource::<BigMapModel>()
+            .init_resource::<BigMapGatewayIntentQueue>()
+            .init_resource::<BigMapUiState>()
+            .init_resource::<SkillBindingUi>()
+            .init_resource::<SkillModel>()
+            .insert_resource(SkillBindingPersistenceRuntime::with_config_path(
+                skill_bindings_path,
+            ));
+    }
+
+    fn overlay_render_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
+            .init_asset::<Image>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<InventoryOperationFeedback>()
+            .init_resource::<MailModel>()
+            .init_resource::<MailUiState>()
+            .init_resource::<BigMapModel>()
+            .init_resource::<BigMapUiState>()
+            .init_resource::<UiReadModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<ShopUiState>()
+            .init_resource::<GameShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<StorageUiState>()
+            .init_resource::<SkillModel>()
+            .init_resource::<SkillBindingUi>()
+            .init_resource::<SkillBindingPersistenceRuntime>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Startup, spawn_overlay_root)
+            .add_systems(Update, render_overlays);
+        app
     }
 
     fn mail_msg(id: u64, claimed: bool, locked: bool, gold: u32, items: Vec<&str>) -> MailMessage {
@@ -5201,7 +7868,217 @@ mod tests {
             count: 1,
             stock,
             panel_type: 0,
+            ..ShopGood::default()
         }
+    }
+
+    #[test]
+    fn crystal_page_helpers_keep_all_authoritative_rows_reachable() {
+        assert_eq!(native_skill_page_count(0), 1);
+        assert_eq!(native_skill_page_count(7), 1);
+        assert_eq!(native_skill_page_count(8), 2);
+        assert_eq!(native_game_shop_page_count(105), 14);
+
+        let mut model = GameShopModel::default();
+        for index in 0..105 {
+            model.items.push(crate::game_shop::GameShopEntry {
+                game_shop_index: index,
+                item_name: format!("Product {index}"),
+                ..Default::default()
+            });
+        }
+        let flattened = (0..native_game_shop_page_count(model.items.len()))
+            .flat_map(|page| native_game_shop_page_entries(&model, page))
+            .map(|entry| entry.game_shop_index)
+            .collect::<Vec<_>>();
+        assert_eq!(flattened, (0..105).collect::<Vec<_>>());
+        assert!(native_game_shop_page_entries(&model, 0).len() <= 8);
+        assert_eq!(native_game_shop_page_entries(&model, 13).len(), 1);
+    }
+
+    #[test]
+    fn native_panel_ecs_bounds_inventory_skill_and_cash_shop_at_1024x768() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Inventory;
+        app.update();
+
+        let inventory_node = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlayInventory>>()
+            .single(app.world())
+            .expect("inventory panel");
+        assert_eq!(inventory_node.width, Val::Px(316.0));
+        assert_eq!(inventory_node.height, Val::Px(236.0));
+        let inventory_viewports = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlayInventoryGridViewport>>()
+            .iter(app.world())
+            .count();
+        assert_eq!(inventory_viewports, 1);
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Skill;
+        app.update();
+        let skill_viewports = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlaySkillListViewport>>()
+            .iter(app.world())
+            .count();
+        assert_eq!(skill_viewports, 1);
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::GameShop;
+        for index in 0..105 {
+            app.world_mut().resource_mut::<GameShopModel>().items.push(
+                crate::game_shop::GameShopEntry {
+                    game_shop_index: index,
+                    item_name: format!("Product {index}"),
+                    ..Default::default()
+                },
+            );
+        }
+        app.update();
+        let shop_node = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlayGameShop>>()
+            .single(app.world())
+            .expect("cash shop panel");
+        assert_eq!(shop_node.width, Val::Px(696.0));
+        assert_eq!(shop_node.height, Val::Px(476.0));
+        let product_count = app
+            .world_mut()
+            .query_filtered::<Entity, With<OverlayGameShopProduct>>()
+            .iter(app.world())
+            .count();
+        assert_eq!(product_count, 8);
+    }
+
+    #[test]
+    fn crystal_social_panels_use_original_geometry_and_bounded_rows() {
+        assert_eq!(
+            CRYSTAL_GROUP_PANEL_RECT,
+            CrystalRect::new(396.0, 259.0, 232.0, 249.0)
+        );
+        assert_eq!(
+            CRYSTAL_GUILD_PANEL_RECT,
+            CrystalRect::new(217.0, 168.0, 590.0, 432.0)
+        );
+        assert_eq!(group_member_position(0), (16.0, 33.0));
+        assert_eq!(group_member_position(1), (16.0, 55.0));
+        assert_eq!(group_member_position(2), (116.0, 55.0));
+        assert_eq!(group_member_position(14), (116.0, 175.0));
+
+        let mut app = overlay_render_test_app();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Group;
+        }
+        app.world_mut()
+            .resource_mut::<crate::social::SocialModel>()
+            .group
+            .members = (0..crate::social::MAX_GROUP_MEMBERS)
+            .map(|index| crate::social::GroupMemberModel {
+                name: format!("Member{index}"),
+                online: true,
+                leader: index == 0,
+                ..Default::default()
+            })
+            .collect();
+        app.update();
+
+        let social_node = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlaySocial>>()
+            .single(app.world())
+            .expect("social root");
+        assert_eq!(social_node.width, Val::Px(1024.0));
+        assert_eq!(social_node.height, Val::Px(768.0));
+        let group_rows = app
+            .world_mut()
+            .query::<&OverlayButton>()
+            .iter(app.world())
+            .filter(|action| matches!(action, OverlayButton::SelectGroupMember(_)))
+            .count();
+        assert_eq!(group_rows, crate::social::MAX_GROUP_MEMBERS);
+
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Guild;
+            state.guild_left_page = GuildLeftPage::Members;
+        }
+        app.world_mut()
+            .resource_mut::<crate::social::SocialModel>()
+            .guild
+            .members = (0..25)
+            .map(|index| crate::social::GuildMemberModel {
+                name: format!("GuildMember{index}"),
+                online: true,
+                ..Default::default()
+            })
+            .collect();
+        app.update();
+        let guild_rows = app
+            .world_mut()
+            .query::<&OverlayButton>()
+            .iter(app.world())
+            .filter(|action| matches!(action, OverlayButton::SelectGuildMember(_)))
+            .count();
+        assert_eq!(guild_rows, 18);
+    }
+
+    #[test]
+    fn guild_tabs_request_the_matching_authoritative_page() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+        init_overlay_button_test_resources(&mut app);
+        app.add_systems(Update, process_overlay_buttons);
+
+        let button = app
+            .world_mut()
+            .spawn((
+                Button,
+                Interaction::Pressed,
+                OverlayButton::SelectGuildLeftPage(GuildLeftPage::Members),
+            ))
+            .id();
+        app.update();
+        app.world_mut().despawn(button);
+
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .guild_left_page,
+            GuildLeftPage::Members
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .iter()
+            .any(|intent| matches!(
+                intent,
+                NativePlayerUiIntent::GuildRequestInfo { info_type: 1 }
+            )));
     }
 
     #[test]
@@ -5239,6 +8116,36 @@ mod tests {
             }
             other => panic!("{other:?}"),
         }
+    }
+
+    #[test]
+    fn belt_mouse_intent_requires_the_current_unique_instance() {
+        let mut inventory = InventoryModel::default();
+        assert!(belt_item_use_intent(&inventory, 0).is_none());
+        inventory.items.push(ItemModel {
+            unique_id: None,
+            key: "legacy".to_owned(),
+            name: "Legacy".to_owned(),
+            quantity: 1,
+            slot: 0,
+            container: 1,
+            ..ItemModel::default()
+        });
+        assert!(belt_item_use_intent(&inventory, 0).is_none());
+        inventory.items[0].unique_id = Some(99);
+        assert!(matches!(
+            belt_item_use_intent(&inventory, 0),
+            Some(NativePlayerUiIntent::UseItem {
+                unique_id: Some(99),
+                slot: Some(0),
+                ref grid,
+                ..
+            }) if grid.as_deref() == Some("belt")
+        ));
+        // Replacing the authoritative belt model invalidates the old item
+        // identity; a previously pressed HUD node must fail closed.
+        inventory.items.clear();
+        assert!(belt_item_use_intent(&inventory, 0).is_none());
     }
 
     fn read_player_ui(_state: Res<NativePlayerUiState>) {}
@@ -5442,28 +8349,13 @@ mod tests {
     }
 
     #[test]
-    fn bigmap_zoom_and_asset_and_position() {
+    fn bigmap_zoom_is_clamped_and_retained() {
         assert_eq!(bigmap_zoom_clamped(0.1), BIGMAP_ZOOM_MIN);
         assert_eq!(bigmap_zoom_clamped(10.0), BIGMAP_ZOOM_MAX);
         assert_eq!(bigmap_zoom_in(1.0), 1.25);
         assert_eq!(bigmap_zoom_out(1.0), 0.75);
         assert_eq!(bigmap_zoom_in(BIGMAP_ZOOM_MAX), BIGMAP_ZOOM_MAX);
         assert_eq!(bigmap_zoom_out(BIGMAP_ZOOM_MIN), BIGMAP_ZOOM_MIN);
-        // Asset path for Bichon
-        assert_eq!(
-            bigmap_asset_path(Some("BichonProvince")),
-            Some("original-ui/MMap/101.png".to_owned())
-        );
-        assert_eq!(bigmap_asset_path(Some("UnknownMap")), None);
-        // Player position scales with zoom
-        let map = MapModel {
-            patches: vec![],
-            center_x: 100,
-            center_y: 200,
-        };
-        let (x1, _y1) = bigmap_player_position(&map, 1.0);
-        let (x2, _y2) = bigmap_player_position(&map, 2.0);
-        assert!(x2 > x1, "zoom should increase offset from center");
         // Close windows retains minimap and zoom
         let mut state = NativePlayerUiState {
             core: mir2_ui_core::state::UiState {
@@ -5483,6 +8375,138 @@ mod tests {
         assert!(!state.storage_open());
         assert!(!state.minimap_visible());
         assert_eq!(state.bigmap_zoom, 2.0);
+    }
+
+    fn spawn_big_map_render_test(
+        mut commands: Commands,
+        asset_server: Res<AssetServer>,
+        model: Res<BigMapModel>,
+        renderer: Res<BigMapUiState>,
+        ui: Res<UiReadModel>,
+    ) {
+        commands.spawn(Node::default()).with_children(|parent| {
+            render_bigmap(parent, Some(&asset_server), &model, &renderer, &ui);
+        });
+    }
+
+    #[test]
+    fn big_map_ecs_spawns_authoritative_image_player_and_npc_rows() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<BigMapUiState>()
+            .init_resource::<UiReadModel>()
+            .add_systems(Startup, spawn_big_map_render_test);
+
+        let mut model = BigMapModel::default();
+        model.set_current_map(1);
+        model.set_player_location(Some(1), BigMapPoint { x: 257, y: 594 });
+        model.apply_world_map_setup(false, Vec::new(), 3_000);
+        model.apply_new_map_info(
+            1,
+            crate::big_map::BigMapInfo {
+                title: "BichonProvince".to_owned(),
+                width: 700,
+                height: 700,
+                big_map: 101,
+                movements: Vec::new(),
+                npcs: vec![crate::big_map::BigMapNpc {
+                    index: 1,
+                    file_name: "NPC/00".to_owned(),
+                    name: "Village Guide".to_owned(),
+                    map_index: 1,
+                    location: BigMapPoint { x: 330, y: 270 },
+                    image: 0,
+                    rate: 0,
+                    show_on_big_map: true,
+                    big_map_icon: 0,
+                    object_id: 77,
+                    icon: 0,
+                    can_teleport_to: false,
+                }],
+            },
+        );
+        app.insert_resource(model);
+        app.update();
+
+        let world = app.world_mut();
+        let images = world
+            .query::<(&BigMapImageEntity, &ImageNode)>()
+            .iter(world)
+            .map(|(marker, image)| (marker.url.clone(), image.image.id()))
+            .collect::<Vec<_>>();
+        assert_eq!(images.len(), 1);
+        assert_eq!(images[0].0, "original-ui/MMap/101.png");
+        let asset_server = world.resource::<AssetServer>();
+        assert_eq!(
+            asset_server
+                .get_path(images[0].1)
+                .map(|path| path.path().to_string_lossy().replace('\\', "/")),
+            Some("original-ui/MMap/101.png".to_owned())
+        );
+
+        let players = world
+            .query::<(&BigMapPlayerEntity, &Node, &ImageNode)>()
+            .iter(world)
+            .map(|(marker, node, _)| (marker.location, node.left, node.top))
+            .collect::<Vec<_>>();
+        assert_eq!(players.len(), 1);
+        assert_eq!(players[0].0, BigMapPoint { x: 257, y: 594 });
+        let (player_x, player_y) = big_map_view_position(BigMapPoint { x: 257, y: 594 }, 700, 700);
+        assert_eq!(players[0].1, Val::Px(player_x - 6.0));
+        assert_eq!(players[0].2, Val::Px(player_y - 5.0));
+
+        let rows = world
+            .query::<&BigMapNpcRowEntity>()
+            .iter(world)
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].object_id, 77);
+        assert_eq!(rows[0].name, "Village Guide");
+        assert_eq!(rows[0].location, BigMapPoint { x: 330, y: 270 });
+    }
+
+    #[test]
+    fn open_big_map_requests_authoritative_info_when_map_identity_arrives_late() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<BigMapModel>()
+            .init_resource::<BigMapGatewayIntentQueue>()
+            .init_resource::<BigMapUiState>()
+            .add_systems(Update, sync_big_map_ui);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::BigMap;
+
+        app.update();
+        assert_eq!(
+            app.world().resource::<BigMapGatewayIntentQueue>().len(),
+            0,
+            "no map request may be invented before MapInformation"
+        );
+
+        app.world_mut()
+            .resource_mut::<BigMapModel>()
+            .set_current_map(1);
+        app.update();
+        let intents = app
+            .world_mut()
+            .resource_mut::<BigMapGatewayIntentQueue>()
+            .drain_intents();
+        assert_eq!(
+            intents,
+            vec![crate::big_map::BigMapGatewayIntent::RequestMapInfo { map_index: 1 }]
+        );
+
+        app.update();
+        assert_eq!(
+            app.world().resource::<BigMapGatewayIntentQueue>().len(),
+            0,
+            "the same authoritative map identity must not flood requests"
+        );
     }
 
     #[test]
@@ -5549,6 +8573,7 @@ mod tests {
             mail.mails.push(mail_msg(11, true, false, 0, vec![]));
             mail.mails.push(mail_msg(12, false, true, 100, vec![]));
         }
+        init_overlay_button_test_resources(&mut app);
         app.add_systems(Update, process_overlay_buttons);
         // Helper to press button
         fn press(app: &mut App, button: OverlayButton) {
@@ -5566,6 +8591,14 @@ mod tests {
             let mail = app.world().resource::<MailModel>();
             assert_eq!(mail.selected_id, Some(10));
             assert!(!mail.mails.iter().find(|m| m.id == 10).unwrap().read);
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiIntentQueue>()
+                .intents
+                .is_empty());
+        }
+        press(&mut app, OverlayButton::ReadMail(10));
+        {
             let intents = app
                 .world()
                 .resource::<NativePlayerUiIntentQueue>()
@@ -5910,6 +8943,7 @@ mod tests {
                 quantity: 4,
                 slot: 0,
                 container: 0,
+                ..ItemModel::default()
             },
             ItemModel {
                 unique_id: Some(43),
@@ -5918,6 +8952,7 @@ mod tests {
                 quantity: 2,
                 slot: 1,
                 container: 0,
+                ..ItemModel::default()
             },
             ItemModel {
                 unique_id: None,
@@ -5926,8 +8961,10 @@ mod tests {
                 quantity: 2,
                 slot: 3,
                 container: 0,
+                ..ItemModel::default()
             },
         ];
+        init_overlay_button_test_resources(&mut app);
         app.add_systems(Update, process_overlay_buttons);
         fn press(app: &mut App, button: OverlayButton) {
             let entity = app
@@ -5941,6 +8978,18 @@ mod tests {
         press(&mut app, OverlayButton::InspectBag(0));
         press(&mut app, OverlayButton::DropInspected);
         press(&mut app, OverlayButton::DropInspected);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .drop_confirmation
+            .is_some());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+        press(&mut app, OverlayButton::ConfirmDropInspected);
+        press(&mut app, OverlayButton::ConfirmDropInspected);
         press(&mut app, OverlayButton::SplitInspected);
         press(&mut app, OverlayButton::SplitInspected);
         press(&mut app, OverlayButton::ArmMoveInspected);
@@ -6003,6 +9052,232 @@ mod tests {
             .resource::<NativePlayerUiState>()
             .inventory_operation
             .is_none());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .drop_confirmation
+            .is_none());
+    }
+
+    #[test]
+    fn character_slots_and_item_actions_fail_closed_without_a_live_item() {
+        let mut state = NativePlayerUiState::default();
+        let inventory = InventoryModel::default();
+        state.inspect = Some(ItemInspect {
+            container: 0,
+            slot: 4,
+            key: "stale".to_owned(),
+            name: "Stale".to_owned(),
+            quantity: 1,
+        });
+
+        assert!(inspected_use_intent(&state, &inventory).is_none());
+        assert!(inspected_equip_intent(&state, &inventory).is_none());
+        assert!(inspected_remove_intent(&state, &inventory).is_none());
+        assert!(inspected_drop_confirmation(&state, &inventory).is_none());
+    }
+
+    #[test]
+    fn stale_drop_confirmation_cannot_address_a_replacement_stack() {
+        let confirmation = InventoryDropConfirmation {
+            key: "Potion".to_owned(),
+            unique_id: 7,
+            slot: 2,
+            count: 3,
+        };
+        let replacement = InventoryModel {
+            gold: 0,
+            items: vec![ItemModel {
+                unique_id: Some(8),
+                key: "Potion".to_owned(),
+                name: "Potion".to_owned(),
+                quantity: 3,
+                slot: 2,
+                container: 0,
+                ..ItemModel::default()
+            }],
+        };
+        assert!(!drop_confirmation_is_current(&confirmation, &replacement));
+    }
+
+    #[test]
+    fn skill_selection_is_local_and_clears_when_windows_close() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(SkillModel {
+                skills: vec![crate::skill_model::SkillEntry {
+                    id: 17,
+                    name: "Fire Ball".to_owned(),
+                    level: 2,
+                    key: Some("fire-ball".to_owned()),
+                    cooldown_ms: 800,
+                    mp_cost: 5,
+                }],
+                ..Default::default()
+            })
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+        init_overlay_button_test_resources(&mut app);
+        app.add_systems(Update, process_overlay_buttons);
+
+        let selected = app
+            .world_mut()
+            .spawn((Interaction::Pressed, OverlayButton::SelectSkill(17), Button))
+            .id();
+        app.update();
+        app.world_mut().despawn(selected);
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .selected_skill_id,
+            Some(17)
+        );
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .close_windows();
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .selected_skill_id,
+            None
+        );
+    }
+
+    #[test]
+    fn assigning_a_skill_key_persists_only_after_the_local_rebind_succeeds() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(SkillModel {
+                skills: vec![crate::skill_model::SkillEntry {
+                    id: 17,
+                    name: "Fire Ball".to_owned(),
+                    level: 2,
+                    key: Some("fire-ball".to_owned()),
+                    cooldown_ms: 800,
+                    mp_cost: 5,
+                }],
+                ..Default::default()
+            })
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+        init_overlay_button_test_resources(&mut app);
+        let path = app
+            .world()
+            .resource::<SkillBindingPersistenceRuntime>()
+            .config_path
+            .clone();
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("json.bak"));
+        let _ = std::fs::remove_file(path.with_extension("json.tmp"));
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Skill;
+        app.add_systems(Update, process_overlay_buttons);
+
+        for button in [
+            OverlayButton::SelectSkill(17),
+            OverlayButton::AssignSkillKey(3),
+        ] {
+            let entity = app
+                .world_mut()
+                .spawn((Interaction::Pressed, button, Button))
+                .id();
+            app.update();
+            app.world_mut().despawn(entity);
+        }
+
+        assert_eq!(
+            app.world().resource::<SkillBindingUi>().skill_for_hotkey(3),
+            Some(17)
+        );
+        let runtime = app.world().resource::<SkillBindingPersistenceRuntime>();
+        assert!(!runtime.dirty);
+        assert_eq!(
+            runtime.last_status,
+            crate::skill_binding_persistence::SkillBindingPersistStatus::Succeeded
+        );
+        let loaded = crate::skill_binding_persistence::load_skill_bindings_from_path(&path);
+        assert_eq!(loaded.bindings.skill_for_hotkey(3), Some(17));
+
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("json.bak"));
+        let _ = std::fs::remove_file(path.with_extension("json.tmp"));
+    }
+
+    #[test]
+    fn crystal_character_inventory_and_skill_page_actions_are_local_and_real() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+        init_overlay_button_test_resources(&mut app);
+        app.add_systems(Update, process_overlay_buttons);
+
+        let press = |app: &mut App, action: OverlayButton| {
+            let entity = app
+                .world_mut()
+                .spawn((Button, Interaction::Pressed, action))
+                .id();
+            app.update();
+            app.world_mut().despawn(entity);
+        };
+
+        press(
+            &mut app,
+            OverlayButton::SelectCharacterPage(CharacterPage::Stats1),
+        );
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().character_page,
+            CharacterPage::Stats1
+        );
+        press(&mut app, OverlayButton::SelectInventoryPage(1));
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().inventory_page,
+            1
+        );
+        press(&mut app, OverlayButton::SkillPageNext);
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().skill_page,
+            0,
+            "an empty authoritative skill model must not create a phantom page"
+        );
+        press(&mut app, OverlayButton::SkillPagePrev);
+        assert_eq!(app.world().resource::<NativePlayerUiState>().skill_page, 0);
     }
 
     #[test]
@@ -6042,6 +9317,7 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .toggle_npc_shop();
+        init_overlay_button_test_resources(&mut app);
         app.add_systems(Update, process_overlay_buttons);
         fn press(app: &mut App, button: OverlayButton) {
             let entity = app
@@ -6172,9 +9448,8 @@ mod tests {
         {
             let mut storage = app.world_mut().resource_mut::<StorageModel>();
             storage.items.push(item("5", "StoredItem", 4, 0));
-            storage.selected_storage_slot = Some(0);
-            storage.selected_bag_slot = None;
         }
+        press(&mut app, OverlayButton::SelectStorage(0));
         press(&mut app, OverlayButton::StorageWithdraw);
         {
             let intents = app
@@ -6208,7 +9483,7 @@ mod tests {
     }
 
     #[test]
-    fn cash_shop_selection_pages_beyond_first_24_rows_is_receipt_deduped() {
+    fn cash_shop_selection_pages_beyond_first_eight_rows_is_receipt_deduped() {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<MailComposeUi>()
@@ -6244,6 +9519,7 @@ mod tests {
                 });
             }
         }
+        init_overlay_button_test_resources(&mut app);
         app.add_systems(Update, process_overlay_buttons);
 
         fn press(app: &mut App, button: OverlayButton) {
@@ -6264,8 +9540,8 @@ mod tests {
         );
         assert_eq!(
             app.world().resource::<NativePlayerUiState>().game_shop_page,
-            1,
-            "selecting gIndex 25 must move to the second bounded page"
+            3,
+            "selecting gIndex 25 must move to the fourth Crystal 4x2 page"
         );
 
         press(&mut app, OverlayButton::GameShopBuy);
