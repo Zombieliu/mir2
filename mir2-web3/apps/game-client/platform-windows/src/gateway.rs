@@ -2245,6 +2245,9 @@ where
     let mut keepalive = tokio::time::interval(Duration::from_secs(15));
     let mut input_poll = tokio::time::interval(Duration::from_millis(8));
     let mut snapshot_log_counter: u32 = 0;
+    // The visible shell must not enter InGame until this socket has delivered
+    // a world snapshot that the render runtime actually accepted.
+    let mut connection_bootstrap_sent = false;
     loop {
         tokio::select! {
             // This remains armed through `sessionResumed` and is disabled only
@@ -2417,6 +2420,7 @@ where
                                     phase,
                                     resume_state,
                                     resume_scene_reset_sent,
+                                    &mut connection_bootstrap_sent,
                                     gate,
                                     push_world_state,
                                 )?;
@@ -2634,6 +2638,7 @@ fn handle_gateway_text_for_connection<F>(
     phase: &mut ConnectionPhase,
     resume_state: &mut NativeResumeClientState,
     resume_scene_reset_sent: &mut bool,
+    connection_bootstrap_sent: &mut bool,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
     push_world_state: &mut F,
 ) -> Result<InboundDisposition, String>
@@ -2727,22 +2732,27 @@ where
         push_world_state,
     )?;
 
-    if *phase == ConnectionPhase::Resumed
-        && is_world_snapshot
-        && snapshot_ingest == WorldSnapshotIngestOutcome::Applied
-    {
+    if is_world_snapshot && snapshot_ingest == WorldSnapshotIngestOutcome::Applied {
         let value: Value = serde_json::from_str(text)
             .map_err(|error| format!("invalid gateway payload: {error}"))?;
         let payload = value.get("payload").unwrap_or(&Value::Null);
-        if let Some(character) = resumed_character_from_snapshot(
-            payload,
-            resume_state.character_index.or(context.character_index),
-        ) {
-            let _ = shell_events.send(ShellGatewayEvent::PlayerBootstrapped { character });
+        if !*connection_bootstrap_sent {
+            if let Some(character) = resumed_character_from_snapshot(
+                payload,
+                resume_state.character_index.or(context.character_index),
+            ) {
+                let _ = shell_events.send(ShellGatewayEvent::PlayerBootstrapped { character });
+                *connection_bootstrap_sent = true;
+            }
         }
-        *phase = ConnectionPhase::Normal;
-        resume_state.reconnect_started_at = None;
-        resume_state.retry_attempt = 0;
+        if *phase == ConnectionPhase::Resumed {
+            *phase = ConnectionPhase::Normal;
+            resume_state.reconnect_started_at = None;
+            resume_state.retry_attempt = 0;
+        }
+    }
+    if is_world_snapshot && snapshot_ingest == WorldSnapshotIngestOutcome::Backpressured {
+        return Ok(InboundDisposition::Quarantined);
     }
     Ok(InboundDisposition::Applied)
 }
@@ -3478,20 +3488,11 @@ fn dispatch_shell_event(
                 }),
             })
         }
-        InboundEvent::Packet(PacketEvent::UserInformation(info)) => match context.character_index {
-            Some(index) => Some(ShellGatewayEvent::PlayerBootstrapped {
-                character: CharacterSummary::new(
-                    index,
-                    info.name.as_deref().unwrap_or("Character"),
-                    u16::try_from(info.level.unwrap_or(1)).unwrap_or(1),
-                    info.class_name.as_deref().unwrap_or("Unknown"),
-                    info.gender.as_deref().unwrap_or("Unknown"),
-                ),
-            }),
-            None => Some(ShellGatewayEvent::OperationFailure {
-                message: "received UserInformation before a character was selected".to_owned(),
-            }),
-        },
+        // UserInformation can arrive before the render runtime accepts its
+        // opening world snapshot. Entering InGame here would release keyboard
+        // input against an empty/stale scene. The connection wrapper emits the
+        // bootstrap only after an Applied worldSnapshot.
+        InboundEvent::Packet(PacketEvent::UserInformation(_)) => None,
         InboundEvent::Packet(PacketEvent::Other { packet, payload }) => match packet.as_str() {
             "NewCharacter" => Some(ShellGatewayEvent::OperationFailure {
                 message: "character creation failed".to_owned(),
@@ -7333,17 +7334,20 @@ mod tests {
             assert_eq!(effect.packet, "ObjectProjectile");
             assert_eq!(effect.sequence, 1);
 
-            let bootstrap = shell_receiver
+            let bootstraps = shell_receiver
                 .try_iter()
-                .find_map(|event| match event {
+                .filter_map(|event| match event {
                     ShellGatewayEvent::PlayerBootstrapped { character } => Some(character),
                     _ => None,
                 })
-                .expect("post-resume PlayerBootstrapped event");
-            assert_eq!(bootstrap.index, 3);
-            assert_eq!(bootstrap.name, "post-resume-authority");
-            assert_eq!(bootstrap.level, 8);
-            assert_eq!(bootstrap.class_name, "Wizard");
+                .collect::<Vec<_>>();
+            assert_eq!(bootstraps.len(), 2);
+            assert_eq!(bootstraps[0].index, 3);
+            assert_eq!(bootstraps[0].name, "initial-authority");
+            assert_eq!(bootstraps[1].index, 3);
+            assert_eq!(bootstraps[1].name, "post-resume-authority");
+            assert_eq!(bootstraps[1].level, 8);
+            assert_eq!(bootstraps[1].class_name, "Wizard");
 
             command_sender
                 .send(GatewayCommand::Shutdown)
@@ -7638,7 +7642,7 @@ mod tests {
     }
 
     #[test]
-    fn shell_dispatch_uses_real_login_roster_and_selected_character() {
+    fn shell_dispatch_uses_real_login_roster_but_waits_for_applied_world_snapshot() {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
@@ -7668,10 +7672,98 @@ mod tests {
         )
         .expect("user event");
         dispatch_shell_event(&user, &context, &sender);
-        match receiver.try_recv().expect("bootstrap event") {
+        assert!(
+            receiver.try_recv().is_err(),
+            "UserInformation must not enter InGame before runtime accepts a world snapshot"
+        );
+    }
+
+    #[test]
+    fn initial_bootstrap_waits_until_world_snapshot_ingest_is_applied() {
+        let context = GatewaySessionContext {
+            account_id: Some("player-one".to_owned()),
+            character_index: Some(3),
+        };
+        let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
+        let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
+        let mut snapshot_log_counter = 0;
+        let mut gameplay_adapter = NativeGameplayAdapter::default();
+        let mut last_world_payload = None;
+        let mut last_wallet = None;
+        let mut ui_cursor = NativeUiPlayerCursor::default();
+        let mut in_flight_claim_mail_id = None;
+        let mut send_mail_in_flight = false;
+        let mut pending_mail_feedback = VecDeque::new();
+        let mut skill_cursor = SkillPacketCursor::default();
+        let mut social_cursor = SocialModel::default();
+        let mut phase = ConnectionPhase::Normal;
+        let mut resume_state = NativeResumeClientState::default();
+        let mut resume_scene_reset_sent = false;
+        let mut connection_bootstrap_sent = false;
+        let mut game_shop_receipt_gate = GameShopReceiptGate::default();
+        let runtime_accepts = std::cell::Cell::new(false);
+        let mut push_world_state = |_: String| runtime_accepts.get();
+        let snapshot = loopback_world_snapshot("initial-authority", 30, 40, 8).to_string();
+
+        assert_eq!(
+            handle_gateway_text_for_connection(
+                &snapshot,
+                &mut snapshot_log_counter,
+                &context,
+                &shell_sender,
+                &mut gameplay_adapter,
+                &gameplay_sender,
+                &mut last_world_payload,
+                &mut last_wallet,
+                &mut ui_cursor,
+                &mut in_flight_claim_mail_id,
+                &mut send_mail_in_flight,
+                &mut pending_mail_feedback,
+                &mut skill_cursor,
+                &mut social_cursor,
+                &mut phase,
+                &mut resume_state,
+                &mut resume_scene_reset_sent,
+                &mut connection_bootstrap_sent,
+                &mut game_shop_receipt_gate,
+                &mut push_world_state,
+            )
+            .expect("backpressured opening snapshot"),
+            InboundDisposition::Quarantined
+        );
+        assert!(!connection_bootstrap_sent);
+        assert!(shell_receiver.try_recv().is_err());
+
+        runtime_accepts.set(true);
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+
+        assert!(connection_bootstrap_sent);
+        match shell_receiver.try_recv().expect("bootstrap after Applied") {
             ShellGatewayEvent::PlayerBootstrapped { character } => {
                 assert_eq!(character.index, 3);
-                assert_eq!(character.name, "Alice");
+                assert_eq!(character.name, "initial-authority");
             }
             other => panic!("unexpected event: {other:?}"),
         }
