@@ -13,8 +13,7 @@ public static class ExclusiveOutput
             ?? throw new DiscoveryException(
                 "OUTPUT_PATH_INVALID",
                 $"No output directory for '{outputPath}'.");
-        Directory.CreateDirectory(directory);
-        PathSafety.EnsureExistingPathComponentsAreNotReparse(directory);
+        EnsureSafeDirectory(directory);
         PathSafety.ValidateRelativeSourcePath(Path.GetFileName(fullPath));
 
         if (File.Exists(fullPath) || Directory.Exists(fullPath))
@@ -24,48 +23,74 @@ public static class ExclusiveOutput
                 $"Refusing to overwrite existing output '{fullPath}'.");
         }
 
-        var created = false;
+        var temporaryPath = Path.Combine(
+            directory,
+            $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
+        Exception? failure = null;
         try
         {
             using var stream = new FileStream(
-                fullPath,
+                temporaryPath,
                 FileMode.CreateNew,
                 FileAccess.Write,
                 FileShare.None,
                 bufferSize: 64 * 1024,
                 FileOptions.WriteThrough);
-            created = true;
             var bytes = Utf8WithoutBom.GetBytes(contents);
             stream.Write(bytes);
             stream.Flush(flushToDisk: true);
+            stream.Dispose();
+            File.Move(temporaryPath, fullPath, overwrite: false);
+            return;
         }
-        catch (IOException exception) when (!created && (File.Exists(fullPath) || Directory.Exists(fullPath)))
+        catch (IOException exception) when (File.Exists(fullPath) || Directory.Exists(fullPath))
         {
-            throw new DiscoveryException(
+            failure = new DiscoveryException(
                 "OUTPUT_ALREADY_EXISTS",
                 $"Refusing to overwrite existing output '{fullPath}': {exception.Message}");
         }
         catch (Exception exception)
         {
-            string? cleanupFailure = null;
-            if (created && File.Exists(fullPath))
-            {
-                try
-                {
-                    File.Delete(fullPath);
-                }
-                catch (Exception cleanupException)
-                {
-                    cleanupFailure = cleanupException.Message;
-                }
-            }
-
-            var suffix = cleanupFailure is null
-                ? string.Empty
-                : $" Partial output cleanup also failed: {cleanupFailure}";
-            throw new DiscoveryException(
+            failure = new DiscoveryException(
                 "OUTPUT_WRITE_FAILED",
-                $"Failed to create and flush output '{fullPath}': {exception.Message}.{suffix}");
+                $"Failed to create and flush output '{fullPath}': {exception.Message}.");
         }
+
+        string? cleanupFailure = null;
+        if (File.Exists(temporaryPath))
+        {
+            try
+            {
+                File.Delete(temporaryPath);
+            }
+            catch (Exception cleanupException)
+            {
+                cleanupFailure = cleanupException.Message;
+            }
+        }
+        if (cleanupFailure is not null)
+        {
+            throw new DiscoveryException(
+                "OUTPUT_CLEANUP_FAILED",
+                $"{failure?.Message} Temporary output '{temporaryPath}' cleanup also failed: {cleanupFailure}");
+        }
+        throw failure ?? new DiscoveryException(
+            "OUTPUT_WRITE_FAILED",
+            $"Failed to create output '{fullPath}' for an unknown reason.");
+    }
+
+    private static void EnsureSafeDirectory(string directory)
+    {
+        var nearestExisting = directory;
+        while (!Directory.Exists(nearestExisting) && !File.Exists(nearestExisting))
+        {
+            nearestExisting = Path.GetDirectoryName(nearestExisting)
+                ?? throw new DiscoveryException(
+                    "OUTPUT_PATH_INVALID",
+                    $"Cannot locate an existing ancestor for output directory '{directory}'.");
+        }
+        PathSafety.EnsureExistingPathComponentsAreNotReparse(nearestExisting);
+        Directory.CreateDirectory(directory);
+        PathSafety.EnsureExistingPathComponentsAreNotReparse(directory);
     }
 }

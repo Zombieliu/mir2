@@ -55,9 +55,9 @@ dotnet run --project tools/crystal-semantic-candidates/CrystalSemanticCandidates
 ```
 
 Unknown arguments and all source-root overrides are rejected.
-The output path is opened with create-new semantics, its file contents are
-flushed before success is reported, and it is never overwritten. A pre-existing
-file or directory fails with
+The complete output is first flushed to a random temporary file in the same
+directory and then published with `File.Move(..., overwrite: false)`. It is
+never overwritten. A pre-existing file or directory fails with
 `OUTPUT_ALREADY_EXISTS`; remove or choose it explicitly rather than replacing
 evidence in place.
 
