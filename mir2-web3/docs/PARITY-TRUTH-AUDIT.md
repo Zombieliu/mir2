@@ -25,9 +25,9 @@ the boundaries of the evidence that already exists.
 
 | Claim | Current value | Evidence boundary |
 |---|---|---|
-| Ledger inventory | inventoryComplete=false | The complete Crystal capability inventory and hashed source-inventory report required by the ledger are not complete. |
+| Ledger inventory | inventoryComplete=false | A hashed source-file snapshot is not a semantic denominator. Source-file inventory and semantic-leaf inventory are separate gates; the latter is not complete. |
 | Global completion percentage | **Undefined** | There is no complete denominator. Do not publish 100%, roughly 90%, or any other global estimate. |
-| Bichon functional slice | Directly evidenced, scoped | Login/character/start, Bichon entry, movement/collision/AOI, the tested quest/combat/drop/pickup/reward path, and save/relogin have direct test/source evidence. This is a vertical slice, not all Crystal semantics. |
+| Bichon functional slice | Directly evidenced, scoped | Login/character/start, Bichon entry, movement/collision/AOI, and the tested quest/combat/reward path have direct test/source evidence. Shared player-drop UID fidelity and disconnect/save atomicity remain active P0 blockers, so drop/pickup/save coverage must not be generalized beyond the exact tested fixtures. |
 | Shared Zone functional slice | Directly evidenced, scoped | Zone movement, authoritative transform/save, AOI, presence, chat, monster defeat and drop ownership have direct tests. This does not prove production deployment, cross-process recovery, or every zone rule. |
 | Windows native functional slice | Directly evidenced, scoped | Native shell/protocol/gateway/UI wiring and the tested player flow exist. This is not formal visual, real-hardware, signed-package, or human acceptance. |
 | Automated global P0 | No direct evidence of a global zero | Scoped reports may show no P0 in their own matrix; that cannot be promoted to “global P0=0” while the ledger denominator is incomplete. |
@@ -90,7 +90,22 @@ direct evidence of the final Windows visual match, DPI behavior on real
 devices, package signing, audio/layout parity, or a human-authenticated
 play session.
 
-## Seven material P1 areas still open
+## Active P0 blockers
+
+These are correctness/truthfulness blockers for the current 100% objective,
+not optional polish:
+
+1. **The semantic denominator is not complete.** A clean, hashed list of
+   Crystal source files can establish source-file inventory only. It cannot set
+   `semanticLeafInventoryComplete=true` until every player-observable semantic
+   candidate has a reviewed disposition and is mapped to ledger leaves.
+2. **Shared player-drop identity and persistence are not yet one fail-closed
+   transaction.** Exact full-stack `UserItem` identity/metadata, Crystal's
+   fresh-item semantics for partial stacks, globally safe UID allocation, Zone
+   promotion, pickup ordering, save failure, disconnect, and relogin must be
+   proven together without lossy packet reconstruction or silent save success.
+
+## Seven material P1 areas still open after the P0 blockers
 
 The following are substantive parity areas, not cosmetic backlog items. They
 remain open until their complete ledger inventory is mapped and all leaves have
@@ -173,14 +188,17 @@ Until then, completion is a set of named ledger statuses, not a percentage.
 
 ## Shortest next path
 
-1. Finish the Crystal source inventory and publish its hash; only then can
-   inventoryComplete change from false.
-2. Convert the existing Bichon, Zone, and Windows slices into explicit ledger
+1. Finish and hash the Crystal source-file snapshot, then complete the separate
+   semantic-candidate disposition inventory. Only the conjunction may set
+   inventoryComplete=true.
+2. Close the shared player-drop UID/metadata and disconnect/save/relogin P0 as
+   a fail-closed end-to-end path.
+3. Convert the existing Bichon, Zone, and Windows slices into explicit ledger
    rows with immutable evidence, negative cases, and freshness/revision
    binding.
-3. Close the seven open P1 families in dependency order: skill/semantic
+4. Close the seven open P1 families in dependency order: skill/semantic
    inventory, AI/events/NPC quests, exact packet/timing/RNG/failure behavior,
    production shared backend/recovery, then package and visual/human gates.
-4. Re-run the Web regression, persistence, stability, signed-package, and
+5. Re-run the Web regression, persistence, stability, signed-package, and
    real-device visual gates at one release revision. Recompute status from the
    ledger; do not infer it from file counts or prior scoped reports.

@@ -9,6 +9,7 @@ out/
 docs/generated/remote-assets/
 docs/generated/player-qa/
 docs/generated/packet-traces/
+docs/generated/crystal-semantic-parity/
 docs/stage2-screenshots/
 docs/stage5-screenshots/
 artifacts/qa-evidence/
