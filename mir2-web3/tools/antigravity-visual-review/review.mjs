@@ -243,9 +243,80 @@ export function findStructuredReview(value, visited = new Set()) {
   return null;
 }
 
+export function extractProviderReview(rawOutput, provider) {
+  let responsePayload;
+  if (provider === "vercel") {
+    if (rawOutput?.error) {
+      throw new Error(`Vercel response contains an error: ${safeApiError(JSON.stringify(rawOutput.error))}`);
+    }
+    responsePayload = rawOutput?.choices?.[0]?.message?.content;
+    if (responsePayload === undefined) {
+      throw new Error("Vercel response is missing choices[0].message.content.");
+    }
+  } else if (provider === "gemini" || provider === "antigravity") {
+    const status = typeof rawOutput?.status === "string" ? rawOutput.status.trim().toUpperCase() : null;
+    if (status && !["SUCCESS", "COMPLETED", "OK"].includes(status)) {
+      throw new Error(`${provider} response status is not successful: ${status}`);
+    }
+    responsePayload = rawOutput?.response;
+    if (responsePayload === undefined) {
+      throw new Error(`${provider} response is missing the primary response field.`);
+    }
+  } else {
+    throw new Error(`Unsupported visual review provider: ${provider}`);
+  }
+  return findStructuredReview(responsePayload);
+}
+
 export function isPathInside(parentPath, childPath) {
   const relative = path.relative(path.resolve(parentPath), path.resolve(childPath));
   return relative === "" || (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative));
+}
+
+export async function loadReviewSchema(schemaPath = DEFAULT_SCHEMA) {
+  const resolved = await requireFile(schemaPath, "--schema");
+  const schemaText = await fs.readFile(resolved, "utf8");
+  let schema;
+  try {
+    schema = JSON.parse(schemaText);
+  } catch (error) {
+    throw new Error(`--schema is not valid JSON: ${resolved}: ${error.message}`);
+  }
+  validateReviewSchema(schema);
+  return {
+    schemaPath: resolved,
+    schemaText,
+    schema,
+    sha256: crypto.createHash("sha256").update(schemaText).digest("hex"),
+  };
+}
+
+export function validateReviewSchema(schema) {
+  const requiredFields = [
+    "verdict",
+    "score",
+    "summary",
+    "sceneAlignment",
+    "scores",
+    "issues",
+    "acceptedDifferences",
+    "nextActions",
+  ];
+  if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
+    throw new Error("Visual review schema must be a JSON object.");
+  }
+  if (schema.type !== "object" || schema.additionalProperties !== false) {
+    throw new Error("Visual review schema must be a closed top-level object.");
+  }
+  if (!Array.isArray(schema.required) || !schema.properties || typeof schema.properties !== "object") {
+    throw new Error("Visual review schema must declare required fields and properties.");
+  }
+  for (const field of requiredFields) {
+    if (!schema.required.includes(field) || !Object.hasOwn(schema.properties, field)) {
+      throw new Error(`Visual review schema is missing required field: ${field}`);
+    }
+  }
+  return schema;
 }
 
 async function main() {
@@ -255,14 +326,16 @@ async function main() {
     return;
   }
   if (args["self-test"]) {
+    const loadedSchema = await loadReviewSchema();
     console.log(JSON.stringify({
       ok: true,
       status: "HANDOFF",
       repoRoot: REPO_ROOT,
-      schemaPath: DEFAULT_SCHEMA,
+      schemaPath: loadedSchema.schemaPath,
+      schemaSha256: loadedSchema.sha256,
       desktopTouched: false,
       repositoryMutated: false,
-      note: "Self-test validates the review harness only; no evidence was uploaded and no model was called.",
+      note: "Self-test validates the tracked review schema and local harness only; no evidence was uploaded and no model was called.",
     }, null, 2));
     return;
   }
@@ -274,8 +347,9 @@ async function main() {
   }
 
   const contextPath = args.context ? await requireFile(args.context, "--context") : null;
-  const schemaPath = path.resolve(args.schema ?? DEFAULT_SCHEMA);
-  await requireFile(schemaPath, "--schema");
+  const requestedSchemaPath = path.resolve(args.schema ?? DEFAULT_SCHEMA);
+  const loadedSchema = await loadReviewSchema(requestedSchemaPath);
+  const { schemaPath, schemaText, schema } = loadedSchema;
   const candidateLabel = String(args.label ?? "Windows-native").trim() || "Windows-native";
   const provider = normalizeProvider(args.provider ?? "vercel");
   const model = args.model
@@ -297,8 +371,6 @@ async function main() {
   const outputDir = path.resolve(args.output ?? path.join(DEFAULT_OUTPUT_ROOT, runId));
   const executablePath = provider === "vercel" ? null : resolveProviderExecutable(provider, args);
   if (executablePath) await assertExecutable(executablePath, provider);
-  const schemaText = await fs.readFile(schemaPath, "utf8");
-  const schema = JSON.parse(schemaText);
   const evidence = await Promise.all(
     [referencePath, candidatePath, ...(contextPath ? [contextPath] : [])].map(describeFile),
   );
@@ -343,6 +415,7 @@ async function main() {
     candidateLabel,
     evidence,
     schemaPath,
+    schemaSha256: loadedSchema.sha256,
     prompt,
     safety: {
       desktopTouched: false,
@@ -395,7 +468,7 @@ async function main() {
   } catch (error) {
     throw new Error(`${provider} CLI did not return valid JSON: ${error.message}`);
   }
-  const review = findStructuredReview(rawOutput);
+  const review = extractProviderReview(rawOutput, provider);
   if (!review) {
     throw new Error(`Could not find schema-shaped visual review in ${provider} output.`);
   }
@@ -411,6 +484,7 @@ async function main() {
     provider,
     model: model ?? "account-default",
     effort,
+    schemaSha256: loadedSchema.sha256,
     ...(provider === "vercel"
       ? {
           serviceTier,
@@ -636,16 +710,36 @@ function safeApiError(responseText) {
 }
 
 export function validateReview(review) {
-  if (!review || typeof review !== "object") throw new Error("Visual review must be an object.");
+  const reviewFields = [
+    "verdict",
+    "score",
+    "summary",
+    "sceneAlignment",
+    "scores",
+    "issues",
+    "acceptedDifferences",
+    "nextActions",
+  ];
+  assertClosedObject(review, "Visual review", reviewFields);
   if (!["accepted", "candidate", "rejected"].includes(review.verdict)) {
     throw new Error(`Visual review has invalid verdict: ${review.verdict}`);
   }
   if (!Number.isInteger(review.score) || review.score < 0 || review.score > 100) {
     throw new Error(`Visual review has invalid score: ${review.score}`);
   }
-  if (!review.sceneAlignment || typeof review.sceneAlignment.sameScene !== "boolean") {
+  if (typeof review.summary !== "string" || review.summary.length === 0) {
+    throw new Error("Visual review summary must be a non-empty string.");
+  }
+  assertClosedObject(
+    review.sceneAlignment,
+    "Visual review sceneAlignment",
+    ["sameScene", "confidence", "blockers"],
+  );
+  if (typeof review.sceneAlignment.sameScene !== "boolean") {
     throw new Error("Visual review is missing sceneAlignment.sameScene.");
   }
+  assertUnitInterval(review.sceneAlignment.confidence, "sceneAlignment.confidence");
+  assertStringArray(review.sceneAlignment.blockers, "sceneAlignment.blockers", 0, 8);
   const scoreNames = [
     "mapAndObjects",
     "entitiesAndAnimation",
@@ -654,17 +748,98 @@ export function validateReview(review) {
     "colorAndLighting",
     "scaleAndDpi",
   ];
+  assertClosedObject(review.scores, "Visual review scores", scoreNames);
   for (const name of scoreNames) {
     const value = review.scores?.[name];
     if (!Number.isInteger(value) || value < 0 || value > 100) {
       throw new Error(`Visual review has invalid scores.${name}: ${value}`);
     }
   }
-  if (!Array.isArray(review.issues)) throw new Error("Visual review issues must be an array.");
-  if (!Array.isArray(review.nextActions) || review.nextActions.length === 0) {
-    throw new Error("Visual review must contain at least one next action.");
+  if (!Array.isArray(review.issues) || review.issues.length > 20) {
+    throw new Error("Visual review issues must be an array with at most 20 entries.");
   }
+  const issueFields = [
+    "id",
+    "priority",
+    "category",
+    "title",
+    "evidence",
+    "recommendation",
+    "confidence",
+    "referenceRegion",
+    "candidateRegion",
+  ];
+  const issueCategories = new Set([
+    "scene-alignment",
+    "map",
+    "objects",
+    "entities",
+    "animation",
+    "hud",
+    "panels",
+    "typography",
+    "minimap",
+    "color-lighting",
+    "scale-dpi",
+    "other",
+  ]);
+  for (const [index, issue] of review.issues.entries()) {
+    const issuePath = `issues[${index}]`;
+    assertClosedObject(issue, `Visual review ${issuePath}`, issueFields);
+    if (typeof issue.id !== "string" || !/^VIS-[0-9]{3}$/.test(issue.id)) {
+      throw new Error(`Visual review has invalid ${issuePath}.id: ${issue.id}`);
+    }
+    if (!["P0", "P1", "P2", "P3"].includes(issue.priority)) {
+      throw new Error(`Visual review has invalid ${issuePath}.priority: ${issue.priority}`);
+    }
+    if (!issueCategories.has(issue.category)) {
+      throw new Error(`Visual review has invalid ${issuePath}.category: ${issue.category}`);
+    }
+    for (const field of ["title", "evidence", "recommendation"]) {
+      if (typeof issue[field] !== "string" || issue[field].length === 0) {
+        throw new Error(`Visual review ${issuePath}.${field} must be a non-empty string.`);
+      }
+    }
+    for (const field of ["referenceRegion", "candidateRegion"]) {
+      if (typeof issue[field] !== "string") {
+        throw new Error(`Visual review ${issuePath}.${field} must be a string.`);
+      }
+    }
+    assertUnitInterval(issue.confidence, `${issuePath}.confidence`);
+  }
+  assertStringArray(review.acceptedDifferences, "acceptedDifferences", 0, 12);
+  assertStringArray(review.nextActions, "nextActions", 1, 10);
   return review;
+}
+
+function assertClosedObject(value, label, allowedFields) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${label} must be an object.`);
+  }
+  const allowed = new Set(allowedFields);
+  const unknown = Object.keys(value).filter((field) => !allowed.has(field));
+  if (unknown.length > 0) {
+    throw new Error(`${label} contains unknown field(s): ${unknown.join(", ")}`);
+  }
+  const missing = allowedFields.filter((field) => !Object.hasOwn(value, field));
+  if (missing.length > 0) {
+    throw new Error(`${label} is missing field(s): ${missing.join(", ")}`);
+  }
+}
+
+function assertStringArray(value, pathLabel, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`Visual review ${pathLabel} must contain ${minimum}..${maximum} strings.`);
+  }
+  if (value.some((entry) => typeof entry !== "string")) {
+    throw new Error(`Visual review ${pathLabel} must contain only strings.`);
+  }
+}
+
+function assertUnitInterval(value, pathLabel) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 1) {
+    throw new Error(`Visual review has invalid ${pathLabel}: ${value}`);
+  }
 }
 
 export function summarizeGatewayUsage(payload, modelMetadata, serviceTier) {

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mir2 visual parity review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "verdict",
+    "score",
+    "summary",
+    "sceneAlignment",
+    "scores",
+    "issues",
+    "acceptedDifferences",
+    "nextActions"
+  ],
+  "properties": {
+    "verdict": {
+      "type": "string",
+      "enum": ["accepted", "candidate", "rejected"]
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sceneAlignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sameScene", "confidence", "blockers"],
+      "properties": {
+        "sameScene": { "type": "boolean" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "blockers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 8
+        }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mapAndObjects",
+        "entitiesAndAnimation",
+        "hudAndPanels",
+        "typography",
+        "colorAndLighting",
+        "scaleAndDpi"
+      ],
+      "properties": {
+        "mapAndObjects": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "entitiesAndAnimation": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "hudAndPanels": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "typography": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "colorAndLighting": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "scaleAndDpi": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "priority",
+          "category",
+          "title",
+          "evidence",
+          "recommendation",
+          "confidence",
+          "referenceRegion",
+          "candidateRegion"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^VIS-[0-9]{3}$" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "category": {
+            "type": "string",
+            "enum": [
+              "scene-alignment",
+              "map",
+              "objects",
+              "entities",
+              "animation",
+              "hud",
+              "panels",
+              "typography",
+              "minimap",
+              "color-lighting",
+              "scale-dpi",
+              "other"
+            ]
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "recommendation": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "referenceRegion": { "type": "string" },
+          "candidateRegion": { "type": "string" }
+        }
+      }
+    },
+    "acceptedDifferences": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 12
+    },
+    "nextActions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "maxItems": 10
+    }
+  }
+}

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
@@ -9,12 +11,15 @@ import {
   buildVercelPrompt,
   buildVercelRequestBody,
   discoverVercelModel,
+  extractProviderReview,
   findStructuredReview,
   geminiPackageRootForWindowsShim,
   isPathInside,
+  loadReviewSchema,
   parseArgs,
   summarizeGatewayUsage,
   validateReview,
+  validateReviewSchema,
 } from "./review.mjs";
 
 test("parseArgs accepts split and equals forms", () => {
@@ -28,6 +33,30 @@ test("parseArgs accepts split and equals forms", () => {
 test("parseArgs rejects unknown flags and missing values", () => {
   assert.throws(() => parseArgs(["--reference"]), /requires a value/);
   assert.throws(() => parseArgs(["--not-a-review-option", "value"]), /Unknown argument/);
+});
+
+test("tracked default review schema is present, closed, and hashable", async () => {
+  const loaded = await loadReviewSchema();
+  assert.equal(path.basename(loaded.schemaPath), "review.schema.json");
+  assert.equal(loaded.schema.type, "object");
+  assert.equal(loaded.schema.additionalProperties, false);
+  assert.match(loaded.sha256, /^[0-9a-f]{64}$/);
+});
+
+test("review schema loading fails closed for missing and malformed contracts", async (context) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-review-schema-test-"));
+  context.after(() => fs.rm(directory, { recursive: true, force: true }));
+
+  await assert.rejects(loadReviewSchema(path.join(directory, "missing.json")), /file does not exist/);
+
+  const invalidJson = path.join(directory, "invalid.json");
+  await fs.writeFile(invalidJson, "{", "utf8");
+  await assert.rejects(loadReviewSchema(invalidJson), /not valid JSON/);
+
+  const incomplete = path.join(directory, "incomplete.json");
+  await fs.writeFile(incomplete, JSON.stringify({ type: "object", additionalProperties: false, required: [], properties: {} }), "utf8");
+  await assert.rejects(loadReviewSchema(incomplete), /missing required field/);
+  assert.throws(() => validateReviewSchema([]), /must be a JSON object/);
 });
 
 test("buildPrompt labels untrusted evidence and candidate role", () => {
@@ -131,6 +160,31 @@ test("findStructuredReview unwraps nested and stringified CLI output", () => {
   assert.deepEqual(findStructuredReview({ nested: [{ payload: JSON.stringify(review) }] }), review);
 });
 
+test("extractProviderReview reads only the provider primary response and rejects error status", () => {
+  const review = {
+    verdict: "candidate",
+    score: 71,
+    scores: { hudAndPanels: 60 },
+    issues: [],
+  };
+  assert.deepEqual(
+    extractProviderReview({ choices: [{ message: { content: JSON.stringify(review) } }] }, "vercel"),
+    review,
+  );
+  assert.deepEqual(
+    extractProviderReview({ status: "SUCCESS", response: JSON.stringify(review) }, "antigravity"),
+    review,
+  );
+  assert.throws(
+    () => extractProviderReview({ status: "ERROR", response: JSON.stringify(review) }, "antigravity"),
+    /not successful/,
+  );
+  assert.throws(
+    () => extractProviderReview({ unrelated: { accepted: review } }, "vercel"),
+    /missing choices/,
+  );
+});
+
 test("isPathInside rejects siblings", () => {
   const parent = path.resolve("root", "repo");
   assert.equal(isPathInside(parent, path.join(parent, "images", "a.png")), true);
@@ -168,6 +222,53 @@ test("validateReview accepts a complete schema-shaped review", () => {
     nextActions: ["修正登录面板"],
   };
   assert.equal(validateReview(review), review);
+});
+
+test("validateReview rejects loose or malformed CLI output", () => {
+  const valid = {
+    verdict: "candidate",
+    score: 71,
+    summary: "可继续修正",
+    sceneAlignment: { sameScene: true, confidence: 0.9, blockers: [] },
+    scores: {
+      mapAndObjects: 80,
+      entitiesAndAnimation: 70,
+      hudAndPanels: 60,
+      typography: 65,
+      colorAndLighting: 75,
+      scaleAndDpi: 70,
+    },
+    issues: [],
+    acceptedDifferences: [],
+    nextActions: ["修正登录面板"],
+  };
+
+  assert.throws(() => validateReview({ ...valid, unexpected: true }), /unknown field/);
+  assert.throws(
+    () => validateReview({ ...valid, sceneAlignment: { ...valid.sceneAlignment, confidence: 2 } }),
+    /sceneAlignment\.confidence/,
+  );
+  assert.throws(
+    () => validateReview({ ...valid, acceptedDifferences: undefined }),
+    /acceptedDifferences/,
+  );
+  assert.throws(
+    () => validateReview({
+      ...valid,
+      issues: [{
+        id: "bad-id",
+        priority: "P2",
+        category: "hud",
+        title: "标题",
+        evidence: "证据",
+        recommendation: "建议",
+        confidence: 0.8,
+        referenceRegion: "left",
+        candidateRegion: "left",
+      }],
+    }),
+    /issues\[0\]\.id/,
+  );
 });
 
 test("summarizeGatewayUsage applies the selected service-tier rates", () => {
