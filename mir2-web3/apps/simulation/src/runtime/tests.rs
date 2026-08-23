@@ -3485,6 +3485,31 @@ fn personal_melee_rejects_neutral_monster_without_consuming_attack_cooldown() {
 }
 
 #[test]
+fn personal_melee_allows_passive_crystal_hunt_monster() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_position(&mut session, Point { x: 330, y: 270 });
+    spawn_crystal_monster_for_test(
+        &mut session,
+        98_774,
+        "Deer",
+        Point { x: 331, y: 270 },
+        MirDirection::Left,
+        false,
+    );
+    sync_visible_objects(&mut session);
+
+    let packets = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+}
+
+#[test]
 fn harvest_before_start_game_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
 

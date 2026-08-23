@@ -39,7 +39,7 @@ use super::combat::{
     crystal_player_attack_blocked_by_status, crystal_player_can_mount_attack,
     crystal_player_has_class_weapon, crystal_player_is_dazed,
     crystal_player_magic_blocked_by_status, crystal_player_movement_blocked_by_status,
-    crystal_player_slowed_by_status, melee_target_is_authoritatively_hostile_in_direction,
+    crystal_player_slowed_by_status, melee_target_is_authoritatively_attackable_in_direction,
 };
 use super::components::{
     current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
@@ -8226,7 +8226,7 @@ impl SimulationSession {
                     }];
                 }
                 if is_in_world(self.app.world())
-                    && melee_target_is_authoritatively_hostile_in_direction(
+                    && melee_target_is_authoritatively_attackable_in_direction(
                         self.app.world(),
                         direction,
                         spell,

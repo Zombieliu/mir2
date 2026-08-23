@@ -61,7 +61,15 @@ pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection)
     attack_target_in_direction_at_distance(world, direction, 1)
 }
 
-pub(super) fn melee_target_is_authoritatively_hostile_in_direction(
+fn monster_is_player_attackable(agent: &MonsterAgent) -> bool {
+    // Crystal AI 1/2/3 are passive hunt or harvest targets (Hen/Pig/Bull,
+    // Deer/Sheep, trees/chests). They do not initiate combat, but the original
+    // client still lets the player attack them. Other non-hostile agents are
+    // guards, trainers, gates, or friendly objects and remain protected.
+    agent.hostile_to_player || matches!(agent.ai, 1 | 2 | 3)
+}
+
+pub(super) fn melee_target_is_authoritatively_attackable_in_direction(
     world: &World,
     direction: MirDirection,
     requested_spell: Spell,
@@ -75,7 +83,7 @@ pub(super) fn melee_target_is_authoritatively_hostile_in_direction(
     let entity = entity_by_object_id(world, object_id)?;
     world
         .get::<MonsterAgent>(entity)
-        .map(|agent| agent.hostile_to_player)
+        .map(monster_is_player_attackable)
 }
 
 #[allow(deprecated)]
@@ -3224,7 +3232,7 @@ impl SimulationSession {
         {
             return Vec::new();
         }
-        if !monster_agent.hostile_to_player {
+        if !monster_is_player_attackable(monster_agent) {
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];
