@@ -162,8 +162,18 @@ assert.doesNotMatch(
 );
 assert.match(
   androidNativeBuild,
-  /--manifest-path "\$\{SCRIPT_DIR\}\/Cargo\.toml"/,
-  "Android native build must resolve its manifest from the script directory",
+  /^MANIFEST="\$\{SCRIPT_DIR\}\/Cargo\.toml"$/m,
+  "Android native build must derive its manifest variable from the script directory",
+);
+assert.equal(
+  [...androidNativeBuild.matchAll(/--manifest-path "\$\{MANIFEST\}"/g)].length,
+  2,
+  "Android native check and package commands must both use the trusted manifest variable",
+);
+assert.doesNotMatch(
+  androidNativeBuild,
+  /--manifest-path "(?!\$\{MANIFEST\})/,
+  "Android native Cargo commands must not bypass the trusted manifest variable",
 );
 
 for (const requiredGate of [
