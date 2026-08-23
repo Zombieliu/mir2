@@ -11502,9 +11502,9 @@ impl ZoneRuntime {
         picker_object_id: u32,
         group_members: &[String],
     ) -> bool {
-        if !drop
+        if drop
             .ownership_remaining_ticks
-            .is_some_and(|remaining_ticks| remaining_ticks > 0)
+            .is_none_or(|remaining_ticks| remaining_ticks == 0)
         {
             return true;
         }

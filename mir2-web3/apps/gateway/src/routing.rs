@@ -5413,6 +5413,46 @@ fn remove_object_remove_packets(packets: &mut Vec<ServerPacket>, object_ids: &BT
     });
 }
 
+fn merge_ground_drop_claim_packets_in_crystal_order(
+    packets: &mut Vec<ServerPacket>,
+    mut claim_packets_by_object_id: BTreeMap<u32, Vec<ServerPacket>>,
+    canceled_claims: &BTreeSet<u32>,
+) {
+    if claim_packets_by_object_id.is_empty() && canceled_claims.is_empty() {
+        return;
+    }
+
+    let original_packets = std::mem::take(packets);
+    let mut ordered_packets = Vec::with_capacity(
+        original_packets.len()
+            + claim_packets_by_object_id
+                .values()
+                .map(Vec::len)
+                .sum::<usize>(),
+    );
+    for packet in original_packets {
+        let removed_object_id = match &packet {
+            ServerPacket::ObjectRemove { object_id } => Some(*object_id),
+            _ => None,
+        };
+        if let Some(object_id) = removed_object_id {
+            if let Some(claim_packets) = claim_packets_by_object_id.remove(&object_id) {
+                // Crystal commits and reports the inventory gain before the
+                // ground object is removed from the scene.
+                ordered_packets.extend(claim_packets);
+            }
+            if canceled_claims.contains(&object_id) {
+                continue;
+            }
+        }
+        ordered_packets.push(packet);
+    }
+    for claim_packets in claim_packets_by_object_id.into_values() {
+        ordered_packets.extend(claim_packets);
+    }
+    *packets = ordered_packets;
+}
+
 fn apply_shared_entity_transform(
     map: &mut ZoneMapSnapshotLayer,
     object_id: u32,
@@ -7122,10 +7162,13 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        let (claim_packets, canceled_claims) =
+        let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
-        remove_object_remove_packets(&mut packets, &canceled_claims);
-        packets.extend(claim_packets);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
         packets
     }
 
@@ -7141,10 +7184,13 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        let (claim_packets, canceled_claims) =
+        let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
-        remove_object_remove_packets(&mut packets, &canceled_claims);
-        packets.extend(claim_packets);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
         packets
     }
 
@@ -7272,17 +7318,17 @@ impl SharedInProcessZoneSessionRuntime {
     fn apply_zone_ground_drop_claims(
         &mut self,
         claims: Vec<GroundDropSnapshot>,
-    ) -> (Vec<ServerPacket>, BTreeSet<u32>) {
+    ) -> (BTreeMap<u32, Vec<ServerPacket>>, BTreeSet<u32>) {
         if claims.is_empty() {
-            return (Vec::new(), BTreeSet::new());
+            return (BTreeMap::new(), BTreeSet::new());
         }
         let Some(identity) = self.inner.active_identity() else {
-            return (Vec::new(), BTreeSet::new());
+            return (BTreeMap::new(), BTreeSet::new());
         };
         let Some(session_id) = self.current_zone_session_id() else {
-            return (Vec::new(), BTreeSet::new());
+            return (BTreeMap::new(), BTreeSet::new());
         };
-        let mut packets = Vec::new();
+        let mut packets_by_object_id = BTreeMap::<u32, Vec<ServerPacket>>::new();
         let mut canceled_claims = BTreeSet::new();
         for drop in claims {
             let object_id = drop.object_id;
@@ -7313,9 +7359,12 @@ impl SharedInProcessZoneSessionRuntime {
             receipt
                 .packets
                 .extend(self.dispatch_zone_player_command(followup, false));
-            packets.extend(receipt.packets);
+            packets_by_object_id
+                .entry(object_id)
+                .or_default()
+                .extend(receipt.packets);
         }
-        (packets, canceled_claims)
+        (packets_by_object_id, canceled_claims)
     }
 
     fn restore_zone_ground_drop_claim(&mut self, drop: GroundDropSnapshot) {
@@ -13191,7 +13240,8 @@ mod tests {
             }));
         assert!(canceled_claims.contains(&9101));
         assert!(pickup_packets
-            .iter()
+            .values()
+            .flatten()
             .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
     }
 
@@ -19014,6 +19064,24 @@ mod tests {
             packet,
             ServerPacket::ObjectRemove { object_id } if *object_id == shared_drop.object_id
         )));
+        let gained_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::GainedItem { .. }))
+            .expect("shared pickup should report the gained item");
+        let remove_index = packets
+            .iter()
+            .position(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectRemove { object_id }
+                        if *object_id == shared_drop.object_id
+                )
+            })
+            .expect("shared pickup should remove the claimed ground object");
+        assert!(
+            gained_index < remove_index,
+            "Crystal sends GainedItem before ObjectRemove"
+        );
         let second_snapshot = second.world_snapshot();
         assert!(second_snapshot
             .inventory_items

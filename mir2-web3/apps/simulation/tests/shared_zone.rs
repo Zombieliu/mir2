@@ -9578,6 +9578,123 @@ fn zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires() {
 }
 
 #[test]
+fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics() {
+    let mut zone = zone();
+    let owner = session("owner");
+    let group_member = session("group-member");
+    let stranger = session("stranger");
+
+    zone.handle(ZoneCommand::Join(join("owner", 101, "Owner", 330, 270)));
+    zone.handle(ZoneCommand::Join(join(
+        "group-member",
+        102,
+        "GroupMember",
+        330,
+        270,
+    )));
+    zone.handle(ZoneCommand::Join(join(
+        "stranger",
+        103,
+        "Stranger",
+        330,
+        270,
+    )));
+
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: owner.clone(),
+        drops: vec![gold_drop(8101, 330, 270, Some(101), Some(1))],
+        now_ms: 0,
+    });
+    let owner_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: owner.clone(),
+        object_id: Some(8101),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    assert!(owner_claim.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::GroundDropClaimed { session_id, drop }
+            if session_id == &owner && drop.object_id == 8101
+    )));
+    let duplicate_owner_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: owner.clone(),
+        object_id: Some(8101),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    assert!(!duplicate_owner_claim
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::GroundDropClaimed { .. })));
+
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: owner.clone(),
+        drops: vec![gold_drop(8102, 330, 270, Some(101), Some(1))],
+        now_ms: 0,
+    });
+    let group_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: group_member.clone(),
+        object_id: Some(8102),
+        target: Point { x: 330, y: 270 },
+        group_members: vec!["oWnEr".to_string()],
+        now_ms: 0,
+    });
+    assert!(group_claim.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::GroundDropClaimed { session_id, drop }
+            if session_id == &group_member && drop.object_id == 8102
+    )));
+
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: owner.clone(),
+        drops: vec![gold_drop(8103, 330, 270, Some(101), Some(1))],
+        now_ms: 0,
+    });
+    let blocked = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: stranger.clone(),
+        object_id: Some(8103),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    assert!(has_packet(&blocked, &stranger, |packet| matches!(
+        packet,
+        ServerPacket::Chat { message, .. } if message == "server.CannotPickupNotOwner"
+    )));
+    assert!(zone.has_ground_drop(8103));
+    let expired_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: stranger.clone(),
+        object_id: Some(8103),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 301,
+    });
+    assert!(expired_claim.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::GroundDropClaimed { session_id, drop }
+            if session_id == &stranger && drop.object_id == 8103
+    )));
+
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: owner,
+        drops: vec![gold_drop(8104, 330, 270, None, Some(1))],
+        now_ms: 0,
+    });
+    let unowned_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: stranger,
+        object_id: Some(8104),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    assert!(unowned_claim.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::GroundDropClaimed { drop, .. } if drop.object_id == 8104
+    )));
+}
+
+#[test]
 fn zone_ground_drop_object_id_claim_allows_adjacent_player_tile_only() {
     let mut zone = zone();
     let first = session("first");
