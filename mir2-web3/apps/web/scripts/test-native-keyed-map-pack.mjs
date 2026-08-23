@@ -10,6 +10,7 @@ import sharp from "sharp";
 
 import {
   alphaKeyMapObjectPixels,
+  assertNativeKeyedMapMissingSourceBudget,
   assertSafeNativeKeyedOutputRoot,
   buildNativeKeyedMapPack,
   collectStandaloneMapReferences,
@@ -18,11 +19,27 @@ import {
   decodeCrystalMiddleAnimationCount,
   mapAtlasPathRequiresAlphaKey,
   mapLibraryKeyForIndex,
+  NATIVE_KEYED_MAX_MISSING_SOURCES,
   parseType100Map,
   resolveCrystalMapPlacement,
 } from "./build-native-keyed-map-pack.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+{
+  assert.doesNotThrow(() =>
+    assertNativeKeyedMapMissingSourceBudget({
+      missingSourceCount: NATIVE_KEYED_MAX_MISSING_SOURCES,
+    }),
+  );
+  assert.throws(
+    () =>
+      assertNativeKeyedMapMissingSourceBudget({
+        missingSourceCount: NATIVE_KEYED_MAX_MISSING_SOURCES + 1,
+      }),
+    /source coverage regressed/,
+  );
+}
 
 function makePixels(width, height, at) {
   const pixels = new Uint8ClampedArray(width * height * 4);

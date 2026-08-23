@@ -20,6 +20,10 @@ const SAFE_TEMP_OUTPUT_PREFIXES = ["native-keyed-map-", "native-map-keyed-"];
 
 export const DEFAULT_MAP_FILE_NAME = "0";
 export const NATIVE_KEYED_MANIFEST_KIND = "mir2-native-map-keyed-manifest";
+// Map 0 still references Crystal frames that have not been legally exported.
+// This is the tracked clean-checkout baseline; local untracked exports must not
+// make CI's budget artificially stricter or looser.
+export const NATIVE_KEYED_MAX_MISSING_SOURCES = 2508;
 
 function loadTypeScriptModule(url, requireMap = {}) {
   const source = readFileSync(url, "utf8");
@@ -284,6 +288,24 @@ function parseArgs(argv) {
 
 function positiveInteger(value) {
   return Number.isFinite(value) && value > 0 ? Math.trunc(value) : 0;
+}
+
+export function assertNativeKeyedMapMissingSourceBudget(
+  result,
+  maxMissingSources = NATIVE_KEYED_MAX_MISSING_SOURCES,
+) {
+  if (!Number.isSafeInteger(maxMissingSources) || maxMissingSources < 0) {
+    throw new Error(`Invalid native keyed map missing-source budget: ${maxMissingSources}`);
+  }
+  if (!Number.isSafeInteger(result?.missingSourceCount) || result.missingSourceCount < 0) {
+    throw new Error("Native keyed map build returned an invalid missingSourceCount");
+  }
+  if (result.missingSourceCount > maxMissingSources) {
+    throw new Error(
+      `Native keyed map source coverage regressed: ${result.missingSourceCount} missing, ` +
+        `budget ${maxMissingSources}`,
+    );
+  }
 }
 
 function parsedCellAt(map, x, y) {
@@ -560,6 +582,11 @@ async function main() {
   const result = await buildNativeKeyedMapPack({
     mapFileName: String(args.map ?? DEFAULT_MAP_FILE_NAME),
   });
+  const maxMissingSources =
+    args.maxMissingSources === undefined
+      ? NATIVE_KEYED_MAX_MISSING_SOURCES
+      : Number(args.maxMissingSources);
+  assertNativeKeyedMapMissingSourceBudget(result, maxMissingSources);
   console.log(JSON.stringify({ ok: true, ...result }, null, 2));
 }
 

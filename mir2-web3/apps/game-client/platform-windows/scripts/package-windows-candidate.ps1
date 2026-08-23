@@ -648,6 +648,12 @@ if ($worktree.revision -ne $SourceRevision.ToLowerInvariant()) { throw 'SourceRe
 $attestation = Read-BuildAttestation -Path $attestationFull
 $attested = Assert-Attestation -Attestation $attestation -AttestationPath $attestationFull -Exe $exe -Worktree $worktree -DirtyAllowed:$AllowDirtyWorktree
 
+if (-not $DryRun) {
+    $webRoot = Join-Path $RepoRoot 'apps\web'
+    & npm --prefix $webRoot run assets:native-map-keyed:build
+    if ($LASTEXITCODE -ne 0) { throw "native keyed map generation failed with exit code $LASTEXITCODE" }
+}
+
  $requiredSources = @((Join-Path $PublicRoot 'bevy-entity-atlases\manifest.json'), (Join-Path $PublicRoot 'generated\map-atlas\manifest.json'), (Join-Path $PublicRoot 'generated\native-map-keyed\manifest.json'), (Join-Path $PublicRoot 'original-effects\effects.generated.json'), (Join-Path $MapPackRoot '0.map.gz'), (Join-Path $PublicRoot 'original-ui\frame-sets.generated.json'), (Join-Path $PublicRoot 'original-ui\ChrSel\0.png'), (Join-Path $PublicRoot 'original-ui\MMap\101.png'), (Join-Path $PublicRoot 'original-ui\Prguse\20.png'), (Join-Path $PublicRoot 'original-ui\Prguse\1084.png'), (Join-Path $PublicRoot 'original-ui\UI_32bit\472.png'), (Join-Path $PublicRoot 'original-ui\Title\30.png'), (Join-Path $PublicRoot 'original-ui\Title\411.png'), (Join-Path $PublicRoot 'original-ui\AArmour\00\0.png'), (Join-Path $PublicRoot 'original-ui\Monster\000\0.png'), (Join-Path $PublicRoot 'original-ui\NPC\00\0.png'), (Join-Path $PublicRoot 'original-ui\Sound\Login2.wav'), (Join-Path $PublicRoot 'original-ui\Sound\Select2.wav'))
  foreach ($index in @(197,205,207,360,431,1340,1350) + @(450..468)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse2\$index.png") }
  foreach ($index in @(411,567,633,634,635,636,637,638,820,821,824,827,848,850,851,853)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Title\$index.png") }

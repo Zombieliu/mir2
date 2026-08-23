@@ -17,6 +17,11 @@ NATIVE_KEYED_MAP_SOURCE="$ROOT/apps/web/public/generated/native-map-keyed"
 MAP_PACK_SOURCE="$ROOT/apps/web/lib/generated/crystal-map-pack"
 FALLBACK_UI_SOURCE="$ROOT/apps/web/public/original-ui"
 
+# The keyed pages are deterministic derivatives of tracked map sources.  Build
+# them at the packaging boundary so a clean checkout never depends on a stale
+# developer-machine output tree.
+npm --prefix "$ROOT/apps/web" run assets:native-map-keyed:build
+
 for required in \
   "$ENTITY_SOURCE/manifest.json" \
   "$MAP_ATLAS_SOURCE/manifest.json" \

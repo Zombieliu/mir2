@@ -9,6 +9,12 @@ on:
       - "mir2-web3/apps/mir2-mobile/**"
       - "mir2-web3/apps/web/public/bevy-entity-atlases/**"
       - "mir2-web3/apps/web/public/generated/map-atlas/**"
+      - "mir2-web3/apps/web/public/original-map/**"
+      - "mir2-web3/apps/web/scripts/build-native-keyed-map-pack.mjs"
+      - "mir2-web3/apps/web/scripts/test-native-keyed-map-pack.mjs"
+      - "mir2-web3/apps/web/package.json"
+      - "mir2-web3/apps/web/package-lock.json"
+      - "mir2-web3/apps/web/lib/generated/crystal_starter_map_region.json"
       - "mir2-web3/apps/web/lib/generated/crystal-map-pack/**"
       - "mir2-web3/scripts/test-cross-platform-client-shells.mjs"
   push:
@@ -21,6 +27,12 @@ on:
       - "mir2-web3/apps/mir2-mobile/**"
       - "mir2-web3/apps/web/public/bevy-entity-atlases/**"
       - "mir2-web3/apps/web/public/generated/map-atlas/**"
+      - "mir2-web3/apps/web/public/original-map/**"
+      - "mir2-web3/apps/web/scripts/build-native-keyed-map-pack.mjs"
+      - "mir2-web3/apps/web/scripts/test-native-keyed-map-pack.mjs"
+      - "mir2-web3/apps/web/package.json"
+      - "mir2-web3/apps/web/package-lock.json"
+      - "mir2-web3/apps/web/lib/generated/crystal_starter_map_region.json"
       - "mir2-web3/apps/web/lib/generated/crystal-map-pack/**"
       - "mir2-web3/scripts/test-cross-platform-client-shells.mjs"
   workflow_dispatch:
@@ -88,6 +100,8 @@ jobs:
         run: |
           npm ci
           npm run assets:map-atlas:build
+          npm run assets:native-map-keyed:build
+          npm run test:native-map-keyed
       - name: Install Rust
         shell: pwsh
         run: |
@@ -114,6 +128,7 @@ jobs:
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-platform-windows.exe
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/bevy-entity-atlases/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/map-atlas/manifest.json
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/native-map-keyed/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/crystal-map-pack/0.map.gz
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/original-ui/Monster/000/0.png
       - uses: actions/upload-artifact@v7
