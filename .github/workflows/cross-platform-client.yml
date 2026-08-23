@@ -109,6 +109,7 @@ jobs:
       - name: Test and build Windows host
         shell: pwsh
         run: |
+          powershell -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1 -SelfTest
           cargo "+$env:RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml -- --check
           cargo "+$env:RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
           $cargoHome = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE ".cargo" }
