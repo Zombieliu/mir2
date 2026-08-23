@@ -16,6 +16,7 @@ on:
       - "mir2-web3/apps/web/package-lock.json"
       - "mir2-web3/apps/web/lib/generated/crystal_starter_map_region.json"
       - "mir2-web3/apps/web/lib/generated/crystal-map-pack/**"
+      - "mir2-web3/apps/web/lib/scene-alpha-key.ts"
       - "mir2-web3/scripts/test-cross-platform-client-shells.mjs"
   push:
     branches:
@@ -34,6 +35,7 @@ on:
       - "mir2-web3/apps/web/package-lock.json"
       - "mir2-web3/apps/web/lib/generated/crystal_starter_map_region.json"
       - "mir2-web3/apps/web/lib/generated/crystal-map-pack/**"
+      - "mir2-web3/apps/web/lib/scene-alpha-key.ts"
       - "mir2-web3/scripts/test-cross-platform-client-shells.mjs"
   workflow_dispatch:
 
@@ -112,12 +114,10 @@ jobs:
           powershell -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1 -SelfTest
           cargo "+$env:RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml -- --check
           cargo "+$env:RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
-          $cargoHome = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE ".cargo" }
-          $rustupHome = if ($env:RUSTUP_HOME) { $env:RUSTUP_HOME } else { Join-Path $env:USERPROFILE ".rustup" }
-          $env:RUSTFLAGS = "--remap-path-prefix=$env:GITHUB_WORKSPACE=. --remap-path-prefix=$cargoHome=.cargo --remap-path-prefix=$rustupHome=.rustup"
-          cargo "+$env:RUST_TOOLCHAIN" build --locked --release --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
+          powershell -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1
           New-Item -ItemType Directory -Force mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64 | Out-Null
-          Copy-Item mir2-web3/apps/game-client/platform-windows/target/release/mir2-platform-windows.exe mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
+          Copy-Item mir2-web3/target-attested-windows-candidate/x86_64-pc-windows-msvc/release/mir2-platform-windows.exe mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
+          Copy-Item mir2-web3/target-attested-windows-candidate/BUILD-ATTESTATION.json mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
       - name: Package native maps and atlases
         shell: bash
         run: >-
@@ -127,6 +127,7 @@ jobs:
         shell: pwsh
         run: |
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-platform-windows.exe
+          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/BUILD-ATTESTATION.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/bevy-entity-atlases/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/map-atlas/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/native-map-keyed/manifest.json

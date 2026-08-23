@@ -365,4 +365,41 @@ function makeType100MapBytes(cells) {
   assert.equal(stagedMeta.hasAlpha, true, "additive staged PNG must preserve source alpha");
 }
 
+{
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "native-keyed-map-"));
+  const packagedMapRoot = path.join(tempRoot, "packaged");
+  const originalMapRoot = path.join(tempRoot, "original-map");
+  const outputRoot = path.join(tempRoot, "native-keyed-map-budget-output");
+  const starterMapRegionPath = path.join(tempRoot, "crystal_starter_map_region.json");
+  await fs.mkdir(packagedMapRoot, { recursive: true });
+  await fs.mkdir(outputRoot, { recursive: true });
+  const mapBytes = makeType100MapBytes([
+    (target, base) => {
+      target.writeInt16LE(2, base + 6);
+      target.writeInt16LE(2, base + 8);
+    },
+  ]);
+  await fs.writeFile(path.join(packagedMapRoot, "0.map.gz"), gzipSync(mapBytes));
+  await fs.writeFile(starterMapRegionPath, JSON.stringify({ sprites: {} }));
+  const sentinelManifest = '{"sentinel":true}\n';
+  await fs.writeFile(path.join(outputRoot, "manifest.json"), sentinelManifest);
+
+  await assert.rejects(
+    buildNativeKeyedMapPack({
+      mapFileName: "0",
+      packagedMapRoot,
+      originalMapRoot,
+      outputRoot,
+      starterMapRegionPath,
+      maxMissingSources: 0,
+    }),
+    /source coverage regressed/,
+  );
+  assert.equal(
+    await fs.readFile(path.join(outputRoot, "manifest.json"), "utf8"),
+    sentinelManifest,
+    "budget rejection must leave the previous generated output untouched",
+  );
+}
+
 console.log("native keyed map pack tests passed");

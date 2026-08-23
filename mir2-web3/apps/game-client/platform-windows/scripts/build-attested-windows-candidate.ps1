@@ -18,6 +18,57 @@ function Get-TextSha256 {
     return Get-Sha256Hex -Bytes ([Text.Encoding]::UTF8.GetBytes($Text))
 }
 
+function Assert-NoReparseAncestors {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $current = [IO.Path]::GetFullPath($Path).TrimEnd('\', '/')
+    while (-not [string]::IsNullOrWhiteSpace($current)) {
+        if (Test-Path -LiteralPath $current) {
+            $item = Get-Item -LiteralPath $current -Force
+            if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "attested build rejects reparse/junction paths: $current"
+            }
+        }
+        $parent = Split-Path -Parent $current
+        if ([string]::IsNullOrWhiteSpace($parent) -or $parent -ceq $current) { break }
+        $current = $parent
+    }
+}
+
+function Assert-NoReparseTree {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    Assert-NoReparseAncestors -Path $Path
+    if (-not (Test-Path -LiteralPath $Path)) { return }
+    $items = @(Get-Item -LiteralPath $Path -Force) + @(Get-ChildItem -LiteralPath $Path -Force -Recurse)
+    foreach ($item in $items) {
+        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "attested build rejects a reparse/junction target tree: $($item.FullName)"
+        }
+    }
+}
+
+function Reset-AttestedTargetDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$ExpectedLeaf
+    )
+    $full = [IO.Path]::GetFullPath($Path).TrimEnd('\', '/')
+    $boundary = [IO.Path]::GetFullPath($Root).TrimEnd('\', '/')
+    if (-not $full.StartsWith($boundary + '\', [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'refusing to reset an attested target outside the repository'
+    }
+    if ((Split-Path -Leaf $full) -cne $ExpectedLeaf) {
+        throw "refusing to reset an unexpected attested target: $full"
+    }
+    Assert-NoReparseAncestors -Path $full
+    if (Test-Path -LiteralPath $full) {
+        Assert-NoReparseTree -Path $full
+        Remove-Item -LiteralPath $full -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $full | Out-Null
+    Assert-NoReparseTree -Path $full
+}
+
 function Get-CleanWorktreeState {
     param([Parameter(Mandatory = $true)][string]$Root)
     Push-Location $Root
@@ -67,11 +118,31 @@ if ($SelfTest) {
     if ((Split-Path -Leaf $TargetDir) -cne $TargetDirName) {
         throw 'target directory self-test failed'
     }
+    $selfRoot = Join-Path ([IO.Path]::GetTempPath()) ('mir2-attested-build-selftest-' + [guid]::NewGuid().ToString('N'))
+    $selfTarget = Join-Path $selfRoot $TargetDirName
+    try {
+        New-Item -ItemType Directory -Path $selfRoot | Out-Null
+        Reset-AttestedTargetDirectory -Path $selfTarget -Root $selfRoot -ExpectedLeaf $TargetDirName
+        Set-Content -LiteralPath (Join-Path $selfTarget 'stale.txt') -Value 'stale'
+        Reset-AttestedTargetDirectory -Path $selfTarget -Root $selfRoot -ExpectedLeaf $TargetDirName
+        if (Test-Path -LiteralPath (Join-Path $selfTarget 'stale.txt')) {
+            throw 'target reset self-test retained stale build output'
+        }
+    } finally {
+        if (Test-Path -LiteralPath $selfRoot) {
+            Assert-NoReparseTree -Path $selfRoot
+            if ((Split-Path -Leaf $selfRoot) -notlike 'mir2-attested-build-selftest-*') {
+                throw 'refusing unsafe attested build self-test cleanup'
+            }
+            Remove-Item -LiteralPath $selfRoot -Recurse -Force
+        }
+    }
     Write-Host 'build-attested-windows-candidate self-test passed'
     exit 0
 }
 
 $before = Get-CleanWorktreeState -Root $RepoRoot
+Reset-AttestedTargetDirectory -Path $TargetDir -Root $RepoRoot -ExpectedLeaf $TargetDirName
 $cargoHome = if ($env:CARGO_HOME) {
     [IO.Path]::GetFullPath($env:CARGO_HOME).TrimEnd('\', '/')
 } else {
@@ -81,9 +152,31 @@ $remapFlags = @(
     "--remap-path-prefix=$RepoRoot=."
     "--remap-path-prefix=$cargoHome=cargo-home"
 )
-$previousRustFlags = $env:RUSTFLAGS
+$controlledBuildVariables = @(
+    'RUSTFLAGS',
+    'CARGO_ENCODED_RUSTFLAGS',
+    'CARGO_BUILD_RUSTFLAGS',
+    'CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS',
+    'RUSTC',
+    'RUSTC_WRAPPER',
+    'RUSTC_WORKSPACE_WRAPPER',
+    'CARGO_BUILD_RUSTC',
+    'CARGO_BUILD_RUSTC_WRAPPER',
+    'CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER'
+)
+$contaminatedVariables = @(
+    foreach ($name in $controlledBuildVariables) {
+        $value = [Environment]::GetEnvironmentVariable($name, 'Process')
+        if (-not [string]::IsNullOrWhiteSpace($value)) { $name }
+    }
+    Get-ChildItem Env: | Where-Object { $_.Name -like 'CARGO_PROFILE_RELEASE_*' -and -not [string]::IsNullOrWhiteSpace($_.Value) } | ForEach-Object { $_.Name }
+)
+if ($contaminatedVariables.Count -gt 0) {
+    throw ('attested build rejects compiler-affecting environment variables: ' + (($contaminatedVariables | Sort-Object -Unique) -join ', '))
+}
+$previousRustFlags = [Environment]::GetEnvironmentVariable('RUSTFLAGS', 'Process')
 try {
-    $env:RUSTFLAGS = (($remapFlags + @($previousRustFlags | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })) -join ' ')
+    $env:RUSTFLAGS = ($remapFlags -join ' ')
     Push-Location $RepoRoot
     try {
         & cargo +1.95.0 build --locked --release --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --target x86_64-pc-windows-msvc --target-dir $TargetDirName
@@ -92,7 +185,7 @@ try {
         Pop-Location
     }
 } finally {
-    $env:RUSTFLAGS = $previousRustFlags
+    [Environment]::SetEnvironmentVariable('RUSTFLAGS', $previousRustFlags, 'Process')
 }
 
 $after = Get-CleanWorktreeState -Root $RepoRoot

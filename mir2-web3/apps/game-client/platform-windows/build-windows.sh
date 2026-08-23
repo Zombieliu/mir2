@@ -34,6 +34,10 @@ BINARY="apps/game-client/platform-windows/target/x86_64-pc-windows-gnu/release/m
 DIST="apps/game-client/platform-windows/dist/windows-x86_64"
 mkdir -p "$DIST"
 cp "$BINARY" "$DIST/mir2-platform-windows.exe"
+if [[ ! -d "apps/web/node_modules/sharp" ]]; then
+  echo "[platform-windows] installing deterministic Web asset-generator dependencies"
+  npm --prefix apps/web ci
+fi
 apps/game-client/platform-windows/package-assets.sh "$DIST/mir2-assets"
 
 echo "[platform-windows] gate passed: $DIST"

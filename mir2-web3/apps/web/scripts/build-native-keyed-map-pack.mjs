@@ -401,6 +401,36 @@ export function assertSafeNativeKeyedOutputRoot(outputRoot) {
   return resolvedOutputRoot;
 }
 
+async function assertNoReparseTree(root) {
+  let current = path.resolve(root);
+  const filesystemRoot = path.parse(current).root;
+  while (true) {
+    if (existsSync(current)) {
+      const stat = await fs.lstat(current);
+      if (stat.isSymbolicLink()) {
+        throw new Error(`Refusing native keyed output through a symlink/junction: ${current}`);
+      }
+    }
+    if (current === filesystemRoot) break;
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  const walk = async (candidate) => {
+    if (!existsSync(candidate)) return;
+    const stat = await fs.lstat(candidate);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`Refusing symlink/junction inside native keyed output: ${candidate}`);
+    }
+    if (!stat.isDirectory()) return;
+    for (const entry of await fs.readdir(candidate)) {
+      await walk(path.join(candidate, entry));
+    }
+  };
+  await walk(path.resolve(root));
+}
+
 async function removeStaleOutputs(root, allowedRoot = root) {
   const resolvedRoot = path.resolve(root);
   const resolvedAllowedRoot = path.resolve(allowedRoot);
@@ -473,8 +503,10 @@ export async function buildNativeKeyedMapPack({
   originalMapRoot = ORIGINAL_MAP_ROOT,
   packagedMapRoot = PACKAGED_MAP_ROOT,
   starterMapRegionPath = STARTER_MAP_REGION_PATH,
+  maxMissingSources = NATIVE_KEYED_MAX_MISSING_SOURCES,
 } = {}) {
   const resolvedOutputRoot = assertSafeNativeKeyedOutputRoot(outputRoot);
+  await assertNoReparseTree(resolvedOutputRoot);
   const outputPageRoot = nativeKeyedPageRoot(resolvedOutputRoot);
   const mapPath = path.join(packagedMapRoot, `${mapFileName}.map.gz`);
   const compressed = await fs.readFile(mapPath);
@@ -483,10 +515,30 @@ export async function buildNativeKeyedMapPack({
     throw new Error(`Unable to parse packaged map ${mapPath}`);
   }
 
+  const references = collectStandaloneMapReferences(parsedMap);
+  let preflightMissingSourceCount = 0;
+  for (const reference of references) {
+    const absoluteSourcePath = path.join(
+      originalMapRoot,
+      reference.libraryKey.split("/").join(path.sep),
+      `${reference.frameIndex}.png`,
+    );
+    if (!existsSync(absoluteSourcePath)) {
+      preflightMissingSourceCount += 1;
+      continue;
+    }
+    if (reference.additive && !(await rawImageForSource(absoluteSourcePath))) {
+      preflightMissingSourceCount += 1;
+    }
+  }
+  assertNativeKeyedMapMissingSourceBudget(
+    { missingSourceCount: preflightMissingSourceCount },
+    maxMissingSources,
+  );
+
   const removedArtifacts = await removeStaleOutputs(resolvedOutputRoot, resolvedOutputRoot);
   await fs.mkdir(outputPageRoot, { recursive: true });
 
-  const references = collectStandaloneMapReferences(parsedMap);
   const offsetIndex = await loadStarterMapOffsetIndex(starterMapRegionPath);
   const entries = [];
   let keyedEntryCount = 0;
@@ -579,13 +631,15 @@ export async function buildNativeKeyedMapPack({
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const result = await buildNativeKeyedMapPack({
-    mapFileName: String(args.map ?? DEFAULT_MAP_FILE_NAME),
-  });
   const maxMissingSources =
     args.maxMissingSources === undefined
       ? NATIVE_KEYED_MAX_MISSING_SOURCES
       : Number(args.maxMissingSources);
+  const result = await buildNativeKeyedMapPack({
+    mapFileName: String(args.map ?? DEFAULT_MAP_FILE_NAME),
+    outputRoot: args.outputRoot === undefined ? OUTPUT_ROOT : String(args.outputRoot),
+    maxMissingSources,
+  });
   assertNativeKeyedMapMissingSourceBudget(result, maxMissingSources);
   console.log(JSON.stringify({ ok: true, ...result }, null, 2));
 }
