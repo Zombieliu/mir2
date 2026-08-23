@@ -1,6 +1,6 @@
 # WN-VIS-PAIR-001 — deterministic original/native evidence gate
 
-Status: **pair gate and native atomic capture code passed; live provenance and human acceptance remain open**
+Status: **pair gate plus native/original atomic capture code passed; live captures, model review and human acceptance remain open**
 
 Date: 2026-08-24
 
@@ -53,6 +53,39 @@ called, and no human visual/feel sign-off was performed in this code-only run.
     bridge and cross-checks the actual running EXE against packaged
     `VERSION.json` plus `PACKAGE-MANIFEST.json`; development or stale packages
     remain draft rather than accepting environment-supplied digest claims.
+- `apps/gateway/src/bin/crystal_original_capture_relay.rs`
+  - is a loopback-only, transparent Crystal TCP relay: client-to-server bytes
+    are forwarded opaquely and are never decoded or persisted;
+  - forwards server frames byte-for-byte while observing only authoritative
+    `StartGame`, map, self-position and lighting packets;
+  - emits an atomic, heartbeat-refreshed
+    `mir2-crystal-original-state-evidence-v1` artifact with one connection id,
+    monotonic packet sequence numbers, exact packet ids and frame SHA-256s;
+  - fails closed on logout, disconnect, missing/invalid map light, stale world
+    state or a non-loopback bind/upstream;
+  - has an end-to-end loopback regression proving both directions are forwarded
+    exactly while opaque client credential bytes never enter evidence JSON.
+- `apps/web/scripts/capture-original-visual-pair.{ps1,mjs}`
+  - captures exactly one `1024x768` original-client area without focusing the
+    window or injecting input, and records only process/window geometry, DPI,
+    executable identity and PNG metadata as observed facts;
+  - requires an explicit original process id for strict mode, avoiding ambiguous
+    selection when original and native windows share the same title;
+  - never derives map, coordinates, lighting or UI state from pixels/window
+    inspection; world-scene claims must come from the relay while scene and the
+    exact native visibility-only UI-state grammar remain explicit operator
+    attestations;
+  - supports strict Login and Character Select captures with `world=null`, while
+    InGame/quest/combat scenes require the relay evidence path;
+  - reads relay evidence both before and after the screenshot and only promotes
+    to strict v1 when the connection, world state and all authoritative packet
+    frame fingerprints remained unchanged across capture;
+  - independently hashes the observed executable and declared asset manifest,
+    checks their real byte lengths, and uses the content-addressed Crystal binary
+    revision `crystal-original-artifact-<exe-sha256>` instead of accepting a
+    manually entered source digest;
+  - otherwise writes only `mir2-native-visual-capture-draft-v1` with explicit
+    blockers. A failed strict request cannot silently become acceptance evidence.
 - Model success is deliberately recorded as
   `READY_FOR_HUMAN_ACCEPTANCE`, never final `ACCEPTED`. The manifest keeps
   `humanAcceptanceRequired=true`, `humanAccepted=false` and `passed=false` until
@@ -81,16 +114,24 @@ cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml 
   capture_light_state_requires_matching_map_and_preserves_dark_override \
   --jobs 1 -- --test-threads=1
   1 passed; 0 failed; 311 filtered out
+
+node --test --test-concurrency=1 apps/web/scripts/test-original-visual-pair.mjs
+  6 passed; 0 failed
+
+cargo +1.95.0 test --manifest-path apps/gateway/Cargo.toml \
+  --bin crystal_original_capture_relay --jobs 1 -- --test-threads=1
+  6 passed; 0 failed
+
+PowerShell parser check: apps/web/scripts/capture-original-visual-pair.ps1
+  passed
 ```
 
 ## Remaining acceptance work
 
-1. Add the Crystal original capture producer with equivalent run/scene metadata
-   and an explicit observed/evidence-bound/operator-attested provenance boundary.
-2. Bind Crystal executable/source/asset provenance to real artifacts rather than
-   trusting manually entered digest strings.
-3. Build a fresh packaged Candidate containing `PACKAGE-MANIFEST.json`, then
+1. Generate the first real Crystal asset manifest and content-addressed evidence
+   files from the exact original client installation used for the baseline.
+2. Build a fresh packaged Candidate containing `PACKAGE-MANIFEST.json`, then
    capture Login, Select, InGame and core-panel pairs from one deterministic
    run; run Gemini scoring against those exact hashes.
-4. Complete the final human 20-minute visual and input-feel acceptance. Model
+3. Complete the final human 20-minute visual and input-feel acceptance. Model
    review remains a defect classifier and cannot substitute for this signature.
