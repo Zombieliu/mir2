@@ -86,6 +86,17 @@ called, and no human visual/feel sign-off was performed in this code-only run.
     manually entered source digest;
   - otherwise writes only `mir2-native-visual-capture-draft-v1` with explicit
     blockers. A failed strict request cannot silently become acceptance evidence.
+- `apps/web/scripts/build-crystal-original-asset-manifest.mjs` and
+  `prepare-original-visual-evidence.mjs`
+  - enumerate only explicitly selected original-client asset directories with
+    stable slash paths and canonical per-file/content-root SHA-256 bindings;
+  - reject traversal, overlapping includes, symlink/reparse paths, output inside
+    the source tree and every overwrite attempt;
+  - let the real Crystal run include `Data`, `Map`, `Localization` and `Sound`
+    while excluding mutable logs, key bindings and private INI configuration;
+  - hash the actual observed `Client.exe` and manifest bytes and derive the
+    source revision as `crystal-original-artifact-<exe-sha256>`; no operator can
+    supply a revision or digest by hand.
 - Model success is deliberately recorded as
   `READY_FOR_HUMAN_ACCEPTANCE`, never final `ACCEPTED`. The manifest keeps
   `humanAcceptanceRequired=true`, `humanAccepted=false` and `passed=false` until
@@ -116,7 +127,12 @@ cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml 
   1 passed; 0 failed; 311 filtered out
 
 node --test --test-concurrency=1 apps/web/scripts/test-original-visual-pair.mjs
-  6 passed; 0 failed
+  7 passed; 0 failed
+
+node --test --test-concurrency=1 \
+  apps/web/scripts/test-build-crystal-original-asset-manifest.mjs \
+  apps/web/scripts/test-prepare-original-visual-evidence.mjs
+  10 passed; 0 failed
 
 cargo +1.95.0 test --manifest-path apps/gateway/Cargo.toml \
   --bin crystal_original_capture_relay --jobs 1 -- --test-threads=1
@@ -128,8 +144,8 @@ PowerShell parser check: apps/web/scripts/capture-original-visual-pair.ps1
 
 ## Remaining acceptance work
 
-1. Generate the first real Crystal asset manifest and content-addressed evidence
-   files from the exact original client installation used for the baseline.
+1. Generate the first real Crystal asset manifest and same-run content-addressed
+   evidence files from the exact original client installation used for the baseline.
 2. Build a fresh packaged Candidate containing `PACKAGE-MANIFEST.json`, then
    capture Login, Select, InGame and core-panel pairs from one deterministic
    run; run Gemini scoring against those exact hashes.

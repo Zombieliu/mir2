@@ -11,6 +11,8 @@ import {
   createSidecarFromObserved,
   parseOriginalCaptureArgs,
 } from "./capture-original-visual-pair.mjs";
+import { buildOriginalAssetManifest } from "./build-crystal-original-asset-manifest.mjs";
+import { prepareOriginalVisualEvidence } from "./prepare-original-visual-evidence.mjs";
 import { verifyVisualPair } from "./verify-native-visual-pair.mjs";
 
 function crc32(bytes) { let crc = 0xffffffff; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0); } return (crc ^ 0xffffffff) >>> 0; }
@@ -168,6 +170,35 @@ test("strict login capture uses operator-attested native UI state and requires n
   assert.equal(result.sidecar.schemaVersion, "mir2-native-visual-capture-v1");
   assert.equal(result.sidecar.uiState, "shell=login");
   assert.equal(result.sidecar.world, null);
+});
+
+test("generated Crystal provenance artifacts promote through the strict capture contract", async (t) => {
+  const f = await fixture(); t.after(() => fs.rm(f.root, { recursive: true, force: true }));
+  const assetRoot = path.join(f.root, "CrystalClient");
+  const manifest = path.join(f.root, "crystal-original-assets.json");
+  const evidenceDir = path.join(f.root, "evidence");
+  await fs.mkdir(path.join(assetRoot, "Data"), { recursive: true });
+  await fs.writeFile(path.join(assetRoot, "Data", "items.dat"), "items");
+  await buildOriginalAssetManifest({ assetRoot, output: manifest, includes: ["Data"], generatedAt: f.now });
+  const evidence = await prepareOriginalVisualEvidence({
+    runId: "vis-pair-001",
+    executable: f.executable,
+    assetManifest: manifest,
+    outputDir: evidenceDir,
+    observedAt: f.now,
+  });
+
+  const result = await createSidecarFromObserved({
+    ...optionsFor(f),
+    scene: "login",
+    "ui-state": "shell=login",
+    "strict-v1": true,
+    "build-evidence": evidence.buildEvidencePath,
+    assetEvidence: [evidence.assetEvidencePath],
+  }, f.observed);
+  assert.equal(result.sidecar.schemaVersion, "mir2-native-visual-capture-v1");
+  assert.equal(result.sidecar.build.sourceRevision, `crystal-original-artifact-${await hash(f.executable)}`);
+  assert.equal(result.sidecar.build.assetManifestSha256, await hash(manifest));
 });
 
 test("strict capture fails closed when authoritative state changes during the screenshot", async (t) => {
