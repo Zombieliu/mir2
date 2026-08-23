@@ -163,8 +163,8 @@ export function validateReviewGate(report, pair, minimumScore, contract) {
   if (typeof report.model !== "string" || report.model.trim().length === 0) {
     throw new Error("Visual review report must identify the model.");
   }
-  if ((report.provider === "vercel" || report.provider === "gemini") && !/gemini/i.test(report.model)) {
-    throw new Error(`Visual review provider ${report.provider} must identify a Gemini model.`);
+  if (report.provider === "vercel" && !/gemini/i.test(report.model)) {
+    throw new Error("Vercel visual review must identify a Gemini model.");
   }
   assertEqual(
     String(report.schemaSha256 ?? "").toLowerCase(),

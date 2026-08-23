@@ -208,6 +208,16 @@ test("review gate binds image hashes and rejects P1, wrong scene, or low score",
   const pair = await verifyVisualPair(fixture);
   const contract = reviewContract();
   assert.equal(validateReviewGate(acceptedReview(pair, contract), pair, 92, contract).passed, true);
+  const geminiDefault = acceptedReview(pair, contract);
+  geminiDefault.provider = "gemini";
+  assert.equal(validateReviewGate(geminiDefault, pair, 92, contract).passed, true);
+  const wrongVercelModel = acceptedReview(pair, contract);
+  wrongVercelModel.provider = "vercel";
+  wrongVercelModel.model = "openai/example";
+  assert.throws(
+    () => validateReviewGate(wrongVercelModel, pair, 92, contract),
+    /must identify a Gemini model/,
+  );
   assert.equal(validateReviewGate(acceptedReview(pair, contract, { score: 91 }), pair, 92, contract).passed, false);
   assert.equal(validateReviewGate(acceptedReview(pair, contract, {
     issues: [{

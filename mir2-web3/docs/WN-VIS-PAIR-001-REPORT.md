@@ -1,6 +1,6 @@
 # WN-VIS-PAIR-001 — deterministic original/native evidence gate
 
-Status: **code gate passed; live capture provenance and human acceptance remain open**
+Status: **pair gate and native atomic capture code passed; live provenance and human acceptance remain open**
 
 Date: 2026-08-24
 
@@ -38,6 +38,21 @@ called, and no human visual/feel sign-off was performed in this code-only run.
   - extracts only the provider's primary response and rejects provider error
     status instead of recursively accepting an unrelated nested object;
   - records the schema SHA-256 in `review.json`.
+- `apps/game-client/platform-windows/src/capture.rs`
+  - replaces the asynchronous `save_to_disk` helper with a Bevy 0.19
+    `ScreenshotCaptured` observer;
+  - freezes the request-time scene, safe UI visibility state, DPI, map and
+    `SelfPlayer` coordinates before GPU readback;
+  - atomically writes and fsyncs the PNG, hashes the final bytes, and only then
+    atomically writes the sidecar;
+  - never serializes account/password/chat/draft text;
+  - emits `mir2-native-visual-capture-draft-v1` with explicit blockers while
+    light or trusted build provenance is unavailable. It cannot be mistaken for
+    an acceptance-eligible v1 sidecar;
+  - reads effective light only from the latest matching-map native lighting
+    bridge and cross-checks the actual running EXE against packaged
+    `VERSION.json` plus `PACKAGE-MANIFEST.json`; development or stale packages
+    remain draft rather than accepting environment-supplied digest claims.
 - Model success is deliberately recorded as
   `READY_FOR_HUMAN_ACCEPTANCE`, never final `ACCEPTED`. The manifest keeps
   `humanAcceptanceRequired=true`, `humanAccepted=false` and `passed=false` until
@@ -57,17 +72,25 @@ node tools/antigravity-visual-review/review.mjs --self-test
 
 git diff --check -- <scoped visual-review files>
   exit 0
+
+cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml \
+  capture:: --jobs 1 -- --test-threads=1
+  15 passed; 0 failed; 297 filtered out
+
+cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml \
+  capture_light_state_requires_matching_map_and_preserves_dark_override \
+  --jobs 1 -- --test-threads=1
+  1 passed; 0 failed; 311 filtered out
 ```
 
 ## Remaining acceptance work
 
-1. Replace the Windows `save_to_disk` screenshot observer with an authoritative
-   `ScreenshotCaptured` observer that atomically writes PNG then sidecar from one
-   frozen runtime state.
-2. Add the Crystal original capture producer with equivalent run/scene metadata.
-3. Bind executable/source/asset provenance to real build artifacts rather than
+1. Add the Crystal original capture producer with equivalent run/scene metadata
+   and an explicit observed/evidence-bound/operator-attested provenance boundary.
+2. Bind Crystal executable/source/asset provenance to real artifacts rather than
    trusting manually entered digest strings.
-4. Capture fresh Login, Select, InGame and core-panel pairs from one deterministic
+3. Build a fresh packaged Candidate containing `PACKAGE-MANIFEST.json`, then
+   capture Login, Select, InGame and core-panel pairs from one deterministic
    run; run Gemini scoring against those exact hashes.
-5. Complete the final human 20-minute visual and input-feel acceptance. Model
+4. Complete the final human 20-minute visual and input-feel acceptance. Model
    review remains a defect classifier and cannot substitute for this signature.

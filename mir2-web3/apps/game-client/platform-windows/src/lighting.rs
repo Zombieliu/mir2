@@ -10,10 +10,10 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Mutex, OnceLock};
 
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
-use super::{native_map_light_cells, MapViewport, ParsedMap};
-use crate::effects::{native_effect_light_snapshots, NativeEffectLightSnapshot};
+use super::{MapViewport, ParsedMap, native_map_light_cells};
+use crate::effects::{NativeEffectLightSnapshot, native_effect_light_snapshots};
 
 pub const STAGE_WIDTH: f32 = 1024.0;
 pub const STAGE_HEIGHT: f32 = 768.0;
@@ -136,6 +136,37 @@ static EFFECT_LIGHTING_CONTEXT: OnceLock<Mutex<Option<EffectLightingContext>>> =
 
 fn effect_lighting_context() -> &'static Mutex<Option<EffectLightingContext>> {
     EFFECT_LIGHTING_CONTEXT.get_or_init(|| Mutex::new(None))
+}
+
+/// Returns the effective Crystal lighting state for a capture only when the
+/// latest lighting bridge context belongs to the requested map. This avoids
+/// labeling a screenshot with a stale override from the previous map.
+pub(crate) fn capture_light_state_for_map(map_file_name: &str) -> Option<String> {
+    let current = effect_lighting_context()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    capture_light_state_slug(
+        current.as_ref().map(|context| &context.bridge),
+        map_file_name,
+    )
+}
+
+fn capture_light_state_slug(
+    bridge: Option<&NativeLightingBridge>,
+    map_file_name: &str,
+) -> Option<String> {
+    let bridge = bridge?;
+    let current_map = bridge.current_map_file_name.as_deref()?;
+    if !same_map_file_name(current_map, map_file_name) {
+        return None;
+    }
+    let setting = bridge
+        .map_light_setting
+        .or(bridge.time_of_day_light_setting)?;
+    Some(format!(
+        "setting={setting};mapDarkLight={}",
+        bridge.map_dark_light
+    ))
 }
 
 fn remember_effect_lighting_context(
@@ -615,6 +646,23 @@ mod tests {
     }
 
     #[test]
+    fn capture_light_state_requires_matching_map_and_preserves_dark_override() {
+        let bridge = NativeLightingBridge {
+            current_map_file_name: Some("maps/0.map".to_owned()),
+            time_of_day_light_setting: Some(4),
+            map_light_setting: Some(3),
+            map_dark_light: 2,
+            ..Default::default()
+        };
+        assert_eq!(
+            capture_light_state_slug(Some(&bridge), "0"),
+            Some("setting=3;mapDarkLight=2".to_owned())
+        );
+        assert_eq!(capture_light_state_slug(Some(&bridge), "1"), None);
+        assert_eq!(capture_light_state_slug(None, "0"), None);
+    }
+
+    #[test]
     fn packet_and_generation_lifecycle_clear_stale_map_light() {
         let mut bridge = NativeLightingBridge::default();
         bridge.set_generation(1);
@@ -986,9 +1034,11 @@ mod tests {
         assert_eq!(lights.len(), MAX_NATIVE_LIGHTS);
         assert_eq!(lights[0]["key"], "1");
         assert_eq!(lights.last().unwrap()["key"], "effect:fx-a");
-        assert!(lights
-            .iter()
-            .all(|value| value["key"] != "effect:fx-invalid-range"));
+        assert!(
+            lights
+                .iter()
+                .all(|value| value["key"] != "effect:fx-invalid-range")
+        );
 
         let missing = NativeLightAssets {
             ranges: [
@@ -1009,11 +1059,13 @@ mod tests {
                 light: 6,
             }],
         );
-        assert!(state["entityLights"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .all(|value| value["kind"] != "effect"));
+        assert!(
+            state["entityLights"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|value| value["kind"] != "effect")
+        );
     }
 
     #[test]
@@ -1043,10 +1095,12 @@ mod tests {
                 },
             ],
         );
-        assert!(state["entityLights"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .all(|value| value["kind"] != "effect"));
+        assert!(
+            state["entityLights"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|value| value["kind"] != "effect")
+        );
     }
 }
