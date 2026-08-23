@@ -162,7 +162,8 @@ fn main() {
     app.add_systems(
         bevy::app::Update,
         (
-            gameplay_bridge::drain_gameplay_events,
+            gameplay_bridge::drain_gameplay_events
+                .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
             entity_presentation::tick_native_entity_presentation,
             entity_overlays::sync_native_entity_overlays,
             effects::tick_native_effects,

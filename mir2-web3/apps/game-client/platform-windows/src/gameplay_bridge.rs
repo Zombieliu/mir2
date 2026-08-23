@@ -20,8 +20,9 @@ use mir2_client_bevy::game_shop::GameShopModel;
 use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::pending_operations::{
-    mark_authoritative_refresh, reconcile_quest_refresh, AuthoritativeModelDomain,
-    AuthoritativeModelRevisions, PendingOperationKey, PendingOperations,
+    apply_quest_operation_ack, mark_authoritative_refresh, reconcile_quest_refresh,
+    AuthoritativeModelDomain, AuthoritativeModelRevisions, PendingOperationKey, PendingOperations,
+    QuestOperationAck,
 };
 use mir2_client_bevy::quest_model::{
     CombatTargetModel, CombatTargetUpdate, GroundPickupModel, NearbyNpc, NearbyNpcModel,
@@ -346,6 +347,10 @@ pub const MAX_BUFFERED_EFFECT_EVENTS: usize = 96;
 /// One complete replacement of native gameplay presentation state.
 #[derive(Debug, Clone, Default)]
 pub struct NativeGameplaySnapshot {
+    /// WebSocket connection generation that produced this snapshot. ACKs and
+    /// presentation deltas from an older generation must not affect a resumed
+    /// connection.
+    pub generation: u64,
     /// A map-protocol-only update must not replace unrelated quest, entity, or
     /// HUD read models merely to clear/update the Big Map resource.
     pub big_map_only: bool,
@@ -355,6 +360,9 @@ pub struct NativeGameplaySnapshot {
     pub combat_target: CombatTargetModel,
     pub world_click_state: NativeWorldClickState,
     pub ground_pickups: GroundPickupModel,
+    /// Exact authoritative completion envelope for the quest command that
+    /// caused this snapshot. It may be a NACK and never mutates quest state.
+    pub quest_operation_ack: Option<QuestOperationAck>,
     pub entity_render_payload: Option<Value>,
     pub damage_events: Vec<NativeDamageEvent>,
     /// Monotonic authoritative effect events since the last drain, in order.
@@ -953,6 +961,7 @@ impl NativeGameplayAdapter {
         let mut world_click_state = world_click_state_from_payload(payload);
         world_click_state.observe_allowed = self.authoritative_observe_allowed;
         NativeGameplaySnapshot {
+            generation: self.generation,
             big_map_only: false,
             quests: transform_quest_tracker(payload, &self.quest_definitions),
             dialog: transform_npc_dialog(payload),
@@ -960,6 +969,7 @@ impl NativeGameplayAdapter {
             combat_target: transform_combat_target(payload, player_x, player_y),
             world_click_state,
             ground_pickups: transform_ground_pickups(payload, player_x, player_y),
+            quest_operation_ack: decode_quest_operation_ack(payload),
             entity_render_payload: Some(payload.clone()),
             damage_events: self.damage_events.iter().cloned().collect(),
             effect_events: self.effect_events.iter().cloned().collect(),
@@ -970,6 +980,7 @@ impl NativeGameplayAdapter {
 
     pub fn big_map_snapshot(&self) -> NativeGameplaySnapshot {
         NativeGameplaySnapshot {
+            generation: self.generation,
             big_map_only: true,
             big_map: self.big_map.clone(),
             ..Default::default()
@@ -1010,22 +1021,77 @@ impl NativeGameplayAdapter {
 #[derive(Resource)]
 pub struct GameplayEventInbox {
     receiver: Mutex<mpsc::Receiver<NativeGameplaySnapshot>>,
+    generation: Mutex<Option<u64>>,
 }
 
 impl GameplayEventInbox {
     pub fn new(receiver: mpsc::Receiver<NativeGameplaySnapshot>) -> Self {
         Self {
             receiver: Mutex::new(receiver),
+            generation: Mutex::new(None),
         }
     }
 
-    fn latest(&self) -> Option<NativeGameplaySnapshot> {
+    fn drain(&self) -> (Vec<NativeGameplaySnapshot>, bool) {
         let receiver = self
             .receiver
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
-        receiver.try_iter().last()
+        let mut snapshots = receiver.try_iter().collect::<Vec<_>>();
+        drop(receiver);
+        let mut generation = self
+            .generation
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        let advanced = retain_current_transport_generation(&mut generation, &mut snapshots);
+        (snapshots, advanced)
     }
+}
+
+fn decode_quest_operation_ack(payload: &Value) -> Option<QuestOperationAck> {
+    let value = payload.get("questOperationAck")?;
+    match serde_json::from_value(value.clone()) {
+        Ok(ack) => Some(ack),
+        Err(error) => {
+            eprintln!("[gateway-client] invalid questOperationAck ignored: {error}");
+            None
+        }
+    }
+}
+
+fn apply_quest_operation_acks(
+    pending: &mut PendingOperations,
+    snapshots: &[NativeGameplaySnapshot],
+) -> usize {
+    snapshots
+        .iter()
+        .filter_map(|snapshot| snapshot.quest_operation_ack.as_ref())
+        .map(|ack| apply_quest_operation_ack(pending, ack))
+        .sum()
+}
+
+fn retain_current_transport_generation(
+    transport: &mut Option<u64>,
+    snapshots: &mut Vec<NativeGameplaySnapshot>,
+) -> bool {
+    let Some(newest) = snapshots.iter().map(|snapshot| snapshot.generation).max() else {
+        return false;
+    };
+    let mut advanced = false;
+    match *transport {
+        None => *transport = Some(newest),
+        Some(current) if newest > current => {
+            *transport = Some(newest);
+            advanced = true;
+        }
+        Some(current) if newest < current => {
+            snapshots.clear();
+            return false;
+        }
+        Some(_) => {}
+    }
+    snapshots.retain(|snapshot| snapshot.generation == transport.unwrap_or(newest));
+    advanced
 }
 
 /// Replace presentation resources with the newest authoritative snapshot.
@@ -1069,8 +1135,15 @@ pub fn drain_gameplay_events(
     mut ecs_commands: Commands,
     time: Res<bevy::prelude::Time>,
 ) {
+    let (snapshots, transport_advanced) = inbox.drain();
+    if transport_advanced {
+        // Clear the old connection's request correlations before any same-frame
+        // UI mutation, even when presentation is currently gated by Login or
+        // CharacterSelect. Otherwise observing the generation while gated could
+        // strand an old pending key forever.
+        pending.release_all_quest_operations();
+    }
     if !should_apply_gameplay_snapshot(shell.screen) {
-        let _ = inbox.latest();
         *quests = QuestTracker::default();
         *dialog = NpcDialogModel::default();
         *nearby_npcs = NearbyNpcModel::default();
@@ -1087,15 +1160,20 @@ pub fn drain_gameplay_events(
         }
         return;
     }
-    let Some(snapshot) = inbox.latest() else {
+    if snapshots.is_empty() {
+        return;
+    }
+    apply_quest_operation_acks(&mut pending, &snapshots);
+    if let (Some(mut big_map), Some(latest)) = (big_map, snapshots.last()) {
+        *big_map = latest.big_map.clone();
+    }
+    let Some(snapshot) = snapshots
+        .into_iter()
+        .rev()
+        .find(|snapshot| !snapshot.big_map_only)
+    else {
         return;
     };
-    if let Some(mut big_map) = big_map {
-        *big_map = snapshot.big_map.clone();
-    }
-    if snapshot.big_map_only {
-        return;
-    }
     reconcile_quest_refresh(&mut pending, &quests, &snapshot.quests);
     mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Quest);
     *quests = snapshot.quests;
@@ -1210,6 +1288,13 @@ pub fn forward_quest_ui_intents(
         .map(|mut queue| queue.drain_intents())
         .unwrap_or_default();
     if shell.screen != NativeShellScreen::InGame {
+        if let Some(operation_pending) = operation_pending.as_deref_mut() {
+            for intent in &pending {
+                if let Some(key) = intent.pending_key() {
+                    operation_pending.release(&key);
+                }
+            }
+        }
         return;
     }
 
@@ -1229,7 +1314,9 @@ pub fn forward_quest_ui_intents(
         .map(|state| state.blocks_world_action(dialog_open, dead))
         .unwrap_or(dialog_open || dead);
 
+    let mut retry_intents = Vec::new();
     for intent in pending {
+        let retry_intent = intent.clone();
         let command = match intent {
             QuestUiIntent::InteractNpc { npc_object_id } => {
                 if world_actions_blocked {
@@ -1245,17 +1332,45 @@ pub fn forward_quest_ui_intents(
             QuestUiIntent::AcceptQuest {
                 npc_index,
                 quest_index,
-            } => NativeOutboundCommand::AcceptQuest {
-                npc_index,
-                quest_index,
-            },
+            } => {
+                let key = PendingOperationKey::QuestAccept {
+                    npc_index,
+                    quest_index,
+                };
+                let Some(request_id) = operation_pending
+                    .as_deref_mut()
+                    .and_then(|pending| pending.bind_quest_request_id(key))
+                else {
+                    eprintln!("[gateway-client] quest accept request id unavailable");
+                    continue;
+                };
+                NativeOutboundCommand::AcceptQuest {
+                    request_id,
+                    npc_index,
+                    quest_index,
+                }
+            }
             QuestUiIntent::FinishQuest {
                 quest_index,
                 selected_item_index,
-            } => NativeOutboundCommand::FinishQuest {
-                quest_index,
-                selected_item_index,
-            },
+            } => {
+                let key = PendingOperationKey::QuestFinish {
+                    quest_index,
+                    selected_item_index,
+                };
+                let Some(request_id) = operation_pending
+                    .as_deref_mut()
+                    .and_then(|pending| pending.bind_quest_request_id(key))
+                else {
+                    eprintln!("[gateway-client] quest finish request id unavailable");
+                    continue;
+                };
+                NativeOutboundCommand::FinishQuest {
+                    request_id,
+                    quest_index,
+                    selected_item_index,
+                }
+            }
             QuestUiIntent::AbandonQuest { quest_index } => {
                 let allowed = tracker.as_deref().is_some_and(|tracker| {
                     tracker.active_quests.iter().any(|quest| {
@@ -1263,9 +1378,23 @@ pub fn forward_quest_ui_intents(
                     })
                 });
                 if !allowed {
+                    if let Some(pending) = operation_pending.as_deref_mut() {
+                        pending.release(&PendingOperationKey::QuestAbandon { quest_index });
+                    }
                     continue;
                 }
-                NativeOutboundCommand::AbandonQuest { quest_index }
+                let key = PendingOperationKey::QuestAbandon { quest_index };
+                let Some(request_id) = operation_pending
+                    .as_deref_mut()
+                    .and_then(|pending| pending.bind_quest_request_id(key))
+                else {
+                    eprintln!("[gateway-client] quest abandon request id unavailable");
+                    continue;
+                };
+                NativeOutboundCommand::AbandonQuest {
+                    request_id,
+                    quest_index,
+                }
             }
             QuestUiIntent::AttackTarget { object_id } => {
                 if world_actions_blocked {
@@ -1328,7 +1457,21 @@ pub fn forward_quest_ui_intents(
                 NativeOutboundCommand::PickUpTile
             }
         };
-        commands.send_command(GatewayCommand::Wire(command));
+        if !commands.send_command(GatewayCommand::Wire(command)) {
+            retry_intents.push(retry_intent);
+        }
+    }
+    let dropped = intents.retain_failed_intents(retry_intents);
+    debug_assert!(
+        dropped.is_empty(),
+        "drained quest intent batch must always fit back into its bounded retry queue"
+    );
+    for intent in dropped {
+        if let (Some(pending), Some(key)) = (operation_pending.as_deref_mut(), intent.pending_key())
+        {
+            pending.release(&key);
+        }
+        eprintln!("[gateway-client] unsent native UI intent dropped after retry saturation");
     }
 
     for intent in player_pending {
@@ -2414,6 +2557,7 @@ fn strip_crystal_markup(text: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::gateway::{CommandSource, PlayerIntent};
     use bevy::prelude::App;
     use mir2_client_bevy::big_map::{BigMapInfo, BigMapNpc};
     use serde_json::json;
@@ -2637,6 +2781,7 @@ mod tests {
         })
         .init_resource::<QuestUiIntentQueue>()
         .init_resource::<NativePlayerUiIntentQueue>()
+        .init_resource::<PendingOperations>()
         .insert_resource(GatewayCommands::new(sender))
         .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
         (app, receiver)
@@ -2656,6 +2801,7 @@ mod tests {
         .insert_resource(read_model)
         .init_resource::<QuestUiIntentQueue>()
         .init_resource::<NativePlayerUiIntentQueue>()
+        .init_resource::<PendingOperations>()
         .insert_resource(GatewayCommands::new(sender))
         .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
         (app, receiver)
@@ -2835,6 +2981,205 @@ mod tests {
     }
 
     #[test]
+    fn world_snapshot_decodes_exact_rejected_quest_operation_ack() {
+        let adapter = NativeGameplayAdapter::default();
+        let snapshot = adapter.snapshot(&json!({
+            "questOperationAck": {
+                "operation": "finishQuest",
+                "requestId": "qs-0000000000000044",
+                "questIndex": 44,
+                "selectedItemIndex": 2,
+                "success": false
+            }
+        }));
+        assert_eq!(
+            snapshot.quest_operation_ack,
+            Some(QuestOperationAck::FinishQuest {
+                request_id: "qs-0000000000000044".into(),
+                quest_index: 44,
+                selected_item_index: 2,
+                success: false,
+            })
+        );
+    }
+
+    #[test]
+    fn quest_nack_survives_a_later_plain_snapshot_in_the_same_bevy_frame() {
+        let key = PendingOperationKey::QuestFinish {
+            quest_index: 44,
+            selected_item_index: 2,
+        };
+        let mut pending = PendingOperations::default();
+        assert!(pending.try_begin(key.clone()));
+        let request_id = pending
+            .bind_quest_request_id(key.clone())
+            .expect("bind quest request id");
+        let snapshots = vec![
+            NativeGameplaySnapshot {
+                quest_operation_ack: Some(QuestOperationAck::FinishQuest {
+                    request_id,
+                    quest_index: 44,
+                    selected_item_index: 2,
+                    success: false,
+                }),
+                ..Default::default()
+            },
+            NativeGameplaySnapshot::default(),
+        ];
+
+        assert_eq!(apply_quest_operation_acks(&mut pending, &snapshots), 1);
+        assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn reconnect_generation_rejects_old_ack_and_releases_old_pending() {
+        let key = PendingOperationKey::QuestFinish {
+            quest_index: 44,
+            selected_item_index: 2,
+        };
+        let mut pending = PendingOperations::default();
+        let mut transport = None;
+        let mut first = vec![NativeGameplaySnapshot {
+            generation: 1,
+            ..Default::default()
+        }];
+        assert!(!retain_current_transport_generation(
+            &mut transport,
+            &mut first
+        ));
+        assert_eq!(first.len(), 1);
+
+        assert!(pending.try_begin(key.clone()));
+        let request_id = pending
+            .bind_quest_request_id(key.clone())
+            .expect("bind old-generation quest request id");
+        let mut stale = vec![NativeGameplaySnapshot {
+            generation: 0,
+            quest_operation_ack: Some(QuestOperationAck::FinishQuest {
+                request_id: request_id.clone(),
+                quest_index: 44,
+                selected_item_index: 2,
+                success: false,
+            }),
+            ..Default::default()
+        }];
+        assert!(!retain_current_transport_generation(
+            &mut transport,
+            &mut stale
+        ));
+        assert!(stale.is_empty());
+        assert_eq!(apply_quest_operation_acks(&mut pending, &stale), 0);
+        assert!(pending.contains(&key));
+
+        let mut resumed = vec![NativeGameplaySnapshot {
+            generation: 2,
+            ..Default::default()
+        }];
+        assert!(retain_current_transport_generation(
+            &mut transport,
+            &mut resumed
+        ));
+        pending.release_all_quest_operations();
+        assert_eq!(resumed.len(), 1);
+        assert!(!pending.contains(&key));
+
+        let resumed_request_id = pending
+            .bind_quest_request_id(key.clone())
+            .expect("retry must re-register on the resumed generation");
+        let old_ack = QuestOperationAck::FinishQuest {
+            request_id,
+            quest_index: 44,
+            selected_item_index: 2,
+            success: false,
+        };
+        assert_eq!(apply_quest_operation_ack(&mut pending, &old_ack), 0);
+        assert!(pending.contains(&key));
+        let resumed_ack = QuestOperationAck::FinishQuest {
+            request_id: resumed_request_id,
+            quest_index: 44,
+            selected_item_index: 2,
+            success: false,
+        };
+        assert_eq!(apply_quest_operation_ack(&mut pending, &resumed_ack), 1);
+        assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn retained_quest_retry_rebinds_after_generation_release() {
+        let (sender, mut receiver) = crate::gateway::command_channel(8);
+        for _ in 0..8 {
+            sender
+                .send(GatewayCommand::Player(PlayerIntent::Walk {
+                    direction: "up".to_owned(),
+                }))
+                .expect("fill the bounded normal lane");
+        }
+
+        let key = PendingOperationKey::QuestAccept {
+            npc_index: 3,
+            quest_index: 11,
+        };
+        let mut pending = PendingOperations::default();
+        assert!(pending.try_begin(key.clone()));
+
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .insert_resource(NativePlayerUiState::default())
+        .insert_resource(NpcDialogModel::default())
+        .insert_resource(UiReadModel::default())
+        .insert_resource(QuestTracker::default())
+        .insert_resource(pending)
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AcceptQuest {
+                npc_index: 3,
+                quest_index: 11,
+            });
+
+        app.update();
+        assert_eq!(
+            app.world().resource::<QuestUiIntentQueue>().retry_len(),
+            1,
+            "a saturated transport must retain the exact quest intent"
+        );
+        let old_request_id = app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .bind_quest_request_id(key.clone())
+            .expect("the retained request must keep its first correlation id");
+
+        app.world_mut()
+            .resource_mut::<PendingOperations>()
+            .release_all_quest_operations();
+        for _ in 0..8 {
+            receiver.try_command().expect("drain the saturated lane");
+        }
+
+        app.update();
+        let sent_request_id = match receiver
+            .try_command()
+            .expect("the retained intent must be sent after reconnect")
+        {
+            GatewayCommand::Wire(NativeOutboundCommand::AcceptQuest {
+                request_id,
+                npc_index: 3,
+                quest_index: 11,
+            }) => request_id,
+            other => panic!("unexpected retried quest command: {other:?}"),
+        };
+        assert_ne!(sent_request_id, old_request_id);
+        let pending = app.world().resource::<PendingOperations>();
+        assert!(pending.contains(&key));
+    }
+
+    #[test]
     fn gateway_world_snapshot_shape_parses_and_resolves_native_combat_intents() {
         let mut frame = json!({
             "type": "worldSnapshot",
@@ -2929,19 +3274,133 @@ mod tests {
             GatewayCommand::Wire(NativeOutboundCommand::AcceptQuest {
                 npc_index: 3,
                 quest_index: 11,
+                request_id,
             })
+                if request_id.starts_with("qs-")
         )));
         assert!(commands.iter().any(|command| matches!(
             command,
             GatewayCommand::Wire(NativeOutboundCommand::FinishQuest {
                 quest_index: 11,
                 selected_item_index: -1,
+                request_id,
             })
+                if request_id.starts_with("qs-")
         )));
         assert!(commands.iter().any(|command| matches!(
             command,
-            GatewayCommand::Wire(NativeOutboundCommand::AbandonQuest { quest_index: 11 })
+            GatewayCommand::Wire(NativeOutboundCommand::AbandonQuest {
+                quest_index: 11,
+                request_id,
+            }) if request_id.starts_with("qs-")
         )));
+    }
+
+    #[test]
+    fn locally_rejected_stale_abandon_releases_its_pending_key() {
+        let (mut app, receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
+        app.world_mut()
+            .resource_mut::<QuestTracker>()
+            .active_quests
+            .clear();
+        let key = PendingOperationKey::QuestAbandon { quest_index: 11 };
+        let mut pending = PendingOperations::default();
+        assert!(pending.try_begin(key.clone()));
+        app.insert_resource(pending);
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AbandonQuest { quest_index: 11 });
+
+        app.update();
+
+        assert!(!app.world().resource::<PendingOperations>().contains(&key));
+        assert!(receiver.try_recv().is_err());
+    }
+
+    #[test]
+    fn sustained_backpressure_keeps_original_pickup_ahead_of_overflow_and_sends_it_once() {
+        let (sender, mut receiver) = crate::gateway::command_channel(8);
+        for _ in 0..8 {
+            sender
+                .send(GatewayCommand::Player(PlayerIntent::Walk {
+                    direction: "up".to_owned(),
+                }))
+                .expect("fill bounded normal lane");
+        }
+
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .insert_resource(NativePlayerUiState::default())
+        .insert_resource(NpcDialogModel::default())
+        .insert_resource(UiReadModel::default())
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::PickUpObject { object_id: 7001 });
+
+        app.update();
+        {
+            let queue = app.world().resource::<QuestUiIntentQueue>();
+            assert_eq!(queue.len(), 1);
+            assert_eq!(queue.retry_len(), 1);
+        }
+
+        for object_id in 8000..(8000 + mir2_client_bevy::quest_ui::MAX_QUEUED_INTENTS as u32 + 8) {
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .push_intent(QuestUiIntent::PickUpObject { object_id });
+        }
+        app.update();
+        {
+            let queue = app.world().resource::<QuestUiIntentQueue>();
+            assert_eq!(queue.len(), mir2_client_bevy::quest_ui::MAX_QUEUED_INTENTS);
+            assert_eq!(
+                queue.retry_len(),
+                mir2_client_bevy::quest_ui::MAX_QUEUED_INTENTS
+            );
+            assert!(queue.overflow_count() > 0);
+        }
+
+        for object_id in 9000..(9000 + mir2_client_bevy::quest_ui::MAX_QUEUED_INTENTS as u32 + 8) {
+            assert!(!app
+                .world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .push_intent(QuestUiIntent::PickUpObject { object_id }));
+        }
+        app.update();
+
+        for _ in 0..8 {
+            receiver.try_command().expect("drain saturated lane");
+        }
+        let mut sent_pickups = Vec::new();
+        for _ in 0..8 {
+            app.update();
+            while let Ok(command) = receiver.try_command() {
+                if let GatewayCommand::Wire(NativeOutboundCommand::PickUp { object_id }) = command {
+                    sent_pickups.push(object_id);
+                }
+            }
+            if app.world().resource::<QuestUiIntentQueue>().is_empty() {
+                break;
+            }
+        }
+        assert_eq!(sent_pickups.first(), Some(&7001));
+        assert_eq!(
+            sent_pickups
+                .iter()
+                .filter(|object_id| **object_id == 7001)
+                .count(),
+            1,
+            "the original pickup must be delivered once, never duplicated"
+        );
+        assert!(app.world().resource::<QuestUiIntentQueue>().is_empty());
     }
 
     #[test]

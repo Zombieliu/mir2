@@ -1,5 +1,32 @@
 # Crystal Server Parity
 
+> WN-CANDIDATE R12 server parity note (2026-08-23): ordinary `AcceptQuest` and
+> `FinishQuest` can no longer mutate task state from anywhere on the map. The
+> native path requires the exact current server-owned dialog link, correct
+> active NPC, real NPC ECS identity, authoritative one-tile proximity, valid
+> lifecycle stage, and (for the starter task) the configured proof item. The
+> Web quest log enables Accept/Complete only under the exact matching link in
+> the current server-owned dialog, which the server revalidates before
+> mutation; the former no-dialog sentinel path
+> is rejected. Opening the guide no longer changes task state; explicit actions emit the matching
+> `ChangeQuest`/`CompleteQuest` surfaces and close the dialog only on success.
+> Gateway world snapshots now echo a monotonic native typed-quest request id in the
+> exact ACK/NACK for normal execution and capacity rejection. Native handling
+> consumes every same-frame ACK once, rejects malformed envelopes, ignores a
+> delayed old id for a replacement submission, filters stale connection
+> generations, and gives retained unsent retries a new id after resume. Existing
+> Crystal/Web `@quest:accept` / `@quest:finish` dialog targets remain accepted.
+> Exceptional server paths close the socket rather than claiming a result.
+> Native pickup transport
+> reports a saturated bounded lane, leaves over-limit reliable commands queued,
+> and retries retained UI intent, while Gateway
+> tests prove `pickUp(objectId)` and `pickUpTile` map to distinct authoritative
+> actions. The ordinary functional loop selects the explicit server-owned
+> dialog targets and passes movement, combat, quest drop,
+> ground-gold and object-id item pickup, exact reward, Bichon identity, save,
+> and relog assertions (current Cargo result 2/2). Windows GUI, Gemini/human visual acceptance, deployed
+> WebSocket behavior, and a fresh full Simulation suite remain unclaimed.
+>
 > Web artifact sync (2026-08-22): the current source has a fresh complete Web
 > production build. Dual WASM runtime budget, map-atlas budget, TypeScript and
 > 13/13 static pages pass under runtime `bevy-1813be587ef98bc1` and BUILD_ID

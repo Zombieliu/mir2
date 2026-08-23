@@ -18,7 +18,7 @@ use std::{
 use futures_util::{SinkExt, StreamExt};
 use mir2_client_bevy::game_shop::{GameShopReceipt, GameShopRequest};
 use mir2_client_bevy::native_shell::{CharacterSummary, NativeGatewayEvent as ShellGatewayEvent};
-use mir2_client_bevy::pending_operations::InventoryOperationAck;
+use mir2_client_bevy::pending_operations::{InventoryOperationAck, QuestOperationAck};
 use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
 use mir2_client_bevy::social::SocialModel;
 use serde::Deserialize;
@@ -286,8 +286,11 @@ impl GatewayCommandSender {
                     Ok(())
                 } else {
                     match sender.try_send(command) {
-                        Ok(()) | Err(std::sync::mpsc::TrySendError::Full(_)) => Ok(()),
-                        Err(std::sync::mpsc::TrySendError::Disconnected(_)) => Err(()),
+                        Ok(()) => Ok(()),
+                        Err(
+                            std::sync::mpsc::TrySendError::Full(_)
+                            | std::sync::mpsc::TrySendError::Disconnected(_),
+                        ) => Err(()),
                     }
                 }
             }
@@ -1822,7 +1825,16 @@ fn drain_command_batch<R: CommandSource>(
     let mut latest_player = None;
     let mut leave = None;
     let mut transaction = None;
-    while let Ok(command) = commands.try_command() {
+    while batch
+        .len()
+        .saturating_add(usize::from(transaction.is_some()))
+        .saturating_add(usize::from(leave.is_some()))
+        .saturating_add(usize::from(latest_player.is_some()))
+        < limit
+    {
+        let Ok(command) = commands.try_command() else {
+            break;
+        };
         match command {
             GatewayCommand::Shutdown => return vec![GatewayCommand::Shutdown],
             GatewayCommand::Connect => {
@@ -2935,10 +2947,12 @@ where
                 .payload
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
+            validate_quest_operation_ack(&payload)?;
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
             gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);
             let _ = gameplay_events.send(gameplay_adapter.snapshot(&payload));
+            strip_one_shot_quest_operation_ack(&mut payload);
             let runtime_snapshot = transform_world_snapshot(&payload);
             let json = serde_json::to_string(&runtime_snapshot).map_err(|e| e.to_string())?;
             let world_ingest = if push_world_state(json) {
@@ -3268,6 +3282,25 @@ where
         }
         _ => Ok(WorldSnapshotIngestOutcome::NotSnapshot),
     }
+}
+
+/// Quest operation acknowledgements correlate only the command that caused
+/// the current personal snapshot. Packet-first world refreshes clone the last
+/// payload, so retaining this field would replay an old ACK onto a later
+/// identical request and prematurely release its pending guard.
+fn strip_one_shot_quest_operation_ack(payload: &mut Value) -> bool {
+    payload
+        .as_object_mut()
+        .is_some_and(|object| object.remove("questOperationAck").is_some())
+}
+
+fn validate_quest_operation_ack(payload: &Value) -> Result<(), String> {
+    let Some(value) = payload.get("questOperationAck") else {
+        return Ok(());
+    };
+    serde_json::from_value::<QuestOperationAck>(value.clone())
+        .map(|_| ())
+        .map_err(|error| format!("invalid questOperationAck: {error}"))
 }
 
 fn correlate_and_deliver_game_shop_receipt(
@@ -5323,13 +5356,22 @@ mod tests {
     #[test]
     fn production_command_queue_is_bounded_and_priority_leave_survives_full_normal_lane() {
         let (sender, mut receiver) = command_channel(8);
+        let mut accepted = 0;
+        let mut rejected = 0;
         for _ in 0..256 {
-            sender
+            if sender
                 .send(GatewayCommand::Player(PlayerIntent::Walk {
                     direction: "up".to_owned(),
                 }))
-                .expect("full normal lane must remain nonblocking");
+                .is_ok()
+            {
+                accepted += 1;
+            } else {
+                rejected += 1;
+            }
         }
+        assert_eq!(accepted, 8, "normal lane must remain strictly bounded");
+        assert_eq!(rejected, 248, "saturation must be reported to producers");
         sender
             .send(GatewayCommand::Wire(NativeOutboundCommand::Disconnect))
             .expect("priority lane must retain disconnect");
@@ -5343,14 +5385,77 @@ mod tests {
     }
 
     #[test]
+    fn quest_operation_ack_is_removed_before_world_payload_is_cached() {
+        let mut payload = serde_json::json!({
+            "mapFileName": "0",
+            "questOperationAck": {
+                "operation": "acceptQuest",
+                "npcIndex": 9,
+                "questIndex": 44,
+                "success": true
+            }
+        });
+        assert!(strip_one_shot_quest_operation_ack(&mut payload));
+        assert!(payload.get("questOperationAck").is_none());
+        assert_eq!(
+            payload.get("mapFileName").and_then(Value::as_str),
+            Some("0")
+        );
+        assert!(!strip_one_shot_quest_operation_ack(&mut payload));
+    }
+
+    #[test]
+    fn malformed_quest_operation_ack_is_a_transport_error() {
+        let malformed = serde_json::json!({
+            "questOperationAck": {
+                "operation": "finishQuest",
+                "questIndex": 44,
+                "success": true
+            }
+        });
+        assert!(validate_quest_operation_ack(&malformed).is_err());
+        assert!(validate_quest_operation_ack(&serde_json::json!({})).is_ok());
+    }
+
+    #[test]
+    fn command_drain_leaves_reliable_wire_overflow_for_the_next_batch() {
+        let (sender, mut receiver) = command_channel(16);
+        for index in 0..8 {
+            sender
+                .send(GatewayCommand::Wire(NativeOutboundCommand::Chat {
+                    message: format!("queued-{index}"),
+                }))
+                .expect("ordinary wire command should fit the channel");
+        }
+        sender
+            .send(GatewayCommand::Wire(NativeOutboundCommand::PickUp {
+                object_id: 7_001,
+            }))
+            .expect("ninth ordinary wire command should fit the channel");
+
+        let first = drain_command_batch(&mut receiver, 8);
+        assert_eq!(first.len(), 8);
+        assert!(!first.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::PickUp { object_id: 7_001 })
+        )));
+
+        let second = drain_command_batch(&mut receiver, 8);
+        assert!(matches!(
+            second.as_slice(),
+            [GatewayCommand::Wire(NativeOutboundCommand::PickUp {
+                object_id: 7_001
+            })]
+        ));
+    }
+
+    #[test]
     fn game_shop_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
         let (sender, mut receiver) = command_channel(8);
         for _ in 0..256 {
-            sender
-                .send(GatewayCommand::Player(PlayerIntent::Walk {
-                    direction: "up".to_owned(),
-                }))
-                .expect("ordinary saturation remains nonblocking");
+            let _ = sender.send(GatewayCommand::Player(PlayerIntent::Walk {
+                direction: "up".to_owned(),
+            }));
         }
         sender
             .send(GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
@@ -5389,11 +5494,9 @@ mod tests {
     fn storage_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
         let (sender, mut receiver) = command_channel(8);
         for _ in 0..256 {
-            sender
-                .send(GatewayCommand::Player(PlayerIntent::Walk {
-                    direction: "up".to_owned(),
-                }))
-                .expect("ordinary saturation remains nonblocking");
+            let _ = sender.send(GatewayCommand::Player(PlayerIntent::Walk {
+                direction: "up".to_owned(),
+            }));
         }
         sender
             .send(GatewayCommand::Wire(NativeOutboundCommand::StoreItem {

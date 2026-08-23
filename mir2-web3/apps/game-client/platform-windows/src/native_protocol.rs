@@ -132,12 +132,16 @@ pub enum NativeOutboundCommand {
         target: String,
     },
     AcceptQuest {
+        #[serde(rename = "requestId")]
+        request_id: String,
         #[serde(rename = "npcIndex")]
         npc_index: u32,
         #[serde(rename = "questIndex")]
         quest_index: i32,
     },
     FinishQuest {
+        #[serde(rename = "requestId")]
+        request_id: String,
         #[serde(rename = "questIndex")]
         quest_index: i32,
         #[serde(
@@ -147,6 +151,8 @@ pub enum NativeOutboundCommand {
         selected_item_index: i32,
     },
     AbandonQuest {
+        #[serde(rename = "requestId")]
+        request_id: String,
         #[serde(rename = "questIndex")]
         quest_index: i32,
     },
@@ -1407,21 +1413,26 @@ mod tests {
         );
         assert_serialized(
             NativeOutboundCommand::AcceptQuest {
+                request_id: "qs-0000000000000001".into(),
                 npc_index: 2,
                 quest_index: 77,
             },
-            json!({"type":"acceptQuest","npcIndex":2,"questIndex":77}),
+            json!({"type":"acceptQuest","requestId":"qs-0000000000000001","npcIndex":2,"questIndex":77}),
         );
         assert_serialized(
             NativeOutboundCommand::FinishQuest {
+                request_id: "qs-0000000000000002".into(),
                 quest_index: 77,
                 selected_item_index: 1,
             },
-            json!({"type":"finishQuest","questIndex":77,"selectedItemIndex":1}),
+            json!({"type":"finishQuest","requestId":"qs-0000000000000002","questIndex":77,"selectedItemIndex":1}),
         );
         assert_serialized(
-            NativeOutboundCommand::AbandonQuest { quest_index: 77 },
-            json!({"type":"abandonQuest","questIndex":77}),
+            NativeOutboundCommand::AbandonQuest {
+                request_id: "qs-0000000000000003".into(),
+                quest_index: 77,
+            },
+            json!({"type":"abandonQuest","requestId":"qs-0000000000000003","questIndex":77}),
         );
         assert_serialized(
             NativeOutboundCommand::Magic {
@@ -1850,14 +1861,18 @@ mod tests {
     #[test]
     fn outbound_finish_quest_keeps_default_selected_item_index_when_omitted_in_json() {
         let command = serde_json::from_str::<NativeOutboundCommand>(
-            r#"{"type":"finishQuest","questIndex":13}"#,
+            r#"{"type":"finishQuest","requestId":"qs-0000000000000013","questIndex":13}"#,
         )
         .expect("finishQuest should deserialize");
         match command {
             NativeOutboundCommand::FinishQuest {
+                request_id,
                 selected_item_index,
                 ..
-            } => assert_eq!(selected_item_index, -1),
+            } => {
+                assert_eq!(request_id, "qs-0000000000000013");
+                assert_eq!(selected_item_index, -1);
+            }
             _ => panic!("wrong command variant"),
         }
     }

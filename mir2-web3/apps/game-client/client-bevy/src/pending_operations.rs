@@ -5,7 +5,7 @@
 //! or resets the session. There is deliberately no timeout: elapsed client
 //! time is not proof that the server accepted or rejected an operation.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::{Resource, SystemSet};
 use serde::{Deserialize, Serialize};
@@ -154,6 +154,92 @@ pub enum PendingOperationKey {
     QuestAbandon {
         quest_index: i32,
     },
+}
+
+/// Correlatable acknowledgement for one native quest submission. Both ACK and
+/// NACK terminate the exact pending key; the authoritative quest snapshot, not
+/// this envelope, remains the source of truth for quest lifecycle state.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(
+    tag = "operation",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+pub enum QuestOperationAck {
+    AcceptQuest {
+        request_id: String,
+        npc_index: u32,
+        quest_index: i32,
+        success: bool,
+    },
+    FinishQuest {
+        request_id: String,
+        quest_index: i32,
+        selected_item_index: i32,
+        success: bool,
+    },
+    AbandonQuest {
+        request_id: String,
+        quest_index: i32,
+        success: bool,
+    },
+}
+
+impl QuestOperationAck {
+    pub fn success(&self) -> bool {
+        match self {
+            Self::AcceptQuest { success, .. }
+            | Self::FinishQuest { success, .. }
+            | Self::AbandonQuest { success, .. } => *success,
+        }
+    }
+}
+
+/// Release only the request identified by an authoritative quest ACK/NACK.
+/// This prevents a rejected Accept/Finish request from permanently disabling
+/// the corresponding native UI control without treating unrelated snapshots
+/// as proof of completion.
+pub fn apply_quest_operation_ack(
+    pending: &mut PendingOperations,
+    ack: &QuestOperationAck,
+) -> usize {
+    let (request_id, key) = match ack {
+        QuestOperationAck::AcceptQuest {
+            request_id,
+            npc_index,
+            quest_index,
+            ..
+        } => (
+            request_id,
+            PendingOperationKey::QuestAccept {
+                npc_index: *npc_index,
+                quest_index: *quest_index,
+            },
+        ),
+        QuestOperationAck::FinishQuest {
+            request_id,
+            quest_index,
+            selected_item_index,
+            ..
+        } => (
+            request_id,
+            PendingOperationKey::QuestFinish {
+                quest_index: *quest_index,
+                selected_item_index: *selected_item_index,
+            },
+        ),
+        QuestOperationAck::AbandonQuest {
+            request_id,
+            quest_index,
+            ..
+        } => (
+            request_id,
+            PendingOperationKey::QuestAbandon {
+                quest_index: *quest_index,
+            },
+        ),
+    };
+    usize::from(pending.release_exact_quest_request(&key, request_id))
 }
 
 /// Correlatable Crystal inventory mutation acknowledgement forwarded by the
@@ -426,9 +512,21 @@ pub fn apply_storage_operation_ack(
 }
 
 /// Bounded set of operations awaiting authoritative completion evidence.
-#[derive(Debug, Default, Resource)]
+#[derive(Debug, Resource)]
 pub struct PendingOperations {
     entries: HashSet<PendingOperationKey>,
+    quest_request_ids: HashMap<PendingOperationKey, String>,
+    next_quest_request_sequence: Option<u64>,
+}
+
+impl Default for PendingOperations {
+    fn default() -> Self {
+        Self {
+            entries: HashSet::new(),
+            quest_request_ids: HashMap::new(),
+            next_quest_request_sequence: Some(1),
+        }
+    }
 }
 
 impl PendingOperations {
@@ -455,11 +553,77 @@ impl PendingOperations {
     /// Explicit host-side ACK/NACK hook. Revisions alone never call this;
     /// uncorrelatable operations remain locked until a true session reset.
     pub fn release(&mut self, key: &PendingOperationKey) -> bool {
+        self.quest_request_ids.remove(key);
         self.entries.remove(key)
     }
 
     pub fn clear(&mut self) {
         self.entries.clear();
+        self.quest_request_ids.clear();
+    }
+
+    /// Bind one process-unique request id to a pending quest operation. A
+    /// transport retry reuses the same id, while a later operation with the
+    /// same business key receives a new id after the earlier key is released.
+    /// The monotonic allocator deliberately survives session resets so an old
+    /// ACK cannot become valid again after reconnect.
+    pub fn bind_quest_request_id(&mut self, key: PendingOperationKey) -> Option<String> {
+        if !matches!(
+            key,
+            PendingOperationKey::QuestAccept { .. }
+                | PendingOperationKey::QuestFinish { .. }
+                | PendingOperationKey::QuestAbandon { .. }
+        ) {
+            return None;
+        }
+        if !self.entries.contains(&key) && !self.try_begin(key.clone()) {
+            return None;
+        }
+        if let Some(request_id) = self.quest_request_ids.get(&key) {
+            return Some(request_id.clone());
+        }
+        let Some(sequence) = self.next_quest_request_sequence else {
+            self.release(&key);
+            return None;
+        };
+        self.next_quest_request_sequence = sequence.checked_add(1);
+        let request_id = format!("qs-{sequence:016}");
+        self.quest_request_ids.insert(key, request_id.clone());
+        Some(request_id)
+    }
+
+    /// Release only when both the logical operation and the echoed request id
+    /// match. Business-key equality alone is not sufficient because a delayed
+    /// ACK may belong to an earlier submission on the same WebSocket.
+    pub fn release_exact_quest_request(
+        &mut self,
+        key: &PendingOperationKey,
+        request_id: &str,
+    ) -> bool {
+        if request_id.is_empty()
+            || self
+                .quest_request_ids
+                .get(key)
+                .is_none_or(|pending| pending != request_id)
+        {
+            return false;
+        }
+        self.release(key)
+    }
+
+    /// A WebSocket generation is a transport boundary for native quest
+    /// receipts. Quest commands that were pending on the old connection must
+    /// be retried against the newly resumed authoritative snapshot; an ACK
+    /// from the old generation must never release a new submission.
+    pub fn release_all_quest_operations(&mut self) -> usize {
+        self.release_matching(|key| {
+            matches!(
+                key,
+                PendingOperationKey::QuestAccept { .. }
+                    | PendingOperationKey::QuestFinish { .. }
+                    | PendingOperationKey::QuestAbandon { .. }
+            )
+        })
     }
 
     /// Clear every operation except the one exact GameShop request protected
@@ -470,6 +634,7 @@ impl PendingOperations {
         self.entries.retain(
             |key| matches!(key, PendingOperationKey::GameShop(pending) if pending == request_id),
         );
+        self.quest_request_ids.clear();
     }
 
     pub fn contains(&self, key: &PendingOperationKey) -> bool {
@@ -506,6 +671,8 @@ impl PendingOperations {
     fn release_matching(&mut self, mut proven: impl FnMut(&PendingOperationKey) -> bool) -> usize {
         let before = self.entries.len();
         self.entries.retain(|key| !proven(key));
+        self.quest_request_ids
+            .retain(|key, _| self.entries.contains(key));
         before - self.entries.len()
     }
 
@@ -518,7 +685,7 @@ impl PendingOperations {
         mut proven: impl FnMut(&PendingOperationKey) -> bool,
     ) -> usize {
         let key = self.entries.iter().find(|key| proven(key)).cloned();
-        key.map(|key| if self.entries.remove(&key) { 1 } else { 0 })
+        key.map(|key| if self.release(&key) { 1 } else { 0 })
             .unwrap_or_default()
     }
 }
@@ -1865,6 +2032,85 @@ mod tests {
             3
         );
         assert!(pending.contains(&PendingOperationKey::StorageRemovePassword));
+    }
+
+    #[cfg(feature = "native-ui")]
+    #[test]
+    fn quest_ack_and_nack_release_only_the_exact_submission() {
+        let mut pending = PendingOperations::default();
+        let accepted = PendingOperationKey::QuestAccept {
+            npc_index: 7,
+            quest_index: 31,
+        };
+        let rejected = PendingOperationKey::QuestFinish {
+            quest_index: 32,
+            selected_item_index: 2,
+        };
+        let unrelated = PendingOperationKey::QuestFinish {
+            quest_index: 32,
+            selected_item_index: 3,
+        };
+        assert!(pending.try_begin(accepted.clone()));
+        assert!(pending.try_begin(rejected.clone()));
+        assert!(pending.try_begin(unrelated.clone()));
+        let accepted_request_id = pending
+            .bind_quest_request_id(accepted.clone())
+            .expect("accept request id");
+        let rejected_request_id = pending
+            .bind_quest_request_id(rejected.clone())
+            .expect("finish request id");
+        let unrelated_request_id = pending
+            .bind_quest_request_id(unrelated.clone())
+            .expect("unrelated finish request id");
+
+        let accept_ack = QuestOperationAck::AcceptQuest {
+            request_id: accepted_request_id.clone(),
+            npc_index: 7,
+            quest_index: 31,
+            success: true,
+        };
+        assert!(accept_ack.success());
+        assert_eq!(apply_quest_operation_ack(&mut pending, &accept_ack), 1);
+        assert!(!pending.contains(&accepted));
+        assert!(pending.try_begin(accepted.clone()));
+        let replacement_request_id = pending
+            .bind_quest_request_id(accepted.clone())
+            .expect("replacement accept request id");
+        assert_ne!(accepted_request_id, replacement_request_id);
+        assert_eq!(apply_quest_operation_ack(&mut pending, &accept_ack), 0);
+        assert!(pending.contains(&accepted));
+        let replacement_ack = QuestOperationAck::AcceptQuest {
+            request_id: replacement_request_id,
+            npc_index: 7,
+            quest_index: 31,
+            success: true,
+        };
+        assert_eq!(apply_quest_operation_ack(&mut pending, &replacement_ack), 1);
+
+        let finish_nack = QuestOperationAck::FinishQuest {
+            request_id: rejected_request_id,
+            quest_index: 32,
+            selected_item_index: 2,
+            success: false,
+        };
+        assert!(!finish_nack.success());
+        assert_eq!(apply_quest_operation_ack(&mut pending, &finish_nack), 1);
+        assert!(!pending.contains(&rejected));
+        assert!(pending.contains(&unrelated));
+
+        let abandon = PendingOperationKey::QuestAbandon { quest_index: 33 };
+        assert!(pending.try_begin(abandon.clone()));
+        let abandon_request_id = pending
+            .bind_quest_request_id(abandon.clone())
+            .expect("abandon request id");
+        let abandon_nack = QuestOperationAck::AbandonQuest {
+            request_id: abandon_request_id,
+            quest_index: 33,
+            success: false,
+        };
+        assert_eq!(apply_quest_operation_ack(&mut pending, &abandon_nack), 1);
+        assert!(!pending.contains(&abandon));
+        assert!(pending.release_exact_quest_request(&unrelated, &unrelated_request_id));
     }
 
     #[cfg(feature = "native-ui")]

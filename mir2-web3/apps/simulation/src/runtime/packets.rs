@@ -42,12 +42,12 @@ use super::combat::{
     crystal_player_slowed_by_status, melee_target_is_authoritatively_attackable_in_direction,
 };
 use super::components::{
-    current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
-    entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
-    CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState, GroundDrop,
-    HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState, MonsterPoisonState,
-    MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
-    SummonedMonster,
+    current_hero_object_id, current_player_is_dead, current_player_object_id, entity_by_object_id,
+    entity_facing, entity_object_id, entity_player_vitals, entity_position, hero_entity,
+    player_entity, CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState,
+    GroundDrop, HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState,
+    MonsterPoisonState, MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position,
+    RemotePlayer, SelfPlayer, SummonedMonster,
 };
 use super::crystal_compat::{
     BASE_STORAGE_SLOTS, BUFF_GENERAL_MEOW_MEOW_SHIELD, CRYSTAL_BIND_DONT_STORE,
@@ -57,7 +57,7 @@ use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_WEAPON, CRYSTAL_POTION_SHAPE_NORMAL, CRYSTAL_POTION_SHAPE_SUN_POTION,
     CRYSTAL_RED_NAME_PK_POINTS, CRYSTAL_STAT_HP, CRYSTAL_STAT_LUCK, CRYSTAL_STAT_MAX_DC,
     CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC,
-    CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MP,
+    CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MP, GUIDE_NPC_ID, GUIDE_QUEST_ID,
 };
 use super::drops::*;
 use super::drops::{
@@ -90,15 +90,17 @@ use super::monsters::{
     crystal_respawn_object_monster_packet, crystal_world_respawn_spawns, point_in_data_range,
     start_game_visible_respawn_spawns,
 };
-use super::movement::{current_location, town_revive_packets};
+use super::movement::{current_location, tile_distance, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog,
     sell_item_impl,
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
-    completed_quest_ids, crystal_quest_reward_selection_missing, crystal_quest_task_list,
-    ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
+    completed_quest_ids, crystal_quest_finish_npc_matches, crystal_quest_info_by_id,
+    crystal_quest_reward_selection_missing, crystal_quest_start_npc_matches,
+    crystal_quest_task_list, ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
+    quest_template_by_id,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -3241,7 +3243,264 @@ fn stage5_quest_remove_packet(quest_id: i32, completed: bool) -> ServerPacket {
     }
 }
 
-fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+fn active_npc_allows_quest_request(
+    world: &World,
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+    selected_item_index: Option<i32>,
+) -> bool {
+    let Some(active_dialog) = world
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+    else {
+        return false;
+    };
+    let npc_object_id = active_dialog.npc_object_id;
+    if !active_dialog.links.iter().any(|link| {
+        quest_dialog_link_allows_operation(&link.target, quest_id, finish, selected_item_index)
+    }) {
+        return false;
+    }
+
+    if !quest_npc_matches_request(quest_id, requested_npc_index, finish, npc_object_id) {
+        return false;
+    }
+
+    npc_is_adjacent_to_player(world, npc_object_id)
+}
+
+fn quest_npc_matches_request(
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+    npc_object_id: u32,
+) -> bool {
+    if quest_template_by_id(quest_id).is_some() {
+        quest_id == GUIDE_QUEST_ID
+            && npc_object_id == GUIDE_NPC_ID
+            && requested_npc_index.is_none_or(|index| index == GUIDE_NPC_ID)
+    } else if let Some(info) = crystal_quest_info_by_id(quest_id) {
+        let requested_matches = requested_npc_index
+            .is_none_or(|index| index == npc_object_id || index == info.npc_index);
+        requested_matches
+            && if finish {
+                crystal_quest_finish_npc_matches(&info, npc_object_id)
+            } else {
+                crystal_quest_start_npc_matches(&info, npc_object_id)
+            }
+    } else {
+        false
+    }
+}
+
+fn npc_is_adjacent_to_player(world: &World, npc_object_id: u32) -> bool {
+    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
+        return false;
+    };
+    if !world.entity(npc_entity).contains::<Npc>() {
+        return false;
+    }
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let (Some(player_position), Some(npc_position)) = (
+        entity_position(world, player),
+        entity_position(world, npc_entity),
+    ) else {
+        return false;
+    };
+    tile_distance(&player_position, &npc_position) <= 1
+}
+
+fn quest_dialog_link_allows_operation(
+    target: &str,
+    quest_id: i32,
+    finish: bool,
+    selected_item_index: Option<i32>,
+) -> bool {
+    let target = target.trim();
+    let explicit = if finish {
+        format!("@FinishQuest:{quest_id}")
+    } else {
+        format!("@AcceptQuest:{quest_id}")
+    };
+    let crystal = if finish {
+        format!("@quest:finish:{quest_id}")
+    } else {
+        format!("@quest:accept:{quest_id}")
+    };
+    target.eq_ignore_ascii_case(&explicit)
+        || target.eq_ignore_ascii_case(&crystal)
+        || (finish
+            && selected_item_index.is_some_and(|selected| {
+                target.eq_ignore_ascii_case(&format!("@quest:finish:{quest_id}:{selected}"))
+            }))
+}
+
+#[cfg(test)]
+mod quest_dialog_operation_link_tests {
+    use bevy_ecs::prelude::World;
+    use mir2_protocol::Point;
+
+    use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
+    use super::super::npc::{ActiveNpcDialogState, NpcDialogLinkState};
+    use super::super::resources::NpcStateResource;
+    use super::{
+        active_npc_allows_quest_request, quest_dialog_link_allows_operation, GUIDE_NPC_ID,
+        GUIDE_QUEST_ID,
+    };
+
+    #[test]
+    fn starter_and_crystal_dialog_links_preserve_web_and_native_quest_actions() {
+        assert!(quest_dialog_link_allows_operation(
+            "@AcceptQuest:1001",
+            1001,
+            false,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@quest:accept:42",
+            42,
+            false,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@FinishQuest:1001",
+            1001,
+            true,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@quest:finish:42",
+            42,
+            true,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@quest:finish:42:2",
+            42,
+            true,
+            Some(2),
+        ));
+        assert!(!quest_dialog_link_allows_operation(
+            "@quest:finish:42:1",
+            42,
+            true,
+            Some(2),
+        ));
+        assert!(!quest_dialog_link_allows_operation(
+            "@quest:accept:43",
+            42,
+            false,
+            None,
+        ));
+    }
+
+    #[test]
+    fn quest_packets_require_the_exact_active_dialog_even_beside_the_correct_npc() {
+        let mut world = World::new();
+        world.insert_resource(NpcStateResource::new());
+        let player = world
+            .spawn((SelfPlayer, ObjectId(1), Position(Point { x: 10, y: 10 })))
+            .id();
+        world.spawn((
+            Npc,
+            ObjectId(GUIDE_NPC_ID),
+            Position(Point { x: 11, y: 10 }),
+        ));
+
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(0),
+            false,
+            None,
+        ));
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(GUIDE_NPC_ID),
+            false,
+            None,
+        ));
+
+        world.resource_mut::<NpcStateResource>().active_npc_dialog = Some(ActiveNpcDialogState {
+            npc_object_id: GUIDE_NPC_ID,
+            npc_name: "Village Guide".to_string(),
+            npc_name_key: None,
+            stage: None,
+            current: 0,
+            required: 1,
+            title: "Quest".to_string(),
+            body: Vec::new(),
+            footer: String::new(),
+            links: vec![NpcDialogLinkState {
+                text: "Accept".to_string(),
+                target: format!("@AcceptQuest:{GUIDE_QUEST_ID}"),
+            }],
+            input: None,
+        });
+        assert!(
+            !active_npc_allows_quest_request(&world, GUIDE_QUEST_ID, Some(0), false, None,),
+            "the removed Web sentinel must not impersonate a concrete NPC"
+        );
+        assert!(active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(GUIDE_NPC_ID),
+            false,
+            None,
+        ));
+
+        world
+            .resource_mut::<NpcStateResource>()
+            .active_npc_dialog
+            .as_mut()
+            .expect("active quest dialog")
+            .links = vec![NpcDialogLinkState {
+            text: "Complete".to_string(),
+            target: format!("@FinishQuest:{GUIDE_QUEST_ID}"),
+        }];
+        assert!(active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+
+        world
+            .entity_mut(player)
+            .get_mut::<Position>()
+            .expect("player position")
+            .0 = Point { x: 20, y: 20 };
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(GUIDE_NPC_ID),
+            false,
+            None,
+        ));
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+    }
+}
+
+pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
@@ -3278,7 +3537,7 @@ fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPac
     }
 }
 
-fn stage5_finish_quest_packet(
+pub(super) fn stage5_finish_quest_packet(
     world: &mut World,
     quest_id: i32,
     selected_item_index: Option<i32>,
@@ -3288,6 +3547,20 @@ fn stage5_finish_quest_packet(
     }
     if ensure_runtime_quest(world, quest_id) != QuestStage::ReadyToTurnIn {
         return Vec::new();
+    }
+    if let Some(quest) = quest_template_by_id(quest_id) {
+        let proof_quantity = world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| {
+                item.container == ItemContainer::Quest && item.key == quest.quest_item.key
+            })
+            .map(|item| item.quantity)
+            .sum::<u32>();
+        if proof_quantity < quest.quest_item.quantity {
+            return Vec::new();
+        }
     }
     if crystal_quest_reward_selection_missing(quest_id, selected_item_index) {
         return vec![system_message_key(world, "client.YouMustSelectRewardItem")];
@@ -7730,17 +8003,65 @@ impl SimulationSession {
             ClientPacket::GroupInvite { accept_invite } => {
                 stage5_group_invite_reply_packet(self.app.world_mut(), accept_invite)
             }
-            ClientPacket::AcceptQuest { quest_index, .. } => {
-                stage5_accept_quest_packet(self.app.world_mut(), quest_index)
+            ClientPacket::AcceptQuest {
+                npc_index,
+                quest_index,
+            } => {
+                if !active_npc_allows_quest_request(
+                    self.app.world(),
+                    quest_index,
+                    Some(npc_index),
+                    false,
+                    None,
+                ) {
+                    Vec::new()
+                } else {
+                    let packets = stage5_accept_quest_packet(self.app.world_mut(), quest_index);
+                    if packets.iter().any(|packet| {
+                        matches!(
+                            packet,
+                            ServerPacket::ChangeQuest {
+                                quest_id,
+                                taken: true,
+                                ..
+                            } if *quest_id == quest_index
+                        )
+                    }) {
+                        dismiss_dialog(self.app.world_mut());
+                    }
+                    packets
+                }
             }
             ClientPacket::FinishQuest {
                 quest_index,
                 selected_item_index,
-            } => stage5_finish_quest_packet(
-                self.app.world_mut(),
-                quest_index,
-                (selected_item_index >= 0).then_some(selected_item_index),
-            ),
+            } => {
+                if !active_npc_allows_quest_request(
+                    self.app.world(),
+                    quest_index,
+                    None,
+                    true,
+                    (selected_item_index >= 0).then_some(selected_item_index),
+                ) {
+                    Vec::new()
+                } else {
+                    let packets = stage5_finish_quest_packet(
+                        self.app.world_mut(),
+                        quest_index,
+                        (selected_item_index >= 0).then_some(selected_item_index),
+                    );
+                    if packets.iter().any(|packet| {
+                        matches!(
+                            packet,
+                            ServerPacket::CompleteQuest { completed_quests }
+                                if completed_quests.contains(&quest_index)
+                        )
+                    }) {
+                        dismiss_dialog(self.app.world_mut());
+                    }
+                    packets
+                }
+            }
             ClientPacket::AbandonQuest { quest_index } => {
                 stage5_abandon_quest_packet(self.app.world_mut(), quest_index)
             }

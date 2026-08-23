@@ -94,7 +94,10 @@ const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 
 enum ParsedSocketInput {
-    Action(SessionAction),
+    Action {
+        action: SessionAction,
+        quest_operation_request: Option<QuestOperationRequest>,
+    },
     ClientCapabilities(Vec<String>),
     ResumeSession(ResumeCredential),
     ResumeRejected,
@@ -1960,18 +1963,24 @@ enum BrowserCommand {
     ItemRentalLockItem,
     ConfirmItemRental,
     AcceptQuest {
+        #[serde(alias = "requestId", default)]
+        request_id: Option<String>,
         #[serde(alias = "npcIndex", default)]
         npc_index: u32,
         #[serde(alias = "questIndex")]
         quest_index: i32,
     },
     FinishQuest {
+        #[serde(alias = "requestId", default)]
+        request_id: Option<String>,
         #[serde(alias = "questIndex")]
         quest_index: i32,
         #[serde(alias = "selectedItemIndex", default = "default_selected_item_index")]
         selected_item_index: i32,
     },
     AbandonQuest {
+        #[serde(alias = "requestId", default)]
+        request_id: Option<String>,
         #[serde(alias = "questIndex")]
         quest_index: i32,
     },
@@ -2132,6 +2141,53 @@ enum SessionAction {
         language: String,
     },
     Tick,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum QuestOperationRequest {
+    AcceptQuest {
+        request_id: Option<String>,
+        npc_index: u32,
+        quest_index: i32,
+    },
+    FinishQuest {
+        request_id: Option<String>,
+        quest_index: i32,
+        selected_item_index: i32,
+    },
+    AbandonQuest {
+        request_id: Option<String>,
+        quest_index: i32,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(
+    tag = "operation",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+enum QuestOperationAck {
+    AcceptQuest {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        request_id: Option<String>,
+        npc_index: u32,
+        quest_index: i32,
+        success: bool,
+    },
+    FinishQuest {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        request_id: Option<String>,
+        quest_index: i32,
+        selected_item_index: i32,
+        success: bool,
+    },
+    AbandonQuest {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        request_id: Option<String>,
+        quest_index: i32,
+        success: bool,
+    },
 }
 
 /// Default `selected_item_index` for `FinishQuest`: `-1` means "no reward
@@ -4625,6 +4681,24 @@ fn spawn_socket_reader(
                 }
                 command => command,
             };
+            let quest_operation_request =
+                match quest_operation_request_for_browser_command(&command) {
+                    Ok(request) => request,
+                    Err(error) => {
+                        if input_tx
+                            .send(SocketInbound::Queued(QueuedSocketInput::new(
+                                ParsedSocketInput::ProtocolError(error),
+                                Arc::clone(&reader_pending_count),
+                                message_permit,
+                            )))
+                            .await
+                            .is_err()
+                        {
+                            return;
+                        }
+                        continue;
+                    }
+                };
             let action = match browser_command_to_action(command) {
                 Ok(action) => action,
                 Err(error) => {
@@ -4680,7 +4754,10 @@ fn spawn_socket_reader(
             }
             if input_tx
                 .send(SocketInbound::Queued(QueuedSocketInput::new(
-                    ParsedSocketInput::Action(action),
+                    ParsedSocketInput::Action {
+                        action,
+                        quest_operation_request,
+                    },
                     Arc::clone(&reader_pending_count),
                     message_permit,
                 )))
@@ -4845,7 +4922,7 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let parsed_input = queued_input.take_input();
-                let mut action = match parsed_input {
+                let (mut action, quest_operation_request) = match parsed_input {
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
@@ -5008,7 +5085,10 @@ async fn handle_socket_inner(
                         }
                         continue;
                     }
-                    ParsedSocketInput::Action(action) => action,
+                    ParsedSocketInput::Action {
+                        action,
+                        quest_operation_request,
+                    } => (action, quest_operation_request),
                     ParsedSocketInput::ProtocolError(error) => {
                         if send_error_message(&sender, &error).await.is_err() {
                             return;
@@ -5276,6 +5356,19 @@ async fn handle_socket_inner(
                                 session,
                                 pending_start_game_route_lease.as_ref(),
                             );
+                            if let Some(request) = quest_operation_request.as_ref() {
+                                let nack = quest_operation_ack_for_responses(request, &[]);
+                                if send_world_snapshot_with_quest_ack(
+                                    &sender,
+                                    session,
+                                    Some(&nack),
+                                )
+                                .await
+                                .is_err()
+                                {
+                                    return;
+                                }
+                            }
                             let _ = send_error_message(&sender, &error).await;
                             continue;
                         }
@@ -5330,6 +5423,19 @@ async fn handle_socket_inner(
                             );
                             return;
                         }
+                        if let Some(request) = quest_operation_request.as_ref() {
+                            let nack = quest_operation_ack_for_responses(request, &[]);
+                            if send_world_snapshot_with_quest_ack(
+                                &sender,
+                                session,
+                                Some(&nack),
+                            )
+                            .await
+                            .is_err()
+                            {
+                                return;
+                            }
+                        }
                         let _ = send_error_message(&sender, &error).await;
                         continue;
                     }
@@ -5350,6 +5456,9 @@ async fn handle_socket_inner(
                     }
                 };
                 let (responses, native_game_shop_post_execution) = execution_result;
+                let quest_operation_ack = quest_operation_request
+                    .as_ref()
+                    .map(|request| quest_operation_ack_for_responses(request, &responses));
                 let native_game_shop_receipt = match native_game_shop_post_execution {
                     Some(post_execution) => match post_execution {
                         NativeGameShopPostExecution::SendReceipt(receipt) => Some(receipt),
@@ -5374,6 +5483,17 @@ async fn handle_socket_inner(
                         eprintln!(
                             "native GameShop post-execution identity finalization failed; closing without receipt: {error}"
                         );
+                        return;
+                    }
+                    if quest_operation_ack.is_some()
+                        && send_world_snapshot_with_quest_ack(
+                            &sender,
+                            session,
+                            quest_operation_ack.as_ref(),
+                        )
+                        .await
+                        .is_err()
+                    {
                         return;
                     }
                     let _ = send_error_message(
@@ -5527,6 +5647,7 @@ async fn handle_socket_inner(
                     save_queue,
                     route_refresh,
                     responses,
+                    quest_operation_ack.as_ref(),
                     should_send_snapshot_by_action,
                     low_latency_action,
                     should_queue_save_by_action,
@@ -5634,6 +5755,7 @@ async fn handle_socket_inner(
                     save_queue,
                     route_refresh,
                     responses,
+                    None,
                     true,
                     false,
                     true,
@@ -5824,6 +5946,7 @@ async fn handle_socket_inner(
                     save_queue,
                     route_refresh,
                     responses,
+                    None,
                     false,
                     true,
                     false,
@@ -5928,6 +6051,7 @@ async fn flush_session_updates(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     responses: Vec<ServerPacket>,
+    quest_operation_ack: Option<&QuestOperationAck>,
     should_send_snapshot_by_action: bool,
     low_latency_action: bool,
     should_queue_save_by_action: bool,
@@ -5951,7 +6075,7 @@ async fn flush_session_updates(
         should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
 
     if should_send_snapshot {
-        send_world_snapshot(sender, session).await?;
+        send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
     }
 
     if !low_latency_action
@@ -7513,6 +7637,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             Ok(SessionAction::Packet(ClientPacket::ConfirmItemRental))
         }
         BrowserCommand::AcceptQuest {
+            request_id: _,
             npc_index,
             quest_index,
         } => Ok(SessionAction::Packet(ClientPacket::AcceptQuest {
@@ -7520,17 +7645,19 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             quest_index,
         })),
         BrowserCommand::FinishQuest {
+            request_id: _,
             quest_index,
             selected_item_index,
         } => Ok(SessionAction::Packet(ClientPacket::FinishQuest {
             quest_index,
             selected_item_index,
         })),
-        BrowserCommand::AbandonQuest { quest_index } => {
-            Ok(SessionAction::Packet(ClientPacket::AbandonQuest {
-                quest_index,
-            }))
-        }
+        BrowserCommand::AbandonQuest {
+            request_id: _,
+            quest_index,
+        } => Ok(SessionAction::Packet(ClientPacket::AbandonQuest {
+            quest_index,
+        })),
         BrowserCommand::ShareQuest { quest_index } => {
             Ok(SessionAction::Packet(ClientPacket::ShareQuest {
                 quest_index,
@@ -7643,6 +7770,122 @@ fn should_send_world_snapshot_for_action(action: &SessionAction) -> bool {
     )
 }
 
+fn quest_operation_request_for_browser_command(
+    command: &BrowserCommand,
+) -> Result<Option<QuestOperationRequest>, String> {
+    let request = match command {
+        BrowserCommand::AcceptQuest {
+            request_id,
+            npc_index,
+            quest_index,
+        } => Some(QuestOperationRequest::AcceptQuest {
+            request_id: validated_quest_request_id(request_id.as_deref())?,
+            npc_index: *npc_index,
+            quest_index: *quest_index,
+        }),
+        BrowserCommand::FinishQuest {
+            request_id,
+            quest_index,
+            selected_item_index,
+        } => Some(QuestOperationRequest::FinishQuest {
+            request_id: validated_quest_request_id(request_id.as_deref())?,
+            quest_index: *quest_index,
+            selected_item_index: *selected_item_index,
+        }),
+        BrowserCommand::AbandonQuest {
+            request_id,
+            quest_index,
+        } => Some(QuestOperationRequest::AbandonQuest {
+            request_id: validated_quest_request_id(request_id.as_deref())?,
+            quest_index: *quest_index,
+        }),
+        _ => None,
+    };
+    Ok(request)
+}
+
+fn validated_quest_request_id(request_id: Option<&str>) -> Result<Option<String>, String> {
+    let Some(request_id) = request_id else {
+        // Existing Web/Android clients do not consume typed quest ACKs yet.
+        // Keep their protocol compatible while native always supplies an id.
+        return Ok(None);
+    };
+    if request_id.is_empty()
+        || request_id.len() > 96
+        || !request_id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+    {
+        return Err("invalid quest requestId".to_string());
+    }
+    Ok(Some(request_id.to_string()))
+}
+
+fn quest_operation_ack_for_responses(
+    request: &QuestOperationRequest,
+    responses: &[ServerPacket],
+) -> QuestOperationAck {
+    match request {
+        QuestOperationRequest::AcceptQuest {
+            request_id,
+            npc_index,
+            quest_index,
+        } => QuestOperationAck::AcceptQuest {
+            request_id: request_id.clone(),
+            npc_index: *npc_index,
+            quest_index: *quest_index,
+            success: responses.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ChangeQuest {
+                        quest_id,
+                        taken: true,
+                        ..
+                    } if quest_id == quest_index
+                )
+            }),
+        },
+        QuestOperationRequest::FinishQuest {
+            request_id,
+            quest_index,
+            selected_item_index,
+        } => QuestOperationAck::FinishQuest {
+            request_id: request_id.clone(),
+            quest_index: *quest_index,
+            selected_item_index: *selected_item_index,
+            success: responses.iter().any(|packet| match packet {
+                ServerPacket::CompleteQuest { completed_quests } => {
+                    completed_quests.contains(quest_index)
+                }
+                ServerPacket::ChangeQuest {
+                    quest_id,
+                    completed: true,
+                    ..
+                } => quest_id == quest_index,
+                _ => false,
+            }),
+        },
+        QuestOperationRequest::AbandonQuest {
+            request_id,
+            quest_index,
+        } => QuestOperationAck::AbandonQuest {
+            request_id: request_id.clone(),
+            quest_index: *quest_index,
+            success: responses.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ChangeQuest {
+                        quest_id,
+                        taken: false,
+                        completed: false,
+                        ..
+                    } if quest_id == quest_index
+                )
+            }),
+        },
+    }
+}
+
 fn is_low_latency_action(action: &SessionAction) -> bool {
     matches!(
         action,
@@ -7681,16 +7924,34 @@ async fn send_world_snapshot(
     sender: &SharedWebSocketSender,
     session: &GatewaySession,
 ) -> Result<(), String> {
+    send_world_snapshot_with_quest_ack(sender, session, None).await
+}
+
+async fn send_world_snapshot_with_quest_ack(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+    quest_operation_ack: Option<&QuestOperationAck>,
+) -> Result<(), String> {
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
+    let mut payload = serde_json::to_value(snapshot).map_err(|error| error.to_string())?;
+    if let Some(ack) = quest_operation_ack {
+        let object = payload
+            .as_object_mut()
+            .ok_or_else(|| "world snapshot must serialize as a JSON object".to_string())?;
+        object.insert(
+            "questOperationAck".to_owned(),
+            serde_json::to_value(ack).map_err(|error| error.to_string())?,
+        );
+    }
     sender
         .lock()
         .await
         .send(Message::Text(
             json!({
                 "type": "worldSnapshot",
-                "payload": snapshot
+                "payload": payload
             })
             .to_string()
             .into(),
@@ -11939,6 +12200,132 @@ mod tests {
     }
 
     #[test]
+    fn quest_operation_ack_is_exact_and_reports_rejection_without_guessing() {
+        let accept = BrowserCommand::AcceptQuest {
+            request_id: Some("qs-0000000000000044".into()),
+            npc_index: 9,
+            quest_index: 44,
+        };
+        let request = super::quest_operation_request_for_browser_command(&accept)
+            .expect("accept request id must be valid")
+            .expect("accept quest must request an acknowledgement");
+        let accepted = super::quest_operation_ack_for_responses(
+            &request,
+            &[ServerPacket::ChangeQuest {
+                quest_id: 44,
+                task_list: Vec::new(),
+                taken: true,
+                completed: false,
+                new: true,
+                quest_state: 1,
+                track_quest: true,
+            }],
+        );
+        assert_eq!(
+            serde_json::to_value(accepted).expect("ack must serialize"),
+            serde_json::json!({
+                "operation": "acceptQuest",
+                "requestId": "qs-0000000000000044",
+                "npcIndex": 9,
+                "questIndex": 44,
+                "success": true
+            })
+        );
+
+        let finish = BrowserCommand::FinishQuest {
+            request_id: Some("qs-0000000000000045".into()),
+            quest_index: 44,
+            selected_item_index: 2,
+        };
+        let request = super::quest_operation_request_for_browser_command(&finish)
+            .expect("finish request id must be valid")
+            .expect("finish quest must request an acknowledgement");
+        let rejected = super::quest_operation_ack_for_responses(&request, &[]);
+        assert_eq!(
+            serde_json::to_value(rejected).expect("nack must serialize"),
+            serde_json::json!({
+                "operation": "finishQuest",
+                "requestId": "qs-0000000000000045",
+                "questIndex": 44,
+                "selectedItemIndex": 2,
+                "success": false
+            })
+        );
+
+        let abandon = BrowserCommand::AbandonQuest {
+            request_id: Some("qs-0000000000000046".into()),
+            quest_index: 45,
+        };
+        let request = super::quest_operation_request_for_browser_command(&abandon)
+            .expect("abandon request id must be valid")
+            .expect("abandon quest must request an acknowledgement");
+        let abandoned = super::quest_operation_ack_for_responses(
+            &request,
+            &[ServerPacket::ChangeQuest {
+                quest_id: 45,
+                task_list: Vec::new(),
+                taken: false,
+                completed: false,
+                new: false,
+                quest_state: 2,
+                track_quest: false,
+            }],
+        );
+        assert_eq!(
+            serde_json::to_value(abandoned).expect("abandon ack must serialize"),
+            serde_json::json!({
+                "operation": "abandonQuest",
+                "requestId": "qs-0000000000000046",
+                "questIndex": 45,
+                "success": true
+            })
+        );
+    }
+
+    #[test]
+    fn quest_request_ids_reject_malformed_values_and_preserve_legacy_web_commands() {
+        for request_id in [
+            "".to_owned(),
+            "bad space".to_owned(),
+            "bad\nline".to_owned(),
+            "q".repeat(97),
+        ] {
+            let command = BrowserCommand::AcceptQuest {
+                request_id: Some(request_id),
+                npc_index: 9,
+                quest_index: 44,
+            };
+            assert!(super::quest_operation_request_for_browser_command(&command).is_err());
+        }
+
+        let legacy = BrowserCommand::AcceptQuest {
+            request_id: None,
+            npc_index: 9,
+            quest_index: 44,
+        };
+        let request = super::quest_operation_request_for_browser_command(&legacy)
+            .expect("legacy Web quest command must remain valid")
+            .expect("legacy command still needs internal ACK bookkeeping");
+        let ack = super::quest_operation_ack_for_responses(&request, &[]);
+        assert_eq!(
+            serde_json::to_value(ack).expect("legacy NACK must serialize"),
+            serde_json::json!({
+                "operation": "acceptQuest",
+                "npcIndex": 9,
+                "questIndex": 44,
+                "success": false
+            })
+        );
+        assert!(matches!(
+            super::browser_command_to_action(legacy),
+            Ok(SessionAction::Packet(ClientPacket::AcceptQuest {
+                npc_index: 9,
+                quest_index: 44
+            }))
+        ));
+    }
+
+    #[test]
     fn new_account_command_accepts_camel_case_fields() {
         let command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"newAccount","accountId":"fresh","password":"demo","birthDateBinary":42,"userName":"Fresh User","secretQuestion":"Q","secretAnswer":"A","emailAddress":"fresh@example.test"}"#,
@@ -12297,13 +12684,17 @@ mod tests {
         let command =
             serde_json::from_str::<BrowserCommand>(r#"{"type":"pickUp","objectId":5000}"#)
                 .expect("pickup command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(command).expect("object pickup should map"),
+            SessionAction::PickUp { object_id: 5000 }
+        ));
 
-        match command {
-            BrowserCommand::PickUp { object_id } => {
-                assert_eq!(object_id, 5000);
-            }
-            other => panic!("unexpected command: {other:?}"),
-        }
+        let tile_command = serde_json::from_str::<BrowserCommand>(r#"{"type":"pickUpTile"}"#)
+            .expect("tile pickup command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(tile_command).expect("tile pickup should map"),
+            SessionAction::Packet(ClientPacket::PickUp)
+        ));
     }
 
     #[test]
@@ -15473,7 +15864,10 @@ mod tests {
         let bytes = std::sync::Arc::new(tokio::sync::Semaphore::new(1));
         {
             let mut queued = super::QueuedSocketInput::new(
-                super::ParsedSocketInput::Action(SessionAction::Tick),
+                super::ParsedSocketInput::Action {
+                    action: SessionAction::Tick,
+                    quest_operation_request: None,
+                },
                 std::sync::Arc::clone(&pending),
                 bytes
                     .clone()
@@ -15484,7 +15878,10 @@ mod tests {
             assert_eq!(bytes.available_permits(), 0);
             assert!(matches!(
                 queued.take_input(),
-                super::ParsedSocketInput::Action(SessionAction::Tick)
+                super::ParsedSocketInput::Action {
+                    action: SessionAction::Tick,
+                    quest_operation_request: None,
+                }
             ));
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
         }

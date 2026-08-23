@@ -7631,11 +7631,53 @@ export default function HomePage() {
     send({ type: "abandonQuest", questIndex: questId });
   }
 
+  function activeQuestDialogTarget(
+    questId: number,
+    operation: "accept" | "finish",
+    selectedItemIndex?: number,
+  ) {
+    const targets = operation === "accept"
+      ? [`@AcceptQuest:${questId}`, `@quest:accept:${questId}`]
+      : [
+          ...(selectedItemIndex === undefined ? [] : [`@quest:finish:${questId}:${selectedItemIndex}`]),
+          `@FinishQuest:${questId}`,
+          `@quest:finish:${questId}`,
+        ];
+    const normalizedTargets = new Set(targets.map((target) => target.toLowerCase()));
+    return worldRef.current.activeNpcDialog?.links.find((link) =>
+      normalizedTargets.has(link.target.trim().toLowerCase()))?.target ?? null;
+  }
+
   function acceptQuest(questId: number) {
-    send({ type: "acceptQuest", npcIndex: 0, questIndex: questId });
+    const target = activeQuestDialogTarget(questId, "accept");
+    const npcIndex = Number(worldRef.current.activeNpcDialog?.npcObjectId);
+    if (!target || !Number.isSafeInteger(npcIndex) || npcIndex <= 0) {
+      appendLog(
+        t(
+          "content.quest.generic.stage.available.objective",
+          [],
+          "Talk to the quest giver to accept this quest.",
+        ),
+        "system",
+      );
+      return;
+    }
+    send({ type: "acceptQuest", npcIndex, questIndex: questId });
   }
 
   function finishQuest(questId: number, selectedItemIndex?: number) {
+    const target = activeQuestDialogTarget(questId, "finish", selectedItemIndex);
+    if (!target) {
+      appendLog(
+        t(
+          "content.quest.generic.stage.readyToTurnIn.objective",
+          [],
+          "Return to the quest NPC to turn in this quest.",
+        ),
+        "system",
+      );
+      return;
+    }
     send({
       type: "finishQuest",
       questIndex: questId,
@@ -13888,7 +13930,20 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: localizedQuestLog, playerClass: self?.classKey ?? null, onTrackQuest: trackQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest, onAcceptQuest: acceptQuest, onFinishQuest: finishQuest }}
+      questLog={{
+        open: showQuestLog,
+        onClose: () => setShowQuestLog(false),
+        quests: localizedQuestLog,
+        playerClass: self?.classKey ?? null,
+        onTrackQuest: trackQuest,
+        onAbandonQuest: abandonQuest,
+        onShareQuest: shareQuest,
+        onAcceptQuest: acceptQuest,
+        onFinishQuest: finishQuest,
+        canAcceptQuest: (questId) => activeQuestDialogTarget(questId, "accept") !== null,
+        canFinishQuest: (questId, selectedItemIndex) =>
+          activeQuestDialogTarget(questId, "finish", selectedItemIndex) !== null,
+      }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => setShowGroup(false), group: extraWindowData.group, playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleAllowInvites: groupToggleAllowInvites }}

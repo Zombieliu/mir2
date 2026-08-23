@@ -1728,10 +1728,7 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
         "Village Guide should respond: {npc_packets:?}"
     );
 
-    let accept_packets = session.handle_packet(ClientPacket::AcceptQuest {
-        npc_index: 0,
-        quest_index: 1001,
-    });
+    let accept_packets = session.select_npc_dialog_target("@AcceptQuest:1001");
     assert!(
         accept_packets.iter().any(|packet| {
             matches!(
@@ -1776,12 +1773,35 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
         ready_snapshot.inventory_items
     );
 
-    session.force_authoritative_player_transform(Point { x: 327, y: 271 }, MirDirection::Left);
+    session.force_authoritative_player_transform(
+        Point {
+            x: guide.x.saturating_sub(1),
+            y: guide.y,
+        },
+        MirDirection::Right,
+    );
     let before_turn_in = session.world_snapshot();
-    let finish_packets = session.handle_packet(ClientPacket::FinishQuest {
-        quest_index: 1001,
-        selected_item_index: -1,
+    let turn_in_dialog_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: guide.object_id,
+        key: "@Main".to_string(),
     });
+    assert!(
+        !turn_in_dialog_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::CompleteQuest { completed_quests }
+                if completed_quests.contains(&1001)
+        )),
+        "opening the turn-in dialog must not complete the quest"
+    );
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == "@FinishQuest:1001")));
+    let finish_packets = session.select_npc_dialog_target("@FinishQuest:1001");
     let after_turn_in = session.world_snapshot();
     assert!(
         finish_packets.iter().any(|packet| {

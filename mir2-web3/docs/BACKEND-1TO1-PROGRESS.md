@@ -1,5 +1,31 @@
 # Backend 1:1 Progress
 
+> WN-CANDIDATE R12 ordinary-player closure (2026-08-23): quest accept and
+> finish are now explicit dialog actions rather than side effects of opening
+> the Village Guide. The native path requires the matching current dialog link,
+> correct active NPC, authoritative one-tile distance, valid stage, and starter
+> proof item before rewards. Web quest-log Accept/Complete are enabled only by
+> an exact matching link from the current server-owned NPC dialog, which the
+> server revalidates before mutation; the former
+> no-dialog sentinel path is rejected. The native bounded command lane reports
+> saturation, preserves a
+> ninth reliable command for the next drain, and the UI bridge retains/retries
+> old pickup and quest intents instead of silently losing them. Native typed quest
+> requests now carry a monotonic request id. Normal execution and capacity
+> rejection echo an exact ACK/NACK in the causative world snapshot; all
+> same-frame ACKs are consumed once, delayed old ids cannot release replacement
+> submissions, malformed ACKs fail native transport validation, and WebSocket
+> generation rollover isolates old snapshots and rebinds retained unsent
+> retries. Existing Crystal/Web `@quest:*` dialog links remain accepted. The
+> ordinary candidate loop proves movement, guide interaction, Field Wasp
+> combat, quest-container drop, exact ground-gold and object-id item pickup,
+> exact rewards, Bichon map identity, and save/relogin restoration; the loop
+> currently passes 2/2 through Cargo. Focused quest, native backpressure, and Gateway object/tile
+> pickup mappings also pass. This is functional protocol/simulation evidence,
+> not a claim of Windows GUI, Gemini visual, deployed WebSocket, or human
+> acceptance; the full 1,285-test Simulation run was intentionally stopped to
+> protect a host with recent hardware/driver bugchecks.
+>
 > Web build/runtime follow-up (2026-08-22): the current integrated source now
 > has a fresh green production build and strict dual-backend runtime budget.
 > Runtime `bevy-1813be587ef98bc1` measures WebGPU 27,119,641 raw / 5,902,117

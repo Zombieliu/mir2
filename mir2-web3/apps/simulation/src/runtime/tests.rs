@@ -30244,10 +30244,52 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let accept_packets = session.handle_packet(ClientPacket::AcceptQuest {
+    let rejected_remote_accept = session.handle_packet(ClientPacket::AcceptQuest {
         npc_index: 0,
         quest_index: super::GUIDE_QUEST_ID,
     });
+    assert!(rejected_remote_accept.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::Available
+    );
+
+    let guide = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.object_id == super::GUIDE_NPC_ID)
+        .expect("guide NPC should be present");
+    session.force_authoritative_player_transform(
+        Point {
+            x: guide.x.saturating_sub(1),
+            y: guide.y,
+        },
+        MirDirection::Right,
+    );
+    let offer_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(!offer_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken: true,
+            ..
+        } if *quest_id == super::GUIDE_QUEST_ID
+    )));
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog.links.iter().any(|link| {
+            link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID)
+        })));
+    let accept_packets = session.select_npc_dialog_target(&format!(
+        "@AcceptQuest:{}",
+        super::GUIDE_QUEST_ID
+    ));
     assert_eq!(
         session.world_snapshot().quest_log[0].stage,
         QuestStage::InProgress
@@ -30268,6 +30310,30 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
             && *track_quest
     )));
 
+    let current_dialog_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(current_dialog_packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ChangeQuest { .. })));
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| !dialog.links.iter().any(|link| {
+            link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID)
+        })));
+    let stale_accept = session.handle_packet(ClientPacket::AcceptQuest {
+        npc_index: super::GUIDE_NPC_ID,
+        quest_index: super::GUIDE_QUEST_ID,
+    });
+    assert!(stale_accept.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::InProgress
+    );
+
     let abandon_packets = session.handle_packet(ClientPacket::AbandonQuest {
         quest_index: super::GUIDE_QUEST_ID,
     });
@@ -30287,8 +30353,12 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
             && !*completed
     )));
 
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
     session.handle_packet(ClientPacket::AcceptQuest {
-        npc_index: 0,
+        npc_index: super::GUIDE_NPC_ID,
         quest_index: super::GUIDE_QUEST_ID,
     });
     super::set_quest_stage(
@@ -30296,12 +30366,78 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
         super::GUIDE_QUEST_ID,
         QuestStage::ReadyToTurnIn,
     );
-    let gold_before = session.world_snapshot().gold;
-
-    let finish_packets = session.handle_packet(ClientPacket::FinishQuest {
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    let gold_before_missing_proof = session.world_snapshot().gold;
+    let missing_proof_finish = session.handle_packet(ClientPacket::FinishQuest {
         quest_index: super::GUIDE_QUEST_ID,
         selected_item_index: -1,
     });
+    assert!(missing_proof_finish.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::ReadyToTurnIn
+    );
+    assert_eq!(session.world_snapshot().gold, gold_before_missing_proof);
+    session.select_npc_dialog_target("@Exit");
+    super::set_quest_stage(
+        session.app.world_mut(),
+        super::GUIDE_QUEST_ID,
+        QuestStage::InProgress,
+    );
+    let in_progress_dialog = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(in_progress_dialog
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::CompleteQuest { .. })));
+    let quest = super::guide_quest_template();
+    let mut drop_packets = Vec::new();
+    assert!(super::try_gain_crystal_quest_drop(
+        session.app.world_mut(),
+        &quest.quest_item.key,
+        &quest.quest_item.name,
+        quest.quest_item.quantity,
+        None,
+        None,
+        &mut drop_packets,
+    ));
+    let gold_before = session.world_snapshot().gold;
+
+    let stale_finish = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: super::GUIDE_QUEST_ID,
+        selected_item_index: -1,
+    });
+    assert!(stale_finish.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::ReadyToTurnIn
+    );
+
+    let turn_in_dialog_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(!turn_in_dialog_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests }
+            if completed_quests.contains(&super::GUIDE_QUEST_ID)
+    )));
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog.links.iter().any(|link| {
+            link.target == format!("@FinishQuest:{}", super::GUIDE_QUEST_ID)
+        })));
+
+    let finish_packets = session.select_npc_dialog_target(&format!(
+        "@FinishQuest:{}",
+        super::GUIDE_QUEST_ID
+    ));
     let after_finish = session.world_snapshot();
 
     assert_eq!(after_finish.quest_log[0].stage, QuestStage::Completed);

@@ -2865,6 +2865,8 @@ mod tests {
     fn starter_scene_loads() {
         let scene = starter_scene();
 
+        assert_eq!(scene.map.file_name, "0");
+        assert_eq!(scene.map.title, "BichonProvince");
         assert_eq!(scene.default_character.name, "Scout");
         assert_eq!(scene.scene_view.width, 24);
         assert_eq!(scene.terrain_patches.len(), 6);

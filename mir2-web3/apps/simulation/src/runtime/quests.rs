@@ -6,13 +6,14 @@ use serde::{Deserialize, Serialize};
 use crate::config::{ItemContainer, QuestObjectiveSnapshot, QuestSnapshot, QuestStage};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    CrystalQuestItemTaskTemplate, CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy,
-    QuestTemplate, crystal_item_by_index, crystal_item_by_name, crystal_npc_info_manifest,
+    crystal_item_by_index, crystal_item_by_name, crystal_npc_info_manifest,
     crystal_quest_packet_manifest, localized_text_or_fallback, starter_server_data,
+    CrystalQuestItemTaskTemplate, CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy,
+    QuestTemplate,
 };
 use mir2_protocol::{
-    ChatType, ClientQuestInfo, ItemInfo, MirClass, QuestItemReward, ServerPacket, ServerPacketId,
-    decode_server_packet, encode_frame,
+    decode_server_packet, encode_frame, ChatType, ClientQuestInfo, ItemInfo, MirClass,
+    QuestItemReward, ServerPacket, ServerPacketId,
 };
 
 use super::crystal_compat::GUIDE_QUEST_ID;
@@ -24,7 +25,7 @@ use super::inventory::{
 use super::items::{
     crystal_item_key_for_template, item_info_from_crystal_template, normalize_crystal_item_key,
 };
-use super::npc::{NpcDialogLinkState, localized_npc_dialog_base_key, npc_script_for_object_id};
+use super::npc::{localized_npc_dialog_base_key, npc_script_for_object_id, NpcDialogLinkState};
 use super::npc_script::{NpcInteractionContext, NpcQuestDialog};
 use super::resources::{
     InventoryResource, PlayerRuntimeResource, QuestResource, RuntimeConfigResource, SessionResource,
@@ -664,20 +665,27 @@ pub(super) fn resolve_npc_quest_dialog(
         dialog_required,
     )?;
 
-    match stage_before_action {
-        QuestStage::Available => set_quest_stage(world, quest_id, QuestStage::InProgress),
-        QuestStage::ReadyToTurnIn => complete_quest(world, quest_id),
-        QuestStage::InProgress | QuestStage::Completed => {}
-    }
+    let links = match stage_before_action {
+        QuestStage::Available => vec![NpcDialogLinkState {
+            text: "Accept".to_string(),
+            target: format!("@AcceptQuest:{quest_id}"),
+        }],
+        QuestStage::ReadyToTurnIn => vec![NpcDialogLinkState {
+            text: "Complete".to_string(),
+            target: format!("@FinishQuest:{quest_id}"),
+        }],
+        QuestStage::InProgress | QuestStage::Completed => Vec::new(),
+    };
 
     Some(NpcQuestDialog {
-        stage_before_action,
+        stage: stage_before_action,
         current: dialog_current,
         required: dialog_required,
         title,
         body,
         footer,
         object_chat,
+        links,
     })
 }
 

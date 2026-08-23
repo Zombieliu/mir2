@@ -100,7 +100,7 @@ pub enum QuestUiIntent {
 }
 
 impl QuestUiIntent {
-    fn pending_key(&self) -> Option<PendingOperationKey> {
+    pub fn pending_key(&self) -> Option<PendingOperationKey> {
         match self {
             Self::AcceptQuest {
                 npc_index,
@@ -130,19 +130,60 @@ impl QuestUiIntent {
 
 #[derive(Resource, Debug, Default)]
 pub struct QuestUiIntentQueue {
+    /// Commands that reached the host bridge but could not enter its bounded
+    /// producer lane. They always drain before newly generated UI input.
+    retry_intents: VecDeque<QuestUiIntent>,
     intents: VecDeque<QuestUiIntent>,
+    overflow_count: u64,
 }
 
 impl QuestUiIntentQueue {
-    pub fn push_intent(&mut self, intent: QuestUiIntent) {
-        if self.intents.len() >= MAX_QUEUED_INTENTS {
-            self.intents.pop_front();
+    /// Queue new UI input without evicting an older intent. At capacity the
+    /// incoming intent is rejected explicitly, preserving FIFO and any
+    /// protected host-backpressure retries.
+    pub fn push_intent(&mut self, intent: QuestUiIntent) -> bool {
+        if self.len() >= MAX_QUEUED_INTENTS {
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            return false;
         }
         self.intents.push_back(intent);
+        true
+    }
+
+    /// Retain host-send failures as the highest-priority FIFO. The bridge calls
+    /// this only after draining a bounded batch, so every failed item normally
+    /// fits. If another producer populated the queue in between, unsent new
+    /// input is evicted from the back before a retry is ever sacrificed.
+    pub fn retain_failed_intents(
+        &mut self,
+        failed: impl IntoIterator<Item = QuestUiIntent>,
+    ) -> Vec<QuestUiIntent> {
+        let mut dropped = Vec::new();
+        for intent in failed {
+            if self.len() >= MAX_QUEUED_INTENTS {
+                if let Some(evicted) = self.intents.pop_back() {
+                    self.overflow_count = self.overflow_count.saturating_add(1);
+                    dropped.push(evicted);
+                } else {
+                    // A full queue made solely of older retries cannot accept
+                    // another retry without becoming unbounded. Return it to
+                    // the host so any matching pending operation is released
+                    // explicitly instead of being stranded forever.
+                    self.overflow_count = self.overflow_count.saturating_add(1);
+                    dropped.push(intent);
+                    continue;
+                }
+            }
+            self.retry_intents.push_back(intent);
+        }
+        dropped
     }
 
     pub fn drain_intents(&mut self) -> Vec<QuestUiIntent> {
-        self.intents.drain(..).collect()
+        let mut drained = Vec::with_capacity(self.len());
+        drained.extend(self.retry_intents.drain(..));
+        drained.extend(self.intents.drain(..));
+        drained
     }
 
     pub fn push_pending_intent(
@@ -151,22 +192,42 @@ impl QuestUiIntentQueue {
         intent: QuestUiIntent,
     ) -> bool {
         let Some(key) = intent.pending_key() else {
-            self.push_intent(intent);
-            return true;
+            return self.push_intent(intent);
         };
-        if !pending.try_begin(key) {
+        if !pending.try_begin(key.clone()) {
             return false;
         }
-        self.push_intent(intent);
-        true
+        if self.push_intent(intent) {
+            true
+        } else {
+            pending.release(&key);
+            false
+        }
     }
 
     pub fn clear(&mut self) {
+        self.retry_intents.clear();
         self.intents.clear();
     }
 
     pub fn is_empty(&self) -> bool {
-        self.intents.is_empty()
+        self.retry_intents.is_empty() && self.intents.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.retry_intents.len() + self.intents.len()
+    }
+
+    pub fn is_full(&self) -> bool {
+        self.len() >= MAX_QUEUED_INTENTS
+    }
+
+    pub fn retry_len(&self) -> usize {
+        self.retry_intents.len()
+    }
+
+    pub fn overflow_count(&self) -> u64 {
+        self.overflow_count
     }
 }
 
@@ -728,11 +789,14 @@ fn process_quest_ui_input(
                         // Save history for service return only when the current server page
                         // still exposes this enabled target. This keeps a stale pointer event
                         // from navigating after a dialog refresh.
-                        npc_nav.push(dialog.clone());
-                        queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                        if queue.push_intent(QuestUiIntent::SelectNpcDialog {
                             target: target.clone(),
-                        });
-                        quest_state.set_feedback(format!("Selected dialog {target}"), false);
+                        }) {
+                            npc_nav.push(dialog.clone());
+                            quest_state.set_feedback(format!("Selected dialog {target}"), false);
+                        } else {
+                            quest_state.set_feedback("Connection busy; try again", true);
+                        }
                     }
                     Some(false) => {
                         quest_state.set_feedback("That dialog option is unavailable", true);
@@ -746,12 +810,15 @@ fn process_quest_ui_input(
                 }
             }
             QuestUiButton::CloseNpcDialog => {
-                queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                if queue.push_intent(QuestUiIntent::SelectNpcDialog {
                     target: "@Exit".to_owned(),
-                });
-                dialog.close();
-                npc_nav.clear();
-                quest_state.set_feedback("Dialog closed", false);
+                }) {
+                    dialog.close();
+                    npc_nav.clear();
+                    quest_state.set_feedback("Dialog closed", false);
+                } else {
+                    quest_state.set_feedback("Connection busy; try again", true);
+                }
             }
             QuestUiButton::ReturnNpcService => {
                 if let Some(prev) = npc_nav.pop() {
@@ -797,12 +864,22 @@ fn process_quest_ui_input(
                     quest_state.set_feedback("Quest has no valid NPC source", true);
                     continue;
                 }
+                if !dialog_exposes_quest_action(
+                    &dialog,
+                    Some(npc_index),
+                    &format!("@AcceptQuest:{quest_index}"),
+                ) {
+                    quest_state
+                        .set_feedback("Use the current NPC dialog to accept this quest", true);
+                    continue;
+                }
                 if let Some(quest) = tracker
                     .active_quests
                     .iter()
                     .find(|q| q.quest_index == quest_index)
                 {
                     if can_accept_quest(quest) {
+                        let queue_full = queue.is_full();
                         if queue.push_pending_intent(
                             &mut pending,
                             QuestUiIntent::AcceptQuest {
@@ -811,6 +888,8 @@ fn process_quest_ui_input(
                             },
                         ) {
                             quest_state.set_feedback(format!("Accepting {}", quest.title), false);
+                        } else if queue_full {
+                            quest_state.set_feedback("Connection busy; try again", true);
                         } else {
                             quest_state.set_feedback("Quest request is already pending", true);
                         }
@@ -820,6 +899,7 @@ fn process_quest_ui_input(
                 } else {
                     // Allow accept even if quest not yet in tracker but offered via NPC dialog
                     // Still require npc_index valid (non-zero or present)
+                    let queue_full = queue.is_full();
                     if queue.push_pending_intent(
                         &mut pending,
                         QuestUiIntent::AcceptQuest {
@@ -828,6 +908,8 @@ fn process_quest_ui_input(
                         },
                     ) {
                         quest_state.set_feedback("Accepting quest", false);
+                    } else if queue_full {
+                        quest_state.set_feedback("Connection busy; try again", true);
                     } else {
                         quest_state.set_feedback("Quest request is already pending", true);
                     }
@@ -837,6 +919,14 @@ fn process_quest_ui_input(
                 quest_index,
                 selected_item_index,
             } => {
+                if !dialog_exposes_quest_action(
+                    &dialog,
+                    None,
+                    &format!("@FinishQuest:{quest_index}"),
+                ) {
+                    quest_state.set_feedback("Return to the quest NPC to deliver this quest", true);
+                    continue;
+                }
                 if let Some(quest) = tracker
                     .active_quests
                     .iter()
@@ -853,6 +943,7 @@ fn process_quest_ui_input(
                         quest_state.set_feedback("Select a reward first", true);
                         continue;
                     }
+                    let queue_full = queue.is_full();
                     if queue.push_pending_intent(
                         &mut pending,
                         QuestUiIntent::FinishQuest {
@@ -861,6 +952,8 @@ fn process_quest_ui_input(
                         },
                     ) {
                         quest_state.set_feedback(format!("Delivering {}", quest.title), false);
+                    } else if queue_full {
+                        quest_state.set_feedback("Connection busy; try again", true);
                     } else {
                         quest_state.set_feedback("Quest request is already pending", true);
                     }
@@ -875,11 +968,14 @@ fn process_quest_ui_input(
                     .find(|q| q.quest_index == quest_index)
                 {
                     if can_abandon_quest(quest) {
+                        let queue_full = queue.is_full();
                         if queue.push_pending_intent(
                             &mut pending,
                             QuestUiIntent::AbandonQuest { quest_index },
                         ) {
                             quest_state.set_feedback(format!("Abandoning {}", quest.title), false);
+                        } else if queue_full {
+                            quest_state.set_feedback("Connection busy; try again", true);
                         } else {
                             quest_state.set_feedback("Quest request is already pending", true);
                         }
@@ -923,24 +1019,34 @@ fn process_quest_ui_input(
             }
             QuestUiButton::AttackTarget { object_id } => {
                 if target_is_attackable(target.as_deref(), object_id) {
-                    queue.push_intent(QuestUiIntent::AttackTarget { object_id });
-                    quest_state.set_feedback("Attacking target", false);
+                    if queue.push_intent(QuestUiIntent::AttackTarget { object_id }) {
+                        quest_state.set_feedback("Attacking target", false);
+                    } else {
+                        quest_state.set_feedback("Connection busy; try again", true);
+                    }
                 } else {
                     quest_state.set_feedback("Target is no longer attackable", true);
                 }
             }
             QuestUiButton::PickUpObject { object_id } => {
                 if let Some(label) = pickup_label(pickups.as_deref(), object_id) {
-                    queue.push_intent(QuestUiIntent::PickUpObject { object_id });
-                    quest_state.set_feedback(format!("Picking up {label}"), false);
+                    if queue.push_intent(QuestUiIntent::PickUpObject { object_id }) {
+                        quest_state.set_feedback(format!("Picking up {label}"), false);
+                    } else {
+                        quest_state.set_feedback("Connection busy; pickup not queued", true);
+                    }
                 } else {
                     quest_state.set_feedback("That ground item is no longer available", true);
                 }
             }
             QuestUiButton::PickUpTile => {
                 if pickup_tile_is_current(pickups.as_deref()) {
-                    queue.push_intent(QuestUiIntent::PickUpTile);
-                    quest_state.set_feedback("Checking the current tile for ground items", false);
+                    if queue.push_intent(QuestUiIntent::PickUpTile) {
+                        quest_state
+                            .set_feedback("Checking the current tile for ground items", false);
+                    } else {
+                        quest_state.set_feedback("Connection busy; pickup not queued", true);
+                    }
                 } else {
                     quest_state.set_feedback("That pickup is no longer available", true);
                 }
@@ -965,12 +1071,15 @@ fn process_quest_ui_input(
                 quest_state.clear_selection();
                 quest_state.clear_feedback();
             } else if dialog_open {
-                queue.push_intent(QuestUiIntent::SelectNpcDialog {
+                if queue.push_intent(QuestUiIntent::SelectNpcDialog {
                     target: "@Exit".to_owned(),
-                });
-                dialog.close();
-                npc_nav.clear();
-                quest_state.set_feedback("Dialog closed", false);
+                }) {
+                    dialog.close();
+                    npc_nav.clear();
+                    quest_state.set_feedback("Dialog closed", false);
+                } else {
+                    quest_state.set_feedback("Connection busy; try again", true);
+                }
             }
         } else if dialog_open && keys.just_pressed(KeyCode::Backspace) {
             // Service return via Backspace when dialog history exists
@@ -989,9 +1098,11 @@ fn process_quest_ui_input(
     if keys.just_pressed(KeyCode::KeyT) {
         if let Some(nearby) = &nearby {
             if let Some(npc) = nearby.nearest() {
-                queue.push_intent(QuestUiIntent::InteractNpc {
+                if !queue.push_intent(QuestUiIntent::InteractNpc {
                     npc_object_id: npc.object_id,
-                });
+                }) {
+                    quest_state.set_feedback("Connection busy; try again", true);
+                }
             }
         }
     }
@@ -999,9 +1110,11 @@ fn process_quest_ui_input(
     if keys.just_pressed(KeyCode::KeyF) {
         if let Some(target) = &target {
             if let Some(target) = &target.target {
-                queue.push_intent(QuestUiIntent::AttackTarget {
+                if !queue.push_intent(QuestUiIntent::AttackTarget {
                     object_id: target.object_id,
-                });
+                }) {
+                    quest_state.set_feedback("Connection busy; try again", true);
+                }
             }
         }
     }
@@ -1011,24 +1124,39 @@ fn process_quest_ui_input(
             Some(pickups) => match pickups.recent.front() {
                 Some(pickup) => match pickup.object_id {
                     Some(object_id) => {
-                        queue.push_intent(QuestUiIntent::PickUpObject { object_id });
-                        quest_state
-                            .set_feedback(format!("Picking up {}", pickup.compact_label()), false);
+                        if queue.push_intent(QuestUiIntent::PickUpObject { object_id }) {
+                            quest_state.set_feedback(
+                                format!("Picking up {}", pickup.compact_label()),
+                                false,
+                            );
+                        } else {
+                            quest_state.set_feedback("Connection busy; pickup not queued", true);
+                        }
                     }
                     None => {
-                        queue.push_intent(QuestUiIntent::PickUpTile);
-                        quest_state
-                            .set_feedback("Checking the current tile for ground items", false);
+                        if queue.push_intent(QuestUiIntent::PickUpTile) {
+                            quest_state
+                                .set_feedback("Checking the current tile for ground items", false);
+                        } else {
+                            quest_state.set_feedback("Connection busy; pickup not queued", true);
+                        }
                     }
                 },
                 None => {
-                    queue.push_intent(QuestUiIntent::PickUpTile);
-                    quest_state.set_feedback("Checking the current tile for ground items", false);
+                    if queue.push_intent(QuestUiIntent::PickUpTile) {
+                        quest_state
+                            .set_feedback("Checking the current tile for ground items", false);
+                    } else {
+                        quest_state.set_feedback("Connection busy; pickup not queued", true);
+                    }
                 }
             },
             None => {
-                queue.push_intent(QuestUiIntent::PickUpTile);
-                quest_state.set_feedback("Checking the current tile for ground items", false);
+                if queue.push_intent(QuestUiIntent::PickUpTile) {
+                    quest_state.set_feedback("Checking the current tile for ground items", false);
+                } else {
+                    quest_state.set_feedback("Connection busy; pickup not queued", true);
+                }
             }
         }
     }
@@ -1190,7 +1318,7 @@ fn render_quest_ui(
             if is_tracker.is_some() {
                 render_quest_tracker_panel(panel, &tracker);
             } else if is_dialog.is_some() {
-                render_dialog_panel(panel, &dialog, &npc_nav, &quest_state);
+                render_dialog_panel(panel, &dialog, &npc_nav, &quest_state, &pending);
             } else if is_target.is_some() {
                 render_combat_target_panel(panel, target.target.as_ref());
             } else if is_pickup.is_some() {
@@ -1237,6 +1365,7 @@ fn render_dialog_panel(
     dialog: &NpcDialogModel,
     nav: &NpcDialogNav,
     quest_state: &QuestUiState,
+    pending: &PendingOperations,
 ) {
     title_line(parent, "NPC Dialog");
 
@@ -1267,13 +1396,35 @@ fn render_dialog_panel(
     feedback_line(parent, quest_state.feedback.as_ref(), 10.0);
 
     for option in dialog.options.iter().take(4) {
+        let action = explicit_quest_dialog_button(
+            &option.option_id,
+            dialog.npc_object_id.unwrap_or_default(),
+        )
+        .unwrap_or_else(|| QuestUiButton::SelectNpcDialog {
+            target: option.option_id.to_owned(),
+        });
+        let operation_available = match &action {
+            QuestUiButton::AcceptQuest {
+                npc_index,
+                quest_index,
+            } => !pending.contains(&PendingOperationKey::QuestAccept {
+                npc_index: *npc_index,
+                quest_index: *quest_index,
+            }),
+            QuestUiButton::FinishQuest {
+                quest_index,
+                selected_item_index,
+            } => !pending.contains(&PendingOperationKey::QuestFinish {
+                quest_index: *quest_index,
+                selected_item_index: *selected_item_index,
+            }),
+            _ => true,
+        };
         action_button(
             parent,
             &option.label,
-            QuestUiButton::SelectNpcDialog {
-                target: option.option_id.to_owned(),
-            },
-            option.enabled,
+            action,
+            option.enabled && operation_available,
         );
     }
 
@@ -1286,6 +1437,41 @@ fn render_dialog_panel(
         nav.can_return(),
     );
     action_button(parent, "Close", QuestUiButton::CloseNpcDialog, true);
+}
+
+fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+    let mut parts = target.trim().trim_start_matches('@').split(':');
+    let action = parts.next()?;
+    let quest_index = parts.next()?.parse::<i32>().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    if action.eq_ignore_ascii_case("AcceptQuest") && npc_index != 0 {
+        Some(QuestUiButton::AcceptQuest {
+            npc_index,
+            quest_index,
+        })
+    } else if action.eq_ignore_ascii_case("FinishQuest") {
+        Some(QuestUiButton::FinishQuest {
+            quest_index,
+            selected_item_index: -1,
+        })
+    } else {
+        None
+    }
+}
+
+fn dialog_exposes_quest_action(
+    dialog: &NpcDialogModel,
+    expected_npc_index: Option<u32>,
+    target: &str,
+) -> bool {
+    dialog.is_open
+        && expected_npc_index.is_none_or(|expected| dialog.npc_object_id == Some(expected))
+        && dialog
+            .options
+            .iter()
+            .any(|option| option.enabled && option.option_id.trim().eq_ignore_ascii_case(target))
 }
 
 fn render_quest_log_panel(
@@ -1420,9 +1606,11 @@ fn render_quest_log_panel(
         let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon {
             quest_index: quest.quest_index,
         });
-        let can_accept = quest_accept_enabled(quest) && npc_index != 0 && !accept_pending;
-        let can_finish =
-            quest_finish_enabled(quest, state.selected_reward_index) && !finish_pending;
+        // Crystal's authoritative Accept/Deliver actions belong to the active
+        // NPC dialog. Keep the quest log informative, but never offer a button
+        // that the server must reject for lacking the exact current dialog.
+        let can_accept = false;
+        let can_finish = false;
         // Track
         action_button(
             parent,
@@ -1441,6 +1629,8 @@ fn render_quest_log_panel(
             parent,
             if accept_pending {
                 "Accepting..."
+            } else if quest_accept_enabled(quest) && npc_index != 0 {
+                "Talk to NPC"
             } else {
                 "Accept"
             },
@@ -1455,6 +1645,8 @@ fn render_quest_log_panel(
             parent,
             if finish_pending {
                 "Delivering..."
+            } else if quest_finish_enabled(quest, state.selected_reward_index) {
+                "Return to NPC"
             } else {
                 "Deliver"
             },
@@ -2005,6 +2197,18 @@ mod tests {
         }
     }
 
+    fn dialog_with_option(npc_object_id: u32, target: &str) -> NpcDialogModel {
+        let mut dialog = NpcDialogModel::default();
+        dialog.is_open = true;
+        dialog.npc_object_id = Some(npc_object_id);
+        dialog.options = vec![crate::quest_model::NpcDialogOption {
+            option_id: target.to_owned(),
+            label: "Continue".to_owned(),
+            enabled: true,
+        }];
+        dialog
+    }
+
     fn queue_sample() -> QuestUiIntentQueue {
         let mut queue = QuestUiIntentQueue::default();
         queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id: 100 });
@@ -2147,18 +2351,44 @@ mod tests {
     }
 
     #[test]
-    fn intent_queue_keeps_fifo_and_drops_oldest_when_full() {
+    fn intent_queue_keeps_oldest_fifo_and_reports_rejected_overflow() {
         let mut queue = QuestUiIntentQueue::default();
         for n in 0..(MAX_QUEUED_INTENTS + 5) {
-            queue.push_intent(QuestUiIntent::PickUpObject {
+            let accepted = queue.push_intent(QuestUiIntent::PickUpObject {
                 object_id: n as u32,
             });
+            assert_eq!(accepted, n < MAX_QUEUED_INTENTS);
         }
 
+        assert_eq!(queue.len(), MAX_QUEUED_INTENTS);
+        assert_eq!(queue.overflow_count(), 5);
         let drained = queue.drain_intents();
         assert_eq!(drained.len(), MAX_QUEUED_INTENTS);
-        assert_eq!(drained[0], QuestUiIntent::PickUpObject { object_id: 5 });
-        assert_eq!(drained[23], QuestUiIntent::PickUpObject { object_id: 28 });
+        assert_eq!(drained[0], QuestUiIntent::PickUpObject { object_id: 0 });
+        assert_eq!(drained[23], QuestUiIntent::PickUpObject { object_id: 23 });
+    }
+
+    #[test]
+    fn retry_saturation_returns_every_dropped_intent_for_pending_release() {
+        let mut queue = QuestUiIntentQueue::default();
+        for object_id in 0..MAX_QUEUED_INTENTS as u32 {
+            queue
+                .retry_intents
+                .push_back(QuestUiIntent::PickUpObject { object_id });
+        }
+        let dropped = queue.retain_failed_intents([QuestUiIntent::AcceptQuest {
+            npc_index: 4001,
+            quest_index: 1001,
+        }]);
+        assert_eq!(
+            dropped,
+            vec![QuestUiIntent::AcceptQuest {
+                npc_index: 4001,
+                quest_index: 1001,
+            }]
+        );
+        assert_eq!(queue.retry_len(), MAX_QUEUED_INTENTS);
+        assert_eq!(queue.overflow_count(), 1);
     }
 
     #[test]
@@ -2236,6 +2466,89 @@ mod tests {
         let drained = queue.drain_intents();
         assert_eq!(drained[0], QuestUiIntent::PickUpObject { object_id: 0 });
         assert_eq!(drained[1], QuestUiIntent::PickUpTile);
+    }
+
+    #[test]
+    fn explicit_starter_dialog_links_map_to_exact_quest_actions() {
+        assert_eq!(
+            explicit_quest_dialog_button("@AcceptQuest:1001", 4001),
+            Some(QuestUiButton::AcceptQuest {
+                npc_index: 4001,
+                quest_index: 1001,
+            })
+        );
+        assert_eq!(
+            explicit_quest_dialog_button("@FinishQuest:1001", 4001),
+            Some(QuestUiButton::FinishQuest {
+                quest_index: 1001,
+                selected_item_index: -1,
+            })
+        );
+        assert_eq!(explicit_quest_dialog_button("@AcceptQuest:1001", 0), None);
+        assert_eq!(
+            explicit_quest_dialog_button("@AcceptQuest:1001:extra", 4001),
+            None
+        );
+        assert_eq!(explicit_quest_dialog_button("@Shop", 4001), None);
+    }
+
+    #[test]
+    fn full_queue_reports_pickup_not_queued_instead_of_success() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(QuestTracker::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(NpcDialogNav::default());
+        app.init_resource::<QuestUiState>();
+        let mut queue = QuestUiIntentQueue::default();
+        for object_id in 0..MAX_QUEUED_INTENTS as u32 {
+            assert!(queue.push_intent(QuestUiIntent::PickUpObject { object_id }));
+        }
+        app.insert_resource(queue);
+        app.init_resource::<PendingOperations>();
+        app.init_resource::<NearbyNpcModel>();
+        app.init_resource::<CombatTargetModel>();
+        let mut pickups = GroundPickupModel::default();
+        pickups.upsert(crate::quest_model::RecentPickup {
+            object_id: Some(999),
+            key: "gold-999".to_owned(),
+            label: "Gold".to_owned(),
+            amount: 1,
+            from_npc: None,
+        });
+        app.insert_resource(pickups);
+
+        let button = app
+            .world_mut()
+            .spawn((
+                Button,
+                QuestUiButton::PickUpObject { object_id: 999 },
+                Interaction::Pressed,
+            ))
+            .id();
+        app.add_systems(Update, process_quest_ui_input);
+        app.update();
+
+        let intents = app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents();
+        assert_eq!(intents.len(), MAX_QUEUED_INTENTS);
+        assert!(!intents.contains(&QuestUiIntent::PickUpObject { object_id: 999 }));
+        let feedback = app
+            .world()
+            .resource::<QuestUiState>()
+            .feedback
+            .as_ref()
+            .expect("queue rejection should be visible");
+        assert!(feedback.is_error);
+        assert!(feedback.message.contains("not queued"));
+        app.world_mut().despawn(button);
     }
 
     #[test]
@@ -2517,7 +2830,7 @@ mod tests {
         app.insert_resource(QuestTracker {
             active_quests: vec![quest(5, QuestStatus::NotStarted)],
         });
-        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(dialog_with_option(10, "@AcceptQuest:5"));
         app.insert_resource(NpcDialogNav::default());
         app.init_resource::<QuestUiState>();
         app.init_resource::<QuestUiIntentQueue>();
@@ -2570,7 +2883,7 @@ mod tests {
     }
 
     #[test]
-    fn disabled_accept_does_not_emit_intent_but_sets_error_feedback() {
+    fn quest_log_accept_without_exact_dialog_is_rejected_locally() {
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
         app.insert_resource(NativeShellModel {
@@ -2578,9 +2891,9 @@ mod tests {
             ..default()
         });
         app.insert_resource(NativePlayerUiState::default());
-        // Quest already in progress cannot be accepted
+        // A quest-log button cannot bypass the current authoritative NPC page.
         app.insert_resource(QuestTracker {
-            active_quests: vec![quest(5, QuestStatus::InProgress)],
+            active_quests: vec![quest(5, QuestStatus::NotStarted)],
         });
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(NpcDialogNav::default());
@@ -2609,9 +2922,15 @@ mod tests {
             .world_mut()
             .resource_mut::<QuestUiIntentQueue>()
             .drain_intents();
-        assert!(intents.is_empty(), "disabled accept should not emit intent");
+        assert!(intents.is_empty(), "remote accept should not emit intent");
         let state = app.world().resource::<QuestUiState>();
         assert_eq!(state.feedback.as_ref().unwrap().is_error, true);
+        assert!(state
+            .feedback
+            .as_ref()
+            .unwrap()
+            .message
+            .contains("current NPC dialog"));
         app.world_mut().despawn(button);
     }
 
@@ -2635,7 +2954,7 @@ mod tests {
         app.insert_resource(QuestTracker {
             active_quests: vec![multi.clone()],
         });
-        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(dialog_with_option(11, "@FinishQuest:7"));
         app.insert_resource(NpcDialogNav::default());
         let mut qs = QuestUiState::default();
         qs.select_quest(7);

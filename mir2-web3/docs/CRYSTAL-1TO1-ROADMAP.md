@@ -1,5 +1,25 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> WN-CANDIDATE R12 checkpoint (2026-08-23): the ordinary-player functional
+> slice now closes remote quest mutation, rejected-task pending locks, and
+> saturated pickup-loss gaps. Village Guide open is presentation-only;
+> native accept/finish require explicit current dialog links, nearby authority,
+> valid stage, and the starter proof item. Web quest-log Accept/Complete are
+> enabled only by the exact matching link in the current NPC dialog, which the
+> server revalidates before mutation; its
+> former no-dialog sentinel path is rejected. Crystal/Web `@quest:accept` and
+> `@quest:finish` dialog links remain valid. Native typed quest mutations use monotonic
+> request ids, exact ACK/NACK correlation, one-shot consumption and generation
+> isolation, so delayed old ACKs cannot release replacement submissions and a
+> retained unsent retry receives a new id after reconnect. Its
+> deterministic loop covers nearby-NPC interaction, movement, Field Wasp
+> combat, quest and ground drops, gold plus object-id item pickup, exact
+> rewards, Bichon map identity, and save/relogin restoration,
+> with focused protocol/bridge regressions green. This advances the playable
+> Windows Candidate path but does not close the remaining live Windows UI,
+> deployed WebSocket, Web production regression, Gemini screenshot comparison,
+> or human visual/feel gates.
+>
 > Fresh Web production-build sync (2026-08-22): the complete current-source
 > pipeline passes with both release WASM backends, 9,650 entity frames, 40,808
 > original assets, 58 map-atlas pages, TypeScript and 13/13 static pages. The
