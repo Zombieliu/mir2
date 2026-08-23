@@ -111,8 +111,17 @@ impl CrystalAdditiveMaterialCache {
         }
     }
 
+    #[cfg(any(not(target_arch = "wasm32"), test))]
     pub(crate) fn len(&self) -> usize {
         self.materials.len()
+    }
+
+    #[cfg(any(not(target_arch = "wasm32"), test))]
+    pub(crate) fn live_len(&self, materials: &Assets<CrystalAdditiveMaterial>) -> usize {
+        self.materials
+            .values()
+            .filter(|handle| materials.get(*handle).is_some())
+            .count()
     }
 }
 

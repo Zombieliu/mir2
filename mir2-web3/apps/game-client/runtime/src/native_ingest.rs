@@ -21,6 +21,19 @@ use bevy::prelude::Resource;
 /// a permanently fixed queue would point at the first, possibly dropped app.
 static NATIVE_QUEUE: OnceLock<Mutex<Option<Arc<Mutex<NativeInboundBuffer>>>>> = OnceLock::new();
 
+// Tests that install a process-global native queue must not run concurrently.
+// Production never acquires this lock; it exists only to make the default
+// parallel Rust test harness deterministic across this module and lib.rs.
+#[cfg(test)]
+static NATIVE_QUEUE_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+#[cfg(test)]
+pub(crate) fn native_queue_test_guard() -> std::sync::MutexGuard<'static, ()> {
+    NATIVE_QUEUE_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
 /// Keep native transport backpressure deterministic. Snapshot traffic gets a
 /// large coalescing budget while the tail remains available to resets and
 /// operation acknowledgements even when rendering stalls.
@@ -1118,6 +1131,7 @@ mod tests {
 
     #[test]
     fn snapshot_coalescing_keeps_post_reset_order() {
+        let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
         assert!(push_native_world_state("old".to_owned()));
         assert!(push_native_scene_reset());
@@ -1141,6 +1155,7 @@ mod tests {
 
     #[test]
     fn type_specific_consumers_preserve_messages_for_later_consumers() {
+        let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
         assert!(push_native_world_state("world".to_owned()));
         assert!(push_native_ui_read_model("ui".to_owned()));
@@ -1163,6 +1178,7 @@ mod tests {
 
     #[test]
     fn rebuilding_runtime_invalidates_only_the_previous_buffer() {
+        let _native_queue_guard = native_queue_test_guard();
         let previous = NativeInbound::new();
         assert!(push_native_world_state("old".to_owned()));
         let previous_buffer = Arc::clone(&previous.buffer);
@@ -1198,6 +1214,7 @@ mod tests {
 
     #[test]
     fn reset_discards_queued_stale_models_but_keeps_models_after_reset() {
+        let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
         assert!(push_native_mail_model(r#"{"mails":[]}"#.to_owned()));
         assert!(push_native_data_reset());
@@ -1226,6 +1243,7 @@ mod tests {
 
     #[test]
     fn scene_reset_discards_old_scene_messages_but_keeps_personal_models() {
+        let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
         assert!(push_native_world_state("old-world".to_owned()));
         assert!(push_native_inventory_model(
@@ -1269,6 +1287,7 @@ mod tests {
 
     #[test]
     fn lighting_snapshot_coalesces_and_scene_reset_drops_only_the_stale_generation() {
+        let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
         assert!(push_native_lighting_render_state("old-1".to_owned()));
         assert!(push_native_lighting_render_state("old-2".to_owned()));

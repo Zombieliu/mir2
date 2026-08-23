@@ -216,6 +216,149 @@ struct SceneRegistry {
     mine_nodes: HashMap<(i32, i32), MineNodeHandles>,
 }
 
+/// Renderer-side counts used by the opt-in Windows native soak diagnostics.
+///
+/// These are deliberately separate counters instead of one aggregate scene
+/// count: `entities` is the legacy object renderer, while
+/// `entity_render_layers` is the retained native layer renderer. Combining
+/// them would make a healthy renderer switch look like a leak.
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeSoakCounts {
+    snapshot_effects: usize,
+    retained_effect_primary: usize,
+    retained_effect_masks: usize,
+    retained_effect_shadows: usize,
+    retained_effect_images: usize,
+    retained_entity_layers: usize,
+    legacy_scene_entities: usize,
+    entity_atlases: usize,
+    map_render_tiles: usize,
+    map_spawned_entities: usize,
+    mine_nodes: usize,
+    lighting_layers: usize,
+    lighting_images: usize,
+    additive_cache_entries: usize,
+    additive_cache_live_entries: usize,
+    additive_asset_count: usize,
+}
+
+/// Take a renderer-only snapshot without touching ECS entities or the native
+/// ingest queue. The registry maps are the authoritative retained counts;
+/// Bevy despawn commands are deferred and therefore unsuitable as same-frame
+/// leak metrics.
+#[cfg(not(target_arch = "wasm32"))]
+fn native_soak_counts(
+    registry: &SceneRegistry,
+    effect_state: &RuntimeEffectRenderState,
+    additive_cache: &additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &Assets<additive_material::CrystalAdditiveMaterial>,
+) -> NativeSoakCounts {
+    NativeSoakCounts {
+        snapshot_effects: effect_state
+            .snapshot
+            .as_ref()
+            .map_or(0, |snapshot| snapshot.effects.len()),
+        retained_effect_primary: registry.effect_render.len(),
+        retained_effect_masks: registry.effect_render_masks.len(),
+        retained_effect_shadows: registry.effect_render_shadows.len(),
+        retained_effect_images: registry.effect_render_images.len(),
+        retained_entity_layers: registry.entity_render_layers.len(),
+        legacy_scene_entities: registry.entities.len(),
+        entity_atlases: registry.entity_render_atlases.len(),
+        map_render_tiles: registry.map_render.tiles.len(),
+        map_spawned_entities: registry.map.spawned.len(),
+        mine_nodes: registry.mine_nodes.len(),
+        lighting_layers: registry.lighting_layers.len(),
+        lighting_images: registry.lighting_images.len(),
+        additive_cache_entries: additive_cache.len(),
+        additive_cache_live_entries: additive_cache.live_len(additive_materials),
+        additive_asset_count: additive_materials.len(),
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Default)]
+struct NativeSoakMetricsClock {
+    initialized: bool,
+    enabled: bool,
+    last_sample_ms: Option<u64>,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_soak_metrics_json(
+    process_id: u32,
+    timestamp_ms: u64,
+    counts: &NativeSoakCounts,
+) -> String {
+    serde_json::json!({
+        "processId": process_id,
+        "timestampMs": timestamp_ms,
+        "snapshotEffects": counts.snapshot_effects,
+        "retainedEffectPrimary": counts.retained_effect_primary,
+        "retainedEffectMasks": counts.retained_effect_masks,
+        "retainedEffectShadows": counts.retained_effect_shadows,
+        "retainedEffectImages": counts.retained_effect_images,
+        "retainedEntityLayers": counts.retained_entity_layers,
+        "legacySceneEntities": counts.legacy_scene_entities,
+        "entityAtlases": counts.entity_atlases,
+        "mapRenderTiles": counts.map_render_tiles,
+        "mapSpawnedEntities": counts.map_spawned_entities,
+        "mineNodes": counts.mine_nodes,
+        "lightingLayers": counts.lighting_layers,
+        "lightingImages": counts.lighting_images,
+        "additiveCacheEntries": counts.additive_cache_entries,
+        "additiveCacheLiveEntries": counts.additive_cache_live_entries,
+        "additiveAssetCount": counts.additive_asset_count,
+    })
+    .to_string()
+}
+
+/// Emit one compact, local-only diagnostic line at most once per 10 seconds.
+/// The environment is read once on the first system run, so the normal path
+/// adds no per-frame environment lookup and no output. WASM never registers
+/// this system and therefore remains a no-op.
+#[cfg(not(target_arch = "wasm32"))]
+fn emit_native_soak_metrics(
+    time: Res<Time>,
+    registry: Res<SceneRegistry>,
+    effect_state: Res<RuntimeEffectRenderState>,
+    additive_cache: Res<additive_material::CrystalAdditiveMaterialCache>,
+    additive_materials: Res<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut clock: Local<NativeSoakMetricsClock>,
+) {
+    if !clock.initialized {
+        clock.enabled = std::env::var("MIR2_NATIVE_SOAK_METRICS")
+            .map(|value| value.trim() == "1")
+            .unwrap_or(false);
+        clock.initialized = true;
+    }
+    if !clock.enabled {
+        return;
+    }
+
+    let elapsed_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    if clock
+        .last_sample_ms
+        .is_some_and(|last| elapsed_ms.saturating_sub(last) < NATIVE_SOAK_METRICS_INTERVAL_MS)
+    {
+        return;
+    }
+    clock.last_sample_ms = Some(elapsed_ms);
+
+    let counts = native_soak_counts(
+        &registry,
+        &effect_state,
+        &additive_cache,
+        &additive_materials,
+    );
+    let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts);
+    eprintln!("[native-soak] {line}");
+}
+
 #[derive(Default)]
 struct MapSceneCache {
     blueprint: Option<MapSceneBlueprint>,
@@ -1248,6 +1391,11 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             )
                 .chain(),
         );
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(
+        Update,
+        emit_native_soak_metrics.after(publish_presentation_pose_frame),
+    );
     app
 }
 
@@ -6359,6 +6507,7 @@ mod native_data_path_tests {
 
     #[test]
     fn native_mail_shop_storage_payloads_update_preserve_reject_and_reset() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
 
         assert!(native_ingest::push_native_mail_model(
@@ -6583,6 +6732,7 @@ mod native_data_path_tests {
 
     #[test]
     fn native_storage_nacks_release_exact_pending_operations_without_mutating_models() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         let unlock = PendingOperationKey::StorageUnlock;
         let remove = PendingOperationKey::StorageRemovePassword;
@@ -6620,6 +6770,7 @@ mod native_data_path_tests {
 
     #[test]
     fn native_game_shop_receipt_requires_exact_pending_request() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         let request = app
             .world_mut()
@@ -6660,6 +6811,7 @@ mod native_data_path_tests {
 
     #[test]
     fn scene_reset_clears_scene_same_frame_but_preserves_personal_models_and_pending() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         app.world_mut().resource_mut::<RuntimeWorldState>().snapshot =
             Some(serde_json::from_str(r#"{"entities":[]}"#).unwrap());
@@ -6814,6 +6966,7 @@ mod native_data_path_tests {
 
     #[test]
     fn data_reset_includes_scene_reset_and_clears_all_models_and_pending() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         app.world_mut().resource_mut::<RuntimeWorldState>().snapshot =
             Some(serde_json::from_str(r#"{"entities":[]}"#).unwrap());
@@ -6871,6 +7024,7 @@ mod native_data_path_tests {
 
     #[test]
     fn data_reset_clears_all_character_read_models_before_next_account_snapshot() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
 
         app.world_mut()
@@ -6960,6 +7114,7 @@ mod native_data_path_tests {
 
     #[test]
     fn unchanged_periodic_inventory_snapshot_keeps_pending_until_exact_nack() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         *app.world_mut()
             .resource_mut::<mir2_client_bevy::inventory::InventoryModel>() =
@@ -7008,6 +7163,7 @@ mod native_data_path_tests {
 
     #[test]
     fn reset_drops_account_a_models_but_preserves_account_b_models_queued_after_it() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":111,"items":[]}"#.to_owned()
@@ -7036,5 +7192,187 @@ mod native_data_path_tests {
                 .as_deref(),
             Some("Account B")
         );
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod native_soak_metrics_tests {
+    use super::*;
+
+    #[test]
+    fn native_soak_counts_empty_scene_are_zero() {
+        let registry = SceneRegistry::default();
+        let effect_state = RuntimeEffectRenderState::default();
+        let additive_cache = additive_material::CrystalAdditiveMaterialCache::default();
+        let additive_materials = Assets::<additive_material::CrystalAdditiveMaterial>::default();
+
+        assert_eq!(
+            native_soak_counts(
+                &registry,
+                &effect_state,
+                &additive_cache,
+                &additive_materials,
+            ),
+            NativeSoakCounts::default()
+        );
+    }
+
+    #[test]
+    fn native_soak_counts_separate_retained_layers_and_assets() {
+        let mut registry = SceneRegistry::default();
+        registry.effect_render.insert(
+            "fx-primary".to_owned(),
+            EffectRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "primary.png".to_owned(),
+                additive: true,
+            },
+        );
+        registry.effect_render_masks.insert(
+            "fx-primary:mask".to_owned(),
+            EffectRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "mask.png".to_owned(),
+                additive: true,
+            },
+        );
+        registry.effect_render_shadows.insert(
+            "fx-primary:shadow".to_owned(),
+            EffectShadowLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                mesh: Handle::default(),
+                material: Handle::default(),
+            },
+        );
+        registry
+            .effect_render_images
+            .insert("primary.png".to_owned(), Handle::default());
+        registry.entity_render_layers.insert(
+            "player:body".to_owned(),
+            EntityRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "player.png".to_owned(),
+                atlas_key: None,
+                atlas_rect_key: None,
+            },
+        );
+        registry.entities.insert(
+            "player".to_owned(),
+            SceneEntityHandles {
+                root: Entity::PLACEHOLDER,
+                shadow: Entity::PLACEHOLDER,
+                body: Entity::PLACEHOLDER,
+                crest: Entity::PLACEHOLDER,
+                facing: Entity::PLACEHOLDER,
+                selection: Entity::PLACEHOLDER,
+            },
+        );
+        registry.entity_render_atlases.insert(
+            "players".to_owned(),
+            EntityRenderAtlasHandle {
+                layout: Handle::default(),
+                rects: HashMap::new(),
+                size: UVec2::new(1, 1),
+                image_key: None,
+                image: None,
+            },
+        );
+        registry.map_render.tiles.insert(
+            "tile-1".to_owned(),
+            MapRenderTileHandle {
+                entity: Entity::PLACEHOLDER,
+                last_seen_generation: 1,
+            },
+        );
+        registry.map.spawned.push(Entity::PLACEHOLDER);
+        registry.mine_nodes.insert(
+            (1, 2),
+            MineNodeHandles {
+                root: Entity::PLACEHOLDER,
+                ore: Entity::PLACEHOLDER,
+            },
+        );
+        registry.lighting_layers.insert(
+            "light-1".to_owned(),
+            EffectRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "light.png".to_owned(),
+                additive: false,
+            },
+        );
+        registry.lighting_images.push(Handle::default());
+
+        let effect_state = RuntimeEffectRenderState {
+            snapshot: Some(
+                serde_json::from_str(
+                    r#"{
+                        "enabled": true,
+                        "stageWidth": 1024,
+                        "stageHeight": 768,
+                        "effects": [{
+                            "key": "fx-primary",
+                            "left": 0,
+                            "top": 0,
+                            "width": 1,
+                            "height": 1,
+                            "z": 1
+                        }]
+                    }"#,
+                )
+                .expect("minimal effect render state should deserialize"),
+            ),
+        };
+        let mut additive_cache = additive_material::CrystalAdditiveMaterialCache::default();
+        let mut additive_materials =
+            Assets::<additive_material::CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let image = images.add(Image::default());
+        let cached_material =
+            additive_cache.material("fx-primary", image, 1.0, &mut additive_materials);
+
+        let counts = native_soak_counts(
+            &registry,
+            &effect_state,
+            &additive_cache,
+            &additive_materials,
+        );
+
+        assert_eq!(counts.snapshot_effects, 1);
+        assert_eq!(counts.retained_effect_primary, 1);
+        assert_eq!(counts.retained_effect_masks, 1);
+        assert_eq!(counts.retained_effect_shadows, 1);
+        assert_eq!(counts.retained_effect_images, 1);
+        assert_eq!(counts.retained_entity_layers, 1);
+        assert_eq!(counts.legacy_scene_entities, 1);
+        assert_eq!(counts.entity_atlases, 1);
+        assert_eq!(counts.map_render_tiles, 1);
+        assert_eq!(counts.map_spawned_entities, 1);
+        assert_eq!(counts.mine_nodes, 1);
+        assert_eq!(counts.lighting_layers, 1);
+        assert_eq!(counts.lighting_images, 1);
+        assert_eq!(counts.additive_cache_entries, 1);
+        assert_eq!(counts.additive_cache_live_entries, 1);
+        assert_eq!(counts.additive_asset_count, 1);
+
+        let encoded = native_soak_metrics_json(4_242, 12_345, &counts);
+        let payload: serde_json::Value =
+            serde_json::from_str(&encoded).expect("native soak metrics should be valid JSON");
+        assert_eq!(payload["processId"], 4_242);
+        assert_eq!(payload["timestampMs"], 12_345);
+        assert_eq!(payload["snapshotEffects"], 1);
+        assert_eq!(payload["additiveCacheEntries"], 1);
+        assert_eq!(payload["additiveCacheLiveEntries"], 1);
+        assert!(!encoded.contains('\n'));
+
+        additive_materials.remove(cached_material.id());
+        let stale = native_soak_counts(
+            &registry,
+            &effect_state,
+            &additive_cache,
+            &additive_materials,
+        );
+        assert_eq!(stale.additive_cache_entries, 1);
+        assert_eq!(stale.additive_cache_live_entries, 0);
+        assert_eq!(stale.additive_asset_count, 0);
     }
 }
