@@ -295,9 +295,10 @@ pub fn keyboard_run_system(
     }
 }
 
-/// Forward absolute turn intents derived from the latest authoritative self
-/// facing. The gateway protocol accepts an absolute direction, not a relative
-/// "left"/"right" turn sense.
+/// Forward the E-key clockwise turn as an absolute intent derived from the
+/// latest authoritative self facing. Q is reserved for the shared Quest Log
+/// shortcut. The gateway protocol accepts an absolute direction, not a
+/// relative turn sense.
 pub fn keyboard_turn_system(
     keys: Res<ButtonInput<KeyCode>>,
     commands: Res<GatewayCommands>,
@@ -318,9 +319,9 @@ pub fn keyboard_turn_system(
         return;
     };
 
-    let turn_delta = if keys.just_pressed(KeyCode::KeyQ) {
-        Some(-1)
-    } else if keys.just_pressed(KeyCode::KeyE) {
+    // Q is the cross-client Quest Log shortcut. It must never also emit a
+    // world turn on the frame that the native quest UI opens or closes.
+    let turn_delta = if keys.just_pressed(KeyCode::KeyE) {
         Some(1)
     } else {
         None
@@ -698,7 +699,7 @@ mod tests {
                     keys.press(KeyCode::ShiftLeft);
                 }
             }
-            WorldAction::Turn => keys.press(KeyCode::KeyQ),
+            WorldAction::Turn => keys.press(KeyCode::KeyE),
             WorldAction::Revive => keys.press(KeyCode::KeyV),
             WorldAction::Skill => keys.press(KeyCode::F1),
         }
@@ -933,7 +934,23 @@ mod tests {
     }
 
     #[test]
-    fn q_rotates_current_facing_left_by_one_crystal_direction() {
+    fn e_rotates_current_facing_right_by_one_crystal_direction() {
+        let (mut app, receiver) = input_app();
+        app.add_systems(bevy::prelude::Update, keyboard_turn_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyE);
+        app.update();
+
+        let intent = receiver.try_recv().expect("turn intent");
+        assert!(matches!(
+            intent,
+            GatewayCommand::Player(PlayerIntent::Turn { direction }) if direction == "upright"
+        ));
+    }
+
+    #[test]
+    fn q_is_reserved_for_quest_log_and_never_emits_a_world_turn() {
         let (mut app, receiver) = input_app();
         app.add_systems(bevy::prelude::Update, keyboard_turn_system);
         app.world_mut()
@@ -941,11 +958,7 @@ mod tests {
             .press(KeyCode::KeyQ);
         app.update();
 
-        let intent = receiver.try_recv().expect("turn intent");
-        assert!(matches!(
-            intent,
-            GatewayCommand::Player(PlayerIntent::Turn { direction }) if direction == "upleft"
-        ));
+        assert!(receiver.try_recv().is_err());
     }
 
     #[test]
