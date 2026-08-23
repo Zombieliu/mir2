@@ -46,7 +46,10 @@ if (!cli.allowAccountMutation) {
 const gatewayUrl = cli.gatewayUrl;
 const timeoutMs = cli.timeoutMs;
 const parsedCombatTimeoutMs = cli.combatTimeoutMs;
-const combatTimeoutMs = Number.isFinite(parsedCombatTimeoutMs) ? parsedCombatTimeoutMs : 120_000;
+// Crystal's Scarecrow quest drop is 1/5 and a level-one warrior needs roughly
+// twenty basic attacks per kill. Two minutes only covers one or two kills and
+// therefore turns the canonical Q1 -> Q2 smoke into a probabilistic gate.
+const combatTimeoutMs = Number.isFinite(parsedCombatTimeoutMs) ? parsedCombatTimeoutMs : 600_000;
 const runToken = `${Date.now().toString(36)}${process.pid.toString(36)}`.replace(/[^a-z0-9]/gi, "");
 const accountId = (process.env.MIR2_NATIVE_SMOKE_ACCOUNT ?? `nw${runToken}`).slice(0, 18);
 const password = process.env.MIR2_NATIVE_SMOKE_PASSWORD ?? "native-pass";
@@ -895,6 +898,7 @@ async function completeCraftLadyQuest(initialWorld, options = {}) {
   const attackedMonsterIds = new Set();
   const confirmedKillIds = new Set();
   const activeCombatTargetName = stopAfterCombatDamaged ? combatCaptureTargetName : "Scarecrow";
+  let pinnedCombatTargetId = null;
   let readyToTurnIn = resumedReadyToTurnIn;
   let directQuestItemGain = null;
 
@@ -927,11 +931,17 @@ async function completeCraftLadyQuest(initialWorld, options = {}) {
       break;
     }
 
-    const scarecrow = findNearestMonster(nowWorld, activeCombatTargetName);
+    let scarecrow =
+      pinnedCombatTargetId === null ? null : findMonsterById(nowWorld, pinnedCombatTargetId);
+    if (!scarecrow || !isMonsterAlive(scarecrow) || !scarecrow.name?.startsWith(activeCombatTargetName)) {
+      pinnedCombatTargetId = null;
+      scarecrow = findNearestMonster(nowWorld, activeCombatTargetName);
+    }
     if (!scarecrow) {
       await delay(800);
       continue;
     }
+    pinnedCombatTargetId = Number(scarecrow.objectId);
 
     const beforeMonster = findMonsterById(nowWorld, scarecrow.objectId);
     const beforeQuest = findQuest(nowWorld, questIndex);
@@ -1073,6 +1083,7 @@ async function completeCraftLadyQuest(initialWorld, options = {}) {
     const latestMonster = findMonsterById(nowWorld, scarecrow.objectId);
     if (progress?.killConfirmed || (isMonsterAlive(beforeMonster) && !isMonsterAlive(latestMonster))) {
       confirmedKillIds.add(String(scarecrow.objectId));
+      pinnedCombatTargetId = null;
     }
     collectConfirmedCombatKills(attackedMonsterIds, combatCheckpoint, confirmedKillIds);
     monsterKills = confirmedKillIds.size;
@@ -2024,7 +2035,7 @@ function parseCli(argv) {
   const args = {
     gatewayUrl: process.env.MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws",
     timeoutMs: positiveInteger(process.env.MIR2_NATIVE_SMOKE_TIMEOUT_MS ?? 20_000, "MIR2_NATIVE_SMOKE_TIMEOUT_MS"),
-    combatTimeoutMs: positiveInteger(process.env.MIR2_NATIVE_SMOKE_COMBAT_TIMEOUT_MS ?? 120_000, "MIR2_NATIVE_SMOKE_COMBAT_TIMEOUT_MS"),
+    combatTimeoutMs: positiveInteger(process.env.MIR2_NATIVE_SMOKE_COMBAT_TIMEOUT_MS ?? 600_000, "MIR2_NATIVE_SMOKE_COMBAT_TIMEOUT_MS"),
     totalTimeoutMs: positiveInteger(process.env.MIR2_NATIVE_SMOKE_TOTAL_TIMEOUT_MS ?? 420_000, "MIR2_NATIVE_SMOKE_TOTAL_TIMEOUT_MS"),
     progressEnabled: !/^(0|false|no)$/i.test(process.env.MIR2_NATIVE_SMOKE_PROGRESS ?? "1"),
     allowAccountMutation: false,
