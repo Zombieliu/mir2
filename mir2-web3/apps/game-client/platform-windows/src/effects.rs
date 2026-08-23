@@ -79,6 +79,32 @@ const EFFECT_TRANSIENT_ORDER: f32 = 9.0;
 /// Upper bound on simultaneously-active transient effects.
 pub const MAX_ACTIVE_EFFECTS: usize = 96;
 
+const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
+
+fn native_soak_metrics_enabled() -> bool {
+    std::env::var("MIR2_NATIVE_SOAK_METRICS")
+        .map(|value| value.trim() == "1")
+        .unwrap_or(false)
+}
+
+/// Pure timing predicate for the producer's periodic metrics gate.
+fn should_emit_native_soak_metrics(last_emitted_at_ms: Option<u64>, now_ms: u64) -> bool {
+    last_emitted_at_ms.map_or(true, |last| {
+        now_ms.saturating_sub(last) >= NATIVE_SOAK_METRICS_INTERVAL_MS
+    })
+}
+
+/// Build the single-line JSON payload without reading process state or logging.
+fn native_soak_metrics_json(process_id: u32, timestamp_ms: u64, active_effects: usize) -> String {
+    json!({
+        "processId": process_id,
+        "timestampMs": timestamp_ms,
+        "activeEffects": active_effects,
+        "activeEffectsCap": MAX_ACTIVE_EFFECTS,
+    })
+    .to_string()
+}
+
 /// Direction numbering matches atlas.rs: Up=0,UpRight=1,Right=2,DownRight=3,
 /// Down=4,DownLeft=5,Left=6,UpLeft=7.
 pub(crate) fn direction_index(direction: &str) -> u32 {
@@ -772,6 +798,8 @@ pub(crate) struct NativeEffects {
     player_x: i32,
     player_y: i32,
     last_state: Option<String>,
+    soak_metrics_enabled: bool,
+    last_soak_metrics_at_ms: Option<u64>,
 }
 
 impl Default for NativeEffects {
@@ -785,11 +813,27 @@ impl Default for NativeEffects {
             player_x: 0,
             player_y: 0,
             last_state: None,
+            soak_metrics_enabled: native_soak_metrics_enabled(),
+            last_soak_metrics_at_ms: None,
         }
     }
 }
 
 impl NativeEffects {
+    fn maybe_emit_native_soak_metrics(&mut self, now_ms: u64) {
+        if !self.soak_metrics_enabled
+            || !should_emit_native_soak_metrics(self.last_soak_metrics_at_ms, now_ms)
+        {
+            return;
+        }
+
+        self.last_soak_metrics_at_ms = Some(now_ms);
+        eprintln!(
+            "[native-soak-fx] {}",
+            native_soak_metrics_json(std::process::id(), now_ms, self.active.len())
+        );
+    }
+
     fn current_light_snapshots(&self, now_ms: u64) -> Vec<NativeEffectLightSnapshot> {
         let mut snapshots = self
             .active
@@ -1567,7 +1611,9 @@ pub(crate) fn tick_native_effects(
         .as_deref()
         .map(|state| state.core.options.effect)
         .unwrap_or(true);
-    if let Some(json) = effects.tick_with_visibility(now_ms, effect_visible) {
+    let render_state = effects.tick_with_visibility(now_ms, effect_visible);
+    effects.maybe_emit_native_soak_metrics(now_ms);
+    if let Some(json) = render_state {
         let success =
             mir2_bevy_runtime::native_ingest::push_native_effect_render_state(json.clone());
         if fx_trace_enabled() {
@@ -1589,6 +1635,26 @@ mod tests {
     use super::*;
     use crate::gameplay_bridge::NativeEffectEvent;
     use serde_json::json;
+
+    #[test]
+    fn native_soak_metrics_gate_is_ten_seconds_and_saturating() {
+        assert!(should_emit_native_soak_metrics(None, 0));
+        assert!(!should_emit_native_soak_metrics(Some(0), 9_999));
+        assert!(should_emit_native_soak_metrics(Some(0), 10_000));
+        assert!(!should_emit_native_soak_metrics(Some(10_000), 10_001));
+        assert!(!should_emit_native_soak_metrics(Some(10_000), 9_000));
+    }
+
+    #[test]
+    fn native_soak_metrics_json_has_bounded_effect_fields() {
+        let payload: Value = serde_json::from_str(&native_soak_metrics_json(4_242, 12_345, 7))
+            .expect("valid metrics JSON");
+        assert_eq!(payload["processId"], 4_242);
+        assert_eq!(payload["timestampMs"], 12_345);
+        assert_eq!(payload["activeEffects"], 7);
+        assert_eq!(payload["activeEffectsCap"], MAX_ACTIVE_EFFECTS);
+        assert!(!native_soak_metrics_json(4_242, 12_345, 7).contains('\n'));
+    }
 
     fn fake_anim(kind: &str, interval: u64, count: u64, repeat: bool) -> Animation {
         let frames = (0..count)
