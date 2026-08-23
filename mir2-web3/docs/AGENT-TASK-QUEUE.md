@@ -8,8 +8,9 @@
 > both entries are reachable only when their authoritative capability is
 > present, ShopConfirm follows the selected tab, and close/new-service resets
 > to the safe Buy-first view. ECS input and Windows double-packet tests pass.
-> This closes the final P1 from the independent review; the request-ID Storage
-> protocol P2 and all real-window/visual/human gates remain open.
+> This closes the final P1 from the independent review. The later
+> `WN-STORAGE-REQID-01` slice closed the request-ID Storage protocol P2 in
+> commit `c4652baf1`; real-window/visual/human gates remain open.
 
 > WN-UI-FUNC-01 R7.1 independent-review remediation (2026-08-23): a
 > `gpt-5.6-sol high` read-only review of `e32caf2cc` found no P0 and six P1;
@@ -22,11 +23,12 @@
 > also closed: Announcement/LevelUp/Hint no longer inherit Shout/System
 > visibility. Updated gates pass ui-core 37/37, native-ui 374/374, Windows
 > 276/276, runtime 180/180, Android 48/48, plus the focused Simulation Guild
-> receipt test. One protocol-level P2 remains explicit: ordinary Storage
-> StoreItem/TakeBackItem ACKs do not carry a request ID, so a delayed duplicate
-> ACK is indistinguishable from a later identical operation. This requires a
-> coordinated protocol version upgrade and is not disguised with an unsafe
-> client-only generation heuristic.
+> receipt test. The protocol-level Storage P2 identified by this review was
+> subsequently closed by `WN-STORAGE-REQID-01`: Candidate Web, Windows and the
+> shared Android adapter now issue `StoreItemV2` / `TakeBackItemV2`, and ACK/NACK
+> correlation requires the exact request ID, operation and coordinates. Legacy
+> packets remain compatibility-only. See
+> `docs/generated/player-qa/native-storage-request-id/WN-STORAGE-REQID-01-REPORT.md`.
 
 > WN-UI-FUNC-01 R7 non-visual functional closure (2026-08-23): shared UI
 > Core, Windows native, runtime and Android adapters now cover the remaining
