@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <AssemblyName>CrystalSemanticCandidates</AssemblyName>
+    <RootNamespace>CrystalSemanticCandidates</RootNamespace>
+    <RoslynBinariesPath Condition="'$(RoslynBinariesPath)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildSDKsPath)/../Roslyn/bincore'))</RoslynBinariesPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+    <Reference Include="Microsoft.CodeAnalysis">
+      <HintPath>$(RoslynBinariesPath)/Microsoft.CodeAnalysis.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>$(RoslynBinariesPath)/Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="VerifyOfflineRoslynAssemblies" BeforeTargets="ResolveReferences">
+    <Error
+      Condition="!Exists('$(RoslynBinariesPath)/Microsoft.CodeAnalysis.dll') Or !Exists('$(RoslynBinariesPath)/Microsoft.CodeAnalysis.CSharp.dll')"
+      Text="Offline Roslyn assemblies were not found at '$(RoslynBinariesPath)'. Install a full .NET SDK or rerun with -p:RoslynBinariesPath=&lt;SDK&gt;/Roslyn/bincore. Repro: dotnet build tools/crystal-semantic-candidates/CrystalSemanticCandidates.csproj --no-restore -p:RoslynBinariesPath=&lt;path&gt;" />
+  </Target>
+</Project>
