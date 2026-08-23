@@ -111,10 +111,10 @@ jobs:
       - name: Test and build Windows host
         shell: pwsh
         run: |
-          powershell -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1 -SelfTest
+          powershell -NoProfile -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1 -SelfTest
           cargo "+$env:RUST_TOOLCHAIN" fmt --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml -- --check
           cargo "+$env:RUST_TOOLCHAIN" test --locked --manifest-path mir2-web3/apps/game-client/platform-windows/Cargo.toml
-          powershell -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1
+          powershell -NoProfile -ExecutionPolicy Bypass -File mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1
           New-Item -ItemType Directory -Force mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64 | Out-Null
           Copy-Item mir2-web3/target-attested-windows-candidate/x86_64-pc-windows-msvc/release/mir2-platform-windows.exe mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
           Copy-Item mir2-web3/target-attested-windows-candidate/BUILD-ATTESTATION.json mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/
@@ -126,8 +126,21 @@ jobs:
       - name: Verify Windows artifact
         shell: pwsh
         run: |
-          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-platform-windows.exe
-          Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/BUILD-ATTESTATION.json
+          $artifactRoot = 'mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64'
+          $exePath = Join-Path $artifactRoot 'mir2-platform-windows.exe'
+          $attestationPath = Join-Path $artifactRoot 'BUILD-ATTESTATION.json'
+          $attestation = Get-Content -LiteralPath $attestationPath -Raw | ConvertFrom-Json
+          $head = (git rev-parse HEAD).Trim().ToLowerInvariant()
+          $exeHash = (Get-FileHash -LiteralPath $exePath -Algorithm SHA256).Hash.ToUpperInvariant()
+          if ($attestation.schema -cne 'mir2.windows.build-attestation.v2') { throw 'unexpected Windows build attestation schema' }
+          if ($attestation.gitRevision -cne $head) { throw 'Windows build attestation revision mismatch' }
+          if ([bool]$attestation.worktreeDirty) { throw 'Windows build attestation unexpectedly records a dirty worktree' }
+          if ($attestation.exeSha256 -cne $exeHash) { throw 'Windows artifact hash differs from build attestation' }
+          if ($attestation.buildCommand.target -cne 'x86_64-pc-windows-msvc') { throw 'Windows build attestation target mismatch' }
+          if ($attestation.buildCommand.targetDir -cne 'target-attested-windows-candidate') { throw 'Windows build attestation target directory mismatch' }
+          if (-not [bool]$attestation.buildCommand.release -or -not [bool]$attestation.buildCommand.locked) { throw 'Windows build attestation release/locked contract mismatch' }
+          Get-Item $exePath
+          Get-Item $attestationPath
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/bevy-entity-atlases/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/map-atlas/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/native-map-keyed/manifest.json

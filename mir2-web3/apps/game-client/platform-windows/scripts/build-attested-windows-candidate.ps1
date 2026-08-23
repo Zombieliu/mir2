@@ -142,7 +142,6 @@ if ($SelfTest) {
 }
 
 $before = Get-CleanWorktreeState -Root $RepoRoot
-Reset-AttestedTargetDirectory -Path $TargetDir -Root $RepoRoot -ExpectedLeaf $TargetDirName
 $cargoHome = if ($env:CARGO_HOME) {
     [IO.Path]::GetFullPath($env:CARGO_HOME).TrimEnd('\', '/')
 } else {
@@ -174,6 +173,7 @@ $contaminatedVariables = @(
 if ($contaminatedVariables.Count -gt 0) {
     throw ('attested build rejects compiler-affecting environment variables: ' + (($contaminatedVariables | Sort-Object -Unique) -join ', '))
 }
+Reset-AttestedTargetDirectory -Path $TargetDir -Root $RepoRoot -ExpectedLeaf $TargetDirName
 $previousRustFlags = [Environment]::GetEnvironmentVariable('RUSTFLAGS', 'Process')
 try {
     $env:RUSTFLAGS = ($remapFlags -join ' ')
