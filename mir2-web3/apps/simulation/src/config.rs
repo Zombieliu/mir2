@@ -2800,6 +2800,14 @@ pub struct SimulationConfig {
     pub conquest_owners: BTreeMap<i32, String>,
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
+    /// Crystal's optional `Settings.SafeZoneBorder` presentation switch.
+    ///
+    /// The imported map manifest retains the decorative TrapHexagon objects so
+    /// deployments that explicitly enable the option can reproduce Crystal,
+    /// but Crystal defaults this setting to false. Keeping the switch in the
+    /// runtime config prevents those map decorations from being confused with
+    /// real player-cast TrapHexagon `ObjectSpell` packets.
+    pub safe_zone_border_effects: bool,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub mine_zones: Vec<MineZoneRecord>,
     /// On-chain mine veins (M4) — render-only mappings, disjoint from `mine_zones`.
@@ -2936,6 +2944,7 @@ impl SimulationConfig {
             conquest_owners: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
+            safe_zone_border_effects: false,
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
             onchain_mine_nodes: Vec::new(),

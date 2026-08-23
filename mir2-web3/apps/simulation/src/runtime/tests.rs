@@ -2124,6 +2124,62 @@ fn start_game_emits_visible_object_packets() {
 }
 
 #[test]
+fn optional_safe_zone_border_is_off_by_default_but_can_be_enabled() {
+    let manifest = crystal_respawn_manifest();
+    let map = manifest
+        .maps
+        .iter()
+        .find(|map| {
+            map.safe_zone_spells
+                .iter()
+                .any(|spell| spell.object_id == 46)
+        })
+        .expect("generated Crystal map data should retain the optional Bichon border");
+    let border = map
+        .safe_zone_spells
+        .iter()
+        .find(|spell| spell.object_id == 46)
+        .expect("Bichon border object 46");
+    let default_config = SimulationConfig::default();
+    let character = default_config.default_character.clone();
+    let default_packets = super::super::packets::start_game_static_visible_object_packets(
+        &map.map_file_name,
+        &border.location,
+        &character,
+        &default_config,
+    );
+    assert!(
+        !default_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectSpell { info }
+                if info.object_id == 46
+                    && info.spell == Spell::TrapHexagon
+                    && info.location == border.location
+        )),
+        "Crystal defaults Settings.SafeZoneBorder to false"
+    );
+
+    let mut enabled_config = SimulationConfig::default();
+    enabled_config.safe_zone_border_effects = true;
+    let enabled_packets = super::super::packets::start_game_static_visible_object_packets(
+        &map.map_file_name,
+        &border.location,
+        &character,
+        &enabled_config,
+    );
+    assert!(
+        enabled_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectSpell { info }
+                if info.object_id == 46
+                    && info.spell == Spell::TrapHexagon
+                    && info.location == border.location
+        )),
+        "an explicit SafeZoneBorder opt-in must retain the imported decoration"
+    );
+}
+
+#[test]
 fn world_snapshot_uses_crystal_symmetric_sixteen_tile_object_range() {
     let mut config = SimulationConfig::default();
     config.visible_players.clear();

@@ -6218,29 +6218,31 @@ pub(super) fn start_game_static_visible_object_packets(
                 ));
             }
         }
-        for spell in map.safe_zone_spells {
-            if !point_in_data_range(&spell.location, player_position) {
-                continue;
-            }
-            let spell_kind = match spell.spell.as_str() {
-                "TrapHexagon" => Spell::TrapHexagon,
-                "Healing" => Spell::Healing,
-                _ => Spell::None,
-            };
-            objects.push((
-                spell.location.y,
-                spell.location.x,
-                spell.object_id,
-                ServerPacket::ObjectSpell {
-                    info: ObjectSpellInfo {
-                        object_id: spell.object_id,
-                        location: spell.location,
-                        spell: spell_kind,
-                        direction: MirDirection::Up,
-                        param: false,
+        if config.safe_zone_border_effects {
+            for spell in map.safe_zone_spells {
+                if !point_in_data_range(&spell.location, player_position) {
+                    continue;
+                }
+                let spell_kind = match spell.spell.as_str() {
+                    "TrapHexagon" => Spell::TrapHexagon,
+                    "Healing" => Spell::Healing,
+                    _ => Spell::None,
+                };
+                objects.push((
+                    spell.location.y,
+                    spell.location.x,
+                    spell.object_id,
+                    ServerPacket::ObjectSpell {
+                        info: ObjectSpellInfo {
+                            object_id: spell.object_id,
+                            location: spell.location,
+                            spell: spell_kind,
+                            direction: MirDirection::Up,
+                            param: false,
+                        },
                     },
-                },
-            ));
+                ));
+            }
         }
     }
 
