@@ -48,13 +48,18 @@ Write deterministic JSON to stdout:
 dotnet run --project tools/crystal-semantic-candidates/CrystalSemanticCandidates.csproj --no-build --configuration Debug
 ```
 
-Or atomically replace an explicit output file:
+Or create a new explicit output file:
 
 ```powershell
 dotnet run --project tools/crystal-semantic-candidates/CrystalSemanticCandidates.csproj --no-build --configuration Debug -- --output C:\temp\crystal-semantic-candidates.json
 ```
 
 Unknown arguments and all source-root overrides are rejected.
+The output path is opened with create-new semantics, its file contents are
+flushed before success is reported, and it is never overwritten. A pre-existing
+file or directory fails with
+`OUTPUT_ALREADY_EXISTS`; remove or choose it explicitly rather than replacing
+evidence in place.
 
 ## Candidate classes
 

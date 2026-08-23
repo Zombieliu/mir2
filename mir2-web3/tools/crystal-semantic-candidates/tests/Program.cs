@@ -117,6 +117,7 @@ internal static class Program
         ("Compiler build-output directories are explicitly excluded", BuildOutputsAreExcluded),
         ("Empty fixed source trees fail closed", EmptySourceTreeFailsClosed),
         ("Candidate discovery never claims full source or semantic inventory completion", CompletionBoundaryIsHardCoded),
+        ("Explicit output is flushed and never overwritten", ExplicitOutputIsNeverOverwritten),
     ];
 
     public static int Main()
@@ -413,6 +414,22 @@ internal static class Program
         Assert(!report.InventoryComplete, "Candidate discovery must never claim total inventory completion.");
         Assert(report.Candidates.All(candidate => candidate.SemanticLeaf is null),
             "Hints or candidates must not automatically become semantic leaves.");
+    }
+
+    private static void ExplicitOutputIsNeverOverwritten()
+    {
+        using var tree = TemporaryCrystalTree.Empty();
+        var output = Path.Combine(tree.Root, "candidate-output.json");
+        const string original = "{\"first\":true}\n";
+
+        ExclusiveOutput.Write(output, original);
+        Assert(File.ReadAllBytes(output).SequenceEqual(new System.Text.UTF8Encoding(false).GetBytes(original)),
+            "Explicit output must be exact UTF-8 without a byte-order mark.");
+        AssertDiscoveryError(
+            "OUTPUT_ALREADY_EXISTS",
+            () => ExclusiveOutput.Write(output, "{\"second\":true}\n"));
+        Assert(File.ReadAllText(output) == original,
+            "A refused second write changed the existing evidence bytes.");
     }
 
     private static void AssertDiscoveryError(string expectedCode, Action action)

@@ -17,7 +17,7 @@ internal static class Program
             }
             else
             {
-                WriteAtomically(outputPath, json);
+                ExclusiveOutput.Write(outputPath, json);
             }
 
             return 0;
@@ -59,27 +59,4 @@ internal static class Program
             "Only '--output <file>' is accepted. Source-root overrides are forbidden.");
     }
 
-    private static void WriteAtomically(string outputPath, string json)
-    {
-        var fullPath = Path.GetFullPath(outputPath);
-        var directory = Path.GetDirectoryName(fullPath)
-            ?? throw new DiscoveryException("OUTPUT_PATH_INVALID", $"No output directory for '{outputPath}'.");
-        Directory.CreateDirectory(directory);
-        PathSafety.EnsureExistingPathComponentsAreNotReparse(directory);
-        PathSafety.ValidateRelativeSourcePath(Path.GetFileName(fullPath));
-
-        var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
-        try
-        {
-            File.WriteAllText(temporaryPath, json, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-            File.Move(temporaryPath, fullPath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporaryPath))
-            {
-                File.Delete(temporaryPath);
-            }
-        }
-    }
 }
