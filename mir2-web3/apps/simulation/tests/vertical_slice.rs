@@ -410,16 +410,13 @@ fn visible_alive_monster_named(
         .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
         .map(|entity| (entity.x, entity.y))?;
 
-    let hostiles = snapshot
+    let monsters = snapshot
         .entities
         .iter()
         .filter(|entity| {
-            entity.kind == WorldEntityKind::Monster
-                && entity.disposition == mir2_simulation::WorldEntityDisposition::Hostile
-                && !entity.dead
-                && entity.hp.unwrap_or(1) > 0
+            entity.kind == WorldEntityKind::Monster && !entity.dead && entity.hp.unwrap_or(1) > 0
         })
-        .map(|entity| (entity.object_id, entity.x, entity.y))
+        .map(|entity| (entity.object_id, entity.x, entity.y, entity.disposition))
         .collect::<Vec<_>>();
 
     snapshot
@@ -431,15 +428,24 @@ fn visible_alive_monster_named(
                 && entity.name.starts_with(monster_name_prefix)
                 && entity.hp.unwrap_or(1) > 0
         })
-        .max_by_key(|entity| {
-            let nearest_hostile = hostiles
+        .min_by_key(|entity| {
+            // Prefer a target away from monsters on the opposing side. Town
+            // guards are friendly to the player but attack hostile monsters;
+            // selecting a Deer beside one makes the guard legitimately take
+            // the last hit and turns this player-reward test flaky.
+            let nearest_opponent = monsters
                 .iter()
-                .filter(|(object_id, _, _)| *object_id != entity.object_id)
-                .map(|(_, x, y)| (x - entity.x).abs().max((y - entity.y).abs()))
+                .filter(|(object_id, _, _, disposition)| {
+                    *object_id != entity.object_id && *disposition != entity.disposition
+                })
+                .map(|(_, x, y, _)| (x - entity.x).abs().max((y - entity.y).abs()))
                 .min()
                 .unwrap_or(i32::MAX);
             let player_distance = (entity.x - player_x).abs().max((entity.y - player_y).abs());
-            (nearest_hostile, -player_distance)
+            // Staying inside the current AOI is more important than isolation;
+            // a far-away entity can disappear from the authoritative snapshot
+            // before the helper reaches it and must not be mistaken for a kill.
+            (player_distance, -nearest_opponent)
         })
 }
 
@@ -1872,7 +1878,11 @@ fn original_deer_harvest_q_drop_advances_quest_four() {
             Point { x: 295, y: 625 },
         ],
         "Deer",
-        18,
+        // Crystal's DeerMeat quest entry is a real 1/2 Q drop. Keep a
+        // deterministic but sufficiently wide hunt budget so the test proves
+        // the imported probability without assuming five successes in only
+        // eighteen kills.
+        30,
     );
 
     assert_quest_stage(&session, 4, QuestStage::ReadyToTurnIn);
