@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
+
 // Headless contract smoke for the Windows-native visible flow. This speaks the
 // same BrowserCommand JSON protocol as the native host, but never mutates game
 // state locally: every transition is acknowledged by the real Gateway and
@@ -13,14 +17,15 @@ try {
   process.exitCode = 1;
   process.exit();
 }
+const outputPath = cli.outputPath;
 if (cli.mode === "help") {
   printCliHelp();
   process.exit(0);
 }
 if (cli.mode === "self-test" || cli.mode === "dry-run") {
-  console.log(JSON.stringify({
+  await emitReport({
     ok: true,
-    status: cli.mode === "self-test" ? "HANDOFF" : "CONFIRM_REQUIRED",
+    status: cli.mode === "self-test" ? "SELF_TEST" : "CONFIRM_REQUIRED",
     mode: cli.mode,
     desktopTouched: false,
     accountMutation: cli.mode === "dry-run" ? "not executed" : false,
@@ -29,7 +34,7 @@ if (cli.mode === "self-test" || cli.mode === "dry-run") {
     note: cli.mode === "dry-run"
       ? "Live smoke creates an account/character and requires --allow-account-mutation; no socket was opened."
       : "Self-test validates arguments only; no socket was opened.",
-  }, null, 2));
+  });
   process.exit(0);
 }
 if (!cli.allowAccountMutation) {
@@ -253,6 +258,13 @@ try {
     }
   }
   if (questResult) firstWorld = questResult.world;
+  if (exerciseCombat && !questResult?.stopAfter) {
+    const groundItemRoundTrip = await exerciseOrdinaryGroundItemRoundTrip(firstWorld);
+    firstWorld = groundItemRoundTrip.world;
+    if (questResult?.report) {
+      questResult.report.ordinaryGroundItemRoundTrip = groundItemRoundTrip.report;
+    }
+  }
   const firstSummary = summarizeWorld(firstWorld);
   assert(firstSummary.playerName === characterName, "first StartGame bootstrapped the wrong character");
   let didStopEarly = false;
@@ -287,7 +299,7 @@ try {
   }
 
   if (didStopEarly) {
-    console.log(JSON.stringify(stopAfterReport, null, 2));
+    await emitReport(stopAfterReport);
   } else {
     checkpoint = sequence;
     send({ type: "logOut" });
@@ -312,7 +324,20 @@ try {
 
     const report = {
       ok: true,
-      status: "HANDOFF",
+      status: "PASS",
+      verifiedScope: exerciseCombat
+        ? "bichon-q1-q2-combat-ground-item-persistence"
+        : exerciseQuest
+          ? "bichon-q1-persistence"
+          : "account-character-start-game-persistence",
+      runConfiguration: {
+        exerciseQuest,
+        exerciseCombat,
+        stopAfterMode: stopAfterMode || null,
+        timeoutMs,
+        combatTimeoutMs,
+        totalTimeoutMs,
+      },
       gatewayUrl,
       accountId,
       characterName,
@@ -331,7 +356,7 @@ try {
         .slice(0, 8)
         .map(summarizeQuestPacket),
     };
-    console.log(JSON.stringify(report, null, 2));
+    await emitReport(report);
   }
   send({ type: "disconnect" });
 } catch (error) {
@@ -1141,12 +1166,11 @@ async function completeCraftLadyQuest(initialWorld, options = {}) {
   const jane = await walkAdjacentToNpc(3, "Assistant Jane", movement);
   checkpoint = sequence;
   send({ type: "interact", objectId: jane.objectId });
-  await waitForWorld(
+  const beforeTurnInWorld = await waitForWorld(
     (world) => Number(world.activeNpcDialog?.npcObjectId) === jane.objectId,
     "Jane NPC dialog for Quest2 finish",
     checkpoint,
   );
-  const beforeTurnInWorld = currentWorld() ?? nowWorld;
   const beforeTurnInExp = Number(beforeTurnInWorld.playerExperience ?? 0);
   const beforeTurnInGold = Number(beforeTurnInWorld.gold ?? 0);
   const beforePendant = itemQuantity(beforeTurnInWorld, "GoldenPendant");
@@ -1162,9 +1186,15 @@ async function completeCraftLadyQuest(initialWorld, options = {}) {
   const completedWorld = await waitForWorld(
     (world) => {
       const quest = findQuest(world, questIndex);
-      return !quest || quest.stage === "completed";
+      const questCompleted = !quest || quest.stage === "completed";
+      const rewardsSettled =
+        Number(world.playerExperience ?? 0) === beforeTurnInExp + 30 &&
+        Number(world.gold ?? 0) === beforeTurnInGold + 200 &&
+        itemQuantity(world, "GoldenPendant") >= beforePendant + 1 &&
+        itemQuantity(world, "CopperRing") >= beforeRing + 1;
+      return questCompleted && rewardsSettled;
     },
-    "completed Quest2 snapshot",
+    "completed Quest2 reward-settled snapshot",
     checkpoint,
   );
   traceStage("quest2-completed", {
@@ -1351,11 +1381,113 @@ async function walkAdjacentToNpc(objectId, label, movement) {
   return npc;
 }
 
-async function collectNearbyGroundDrops(world, movement) {
+async function exerciseOrdinaryGroundItemRoundTrip(initialWorld) {
+  const beforeWorld = currentWorld() ?? initialWorld;
+  const item = selectOrdinaryDropProofItem(beforeWorld);
+  assert(item, "Quest2 rewards did not contain a normal droppable inventory item");
+
+  const uniqueId = Number(item.uniqueId);
+  const beforeQuantity = itemQuantityByUniqueId(beforeWorld, uniqueId);
+  const beforeDropIds = dropObjectIds(beforeWorld);
+  const dropCheckpoint = sequence;
+  send({
+    type: "dropItem",
+    key: String(item.key ?? ""),
+    uniqueId,
+    count: 1,
+    heroInventory: false,
+  });
+
+  const dropped = await waitFor(
+    () => {
+      throwForGatewayErrorAfter(dropCheckpoint, `drop ordinary item ${uniqueId}`);
+      const ackEntry = messages.find(
+        (entry) =>
+          entry.sequence > dropCheckpoint &&
+          entry.message.type === "packet" &&
+          entry.message.packet === "DropItem" &&
+          Number(entry.message.payload?.uniqueId) === uniqueId,
+      );
+      if (ackEntry?.message.payload?.success === false) {
+        throw new Error(`DropItem rejected for authoritative uniqueId ${uniqueId}`);
+      }
+      if (ackEntry?.message.payload?.success !== true) return null;
+      if (!latestSnapshot || latestSnapshot.sequence <= dropCheckpoint) return null;
+      const world = currentWorld();
+      if (!world || itemQuantityByUniqueId(world, uniqueId) !== beforeQuantity - 1) return null;
+      const drop = collectGroundDropsFromSnapshot(world).find(
+        (candidate) =>
+          !beforeDropIds.has(String(candidate?.objectId)) &&
+          String(candidate?.name ?? "").toLowerCase() === String(item.name ?? "").toLowerCase(),
+      );
+      return drop ? { world, drop, ackEntry } : null;
+    },
+    `ordinary item ${uniqueId} appears as ObjectItem`,
+  );
+
+  const movement = [];
+  const pickupSequence = sequence;
+  const pickup = await collectNearbyGroundDrops(dropped.world, movement, {
+    objectIds: new Set([String(dropped.drop.objectId)]),
+  });
+  assert(
+    pickup.pickedIds.map(Number).includes(Number(dropped.drop.objectId)),
+    `ordinary ground object ${dropped.drop.objectId} was not picked up`,
+  );
+  const afterWorld = pickup.world;
+  assert(
+    itemQuantityByUniqueId(afterWorld, uniqueId) === beforeQuantity,
+    `ordinary item ${uniqueId} quantity did not round-trip through the ground`,
+  );
+  const gainedEntry = gainedItemMessages.find(
+    (entry) =>
+      entry.sequence > pickupSequence &&
+      (Number(entry.message.payload?.item?.uniqueId) === uniqueId ||
+        Number(entry.message.payload?.item?.unique_id) === uniqueId),
+  );
+  assert(gainedEntry, `ordinary pickup omitted GainedItem for uniqueId ${uniqueId}`);
+  const removalEntry = findZonePacketAfter(
+    new Set(["ObjectRemove", "ObjectHide"]),
+    dropped.drop.objectId,
+    pickupSequence,
+  );
+  assert(removalEntry, `ordinary pickup omitted ObjectRemove for ${dropped.drop.objectId}`);
+
+  traceStage("ordinary-ground-item-round-trip", {
+    uniqueId,
+    name: item.name,
+    objectId: Number(dropped.drop.objectId),
+    movementSteps: movement.length,
+  });
+  return {
+    world: afterWorld,
+    report: {
+      item: compactRecord(item, ["uniqueId", "key", "name", "container", "quantity"]),
+      droppedObject: compactRecord(dropped.drop, ["objectId", "name", "quantity", "x", "y"]),
+      dropAckSequence: dropped.ackEntry.sequence,
+      gainedItemSequence: gainedEntry.sequence,
+      removalSequence: removalEntry.sequence,
+      quantityBefore: beforeQuantity,
+      quantityAfterDrop: beforeQuantity - 1,
+      quantityAfterPickup: itemQuantityByUniqueId(afterWorld, uniqueId),
+      movementSteps: movement.length,
+    },
+  };
+}
+
+async function collectNearbyGroundDrops(world, movement, options = {}) {
   world = mergeWorldWithZoneOverlay(world) ?? currentWorld() ?? world;
   const player = playerEntity(world);
+  const allowedObjectIds = options.objectIds
+    ? new Set([...options.objectIds].map((value) => String(value)))
+    : null;
   const candidates = collectGroundDropsFromSnapshot(world)
-    .filter((drop) => Number.isFinite(Number(drop?.x)) && Number.isFinite(Number(drop?.y)))
+    .filter(
+      (drop) =>
+        Number.isFinite(Number(drop?.x)) &&
+        Number.isFinite(Number(drop?.y)) &&
+        (!allowedObjectIds || allowedObjectIds.has(String(drop?.objectId))),
+    )
     .sort((left, right) => (player ? tileDistance(player, left) - tileDistance(player, right) : 0))
     .slice(0, 4);
   if (!candidates.length) {
@@ -1609,6 +1741,27 @@ function inventorySignature(world) {
         ),
       ),
   );
+}
+
+function selectOrdinaryDropProofItem(world) {
+  const items = (Array.isArray(world?.inventoryItems) ? world.inventoryItems : []).filter(
+    (item) =>
+      Number.isSafeInteger(Number(item?.uniqueId)) &&
+      Number(item.uniqueId) > 0 &&
+      Number(item?.quantity ?? 0) > 0 &&
+      String(item?.container ?? "").toLowerCase() !== "quest",
+  );
+  return (
+    items.find((item) => String(item?.name ?? "").toLowerCase() === "copperring") ??
+    items.find((item) => String(item?.name ?? "").toLowerCase() === "goldenpendant") ??
+    null
+  );
+}
+
+function itemQuantityByUniqueId(world, uniqueId) {
+  return (Array.isArray(world?.inventoryItems) ? world.inventoryItems : [])
+    .filter((item) => Number(item?.uniqueId) === Number(uniqueId))
+    .reduce((sum, item) => sum + Number(item?.quantity ?? 0), 0);
 }
 
 function summarizeInventory(world) {
@@ -2031,6 +2184,31 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function emitReport(report) {
+  const evidence = {
+    schemaVersion: "mir2-windows-native-flow-evidence-v2",
+    generatedAt: new Date().toISOString(),
+    producer: "windows-native-protocol-smoke",
+    desktopTouched: false,
+    ...report,
+  };
+  const serialized = `${JSON.stringify(evidence, null, 2)}\n`;
+  console.log(serialized.trimEnd());
+  if (!outputPath) return;
+
+  const resolved = path.resolve(outputPath);
+  await fs.mkdir(path.dirname(resolved), { recursive: true });
+  const handle = await fs.open(resolved, "wx", 0o600);
+  try {
+    await handle.writeFile(serialized, "utf8");
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+  const sha256 = crypto.createHash("sha256").update(serialized, "utf8").digest("hex");
+  console.error(JSON.stringify({ evidencePath: resolved, sha256, overwrite: false }));
+}
+
 function parseCli(argv) {
   const args = {
     gatewayUrl: process.env.MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws",
@@ -2038,6 +2216,7 @@ function parseCli(argv) {
     combatTimeoutMs: positiveInteger(process.env.MIR2_NATIVE_SMOKE_COMBAT_TIMEOUT_MS ?? 600_000, "MIR2_NATIVE_SMOKE_COMBAT_TIMEOUT_MS"),
     totalTimeoutMs: positiveInteger(process.env.MIR2_NATIVE_SMOKE_TOTAL_TIMEOUT_MS ?? 420_000, "MIR2_NATIVE_SMOKE_TOTAL_TIMEOUT_MS"),
     progressEnabled: !/^(0|false|no)$/i.test(process.env.MIR2_NATIVE_SMOKE_PROGRESS ?? "1"),
+    outputPath: process.env.MIR2_NATIVE_SMOKE_OUTPUT ?? null,
     allowAccountMutation: false,
     mode: "run",
   };
@@ -2046,6 +2225,7 @@ function parseCli(argv) {
     ["--timeout-ms", "timeoutMs"],
     ["--combat-timeout-ms", "combatTimeoutMs"],
     ["--total-timeout-ms", "totalTimeoutMs"],
+    ["--output", "outputPath"],
   ]);
   let positionalGateway = null;
   for (let index = 0; index < argv.length; index += 1) {
@@ -2098,6 +2278,7 @@ Options:
   --timeout-ms N                Per-packet timeout (default: 20000)
   --combat-timeout-ms N         Optional combat timeout (default: 120000)
   --total-timeout-ms N          Overall timeout (default: 420000)
+  --output PATH                 Create (never overwrite) a durable JSON evidence file
   --dry-run                     Validate only; do not open a socket
   --self-test                   Validate only; do not open a socket
   --allow-account-mutation      Explicitly allow disposable account/character creation

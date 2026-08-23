@@ -5451,6 +5451,19 @@ async fn handle_socket_inner(
                             );
                             return;
                         }
+                        if let Some(request) = quest_operation_request.as_ref() {
+                            let nack = quest_operation_ack_for_responses(request, &[]);
+                            if send_world_snapshot_with_quest_ack(
+                                &sender,
+                                session,
+                                Some(&nack),
+                            )
+                            .await
+                            .is_err()
+                            {
+                                return;
+                            }
+                        }
                         let _ = send_error_message(&sender, &error).await;
                         return;
                     }
