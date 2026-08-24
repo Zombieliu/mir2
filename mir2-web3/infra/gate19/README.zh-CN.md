@@ -138,3 +138,27 @@ Zone 使用约 `8–9` 个 CPU 和约 `2 GiB` 内存。这是压力测试结果�
 只在 15 分钟窗口观测内存与 WAL；商业服阶段仍必须补做长期耐久认证。Gate 21
 必须在保留可验证复制 cursor/digest 的前提下实现 durable base snapshot、
 已确认前缀截断和 WAL 上限。
+
+## Gateway save-recovery 运维边界
+
+三个 Gateway 使用固定实例身份 gate19-gateway-1/2/3、互不相同的绝对 root 和
+以下固定 physical volume：
+
+- mir2-gate19-gateway-1-save-recovery-v1
+- mir2-gate19-gateway-2-save-recovery-v1
+- mir2-gate19-gateway-3-save-recovery-v1
+
+gateway-1/2/3 都必须显式声明 `com.obelisk.mir2.role=gateway`。这是验证器的权威
+Gateway 清单，不依赖 service 名称、镜像名或显式监听地址。build target、Gateway
+image token 和 TCP/Web 环境变量仅作为疑似 Gateway 守卫；缺少或错写角色标签会让
+静态验收失败。
+
+MIR2_GATEWAY_1/2/3_SAVE_RECOVERY_MAC_KEY 都必须由密钥管理系统注入且彼此独立。
+Compose 只拒绝缺失或空值；malformed、placeholder、重复弱值等非空内容由
+Gateway Rust 启动校验负责。静态检查不会把这项强度校验报告为已通过。
+
+每个实例的 key、physical volume 与 MIR2_GATEWAY_INSTANCE_ID 必须在重启、滚动
+更新和备份恢复后保持同一映射。固定 physical names 不受
+COMPOSE_PROJECT_NAME/-p 影响，但也意味着同一 Docker daemon 只能部署一套
+Gate 19；不同 -p 会连接同一组 sidecar。独立集群必须使用不同主机/daemon，或经
+审计后显式改名。不要输出展开后的 docker compose config。
