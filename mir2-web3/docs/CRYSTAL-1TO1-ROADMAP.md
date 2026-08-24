@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-24 spawned-AI checkpoint: AI 48 GuardianRock now evaluates the
+> authoritative player's Crystal-numeric MagicResist roll before queuing its
+> delayed pull. A resisted attack still emits the range animation after the
+> Crystal 500 ms wind-up but neither moves nor damages the player. The existing
+> real-map lane test proves both outcomes serially. This closes the previously
+> named GuardianRock resistance detail only; GreatFoxSpirit, YinDevilNode,
+> SnowWolfKing and other full-AI gates remain open.
+>
 > 2026-08-24 spawned-AI checkpoint: AI 27 Khazard no longer pulls every
 > aligned target unconditionally. The pull now uses the authoritative
 > Crystal-numeric MagicResist roll; a successful resist preserves the range

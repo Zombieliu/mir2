@@ -1007,7 +1007,13 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     let general_meow_meow_slam_branch =
                         agent.ai == 123 && distance <= 2 && tick % 9 == 0;
                     let manectric_claw_thrust_branch = agent.ai == 86 && distance > 1;
-                    let guardian_rock_pull_movement = if agent.ai == 48 && distance > 1 {
+                    // Crystal `GuardianRock.PullAttack`: MagicResist fully
+                    // shrugs the pull while the range-attack animation still
+                    // broadcasts after its normal 500 ms wind-up.
+                    let guardian_rock_pull_movement = if agent.ai == 48
+                        && distance > 1
+                        && crystal_player_magic_mitigated(world, 1) != 0
+                    {
                         direction_toward(&player_position, &position).map(|direction| {
                             PendingPlayerMovement {
                                 direction,

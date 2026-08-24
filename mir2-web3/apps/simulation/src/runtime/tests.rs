@@ -13523,6 +13523,7 @@ fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
+    let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
         .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
@@ -13596,6 +13597,53 @@ fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
     assert_eq!(
         session.world_snapshot().player_hp.expect("player hp"),
         before_hp
+    );
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert!(super::player_stats(session.app.world()).magic_resist() > 0);
+    let resisted_tick = (current_tick.saturating_add(3)..current_tick.saturating_add(500))
+        .find(|candidate| {
+            super::set_runtime_tick(session.app.world_mut(), *candidate);
+            super::crystal_player_magic_mitigated(session.app.world(), 1) == 0
+        })
+        .expect("bounded deterministic window should contain a MagicResist success");
+
+    set_player_position(&mut session, player_origin.clone());
+    {
+        let mut entry = session.app.world_mut().entity_mut(rock);
+        let mut agent = entry
+            .get_mut::<MonsterAgent>()
+            .expect("guardian rock agent");
+        agent.tracking_player = true;
+        agent.next_attack_tick = resisted_tick;
+        agent.next_move_tick = resisted_tick;
+    }
+    super::set_runtime_tick(session.app.world_mut(), resisted_tick.saturating_sub(1));
+    sync_visible_objects(&mut session);
+
+    let resisted_windup_packets = session.tick();
+    assert!(!resisted_windup_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info } if info.object_id == rock_object_id
+    )));
+    let resisted_pull_packets = session.tick();
+    assert!(resisted_pull_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info }
+            if info.object_id == rock_object_id && info.direction == MirDirection::Left
+    )));
+    assert!(!resisted_pull_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == player_object_id
+    )));
+    assert_eq!(
+        entity_position(session.app.world(), player).expect("player position after resisted pull"),
+        player_origin,
+    );
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("player hp"),
+        before_hp,
+        "GuardianRock's pull remains non-damaging when resisted",
     );
 }
 

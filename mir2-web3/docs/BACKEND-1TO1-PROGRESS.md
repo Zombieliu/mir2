@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> Crystal AI 48 correction (2026-08-24): GuardianRock's delayed pull now uses
+> the same `MagicResist / MagicResistWeight` all-or-nothing gate as
+> `GuardianRock.PullAttack`. A successful resistance roll suppresses only the
+> player movement; the normal 500 ms wind-up and `ObjectRangeAttack` remain
+> packet-visible, and the attack remains non-damaging. The existing real-map
+> pull-lane regression now covers both unresisted and deterministic resisted
+> paths in one locked serial test. Other spawned-AI details remain open.
+>
 > Crystal AI 27 correction (2026-08-24): Khazard's four-tile pull now applies
 > the same `MagicResist / MagicResistWeight` all-or-nothing resistance gate as
 > `Khazard.PullAttack`. A resisted pull still broadcasts the range-attack

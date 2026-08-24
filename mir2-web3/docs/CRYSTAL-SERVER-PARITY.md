@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> AI 48 GuardianRock parity correction (2026-08-24): the queued pull movement
+> now passes through Crystal's `Random(MagicResistWeight) < MagicResist`
+> all-or-nothing resistance rule. Resistance does not cancel the delayed
+> `ObjectRangeAttack` animation and does not introduce damage. A deterministic
+> two-phase behavior regression locks the ordinary four-tile pull and the
+> resisted zero-movement branch. This is a bounded AI correction, not closure
+> of the remaining monster behavior matrix.
+>
 > AI 27 Khazard parity correction (2026-08-24): the runtime pull branch now
 > checks the authoritative player's Crystal-numeric `MagicResist` against
 > `Settings.MagicResistWeight` before moving the target, matching
