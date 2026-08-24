@@ -55,8 +55,8 @@ jobs:
     name: Shell security and packaging contracts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - run: node mir2-web3/scripts/test-cross-platform-client-shells.mjs
@@ -65,7 +65,7 @@ jobs:
     name: Shared Rust and WASM
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Install Rust
         run: |
           rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --component rustfmt
@@ -90,8 +90,8 @@ jobs:
     name: Windows native host and assets
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -146,11 +146,122 @@ jobs:
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/generated/native-map-keyed/manifest.json
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/crystal-map-pack/0.map.gz
           Get-Item mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64/mir2-assets/original-ui/Monster/000/0.png
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: mir2-windows-x86_64
+          name: mir2-windows-x86_64-unpublished-build
           path: mir2-web3/apps/game-client/platform-windows/dist/windows-x86_64
           retention-days: 7
+
+  windows-candidate-publish:
+    name: Attested Windows Candidate publication gate
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    needs: windows-native
+    runs-on: windows-latest
+    environment: windows-candidate-publisher
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      # Configure this only as a protected environment secret. Empty, invalid,
+      # or non-matching values fail before provenance or publication.
+      MIR2_WINDOWS_CANDIDATE_PUBLISHER_UID: ${{ secrets.MIR2_WINDOWS_CANDIDATE_PUBLISHER_UID }}
+      GITHUB_ACTOR_ID: ${{ github.actor_id }}
+      GITHUB_REPOSITORY_ID: ${{ github.repository_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Download unpublished Windows build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: mir2-windows-x86_64-unpublished-build
+          path: windows-candidate-payload
+      - name: Enforce protected publisher identity
+        shell: pwsh
+        run: |
+          ./mir2-web3/apps/game-client/platform-windows/scripts/verify-windows-publisher-contract.ps1 `
+            -OutputPath windows-candidate-payload/PUBLISHER-IDENTITY.json
+      - name: Verify downloaded build binding and prepare release subject
+        shell: pwsh
+        run: |
+          $payload = (Resolve-Path -LiteralPath 'windows-candidate-payload').Path
+          $exe = Join-Path $payload 'mir2-platform-windows.exe'
+          $buildAttestationPath = Join-Path $payload 'BUILD-ATTESTATION.json'
+          $publisherIdentityPath = Join-Path $payload 'PUBLISHER-IDENTITY.json'
+          foreach ($required in @($exe, $buildAttestationPath, $publisherIdentityPath)) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "required Windows Candidate input missing: $required"
+            }
+          }
+          $buildAttestation = Get-Content -LiteralPath $buildAttestationPath -Raw | ConvertFrom-Json
+          $publisherIdentity = Get-Content -LiteralPath $publisherIdentityPath -Raw | ConvertFrom-Json
+          $exeHash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToUpperInvariant()
+          $head = (git rev-parse HEAD).Trim().ToLowerInvariant()
+          if ($buildAttestation.schema -cne 'mir2.windows.build-attestation.v2') { throw 'unexpected Windows build attestation schema' }
+          if ($buildAttestation.gitRevision -cne $head) { throw 'downloaded build revision mismatch' }
+          if ([bool]$buildAttestation.worktreeDirty) { throw 'downloaded build records a dirty worktree' }
+          if ($buildAttestation.exeSha256 -cne $exeHash) { throw 'downloaded EXE hash differs from build attestation' }
+          if (-not [bool]$buildAttestation.buildCommand.locked) { throw 'downloaded build was not dependency-locked' }
+          if ($publisherIdentity.schema -cne 'mir2.windows.publisher-identity.v1' -or -not [bool]$publisherIdentity.verified) { throw 'publisher identity evidence is invalid' }
+          if ($publisherIdentity.publisherUid -cne $env:GITHUB_ACTOR_ID) { throw 'publisher identity evidence differs from workflow actor' }
+          if ($publisherIdentity.sourceRevision -cne $head) { throw 'publisher identity evidence revision mismatch' }
+
+          $releaseDir = Join-Path $env:RUNNER_TEMP 'mir2-windows-candidate-release'
+          New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+          $archive = Join-Path $releaseDir ("mir2-windows-candidate-{0}.zip" -f $head)
+          Compress-Archive -Path (Join-Path $payload '*') -DestinationPath $archive -CompressionLevel Optimal
+          $archiveHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToUpperInvariant()
+          $provenance = [ordered]@{
+            schema = 'mir2.windows.candidate-provenance.v1'
+            artifact = [IO.Path]::GetFileName($archive)
+            artifactSha256 = $archiveHash
+            sourceRevision = $head
+            buildAttestationSha256 = (Get-FileHash -LiteralPath $buildAttestationPath -Algorithm SHA256).Hash.ToUpperInvariant()
+            publisherIdentitySha256 = (Get-FileHash -LiteralPath $publisherIdentityPath -Algorithm SHA256).Hash.ToUpperInvariant()
+            repositoryId = $env:GITHUB_REPOSITORY_ID
+            runId = $env:GITHUB_RUN_ID
+            runAttempt = $env:GITHUB_RUN_ATTEMPT
+          }
+          $provenancePath = Join-Path $releaseDir 'SUPPLY-CHAIN-PROVENANCE.json'
+          [IO.File]::WriteAllText($provenancePath, (($provenance | ConvertTo-Json -Depth 5) + "`n"), [Text.UTF8Encoding]::new($false))
+          "WINDOWS_CANDIDATE_ARCHIVE=$archive" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "WINDOWS_CANDIDATE_PROVENANCE=$provenancePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Generate GitHub build provenance attestation
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: |
+            ${{ env.WINDOWS_CANDIDATE_ARCHIVE }}
+            ${{ env.WINDOWS_CANDIDATE_PROVENANCE }}
+      - name: Verify GitHub build provenance attestation
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          foreach ($subject in @($env:WINDOWS_CANDIDATE_ARCHIVE, $env:WINDOWS_CANDIDATE_PROVENANCE)) {
+            $verified = $false
+            foreach ($attempt in 1..3) {
+              gh attestation verify "$subject" --repo "$env:GITHUB_REPOSITORY"
+              if ($LASTEXITCODE -eq 0) {
+                $verified = $true
+                break
+              }
+              if ($attempt -lt 3) { Start-Sleep -Seconds 5 }
+            }
+            if (-not $verified) {
+              throw "GitHub provenance verification failed closed for $subject"
+            }
+          }
+      - name: Upload verified Windows Candidate artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-windows-candidate-${{ github.sha }}
+          path: |
+            ${{ env.WINDOWS_CANDIDATE_ARCHIVE }}
+            ${{ env.WINDOWS_CANDIDATE_PROVENANCE }}
+          if-no-files-found: error
+          retention-days: 14
 
   desktop-shells:
     name: Tauri ${{ matrix.os }}
@@ -166,7 +277,7 @@ jobs:
       run:
         working-directory: mir2-web3/apps/mir2-launcher-tauri
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Install Linux WebKit dependencies
         if: runner.os == 'Linux'
         working-directory: .
@@ -182,7 +293,7 @@ jobs:
             libssl-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -209,13 +320,13 @@ jobs:
       run:
         working-directory: mir2-web3/apps/mir2-mobile
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: mir2-web3/apps/mir2-mobile/package-lock.json
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: "21"
@@ -298,7 +409,7 @@ jobs:
 
           echo "Using Android NDK LLVM tools from $LLVM_BIN"
           mir2-web3/apps/game-client/platform-android/build-android.sh
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mir2-android-debug-apk
           path: mir2-web3/apps/mir2-mobile/android/app/build/outputs/apk/debug/app-debug.apk
@@ -311,8 +422,8 @@ jobs:
       run:
         working-directory: mir2-web3/apps/mir2-mobile
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
