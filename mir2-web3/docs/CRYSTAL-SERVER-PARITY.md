@@ -27,13 +27,14 @@
 > fail-closed: unsupported spell semantics remain in the parity backlog and are
 > not represented by fabricated gameplay.
 >
-> AI 50 GreatFoxSpirit recall correction (2026-08-25): the current
-> authoritative-player recall candidate now passes through Crystal's
-> `Random(MagicResistWeight) < MagicResist` rejection before any transform or
-> teleport packet is produced. The cooldown is committed before the check, as
-> Crystal commits `RecallTime` before iterating candidates. Deterministic tests
-> lock both successful and resisted recall behavior. Broader multi-target recall
-> ordering/filtering remains outside this bounded correction.
+> AI 50 GreatFoxSpirit recall correction (2026-08-25): recall now evaluates the
+> local authoritative equivalent of Crystal `FindAllTargets(30)` in deterministic
+> ring/y/x order, skips dead, hidden, same-side, near, stale, or unsupported
+> entities, checks MagicResist per candidate, and returns on the first successful
+> teleport. `RemotePlayer` mirror transforms are never mutated; `SelfPlayer` and
+> opposing monster objects preserve their real IDs across teleport packets.
+> Monster MagicResist is still a documented zero fallback because the personal
+> monster ECS has no imported resistance stat. Locked focused tests pass 2/2.
 >
 > AI 48 GuardianRock parity correction (2026-08-24): the queued pull movement
 > now passes through Crystal's `Random(MagicResistWeight) < MagicResist`

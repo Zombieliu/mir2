@@ -29,14 +29,14 @@
 > This is a fail-closed correction; each still-unsupported spell remains an open
 > implementation item rather than being claimed as functional.
 >
-> Crystal AI 50 recall correction (2026-08-25): GreatFoxSpirit now evaluates
-> the authoritative player's `MagicResist / MagicResistWeight` all-or-nothing
-> roll before teleporting that recall candidate. A resisted attempt emits no
-> teleport/movement packets and leaves the player in place, while the ten-second
-> recall cooldown still starts before candidate evaluation exactly as in
-> `GreatFoxSpirit.ProcessTarget`. Locked serial regressions cover both the
-> ordinary recall and deterministic resisted branch. Multi-target recall
-> selection/filtering remains open.
+> Crystal AI 50 recall correction (2026-08-25): GreatFoxSpirit now performs a
+> bounded local `FindAllTargets(30)` candidate pass, filters unsupported/stale,
+> dead, hidden, near, and same-disposition entities, applies MagicResist for each
+> candidate, and stops after the first successful teleport exactly as Crystal's
+> loop does. `RemotePlayer` mirrors are excluded from local mutation; `SelfPlayer`
+> and opposing monster entities use their real object IDs in teleport packets.
+> Player resistance is authoritative; monster resistance remains zero until an
+> imported monster stat component exists. Locked focused tests pass 2/2.
 >
 > Crystal AI 48 correction (2026-08-24): GuardianRock's delayed pull now uses
 > the same `MagicResist / MagicResistWeight` all-or-nothing gate as

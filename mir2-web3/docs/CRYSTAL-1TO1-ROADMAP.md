@@ -28,13 +28,14 @@
 > spells as unsupported and does not increase their functional-completeness
 > count.
 >
-> 2026-08-25 spawned-AI checkpoint: AI 50 GreatFoxSpirit's implemented player
-> recall now honors Crystal's full-shrug MagicResist check. A resisted candidate
-> receives no teleport-out/walk/teleport-in sequence and stays at its original
-> tile; the recall cooldown still starts at the attempt, preserving Crystal's
-> operation order. Focused serial tests prove both paths. This closes the player
-> MagicResist branch only; multi-target target ordering/filtering, YinDevilNode,
-> SnowWolfKing and other full-AI gates remain open.
+> 2026-08-25 spawned-AI checkpoint: AI 50 GreatFoxSpirit recall now evaluates
+> the bounded local equivalent of Crystal `FindAllTargets(30)` in ring/y/x order,
+> filters dead, hidden, same-disposition, near, stale, and non-authoritative
+> candidates, applies MagicResist per candidate, and returns immediately after
+> the first successful teleport. `RemotePlayer` mirrors are never mutated; the
+> authoritative `SelfPlayer` and opposing monster ECS entities are supported.
+> Player MagicResist is real; monster MagicResist remains an explicit zero-stat
+> fallback until monster stat blocks are modeled. Focused locked tests pass 2/2.
 >
 > 2026-08-24 spawned-AI checkpoint: AI 48 GuardianRock now evaluates the
 > authoritative player's Crystal-numeric MagicResist roll before queuing its
