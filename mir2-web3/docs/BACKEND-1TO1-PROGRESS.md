@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> Crystal map-event import foundation (2026-08-25): the generator now imports
+> six active `_MAPCOORD` bindings and eighteen `Envir/Events/**/*.txt` files,
+> resolves nested `#INSERT`/section `#INCLUDE` directives with source-line
+> provenance, and fails closed on dangling paths, traversal, cycles, size, depth,
+> or resolved-line limits. Commented Bichon bindings remain excluded. Independent
+> regeneration is byte-identical (`SHA-256 DA5A2387264E72AFB4D7268220290C0E6E400ED8CFB21E1F011E7E49E2C3E087`),
+> importer self-tests pass 3/3, game-data tests pass 35/35 plus 3/3, and the
+> Simulation consumer integration passes 1/1. This imports authoritative data;
+> runtime coordinate-trigger execution and event semantics remain open.
+>
 > Crystal unmatched-spell safety correction (2026-08-25): imported spells
 > without an explicit Rust implementation no longer fall through to a generic
 > 500 ms offensive damage action. The default branch now follows

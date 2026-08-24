@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-25 map-event data checkpoint: active Crystal `_MAPCOORD` bindings,
+> all current Event text files, nested inserts/includes, and exact source
+> provenance are now generated into a bounded, deterministic game-data manifest.
+> Unsafe/dangling/cyclic include graphs fail generation; commented bindings do
+> not become live data. Generator, determinism, game-data, and Simulation
+> consumer gates pass. This closes the previously missing import foundation,
+> not runtime map-coordinate activation, event scheduling, or script-command
+> semantic parity.
+>
 > 2026-08-25 spell-authority checkpoint: the runtime no longer invents generic
 > damage for an imported Crystal spell whose switch branch has not been
 > implemented. Unsupported dispatch spends MP in Crystal order, returns

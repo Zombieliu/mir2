@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> Map-coordinate event import checkpoint (2026-08-25): generated game data now
+> retains all six active Crystal map-coordinate bindings, eighteen Event files,
+> resolved section/include content, and per-line source provenance. The importer
+> enforces traversal, cycle, depth, file/total-byte, and resolved-line limits and
+> produces deterministic output. Independent Rust/Node gates pass. No runtime
+> event is claimed here: authoritative movement-trigger evaluation and execution
+> of the imported event sections remain required before coordinate-event parity
+> can be marked functional.
+>
 > Unmatched Crystal spell correction (2026-08-25): the Rust manifest dispatcher
 > now matches `HumanObject`'s default switch behavior instead of converting an
 > unknown spell into a generic target hit. MP deduction remains before dispatch;
