@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-25 Zone factory restore safety checkpoint: complete World Director
+> images are now decoded and restored into an isolated Zone resource map before
+> one lock-protected live-map replacement. Replica markers and autonomous-tick
+> flags share a fixed replicas -> Zones lock order across mark, promote, resume,
+> first resource creation, and restore, preventing standby Zones from resuming
+> autonomous writes. Atomic restore gates pass 2/2, replica gates pass 4/4, and
+> the locked Gateway compile passes. Durable checkpoint filesystem publication
+> remains a separate security track and is not claimed by this checkpoint.
+
 > 2026-08-25 spawned-AI checkpoint: AI 41/42 YinDevilNode/YangDevilNode now
 > stay immobile, suppress player chase, detect same-disposition friendly targets within
 > seven tiles, and emit the Crystal delayed support `ObjectAttack`. AI 41 maps to

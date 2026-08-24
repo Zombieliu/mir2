@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> Zone recovery checkpoint (2026-08-25): World Director factory restores now
+> validate and stage every Zone before one atomic live-map replacement. The
+> replica marker and autonomous-tick state is updated under a single fixed
+> replicas -> Zones lock order for mark/promote/resume/resource creation and
+> restore. Focused atomic gates pass 2/2 and replica gates pass 4/4, with Gateway
+> compile green. This closes Zone-factory partial restore and standby tick races;
+> durable checkpoint file publication remains a separate open security boundary.
+
 > AI 41/42 Yin/Yang Devil Node checkpoint (2026-08-25): the runtime now preserves
 > Crystal immobility and support-cast timing, requires a friendly target within seven
 > tiles, and maps AI-specific `BlessedArmour/MaxAC` or

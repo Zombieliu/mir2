@@ -4447,16 +4447,17 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn mark_zone_as_replica(&self, zone_id: &ZoneId) {
-        self.replica_zone_ids
+        // Fixed lock order for operations that need both maps: replicas, then Zones.
+        let mut replica_zone_ids = self
+            .replica_zone_ids
             .lock()
-            .expect("shared Zone replica marker mutex should not be poisoned")
-            .insert(zone_id.clone());
-        if let Some(resources) = self
+            .expect("shared Zone replica marker mutex should not be poisoned");
+        let zones = self
             .zones
             .lock()
-            .expect("shared Zone factory mutex should not be poisoned")
-            .get(zone_id)
-        {
+            .expect("shared Zone factory mutex should not be poisoned");
+        replica_zone_ids.insert(zone_id.clone());
+        if let Some(resources) = zones.get(zone_id) {
             resources
                 .autonomous_ticks_enabled
                 .store(false, Ordering::Release);
@@ -4471,21 +4472,23 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn promote_zone_from_replica(&self, zone_id: &ZoneId) -> Result<(), String> {
-        if !self
+        // Keep the same replicas -> Zones lock order as mark/restore.
+        let mut replica_zone_ids = self
             .replica_zone_ids
             .lock()
-            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?
-            .remove(zone_id)
-        {
-            return Err(format!("Zone {zone_id} is not a standby replica"));
-        }
-        let resources = self
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?;
+        let zones = self
             .zones
             .lock()
-            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?;
+        if !replica_zone_ids.contains(zone_id) {
+            return Err(format!("Zone {zone_id} is not a standby replica"));
+        }
+        let resources = zones
             .get(zone_id)
             .cloned()
             .ok_or_else(|| format!("Zone {zone_id} has no installed replica state"))?;
+        replica_zone_ids.remove(zone_id);
         resources
             .autonomous_ticks_enabled
             .store(true, Ordering::Release);
@@ -4510,13 +4513,20 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn resume_active_zone(&self, zone_id: &ZoneId) -> Result<(), String> {
-        if self.is_zone_replica(zone_id) {
-            return Err(format!("Zone {zone_id} is a standby replica"));
-        }
-        let resources = self
+        // Keep the replica check and tick enable in the same replicas -> Zones
+        // critical section as mark/promote/restore/resource creation.
+        let replica_zone_ids = self
+            .replica_zone_ids
+            .lock()
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?;
+        let zones = self
             .zones
             .lock()
-            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?;
+        if replica_zone_ids.contains(zone_id) {
+            return Err(format!("Zone {zone_id} is a standby replica"));
+        }
+        let resources = zones
             .get(zone_id)
             .cloned()
             .ok_or_else(|| format!("Zone {zone_id} has no active runtime state"))?;
@@ -4614,11 +4624,19 @@ impl SharedInProcessZoneRuntimeFactory {
         self.install_factory_checkpoint(checkpoint)
     }
 
-    /// Restore a World Director image while deliberately discarding legacy
-    /// session-scoped state. This also migrates v1 checkpoints that contained
-    /// orphan players and unbounded pending packet frames. The caller must
-    /// verify the enclosing World Director commitment before invoking this.
+    /// Preserve the existing caller API while using the transactional
+    /// implementation for every World Director restore.
     pub(crate) fn install_world_checkpoint_bytes(&self, bytes: &[u8]) -> Result<usize, String> {
+        self.install_world_checkpoint_bytes_atomically(bytes)
+    }
+
+    /// Restore a complete World Director image without exposing a partially
+    /// restored set of Zones. Every Zone is decoded and restored into an
+    /// isolated resource map before the live map is replaced under one lock.
+    pub(crate) fn install_world_checkpoint_bytes_atomically(
+        &self,
+        bytes: &[u8],
+    ) -> Result<usize, String> {
         let mut checkpoint: SharedInProcessZoneFactoryCheckpoint = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode shared Zone factory checkpoint: {error}"))?;
         checkpoint.zones = checkpoint
@@ -4628,7 +4646,76 @@ impl SharedInProcessZoneRuntimeFactory {
                 Ok((zone_id, zone_checkpoint.into_verified_world_only()?))
             })
             .collect::<Result<BTreeMap<_, _>, String>>()?;
-        self.install_factory_checkpoint(checkpoint)
+        self.install_factory_checkpoint_atomically(checkpoint)
+    }
+
+    fn install_factory_checkpoint_atomically(
+        &self,
+        checkpoint: SharedInProcessZoneFactoryCheckpoint,
+    ) -> Result<usize, String> {
+        if checkpoint.version != SHARED_ZONE_FACTORY_CHECKPOINT_VERSION {
+            return Err(format!(
+                "unsupported shared Zone factory checkpoint version {}, expected {}",
+                checkpoint.version, SHARED_ZONE_FACTORY_CHECKPOINT_VERSION
+            ));
+        }
+
+        let zone_count = checkpoint.zones.len();
+        let mut restored_states = BTreeMap::new();
+        for (zone_id, zone_checkpoint) in checkpoint.zones {
+            restored_states.insert(zone_id, SharedInProcessZoneState::restore(zone_checkpoint)?);
+        }
+
+        let mut staged_resources = BTreeMap::new();
+        for (zone_id, restored) in restored_states {
+            let cadence = self
+                .tick_cadences
+                .get(&zone_id)
+                .copied()
+                .unwrap_or(self.default_tick_cadence);
+            let resources = SharedInProcessZoneResources::new(
+                &zone_id,
+                cadence,
+                self.mutation_capture.clone(),
+                false,
+            );
+            *resources
+                .zone_state
+                .lock()
+                .map_err(|_| format!("staged shared Zone {zone_id} state mutex was poisoned"))? =
+                restored;
+            staged_resources.insert(zone_id, resources);
+        }
+
+        let checkpoint_zone_ids = staged_resources.keys().cloned().collect::<BTreeSet<_>>();
+        // One atomic critical section observes replica markers, rechecks the
+        // live Zone set, replaces it, and initializes every tick flag. The
+        // fixed order is replicas -> Zones, matching mark/promote.
+        let replica_zone_ids = self
+            .replica_zone_ids
+            .lock()
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?;
+        let mut live_resources = self
+            .zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?;
+        let current_zone_ids = live_resources.keys().cloned().collect::<BTreeSet<_>>();
+        if !current_zone_ids.is_subset(&checkpoint_zone_ids) {
+            return Err(
+                "shared Zone checkpoint is missing a Zone created during journal replay"
+                    .to_string(),
+            );
+        }
+
+        *live_resources = staged_resources;
+        for (zone_id, resources) in live_resources.iter() {
+            let autonomous_ticks_enabled =
+                self.autonomous_ticks_by_default && !replica_zone_ids.contains(zone_id);
+            resources
+                .autonomous_ticks_enabled
+                .store(autonomous_ticks_enabled, Ordering::Release);
+        }
+        Ok(zone_count)
     }
 
     fn install_factory_checkpoint(
@@ -4735,15 +4822,21 @@ impl SharedInProcessZoneRuntimeFactory {
             .get(zone_id)
             .copied()
             .unwrap_or(self.default_tick_cadence);
-        let autonomous_ticks_enabled = self.autonomous_ticks_by_default
-            && !self
-                .replica_zone_ids
-                .lock()
-                .expect("shared Zone replica marker mutex should not be poisoned")
-                .contains(zone_id);
-        self.zones
+        // Keep replica observation and first resource insertion in the same
+        // replicas -> Zones critical section as mark/promote/restore. Otherwise
+        // a concurrent mark could install the marker between the two locks and
+        // leave a standby resource with autonomous ticks enabled.
+        let replica_zone_ids = self
+            .replica_zone_ids
             .lock()
-            .expect("shared zone factory mutex should not be poisoned")
+            .expect("shared Zone replica marker mutex should not be poisoned");
+        let autonomous_ticks_enabled =
+            self.autonomous_ticks_by_default && !replica_zone_ids.contains(zone_id);
+        let mut zones = self
+            .zones
+            .lock()
+            .expect("shared zone factory mutex should not be poisoned");
+        zones
             .entry(zone_id.clone())
             .or_insert_with(|| {
                 SharedInProcessZoneResources::new(
@@ -11033,13 +11126,13 @@ mod tests {
         PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
         SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
         SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
-        SharedInProcessZoneRuntimeFactory, SharedInProcessZoneSessionRuntime,
-        SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
-        SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
-        SharedNpcWorldTransactionReceipt, SharedSessionRouter, SharedTradeSettlementOutcome,
-        SharedZoneMovementIngress, SharedZoneMutationGate, SharedZoneRuntimeFactory, ZoneId,
-        ZoneNativePlayerAttack, ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry,
-        ZoneRuntimeFactory,
+        SharedInProcessZoneFactoryCheckpoint, SharedInProcessZoneRuntimeFactory,
+        SharedInProcessZoneSessionRuntime, SharedInProcessZoneState, SharedNpcEntitySideEffect,
+        SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope, SharedNpcWorldService,
+        SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt, SharedSessionRouter,
+        SharedTradeSettlementOutcome, SharedZoneMovementIngress, SharedZoneMutationGate,
+        SharedZoneRuntimeFactory, ZoneId, ZoneNativePlayerAttack, ZoneNativePlayerAttackKind,
+        ZonePresenceKey, ZoneRegistry, ZoneRuntimeFactory,
     };
 
     use crate::{GatewayConfig, GatewaySession};
@@ -11068,6 +11161,100 @@ mod tests {
         thread,
         time::{Duration, Instant},
     };
+
+    #[test]
+    fn atomic_world_checkpoint_restore_preserves_factory_when_later_zone_is_invalid() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let original_zone = ZoneId::new("atomic-original");
+        let original_resources = factory.resources_for_zone(&original_zone);
+        original_resources
+            .zone_state
+            .lock()
+            .unwrap()
+            .next_zone_object_id = 91_337;
+        let original_bytes = factory.world_checkpoint_bytes().unwrap();
+
+        let mut candidate: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&original_bytes).unwrap();
+        let mut corrupt_later_zone = candidate
+            .zones
+            .values()
+            .next()
+            .expect("the original Zone checkpoint must exist")
+            .clone();
+        corrupt_later_zone.version = corrupt_later_zone.version.saturating_add(1);
+        candidate
+            .zones
+            .insert(ZoneId::new("zz-corrupt-later-zone"), corrupt_later_zone);
+        let candidate_bytes = serde_json::to_vec(&candidate).unwrap();
+
+        let error = factory
+            .install_world_checkpoint_bytes_atomically(&candidate_bytes)
+            .expect_err("an invalid later Zone must reject the entire factory restore");
+        assert!(error.contains("unsupported shared Zone state checkpoint version"));
+        assert_eq!(factory.world_checkpoint_bytes().unwrap(), original_bytes);
+        assert_eq!(factory.active_zone_count(), 1);
+    }
+
+    #[test]
+    fn atomic_world_checkpoint_restore_preserves_replica_state_and_tick_flags() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let replica_zone = ZoneId::new("atomic-replica");
+        factory.resources_for_zone(&replica_zone);
+        factory.mark_zone_as_replica(&replica_zone);
+        assert!(factory.is_zone_replica(&replica_zone));
+        assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+
+        let mut candidate: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&factory.world_checkpoint_bytes().unwrap()).unwrap();
+        let normal_zone = ZoneId::new("atomic-normal");
+        let normal_checkpoint = candidate
+            .zones
+            .get(&replica_zone)
+            .expect("the replica checkpoint must exist")
+            .clone();
+        candidate
+            .zones
+            .insert(normal_zone.clone(), normal_checkpoint);
+
+        let restored = factory
+            .install_world_checkpoint_bytes_atomically(&serde_json::to_vec(&candidate).unwrap())
+            .unwrap();
+        assert_eq!(restored, 2);
+        assert_eq!(factory.active_zone_count(), 2);
+        assert!(factory.is_zone_replica(&replica_zone));
+        assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+        assert!(!factory.is_zone_replica(&normal_zone));
+        assert!(factory.autonomous_ticks_enabled(&normal_zone));
+
+        factory.promote_zone_from_replica(&replica_zone).unwrap();
+        assert!(!factory.is_zone_replica(&replica_zone));
+        assert!(factory.autonomous_ticks_enabled(&replica_zone));
+    }
+
+    #[test]
+    fn failed_replica_promotion_preserves_the_replica_marker() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let missing_zone = ZoneId::new("missing-replica-state");
+        factory.mark_zone_as_replica(&missing_zone);
+
+        let error = factory
+            .promote_zone_from_replica(&missing_zone)
+            .expect_err("a replica without installed state must not be promoted");
+        assert!(error.contains("has no installed replica state"));
+        assert!(factory.is_zone_replica(&missing_zone));
+    }
+    #[test]
+    fn first_resource_creation_honors_an_existing_replica_marker() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let replica_zone = ZoneId::new("replica-before-resource");
+        factory.mark_zone_as_replica(&replica_zone);
+
+        factory.resources_for_zone(&replica_zone);
+
+        assert!(factory.is_zone_replica(&replica_zone));
+        assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+    }
 
     #[test]
     fn pending_zone_packets_never_exceed_rpc_outbound_capacity() {

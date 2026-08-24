@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Zone factory recovery safety checkpoint (2026-08-25): a complete World
+> Director Zone image is staged off-line and replaces the live Zone map only
+> after every Zone validates and restores. Replica markers, resource creation,
+> promotion/resume, atomic restore, and autonomous-tick initialization now share
+> the fixed replicas -> Zones lock order, closing partial factory mutation and
+> standby double-tick races. Atomic restore tests pass 2/2, replica tests pass
+> 4/4, Rustfmt/diff gates pass, and locked Gateway compile passes. This does not
+> claim the still-separate durable filesystem publication path.
+
 > Crystal AI 41/42 support-node checkpoint (2026-08-25): YinDevilNode and
 > YangDevilNode are now immobile non-chasing support casters. They require a
 > same-disposition friend within seven tiles, broadcast the delayed Crystal
