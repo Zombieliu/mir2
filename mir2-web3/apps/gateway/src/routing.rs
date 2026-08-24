@@ -104,6 +104,68 @@ impl ZoneOwnerLease {
     }
 }
 
+/// One immutable teardown snapshot produced at the authoritative Zone owner.
+///
+/// Identity and character state must be captured by the same owner-side
+/// operation. The lease records which fenced owner generation produced the
+/// snapshot, so callers can reject a handoff that races preparation.
+#[derive(Debug, Clone)]
+pub struct PreparedZoneTeardown {
+    pub(crate) owner_lease: ZoneOwnerLease,
+    pub(crate) identity: ActiveSessionIdentity,
+    pub(crate) checkpoint: CharacterSaveRecord,
+}
+
+impl PreparedZoneTeardown {
+    fn new(
+        owner_lease: ZoneOwnerLease,
+        identity: ActiveSessionIdentity,
+        checkpoint: CharacterSaveRecord,
+    ) -> Self {
+        Self {
+            owner_lease,
+            identity,
+            checkpoint,
+        }
+    }
+
+    pub fn owner_lease(&self) -> &ZoneOwnerLease {
+        &self.owner_lease
+    }
+
+    pub fn identity(&self) -> &ActiveSessionIdentity {
+        &self.identity
+    }
+
+    pub fn checkpoint(&self) -> &CharacterSaveRecord {
+        &self.checkpoint
+    }
+
+    pub(crate) fn validate_identity_checkpoint(&self) -> Result<(), String> {
+        if self.identity.account_id.is_empty()
+            || self.identity.account_id.as_str() != self.identity.account_id.trim()
+        {
+            return Err("teardown identity requires a nonempty canonical account id".to_string());
+        }
+        if self.identity.character_index < 0 {
+            return Err("teardown identity requires a nonnegative character index".to_string());
+        }
+        if self.identity.character_name.is_empty() {
+            return Err("teardown identity requires a nonempty character name".to_string());
+        }
+        if self.checkpoint.character.index != self.identity.character_index {
+            return Err(
+                "teardown checkpoint character index does not match its identity".to_string(),
+            );
+        }
+        if self.checkpoint.character.name != self.identity.character_name {
+            return Err(
+                "teardown checkpoint character name does not match its identity".to_string(),
+            );
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ZoneOwnerCommandMode {
     Direct,
@@ -229,10 +291,7 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime: &mut ZoneRuntimeHandle,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(
-            request.command(),
-            WorldCommand::NativeGameShopPurchase(_)
-        ) {
+        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
             return Err(
                 "typed GameShop outcome execution requires a native idempotent purchase"
                     .to_string(),
@@ -277,9 +336,28 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime.restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self, runtime: &ZoneRuntimeHandle) -> Result<(), String> {
-        runtime.save_active_character();
-        Ok(())
+    fn prepare_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        prepare_zone_teardown_checkpoint(runtime, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        persist_zone_teardown_checkpoint(runtime, prepared)
+    }
+
+    fn release_teardown_fence(&self, runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        release_zone_teardown_fence(runtime)
+    }
+
+    fn save_active_character(&self, runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        runtime.save_active_character()
     }
 
     fn refresh_active_external_mail(
@@ -325,10 +403,7 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
         &self,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
-        if !matches!(
-            request.command(),
-            WorldCommand::NativeGameShopPurchase(_)
-        ) {
+        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
             return Err(
                 "typed GameShop outcome execution requires a native idempotent purchase"
                     .to_string(),
@@ -363,6 +438,21 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
             "zone owner RPC transport does not implement restore_active_character_checkpoint"
                 .to_string(),
         )
+    }
+
+    fn prepare_teardown_checkpoint(
+        &self,
+        _owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        Err("zone owner RPC transport does not implement prepare_teardown_checkpoint".to_string())
+    }
+
+    fn persist_teardown_checkpoint(&self, _prepared: &PreparedZoneTeardown) -> Result<(), String> {
+        Err("zone owner RPC transport does not implement persist_teardown_checkpoint".to_string())
+    }
+
+    fn release_teardown_fence(&self) -> Result<(), String> {
+        Err("zone owner RPC transport does not implement release_teardown_fence".to_string())
     }
 
     fn save_active_character(&self) -> Result<(), String>;
@@ -456,7 +546,27 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
             .restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self, _runtime: &ZoneRuntimeHandle) -> Result<(), String> {
+    fn prepare_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        self.transport.prepare_teardown_checkpoint(owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        self.transport.persist_teardown_checkpoint(prepared)
+    }
+
+    fn release_teardown_fence(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        self.transport.release_teardown_fence()
+    }
+
+    fn save_active_character(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
         self.transport.save_active_character()
     }
 
@@ -546,6 +656,27 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
                 runtime.execute_production_player_command(authenticated, command)
             }
         }
+    }
+    fn prepare_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(owner_lease)?;
+        }
+        prepare_zone_teardown_checkpoint(runtime, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(prepared.owner_lease())?;
+        }
+        persist_zone_teardown_checkpoint(runtime, prepared)
     }
 }
 
@@ -663,6 +794,40 @@ impl HostedZoneOwnerCommandClient {
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?
             .restore_active_character_checkpoint(checkpoint)
+    }
+
+    pub fn prepare_teardown_checkpoint(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(owner_lease)?;
+        }
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        prepare_zone_teardown_checkpoint(runtime, owner_lease)
+    }
+
+    pub fn persist_teardown_checkpoint(
+        &self,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(prepared.owner_lease())?;
+        }
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        persist_zone_teardown_checkpoint(runtime, prepared)
     }
 
     pub(crate) fn refresh_replica_zone_binding(&self) -> Result<(), String> {
@@ -841,15 +1006,42 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
     }
 
-    fn save_active_character(&self, _runtime: &ZoneRuntimeHandle) -> Result<(), String> {
-        let runtime = self
+    fn prepare_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        HostedZoneOwnerCommandClient::prepare_teardown_checkpoint(self, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        HostedZoneOwnerCommandClient::persist_teardown_checkpoint(self, prepared)
+    }
+
+    fn release_teardown_fence(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        let mut runtime = self
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
-        runtime
-            .as_ref()
-            .map(|runtime| runtime.save_active_character())
-            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        release_zone_teardown_fence(runtime)
+    }
+
+    fn save_active_character(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        runtime.save_active_character()
     }
 
     fn refresh_active_external_mail(
@@ -907,15 +1099,37 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
     }
 
-    fn save_active_character(&self) -> Result<(), String> {
-        let runtime = self
+    fn prepare_teardown_checkpoint(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        HostedZoneOwnerCommandClient::prepare_teardown_checkpoint(self, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(&self, prepared: &PreparedZoneTeardown) -> Result<(), String> {
+        HostedZoneOwnerCommandClient::persist_teardown_checkpoint(self, prepared)
+    }
+
+    fn release_teardown_fence(&self) -> Result<(), String> {
+        let mut runtime = self
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
-        runtime
-            .as_ref()
-            .map(|runtime| runtime.save_active_character())
-            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        release_zone_teardown_fence(runtime)
+    }
+
+    fn save_active_character(&self) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        runtime.save_active_character()
     }
 
     fn refresh_active_external_mail(&self) -> Result<bool, String> {
@@ -1731,6 +1945,7 @@ struct SharedInProcessZoneState {
     pending_zone_monster_kill_awards: BTreeMap<ZonePresenceKey, Vec<ZoneMonsterKillAward>>,
     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<i32>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
+    teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
@@ -1783,6 +1998,8 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_monster_kill_awards: Vec<(ZonePresenceKey, Vec<ZoneMonsterKillAward>)>,
     pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<i32>)>,
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
+    #[serde(default)]
+    teardown_fences: Vec<ZonePresenceKey>,
     players: Vec<(ZonePresenceKey, ZonePlayerPresence)>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
     trade_offers: Vec<(ZonePresenceKey, SharedTradeOffer)>,
@@ -1881,6 +2098,7 @@ impl SharedInProcessZoneStateCheckpoint {
         self.pending_zone_monster_kill_awards.clear();
         self.pending_zone_player_damages.clear();
         self.pending_zone_player_heals.clear();
+        self.teardown_fences.clear();
         self.players.clear();
         self.trade_offers.clear();
         self.pending_trade_deliveries.clear();
@@ -1952,6 +2170,7 @@ impl SharedInProcessZoneState {
             pending_zone_monster_kill_awards: BTreeMap::new(),
             pending_zone_player_damages: BTreeMap::new(),
             pending_zone_player_heals: BTreeMap::new(),
+            teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
             players: BTreeMap::new(),
             maps: BTreeMap::new(),
@@ -2013,6 +2232,7 @@ impl SharedInProcessZoneState {
                 .into_iter()
                 .collect(),
             pending_zone_player_heals: self.pending_zone_player_heals.clone().into_iter().collect(),
+            teardown_fences: self.teardown_fences.clone().into_iter().collect(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
             trade_offers: self.trade_offers.clone().into_iter().collect(),
@@ -2043,6 +2263,7 @@ impl SharedInProcessZoneState {
             pending_zone_monster_kill_awards: Vec::new(),
             pending_zone_player_damages: Vec::new(),
             pending_zone_player_heals: Vec::new(),
+            teardown_fences: Vec::new(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
             trade_offers: Vec::new(),
@@ -2142,6 +2363,7 @@ impl SharedInProcessZoneState {
                 .into_iter()
                 .collect(),
             pending_zone_player_heals: checkpoint.pending_zone_player_heals.into_iter().collect(),
+            teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
             players: checkpoint.players.into_iter().collect(),
             maps: checkpoint.maps,
@@ -2251,7 +2473,114 @@ impl SharedInProcessZoneState {
         self.pending_zone_monster_kill_awards.remove(key);
         self.pending_zone_player_damages.remove(key);
         self.pending_zone_player_heals.remove(key);
+        self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
+    }
+
+    fn begin_teardown_fence(&mut self, key: &ZonePresenceKey) -> Result<(), String> {
+        if !self.players.contains_key(key) || !self.zone_sessions.contains_key(key) {
+            return Err("cannot fence a missing shared Zone presence".to_string());
+        }
+        self.teardown_fences.insert(key.clone());
+        // Once the socket has closed, no realtime packet may bypass the
+        // deterministic teardown drain through a stale live registration.
+        self.live_zone_outbounds.remove(key);
+        Ok(())
+    }
+
+    fn release_teardown_fence(&mut self, key: &ZonePresenceKey) {
+        self.teardown_fences.remove(key);
+    }
+
+    fn teardown_fenced(&self, key: &ZonePresenceKey) -> bool {
+        self.teardown_fences.contains(key)
+    }
+
+    fn any_teardown_fenced(&self) -> bool {
+        !self.teardown_fences.is_empty()
+    }
+    fn command_mutates_teardown_fence(&self, command: &ZoneCommand) -> bool {
+        if self.teardown_fences.is_empty() {
+            return false;
+        }
+
+        let source_session_id = match command {
+            ZoneCommand::Join(join) => Some(&join.session_id),
+            ZoneCommand::Leave { session_id }
+            | ZoneCommand::Walk { session_id, .. }
+            | ZoneCommand::Run { session_id, .. }
+            | ZoneCommand::Turn { session_id, .. }
+            | ZoneCommand::TeleportToNpc { session_id, .. }
+            | ZoneCommand::UpdateChatProfile { session_id, .. }
+            | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+            | ZoneCommand::SyncPlayerCombatState { session_id, .. }
+            | ZoneCommand::SyncPlayerTransform { session_id, .. }
+            | ZoneCommand::SyncPlayerVitals { session_id, .. }
+            | ZoneCommand::Chat { session_id, .. }
+            | ZoneCommand::BroadcastPackets { session_id, .. }
+            | ZoneCommand::SyncSharedObjects { session_id, .. }
+            | ZoneCommand::BroadcastSharedObjectPackets { session_id, .. }
+            | ZoneCommand::SyncGroundDrops { session_id, .. }
+            | ZoneCommand::SpawnMonster { session_id, .. }
+            | ZoneCommand::SyncNativeMonsters { session_id, .. }
+            | ZoneCommand::PlayerAttackObject { session_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerCastMagic { session_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
+            | ZoneCommand::ResolveReincarnation { session_id, .. }
+            | ZoneCommand::ClaimGroundDrop { session_id, .. }
+            | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
+            | ZoneCommand::CommitGroundDropClaim { session_id, .. }
+            | ZoneCommand::CancelGroundDropClaim { session_id, .. }
+            | ZoneCommand::TickPlayerMovement { session_id, .. }
+            | ZoneCommand::OpenDoor { session_id, .. }
+            | ZoneCommand::ConfigureHazards { session_id, .. } => Some(session_id),
+            ZoneCommand::Tick { .. } => None,
+        };
+        if source_session_id.is_some_and(|session_id| {
+            self.zone_session_keys
+                .get(session_id)
+                .is_some_and(|key| self.teardown_fenced(key))
+        }) {
+            return true;
+        }
+
+        let target_object_id = match command {
+            ZoneCommand::PlayerAttackObject { object_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { object_id, .. }
+            | ZoneCommand::PlayerRangeAttackObject { object_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { object_id, .. }
+            | ZoneCommand::PlayerCastMagic { object_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { object_id, .. } => Some(*object_id),
+            _ => None,
+        };
+        if target_object_id.is_some_and(|object_id| {
+            self.teardown_fences.iter().any(|key| {
+                self.players
+                    .get(key)
+                    .is_some_and(|presence| presence.zone_object_id == object_id)
+            })
+        }) {
+            return true;
+        }
+
+        matches!(command, ZoneCommand::Tick { .. })
+    }
+
+    fn prepend_zone_monster_kill_awards(
+        &mut self,
+        key: ZonePresenceKey,
+        mut awards: Vec<ZoneMonsterKillAward>,
+    ) {
+        if awards.is_empty() {
+            return;
+        }
+        if let Some(mut later) = self.pending_zone_monster_kill_awards.remove(&key) {
+            awards.append(&mut later);
+        }
+        self.pending_zone_monster_kill_awards.insert(key, awards);
     }
 
     fn zone_session_id_for_key(key: &ZonePresenceKey) -> SessionId {
@@ -2517,6 +2846,23 @@ impl SharedInProcessZoneState {
         Vec<i32>,
         Vec<i32>,
     ) {
+        self.dispatch_zone_outbounds_with_fence_policy(outbounds, current_key, false)
+    }
+
+    fn dispatch_zone_outbounds_with_fence_policy(
+        &mut self,
+        outbounds: Vec<ZoneOutbound>,
+        current_key: Option<&ZonePresenceKey>,
+        allow_fenced_current: bool,
+    ) -> (
+        Vec<ServerPacket>,
+        Option<(Point, MirDirection)>,
+        Option<(bool, bool)>,
+        Vec<GroundDropSnapshot>,
+        Vec<ZoneMonsterKillAward>,
+        Vec<i32>,
+        Vec<i32>,
+    ) {
         let mut current_packets = Vec::new();
         let mut current_transform = None;
         let mut current_shout_consume = None;
@@ -2533,6 +2879,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.apply_zone_packets_to_map_layer(&key, &packets);
                     if current_key == Some(&key) {
                         current_packets.extend(packets);
@@ -2548,6 +2899,11 @@ impl SharedInProcessZoneState {
                         let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                             continue;
                         };
+                        if self.teardown_fenced(&key)
+                            && !(allow_fenced_current && current_key == Some(&key))
+                        {
+                            continue;
+                        }
                         self.apply_zone_packets_to_map_layer(&key, &packets);
                         if current_key == Some(&key) {
                             current_packets.extend(packets.clone());
@@ -2558,6 +2914,11 @@ impl SharedInProcessZoneState {
                 }
                 ZoneOutbound::ToAll { packets } => {
                     for key in self.zone_session_keys.values().cloned().collect::<Vec<_>>() {
+                        if self.teardown_fenced(&key)
+                            && !(allow_fenced_current && current_key == Some(&key))
+                        {
+                            continue;
+                        }
                         self.apply_zone_packets_to_map_layer(&key, &packets);
                         if current_key == Some(&key) {
                             current_packets.extend(packets.clone());
@@ -2574,6 +2935,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.update_player_transform(&key, position.clone(), direction);
                     if current_key == Some(&key) {
                         current_transform = Some((position, direction));
@@ -2594,6 +2960,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     if current_key == Some(&key) {
                         current_shout_consume = Some((map_shout, server_shout));
                     } else {
@@ -2604,6 +2975,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.remove_shared_drop_for_key(&key, drop.object_id);
                     if current_key == Some(&key) {
                         current_ground_drop_claims.push(drop);
@@ -2615,6 +2991,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.sync_authoritative_zone_drops_for_key(&key, &award.drops);
                     if current_key == Some(&key) {
                         current_monster_kill_awards.push(award);
@@ -2626,6 +3007,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     if current_key == Some(&key) {
                         current_player_damages.push(damage);
                     } else {
@@ -2636,6 +3022,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     if current_key == Some(&key) {
                         current_player_heals.push(amount);
                     } else {
@@ -3107,9 +3498,7 @@ impl SharedInProcessZoneState {
                         // ObjectMonster has no relationship field. Rehydrate
                         // only from the live Zone authority; without one the
                         // legacy packet remains Neutral/fail-closed.
-                        if let Some(monster) =
-                            native_monsters_by_object_id.get(&info.object_id)
-                        {
+                        if let Some(monster) = native_monsters_by_object_id.get(&info.object_id) {
                             reconcile_shared_entity_with_native_monster(map, &mut entity, monster);
                         }
                         if let Some(dead) = map.dead_entity_ids.get(&info.object_id) {
@@ -6123,6 +6512,12 @@ fn run_shared_zone_cadence_tick(
     let mut zone_state = zone_state
         .lock()
         .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+    // A teardown checkpoint must observe a quiescent Zone. ZoneManager only
+    // exposes a global Tick, so pause autonomous mutations while any player is
+    // frozen; explicit teardown performs one final fenced drain itself.
+    if zone_state.any_teardown_fenced() {
+        return Ok(());
+    }
     #[cfg(test)]
     {
         zone_state.zone_cadence_tick_count = zone_state.zone_cadence_tick_count.saturating_add(1);
@@ -6164,6 +6559,9 @@ fn execute_shared_zone_movement(
     let Some(key) = session_state.presence_key.clone() else {
         return Ok(None);
     };
+    if zone_state.teardown_fenced(&key) {
+        return Ok(None);
+    }
     let Some(presence) = zone_state.players.get(&key) else {
         return Ok(None);
     };
@@ -6283,6 +6681,63 @@ pub(crate) fn sync_zone_movement_transform(runtime: &mut ZoneRuntimeHandle) -> R
         return Ok(());
     };
     runtime.sync_pending_zone_movement_transform()
+}
+
+pub(crate) fn prepare_zone_teardown_checkpoint(
+    runtime: &mut ZoneRuntimeHandle,
+    owner_lease: &ZoneOwnerLease,
+) -> Result<Option<PreparedZoneTeardown>, String> {
+    if let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+    {
+        return shared.prepare_teardown_checkpoint(owner_lease);
+    }
+    let Some(identity) = runtime.active_identity() else {
+        return Ok(None);
+    };
+    let checkpoint = runtime
+        .active_character_checkpoint()
+        .ok_or_else(|| "teardown identity has no active character checkpoint".to_string())?;
+    let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
+    prepared.validate_identity_checkpoint()?;
+    Ok(Some(prepared))
+}
+
+pub(crate) fn persist_zone_teardown_checkpoint(
+    runtime: &mut ZoneRuntimeHandle,
+    prepared: &PreparedZoneTeardown,
+) -> Result<(), String> {
+    prepared.validate_identity_checkpoint()?;
+    let identity = runtime
+        .active_identity()
+        .ok_or_else(|| "teardown persist requires the prepared active identity".to_string())?;
+    if identity != prepared.identity {
+        return Err("teardown persist active identity changed after preparation".to_string());
+    }
+    runtime.restore_active_character_checkpoint(prepared.checkpoint())?;
+    runtime.save_active_character()
+}
+
+pub(crate) fn release_zone_teardown_fence(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+    let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+    else {
+        return Ok(());
+    };
+    shared.release_teardown_fence()
+}
+
+#[cfg(test)]
+pub(crate) fn zone_teardown_is_fenced(runtime: &ZoneRuntimeHandle) -> bool {
+    runtime
+        .as_ref()
+        .as_any()
+        .downcast_ref::<SharedInProcessZoneSessionRuntime>()
+        .is_some_and(SharedInProcessZoneSessionRuntime::teardown_is_fenced)
 }
 
 impl fmt::Debug for SharedInProcessZoneSessionRuntime {
@@ -7172,6 +7627,118 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
+    fn prepare_teardown_checkpoint(
+        &mut self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        let Some(identity) = self.inner.active_identity() else {
+            return Ok(None);
+        };
+        let key = ZonePresenceKey::from_identity(&identity);
+        let (
+            mut packets,
+            pending_transform,
+            shout_consume,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+            authoritative_transform,
+            authoritative_vitals,
+        ) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+            zone_state.begin_teardown_fence(&key)?;
+            let session_id = zone_state
+                .zone_sessions
+                .get(&key)
+                .cloned()
+                .ok_or_else(|| "fenced shared Zone presence has no session id".to_string())?;
+            let pending = (
+                zone_state.take_pending_zone_packets(&key),
+                zone_state.take_pending_zone_transform(&key),
+                zone_state.take_pending_zone_shout_consume(&key),
+                zone_state.take_pending_zone_ground_drop_claims(&key),
+                zone_state.take_pending_zone_monster_kill_awards(&key),
+                zone_state.take_pending_zone_player_damages(&key),
+                zone_state.take_pending_zone_player_heals(&key),
+            );
+            (
+                pending.0,
+                pending.1,
+                pending.2,
+                pending.3,
+                pending.4,
+                pending.5,
+                pending.6,
+                zone_state.zone_manager.player_transform(&session_id),
+                zone_state.zone_manager.player_vitals(&session_id),
+            )
+        };
+
+        let authoritative_transform = authoritative_transform.ok_or_else(|| {
+            "fenced shared Zone presence has no authoritative transform".to_string()
+        })?;
+        let authoritative_vitals = authoritative_vitals
+            .ok_or_else(|| "fenced shared Zone presence has no authoritative vitals".to_string())?;
+
+        // Deterministic drain order is part of the persistence contract. Packet
+        // lifecycle effects are applied before rewards and claims, and the final
+        // Zone snapshot wins over any stale private mirror.
+        self.apply_zone_transform(pending_transform);
+        self.apply_zone_shout_consume(shout_consume);
+        packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
+        self.apply_zone_monster_kill_awards_checked(&key, monster_kill_awards)?;
+        let (claim_packets_by_object_id, canceled_claims) =
+            self.apply_zone_ground_drop_claims(ground_drop_claims);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
+
+        self.inner.force_authoritative_player_transform(
+            authoritative_transform.0,
+            authoritative_transform.1,
+        );
+        self.inner.force_authoritative_player_vitals(
+            Some(authoritative_vitals.0),
+            Some(authoritative_vitals.2),
+        );
+        let checkpoint = self
+            .inner
+            .active_character_checkpoint()
+            .ok_or_else(|| "teardown drain produced no active checkpoint".to_string())?;
+        let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
+        prepared.validate_identity_checkpoint()?;
+        Ok(Some(prepared))
+    }
+
+    fn release_teardown_fence(&mut self) -> Result<(), String> {
+        let Some(key) = self.current_presence_key() else {
+            return Ok(());
+        };
+        self.zone_state
+            .lock()
+            .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+            .release_teardown_fence(&key);
+        Ok(())
+    }
+
+    fn teardown_is_fenced(&self) -> bool {
+        self.current_presence_key().is_some_and(|key| {
+            self.zone_state
+                .lock()
+                .map(|state| state.teardown_fenced(&key))
+                .unwrap_or(true)
+        })
+    }
+
     fn dispatch_zone_player_command(
         &mut self,
         command: ZoneCommand,
@@ -7242,6 +7809,9 @@ impl SharedInProcessZoneSessionRuntime {
                 .expect("shared zone presence mutex should not be poisoned");
             let mut outbounds = Vec::new();
             for command in commands {
+                if zone_state.command_mutates_teardown_fence(&command) {
+                    continue;
+                }
                 outbounds.extend(zone_state.zone_manager.handle(command));
             }
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key))
@@ -7291,6 +7861,50 @@ impl SharedInProcessZoneSessionRuntime {
             .map(|presence| presence.zone_object_id)
     }
 
+    fn apply_zone_monster_kill_awards_checked(
+        &mut self,
+        key: &ZonePresenceKey,
+        awards: Vec<ZoneMonsterKillAward>,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if awards.is_empty() {
+            return Ok(Vec::new());
+        }
+        let Some(identity) = self.inner.active_identity() else {
+            self.zone_state
+                .lock()
+                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+                .prepend_zone_monster_kill_awards(key.clone(), awards);
+            return Err("monster kill award drain requires an active identity".to_string());
+        };
+
+        let mut packets = Vec::new();
+        let mut awards = awards.into_iter();
+        while let Some(award) = awards.next() {
+            let retry_award = award.clone();
+            let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+                identity: identity.clone(),
+                command: SharedAccountInventoryCommand::MonsterKillAward(award),
+            });
+            debug_assert_eq!(
+                receipt.kind,
+                SharedAccountInventoryTransactionKind::MonsterKillAward
+            );
+            if !receipt.committed {
+                let mut retry = vec![retry_award];
+                retry.extend(awards);
+                self.zone_state
+                    .lock()
+                    .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+                    .prepend_zone_monster_kill_awards(key.clone(), retry);
+                return Err(
+                    "monster kill award economy commit failed during teardown drain".to_string(),
+                );
+            }
+            packets.extend(receipt.packets);
+        }
+        Ok(packets)
+    }
+
     fn apply_zone_monster_kill_awards(
         &mut self,
         awards: Vec<ZoneMonsterKillAward>,
@@ -7313,6 +7927,46 @@ impl SharedInProcessZoneSessionRuntime {
                 receipt.packets
             })
             .collect()
+    }
+
+    fn dispatch_zone_fenced_teardown_followup(
+        &mut self,
+        command: ZoneCommand,
+    ) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let (
+            mut packets,
+            transform,
+            shout_consume,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+        ) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let outbounds = zone_state.zone_manager.handle(command);
+            zone_state.dispatch_zone_outbounds_with_fence_policy(outbounds, Some(&key), true)
+        };
+        self.apply_zone_transform(transform);
+        self.apply_zone_shout_consume(shout_consume);
+        packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
+        packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
+        let (claim_packets_by_object_id, canceled_claims) =
+            self.apply_zone_ground_drop_claims(ground_drop_claims);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
+        packets
     }
 
     fn apply_zone_ground_drop_claims(
@@ -7356,9 +8010,12 @@ impl SharedInProcessZoneSessionRuntime {
                     now_ms: Self::zone_now_ms(),
                 }
             };
-            receipt
-                .packets
-                .extend(self.dispatch_zone_player_command(followup, false));
+            let followup_packets = if self.teardown_is_fenced() {
+                self.dispatch_zone_fenced_teardown_followup(followup)
+            } else {
+                self.dispatch_zone_player_command(followup, false)
+            };
+            receipt.packets.extend(followup_packets);
             packets_by_object_id
                 .entry(object_id)
                 .or_default()
@@ -8012,8 +8669,7 @@ impl SharedInProcessZoneSessionRuntime {
         if matches!(
             &attack.kind,
             ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
-        )
-            && !is_player_target
+        ) && !is_player_target
             && !attack
                 .monster
                 .as_ref()
@@ -8796,15 +9452,19 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
-    fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
+    fn cancel_pending_shared_trade_offers_for_character(
+        &mut self,
+        character_name: Option<&str>,
+    ) -> Vec<ServerPacket> {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
         };
-        let character_name = self
-            .inner
-            .active_identity()
-            .map(|identity| identity.character_name)
-            .unwrap_or_default();
+        let character_name = character_name.map(str::to_owned).unwrap_or_else(|| {
+            self.inner
+                .active_identity()
+                .map(|identity| identity.character_name)
+                .unwrap_or_default()
+        });
         let own_offer = self
             .zone_state
             .lock()
@@ -8813,6 +9473,10 @@ impl SharedInProcessZoneSessionRuntime {
         own_offer
             .map(|offer| self.inner.rollback_shared_trade_offer(&offer))
             .unwrap_or_default()
+    }
+
+    fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
+        self.cancel_pending_shared_trade_offers_for_character(None)
     }
 
     fn cancel_pending_shared_rental_offers(&mut self) {
@@ -9317,10 +9981,28 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
         self.last_game_shop_purchase_outcome = None;
+        if self.current_presence_key().is_some_and(|key| {
+            self.zone_state
+                .lock()
+                .map(|state| state.teardown_fenced(&key))
+                .unwrap_or(true)
+        }) {
+            return Err("shared Zone session is fenced for teardown".to_string());
+        }
         let removes_presence = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::Disconnect | ClientPacket::LogOut)
         );
+        let departing_character_name = removes_presence
+            .then(|| {
+                self.inner
+                    .active_identity()
+                    .map(|identity| identity.character_name)
+            })
+            .flatten();
+        if removes_presence {
+            self.sync_pending_zone_movement_transform()?;
+        }
         let is_low_latency_zone_player_packet = matches!(
             &command,
             WorldCommand::ClientPacket(
@@ -9591,11 +10273,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.filter_stale_owner_dead_entity_packets(&mut packets);
             return Ok(packets);
         }
-        if removes_presence {
-            packets.extend(self.cancel_pending_shared_trade_offers());
-            self.cancel_pending_shared_rental_offers();
-            packets.extend(self.remove_presence());
-        }
         if !unavailable_shared_target {
             if let Some(object_id) = shared_action_target_id {
                 self.apply_shared_action_target_snapshot(object_id);
@@ -9684,6 +10361,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        if removes_presence {
+            packets.extend(self.cancel_pending_shared_trade_offers_for_character(
+                departing_character_name.as_deref(),
+            ));
+            self.cancel_pending_shared_rental_offers();
+            packets.extend(self.remove_presence());
+        }
         if shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some() {
             self.remap_player_ground_drop_packets(&mut command_packets);
         }
@@ -9941,14 +10625,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.inner.restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self) {
-        self.inner.save_active_character();
+    fn save_active_character(&mut self) -> Result<(), String> {
+        self.sync_pending_zone_movement_transform()?;
+        self.inner.save_active_character()
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {
-        let changed = self.inner.refresh_active_external_mail();
-        self.sync_zone_snapshot();
-        changed
+        self.inner.refresh_active_external_mail()
     }
 }
 
@@ -10825,16 +11508,16 @@ mod tests {
     // --- map=zone integration harness (oracle for the per-zone-tick + handoff steps) ---
 
     fn open_per_map_session(registry: &ZoneRegistry, map: &str, account: &str) -> GatewaySession {
-        let routed = registry.open_session_for(
+        GatewaySession::new_with_zone_registry_route(
             GatewayConfig::default(),
+            registry,
             SessionRouteRequest {
                 account_id: Some(account.to_string()),
                 character_index: Some(0),
                 map_file_name: Some(map.to_string()),
                 ..SessionRouteRequest::anonymous()
             },
-        );
-        GatewaySession::with_routed_world_runtime(routed.zone_id, routed.runtime)
+        )
     }
 
     fn session_sees_player(session: &GatewaySession, name: &str) -> bool {
@@ -10965,8 +11648,8 @@ mod tests {
                 self.inner.restore_active_character_checkpoint(checkpoint)
             }
 
-            fn save_active_character(&self) {
-                self.inner.save_active_character();
+            fn save_active_character(&mut self) -> Result<(), String> {
+                self.inner.save_active_character()
             }
 
             fn refresh_active_external_mail(&mut self) -> bool {
@@ -11053,8 +11736,8 @@ mod tests {
                 self.inner.active_identity()
             }
 
-            fn save_active_character(&self) {
-                self.inner.save_active_character();
+            fn save_active_character(&mut self) -> Result<(), String> {
+                self.inner.save_active_character()
             }
 
             fn refresh_active_external_mail(&mut self) -> bool {
@@ -11185,33 +11868,12 @@ mod tests {
 
     #[test]
     fn shared_in_process_factory_isolates_state_by_zone_id() {
-        let registry = ZoneRegistry::with_router(
-            ZoneId::primary(),
-            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
-            Arc::new(MapZoneSessionRouter::new().with_route("0", ZoneId::new("bichon-0")))
-                as SharedSessionRouter,
-        );
-        let mut bichon = GatewaySession::with_routed_world_runtime(
-            ZoneId::new("bichon-0"),
-            registry
-                .open_session_for(
-                    GatewayConfig::default(),
-                    SessionRouteRequest {
-                        account_id: Some("demo".to_string()),
-                        character_index: Some(0),
-                        map_file_name: Some("0".to_string()),
-                        ..SessionRouteRequest::anonymous()
-                    },
-                )
-                .runtime,
-        );
-        let mut primary = GatewaySession::with_routed_world_runtime(
-            ZoneId::primary(),
-            registry.open_session(GatewayConfig::default()).runtime,
-        );
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let mut bichon = factory.create_runtime(GatewayConfig::default(), &ZoneId::new("bichon-0"));
+        let mut primary = factory.create_runtime(GatewayConfig::default(), &ZoneId::primary());
 
-        start_demo_character(&mut bichon);
-        start_new_character(&mut primary, "second", "Blade");
+        start_new_runtime_handle(&mut bichon, "bichon-isolation", "Scout");
+        start_new_runtime_handle(&mut primary, "primary-isolation", "Blade");
 
         let bichon_snapshot = bichon.world_snapshot();
         let primary_snapshot = primary.world_snapshot();
@@ -17718,7 +18380,10 @@ mod tests {
             damage: 999,
             monster: Some(monster.clone()),
             kind: ZoneNativePlayerAttackKind::Range {
-                target: Point { x: target.x, y: target.y },
+                target: Point {
+                    x: target.x,
+                    y: target.y,
+                },
                 spell: Spell::None,
                 attack_type: 0,
             },
@@ -17769,10 +18434,9 @@ mod tests {
         assert!(runtime
             .sync_authoritative_zone_combat_state(&session_id)
             .is_some());
-        runtime.inner.force_authoritative_player_transform(
-            Point { x: 330, y: 270 },
-            MirDirection::Right,
-        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 330, y: 270 }, MirDirection::Right);
         let target = shared_monster_entity(260_902);
         let monster = zone_monster_spawn_from_shared_entity(&target, 0)
             .expect("neutral shared monster should be representable");
@@ -17793,7 +18457,10 @@ mod tests {
             damage: 999,
             monster: Some(monster),
             kind: ZoneNativePlayerAttackKind::Range {
-                target: Point { x: target.x, y: target.y },
+                target: Point {
+                    x: target.x,
+                    y: target.y,
+                },
                 spell: Spell::None,
                 attack_type: 0,
             },
@@ -17827,17 +18494,20 @@ mod tests {
     fn gateway_prefilter_uses_explicit_disposition_for_friendly_and_hostile_ai0() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
-        start_new_runtime(&mut runtime, "explicit-disposition-warrior", "DispositionBlade");
+        start_new_runtime(
+            &mut runtime,
+            "explicit-disposition-warrior",
+            "DispositionBlade",
+        );
         let session_id = runtime
             .current_zone_session_id()
             .expect("runtime should own a Zone session");
         assert!(runtime
             .sync_authoritative_zone_combat_state(&session_id)
             .is_some());
-        runtime.inner.force_authoritative_player_transform(
-            Point { x: 330, y: 270 },
-            MirDirection::UpLeft,
-        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 330, y: 270 }, MirDirection::UpLeft);
         let mut target = shared_monster_entity(260_903);
         target.ai = Some(0);
         target.disposition = WorldEntityDisposition::Friendly;
@@ -18084,10 +18754,9 @@ mod tests {
             ),
             false,
         );
-        runtime.inner.force_authoritative_player_transform(
-            attacker_position,
-            MirDirection::Right,
-        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(attacker_position, MirDirection::Right);
 
         let packets = runtime
             .execute(WorldCommand::Attack {
@@ -18222,12 +18891,7 @@ mod tests {
     fn shared_in_process_runtime_applies_current_map_shared_monsters_to_local_runtime() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
-        runtime
-            .inner
-            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
-                character_index: 0,
-            }))
-            .expect("start game should succeed");
+        start_demo_runtime(&mut runtime);
         let mut monster = runtime
             .inner
             .world_snapshot()
@@ -18237,6 +18901,15 @@ mod tests {
                 entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
+        let authoritative_hp = zone_state
+            .lock()
+            .expect("shared zone state should lock")
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .into_iter()
+            .find(|native| native.object_id == monster.object_id)
+            .map(|native| native.hp)
+            .expect("starter monster should have Zone-native vitals");
         monster.hp = Some(1);
 
         zone_state
@@ -18258,7 +18931,7 @@ mod tests {
             .into_iter()
             .find(|entity| entity.object_id == monster.object_id)
             .and_then(|entity| entity.hp);
-        assert_eq!(local_hp, Some(1));
+        assert_eq!(local_hp, Some(authoritative_hp));
     }
 
     #[test]
@@ -18788,19 +19461,20 @@ mod tests {
             object_id: shared_guide.object_id,
             key: "@Main".to_string(),
         });
-        let snapshot = second.world_snapshot();
-
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectChat { object_id, .. } if *object_id == shared_guide.object_id
         )));
+        let dialog_snapshot = second.world_snapshot();
         assert_eq!(
-            snapshot
+            dialog_snapshot
                 .active_npc_dialog
                 .as_ref()
                 .map(|dialog| dialog.npc_object_id),
             Some(shared_guide.object_id)
         );
+        second.select_npc_dialog_target("@AcceptQuest:1001");
+        let snapshot = second.world_snapshot();
         assert!(
             snapshot.quest_log.iter().any(|quest| {
                 shared_guide.quest_ids.contains(&quest.quest_id)
@@ -20541,6 +21215,10 @@ mod tests {
                 _ => None,
             })
             .expect("new character should return an index");
+        session.handle_packet(ClientPacket::Login {
+            account_id: account_id.to_string(),
+            password: account_id.to_string(),
+        });
         session.handle_packet(ClientPacket::StartGame { character_index });
     }
 
@@ -20893,5 +21571,9 @@ mod tests {
             pickup_grade: 0,
             maintain_food_time: 24_000,
         }
+    }
+
+    mod abnormal_teardown_zone_drain_tests {
+        include!("abnormal_teardown_zone_drain_tests.rs");
     }
 }

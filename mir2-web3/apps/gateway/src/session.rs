@@ -7,6 +7,8 @@ use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
+#[cfg(test)]
+use mir2_simulation::CharacterSaveRecord;
 use mir2_simulation::{
     ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
     WorldSnapshot, ZoneRuntimeHandle,
@@ -15,11 +17,15 @@ use mir2_simulation::{
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
 use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, GlobalZoneMessageBus,
-    GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, RpcZoneOwnerCommandClient,
-    SessionRouteRequest, SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender,
-    SharedZoneMovementIngress, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority, ZoneId,
-    ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
+    GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, PreparedZoneTeardown,
+    RpcZoneOwnerCommandClient, SessionRouteRequest, SharedZoneLiveOutboundRegistration,
+    SharedZoneLiveOutboundSender, SharedZoneMovementIngress, SharedZoneOwnerCommandClient,
+    SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest,
+    ZoneOwnerLease, ZoneRegistry,
 };
+
+#[path = "save_recovery.rs"]
+pub(crate) mod save_recovery;
 
 pub type GatewayConfig = SimulationConfig;
 
@@ -85,6 +91,19 @@ impl GatewayZoneMovementIngress {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum GatewayTeardownPersistenceOutcome {
+    Saved,
+    Journaled {
+        already_durable: bool,
+    },
+    Retry {
+        prepare_error: Option<String>,
+        save_error: Option<String>,
+        journal_error: Option<String>,
+    },
+}
+
 pub struct GatewaySession {
     session_id: String,
     zone_id: ZoneId,
@@ -100,6 +119,8 @@ pub struct GatewaySession {
     requested_explicit_line: Option<u16>,
     global_message_bus: Option<Arc<GlobalZoneMessageBus>>,
     handoff_generation: u64,
+    active_identity_binding: Option<ActiveSessionIdentity>,
+    teardown_checkpoint: Option<PreparedZoneTeardown>,
 }
 
 #[derive(Clone)]
@@ -167,6 +188,22 @@ impl GatewaySession {
         .with_routing_context(config, registry.clone())
     }
 
+    #[cfg(test)]
+    pub(crate) fn new_with_zone_registry_route(
+        config: GatewayConfig,
+        registry: &ZoneRegistry,
+        request: SessionRouteRequest,
+    ) -> Self {
+        let routed = registry.open_session_for(config.clone(), request);
+        Self::with_routed_world_runtime_and_owner_authority(
+            routed.zone_id,
+            routed.owner_lease,
+            Some(routed.owner_lease_authority),
+            routed.runtime,
+        )
+        .with_routing_context(config, registry.clone())
+    }
+
     pub fn with_routed_world_runtime(zone_id: ZoneId, runtime: ZoneRuntimeHandle) -> Self {
         let zone_owner_lease = ZoneOwnerLease::in_process(&zone_id);
         Self::with_routed_world_runtime_and_owner(zone_id, zone_owner_lease, runtime)
@@ -193,6 +230,7 @@ impl GatewaySession {
     ) -> Self {
         let zone_owner_command_client =
             default_zone_owner_command_client(&zone_id, zone_owner_lease_authority.as_ref());
+        let active_identity_binding = runtime.active_identity();
         Self {
             session_id: next_gateway_session_id(),
             zone_id,
@@ -208,6 +246,8 @@ impl GatewaySession {
             requested_explicit_line: None,
             global_message_bus: None,
             handoff_generation: 0,
+            active_identity_binding,
+            teardown_checkpoint: None,
         }
     }
 
@@ -252,6 +292,7 @@ impl GatewaySession {
             default_zone_owner_command_client(&zone_id, zone_owner_lease_authority.as_ref());
         let gameplay_event_publisher =
             GatewayGameplayEventPublisher::new(zone_id.clone(), gameplay_event_sink);
+        let active_identity_binding = runtime.active_identity();
         Self {
             session_id: next_gateway_session_id(),
             zone_id,
@@ -267,6 +308,8 @@ impl GatewaySession {
             requested_explicit_line: None,
             global_message_bus: None,
             handoff_generation: 0,
+            active_identity_binding,
+            teardown_checkpoint: None,
         }
     }
 
@@ -406,13 +449,72 @@ impl GatewaySession {
     }
 
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
-        self.execute_infallible(WorldCommand::ClientPacket(packet))
+        match self.try_handle_packet(packet) {
+            Ok(packets) => packets,
+            Err(_error) => {
+                eprintln!("gateway packet execution rejected; details suppressed");
+                Vec::new()
+            }
+        }
+    }
+
+    pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        if let ClientPacket::Login {
+            account_id,
+            password,
+        } = &packet
+        {
+            self.prepare_standard_login_recovery(account_id, password)?;
+        }
+        self.execute_world_command(WorldCommand::ClientPacket(packet))
+            .map(|execution| execution.packets)
     }
 
     pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
-        self.execute_infallible(WorldCommand::PasskeyLogin {
+        match self.try_passkey_login(account_id) {
+            Ok(packets) => packets,
+            Err(_error) => {
+                eprintln!("gateway passkey login rejected; details suppressed");
+                Vec::new()
+            }
+        }
+    }
+
+    pub fn try_passkey_login(&mut self, account_id: &str) -> Result<Vec<ServerPacket>, String> {
+        let config = self
+            .routing_context
+            .as_ref()
+            .map(|routing| routing.config.clone())
+            .ok_or_else(|| {
+                "passkey login recovery requires a configured routing context".to_string()
+            })?;
+        match mir2_simulation::SimulationSession::passkey_login_recovery_preflight(
+            &config, account_id,
+        )? {
+            mir2_simulation::PasskeyRecoveryPreflight::ExistingEligible => {
+                self.replay_account_recovery(account_id)?;
+            }
+            mir2_simulation::PasskeyRecoveryPreflight::Missing => {
+                return save_recovery::provision_account_if_recovery_clear(
+                    &config,
+                    account_id,
+                    || {
+                        mir2_simulation::SimulationSession::provision_passkey_account(
+                            &config, account_id,
+                        )?;
+                        self.execute_world_command(WorldCommand::PasskeyLogin {
+                            account_id: account_id.to_string(),
+                        })
+                        .map(|execution| execution.packets)
+                    },
+                );
+            }
+            mir2_simulation::PasskeyRecoveryPreflight::Rejected => {}
+        }
+        self.execute_world_command(WorldCommand::PasskeyLogin {
             account_id: account_id.to_string(),
         })
+        .map(|execution| execution.packets)
     }
 
     pub fn execute_with_outcome(
@@ -622,12 +724,187 @@ impl GatewaySession {
             .expect("zone owner active identity should not fail")
     }
 
-    pub fn save_active_character(&mut self) {
+    pub fn save_active_character(&mut self) -> Result<(), String> {
+        let owner_lease = self.zone_owner_lease.clone();
+        self.validate_zone_owner_lease(&owner_lease)?;
         sync_zone_movement_transform(&mut self.runtime)
-            .expect("zone movement transform sync should not fail before save");
+            .map_err(|error| format!("zone movement transform sync before save failed: {error}"))?;
         self.zone_owner_command_client
-            .save_active_character(&self.runtime)
-            .expect("zone owner save should not fail");
+            .save_active_character(&mut self.runtime)
+            .map_err(|error| format!("zone owner active character save failed: {error}"))
+    }
+
+    fn prepare_teardown_checkpoint(&mut self) -> Result<bool, String> {
+        if self.teardown_checkpoint.is_some() {
+            return Ok(true);
+        }
+        let owner_lease = self.zone_owner_lease.clone();
+        self.validate_zone_owner_lease(&owner_lease)?;
+        let prepared = self
+            .zone_owner_command_client
+            .prepare_teardown_checkpoint(&mut self.runtime, &owner_lease)?;
+        // A handoff may complete while a remote owner is preparing. Never
+        // cache the result until the same lease generation is still current.
+        self.validate_zone_owner_lease(&owner_lease)?;
+        let Some(prepared) = prepared else {
+            if self.active_identity_binding.is_some() {
+                return Err(
+                    "teardown owner returned no checkpoint for the session-bound identity"
+                        .to_string(),
+                );
+            }
+            return Ok(false);
+        };
+        prepared.validate_identity_checkpoint()?;
+        if prepared.owner_lease() != &owner_lease {
+            return Err(
+                "teardown prepared pair was produced by a different owner lease".to_string(),
+            );
+        }
+        let expected_identity = self.active_identity_binding.as_ref().ok_or_else(|| {
+            "teardown checkpoint has no session-bound active identity".to_string()
+        })?;
+        if prepared.identity() != expected_identity {
+            return Err(
+                "teardown prepared identity does not match the session-bound identity".to_string(),
+            );
+        }
+        self.teardown_checkpoint = Some(prepared);
+        Ok(true)
+    }
+
+    fn save_prepared_teardown_checkpoint(&mut self) -> Result<(), String> {
+        let owner_lease = self
+            .teardown_checkpoint
+            .as_ref()
+            .ok_or_else(|| "teardown save requires a prepared checkpoint".to_string())?
+            .owner_lease()
+            .clone();
+        self.validate_zone_owner_lease(&owner_lease)?;
+        let prepared = self
+            .teardown_checkpoint
+            .as_ref()
+            .ok_or_else(|| "teardown save requires a prepared checkpoint".to_string())?;
+        self.zone_owner_command_client
+            .persist_teardown_checkpoint(&mut self.runtime, prepared)
+            .map_err(|error| format!("zone owner teardown checkpoint save failed: {error}"))
+    }
+
+    fn journal_prepared_teardown_checkpoint(
+        &self,
+    ) -> Result<save_recovery::JournalReceipt, String> {
+        let prepared = self
+            .teardown_checkpoint
+            .as_ref()
+            .ok_or_else(|| "teardown journal requires a prepared checkpoint".to_string())?;
+        let config = self
+            .routing_context
+            .as_ref()
+            .map(|routing| routing.config.clone())
+            .ok_or_else(|| "teardown journal requires a configured routing context".to_string())?;
+        save_recovery::journal_checkpoint(
+            &config,
+            &prepared.identity().account_id,
+            prepared.identity().character_index,
+            prepared.checkpoint(),
+        )
+    }
+
+    pub(crate) fn try_persist_teardown_once(&mut self) -> GatewayTeardownPersistenceOutcome {
+        match self.prepare_teardown_checkpoint() {
+            Ok(false) => return GatewayTeardownPersistenceOutcome::Saved,
+            Ok(true) => {}
+            Err(error) => {
+                return GatewayTeardownPersistenceOutcome::Retry {
+                    prepare_error: Some(error),
+                    save_error: None,
+                    journal_error: None,
+                };
+            }
+        }
+
+        match self.save_prepared_teardown_checkpoint() {
+            Ok(()) => GatewayTeardownPersistenceOutcome::Saved,
+            Err(save_error) => match self.journal_prepared_teardown_checkpoint() {
+                Ok(receipt) => GatewayTeardownPersistenceOutcome::Journaled {
+                    already_durable: receipt.already_durable,
+                },
+                Err(journal_error) => GatewayTeardownPersistenceOutcome::Retry {
+                    prepare_error: None,
+                    save_error: Some(save_error),
+                    journal_error: Some(journal_error),
+                },
+            },
+        }
+    }
+
+    pub(crate) fn release_teardown_for_resume(&mut self) -> Result<(), String> {
+        let Some(prepared) = self.teardown_checkpoint.as_ref() else {
+            return Ok(());
+        };
+        let owner_lease = prepared.owner_lease().clone();
+        self.validate_zone_owner_lease(&owner_lease)?;
+        self.zone_owner_command_client
+            .release_teardown_fence(&mut self.runtime)
+            .map_err(|error| format!("zone owner teardown fence release failed: {error}"))?;
+        self.teardown_checkpoint = None;
+        Ok(())
+    }
+
+    #[cfg(test)]
+    pub(crate) fn prepared_teardown_checkpoint(&self) -> Option<&CharacterSaveRecord> {
+        self.teardown_checkpoint
+            .as_ref()
+            .map(PreparedZoneTeardown::checkpoint)
+    }
+
+    pub(crate) fn prepare_standard_login_recovery(
+        &mut self,
+        account_id: &str,
+        password: &str,
+    ) -> Result<(), String> {
+        let config = self
+            .routing_context
+            .as_ref()
+            .map(|routing| routing.config.clone())
+            .ok_or_else(|| {
+                "standard login recovery requires a configured routing context".to_string()
+            })?;
+        self.replay_account_recovery_after_preflight(
+            account_id,
+            mir2_simulation::SimulationSession::standard_login_recovery_preflight(
+                &config, account_id, password,
+            ),
+        )
+    }
+
+    pub(crate) fn replay_account_recovery_after_preflight(
+        &mut self,
+        account_id: &str,
+        preflight: Result<bool, String>,
+    ) -> Result<(), String> {
+        if !preflight? {
+            return Ok(());
+        }
+        self.replay_account_recovery(account_id)
+    }
+
+    fn replay_account_recovery(&mut self, account_id: &str) -> Result<(), String> {
+        let Some(config) = self
+            .routing_context
+            .as_ref()
+            .map(|routing| routing.config.clone())
+        else {
+            return Ok(());
+        };
+        let summary = save_recovery::replay_account(&config, account_id)?;
+        if summary.replayed > 0 || summary.already_committed > 0 {
+            eprintln!(
+                "[save-recovery] account login replay completed replayed={} alreadyCommitted={}",
+                summary.replayed, summary.already_committed
+            );
+        }
+        Ok(())
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
@@ -666,9 +943,8 @@ impl GatewaySession {
         // Native purchases must never reach the generic transport method. This
         // is a session-level invariant as well as an RPC transport invariant,
         // so alternate/custom command clients cannot bypass typed V2 execution.
-        let require_typed_game_shop_purchase_outcome =
-            require_typed_game_shop_purchase_outcome
-                || matches!(request.command(), WorldCommand::NativeGameShopPurchase(_));
+        let require_typed_game_shop_purchase_outcome = require_typed_game_shop_purchase_outcome
+            || matches!(request.command(), WorldCommand::NativeGameShopPurchase(_));
         let may_change_map = command_may_change_map(request.command());
         let previous_snapshot = if may_change_map && self.active_identity().is_some() {
             Some(self.world_snapshot())
@@ -683,6 +959,7 @@ impl GatewaySession {
                 .execute(&mut self.runtime, request)?
         };
         self.publish_gameplay_event(&execution);
+        self.active_identity_binding = execution.outcome.active_identity.clone();
         self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
         if may_change_map {
             self.rebind_after_map_change(previous_snapshot.as_ref())?;
@@ -729,8 +1006,11 @@ impl GatewaySession {
         let target_zone_id = match routing.registry.try_route_session(&route_request) {
             Ok(zone_id) => zone_id,
             Err(error) => {
-                self.rollback_failed_handoff(previous_snapshot);
-                return Err(format!("Zone handoff routing rejected: {error}"));
+                let failure = format!("Zone handoff routing rejected: {error}");
+                return Err(handoff_failure_with_rollback(
+                    failure,
+                    self.rollback_failed_handoff(previous_snapshot),
+                ));
             }
         };
         if target_zone_id == self.zone_id {
@@ -740,14 +1020,14 @@ impl GatewaySession {
 
         sync_zone_movement_transform(&mut self.runtime)
             .map_err(|error| format!("Zone handoff source transform sync failed: {error}"))?;
+        self.zone_owner_command_client
+            .save_active_character(&mut self.runtime)
+            .map_err(|error| format!("Zone handoff source save failed: {error}"))?;
         let source_checkpoint = self
             .zone_owner_command_client
             .active_character_checkpoint(&self.runtime)
             .map_err(|error| format!("Zone handoff source checkpoint failed: {error}"))?
             .ok_or_else(|| "Zone handoff source has no active character checkpoint".to_string())?;
-        self.zone_owner_command_client
-            .save_active_character(&self.runtime)
-            .map_err(|error| format!("Zone handoff source save failed: {error}"))?;
         let routed = routing
             .registry
             .try_open_session_for(routing.config.clone(), route_request.clone())?;
@@ -811,10 +1091,13 @@ impl GatewaySession {
             let _ = routing
                 .registry
                 .release_session(&route_request, gateway_now_ms());
-            self.rollback_failed_handoff(previous_snapshot);
-            return Err(format!(
+            let failure = format!(
                 "Zone handoff {} -> {} prepare failed: {error}",
                 self.zone_id, routed.zone_id
+            );
+            return Err(handoff_failure_with_rollback(
+                failure,
+                self.rollback_failed_handoff(previous_snapshot),
             ));
         }
 
@@ -826,10 +1109,13 @@ impl GatewaySession {
             let _ = routing
                 .registry
                 .release_session(&route_request, gateway_now_ms());
-            self.rollback_failed_handoff(previous_snapshot);
-            return Err(format!(
+            let failure = format!(
                 "Zone handoff {} -> {} source close failed: {error}",
                 self.zone_id, routed.zone_id
+            );
+            return Err(handoff_failure_with_rollback(
+                failure,
+                self.rollback_failed_handoff(previous_snapshot),
             ));
         }
 
@@ -853,30 +1139,38 @@ impl GatewaySession {
         Ok(())
     }
 
-    fn rollback_failed_handoff(&mut self, previous_snapshot: Option<&WorldSnapshot>) {
+    fn rollback_failed_handoff(
+        &mut self,
+        previous_snapshot: Option<&WorldSnapshot>,
+    ) -> Result<(), String> {
         let Some(key) = previous_snapshot.and_then(snapshot_transfer_key) else {
-            return;
+            return Ok(());
         };
         let request = ZoneOwnerCommandRequest::direct(
             self.zone_owner_lease.clone(),
             WorldCommand::TransferMap { key },
         );
-        if self
-            .zone_owner_command_client
+        self.zone_owner_command_client
             .execute(&mut self.runtime, request)
-            .is_ok()
-        {
-            let _ = sync_zone_movement_transform(&mut self.runtime);
-            let _ = self
-                .zone_owner_command_client
-                .save_active_character(&self.runtime);
-        }
+            .map_err(|error| format!("failed handoff rollback transfer failed: {error}"))?;
+        sync_zone_movement_transform(&mut self.runtime)
+            .map_err(|error| format!("failed handoff rollback transform sync failed: {error}"))?;
+        self.zone_owner_command_client
+            .save_active_character(&mut self.runtime)
+            .map_err(|error| format!("failed handoff rollback save failed: {error}"))
     }
 
     fn publish_gameplay_event(&self, execution: &WorldCommandExecution) {
         if let Some(publisher) = &self.gameplay_event_publisher {
             publisher.publish(&execution.outcome);
         }
+    }
+}
+
+fn handoff_failure_with_rollback(failure: String, rollback: Result<(), String>) -> String {
+    match rollback {
+        Ok(()) => failure,
+        Err(error) => format!("{failure}; rollback was not durably completed: {error}"),
     }
 }
 
@@ -999,6 +1293,15 @@ fn first_json_difference(
     }
 }
 
+#[cfg(test)]
+#[path = "save_fail_closed_tests.rs"]
+mod save_fail_closed_tests;
+
+#[cfg(test)]
+mod abnormal_teardown_persistence_tests {
+    include!("abnormal_teardown_persistence_tests.rs");
+}
+
 fn default_zone_owner_command_client(
     zone_id: &ZoneId,
     zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,
@@ -1052,6 +1355,16 @@ mod tests {
         ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
     };
     use std::sync::{Arc, Mutex};
+
+    fn login_demo(session: &mut GatewaySession) {
+        let packets = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    }
 
     #[derive(Debug, Default)]
     struct RecordingZoneOwnerCommandClient {
@@ -1841,15 +2154,11 @@ mod tests {
         let event_sink = Arc::new(InMemoryGameplayEventSink::default());
         let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
         let registry = ZoneRegistry::in_process();
-        let routed = registry.open_session(GatewayConfig::default());
-        let mut session =
-            GatewaySession::with_routed_world_runtime_and_owner_authority_and_event_sink(
-                routed.zone_id,
-                routed.owner_lease,
-                Some(routed.owner_lease_authority),
-                routed.runtime,
-                shared_event_sink,
-            );
+        let mut session = GatewaySession::new_with_zone_registry_and_event_sink(
+            GatewayConfig::default(),
+            &registry,
+            shared_event_sink,
+        );
         session.handle_packet(ClientPacket::Login {
             account_id: "demo".to_string(),
             password: "demo".to_string(),
@@ -1912,6 +2221,7 @@ mod tests {
     #[test]
     fn new_character_is_added_and_returned() {
         let mut session = GatewaySession::new(GatewayConfig::default());
+        login_demo(&mut session);
         let packets = session.handle_packet(ClientPacket::NewCharacter {
             name: "Blade".to_string(),
             gender: MirGender::Female,
@@ -1930,6 +2240,7 @@ mod tests {
     #[test]
     fn start_game_emits_bootstrap_sequence() {
         let mut session = GatewaySession::new(GatewayConfig::default());
+        login_demo(&mut session);
         let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         assert!(matches!(
@@ -1975,6 +2286,7 @@ mod tests {
     #[test]
     fn walk_updates_self_location() {
         let mut session = GatewaySession::new(GatewayConfig::default());
+        login_demo(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         let packets = session.handle_packet(ClientPacket::Walk {
             direction: MirDirection::Right,
@@ -2004,6 +2316,7 @@ mod tests {
     #[test]
     fn chat_normal_message_emits_crystal_object_chat_only() {
         let mut session = GatewaySession::new(GatewayConfig::default());
+        login_demo(&mut session);
         let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let packets = session.handle_packet(ClientPacket::Chat {
@@ -2046,6 +2359,7 @@ mod tests {
     #[test]
     fn drop_item_creates_ground_drop_packet() {
         let mut session = GatewaySession::new(GatewayConfig::default());
+        login_demo(&mut session);
         let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let packets = session.drop_item("red-potion");

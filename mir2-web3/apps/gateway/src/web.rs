@@ -3,7 +3,7 @@ use std::env;
 use std::io;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex, OnceLock, RwLock};
 use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
@@ -70,7 +70,9 @@ use crate::resume::{
     NATIVE_RESUME_PROTOCOL, RESUME_CREDENTIAL_ROTATION_MS,
 };
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
-use crate::session::{catch_gateway_panic, GatewayZoneMovementIngress};
+use crate::session::{
+    catch_gateway_panic, GatewayTeardownPersistenceOutcome, GatewayZoneMovementIngress,
+};
 use crate::spectator::{SpectatorFrame, SpectatorHub};
 use crate::tcp::chat_broadcast::{
     recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
@@ -90,6 +92,8 @@ const SOCKET_INPUT_MAX_BUFFERED_BYTES: usize = WEBSOCKET_MAX_FRAME_BYTES * SOCKE
 const DEFAULT_PRODUCTION_MAX_WS_CONNECTIONS: usize = 2_048;
 const DEFAULT_PRODUCTION_MAX_ACTIVE_SESSIONS: usize = 512;
 const DEFAULT_PRODUCTION_MAX_RECONNECT_LEASES: usize = 512;
+const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
+static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::new();
 const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 
@@ -881,6 +885,8 @@ impl WebSessionSaveQueue {
         now: Instant,
         save: impl FnOnce() -> Result<(), String>,
     ) -> Result<(), String> {
+        self.dirty = true;
+        self.queued_requests = self.queued_requests.saturating_add(1);
         save()?;
         self.dirty = false;
         self.queued_requests = 0;
@@ -1376,6 +1382,24 @@ impl ReconnectSessionStore {
             .expect("gateway reconnect session store mutex should not be poisoned")
             .credentials
             .revoke_family(family_id);
+    }
+
+    fn revoke_account_reconnects(&self, account_id: &str) {
+        let mut state = self
+            .state
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::advance_revision(&mut state.account_auth_revisions, account_id);
+        let revoked_families = state
+            .sessions
+            .iter()
+            .filter(|(key, _)| key.account_id == account_id)
+            .filter_map(|(_, lease)| lease.resume_family_id.clone())
+            .collect::<Vec<_>>();
+        state.sessions.retain(|key, _| key.account_id != account_id);
+        for family_id in revoked_families {
+            state.credentials.revoke_family(&family_id);
+        }
     }
 
     fn purge_expired(&self) {
@@ -2423,6 +2447,23 @@ pub async fn run_web_gateway(
     // starter slice. Empty maps stay dormant regardless.
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
         mir2_simulation::set_crystal_full_world_zone_collision(true);
+    }
+    let recovery = crate::session::save_recovery::replay_startup(&config).map_err(|error| {
+        crate::session::save_recovery::record_persistence_status(
+            crate::session::save_recovery::PersistenceStatus::Fatal,
+            "web-startup",
+            "recovery replay failed",
+        );
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("web startup recovery replay failed: {error}"),
+        )
+    })?;
+    if recovery.replayed > 0 || recovery.already_committed > 0 || recovery.quarantined > 0 {
+        eprintln!(
+            "[save-recovery] transport=web-startup replayed={} alreadyCommitted={} quarantined={}",
+            recovery.replayed, recovery.already_committed, recovery.quarantined
+        );
     }
     let topology = ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
@@ -4327,6 +4368,18 @@ async fn ws_upgrade(
                 .into_response();
         }
     };
+    let persistence_session_permit = match web_persistence_session_admission().try_acquire_owned() {
+        Ok(permit) => permit,
+        Err(_) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(AdminErrorResponse {
+                    error: "gateway persistence session capacity reached".to_string(),
+                }),
+            )
+                .into_response();
+        }
+    };
     let peer_address = trusted_client_address(&headers, peer);
     let tcp_peer_ip = peer.ip();
     let user_agent = headers
@@ -4342,6 +4395,7 @@ async fn ws_upgrade(
             socket,
             state,
             ws_connection_permit,
+            persistence_session_permit,
             tcp_peer_ip,
             peer_address,
             user_agent,
@@ -4353,6 +4407,7 @@ async fn handle_socket(
     socket: WebSocket,
     state: WebState,
     _ws_connection_permit: GatewayCapacityPermit,
+    _persistence_session_permit: OwnedSemaphorePermit,
     tcp_peer_ip: IpAddr,
     peer_address: String,
     user_agent: String,
@@ -4363,6 +4418,7 @@ async fn handle_socket(
     let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
     let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
     let mut native_resume = NativeResumeConnectionState::new();
+    let mut explicit_world_leave_completed = false;
     handle_socket_inner(
         socket,
         &mut session,
@@ -4374,6 +4430,7 @@ async fn handle_socket(
         &mut save_queue,
         &mut route_refresh,
         &mut native_resume,
+        &mut explicit_world_leave_completed,
         state.injector.clone(),
         realm_info,
         state.chat_hub.clone(),
@@ -4384,22 +4441,39 @@ async fn handle_socket(
         user_agent,
     )
     .await;
-    let _ = tokio::task::block_in_place(|| {
-        catch_gateway_panic("web refresh_active_external_mail", || {
-            session.refresh_active_external_mail()
-        })
+    if explicit_world_leave_completed {
+        native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
+        let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+        return;
+    }
+    let persistence_outcome =
+        persist_web_session_before_teardown(&mut session, &mut save_queue).await;
+    let recovery_account_id = tokio::task::block_in_place(|| {
+        session
+            .active_identity()
+            .map(|identity| identity.account_id)
     });
-    let _ = save_queue.force_save_now(Instant::now(), || {
-        tokio::task::block_in_place(|| {
-            catch_gateway_panic("web save_active_character", || {
-                session.save_active_character()
-            })
-        })
-    });
-    if !native_resume.resume_allowed {
+    if !apply_teardown_persistence_to_resume(
+        persistence_outcome,
+        &mut native_resume,
+        state.reconnect_sessions.as_ref(),
+        recovery_account_id.as_deref(),
+    ) {
         if let Some(family_id) = native_resume.family_id.take() {
             state.reconnect_sessions.revoke_resume_family(&family_id);
         }
+        let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+        return;
+    }
+    let release_result = tokio::task::block_in_place(|| {
+        catch_gateway_panic("web release saved teardown fence for resume", || {
+            session.release_teardown_for_resume()
+        })
+        .and_then(|result| result)
+    });
+    if let Err(error) = release_result {
+        eprintln!("web reconnect grace skipped because teardown fence could not thaw: {error}");
+        native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
         let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
         return;
     }
@@ -4454,6 +4528,94 @@ async fn handle_socket(
         return;
     }
     let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+}
+
+fn web_persistence_session_admission() -> Arc<Semaphore> {
+    Arc::clone(WEB_PERSISTENCE_SESSION_ADMISSION.get_or_init(|| {
+        Arc::new(Semaphore::new(
+            positive_usize_env("MIR2_GATEWAY_MAX_PERSISTENCE_SESSIONS")
+                .unwrap_or(DEFAULT_MAX_PERSISTENCE_SESSION_TASKS),
+        ))
+    }))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WebTeardownPersistenceOutcome {
+    Saved,
+    Journaled,
+}
+
+fn should_retain_reconnect_session(
+    persistence_outcome: WebTeardownPersistenceOutcome,
+    resume_allowed: bool,
+) -> bool {
+    persistence_outcome == WebTeardownPersistenceOutcome::Saved && resume_allowed
+}
+
+fn apply_teardown_persistence_to_resume(
+    persistence_outcome: WebTeardownPersistenceOutcome,
+    native_resume: &mut NativeResumeConnectionState,
+    reconnect_sessions: &ReconnectSessionStore,
+    account_id: Option<&str>,
+) -> bool {
+    if persistence_outcome == WebTeardownPersistenceOutcome::Journaled {
+        if let Some(account_id) = account_id {
+            reconnect_sessions.revoke_account_reconnects(account_id);
+        }
+        native_resume.disable_and_revoke(reconnect_sessions);
+    }
+    should_retain_reconnect_session(persistence_outcome, native_resume.resume_allowed)
+}
+
+async fn persist_web_session_before_teardown(
+    session: &mut GatewaySession,
+    _save_queue: &mut WebSessionSaveQueue,
+) -> WebTeardownPersistenceOutcome {
+    let mut retry_delay = Duration::from_millis(100);
+    loop {
+        let persistence = tokio::task::block_in_place(|| {
+            catch_gateway_panic("web teardown persist immutable checkpoint", || {
+                session.try_persist_teardown_once()
+            })
+        });
+        match persistence {
+            Ok(GatewayTeardownPersistenceOutcome::Saved) => {
+                crate::session::save_recovery::record_persistence_status(
+                    crate::session::save_recovery::PersistenceStatus::Saved,
+                    "web-teardown",
+                    "immutable drained checkpoint committed before teardown",
+                );
+                return WebTeardownPersistenceOutcome::Saved;
+            }
+            Ok(GatewayTeardownPersistenceOutcome::Journaled { already_durable }) => {
+                crate::session::save_recovery::record_persistence_status(
+                    crate::session::save_recovery::PersistenceStatus::Journaled,
+                    "web-teardown",
+                    if already_durable {
+                        "immutable drained checkpoint was already durable in recovery journal"
+                    } else {
+                        "immutable drained checkpoint durably written to recovery journal"
+                    },
+                );
+                return WebTeardownPersistenceOutcome::Journaled;
+            }
+            Ok(GatewayTeardownPersistenceOutcome::Retry {
+                prepare_error,
+                save_error,
+                journal_error,
+            }) => eprintln!(
+                "web teardown persistence retry: prepare={prepare_error:?} save={save_error:?} journal={journal_error:?}"
+            ),
+            Err(error) => eprintln!("web teardown persistence panicked: {error}"),
+        }
+        crate::session::save_recovery::record_persistence_status(
+            crate::session::save_recovery::PersistenceStatus::Fatal,
+            "web-teardown",
+            "DB save and recovery journal both failed; retaining Zone presence",
+        );
+        tokio::time::sleep(retry_delay).await;
+        retry_delay = retry_delay.saturating_mul(2).min(Duration::from_secs(5));
+    }
 }
 
 fn zone_movement_packet_for_action(action: &SessionAction) -> Option<ClientPacket> {
@@ -4800,6 +4962,7 @@ async fn handle_socket_inner(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     native_resume: &mut NativeResumeConnectionState,
+    explicit_world_leave_completed: &mut bool,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
@@ -5170,9 +5333,6 @@ async fn handle_socket_inner(
                     SessionAction::Packet(ClientPacket::StartGame { .. })
                 );
                 let leaves_world = is_explicit_session_leave_action(&action);
-                if leaves_world {
-                    native_resume.disable_and_revoke(reconnect_sessions.as_ref());
-                }
 
                 let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
                 let low_latency_action = is_low_latency_action(&action);
@@ -5423,6 +5583,7 @@ async fn handle_socket_inner(
                             );
                             return;
                         }
+                        eprintln!("web session action rejected; internal detail: {error}");
                         if let Some(request) = quest_operation_request.as_ref() {
                             let nack = quest_operation_ack_for_responses(request, &[]);
                             if send_world_snapshot_with_quest_ack(
@@ -5436,7 +5597,12 @@ async fn handle_socket_inner(
                                 return;
                             }
                         }
-                        let _ = send_error_message(&sender, &error).await;
+                        let _ = send_session_action_error(
+                            &sender,
+                            login_account_id.is_some(),
+                            leaves_world,
+                        )
+                        .await;
                         continue;
                     }
                     Err(error) => {
@@ -5451,6 +5617,7 @@ async fn handle_socket_inner(
                             );
                             return;
                         }
+                        eprintln!("web session action panicked; internal detail: {error}");
                         if let Some(request) = quest_operation_request.as_ref() {
                             let nack = quest_operation_ack_for_responses(request, &[]);
                             if send_world_snapshot_with_quest_ack(
@@ -5464,11 +5631,21 @@ async fn handle_socket_inner(
                                 return;
                             }
                         }
-                        let _ = send_error_message(&sender, &error).await;
+                        let _ = send_session_action_error(
+                            &sender,
+                            login_account_id.is_some(),
+                            leaves_world,
+                        )
+                        .await;
                         return;
                     }
                 };
                 let (responses, native_game_shop_post_execution) = execution_result;
+                if leaves_world {
+                    *explicit_world_leave_completed = true;
+                    native_resume.disable_and_revoke(reconnect_sessions.as_ref());
+                    active_session_permit.take();
+                }
                 let quest_operation_ack = quest_operation_request
                     .as_ref()
                     .map(|request| quest_operation_ack_for_responses(request, &responses));
@@ -5674,7 +5851,13 @@ async fn handle_socket_inner(
                         );
                         return;
                     }
-                    let _ = send_error_message(&sender, &error).await;
+                    eprintln!("web session state flush failed; internal detail: {error}");
+                    let _ = send_fixed_error_event(
+                        &sender,
+                        "stateSyncUnavailable",
+                        "Player state synchronization is temporarily unavailable.",
+                    )
+                    .await;
                     return;
                 }
                 if let (Some(request), Some(receipt)) = (
@@ -5945,6 +6128,7 @@ async fn handle_socket_inner(
                             catch_gateway_panic("web save_active_character", || {
                                 session.save_active_character()
                             })
+                            .and_then(|result| result)
                         })
                     }) {
                         let _ = send_error_message(&sender, &error).await;
@@ -6100,6 +6284,7 @@ async fn flush_session_updates(
                 catch_gateway_panic("web save_active_character", || {
                     session.save_active_character()
                 })
+                .and_then(|result| result)
             })
         })?;
     } else {
@@ -6108,6 +6293,7 @@ async fn flush_session_updates(
                 catch_gateway_panic("web save_active_character", || {
                     session.save_active_character()
                 })
+                .and_then(|result| result)
             })
         })?;
     }
@@ -6551,7 +6737,7 @@ fn execute_session_action(
     }
     match action {
         SessionAction::Packet(packet) => {
-            let responses = session.handle_packet(packet);
+            let responses = session.try_handle_packet(packet)?;
             log_move_action(move_log, &responses);
             Ok(responses)
         }
@@ -6571,7 +6757,7 @@ fn execute_session_action(
             token,
         } => {
             verify_passkey_gateway_token(&proof_account_id, &token)?;
-            Ok(session.passkey_login(&account_id))
+            session.try_passkey_login(&account_id)
         }
         SessionAction::MoveTo { x, y, running } => {
             let responses = session.move_to(x, y, running);
@@ -6613,12 +6799,20 @@ fn execute_production_session_action(
     }
     let zone_owner_lease = session.zone_owner_lease().clone();
     let execution = match action {
-        SessionAction::Packet(packet) => session
-            .execute_production_player_command_with_zone_owner_lease(
+        SessionAction::Packet(packet) => {
+            if let ClientPacket::Login {
+                account_id,
+                password,
+            } = &packet
+            {
+                session.prepare_standard_login_recovery(account_id, password)?;
+            }
+            session.execute_production_player_command_with_zone_owner_lease(
                 &zone_owner_lease,
                 authenticated,
                 WorldCommand::ClientPacket(packet),
-            )?,
+            )?
+        }
         SessionAction::GameShopBuy {
             g_index,
             quantity,
@@ -6639,7 +6833,7 @@ fn execute_production_session_action(
             token,
         } => {
             verify_passkey_gateway_token(&proof_account_id, &token)?;
-            return Ok(session.passkey_login(&account_id));
+            return session.try_passkey_login(&account_id);
         }
         SessionAction::MoveTo { x, y, running } => session
             .execute_production_player_command_with_zone_owner_lease(
@@ -8228,6 +8422,66 @@ async fn send_error_message(
         .send(Message::Text(
             json!({
                 "type": "error",
+                "message": message
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+}
+
+fn session_action_error_event(is_login: bool, leaves_world: bool) -> Value {
+    let (code, message) = if is_login {
+        (
+            "accountStateUnavailable",
+            "Account state is temporarily unavailable.",
+        )
+    } else if leaves_world {
+        (
+            "saveUnavailable",
+            "Character save is temporarily unavailable; the session remains active.",
+        )
+    } else {
+        (
+            "commandRejected",
+            "The session command could not be completed.",
+        )
+    };
+    json!({
+        "type": "error",
+        "code": code,
+        "message": message
+    })
+}
+
+async fn send_session_action_error(
+    sender: &SharedWebSocketSender,
+    is_login: bool,
+    leaves_world: bool,
+) -> Result<(), axum::Error> {
+    sender
+        .lock()
+        .await
+        .send(Message::Text(
+            session_action_error_event(is_login, leaves_world)
+                .to_string()
+                .into(),
+        ))
+        .await
+}
+
+async fn send_fixed_error_event(
+    sender: &SharedWebSocketSender,
+    code: &'static str,
+    message: &'static str,
+) -> Result<(), axum::Error> {
+    sender
+        .lock()
+        .await
+        .send(Message::Text(
+            json!({
+                "type": "error",
+                "code": code,
                 "message": message
             })
             .to_string()
@@ -11509,6 +11763,10 @@ fn movement_json(
 }
 
 #[cfg(test)]
+#[path = "web_save_fail_closed_tests.rs"]
+mod web_save_fail_closed_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
@@ -11530,7 +11788,8 @@ mod tests {
         UserLocation,
     };
     use mir2_simulation::{
-        AccountStore, SimulationConfig, Stage5MailMessage, Stage5MailTargetKind, Stage5SystemsState,
+        AccountStore, SimulationConfig, Stage5MailMessage, Stage5MailTargetKind,
+        Stage5SystemsState, WorldEntityKind,
     };
     use serde_json::{json, Value};
     use std::net::SocketAddr;
@@ -11542,6 +11801,21 @@ mod tests {
     use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    struct TestEnvRestoreGuard {
+        previous: Vec<(String, Option<std::ffi::OsString>)>,
+    }
+
+    impl Drop for TestEnvRestoreGuard {
+        fn drop(&mut self) {
+            for (name, value) in self.previous.drain(..) {
+                match value {
+                    Some(value) => std::env::set_var(name, value),
+                    None => std::env::remove_var(name),
+                }
+            }
+        }
+    }
 
     type TestWebSocket = WebSocketStream<MaybeTlsStream<TcpStream>>;
 
@@ -11698,29 +11972,41 @@ mod tests {
         let _guard = ENV_LOCK
             .get_or_init(|| Mutex::new(()))
             .lock()
-            .expect("test env mutex should not be poisoned");
-        let previous = variables
-            .iter()
-            .map(|(name, _)| (*name, std::env::var(name).ok()))
-            .collect::<Vec<_>>();
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _restore = TestEnvRestoreGuard {
+            previous: variables
+                .iter()
+                .map(|(name, _)| ((*name).to_string(), std::env::var_os(name)))
+                .collect(),
+        };
         for (name, value) in variables {
             match value {
                 Some(value) => std::env::set_var(name, value),
                 None => std::env::remove_var(name),
             }
         }
-        let result = action();
-        for (name, value) in previous {
-            match value {
-                Some(value) => std::env::set_var(name, value),
-                None => std::env::remove_var(name),
-            }
-        }
-        result
+        action()
     }
 
     fn with_env_var<T>(name: &str, value: Option<&str>, action: impl FnOnce() -> T) -> T {
         with_env_vars(&[(name, value)], action)
+    }
+
+    #[test]
+    fn with_env_vars_restores_after_panic_and_recovers_poisoned_lock() {
+        const NAME: &str = "MIR2_TEST_ENV_RESTORE_AFTER_PANIC";
+        let previous = std::env::var_os(NAME);
+        let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            with_env_var(NAME, Some("temporary"), || {
+                panic!("intentional env helper panic")
+            });
+        }));
+        assert!(panic.is_err());
+        assert_eq!(std::env::var_os(NAME), previous);
+
+        let observed = with_env_var(NAME, Some("recovered"), || std::env::var(NAME).unwrap());
+        assert_eq!(observed, "recovered");
+        assert_eq!(std::env::var_os(NAME), previous);
     }
 
     fn sample_intelligent_creature(slot_index: i32) -> ClientIntelligentCreature {
@@ -14066,21 +14352,58 @@ mod tests {
             );
         }
 
+        const DUPLICATE_CLAIM_BARRIER_TIME: i64 = 9_876_543;
         send_test_websocket_json(
             &mut socket,
             json!({"type": "collectParcel", "mailId": mail_id}),
         )
         .await;
-        let (duplicate_parcel, duplicate_claim_events) = read_test_websocket_until(
+        send_test_websocket_json(
             &mut socket,
-            "duplicate ParcelCollected rejection",
-            |event| test_packet(event, "ParcelCollected"),
+            json!({"type": "keepAlive", "time": DUPLICATE_CLAIM_BARRIER_TIME}),
         )
         .await;
-        assert_eq!(duplicate_parcel["payload"]["result"], -1);
+        let (_, duplicate_claim_events) = read_test_websocket_until(
+            &mut socket,
+            "duplicate mail claim synchronization barrier",
+            |event| {
+                test_packet(event, "KeepAlive")
+                    && event["payload"]["time"] == DUPLICATE_CLAIM_BARRIER_TIME
+            },
+        )
+        .await;
         assert!(!duplicate_claim_events
             .iter()
             .any(|event| test_packet(event, "GainedItem")));
+        assert!(!duplicate_claim_events
+            .iter()
+            .any(|event| test_packet(event, "ParcelCollected")));
+        {
+            let store = account_store
+                .lock()
+                .expect("test account store should not be poisoned");
+            let save = &store.accounts["native_ws_shop_e2e"].saves[&character_index];
+            let systems: Stage5SystemsState =
+                serde_json::from_str(save.stage5_systems_json.as_deref().unwrap()).unwrap();
+            assert!(
+                systems
+                    .mail
+                    .iter()
+                    .find(|mail| u64::from(mail.id) == mail_id)
+                    .expect("claimed mail should remain addressable")
+                    .claimed
+            );
+            assert_eq!(
+                save.inventory_items_json
+                    .iter()
+                    .filter_map(|item| serde_json::from_str::<Value>(item).ok())
+                    .filter(|item| {
+                        item["key"] == expected_key && item["quantity"] == expected_quantity
+                    })
+                    .count(),
+                1
+            );
+        }
 
         socket
             .close(None)
@@ -17936,8 +18259,7 @@ mod tests {
                 ("MIR2_GATEWAY_QA_CONTROL_TOKEN", Some("qa-secret")),
             ],
             || {
-                let mut session = crate::GatewaySession::new(SimulationConfig::default());
-                session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+                let mut session = demo_game_session();
                 let enforce = super::production_player_command_safety_enabled(
                     "127.0.0.1".parse().expect("loopback IP"),
                 );
@@ -18086,7 +18408,7 @@ mod tests {
                 })
                 .to_string();
 
-                let packets = super::execute_session_action(
+                super::execute_session_action(
                     &mut session,
                     SessionAction::QaControl {
                         token: "qa-secret".to_string(),
@@ -18099,13 +18421,16 @@ mod tests {
                     enforce,
                 )
                 .expect("authorized local-development QA native state apply should execute");
-
-                assert!(packets
-                    .iter()
-                    .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
                 let snapshot = session.world_snapshot();
                 assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
                 assert_eq!(snapshot.map_title.as_deref(), Some("BichonProvince"));
+                let self_player = snapshot
+                    .entities
+                    .iter()
+                    .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+                    .expect("QA apply should retain the self player entity");
+                assert_eq!((self_player.x, self_player.y), (335, 262));
+                assert_eq!(self_player.direction, MirDirection::UpRight);
                 assert_eq!(snapshot.player_hp, Some(51));
                 assert!(snapshot.player_max_hp.is_some_and(|max_hp| max_hp >= 51));
                 assert_eq!(snapshot.player_mp, Some(32));

@@ -1175,6 +1175,23 @@ mod tests {
         path
     }
 
+    fn started_demo_session() -> SimulationSession {
+        let mut session = SimulationSession::new(GatewayConfig::default());
+        let login = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert!(login
+            .iter()
+            .any(|packet| matches!(packet, mir2_protocol::ServerPacket::LoginSuccess { .. })));
+        let start = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(start.iter().any(|packet| matches!(
+            packet,
+            mir2_protocol::ServerPacket::StartGame { result: 4, .. }
+        )));
+        session
+    }
+
     #[test]
     fn public_delay_is_enforced_but_director_can_be_live() {
         let config = test_config(temp_dir("authorization"));
@@ -1201,8 +1218,7 @@ mod tests {
     fn sanitized_recording_excludes_private_inventory_and_supports_replay() {
         let data_dir = temp_dir("recording");
         let hub = SpectatorHub::new(test_config(data_dir.clone()));
-        let mut session = SimulationSession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let session = started_demo_session();
         let snapshot = session.world_snapshot();
         let frame = hub.publish(&snapshot).unwrap().unwrap();
         assert_eq!(frame.world["inventoryItems"], json!([]));
@@ -1225,8 +1241,7 @@ mod tests {
         let mut config = test_config(data_dir.clone());
         config.recording_enabled = false;
         let hub = SpectatorHub::new(config);
-        let mut session = SimulationSession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let session = started_demo_session();
 
         let frame = hub.publish(&session.world_snapshot()).unwrap().unwrap();
         let metrics = hub.metrics();
@@ -1255,8 +1270,7 @@ mod tests {
     fn camera_or_target_becomes_the_only_self_player() {
         let data_dir = temp_dir("view");
         let hub = SpectatorHub::new(test_config(data_dir.clone()));
-        let mut session = SimulationSession::new(GatewayConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let session = started_demo_session();
         let frame = hub.publish(&session.world_snapshot()).unwrap().unwrap();
         let target = frame.targets().first().unwrap().name.clone();
         let world = frame.world_for_view(Some(&target), false, None);
