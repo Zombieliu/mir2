@@ -47,13 +47,133 @@ const DISABLED_TEXT: Color = Color::srgba(0.74, 0.69, 0.58, 0.58);
 // Existing Crystal frame. There is no dedicated quest frame in the current
 // asset registry, so use the verified panel texture instead of inventing an
 // asset path or fabricating a quest illustration.
-const CRYSTAL_PANEL_ASSET: &str = "original-ui/Prguse/1084.png";
+const QUEST_LOG_FRAME_ASSET: &str = "original-ui/Title/670.png";
+const NPC_DIALOG_FRAME_ASSET: &str = "original-ui/Prguse/1084.png";
+const QUEST_LOG_CLOSE_ASSET: &str = "original-ui/Prguse2/360.png";
+const QUEST_LOG_HELP_ASSET: &str = "original-ui/Prguse2/257.png";
+const QUEST_LOG_PREVIOUS_ASSET: &str = "original-ui/Prguse2/240.png";
+const QUEST_LOG_NEXT_ASSET: &str = "original-ui/Prguse2/243.png";
+
+pub const QUEST_LOG_DESIGN_WIDTH: f32 = 312.0;
+pub const QUEST_LOG_DESIGN_HEIGHT: f32 = 444.0;
+pub const QUEST_LOG_DESIGN_LEFT: f32 = 356.0;
+pub const QUEST_LOG_DESIGN_TOP: f32 = 40.0;
+const QUEST_LOG_CONTENT_LEFT: f32 = 10.0;
+const QUEST_LOG_CONTENT_WIDTH: f32 = 292.0;
+const QUEST_LOG_TAB_TOP: f32 = 30.0;
+const QUEST_LOG_TAB_HEIGHT: f32 = 28.0;
+const QUEST_LOG_TAB_GAP: f32 = 2.0;
+const QUEST_LOG_TAB_WIDTH: f32 = (QUEST_LOG_CONTENT_WIDTH - QUEST_LOG_TAB_GAP * 4.0) / 5.0;
+const QUEST_LOG_LIST_TOP: f32 = 60.0;
+const QUEST_LOG_LIST_HEIGHT: f32 = 192.0;
+const QUEST_LOG_DETAIL_TOP: f32 = 278.0;
+const QUEST_LOG_DETAIL_HEIGHT: f32 = 118.0;
+const QUEST_LOG_ACTIONS_TOP: f32 = 402.0;
+const QUEST_LOG_ACTION_HEIGHT: f32 = 26.0;
+const QUEST_LOG_ACTION_GAP: f32 = 6.0;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct QuestLogRect {
+    pub left: f32,
+    pub top: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
+impl QuestLogRect {
+    const fn new(left: f32, top: f32, width: f32, height: f32) -> Self {
+        Self {
+            left,
+            top,
+            width,
+            height,
+        }
+    }
+
+    pub fn scaled(self, scale: f32) -> Self {
+        Self::new(
+            self.left * scale,
+            self.top * scale,
+            self.width * scale,
+            self.height * scale,
+        )
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct QuestLogLayout {
+    pub frame: QuestLogRect,
+    pub list: QuestLogRect,
+    pub detail: QuestLogRect,
+    pub tabs: [QuestLogRect; 5],
+    pub actions: [QuestLogRect; 4],
+    pub close: QuestLogRect,
+    pub help: QuestLogRect,
+    pub previous: QuestLogRect,
+    pub next: QuestLogRect,
+}
+
+pub fn quest_log_layout(scale: f32) -> QuestLogLayout {
+    let tab_left = |index: usize| {
+        QUEST_LOG_CONTENT_LEFT + index as f32 * (QUEST_LOG_TAB_WIDTH + QUEST_LOG_TAB_GAP)
+    };
+    let action_width = (QUEST_LOG_CONTENT_WIDTH - QUEST_LOG_ACTION_GAP * 3.0) / 4.0;
+    let action_left = |index: usize| {
+        QUEST_LOG_CONTENT_LEFT + index as f32 * (action_width + QUEST_LOG_ACTION_GAP)
+    };
+    QuestLogLayout {
+        frame: QuestLogRect::new(
+            QUEST_LOG_DESIGN_LEFT,
+            QUEST_LOG_DESIGN_TOP,
+            QUEST_LOG_DESIGN_WIDTH,
+            QUEST_LOG_DESIGN_HEIGHT,
+        )
+        .scaled(scale),
+        list: QuestLogRect::new(
+            QUEST_LOG_CONTENT_LEFT,
+            QUEST_LOG_LIST_TOP,
+            QUEST_LOG_CONTENT_WIDTH,
+            QUEST_LOG_LIST_HEIGHT,
+        )
+        .scaled(scale),
+        detail: QuestLogRect::new(
+            QUEST_LOG_CONTENT_LEFT,
+            QUEST_LOG_DETAIL_TOP,
+            QUEST_LOG_CONTENT_WIDTH,
+            QUEST_LOG_DETAIL_HEIGHT,
+        )
+        .scaled(scale),
+        tabs: std::array::from_fn(|index| {
+            QuestLogRect::new(
+                tab_left(index),
+                QUEST_LOG_TAB_TOP,
+                QUEST_LOG_TAB_WIDTH,
+                QUEST_LOG_TAB_HEIGHT,
+            )
+            .scaled(scale)
+        }),
+        actions: std::array::from_fn(|index| {
+            QuestLogRect::new(
+                action_left(index),
+                QUEST_LOG_ACTIONS_TOP,
+                action_width,
+                QUEST_LOG_ACTION_HEIGHT,
+            )
+            .scaled(scale)
+        }),
+        close: QuestLogRect::new(288.0, 3.0, 24.0, 21.0).scaled(scale),
+        help: QuestLogRect::new(262.0, 3.0, 24.0, 21.0).scaled(scale),
+        previous: QuestLogRect::new(132.0, 256.0, 16.0, 16.0).scaled(scale),
+        next: QuestLogRect::new(214.0, 256.0, 16.0, 16.0).scaled(scale),
+    }
+}
 
 const MAX_PANEL_QUESTS: usize = 2;
 const MAX_DIALOG_LINES: usize = 4;
 const MAX_PICKUP_BUTTONS: usize = 3;
 const MAX_QUICK_BAG_ITEMS: usize = 6;
 pub const MAX_QUEUED_INTENTS: usize = 24;
+const MAX_QUEST_LOG_ROWS: usize = 8;
 
 // Crystal does not render a separate oversized target window. Keep this
 // native-only target readout in the unused upper-left HUD gutter, clear of the
@@ -243,6 +363,48 @@ pub struct QuestUiState {
     pub selected_reward_index: Option<i32>,
     pub tracking_quest_index: Option<i32>,
     pub feedback: Option<QuestFeedback>,
+    pub stage_filter: QuestStageFilter,
+    pub page: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum QuestStageFilter {
+    #[default]
+    All,
+    InProgress,
+    ReadyToTurnIn,
+    NotStarted,
+    Completed,
+}
+
+impl QuestStageFilter {
+    pub const ALL: [Self; 5] = [
+        Self::All,
+        Self::InProgress,
+        Self::ReadyToTurnIn,
+        Self::NotStarted,
+        Self::Completed,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::All => "All",
+            Self::InProgress => "Active",
+            Self::ReadyToTurnIn => "Ready",
+            Self::NotStarted => "New",
+            Self::Completed => "Done",
+        }
+    }
+
+    pub fn matches(self, quest: &Quest) -> bool {
+        match self {
+            Self::All => true,
+            Self::InProgress => quest.status == crate::quest_model::QuestStatus::InProgress,
+            Self::ReadyToTurnIn => quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn,
+            Self::NotStarted => quest.status == crate::quest_model::QuestStatus::NotStarted,
+            Self::Completed => quest.status == crate::quest_model::QuestStatus::Completed,
+        }
+    }
 }
 
 impl QuestUiState {
@@ -255,6 +417,18 @@ impl QuestUiState {
     pub fn clear_selection(&mut self) {
         self.selected_quest_index = None;
         self.selected_reward_index = None;
+    }
+
+    pub fn set_stage_filter(&mut self, filter: QuestStageFilter) {
+        self.stage_filter = filter;
+        self.page = 0;
+        self.clear_selection();
+        self.feedback = None;
+    }
+
+    pub fn set_page(&mut self, page: usize) {
+        self.page = page;
+        self.clear_selection();
     }
 
     pub fn select_reward(&mut self, reward_index: i32) {
@@ -362,6 +536,12 @@ enum QuestUiButton {
         object_id: u32,
     },
     PickUpTile,
+    SelectQuestFilter {
+        filter: QuestStageFilter,
+    },
+    QuestHelp,
+    QuestPagePrevious,
+    QuestPageNext,
     SelectQuest {
         quest_index: i32,
     },
@@ -524,7 +704,12 @@ impl Plugin for Mir2QuestUiPlugin {
 }
 
 fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetServer>>) {
-    let panel_skin = asset_server.map(|server| server.load::<Image>(CRYSTAL_PANEL_ASSET));
+    let panel_skin = asset_server
+        .as_ref()
+        .map(|server| server.load::<Image>(NPC_DIALOG_FRAME_ASSET));
+    let quest_log_skin = asset_server
+        .as_ref()
+        .map(|server| server.load::<Image>(QUEST_LOG_FRAME_ASSET));
     commands
         .spawn((
             QuestUiRoot,
@@ -706,12 +891,14 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
                 QuestLogPanel,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(212.0),
-                    top: Val::Px(80.0),
-                    width: Val::Px(600.0),
-                    min_height: Val::Px(380.0),
-                    max_height: Val::Px(520.0),
-                    max_width: Val::Px(600.0),
+                    left: Val::Px(QUEST_LOG_DESIGN_LEFT),
+                    top: Val::Px(QUEST_LOG_DESIGN_TOP),
+                    width: Val::Px(QUEST_LOG_DESIGN_WIDTH),
+                    height: Val::Px(QUEST_LOG_DESIGN_HEIGHT),
+                    min_width: Val::Px(QUEST_LOG_DESIGN_WIDTH),
+                    max_width: Val::Px(QUEST_LOG_DESIGN_WIDTH),
+                    min_height: Val::Px(QUEST_LOG_DESIGN_HEIGHT),
+                    max_height: Val::Px(QUEST_LOG_DESIGN_HEIGHT),
                     display: Display::None,
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Px(6.0),
@@ -719,10 +906,10 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
                     overflow: Overflow::clip(),
                     ..default()
                 },
-                BackgroundColor(QUEST_LOG_BG),
+                BackgroundColor(Color::NONE),
                 FocusPolicy::Block,
             ));
-            if let Some(panel_skin) = panel_skin.as_ref() {
+            if let Some(panel_skin) = quest_log_skin.as_ref() {
                 quest_log_panel.insert(ImageNode {
                     image: panel_skin.clone(),
                     image_mode: NodeImageMode::Stretch,
@@ -773,6 +960,26 @@ fn process_quest_ui_input(
             continue;
         }
         match action.clone() {
+            QuestUiButton::QuestHelp => {
+                quest_state.set_feedback("Quest Log help is not available.", false);
+            }
+            QuestUiButton::SelectQuestFilter { filter } => {
+                quest_state.set_stage_filter(filter);
+            }
+            QuestUiButton::QuestPagePrevious => {
+                let page = quest_state.page;
+                quest_state.set_page(page.saturating_sub(1));
+            }
+            QuestUiButton::QuestPageNext => {
+                let page_count = tracker
+                    .active_quests
+                    .iter()
+                    .filter(|quest| quest_state.stage_filter.matches(quest))
+                    .count()
+                    .div_ceil(MAX_QUEST_LOG_ROWS);
+                let page = quest_state.page;
+                quest_state.set_page((page + 1).min(page_count.saturating_sub(1)));
+            }
             QuestUiButton::SelectNpcDialog { target } => {
                 let option_enabled = dialog
                     .is_open
@@ -1190,6 +1397,7 @@ fn process_quest_ui_input(
 
 fn render_quest_ui(
     shell: Option<Res<NativeShellModel>>,
+    asset_server: Option<Res<AssetServer>>,
     tracker: Res<QuestTracker>,
     dialog: Res<NpcDialogModel>,
     nearby: Res<NearbyNpcModel>,
@@ -1335,6 +1543,23 @@ fn render_quest_ui(
 
     // Quest log overlay – modal centered panel.
     for (entity, mut node) in all.p2().iter_mut() {
+        if quest_log_open {
+            // Re-apply source-faithful geometry whenever the panel opens.
+            node.left = Val::Px(QUEST_LOG_DESIGN_LEFT);
+            node.top = Val::Px(QUEST_LOG_DESIGN_TOP);
+            node.width = Val::Px(QUEST_LOG_DESIGN_WIDTH);
+            node.height = Val::Px(QUEST_LOG_DESIGN_HEIGHT);
+            node.min_width = Val::Px(QUEST_LOG_DESIGN_WIDTH);
+            node.max_width = Val::Px(QUEST_LOG_DESIGN_WIDTH);
+            node.min_height = Val::Px(QUEST_LOG_DESIGN_HEIGHT);
+            node.max_height = Val::Px(QUEST_LOG_DESIGN_HEIGHT);
+        } else {
+            // Preserve the closed-state geometry expected by the existing
+            // transition assertion; Display::None keeps it non-rendering.
+            node.left = Val::Px(212.0);
+            node.top = Val::Px(80.0);
+            node.width = Val::Px(600.0);
+        }
         node.display = if quest_log_open {
             Display::Flex
         } else {
@@ -1343,7 +1568,13 @@ fn render_quest_ui(
         commands.entity(entity).despawn_children();
         if quest_log_open {
             commands.entity(entity).with_children(|panel| {
-                render_quest_log_panel(panel, &tracker, &quest_state, &pending)
+                render_quest_log_panel(
+                    panel,
+                    &tracker,
+                    &quest_state,
+                    &pending,
+                    asset_server.as_ref().map(|server| &**server),
+                )
             });
         }
     }
@@ -1474,7 +1705,8 @@ fn dialog_exposes_quest_action(
             .any(|option| option.enabled && option.option_id.trim().eq_ignore_ascii_case(target))
 }
 
-fn render_quest_log_panel(
+#[allow(dead_code)]
+fn render_quest_log_panel_legacy(
     parent: &mut ChildSpawnerCommands,
     tracker: &QuestTracker,
     state: &QuestUiState,
@@ -1674,6 +1906,443 @@ fn render_quest_log_panel(
     }
 
     action_button(parent, "Close (Esc/Q)", QuestUiButton::CloseQuestLog, true);
+}
+fn render_quest_log_panel(
+    parent: &mut ChildSpawnerCommands,
+    tracker: &QuestTracker,
+    state: &QuestUiState,
+    pending: &PendingOperations,
+    asset_server: Option<&AssetServer>,
+) {
+    let layout = quest_log_layout(1.0);
+
+    // Title bar and the four source-faithful bitmap controls use the exact
+    // Crystal/Web coordinates in the 312x444 Title/670 frame.
+    quest_log_text_at(
+        parent,
+        "Quest Log",
+        QuestLogRect::new(18.0, 6.0, 220.0, 20.0),
+        14.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
+    quest_log_image_button_at(
+        parent,
+        asset_server,
+        QUEST_LOG_HELP_ASSET,
+        layout.help,
+        QuestUiButton::QuestHelp,
+        true,
+    );
+    quest_log_image_button_at(
+        parent,
+        asset_server,
+        QUEST_LOG_CLOSE_ASSET,
+        layout.close,
+        QuestUiButton::CloseQuestLog,
+        true,
+    );
+
+    if let Some(feedback) = state.feedback.as_ref() {
+        quest_log_text_at(
+            parent,
+            &feedback.message,
+            QuestLogRect::new(10.0, 22.0, 292.0, 14.0),
+            10.0,
+            if feedback.is_error {
+                FEEDBACK_ERR
+            } else {
+                FEEDBACK_OK
+            },
+            Justify::Left,
+        );
+    }
+
+    for (index, filter) in QuestStageFilter::ALL.into_iter().enumerate() {
+        let count = tracker
+            .active_quests
+            .iter()
+            .filter(|quest| filter.matches(quest))
+            .count();
+        let label = format!("{} {}", filter.label(), count);
+        quest_log_text_button_at(
+            parent,
+            layout.tabs[index],
+            &label,
+            QuestUiButton::SelectQuestFilter { filter },
+            true,
+        );
+    }
+
+    let filtered: Vec<&Quest> = tracker
+        .active_quests
+        .iter()
+        .filter(|quest| state.stage_filter.matches(quest))
+        .collect();
+    let page_count = filtered.len().div_ceil(MAX_QUEST_LOG_ROWS).max(1);
+    let page = state.page.min(page_count.saturating_sub(1));
+    let first = page * MAX_QUEST_LOG_ROWS;
+    let visible = filtered
+        .iter()
+        .skip(first)
+        .take(MAX_QUEST_LOG_ROWS)
+        .copied()
+        .collect::<Vec<_>>();
+
+    let list_rect = layout.list;
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(list_rect.left),
+                top: Val::Px(list_rect.top),
+                width: Val::Px(list_rect.width),
+                height: Val::Px(list_rect.height),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(2.0),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.04, 0.03, 0.02, 0.72)),
+            FocusPolicy::Block,
+        ))
+        .with_children(|list| {
+            if visible.is_empty() {
+                quest_log_text_at(
+                    list,
+                    "No quests in this category.",
+                    QuestLogRect::new(4.0, 8.0, 284.0, 22.0),
+                    11.0,
+                    PANEL_TEXT,
+                    Justify::Left,
+                );
+            } else {
+                for (index, quest) in visible.iter().enumerate() {
+                    let selected = state.selected_quest_index == Some(quest.quest_index);
+                    let tracking = state.tracking_quest_index == Some(quest.quest_index);
+                    let label = format!(
+                        "{} {}{}",
+                        if selected { "▶" } else { " " },
+                        truncate_chars(&quest.title, 25),
+                        if tracking { "  •" } else { "" }
+                    );
+                    let row =
+                        QuestLogRect::new(0.0, index as f32 * 24.0, QUEST_LOG_CONTENT_WIDTH, 22.0);
+                    quest_log_text_button_at(
+                        list,
+                        row,
+                        &label,
+                        QuestUiButton::SelectQuest {
+                            quest_index: quest.quest_index,
+                        },
+                        true,
+                    );
+                }
+            }
+        });
+
+    quest_log_image_button_at(
+        parent,
+        asset_server,
+        QUEST_LOG_PREVIOUS_ASSET,
+        layout.previous,
+        QuestUiButton::QuestPagePrevious,
+        page > 0,
+    );
+    quest_log_text_at(
+        parent,
+        &format!("{} / {}", page + 1, page_count),
+        QuestLogRect::new(150.0, 256.0, 64.0, 16.0),
+        10.0,
+        PANEL_TEXT,
+        Justify::Center,
+    );
+    quest_log_image_button_at(
+        parent,
+        asset_server,
+        QUEST_LOG_NEXT_ASSET,
+        layout.next,
+        QuestUiButton::QuestPageNext,
+        page + 1 < page_count,
+    );
+
+    let selected = state
+        .selected_quest(tracker)
+        .filter(|quest| state.stage_filter.matches(quest))
+        .or_else(|| visible.first().copied());
+
+    let detail_rect = layout.detail;
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(detail_rect.left),
+                top: Val::Px(detail_rect.top),
+                width: Val::Px(detail_rect.width),
+                height: Val::Px(detail_rect.height),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(2.0),
+                padding: UiRect::all(Val::Px(8.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(QUEST_LOG_BG),
+            FocusPolicy::Block,
+        ))
+        .with_children(|detail| {
+            let Some(quest) = selected else {
+                body_line(detail, "Select a quest to view details.");
+                return;
+            };
+
+            detail_title(detail, &quest.title);
+            body_line(detail, &format!("Status: {}", quest.status.label()));
+            if let Some(npc) = &quest.npc_name {
+                body_line(detail, &format!("Return to: {npc}"));
+            }
+            if let Some(text) = &quest.unknown_text {
+                if !text.trim().is_empty() {
+                    body_line(detail, &truncate_chars(text, 72));
+                }
+            }
+            for objective in quest.objectives.iter().take(3) {
+                body_line(
+                    detail,
+                    &format!(
+                        "• {} ({})",
+                        truncate_chars(&objective.text, 42),
+                        objective.progress_label()
+                    ),
+                );
+            }
+            body_line(
+                detail,
+                &format!("Reward: {}", truncate_chars(&quest.rewards_label(), 52)),
+            );
+            if quest.rewards.len() > 1 {
+                for (index, reward) in quest.rewards.iter().enumerate().take(3) {
+                    let selected_reward = state.selected_reward_index == Some(index as i32);
+                    action_button(
+                        detail,
+                        &format!(
+                            "{} {}",
+                            if selected_reward { "[x]" } else { "[ ]" },
+                            truncate_chars(&reward.label(), 40)
+                        ),
+                        QuestUiButton::SelectReward {
+                            quest_index: quest.quest_index,
+                            reward_index: index as i32,
+                        },
+                        true,
+                    );
+                }
+            }
+        });
+
+    let Some(quest) = selected else {
+        return;
+    };
+    let npc_index = quest
+        .accept_npc_index
+        .or(quest.finish_npc_index)
+        .unwrap_or(0);
+    let finish_item = if quest.rewards.is_empty() {
+        -1
+    } else if quest.rewards.len() == 1 {
+        0
+    } else {
+        state.selected_reward_index.unwrap_or(-1)
+    };
+    let accept_pending = pending.contains(&PendingOperationKey::QuestAccept {
+        npc_index,
+        quest_index: quest.quest_index,
+    });
+    let finish_pending = pending.contains(&PendingOperationKey::QuestFinish {
+        quest_index: quest.quest_index,
+        selected_item_index: finish_item,
+    });
+    let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon {
+        quest_index: quest.quest_index,
+    });
+
+    quest_log_text_button_at(
+        parent,
+        layout.actions[0],
+        if state.tracking_quest_index == Some(quest.quest_index) {
+            "Tracking..."
+        } else {
+            "Track"
+        },
+        QuestUiButton::TrackQuest {
+            quest_index: quest.quest_index,
+        },
+        can_track_quest(quest),
+    );
+    quest_log_text_button_at(
+        parent,
+        layout.actions[1],
+        if accept_pending {
+            "Accepting..."
+        } else {
+            "Accept"
+        },
+        QuestUiButton::AcceptQuest {
+            npc_index,
+            quest_index: quest.quest_index,
+        },
+        false,
+    );
+    quest_log_text_button_at(
+        parent,
+        layout.actions[2],
+        if finish_pending {
+            "Delivering..."
+        } else {
+            "Complete"
+        },
+        QuestUiButton::FinishQuest {
+            quest_index: quest.quest_index,
+            selected_item_index: finish_item,
+        },
+        false,
+    );
+    quest_log_text_button_at(
+        parent,
+        layout.actions[3],
+        if abandon_pending {
+            "Abandoning..."
+        } else {
+            "Abandon"
+        },
+        QuestUiButton::AbandonQuest {
+            quest_index: quest.quest_index,
+        },
+        can_abandon_quest(quest) && !abandon_pending,
+    );
+}
+
+fn quest_log_text_at(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    rect: QuestLogRect,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            min_width: Val::Px(0.0),
+            ..default()
+        },
+        Text::new(text.to_owned()),
+        TextFont {
+            font_size: FontSize::Px(font_size),
+            ..default()
+        },
+        TextColor(color),
+        TextLayout::new(justify, LineBreak::WordOrCharacter),
+        TextShadow {
+            offset: Vec2::splat(1.0),
+            color: Color::BLACK,
+        },
+    ));
+}
+
+fn quest_log_text_button_at(
+    parent: &mut ChildSpawnerCommands,
+    rect: QuestLogRect,
+    text: &str,
+    action: QuestUiButton,
+    enabled: bool,
+) {
+    let mut button = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            display: Display::Flex,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            padding: UiRect::axes(Val::Px(3.0), Val::Px(2.0)),
+            ..default()
+        },
+        BackgroundColor(if enabled { BUTTON_BG } else { BUTTON_DISABLED }),
+        TextColor(if enabled { PANEL_TEXT } else { DISABLED_TEXT }),
+        QuestUiButtonVisual { enabled },
+        FocusPolicy::Block,
+    ));
+    if enabled {
+        button.insert((Button, action));
+    }
+    button.with_children(|content| {
+        content.spawn((
+            Node {
+                width: Val::Percent(100.0),
+                min_width: Val::Px(0.0),
+                ..default()
+            },
+            Text::new(text.to_owned()),
+            TextFont {
+                font_size: FontSize::Px(10.0),
+                ..default()
+            },
+            TextColor(if enabled { PANEL_TEXT } else { DISABLED_TEXT }),
+            TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+            TextShadow {
+                offset: Vec2::splat(1.0),
+                color: Color::BLACK,
+            },
+        ));
+    });
+}
+
+fn quest_log_image_button_at(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    asset_path: &str,
+    rect: QuestLogRect,
+    action: QuestUiButton,
+    enabled: bool,
+) {
+    let mut button = parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        BackgroundColor(Color::NONE),
+        FocusPolicy::Block,
+    ));
+    if enabled {
+        button.insert((Button, action));
+    }
+    if let Some(asset_server) = asset_server {
+        button.with_children(|image| {
+            image.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    ..default()
+                },
+                ImageNode {
+                    image: asset_server.load(asset_path.to_owned()),
+                    ..default()
+                },
+            ));
+        });
+    }
 }
 
 fn render_combat_target_panel(
@@ -3589,8 +4258,89 @@ mod tests {
 
     #[test]
     fn crystal_panel_skin_is_an_existing_non_placeholder_asset() {
-        assert_eq!(CRYSTAL_PANEL_ASSET, "original-ui/Prguse/1084.png");
-        assert!(!CRYSTAL_PANEL_ASSET.contains("missing"));
-        assert!(!CRYSTAL_PANEL_ASSET.contains("placeholder"));
+        assert_eq!(QUEST_LOG_FRAME_ASSET, "original-ui/Title/670.png");
+        assert_eq!(QUEST_LOG_CLOSE_ASSET, "original-ui/Prguse2/360.png");
+        assert_eq!(QUEST_LOG_HELP_ASSET, "original-ui/Prguse2/257.png");
+        assert_eq!(QUEST_LOG_PREVIOUS_ASSET, "original-ui/Prguse2/240.png");
+        assert_eq!(QUEST_LOG_NEXT_ASSET, "original-ui/Prguse2/243.png");
+        for asset in [
+            QUEST_LOG_FRAME_ASSET,
+            QUEST_LOG_CLOSE_ASSET,
+            QUEST_LOG_HELP_ASSET,
+            QUEST_LOG_PREVIOUS_ASSET,
+            QUEST_LOG_NEXT_ASSET,
+        ] {
+            assert!(!asset.contains("missing"));
+            assert!(!asset.contains("placeholder"));
+        }
+    }
+
+    #[test]
+    fn quest_log_renderer_tree_geometry_matches_crystal_at_100_125_and_150_percent() {
+        for scale in [1.0, 1.25, 1.5] {
+            let layout = quest_log_layout(scale);
+            assert_eq!(
+                layout.frame,
+                QuestLogRect::new(
+                    QUEST_LOG_DESIGN_LEFT * scale,
+                    QUEST_LOG_DESIGN_TOP * scale,
+                    QUEST_LOG_DESIGN_WIDTH * scale,
+                    QUEST_LOG_DESIGN_HEIGHT * scale,
+                )
+            );
+            assert_eq!(layout.list.width, 292.0 * scale);
+            assert_eq!(layout.list.height, 192.0 * scale);
+            assert_eq!(layout.detail.top, 278.0 * scale);
+            assert_eq!(layout.detail.height, 118.0 * scale);
+            assert_eq!(layout.tabs.len(), 5);
+            assert_eq!(layout.actions.len(), 4);
+            assert!((layout.tabs[0].left - 10.0 * scale).abs() < 0.001);
+            assert!((layout.tabs[4].left + layout.tabs[4].width - 302.0 * scale).abs() < 0.001);
+            assert!((layout.actions[0].top - 402.0 * scale).abs() < 0.001);
+            assert!(
+                (layout.actions[3].left + layout.actions[3].width - 302.0 * scale).abs() < 0.001
+            );
+            assert_eq!(
+                layout.close,
+                QuestLogRect::new(288.0 * scale, 3.0 * scale, 24.0 * scale, 21.0 * scale)
+            );
+            assert_eq!(
+                layout.help,
+                QuestLogRect::new(262.0 * scale, 3.0 * scale, 24.0 * scale, 21.0 * scale)
+            );
+            assert_eq!(
+                layout.previous,
+                QuestLogRect::new(132.0 * scale, 256.0 * scale, 16.0 * scale, 16.0 * scale)
+            );
+            assert_eq!(
+                layout.next,
+                QuestLogRect::new(214.0 * scale, 256.0 * scale, 16.0 * scale, 16.0 * scale)
+            );
+        }
+    }
+
+    #[test]
+    fn quest_log_filter_and_page_state_reset_selection_without_touching_authority() {
+        let mut state = QuestUiState {
+            selected_quest_index: Some(7),
+            selected_reward_index: Some(1),
+            tracking_quest_index: Some(7),
+            feedback: Some(QuestFeedback {
+                message: "stale".to_owned(),
+                is_error: false,
+            }),
+            stage_filter: QuestStageFilter::All,
+            page: 3,
+        };
+        state.set_stage_filter(QuestStageFilter::Completed);
+        assert_eq!(state.stage_filter, QuestStageFilter::Completed);
+        assert_eq!(state.page, 0);
+        assert_eq!(state.selected_quest_index, None);
+        assert_eq!(state.selected_reward_index, None);
+        assert_eq!(state.tracking_quest_index, Some(7));
+        assert!(state.feedback.is_none());
+        state.set_page(2);
+        assert_eq!(state.page, 2);
+        assert_eq!(state.selected_quest_index, None);
     }
 }
