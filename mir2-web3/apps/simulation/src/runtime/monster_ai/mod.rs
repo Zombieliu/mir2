@@ -1594,7 +1594,10 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             &mut packets,
                         );
                     }
-                    if khazard_pull_branch {
+                    // Crystal `Khazard.PullAttack`: the pull is completely
+                    // resisted when `Random(MagicResistWeight) < MagicResist`.
+                    // The range-attack animation still broadcasts on a resist.
+                    if khazard_pull_branch && crystal_player_magic_mitigated(world, 1) != 0 {
                         if let Some(pull_direction) = direction_toward(&player_position, &position)
                         {
                             let _ = push_player_in_direction(

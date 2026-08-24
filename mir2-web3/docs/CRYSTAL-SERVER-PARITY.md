@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> AI 27 Khazard parity correction (2026-08-24): the runtime pull branch now
+> checks the authoritative player's Crystal-numeric `MagicResist` against
+> `Settings.MagicResistWeight` before moving the target, matching
+> `Khazard.PullAttack`. The `ObjectRangeAttack` surface remains visible on a
+> resist and the pull remains non-damaging. A deterministic two-phase behavior
+> regression proves movement without resistance and zero movement with a
+> successful resistance roll. This does not close the remaining AI matrix.
+>
 > NPC per-player/global visibility correction (2026-08-24): Rust now mirrors
 > Crystal `NPCObject.CheckVisible` for `FlagNeeded`, level, and class, plus the
 > minute schedule in `NPCObject.Process` for `DayofWeek` and `TimeVisible`.

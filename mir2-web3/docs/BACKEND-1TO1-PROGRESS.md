@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> Crystal AI 27 correction (2026-08-24): Khazard's four-tile pull now applies
+> the same `MagicResist / MagicResistWeight` all-or-nothing resistance gate as
+> `Khazard.PullAttack`. A resisted pull still broadcasts the range-attack
+> animation but does not move or damage the player. The existing real-map lane
+> test now proves both an unresisted pull and a deterministic resisted pull in
+> one run; the focused locked serial test passes. Remaining spawned-AI details
+> are still open and are not covered by this bounded closure.
+>
 > Crystal NPC visibility closure (2026-08-24): generated `FlagNeeded`,
 > `DayofWeek`, and `TimeVisible` metadata now controls authoritative NPC
 > visibility instead of permanently hiding every gated NPC. Character flags

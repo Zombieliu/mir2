@@ -14823,6 +14823,51 @@ fn khazard_uses_crystal_four_tile_pull_packet_without_damage() {
             .next_state_tick
             > current_tick
     );
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert!(super::player_stats(session.app.world()).magic_resist() > 0);
+    let resisted_tick = (current_tick.saturating_add(2)..current_tick.saturating_add(500))
+        .find(|candidate| {
+            super::set_runtime_tick(session.app.world_mut(), *candidate);
+            super::crystal_player_magic_mitigated(session.app.world(), 1) == 0
+        })
+        .expect("bounded deterministic window should contain a MagicResist success");
+
+    set_player_position(&mut session, player_origin.clone());
+    {
+        let mut entry = session.app.world_mut().entity_mut(khazard);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("khazard agent");
+        agent.tracking_player = true;
+        agent.next_attack_tick = resisted_tick;
+        agent.next_move_tick = resisted_tick;
+        drop(agent);
+        entry
+            .get_mut::<MonsterAiState>()
+            .expect("khazard ai state")
+            .next_state_tick = 0;
+    }
+    super::set_runtime_tick(session.app.world_mut(), resisted_tick.saturating_sub(1));
+    sync_visible_objects(&mut session);
+
+    let resisted_packets = session.tick();
+    assert!(resisted_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info }
+            if info.object_id == khazard_object_id && info.direction == MirDirection::Left
+    )));
+    assert!(!resisted_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == player_object_id
+    )));
+    assert_eq!(
+        entity_position(session.app.world(), player).expect("player position after resisted pull"),
+        player_origin,
+    );
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("player hp"),
+        before_hp,
+        "Khazard's pull remains non-damaging when resisted",
+    );
 }
 
 #[test]

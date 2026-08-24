@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-24 spawned-AI checkpoint: AI 27 Khazard no longer pulls every
+> aligned target unconditionally. The pull now uses the authoritative
+> Crystal-numeric MagicResist roll; a successful resist preserves the range
+> animation while producing no movement or damage. The real-map behavior test
+> covers both unresisted and resisted branches and passes serially. This closes
+> only the previously named Khazard MagicResist detail; GuardianRock,
+> GreatFoxSpirit, YinDevilNode, SnowWolfKing and other full-AI gates remain open.
+>
 > 2026-08-24 NPC dynamic-visibility checkpoint: the former placeholder that
 > returned false for every `FlagNeeded` or `TimeVisible` NPC is removed.
 > StartGame, AOI object packets, authoritative `worldSnapshot`, and NPC
