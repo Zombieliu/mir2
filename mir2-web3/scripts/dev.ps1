@@ -505,6 +505,11 @@ try {
             Invoke-Compose -Arguments @("build", "workspace")
         }
         "up" {
+            $RecoveryHelper = Join-Path $PSScriptRoot "Initialize-LocalSaveRecovery.ps1"
+            if (-not (Test-Path -LiteralPath $RecoveryHelper -PathType Leaf)) { throw "Missing local save-recovery bootstrap helper: $RecoveryHelper" }
+            . $RecoveryHelper
+            $RecoveryBootstrap = Initialize-Mir2LocalSaveRecovery -ProjectRoot $ProjectRoot
+            $RecoveryBootstrap.MacKey = $null
             Test-ReleaseLock
             if ($FullAssets) {
                 Install-FullAssets

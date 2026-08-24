@@ -481,6 +481,7 @@ case "${command}" in
     compose build workspace
     ;;
   up)
+    bash "${project_root}/scripts/Initialize-LocalSaveRecovery.sh" --project-root "${project_root}" --quiet
     release_lock_check
     if [[ "${full_assets}" -eq 1 ]]; then
       install_full_assets

@@ -60,12 +60,26 @@ services:
     command:
       - bash
       - -lc
-      - cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
+      - >-
+        secret_file=/run/secrets/mir2_save_recovery_mac_key;
+        if [ ! -r "$$secret_file" ]; then
+          echo '[gateway preflight] Missing local save-recovery secret. Windows: powershell -NoProfile -File scripts/Initialize-LocalSaveRecovery.ps1 ; Unix: bash scripts/Initialize-LocalSaveRecovery.sh' >&2;
+          exit 78;
+        fi;
+        recovery_key="$$(tr -d '\r\n' < "$$secret_file")";
+        if ! [[ "$$recovery_key" =~ ^[0-9a-f]{64}$$ ]]; then
+          echo '[gateway preflight] Invalid local save-recovery secret. Windows: powershell -NoProfile -File scripts/Initialize-LocalSaveRecovery.ps1 ; Unix: bash scripts/Initialize-LocalSaveRecovery.sh' >&2;
+          exit 78;
+        fi;
+        export MIR2_SAVE_RECOVERY_MAC_KEY="$$recovery_key";
+        unset recovery_key;
+        exec cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
     environment:
       <<: *developer-environment
       MIR2_GATEWAY_WEB_ADDR: 0.0.0.0:7110
       MIR2_GATEWAY_TCP_ADDR: 0.0.0.0:7000
       MIR2_ACCOUNT_STORE_PATH: /workspace/mir2-web3/.mir2-data/accounts.json
+      MIR2_SAVE_RECOVERY_DIR: /workspace/mir2-web3/.mir2-data/save-recovery/v1/developer-compose-gateway
       MIR2_SIMULATION_FIXED_LIGHT_SETTING: ${MIR2_SIMULATION_FIXED_LIGHT_SETTING:-day}
     ports:
       - "${MIR2_BIND_ADDRESS:-127.0.0.1}:${MIR2_GATEWAY_WEB_PORT:-7110}:7110"
@@ -76,6 +90,10 @@ services:
       - developer-cargo-git:/home/node/.cargo/git
       - developer-target:/workspace/mir2-web3/target
       - developer-state:/workspace/mir2-web3/.mir2-data
+    secrets:
+      - source: mir2_save_recovery_mac_key
+        target: mir2_save_recovery_mac_key
+        mode: 0400
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:7110/health"]
       interval: 3s
@@ -130,3 +148,7 @@ volumes:
   player-web-map-atlas:
   admin-web-node-modules:
   admin-web-next:
+
+secrets:
+  mir2_save_recovery_mac_key:
+    file: ../.mir2-data/local-secrets/save-recovery-mac-key.hex
