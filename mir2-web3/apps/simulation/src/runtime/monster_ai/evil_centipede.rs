@@ -4,7 +4,7 @@
 use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_protocol::{Point, ServerPacket};
 
-use super::super::components::{MonsterAgent, MonsterAiState, MonsterVitals, entity_object_id};
+use super::super::components::{entity_object_id, MonsterAgent, MonsterAiState, MonsterVitals};
 use super::super::movement::*;
 
 pub(in crate::runtime) fn update_evil_centipede_state(

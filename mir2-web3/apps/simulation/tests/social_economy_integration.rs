@@ -156,7 +156,7 @@ fn social_friend_and_blacklist_keep_crystal_single_entry_semantics() {
 }
 
 #[test]
-fn mail_claim_exact_parcel_rolls_back_when_all_attachments_do_not_fit() {
+fn mail_claim_exact_parcel_silently_rolls_back_when_all_attachments_do_not_fit() {
     let mut session = SimulationSession::new(config_with_mail_parcel(79));
     session.handle_packet(ClientPacket::Login {
         account_id: "demo".to_string(),
@@ -169,18 +169,17 @@ fn mail_claim_exact_parcel_rolls_back_when_all_attachments_do_not_fit() {
 
     assert_eq!(
         session.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
-        vec![ServerPacket::ParcelCollected { result: -1 }]
+        Vec::new(),
+        "an ineligible direct CollectParcel must be silent"
     );
     let after = session.world_snapshot();
 
     assert_eq!(after.gold, 10);
     assert_eq!(after.inventory_items.len(), before.inventory_items.len());
-    assert!(
-        !after
-            .inventory_items
-            .iter()
-            .any(|item| item.key == "dagger" || item.key == "wooden-sword")
-    );
+    assert!(!after
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "dagger" || item.key == "wooden-sword"));
     let mail = after
         .stage5_systems
         .mail
@@ -206,12 +205,10 @@ fn mail_claim_exact_parcel_consumes_payload_and_persists_collected_state() {
     });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    assert!(
-        session
-            .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 }))
-    );
+    assert!(session
+        .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
     let after = session.world_snapshot();
 
     assert_eq!(after.gold, 87);
@@ -223,11 +220,9 @@ fn mail_claim_exact_parcel_consumes_payload_and_persists_collected_state() {
     assert_eq!(claimed_items.len(), 2);
     assert!(claimed_items.iter().any(|item| item.key == "dagger"));
     assert!(claimed_items.iter().any(|item| item.key == "wooden-sword"));
-    assert!(
-        claimed_items
-            .iter()
-            .all(|item| item.unique_id != 77_001 && item.unique_id != 77_002)
-    );
+    assert!(claimed_items
+        .iter()
+        .all(|item| item.unique_id != 77_001 && item.unique_id != 77_002));
     let mail = after
         .stage5_systems
         .mail

@@ -155,9 +155,9 @@ pub fn validate_production_player_command(
         WorldCommand::ClientPacket(ClientPacket::SendMail { .. }) if !authenticated => {
             Err("authenticated account is required to send mail".to_string())
         }
-        WorldCommand::NativeGameShopPurchase(_) if !authenticated => Err(
-            "authenticated account is required for native GameShop purchases".to_string(),
-        ),
+        WorldCommand::NativeGameShopPurchase(_) if !authenticated => {
+            Err("authenticated account is required for native GameShop purchases".to_string())
+        }
         _ => Ok(()),
     }
 }
@@ -343,7 +343,7 @@ pub trait WorldRuntime: Send + Sync {
     ) -> Result<(), String> {
         Err("world runtime does not support active character checkpoint restore".to_string())
     }
-    fn save_active_character(&self);
+    fn save_active_character(&mut self) -> Result<(), String>;
     fn refresh_active_external_mail(&mut self) -> bool;
 }
 
@@ -692,11 +692,12 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
         let packets = match command {
-            WorldCommand::ClientPacket(packet) => self.session.handle_packet(packet),
-            WorldCommand::NativeGameShopPurchase(request) => self
-                .session
-                .game_shop_buy_packet_idempotent(request)?
-                .packets,
+            WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
+            WorldCommand::NativeGameShopPurchase(request) => {
+                self.session
+                    .game_shop_buy_packet_idempotent(request)?
+                    .packets
+            }
             WorldCommand::PasskeyLogin { account_id } => self.session.passkey_login(&account_id),
             WorldCommand::MoveTo { position, running } => {
                 self.session.move_to_with_mode(position, running)
@@ -829,8 +830,8 @@ impl WorldRuntime for InProcessWorldRuntime {
         self.session.restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self) {
-        self.session.save_active_character();
+    fn save_active_character(&mut self) -> Result<(), String> {
+        self.session.save_active_character()
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {
@@ -841,7 +842,7 @@ impl WorldRuntime for InProcessWorldRuntime {
 #[cfg(test)]
 mod tests {
     use super::{InProcessWorldRuntime, WorldCommand, WorldCommandKind, WorldRuntime};
-    use crate::SimulationConfig;
+    use crate::{SimulationConfig, SimulationSession};
     use mir2_protocol::{ClientPacket, MirDirection, ServerPacket};
 
     #[test]
@@ -886,7 +887,10 @@ mod tests {
 
     #[test]
     fn in_process_world_runtime_accepts_passkey_login() {
-        let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+        let config = SimulationConfig::default();
+        SimulationSession::provision_passkey_account(&config, "sui:0xpasskey")
+            .expect("trusted setup should provision the passkey account durably");
+        let mut runtime = InProcessWorldRuntime::new(config);
 
         let execution = runtime
             .execute_with_outcome(WorldCommand::PasskeyLogin {

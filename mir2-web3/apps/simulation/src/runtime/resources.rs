@@ -20,8 +20,8 @@ use super::skills::SkillState;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{
-    Arc,
     atomic::{AtomicU64, Ordering},
+    Arc,
 };
 use std::time::{SystemTime, UNIX_EPOCH};
 

@@ -6,17 +6,17 @@ use serde::{Deserialize, Serialize};
 
 use super::combat::{apply_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state};
 use super::components::{
-    Facing, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position, entity_by_object_id,
-    entity_name, entity_object_id, player_entity,
+    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
+    MonsterAgent, MonsterVitals, PlayerVitals, Position,
 };
 use super::crystal_compat::*;
 use super::drops::{
-    SharedAccountInventoryTransactionReceipt, drop_player_death_penalty,
-    zone_ground_drop_snapshots_for_monster,
+    drop_player_death_penalty, zone_ground_drop_snapshots_for_monster,
+    SharedAccountInventoryTransactionReceipt,
 };
 use super::equipment::*;
 use super::inventory::*;
-use super::items::{ItemState, item_unique_id, user_item_from_item_state};
+use super::items::{item_unique_id, user_item_from_item_state, ItemState};
 use super::map::*;
 use super::monsters::{
     apply_shared_monster_death_state, apply_shared_monster_revive_state,
@@ -26,13 +26,13 @@ use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
 use super::resources::{
-    BuffResource, ElementalResource, FishingResource, GroupResource, HeroInventoryResource,
-    InventoryResource, ItemRentalRecordState, ItemRentalResource, MapRuntimeResource,
-    MountResource, NpcStateResource, ObjectIdAllocatorResource, PlayerActionTimingResource,
-    PlayerMovementTimingResource, PlayerPermissionResource, PlayerRuntimeResource,
-    PotionRecoveryResource, QuestResource, RuntimeClockResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
-    advance_runtime_tick,
+    advance_runtime_tick, BuffResource, ElementalResource, FishingResource, GroupResource,
+    HeroInventoryResource, InventoryResource, ItemRentalRecordState, ItemRentalResource,
+    MapRuntimeResource, MountResource, NpcStateResource, ObjectIdAllocatorResource,
+    PlayerActionTimingResource, PlayerMovementTimingResource, PlayerPermissionResource,
+    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeClockResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
+    Stage5SystemsResource,
 };
 use super::save::*;
 use super::skills::*;
@@ -45,7 +45,7 @@ use crate::config::{
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
 };
-use mir2_game_data::{CrystalMonsterTemplate, LanguageCode, crystal_monster_by_name};
+use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
     ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
     UserItemRentalInformation,
@@ -110,6 +110,13 @@ pub struct ActiveSessionIdentity {
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PasskeyRecoveryPreflight {
+    ExistingEligible,
+    Missing,
+    Rejected,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -250,10 +257,8 @@ impl SimulationSession {
         Ok(language)
     }
 
-    pub fn save_active_character(&self) {
-        if let Err(error) = persist_active_character_save(self.app.world()) {
-            eprintln!("failed to save active character: {error}");
-        }
+    pub fn save_active_character(&self) -> Result<(), String> {
+        persist_active_character_save(self.app.world())
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
@@ -365,6 +370,38 @@ impl SimulationSession {
         vec![ServerPacket::Connected]
     }
 
+    pub fn standard_login_recovery_preflight(
+        config: &SimulationConfig,
+        account_id: &str,
+        password: &str,
+    ) -> Result<bool, String> {
+        standard_login_recovery_preflight(config, account_id, password)
+            .map(|result| matches!(result, RecoveryLoginPreflight::Eligible))
+    }
+
+    pub fn passkey_login_recovery_preflight(
+        config: &SimulationConfig,
+        account_id: &str,
+    ) -> Result<PasskeyRecoveryPreflight, String> {
+        passkey_login_recovery_preflight(config, account_id).map(|result| match result {
+            RecoveryLoginPreflight::Eligible => PasskeyRecoveryPreflight::ExistingEligible,
+            RecoveryLoginPreflight::Missing => PasskeyRecoveryPreflight::Missing,
+            RecoveryLoginPreflight::Banned(_) | RecoveryLoginPreflight::Rejected => {
+                PasskeyRecoveryPreflight::Rejected
+            }
+        })
+    }
+
+    /// Trusted Gateway-only provisioning boundary. The caller must have verified the
+    /// external passkey token and must hold recovery-journal clearance for this identity.
+    /// This capability is intentionally absent from WorldCommand and Zone RPC.
+    pub fn provision_passkey_account(
+        config: &SimulationConfig,
+        account_id: &str,
+    ) -> Result<(), String> {
+        super::save::provision_passkey_account(config, account_id)
+    }
+
     pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
         let config = self
             .app
@@ -470,6 +507,32 @@ impl SimulationSession {
             character_index: character.index,
             character_name: character.name.clone(),
         })
+    }
+
+    /// Select an account for trusted recovery-journal replay without accepting
+    /// or retaining authentication material. This is deliberately not exposed
+    /// through `ClientPacket`; callers must validate the journal first.
+    pub fn select_account_for_recovery(&mut self, account_id: &str) -> Result<(), String> {
+        let config = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
+        let characters = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store lock poisoned during recovery replay".to_string())?
+            .accounts
+            .get(account_id)
+            .map(|account| account.characters.clone())
+            .ok_or_else(|| "recovery account does not exist".to_string())?;
+        let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+        session.account_id = Some(account_id.to_string());
+        session.characters = characters;
+        session.selected_character = None;
+        session.clear_active_save_revision();
+        Ok(())
     }
 
     pub fn active_zone_join_snapshot(&self, session_id: impl Into<String>) -> Option<ZoneJoin> {

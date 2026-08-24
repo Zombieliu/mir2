@@ -4,7 +4,8 @@ use mir2_protocol::Point;
 
 use super::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision, point_in_bounds,
-    runtime_active_map_collision_data, runtime_map_collision_data, runtime_world_map_collision_data,
+    runtime_active_map_collision_data, runtime_map_collision_data,
+    runtime_world_map_collision_data,
 };
 
 #[test]
@@ -71,7 +72,10 @@ fn collision_data_for_map_or_config_keeps_non_crystalworld_starter_collision_for
 fn active_full_bichon_collision_wins_over_starter_config_but_starter_field_keeps_starter_collision()
 {
     let config = SimulationConfig::default();
-    assert_eq!(config.monster_spawn_source, MonsterSpawnSource::StarterScenario);
+    assert_eq!(
+        config.monster_spawn_source,
+        MonsterSpawnSource::StarterScenario
+    );
 
     let active_bichon = mir2_protocol::MapInformation {
         map_index: 0,
@@ -110,8 +114,7 @@ fn active_full_bichon_collision_wins_over_starter_config_but_starter_field_keeps
     let point = (full_world.collision.region_bounds.min_y
         ..=full_world.collision.region_bounds.max_y)
         .find_map(|y| {
-            (full_world.collision.region_bounds.min_x
-                ..=full_world.collision.region_bounds.max_x)
+            (full_world.collision.region_bounds.min_x..=full_world.collision.region_bounds.max_x)
                 .find_map(|x| {
                     let point = Point { x, y };
                     let outside_starter =

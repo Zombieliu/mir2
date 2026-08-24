@@ -6,8 +6,8 @@ use mir2_protocol::{MirDirection, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    GeneralMeowMeowState, Monster, MonsterAgent, MonsterAiState, MonsterVitals, entity_facing,
-    entity_name, entity_object_id, entity_position, player_entity,
+    entity_facing, entity_name, entity_object_id, entity_position, player_entity,
+    GeneralMeowMeowState, Monster, MonsterAgent, MonsterAiState, MonsterVitals,
 };
 use super::super::crystal_compat::*;
 use super::super::monsters::*;

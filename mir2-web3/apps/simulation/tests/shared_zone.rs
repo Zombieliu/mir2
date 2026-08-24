@@ -9,13 +9,26 @@ use mir2_protocol::{
 };
 use mir2_simulation::{
     GroundDropLootSnapshot, GroundDropSnapshot, SessionId, SimulationConfig, SimulationSession,
-    WorldEntityDisposition, WorldEntityKind, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata,
-    ZoneMonsterDefense, ZoneMonsterSpawn, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination,
-    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
+    WorldEntityDisposition, WorldEntityKind, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
+    ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterSpawn, ZoneNpcTeleportConfig,
+    ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 
 fn session(value: &str) -> SessionId {
     SessionId::new(value)
+}
+
+fn login_demo_account(session: &mut SimulationSession) {
+    let packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })),
+        "login packets: {packets:?}"
+    );
 }
 
 fn join(session_id: &str, object_id: u32, name: &str, x: i32, y: i32) -> ZoneJoin {
@@ -5139,7 +5152,10 @@ fn materialized_melee_rejection_is_atomic_and_allowed_attack_commits() {
         ServerPacket::UserLocation { .. }
     )));
     assert_eq!(zone.native_monster_count(), 0);
-    assert_eq!(zone.canonical_state_root().expect("state root"), before_root);
+    assert_eq!(
+        zone.canonical_state_root().expect("state root"),
+        before_root
+    );
     assert!(!rejected.iter().any(|outbound| matches!(
         outbound,
         ZoneOutbound::ToMany { packets, .. } | ZoneOutbound::ToAll { packets }
@@ -5210,7 +5226,10 @@ fn zone_direct_and_materialized_melee_reject_neutral_monsters_atomically() {
         ServerPacket::UserLocation { .. }
     )));
     assert!(!has_packet(&direct, &observer, |_| true));
-    assert_eq!(zone.canonical_state_root().expect("state root"), direct_root_before);
+    assert_eq!(
+        zone.canonical_state_root().expect("state root"),
+        direct_root_before
+    );
     assert_eq!(
         zone.native_monster_snapshots()
             .into_iter()
@@ -5573,7 +5592,10 @@ fn materialized_range_refresh_rejects_stale_readiness_before_spawn() {
         ServerPacket::UserLocation { .. }
     )));
     assert_eq!(zone.native_monster_count(), 0);
-    assert_eq!(zone.canonical_state_root().expect("state root"), before_root);
+    assert_eq!(
+        zone.canonical_state_root().expect("state root"),
+        before_root
+    );
 }
 
 #[test]
@@ -5620,7 +5642,10 @@ fn materialized_range_rejects_neutral_ai_atomically() {
             ))
     )));
     assert_eq!(zone.native_monster_count(), 0);
-    assert_eq!(zone.canonical_state_root().expect("state root"), before_root);
+    assert_eq!(
+        zone.canonical_state_root().expect("state root"),
+        before_root
+    );
 }
 
 #[test]
@@ -5733,14 +5758,18 @@ fn observer_actions_require_the_authenticated_owner_actor() {
         packets: spoofed,
         now_ms: 11,
     });
-    assert!(!has_packet(&identity_missing, &observer, |packet| matches!(
-        packet,
-        ServerPacket::ObjectAttack { .. }
-            | ServerPacket::ObjectRangeAttack { .. }
-            | ServerPacket::ObjectMagic { .. }
-            | ServerPacket::ObjectSpell { .. }
-            | ServerPacket::ObjectHarvest { .. }
-    )));
+    assert!(!has_packet(
+        &identity_missing,
+        &observer,
+        |packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { .. }
+                | ServerPacket::ObjectRangeAttack { .. }
+                | ServerPacket::ObjectMagic { .. }
+                | ServerPacket::ObjectSpell { .. }
+                | ServerPacket::ObjectHarvest { .. }
+        )
+    ));
 }
 
 #[test]
@@ -9593,11 +9622,7 @@ fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics(
         270,
     )));
     zone.handle(ZoneCommand::Join(join(
-        "stranger",
-        103,
-        "Stranger",
-        330,
-        270,
+        "stranger", 103, "Stranger", 330, 270,
     )));
 
     zone.handle(ZoneCommand::SyncGroundDrops {
@@ -10276,6 +10301,7 @@ fn zone_one_shot_map_shout_is_consumed_before_next_profile_sync() {
 #[test]
 fn call_npc_packet_opens_runtime_npc_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.transfer_map("crystal:0:327:271");
 
@@ -10311,6 +10337,7 @@ fn call_npc_packet_opens_runtime_npc_dialog() {
 #[test]
 fn session_applies_shared_monster_snapshot_to_local_runtime() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut shared_monster = session
         .world_snapshot()
@@ -10346,6 +10373,7 @@ fn session_applies_shared_monster_snapshot_to_local_runtime() {
 #[test]
 fn session_materializes_missing_shared_deer_corpse_and_resets_it_on_respawn() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut shared_deer = session
         .world_snapshot()
@@ -10412,6 +10440,7 @@ fn session_materializes_missing_shared_deer_corpse_and_resets_it_on_respawn() {
 #[test]
 fn session_resets_shared_deer_harvest_state_on_explicit_zone_revive() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut shared_deer = session
         .world_snapshot()
@@ -10474,6 +10503,7 @@ fn session_resets_shared_deer_harvest_state_on_explicit_zone_revive() {
 #[test]
 fn session_mirrors_zone_monster_death_until_explicit_revive() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let monster = session
         .world_snapshot()

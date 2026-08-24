@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
-    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString, rand_core::OsRng},
 };
 use sha2::{Digest, Sha256};
 
@@ -13,16 +13,17 @@ use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    AccountBanStatus, AccountRecord, CharacterRecord, CharacterSaveRecord, SimulationConfig,
-    Stage5MailMessage, Stage5SystemsState, apply_crystal_map_metadata, crystal_base_vitals,
+    apply_crystal_map_metadata, crystal_base_vitals, AccountBanStatus, AccountRecord,
+    AccountSourceRefreshOutcome, CharacterRecord, CharacterSaveRecord, SimulationConfig,
+    Stage5MailMessage, Stage5SystemsState,
 };
 
 use super::components::{
-    PlayerVitals, entity_facing, entity_player_vitals, entity_position, player_entity,
+    entity_facing, entity_player_vitals, entity_position, player_entity, PlayerVitals,
 };
 use super::crystal_compat::BASE_STORAGE_SLOTS;
 use super::equipment::{
-    EquipmentState, refresh_mount_resource_from_equipment, seed_equipment_items_for_character,
+    refresh_mount_resource_from_equipment, seed_equipment_items_for_character, EquipmentState,
 };
 use super::inventory::{
     crystal_start_inventory_items, normalize_inventory_known_item_metadata,
@@ -35,13 +36,13 @@ use super::map::{
     spawn_config_visible_npcs, spawn_visible_world_for_current_map,
 };
 use super::packets::*;
-use super::quests::{QuestState, effective_crystal_quest_info_packets};
+use super::quests::{effective_crystal_quest_info_packets, QuestState};
 use super::resources::{
-    BuffResource, HeroInventoryResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
-    NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
+    current_language, runtime_tick, set_runtime_tick, BuffResource, HeroInventoryResource,
+    InventoryResource, ItemRentalResource, MapRuntimeResource, NpcStateResource,
+    ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
     PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
-    SessionResource, SkillResource, Stage5SystemsResource, current_language, runtime_tick,
-    set_runtime_tick,
+    SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 use super::skills::seed_skills;
@@ -190,21 +191,60 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     })
 }
 
+pub(super) fn active_session_mutating_account_id(session: &SessionResource) -> Option<String> {
+    let account_id = session.account_id.as_ref()?;
+    if account_id.is_empty() || account_id.as_str() != account_id.trim() {
+        return None;
+    }
+    Some(account_id.clone())
+}
+
+fn exact_character_identity_matches(
+    character: &CharacterRecord,
+    expected: &CharacterRecord,
+) -> bool {
+    character.index == expected.index && character.name == expected.name
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) enum CrystalCharacterSelectState {
+    Authenticated { account_id: String },
+    Unauthenticated,
+    InGame,
+}
+
+/// Crystal dispatches character creation, deletion, and StartGame only while
+/// the connection is in Select. Preserve that stage check before considering
+/// whether an account is bound, then require the exact canonical account key.
+pub(super) fn crystal_character_select_state(
+    session: &SessionResource,
+) -> CrystalCharacterSelectState {
+    if session.selected_character.is_some() {
+        return CrystalCharacterSelectState::InGame;
+    }
+    match active_session_mutating_account_id(session) {
+        Some(account_id) => CrystalCharacterSelectState::Authenticated { account_id },
+        None => CrystalCharacterSelectState::Unauthenticated,
+    }
+}
+
 pub(super) fn persist_active_character_save(world: &World) -> Result<(), String> {
     let Some(save) = snapshot_active_character_save(world) else {
         return Ok(());
     };
-    let Some(account_id) = world
-        .resource::<SessionResource>()
-        .account_id
-        .as_deref()
-        .map(str::trim)
-        .filter(|account_id| !account_id.is_empty())
-        .map(str::to_owned)
-    else {
-        eprintln!("refusing to persist active character without an authenticated account identity");
-        return Ok(());
+    let session = world.resource::<SessionResource>();
+    let Some(account_id) = active_session_mutating_account_id(session) else {
+        return Err(
+            "refusing to persist active character without an authenticated account identity"
+                .to_string(),
+        );
     };
+    let active_character = session.selected_character.as_ref().ok_or_else(|| {
+        "refusing to persist active character without a selected character".to_string()
+    })?;
+    if !exact_character_identity_matches(&save.character, active_character) {
+        return Err("active character full-save snapshot identity mismatch".to_string());
+    }
     let expected_revision = save.revision;
     match persist_character_save(world, &account_id, save)? {
         PersistCharacterSaveResult::Full(committed_revision) => {
@@ -242,13 +282,8 @@ where
 {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
     let session = world.resource::<SessionResource>();
-    let account_id = session
-        .account_id
-        .as_deref()
-        .map(str::trim)
-        .filter(|account_id| !account_id.is_empty())
-        .ok_or_else(|| "active character transaction requires an account identity".to_string())?
-        .to_string();
+    let account_id = active_session_mutating_account_id(session)
+        .ok_or_else(|| "active character transaction requires an account identity".to_string())?;
     let active_character = session
         .selected_character
         .as_ref()
@@ -261,52 +296,57 @@ where
 
     let (result, baseline_revision, committed_revision) =
         config.commit_account_store_transaction(&touched_accounts, move |store| {
-        let account = store
-            .accounts
-            .get(&account_id)
-            .ok_or_else(|| "active character account changed before commit".to_string())?;
-        let persisted_character = account
-            .characters
-            .iter()
-            .find(|character| character.index == active_character.index)
-            .ok_or_else(|| "active character changed before commit".to_string())?;
-        if persisted_character.name != active_character.name
-            || active_save.character.index != active_character.index
-            || active_save.character.name != active_character.name
-        {
-            return Err("active character transaction identity mismatch".to_string());
-        }
-        let persisted_save = account
-            .saves
-            .get(&active_character.index)
-            .cloned()
-            .ok_or_else(|| "active character save changed before commit".to_string())?;
-        let baseline_revision = persisted_save.revision;
+            let account = store
+                .accounts
+                .get(&account_id)
+                .ok_or_else(|| "active character account changed before commit".to_string())?;
+            let persisted_character = account
+                .characters
+                .iter()
+                .find(|character| character.index == active_character.index)
+                .ok_or_else(|| "active character changed before commit".to_string())?;
+            if !exact_character_identity_matches(persisted_character, &active_character)
+                || !exact_character_identity_matches(&active_save.character, &active_character)
+            {
+                return Err("active character transaction identity mismatch".to_string());
+            }
+            let persisted_save = account
+                .saves
+                .get(&active_character.index)
+                .cloned()
+                .ok_or_else(|| "active character save changed before commit".to_string())?;
+            if !exact_character_identity_matches(&persisted_save.character, &active_character) {
+                return Err(
+                    "active character durable save identity mismatch before transaction"
+                        .to_string(),
+                );
+            }
+            let baseline_revision = persisted_save.revision;
 
-        // A current session may atomically include its own unsaved World state.
-        // A stale session must instead mutate the lock-held persisted baseline,
-        // never its old full snapshot.
-        let mut staged_save = if baseline_revision == expected_revision {
-            let mut current = active_save;
-            merge_persisted_mail_into_character_save(&mut current, &persisted_save)?;
-            current
-        } else {
-            persisted_save
-        };
+            // A current session may atomically include its own unsaved World state.
+            // A stale session must instead mutate the lock-held persisted baseline,
+            // never its old full snapshot.
+            let mut staged_save = if baseline_revision == expected_revision {
+                let mut current = active_save;
+                merge_persisted_mail_into_character_save(&mut current, &persisted_save)?;
+                current
+            } else {
+                persisted_save
+            };
 
-        let result = transaction(&mut staged_save)?;
-        let committed_revision = baseline_revision
-            .checked_add(1)
-            .ok_or_else(|| "active character revision exhausted".to_string())?;
-        staged_save.revision = committed_revision;
-        store
-            .accounts
-            .get_mut(&account_id)
-            .expect("validated active account should exist")
-            .saves
-            .insert(active_character.index, staged_save);
-        Ok((result, baseline_revision, committed_revision))
-    })?;
+            let result = transaction(&mut staged_save)?;
+            let committed_revision = baseline_revision
+                .checked_add(1)
+                .ok_or_else(|| "active character revision exhausted".to_string())?;
+            staged_save.revision = committed_revision;
+            store
+                .accounts
+                .get_mut(&account_id)
+                .expect("validated active account should exist")
+                .saves
+                .insert(active_character.index, staged_save);
+            Ok((result, baseline_revision, committed_revision))
+        })?;
 
     if baseline_revision == expected_revision {
         world
@@ -364,30 +404,43 @@ impl SimulationSession {
     }
 }
 
+#[cfg(test)]
+#[path = "save_fail_closed_tests.rs"]
+mod save_fail_closed_tests;
+
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
-    let (config, account_id, character_index) = {
+    let (config, account_id, selected_character) = {
         let config = world.resource::<RuntimeConfigResource>().config.clone();
         let session = world.resource::<SessionResource>();
-        let Some(account_id) = session.account_id.clone() else {
+        let Some(account_id) = active_session_mutating_account_id(session) else {
             return false;
         };
         let Some(character) = session.selected_character.as_ref() else {
             return false;
         };
-        (config, account_id, character.index)
+        (config, account_id, character.clone())
     };
 
     let external_mail = {
         let Ok(store) = config.account_store.lock() else {
             return false;
         };
-        let Some(save) = store
-            .accounts
-            .get(&account_id)
-            .and_then(|account| account.saves.get(&character_index))
-        else {
+        let Some(account) = store.accounts.get(&account_id) else {
             return false;
         };
+        if !account
+            .characters
+            .iter()
+            .any(|character| exact_character_identity_matches(character, &selected_character))
+        {
+            return false;
+        }
+        let Some(save) = account.saves.get(&selected_character.index) else {
+            return false;
+        };
+        if !exact_character_identity_matches(&save.character, &selected_character) {
+            return false;
+        }
         save.stage5_systems_json
             .as_deref()
             .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
@@ -430,9 +483,7 @@ pub(super) fn merge_external_stage5_mail(
             .position(|local| stage5_mail_same_delivery(local, &external))
         {
             let local = &mut local_mail[local_index];
-            if let Some(ledger_changed) =
-                merge_native_game_shop_ledger_mail(local, &external)?
-            {
+            if let Some(ledger_changed) = merge_native_game_shop_ledger_mail(local, &external)? {
                 changed |= ledger_changed;
                 continue;
             }
@@ -515,14 +566,8 @@ fn legacy_stage5_mail_delivery_nonce(mail: &Stage5MailMessage) -> Result<String,
     // rows with the same ID and header are intentionally treated as one
     // delivery: where history is ambiguous, preventing a duplicate claim is
     // safer than preserving a possibly duplicated entry.
-    let identity = serde_json::to_vec(&(
-        mail.id,
-        &mail.from,
-        &mail.to,
-        &mail.subject,
-        &mail.body,
-    ))
-    .map_err(|error| format!("failed to encode legacy mail identity: {error}"))?;
+    let identity = serde_json::to_vec(&(mail.id, &mail.from, &mail.to, &mail.subject, &mail.body))
+        .map_err(|error| format!("failed to encode legacy mail identity: {error}"))?;
     let digest = Sha256::digest(identity);
     let mut nonce = String::with_capacity(7 + digest.len() * 2);
     nonce.push_str("legacy-");
@@ -688,10 +733,26 @@ pub(super) fn persist_character_save(
     mut save: CharacterSaveRecord,
 ) -> Result<PersistCharacterSaveResult, String> {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let active_character = {
+        let session = world.resource::<SessionResource>();
+        let active_account_id = active_session_mutating_account_id(session).ok_or_else(|| {
+            "full character save requires an authenticated account identity".to_string()
+        })?;
+        if active_account_id != account_id {
+            return Err("full character save account identity mismatch".to_string());
+        }
+        session
+            .selected_character
+            .as_ref()
+            .ok_or_else(|| "full character save requires a selected character".to_string())?
+            .clone()
+    };
+    if !exact_character_identity_matches(&save.character, &active_character) {
+        return Err("full character save snapshot identity mismatch".to_string());
+    }
     let account_id = account_id.to_string();
     let expected_revision = save.revision;
-    let character_index = save.character.index;
-    let character_name = save.character.name.clone();
+    let character_index = active_character.index;
     let touched_accounts = vec![account_id.clone()];
 
     config.commit_account_store_transaction(&touched_accounts, move |store| {
@@ -704,7 +765,9 @@ pub(super) fn persist_character_save(
             .iter()
             .find(|character| character.index == character_index)
             .ok_or_else(|| "full character save requires an existing character".to_string())?;
-        if persisted_character.name != character_name || save.character.name != character_name {
+        if !exact_character_identity_matches(persisted_character, &active_character)
+            || !exact_character_identity_matches(&save.character, &active_character)
+        {
             return Err("full character save identity mismatch".to_string());
         }
         let persisted_save = account
@@ -712,6 +775,9 @@ pub(super) fn persist_character_save(
             .get(&character_index)
             .cloned()
             .ok_or_else(|| "full character save requires an existing durable save".to_string())?;
+        if !exact_character_identity_matches(&persisted_save.character, &active_character) {
+            return Err("full character durable save identity mismatch".to_string());
+        }
         if persisted_save.revision != expected_revision {
             let durable_revision = persisted_save.revision;
             let mut durable_save = persisted_save;
@@ -980,24 +1046,24 @@ pub(super) fn create_account_with_password(
             return 2;
         }
     }
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    if store.accounts.contains_key(account_id) {
-        return 7;
-    }
-    let mut account = AccountRecord::empty();
     let Ok(password_hash) = hash_account_password(password) else {
         return 0;
     };
-    account.password = password_hash;
-    store.accounts.insert(account_id.to_string(), account);
-    drop(store);
-    if let Err(error) = config.save_account_store_account(account_id) {
-        eprintln!("failed to persist account store: {error}");
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    match config.commit_account_store_transaction(&touched_accounts, move |store| {
+        if store.accounts.contains_key(&account_id) {
+            return Err("account already exists".to_string());
+        }
+        let mut account = AccountRecord::empty();
+        account.password = password_hash;
+        store.accounts.insert(account_id, account);
+        Ok(())
+    }) {
+        Ok(()) => 8,
+        Err(error) if error == "account already exists" => 7,
+        Err(_) => 0,
     }
-    8
 }
 
 pub(super) enum AccountLoginResult {
@@ -1006,49 +1072,155 @@ pub(super) enum AccountLoginResult {
     InvalidCredentials,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) enum RecoveryLoginPreflight {
+    Eligible,
+    Missing,
+    Banned(AccountBanStatus),
+    Rejected,
+}
+
+enum RecoveryCredential<'a> {
+    Standard(&'a str),
+    Passkey,
+}
+
+fn recovery_login_preflight_after_source_refresh(
+    config: &SimulationConfig,
+    account_id: &str,
+    credential: RecoveryCredential<'_>,
+    source_refresh: Result<AccountSourceRefreshOutcome, String>,
+) -> Result<RecoveryLoginPreflight, String> {
+    let source_refresh = source_refresh?;
+    if source_refresh == AccountSourceRefreshOutcome::Missing {
+        return Ok(RecoveryLoginPreflight::Missing);
+    }
+    let store = config
+        .account_store
+        .lock()
+        .map_err(|_| "account store mutex poisoned during login preflight".to_string())?;
+    let Some(account) = store.accounts.get(account_id) else {
+        return Ok(match credential {
+            RecoveryCredential::Passkey => RecoveryLoginPreflight::Missing,
+            RecoveryCredential::Standard(_) => RecoveryLoginPreflight::Rejected,
+        });
+    };
+    if let Some(ban) = account.active_ban(unix_now_ms()) {
+        return Ok(RecoveryLoginPreflight::Banned(ban));
+    }
+    match credential {
+        RecoveryCredential::Standard(password) => {
+            if verify_account_password(&account.password, password) == PasswordVerification::Invalid
+            {
+                Ok(RecoveryLoginPreflight::Rejected)
+            } else {
+                Ok(RecoveryLoginPreflight::Eligible)
+            }
+        }
+        RecoveryCredential::Passkey => Ok(RecoveryLoginPreflight::Eligible),
+    }
+}
+
+pub(super) fn standard_login_recovery_preflight(
+    config: &SimulationConfig,
+    account_id: &str,
+    password: &str,
+) -> Result<RecoveryLoginPreflight, String> {
+    if is_wallet_namespaced_account(account_id)
+        || (production_identity_policy_enabled() && !commercial_account_id_is_valid(account_id))
+    {
+        return Ok(RecoveryLoginPreflight::Rejected);
+    }
+    recovery_login_preflight_after_source_refresh(
+        config,
+        account_id,
+        RecoveryCredential::Standard(password),
+        config.refresh_account_store_account(account_id),
+    )
+}
+
+pub(super) fn passkey_login_recovery_preflight(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> Result<RecoveryLoginPreflight, String> {
+    recovery_login_preflight_after_source_refresh(
+        config,
+        account_id,
+        RecoveryCredential::Passkey,
+        config.refresh_account_store_account(account_id),
+    )
+}
+
 pub(super) fn login_account(
     config: &SimulationConfig,
     account_id: &str,
     password: &str,
 ) -> AccountLoginResult {
-    if is_wallet_namespaced_account(account_id) {
-        return AccountLoginResult::InvalidCredentials;
+    match standard_login_recovery_preflight(config, account_id, password) {
+        Ok(RecoveryLoginPreflight::Eligible) => {}
+        Ok(RecoveryLoginPreflight::Missing) => {
+            return AccountLoginResult::InvalidCredentials;
+        }
+        Ok(RecoveryLoginPreflight::Banned(ban)) => return AccountLoginResult::Banned(ban),
+        Ok(RecoveryLoginPreflight::Rejected) => {
+            return AccountLoginResult::InvalidCredentials;
+        }
+        Err(_error) => {
+            eprintln!("authoritative account source unavailable during standard login");
+            return AccountLoginResult::InvalidCredentials;
+        }
     }
-    if let Err(error) = config.refresh_account_store_account(account_id) {
-        eprintln!("failed to refresh postgres account {account_id}: {error}");
-    }
-    if production_identity_policy_enabled() && !commercial_account_id_is_valid(account_id) {
-        return AccountLoginResult::InvalidCredentials;
-    }
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    let Some(account) = store.accounts.get_mut(account_id) else {
+    let verification = {
+        let store = match config.account_store.lock() {
+            Ok(store) => store,
+            Err(_) => return AccountLoginResult::InvalidCredentials,
+        };
+        let Some(account) = store.accounts.get(account_id) else {
+            return AccountLoginResult::InvalidCredentials;
+        };
+        if let Some(ban) = account.active_ban(unix_now_ms()) {
+            return AccountLoginResult::Banned(ban);
+        }
+        match verify_account_password(&account.password, password) {
+            PasswordVerification::Invalid => return AccountLoginResult::InvalidCredentials,
+            PasswordVerification::Current => {
+                return AccountLoginResult::Success(account.characters.clone());
+            }
+            PasswordVerification::LegacyNeedsMigration => {
+                PasswordVerification::LegacyNeedsMigration
+            }
+        }
+    };
+    debug_assert_eq!(verification, PasswordVerification::LegacyNeedsMigration);
+    let Ok(password_hash) = hash_account_password(password) else {
         return AccountLoginResult::InvalidCredentials;
     };
-    let now_ms = unix_now_ms();
-    if let Some(ban) = account.active_ban(now_ms) {
-        return AccountLoginResult::Banned(ban);
-    }
-    match verify_account_password(&account.password, password) {
-        PasswordVerification::Invalid => AccountLoginResult::InvalidCredentials,
-        PasswordVerification::Current => AccountLoginResult::Success(account.characters.clone()),
-        PasswordVerification::LegacyNeedsMigration => {
-            let Ok(password_hash) = hash_account_password(password) else {
-                return AccountLoginResult::InvalidCredentials;
-            };
-            account.password = password_hash;
-            let characters = account.characters.clone();
-            drop(store);
-            if let Err(error) = config.save_account_store_account(account_id) {
-                eprintln!(
-                    "failed to persist Argon2id password migration for {account_id}: {error}"
-                );
-                return AccountLoginResult::InvalidCredentials;
-            }
-            AccountLoginResult::Success(characters)
+    let account_id = account_id.to_string();
+    let password = password.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    let migration = config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let account = store
+            .accounts
+            .get_mut(&account_id)
+            .ok_or_else(|| "account disappeared during password migration".to_string())?;
+        if let Some(ban) = account.active_ban(unix_now_ms()) {
+            return Ok(Err(ban));
         }
+        match verify_account_password(&account.password, &password) {
+            PasswordVerification::Invalid => {
+                Err("credentials changed during password migration".to_string())
+            }
+            PasswordVerification::Current => Ok(Ok(account.characters.clone())),
+            PasswordVerification::LegacyNeedsMigration => {
+                account.password = password_hash;
+                Ok(Ok(account.characters.clone()))
+            }
+        }
+    });
+    match migration {
+        Ok(Ok(characters)) => AccountLoginResult::Success(characters),
+        Ok(Err(ban)) => AccountLoginResult::Banned(ban),
+        Err(_) => AccountLoginResult::InvalidCredentials,
     }
 }
 
@@ -1056,38 +1228,79 @@ pub(super) fn login_passkey_account(
     config: &SimulationConfig,
     account_id: &str,
 ) -> AccountLoginResult {
-    if let Err(error) = config.refresh_account_store_account(account_id) {
-        eprintln!("failed to refresh postgres passkey account {account_id}: {error}");
-    }
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    let created = !store.accounts.contains_key(account_id);
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(AccountRecord::empty);
-    let now_ms = unix_now_ms();
-    if let Some(ban) = account.active_ban(now_ms) {
-        return AccountLoginResult::Banned(ban);
-    }
-    // Wallet/passkey accounts authenticate via the passkey token, never a
-    // password. Stamp the locked sentinel so the classic password path can never
-    // match — this also heals any legacy record persisted with the guessable
-    // default password before this hardening.
-    let password_locked = account.password != LOCKED_ACCOUNT_PASSWORD;
-    if password_locked {
-        account.password = LOCKED_ACCOUNT_PASSWORD.to_string();
-    }
-    let characters = account.characters.clone();
-    drop(store);
-    if created || password_locked {
-        if let Err(error) = config.save_account_store_account(account_id) {
-            eprintln!("failed to persist passkey account store: {error}");
+    match passkey_login_recovery_preflight(config, account_id) {
+        Ok(RecoveryLoginPreflight::Eligible) => {}
+        Ok(RecoveryLoginPreflight::Missing) | Ok(RecoveryLoginPreflight::Rejected) => {
+            return AccountLoginResult::InvalidCredentials;
+        }
+        Ok(RecoveryLoginPreflight::Banned(ban)) => return AccountLoginResult::Banned(ban),
+        Err(_) => {
+            eprintln!("authoritative account source unavailable during passkey login");
+            return AccountLoginResult::InvalidCredentials;
         }
     }
-    AccountLoginResult::Success(characters)
+
+    {
+        let store = match config.account_store.lock() {
+            Ok(store) => store,
+            Err(_) => return AccountLoginResult::InvalidCredentials,
+        };
+        let Some(account) = store.accounts.get(account_id) else {
+            return AccountLoginResult::InvalidCredentials;
+        };
+        if account.password == LOCKED_ACCOUNT_PASSWORD {
+            return AccountLoginResult::Success(account.characters.clone());
+        }
+    }
+
+    let account_id_owned = account_id.to_string();
+    let transaction_accounts = vec![account_id_owned.clone()];
+    let mutation = config.commit_account_store_transaction(&transaction_accounts, |store| {
+        let account = store
+            .accounts
+            .get_mut(&account_id_owned)
+            .ok_or_else(|| "passkey account disappeared before durable healing".to_string())?;
+        if let Some(ban) = account.active_ban(unix_now_ms()) {
+            return Ok(Err(ban));
+        }
+        account.password = LOCKED_ACCOUNT_PASSWORD.to_string();
+        Ok(Ok(account.characters.clone()))
+    });
+    match mutation {
+        Ok(Ok(characters)) => AccountLoginResult::Success(characters),
+        Ok(Err(ban)) => AccountLoginResult::Banned(ban),
+        Err(_) => {
+            eprintln!("durable passkey account healing failed");
+            AccountLoginResult::InvalidCredentials
+        }
+    }
+}
+
+pub(super) fn provision_passkey_account(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> Result<(), String> {
+    match passkey_login_recovery_preflight(config, account_id)? {
+        RecoveryLoginPreflight::Missing => {}
+        RecoveryLoginPreflight::Eligible => {
+            return Err("passkey account already exists".to_string());
+        }
+        RecoveryLoginPreflight::Banned(_) | RecoveryLoginPreflight::Rejected => {
+            return Err("passkey account is not eligible for provisioning".to_string());
+        }
+    }
+
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        if store.accounts.contains_key(&account_id) {
+            return Err("passkey account appeared during provisioning".to_string());
+        }
+        let mut account = AccountRecord::empty();
+        account.password = LOCKED_ACCOUNT_PASSWORD.to_string();
+        store.accounts.insert(account_id, account);
+        Ok(())
+    })
 }
 
 pub(super) fn active_account_ban(
@@ -1139,27 +1352,30 @@ pub(super) fn change_account_password(
         return 3;
     }
 
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    let Some(account) = store.accounts.get_mut(account_id) else {
-        return 4;
-    };
-    if verify_account_password(&account.password, current_password) == PasswordVerification::Invalid
-    {
-        return 5;
-    }
-
     let Ok(password_hash) = hash_account_password(new_password) else {
         return 0;
     };
-    account.password = password_hash;
-    drop(store);
-    if let Err(error) = config.save_account_store_account(account_id) {
-        eprintln!("failed to persist account store: {error}");
+    let account_id = account_id.to_string();
+    let current_password = current_password.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    match config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let account = store
+            .accounts
+            .get_mut(&account_id)
+            .ok_or_else(|| "account was not found".to_string())?;
+        if verify_account_password(&account.password, &current_password)
+            == PasswordVerification::Invalid
+        {
+            return Err("current password was rejected".to_string());
+        }
+        account.password = password_hash;
+        Ok(())
+    }) {
+        Ok(()) => 6,
+        Err(error) if error == "account was not found" => 4,
+        Err(error) if error == "current password was rejected" => 5,
+        Err(_) => 0,
     }
-    6
 }
 
 /// Recovery-only password reset used by the authenticated Gateway identity
@@ -1174,17 +1390,16 @@ pub fn reset_account_password_after_recovery(
     validate_commercial_identity_credentials(account_id, new_password)?;
     config.refresh_account_store_account(account_id)?;
     let password_hash = hash_account_password(new_password)?;
-    let mut store = config
-        .account_store
-        .lock()
-        .map_err(|_| "account store lock poisoned".to_string())?;
-    let account = store
-        .accounts
-        .get_mut(account_id)
-        .ok_or_else(|| "account was not found".to_string())?;
-    account.password = password_hash;
-    drop(store);
-    config.save_account_store_account(account_id)
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let account = store
+            .accounts
+            .get_mut(&account_id)
+            .ok_or_else(|| "account was not found".to_string())?;
+        account.password = password_hash;
+        Ok(())
+    })
 }
 
 pub fn validate_commercial_identity_credentials(
@@ -1204,26 +1419,20 @@ pub(super) fn add_character_to_account(
     config: &SimulationConfig,
     account_id: &str,
     mut character: CharacterRecord,
-) -> CharacterRecord {
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    character.index = store.allocate_character_index();
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(AccountRecord::empty);
-    account.saves.insert(
-        character.index,
-        crystal_new_character_save(config, character.clone()),
-    );
-    account.characters.push(character.clone());
-    drop(store);
-    if let Err(error) = config.save_account_store_account(account_id) {
-        eprintln!("failed to persist account store: {error}");
-    }
-    character
+) -> Result<CharacterRecord, String> {
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        character.index = store.allocate_character_index();
+        let save = crystal_new_character_save(config, character.clone());
+        let account = store
+            .accounts
+            .get_mut(&account_id)
+            .ok_or_else(|| "character creation requires an existing account".to_string())?;
+        account.saves.insert(character.index, save);
+        account.characters.push(character.clone());
+        Ok(character)
+    })
 }
 
 pub(super) fn delete_character_from_account(
@@ -1231,71 +1440,99 @@ pub(super) fn delete_character_from_account(
     account_id: &str,
     character_index: i32,
 ) -> Result<String, String> {
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    let Some(account) = store.accounts.get_mut(account_id) else {
-        return Err(format!("account {account_id} not found"));
-    };
-
-    let Some(existing) = account
-        .characters
-        .iter()
-        .find(|character| character.index == character_index)
-        .cloned()
-    else {
-        return Err("Character not found.".to_string());
-    };
-
-    account
-        .characters
-        .retain(|character| character.index != character_index);
-    account.saves.remove(&character_index);
-
-    drop(store);
-    if let Err(error) = config.save_account_store_account(account_id) {
-        eprintln!("failed to persist account store: {error}");
-    }
-    Ok(existing.name)
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let account = store
+            .accounts
+            .get_mut(&account_id)
+            .ok_or_else(|| "account was not found".to_string())?;
+        let existing = account
+            .characters
+            .iter()
+            .find(|character| character.index == character_index)
+            .cloned()
+            .ok_or_else(|| "Character not found.".to_string())?;
+        account
+            .characters
+            .retain(|character| character.index != character_index);
+        account.saves.remove(&character_index);
+        Ok(existing.name)
+    })
 }
 
 pub(super) fn character_save_for_start(
     config: &SimulationConfig,
     account_id: &str,
     character_index: i32,
-) -> Option<CharacterSaveRecord> {
-    let mut store = config
-        .account_store
-        .lock()
-        .expect("account store mutex should not be poisoned");
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-    let character = account
-        .characters
-        .iter()
-        .find(|character| character.index == character_index)
-        .cloned()?;
-    let save = account
-        .saves
-        .entry(character_index)
-        .or_insert_with(|| default_save_for_character(config, character.clone()));
-    let mut changed = false;
-    changed |= normalize_legacy_default_vitals(save);
-    changed |= normalize_legacy_synthetic_starter_equipment(save);
-    changed |= normalize_legacy_default_account_demo_seed_state(save);
-    changed |= normalize_legacy_crystal_new_character_seed_state(save);
-    changed |= normalize_legacy_crystal_level_one_empty_equipment(save);
-    let save = save.clone();
-    drop(store);
-    if changed {
-        if let Err(error) = config.save_account_store_account(account_id) {
-            eprintln!("failed to persist normalized character save: {error}");
-        }
+) -> Result<Option<CharacterSaveRecord>, String> {
+    if config.refresh_account_store_account(account_id)? == AccountSourceRefreshOutcome::Missing {
+        return Ok(None);
     }
-    Some(save)
+    let mut save = {
+        let store = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store lock poisoned".to_string())?;
+        let Some(account) = store.accounts.get(account_id) else {
+            return Ok(None);
+        };
+        let Some(character) = account
+            .characters
+            .iter()
+            .find(|character| character.index == character_index)
+        else {
+            return Ok(None);
+        };
+        let Some(save) = account.saves.get(&character_index) else {
+            return Ok(None);
+        };
+        if save.character.index != character.index || save.character.name != character.name {
+            return Ok(None);
+        }
+        save.clone()
+    };
+    let mut changed = false;
+    changed |= normalize_legacy_default_vitals(&mut save);
+    changed |= normalize_legacy_synthetic_starter_equipment(&mut save);
+    changed |= normalize_legacy_default_account_demo_seed_state(&mut save);
+    changed |= normalize_legacy_crystal_new_character_seed_state(&mut save);
+    changed |= normalize_legacy_crystal_level_one_empty_equipment(&mut save);
+    if !changed {
+        return Ok(Some(save));
+    }
+
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
+    config
+        .commit_account_store_transaction(&touched_accounts, move |store| {
+            let account = store
+                .accounts
+                .get_mut(&account_id)
+                .ok_or_else(|| "character start account disappeared".to_string())?;
+            let character_name = account
+                .characters
+                .iter()
+                .find(|character| character.index == character_index)
+                .map(|character| character.name.clone())
+                .ok_or_else(|| "character start character disappeared".to_string())?;
+            let persisted_save = account
+                .saves
+                .get_mut(&character_index)
+                .ok_or_else(|| "character start save disappeared".to_string())?;
+            if persisted_save.character.index != character_index
+                || persisted_save.character.name != character_name
+            {
+                return Err("character start save identity changed".to_string());
+            }
+            normalize_legacy_default_vitals(persisted_save);
+            normalize_legacy_synthetic_starter_equipment(persisted_save);
+            normalize_legacy_default_account_demo_seed_state(persisted_save);
+            normalize_legacy_crystal_new_character_seed_state(persisted_save);
+            normalize_legacy_crystal_level_one_empty_equipment(persisted_save);
+            Ok(persisted_save.clone())
+        })
+        .map(Some)
 }
 
 pub(super) fn crystal_new_character_save(
@@ -1511,7 +1748,8 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         // can additionally grant GM for the session without mutating the record.
         let gm_level = {
             let config = world.resource::<RuntimeConfigResource>().config.clone();
-            let account_id = world.resource::<SessionResource>().account_id.clone();
+            let account_id =
+                active_session_mutating_account_id(world.resource::<SessionResource>());
             let stored = account_id
                 .as_ref()
                 .and_then(|account_id| {
@@ -1711,19 +1949,18 @@ impl SimulationSession {
         self.handle_packet(ClientPacket::DeleteCharacter { character_index })
     }
     pub(super) fn delete_character_impl(&mut self, character_index: i32) -> Vec<ServerPacket> {
+        let account_id =
+            match crystal_character_select_state(self.app.world().resource::<SessionResource>()) {
+                CrystalCharacterSelectState::Authenticated { account_id } => account_id,
+                CrystalCharacterSelectState::Unauthenticated
+                | CrystalCharacterSelectState::InGame => return Vec::new(),
+            };
         let config = self
             .app
             .world()
             .resource::<RuntimeConfigResource>()
             .config
             .clone();
-        let account_id = self
-            .app
-            .world()
-            .resource::<SessionResource>()
-            .account_id
-            .clone()
-            .unwrap_or_else(|| "demo".to_string());
 
         match delete_character_from_account(&config, &account_id, character_index) {
             Ok(deleted_name) => {
@@ -1760,13 +1997,17 @@ impl SimulationSession {
 
 impl SimulationSession {
     pub(super) fn start_game(&mut self, character_index: i32) -> Vec<ServerPacket> {
-        if let Err(error) = persist_active_character_save(self.app.world()) {
-            eprintln!("character switch save rejected; retaining active session: {error}");
-            return vec![ServerPacket::StartGame {
-                result: 2,
-                resolution: 0,
-            }];
-        }
+        let account_id =
+            match crystal_character_select_state(self.app.world().resource::<SessionResource>()) {
+                CrystalCharacterSelectState::Authenticated { account_id } => account_id,
+                CrystalCharacterSelectState::Unauthenticated => {
+                    return vec![ServerPacket::StartGame {
+                        result: 1,
+                        resolution: 0,
+                    }];
+                }
+                CrystalCharacterSelectState::InGame => return Vec::new(),
+            };
         let save = {
             let config = self
                 .app
@@ -1774,13 +2015,6 @@ impl SimulationSession {
                 .resource::<RuntimeConfigResource>()
                 .config
                 .clone();
-            let account_id = self
-                .app
-                .world()
-                .resource::<SessionResource>()
-                .account_id
-                .clone()
-                .unwrap_or_else(|| "demo".to_string());
             if let Some(ban) = active_account_ban(&config, &account_id) {
                 return vec![ServerPacket::StartGameBanned {
                     reason: ban.reason,
@@ -1790,7 +2024,7 @@ impl SimulationSession {
             character_save_for_start(&config, &account_id, character_index)
         };
 
-        let Some(save) = save else {
+        let Ok(Some(save)) = save else {
             return vec![ServerPacket::StartGame {
                 result: 2,
                 resolution: 0,

@@ -3691,7 +3691,14 @@ mod dialog_security_tests {
     #[test]
     fn stale_dialog_quest_link_cannot_be_replayed_after_player_walks_away() {
         let mut session = SimulationSession::new(crate::config::SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
         session
@@ -3724,7 +3731,17 @@ mod dialog_security_tests {
             .insert(Position(Point { x: 300, y: 300 }));
         let packets = session.select_npc_dialog_target(&format!("@quest:accept:{GUIDE_QUEST_ID}"));
 
-        assert!(packets.is_empty());
+        assert!(packets.iter().all(|packet| {
+            !matches!(
+                packet,
+                ServerPacket::ChangeQuest { quest_id, .. }
+                    if *quest_id == GUIDE_QUEST_ID
+            ) && !matches!(
+                packet,
+                ServerPacket::CompleteQuest { completed_quests }
+                    if completed_quests.contains(&GUIDE_QUEST_ID)
+            )
+        }));
         assert_eq!(
             quest_stage(session.app.world(), GUIDE_QUEST_ID),
             Some(QuestStage::Available)

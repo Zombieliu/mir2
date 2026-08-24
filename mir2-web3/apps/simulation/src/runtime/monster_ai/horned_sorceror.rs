@@ -23,13 +23,13 @@ use mir2_protocol::{
 
 use super::super::combat::*;
 use super::super::components::{
-    Facing, Monster, MonsterAgent, MonsterAiState, MonsterVitals, Position, entity_name,
-    entity_object_id, entity_position, player_entity,
+    entity_name, entity_object_id, entity_position, player_entity, Facing, Monster, MonsterAgent,
+    MonsterAiState, MonsterVitals, Position,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
 use super::super::packets::*;
-use super::super::resources::{PendingGroundSpellAction, RuntimeQueueResource, current_language};
+use super::super::resources::{current_language, PendingGroundSpellAction, RuntimeQueueResource};
 
 use super::common::*;
 
@@ -699,7 +699,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::ClientPacket;
+    use mir2_protocol::{ClientPacket, ServerPacket};
     // `monster_is_damageable`, `player_entity`, `entity_position`, `can_occupy`,
     // `Monster`, `MonsterAgent`, `MonsterAiState`, `Facing`, `Position` are brought
     // in via the module-level globs (`use super::super::{monsters,components,movement}::*`
@@ -713,7 +713,14 @@ mod tests {
     /// so the test needs none of the `tests.rs` fixtures (out of reach here).
     fn session_with_player() -> SimulationSession {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         session
     }
 

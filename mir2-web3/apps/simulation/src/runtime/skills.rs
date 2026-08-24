@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-use crate::EquipmentSlot;
 use crate::config::SkillSnapshot;
+use crate::EquipmentSlot;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    CrystalItemTemplate, CrystalMagicTemplate, CrystalRespawnTemplate, LanguageCode,
-    SkillEffectTemplate, SkillTemplate, crystal_magic_by_spell, crystal_magic_manifest,
-    crystal_monster_by_name, localized_text_or_fallback, starter_server_data,
+    crystal_magic_by_spell, crystal_magic_manifest, crystal_monster_by_name,
+    localized_text_or_fallback, starter_server_data, CrystalItemTemplate, CrystalMagicTemplate,
+    CrystalRespawnTemplate, LanguageCode, SkillEffectTemplate, SkillTemplate,
 };
 use mir2_protocol::{
     ClientBuff, ClientMagic, MirClass, MirDirection, ObjectAttackInfo, ObjectEffectInfo,
@@ -15,19 +15,19 @@ use mir2_protocol::{
 };
 
 use super::buffs::{
-    BuffState, apply_or_refresh_buff, buff_metadata, client_buff_packet_for_state,
-    crystal_buff_type_for_key,
+    apply_or_refresh_buff, buff_metadata, client_buff_packet_for_state, crystal_buff_type_for_key,
+    BuffState,
 };
 use super::combat::{
-    CrystalDefence, PendingMonsterDefeatAction, apply_player_monster_poison, combat_delay_ticks,
-    damage_monster_entity, damage_player_owned_monster_entity, queue_due_packet,
-    queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
-    schedule_damage_to_player, schedule_heal_to_player, set_cast_defence,
+    apply_player_monster_poison, combat_delay_ticks, damage_monster_entity,
+    damage_player_owned_monster_entity, queue_due_packet, queued_before_world_tick_due_tick,
+    ranged_attack_delay_ticks, schedule_damage_to_monster, schedule_damage_to_player,
+    schedule_heal_to_player, set_cast_defence, CrystalDefence, PendingMonsterDefeatAction,
 };
 use super::components::{
-    CharacterBody, DisplayName, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position,
-    SummonedMonster, current_player_object_id, entity_by_object_id, entity_facing, entity_name,
-    entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
+    current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
+    entity_player_vitals, entity_position, hero_entity, player_entity, CharacterBody, DisplayName,
+    Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
 use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_AGILITY,
@@ -50,8 +50,9 @@ use super::map::{
 };
 use super::monster_ai::nearby_opposing_monster_targets;
 use super::monsters::{
-    PendingMonsterSpawnAction, active_summoned_monster_count, allocate_runtime_monster_object_id,
+    active_summoned_monster_count, allocate_runtime_monster_object_id,
     crystal_dynamic_monster_template, deterministic_roll, queue_pending_monster_spawn,
+    PendingMonsterSpawnAction,
 };
 use super::movement::{
     can_occupy, direction_toward, is_blocked_tile, offset_point, rotated_direction,
@@ -62,9 +63,9 @@ use super::packets::{
     object_struck_packet,
 };
 use super::resources::{
-    BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
+    is_in_world, BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
     PlayerRuntimeResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
-    SkillResource, Stage5SystemsResource, is_in_world,
+    SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 

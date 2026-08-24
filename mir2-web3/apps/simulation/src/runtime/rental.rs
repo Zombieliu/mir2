@@ -2,7 +2,7 @@ use bevy_ecs::prelude::World;
 use mir2_protocol::{ItemRentalInformation, ServerPacket, UserItemRentalInformation};
 
 use crate::config::{
-    CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState, new_stage5_mail_delivery_nonce,
+    new_stage5_mail_delivery_nonce, CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState,
 };
 
 use super::crystal_compat::{
@@ -523,11 +523,7 @@ pub(super) fn retrieve_rental_item_impl(
     };
     item.container = container;
     item.slot = slot;
-    normalize_incoming_item_tree_unique_ids(
-        world.resource::<InventoryResource>(),
-        &mut item,
-        &[],
-    );
+    normalize_incoming_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
     world
         .resource_mut::<InventoryResource>()
         .inventory_items

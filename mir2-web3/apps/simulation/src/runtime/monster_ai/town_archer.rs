@@ -6,8 +6,8 @@ use mir2_protocol::{Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    Facing, MonsterAgent, MonsterAiState, current_player_is_dead, entity_name, entity_object_id,
-    player_entity,
+    current_player_is_dead, entity_name, entity_object_id, player_entity, Facing, MonsterAgent,
+    MonsterAiState,
 };
 use super::super::crystal_compat::*;
 use super::super::monsters::*;

@@ -14,11 +14,11 @@ use super::crystal_compat::{
     DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
 };
 use super::items::{
-    ItemState, crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
+    crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
     crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
     crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
     default_item_unique_id, item_has_rental_bind_flag, item_icon_for_key, item_unique_id,
-    user_item_from_item_state,
+    user_item_from_item_state, ItemState,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
@@ -1057,10 +1057,7 @@ pub(super) fn item_list_unique_id_is_used(items: &[ItemState], unique_id: u64) -
         .any(|item| item_tree_unique_id_is_used(item, unique_id))
 }
 
-pub(super) fn inventory_unique_id_is_used(
-    resources: &InventoryResource,
-    unique_id: u64,
-) -> bool {
+pub(super) fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
     item_list_unique_id_is_used(&resources.belt_items, unique_id)
         || item_list_unique_id_is_used(&resources.inventory_items, unique_id)
         || item_list_unique_id_is_used(&resources.storage_items, unique_id)
@@ -1178,11 +1175,7 @@ pub(super) fn normalize_incoming_item_tree_unique_ids(
         .saturating_add(1)
         .max(1);
 
-    fn normalize_tree(
-        item: &mut ItemState,
-        seen: &mut BTreeSet<u64>,
-        next_unique_id: &mut u64,
-    ) {
+    fn normalize_tree(item: &mut ItemState, seen: &mut BTreeSet<u64>, next_unique_id: &mut u64) {
         let current_unique_id = item.unique_id;
         if current_unique_id == 0 || !seen.insert(current_unique_id) {
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
@@ -1314,9 +1307,7 @@ pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) 
     {
         seen.insert(item_unique_id(item));
     }
-    let mut next_unique_id = inventory_max_unique_id(resources)
-        .saturating_add(1)
-        .max(1);
+    let mut next_unique_id = inventory_max_unique_id(resources).saturating_add(1).max(1);
     for item in &mut resources.belt_items {
         normalize_embedded_item_unique_ids(&mut item.socketed, &mut seen, &mut next_unique_id);
     }
@@ -1327,11 +1318,7 @@ pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) 
         normalize_embedded_item_unique_ids(&mut item.socketed, &mut seen, &mut next_unique_id);
     }
     for equipment in &mut resources.equipment_items {
-        normalize_embedded_item_unique_ids(
-            &mut equipment.socketed,
-            &mut seen,
-            &mut next_unique_id,
-        );
+        normalize_embedded_item_unique_ids(&mut equipment.socketed, &mut seen, &mut next_unique_id);
     }
 }
 

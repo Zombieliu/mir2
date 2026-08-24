@@ -41,8 +41,8 @@ pub(in crate::runtime) fn update_football_state(agent: &mut MonsterAgent, tick: 
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        DisplayName, Facing, Monster, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId,
-        Position, WorldObject, entity_object_id, entity_position, player_entity,
+        entity_object_id, entity_position, player_entity, DisplayName, Facing, Monster,
+        MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, crystal_respawn_can_wander,
@@ -50,7 +50,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::{ClientPacket, MirDirection, Point};
+    use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
 
     /// Spawn a real "Football" template (manifest AI == 68) the same way
     /// `spawn_crystal_monster_for_test` does, so the agent that reaches the
@@ -64,7 +64,14 @@ mod tests {
     #[test]
     fn football_is_passive_non_combatant() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
         let player_origin = Point { x: 900, y: 900 };

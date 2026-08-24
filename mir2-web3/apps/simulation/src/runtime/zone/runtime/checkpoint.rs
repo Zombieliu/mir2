@@ -249,8 +249,8 @@ impl ZoneRuntime {
             // Legacy checkpoints had only the AI-derived boolean. Without the
             // explicit authoritative disposition they must remain untargetable
             // and must not target players.
-            monster.hostile_to_player = monster.disposition
-                == Some(crate::config::WorldEntityDisposition::Hostile);
+            monster.hostile_to_player =
+                monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile);
         }
         runtime.pending_native_hits = checkpoint.pending_native_hits;
         runtime.pending_native_projectiles = checkpoint.pending_native_projectiles;
@@ -463,10 +463,9 @@ mod tests {
             drops: Vec::new(),
         };
         assert!(runtime.spawn_world_event_monster(&spawn, 0).0);
-        let mut checkpoint: serde_json::Value = serde_json::from_slice(
-            &runtime.checkpoint_bytes().expect("checkpoint bytes"),
-        )
-        .expect("checkpoint JSON");
+        let mut checkpoint: serde_json::Value =
+            serde_json::from_slice(&runtime.checkpoint_bytes().expect("checkpoint bytes"))
+                .expect("checkpoint JSON");
         checkpoint["native_monsters"][spawn.object_id.to_string()]
             .as_object_mut()
             .expect("retained native monster")

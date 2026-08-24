@@ -29,8 +29,8 @@ use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    Facing, Monster, MonsterAgent, MonsterAiState, Position, current_player_object_id, entity_name,
-    entity_object_id, entity_position, player_entity,
+    current_player_object_id, entity_name, entity_object_id, entity_position, player_entity,
+    Facing, Monster, MonsterAgent, MonsterAiState, Position,
 };
 use super::super::crystal_compat::*;
 use super::super::monsters::*;
@@ -382,7 +382,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::ClientPacket;
+    use mir2_protocol::{ClientPacket, ServerPacket};
 
     /// HornedMage inherits AxeSkeleton's fear/kite `ProcessTarget`: with the fear
     /// window not yet active and the target at `dist >= AttackRange (6)`, it sets
@@ -392,7 +392,14 @@ mod tests {
     #[test]
     fn horned_mage_moves_closer_before_fear_window() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
 

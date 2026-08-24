@@ -814,17 +814,14 @@ mod tests {
         assert_eq!(projection.auctions.len(), 1);
         assert_eq!(projection.auctions[0].item_key, "iron-sword");
         assert_eq!(projection.auctions[0].price, 1200);
-        assert!(
-            projection.npc_state.iter().any(|row| row.kind == "flag"
-                && row.state_key == "42"
-                && row.state_value == "true")
-        );
-        assert!(
-            projection
-                .npc_state
-                .iter()
-                .any(|row| row.kind == "value" && row.state_key == "start|main|progress")
-        );
+        assert!(projection
+            .npc_state
+            .iter()
+            .any(|row| row.kind == "flag" && row.state_key == "42" && row.state_value == "true"));
+        assert!(projection
+            .npc_state
+            .iter()
+            .any(|row| row.kind == "value" && row.state_key == "start|main|progress"));
     }
 
     #[test]

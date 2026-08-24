@@ -34,7 +34,7 @@ use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket};
 
 use super::super::components::{
-    Facing, MonsterAgent, MonsterAiState, MonsterVitals, entity_object_id,
+    entity_object_id, Facing, MonsterAgent, MonsterAiState, MonsterVitals,
 };
 use super::super::resources::MapRuntimeResource;
 

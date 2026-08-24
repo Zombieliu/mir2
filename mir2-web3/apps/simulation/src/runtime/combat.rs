@@ -75,10 +75,9 @@ pub(super) fn melee_target_is_authoritatively_attackable_in_direction(
     requested_spell: Spell,
 ) -> Option<bool> {
     let object_id = attack_target_in_direction(world, direction).or_else(|| {
-        (requested_spell == Spell::Thrusting
-            && skill_toggle_state(world, Spell::Thrusting))
-        .then(|| attack_target_in_direction_at_distance(world, direction, 2))
-        .flatten()
+        (requested_spell == Spell::Thrusting && skill_toggle_state(world, Spell::Thrusting))
+            .then(|| attack_target_in_direction_at_distance(world, direction, 2))
+            .flatten()
     })?;
     let entity = entity_by_object_id(world, object_id)?;
     world
@@ -180,9 +179,9 @@ pub(super) fn crystal_player_is_riding_mount(world: &World) -> bool {
 /// `mount_type >= 0` is the authoritative local equivalent of `HasMount`.
 /// Missing mount state fails closed.
 pub(super) fn crystal_player_can_mount_attack(world: &World) -> bool {
-    world.get_resource::<MountResource>().is_some_and(|mount| {
-        !mount.riding_mount || (mount.mount_type >= 0 && mount.has_bells)
-    })
+    world
+        .get_resource::<MountResource>()
+        .is_some_and(|mount| !mount.riding_mount || (mount.mount_type >= 0 && mount.has_bells))
 }
 
 pub(super) fn crystal_player_is_fishing(world: &World) -> bool {

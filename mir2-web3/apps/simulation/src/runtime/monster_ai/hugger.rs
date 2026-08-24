@@ -26,8 +26,8 @@ use mir2_protocol::{MirDirection, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    Monster, MonsterAgent, MonsterAiState, entity_name, entity_object_id, entity_position,
-    player_entity,
+    entity_name, entity_object_id, entity_position, player_entity, Monster, MonsterAgent,
+    MonsterAiState,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
@@ -210,7 +210,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::{ClientPacket, MirDirection};
+    use mir2_protocol::{ClientPacket, MirDirection, ServerPacket};
 
     fn spawn_hugger(
         session: &mut SimulationSession,
@@ -268,7 +268,14 @@ mod tests {
     #[test]
     fn hugger_detonates_when_fuse_expires() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
 

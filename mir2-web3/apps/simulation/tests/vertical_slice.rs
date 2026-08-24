@@ -1703,6 +1703,7 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
         save.direction = MirDirection::Left;
     }
     let mut session = SimulationSession::new(config);
+    login(&mut session, "demo");
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let guide = session
         .world_snapshot()

@@ -32,8 +32,8 @@ use mir2_protocol::{
 
 use super::super::combat::*;
 use super::super::components::{
-    Facing, MonsterAgent, MonsterAiState, entity_name, entity_object_id, entity_position,
-    player_entity,
+    entity_name, entity_object_id, entity_position, player_entity, Facing, MonsterAgent,
+    MonsterAiState,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
@@ -602,8 +602,8 @@ fn deterministic_chance_roll_nonzero(
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        DisplayName, Monster, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
-        entity_object_id,
+        entity_object_id, DisplayName, Monster, MonsterCombatStats, MonsterVitals, ObjectId,
+        Position, WorldObject,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, crystal_respawn_can_wander,
@@ -611,7 +611,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::ClientPacket;
+    use mir2_protocol::{ClientPacket, ServerPacket};
 
     /// Spawn a real "TreeQueen" template (manifest AI == 142) the same way
     /// `spawn_crystal_monster_for_test` does, so the agent that reaches the AI
@@ -624,7 +624,14 @@ mod tests {
     #[test]
     fn tree_queen_is_immobile_faces_up_and_arms_timers() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
         let player_origin = Point { x: 900, y: 900 };

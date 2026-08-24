@@ -33,7 +33,7 @@ pub use runtime::{
     set_crystal_full_world_zone_collision, validate_commercial_identity_credentials,
     zone_ground_drop_snapshots_for_monster_at_tick, zone_id_for_key, ActiveSessionIdentity,
     ChatPacketPreparation, GameShopPurchaseExecution, GameShopPurchaseFailure,
-    GameShopPurchaseOutcome, PlayerId, PreparedChatPacket, SessionId,
+    GameShopPurchaseOutcome, PasskeyRecoveryPreflight, PlayerId, PreparedChatPacket, SessionId,
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
     SharedGroundDropPickupCommit, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,

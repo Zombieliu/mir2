@@ -2,7 +2,7 @@ use crate::config::{ItemContainer, Stage5SocialState};
 
 use super::crystal_compat::CRYSTAL_BIND_DONT_TRADE;
 use super::inventory::empty_slots_for_inventory_container;
-use super::items::{ItemState, item_has_crystal_or_rental_bind_flag};
+use super::items::{item_has_crystal_or_rental_bind_flag, ItemState};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum Stage5SocialAddResult {

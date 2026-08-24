@@ -16,7 +16,7 @@ use mir2_protocol::MirClass;
 
 use super::crystal_compat::*;
 use super::equipment::EquipmentState;
-use super::items::{ItemState, crystal_item_template_for_item_key};
+use super::items::{crystal_item_template_for_item_key, ItemState};
 use super::resources::{BuffResource, InventoryResource, SessionResource, Stage5SystemsResource};
 
 /// Crystal social experience-rate bonuses. Marriage, mentorship, and guild
@@ -311,7 +311,7 @@ pub(super) fn refresh_player_stats(world: &mut World) {
 /// Resize the player's HP/MP pools to the freshly computed maxima, clamping the
 /// live values so an unequip can never leave `hp > max_hp`.
 fn apply_pool_caps_to_player(world: &mut World, max_hp: i32, max_mp: i32) {
-    use super::components::{PlayerVitals, player_entity};
+    use super::components::{player_entity, PlayerVitals};
 
     let Some(player) = player_entity(world) else {
         return;

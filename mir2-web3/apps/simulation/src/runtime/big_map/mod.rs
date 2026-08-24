@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use mir2_game_data::{
-    CrystalMovementTemplate, CrystalNpcInfoTemplate, crystal_npc_info_manifest,
-    crystal_respawn_manifest_ref,
+    crystal_npc_info_manifest, crystal_respawn_manifest_ref, CrystalMovementTemplate,
+    CrystalNpcInfoTemplate,
 };
 use mir2_protocol::{
     ClientMapInfo, ClientMovementInfo, ClientNpcInfo, WorldMapIcon, WorldMapSetup,
@@ -617,11 +617,9 @@ mod tests {
         assert_eq!(loaded.teleport_to_npc_cost, 777);
         assert_eq!(loaded.source_path.as_deref(), Some(world_map.as_path()));
         assert_eq!(loaded.setup_source_path.as_deref(), Some(setup.as_path()));
-        assert!(
-            loaded
-                .source_diagnostic
-                .contains("teleport_to_npc_cost=777")
-        );
+        assert!(loaded
+            .source_diagnostic
+            .contains("teleport_to_npc_cost=777"));
         fs::remove_dir_all(root).unwrap();
     }
 
@@ -656,13 +654,11 @@ mod tests {
         let loaded = authoritative_world_map_config();
         assert!(!loaded.setup.enabled);
         assert!(loaded.setup.icons.is_empty());
-        assert!(
-            loaded
-                .source_path
-                .as_ref()
-                .map(|path| path.is_file())
-                .unwrap_or(true)
-        );
+        assert!(loaded
+            .source_path
+            .as_ref()
+            .map(|path| path.is_file())
+            .unwrap_or(true));
         assert_eq!(loaded.teleport_to_npc_cost, 3_000);
         assert!(authoritative_source_diagnostic().contains("world_map_source="));
         if let Some(setup_path) = loaded.setup_source_path.as_ref() {

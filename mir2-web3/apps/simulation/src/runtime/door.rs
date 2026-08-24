@@ -11,7 +11,7 @@
 use bevy_ecs::prelude::World;
 use mir2_protocol::ServerPacket;
 
-use super::resources::{MapRuntimeResource, runtime_tick};
+use super::resources::{runtime_tick, MapRuntimeResource};
 
 /// Crystal closes doors 5000 ms after they were opened (`Map.Process`). At one
 /// runtime tick per 1000 ms that is five ticks.

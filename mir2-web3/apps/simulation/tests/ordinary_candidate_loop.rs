@@ -720,6 +720,7 @@ fn stale_npc_dialog_action_is_rejected_after_ordinary_walks_out_of_range() {
         script_key: Some("BichonProvince/Warehouse-D002".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login(&mut session, "demo", "demo");
     start_game(&mut session, 0);
 
     let opened = session.interact(4_991);

@@ -440,6 +440,7 @@ fn write_acceptance_artifacts_if_requested(report: &ProgressionCertificationRepo
 #[test]
 fn platinum_profile_rejects_post_176_classes_and_heroes() {
     let mut session = SimulationSession::new(platinum_config());
+    login_demo_account(&mut session);
 
     for (name, gender, class) in [
         ("AssassinBlocked", MirGender::Male, MirClass::Assassin),
@@ -467,6 +468,7 @@ fn platinum_profile_rejects_post_176_classes_and_heroes() {
 #[test]
 fn monster_experience_levels_a_character_and_carries_overflow() {
     let mut session = SimulationSession::new(platinum_config());
+    login_demo_account(&mut session);
     create_and_start_level_one_character(&mut session, "NaturalLevel", MirClass::Warrior);
 
     let receipt = session.commit_shared_monster_kill_award_transaction(91_001, "Hen", 300);
@@ -494,6 +496,7 @@ fn monster_experience_levels_a_character_and_carries_overflow() {
 #[test]
 fn one_authoritative_award_can_cross_the_full_1_to_50_acceptance_curve() {
     let mut session = SimulationSession::new(platinum_config());
+    login_demo_account(&mut session);
     create_and_start_level_one_character(&mut session, "CurveRunner", MirClass::Wizard);
     let total_to_level_50 = platinum_176_profile()
         .experience_curve
@@ -539,6 +542,7 @@ fn all_three_classes_progress_level_by_level_through_source_backed_hunting_route
         (MirClass::Taoist, "RouteTaoist"),
     ] {
         let mut session = SimulationSession::new(platinum_config());
+        login_demo_account(&mut session);
         create_and_start_level_one_character(&mut session, character_name, class);
         let mut transaction_id = 100_000_u32 + u32::from(class as u8) * 10_000;
         let mut level_transitions = Vec::new();
@@ -776,6 +780,7 @@ fn natural_level_and_experience_survive_logout_and_fresh_session_reload() {
 #[test]
 fn platinum_176_blocks_post_176_stage5_actions_but_keeps_classic_social_endgame() {
     let mut session = SimulationSession::new(platinum_config());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let before = session.world_snapshot();
 
@@ -824,6 +829,7 @@ fn platinum_176_blocks_post_176_stage5_actions_but_keeps_classic_social_endgame(
 #[test]
 fn platinum_176_new_character_starts_with_source_start_items_in_the_bag() {
     let mut session = SimulationSession::new(platinum_config());
+    login_demo_account(&mut session);
     create_and_start_level_one_character(&mut session, "SourceStarter", MirClass::Warrior);
     let snapshot = session.world_snapshot();
 
@@ -846,6 +852,7 @@ fn platinum_176_new_character_starts_with_source_start_items_in_the_bag() {
 #[test]
 fn deeply_red_player_death_drops_two_eligible_items_and_recalculates_equipment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("qa.giveItem", vec!["red-potion".to_string()]);
     session.apply_zone_unlawful_player_kill(300);
@@ -917,6 +924,7 @@ fn pk_decay_accumulator_persists_and_reconnect_cannot_accelerate_decay() {
 #[test]
 fn pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries() {
     let mut red = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut red);
     red.handle_packet(ClientPacket::StartGame { character_index: 0 });
     red.apply_zone_unlawful_player_kill(200);
     assert_eq!(red.zone_player_name_colour_argb(), 0xFFFF_0000u32 as i32);
@@ -933,6 +941,7 @@ fn pk_name_colour_transitions_from_red_to_brown_to_normal_at_decay_boundaries() 
     )));
 
     let mut brown = SimulationSession::new(SimulationConfig::default());
+    login_demo_account(&mut brown);
     brown.handle_packet(ClientPacket::StartGame { character_index: 0 });
     brown.apply_zone_unlawful_player_kill(100);
     let mut brown_decay_packets = Vec::new();

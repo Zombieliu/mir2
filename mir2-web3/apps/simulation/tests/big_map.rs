@@ -1,8 +1,19 @@
 use mir2_protocol::{ClientPacket, ServerPacket};
 use mir2_simulation::{SimulationConfig, SimulationSession, WorldSnapshot};
 
+fn login_demo(session: &mut SimulationSession) {
+    let packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
 fn started_session() -> SimulationSession {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
 }
@@ -166,6 +177,7 @@ fn logout_resets_connection_scoped_map_info_cache() {
     ));
 
     session.handle_packet(ClientPacket::LogOut);
+    login_demo(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let second = session.handle_packet(ClientPacket::RequestMapInfo { map_index: 1 });
     assert!(matches!(

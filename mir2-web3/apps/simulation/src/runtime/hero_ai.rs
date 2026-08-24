@@ -4,7 +4,7 @@ use bevy_ecs::{
     entity::Entity,
     prelude::{Resource, World},
 };
-use mir2_game_data::{CrystalMagicTemplate, crystal_magic_by_spell, crystal_monster_by_name};
+use mir2_game_data::{crystal_magic_by_spell, crystal_monster_by_name, CrystalMagicTemplate};
 use mir2_protocol::{
     ClientBuff, MirClass, MirDirection, ObjectAttackInfo, ObjectMovement, ObjectRangeAttackInfo,
     Point, ServerPacket, Spell, UserItem, UserItemStat,
@@ -14,12 +14,12 @@ use crate::config::{EquipmentSlot, WorldEntityDisposition};
 
 use super::buffs::crystal_buff_type_for_key;
 use super::combat::{
-    PendingMonsterDefeatAction, combat_delay_ticks, melee_attack_delay_ticks, queue_due_packet,
-    ranged_attack_delay_ticks, schedule_damage_to_monster,
+    combat_delay_ticks, melee_attack_delay_ticks, queue_due_packet, ranged_attack_delay_ticks,
+    schedule_damage_to_monster, PendingMonsterDefeatAction,
 };
 use super::components::{
-    CharacterBody, Facing, Hero, Monster, MonsterAgent, MonsterAiState, MonsterVitals, ObjectId,
-    PlayerVitals, Position, entity_name, entity_position, hero_entity, player_entity,
+    entity_name, entity_position, hero_entity, player_entity, CharacterBody, Facing, Hero, Monster,
+    MonsterAgent, MonsterAiState, MonsterVitals, ObjectId, PlayerVitals, Position,
 };
 use super::crystal_compat::{
     CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT, CRYSTAL_STAT_MANA_PENALTY_PERCENT, CRYSTAL_STAT_MAX_AC,
@@ -28,8 +28,8 @@ use super::crystal_compat::{
 };
 use super::equipment::equipment_slot_index;
 use super::items::{
-    ItemState, crystal_equipment_slot_for_item_key, crystal_item_added_stat_value,
-    crystal_item_stat_value, crystal_item_template_for_item_key, user_item_from_item_state,
+    crystal_equipment_slot_for_item_key, crystal_item_added_stat_value, crystal_item_stat_value,
+    crystal_item_template_for_item_key, user_item_from_item_state, ItemState,
 };
 use super::monsters::{is_hidden_or_sleeping_target, monster_locks_player_target_on_hit};
 use super::movement::{

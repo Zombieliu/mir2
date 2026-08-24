@@ -7,38 +7,37 @@ use std::sync::{Arc, Mutex, OnceLock};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{With, Without, World};
 use mir2_game_data::{
-    BlockedMapCellTemplate, DecorKind, DecorObjectTemplate, DoorMapCellTemplate,
-    FishingCellTemplate, MapBounds, MapCellAttribute, SceneView, StarterMapCollision, TerrainKind,
-    TerrainPatchTemplate, crystal_map_respawns_by_index, crystal_map_respawns_ref,
-    crystal_npc_info_manifest, localized_text_or_fallback, starter_map_collision,
+    crystal_map_respawns_by_index, crystal_map_respawns_ref, crystal_npc_info_manifest,
+    localized_text_or_fallback, starter_map_collision, BlockedMapCellTemplate, DecorKind,
+    DecorObjectTemplate, DoorMapCellTemplate, FishingCellTemplate, MapBounds, MapCellAttribute,
+    SceneView, StarterMapCollision, TerrainKind, TerrainPatchTemplate,
 };
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
 
 use super::components::{
-    CharacterBody, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterCombatStats,
-    MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
-    SpawnSlotRef, WorldObject, current_player_object_id, entity_position, player_entity,
+    current_player_object_id, entity_position, player_entity, CharacterBody, DisplayName, Facing,
+    Hero, Monster, MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId,
+    PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::monsters::{
-    MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable,
     build_crystal_current_map_full_spawn_table, build_crystal_current_map_visible_spawn_table,
     build_spawn_table, initial_general_meow_meow_state, initial_monster_ai_state_for_object,
-    initial_yimoogi_state,
+    initial_yimoogi_state, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable,
 };
 use super::movement::{current_location, point_in_bounds, summon_spawn_position_near, tile_key};
 use super::packets::{
     localized_monster_name_key, localized_npc_name_key, localized_visible_player_name_key,
 };
 use super::resources::{
-    MapRuntimeResource, MountResource, NpcStateResource, PlayerRuntimeResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, Stage5SystemsResource,
-    current_language, is_in_world, reset_crystal_player_movement_timing,
+    current_language, is_in_world, reset_crystal_player_movement_timing, MapRuntimeResource,
+    MountResource, NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, Stage5SystemsResource,
 };
-use super::save::{ActiveCharacterRuntimeState, active_character_runtime_state};
-use super::session::{SimulationSession, system_message};
-use crate::MapTransferRecord;
+use super::save::{active_character_runtime_state, ActiveCharacterRuntimeState};
+use super::session::{system_message, SimulationSession};
 use crate::config::{MapDropRuleRecord, MonsterSpawnSource, SimulationConfig};
+use crate::MapTransferRecord;
 
 #[derive(Debug, Clone)]
 pub(super) struct RuntimeMapCollisionData {

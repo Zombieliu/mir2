@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use base64::Engine as _;
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_game_shop_info_packet_payloads, crystal_item_by_index, format_localized_text,
@@ -10,18 +12,14 @@ use mir2_protocol::{
     ChatType, GameShopItem, MirClass, MirDirection, MirGender, Point, ServerPacket, ServerPacketId,
 };
 use serde::{Deserialize, Serialize};
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use base64::Engine as _;
 
 use crate::config::{
-    crystal_base_vitals, new_stage5_mail_delivery_nonce, CharacterRecord, CurrencyKind,
-    EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
+    crystal_base_vitals, new_stage5_mail_delivery_nonce, AccountStore, CharacterRecord,
+    CurrencyKind, EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
     Stage5HeroState, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
     WorldEntityDisposition,
 };
-use crate::{
-    NativeGameShopPurchaseRequest, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
-};
+use crate::{NativeGameShopPurchaseRequest, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2};
 
 use super::components::{
     entity_by_object_id, entity_position, player_entity, DisplayName, Facing, Npc, NpcAgent,
@@ -39,8 +37,7 @@ use super::inventory::{
     additional_slots_needed_for_item_quantity, allocate_item_unique_id, binary_datetime_ticks,
     can_gain_item_quantity, crystal_duration_label_from_seconds, crystal_npc_storage_open_packets,
     current_binary_datetime, find_empty_inventory_item_slot, free_bag_slots,
-    future_binary_datetime_minutes, item_heal_values_for_key,
-    normalize_fresh_item_tree_unique_ids,
+    future_binary_datetime_minutes, item_heal_values_for_key, normalize_fresh_item_tree_unique_ids,
 };
 use super::items::{
     crystal_equipment_slot_for_item_key, crystal_item_key_for_template, crystal_item_stat_value,
@@ -200,11 +197,7 @@ pub(super) fn stage5_claim_mail_authoritative(
     for (mut item, (container, slot)) in item_states.into_iter().zip(exact_item_slots) {
         item.container = container;
         item.slot = slot;
-        normalize_fresh_item_tree_unique_ids(
-            world.resource::<InventoryResource>(),
-            &mut item,
-            &[],
-        );
+        normalize_fresh_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
         gained_items.push(item.clone());
         world
             .resource_mut::<InventoryResource>()
@@ -531,9 +524,7 @@ fn decode_native_game_shop_ledger(
         .map_err(|error| format!("failed to decode native GameShop ledger: {error}"))
 }
 
-fn validate_native_game_shop_ledger_mail_metadata(
-    mail: &Stage5MailMessage,
-) -> Result<(), String> {
+fn validate_native_game_shop_ledger_mail_metadata(mail: &Stage5MailMessage) -> Result<(), String> {
     if !is_native_game_shop_ledger_mail(mail)
         || mail.delivery_nonce != NATIVE_GAME_SHOP_LEDGER_DELIVERY_NONCE
         || !mail.locked
@@ -640,9 +631,10 @@ pub(super) fn merge_native_game_shop_ledger_mail(
 
     // Canonical ordering makes A∪B and B∪A byte-identical and prevents
     // stale sessions from oscillating the persisted JSON representation.
-    local_ledger
-        .entries
-        .sort_by(|left, right| left.server_idempotency_key.cmp(&right.server_idempotency_key));
+    local_ledger.entries.sort_by(|left, right| {
+        left.server_idempotency_key
+            .cmp(&right.server_idempotency_key)
+    });
     let merged_body = serde_json::to_string(&local_ledger)
         .map_err(|error| format!("failed to encode merged native GameShop ledger: {error}"))?;
     if local.body != merged_body {
@@ -698,9 +690,11 @@ fn native_game_shop_ledger_outcome(
     {
         return Err("native GameShop ledger binding mismatch".to_string());
     }
-    let Some(entry) = ledger.entries.iter().find(|entry| {
-        entry.server_idempotency_key == request.server_idempotency_key
-    }) else {
+    let Some(entry) = ledger
+        .entries
+        .iter()
+        .find(|entry| entry.server_idempotency_key == request.server_idempotency_key)
+    else {
         return Ok(None);
     };
     if entry.gateway_session_id != request.gateway_session_id
@@ -929,8 +923,8 @@ mod game_shop_validation_tests {
     };
     use crate::config::{
         deliver_stage5_system_mail, AccountRecord, AccountStore, AccountStoreTransactionFault,
-        CharacterRecord, SimulationConfig, Stage5MailDelivery, Stage5MailMessage,
-        Stage5MailTargetKind, Stage5SystemsState,
+        AccountStoreTransactionScopeObservation, CharacterRecord, SimulationConfig,
+        Stage5MailDelivery, Stage5MailMessage, Stage5MailTargetKind, Stage5SystemsState,
     };
     use crate::{NativeGameShopPurchaseRequest, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2};
     use base64::engine::general_purpose::URL_SAFE_NO_PAD;
@@ -1061,7 +1055,11 @@ mod game_shop_validation_tests {
     fn native_ledger_at_capacity(
         account_id: &str,
         player_name: &str,
-    ) -> (Stage5MailMessage, NativeGameShopPurchaseRequest, GameShopPurchaseOutcome) {
+    ) -> (
+        Stage5MailMessage,
+        NativeGameShopPurchaseRequest,
+        GameShopPurchaseOutcome,
+    ) {
         let outcome = GameShopPurchaseOutcome::success(31, 1, 1, None, 77);
         let entries = (0..super::NATIVE_GAME_SHOP_LEDGER_MAX_ENTRIES)
             .map(|index| super::NativeGameShopLedgerEntry {
@@ -1109,8 +1107,7 @@ mod game_shop_validation_tests {
         account_id: &str,
         player_name: &str,
     ) -> (NativeGameShopPurchaseRequest, GameShopPurchaseOutcome) {
-        let (mail, oldest_request, outcome) =
-            native_ledger_at_capacity(account_id, player_name);
+        let (mail, oldest_request, outcome) = native_ledger_at_capacity(account_id, player_name);
         let mut store = config
             .account_store
             .lock()
@@ -1248,6 +1245,109 @@ mod game_shop_validation_tests {
         }
         assert!(credit_enabled > 0 && credit_disabled > 0);
         assert!(gold_enabled > 0 && gold_disabled > 0);
+    }
+
+    #[test]
+    fn production_game_shop_path_selects_exact_transaction_scope_and_preserves_behavior() {
+        use AccountStoreTransactionScopeObservation::{AccountOnly, WithGlobal};
+
+        let cases: [(
+            &str,
+            i32,
+            bool,
+            AccountStoreTransactionScopeObservation,
+            Option<i32>,
+            Option<u64>,
+            Option<u64>,
+        ); 3] = [
+            ("unlimited", 0, false, AccountOnly, None, None, None),
+            (
+                "finite-individual",
+                3,
+                true,
+                AccountOnly,
+                Some(2),
+                None,
+                Some(1),
+            ),
+            (
+                "finite-global",
+                3,
+                false,
+                WithGlobal,
+                Some(2),
+                Some(1),
+                None,
+            ),
+        ];
+
+        for (
+            label,
+            stock,
+            individual_stock,
+            expected_scope,
+            expected_stock_level,
+            expected_global_purchases,
+            expected_individual_purchases,
+        ) in cases
+        {
+            let config = SimulationConfig::default();
+            let mut session = started_session(config.clone(), "demo", 1_000, 0);
+            config.clear_account_store_transaction_scope_observations();
+
+            let packets = session.game_shop_buy_product(
+                finite_product(stock, individual_stock),
+                1,
+                GameShopPriceType::Gold,
+            );
+
+            assert!(
+                packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 10 })),
+                "{label} must emit the unchanged successful currency outcome"
+            );
+            let packet_stock_level = packets.iter().find_map(|packet| match packet {
+                ServerPacket::GameShopStock {
+                    g_index: 1,
+                    stock_level,
+                } => Some(*stock_level),
+                _ => None,
+            });
+            assert_eq!(packet_stock_level, expected_stock_level, "{label}");
+            assert_eq!(session.world_snapshot().gold, 990, "{label}");
+            assert_eq!(
+                config.account_store_transaction_scope_observations(),
+                vec![expected_scope],
+                "{label} must perform exactly one commit with the least privilege"
+            );
+
+            let global_purchases = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+                .game_shop_global_purchases
+                .get(&1)
+                .copied();
+            let systems = durable_systems(&config, "demo");
+            assert_eq!(global_purchases, expected_global_purchases, "{label}");
+            assert_eq!(
+                systems.game_shop_individual_purchases.get(&1).copied(),
+                expected_individual_purchases,
+                "{label}"
+            );
+            assert_eq!(systems.mail.len(), 1, "{label}");
+            assert!(
+                packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::Chat {
+                        chat_type: mir2_protocol::ChatType::Hint,
+                        ..
+                    }
+                )),
+                "{label} must expose the successful mailbox-delivery outcome"
+            );
+        }
     }
 
     #[test]
@@ -1796,21 +1896,13 @@ mod game_shop_validation_tests {
             "gs-0000000000000001",
         );
 
-        let before_gold = session
-            .app
-            .world()
-            .resource::<PlayerRuntimeResource>()
-            .gold;
+        let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
         let first = session
             .game_shop_buy_packet_idempotent(request.clone())
             .expect("first native purchase should commit");
         assert!(first.outcome.success);
         assert!(!first.packets.is_empty());
-        let after_first_gold = session
-            .app
-            .world()
-            .resource::<PlayerRuntimeResource>()
-            .gold;
+        let after_first_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
         assert!(after_first_gold < before_gold);
 
         let duplicate = session
@@ -1819,11 +1911,7 @@ mod game_shop_validation_tests {
         assert_eq!(duplicate.outcome, first.outcome);
         assert!(duplicate.packets.is_empty());
         assert_eq!(
-            session
-                .app
-                .world()
-                .resource::<PlayerRuntimeResource>()
-                .gold,
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
             after_first_gold
         );
         let systems = durable_systems(&config, account_id);
@@ -1868,11 +1956,7 @@ mod game_shop_validation_tests {
         let first = session
             .game_shop_buy_packet_idempotent(first_request.clone())
             .expect("first request should commit");
-        let gold_after_first = session
-            .app
-            .world()
-            .resource::<PlayerRuntimeResource>()
-            .gold;
+        let gold_after_first = session.app.world().resource::<PlayerRuntimeResource>().gold;
 
         deliver_stage5_system_mail(
             &config,
@@ -1898,11 +1982,7 @@ mod game_shop_validation_tests {
             Some(GameShopPurchaseFailure::CommitFailed)
         );
         assert_eq!(
-            session
-                .app
-                .world()
-                .resource::<PlayerRuntimeResource>()
-                .gold,
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
             gold_after_first
         );
 
@@ -1917,19 +1997,8 @@ mod game_shop_validation_tests {
             .expect("same client correlation id on a new trusted scope is a new purchase");
         assert!(second.outcome.success);
         assert_ne!(second.outcome.mail_id, first.outcome.mail_id);
-        assert!(
-            session
-                .app
-                .world()
-                .resource::<PlayerRuntimeResource>()
-                .gold
-                < gold_after_first
-        );
-        let gold_after_second = session
-            .app
-            .world()
-            .resource::<PlayerRuntimeResource>()
-            .gold;
+        assert!(session.app.world().resource::<PlayerRuntimeResource>().gold < gold_after_first);
+        let gold_after_second = session.app.world().resource::<PlayerRuntimeResource>().gold;
         let systems_after_second = durable_systems(&config, account_id);
         assert_eq!(
             systems_after_second
@@ -1947,11 +2016,7 @@ mod game_shop_validation_tests {
         assert_eq!(delayed_first.outcome, first.outcome);
         assert!(delayed_first.packets.is_empty());
         assert_eq!(
-            session
-                .app
-                .world()
-                .resource::<PlayerRuntimeResource>()
-                .gold,
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
             gold_after_second,
             "delayed session A replay must not debit a third time"
         );
@@ -2287,9 +2352,7 @@ mod game_shop_validation_tests {
                 before_visible_mail
             );
             assert_eq!(
-                after_replay
-                    .stage5_systems
-                    .game_shop_individual_purchases,
+                after_replay.stage5_systems.game_shop_individual_purchases,
                 before_individual_stock
             );
             assert_eq!(
@@ -2333,7 +2396,7 @@ mod game_shop_validation_tests {
             .mail
             .into_iter()
             .find(super::is_native_game_shop_ledger_mail)
-            .expect("purchase should create one hidden ledger") ;
+            .expect("purchase should create one hidden ledger");
         assert!(hidden.deleted && hidden.locked && hidden.claimed);
         let before = session.world_snapshot();
 
@@ -3451,8 +3514,9 @@ impl SimulationSession {
         if identity.account_id != request.account_id
             || identity.character_index != request.character_index
         {
-            return Err("native GameShop purchase identity does not match the active character"
-                .to_string());
+            return Err(
+                "native GameShop purchase identity does not match the active character".to_string(),
+            );
         }
 
         let price_type = match GameShopPriceType::try_from(request.price_type) {
@@ -3505,63 +3569,68 @@ impl SimulationSession {
         let request_for_commit = request.clone();
         let player_name = active_character.name.clone();
         let touched_accounts = vec![account_id.clone()];
-        let committed = config.commit_account_store_transaction(&touched_accounts, move |store| {
-            let persisted_save = store
-                .accounts
-                .get(&account_id)
-                .and_then(|account| account.saves.get(&active_character.index))
-                .cloned()
-                .ok_or_else(|| "native GameShop durable save is unavailable".to_string())?;
-            if persisted_save.character.name != active_character.name {
-                return Err("native GameShop durable character identity changed".to_string());
-            }
-            let baseline_revision = persisted_save.revision;
-            let mut staged_save = if baseline_revision == expected_revision {
-                let mut current = active_save;
-                merge_persisted_mail_into_character_save(&mut current, &persisted_save)?;
-                current
-            } else {
-                persisted_save
-            };
-            let mut systems = staged_save
-                .stage5_systems_json
-                .as_deref()
-                .map(serde_json::from_str::<Stage5SystemsState>)
-                .transpose()
-                .map_err(|error| format!("failed to decode native GameShop ledger: {error}"))?
-                .unwrap_or_default();
-            if let Some(existing) =
-                record_native_game_shop_ledger_outcome(
+        let committed =
+            config.commit_account_store_transaction(&touched_accounts, move |store| {
+                let persisted_save = store
+                    .accounts
+                    .get(&account_id)
+                    .and_then(|account| account.saves.get(&active_character.index))
+                    .cloned()
+                    .ok_or_else(|| "native GameShop durable save is unavailable".to_string())?;
+                if persisted_save.character.name != active_character.name {
+                    return Err("native GameShop durable character identity changed".to_string());
+                }
+                let baseline_revision = persisted_save.revision;
+                let mut staged_save = if baseline_revision == expected_revision {
+                    let mut current = active_save;
+                    merge_persisted_mail_into_character_save(&mut current, &persisted_save)?;
+                    current
+                } else {
+                    persisted_save
+                };
+                let mut systems = staged_save
+                    .stage5_systems_json
+                    .as_deref()
+                    .map(serde_json::from_str::<Stage5SystemsState>)
+                    .transpose()
+                    .map_err(|error| format!("failed to decode native GameShop ledger: {error}"))?
+                    .unwrap_or_default();
+                if let Some(existing) = record_native_game_shop_ledger_outcome(
                     &mut systems,
                     &player_name,
                     &request_for_commit,
                     &outcome,
-                )?
-            {
-                return Ok((existing, systems, baseline_revision, baseline_revision, true));
-            }
-            staged_save.stage5_systems_json = Some(
-                serde_json::to_string(&systems)
-                    .map_err(|error| format!("failed to encode native GameShop ledger: {error}"))?,
-            );
-            let committed_revision = baseline_revision
-                .checked_add(1)
-                .ok_or_else(|| "native GameShop character revision exhausted".to_string())?;
-            staged_save.revision = committed_revision;
-            store
-                .accounts
-                .get_mut(&account_id)
-                .expect("validated native GameShop account should exist")
-                .saves
-                .insert(active_character.index, staged_save);
-            Ok((
-                outcome,
-                systems,
-                baseline_revision,
-                committed_revision,
-                false,
-            ))
-        })?;
+                )? {
+                    return Ok((
+                        existing,
+                        systems,
+                        baseline_revision,
+                        baseline_revision,
+                        true,
+                    ));
+                }
+                staged_save.stage5_systems_json =
+                    Some(serde_json::to_string(&systems).map_err(|error| {
+                        format!("failed to encode native GameShop ledger: {error}")
+                    })?);
+                let committed_revision = baseline_revision
+                    .checked_add(1)
+                    .ok_or_else(|| "native GameShop character revision exhausted".to_string())?;
+                staged_save.revision = committed_revision;
+                store
+                    .accounts
+                    .get_mut(&account_id)
+                    .expect("validated native GameShop account should exist")
+                    .saves
+                    .insert(active_character.index, staged_save);
+                Ok((
+                    outcome,
+                    systems,
+                    baseline_revision,
+                    committed_revision,
+                    false,
+                ))
+            })?;
         let (committed_outcome, committed_systems, baseline_revision, committed_revision, replayed) =
             committed;
         if !replayed && baseline_revision == expected_revision {
@@ -3672,7 +3741,7 @@ impl SimulationSession {
                         raw_price_type,
                         failure,
                         None,
-                    )
+                    );
                 }
             };
         let language = current_language(self.app.world());
@@ -3682,6 +3751,7 @@ impl SimulationSession {
         let game_shop_index = details.game_shop_index;
         let stock = details.stock;
         let individual_stock = details.individual_stock;
+        let uses_global_stock = stock > 0 && !individual_stock;
         let purchase_quantity = details.purchase_quantity;
         let attachment_count = details.attachment_states_json.len();
         let pending_mail = Stage5MailMessage {
@@ -3757,7 +3827,7 @@ impl SimulationSession {
         let touched_accounts = vec![account_id.clone()];
         let idempotent_request_for_commit = idempotent_request.clone();
 
-        let committed = config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let purchase_transaction = move |store: &mut AccountStore| {
             let persisted_save = {
                 let account = store
                     .accounts
@@ -3898,11 +3968,10 @@ impl SimulationSession {
                     &committed_outcome,
                 )?;
                 debug_assert!(existing.is_none());
-                staged_save.stage5_systems_json = Some(
-                    serde_json::to_string(&committed_systems).map_err(|error| {
+                staged_save.stage5_systems_json =
+                    Some(serde_json::to_string(&committed_systems).map_err(|error| {
                         format!("failed to encode committed native GameShop ledger: {error}")
-                    })?,
-                );
+                    })?);
             }
             let committed_revision = baseline_revision
                 .checked_add(1)
@@ -3926,7 +3995,15 @@ impl SimulationSession {
                 committed_outcome,
                 false,
             ))
-        });
+        };
+        let committed = if uses_global_stock {
+            config.commit_account_store_transaction_with_global(
+                &touched_accounts,
+                purchase_transaction,
+            )
+        } else {
+            config.commit_account_store_transaction(&touched_accounts, purchase_transaction)
+        };
         let (
             committed_mail,
             committed_gold,

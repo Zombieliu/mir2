@@ -14,6 +14,16 @@ fn started_storage_session() -> SimulationSession {
         script_key: Some("BichonProvince/Warehouse-D002".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    let login_packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(
+        login_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })),
+        "login packets: {login_packets:?}"
+    );
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4_991);
     let _ = session.select_npc_dialog_target("@Storage");

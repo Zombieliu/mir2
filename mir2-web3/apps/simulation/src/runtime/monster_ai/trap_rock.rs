@@ -7,8 +7,8 @@ use mir2_protocol::{MirDirection, Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    DisplayName, Facing, Monster, MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterVitals,
-    ObjectId, Position, SummonedMonster, WorldObject, entity_name, entity_object_id,
+    entity_name, entity_object_id, DisplayName, Facing, Monster, MonsterAgent, MonsterAiState,
+    MonsterCombatStats, MonsterVitals, ObjectId, Position, SummonedMonster, WorldObject,
 };
 use super::super::crystal_compat::*;
 use super::super::monsters::*;

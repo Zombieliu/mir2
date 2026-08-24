@@ -96,15 +96,25 @@ fn stale_session_cannot_delete_lock_but_can_unlock_then_delete_durably() {
     let mut current = started_session(config.clone());
     let mut stale = started_session(config.clone());
 
-    current.handle_packet(ClientPacket::LockMail {
+    let locked = current.handle_packet(ClientPacket::LockMail {
         mail_id: u64::from(mail_id),
         lock: true,
     });
+    assert_eq!(mail_flags(&locked, mail_id), (false, true, false));
 
     let rejected = stale.handle_packet(ClientPacket::DeleteMail {
         mail_id: u64::from(mail_id),
     });
-    assert_eq!(mail_flags(&rejected, mail_id), (false, false, false));
+    assert!(
+        rejected.is_empty(),
+        "a rejected stale delete must not expose the cached mailbox: {rejected:?}"
+    );
+
+    let still_locked = current.handle_packet(ClientPacket::LockMail {
+        mail_id: u64::from(mail_id),
+        lock: true,
+    });
+    assert_eq!(mail_flags(&still_locked, mail_id), (false, true, false));
 
     let unlock = stale.handle_packet(ClientPacket::LockMail {
         mail_id: u64::from(mail_id),
@@ -135,20 +145,21 @@ fn malformed_missing_deleted_and_invalid_identity_are_no_ops() {
     let baseline = session.handle_packet(ClientPacket::ReadMail {
         mail_id: u64::from(mail_id),
     });
+    assert_eq!(mail_flags(&baseline, mail_id), (true, false, false));
 
     let missing = session.handle_packet(ClientPacket::DeleteMail { mail_id: 999_999 });
-    assert_eq!(
-        mail_flags(&missing, mail_id),
-        mail_flags(&baseline, mail_id)
+    assert!(
+        missing.is_empty(),
+        "a missing mail identity must be a silent no-op: {missing:?}"
     );
 
     let oversized = session.handle_packet(ClientPacket::LockMail {
         mail_id: u64::from(u32::MAX) + 1,
         lock: true,
     });
-    assert_eq!(
-        mail_flags(&oversized, mail_id),
-        mail_flags(&baseline, mail_id)
+    assert!(
+        oversized.is_empty(),
+        "an oversized mail identity must be a silent no-op: {oversized:?}"
     );
 
     {
@@ -171,9 +182,9 @@ fn malformed_missing_deleted_and_invalid_identity_are_no_ops() {
         mail_id: u64::from(mail_id),
         lock: true,
     });
-    assert_eq!(
-        mail_flags(&malformed, mail_id),
-        mail_flags(&baseline, mail_id)
+    assert!(
+        malformed.is_empty(),
+        "malformed durable mail state must fail closed: {malformed:?}"
     );
     assert_eq!(
         config

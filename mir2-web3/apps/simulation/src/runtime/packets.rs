@@ -136,11 +136,25 @@ const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
 const CRYSTAL_MAIL_CAPACITY: usize = 100;
 pub(super) const MAX_MAIL_RECIPIENT_CHARS: usize = 20;
 pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 1_000;
+const MAIL_TARGET_DURABLE_IDENTITY_MISMATCH: &str = "mail target durable save identity mismatch";
 
 #[derive(Resource, Debug, Default)]
 struct BigMapConnectionState {
     world_map_setup_sent: bool,
     sent_map_indexes: BTreeSet<i32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ActiveGmAuthorizationIdentity {
+    account_id: String,
+    character_index: i32,
+    character_name: String,
+}
+
+#[derive(Resource, Debug, Clone, Default)]
+struct AccountGmAuthorizationState {
+    password_authorized_identity: Option<ActiveGmAuthorizationIdentity>,
+    login_pending_identity: Option<ActiveGmAuthorizationIdentity>,
 }
 
 pub(super) fn system_message(message: &str) -> ServerPacket {
@@ -219,18 +233,14 @@ fn stage5_mail_sender(world: &World) -> Option<Stage5MailSender> {
         return None;
     }
     let session = world.resource::<SessionResource>();
-    let account_id = session
-        .account_id
-        .as_deref()
-        .map(str::trim)
-        .filter(|account_id| !account_id.is_empty())?;
+    let account_id = active_session_mutating_account_id(session)?;
     let character = session.selected_character.as_ref()?;
     let character_name = character.name.trim();
     if character_name.is_empty() {
         return None;
     }
     Some(Stage5MailSender {
-        account_id: account_id.to_string(),
+        account_id,
         character_index: character.index,
         character_name: character_name.to_string(),
     })
@@ -417,6 +427,37 @@ fn stage5_commit_mail_transaction(
         {
             return Err("mail sender save identity mismatch".to_string());
         }
+        let mut staged_target_save = if self_mail {
+            None
+        } else {
+            let target_account = store
+                .accounts
+                .get(&target.account_id)
+                .ok_or_else(|| format!("mail target account {} not found", target.account_id))?;
+            let target_character = target_account
+                .characters
+                .iter()
+                .find(|character| {
+                    character.index == target.character_index
+                        && character.name == target.character_name
+                })
+                .cloned()
+                .ok_or_else(|| {
+                    format!("mail target character {} not found", target.character_name)
+                })?;
+            let target_save = match target_account.saves.get(&target.character_index) {
+                Some(target_save) => {
+                    if target_save.character.index != target_character.index
+                        || target_save.character.name != target_character.name
+                    {
+                        return Err(MAIL_TARGET_DURABLE_IDENTITY_MISMATCH.to_string());
+                    }
+                    target_save.clone()
+                }
+                None => CharacterSaveRecord::new(target_character),
+            };
+            Some(target_save)
+        };
         let sender_baseline_revision = sender_save.revision;
         sender_save.gold = sender_save
             .gold
@@ -440,26 +481,9 @@ fn stage5_commit_mail_transaction(
         let _committed_mail = if self_mail {
             stage5_append_mail_to_save(&mut sender_save, &target.character_name, mail)?
         } else {
-            let target_account = store
-                .accounts
-                .get(&target.account_id)
-                .ok_or_else(|| format!("mail target account {} not found", target.account_id))?;
-            let target_character = target_account
-                .characters
-                .iter()
-                .find(|character| {
-                    character.index == target.character_index
-                        && character.name == target.character_name
-                })
-                .cloned()
-                .ok_or_else(|| {
-                    format!("mail target character {} not found", target.character_name)
-                })?;
-            let mut target_save = target_account
-                .saves
-                .get(&target.character_index)
-                .cloned()
-                .unwrap_or_else(|| CharacterSaveRecord::new(target_character));
+            let mut target_save = staged_target_save
+                .take()
+                .expect("non-self mail target save should be staged");
             let committed =
                 stage5_append_mail_to_save(&mut target_save, &target.character_name, mail)?;
             target_save.revision = target_save
@@ -688,6 +712,9 @@ fn stage5_send_mail_packet(
     ) {
         Ok(committed) => committed,
         Err(error) => {
+            if error == MAIL_TARGET_DURABLE_IDENTITY_MISMATCH {
+                return Vec::new();
+            }
             eprintln!("mail transaction failed: {error}");
             return vec![ServerPacket::MailSent { result: -1 }];
         }
@@ -741,7 +768,7 @@ fn stage5_send_mail_packet(
 
 fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
     let Some(mail_id) = u32::try_from(mail_id).ok() else {
-        return vec![ServerPacket::ParcelCollected { result: -1 }];
+        return Vec::new();
     };
     let base_inventory = world.resource::<InventoryResource>().clone();
     let base_player = world.resource::<PlayerRuntimeResource>().clone();
@@ -811,7 +838,10 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
         if let Err(error) = committed {
             eprintln!("mail claim transaction failed: {error}");
         }
-        return vec![ServerPacket::ParcelCollected { result: -1 }];
+        // Crystal PlayerObject.CollectMail silently returns when the addressed
+        // mail is absent or cannot be collected. ParcelCollected(-1) belongs to
+        // the NPCScript bulk [@COLLECTPARCEL] path, not this single-mail command.
+        return Vec::new();
     };
 
     // The durable account-store transaction is authoritative. Only after it
@@ -923,12 +953,17 @@ fn stage5_mail_status_packet(
     match stage5_commit_mail_status_transaction(world, mail_id, mutation) {
         Ok(committed_mailbox) => {
             world.resource_mut::<Stage5SystemsResource>().stage5_systems = committed_mailbox;
+            vec![stage5_receive_mail_packet(world)]
         }
         Err(error) => {
             eprintln!("mail status transaction rejected: {error}");
+            // Crystal MirConnection/PlayerObject silently returns when the
+            // request is out of Game stage or the addressed mail is absent.
+            // Never project the stale live mailbox on an identity/persistence
+            // rejection because it may belong to a previously bound account.
+            Vec::new()
         }
     }
-    vec![stage5_receive_mail_packet(world)]
 }
 
 fn stage5_read_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
@@ -5570,6 +5605,135 @@ pub(super) fn prepare_chat_packet(
     })
 }
 
+fn strict_active_account_authorization(
+    world: &World,
+) -> Option<(ActiveGmAuthorizationIdentity, u8)> {
+    let session = world.resource::<SessionResource>();
+    let account_id = active_session_mutating_account_id(session)?;
+    let character = session.selected_character.as_ref()?;
+    let identity = ActiveGmAuthorizationIdentity {
+        account_id: account_id.clone(),
+        character_index: character.index,
+        character_name: character.name.clone(),
+    };
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let stored_level =
+        {
+            let store = config.account_store.lock().ok()?;
+            let account = store.accounts.get(&account_id)?;
+            if !account.characters.iter().any(|candidate| {
+                candidate.index == character.index && candidate.name == character.name
+            }) {
+                return None;
+            }
+            account.gm_level
+        };
+    let env_level = if crate::config::account_is_env_gm(&account_id) {
+        1
+    } else {
+        0
+    };
+    Some((identity, stored_level.max(env_level)))
+}
+
+fn reset_account_derived_gm_runtime(gm: &mut GmRuntimeResource) {
+    gm.login_pending = false;
+    gm.gm_never_die = false;
+    gm.game_master = false;
+    gm.observer = false;
+    gm.allow_guild_invite = true;
+    gm.enable_group_recall = false;
+    gm.allow_trade = true;
+    gm.allow_observe = false;
+    gm.pearls = 0;
+    gm.light = 0;
+    gm.transform_paused = false;
+}
+
+fn clear_account_derived_gm_permissions(world: &mut World) {
+    world.resource_mut::<PlayerPermissionResource>().gm_level = 0;
+    world.remove_resource::<AccountGmAuthorizationState>();
+    reset_account_derived_gm_runtime(&mut world.resource_mut::<GmRuntimeResource>());
+}
+
+fn revalidate_cached_gm_authorization(world: &mut World) -> Option<ActiveGmAuthorizationIdentity> {
+    let Some((identity, account_level)) = strict_active_account_authorization(world) else {
+        clear_account_derived_gm_permissions(world);
+        return None;
+    };
+    let identity_mismatch = world
+        .get_resource::<AccountGmAuthorizationState>()
+        .is_some_and(|state| {
+            state
+                .password_authorized_identity
+                .as_ref()
+                .is_some_and(|bound| bound != &identity)
+                || state
+                    .login_pending_identity
+                    .as_ref()
+                    .is_some_and(|bound| bound != &identity)
+        });
+    if identity_mismatch {
+        clear_account_derived_gm_permissions(world);
+        world.resource_mut::<PlayerPermissionResource>().gm_level = account_level;
+        return Some(identity);
+    }
+    let password_level = world
+        .get_resource::<AccountGmAuthorizationState>()
+        .and_then(|state| state.password_authorized_identity.as_ref())
+        .is_some_and(|bound| bound == &identity) as u8;
+    let authorized_level = account_level.max(password_level);
+    let cached_level = world.resource::<PlayerPermissionResource>().gm_level;
+    if cached_level > authorized_level {
+        reset_account_derived_gm_runtime(&mut world.resource_mut::<GmRuntimeResource>());
+        if let Some(mut state) = world.get_resource_mut::<AccountGmAuthorizationState>() {
+            state.login_pending_identity = None;
+        }
+    }
+    world.resource_mut::<PlayerPermissionResource>().gm_level = authorized_level;
+    Some(identity)
+}
+
+fn gm_command_keyword(message: &str) -> Option<&str> {
+    message
+        .trim_start()
+        .strip_prefix('@')?
+        .split_whitespace()
+        .next()
+}
+
+fn bind_gm_login_prompt(world: &mut World, identity: ActiveGmAuthorizationIdentity) {
+    if let Some(mut state) = world.get_resource_mut::<AccountGmAuthorizationState>() {
+        state.login_pending_identity = Some(identity);
+    } else {
+        world.insert_resource(AccountGmAuthorizationState {
+            password_authorized_identity: None,
+            login_pending_identity: Some(identity),
+        });
+    }
+}
+
+fn gm_login_prompt_matches(world: &World, identity: &ActiveGmAuthorizationIdentity) -> bool {
+    world
+        .get_resource::<AccountGmAuthorizationState>()
+        .and_then(|state| state.login_pending_identity.as_ref())
+        == Some(identity)
+}
+
+fn finish_gm_login_attempt(
+    world: &mut World,
+    identity: ActiveGmAuthorizationIdentity,
+    granted: bool,
+) {
+    let mut state = world
+        .get_resource_mut::<AccountGmAuthorizationState>()
+        .expect("a validated GM login prompt should have an authorization binding");
+    state.login_pending_identity = None;
+    if granted {
+        state.password_authorized_identity = Some(identity);
+    }
+}
+
 pub(super) fn handle_chat_packet(
     world: &mut World,
     message: String,
@@ -5579,7 +5743,20 @@ pub(super) fn handle_chat_packet(
     // candidate (Crystal `PlayerObject.Chat`, GMLogin branch). It is checked
     // before everything else and consumed regardless of outcome.
     if super::gm_commands::gm_login_pending(world) {
-        return super::gm_commands::resolve_gm_login_password(world, &message);
+        let Some((identity, _)) = strict_active_account_authorization(world) else {
+            clear_account_derived_gm_permissions(world);
+            return Vec::new();
+        };
+        if !gm_login_prompt_matches(world, &identity) {
+            clear_account_derived_gm_permissions(world);
+            return Vec::new();
+        }
+        let password_granted =
+            world.resource::<GmRuntimeResource>().password.as_deref() == Some(message.as_str());
+        let packets = super::gm_commands::resolve_gm_login_password(world, &message);
+        finish_gm_login_attempt(world, identity, password_granted);
+        let _ = revalidate_cached_gm_authorization(world);
+        return packets;
     }
 
     // Crystal consumes EVERY `@`-prefixed line as a command attempt — it is never
@@ -5588,6 +5765,13 @@ pub(super) fn handle_chat_packet(
     // claims `@` lines; a non-GM issuing a GM-gated command gets Crystal's silent
     // `return;`, so command existence still never leaks to ordinary players.
     if super::gm_commands::is_gm_command(&message) {
+        let Some(identity) = revalidate_cached_gm_authorization(world) else {
+            return Vec::new();
+        };
+        if gm_command_keyword(&message).is_some_and(|command| command.eq_ignore_ascii_case("LOGIN"))
+        {
+            bind_gm_login_prompt(world, identity);
+        }
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
             return packets;
         }
@@ -7565,15 +7749,17 @@ fn stage5_get_ranking_packet(
         return Vec::new();
     }
 
-    let session = world.resource::<SessionResource>();
-    let Some(session_account_id) = session.account_id.clone() else {
+    // Crystal only serves rankings in Game/Observer
+    // (`MirConnection.cs:2182-2185`). For the Simulation Game state, also prove
+    // that the exact bound account still owns the selected character before
+    // enumerating any cross-account ranking payload.
+    let Some((active_identity, _)) = strict_active_account_authorization(world) else {
         return Vec::new();
     };
-    let active_character_index = session
-        .selected_character
-        .as_ref()
-        .map(|character| character.index);
-    let active_key = active_character_index.map(|index| (session_account_id.clone(), index));
+    let active_key = Some((
+        active_identity.account_id.clone(),
+        active_identity.character_index,
+    ));
     let active_save = snapshot_active_character_save(world);
     let config = world.resource::<RuntimeConfigResource>().config.clone();
 
@@ -7685,14 +7871,30 @@ fn stage5_get_ranking_packet(
 
 impl SimulationSession {
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
+        match self.try_handle_packet(packet) {
+            Ok(packets) => packets,
+            Err(_error) => {
+                eprintln!("simulation packet execution rejected; details suppressed");
+                Vec::new()
+            }
+        }
+    }
+
+    pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
+            if let Err(error) = persist_active_character_save(self.app.world()) {
+                clear_account_derived_gm_permissions(self.app.world_mut());
+                return Err(error);
+            }
+        }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);
             apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
-            return packets;
+            return Ok(packets);
         }
 
         let packets = self.handle_packet_impl(packet);
-        self.finalize_packets(packets)
+        Ok(self.finalize_packets(packets))
     }
 
     fn handle_packet_impl(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
@@ -7705,9 +7907,7 @@ impl SimulationSession {
                 vec![ServerPacket::ClientVersion { result: 1 }]
             }
             ClientPacket::Disconnect => {
-                if let Err(error) = persist_active_character_save(self.app.world()) {
-                    eprintln!("disconnect save rejected: {error}");
-                }
+                clear_account_derived_gm_permissions(self.app.world_mut());
                 vec![ServerPacket::Disconnect { reason: 0 }]
             }
             ClientPacket::KeepAlive { time } => vec![ServerPacket::KeepAlive { time }],
@@ -8183,6 +8383,7 @@ impl SimulationSession {
                         return vec![ServerPacket::Login { result: 4 }];
                     }
                 };
+                clear_account_derived_gm_permissions(self.app.world_mut());
                 let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                 session.account_id = Some(account_id);
                 session.characters = characters;
@@ -8201,6 +8402,13 @@ impl SimulationSession {
                 gender,
                 class,
             } => {
+                let account_id = match crystal_character_select_state(
+                    self.app.world().resource::<SessionResource>(),
+                ) {
+                    CrystalCharacterSelectState::Authenticated { account_id } => account_id,
+                    CrystalCharacterSelectState::Unauthenticated
+                    | CrystalCharacterSelectState::InGame => return Vec::new(),
+                };
                 let config = self
                     .app
                     .world()
@@ -8210,14 +8418,7 @@ impl SimulationSession {
                 if !config.class_is_allowed(class) {
                     return vec![ServerPacket::NewCharacter { result: 1 }];
                 }
-                let account_id = self
-                    .app
-                    .world()
-                    .resource::<SessionResource>()
-                    .account_id
-                    .clone()
-                    .unwrap_or_else(|| "demo".to_string());
-                let character = add_character_to_account(
+                let character = match add_character_to_account(
                     &config,
                     &account_id,
                     CharacterRecord {
@@ -8227,7 +8428,10 @@ impl SimulationSession {
                         class,
                         gender,
                     },
-                );
+                ) {
+                    Ok(character) => character,
+                    Err(_) => return vec![ServerPacket::NewCharacter { result: 1 }],
+                };
                 self.app
                     .world_mut()
                     .resource_mut::<SessionResource>()
@@ -8258,10 +8462,33 @@ impl SimulationSession {
             }
             ClientPacket::StartGame { character_index } => self.start_game(character_index),
             ClientPacket::LogOut => {
-                if let Err(error) = persist_active_character_save(self.app.world()) {
-                    eprintln!("logout save rejected; retaining active session: {error}");
+                let (account_id, in_game) = {
+                    let session = self.app.world().resource::<SessionResource>();
+                    (
+                        active_session_mutating_account_id(session),
+                        session.selected_character.is_some(),
+                    )
+                };
+                if !in_game {
+                    clear_account_derived_gm_permissions(self.app.world_mut());
+                    if account_id.is_none() {
+                        self.app
+                            .world_mut()
+                            .resource_mut::<SessionResource>()
+                            .characters
+                            .clear();
+                    }
                     return Vec::new();
                 }
+                let Some(account_id) = account_id else {
+                    clear_account_derived_gm_permissions(self.app.world_mut());
+                    self.app
+                        .world_mut()
+                        .resource_mut::<SessionResource>()
+                        .characters
+                        .clear();
+                    return Vec::new();
+                };
                 // Map metadata de-duplication is scoped to one in-world
                 // connection. A later StartGame must receive setup/map info
                 // again even when the SimulationSession object is reused.
@@ -8279,9 +8506,7 @@ impl SimulationSession {
                         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                         session.selected_character = None;
                         session.clear_active_save_revision();
-                        if let Some(account_id) = session.account_id.clone() {
-                            session.characters = account_characters(&config, &account_id);
-                        }
+                        session.characters = account_characters(&config, &account_id);
                     }
                     self.app
                         .world_mut()
@@ -8304,6 +8529,7 @@ impl SimulationSession {
                     inventory.storage_unlocked =
                         !inventory.storage_has_password || !config.require_storage_password;
                 }
+                clear_account_derived_gm_permissions(self.app.world_mut());
                 rebuild_world(self.app.world_mut());
                 let session = self.app.world().resource::<SessionResource>();
                 vec![ServerPacket::LogOutSuccess {
@@ -8989,66 +9215,58 @@ mod mail_status_transaction_tests {
         session
     }
 
-    fn receive_mail_flags(packets: &[ServerPacket], mail_id: u32) -> (bool, bool) {
-        let mail = packets
-            .iter()
-            .find_map(|packet| match packet {
-                ServerPacket::ReceiveMail { mail } => {
-                    mail.iter().find(|mail| mail.mail_id == u64::from(mail_id))
-                }
-                _ => None,
-            })
-            .expect("ReceiveMail should contain fixture mail");
-        (mail.opened, mail.locked)
-    }
-
     #[test]
     fn status_persist_failure_does_not_mutate_world_store_or_file() {
-        let (config, mail_id) = test_config("persist-failure");
-        let mut session = start_test_session(config.clone());
-        let before = session.handle_packet(ClientPacket::ReadMail {
-            mail_id: u64::from(mail_id),
-        });
-        let before_flags = receive_mail_flags(&before, mail_id);
-        let before_store_mailbox = config
-            .account_store
-            .lock()
-            .expect("account store should not be poisoned")
-            .accounts["demo"]
-            .saves[&0]
-            .stage5_systems_json
-            .clone();
-        let before_file = std::fs::read(
-            config
+        for mutation in ["read", "lock", "delete"] {
+            let (config, mail_id) = test_config(&format!("persist-failure-{mutation}"));
+            let mut session = start_test_session(config.clone());
+            let before_world = session.world_snapshot();
+            let before_store = {
+                let store = config
+                    .account_store
+                    .lock()
+                    .expect("account store should not be poisoned");
+                serde_json::to_value(&*store).expect("account store snapshot should serialize")
+            };
+            let account_store_path = config
                 .account_store_path
                 .as_deref()
-                .expect("test config should have a file store"),
-        )
-        .expect("account-store file should exist");
+                .expect("test config should have a file store");
+            let before_file =
+                std::fs::read(account_store_path).expect("account-store file should exist");
 
-        config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
-        let after = session.handle_packet(ClientPacket::LockMail {
-            mail_id: u64::from(mail_id),
-            lock: true,
-        });
-        assert_eq!(receive_mail_flags(&after, mail_id), before_flags);
-        assert_eq!(
-            config
-                .account_store
-                .lock()
-                .expect("account store should not be poisoned")
-                .accounts["demo"]
-                .saves[&0]
-                .stage5_systems_json,
-            before_store_mailbox
-        );
-        let after_file = std::fs::read(
-            config
-                .account_store_path
-                .as_deref()
-                .expect("test config should have a file store"),
-        )
-        .expect("account-store file should still exist");
-        assert_eq!(after_file, before_file);
+            config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+            let command = match mutation {
+                "read" => ClientPacket::ReadMail {
+                    mail_id: u64::from(mail_id),
+                },
+                "lock" => ClientPacket::LockMail {
+                    mail_id: u64::from(mail_id),
+                    lock: true,
+                },
+                "delete" => ClientPacket::DeleteMail {
+                    mail_id: u64::from(mail_id),
+                },
+                _ => unreachable!("fixed mail mutation fixture"),
+            };
+            let after = session.handle_packet(command);
+
+            assert!(
+                after.is_empty(),
+                "Crystal-compatible persistence rejection must be silent for {mutation}: {after:?}"
+            );
+            assert_eq!(session.world_snapshot(), before_world);
+            let after_store = {
+                let store = config
+                    .account_store
+                    .lock()
+                    .expect("account store should not be poisoned");
+                serde_json::to_value(&*store).expect("account store snapshot should serialize")
+            };
+            assert_eq!(after_store, before_store);
+            let after_file =
+                std::fs::read(account_store_path).expect("account-store file should still exist");
+            assert_eq!(after_file, before_file);
+        }
     }
 }

@@ -29,17 +29,15 @@ use super::packets::{
     apply_observer_action_state, apply_retained_zone_object_packet, chat_packet,
     object_chat_packet, object_chat_packet_with_text, object_player_packets, object_run_packet,
     object_turn_packet, object_walk_packet, observer_action_packet, owner_action_actor_id,
-    owner_action_transform,
-    retained_zone_object_from_packet, retained_zone_object_is_drop, retained_zone_object_owned_by,
-    retained_zone_object_remove_id, retained_zone_object_update_id, shared_object_action_packet,
-    user_location_packet,
+    owner_action_transform, retained_zone_object_from_packet, retained_zone_object_is_drop,
+    retained_zone_object_owned_by, retained_zone_object_remove_id, retained_zone_object_update_id,
+    shared_object_action_packet, user_location_packet,
 };
 use super::types::{
-    PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand,
-    ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneMovementAction, ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot,
-    ZoneNpcTeleportConfig, ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState,
-    ZoneReincarnationOffer,
+    PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand, ZoneGroundDrop, ZoneGroundDropClaim,
+    ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction,
+    ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
+    ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState, ZoneReincarnationOffer,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
@@ -400,7 +398,8 @@ impl ZoneRuntime {
         fork.hazard = self.hazard.clone();
         fork.next_object_id = self.next_object_id;
         for (session_id, player) in &fork.players {
-            fork.player_grid.insert(session_id.clone(), &player.position);
+            fork.player_grid
+                .insert(session_id.clone(), &player.position);
             fork.ecs
                 .upsert_player(session_id, player.object_id, &player.position);
         }
@@ -13952,7 +13951,10 @@ mod pvp_tests {
                     && packets.len() == 1
                     && matches!(packets[0], ServerPacket::UserLocation { .. })
         ));
-        assert_eq!(zone.canonical_state_root().expect("state root"), before_root);
+        assert_eq!(
+            zone.canonical_state_root().expect("state root"),
+            before_root
+        );
         assert_eq!(zone.occupancy, before_occupancy);
         assert_eq!(format!("{:?}", zone.player_grid), before_player_grid);
         assert_eq!(format!("{:?}", zone.object_grid), before_object_grid);
@@ -13997,12 +13999,12 @@ mod pvp_tests {
             .player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 50, 1,)
             .iter()
             .any(|outbound| matches!(outbound,
-                ZoneOutbound::ToSession { session_id, packets }
-                    if session_id == &attacker
-                        && packets.iter().any(|packet| matches!(
-                            packet,
-                            ServerPacket::UserLocation { .. }
-                        )))));
+            ZoneOutbound::ToSession { session_id, packets }
+                if session_id == &attacker
+                    && packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::UserLocation { .. }
+                    )))));
         assert_eq!(zone.players[&target].hp, 100);
 
         zone.handle(ZoneCommand::UpdateChatProfile {
@@ -14017,12 +14019,12 @@ mod pvp_tests {
             .player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 50, 2,)
             .iter()
             .any(|outbound| matches!(outbound,
-                ZoneOutbound::ToSession { session_id, packets }
-                    if session_id == &attacker
-                        && packets.iter().any(|packet| matches!(
-                            packet,
-                            ServerPacket::UserLocation { .. }
-                        )))));
+            ZoneOutbound::ToSession { session_id, packets }
+                if session_id == &attacker
+                    && packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::UserLocation { .. }
+                    )))));
         assert_eq!(zone.players[&target].hp, 100);
     }
 

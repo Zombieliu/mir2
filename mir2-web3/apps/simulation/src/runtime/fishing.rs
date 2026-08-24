@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::World;
-use mir2_game_data::{CrystalItemTemplate, crystal_drop_table_by_key, localized_text_or_fallback};
+use mir2_game_data::{crystal_drop_table_by_key, localized_text_or_fallback, CrystalItemTemplate};
 use mir2_protocol::{ChatType, Point, ServerPacket};
 
 use crate::config::{EquipmentSlot, ItemContainer, WorldEntityDisposition};
@@ -9,12 +9,12 @@ use super::crystal_compat::{
     CRYSTAL_FISHING_ROD_SHAPES, CRYSTAL_ITEM_TYPE_BAIT, CRYSTAL_ITEM_TYPE_WEAPON,
     CRYSTAL_STAT_CRITICAL_RATE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MIN_AC,
 };
-use super::drops::{ResolvedDropTemplate, can_gain_gold, crystal_attempt_drop_entry};
-use super::equipment::{EquipmentState, equipment_slot_unique_id};
+use super::drops::{can_gain_gold, crystal_attempt_drop_entry, ResolvedDropTemplate};
+use super::equipment::{equipment_slot_unique_id, EquipmentState};
 use super::inventory::{add_or_increment_item_with_random_metadata, can_gain_item_quantity};
 use super::items::{
-    ItemState, crystal_item_template_for_item_key, item_unique_id, user_item_from_item_state,
-    user_item_stat_total,
+    crystal_item_template_for_item_key, item_unique_id, user_item_from_item_state,
+    user_item_stat_total, ItemState,
 };
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_spawn_candidates_on_map, deterministic_roll,
@@ -22,8 +22,8 @@ use super::monsters::{
 };
 use super::movement::{current_location, offset_point};
 use super::resources::{
-    FishingResource, InventoryResource, MapRuntimeResource, PlayerRuntimeResource,
-    RuntimeConfigResource, current_language, is_in_world, runtime_tick,
+    current_language, is_in_world, runtime_tick, FishingResource, InventoryResource,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
 };
 
 const CRYSTAL_FISHING_SUCCESS_START_PERCENT: i32 = 10;

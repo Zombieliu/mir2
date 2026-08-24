@@ -26,8 +26,8 @@ use mir2_protocol::{Point, ServerPacket};
 
 use super::super::combat::*;
 use super::super::components::{
-    Monster, MonsterAgent, MonsterAiState, current_player_is_dead, entity_name, entity_object_id,
-    entity_position, player_entity,
+    current_player_is_dead, entity_name, entity_object_id, entity_position, player_entity, Monster,
+    MonsterAgent, MonsterAiState,
 };
 use super::super::monsters::*;
 use super::super::movement::*;
@@ -202,8 +202,8 @@ fn detonate_boulder_spirit(
 #[cfg(test)]
 mod tests {
     use super::super::super::components::{
-        DisplayName, Facing, MonsterCombatStats, MonsterVitals, ObjectId, Position, WorldObject,
-        entity_object_id, player_entity,
+        entity_object_id, player_entity, DisplayName, Facing, MonsterCombatStats, MonsterVitals,
+        ObjectId, Position, WorldObject,
     };
     use super::super::super::monsters::{
         crystal_dynamic_monster_template, initial_monster_ai_state_for_object,
@@ -212,7 +212,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::{ClientPacket, MirDirection};
+    use mir2_protocol::{ClientPacket, MirDirection, ServerPacket};
 
     /// Spawn a real "BoulderSpirit" template (manifest AI == 170) the same way
     /// `spawn_crystal_monster_for_test` does, so the agent reaching the AI is
@@ -229,7 +229,14 @@ mod tests {
     #[test]
     fn boulder_spirit_arms_then_detonates_and_damages_player() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player_origin = Point { x: 322, y: 277 };
         let player = player_entity(session.app.world()).expect("player entity");

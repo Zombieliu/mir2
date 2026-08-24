@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::{EquipmentItemSnapshot, EquipmentSlot, ItemContainer, ItemGrade};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    CrystalItemTemplate, EquipmentTemplate, LanguageCode, crystal_npc_info_by_script_key,
-    crystal_npc_script_by_key, localized_text_or_fallback,
+    crystal_npc_info_by_script_key, crystal_npc_script_by_key, localized_text_or_fallback,
+    CrystalItemTemplate, EquipmentTemplate, LanguageCode,
 };
 use mir2_protocol::{
     ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemSealedInfo,
@@ -18,8 +18,8 @@ use super::components::{
 };
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_REPAIR, CRYSTAL_BIND_DONT_STORE, CRYSTAL_BIND_NO_SREPAIR,
-    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_ITEM_TYPE_BELLS, CRYSTAL_ITEM_TYPE_MOUNT,
-    CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
+    CRYSTAL_BIND_ON_EQUIP, CRYSTAL_ITEM_TYPE_BELLS, CRYSTAL_ITEM_TYPE_MOUNT, CRYSTAL_STAT_MAX_AC,
+    CRYSTAL_STAT_MAX_DC,
 };
 use super::inventory::{
     allocate_item_unique_id_avoiding, collection_slot_occupied,
@@ -27,20 +27,19 @@ use super::inventory::{
     item_matches_inventory_unique_id, remove_item_destination, storage_locked,
 };
 use super::items::{
-    ItemState, crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
+    crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
     crystal_item_needs_identify, crystal_item_requirement_rejection_key, crystal_item_stat_value,
     crystal_item_template_for_dynamic_key, crystal_item_template_for_item_key,
-    default_item_unique_id, equipment_has_crystal_or_rental_bind_flag, item_is_socket_type,
-    item_has_crystal_or_rental_bind_flag,
-    item_state_can_equip_to_slot, item_state_identified, item_state_soul_bound_id,
-    merged_user_item_stats, upsert_user_item_stat, user_item_from_item_state,
-    user_item_rental_information,
+    default_item_unique_id, equipment_has_crystal_or_rental_bind_flag,
+    item_has_crystal_or_rental_bind_flag, item_is_socket_type, item_state_can_equip_to_slot,
+    item_state_identified, item_state_soul_bound_id, merged_user_item_stats, upsert_user_item_stat,
+    user_item_from_item_state, user_item_rental_information, ItemState,
 };
 use super::map::{current_map_disallows_mount, current_map_requires_bridle};
 use super::monsters::deterministic_roll;
 use super::npc::{
-    ActiveNpcServiceState, active_crystal_storage_service, crystal_npc_script_item_types,
-    current_crystal_npc_service_in_range,
+    active_crystal_storage_service, crystal_npc_script_item_types,
+    current_crystal_npc_service_in_range, ActiveNpcServiceState,
 };
 use super::resources::{
     BuffResource, InventoryResource, MountResource, PlayerPermissionResource, PlayerRuntimeResource,
@@ -1669,9 +1668,7 @@ pub(super) fn remove_equipped_slot_item_impl(
             bells.container = destination.0;
             bells.slot = destination.1;
             match destination.0 {
-                ItemContainer::Bag1 | ItemContainer::Bag2 => {
-                    resources.inventory_items.push(bells)
-                }
+                ItemContainer::Bag1 | ItemContainer::Bag2 => resources.inventory_items.push(bells),
                 ItemContainer::Storage => resources.storage_items.push(bells),
                 _ => unreachable!("mount slot destination was validated"),
             }
