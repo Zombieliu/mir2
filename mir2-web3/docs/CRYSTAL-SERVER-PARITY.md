@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> AI 41/42 Yin/Yang Devil Node checkpoint (2026-08-25): the runtime now preserves
+> Crystal immobility and support-cast timing, requires a friendly target within seven
+> tiles, and maps AI-specific `BlessedArmour/MaxAC` or
+> `UltimateEnhancer/MaxDC` stats at `target level / 7 + 4`. The existing player Buff
+> authority is used only when the node is genuinely friendly to the player. Monster
+> target Buff state is not yet authoritative, so no synthetic `AddBuff` is emitted for
+> it. Focused locked tests pass 2/2; complete monster Buff storage/expiry/snapshot
+> semantics remain an open parity item.
+
 > Map-coordinate event import checkpoint (2026-08-25): generated game data now
 > retains all six active Crystal map-coordinate bindings, eighteen Event files,
 > resolved section/include content, and per-line source provenance. The importer

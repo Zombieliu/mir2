@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Crystal AI 41/42 support-node checkpoint (2026-08-25): YinDevilNode and
+> YangDevilNode are now immobile non-chasing support casters. They require a
+> same-disposition friend within seven tiles, broadcast the delayed Crystal
+> `ObjectAttack`, and map AI 41 to `BlessedArmour/MaxAC` and AI 42 to
+> `UltimateEnhancer/MaxDC` with the exact `target level / 7 + 4` value and five-second
+> player Buff lifetime. Because target-owned monster Buff state is still absent, monster
+> targets fail closed without a fake client Buff. Locked integration tests pass 2/2;
+> monster-target Buff aggregation/expiry/snapshot remains explicitly open.
+
 > Crystal map-event import foundation (2026-08-25): the generator now imports
 > six active `_MAPCOORD` bindings and eighteen `Envir/Events/**/*.txt` files,
 > resolves nested `#INSERT`/section `#INCLUDE` directives with source-line

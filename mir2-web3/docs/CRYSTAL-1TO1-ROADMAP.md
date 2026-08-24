@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-25 spawned-AI checkpoint: AI 41/42 YinDevilNode/YangDevilNode now
+> stay immobile, suppress player chase, detect same-disposition friendly targets within
+> seven tiles, and emit the Crystal delayed support `ObjectAttack`. AI 41 maps to
+> `BlessedArmour/MaxAC`; AI 42 maps to `UltimateEnhancer/MaxDC`; a genuinely
+> player-friendly node uses the authoritative player Buff resource for five seconds.
+> Monster-target Buff ownership is not represented by the personal runtime, so that
+> branch deliberately fails closed instead of forging `AddBuff`. Focused locked tests
+> pass 2/2. This is a bounded support-node advance, not full monster-Buff parity.
+
 > 2026-08-25 map-event data checkpoint: active Crystal `_MAPCOORD` bindings,
 > all current Event text files, nested inserts/includes, and exact source
 > provenance are now generated into a bounded, deterministic game-data manifest.
