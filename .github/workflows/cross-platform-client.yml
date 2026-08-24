@@ -224,6 +224,12 @@ jobs:
         run: |
           rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
           rustup target add --toolchain "$RUST_TOOLCHAIN" aarch64-linux-android
+      - name: Fetch native Bevy dependencies
+        working-directory: .
+        run: >-
+          cargo "+$RUST_TOOLCHAIN" fetch --locked
+          --manifest-path mir2-web3/apps/game-client/platform-android/Cargo.toml
+          --target aarch64-linux-android
       - run: npm ci
       - run: npm test
       - run: npm run build
