@@ -12612,6 +12612,82 @@ fn great_fox_spirit_recalls_far_player_to_nearby_tile() {
 }
 
 #[test]
+fn great_fox_spirit_recall_respects_magic_resist_and_starts_cooldown() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert!(super::player_stats(session.app.world()).magic_resist() > 0);
+    let player_origin = Point { x: 900, y: 900 };
+    let fox_position = Point {
+        x: player_origin.x + 10,
+        y: player_origin.y,
+    };
+    let current_tick = runtime_tick(session.app.world());
+    let mut recall_case = None;
+    for recall_tick in current_tick.saturating_add(1)..current_tick.saturating_add(500) {
+        super::set_runtime_tick(session.app.world_mut(), recall_tick);
+        if super::crystal_player_magic_mitigated(session.app.world(), 1) != 0 {
+            continue;
+        }
+        if let Some(fox_object_id) = (100_500_u32..102_000_u32).find(|object_id| {
+            super::deterministic_chance_roll(recall_tick, *object_id, 502, 10)
+                && !super::deterministic_chance_roll(recall_tick, *object_id, 503, 4)
+        }) {
+            recall_case = Some((recall_tick, fox_object_id));
+            break;
+        }
+    }
+    let (recall_tick, fox_object_id) =
+        recall_case.expect("bounded search should find a resisted recall attempt");
+    let player_object_id = current_player_object_id(session.app.world()).expect("player object id");
+    set_player_position(&mut session, player_origin.clone());
+    let fox = spawn_crystal_monster_for_test(
+        &mut session,
+        fox_object_id,
+        "GreatFoxSpirit",
+        fox_position,
+        MirDirection::Left,
+        true,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(fox);
+        let mut agent = entry
+            .get_mut::<MonsterAgent>()
+            .expect("great fox spirit agent");
+        agent.tracking_player = true;
+        agent.can_wander = false;
+    }
+    super::set_runtime_tick(session.app.world_mut(), recall_tick.saturating_sub(1));
+    sync_visible_objects(&mut session);
+
+    let packets = session.tick();
+    assert_eq!(player_position(&session), player_origin);
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == player_object_id
+    )));
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectTeleportOut { object_id, .. }
+            | ServerPacket::ObjectTeleportIn { object_id, .. }
+            if *object_id == player_object_id
+    )));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(fox)
+            .get::<MonsterAiState>()
+            .expect("great fox spirit ai state")
+            .next_state_tick,
+        recall_tick + super::GREAT_FOX_SPIRIT_RECALL_COOLDOWN_TICKS,
+        "Crystal starts RecallTime before evaluating candidate MagicResist",
+    );
+}
+
+#[test]
 fn bone_lord_uses_crystal_seven_tile_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);

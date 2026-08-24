@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-25 spawned-AI checkpoint: AI 50 GreatFoxSpirit's implemented player
+> recall now honors Crystal's full-shrug MagicResist check. A resisted candidate
+> receives no teleport-out/walk/teleport-in sequence and stays at its original
+> tile; the recall cooldown still starts at the attempt, preserving Crystal's
+> operation order. Focused serial tests prove both paths. This closes the player
+> MagicResist branch only; multi-target target ordering/filtering, YinDevilNode,
+> SnowWolfKing and other full-AI gates remain open.
+>
 > 2026-08-24 spawned-AI checkpoint: AI 48 GuardianRock now evaluates the
 > authoritative player's Crystal-numeric MagicResist roll before queuing its
 > delayed pull. A resisted attack still emits the range animation after the

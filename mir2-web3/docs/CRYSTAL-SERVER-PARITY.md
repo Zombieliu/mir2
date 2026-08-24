@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> AI 50 GreatFoxSpirit recall correction (2026-08-25): the current
+> authoritative-player recall candidate now passes through Crystal's
+> `Random(MagicResistWeight) < MagicResist` rejection before any transform or
+> teleport packet is produced. The cooldown is committed before the check, as
+> Crystal commits `RecallTime` before iterating candidates. Deterministic tests
+> lock both successful and resisted recall behavior. Broader multi-target recall
+> ordering/filtering remains outside this bounded correction.
+>
 > AI 48 GuardianRock parity correction (2026-08-24): the queued pull movement
 > now passes through Crystal's `Random(MagicResistWeight) < MagicResist`
 > all-or-nothing resistance rule. Resistance does not cancel the delayed

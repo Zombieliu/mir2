@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Crystal AI 50 recall correction (2026-08-25): GreatFoxSpirit now evaluates
+> the authoritative player's `MagicResist / MagicResistWeight` all-or-nothing
+> roll before teleporting that recall candidate. A resisted attempt emits no
+> teleport/movement packets and leaves the player in place, while the ten-second
+> recall cooldown still starts before candidate evaluation exactly as in
+> `GreatFoxSpirit.ProcessTarget`. Locked serial regressions cover both the
+> ordinary recall and deterministic resisted branch. Multi-target recall
+> selection/filtering remains open.
+>
 > Crystal AI 48 correction (2026-08-24): GuardianRock's delayed pull now uses
 > the same `MagicResist / MagicResistWeight` all-or-nothing gate as
 > `GuardianRock.PullAttack`. A successful resistance roll suppresses only the

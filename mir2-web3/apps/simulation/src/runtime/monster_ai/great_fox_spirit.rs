@@ -104,6 +104,12 @@ pub(in crate::runtime) fn try_great_fox_spirit_recall(
     let Some(player_object_id) = current_player_object_id(world) else {
         return false;
     };
+    // Crystal skips each recall candidate when its all-or-nothing
+    // MagicResist roll succeeds. The ten-second recall cooldown has already
+    // started at this point, matching `GreatFoxSpirit.ProcessTarget`.
+    if crystal_player_magic_mitigated(world, 1) == 0 {
+        return false;
+    }
     let direction = rotated_direction(
         MirDirection::Up,
         deterministic_roll(tick, entity.index() as usize, 50, 7) as i32,
