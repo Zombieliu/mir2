@@ -1888,7 +1888,7 @@ pub(super) fn runtime_active_map_collision_data(
     if normalize_map_file_name(&map.file_name) == normalize_map_file_name("0")
         && map.title != "Starter Field"
     {
-        return runtime_full_map_collision_data(&map.file_name)
+        return runtime_world_map_collision_data(&map.file_name)
             .map(|collision| (*collision).clone())
             .or_else(|| runtime_map_collision_data(&map.file_name));
     }

@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-25 clean-checkout Bichon collision correction: an active map `0`
+> whose title is not `Starter Field` now resolves through the world collision
+> loader, which prefers an installed Crystal map and falls back to the tracked
+> gzipped map pack. The previous full-client-only lookup silently fell back to
+> the starter slice on clean Linux CI, shrinking Bichon from `0..699` to
+> `302..358 x 248..313` and removing its fishing cells. The focused active-map
+> regression passes 1/1 and the complete fishing group passes 16/16. This closes
+> the clean-host loader regression, not broader map-content or visual parity.
+
 > 2026-08-25 Zone factory restore safety checkpoint: complete World Director
 > images are now decoded and restored into an isolated Zone resource map before
 > one lock-protected live-map replacement. Replica markers and autonomous-tick

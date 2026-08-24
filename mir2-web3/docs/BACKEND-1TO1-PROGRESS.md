@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> Clean-host Bichon collision correction (2026-08-25): active non-starter map
+> `0` now uses `runtime_world_map_collision_data`, preserving the installed
+> Crystal-client preference while adding the repository gzipped map-pack
+> fallback. A clean Linux worker previously fell through to the starter slice,
+> causing one full-map assertion and seven real-fishing-fixture tests to fail.
+> The focused map gate passes 1/1 and all fishing tests pass 16/16. This is a
+> loader-source correction only; it does not claim complete map/content parity.
+
 > Zone factory recovery safety checkpoint (2026-08-25): a complete World
 > Director Zone image is staged off-line and replaces the live Zone map only
 > after every Zone validates and restores. Replica markers, resource creation,

@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> Clean-checkout map-source correction (2026-08-25): active Bichon map `0`
+> now uses the same world collision loader as CrystalWorld hosting, including
+> the tracked gzipped map-pack fallback when no original client is installed.
+> The former full-client-only branch degraded to `Starter Field` collision on
+> Linux CI and erased the real fishing-cell surface. The exact active-map test
+> passes 1/1 and the fishing suite passes 16/16. This closes that server loader
+> regression without expanding the wider map or client-visual parity claim.
+
 > Zone recovery checkpoint (2026-08-25): World Director factory restores now
 > validate and stage every Zone before one atomic live-map replacement. The
 > replica marker and autonomous-tick state is updated under a single fixed
