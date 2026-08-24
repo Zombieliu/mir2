@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> Unmatched Crystal spell correction (2026-08-25): the Rust manifest dispatcher
+> now matches `HumanObject`'s default switch behavior instead of converting an
+> unknown spell into a generic target hit. MP deduction remains before dispatch;
+> the caster receives/broadcasts `cast=false`, with no CastTime-equivalent
+> cooldown, magic progression, projectile, or damage action. Focused tests also
+> lock FireBall's explicit successful path. This change is intentionally
+> fail-closed: unsupported spell semantics remain in the parity backlog and are
+> not represented by fabricated gameplay.
+>
 > AI 50 GreatFoxSpirit recall correction (2026-08-25): the current
 > authoritative-player recall candidate now passes through Crystal's
 > `Random(MagicResistWeight) < MagicResist` rejection before any transform or

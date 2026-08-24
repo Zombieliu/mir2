@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-25 spell-authority checkpoint: the runtime no longer invents generic
+> damage for an imported Crystal spell whose switch branch has not been
+> implemented. Unsupported dispatch spends MP in Crystal order, returns
+> `cast=false` through both caster packet surfaces, and does not mutate
+> cooldown/progression or queue projectile/damage work. A FireBall neighbor
+> regression proves implemented offensive spells still work. This closes a
+> security/semantic false-positive path; it deliberately exposes unsupported
+> spells as unsupported and does not increase their functional-completeness
+> count.
+>
 > 2026-08-25 spawned-AI checkpoint: AI 50 GreatFoxSpirit's implemented player
 > recall now honors Crystal's full-shrug MagicResist check. A resisted candidate
 > receives no teleport-out/walk/teleport-in sequence and stays at its original

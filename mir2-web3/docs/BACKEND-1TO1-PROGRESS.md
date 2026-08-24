@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> Crystal unmatched-spell safety correction (2026-08-25): imported spells
+> without an explicit Rust implementation no longer fall through to a generic
+> 500 ms offensive damage action. The default branch now follows
+> `HumanObject` dispatch: MP is spent before the switch, `Magic` and
+> `ObjectMagic` publish `cast=false`, and no cooldown, skill progress,
+> projectile, or delayed damage is created. Explicit FireBall remains on its
+> normal cast/projectile/damage path. Ten focused locked serial skill tests pass.
+> This is a fail-closed correction; each still-unsupported spell remains an open
+> implementation item rather than being claimed as functional.
+>
 > Crystal AI 50 recall correction (2026-08-25): GreatFoxSpirit now evaluates
 > the authoritative player's `MagicResist / MagicResistWeight` all-or-nothing
 > roll before teleporting that recall candidate. A resisted attempt emits no
