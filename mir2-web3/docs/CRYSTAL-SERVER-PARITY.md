@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> NPC per-player/global visibility correction (2026-08-24): Rust now mirrors
+> Crystal `NPCObject.CheckVisible` for `FlagNeeded`, level, and class, plus the
+> minute schedule in `NPCObject.Process` for `DayofWeek` and `TimeVisible`.
+> The existing persisted character NPC flags are read during StartGame and live
+> AOI reconciliation. A flag transition produces the matching `ObjectNpc` or
+> `ObjectRemove`; hidden NPCs cannot be interacted with and are not exposed in
+> authoritative world snapshots. Server-local time follows Crystal's local
+> clock and exact `start <= current < finish` rule, with a deterministic UTC
+> fallback only where a target has no local-calendar API. Focused schedule and
+> live-AOI regressions pass together with the locked serial Simulation compile.
+> Map-coordinate events, complete NPC include semantics, and full server parity
+> are still open.
+>
 > WN-CANDIDATE R12 server parity note (2026-08-23): ordinary `AcceptQuest` and
 > `FinishQuest` can no longer mutate task state from anywhere on the map. The
 > native path requires the exact current server-owned dialog link, correct

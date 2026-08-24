@@ -92,8 +92,8 @@ use super::monsters::{
 };
 use super::movement::{current_location, tile_distance, town_revive_packets};
 use super::npc::{
-    buy_item_impl, crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog,
-    sell_item_impl,
+    buy_item_impl, crystal_npc_object_visible_in_world, crystal_npc_visible_to_character,
+    crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl, CrystalNpcLocalTime, NpcFlagState,
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
@@ -6604,6 +6604,8 @@ pub(super) fn start_game_static_visible_object_packets(
     player_position: &Point,
     character: &CharacterRecord,
     config: &SimulationConfig,
+    npc_flags: &[NpcFlagState],
+    local_time: CrystalNpcLocalTime,
 ) -> Vec<ServerPacket> {
     let normalized_map = normalize_map_file_name(map_file_name);
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
@@ -6622,7 +6624,7 @@ pub(super) fn start_game_static_visible_object_packets(
         if !point_in_data_range(&npc.location, player_position) {
             continue;
         }
-        if !crystal_npc_visible_to_character(&npc, character) {
+        if !crystal_npc_visible_to_character(&npc, character, npc_flags, local_time) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
@@ -6956,6 +6958,9 @@ pub(super) fn collect_world_entities(
         let remote_marker = entity.get::<RemotePlayer>();
         let npc_marker = entity.get::<Npc>();
         let npc_agent = entity.get::<NpcAgent>();
+        if npc_marker.is_some() && !crystal_npc_object_visible_in_world(world, object_id.0) {
+            continue;
+        }
 
         if self_marker.is_none() && !point_in_scene_data_range(scene_view, &position.0) {
             continue;
@@ -7590,6 +7595,9 @@ pub(super) fn visible_object_bundle_for_entity(
     }
 
     if entry.get::<Npc>().is_some() {
+        if !crystal_npc_object_visible_in_world(world, object_id) {
+            return None;
+        }
         let name = entry.get::<DisplayName>()?.resolve(language);
         let position = entry.get::<Position>()?.0.clone();
         let facing = entry.get::<Facing>()?.0;

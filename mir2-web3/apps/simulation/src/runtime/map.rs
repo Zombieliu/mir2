@@ -1101,19 +1101,16 @@ fn despawn_stage5_hero_for_no_hero_map(world: &mut World, packets: &mut Vec<Serv
 }
 
 pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
-    let (map_file_name, character) = {
+    let map_file_name = {
         let map = world.resource::<MapRuntimeResource>();
-        let Some(character) = world
+        if world
             .resource::<SessionResource>()
             .selected_character
-            .clone()
-        else {
+            .is_none()
+        {
             return;
-        };
-        (
-            normalize_map_file_name(&map.current_map.file_name),
-            character,
-        )
+        }
+        normalize_map_file_name(&map.current_map.file_name)
     };
     let quest_ids_by_npc = super::npc::crystal_quest_ids_by_npc();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
@@ -1121,9 +1118,6 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
     for npc in crystal_npc_info_manifest().npcs {
         let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
         if npc_map_file_name.as_deref() != Some(map_file_name.as_str()) {
-            continue;
-        }
-        if !super::npc::crystal_npc_visible_to_character(&npc, &character) {
             continue;
         }
         if !config.npc_script_is_allowed(&npc.script_key) {

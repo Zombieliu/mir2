@@ -35,6 +35,7 @@ use super::map::{
     runtime_world_map_collision_data, should_use_crystal_current_map_world,
     spawn_config_visible_npcs, spawn_visible_world_for_current_map,
 };
+use super::npc::current_crystal_npc_local_time;
 use super::packets::*;
 use super::quests::{effective_crystal_quest_info_packets, QuestState};
 use super::resources::{
@@ -2136,11 +2137,19 @@ impl SimulationSession {
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
         packets.extend(start_game_account_social_and_shop_packets());
         packets.extend(start_game_base_stats_packet(character.class));
+        let npc_flags = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .npc_flags
+            .clone();
         packets.extend(start_game_static_visible_object_packets(
             &map.current_map.file_name,
             &player_runtime.player_position,
             &character,
             &config,
+            &npc_flags,
+            current_crystal_npc_local_time(),
         ));
         if resources.storage_size != BASE_STORAGE_SLOTS
             || resources.has_expanded_storage

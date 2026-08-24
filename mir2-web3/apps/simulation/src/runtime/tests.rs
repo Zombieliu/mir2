@@ -2344,6 +2344,8 @@ fn optional_safe_zone_border_is_off_by_default_but_can_be_enabled() {
         &border.location,
         &character,
         &default_config,
+        &[],
+        super::CrystalNpcLocalTime::new(0, 0, 0),
     );
     assert!(
         !default_packets.iter().any(|packet| matches!(
@@ -2363,6 +2365,8 @@ fn optional_safe_zone_border_is_off_by_default_but_can_be_enabled() {
         &border.location,
         &character,
         &enabled_config,
+        &[],
+        super::CrystalNpcLocalTime::new(0, 0, 0),
     );
     assert!(
         enabled_packets.iter().any(|packet| matches!(
@@ -27051,7 +27055,7 @@ fn crystal_npc_say_section_strips_comment_lines() {
 }
 
 #[test]
-fn crystal_npc_dynamic_visibility_flags_remain_hidden_until_runtime_hooks_exist() {
+fn crystal_npc_dynamic_visibility_matches_character_flags_and_crystal_schedule() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -27063,20 +27067,134 @@ fn crystal_npc_dynamic_visibility_flags_remain_hidden_until_runtime_hooks_exist(
         .as_ref()
         .expect("started character");
     let manifest = crystal_npc_info_manifest();
-    let flagged = manifest
+    let mut flagged = manifest
         .npcs
         .iter()
         .find(|npc| npc.flag_needed != 0)
-        .expect("Crystal manifest should include flag-gated NPCs");
-    let timed = manifest
+        .expect("Crystal manifest should include flag-gated NPCs")
+        .clone();
+    flagged.min_level = 0;
+    flagged.max_level = 0;
+    flagged.class_required.clear();
+    flagged.day_of_week.clear();
+    flagged.time_visible = false;
+    let mut timed = manifest
         .npcs
         .iter()
         .find(|npc| npc.time_visible)
-        .expect("Crystal manifest should include time-gated NPCs");
+        .expect("Crystal manifest should include time-gated NPCs")
+        .clone();
+    timed.flag_needed = 0;
+    timed.min_level = 0;
+    timed.max_level = 0;
+    timed.class_required.clear();
+    timed.day_of_week = "Monday".to_string();
+    timed.hour_start = 10;
+    timed.minute_start = 15;
+    timed.hour_end = 11;
+    timed.minute_end = 30;
 
-    assert!(!super::crystal_npc_visible_to_character(flagged, character));
-    assert!(!super::crystal_npc_visible_to_character(timed, character));
-    // TODO: wire dynamic flag_needed/time_visible evaluation against live NPC flags and Crystal local time.
+    let monday_open = super::CrystalNpcLocalTime::new(1, 10, 15);
+    assert!(!super::crystal_npc_visible_to_character(
+        &flagged,
+        character,
+        &[],
+        monday_open,
+    ));
+    assert!(super::crystal_npc_visible_to_character(
+        &flagged,
+        character,
+        &[super::NpcFlagState {
+            index: u32::try_from(flagged.flag_needed).expect("positive Crystal flag index"),
+            value: true,
+        }],
+        monday_open,
+    ));
+    assert!(super::crystal_npc_visible_to_character(
+        &timed,
+        character,
+        &[],
+        monday_open,
+    ));
+    assert!(!super::crystal_npc_visible_to_character(
+        &timed,
+        character,
+        &[],
+        super::CrystalNpcLocalTime::new(1, 11, 30),
+    ));
+    assert!(!super::crystal_npc_visible_to_character(
+        &timed,
+        character,
+        &[],
+        super::CrystalNpcLocalTime::new(2, 10, 15),
+    ));
+}
+
+#[test]
+fn crystal_npc_flag_changes_reconcile_live_aoi_and_block_hidden_interaction() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let flagged = crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .find(|npc| {
+            npc.map_file_name.as_deref() == Some("0")
+                && npc.flag_needed > 0
+                && npc.loaded_object_id.is_some()
+        })
+        .expect("Bichon should contain a flag-gated Crystal NPC");
+    let object_id = flagged.loaded_object_id.expect("loaded NPC object id");
+    let flag_index = u32::try_from(flagged.flag_needed).expect("positive Crystal flag index");
+
+    super::spawn_crystal_current_map_npcs(session.app.world_mut());
+    session.force_authoritative_player_transform(flagged.location.clone(), MirDirection::Down);
+    let hidden_packets = session.finalize_packets(Vec::new());
+    assert!(!session
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    assert!(!hidden_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectNpc { info } if info.object_id == object_id
+    )));
+    assert!(!super::crystal_npc_service_object_in_range(
+        session.app.world(),
+        object_id,
+    ));
+
+    set_crystal_npc_flag(session.app.world_mut(), flag_index, true);
+    let shown_packets = session.finalize_packets(Vec::new());
+    assert!(session
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    assert!(shown_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectNpc { info } if info.object_id == object_id
+    )));
+    assert!(super::crystal_npc_service_object_in_range(
+        session.app.world(),
+        object_id,
+    ));
+
+    set_crystal_npc_flag(session.app.world_mut(), flag_index, false);
+    let removed_packets = session.finalize_packets(Vec::new());
+    assert!(!session
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    assert!(removed_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRemove { object_id: removed } if *removed == object_id
+    )));
+    assert!(!super::crystal_npc_service_object_in_range(
+        session.app.world(),
+        object_id,
+    ));
 }
 
 #[test]

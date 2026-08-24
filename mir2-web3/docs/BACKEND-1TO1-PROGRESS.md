@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> Crystal NPC visibility closure (2026-08-24): generated `FlagNeeded`,
+> `DayofWeek`, and `TimeVisible` metadata now controls authoritative NPC
+> visibility instead of permanently hiding every gated NPC. Character flags
+> use the existing per-character persisted NPC flag state; schedule evaluation
+> uses server-local `.NET DayOfWeek` names and Crystal's inclusive-start,
+> exclusive-finish minute boundary. Crystal NPC entities remain materialized so
+> later flag changes can reconcile live AOI: the client receives `ObjectNpc`
+> when a flag becomes true and `ObjectRemove` when it becomes false. Hidden
+> NPCs are also removed from `worldSnapshot` and rejected by the interaction
+> range guard. Locked serial compile and focused pure-schedule/live-AOI tests
+> pass. This closes this bounded semantic gap only; full NPC script/event and
+> whole-project parity remain open.
+>
 > WN-CANDIDATE R12 ordinary-player closure (2026-08-23): quest accept and
 > finish are now explicit dialog actions rather than side effects of opening
 > the Village Guide. The native path requires the matching current dialog link,

@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-24 NPC dynamic-visibility checkpoint: the former placeholder that
+> returned false for every `FlagNeeded` or `TimeVisible` NPC is removed.
+> StartGame, AOI object packets, authoritative `worldSnapshot`, and NPC
+> interaction now share persisted character-flag plus server-local schedule
+> evaluation. The implementation preserves Crystal's weekday naming and
+> inclusive-start/exclusive-finish minute boundaries, materializes gated NPCs
+> for later live reconciliation, caches loaded-object metadata off the hot path,
+> and emits `ObjectNpc`/`ObjectRemove` on flag transitions. Focused pure boundary
+> and live AOI/interaction regressions pass; the locked Simulation compile is
+> green. This is one verified semantic closure and does not justify the stale
+> broad “NPC scripting 100%” claim: map-coordinate events, include expansion,
+> and remaining script behavior are still tracked as open.
+>
 > WN-CANDIDATE R12 checkpoint (2026-08-23): the ordinary-player functional
 > slice now closes remote quest mutation, rejected-task pending locks, and
 > saturated pickup-loss gaps. Village Guide open is presentation-only;
