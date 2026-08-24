@@ -9,15 +9,17 @@
 > targets fail closed without a fake client Buff. Locked integration tests pass 2/2;
 > monster-target Buff aggregation/expiry/snapshot remains explicitly open.
 
-> Crystal map-event import foundation (2026-08-25): the generator now imports
-> six active `_MAPCOORD` bindings and eighteen `Envir/Events/**/*.txt` files,
-> resolves nested `#INSERT`/section `#INCLUDE` directives with source-line
-> provenance, and fails closed on dangling paths, traversal, cycles, size, depth,
-> or resolved-line limits. Commented Bichon bindings remain excluded. Independent
-> regeneration is byte-identical (`SHA-256 DA5A2387264E72AFB4D7268220290C0E6E400ED8CFB21E1F011E7E49E2C3E087`),
-> importer self-tests pass 3/3, game-data tests pass 35/35 plus 3/3, and the
-> Simulation consumer integration passes 1/1. This imports authoritative data;
-> runtime coordinate-trigger execution and event semantics remain open.
+> Crystal map-coordinate runtime checkpoint (2026-08-25): all six active
+> `_MAPCOORD` bindings are now evaluated after authoritative movement in both
+> personal Simulation and shared Zone execution. `LEVEL` and `CHECKPKPOINT`
+> consume the real player level/PK state (including the former NPC-script PK
+> hardcode), denied gates emit the imported `Hint`, and authorized `ENTERMAP`
+> rows feed the existing transfer authority. The Gateway's post-Zone movement
+> handoff can therefore transfer only from an authorized snapshot row. Focused
+> integration gates pass 2/2 over every active binding and the level 49/50 and
+> PK 199/200 boundaries; locked Simulation compile also passes. This closes
+> runtime execution for the imported six-binding subset, not arbitrary event
+> scheduling or a general Crystal script interpreter.
 >
 > Crystal unmatched-spell safety correction (2026-08-25): imported spells
 > without an explicit Rust implementation no longer fall through to a generic

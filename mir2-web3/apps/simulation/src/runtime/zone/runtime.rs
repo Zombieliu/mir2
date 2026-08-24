@@ -14,6 +14,7 @@ use mir2_protocol::{
 use serde::{Deserialize, Serialize};
 
 use crate::runtime::big_map::authoritative_zone_npc_teleport_config;
+use crate::runtime::map_events::map_coordinate_hint_packets;
 
 mod checkpoint;
 
@@ -1617,6 +1618,19 @@ impl ZoneRuntime {
         let path = (1..=steps)
             .map(|amount| offset_point(&origin, action.direction, amount))
             .collect::<Vec<_>>();
+        let map_coordinate_packets = {
+            let player = self
+                .players
+                .get(session_id)
+                .expect("action owner should still exist");
+            map_coordinate_hint_packets(
+                &self.key.map_file_name,
+                &path,
+                player.level,
+                player.chat_profile.pk_points,
+                action.direction,
+            )
+        };
 
         let blocked = path
             .iter()
@@ -1666,9 +1680,11 @@ impl ZoneRuntime {
             .players
             .get(session_id)
             .expect("action owner should still exist");
+        let mut owner_packets = vec![user_location_packet(player)];
+        owner_packets.extend(map_coordinate_packets);
         outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
-            packets: vec![user_location_packet(player)],
+            packets: owner_packets,
         });
 
         let observers = self

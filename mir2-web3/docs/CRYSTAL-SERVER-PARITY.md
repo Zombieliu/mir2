@@ -9,14 +9,15 @@
 > it. Focused locked tests pass 2/2; complete monster Buff storage/expiry/snapshot
 > semantics remain an open parity item.
 
-> Map-coordinate event import checkpoint (2026-08-25): generated game data now
-> retains all six active Crystal map-coordinate bindings, eighteen Event files,
-> resolved section/include content, and per-line source provenance. The importer
-> enforces traversal, cycle, depth, file/total-byte, and resolved-line limits and
-> produces deterministic output. Independent Rust/Node gates pass. No runtime
-> event is claimed here: authoritative movement-trigger evaluation and execution
-> of the imported event sections remain required before coordinate-event parity
-> can be marked functional.
+> Map-coordinate event runtime checkpoint (2026-08-25): the six active Crystal
+> bindings now run from authoritative personal-session and shared-Zone movement.
+> The evaluator consumes live level and PK-point state, fails closed on unsupported
+> conditions/actions, emits the imported denial hint, and exposes an `ENTERMAP`
+> transfer only after its gate succeeds. The Gateway already completes authorized
+> post-Zone transfers from that snapshot, so denied cells cannot bypass the gate.
+> End-to-end tests pass 2/2 across all six bindings and exact level 49/50 and PK
+> 199/200 boundaries. This is functional parity for the imported subset only;
+> arbitrary event scheduling and full script-command semantics remain open.
 >
 > Unmatched Crystal spell correction (2026-08-25): the Rust manifest dispatcher
 > now matches `HumanObject`'s default switch behavior instead of converting an

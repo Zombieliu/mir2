@@ -1119,7 +1119,11 @@ pub(super) fn evaluate_crystal_npc_condition(
             i32::try_from(world.resource::<PlayerRuntimeResource>().gold).unwrap_or(i32::MAX),
             &parts[1..],
         ),
-        "CHECKPKPOINT" => crystal_npc_compare_numeric(world, 0, &parts[1..]),
+        "CHECKPKPOINT" => crystal_npc_compare_numeric(
+            world,
+            world.resource::<PlayerRuntimeResource>().pk_points,
+            &parts[1..],
+        ),
         "CHECKQUEST" => crystal_npc_check_quest(world, &parts[1..]),
         "CHECKITEM" => crystal_npc_check_item(world, &parts[1..]),
         "CHECK" => crystal_npc_check_flag(world, &parts[1..]),

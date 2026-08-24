@@ -9,14 +9,16 @@
 > branch deliberately fails closed instead of forging `AddBuff`. Focused locked tests
 > pass 2/2. This is a bounded support-node advance, not full monster-Buff parity.
 
-> 2026-08-25 map-event data checkpoint: active Crystal `_MAPCOORD` bindings,
-> all current Event text files, nested inserts/includes, and exact source
-> provenance are now generated into a bounded, deterministic game-data manifest.
-> Unsafe/dangling/cyclic include graphs fail generation; commented bindings do
-> not become live data. Generator, determinism, game-data, and Simulation
-> consumer gates pass. This closes the previously missing import foundation,
-> not runtime map-coordinate activation, event scheduling, or script-command
-> semantic parity.
+> 2026-08-25 map-coordinate runtime checkpoint: the six active Crystal
+> `_MAPCOORD` bindings now execute through authoritative movement in both the
+> personal Simulation session and the shared Zone path. `LEVEL` and
+> `CHECKPKPOINT` conditions use the live player values, denied moves emit the
+> imported `Hint`, and successful `ENTERMAP` actions resolve through the existing
+> map-transfer authority; the Gateway consumes only those authorized transfer
+> rows after Zone movement. Focused end-to-end gates pass 2/2 across all six
+> bindings, including level 49/50 and PK 199/200 boundaries. The bounded
+> importer and fail-closed evaluator remain deliberately limited to this imported
+> subset; arbitrary event scheduling and general script-command parity remain open.
 >
 > 2026-08-25 spell-authority checkpoint: the runtime no longer invents generic
 > damage for an imported Crystal spell whose switch branch has not been

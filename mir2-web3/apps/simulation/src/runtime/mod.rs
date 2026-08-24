@@ -14,6 +14,7 @@ mod inventory;
 mod items;
 mod leveling;
 mod map;
+mod map_events;
 mod mining;
 mod monster_ai;
 mod monsters;

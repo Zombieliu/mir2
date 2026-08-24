@@ -20,6 +20,7 @@ use super::components::{
     PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
+use super::map_events::{authorized_map_coordinate_transfers, crystal_map_coordinate_source_cells};
 use super::monsters::{
     build_crystal_current_map_full_spawn_table, build_crystal_current_map_visible_spawn_table,
     build_spawn_table, initial_general_meow_meow_state, initial_monster_ai_state_for_object,
@@ -97,7 +98,8 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     };
     let mut blocked_cells = collision.blocked_set;
     blocked_cells.extend(collision.closed_door_set);
-    let transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    let mut transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    transfer_source_cells.extend(crystal_map_coordinate_source_cells(map_file_name));
     let mut doors: BTreeMap<u8, Vec<(i32, i32)>> = BTreeMap::new();
     for door in &collision.collision.doors {
         let cell = (door.x, door.y);
@@ -303,6 +305,7 @@ pub(super) fn transfer_for_current_player_position(world: &World) -> Option<MapT
         .chain(crystal_movement_transfer_records_for_map(
             &map.current_map.file_name,
         ))
+        .chain(authorized_map_coordinate_transfers(world))
         .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
         .find(|transfer| point_in_bounds(&transfer.from_bounds, &position))
 }
@@ -322,6 +325,8 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
             .iter()
             .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
+        || crystal_map_coordinate_source_cells(&map.current_map.file_name)
+            .any(|(x, y)| point.x == x && point.y == y)
 }
 
 pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> Vec<ServerPacket> {
@@ -555,11 +560,17 @@ pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPack
         Ok(None) => {}
     }
 
-    let Some(transfer) = transfer_for_key(
+    let transfer = transfer_for_key(
         &world.resource::<RuntimeConfigResource>().config,
         world.resource::<MapRuntimeResource>(),
         key,
-    ) else {
+    )
+    .or_else(|| {
+        authorized_map_coordinate_transfers(world)
+            .into_iter()
+            .find(|transfer| transfer.key == key)
+    });
+    let Some(transfer) = transfer else {
         let language = super::session::current_language(world);
         return vec![super::session::system_message(&localized_text_or_fallback(
             language,

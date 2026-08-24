@@ -84,6 +84,7 @@ use super::map::{
     current_map_disallows_hero, filter_decor_objects, filter_terrain_patches, is_safe_zone_point,
     normalize_map_file_name, rebuild_world, spawn_stage5_hero,
 };
+use super::map_events::authorized_map_coordinate_transfers;
 use super::monster_ai::advance_world;
 use super::monsters::{
     crystal_monster_effect_for_name, crystal_respawn_object_id,
@@ -6088,7 +6089,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .map(|buff| buff.snapshot(tick, language))
             .collect(),
         stage5_systems,
-        map_transfers: collect_map_transfer_snapshots(config, map),
+        map_transfers: collect_map_transfer_snapshots(world),
         interaction_hints: build_interaction_hints(world, resources),
     }
 }
@@ -6828,10 +6829,9 @@ pub(super) fn user_quest_inventory_slots(items: &[ItemState]) -> Vec<Option<User
     slots
 }
 
-pub(super) fn collect_map_transfer_snapshots(
-    config: &SimulationConfig,
-    map: &MapRuntimeResource,
-) -> Vec<MapTransferSnapshot> {
+pub(super) fn collect_map_transfer_snapshots(world: &World) -> Vec<MapTransferSnapshot> {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let map = world.resource::<MapRuntimeResource>();
     let current_map = normalize_map_file_name(&map.current_map.file_name);
     let mut transfers: Vec<MapTransferSnapshot> = config
         .map_transfers
@@ -6850,6 +6850,19 @@ pub(super) fn collect_map_transfer_snapshots(
 
     transfers.extend(
         crystal_movement_transfer_records_for_map(&map.current_map.file_name)
+            .into_iter()
+            .map(|transfer| MapTransferSnapshot {
+                key: transfer.key,
+                map_file_name: transfer.from_map_file_name,
+                bounds: transfer.from_bounds,
+                to_map_file_name: transfer.to_map_file_name,
+                to_map_title: transfer.to_map_title,
+                to_position: transfer.to_position,
+                to_direction: transfer.to_direction,
+            }),
+    );
+    transfers.extend(
+        authorized_map_coordinate_transfers(world)
             .into_iter()
             .map(|transfer| MapTransferSnapshot {
                 key: transfer.key,
