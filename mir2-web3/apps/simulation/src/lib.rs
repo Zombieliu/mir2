@@ -1,9 +1,14 @@
 mod config;
 pub mod db_projection;
 mod runtime;
+pub mod user_item_uid;
 mod world_runtime;
 
 pub use db_projection::{apply_migrations, MIGRATIONS};
+pub use user_item_uid::{
+    FileUserItemUidAuthority, UserItemUid, UserItemUidAllocator, UserItemUidError,
+    UserItemUidReason, UserItemUidStore, USER_ITEM_UID_MAX, USER_ITEM_UID_MIN,
+};
 
 pub use config::{
     account_store_requires_postgres_source_from_env, account_store_runtime_backend_from_env,
