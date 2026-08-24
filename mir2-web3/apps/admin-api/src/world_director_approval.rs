@@ -15,7 +15,7 @@ use mir2_gateway::{
 use postgres::{Client, NoTls};
 use reqwest::blocking::Client as HttpClient;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
 const CHECKPOINT_VERSION: u32 = 1;
@@ -2482,16 +2482,14 @@ mod tests {
         });
         let decision =
             decode_openai_director_decision(&serde_json::to_vec(&response).unwrap()).unwrap();
-        assert!(
-            materialize_ai_director_proposal(
-                decision,
-                &snapshot(1_800_000_010_000),
-                "gpt-5.6-terra",
-                1_800_000_010_000,
-            )
-            .unwrap()
-            .is_none()
-        );
+        assert!(materialize_ai_director_proposal(
+            decision,
+            &snapshot(1_800_000_010_000),
+            "gpt-5.6-terra",
+            1_800_000_010_000,
+        )
+        .unwrap()
+        .is_none());
     }
 
     #[test]
@@ -2521,11 +2519,9 @@ mod tests {
             let read = stream.read(&mut request).unwrap();
             let request = String::from_utf8_lossy(&request[..read]);
             assert!(request.starts_with("POST /v1/responses "));
-            assert!(
-                request
-                    .to_ascii_lowercase()
-                    .contains("authorization: bearer test-api-key")
-            );
+            assert!(request
+                .to_ascii_lowercase()
+                .contains("authorization: bearer test-api-key"));
             let body = request.split_once("\r\n\r\n").unwrap().1;
             let body = serde_json::from_str::<Value>(body).unwrap();
             assert_eq!(body["model"], "gpt-5.6-terra");
@@ -2618,12 +2614,10 @@ mod tests {
         let dashboard = service.dashboard(now_ms + 2).unwrap();
         assert_eq!(dashboard.pending_count, 0);
         assert_eq!(dashboard.active_count, 1);
-        assert!(
-            dashboard
-                .audit
-                .iter()
-                .any(|record| record.action == "proposal.zone_delivery_succeeded")
-        );
+        assert!(dashboard
+            .audit
+            .iter()
+            .any(|record| record.action == "proposal.zone_delivery_succeeded"));
     }
 
     #[test]
