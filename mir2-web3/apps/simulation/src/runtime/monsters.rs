@@ -3,9 +3,9 @@ use std::collections::BTreeSet;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
+    crystal_monster_by_name, crystal_starter_region_respawns, starter_server_data,
     CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
-    MonsterSpawnDispositionTemplate, crystal_monster_by_name, crystal_starter_region_respawns,
-    starter_server_data,
+    MonsterSpawnDispositionTemplate,
 };
 use mir2_protocol::{
     MirDirection, MonsterInfo, ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo,
@@ -18,15 +18,15 @@ use crate::config::{
 };
 
 use super::combat::{
-    PendingPlayerStatusEffect, combat_delay_ticks, deterministic_chance_roll,
-    melee_attack_delay_ticks, ranged_attack_delay_ticks,
+    combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
+    ranged_attack_delay_ticks, PendingPlayerStatusEffect,
 };
 use super::combat::{crystal_player_rolled_armour, crystal_player_rolled_magic_armour};
 use super::components::{
-    DisplayName, Facing, GeneralMeowMeowState, HarvestMonsterState, HarvestOwnership, Monster,
-    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, PlayerVitals,
-    Position, RouteStep, SpawnSlotRef, SummonedMonster, WoomaTaurusState, WorldObject,
-    YimoogiState, entity_facing, entity_object_id, entity_position,
+    entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
+    HarvestMonsterState, HarvestOwnership, Monster, MonsterAgent, MonsterAiState,
+    MonsterCombatStats, MonsterVitals, ObjectId, PlayerVitals, Position, RouteStep, SpawnSlotRef,
+    SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
@@ -38,8 +38,8 @@ use super::map::{
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
 use super::packets::object_movement;
 use super::resources::{
-    MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource, RuntimeQueueResource,
-    runtime_tick,
+    runtime_tick, MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource,
+    RuntimeQueueResource,
 };
 use super::stats::deterministic_range_roll;
 
@@ -1180,15 +1180,16 @@ fn spawn_runtime_monster_with_position_policy(
     activation_delay_ticks: u64,
     trusted_shared_position: bool,
 ) -> Option<Entity> {
-    let (config, current_map_file_name) = {
-        let map = world.resource::<MapRuntimeResource>();
-        (
-            world.resource::<RuntimeConfigResource>().config.clone(),
-            map.current_map.file_name.clone(),
-        )
-    };
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    // `can_occupy` is authoritative for the active map: it reads the
+    // collision source already refreshed into MapRuntimeResource after
+    // StartGame/map transfer. Re-resolving from `config.monster_spawn_source`
+    // here can select starter collision while the active map is full Crystal
+    // Bichon (the Jar1 slave then gets rejected at a valid death tile). Keep
+    // the summoned compatibility escape hatch unchanged, but make ordinary
+    // monster spawns use the same static collision decision as occupancy.
     let valid_spawn_point = trusted_shared_position
-        || is_static_spawnable_point_on_map(&config, &current_map_file_name, &position)
+        || super::movement::can_occupy(world, position.clone(), None)
         || (summoned.is_some() && runtime_position_exists(world, &position));
     if !valid_spawn_point {
         return None;

@@ -60,11 +60,11 @@ pub(crate) struct ZoneMapCollisionData {
 }
 
 pub(super) fn normalize_map_file_name(file_name: &str) -> String {
-    file_name
-        .trim()
-        .trim_end_matches(".map")
-        .trim_end_matches(".MAP")
-        .to_ascii_lowercase()
+    let normalized = file_name.trim().to_ascii_lowercase();
+    normalized
+        .strip_suffix(".map")
+        .unwrap_or(&normalized)
+        .to_owned()
 }
 
 /// When set, the shared multiplayer zone hosts every map at its *full* size
@@ -1852,27 +1852,16 @@ pub(super) fn runtime_world_map_collision_data(
 
 pub(super) fn refresh_runtime_map_collision(world: &mut World) {
     let current_map = world.resource::<MapRuntimeResource>().current_map.clone();
-    let spawn_source = world
-        .resource::<RuntimeConfigResource>()
-        .config
-        .monster_spawn_source;
+    let config = &world.resource::<RuntimeConfigResource>().config;
     // The activated world walks the full map everywhere (gz map-pack backed), so
     // players are never fenced into the Bichon starter slice — they can reach
     // every transfer and roam all maps. Other sources keep their prior collision.
-    let collision = if spawn_source == MonsterSpawnSource::CrystalWorld {
-        runtime_world_map_collision_data(&current_map.file_name)
-            .map(|collision| (*collision).clone())
+    let collision = if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+        crystal_world_collision_data_or_config(config, &current_map.file_name)
     } else {
         runtime_active_map_collision_data(&current_map)
-    }
-    .unwrap_or_else(|| {
-        let fallback = world
-            .resource::<RuntimeConfigResource>()
-            .config
-            .map_collision
-            .clone();
-        runtime_map_collision_from_template(fallback)
-    });
+            .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()))
+    };
 
     let doors = super::resources::DoorRegistry::from_templates(&collision.collision.doors);
     {
@@ -1906,7 +1895,20 @@ pub(super) fn collision_data_for_map_or_config(
     config: &SimulationConfig,
     map_file_name: &str,
 ) -> RuntimeMapCollisionData {
-    runtime_map_collision_data(map_file_name)
+    if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+        crystal_world_collision_data_or_config(config, map_file_name)
+    } else {
+        runtime_map_collision_data(map_file_name)
+            .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()))
+    }
+}
+
+fn crystal_world_collision_data_or_config(
+    config: &SimulationConfig,
+    map_file_name: &str,
+) -> RuntimeMapCollisionData {
+    runtime_world_map_collision_data(map_file_name)
+        .map(|collision| (*collision).clone())
         .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()))
 }
 
@@ -2152,3 +2154,7 @@ impl SimulationSession {
         apply_map_transfer(self.app.world_mut(), key)
     }
 }
+
+#[cfg(test)]
+#[path = "map_collision_source_tests.rs"]
+mod map_collision_source_tests;
