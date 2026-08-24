@@ -185,16 +185,19 @@ dist/gateway-releases/mir2-gateway-<target>-<tag>.tar.gz.sha256
 dist/gateway-releases/latest-mir2-gateway-release.json
 ```
 
-The package contains:
+The release archive contains exactly four allowlisted payload members:
 
 ```text
 mir2-gateway
+zone_host
 RELEASE.json
 README.txt
-systemd/mir2-gateway.service
-systemd/mir2-gateway.env.example
-scripts/install-gateway-release.sh
 ```
+
+The installer, systemd unit, and environment template are trusted files
+provisioned separately at fixed root-owned paths. They are intentionally not
+package members. The adjacent `.sha256` object is an integrity convenience
+only; the root-owned pin manifest remains the release authority.
 
 ## GitHub Actions R2 Publish
 
@@ -352,42 +355,85 @@ ls /var/lib/mir2/crystal-map-pack/*.map.gz | wc -l   # 1620
 grep MIR2_CRYSTAL_MAP_PACK /etc/mir2/gateway.env
 ```
 
-## First Server Setup
+## First Server Setup and Production Install
 
-On Ubuntu/Debian:
+Production release installation has one supported path: the preinstalled
+root-owned trusted installer. The release archive is never extracted by an
+operator, and no archive-provided script, systemd unit, environment template,
+checksum sidecar, caller URL, or caller digest is trusted.
 
-```bash
-sudo useradd --system --home /var/lib/mir2 --shell /usr/sbin/nologin mir2
-sudo mkdir -p /opt/mir2/gateway/releases /var/lib/mir2 /var/log/mir2 /etc/mir2
-sudo chown -R mir2:mir2 /opt/mir2/gateway /var/lib/mir2 /var/log/mir2
-sudo cp infra/systemd/mir2-gateway.env.example /etc/mir2/gateway.env
-sudo cp infra/systemd/mir2-gateway.service /etc/systemd/system/mir2-gateway.service
-sudo systemctl daemon-reload
-```
-
-Edit `/etc/mir2/gateway.env` before starting. For the first <=10-player smoke,
-the file account store is acceptable. Move to Postgres before broader staging.
-
-## Install Or Roll Forward
+Provision the fixed trust bundle through trusted configuration management:
 
 ```bash
-tag=2026-05-18-001
-url="https://<release-host>/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz"
-
-sudo mkdir -p "/opt/mir2/gateway/releases/$tag"
-curl -fsSL "$url" -o /tmp/mir2-gateway.tar.gz
-sudo tar -xzf /tmp/mir2-gateway.tar.gz -C "/opt/mir2/gateway/releases/$tag"
-sudo chown -R mir2:mir2 "/opt/mir2/gateway/releases/$tag"
-sudo ln -sfn "/opt/mir2/gateway/releases/$tag" /opt/mir2/gateway/current
-sudo systemctl restart mir2-gateway
+sudo install -d -o root -g root -m 0755 \
+  /usr/local/libexec/mir2 /usr/local/share/mir2/gateway /etc/mir2
+sudo install -o root -g root -m 0755 \
+  scripts/install-gateway-release.sh \
+  /usr/local/libexec/mir2/install-gateway-release.sh
+sudo install -o root -g root -m 0644 \
+  infra/systemd/mir2-gateway.env.example \
+  /usr/local/share/mir2/gateway/mir2-gateway.env.example
+sudo install -o root -g root -m 0600 \
+  /secure/config/mir2/gateway-release.pin \
+  /etc/mir2/gateway-release.pin
 ```
+
+The pin file is an independently authenticated, root-owned three-line manifest:
+
+```text
+MIR2_GATEWAY_RELEASE_URL=https://<release-host>/gateway/releases/<tag>/mir2-gateway-linux-x64.tar.gz
+MIR2_GATEWAY_RELEASE_SHA256=<64-hex digest obtained independently from the authenticated registry>
+MIR2_GATEWAY_RELEASE_TAG=<safe single component>
+```
+
+The first invocation renders `/etc/mir2/gateway.env`, creates the service
+identity and required root/service-owned directories, installs the four-member
+release, and does not start systemd:
+
+```bash
+sudo env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin LC_ALL=C \
+  /usr/local/libexec/mir2/install-gateway-release.sh
+```
+
+Populate the Postgres, Redis, and optional operator credentials in the
+root-owned environment file from a trusted secret manager or CSPRNG. The
+installer applies only a weak-pattern heuristic; it cannot determine whether a
+credential is public or private. Keep credentials independent and keep the
+stable recovery MAC key unchanged while recovery journals exist. Then activate
+using the same fixed path:
+
+```bash
+sudo env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin LC_ALL=C \
+  /usr/local/libexec/mir2/install-gateway-release.sh --activate
+```
+
+Roll-forward is the same operation: update the root-owned pin through trusted
+configuration management and invoke the fixed installer. Do not use `curl | bash`,
+direct `tar` extraction, `chown -R`, caller-controlled release variables, or a
+manual `current` symlink update.
+
+### Release security acceptance gate
+
+Production and CI acceptance of the release-security selftest must run on an
+actual Linux host with the Linux gate explicitly required:
+
+```bash
+MIR2_REQUIRE_LINUX_SECURITY_GATE=1 \
+  bash scripts/selftest-gateway-save-recovery.sh
+```
+
+Acceptance requires exit status `0` and a final `PASS:` line from the Linux
+branch. A Windows or other non-Linux run may report `LOCAL CHECKS PASS` and
+exit `0` for its portable checks, but it also reports `NOT RUN: Linux security
+gate` and cannot satisfy production/CI Linux security acceptance. Setting
+`MIR2_REQUIRE_LINUX_SECURITY_GATE=1` on a non-Linux host must fail closed.
 
 Smoke check:
 
 ```bash
-systemctl status mir2-gateway --no-pager
+sudo systemctl status mir2-gateway --no-pager
 curl -fsS http://127.0.0.1:7110/health
-journalctl -u mir2-gateway -n 100 --no-pager
+sudo journalctl -u mir2-gateway -n 100 --no-pager
 ```
 
 ## UCloud Postgres/Redis Cutover Evidence
@@ -996,18 +1042,10 @@ test -f /var/lib/mir2/crystal-client/current/Map/0.map
 grep '^CRYSTAL_CLIENT_ROOT=' /etc/mir2/gateway.env
 ```
 
-Or use the install/update helper:
-
-```bash
-tag=2026-05-18-001
-curl -fsSL "https://<release-host>/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz" \
-  -o /tmp/mir2-gateway-linux-x64.tar.gz
-tar -xzf /tmp/mir2-gateway-linux-x64.tar.gz -C /tmp scripts/install-gateway-release.sh
-
-MIR2_GATEWAY_RELEASE_URL="https://<release-host>/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz" \
-MIR2_GATEWAY_RELEASE_SHA256_URL="https://<release-host>/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz.sha256" \
-bash /tmp/scripts/install-gateway-release.sh
-```
+For a release update, use the fixed-path procedure in **First Server Setup and
+Production Install** above after changing the root-owned pin through trusted
+configuration management. There is no supported archive-extraction helper or
+caller-supplied URL/digest invocation.
 
 ## Network Shape
 
