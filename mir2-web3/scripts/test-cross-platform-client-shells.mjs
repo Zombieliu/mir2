@@ -139,16 +139,21 @@ assert.doesNotMatch(
 );
 
 for (const requiredAction of [
-  "actions/checkout@v7",
-  "actions/setup-node@v7",
-  "actions/setup-java@v5",
-  "actions/upload-artifact@v7",
+  "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+  "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+  "actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961",
+  "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
 ]) {
   assert.ok(
     clientWorkflow.includes(requiredAction),
-    `cross-platform CI must use the Node 24 action ${requiredAction}`,
+    `cross-platform CI must use the reviewed immutable action revision ${requiredAction}`,
   );
 }
+assert.doesNotMatch(
+  clientWorkflow,
+  /uses:\s*actions\/(?:checkout|setup-node|setup-java|upload-artifact)@v\d+/,
+  "cross-platform CI must not regress to mutable action tags",
+);
 
 assert.match(
   clientWorkflow,
