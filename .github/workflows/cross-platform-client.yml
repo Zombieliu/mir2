@@ -243,10 +243,61 @@ jobs:
         run: cd android && ./gradlew assembleDebug
       - name: Compile native Bevy host
         working-directory: .
+        shell: bash
         run: |
-          NDK_HOME="$(find "$ANDROID_SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
-          test -n "$NDK_HOME"
-          ANDROID_NDK_HOME="$NDK_HOME" mir2-web3/apps/game-client/platform-android/build-android.sh
+          set -euo pipefail
+
+          TARGET="aarch64-linux-android"
+          API_LEVEL="${MIR2_ANDROID_API_LEVEL:-26}"
+          [[ "$API_LEVEL" =~ ^[0-9]+$ ]] || { echo "Invalid Android API level: $API_LEVEL" >&2; exit 1; }
+
+          NDK_HOME=""
+          for candidate in "${ANDROID_NDK_HOME:-}" "${ANDROID_NDK_ROOT:-}"; do
+            [[ -d "$candidate" ]] && NDK_HOME="$candidate" && break
+          done
+          if [[ -z "$NDK_HOME" ]]; then
+            for sdk_root in "${ANDROID_SDK_ROOT:-}" "${ANDROID_HOME:-}"; do
+              [[ -n "$sdk_root" && -d "$sdk_root/ndk" ]] || continue
+              NDK_HOME="$(find "$sdk_root/ndk" -mindepth 1 -maxdepth 1 -type d -print | sort -V | tail -n 1)"
+              [[ -n "$NDK_HOME" ]] && break
+            done
+          fi
+          [[ -d "$NDK_HOME" ]] || { echo "Android NDK not found from runner environment or SDK ndk directories" >&2; exit 1; }
+
+          PREBUILT_ROOT="$NDK_HOME/toolchains/llvm/prebuilt"
+          [[ -d "$PREBUILT_ROOT" ]] || { echo "NDK LLVM prebuilt directory not found below $NDK_HOME" >&2; exit 1; }
+          LLVM_BIN="$(find "$PREBUILT_ROOT" -mindepth 1 -maxdepth 1 -type d -print | sort | tail -n 1)/bin"
+          [[ -d "$LLVM_BIN" ]] || { echo "NDK LLVM prebuilt bin directory not found below $NDK_HOME" >&2; exit 1; }
+
+          CC="$LLVM_BIN/${TARGET}${API_LEVEL}-clang"
+          CXX="$LLVM_BIN/${TARGET}${API_LEVEL}-clang++"
+          AR="$LLVM_BIN/llvm-ar"
+          for tool in "$CC" "$CXX" "$AR"; do
+            [[ -x "$tool" ]] || { echo "Required Android NDK tool is missing or not executable: $tool" >&2; exit 1; }
+          done
+
+          : "${GITHUB_PATH:?GITHUB_PATH is not set}"
+          : "${GITHUB_ENV:?GITHUB_ENV is not set}"
+          printf '%s\n' "$LLVM_BIN" >> "$GITHUB_PATH"
+          export PATH="$LLVM_BIN:$PATH"
+          export ANDROID_NDK_HOME="$NDK_HOME"
+          export ANDROID_NDK_ROOT="$NDK_HOME"
+          export MIR2_ANDROID_TARGET="$TARGET"
+          export MIR2_ANDROID_API_LEVEL="$API_LEVEL"
+          export CC_aarch64_linux_android="$CC"
+          export CXX_aarch64_linux_android="$CXX"
+          export AR_aarch64_linux_android="$AR"
+          export TARGET_CXX="$CXX"
+          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$CC"
+          export CARGO_TARGET_AARCH64_LINUX_ANDROID_AR="$AR"
+          for name in ANDROID_NDK_HOME ANDROID_NDK_ROOT MIR2_ANDROID_TARGET MIR2_ANDROID_API_LEVEL \
+            CC_aarch64_linux_android CXX_aarch64_linux_android AR_aarch64_linux_android TARGET_CXX \
+            CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER CARGO_TARGET_AARCH64_LINUX_ANDROID_AR; do
+            printf '%s=%s\n' "$name" "${!name}"
+          done >> "$GITHUB_ENV"
+
+          echo "Using Android NDK LLVM tools from $LLVM_BIN"
+          mir2-web3/apps/game-client/platform-android/build-android.sh
       - uses: actions/upload-artifact@v7
         with:
           name: mir2-android-debug-apk
