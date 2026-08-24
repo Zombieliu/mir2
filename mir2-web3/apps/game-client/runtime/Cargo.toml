@@ -26,9 +26,6 @@ bevy = { version = "0.19.0", default-features = false, features = [
   "bevy_winit",
   "multi_threaded",
   "png",
-  # NativeActivity glue for the Android host. Only compiled on Android targets;
-  # harmless to the wasm and desktop builds.
-  "android-native-activity"
 ] }
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.72"
