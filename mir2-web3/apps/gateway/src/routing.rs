@@ -650,13 +650,44 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
             authority.validate_owner_lease(request.owner_lease())?;
         }
         let mode = request.mode();
+        let economy_context = if matches!(
+            mode,
+            ZoneOwnerCommandMode::ProductionPlayer {
+                authenticated: true
+            }
+        ) {
+            runtime
+                .as_mut()
+                .as_any_mut()
+                .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+                .and_then(|runtime| {
+                    runtime.next_in_process_economy_execution_context(request.owner_lease())
+                })
+        } else {
+            None
+        };
         let command = request.into_command();
-        match mode {
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.set_economy_execution_context(economy_context);
+        }
+        let result = match mode {
             ZoneOwnerCommandMode::Direct => runtime.execute_with_outcome(command),
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
                 runtime.execute_production_player_command(authenticated, command)
             }
+        };
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.set_economy_execution_context(None);
         }
+        result
     }
     fn prepare_teardown_checkpoint(
         &self,
@@ -897,16 +928,29 @@ impl HostedZoneOwnerCommandClient {
         request: ZoneOwnerCommandRequest,
         external_commit_authorized: bool,
     ) -> Result<WorldCommandExecution, String> {
-        let economy_context = request.source_sequence().map(|source_sequence| {
-            SharedAccountInventoryExecutionContext {
-                zone_id: request.owner_lease().zone_id().clone(),
-                fencing_generation: request.owner_lease().fencing_token(),
-                source_sequence,
-                created_at_ms: shared_gateway_now_ms(),
-                external_commit_authorized,
-            }
-        });
         let mode = request.mode();
+        // A journal sequence proves ordering, not caller authority. Only an
+        // authenticated production-player command on the active owner may
+        // perform external economy effects. Direct/admin-style requests and
+        // standby replay stay unfenced from the durable store even when the
+        // replication layer attaches a real source sequence.
+        let economy_context = match (external_commit_authorized, mode) {
+            (
+                true,
+                ZoneOwnerCommandMode::ProductionPlayer {
+                    authenticated: true,
+                },
+            ) => request.source_sequence().map(|source_sequence| {
+                SharedAccountInventoryExecutionContext {
+                    zone_id: request.owner_lease().zone_id().clone(),
+                    fencing_generation: request.owner_lease().fencing_token(),
+                    source_sequence,
+                    created_at_ms: shared_gateway_now_ms(),
+                    external_commit_authorized: true,
+                }
+            }),
+            _ => None,
+        };
         let command = request.into_command();
         let mut runtime = self
             .runtime
@@ -1292,7 +1336,7 @@ pub trait ZoneRuntimeFactory: Send + Sync {
 
 pub type SharedZoneRuntimeFactory = Arc<dyn ZoneRuntimeFactory>;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedAccountInventoryExecutionContext {
     pub zone_id: ZoneId,
     pub fencing_generation: u64,
@@ -1308,6 +1352,10 @@ pub struct SharedAccountInventoryExecutionContext {
 pub enum SharedTradeSettlementOutcome {
     Committed,
     Duplicate,
+    /// No ordered/fenced execution context was available, so no external
+    /// settlement attempt was made. This is distinct from both a business
+    /// rejection and an acknowledgement-unknown durable attempt.
+    Deferred,
     DurableCommitted {
         event_id: String,
     },
@@ -1319,6 +1367,7 @@ pub enum SharedTradeSettlementOutcome {
     /// idempotent settlement; they must never roll back or reopen trading.
     OutcomeUnknown {
         idempotency_key: String,
+        execution_context: SharedAccountInventoryExecutionContext,
     },
     Rejected,
 }
@@ -1326,11 +1375,17 @@ pub enum SharedTradeSettlementOutcome {
 #[derive(Debug, Clone, PartialEq)]
 pub enum SharedAccountInventoryCommitOutcome {
     Confirmed(SharedAccountInventoryTransactionReceipt),
+    /// No ordered/fenced execution context was available and the service did
+    /// not contact the durable store or mutate the private projection.
+    Deferred {
+        receipt: SharedAccountInventoryTransactionReceipt,
+    },
     /// PostgreSQL may have committed the immutable economy envelope, but the
     /// producer could not confirm it. The owning Zone must retain the claim and
     /// retry the same idempotency key; restoring the drop could credit it twice.
     OutcomeUnknown {
         idempotency_key: String,
+        execution_context: SharedAccountInventoryExecutionContext,
         receipt: SharedAccountInventoryTransactionReceipt,
     },
 }
@@ -1338,7 +1393,9 @@ pub enum SharedAccountInventoryCommitOutcome {
 impl SharedAccountInventoryCommitOutcome {
     fn into_receipt(self) -> SharedAccountInventoryTransactionReceipt {
         match self {
-            Self::Confirmed(receipt) | Self::OutcomeUnknown { receipt, .. } => receipt,
+            Self::Confirmed(receipt)
+            | Self::Deferred { receipt }
+            | Self::OutcomeUnknown { receipt, .. } => receipt,
         }
     }
 }
@@ -1348,7 +1405,9 @@ impl std::ops::Deref for SharedAccountInventoryCommitOutcome {
 
     fn deref(&self) -> &Self::Target {
         match self {
-            Self::Confirmed(receipt) | Self::OutcomeUnknown { receipt, .. } => receipt,
+            Self::Confirmed(receipt)
+            | Self::Deferred { receipt }
+            | Self::OutcomeUnknown { receipt, .. } => receipt,
         }
     }
 }
@@ -1356,7 +1415,9 @@ impl std::ops::Deref for SharedAccountInventoryCommitOutcome {
 impl std::ops::DerefMut for SharedAccountInventoryCommitOutcome {
     fn deref_mut(&mut self) -> &mut Self::Target {
         match self {
-            Self::Confirmed(receipt) | Self::OutcomeUnknown { receipt, .. } => receipt,
+            Self::Confirmed(receipt)
+            | Self::Deferred { receipt }
+            | Self::OutcomeUnknown { receipt, .. } => receipt,
         }
     }
 }
@@ -1469,6 +1530,19 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         SharedAccountInventoryCommitOutcome::Confirmed(self.commit(runtime, envelope))
     }
 
+    /// Retry a previously uncertain durable command. Durable implementations
+    /// must prove that `expected_idempotency_key` is the key produced by the
+    /// checkpointed execution context before contacting their store.
+    fn retry_commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        _expected_idempotency_key: &str,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        self.commit_fenced(runtime, context, envelope)
+    }
+
     fn bootstrap_fenced(
         &self,
         _runtime: &InProcessWorldRuntime,
@@ -1484,6 +1558,18 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         _second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         SharedTradeSettlementOutcome::Committed
+    }
+
+    /// Retry a previously uncertain durable trade under its checkpointed
+    /// context and key. See `retry_commit_fenced`.
+    fn retry_trade_fenced(
+        &self,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        _expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.settle_trade_fenced(context, first, second)
     }
 
     fn reconcile_ground_drop_projections_fenced(
@@ -2042,6 +2128,11 @@ struct SharedItemRentalInvite {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct UnresolvedSharedTradeSettlement {
     idempotency_key: String,
+    /// Exact context that produced the uncertain durable envelope. Older
+    /// checkpoints omit it and therefore remain fail-closed instead of being
+    /// retried under a newly generated key.
+    #[serde(default)]
+    execution_context: Option<SharedAccountInventoryExecutionContext>,
     first_key: ZonePresenceKey,
     second_key: ZonePresenceKey,
     first_offer: SharedTradeOffer,
@@ -2074,6 +2165,9 @@ impl UnresolvedSharedTradeSettlement {
 struct UnresolvedGroundDropSettlement {
     #[serde(default)]
     idempotency_key: Option<String>,
+    /// Exact context that produced `idempotency_key`; see the trade record.
+    #[serde(default)]
+    execution_context: Option<SharedAccountInventoryExecutionContext>,
     presence_key: ZonePresenceKey,
     zone_key: ZoneKey,
     ticket: GroundDropClaimTicket,
@@ -2109,6 +2203,10 @@ struct SharedInProcessZoneState {
     next_live_outbound_registration_id: u64,
     #[cfg(test)]
     zone_cadence_tick_count: u64,
+    /// Monotonic command sequence used by the local authoritative Zone owner
+    /// for fenced economy side effects. It is checkpointed with Zone state so
+    /// every in-process session sharing this Zone consumes one ordered stream.
+    next_economy_source_sequence: u64,
     zone_manager: ZoneManager,
     zone_sessions: BTreeMap<ZonePresenceKey, SessionId>,
     zone_session_keys: BTreeMap<SessionId, ZonePresenceKey>,
@@ -2162,6 +2260,8 @@ pub(crate) mod base64_bytes {
 struct SharedInProcessZoneStateCheckpoint {
     version: u32,
     next_zone_object_id: u32,
+    #[serde(default)]
+    next_economy_source_sequence: u64,
     next_live_outbound_registration_id: u64,
     #[serde(with = "crate::routing::base64_bytes", default)]
     zone_manager_bytes: Vec<u8>,
@@ -2244,6 +2344,7 @@ impl SharedInProcessZoneStateCheckpoint {
                 })?;
             let settlement = UnresolvedGroundDropSettlement {
                 idempotency_key: None,
+                execution_context: None,
                 presence_key,
                 zone_key,
                 ticket,
@@ -2375,6 +2476,7 @@ impl SharedInProcessZoneState {
             next_live_outbound_registration_id: 0,
             #[cfg(test)]
             zone_cadence_tick_count: 0,
+            next_economy_source_sequence: 0,
             zone_manager: ZoneManager::new(),
             zone_sessions: BTreeMap::new(),
             zone_session_keys: BTreeMap::new(),
@@ -2404,10 +2506,17 @@ impl SharedInProcessZoneState {
         }
     }
 
+    fn next_economy_source_sequence(&mut self) -> Option<u64> {
+        let next = self.next_economy_source_sequence.checked_add(1)?;
+        self.next_economy_source_sequence = next;
+        Some(next)
+    }
+
     fn checkpoint(&self) -> Result<SharedInProcessZoneStateCheckpoint, String> {
         Ok(SharedInProcessZoneStateCheckpoint {
             version: SHARED_ZONE_STATE_CHECKPOINT_VERSION,
             next_zone_object_id: self.next_zone_object_id,
+            next_economy_source_sequence: self.next_economy_source_sequence,
             next_live_outbound_registration_id: self.next_live_outbound_registration_id,
             zone_manager_bytes: self.zone_manager.checkpoint_bytes()?,
             zone_sessions: self.zone_sessions.clone().into_iter().collect(),
@@ -2479,6 +2588,7 @@ impl SharedInProcessZoneState {
         SharedInProcessZoneStateCheckpoint {
             version: SHARED_ZONE_STATE_CHECKPOINT_VERSION,
             next_zone_object_id: self.next_zone_object_id,
+            next_economy_source_sequence: self.next_economy_source_sequence,
             next_live_outbound_registration_id: 0,
             zone_manager_bytes: self.zone_manager.checkpoint_bytes()?,
             zone_sessions: self.zone_sessions.clone().into_iter().collect(),
@@ -2703,6 +2813,7 @@ impl SharedInProcessZoneState {
             next_live_outbound_registration_id: checkpoint.next_live_outbound_registration_id,
             #[cfg(test)]
             zone_cadence_tick_count: 0,
+            next_economy_source_sequence: checkpoint.next_economy_source_sequence,
             zone_manager,
             zone_sessions,
             zone_session_keys,
@@ -3137,6 +3248,7 @@ impl SharedInProcessZoneState {
         key: &ZonePresenceKey,
         ticket: &GroundDropClaimTicket,
         idempotency_key: String,
+        execution_context: Option<SharedAccountInventoryExecutionContext>,
     ) -> bool {
         let Some(session_id) = self.zone_sessions.get(key).cloned() else {
             return false;
@@ -3149,6 +3261,7 @@ impl SharedInProcessZoneState {
         };
         let settlement = UnresolvedGroundDropSettlement {
             idempotency_key: Some(idempotency_key),
+            execution_context,
             presence_key: key.clone(),
             zone_key,
             ticket: ticket.clone(),
@@ -7432,6 +7545,24 @@ impl SharedInProcessZoneSessionRuntime {
         self.economy_execution_context = context;
     }
 
+    fn next_in_process_economy_execution_context(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Option<SharedAccountInventoryExecutionContext> {
+        let source_sequence = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .next_economy_source_sequence()?;
+        Some(SharedAccountInventoryExecutionContext {
+            zone_id: owner_lease.zone_id().clone(),
+            fencing_generation: owner_lease.fencing_token(),
+            source_sequence,
+            created_at_ms: shared_gateway_now_ms(),
+            external_commit_authorized: true,
+        })
+    }
+
     fn rebind_account_store(&mut self, authoritative: &GatewayConfig) {
         self.inner.rebind_account_store(authoritative);
     }
@@ -7462,6 +7593,28 @@ impl SharedInProcessZoneSessionRuntime {
         outcome
     }
 
+    fn retry_account_inventory_outcome(
+        &mut self,
+        recovery_context: &SharedAccountInventoryExecutionContext,
+        expected_idempotency_key: &str,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let service = Arc::clone(&self.account_inventory_service);
+        let outcome = service.retry_commit_fenced(
+            &mut self.inner,
+            Some(recovery_context),
+            expected_idempotency_key,
+            envelope,
+        );
+        if matches!(
+            &outcome,
+            SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed
+        ) {
+            self.last_ground_drop_projection_reconciliation_identity = None;
+        }
+        outcome
+    }
+
     fn commit_account_inventory(
         &mut self,
         envelope: SharedAccountInventoryCommandEnvelope,
@@ -7482,6 +7635,21 @@ impl SharedInProcessZoneSessionRuntime {
     ) -> SharedTradeSettlementOutcome {
         self.account_inventory_service.settle_trade_fenced(
             self.economy_execution_context.as_ref(),
+            first,
+            second,
+        )
+    }
+
+    fn retry_shared_trade(
+        &self,
+        recovery_context: &SharedAccountInventoryExecutionContext,
+        expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.account_inventory_service.retry_trade_fenced(
+            Some(recovery_context),
+            expected_idempotency_key,
             first,
             second,
         )
@@ -8707,11 +8875,18 @@ impl SharedInProcessZoneSessionRuntime {
                     },
                 ),
             };
-            let outcome_unknown_key = match &outcome {
+            let deferred = matches!(
+                &outcome,
+                SharedAccountInventoryCommitOutcome::Deferred { .. }
+            );
+            let outcome_unknown = match &outcome {
                 SharedAccountInventoryCommitOutcome::OutcomeUnknown {
-                    idempotency_key, ..
-                } => Some(idempotency_key.clone()),
-                SharedAccountInventoryCommitOutcome::Confirmed(_) => None,
+                    idempotency_key,
+                    execution_context,
+                    ..
+                } => Some((idempotency_key.clone(), execution_context.clone())),
+                SharedAccountInventoryCommitOutcome::Confirmed(_)
+                | SharedAccountInventoryCommitOutcome::Deferred { .. } => None,
             };
             let mut receipt = outcome.into_receipt();
             debug_assert_eq!(
@@ -8724,13 +8899,22 @@ impl SharedInProcessZoneSessionRuntime {
                     session_id: ticket.session_id.clone(),
                     ticket,
                 })
-            } else if let Some(idempotency_key) = outcome_unknown_key {
+            } else if let Some((idempotency_key, execution_context)) = outcome_unknown {
                 // The database may already own this claim. Detach it from the
                 // historical session while retaining the Zone tombstone and a
                 // checkpointed account/character recovery authority.
-                if !self.retain_unresolved_zone_ground_drop_claim(&ticket, idempotency_key) {
+                if !self.retain_unresolved_zone_ground_drop_claim(
+                    &ticket,
+                    idempotency_key,
+                    Some(execution_context),
+                ) {
                     self.requeue_zone_ground_drop_claim(ticket);
                 }
+                None
+            } else if deferred {
+                // No durable attempt occurred. Keep the Zone claim hidden and
+                // retry it when a later ordered command provides a fence.
+                self.requeue_zone_ground_drop_claim(ticket);
                 None
             } else {
                 self.restore_zone_ground_drop_claim(drop);
@@ -8760,6 +8944,7 @@ impl SharedInProcessZoneSessionRuntime {
         &mut self,
         ticket: &GroundDropClaimTicket,
         idempotency_key: String,
+        execution_context: Option<SharedAccountInventoryExecutionContext>,
     ) -> bool {
         let Some(key) = self.current_presence_key() else {
             return false;
@@ -8767,7 +8952,12 @@ impl SharedInProcessZoneSessionRuntime {
         self.zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned")
-            .detach_unresolved_ground_drop_settlement(&key, ticket, idempotency_key)
+            .detach_unresolved_ground_drop_settlement(
+                &key,
+                ticket,
+                idempotency_key,
+                execution_context,
+            )
     }
 
     fn requeue_zone_ground_drop_claim(&mut self, ticket: GroundDropClaimTicket) {
@@ -10082,8 +10272,12 @@ impl SharedInProcessZoneSessionRuntime {
                 let mut packets = execution.packets;
                 if matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. }) {
                     packets.extend(self.sync_newly_active_private_monsters_to_zone());
-                    packets.extend(self.apply_zone_current_position_map_transfer());
                 }
+                // Crystal Turn invokes CheckMovement on the standing tile after
+                // applying the requested direction.  Walk/Run and Turn must all
+                // hand an admitted MapCoord transfer back to the personal
+                // session so Gateway can commit the real map change/rebind.
+                packets.extend(self.apply_zone_current_position_map_transfer());
                 Some(packets)
             }
             ClientPacket::TeleportToNpc { object_id } => {
@@ -10259,18 +10453,42 @@ impl SharedInProcessZoneSessionRuntime {
         if ZonePresenceKey::from_identity(&identity) != settlement.presence_key {
             return Vec::new();
         }
-        let outcome =
-            self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+        if !self
+            .economy_execution_context
+            .as_ref()
+            .is_some_and(|context| context.external_commit_authorized)
+        {
+            return Vec::new();
+        }
+        let Some(expected_idempotency_key) = settlement.idempotency_key.as_deref() else {
+            return Vec::new();
+        };
+        let Some(recovery_context) = settlement.execution_context.as_ref() else {
+            return Vec::new();
+        };
+        let outcome = self.retry_account_inventory_outcome(
+            recovery_context,
+            expected_idempotency_key,
+            SharedAccountInventoryCommandEnvelope {
                 identity,
                 command: SharedAccountInventoryCommand::GroundDropClaimPickup {
                     drop: settlement.ticket.drop.clone(),
                     claim_idempotency_key: settlement.ticket.idempotency_key.clone(),
                 },
-            });
+            },
+        );
         let receipt = match outcome {
+            SharedAccountInventoryCommitOutcome::Deferred { .. } => return Vec::new(),
             SharedAccountInventoryCommitOutcome::OutcomeUnknown {
-                idempotency_key, ..
+                idempotency_key,
+                execution_context,
+                ..
             } => {
+                if idempotency_key != expected_idempotency_key
+                    || execution_context != *recovery_context
+                {
+                    return Vec::new();
+                }
                 self.zone_state
                     .lock()
                     .expect("shared zone presence mutex should not be poisoned")
@@ -10352,9 +10570,29 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(settlement) = settlement else {
             return false;
         };
-
-        let outcome = self.settle_shared_trade(&settlement.first_offer, &settlement.second_offer);
+        if !self
+            .economy_execution_context
+            .as_ref()
+            .is_some_and(|context| context.external_commit_authorized)
+        {
+            return true;
+        }
+        let Some(recovery_context) = settlement.execution_context.as_ref() else {
+            return true;
+        };
+        let outcome = self.retry_shared_trade(
+            recovery_context,
+            &settlement.idempotency_key,
+            &settlement.first_offer,
+            &settlement.second_offer,
+        );
         let resolution = match outcome {
+            SharedTradeSettlementOutcome::Deferred => {
+                // The prior uncertain attempt still owns both offers. Missing
+                // context on this pass cannot resolve or roll it back.
+                self.note_durable_trade_projection_pending();
+                None
+            }
             SharedTradeSettlementOutcome::DurableCommitted { .. }
             | SharedTradeSettlementOutcome::DurableDuplicate { .. } => {
                 self.note_durable_trade_projection_pending();
@@ -10370,8 +10608,15 @@ impl SharedInProcessZoneSessionRuntime {
                     TradeProjectionReconciliationState::Unknown;
                 Some(UnresolvedSharedTradeResolution::Rejected)
             }
-            SharedTradeSettlementOutcome::OutcomeUnknown { idempotency_key } => {
-                debug_assert_eq!(idempotency_key, settlement.idempotency_key);
+            SharedTradeSettlementOutcome::OutcomeUnknown {
+                idempotency_key,
+                execution_context,
+            } => {
+                if idempotency_key != settlement.idempotency_key
+                    || execution_context != *recovery_context
+                {
+                    return true;
+                }
                 self.note_durable_trade_projection_pending();
                 None
             }
@@ -10694,9 +10939,13 @@ impl SharedInProcessZoneSessionRuntime {
                 | SharedTradeSettlementOutcome::DurableDuplicate { .. } => {
                     durable_settlement = true;
                 }
-                SharedTradeSettlementOutcome::OutcomeUnknown { idempotency_key } => {
+                SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key,
+                    execution_context,
+                } => {
                     let unresolved = UnresolvedSharedTradeSettlement {
                         idempotency_key,
+                        execution_context: Some(execution_context),
                         first_key: self_key.clone(),
                         second_key: partner_key,
                         first_offer: offer.clone(),
@@ -10708,7 +10957,9 @@ impl SharedInProcessZoneSessionRuntime {
                     let _ = zone_state.retain_unresolved_trade_settlement(unresolved);
                     unknown_settlement = true;
                 }
-                SharedTradeSettlementOutcome::Rejected => {
+                SharedTradeSettlementOutcome::Deferred | SharedTradeSettlementOutcome::Rejected => {
+                    // This is the initial attempt and Deferred guarantees that
+                    // no store call occurred, so returning both offers is safe.
                     zone_state
                         .pending_trade_rollbacks
                         .entry(partner_key)
@@ -10953,11 +11204,18 @@ impl SharedInProcessZoneSessionRuntime {
                 },
             ),
         };
-        let outcome_unknown_key = match &outcome {
+        let deferred = matches!(
+            &outcome,
+            SharedAccountInventoryCommitOutcome::Deferred { .. }
+        );
+        let outcome_unknown = match &outcome {
             SharedAccountInventoryCommitOutcome::OutcomeUnknown {
-                idempotency_key, ..
-            } => Some(idempotency_key.clone()),
-            SharedAccountInventoryCommitOutcome::Confirmed(_) => None,
+                idempotency_key,
+                execution_context,
+                ..
+            } => Some((idempotency_key.clone(), execution_context.clone())),
+            SharedAccountInventoryCommitOutcome::Confirmed(_)
+            | SharedAccountInventoryCommitOutcome::Deferred { .. } => None,
         };
         let mut receipt = outcome.into_receipt();
         debug_assert_eq!(
@@ -10976,10 +11234,17 @@ impl SharedInProcessZoneSessionRuntime {
                 }),
                 None,
             )
-        } else if let Some(idempotency_key) = outcome_unknown_key {
-            if !self.retain_unresolved_zone_ground_drop_claim(&ticket, idempotency_key) {
+        } else if let Some((idempotency_key, execution_context)) = outcome_unknown {
+            if !self.retain_unresolved_zone_ground_drop_claim(
+                &ticket,
+                idempotency_key,
+                Some(execution_context),
+            ) {
                 self.requeue_zone_ground_drop_claim(ticket);
             }
+            (None, None)
+        } else if deferred {
+            self.requeue_zone_ground_drop_claim(ticket);
             (None, None)
         } else {
             self.restore_zone_ground_drop_claim(drop);
@@ -12137,20 +12402,21 @@ mod tests {
         shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
         suppress_personal_tick_shared_monster_motion, sync_zone_movement_transform,
         world_entity_from_monster_info, zone_monster_spawn_from_shared_entity,
-        InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
-        InProcessNpcWorldService, InProcessZoneRuntimeFactory, MapZoneSessionRouter,
-        PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
-        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryCommitOutcome,
-        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
-        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
+        InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
+        MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
+        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
+        SharedAccountInventoryCommitOutcome, SharedAccountInventoryExecutionContext,
+        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneFactoryCheckpoint, SharedInProcessZoneRuntimeFactory,
         SharedInProcessZoneSessionRuntime, SharedInProcessZoneState, SharedNpcEntitySideEffect,
         SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope, SharedNpcWorldService,
         SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt, SharedSessionRouter,
         SharedTradeSettlementOutcome, SharedZoneMovementIngress, SharedZoneMutationGate,
-        SharedZoneRuntimeFactory, TradeProjectionReconciliationState, ZoneId,
-        ZoneNativePlayerAttack, ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry,
-        ZoneRuntimeFactory,
+        SharedZoneRuntimeFactory, TradeProjectionReconciliationState,
+        UnresolvedSharedTradeSettlement, ZoneId, ZoneNativePlayerAttack,
+        ZoneNativePlayerAttackKind, ZoneOwnerCommandRequest, ZoneOwnerLease, ZonePresenceKey,
+        ZoneRegistry, ZoneRuntimeFactory,
     };
 
     use crate::{GatewayConfig, GatewaySession};
@@ -12273,6 +12539,27 @@ mod tests {
 
         assert!(factory.is_zone_replica(&replica_zone));
         assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+    }
+
+    #[test]
+    fn economy_source_sequence_survives_checkpoint_and_exhaustion_fails_closed() {
+        let mut state = SharedInProcessZoneState::new();
+        assert_eq!(state.next_economy_source_sequence(), Some(1));
+        assert_eq!(state.next_economy_source_sequence(), Some(2));
+
+        let checkpoint = state.checkpoint().expect("checkpoint");
+        let mut restored = SharedInProcessZoneState::restore(checkpoint).expect("restore");
+        assert_eq!(restored.next_economy_source_sequence(), Some(3));
+
+        restored.next_economy_source_sequence = u64::MAX - 1;
+        assert_eq!(restored.next_economy_source_sequence(), Some(u64::MAX));
+        assert_eq!(restored.next_economy_source_sequence(), None);
+
+        let exhausted_checkpoint = restored.checkpoint().expect("exhausted checkpoint");
+        let mut exhausted =
+            SharedInProcessZoneState::restore(exhausted_checkpoint).expect("exhausted restore");
+        assert_eq!(exhausted.next_economy_source_sequence(), None);
+        assert_eq!(exhausted.next_economy_source_sequence, u64::MAX);
     }
 
     #[test]
@@ -15071,6 +15358,150 @@ mod tests {
     }
 
     #[derive(Debug)]
+    struct EconomyContextFenceProbe {
+        contexts: Arc<Mutex<Vec<Option<SharedAccountInventoryExecutionContext>>>>,
+    }
+
+    impl SharedAccountInventoryService for EconomyContextFenceProbe {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn commit_fenced(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryCommitOutcome {
+            self.contexts
+                .lock()
+                .expect("economy fence contexts should lock")
+                .push(context.cloned());
+            let SharedAccountInventoryCommand::GoldDrop { .. } = &envelope.command else {
+                panic!("economy fence probe only accepts GoldDrop")
+            };
+            if context.is_none_or(|context| !context.external_commit_authorized) {
+                return SharedAccountInventoryCommitOutcome::Deferred {
+                    receipt: SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GoldDrop,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                };
+            }
+            SharedAccountInventoryCommitOutcome::Confirmed(
+                InProcessAccountInventoryService::new().commit(runtime, envelope),
+            )
+        }
+    }
+
+    #[test]
+    fn hosted_owner_only_fences_authenticated_active_production_economy() {
+        let contexts = Arc::new(Mutex::new(Vec::new()));
+        let service = Arc::new(EconomyContextFenceProbe {
+            contexts: Arc::clone(&contexts),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "hosted-economy-fence", "FenceOwner");
+        let mut checkpoint = runtime
+            .inner
+            .active_character_checkpoint()
+            .expect("active character checkpoint");
+        checkpoint.gold = 100;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .expect("seed test gold");
+        let starting_gold = runtime.world_snapshot().gold;
+        let client = HostedZoneOwnerCommandClient::new(Box::new(runtime));
+        let lease = ZoneOwnerLease::in_process(&ZoneId::new("test-shared-zone"));
+
+        let direct = client
+            .execute_request(
+                ZoneOwnerCommandRequest::direct(
+                    lease.clone(),
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(41),
+            )
+            .expect("direct command should fail closed without a durable context");
+        assert!(direct.packets.is_empty());
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold);
+
+        let unauthenticated = client
+            .execute_request(
+                ZoneOwnerCommandRequest::production_player(
+                    lease.clone(),
+                    false,
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(42),
+            )
+            .expect("unauthenticated production command should be rejected");
+        assert!(!unauthenticated
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { .. })));
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold);
+
+        let replay = client
+            .execute_replay_request(
+                ZoneOwnerCommandRequest::production_player(
+                    lease.clone(),
+                    true,
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(43),
+            )
+            .expect("standby replay should apply without external economy authority");
+        assert!(replay.packets.is_empty());
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold);
+
+        let active = client
+            .execute_request(
+                ZoneOwnerCommandRequest::production_player(
+                    lease,
+                    true,
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(44),
+            )
+            .expect("active authenticated production command should commit");
+        assert!(active
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 1 })));
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold - 1);
+
+        let contexts = contexts.lock().expect("economy fence contexts should lock");
+        assert_eq!(contexts.len(), 4);
+        assert_eq!(
+            contexts[0], None,
+            "Direct mode is not externally authorized"
+        );
+        assert_eq!(
+            contexts[1], None,
+            "unauthenticated production mode is not externally authorized"
+        );
+        assert_eq!(
+            contexts[2], None,
+            "standby replay is not externally authorized"
+        );
+        let active_context = contexts[3]
+            .as_ref()
+            .expect("active production command should receive a context");
+        assert_eq!(active_context.source_sequence, 44);
+        assert_eq!(active_context.fencing_generation, 1);
+        assert!(active_context.external_commit_authorized);
+    }
+
+    #[derive(Debug)]
     struct GroundDropProjectionReconciliationProbe {
         calls: Arc<Mutex<usize>>,
         pending: Arc<Mutex<bool>>,
@@ -15200,11 +15631,14 @@ mod tests {
 
         fn settle_trade_fenced(
             &self,
-            _context: Option<&SharedAccountInventoryExecutionContext>,
+            context: Option<&SharedAccountInventoryExecutionContext>,
             first: &SharedTradeOffer,
             second: &SharedTradeOffer,
         ) -> SharedTradeSettlementOutcome {
             *self.calls.lock().expect("settlement calls should lock") += 1;
+            if context.is_none() {
+                return SharedTradeSettlementOutcome::Deferred;
+            }
             if *self.unresolved.lock().expect("settlement mode should lock") {
                 let mut nonces = [
                     first.settlement_nonce.as_str(),
@@ -15213,9 +15647,53 @@ mod tests {
                 nonces.sort_unstable();
                 SharedTradeSettlementOutcome::OutcomeUnknown {
                     idempotency_key: format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]),
+                    execution_context: context
+                        .expect("unknown trade outcome requires a test context")
+                        .clone(),
                 }
             } else {
                 SharedTradeSettlementOutcome::Rejected
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    struct UnknownThenCommittedTradeSettlementService {
+        unresolved: Arc<Mutex<bool>>,
+        calls: Arc<Mutex<usize>>,
+    }
+
+    impl SharedAccountInventoryService for UnknownThenCommittedTradeSettlementService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn settle_trade_fenced(
+            &self,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            first: &SharedTradeOffer,
+            second: &SharedTradeOffer,
+        ) -> SharedTradeSettlementOutcome {
+            *self.calls.lock().expect("settlement calls should lock") += 1;
+            let Some(context) = context else {
+                return SharedTradeSettlementOutcome::Deferred;
+            };
+            if *self.unresolved.lock().expect("settlement mode should lock") {
+                let mut nonces = [
+                    first.settlement_nonce.as_str(),
+                    second.settlement_nonce.as_str(),
+                ];
+                nonces.sort_unstable();
+                SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key: format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]),
+                    execution_context: context.clone(),
+                }
+            } else {
+                SharedTradeSettlementOutcome::Committed
             }
         }
     }
@@ -15238,7 +15716,7 @@ mod tests {
         fn commit_fenced(
             &self,
             runtime: &mut InProcessWorldRuntime,
-            _context: Option<&SharedAccountInventoryExecutionContext>,
+            context: Option<&SharedAccountInventoryExecutionContext>,
             envelope: SharedAccountInventoryCommandEnvelope,
         ) -> SharedAccountInventoryCommitOutcome {
             if !matches!(
@@ -15254,6 +15732,15 @@ mod tests {
                 .calls
                 .lock()
                 .expect("ground settlement calls should lock") += 1;
+            if context.is_none() {
+                return SharedAccountInventoryCommitOutcome::Deferred {
+                    receipt: SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                };
+            }
             if *self
                 .unresolved
                 .lock()
@@ -15262,6 +15749,9 @@ mod tests {
                 let idempotency_key = envelope.stable_idempotency_key();
                 SharedAccountInventoryCommitOutcome::OutcomeUnknown {
                     idempotency_key,
+                    execution_context: context
+                        .expect("unknown ground outcome requires a test context")
+                        .clone(),
                     receipt: SharedAccountInventoryTransactionReceipt {
                         kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
                         committed: false,
@@ -15324,6 +15814,13 @@ mod tests {
         let mut runtime =
             shared_session_runtime_with_account_inventory_service(Arc::clone(&zone_state), service);
         start_new_runtime(&mut runtime, "ground-ack-unknown", "ClaimOwner");
+        runtime.set_economy_execution_context(Some(SharedAccountInventoryExecutionContext {
+            zone_id: ZoneId::new("test-shared-zone"),
+            fencing_generation: 1,
+            source_sequence: 1,
+            created_at_ms: 1_000,
+            external_commit_authorized: true,
+        }));
         let self_entity = runtime
             .inner
             .world_snapshot()
@@ -15379,6 +15876,16 @@ mod tests {
             let settlement = state
                 .unresolved_ground_drop_settlement_for_presence(&key)
                 .expect("unknown claim must detach into recovery authority");
+            assert_eq!(
+                settlement.execution_context,
+                Some(SharedAccountInventoryExecutionContext {
+                    zone_id: ZoneId::new("test-shared-zone"),
+                    fencing_generation: 1,
+                    source_sequence: 1,
+                    created_at_ms: 1_000,
+                    external_commit_authorized: true,
+                })
+            );
             assert!(state
                 .zone_manager
                 .has_detached_ground_drop_claim_ticket(&settlement.zone_key, &settlement.ticket,));
@@ -15410,6 +15917,24 @@ mod tests {
             .zone_manager
             .has_detached_ground_drop_claim_ticket(&detached.zone_key, &detached.ticket));
 
+        runtime.set_economy_execution_context(None);
+        let deferred_packets = runtime.apply_pending_shared_trade_packets();
+        assert!(deferred_packets.is_empty());
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold);
+        assert!(zone_state
+            .lock()
+            .expect("shared Zone state should lock")
+            .unresolved_ground_drop_settlement_for_presence(&key)
+            .is_some());
+
+        runtime.set_economy_execution_context(Some(SharedAccountInventoryExecutionContext {
+            zone_id: ZoneId::new("test-shared-zone"),
+            fencing_generation: 1,
+            source_sequence: 2,
+            created_at_ms: 1_001,
+            external_commit_authorized: true,
+        }));
         *unresolved.lock().expect("ground settlement mode") = false;
         let retry_packets = runtime.apply_pending_shared_trade_packets();
         assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
@@ -15430,6 +15955,114 @@ mod tests {
         assert!(runtime.apply_pending_shared_trade_packets().is_empty());
         assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
         assert_eq!(runtime.inner.world_snapshot().gold, initial_gold + 25);
+    }
+
+    #[test]
+    fn deferred_trade_recovery_keeps_authority_then_retries_the_real_key() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenRejectedTradeSettlementService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(Arc::clone(&zone_state), service);
+        start_new_runtime(&mut runtime, "trade-deferred-recovery", "DeferredOwner");
+        let identity = runtime
+            .inner
+            .active_identity()
+            .expect("active trade owner identity");
+        let first_key = ZonePresenceKey::from_identity(&identity);
+        let second_key = ZonePresenceKey {
+            account_id: "trade-deferred-partner".to_string(),
+            character_index: 0,
+        };
+        let first_offer = SharedTradeOffer {
+            settlement_nonce: "00000000000000000000000000000091".to_string(),
+            account_id: identity.account_id.clone(),
+            character_index: identity.character_index,
+            character_name: identity.character_name.clone(),
+            partner_name: "DeferredPartner".to_string(),
+            gold: 30,
+            items: Vec::new(),
+        };
+        let second_offer = SharedTradeOffer {
+            settlement_nonce: "00000000000000000000000000000092".to_string(),
+            account_id: second_key.account_id.clone(),
+            character_index: second_key.character_index,
+            character_name: "DeferredPartner".to_string(),
+            partner_name: identity.character_name,
+            gold: 0,
+            items: Vec::new(),
+        };
+        let mut nonces = [
+            first_offer.settlement_nonce.as_str(),
+            second_offer.settlement_nonce.as_str(),
+        ];
+        nonces.sort_unstable();
+        let idempotency_key = format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]);
+        zone_state
+            .lock()
+            .expect("shared Zone state should lock")
+            .retain_unresolved_trade_settlement(UnresolvedSharedTradeSettlement {
+                idempotency_key: idempotency_key.clone(),
+                execution_context: Some(SharedAccountInventoryExecutionContext {
+                    zone_id: ZoneId::new("test-origin-zone"),
+                    fencing_generation: 1,
+                    source_sequence: 90,
+                    created_at_ms: 9_000,
+                    external_commit_authorized: true,
+                }),
+                first_key: first_key.clone(),
+                second_key: second_key.clone(),
+                first_offer,
+                second_offer,
+            })
+            .expect("fixture unresolved trade should insert");
+
+        runtime.set_economy_execution_context(None);
+        assert!(runtime.resolve_unresolved_trade_settlement());
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 0);
+        {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            assert_eq!(state.unresolved_trade_settlements.len(), 1);
+            assert!(state.pending_trade_rollbacks.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+        }
+
+        runtime.set_economy_execution_context(Some(SharedAccountInventoryExecutionContext {
+            zone_id: ZoneId::new("test-shared-zone"),
+            fencing_generation: 2,
+            source_sequence: 91,
+            created_at_ms: 9_100,
+            external_commit_authorized: true,
+        }));
+        assert!(runtime.resolve_unresolved_trade_settlement());
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+        {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            let retained = state
+                .unresolved_trade_settlement_for_presence(&first_key)
+                .expect("ordered unknown result should remain retained");
+            assert_eq!(retained.idempotency_key, idempotency_key);
+            assert!(state.pending_trade_rollbacks.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+        }
+
+        *unresolved.lock().expect("settlement mode should lock") = false;
+        assert!(!runtime.resolve_unresolved_trade_settlement());
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        let state = zone_state.lock().expect("shared Zone state should lock");
+        assert!(state.unresolved_trade_settlements.is_empty());
+        assert!(state
+            .pending_trade_rollbacks
+            .get(&first_key)
+            .is_some_and(|offers| offers.len() == 1));
+        assert!(state
+            .pending_trade_rollbacks
+            .get(&second_key)
+            .is_some_and(|offers| offers.len() == 1));
     }
 
     #[test]
@@ -15472,11 +16105,17 @@ mod tests {
             .expect("claimant should observe the shared gold drop");
         let object_id = shared_drop.object_id;
         claimant.transfer_map(&format!("crystal:0:{}:{}", shared_drop.x, shared_drop.y));
-        let unknown_packets = claimant.pick_up(object_id);
+        let unknown_packets = claimant
+            .execute_production_player_command(true, WorldCommand::PickUp { object_id })
+            .expect("ordered claimant pickup should execute")
+            .packets;
 
-        assert!(unknown_packets
-            .iter()
-            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert!(
+            unknown_packets
+                .iter()
+                .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })),
+            "unknown pickup must not deliver gold: {unknown_packets:#?}"
+        );
         assert_eq!(claimant.world_snapshot().gold, starting_gold);
         assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
 
@@ -15538,7 +16177,13 @@ mod tests {
             account_id: claimant_identity.account_id.clone(),
             password: claimant_identity.account_id.clone(),
         });
-        let recovery_packets = resumed.handle_packet(ClientPacket::StartGame { character_index });
+        let recovery_packets = resumed
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame { character_index }),
+            )
+            .expect("ordered StartGame should recover the durable pickup")
+            .packets;
 
         assert!(recovery_packets
             .iter()
@@ -15569,6 +16214,214 @@ mod tests {
             .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
         assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
         assert_eq!(resumed.world_snapshot().gold, starting_gold + 25);
+    }
+
+    #[test]
+    fn unknown_trade_survives_process_restart_and_delivers_both_sides_once_after_new_logins() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenCommittedTradeSettlementService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let first_factory = Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service)),
+        );
+        let first_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&first_factory) as SharedZoneRuntimeFactory,
+        );
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        let mut second = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        start_demo_character(&mut first);
+        start_new_character(&mut second, "trade-restart-second", "RestartBob");
+        let first_identity = first.active_identity().expect("first trade identity");
+        let second_identity = second.active_identity().expect("second trade identity");
+
+        first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let funding_drop = second
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| {
+                matches!(
+                    &drop.loot,
+                    GroundDropLootSnapshot::Gold { amount } if *amount == 100
+                )
+            })
+            .expect("second party should observe funding gold");
+        second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
+        second.pick_up(funding_drop.object_id);
+        let first_starting_gold = first.world_snapshot().gold;
+        let second_starting_gold = second.world_snapshot().gold;
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        let first_confirm = first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert!(first_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 30 })));
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
+        let unknown_packets = second
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked: true }),
+            )
+            .expect("authenticated ordered trade confirmation should execute")
+            .packets;
+        assert!(unknown_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
+        assert!(
+            unknown_packets
+                .iter()
+                .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })),
+            "unknown settlement must not deliver either offer: {unknown_packets:#?}"
+        );
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 40);
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+        first
+            .save_active_character()
+            .expect("first debited offer should persist before process restart");
+        second
+            .save_active_character()
+            .expect("second debited offer should persist before process restart");
+
+        let unresolved_authority = {
+            let resources = first_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("first factory Zone state should lock");
+            let settlement = state
+                .unresolved_trade_settlements
+                .values()
+                .next()
+                .expect("unknown trade should retain one recovery record")
+                .clone();
+            assert!(settlement.execution_context.is_some());
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+            settlement
+        };
+        let world_checkpoint_bytes = first_factory
+            .world_checkpoint_bytes()
+            .expect("world-only checkpoint should preserve unknown trade");
+
+        drop(second);
+        drop(first);
+        assert_eq!(
+            *calls.lock().expect("settlement calls should lock"),
+            1,
+            "teardown and Drop must not retry without an economy command context"
+        );
+
+        let restored_factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service));
+        assert_eq!(
+            restored_factory
+                .install_world_checkpoint_bytes(&world_checkpoint_bytes)
+                .expect("fresh factory should install world-only checkpoint"),
+            1
+        );
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("restored factory Zone state should lock");
+            assert_eq!(state.unresolved_trade_settlements.len(), 1);
+            assert_eq!(
+                state.unresolved_trade_settlements.values().next(),
+                Some(&unresolved_authority),
+                "restart must preserve the exact old key, context, parties, and offers"
+            );
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+        }
+
+        *unresolved.lock().expect("settlement mode should lock") = false;
+        let restored_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&restored_factory) as SharedZoneRuntimeFactory,
+        );
+        let mut resumed_first =
+            GatewaySession::new_with_zone_registry(config.clone(), &restored_registry);
+        resumed_first.handle_packet(ClientPacket::Login {
+            account_id: first_identity.account_id.clone(),
+            password: "demo".to_string(),
+        });
+        let first_recovery = resumed_first
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame {
+                    character_index: first_identity.character_index,
+                }),
+            )
+            .expect("first party StartGame should resolve and deliver the trade")
+            .packets;
+        assert!(first_recovery
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 40 })));
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        assert_eq!(
+            resumed_first.world_snapshot().gold,
+            first_starting_gold - 30 + 40
+        );
+
+        let mut resumed_second = GatewaySession::new_with_zone_registry(config, &restored_registry);
+        resumed_second.handle_packet(ClientPacket::Login {
+            account_id: second_identity.account_id.clone(),
+            password: second_identity.account_id.clone(),
+        });
+        let second_recovery = resumed_second
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame {
+                    character_index: second_identity.character_index,
+                }),
+            )
+            .expect("second party StartGame should consume the finalized delivery")
+            .packets;
+        assert!(second_recovery
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        assert_eq!(
+            resumed_second.world_snapshot().gold,
+            second_starting_gold - 40 + 30
+        );
+
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("resolved factory Zone state should lock");
+            assert!(state.unresolved_trade_settlements.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+        }
+        for packets in [
+            resumed_first.handle_packet(ClientPacket::KeepAlive { time: 74 }),
+            resumed_second.handle_packet(ClientPacket::KeepAlive { time: 75 }),
+        ] {
+            assert!(packets
+                .iter()
+                .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        }
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        assert_eq!(
+            resumed_first.world_snapshot().gold,
+            first_starting_gold - 30 + 40
+        );
+        assert_eq!(
+            resumed_second.world_snapshot().gold,
+            second_starting_gold - 40 + 30
+        );
     }
 
     #[test]
@@ -18695,6 +19548,57 @@ mod tests {
     }
 
     #[test]
+    fn shared_gateway_turn_commits_allowed_crystal_map_coordinate_transfer() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(Arc::clone(&zone_state));
+        start_new_runtime(&mut runtime, "mapcoord-turn", "MapCoordTurn");
+
+        let mut checkpoint = runtime
+            .inner
+            .active_character_checkpoint()
+            .expect("started character checkpoint");
+        checkpoint.pk_points = 200;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .expect("PK gate fixture should restore");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:3:861:686".to_string(),
+            })
+            .expect("fixture should enter the Crystal source coordinate");
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Turn {
+                direction: MirDirection::Left,
+            }))
+            .expect("shared Turn should execute");
+
+        assert!(
+            packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::MapInformation { info } if info.file_name == "D1801"
+            )),
+            "allowed shared Turn must commit the authoritative E1 transfer: {packets:?}"
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == Point { x: 128, y: 171 }
+                    && location.direction == MirDirection::Left
+        )));
+        let snapshot = runtime.world_snapshot();
+        assert_eq!(snapshot.map_file_name.as_deref(), Some("D1801"));
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("transferred player snapshot");
+        assert_eq!((player.x, player.y), (128, 171));
+        assert_eq!(player.direction, MirDirection::Left);
+    }
+
+    #[test]
     fn shared_in_process_registry_routes_monster_attack_through_zone_native_combat() {
         let (mut first, mut second) = started_shared_zone_sessions();
         let map_file_name = first
@@ -19603,8 +20507,11 @@ mod tests {
             "equipmentItemsJson": []
         });
         first.stage5_command("qa.applyNativeState", vec![native_state.to_string()]);
-        first.transfer_map("crystal:0102:3:7");
-        second.transfer_map("crystal:0102:9:7");
+        // MeatStore (0102) is authoritatively `NoMount` in Server.MirDB.
+        // Exercise mounted three-tile movement on a known walkable, mount-allowed
+        // Bichon fixture instead of relying on the former incomplete map metadata.
+        first.transfer_map("crystal:0:330:270");
+        second.transfer_map("crystal:0:340:270");
 
         first.stage5_command("qa.giveItem", vec!["crystal-item-769".to_string()]);
         let mount_unique_id = first
@@ -22685,16 +23592,15 @@ mod tests {
     }
 
     #[test]
-    fn commit_ack_unknown_trade_stays_debited_blocked_and_checkpointed_until_resolved() {
+    fn unfenced_initial_trade_is_deferred_and_rolls_back_exactly_once() {
         let unresolved = Arc::new(Mutex::new(true));
         let calls = Arc::new(Mutex::new(0));
         let service = Arc::new(UnknownThenRejectedTradeSettlementService {
-            unresolved: Arc::clone(&unresolved),
+            unresolved,
             calls: Arc::clone(&calls),
         }) as SharedAccountInventoryServiceHandle;
-        let factory = Arc::new(
-            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service)),
-        );
+        let factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service));
         let registry = ZoneRegistry::new(
             ZoneId::primary(),
             Arc::clone(&factory) as SharedZoneRuntimeFactory,
@@ -22703,163 +23609,39 @@ mod tests {
         let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
         let mut second = GatewaySession::new_with_zone_registry(config, &registry);
         start_demo_character(&mut first);
-        start_new_character(&mut second, "trade-ack-unknown-second", "UnknownBob");
+        start_new_character(&mut second, "trade-deferred-second", "DeferredBob");
 
         let first_starting_gold = first.world_snapshot().gold;
         first.handle_packet(ClientPacket::TradeRequest);
         second.handle_packet(ClientPacket::TradeRequest);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::TradeConfirm { locked: true });
-        let unknown = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        let second_packets = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
 
-        assert!(unknown
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+        assert!(second_packets
             .iter()
             .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
-        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
-        assert_eq!(
-            factory
-                .resources_for_zone(&ZoneId::primary())
-                .zone_state
-                .lock()
-                .expect("zone state should lock")
-                .unresolved_trade_settlements
-                .len(),
-            1
-        );
-
-        let mutations = [
-            ClientPacket::TradeRequest,
-            ClientPacket::TradeReply {
-                accept_invite: false,
-            },
-            ClientPacket::TradeGold { amount: 1 },
-            ClientPacket::DepositTradeItem { from: 0, to: 0 },
-            ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
-            ClientPacket::TradeConfirm { locked: false },
-            ClientPacket::TradeCancel,
-        ];
-        for packet in mutations {
-            assert!(second.handle_packet(packet).is_empty());
-            assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
-        }
-
-        let calls_before_teardown = *calls.lock().expect("settlement calls should lock");
-        match second.try_persist_teardown_once() {
-            crate::session::GatewayTeardownPersistenceOutcome::Saved => {}
-            outcome => {
-                panic!("teardown checkpoint should save without settlement retry: {outcome:?}")
-            }
-        }
-        assert_eq!(
-            *calls.lock().expect("settlement calls should lock"),
-            calls_before_teardown,
-            "teardown without an economy command context must preserve unresolved trade"
-        );
-        assert_eq!(
-            factory
-                .resources_for_zone(&ZoneId::primary())
-                .zone_state
-                .lock()
-                .expect("zone state should lock")
-                .unresolved_trade_settlements
-                .len(),
-            1
-        );
-        second
-            .release_teardown_for_resume()
-            .expect("test session should resume after teardown proof");
-
-        let world_checkpoint_bytes = factory
-            .world_checkpoint_bytes()
-            .expect("world-only factory checkpoint");
-        let world_checkpoint: SharedInProcessZoneFactoryCheckpoint =
-            serde_json::from_slice(&world_checkpoint_bytes)
-                .expect("decode world-only factory checkpoint");
-        assert_eq!(
-            world_checkpoint
-                .zones
-                .values()
-                .map(|zone| zone.unresolved_trade_settlements.len())
-                .sum::<usize>(),
-            1,
-            "world-only checkpoint must preserve unresolved trade recovery authority"
-        );
-        assert!(world_checkpoint.zones.values().all(|zone| {
-            zone.zone_sessions.is_empty()
-                && zone.zone_session_keys.is_empty()
-                && zone.players.is_empty()
-        }));
-        let restored_world_factory =
-            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service));
-        assert_eq!(
-            restored_world_factory
-                .install_world_checkpoint_bytes(&world_checkpoint_bytes)
-                .expect("restore world-only factory checkpoint"),
-            1
-        );
-        assert_eq!(
-            restored_world_factory
-                .resources_for_zone(&ZoneId::primary())
-                .zone_state
-                .lock()
-                .expect("restored world-only zone state should lock")
-                .unresolved_trade_settlements
-                .len(),
-            1
-        );
-
-        let checkpoint_bytes = factory.checkpoint_bytes().expect("factory checkpoint");
-        let checkpoint: SharedInProcessZoneFactoryCheckpoint =
-            serde_json::from_slice(&checkpoint_bytes).expect("decode factory checkpoint");
-        assert_eq!(
-            checkpoint
-                .zones
-                .values()
-                .map(|zone| zone.unresolved_trade_settlements.len())
-                .sum::<usize>(),
-            1,
-            "commit-ack-unknown recovery authority must survive checkpointing"
-        );
-        let restored_factory =
-            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service);
-        assert_eq!(
-            restored_factory
-                .install_checkpoint_bytes(&checkpoint_bytes)
-                .expect("restore factory checkpoint"),
-            1
-        );
-        assert_eq!(
-            restored_factory
-                .resources_for_zone(&ZoneId::primary())
-                .zone_state
-                .lock()
-                .expect("restored zone state should lock")
-                .unresolved_trade_settlements
-                .len(),
-            1,
-            "restored checkpoint must retain the recovery authority"
-        );
-
-        *unresolved.lock().expect("settlement mode should lock") = false;
-        second.handle_packet(ClientPacket::KeepAlive { time: 91 });
         let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 92 });
         assert!(rollback
             .iter()
             .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
         assert_eq!(first.world_snapshot().gold, first_starting_gold);
-        assert!(factory
-            .resources_for_zone(&ZoneId::primary())
-            .zone_state
-            .lock()
-            .expect("zone state should lock")
-            .unresolved_trade_settlements
-            .is_empty());
-        assert!(
-            *calls.lock().expect("settlement calls should lock") >= 9,
-            "every guarded command must keep retrying the exact unresolved settlement"
-        );
-    }
+        {
+            let resources = factory.resources_for_zone(&ZoneId::primary());
+            let state = resources.zone_state.lock().expect("zone state should lock");
+            assert!(state.unresolved_trade_settlements.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+        }
 
+        let repeat = first.handle_packet(ClientPacket::KeepAlive { time: 93 });
+        assert!(repeat
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+    }
     #[test]
     fn shared_trade_repeat_request_cannot_replace_debited_unmatched_offer() {
         let (mut first, mut second) = started_shared_zone_sessions();

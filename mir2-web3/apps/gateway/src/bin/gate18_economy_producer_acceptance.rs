@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::economy::{EconomyBalanceKey, PostgresEconomyStore};
+use mir2_gateway::routing::SharedAccountInventoryCommitOutcome;
 use mir2_gateway::{
     GatewayConfig, PostgresEconomyAccountInventoryService, SharedAccountInventoryCommand,
     SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
@@ -341,8 +342,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && ledger_gold_after_materialized == ledger_gold_after_active,
         ),
         (
-            "unfencedProducerRejected".to_string(),
-            !unfenced.committed && unfenced.packets.is_empty(),
+            "unfencedProducerDeferred".to_string(),
+            matches!(
+                unfenced,
+                SharedAccountInventoryCommitOutcome::Deferred { ref receipt }
+                    if !receipt.committed && receipt.packets.is_empty()
+            ),
         ),
         (
             "ownerFenceAndSourceSequenceBound".to_string(),
@@ -377,8 +382,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 && store.balance(&bob_item_balance)? == trade_bob_item_after,
         ),
         (
-            "unfencedTradeRejected".to_string(),
-            unfenced_trade == SharedTradeSettlementOutcome::Rejected,
+            "unfencedTradeDeferred".to_string(),
+            unfenced_trade == SharedTradeSettlementOutcome::Deferred,
         ),
         (
             "tradePrivateProjectionsMaterializedExactlyOnce".to_string(),

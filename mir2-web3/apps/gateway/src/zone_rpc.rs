@@ -808,20 +808,34 @@ struct ZoneReplicationCatalog {
 }
 
 impl ZoneReplicationCatalog {
+    fn next_sequence_for_append(&self, zone_id: &str) -> Result<u64, ZoneRpcFault> {
+        let source_sequence = self
+            .cursors
+            .get(zone_id)
+            .map(|cursor| cursor.next_sequence)
+            .unwrap_or_default();
+        source_sequence.checked_add(1).ok_or_else(|| {
+            ZoneRpcFault::new(
+                "replication_sequence_exhausted",
+                format!("Zone {zone_id} exhausted its replication sequence"),
+            )
+        })?;
+        Ok(source_sequence)
+    }
+
     fn append(
         &mut self,
         host_entry_index: usize,
         entry: &WireHostJournalEntry,
     ) -> Result<(), ZoneRpcFault> {
+        let source_sequence = self.next_sequence_for_append(&entry.zone_id)?;
         let cursor = self.cursors.entry(entry.zone_id.clone()).or_default();
-        let next_sequence = cursor.next_sequence.checked_add(1).ok_or_else(|| {
-            ZoneRpcFault::new(
-                "replication_sequence_exhausted",
-                format!("Zone {} exhausted its replication sequence", entry.zone_id),
-            )
-        })?;
+        debug_assert_eq!(cursor.next_sequence, source_sequence);
+        let next_sequence = source_sequence
+            .checked_add(1)
+            .expect("replication append preflight guarantees one remaining sequence");
         let next_digest =
-            zone_replication_entry_digest(&cursor.latest_digest, cursor.next_sequence, entry)?;
+            zone_replication_entry_digest(&cursor.latest_digest, source_sequence, entry)?;
         cursor.latest_digest = next_digest;
         cursor.next_sequence = next_sequence;
         cursor.host_entry_indexes.push(host_entry_index);
@@ -2494,6 +2508,8 @@ pub struct ZoneHostServer {
     zone_gate_wait_duration_ns_total: AtomicU64,
     zone_gate_wait_duration_ns_max: AtomicU64,
     execute_requests_total: AtomicU64,
+    #[cfg(test)]
+    runtime_execute_calls: AtomicU64,
     execute_runtime_duration_ns_total: AtomicU64,
     execute_journal_duration_ns_total: AtomicU64,
     checkpoint_exports_total: AtomicU64,
@@ -2671,6 +2687,8 @@ impl ZoneHostServer {
             zone_gate_wait_duration_ns_total: AtomicU64::new(0),
             zone_gate_wait_duration_ns_max: AtomicU64::new(0),
             execute_requests_total: AtomicU64::new(0),
+            #[cfg(test)]
+            runtime_execute_calls: AtomicU64::new(0),
             execute_runtime_duration_ns_total: AtomicU64::new(0),
             execute_journal_duration_ns_total: AtomicU64::new(0),
             checkpoint_exports_total: AtomicU64::new(0),
@@ -3846,13 +3864,6 @@ impl ZoneHostServer {
                         "lease zone id does not match envelope zone id",
                     ));
                 }
-                let source_sequence = self
-                    .journal
-                    .lock()
-                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
-                    .replication
-                    .head(zone_id)
-                    .next_sequence;
                 let journal_entry = WireHostJournalEntry {
                     sequence: 0,
                     session_id: session_id.to_string(),
@@ -3863,21 +3874,39 @@ impl ZoneHostServer {
                     closed: false,
                     zone_tick_ms: None,
                 };
+                let owner_lease = owner_lease.into_lease()?;
+                let command = command.into_world()?;
                 let request = match mode.into_mode() {
-                    ZoneOwnerCommandMode::Direct => ZoneOwnerCommandRequest::direct(
-                        owner_lease.into_lease()?,
-                        command.into_world()?,
-                    ),
+                    ZoneOwnerCommandMode::Direct => {
+                        ZoneOwnerCommandRequest::direct(owner_lease, command)
+                    }
                     ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
                         ZoneOwnerCommandRequest::production_player(
-                            owner_lease.into_lease()?,
+                            owner_lease,
                             authenticated,
-                            command.into_world()?,
+                            command,
                         )
                     }
-                }
-                .with_source_sequence(source_sequence);
+                };
+                // Preserve fencing/command validation precedence, then prove a
+                // journal slot exists before the runtime can mutate private
+                // state or contact an external durable economy store. The
+                // per-Zone operation gate held by `handle_envelope` prevents a
+                // same-Zone tick or command from consuming this sequence
+                // between preflight and append.
+                self.owner_lease_authority
+                    .validate_owner_lease(request.owner_lease())
+                    .map_err(classify_runtime_error)?;
+                let source_sequence = self
+                    .journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .next_sequence_for_append(zone_id)?;
+                let request = request.with_source_sequence(source_sequence);
                 let runtime_started = Instant::now();
+                #[cfg(test)]
+                self.runtime_execute_calls.fetch_add(1, Ordering::Relaxed);
                 let execution = session.execute_request(request)?;
                 self.execute_runtime_duration_ns_total.fetch_add(
                     saturating_duration_ns(runtime_started.elapsed()),
@@ -6724,6 +6753,252 @@ mod zone_rpc_authorization_tests {
                 }
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod replication_sequence_exhaustion_tests {
+    use super::*;
+    use crate::routing::{
+        InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
+        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryCommitOutcome,
+        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
+        SharedAccountInventoryServiceHandle, ZoneOwnerLeaseAuthority,
+    };
+    use mir2_simulation::SharedAccountInventoryTransactionReceipt;
+
+    #[derive(Debug)]
+    struct DurableEconomyStoreProbe {
+        contexts: Arc<Mutex<Vec<Option<SharedAccountInventoryExecutionContext>>>>,
+    }
+
+    impl SharedAccountInventoryService for DurableEconomyStoreProbe {
+        fn commit(
+            &self,
+            runtime: &mut mir2_simulation::InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn commit_fenced(
+            &self,
+            runtime: &mut mir2_simulation::InProcessWorldRuntime,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryCommitOutcome {
+            self.contexts
+                .lock()
+                .expect("durable economy probe contexts should lock")
+                .push(context.cloned());
+            SharedAccountInventoryCommitOutcome::Confirmed(
+                InProcessAccountInventoryService::new().commit(runtime, envelope),
+            )
+        }
+    }
+
+    fn execute_world_command(
+        server: &ZoneHostServer,
+        session_id: &str,
+        zone_id: &ZoneId,
+        owner_lease: &ZoneOwnerLease,
+        mode: ZoneOwnerCommandMode,
+        command: WorldCommand,
+    ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        server.handle_envelope(ZoneRpcEnvelope {
+            protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+            session_id: session_id.to_string(),
+            zone_id: zone_id.as_str().to_string(),
+            auth_token: None,
+            request: ZoneRpcRequest::Execute {
+                owner_lease: WireZoneOwnerLease::from(owner_lease),
+                mode: WireZoneOwnerCommandMode::from(mode),
+                command: WireWorldCommand::from_world(command)
+                    .expect("test world command should encode"),
+            },
+        })
+    }
+
+    fn session_snapshot(
+        server: &ZoneHostServer,
+        session_id: &str,
+        zone_id: &ZoneId,
+    ) -> WorldSnapshot {
+        server
+            .sessions
+            .lock()
+            .expect("Zone Host sessions should lock")
+            .get(&(session_id.to_string(), zone_id.as_str().to_string()))
+            .expect("test Zone Host session should exist")
+            .hosted
+            .world_snapshot()
+            .expect("test Zone Host snapshot should be available")
+    }
+
+    fn journal_observation(
+        server: &ZoneHostServer,
+        zone_id: &ZoneId,
+    ) -> (usize, ZoneReplicationHead) {
+        let journal = server
+            .journal
+            .lock()
+            .expect("Zone Host journal should lock");
+        (
+            journal.entries.len(),
+            journal.replication.head(zone_id.as_str()),
+        )
+    }
+
+    #[test]
+    fn authenticated_economy_fails_before_runtime_and_store_when_sequence_is_exhausted() {
+        let store_contexts = Arc::new(Mutex::new(Vec::new()));
+        let service = Arc::new(DurableEconomyStoreProbe {
+            contexts: Arc::clone(&store_contexts),
+        }) as SharedAccountInventoryServiceHandle;
+        let factory = Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_tick_cadences_and_account_inventory_service(
+                Duration::from_secs(60 * 60),
+                BTreeMap::new(),
+                service,
+            ),
+        );
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let shared_authority: SharedZoneOwnerLeaseAuthority = authority.clone();
+        let server = ZoneHostServer::with_options_and_factory(
+            GatewayConfig::default(),
+            shared_authority,
+            None,
+            ZoneRpcLimits::default(),
+            factory,
+        );
+        let zone_id = ZoneId::primary();
+        let owner_lease = authority.owner_lease(&zone_id);
+        let session_id = "replication-exhaustion-economy";
+
+        execute_world_command(
+            &server,
+            session_id,
+            &zone_id,
+            &owner_lease,
+            ZoneOwnerCommandMode::Direct,
+            WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }),
+        )
+        .expect("demo login should initialize the economic fixture");
+        execute_world_command(
+            &server,
+            session_id,
+            &zone_id,
+            &owner_lease,
+            ZoneOwnerCommandMode::Direct,
+            WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
+        )
+        .expect("demo StartGame should initialize the economic fixture");
+        store_contexts
+            .lock()
+            .expect("durable economy probe contexts should lock")
+            .clear();
+
+        // Represent a valid compacted prefix immediately before the final
+        // representable mutation sequence. This keeps the synthetic cursor
+        // internally consistent without allocating an impossible journal.
+        {
+            let mut journal = server
+                .journal
+                .lock()
+                .expect("Zone Host journal should lock");
+            let cursor = journal
+                .replication
+                .cursors
+                .entry(zone_id.as_str().to_string())
+                .or_default();
+            cursor.base_snapshot_id = Some("sequence-boundary-fixture".to_string());
+            cursor.base_sequence = u64::MAX - 1;
+            cursor.base_digest = [0x5a; 32];
+            cursor.next_sequence = u64::MAX - 1;
+            cursor.latest_digest = cursor.base_digest;
+            cursor.host_entry_indexes.clear();
+            cursor.entry_digests.clear();
+        }
+
+        let starting_gold = session_snapshot(&server, session_id, &zone_id).gold;
+        let runtime_calls_before_last = server.runtime_execute_calls.load(Ordering::Acquire);
+        let (journal_len_before_last, head_before_last) = journal_observation(&server, &zone_id);
+        assert_eq!(head_before_last.next_sequence, u64::MAX - 1);
+
+        let last_execution = execute_world_command(
+            &server,
+            session_id,
+            &zone_id,
+            &owner_lease,
+            ZoneOwnerCommandMode::ProductionPlayer {
+                authenticated: true,
+            },
+            WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+        )
+        .expect("MAX - 1 must remain the final executable source sequence");
+        assert!(matches!(last_execution, ZoneRpcPayload::Execution { .. }));
+        assert_eq!(
+            server.runtime_execute_calls.load(Ordering::Acquire),
+            runtime_calls_before_last + 1
+        );
+        assert_eq!(
+            session_snapshot(&server, session_id, &zone_id).gold,
+            starting_gold - 1
+        );
+        let contexts_after_last = store_contexts
+            .lock()
+            .expect("durable economy probe contexts should lock")
+            .clone();
+        assert_eq!(contexts_after_last.len(), 1);
+        let last_context = contexts_after_last[0]
+            .as_ref()
+            .expect("last legal economy mutation should be durably fenced");
+        assert_eq!(last_context.source_sequence, u64::MAX - 1);
+        assert!(last_context.external_commit_authorized);
+        let (journal_len_at_max, head_at_max) = journal_observation(&server, &zone_id);
+        assert_eq!(journal_len_at_max, journal_len_before_last + 1);
+        assert_eq!(head_at_max.next_sequence, u64::MAX);
+        assert_ne!(head_at_max.latest_digest, head_before_last.latest_digest);
+
+        let runtime_calls_at_max = server.runtime_execute_calls.load(Ordering::Acquire);
+        let gold_at_max = session_snapshot(&server, session_id, &zone_id).gold;
+        let error = execute_world_command(
+            &server,
+            session_id,
+            &zone_id,
+            &owner_lease,
+            ZoneOwnerCommandMode::ProductionPlayer {
+                authenticated: true,
+            },
+            WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 2 }),
+        )
+        .expect_err("u64::MAX replication Head must reject before execution");
+        assert_eq!(error.code, "replication_sequence_exhausted");
+        assert_eq!(
+            server.runtime_execute_calls.load(Ordering::Acquire),
+            runtime_calls_at_max,
+            "runtime execute must not be entered after sequence exhaustion"
+        );
+        assert_eq!(
+            store_contexts
+                .lock()
+                .expect("durable economy probe contexts should lock")
+                .len(),
+            1,
+            "external durable economy boundary must not be called after sequence exhaustion"
+        );
+        assert_eq!(
+            session_snapshot(&server, session_id, &zone_id).gold,
+            gold_at_max,
+            "rejected economy command must not mutate runtime gold"
+        );
+        let (journal_len_after_failure, head_after_failure) =
+            journal_observation(&server, &zone_id);
+        assert_eq!(journal_len_after_failure, journal_len_at_max);
+        assert_eq!(head_after_failure, head_at_max);
     }
 }
 

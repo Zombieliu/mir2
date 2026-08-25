@@ -1888,14 +1888,16 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         context: Option<&SharedAccountInventoryExecutionContext>,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryCommitOutcome {
+        let Some(context) = context else {
+            return SharedAccountInventoryCommitOutcome::Deferred {
+                receipt: Self::failed_receipt(&envelope.command),
+            };
+        };
         let mut outcome_unknown = None;
         let receipt = (|| -> SharedAccountInventoryTransactionReceipt {
             if runtime.active_identity().as_ref() != Some(&envelope.identity) {
                 return Self::failed_receipt(&envelope.command);
             }
-            let Some(context) = context else {
-                return Self::failed_receipt(&envelope.command);
-            };
             let stable_key = envelope.stable_idempotency_key();
             let ground_outcome_key = Self::is_ground_drop_pickup(&envelope.command)
                 .then(|| economy_transaction_for_command(context, &envelope, None))
@@ -2001,11 +2003,35 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         match outcome_unknown {
             Some(idempotency_key) => SharedAccountInventoryCommitOutcome::OutcomeUnknown {
                 idempotency_key,
+                execution_context: context.clone(),
                 receipt,
             },
             None => SharedAccountInventoryCommitOutcome::Confirmed(receipt),
         }
     }
+
+    fn retry_commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        expected_idempotency_key: &str,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let Some(context) = context else {
+            return SharedAccountInventoryCommitOutcome::Deferred {
+                receipt: Self::failed_receipt(&envelope.command),
+            };
+        };
+        let generated_key = economy_transaction_for_command(context, &envelope, None)
+            .map(|transaction| transaction.idempotency_key);
+        if generated_key.as_deref() != Some(expected_idempotency_key) {
+            return SharedAccountInventoryCommitOutcome::Deferred {
+                receipt: Self::failed_receipt(&envelope.command),
+            };
+        }
+        self.commit_fenced(runtime, Some(context), envelope)
+    }
+
     fn bootstrap_fenced(
         &self,
         runtime: &InProcessWorldRuntime,
@@ -2052,7 +2078,7 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         let Some(context) = context else {
-            return SharedTradeSettlementOutcome::Rejected;
+            return SharedTradeSettlementOutcome::Deferred;
         };
         if !context.external_commit_authorized {
             return SharedTradeSettlementOutcome::Committed;
@@ -2080,9 +2106,30 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
                 Ok(None) => SharedTradeSettlementOutcome::Rejected,
                 Err(_) => SharedTradeSettlementOutcome::OutcomeUnknown {
                     idempotency_key: transaction.idempotency_key,
+                    execution_context: context.clone(),
                 },
             },
         }
+    }
+
+    fn retry_trade_fenced(
+        &self,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        let Some(context) = context else {
+            return SharedTradeSettlementOutcome::Deferred;
+        };
+        let generated_key = match economy_transaction_for_trade(context, first, second) {
+            Ok(Some(transaction)) => transaction.idempotency_key,
+            Ok(None) | Err(_) => return SharedTradeSettlementOutcome::Deferred,
+        };
+        if generated_key != expected_idempotency_key {
+            return SharedTradeSettlementOutcome::Deferred;
+        }
+        self.settle_trade_fenced(Some(context), first, second)
     }
 
     fn reconcile_trade_projections_fenced(
@@ -2772,6 +2819,7 @@ mod tests {
         fail_next_bootstrap: bool,
         delay_commit_visibility_until_lookup: bool,
         pending_transaction: Option<(String, EconomyOutboxEvent, EconomyTransactionReceipt)>,
+        store_calls: usize,
     }
 
     #[derive(Debug, Clone)]
@@ -2875,10 +2923,35 @@ mod tests {
                 .transactions
                 .len()
         }
+
+        fn transaction_keys(&self) -> Vec<String> {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .transactions
+                .keys()
+                .cloned()
+                .collect()
+        }
+
+        fn store_call_count(&self) -> usize {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .store_calls
+        }
+
+        fn record_store_call(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .store_calls += 1;
+        }
     }
 
     impl EconomySettlementStore for FakeEconomyStore {
         fn ensure_migrated(&self) -> Result<(), String> {
+            self.record_store_call();
             Ok(())
         }
 
@@ -2888,6 +2961,7 @@ mod tests {
             snapshot: &WorldSnapshot,
             bootstrapped_at_ms: u64,
         ) -> Result<EconomyBootstrapReceipt, String> {
+            self.record_store_call();
             let opening = EconomyOpeningSnapshot::from_runtime(identity, snapshot)?;
             let snapshot_digest = opening.digest()?;
             let mut state = self
@@ -2930,6 +3004,7 @@ mod tests {
             &self,
             envelope: &EconomyTransactionEnvelope,
         ) -> Result<Option<EconomyTransactionReceipt>, String> {
+            self.record_store_call();
             envelope.validate()?;
             let mut state = self
                 .state
@@ -2953,6 +3028,7 @@ mod tests {
             &self,
             envelope: &EconomyTransactionEnvelope,
         ) -> Result<EconomyTransactionReceipt, String> {
+            self.record_store_call();
             envelope.validate()?;
             let event_id = envelope.event_id()?;
             let projection_rows = trade_projection_rows_from_envelope(envelope, &event_id)?;
@@ -3056,6 +3132,7 @@ mod tests {
             &self,
             identity: &ActiveSessionIdentity,
         ) -> Result<Vec<DurableTradeProjection>, String> {
+            self.record_store_call();
             let mut state = self
                 .state
                 .lock()
@@ -3101,6 +3178,7 @@ mod tests {
             identity: &ActiveSessionIdentity,
             event_id: &str,
         ) -> Result<(), String> {
+            self.record_store_call();
             let mut state = self
                 .state
                 .lock()
@@ -3125,6 +3203,7 @@ mod tests {
             &self,
             identity: &ActiveSessionIdentity,
         ) -> Result<Vec<DurableGroundDropProjection>, String> {
+            self.record_store_call();
             let mut state = self
                 .state
                 .lock()
@@ -3176,6 +3255,7 @@ mod tests {
             identity: &ActiveSessionIdentity,
             event_id: &str,
         ) -> Result<(), String> {
+            self.record_store_call();
             let mut state = self
                 .state
                 .lock()
@@ -3320,6 +3400,152 @@ mod tests {
                 EconomyBalanceKey::gold(&identity.account_id, identity.character_index),
                 gold,
             );
+    }
+
+    #[test]
+    fn missing_context_ground_drop_is_explicitly_deferred_without_store_access() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime =
+            start_test_runtime("economy-ground-no-context", "NoContextGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let command = claimed_gold_pickup(identity, 99_006, 25, "ground-no-context");
+        let initial_gold = runtime.world_snapshot().gold;
+        let initial_store_calls = store.store_call_count();
+
+        let outcome = service.commit_fenced(&mut runtime, None, command);
+
+        assert!(matches!(
+            outcome,
+            SharedAccountInventoryCommitOutcome::Deferred { receipt }
+                if receipt.kind == SharedAccountInventoryTransactionKind::GroundDropPickup
+                && !receipt.committed
+        ));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(store.transaction_count(), 0);
+        assert_eq!(store.store_call_count(), initial_store_calls);
+    }
+
+    #[test]
+    fn missing_context_trade_is_explicitly_deferred_without_store_access() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let alice = start_test_runtime("economy-trade-no-context-alice", "NoContextAlice").unwrap();
+        let bob = start_test_runtime("economy-trade-no-context-bob", "NoContextBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let first = gold_trade_offer(
+            alice_identity,
+            bob_identity.character_name.clone(),
+            "00000000000000000000000000000085",
+            10,
+        );
+        let second = gold_trade_offer(
+            bob_identity,
+            first.character_name.clone(),
+            "00000000000000000000000000000086",
+            0,
+        );
+        let initial_store_calls = store.store_call_count();
+        let outcome = service.settle_trade_fenced(None, &first, &second);
+
+        assert_eq!(outcome, SharedTradeSettlementOutcome::Deferred);
+        assert_eq!(store.transaction_count(), 0);
+        assert_eq!(store.store_call_count(), initial_store_calls);
+    }
+
+    #[test]
+    fn ground_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-retry-key", "RetryGround").unwrap();
+        let command = claimed_gold_pickup(
+            runtime.active_identity().unwrap(),
+            99_007,
+            25,
+            "ground-retry-key",
+        );
+        let original_context = external_context(7, 81, 8_100);
+        let expected_key = economy_transaction_for_command(&original_context, &command, None)
+            .expect("ground recovery transaction")
+            .idempotency_key;
+        let mut replacement_context = original_context.clone();
+        replacement_context.zone_id = crate::ZoneId::new("map:replacement");
+        replacement_context.fencing_generation = 8;
+        replacement_context.source_sequence = 82;
+        let initial_store_calls = store.store_call_count();
+
+        let mismatched = service.retry_commit_fenced(
+            &mut runtime,
+            Some(&replacement_context),
+            &expected_key,
+            command.clone(),
+        );
+        assert!(matches!(
+            mismatched,
+            SharedAccountInventoryCommitOutcome::Deferred { .. }
+        ));
+        assert_eq!(store.store_call_count(), initial_store_calls);
+        assert_eq!(store.transaction_count(), 0);
+
+        let recovered = service.retry_commit_fenced(
+            &mut runtime,
+            Some(&original_context),
+            &expected_key,
+            command,
+        );
+        assert!(matches!(
+            recovered,
+            SharedAccountInventoryCommitOutcome::Confirmed(ref receipt) if receipt.committed
+        ));
+        assert_eq!(store.transaction_keys(), vec![expected_key]);
+    }
+
+    #[test]
+    fn trade_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let alice = start_test_runtime("economy-trade-retry-alice", "RetryAlice").unwrap();
+        let bob = start_test_runtime("economy-trade-retry-bob", "RetryBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let first = gold_trade_offer(
+            alice_identity.clone(),
+            bob_identity.character_name.clone(),
+            "00000000000000000000000000000087",
+            10,
+        );
+        let second = gold_trade_offer(
+            bob_identity.clone(),
+            alice_identity.character_name.clone(),
+            "00000000000000000000000000000088",
+            0,
+        );
+        let original_context = external_context(9, 91, 9_100);
+        bootstrap_trade_balance(&store, &alice_identity, &alice, &original_context, 10);
+        bootstrap_trade_balance(&store, &bob_identity, &bob, &original_context, 0);
+        let expected_key = economy_transaction_for_trade(&original_context, &first, &second)
+            .expect("valid trade recovery transaction")
+            .expect("non-empty trade recovery transaction")
+            .idempotency_key;
+        let mut replacement_context = original_context.clone();
+        replacement_context.zone_id = crate::ZoneId::new("map:replacement");
+        replacement_context.fencing_generation = 10;
+        replacement_context.source_sequence = 92;
+        let initial_store_calls = store.store_call_count();
+
+        assert_eq!(
+            service.retry_trade_fenced(Some(&replacement_context), &expected_key, &first, &second,),
+            SharedTradeSettlementOutcome::Deferred
+        );
+        assert_eq!(store.store_call_count(), initial_store_calls);
+        assert_eq!(store.transaction_count(), 0);
+
+        assert!(matches!(
+            service.retry_trade_fenced(Some(&original_context), &expected_key, &first, &second,),
+            SharedTradeSettlementOutcome::DurableCommitted { .. }
+        ));
+        assert_eq!(store.transaction_keys(), vec![expected_key]);
     }
 
     #[test]
@@ -3539,6 +3765,7 @@ mod tests {
             outcome,
             SharedTradeSettlementOutcome::OutcomeUnknown {
                 idempotency_key: expected_key,
+                execution_context: context,
             }
         );
         assert_eq!(store.transaction_count(), 1);
