@@ -40344,6 +40344,7 @@ fn return_incoming_item_tree_through_path(
     match path {
         IncomingItemTreePath::SharedTrade => {
             let offer = super::SharedTradeOffer {
+                settlement_nonce: "00000000000000000000000000000001".to_string(),
                 account_id: "sender-account".to_string(),
                 character_index: 0,
                 character_name: "Sender".to_string(),
@@ -40590,6 +40591,7 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
         match path {
             IncomingItemTreePath::SharedTrade => {
                 let offer = super::SharedTradeOffer {
+                    settlement_nonce: "00000000000000000000000000000001".to_string(),
                     account_id: "sender-account".to_string(),
                     character_index: 0,
                     character_name: "Sender".to_string(),
@@ -40846,6 +40848,7 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                     .unwrap();
                     let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
                     let offer = super::SharedTradeOffer {
+                        settlement_nonce: "00000000000000000000000000000001".to_string(),
                         account_id: "sender-account".to_string(),
                         character_index: 0,
                         character_name: "Sender".to_string(),
@@ -61713,6 +61716,331 @@ fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
         .is_some_and(|trade| trade.completed && trade.accepted && trade.locked));
 }
 
+#[test]
+fn repeated_trade_request_cannot_replace_an_already_debited_offer() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeGold { amount: 25 });
+    let (_, offer) = session.shared_trade_confirm();
+    let offer = offer.expect("completed offer");
+    let completed = session
+        .world_snapshot()
+        .stage5_systems
+        .trade
+        .expect("completed trade state");
+    assert_eq!(session.world_snapshot().gold, starting_gold - 25);
+
+    assert!(session.trade_request("Replacement").is_empty());
+    let preserved = session
+        .world_snapshot()
+        .stage5_systems
+        .trade
+        .expect("original trade state remains");
+    assert_eq!(preserved.settlement_nonce, completed.settlement_nonce);
+    assert_eq!(preserved.partner, "Trader");
+    assert_eq!(preserved.offered_gold, 25);
+    assert!(preserved.completed);
+    assert_eq!(session.world_snapshot().gold, starting_gold - 25);
+
+    session.rollback_shared_trade_offer(&offer);
+    assert_eq!(session.world_snapshot().gold, starting_gold);
+}
+
+#[test]
+fn shared_ground_drop_projection_persists_marker_and_replays_once() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+    let event_id = "b".repeat(64);
+    let drop = GroundDropSnapshot {
+        object_id: 90_501,
+        name: "Durable projection gold".to_string(),
+        name_colour_argb: -1,
+        icon: 0,
+        x: 330,
+        y: 270,
+        quantity: 1,
+        source_monster: "projection-test".to_string(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::Gold { amount: 25 },
+    };
+
+    let packets = session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("first projection");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+    assert_eq!(session.world_snapshot().gold, starting_gold + 25);
+    assert!(session.has_shared_economy_projection_event(&event_id));
+
+    let durable = session
+        .active_character_checkpoint()
+        .expect("durable character projection");
+    session
+        .restore_active_character_checkpoint(&durable)
+        .expect("restore durable projection");
+    assert!(session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("idempotent projection retry")
+        .is_empty());
+    assert_eq!(session.world_snapshot().gold, starting_gold + 25);
+}
+
+#[test]
+fn shared_ground_drop_projection_save_failure_rolls_back_and_retries_once() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let event_id = "c".repeat(64);
+    let drop = GroundDropSnapshot {
+        object_id: 90_502,
+        name: "Atomic durable projection gold".to_string(),
+        name_colour_argb: -1,
+        icon: 0,
+        x: 330,
+        y: 270,
+        quantity: 1,
+        source_monster: "projection-save-failure-test".to_string(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::Gold { amount: 25 },
+    };
+    let before_world = session.world_snapshot();
+    let before_checkpoint = session
+        .active_character_checkpoint()
+        .expect("pre-projection checkpoint");
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert!(session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect_err("injected save failure must reject the projection")
+        .contains("injected account-store persistence failure"));
+    assert_eq!(session.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &session
+                .active_character_checkpoint()
+                .expect("rolled-back live checkpoint"),
+        )
+        .expect("rolled-back checkpoint should serialize"),
+        serde_json::to_string(&before_checkpoint).expect("baseline checkpoint should serialize"),
+        "the live character checkpoint must roll back with the world"
+    );
+    assert!(!session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+
+    let retry = session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("fault is one-shot and the durable projection must retry");
+    assert!(retry
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+    assert_eq!(session.world_snapshot().gold, before_world.gold + 25);
+    assert!(session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+    assert!(session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("durable second retry")
+        .is_empty());
+}
+#[test]
+fn durable_trade_projection_replays_pretrade_checkpoint_once() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+    let active = session.active_identity().expect("active identity");
+    let offered_item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion")
+        .expect("demo inventory should include red potion");
+
+    let before_trade = session
+        .active_character_checkpoint()
+        .expect("pre-trade checkpoint");
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeReply {
+        accept_invite: true,
+    });
+    let deposit = session.handle_packet(ClientPacket::DepositTradeItem {
+        from: i32::from(offered_item.slot),
+        to: 0,
+    });
+    assert!(deposit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    assert_eq!(
+        session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
+        vec![ServerPacket::TradeGold { amount: 25 }]
+    );
+    let (_, own_offer) = session.shared_trade_confirm();
+    let own_offer = own_offer.expect("validated own offer");
+    assert_eq!(session.world_snapshot().gold, starting_gold - 25);
+
+    session
+        .restore_active_character_checkpoint(&before_trade)
+        .expect("restore pre-trade crash checkpoint");
+    assert_eq!(session.world_snapshot().gold, starting_gold);
+    assert!(session.world_snapshot().stage5_systems.trade.is_none());
+
+    let incoming_offer = super::SharedTradeOffer {
+        settlement_nonce: "00000000000000000000000000000002".to_string(),
+        account_id: "trader-account".to_string(),
+        character_index: 1,
+        character_name: "Trader".to_string(),
+        partner_name: active.character_name.clone(),
+        gold: 10,
+        items: Vec::new(),
+    };
+    let event_id = "a".repeat(64);
+    let packets = session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("durable projection");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DeleteItem { unique_id, count }
+            if *unique_id == offered_item.unique_id && *count == u16::try_from(offered_item.quantity).expect("fixture quantity fits protocol")
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 10 })));
+    assert_eq!(session.world_snapshot().gold, starting_gold - 15);
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == offered_item.unique_id));
+    assert!(session.world_snapshot().stage5_systems.trade.is_none());
+    assert!(session.has_shared_economy_projection_event(&event_id));
+
+    let retry = session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("idempotent retry");
+    assert!(retry.is_empty());
+    assert_eq!(session.world_snapshot().gold, starting_gold - 15);
+}
+
+#[test]
+fn shared_trade_projection_save_failure_rolls_back_and_retries_once() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+    let active = session.active_identity().expect("active identity");
+    let offered_item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion")
+        .expect("demo inventory should include red potion");
+    let before_projection = session
+        .active_character_checkpoint()
+        .expect("pre-projection checkpoint");
+
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeReply {
+        accept_invite: true,
+    });
+    let deposit = session.handle_packet(ClientPacket::DepositTradeItem {
+        from: i32::from(offered_item.slot),
+        to: 0,
+    });
+    assert!(deposit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    assert_eq!(
+        session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
+        vec![ServerPacket::TradeGold { amount: 25 }]
+    );
+    let (_, own_offer) = session.shared_trade_confirm();
+    let own_offer = own_offer.expect("completed own offer");
+    session
+        .restore_active_character_checkpoint(&before_projection)
+        .expect("simulate pre-settlement restart");
+    let incoming_offer = super::SharedTradeOffer {
+        settlement_nonce: "00000000000000000000000000000002".to_string(),
+        account_id: "trader-account".to_string(),
+        character_index: 1,
+        character_name: "Trader".to_string(),
+        partner_name: active.character_name.clone(),
+        gold: 10,
+        items: Vec::new(),
+    };
+    let event_id = "d".repeat(64);
+    let before_world = session.world_snapshot();
+    assert_eq!(before_world.gold, starting_gold);
+    assert!(before_world.stage5_systems.trade.is_none());
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert!(session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect_err("injected save failure must reject the projection")
+        .contains("injected account-store persistence failure"));
+    assert_eq!(session.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &session
+                .active_character_checkpoint()
+                .expect("rolled-back live checkpoint"),
+        )
+        .expect("rolled-back checkpoint should serialize"),
+        serde_json::to_string(&before_projection).expect("baseline checkpoint should serialize"),
+        "gold, inventory, trade state, and projection marker must all roll back"
+    );
+    assert!(!session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+
+    let retry = session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("fault is one-shot and durable trade must retry");
+    assert!(retry
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
+    assert!(retry.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DeleteItem { unique_id, count }
+            if *unique_id == offered_item.unique_id
+                && *count == u16::try_from(offered_item.quantity).expect("fixture quantity fits protocol")
+    )));
+    assert!(retry
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 10 })));
+    assert_eq!(session.world_snapshot().gold, starting_gold - 15);
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == offered_item.unique_id));
+    assert!(session.world_snapshot().stage5_systems.trade.is_none());
+    assert!(session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+    assert!(session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("durable second retry")
+        .is_empty());
+}
 #[test]
 fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     // Regression guard for the F-07 trade item-swap exploit: a player deposits a

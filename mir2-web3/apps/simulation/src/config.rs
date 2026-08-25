@@ -3064,9 +3064,9 @@ pub(crate) enum AccountSourceRefreshOutcome {
     Missing,
 }
 
-#[cfg(test)]
+#[cfg(any(test, feature = "test-support"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum AccountStoreTransactionFault {
+pub enum AccountStoreTransactionFault {
     BeforePersist,
     Persist,
     BeforeFileRename,
@@ -3395,7 +3395,7 @@ pub struct SimulationConfig {
     /// Once publication has an unknown outcome, only process restart plus a
     /// fresh durable reload may create a writable state again.
     account_store_write_state: Arc<Mutex<AccountStoreWriteState>>,
-    #[cfg(test)]
+    #[cfg(any(test, feature = "test-support"))]
     account_store_transaction_fault: Arc<Mutex<Option<AccountStoreTransactionFault>>>,
     #[cfg(test)]
     account_store_repository_writer_probe: Arc<Mutex<Option<AccountStoreRepositoryWriterProbe>>>,
@@ -3555,7 +3555,7 @@ impl SimulationConfig {
             content_profile: None,
             account_store_persist_lock: Arc::new(Mutex::new(())),
             account_store_write_state: Arc::new(Mutex::new(AccountStoreWriteState::Writable)),
-            #[cfg(test)]
+            #[cfg(any(test, feature = "test-support"))]
             account_store_transaction_fault: Arc::new(Mutex::new(None)),
             #[cfg(test)]
             account_store_repository_writer_probe: Arc::new(Mutex::new(None)),
@@ -3960,7 +3960,7 @@ impl SimulationConfig {
     }
 
     fn take_account_store_file_commit_fault(&self) -> Option<AccountStoreFileCommitFault> {
-        #[cfg(test)]
+        #[cfg(any(test, feature = "test-support"))]
         {
             let mut fault = self
                 .account_store_transaction_fault
@@ -3980,7 +3980,7 @@ impl SimulationConfig {
             }
             mapped
         }
-        #[cfg(not(test))]
+        #[cfg(not(any(test, feature = "test-support")))]
         {
             None
         }
@@ -4150,7 +4150,7 @@ impl SimulationConfig {
         let mutation_plan =
             build_account_store_mutation_plan(&original_store, &staged_store, scope, false);
 
-        #[cfg(test)]
+        #[cfg(any(test, feature = "test-support"))]
         if self.take_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist) {
             return Err("injected account-store failure before persist".to_string());
         }
@@ -4161,7 +4161,7 @@ impl SimulationConfig {
         serde_json::to_vec(&staged_store)
             .map_err(|error| format!("failed to encode account-store transaction: {error}"))?;
 
-        #[cfg(test)]
+        #[cfg(any(test, feature = "test-support"))]
         if self.take_account_store_transaction_fault(AccountStoreTransactionFault::Persist) {
             return Err("injected account-store persistence failure".to_string());
         }
@@ -4248,11 +4248,8 @@ impl SimulationConfig {
         Ok(result)
     }
 
-    #[cfg(test)]
-    pub(crate) fn inject_account_store_transaction_fault(
-        &self,
-        fault: AccountStoreTransactionFault,
-    ) {
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn inject_account_store_transaction_fault(&self, fault: AccountStoreTransactionFault) {
         *self
             .account_store_transaction_fault
             .lock()
@@ -4331,7 +4328,7 @@ impl SimulationConfig {
             .and_then(|probe| probe.last_plan_includes_global)
     }
 
-    #[cfg(test)]
+    #[cfg(any(test, feature = "test-support"))]
     fn take_account_store_transaction_fault(&self, expected: AccountStoreTransactionFault) -> bool {
         let mut fault = self
             .account_store_transaction_fault
@@ -5754,6 +5751,11 @@ pub struct Stage5SystemsState {
     /// save state, not an item-stack counter.
     #[serde(default)]
     pub game_shop_individual_purchases: BTreeMap<i32, u64>,
+    /// Durable proof that the matching external ledger event has already been
+    /// materialized into this private character snapshot. The exact event ID is
+    /// recorded in the same save as the resulting gold/item mutation.
+    #[serde(default)]
+    pub economy_projection_event_ids: BTreeSet<String>,
     pub trade: Option<Stage5TradeState>,
     pub auction: Vec<Stage5AuctionListing>,
     #[serde(default)]
@@ -5799,6 +5801,7 @@ impl Default for Stage5SystemsState {
             mentor: Stage5MentorState::default(),
             mail: Vec::new(),
             game_shop_individual_purchases: BTreeMap::new(),
+            economy_projection_event_ids: BTreeSet::new(),
             trade: None,
             auction: Vec::new(),
             refine: Stage5RefineState::default(),
@@ -6260,6 +6263,11 @@ fn stage5_mail_character_matches(
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5TradeState {
+    /// Opaque identity for this one participant's confirmation attempt. The
+    /// pair of participant nonces forms the durable settlement identity, so two
+    /// otherwise identical legal trades remain distinct.
+    #[serde(default)]
+    pub settlement_nonce: String,
     pub partner: String,
     pub offered_items: Vec<String>,
     #[serde(default)]

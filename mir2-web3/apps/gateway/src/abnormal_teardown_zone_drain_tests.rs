@@ -113,6 +113,49 @@ fn abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once() {
 }
 
 #[test]
+fn abrupt_teardown_rolls_back_unmatched_debited_trade_before_checkpoint() {
+    let (zone_state, mut runtime) = prepared_runtime();
+    let identity = runtime.inner.active_identity().expect("active identity");
+    let key = ZonePresenceKey::from_identity(&identity);
+    let starting_gold = runtime.inner.world_snapshot().gold;
+
+    runtime.inner.trade_request("MissingPartner");
+    runtime
+        .inner
+        .execute(WorldCommand::ClientPacket(ClientPacket::TradeReply {
+            accept_invite: true,
+        }))
+        .expect("accept fixture trade");
+    runtime
+        .inner
+        .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
+            amount: 25,
+        }))
+        .expect("offer fixture gold");
+    let (_, offer) = runtime.inner.shared_trade_confirm();
+    let offer = offer.expect("completed unmatched offer");
+    assert_eq!(runtime.inner.world_snapshot().gold, starting_gold - 25);
+    zone_state
+        .lock()
+        .expect("zone state")
+        .trade_offers
+        .insert(key.clone(), offer);
+
+    let owner_lease = ZoneOwnerLease::in_process(&ZoneId::primary());
+    let prepared = runtime
+        .prepare_teardown_checkpoint(&owner_lease)
+        .expect("teardown drain")
+        .expect("active checkpoint");
+
+    assert_eq!(prepared.checkpoint().gold, starting_gold);
+    assert!(!zone_state
+        .lock()
+        .expect("zone state")
+        .trade_offers
+        .contains_key(&key));
+}
+
+#[test]
 fn web_mail_refresh_cannot_overwrite_zone_vitals_before_teardown_drain() {
     let (zone_state, mut runtime) = prepared_runtime();
     let identity = runtime.inner.active_identity().expect("active identity");

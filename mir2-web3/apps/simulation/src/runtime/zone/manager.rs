@@ -186,6 +186,67 @@ impl ZoneManager {
     /// World-level checkpoints must not resurrect Gateway sessions after a
     /// process restart. The Gateway owns session recovery; the Zone manager only
     /// contributes persistent map/world state to those checkpoints.
+    pub fn zone_key_for_session(&self, session_id: &SessionId) -> Option<ZoneKey> {
+        self.session_zones.get(session_id).cloned()
+    }
+
+    pub fn detached_ground_drop_claim_ticket_is_canonical(
+        &self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.detached_ground_drop_claim_ticket_is_canonical(ticket))
+    }
+
+    pub fn has_detached_ground_drop_claim_ticket(
+        &self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.has_detached_ground_drop_claim_ticket(ticket))
+    }
+
+    pub fn detach_ground_drop_claim(
+        &mut self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> Option<ZoneKey> {
+        let key = self.session_zones.get(session_id)?.clone();
+        self.zones
+            .get_mut(&key)?
+            .detach_ground_drop_claim(session_id, ticket)
+            .then_some(key)
+    }
+
+    pub fn detach_all_ground_drop_claims(
+        &mut self,
+    ) -> Vec<(ZoneKey, SessionId, GroundDropClaimTicket)> {
+        let mut detached = Vec::new();
+        for (key, zone) in &mut self.zones {
+            detached.extend(
+                zone.detach_all_ground_drop_claims()
+                    .into_iter()
+                    .map(|(session_id, ticket)| (key.clone(), session_id, ticket)),
+            );
+        }
+        detached
+    }
+
+    pub fn restore_detached_ground_drop_claim(
+        &mut self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+        now_ms: u64,
+    ) -> Option<Vec<ZoneOutbound>> {
+        self.zones
+            .get_mut(key)?
+            .restore_detached_ground_drop_claim(ticket, now_ms)
+    }
+
     pub fn has_pending_ground_drop_claim_ticket(
         &self,
         session_id: &SessionId,
@@ -197,6 +258,16 @@ impl ZoneManager {
         self.zones
             .get(key)
             .is_some_and(|zone| zone.has_pending_ground_drop_claim_ticket(session_id, ticket))
+    }
+
+    /// Enumerate the authoritative Zone claims awaiting Gateway settlement.
+    /// Gateway checkpoint recovery validates each entry against its own
+    /// presence mappings before adopting it.
+    pub fn pending_ground_drop_claim_tickets(&self) -> Vec<(SessionId, GroundDropClaimTicket)> {
+        self.zones
+            .values()
+            .flat_map(ZoneRuntime::pending_ground_drop_claim_tickets)
+            .collect()
     }
 
     pub fn leave_all_sessions(&mut self) -> usize {

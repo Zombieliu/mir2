@@ -182,7 +182,16 @@ pub(super) fn validate_stage5_systems_item_carriers(
     systems: &Stage5SystemsState,
 ) -> Result<(), String> {
     validate_stage5_mail_item_carriers(&systems.mail)?;
-    validate_stage5_guild_storage_item_carriers(&systems.guild)
+    validate_stage5_guild_storage_item_carriers(&systems.guild)?;
+    if systems.economy_projection_event_ids.iter().any(|event_id| {
+        event_id.len() != 64
+            || !event_id
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    }) {
+        return Err("invalid durable economy projection event ID".to_string());
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -3635,6 +3644,7 @@ impl SimulationSession {
             .resource_mut::<Stage5SystemsResource>()
             .stage5_systems
             .trade = Some(Stage5TradeState {
+            settlement_nonce: new_stage5_mail_delivery_nonce(),
             partner: partner.clone(),
             offered_items: Vec::new(),
             offered_slots: BTreeMap::new(),

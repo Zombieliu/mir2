@@ -1304,11 +1304,61 @@ pub struct SharedAccountInventoryExecutionContext {
     pub external_commit_authorized: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SharedTradeSettlementOutcome {
     Committed,
     Duplicate,
+    DurableCommitted {
+        event_id: String,
+    },
+    DurableDuplicate {
+        event_id: String,
+    },
+    /// PostgreSQL may have committed, but the producer could not confirm the
+    /// outcome. Callers must retain both debited offers and retry the same
+    /// idempotent settlement; they must never roll back or reopen trading.
+    OutcomeUnknown {
+        idempotency_key: String,
+    },
     Rejected,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SharedAccountInventoryCommitOutcome {
+    Confirmed(SharedAccountInventoryTransactionReceipt),
+    /// PostgreSQL may have committed the immutable economy envelope, but the
+    /// producer could not confirm it. The owning Zone must retain the claim and
+    /// retry the same idempotency key; restoring the drop could credit it twice.
+    OutcomeUnknown {
+        idempotency_key: String,
+        receipt: SharedAccountInventoryTransactionReceipt,
+    },
+}
+
+impl SharedAccountInventoryCommitOutcome {
+    fn into_receipt(self) -> SharedAccountInventoryTransactionReceipt {
+        match self {
+            Self::Confirmed(receipt) | Self::OutcomeUnknown { receipt, .. } => receipt,
+        }
+    }
+}
+
+impl std::ops::Deref for SharedAccountInventoryCommitOutcome {
+    type Target = SharedAccountInventoryTransactionReceipt;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Confirmed(receipt) | Self::OutcomeUnknown { receipt, .. } => receipt,
+        }
+    }
+}
+
+impl std::ops::DerefMut for SharedAccountInventoryCommitOutcome {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self {
+            Self::Confirmed(receipt) | Self::OutcomeUnknown { receipt, .. } => receipt,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -1415,8 +1465,8 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         runtime: &mut InProcessWorldRuntime,
         _context: Option<&SharedAccountInventoryExecutionContext>,
         envelope: SharedAccountInventoryCommandEnvelope,
-    ) -> mir2_simulation::SharedAccountInventoryTransactionReceipt {
-        self.commit(runtime, envelope)
+    ) -> SharedAccountInventoryCommitOutcome {
+        SharedAccountInventoryCommitOutcome::Confirmed(self.commit(runtime, envelope))
     }
 
     fn bootstrap_fenced(
@@ -1434,6 +1484,38 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         _second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         SharedTradeSettlementOutcome::Committed
+    }
+
+    fn reconcile_ground_drop_projections_fenced(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        Vec::new()
+    }
+
+    fn has_pending_ground_drop_projection_fenced(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        false
+    }
+
+    fn reconcile_trade_projections_fenced(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        Vec::new()
+    }
+
+    fn has_pending_trade_projection_fenced(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        false
     }
 
     fn commit_ground_drop_pickup(
@@ -1953,6 +2035,69 @@ struct SharedItemRentalInvite {
     renting: bool,
 }
 
+/// A two-party trade whose PostgreSQL COMMIT acknowledgement was lost. Both
+/// offers have already been debited from their private runtimes, so this record
+/// is the recovery authority until the same idempotent settlement is confirmed
+/// durable or confirmed absent.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct UnresolvedSharedTradeSettlement {
+    idempotency_key: String,
+    first_key: ZonePresenceKey,
+    second_key: ZonePresenceKey,
+    first_offer: SharedTradeOffer,
+    second_offer: SharedTradeOffer,
+}
+
+impl UnresolvedSharedTradeSettlement {
+    fn recovery_key(&self) -> String {
+        format!(
+            "{}|{}:{}:{}|{}:{}:{}",
+            self.idempotency_key,
+            self.first_key.account_id,
+            self.first_key.character_index,
+            self.first_offer.settlement_nonce,
+            self.second_key.account_id,
+            self.second_key.character_index,
+            self.second_offer.settlement_nonce
+        )
+    }
+
+    fn involves(&self, key: &ZonePresenceKey) -> bool {
+        &self.first_key == key || &self.second_key == key
+    }
+}
+
+/// A ground-drop settlement whose durable outcome is unknown, detached from
+/// the historical Gateway session while the Zone retains the removed-object
+/// tombstone. Recovery is owned by account/character and the full Zone key.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct UnresolvedGroundDropSettlement {
+    #[serde(default)]
+    idempotency_key: Option<String>,
+    presence_key: ZonePresenceKey,
+    zone_key: ZoneKey,
+    ticket: GroundDropClaimTicket,
+}
+
+impl UnresolvedGroundDropSettlement {
+    fn recovery_key(&self) -> String {
+        format!(
+            "{}|{}|{}|{}|{}:{}|{}",
+            self.zone_key.shard_id,
+            self.zone_key.map_file_name.to_ascii_lowercase(),
+            self.zone_key.channel_id,
+            self.zone_key.instance_id,
+            self.presence_key.account_id,
+            self.presence_key.character_index,
+            self.ticket.idempotency_key
+        )
+    }
+
+    fn involves(&self, key: &ZonePresenceKey) -> bool {
+        &self.presence_key == key
+    }
+}
+
 const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 2;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
@@ -1981,6 +2126,8 @@ struct SharedInProcessZoneState {
     trade_offers: BTreeMap<ZonePresenceKey, SharedTradeOffer>,
     pending_trade_deliveries: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
     pending_trade_rollbacks: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
+    unresolved_ground_drop_settlements: BTreeMap<String, UnresolvedGroundDropSettlement>,
+    unresolved_trade_settlements: BTreeMap<String, UnresolvedSharedTradeSettlement>,
     pending_rental_invites: BTreeMap<ZonePresenceKey, Vec<SharedItemRentalInvite>>,
     pending_rental_cancels: BTreeMap<ZonePresenceKey, usize>,
     rental_item_offers: BTreeMap<ZonePresenceKey, SharedItemRentalItemOffer>,
@@ -2034,6 +2181,10 @@ struct SharedInProcessZoneStateCheckpoint {
     trade_offers: Vec<(ZonePresenceKey, SharedTradeOffer)>,
     pending_trade_deliveries: Vec<(ZonePresenceKey, Vec<SharedTradeOffer>)>,
     pending_trade_rollbacks: Vec<(ZonePresenceKey, Vec<SharedTradeOffer>)>,
+    #[serde(default)]
+    unresolved_ground_drop_settlements: Vec<UnresolvedGroundDropSettlement>,
+    #[serde(default)]
+    unresolved_trade_settlements: Vec<UnresolvedSharedTradeSettlement>,
     pending_rental_invites: Vec<(ZonePresenceKey, Vec<SharedItemRentalInvite>)>,
     pending_rental_cancels: Vec<(ZonePresenceKey, usize)>,
     rental_item_offers: Vec<(ZonePresenceKey, SharedItemRentalItemOffer)>,
@@ -2073,6 +2224,41 @@ impl SharedInProcessZoneStateCheckpoint {
         } else {
             ZoneManager::restore_checkpoint(&self.zone_manager_bytes)?
         };
+        let mut unresolved_ground = self
+            .unresolved_ground_drop_settlements
+            .drain(..)
+            .map(|settlement| (settlement.recovery_key(), settlement))
+            .collect::<BTreeMap<_, _>>();
+        for (zone_key, session_id, ticket) in zone_manager.detach_all_ground_drop_claims() {
+            let presence_key = self
+                .zone_session_keys
+                .iter()
+                .find_map(|(candidate_session, key)| {
+                    (candidate_session == &session_id).then_some(key.clone())
+                })
+                .ok_or_else(|| {
+                    format!(
+                        "world-only checkpoint cannot detach ground claim without presence for {}",
+                        session_id.as_str()
+                    )
+                })?;
+            let settlement = UnresolvedGroundDropSettlement {
+                idempotency_key: None,
+                presence_key,
+                zone_key,
+                ticket,
+            };
+            let recovery_key = settlement.recovery_key();
+            if let Some(existing) = unresolved_ground.insert(recovery_key, settlement.clone()) {
+                if existing != settlement {
+                    return Err(
+                        "world-only checkpoint has conflicting detached ground settlements"
+                            .to_string(),
+                    );
+                }
+            }
+        }
+        self.unresolved_ground_drop_settlements = unresolved_ground.into_values().collect();
         zone_manager.leave_all_sessions();
         self.zone_manager_bytes = zone_manager.checkpoint_bytes()?;
 
@@ -2206,6 +2392,8 @@ impl SharedInProcessZoneState {
             trade_offers: BTreeMap::new(),
             pending_trade_deliveries: BTreeMap::new(),
             pending_trade_rollbacks: BTreeMap::new(),
+            unresolved_ground_drop_settlements: BTreeMap::new(),
+            unresolved_trade_settlements: BTreeMap::new(),
             pending_rental_invites: BTreeMap::new(),
             pending_rental_cancels: BTreeMap::new(),
             rental_item_offers: BTreeMap::new(),
@@ -2267,6 +2455,16 @@ impl SharedInProcessZoneState {
             trade_offers: self.trade_offers.clone().into_iter().collect(),
             pending_trade_deliveries: self.pending_trade_deliveries.clone().into_iter().collect(),
             pending_trade_rollbacks: self.pending_trade_rollbacks.clone().into_iter().collect(),
+            unresolved_ground_drop_settlements: self
+                .unresolved_ground_drop_settlements
+                .values()
+                .cloned()
+                .collect(),
+            unresolved_trade_settlements: self
+                .unresolved_trade_settlements
+                .values()
+                .cloned()
+                .collect(),
             pending_rental_invites: self.pending_rental_invites.clone().into_iter().collect(),
             pending_rental_cancels: self.pending_rental_cancels.clone().into_iter().collect(),
             rental_item_offers: self.rental_item_offers.clone().into_iter().collect(),
@@ -2298,6 +2496,16 @@ impl SharedInProcessZoneState {
             trade_offers: Vec::new(),
             pending_trade_deliveries: Vec::new(),
             pending_trade_rollbacks: Vec::new(),
+            unresolved_ground_drop_settlements: self
+                .unresolved_ground_drop_settlements
+                .values()
+                .cloned()
+                .collect(),
+            unresolved_trade_settlements: self
+                .unresolved_trade_settlements
+                .values()
+                .cloned()
+                .collect(),
             pending_rental_invites: Vec::new(),
             pending_rental_cancels: Vec::new(),
             rental_item_offers: Vec::new(),
@@ -2356,7 +2564,7 @@ impl SharedInProcessZoneState {
         if players.len() != checkpoint.players.len() {
             return Err("shared Zone checkpoint contains duplicate player presences".to_string());
         }
-        let pending_zone_ground_drop_claims = checkpoint
+        let mut pending_zone_ground_drop_claims = checkpoint
             .pending_zone_ground_drop_claims
             .iter()
             .cloned()
@@ -2395,6 +2603,100 @@ impl SharedInProcessZoneState {
                     ));
                 }
             }
+        }
+        // The Zone checkpoint is authoritative for a claim that was accepted
+        // before the Gateway had materialized its settlement queue. Restore
+        // those exact tickets, but never invent a Gateway presence: every Zone
+        // ticket must still map to the same session and player.
+        for (session_id, ticket) in zone_manager.pending_ground_drop_claim_tickets() {
+            let key = zone_session_keys.get(&session_id).ok_or_else(|| {
+                format!(
+                    "shared Zone checkpoint has Zone pending drop claim without session mapping for {}",
+                    session_id.as_str()
+                )
+            })?;
+            if zone_sessions.get(key) != Some(&session_id) {
+                return Err(format!(
+                    "shared Zone checkpoint has Zone pending drop claim with inconsistent presence mapping for {}",
+                    session_id.as_str()
+                ));
+            }
+            if !players.contains_key(key) {
+                return Err(format!(
+                    "shared Zone checkpoint has Zone pending drop claim without player for {}/{}",
+                    key.account_id, key.character_index
+                ));
+            }
+            let tickets = pending_zone_ground_drop_claims
+                .entry(key.clone())
+                .or_default();
+            if !tickets.contains(&ticket) {
+                tickets.push(ticket);
+            }
+        }
+        let unresolved_ground_count = checkpoint.unresolved_ground_drop_settlements.len();
+        let unresolved_ground_drop_settlements = checkpoint
+            .unresolved_ground_drop_settlements
+            .into_iter()
+            .map(|settlement| {
+                if settlement.presence_key.account_id.trim().is_empty()
+                    || settlement
+                        .idempotency_key
+                        .as_ref()
+                        .is_some_and(|key| key.trim().is_empty())
+                    || !zone_manager.has_detached_ground_drop_claim_ticket(
+                        &settlement.zone_key,
+                        &settlement.ticket,
+                    )
+                {
+                    return Err(
+                        "shared Zone checkpoint contains invalid detached ground settlement"
+                            .to_string(),
+                    );
+                }
+                Ok((settlement.recovery_key(), settlement))
+            })
+            .collect::<Result<BTreeMap<_, _>, String>>()?;
+        if unresolved_ground_drop_settlements.len() != unresolved_ground_count {
+            return Err(
+                "shared Zone checkpoint contains duplicate detached ground settlements".to_string(),
+            );
+        }
+        let unresolved_count = checkpoint.unresolved_trade_settlements.len();
+        let unresolved_trade_settlements = checkpoint
+            .unresolved_trade_settlements
+            .into_iter()
+            .map(|settlement| {
+                if settlement.idempotency_key.trim().is_empty()
+                    || settlement.first_key == settlement.second_key
+                    || settlement.first_key.account_id != settlement.first_offer.account_id
+                    || settlement.first_key.character_index
+                        != settlement.first_offer.character_index
+                    || settlement.second_key.account_id != settlement.second_offer.account_id
+                    || settlement.second_key.character_index
+                        != settlement.second_offer.character_index
+                    || !settlement
+                        .first_offer
+                        .partner_name
+                        .eq_ignore_ascii_case(&settlement.second_offer.character_name)
+                    || !settlement
+                        .second_offer
+                        .partner_name
+                        .eq_ignore_ascii_case(&settlement.first_offer.character_name)
+                {
+                    return Err(
+                        "shared Zone checkpoint contains invalid unresolved trade settlement"
+                            .to_string(),
+                    );
+                }
+                Ok((settlement.recovery_key(), settlement))
+            })
+            .collect::<Result<BTreeMap<_, _>, String>>()?;
+        if unresolved_trade_settlements.len() != unresolved_count {
+            return Err(
+                "shared Zone checkpoint contains duplicate unresolved trade settlements"
+                    .to_string(),
+            );
         }
         Ok(Self {
             next_zone_object_id: checkpoint.next_zone_object_id,
@@ -2445,6 +2747,8 @@ impl SharedInProcessZoneState {
             trade_offers: checkpoint.trade_offers.into_iter().collect(),
             pending_trade_deliveries: checkpoint.pending_trade_deliveries.into_iter().collect(),
             pending_trade_rollbacks: checkpoint.pending_trade_rollbacks.into_iter().collect(),
+            unresolved_ground_drop_settlements,
+            unresolved_trade_settlements,
             pending_rental_invites: checkpoint.pending_rental_invites.into_iter().collect(),
             pending_rental_cancels: checkpoint.pending_rental_cancels.into_iter().collect(),
             rental_item_offers: checkpoint.rental_item_offers.into_iter().collect(),
@@ -2826,6 +3130,108 @@ impl SharedInProcessZoneState {
             .entry(key)
             .or_default()
             .push(ticket);
+    }
+
+    fn detach_unresolved_ground_drop_settlement(
+        &mut self,
+        key: &ZonePresenceKey,
+        ticket: &GroundDropClaimTicket,
+        idempotency_key: String,
+    ) -> bool {
+        let Some(session_id) = self.zone_sessions.get(key).cloned() else {
+            return false;
+        };
+        if &ticket.session_id != &session_id {
+            return false;
+        }
+        let Some(zone_key) = self.zone_manager.zone_key_for_session(&session_id) else {
+            return false;
+        };
+        let settlement = UnresolvedGroundDropSettlement {
+            idempotency_key: Some(idempotency_key),
+            presence_key: key.clone(),
+            zone_key,
+            ticket: ticket.clone(),
+        };
+        let recovery_key = settlement.recovery_key();
+        match self.unresolved_ground_drop_settlements.get(&recovery_key) {
+            Some(existing) => return existing == &settlement,
+            None => {}
+        }
+        if self
+            .zone_manager
+            .detach_ground_drop_claim(&session_id, ticket)
+            .as_ref()
+            != Some(&settlement.zone_key)
+        {
+            return false;
+        }
+        self.unresolved_ground_drop_settlements
+            .insert(recovery_key, settlement);
+        true
+    }
+
+    fn unresolved_ground_drop_settlement_for_presence(
+        &self,
+        key: &ZonePresenceKey,
+    ) -> Option<UnresolvedGroundDropSettlement> {
+        self.unresolved_ground_drop_settlements
+            .values()
+            .find(|settlement| settlement.involves(key))
+            .cloned()
+    }
+
+    fn retain_unresolved_ground_drop_outcome_key(
+        &mut self,
+        expected: &UnresolvedGroundDropSettlement,
+        idempotency_key: String,
+    ) -> bool {
+        let recovery_key = expected.recovery_key();
+        let Some(stored) = self
+            .unresolved_ground_drop_settlements
+            .get_mut(&recovery_key)
+        else {
+            return false;
+        };
+        if stored != expected {
+            return false;
+        }
+        match stored.idempotency_key.as_ref() {
+            Some(existing) => existing == &idempotency_key,
+            None => {
+                stored.idempotency_key = Some(idempotency_key);
+                true
+            }
+        }
+    }
+
+    fn resolve_unresolved_ground_drop_settlement(
+        &mut self,
+        expected: &UnresolvedGroundDropSettlement,
+        committed: bool,
+        now_ms: u64,
+    ) -> Option<Vec<ZoneOutbound>> {
+        let recovery_key = expected.recovery_key();
+        if self.unresolved_ground_drop_settlements.get(&recovery_key) != Some(expected) {
+            return None;
+        }
+        let outbounds = if committed {
+            Vec::new()
+        } else {
+            let outbounds = self.zone_manager.restore_detached_ground_drop_claim(
+                &expected.zone_key,
+                &expected.ticket,
+                now_ms,
+            )?;
+            self.restore_drop(
+                &expected.zone_key.map_file_name,
+                expected.ticket.drop.clone(),
+            );
+            outbounds
+        };
+        self.unresolved_ground_drop_settlements
+            .remove(&recovery_key);
+        Some(outbounds)
     }
 
     fn take_pending_zone_ground_drop_claims(
@@ -4108,6 +4514,74 @@ impl SharedInProcessZoneState {
         }
     }
 
+    fn retain_unresolved_trade_settlement(
+        &mut self,
+        settlement: UnresolvedSharedTradeSettlement,
+    ) -> Result<(), String> {
+        let recovery_key = settlement.recovery_key();
+        match self.unresolved_trade_settlements.get(&recovery_key) {
+            Some(existing) if existing == &settlement => Ok(()),
+            Some(_) => Err("conflicting unresolved trade settlement recovery key".to_string()),
+            None => {
+                self.unresolved_trade_settlements
+                    .insert(recovery_key, settlement);
+                Ok(())
+            }
+        }
+    }
+
+    fn unresolved_trade_settlement_for_presence(
+        &self,
+        key: &ZonePresenceKey,
+    ) -> Option<UnresolvedSharedTradeSettlement> {
+        self.unresolved_trade_settlements
+            .values()
+            .find(|settlement| settlement.involves(key))
+            .cloned()
+    }
+
+    fn has_unresolved_trade_settlement_for_presence(&self, key: &ZonePresenceKey) -> bool {
+        self.unresolved_trade_settlements
+            .values()
+            .any(|settlement| settlement.involves(key))
+    }
+
+    fn resolve_unresolved_trade_settlement(
+        &mut self,
+        expected: &UnresolvedSharedTradeSettlement,
+        resolution: UnresolvedSharedTradeResolution,
+    ) -> bool {
+        let recovery_key = expected.recovery_key();
+        if self.unresolved_trade_settlements.get(&recovery_key) != Some(expected) {
+            return false;
+        }
+        self.unresolved_trade_settlements.remove(&recovery_key);
+        match resolution {
+            UnresolvedSharedTradeResolution::Durable => {}
+            UnresolvedSharedTradeResolution::LocalCommit => {
+                self.pending_trade_deliveries
+                    .entry(expected.first_key.clone())
+                    .or_default()
+                    .push(expected.second_offer.clone());
+                self.pending_trade_deliveries
+                    .entry(expected.second_key.clone())
+                    .or_default()
+                    .push(expected.first_offer.clone());
+            }
+            UnresolvedSharedTradeResolution::Rejected => {
+                self.pending_trade_rollbacks
+                    .entry(expected.first_key.clone())
+                    .or_default()
+                    .push(expected.first_offer.clone());
+                self.pending_trade_rollbacks
+                    .entry(expected.second_key.clone())
+                    .or_default()
+                    .push(expected.second_offer.clone());
+            }
+        }
+        true
+    }
+
     fn take_pending_trade_deliveries(&mut self, key: &ZonePresenceKey) -> Vec<SharedTradeOffer> {
         self.pending_trade_deliveries
             .remove(key)
@@ -4258,6 +4732,13 @@ impl SharedInProcessZoneState {
         }
         own_offer
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum UnresolvedSharedTradeResolution {
+    Durable,
+    LocalCommit,
+    Rejected,
 }
 
 type SharedZoneMutationObserver =
@@ -6262,6 +6743,8 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             account_inventory_service: self.account_inventory_service.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
+            last_ground_drop_projection_reconciliation_identity: None,
+            trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: SharedZoneMovementIngress::new(
                 resources.movement_sender,
                 resources.zone_state,
@@ -6821,12 +7304,21 @@ fn execute_shared_zone_movement(
     }))
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TradeProjectionReconciliationState {
+    Unknown,
+    Clear(ActiveSessionIdentity),
+    Pending(ActiveSessionIdentity),
+}
+
 struct SharedInProcessZoneSessionRuntime {
     inner: InProcessWorldRuntime,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
+    last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
+    trade_projection_reconciliation_state: TradeProjectionReconciliationState,
     movement_ingress: SharedZoneMovementIngress,
     shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
@@ -6944,13 +7436,38 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.rebind_account_store(authoritative);
     }
 
+    fn commit_account_inventory_outcome(
+        &mut self,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let is_ground_drop_projection = matches!(
+            &envelope.command,
+            SharedAccountInventoryCommand::GroundDropPickup(_)
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+        );
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        let outcome = service.commit_fenced(&mut self.inner, context.as_ref(), envelope);
+        if is_ground_drop_projection
+            && matches!(
+                &outcome,
+                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed
+            )
+        {
+            // The durable row may already be projected, but invalidating this
+            // cache costs one bounded query and guarantees that an immediate
+            // save/capacity failure is retried for the owning character.
+            self.last_ground_drop_projection_reconciliation_identity = None;
+        }
+        outcome
+    }
+
     fn commit_account_inventory(
         &mut self,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryTransactionReceipt {
-        let service = Arc::clone(&self.account_inventory_service);
-        let context = self.economy_execution_context.clone();
-        service.commit_fenced(&mut self.inner, context.as_ref(), envelope)
+        self.commit_account_inventory_outcome(envelope)
+            .into_receipt()
     }
 
     fn bootstrap_account_inventory(&self) -> bool {
@@ -7880,6 +8397,16 @@ impl SharedInProcessZoneSessionRuntime {
             &canceled_claims,
         );
 
+        // A transport teardown has no ordered/fenced economy command context.
+        // Apply only decisions that were already finalized before teardown;
+        // unresolved PostgreSQL outcomes remain in the recovery ledger for the
+        // next authenticated command. Retrying them here could turn a missing
+        // commit acknowledgement into a false rejection and duplicate assets.
+        packets.extend(self.apply_finalized_shared_trade_packets());
+        packets.extend(
+            self.cancel_pending_shared_trade_offers_for_character(Some(&identity.character_name)),
+        );
+
         self.inner.force_authoritative_player_transform(
             authoritative_transform.0,
             authoritative_transform.1,
@@ -8162,9 +8689,9 @@ impl SharedInProcessZoneSessionRuntime {
             let drop = ticket.drop.clone();
             let object_id = ticket.object_id;
             let identity_matches_claim = current_session_id.as_ref() == Some(&ticket.session_id);
-            let mut receipt = match active_identity.as_ref().filter(|_| identity_matches_claim) {
+            let outcome = match active_identity.as_ref().filter(|_| identity_matches_claim) {
                 Some(identity) => {
-                    self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+                    self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                         identity: identity.clone(),
                         command: SharedAccountInventoryCommand::GroundDropClaimPickup {
                             drop: drop.clone(),
@@ -8172,37 +8699,56 @@ impl SharedInProcessZoneSessionRuntime {
                         },
                     })
                 }
-                None => SharedAccountInventoryTransactionReceipt {
-                    kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
-                    committed: false,
-                    packets: Vec::new(),
-                },
+                None => SharedAccountInventoryCommitOutcome::Confirmed(
+                    SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                ),
             };
+            let outcome_unknown_key = match &outcome {
+                SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                    idempotency_key, ..
+                } => Some(idempotency_key.clone()),
+                SharedAccountInventoryCommitOutcome::Confirmed(_) => None,
+            };
+            let mut receipt = outcome.into_receipt();
             debug_assert_eq!(
                 receipt.kind,
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             );
             let followup = if receipt.committed {
                 self.retire_local_ground_drop_projection(&drop);
-                ZoneCommand::CommitGroundDropClaimWithTicket {
+                Some(ZoneCommand::CommitGroundDropClaimWithTicket {
                     session_id: ticket.session_id.clone(),
                     ticket,
+                })
+            } else if let Some(idempotency_key) = outcome_unknown_key {
+                // The database may already own this claim. Detach it from the
+                // historical session while retaining the Zone tombstone and a
+                // checkpointed account/character recovery authority.
+                if !self.retain_unresolved_zone_ground_drop_claim(&ticket, idempotency_key) {
+                    self.requeue_zone_ground_drop_claim(ticket);
                 }
+                None
             } else {
                 self.restore_zone_ground_drop_claim(drop);
                 canceled_claims.insert(object_id);
-                ZoneCommand::CancelGroundDropClaimWithTicket {
+                Some(ZoneCommand::CancelGroundDropClaimWithTicket {
                     session_id: ticket.session_id.clone(),
                     ticket,
                     now_ms: Self::zone_now_ms(),
-                }
+                })
             };
-            let followup_packets = if self.teardown_is_fenced() {
-                self.dispatch_zone_fenced_teardown_followup(followup)
-            } else {
-                self.dispatch_zone_player_command(followup, false)
-            };
-            receipt.packets.extend(followup_packets);
+            if let Some(followup) = followup {
+                let followup_packets = if self.teardown_is_fenced() {
+                    self.dispatch_zone_fenced_teardown_followup(followup)
+                } else {
+                    self.dispatch_zone_player_command(followup, false)
+                };
+                receipt.packets.extend(followup_packets);
+            }
             packets_by_object_id
                 .entry(object_id)
                 .or_default()
@@ -8210,6 +8756,30 @@ impl SharedInProcessZoneSessionRuntime {
         }
         (packets_by_object_id, canceled_claims)
     }
+    fn retain_unresolved_zone_ground_drop_claim(
+        &mut self,
+        ticket: &GroundDropClaimTicket,
+        idempotency_key: String,
+    ) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .detach_unresolved_ground_drop_settlement(&key, ticket, idempotency_key)
+    }
+
+    fn requeue_zone_ground_drop_claim(&mut self, ticket: GroundDropClaimTicket) {
+        let Some(key) = self.current_presence_key() else {
+            return;
+        };
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .queue_zone_ground_drop_claim(key, ticket);
+    }
+
     fn restore_zone_ground_drop_claim(&mut self, drop: GroundDropSnapshot) {
         let Some(key) = self.current_presence_key() else {
             return;
@@ -9583,7 +10153,255 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 
+    fn reconcile_durable_ground_drop_projections(&mut self) -> Vec<ServerPacket> {
+        let identity = self.inner.active_identity();
+        if identity.is_none()
+            || identity == self.last_ground_drop_projection_reconciliation_identity
+        {
+            return Vec::new();
+        }
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        let packets =
+            service.reconcile_ground_drop_projections_fenced(&mut self.inner, context.as_ref());
+        if !service.has_pending_ground_drop_projection_fenced(&self.inner, context.as_ref()) {
+            self.last_ground_drop_projection_reconciliation_identity = identity;
+        }
+        packets
+    }
+
+    fn note_durable_trade_projection_pending(&mut self) {
+        self.trade_projection_reconciliation_state = self
+            .inner
+            .active_identity()
+            .map(TradeProjectionReconciliationState::Pending)
+            .unwrap_or(TradeProjectionReconciliationState::Unknown);
+    }
+
+    fn reconcile_durable_trade_projections(&mut self) -> Vec<ServerPacket> {
+        let Some(identity) = self.inner.active_identity() else {
+            self.trade_projection_reconciliation_state =
+                TradeProjectionReconciliationState::Unknown;
+            return Vec::new();
+        };
+        // Unknown/Pending states always re-query. Only a confirmed Clear state
+        // for this exact character may use the no-local-trade fast path.
+        let should_reconcile = match &self.trade_projection_reconciliation_state {
+            TradeProjectionReconciliationState::Clear(cached_identity)
+                if cached_identity == &identity =>
+            {
+                self.inner.has_active_shared_trade_state()
+            }
+            TradeProjectionReconciliationState::Unknown
+            | TradeProjectionReconciliationState::Clear(_)
+            | TradeProjectionReconciliationState::Pending(_) => true,
+        };
+        if !should_reconcile {
+            return Vec::new();
+        }
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        let packets = service.reconcile_trade_projections_fenced(&mut self.inner, context.as_ref());
+        self.trade_projection_reconciliation_state =
+            if service.has_pending_trade_projection_fenced(&self.inner, context.as_ref()) {
+                TradeProjectionReconciliationState::Pending(identity)
+            } else {
+                TradeProjectionReconciliationState::Clear(identity)
+            };
+        packets
+    }
+
+    fn has_pending_durable_trade_projection(&self) -> bool {
+        if self.has_unresolved_trade_settlement() {
+            return true;
+        }
+        let Some(identity) = self.inner.active_identity() else {
+            return false;
+        };
+        match &self.trade_projection_reconciliation_state {
+            TradeProjectionReconciliationState::Unknown
+            | TradeProjectionReconciliationState::Pending(_) => true,
+            TradeProjectionReconciliationState::Clear(cached_identity)
+                if cached_identity != &identity =>
+            {
+                true
+            }
+            TradeProjectionReconciliationState::Clear(_) => {
+                self.inner.has_active_shared_trade_state()
+                    && self
+                        .account_inventory_service
+                        .has_pending_trade_projection_fenced(
+                            &self.inner,
+                            self.economy_execution_context.as_ref(),
+                        )
+            }
+        }
+    }
+
+    /// Retry one detached ground-drop settlement for the same account and
+    /// character. Unknown stays hidden; a durable commit retires the recovery
+    /// record, while only a definitive rejection restores the exact Zone drop.
+    fn resolve_unresolved_ground_drop_settlement(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let settlement = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .unresolved_ground_drop_settlement_for_presence(&key);
+        let Some(settlement) = settlement else {
+            return Vec::new();
+        };
+        let Some(identity) = self.inner.active_identity() else {
+            return Vec::new();
+        };
+        if ZonePresenceKey::from_identity(&identity) != settlement.presence_key {
+            return Vec::new();
+        }
+        let outcome =
+            self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+                identity,
+                command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                    drop: settlement.ticket.drop.clone(),
+                    claim_idempotency_key: settlement.ticket.idempotency_key.clone(),
+                },
+            });
+        let receipt = match outcome {
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                idempotency_key, ..
+            } => {
+                self.zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .retain_unresolved_ground_drop_outcome_key(&settlement, idempotency_key);
+                return Vec::new();
+            }
+            SharedAccountInventoryCommitOutcome::Confirmed(receipt) => receipt,
+        };
+        if receipt.committed {
+            self.retire_local_ground_drop_projection(&settlement.ticket.drop);
+        }
+        let dispatched = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let Some(outbounds) = zone_state.resolve_unresolved_ground_drop_settlement(
+                &settlement,
+                receipt.committed,
+                Self::zone_now_ms(),
+            ) else {
+                return Vec::new();
+            };
+            zone_state.dispatch_zone_outbounds(outbounds, Some(&key))
+        };
+        let (
+            mut zone_packets,
+            transform,
+            shout_consume,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+        ) = dispatched;
+        self.apply_zone_transform(transform);
+        self.apply_zone_shout_consume(shout_consume);
+        zone_packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        self.apply_zone_player_buff_packets(&zone_packets);
+        self.inner
+            .apply_shared_monster_lifecycle_packets(&zone_packets);
+        zone_packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
+        if !ground_drop_claims.is_empty() {
+            let (claim_packets, canceled_claims) =
+                self.apply_zone_ground_drop_claims(ground_drop_claims);
+            merge_ground_drop_claim_packets_in_crystal_order(
+                &mut zone_packets,
+                claim_packets,
+                &canceled_claims,
+            );
+        }
+        let mut packets = receipt.packets;
+        packets.extend(zone_packets);
+        packets
+    }
+
+    fn has_unresolved_trade_settlement(&self) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .has_unresolved_trade_settlement_for_presence(&key)
+    }
+
+    /// Retry one retained commit-ack-unknown trade with the exact same offers.
+    /// The shared checkpoint record is removed only after a definitive durable,
+    /// local-development, or rejected result has been observed.
+    fn resolve_unresolved_trade_settlement(&mut self) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        let settlement = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .unresolved_trade_settlement_for_presence(&key);
+        let Some(settlement) = settlement else {
+            return false;
+        };
+
+        let outcome = self.settle_shared_trade(&settlement.first_offer, &settlement.second_offer);
+        let resolution = match outcome {
+            SharedTradeSettlementOutcome::DurableCommitted { .. }
+            | SharedTradeSettlementOutcome::DurableDuplicate { .. } => {
+                self.note_durable_trade_projection_pending();
+                Some(UnresolvedSharedTradeResolution::Durable)
+            }
+            SharedTradeSettlementOutcome::Committed | SharedTradeSettlementOutcome::Duplicate => {
+                self.trade_projection_reconciliation_state =
+                    TradeProjectionReconciliationState::Unknown;
+                Some(UnresolvedSharedTradeResolution::LocalCommit)
+            }
+            SharedTradeSettlementOutcome::Rejected => {
+                self.trade_projection_reconciliation_state =
+                    TradeProjectionReconciliationState::Unknown;
+                Some(UnresolvedSharedTradeResolution::Rejected)
+            }
+            SharedTradeSettlementOutcome::OutcomeUnknown { idempotency_key } => {
+                debug_assert_eq!(idempotency_key, settlement.idempotency_key);
+                self.note_durable_trade_projection_pending();
+                None
+            }
+        };
+        if let Some(resolution) = resolution {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .resolve_unresolved_trade_settlement(&settlement, resolution);
+        }
+        self.has_unresolved_trade_settlement()
+    }
+
     fn apply_pending_shared_trade_packets(&mut self) -> Vec<ServerPacket> {
+        let mut packets = self.resolve_unresolved_ground_drop_settlement();
+        packets.extend(self.reconcile_durable_ground_drop_projections());
+        let unresolved_trade = self.resolve_unresolved_trade_settlement();
+        if unresolved_trade {
+            self.note_durable_trade_projection_pending();
+        } else {
+            packets.extend(self.reconcile_durable_trade_projections());
+        }
+        packets.extend(self.apply_finalized_shared_trade_packets());
+        packets
+    }
+
+    /// Materialize only trade deliveries/rollbacks whose settlement outcome is
+    /// already final. This performs no external lookup or commit and is safe in
+    /// teardown/Drop paths that intentionally lack an economy command context.
+    fn apply_finalized_shared_trade_packets(&mut self) -> Vec<ServerPacket> {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
         };
@@ -9844,7 +10662,9 @@ impl SharedInProcessZoneSessionRuntime {
                         rollback_self = Some(offer.clone());
                     }
                 } else {
-                    zone_state.trade_offers.insert(self_key, offer.clone());
+                    zone_state
+                        .trade_offers
+                        .insert(self_key.clone(), offer.clone());
                 }
             } else {
                 rollback_self = Some(offer.clone());
@@ -9852,29 +10672,50 @@ impl SharedInProcessZoneSessionRuntime {
         }
 
         let mut deliver_to_self = Vec::new();
+        let mut durable_settlement = false;
+        let mut unknown_settlement = false;
         if let Some((partner_key, partner_offer)) = matched_offer {
             let settlement = self.settle_shared_trade(&offer, &partner_offer);
             let mut zone_state = self
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
-            if matches!(
-                settlement,
-                SharedTradeSettlementOutcome::Committed | SharedTradeSettlementOutcome::Duplicate
-            ) {
-                zone_state
-                    .pending_trade_deliveries
-                    .entry(partner_key)
-                    .or_default()
-                    .push(offer.clone());
-                deliver_to_self.push(partner_offer);
-            } else {
-                zone_state
-                    .pending_trade_rollbacks
-                    .entry(partner_key)
-                    .or_default()
-                    .push(partner_offer);
-                rollback_self = Some(offer.clone());
+            match settlement {
+                SharedTradeSettlementOutcome::Committed
+                | SharedTradeSettlementOutcome::Duplicate => {
+                    zone_state
+                        .pending_trade_deliveries
+                        .entry(partner_key)
+                        .or_default()
+                        .push(offer.clone());
+                    deliver_to_self.push(partner_offer);
+                }
+                SharedTradeSettlementOutcome::DurableCommitted { .. }
+                | SharedTradeSettlementOutcome::DurableDuplicate { .. } => {
+                    durable_settlement = true;
+                }
+                SharedTradeSettlementOutcome::OutcomeUnknown { idempotency_key } => {
+                    let unresolved = UnresolvedSharedTradeSettlement {
+                        idempotency_key,
+                        first_key: self_key.clone(),
+                        second_key: partner_key,
+                        first_offer: offer.clone(),
+                        second_offer: partner_offer,
+                    };
+                    // A conflicting cryptographic idempotency key must still
+                    // fail closed: retain the existing recovery authority and
+                    // keep this character's trade gate Pending.
+                    let _ = zone_state.retain_unresolved_trade_settlement(unresolved);
+                    unknown_settlement = true;
+                }
+                SharedTradeSettlementOutcome::Rejected => {
+                    zone_state
+                        .pending_trade_rollbacks
+                        .entry(partner_key)
+                        .or_default()
+                        .push(partner_offer);
+                    rollback_self = Some(offer.clone());
+                }
             }
         }
 
@@ -9884,20 +10725,33 @@ impl SharedInProcessZoneSessionRuntime {
         for offer in deliver_to_self {
             packets.extend(self.inner.apply_shared_trade_delivery(&offer));
         }
+        if unknown_settlement {
+            // Neither side may regain or reuse the debited assets until the
+            // exact same idempotent settlement produces a definitive result.
+            self.note_durable_trade_projection_pending();
+        }
+        if durable_settlement {
+            // The durable commit creates projection work after a previously
+            // cached Clear result. Invalidate the fast path before attempting
+            // immediate private reconciliation so save/mark failures remain
+            // fail-closed on subsequent commands and ticks.
+            self.note_durable_trade_projection_pending();
+            packets.extend(self.reconcile_durable_trade_projections());
+        }
         packets
     }
 
-    fn pick_up_shared_drop(&mut self, object_id: Option<u32>) -> Vec<ServerPacket> {
+    fn pick_up_shared_drop(&mut self, object_id: Option<u32>) -> Option<Vec<ServerPacket>> {
         let snapshot = self.inner.world_snapshot();
         let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
-            return Vec::new();
+            return None;
         };
         let Some(session_id) = self.current_zone_session_id() else {
-            return Vec::new();
+            return None;
         };
         self.sync_current_shared_ground_drops_to_zone(&session_id);
         let picker_group_members = snapshot.stage5_systems.group.members.clone();
-        self.dispatch_zone_player_command(
+        Some(self.dispatch_zone_player_command(
             ZoneCommand::ClaimGroundDrop {
                 session_id,
                 object_id,
@@ -9909,7 +10763,7 @@ impl SharedInProcessZoneSessionRuntime {
                 now_ms: Self::zone_now_ms(),
             },
             false,
-        )
+        ))
     }
 
     fn pick_up_shared_drop_with_intelligent_creature(
@@ -10081,9 +10935,9 @@ impl SharedInProcessZoneSessionRuntime {
         let eligible = session_matches_claim
             && intelligent_creature_allows_ground_drop(active_creature, &drop);
         let active_identity = self.inner.active_identity();
-        let mut receipt = match active_identity.as_ref().filter(|_| eligible) {
+        let outcome = match active_identity.as_ref().filter(|_| eligible) {
             Some(identity) => {
-                self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+                self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                     identity: identity.clone(),
                     command: SharedAccountInventoryCommand::GroundDropClaimPickup {
                         drop: drop.clone(),
@@ -10091,12 +10945,21 @@ impl SharedInProcessZoneSessionRuntime {
                     },
                 })
             }
-            None => SharedAccountInventoryTransactionReceipt {
-                kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
-                committed: false,
-                packets: Vec::new(),
-            },
+            None => SharedAccountInventoryCommitOutcome::Confirmed(
+                SharedAccountInventoryTransactionReceipt {
+                    kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                    committed: false,
+                    packets: Vec::new(),
+                },
+            ),
         };
+        let outcome_unknown_key = match &outcome {
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                idempotency_key, ..
+            } => Some(idempotency_key.clone()),
+            SharedAccountInventoryCommitOutcome::Confirmed(_) => None,
+        };
+        let mut receipt = outcome.into_receipt();
         debug_assert_eq!(
             receipt.kind,
             SharedAccountInventoryTransactionKind::GroundDropPickup
@@ -10107,29 +10970,36 @@ impl SharedInProcessZoneSessionRuntime {
                 .packets
                 .insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
             (
-                ZoneCommand::CommitGroundDropClaimWithTicket {
+                Some(ZoneCommand::CommitGroundDropClaimWithTicket {
                     session_id: ticket.session_id.clone(),
                     ticket,
-                },
+                }),
                 None,
             )
+        } else if let Some(idempotency_key) = outcome_unknown_key {
+            if !self.retain_unresolved_zone_ground_drop_claim(&ticket, idempotency_key) {
+                self.requeue_zone_ground_drop_claim(ticket);
+            }
+            (None, None)
         } else {
             self.restore_zone_ground_drop_claim(drop);
             (
-                ZoneCommand::CancelGroundDropClaimWithTicket {
+                Some(ZoneCommand::CancelGroundDropClaimWithTicket {
                     session_id: ticket.session_id.clone(),
                     ticket,
                     now_ms: Self::zone_now_ms(),
-                },
+                }),
                 Some(object_id),
             )
         };
-        let followup_packets = if self.teardown_is_fenced() {
-            self.dispatch_zone_fenced_teardown_followup(followup)
-        } else {
-            self.dispatch_zone_player_command(followup, false)
-        };
-        receipt.packets.extend(followup_packets);
+        if let Some(followup) = followup {
+            let followup_packets = if self.teardown_is_fenced() {
+                self.dispatch_zone_fenced_teardown_followup(followup)
+            } else {
+                self.dispatch_zone_player_command(followup, false)
+            };
+            receipt.packets.extend(followup_packets);
+        }
         (receipt.packets, canceled_object_id)
     }
     fn adjacent_remote_player_name(&self) -> Option<String> {
@@ -10154,7 +11024,10 @@ impl SharedInProcessZoneSessionRuntime {
 
 impl Drop for SharedInProcessZoneSessionRuntime {
     fn drop(&mut self) {
-        let _ = self.apply_pending_shared_trade_packets();
+        // Drop is outside an ordered/fenced command. Preserve unresolved
+        // durable outcomes for checkpoint/new-login recovery and only apply
+        // already-finalized local deliveries or rollbacks.
+        let _ = self.apply_finalized_shared_trade_packets();
         let _ = self.cancel_pending_shared_trade_offers();
         self.remove_presence();
     }
@@ -10220,6 +11093,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         ) && !is_personal_session_chat_packet;
         let is_low_latency_zone_packet =
             is_low_latency_zone_player_packet || is_low_latency_zone_chat_packet;
+        let is_start_game = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::StartGame { .. })
+        );
         let is_transfer_map_command = matches!(&command, WorldCommand::TransferMap { .. });
         let is_authoritative_move_to = matches!(&command, WorldCommand::MoveTo { .. });
         let is_handoff_transform = matches!(&command, WorldCommand::ApplyHandoffTransform { .. });
@@ -10249,6 +11126,18 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let is_trade_cancel = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::TradeCancel)
+        );
+        let is_trade_state_mutation = matches!(
+            &command,
+            WorldCommand::ClientPacket(
+                ClientPacket::TradeRequest
+                    | ClientPacket::TradeReply { .. }
+                    | ClientPacket::TradeGold { .. }
+                    | ClientPacket::DepositTradeItem { .. }
+                    | ClientPacket::RetrieveTradeItem { .. }
+                    | ClientPacket::TradeConfirm { .. }
+                    | ClientPacket::TradeCancel
+            )
         );
         let shared_trade_confirm = match &command {
             WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked }) => Some(*locked),
@@ -10427,6 +11316,15 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             packets.extend(self.apply_pending_shared_rental_packets());
             packets
         };
+        if removes_presence {
+            // Roll back an unmatched, already-debited offer before the inner
+            // LogOut/Disconnect path persists and clears the active character.
+            // Matched durable trades have already left `trade_offers` and are
+            // recovered through their PostgreSQL projection rows instead.
+            packets.extend(self.cancel_pending_shared_trade_offers_for_character(
+                departing_character_name.as_deref(),
+            ));
+        }
         if !is_low_latency_zone_packet && !revives_presented_private_death {
             // Damage/heal outbounds are deltas used for client packets. The
             // shared Zone is the exact vitals authority, so reconcile after
@@ -10496,7 +11394,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             None
         };
-        let mut command_packets = if unavailable_shared_target {
+        let blocks_durable_trade_mutation =
+            is_trade_state_mutation && self.has_pending_durable_trade_projection();
+        let mut command_packets = if blocks_durable_trade_mutation {
+            Vec::new()
+        } else if unavailable_shared_target {
             if shared_harvest_direction.is_some() {
                 self.authoritative_zone_owner_correction()
             } else {
@@ -10505,11 +11407,15 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
         } else if is_trade_cancel {
-            let cancel_packets = self.cancel_pending_shared_trade_offers();
-            if cancel_packets.is_empty() {
-                self.inner.shared_trade_cancel(false)
+            if self.has_pending_durable_trade_projection() {
+                Vec::new()
             } else {
-                cancel_packets
+                let cancel_packets = self.cancel_pending_shared_trade_offers();
+                if cancel_packets.is_empty() {
+                    self.inner.shared_trade_cancel(false)
+                } else {
+                    cancel_packets
+                }
             }
         } else if is_item_rental_lock_fee {
             self.execute_shared_item_rental_lock_fee()
@@ -10523,7 +11429,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else if let Some(partner_name) = shared_rental_partner {
             self.execute_shared_item_rental_request(partner_name)
         } else if let Some(partner_name) = shared_trade_partner {
-            self.inner.trade_request(&partner_name)
+            if self.inner.has_active_shared_trade_state()
+                || self.has_pending_durable_trade_projection()
+            {
+                Vec::new()
+            } else {
+                self.inner.trade_request(&partner_name)
+            }
         } else if let Some(amount) = shared_gold_drop_amount {
             self.execute_shared_gold_drop(amount)
         } else if let Some((unique_id, count, hero_inventory)) = shared_inventory_item_drop {
@@ -10532,11 +11444,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 None => self.inner.execute(command)?,
             }
         } else if let Some(object_id) = shared_pickup_object_id {
-            let shared_packets = self.pick_up_shared_drop(object_id);
-            if shared_packets.is_empty() {
-                self.inner.execute(command)?
-            } else {
-                shared_packets
+            match self.pick_up_shared_drop(object_id) {
+                Some(shared_packets) => shared_packets,
+                None => self.inner.execute(command)?,
             }
         } else if let Some((mouse_mode, location)) = shared_intelligent_creature_pickup {
             // Shared creature pickup is authoritative even when it produces no
@@ -10560,9 +11470,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.inner.execute(command)?
         };
         if removes_presence {
-            packets.extend(self.cancel_pending_shared_trade_offers_for_character(
-                departing_character_name.as_deref(),
-            ));
             self.cancel_pending_shared_rental_offers();
             packets.extend(self.remove_presence());
         }
@@ -10687,6 +11594,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.filter_stale_owner_dead_entity_packets(&mut packets);
         if !removes_presence && !skip_tail_zone_snapshot {
             packets.extend(self.sync_zone_snapshot());
+        }
+        if is_start_game && self.current_presence_key().is_some() {
+            // The pre-command recovery pass cannot see an identity/presence
+            // before StartGame. Resolve durable recovery immediately after the
+            // authoritative Zone join so the first playable snapshot already
+            // contains post-restart economy state.
+            packets.extend(self.apply_pending_shared_trade_packets());
         }
         if let Some(current_key) = self.current_presence_key() {
             self.zone_state
@@ -11226,15 +12140,17 @@ mod tests {
         InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
         InProcessNpcWorldService, InProcessZoneRuntimeFactory, MapZoneSessionRouter,
         PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
-        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
-        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryCommitOutcome,
+        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
+        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneFactoryCheckpoint, SharedInProcessZoneRuntimeFactory,
         SharedInProcessZoneSessionRuntime, SharedInProcessZoneState, SharedNpcEntitySideEffect,
         SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope, SharedNpcWorldService,
         SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt, SharedSessionRouter,
         SharedTradeSettlementOutcome, SharedZoneMovementIngress, SharedZoneMutationGate,
-        SharedZoneRuntimeFactory, ZoneId, ZoneNativePlayerAttack, ZoneNativePlayerAttackKind,
-        ZonePresenceKey, ZoneRegistry, ZoneRuntimeFactory,
+        SharedZoneRuntimeFactory, TradeProjectionReconciliationState, ZoneId,
+        ZoneNativePlayerAttack, ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry,
+        ZoneRuntimeFactory,
     };
 
     use crate::{GatewayConfig, GatewaySession};
@@ -11492,6 +12408,18 @@ mod tests {
         let checkpoint = state.checkpoint().expect("checkpoint with pending claim");
         SharedInProcessZoneState::restore(checkpoint.clone())
             .expect("an exact pending claim should restore");
+
+        let expected_ticket = checkpoint.pending_zone_ground_drop_claims[0].1[0].clone();
+        let mut missing_gateway_pending_entry = checkpoint.clone();
+        missing_gateway_pending_entry
+            .pending_zone_ground_drop_claims
+            .clear();
+        let restored = SharedInProcessZoneState::restore(missing_gateway_pending_entry)
+            .expect("the authoritative Zone ticket should hydrate the missing Gateway entry");
+        assert_eq!(
+            restored.pending_zone_ground_drop_claims.get(&key),
+            Some(&vec![expected_ticket])
+        );
 
         let mut tampered_ticket = checkpoint.clone();
         tampered_ticket.pending_zone_ground_drop_claims[0].1[0]
@@ -14143,6 +15071,78 @@ mod tests {
     }
 
     #[derive(Debug)]
+    struct GroundDropProjectionReconciliationProbe {
+        calls: Arc<Mutex<usize>>,
+        pending: Arc<Mutex<bool>>,
+    }
+
+    impl SharedAccountInventoryService for GroundDropProjectionReconciliationProbe {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn reconcile_ground_drop_projections_fenced(
+            &self,
+            _runtime: &mut InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> Vec<ServerPacket> {
+            *self
+                .calls
+                .lock()
+                .expect("ground projection probe should lock") += 1;
+            Vec::new()
+        }
+
+        fn has_pending_ground_drop_projection_fenced(
+            &self,
+            _runtime: &InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> bool {
+            *self
+                .pending
+                .lock()
+                .expect("ground projection pending should lock")
+        }
+    }
+
+    #[derive(Debug)]
+    struct TradeProjectionReconciliationProbe {
+        calls: Arc<Mutex<usize>>,
+        pending: Arc<Mutex<bool>>,
+    }
+
+    impl SharedAccountInventoryService for TradeProjectionReconciliationProbe {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn reconcile_trade_projections_fenced(
+            &self,
+            _runtime: &mut InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> Vec<ServerPacket> {
+            *self.calls.lock().expect("projection probe should lock") += 1;
+            Vec::new()
+        }
+
+        fn has_pending_trade_projection_fenced(
+            &self,
+            _runtime: &InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> bool {
+            *self.pending.lock().expect("projection pending should lock")
+        }
+    }
+
+    #[derive(Debug)]
     struct RecordingTradeSettlementService {
         bootstraps: Arc<Mutex<usize>>,
         trades: Arc<Mutex<Vec<(SharedTradeOffer, SharedTradeOffer)>>>,
@@ -14181,6 +15181,576 @@ mod tests {
                 .push((first.clone(), second.clone()));
             SharedTradeSettlementOutcome::Committed
         }
+    }
+
+    #[derive(Debug)]
+    struct UnknownThenRejectedTradeSettlementService {
+        unresolved: Arc<Mutex<bool>>,
+        calls: Arc<Mutex<usize>>,
+    }
+
+    impl SharedAccountInventoryService for UnknownThenRejectedTradeSettlementService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn settle_trade_fenced(
+            &self,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+            first: &SharedTradeOffer,
+            second: &SharedTradeOffer,
+        ) -> SharedTradeSettlementOutcome {
+            *self.calls.lock().expect("settlement calls should lock") += 1;
+            if *self.unresolved.lock().expect("settlement mode should lock") {
+                let mut nonces = [
+                    first.settlement_nonce.as_str(),
+                    second.settlement_nonce.as_str(),
+                ];
+                nonces.sort_unstable();
+                SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key: format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]),
+                }
+            } else {
+                SharedTradeSettlementOutcome::Rejected
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    struct UnknownThenCommittedGroundDropService {
+        unresolved: Arc<Mutex<bool>>,
+        calls: Arc<Mutex<usize>>,
+    }
+
+    impl SharedAccountInventoryService for UnknownThenCommittedGroundDropService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn commit_fenced(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryCommitOutcome {
+            if !matches!(
+                &envelope.command,
+                SharedAccountInventoryCommand::GroundDropPickup(_)
+                    | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+            ) {
+                return SharedAccountInventoryCommitOutcome::Confirmed(
+                    InProcessAccountInventoryService::new().commit(runtime, envelope),
+                );
+            }
+            *self
+                .calls
+                .lock()
+                .expect("ground settlement calls should lock") += 1;
+            if *self
+                .unresolved
+                .lock()
+                .expect("ground settlement mode should lock")
+            {
+                let idempotency_key = envelope.stable_idempotency_key();
+                SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                    idempotency_key,
+                    receipt: SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                }
+            } else {
+                SharedAccountInventoryCommitOutcome::Confirmed(
+                    InProcessAccountInventoryService::new().commit(runtime, envelope),
+                )
+            }
+        }
+    }
+
+    #[test]
+    fn active_character_retries_pending_ground_drop_projection_then_caches_clear_state() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(true));
+        let service = Arc::new(GroundDropProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "drop-reconcile-on-start", "DropOwner");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "StartGame should reconcile immediately after the Zone join"
+        );
+
+        runtime.execute(WorldCommand::Tick).expect("pending tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 2);
+        runtime.execute(WorldCommand::Tick).expect("retry tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 3);
+
+        *pending.lock().expect("projection pending should lock") = false;
+        runtime.execute(WorldCommand::Tick).expect("clear tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 4);
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("cached clear tick");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            4,
+            "a clear identity should not poll PostgreSQL on ordinary ticks"
+        );
+    }
+
+    #[test]
+    fn commit_ack_unknown_ground_claim_is_checkpointed_and_retried_without_restore() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenCommittedGroundDropService {
+            unresolved: unresolved.clone(),
+            calls: calls.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(Arc::clone(&zone_state), service);
+        start_new_runtime(&mut runtime, "ground-ack-unknown", "ClaimOwner");
+        let self_entity = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("runtime should expose self player");
+        let drop = shared_gold_drop(91_001, self_entity.x, self_entity.y, None, None);
+        let object_id = drop.object_id;
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let key = runtime
+            .current_presence_key()
+            .expect("active shared Zone presence");
+        let initial_gold = runtime.inner.world_snapshot().gold;
+        runtime.restore_zone_ground_drop_claim(drop.clone());
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncGroundDrops {
+                session_id: session_id.clone(),
+                drops: vec![drop],
+                now_ms: 1_000,
+            },
+            false,
+        );
+
+        let first_packets = runtime.dispatch_zone_player_command(
+            ZoneCommand::ClaimGroundDrop {
+                session_id,
+                object_id: Some(object_id),
+                target: Point {
+                    x: self_entity.x,
+                    y: self_entity.y,
+                },
+                group_members: Vec::new(),
+                now_ms: 1_001,
+            },
+            false,
+        );
+
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold);
+        assert!(first_packets
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        let checkpoint = {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            assert!(!state.pending_zone_ground_drop_claims.contains_key(&key));
+            assert!(state
+                .zone_manager
+                .pending_ground_drop_claim_tickets()
+                .is_empty());
+            let settlement = state
+                .unresolved_ground_drop_settlement_for_presence(&key)
+                .expect("unknown claim must detach into recovery authority");
+            assert!(state
+                .zone_manager
+                .has_detached_ground_drop_claim_ticket(&settlement.zone_key, &settlement.ticket,));
+            state.checkpoint().expect("unknown claim checkpoint")
+        };
+        SharedInProcessZoneState::restore(checkpoint)
+            .expect("unknown claim must survive checkpoint restore");
+        let world_checkpoint = zone_state
+            .lock()
+            .expect("shared Zone state should lock")
+            .world_checkpoint()
+            .expect("world-only unknown claim checkpoint");
+        assert!(world_checkpoint.zone_sessions.is_empty());
+        assert!(world_checkpoint.zone_session_keys.is_empty());
+        assert!(world_checkpoint.players.is_empty());
+        assert!(world_checkpoint.pending_zone_ground_drop_claims.is_empty());
+        assert_eq!(world_checkpoint.unresolved_ground_drop_settlements.len(), 1);
+        let restored_world = SharedInProcessZoneState::restore(world_checkpoint)
+            .expect("world-only unknown claim must restore");
+        assert!(restored_world.zone_sessions.is_empty());
+        assert!(restored_world.players.is_empty());
+        assert_eq!(restored_world.unresolved_ground_drop_settlements.len(), 1);
+        let detached = restored_world
+            .unresolved_ground_drop_settlements
+            .values()
+            .next()
+            .expect("detached recovery record");
+        assert!(restored_world
+            .zone_manager
+            .has_detached_ground_drop_claim_ticket(&detached.zone_key, &detached.ticket));
+
+        *unresolved.lock().expect("ground settlement mode") = false;
+        let retry_packets = runtime.apply_pending_shared_trade_packets();
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold + 25);
+        assert!(retry_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold } if *gold == 25)));
+        {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            assert!(!state.pending_zone_ground_drop_claims.contains_key(&key));
+            assert!(state
+                .zone_manager
+                .pending_ground_drop_claim_tickets()
+                .is_empty());
+            assert!(state.unresolved_ground_drop_settlements.is_empty());
+        }
+
+        assert!(runtime.apply_pending_shared_trade_packets().is_empty());
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold + 25);
+    }
+
+    #[test]
+    fn unknown_ground_claim_survives_process_restart_and_credits_once_after_new_login() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenCommittedGroundDropService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let first_factory = Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service)),
+        );
+        let first_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&first_factory) as SharedZoneRuntimeFactory,
+        );
+        let config = GatewayConfig::default();
+        let mut owner = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        let mut claimant = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        start_demo_character(&mut owner);
+        start_new_character(&mut claimant, "ground-restart-claimant", "RestartClaimant");
+        let claimant_identity = claimant
+            .active_identity()
+            .expect("claimant should have an active character");
+        let character_index = claimant_identity.character_index;
+        let starting_gold = claimant.world_snapshot().gold;
+
+        owner.handle_packet(ClientPacket::DropGold { amount: 25 });
+        let shared_drop = claimant
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| {
+                matches!(
+                    &drop.loot,
+                    GroundDropLootSnapshot::Gold { amount } if *amount == 25
+                )
+            })
+            .expect("claimant should observe the shared gold drop");
+        let object_id = shared_drop.object_id;
+        claimant.transfer_map(&format!("crystal:0:{}:{}", shared_drop.x, shared_drop.y));
+        let unknown_packets = claimant.pick_up(object_id);
+
+        assert!(unknown_packets
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert_eq!(claimant.world_snapshot().gold, starting_gold);
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
+
+        let (zone_key, ticket) = {
+            let resources = first_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("first factory zone state should lock");
+            let settlement = state
+                .unresolved_ground_drop_settlements
+                .values()
+                .next()
+                .expect("unknown pickup should retain one recovery record");
+            assert!(state
+                .zone_manager
+                .has_detached_ground_drop_claim_ticket(&settlement.zone_key, &settlement.ticket,));
+            (settlement.zone_key.clone(), settlement.ticket.clone())
+        };
+        let world_checkpoint_bytes = first_factory
+            .world_checkpoint_bytes()
+            .expect("world-only checkpoint should preserve unknown pickup");
+
+        drop(claimant);
+        drop(owner);
+        assert_eq!(
+            *calls.lock().expect("ground settlement calls"),
+            1,
+            "teardown and Drop must not retry without an economy command context"
+        );
+
+        let restored_factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service));
+        assert_eq!(
+            restored_factory
+                .install_world_checkpoint_bytes(&world_checkpoint_bytes)
+                .expect("fresh factory should install world-only checkpoint"),
+            1
+        );
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("restored factory zone state should lock");
+            assert_eq!(state.unresolved_ground_drop_settlements.len(), 1);
+            assert!(state
+                .zone_manager
+                .has_detached_ground_drop_claim_ticket(&zone_key, &ticket));
+        }
+
+        *unresolved.lock().expect("ground settlement mode") = false;
+        let restored_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&restored_factory) as SharedZoneRuntimeFactory,
+        );
+        let mut resumed = GatewaySession::new_with_zone_registry(config, &restored_registry);
+        resumed.handle_packet(ClientPacket::Login {
+            account_id: claimant_identity.account_id.clone(),
+            password: claimant_identity.account_id.clone(),
+        });
+        let recovery_packets = resumed.handle_packet(ClientPacket::StartGame { character_index });
+
+        assert!(recovery_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(resumed.world_snapshot().gold, starting_gold + 25);
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("resolved factory zone state should lock");
+            assert!(state.unresolved_ground_drop_settlements.is_empty());
+            let zone = state
+                .zone_manager
+                .zone(&zone_key)
+                .expect("restored Zone should remain present");
+            assert!(!zone.has_ground_drop(object_id));
+            assert!(
+                zone.has_detached_ground_drop_claim_ticket(&ticket),
+                "the committed object's tombstone must continue blocking restoration"
+            );
+        }
+
+        let later_packets = resumed.handle_packet(ClientPacket::KeepAlive { time: 73 });
+        assert!(later_packets
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(resumed.world_snapshot().gold, starting_gold + 25);
+    }
+
+    #[test]
+    fn active_character_reconciles_durable_trade_projection_once_without_local_trade_state() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(false));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending,
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-reconcile-on-start", "TradeStart");
+        assert!(!runtime.inner.has_active_shared_trade_state());
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "StartGame should reconcile immediately after the Zone join"
+        );
+
+        runtime.execute(WorldCommand::Tick).expect("first tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 1);
+        runtime.execute(WorldCommand::Tick).expect("second tick");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "an identity with no pending trade should not poll on every tick"
+        );
+    }
+
+    #[test]
+    fn unreconciled_character_blocks_trade_mutation_until_projection_query_succeeds() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(true));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-reconcile-fail-closed", "TradeGuard");
+
+        assert!(runtime.has_pending_durable_trade_projection());
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "StartGame should make the first fail-closed reconciliation attempt"
+        );
+        runtime.execute(WorldCommand::Tick).expect("pending tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 2);
+        assert!(runtime.has_pending_durable_trade_projection());
+
+        *pending.lock().expect("projection pending should lock") = false;
+        runtime.execute(WorldCommand::Tick).expect("recovered tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 3);
+        assert!(!runtime.has_pending_durable_trade_projection());
+    }
+
+    #[test]
+    fn durable_settlement_invalidates_clear_projection_cache_without_local_trade_state() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(false));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-cache-invalidate", "TradeCache");
+
+        runtime.execute(WorldCommand::Tick).expect("initial clear");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 1);
+        assert!(!runtime.inner.has_active_shared_trade_state());
+        assert!(!runtime.has_pending_durable_trade_projection());
+
+        *pending.lock().expect("pending flag should lock") = true;
+        runtime.note_durable_trade_projection_pending();
+        assert!(
+            runtime.has_pending_durable_trade_projection(),
+            "a durable settlement must invalidate the old clear cache even after local trade clears"
+        );
+
+        let mutations = [
+            ClientPacket::TradeRequest,
+            ClientPacket::TradeReply {
+                accept_invite: false,
+            },
+            ClientPacket::TradeGold { amount: 1 },
+            ClientPacket::DepositTradeItem { from: 0, to: 0 },
+            ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::TradeConfirm { locked: false },
+            ClientPacket::TradeCancel,
+        ];
+        for packet in mutations {
+            assert!(runtime
+                .execute(WorldCommand::ClientPacket(packet))
+                .expect("guarded trade packet")
+                .is_empty());
+        }
+        assert!(!runtime.inner.has_active_shared_trade_state());
+        let calls_while_pending = *calls.lock().expect("probe count should lock");
+        assert!(
+            calls_while_pending > 1,
+            "pending reconciliation must remain live across guarded commands"
+        );
+
+        *pending.lock().expect("pending flag should lock") = false;
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("projection clears");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            calls_while_pending + 1
+        );
+        assert!(!runtime.has_pending_durable_trade_projection());
+    }
+
+    #[test]
+    fn pending_durable_trade_blocks_every_trade_state_mutation_packet() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(false));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls,
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-pending-mutations", "TradeGuard");
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("initial reconcile");
+
+        runtime.inner.trade_request("Trader");
+        runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeReply {
+                accept_invite: true,
+            }))
+            .expect("accept local fixture trade");
+        runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
+                amount: 25,
+            }))
+            .expect("offer fixture gold");
+        let (_, offer) = runtime.inner.shared_trade_confirm();
+        let offer = offer.expect("completed fixture offer");
+        let before = runtime.inner.world_snapshot();
+        *pending.lock().expect("pending flag should lock") = true;
+
+        let mutations = [
+            ClientPacket::TradeRequest,
+            ClientPacket::TradeReply {
+                accept_invite: false,
+            },
+            ClientPacket::TradeGold { amount: 1 },
+            ClientPacket::DepositTradeItem { from: 0, to: 0 },
+            ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::TradeConfirm { locked: false },
+            ClientPacket::TradeCancel,
+        ];
+        for packet in mutations {
+            assert!(runtime
+                .execute(WorldCommand::ClientPacket(packet))
+                .expect("guarded trade packet")
+                .is_empty());
+        }
+
+        let after = runtime.inner.world_snapshot();
+        let trade = after
+            .stage5_systems
+            .trade
+            .expect("trade state is preserved");
+        assert_eq!(after.gold, before.gold);
+        assert_eq!(trade.settlement_nonce, offer.settlement_nonce);
+        assert_eq!(trade.partner, offer.partner_name);
+        assert_eq!(trade.offered_gold, offer.gold);
+        assert!(trade.completed);
     }
 
     #[test]
@@ -20285,6 +21855,17 @@ mod tests {
     }
 
     #[test]
+    fn shared_pickup_zone_path_is_handled_even_when_it_emits_no_packets() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_new_runtime(&mut runtime, "zone-empty-pickup", "Scout");
+
+        let result = runtime.pick_up_shared_drop(Some(u32::MAX));
+
+        assert_eq!(result, Some(Vec::new()));
+    }
+
+    #[test]
     fn shared_in_process_runtime_claims_shared_drop_through_zone() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
@@ -21104,6 +22685,253 @@ mod tests {
     }
 
     #[test]
+    fn commit_ack_unknown_trade_stays_debited_blocked_and_checkpointed_until_resolved() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenRejectedTradeSettlementService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let factory = Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service)),
+        );
+        let registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&factory) as SharedZoneRuntimeFactory,
+        );
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut second = GatewaySession::new_with_zone_registry(config, &registry);
+        start_demo_character(&mut first);
+        start_new_character(&mut second, "trade-ack-unknown-second", "UnknownBob");
+
+        let first_starting_gold = first.world_snapshot().gold;
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        let unknown = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+
+        assert!(unknown
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert_eq!(
+            factory
+                .resources_for_zone(&ZoneId::primary())
+                .zone_state
+                .lock()
+                .expect("zone state should lock")
+                .unresolved_trade_settlements
+                .len(),
+            1
+        );
+
+        let mutations = [
+            ClientPacket::TradeRequest,
+            ClientPacket::TradeReply {
+                accept_invite: false,
+            },
+            ClientPacket::TradeGold { amount: 1 },
+            ClientPacket::DepositTradeItem { from: 0, to: 0 },
+            ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::TradeConfirm { locked: false },
+            ClientPacket::TradeCancel,
+        ];
+        for packet in mutations {
+            assert!(second.handle_packet(packet).is_empty());
+            assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        }
+
+        let calls_before_teardown = *calls.lock().expect("settlement calls should lock");
+        match second.try_persist_teardown_once() {
+            crate::session::GatewayTeardownPersistenceOutcome::Saved => {}
+            outcome => {
+                panic!("teardown checkpoint should save without settlement retry: {outcome:?}")
+            }
+        }
+        assert_eq!(
+            *calls.lock().expect("settlement calls should lock"),
+            calls_before_teardown,
+            "teardown without an economy command context must preserve unresolved trade"
+        );
+        assert_eq!(
+            factory
+                .resources_for_zone(&ZoneId::primary())
+                .zone_state
+                .lock()
+                .expect("zone state should lock")
+                .unresolved_trade_settlements
+                .len(),
+            1
+        );
+        second
+            .release_teardown_for_resume()
+            .expect("test session should resume after teardown proof");
+
+        let world_checkpoint_bytes = factory
+            .world_checkpoint_bytes()
+            .expect("world-only factory checkpoint");
+        let world_checkpoint: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&world_checkpoint_bytes)
+                .expect("decode world-only factory checkpoint");
+        assert_eq!(
+            world_checkpoint
+                .zones
+                .values()
+                .map(|zone| zone.unresolved_trade_settlements.len())
+                .sum::<usize>(),
+            1,
+            "world-only checkpoint must preserve unresolved trade recovery authority"
+        );
+        assert!(world_checkpoint.zones.values().all(|zone| {
+            zone.zone_sessions.is_empty()
+                && zone.zone_session_keys.is_empty()
+                && zone.players.is_empty()
+        }));
+        let restored_world_factory =
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service));
+        assert_eq!(
+            restored_world_factory
+                .install_world_checkpoint_bytes(&world_checkpoint_bytes)
+                .expect("restore world-only factory checkpoint"),
+            1
+        );
+        assert_eq!(
+            restored_world_factory
+                .resources_for_zone(&ZoneId::primary())
+                .zone_state
+                .lock()
+                .expect("restored world-only zone state should lock")
+                .unresolved_trade_settlements
+                .len(),
+            1
+        );
+
+        let checkpoint_bytes = factory.checkpoint_bytes().expect("factory checkpoint");
+        let checkpoint: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&checkpoint_bytes).expect("decode factory checkpoint");
+        assert_eq!(
+            checkpoint
+                .zones
+                .values()
+                .map(|zone| zone.unresolved_trade_settlements.len())
+                .sum::<usize>(),
+            1,
+            "commit-ack-unknown recovery authority must survive checkpointing"
+        );
+        let restored_factory =
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service);
+        assert_eq!(
+            restored_factory
+                .install_checkpoint_bytes(&checkpoint_bytes)
+                .expect("restore factory checkpoint"),
+            1
+        );
+        assert_eq!(
+            restored_factory
+                .resources_for_zone(&ZoneId::primary())
+                .zone_state
+                .lock()
+                .expect("restored zone state should lock")
+                .unresolved_trade_settlements
+                .len(),
+            1,
+            "restored checkpoint must retain the recovery authority"
+        );
+
+        *unresolved.lock().expect("settlement mode should lock") = false;
+        second.handle_packet(ClientPacket::KeepAlive { time: 91 });
+        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 92 });
+        assert!(rollback
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        assert!(factory
+            .resources_for_zone(&ZoneId::primary())
+            .zone_state
+            .lock()
+            .expect("zone state should lock")
+            .unresolved_trade_settlements
+            .is_empty());
+        assert!(
+            *calls.lock().expect("settlement calls should lock") >= 9,
+            "every guarded command must keep retrying the exact unresolved settlement"
+        );
+    }
+
+    #[test]
+    fn shared_trade_repeat_request_cannot_replace_debited_unmatched_offer() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        let starting_gold = first.world_snapshot().gold;
+        let red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        let original = first
+            .world_snapshot()
+            .stage5_systems
+            .trade
+            .expect("completed unmatched offer");
+        assert_eq!(first.world_snapshot().gold, starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        assert!(first.handle_packet(ClientPacket::TradeRequest).is_empty());
+        let preserved = first
+            .world_snapshot()
+            .stage5_systems
+            .trade
+            .expect("original unmatched offer remains");
+        assert_eq!(preserved.settlement_nonce, original.settlement_nonce);
+        assert_eq!(preserved.offered_gold, 30);
+        assert!(preserved.completed);
+
+        second.handle_packet(ClientPacket::TradeCancel);
+        first.handle_packet(ClientPacket::KeepAlive { time: 31 });
+        assert_eq!(first.world_snapshot().gold, starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+    }
+
+    #[test]
+    fn unmatched_offerer_logout_rolls_back_before_persisting_character() {
+        let (mut first, _second) = started_shared_zone_sessions();
+        let starting_gold = first.world_snapshot().gold;
+        let red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert_eq!(first.world_snapshot().gold, starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        let logout = first.handle_packet(ClientPacket::LogOut);
+        assert!(logout
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert!(logout.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.count == 5
+        )));
+        assert!(logout
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
+
+        first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(first.world_snapshot().gold, starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+        assert!(first.world_snapshot().stage5_systems.trade.is_none());
+    }
+
+    #[test]
     fn shared_in_process_registry_rolls_back_pending_trade_when_partner_cancels() {
         let (mut first, mut second) = started_shared_zone_sessions();
         let first_starting_gold = first.world_snapshot().gold;
@@ -21586,6 +23414,8 @@ mod tests {
             account_inventory_service,
             npc_world_service,
             economy_execution_context: None,
+            last_ground_drop_projection_reconciliation_identity: None,
+            trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,

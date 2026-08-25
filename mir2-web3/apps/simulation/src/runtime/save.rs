@@ -13,9 +13,9 @@ use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    apply_crystal_map_metadata, crystal_base_vitals, AccountBanStatus, AccountRecord,
-    AccountSourceRefreshOutcome, CharacterRecord, CharacterSaveRecord, ItemContainer,
-    SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    apply_crystal_map_metadata, crystal_base_vitals, new_stage5_mail_delivery_nonce,
+    AccountBanStatus, AccountRecord, AccountSourceRefreshOutcome, CharacterRecord,
+    CharacterSaveRecord, ItemContainer, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
 };
 
 use super::components::{
@@ -410,6 +410,7 @@ impl SimulationSession {
             .keys()
             .copied()
             .collect();
+        self.dirty_economy_projection_event_ids.clear();
         set_runtime_tick(self.app.world_mut(), replay_tick);
         Ok(())
     }
@@ -877,16 +878,19 @@ pub(super) fn merge_persisted_mail_into_character_save(
     let persisted_systems = serde_json::from_str::<Stage5SystemsState>(persisted_state)
         .map_err(|error| format!("failed to decode persisted stage5 mail: {error}"))?;
     validate_stage5_systems_item_carriers(&persisted_systems)?;
-    if persisted_systems.mail.is_empty() {
-        return Ok(false);
-    }
     let mut systems = match save.stage5_systems_json.as_deref() {
         Some(state) => serde_json::from_str::<Stage5SystemsState>(state)
             .map_err(|error| format!("failed to decode active stage5 mail: {error}"))?,
         None => Stage5SystemsState::default(),
     };
     validate_stage5_systems_item_carriers(&systems)?;
-    if !merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)? {
+    let marker_count = systems.economy_projection_event_ids.len();
+    systems
+        .economy_projection_event_ids
+        .extend(persisted_systems.economy_projection_event_ids);
+    let markers_changed = systems.economy_projection_event_ids.len() != marker_count;
+    let mail_changed = merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)?;
+    if !markers_changed && !mail_changed {
         return Ok(false);
     }
     save.stage5_systems_json = Some(
@@ -1921,6 +1925,9 @@ fn migrate_legacy_candidate_stage5_systems(systems: &mut Stage5SystemsState) -> 
         }
     }
     if let Some(trade) = systems.trade.as_mut() {
+        if trade.settlement_nonce.is_empty() {
+            trade.settlement_nonce = new_stage5_mail_delivery_nonce();
+        }
         for key in &mut trade.offered_items {
             canonicalize_legacy_candidate_key(key)?;
         }
@@ -2116,6 +2123,7 @@ fn decode_and_validate_stage5_systems(
     };
     migrate_legacy_candidate_stage5_systems(&mut systems)?;
     validate_stage5_systems_item_carriers(&systems)?;
+
     normalize_stage5_mail_delivery_nonces(&mut systems.mail)?;
     Ok(systems)
 }
@@ -3064,6 +3072,7 @@ mod character_save_item_validation_tests {
             .insert(3, serde_json::to_string(&guild_item).unwrap());
         systems.guild.storage_item_users.insert(3, 77);
         systems.trade = Some(Stage5TradeState {
+            settlement_nonce: String::new(),
             partner: "Partner".to_string(),
             offered_items: vec!["belt-lantern-oil".to_string()],
             offered_slots: BTreeMap::new(),

@@ -41,8 +41,8 @@ use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{
-    CharacterRecord, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
-    WorldSnapshot,
+    CharacterRecord, GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind,
+    WorldEntitySnapshot, WorldSnapshot,
 };
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
@@ -105,6 +105,7 @@ impl HeadlessRuntime {
 pub struct SimulationSession {
     pub(super) app: HeadlessRuntime,
     pub(super) visible_objects: BTreeSet<u32>,
+    pub(super) dirty_economy_projection_event_ids: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -130,6 +131,8 @@ pub struct SharedTradeOfferItem {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedTradeOffer {
+    #[serde(default)]
+    pub settlement_nonce: String,
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
@@ -237,6 +240,7 @@ impl SimulationSession {
         Self {
             app,
             visible_objects: BTreeSet::new(),
+            dirty_economy_projection_event_ids: BTreeSet::new(),
         }
     }
 
@@ -265,6 +269,76 @@ impl SimulationSession {
 
     pub fn save_active_character(&self) -> Result<(), String> {
         persist_active_character_save(self.app.world())
+    }
+
+    pub fn has_shared_economy_projection_event(&self, event_id: &str) -> bool {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .economy_projection_event_ids
+            .contains(event_id)
+    }
+
+    /// Record the external ledger event in the same durable character snapshot
+    /// as its already-applied private projection. If persistence fails the
+    /// in-memory marker remains: a same-process retry persists it without
+    /// replaying, while a crash restores the prior state and safely replays.
+    pub fn persist_shared_economy_projection_event(
+        &mut self,
+        event_id: &str,
+    ) -> Result<(), String> {
+        if event_id.len() != 64
+            || !event_id
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        {
+            return Err("economy projection event ID must be lowercase SHA-256 hex".to_string());
+        }
+        let already_durable = self.has_shared_economy_projection_event(event_id)
+            && !self.dirty_economy_projection_event_ids.contains(event_id);
+        if already_durable {
+            return Ok(());
+        }
+
+        self.app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .economy_projection_event_ids
+            .insert(event_id.to_string());
+        self.dirty_economy_projection_event_ids
+            .insert(event_id.to_string());
+        let result = self.save_active_character();
+        if result.is_ok() {
+            self.dirty_economy_projection_event_ids.remove(event_id);
+        }
+        result
+    }
+
+    /// Materialize a durable ground-drop reward into the private character
+    /// snapshot exactly once. The event marker is saved with the asset change;
+    /// a same-process save retry observes the dirty marker, while a crash
+    /// restores the prior snapshot and safely replays from the durable row.
+    pub fn apply_shared_ground_drop_projection(
+        &mut self,
+        event_id: &str,
+        drop: &GroundDropSnapshot,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if self.has_shared_economy_projection_event(event_id) {
+            self.persist_shared_economy_projection_event(event_id)?;
+            return Ok(Vec::new());
+        }
+        if !self.can_commit_shared_ground_drop_pickup(drop) {
+            return Err("ground-drop projection currently cannot fit".to_string());
+        }
+        self.apply_new_shared_economy_projection_atomically(event_id, |session| {
+            let receipt = session.commit_shared_ground_drop_pickup_transaction(drop);
+            if !receipt.committed {
+                return Err("ground-drop projection application failed".to_string());
+            }
+            Ok(receipt.packets)
+        })
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
@@ -339,6 +413,15 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    pub fn has_active_shared_trade_state(&self) -> bool {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .is_some()
+    }
+
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
         let offer = build_shared_trade_offer(self.app.world());
         let packets = super::packets::stage5_trade_confirm_packet(self.app.world_mut(), true);
@@ -365,6 +448,72 @@ impl SimulationSession {
     pub fn apply_shared_trade_delivery(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, false);
         self.finalize_packets(packets)
+    }
+
+    /// Materialize one side of a durably committed two-party trade and persist
+    /// the external event marker in the same character snapshot. Replays are
+    /// no-ops once the marker is durable; a same-process save retry only
+    /// retries persistence and never applies the assets twice.
+    pub fn apply_shared_trade_settlement_projection(
+        &mut self,
+        event_id: &str,
+        own_offer: &SharedTradeOffer,
+        incoming_offer: &SharedTradeOffer,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if event_id.len() != 64
+            || !event_id
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        {
+            return Err("trade projection event ID must be lowercase SHA-256 hex".to_string());
+        }
+        if self.has_shared_economy_projection_event(event_id) {
+            self.persist_shared_economy_projection_event(event_id)?;
+            return Ok(Vec::new());
+        }
+
+        let packets = self.apply_new_shared_economy_projection_atomically(event_id, |session| {
+            apply_shared_trade_settlement_projection(
+                session.app.world_mut(),
+                own_offer,
+                incoming_offer,
+            )
+        })?;
+        Ok(self.finalize_packets(packets))
+    }
+
+    /// Apply a newly seen durable economy projection only when its private
+    /// character snapshot, including the event marker, can be saved. The
+    /// projection functions fully preflight before their first mutation; once
+    /// they do mutate, a save failure must restore the exact prior character
+    /// checkpoint so a pending durable row can retry and emit its packets.
+    fn apply_new_shared_economy_projection_atomically<F>(
+        &mut self,
+        event_id: &str,
+        apply: F,
+    ) -> Result<Vec<ServerPacket>, String>
+    where
+        F: FnOnce(&mut Self) -> Result<Vec<ServerPacket>, String>,
+    {
+        let checkpoint = self.active_character_checkpoint().ok_or_else(|| {
+            "economy projection requires an active character checkpoint".to_string()
+        })?;
+        let dirty_before = self.dirty_economy_projection_event_ids.clone();
+        let packets = apply(self)?;
+
+        if let Err(save_error) = self.persist_shared_economy_projection_event(event_id) {
+            self.restore_active_character_checkpoint(&checkpoint)
+                .map_err(|restore_error| {
+                    format!(
+                        "economy projection persistence failed ({save_error}); checkpoint rollback failed ({restore_error})"
+                    )
+                })?;
+            self.dirty_economy_projection_event_ids = dirty_before;
+            self.dirty_economy_projection_event_ids.remove(event_id);
+            return Err(save_error);
+        }
+
+        Ok(packets)
     }
 
     pub fn rollback_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
@@ -1170,7 +1319,13 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     let character = session.selected_character.as_ref()?;
     let stage5 = world.resource::<Stage5SystemsResource>();
     let trade = stage5.stage5_systems.trade.as_ref()?;
-    if trade.completed {
+    if trade.completed
+        || trade.settlement_nonce.len() != 32
+        || !trade
+            .settlement_nonce
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    {
         return None;
     }
 
@@ -1196,6 +1351,7 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     }
 
     Some(SharedTradeOffer {
+        settlement_nonce: trade.settlement_nonce.clone(),
         account_id,
         character_index: character.index,
         character_name: character.name.clone(),
@@ -1274,6 +1430,176 @@ fn apply_shared_trade_offer(
     }
 
     packets
+}
+
+fn apply_shared_trade_settlement_projection(
+    world: &mut World,
+    own_offer: &SharedTradeOffer,
+    incoming_offer: &SharedTradeOffer,
+) -> Result<Vec<ServerPacket>, String> {
+    if !is_in_world(world) {
+        return Err("trade projection requires an active character".to_string());
+    }
+    if own_offer.settlement_nonce.len() != 32
+        || incoming_offer.settlement_nonce.len() != 32
+        || own_offer.settlement_nonce == incoming_offer.settlement_nonce
+        || !own_offer
+            .settlement_nonce
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        || !incoming_offer
+            .settlement_nonce
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        || !own_offer
+            .partner_name
+            .eq_ignore_ascii_case(&incoming_offer.character_name)
+        || !incoming_offer
+            .partner_name
+            .eq_ignore_ascii_case(&own_offer.character_name)
+    {
+        return Err("trade projection offers are not a valid reciprocal pair".to_string());
+    }
+
+    let (active_account_id, active_character_index, active_character_name) = {
+        let session = world.resource::<SessionResource>();
+        let account_id = session
+            .account_id
+            .clone()
+            .ok_or_else(|| "trade projection requires an active account".to_string())?;
+        let character = session
+            .selected_character
+            .as_ref()
+            .ok_or_else(|| "trade projection requires an active character".to_string())?;
+        (account_id, character.index, character.name.clone())
+    };
+    if active_account_id != own_offer.account_id
+        || active_character_index != own_offer.character_index
+        || !active_character_name.eq_ignore_ascii_case(&own_offer.character_name)
+    {
+        return Err("trade projection identity does not match the active character".to_string());
+    }
+
+    let outgoing_already_debited = {
+        let systems = world.resource::<Stage5SystemsResource>();
+        match systems.stage5_systems.trade.as_ref() {
+            Some(trade)
+                if trade.settlement_nonce == own_offer.settlement_nonce
+                    && trade
+                        .partner
+                        .eq_ignore_ascii_case(&incoming_offer.character_name) =>
+            {
+                trade.completed
+            }
+            Some(_) => {
+                return Err(
+                    "trade projection conflicts with a different durable trade state".to_string(),
+                );
+            }
+            // A crash may restore a checkpoint from before the trade UI was
+            // opened. Such a snapshot cannot contain the outgoing debit,
+            // because debit and the matching completed trade state are saved
+            // atomically in one CharacterSaveRecord.
+            None => false,
+        }
+    };
+
+    let current_gold = world.resource::<PlayerRuntimeResource>().gold;
+    let gold_after_outgoing = if outgoing_already_debited {
+        current_gold
+    } else {
+        current_gold
+            .checked_sub(own_offer.gold)
+            .ok_or_else(|| "trade projection outgoing gold is unavailable".to_string())?
+    };
+    let final_gold = gold_after_outgoing
+        .checked_add(incoming_offer.gold)
+        .ok_or_else(|| "trade projection incoming gold exceeds the character cap".to_string())?;
+
+    let mut staged_inventory = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .clone();
+    let mut outgoing_deleted_items = Vec::new();
+    if !outgoing_already_debited {
+        let mut outgoing_ids = BTreeSet::new();
+        for offered_item in &own_offer.items {
+            let item = staged_inventory
+                .iter()
+                .find(|item| item_unique_id(item) == offered_item.unique_id)
+                .ok_or_else(|| "trade projection outgoing item is unavailable".to_string())?;
+            if offered_item.key != item.key
+                || validate_committed_item_state_carrier(item).is_err()
+                || serde_json::to_string(item).ok().as_deref()
+                    != Some(offered_item.item_state_json.as_str())
+                || !outgoing_ids.insert(offered_item.unique_id)
+            {
+                return Err("trade projection outgoing item integrity mismatch".to_string());
+            }
+            let count = u16::try_from(item.quantity).map_err(|_| {
+                "trade projection outgoing item quantity exceeds protocol range".to_string()
+            })?;
+            outgoing_deleted_items.push((offered_item.unique_id, count));
+        }
+        staged_inventory.retain(|item| !outgoing_ids.contains(&item_unique_id(item)));
+    }
+
+    let mut delivered_items = Vec::new();
+    for offered_item in &incoming_offer.items {
+        let mut item = serde_json::from_str::<ItemState>(&offered_item.item_state_json)
+            .map_err(|error| format!("decode trade projection item: {error}"))?;
+        if validate_committed_item_state_carrier(&item).is_err()
+            || offered_item.key != item.key
+            || offered_item.unique_id != item_unique_id(&item)
+            || staged_inventory
+                .iter()
+                .any(|existing| item_unique_id(existing) == offered_item.unique_id)
+        {
+            return Err("trade projection incoming item integrity mismatch".to_string());
+        }
+        let (container, slot) = preferred_or_empty_trade_delivery_slot_for_items(
+            &staged_inventory,
+            item.container,
+            item.slot,
+        )
+        .ok_or_else(|| "trade projection has no free inventory slot".to_string())?;
+        item.container = container;
+        item.slot = slot;
+        let user_item = try_user_item_from_item_state(&item)
+            .map_err(|error| format!("encode trade projection item: {error}"))?;
+        staged_inventory.push(item.clone());
+        delivered_items.push((item, user_item));
+    }
+
+    world.resource_mut::<PlayerRuntimeResource>().gold = final_gold;
+    world.resource_mut::<InventoryResource>().inventory_items = staged_inventory;
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade = None;
+
+    let mut packets = Vec::new();
+    if !outgoing_already_debited && own_offer.gold > 0 {
+        packets.push(ServerPacket::LoseGold {
+            gold: own_offer.gold,
+        });
+    }
+    packets.extend(
+        outgoing_deleted_items
+            .into_iter()
+            .map(|(unique_id, count)| ServerPacket::DeleteItem { unique_id, count }),
+    );
+    if incoming_offer.gold > 0 {
+        packets.push(ServerPacket::GainedGold {
+            gold: incoming_offer.gold,
+        });
+    }
+    packets.extend(
+        delivered_items
+            .into_iter()
+            .map(|(_, item)| ServerPacket::GainedItem { item }),
+    );
+    Ok(packets)
 }
 
 fn trade_offer_delivery_failed_packets(world: &mut World, rollback: bool) -> Vec<ServerPacket> {

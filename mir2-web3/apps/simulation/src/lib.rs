@@ -4,6 +4,8 @@ mod runtime;
 pub mod user_item_uid;
 mod world_runtime;
 
+#[cfg(any(test, feature = "test-support"))]
+pub use config::AccountStoreTransactionFault;
 pub use db_projection::{apply_migrations, MIGRATIONS};
 pub use user_item_uid::{
     FileUserItemUidAuthority, UserItemUid, UserItemUidAllocator, UserItemUidError,

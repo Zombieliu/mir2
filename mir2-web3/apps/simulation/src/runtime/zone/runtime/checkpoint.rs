@@ -20,10 +20,33 @@ use crate::runtime::zone::ZoneCollision;
 
 const LEGACY_CANONICAL_ZONE_STATE_VERSION: u32 = 1;
 const LEGACY_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v1\0";
-const CANONICAL_ZONE_STATE_VERSION: u32 = 2;
-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v2\0";
+const LEGACY_V2_CANONICAL_ZONE_STATE_VERSION: u32 = 2;
+const LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v2\0";
+const CANONICAL_ZONE_STATE_VERSION: u32 = 3;
+const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
 const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
+const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
+const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
+
+fn legacy_v2_ground_drop_claim_idempotency_key(
+    key: &ZoneKey,
+    object_id: u32,
+    drop_generation: u64,
+    claim_id: u64,
+    payload_digest: &str,
+) -> String {
+    format!(
+        "ground-drop:{}:{}:{}:{}:{}:{}:{}:{}",
+        key.shard_id,
+        key.map_file_name,
+        key.channel_id,
+        key.instance_id,
+        object_id,
+        drop_generation,
+        claim_id,
+        payload_digest
+    )
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum StateRootPolicy {
@@ -262,6 +285,46 @@ impl ZoneRuntime {
         Ok(hex_lower(&hasher.finalize()))
     }
 
+    fn legacy_v2_canonical_state_root(&self) -> Result<String, String> {
+        // v2 committed the original claim-scoped idempotency key. Keep this
+        // schema exact so a v2 checkpoint is authenticated before the
+        // post-verification v3 re-anchor removes claim_id from the economic
+        // key. The claim id itself remains part of the ticket for ABA
+        // protection; only the ledger identity changes.
+        let state = CanonicalZoneState {
+            version: LEGACY_V2_CANONICAL_ZONE_STATE_VERSION,
+            key: &self.key,
+            collision: &self.collision,
+            players: &self.players,
+            objects: &self.objects,
+            dead_object_ids: &self.dead_object_ids,
+            revived_object_ids: &self.revived_object_ids,
+            removed_object_ids: &self.removed_object_ids,
+            harvested_object_ids: &self.harvested_object_ids,
+            native_monsters: &self.native_monsters,
+            pending_native_hits: &self.pending_native_hits,
+            pending_native_projectiles: &self.pending_native_projectiles,
+            pending_native_player_hits: &self.pending_native_player_hits,
+            pending_native_player_heals: &self.pending_native_player_heals,
+            pending_native_summons: &self.pending_native_summons,
+            pending_native_ground_spells: &self.pending_native_ground_spells,
+            ground_drops: &self.ground_drops,
+            claimed_ground_drops: &self.claimed_ground_drops,
+            next_ground_drop_generation: self.next_ground_drop_generation,
+            next_ground_drop_claim_id: self.next_ground_drop_claim_id,
+            open_doors: &self.open_doors,
+            hazard: &self.hazard,
+            next_object_id: self.next_object_id,
+        };
+        let bytes = serde_json::to_vec(&state).map_err(|error| {
+            format!("failed to serialize legacy v2 canonical zone state: {error}")
+        })?;
+        let mut hasher = Sha256::new();
+        hasher.update(LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN);
+        hasher.update(bytes);
+        Ok(hex_lower(&hasher.finalize()))
+    }
+
     fn hydrate_legacy_ground_drop_claim_authority(&mut self) -> Result<(), String> {
         // v1 state roots intentionally predate every field below. Once the
         // legacy root has verified, none of those uncommitted v2 fields can be
@@ -307,7 +370,6 @@ impl ZoneRuntime {
                     &key,
                     *object_id,
                     drop_generation,
-                    claim_id,
                     &payload_digest,
                 ),
                 session_id: claim.session_id.clone(),
@@ -353,6 +415,83 @@ impl ZoneRuntime {
             );
         }
         Ok(())
+    }
+
+    fn validate_legacy_v2_ground_drop_claim_authority(&self) -> Result<(), String> {
+        let mut max_generation = 0_u64;
+        let mut max_claim_id = 0_u64;
+        for (object_id, stored) in &self.ground_drops {
+            if stored.drop.object_id != *object_id
+                || stored.drop_generation == 0
+                || stored.payload_digest != canonical_ground_drop_payload_digest(&stored.drop)
+            {
+                return Err(format!("invalid authoritative ground drop {object_id}"));
+            }
+            max_generation = max_generation.max(stored.drop_generation);
+        }
+        for (object_id, claim) in &self.claimed_ground_drops {
+            let Some(ticket) = claim.ticket.as_ref() else {
+                return Err(format!(
+                    "claimed ground drop {object_id} is missing its legacy v2 ticket"
+                ));
+            };
+            let legacy_key = legacy_v2_ground_drop_claim_idempotency_key(
+                &self.key,
+                ticket.object_id,
+                ticket.drop_generation,
+                ticket.claim_id,
+                &ticket.payload_digest,
+            );
+            let stable_key = canonical_ground_drop_claim_idempotency_key(
+                &self.key,
+                ticket.object_id,
+                ticket.drop_generation,
+                &ticket.payload_digest,
+            );
+            // v2 was written with the claim-scoped key before this migration,
+            // but short-lived v2 builds could already have emitted the stable
+            // key. The v2 root authenticates the exact stored value in either
+            // case; both forms are re-anchored to v3 below.
+            if ticket.object_id != *object_id
+                || claim.session_id != ticket.session_id
+                || claim.drop != ticket.drop
+                || ticket.object_id != ticket.drop.object_id
+                || ticket.owner_object_id != ticket.drop.owner_object_id
+                || ticket.claim_id == 0
+                || ticket.drop_generation == 0
+                || ticket.payload_digest.is_empty()
+                || canonical_ground_drop_payload_digest(&ticket.drop) != ticket.payload_digest
+                || (ticket.idempotency_key != legacy_key && ticket.idempotency_key != stable_key)
+            {
+                return Err(format!(
+                    "invalid legacy v2 claimed ground drop ticket {object_id}"
+                ));
+            }
+            max_generation = max_generation.max(ticket.drop_generation);
+            max_claim_id = max_claim_id.max(ticket.claim_id);
+        }
+        if self.next_ground_drop_generation <= max_generation
+            || self.next_ground_drop_claim_id <= max_claim_id
+        {
+            return Err(
+                "legacy v2 ground-drop authority counters do not exceed persisted values"
+                    .to_string(),
+            );
+        }
+        Ok(())
+    }
+
+    fn reanchor_legacy_v2_ground_drop_claim_idempotency_keys(&mut self) {
+        for claim in self.claimed_ground_drops.values_mut() {
+            if let Some(ticket) = claim.ticket.as_mut() {
+                ticket.idempotency_key = canonical_ground_drop_claim_idempotency_key(
+                    &self.key,
+                    ticket.object_id,
+                    ticket.drop_generation,
+                    &ticket.payload_digest,
+                );
+            }
+        }
     }
 
     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
@@ -412,12 +551,14 @@ impl ZoneRuntime {
         let checkpoint: ZoneRuntimeCheckpoint = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode zone runtime checkpoint: {error}"))?;
         if checkpoint.version != LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION
+            && checkpoint.version != LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
         {
             return Err(format!(
-                "unsupported zone runtime checkpoint version {}, expected {} or {}",
+                "unsupported zone runtime checkpoint version {}, expected {}, {}, or {}",
                 checkpoint.version,
                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 ZONE_RUNTIME_CHECKPOINT_VERSION
             ));
         }
@@ -496,10 +637,13 @@ impl ZoneRuntime {
             runtime.object_grid.insert(*object_id, &object.position);
         }
 
-        let restored_root = if checkpoint_version == LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION {
-            runtime.legacy_canonical_state_root()?
-        } else {
-            runtime.canonical_state_root()?
+        let restored_root = match checkpoint_version {
+            LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.legacy_canonical_state_root()?,
+            LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.legacy_v2_canonical_state_root()?
+            }
+            ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
+            _ => unreachable!("checkpoint version was validated above"),
         };
         if restored_root != expected_state_root && state_root_policy == StateRootPolicy::Strict {
             return Err(format!(
@@ -507,10 +651,19 @@ impl ZoneRuntime {
                 expected_state_root
             ));
         }
-        if checkpoint_version == LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION {
-            runtime.hydrate_legacy_ground_drop_claim_authority()?;
-        } else {
-            runtime.validate_ground_drop_claim_authority()?;
+        match checkpoint_version {
+            LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.hydrate_legacy_ground_drop_claim_authority()?;
+            }
+            LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.validate_legacy_v2_ground_drop_claim_authority()?;
+                runtime.reanchor_legacy_v2_ground_drop_claim_idempotency_keys();
+                runtime.validate_ground_drop_claim_authority()?;
+            }
+            ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.validate_ground_drop_claim_authority()?;
+            }
+            _ => unreachable!("checkpoint version was validated above"),
         }
         Ok(runtime)
     }
@@ -692,7 +845,6 @@ mod tests {
                 &runtime.key,
                 claimed_snapshot.object_id,
                 claimed_stored.drop_generation,
-                claim_id,
                 &claimed_stored.payload_digest,
             ),
             session_id: claim_session_id.clone(),
@@ -749,6 +901,123 @@ mod tests {
     }
 
     #[test]
+    fn legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key() {
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("legacy-v2-drop-map"));
+        let claimed_snapshot = checkpoint_gold_drop(202);
+        let stored = runtime
+            .new_zone_ground_drop(claimed_snapshot.clone(), None)
+            .expect("ground-drop generation");
+        let claim_id = runtime
+            .allocate_ground_drop_claim_id()
+            .expect("ground-drop claim id");
+        let session_id = SessionId::new("legacy-v2-claimer");
+        let legacy_ticket = GroundDropClaimTicket {
+            claim_id,
+            object_id: claimed_snapshot.object_id,
+            drop_generation: stored.drop_generation,
+            payload_digest: stored.payload_digest.clone(),
+            idempotency_key: legacy_v2_ground_drop_claim_idempotency_key(
+                &runtime.key,
+                claimed_snapshot.object_id,
+                stored.drop_generation,
+                claim_id,
+                &stored.payload_digest,
+            ),
+            session_id: session_id.clone(),
+            owner_object_id: claimed_snapshot.owner_object_id,
+            drop: claimed_snapshot.clone(),
+        };
+        runtime.claimed_ground_drops.insert(
+            claimed_snapshot.object_id,
+            ZoneGroundDropClaim {
+                session_id: session_id.clone(),
+                drop: claimed_snapshot,
+                ticket: Some(legacy_ticket.clone()),
+            },
+        );
+        let legacy_root = runtime
+            .legacy_v2_canonical_state_root()
+            .expect("legacy v2 checkpoint root");
+        let mut checkpoint: ZoneRuntimeCheckpoint = serde_json::from_slice(
+            &runtime
+                .checkpoint_bytes()
+                .expect("current checkpoint source bytes"),
+        )
+        .expect("checkpoint JSON");
+        checkpoint.version = LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION;
+        checkpoint.state_root = legacy_root;
+        checkpoint
+            .claimed_ground_drops
+            .get_mut(&legacy_ticket.object_id)
+            .and_then(|claim| claim.ticket.as_mut())
+            .expect("legacy v2 ticket")
+            .idempotency_key = legacy_ticket.idempotency_key.clone();
+
+        let mut forged = checkpoint.clone();
+        forged
+            .claimed_ground_drops
+            .get_mut(&legacy_ticket.object_id)
+            .and_then(|claim| claim.ticket.as_mut())
+            .expect("forged legacy v2 ticket")
+            .claim_id = legacy_ticket.claim_id.saturating_add(1);
+        let error = ZoneRuntime::restore_checkpoint(
+            &serde_json::to_vec(&forged).expect("forged legacy v2 checkpoint bytes"),
+        )
+        .expect_err("v2 fields outside the verified root must fail closed");
+        assert!(error.contains("state root mismatch"), "{error}");
+
+        let restored = ZoneRuntime::restore_checkpoint(
+            &serde_json::to_vec(&checkpoint).expect("legacy v2 checkpoint bytes"),
+        )
+        .expect("strict v2 checkpoint restore");
+        let ticket = restored
+            .claimed_ground_drops
+            .get(&legacy_ticket.object_id)
+            .and_then(|claim| claim.ticket.as_ref())
+            .expect("re-anchored pending ticket");
+        assert_eq!(ticket.claim_id, legacy_ticket.claim_id);
+        assert_eq!(ticket.session_id, legacy_ticket.session_id);
+        assert_eq!(ticket.drop, legacy_ticket.drop);
+        assert_eq!(
+            ticket.idempotency_key,
+            canonical_ground_drop_claim_idempotency_key(
+                &restored.key,
+                ticket.object_id,
+                ticket.drop_generation,
+                &ticket.payload_digest,
+            )
+        );
+        assert_ne!(ticket.idempotency_key, legacy_ticket.idempotency_key);
+        assert!(restored.has_pending_ground_drop_claim_ticket(&session_id, ticket));
+
+        // A short-lived v2 writer could already emit the stable key before the
+        // checkpoint version bump. Its v2 root still commits that exact shape,
+        // so it restores through the same re-anchor path.
+        let mut already_stable_v2: ZoneRuntimeCheckpoint = serde_json::from_slice(
+            &restored
+                .checkpoint_bytes()
+                .expect("stable v2 source checkpoint bytes"),
+        )
+        .expect("stable v2 source checkpoint JSON");
+        already_stable_v2.version = LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION;
+        already_stable_v2.state_root = restored
+            .legacy_v2_canonical_state_root()
+            .expect("stable v2 checkpoint root");
+        let restored_stable_v2 = ZoneRuntime::restore_checkpoint(
+            &serde_json::to_vec(&already_stable_v2).expect("stable v2 checkpoint bytes"),
+        )
+        .expect("strict stable v2 checkpoint restore");
+        assert!(restored_stable_v2.has_pending_ground_drop_claim_ticket(&session_id, ticket));
+
+        let reanchored: ZoneRuntimeCheckpoint = serde_json::from_slice(
+            &restored
+                .checkpoint_bytes()
+                .expect("re-anchored checkpoint bytes"),
+        )
+        .expect("re-anchored checkpoint JSON");
+        assert_eq!(reanchored.version, ZONE_RUNTIME_CHECKPOINT_VERSION);
+    }
+    #[test]
     fn complete_zone_checkpoint_restores_authoritative_and_derived_state() {
         let session_id = SessionId::new("checkpoint-player");
         let mut runtime = ZoneRuntime::new_with_collision(
@@ -803,6 +1072,20 @@ mod tests {
         assert!(restored.ecs_mirror_matches_players());
     }
 
+    #[test]
+    fn checkpoint_state_root_authenticates_removed_object_tombstones() {
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("tombstone-integrity-map"));
+        runtime.removed_object_ids.insert(8_021);
+        let bytes = runtime.checkpoint_bytes().expect("checkpoint bytes");
+        let mut checkpoint: ZoneRuntimeCheckpoint =
+            serde_json::from_slice(&bytes).expect("checkpoint JSON");
+        assert!(checkpoint.removed_object_ids.remove(&8_021));
+        let tampered = serde_json::to_vec(&checkpoint).expect("tampered checkpoint JSON");
+
+        let error = ZoneRuntime::restore_checkpoint(&tampered)
+            .expect_err("removing a detached-drop tombstone must fail");
+        assert!(error.contains("state root mismatch"), "{error}");
+    }
     #[test]
     fn complete_zone_checkpoint_rejects_valid_json_with_changed_state() {
         let runtime = ZoneRuntime::new(ZoneKey::for_map("tamper-map"));
@@ -877,7 +1160,6 @@ mod tests {
                 &restored.key,
                 ticket.object_id,
                 ticket.drop_generation,
-                ticket.claim_id,
                 &ticket.payload_digest,
             )
         );
@@ -936,7 +1218,6 @@ mod tests {
                 &restored.key,
                 ticket.object_id,
                 ticket.drop_generation,
-                ticket.claim_id,
                 &ticket.payload_digest,
             )
         );

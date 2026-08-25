@@ -9843,6 +9843,101 @@ fn zone_ground_drop_claim_cancel_restores_visibility() {
 }
 
 #[test]
+fn detached_ground_drop_claim_survives_session_leave_and_restores_once() {
+    // Strict Zone checkpoints reconstruct collision from the signed map
+    // module. Use the canonical map collision here rather than the unbounded
+    // test helper so the state-root comparison exercises a production-shaped
+    // restore.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 330, 270)));
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8_021, 330, 270, Some(101), Some(10))],
+        now_ms: 0,
+    });
+    let claimed = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_021),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 1,
+    });
+    let ticket = ground_drop_claim_ticket(&claimed, &first, 8_021);
+
+    assert!(zone.detach_ground_drop_claim(&first, &ticket));
+    assert!(zone.pending_ground_drop_claim_tickets().is_empty());
+    assert!(zone.has_detached_ground_drop_claim_ticket(&ticket));
+    assert!(!zone.has_ground_drop(8_021));
+    zone.handle(ZoneCommand::Leave { session_id: first });
+
+    let checkpoint = zone.checkpoint_bytes().expect("detached Zone checkpoint");
+    let mut restored =
+        ZoneRuntime::restore_checkpoint(&checkpoint).expect("restore detached Zone checkpoint");
+    assert!(restored.has_detached_ground_drop_claim_ticket(&ticket));
+    let outbounds = restored
+        .restore_detached_ground_drop_claim(&ticket, 10)
+        .expect("definitive rejection restores detached claim");
+    assert!(has_packet(&outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectGold { info } if info.object_id == 8_021 && info.gold == 25
+    )));
+    assert!(restored.has_ground_drop(8_021));
+    assert!(restored
+        .restore_detached_ground_drop_claim(&ticket, 11)
+        .is_none());
+    assert_eq!(restored.ground_drop_count(), 1);
+}
+
+#[test]
+fn zone_ground_drop_reclaim_uses_fresh_claim_id_and_stable_economic_key() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8_111, 330, 270, Some(101), Some(10))],
+        now_ms: 0,
+    });
+
+    let first_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_111),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 1,
+    });
+    let first_ticket = ground_drop_claim_ticket(&first_claim, &first, 8_111);
+    zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: first_ticket.clone(),
+        now_ms: 2,
+    });
+
+    let reclaimed = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_111),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 3,
+    });
+    let reclaimed_ticket = ground_drop_claim_ticket(&reclaimed, &first, 8_111);
+
+    assert_ne!(reclaimed_ticket.claim_id, first_ticket.claim_id);
+    assert_eq!(
+        reclaimed_ticket.drop_generation,
+        first_ticket.drop_generation
+    );
+    assert_eq!(reclaimed_ticket.payload_digest, first_ticket.payload_digest);
+    assert_eq!(
+        reclaimed_ticket.idempotency_key,
+        first_ticket.idempotency_key
+    );
+}
+
+#[test]
 fn zone_ground_drop_ticket_tampering_and_legacy_commands_fail_closed() {
     let mut zone = zone();
     let first = session("first");
@@ -10043,7 +10138,7 @@ fn zone_ground_drop_countdown_changes_keep_generation_but_not_claim_identity() {
     assert_eq!(second_ticket.drop_generation, first_ticket.drop_generation);
     assert_eq!(second_ticket.payload_digest, first_ticket.payload_digest);
     assert!(second_ticket.claim_id > first_ticket.claim_id);
-    assert_ne!(second_ticket.idempotency_key, first_ticket.idempotency_key);
+    assert_eq!(second_ticket.idempotency_key, first_ticket.idempotency_key);
 }
 #[test]
 fn zone_ground_drop_nearest_claim_filters_range_and_allowed_ids() {

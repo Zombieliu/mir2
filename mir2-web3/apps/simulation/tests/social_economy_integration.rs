@@ -11,10 +11,16 @@ fn item_state_json(
     slot: u8,
     unique_id: u64,
 ) -> String {
+    let icon = match key {
+        "red-potion" => 23,
+        "dagger" => 37,
+        "wooden-sword" => 221,
+        _ => 1,
+    };
     serde_json::to_string(&serde_json::json!({
         "key": key,
         "name": name,
-        "icon": 1,
+        "icon": icon,
         "slot": slot,
         "unique_id": unique_id,
         "container": container,
@@ -60,8 +66,8 @@ fn filler_inventory(slot_count: u8) -> Vec<String> {
         .map(|index| {
             let (container, slot) = bag_slot(index);
             item_state_json(
-                &format!("filler-{index}"),
-                &format!("Filler {index}"),
+                "red-potion",
+                "Red Potion",
                 container,
                 slot,
                 10_000 + u64::from(index),
@@ -143,7 +149,7 @@ fn social_friend_and_blacklist_keep_crystal_single_entry_semantics() {
     assert!(social.friends.is_empty());
     assert_eq!(social.blocked, vec!["Jina".to_string()]);
 
-    session.save_active_character();
+    let _ = session.save_active_character();
     let mut reloaded = SimulationSession::new(config);
     reloaded.handle_packet(ClientPacket::Login {
         account_id: "demo".to_string(),

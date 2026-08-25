@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> 2026-08-26 Slice D durable settlement is closed for its bounded item-identity
+> scope. PostgreSQL idempotency lookup/transact share an advisory transaction lock;
+> uncertainty remains `OutcomeUnknown`; exact ground projection and save are atomic;
+> detached claims survive world-only checkpoint restore with complete authority.
+> Teardown/`Drop` now applies finalized packets only, while unresolved settlement is
+> retried only with an ordered economy context. StartGame performs recovery after
+> Zone join, and the fresh-process/new-login regression proves exactly one credit.
+>
+> Evidence: Simulation 1472/0, shared_zone 195/0, Gateway 642/0/1 ignored out of
+> 643, social_economy 3/0, Web typecheck 0, exact-file Rustfmt 0, Gate18 bins 0,
+> and diff check 0. Independent final audit is GO with P0=0/P1=0/P2=1; the P2 is
+> a non-blocking service-layer `ContextUnavailable/Deferred` defense-in-depth item.
+> This is not whole-game parity: an independent full-project audit currently puts
+> backend Crystal semantic coverage at about 49% (45-54% range).
+
 > 2026-08-25 GroundDrop identity Slice C complete: authoritative claim tickets
 > now bind Zone key, object id, monotonic generation, claim id, canonical payload
 > digest, session/owner identity, and the complete drop payload. Player and

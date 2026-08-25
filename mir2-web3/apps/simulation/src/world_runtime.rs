@@ -377,6 +377,18 @@ impl InProcessWorldRuntime {
         self.session.has_active_intelligent_creature_auto_pickup()
     }
 
+    pub fn has_shared_economy_projection_event(&self, event_id: &str) -> bool {
+        self.session.has_shared_economy_projection_event(event_id)
+    }
+
+    pub fn persist_shared_economy_projection_event(
+        &mut self,
+        event_id: &str,
+    ) -> Result<(), String> {
+        self.session
+            .persist_shared_economy_projection_event(event_id)
+    }
+
     pub fn apply_shared_ground_drop_pickup(
         &mut self,
         drop: &GroundDropSnapshot,
@@ -629,6 +641,10 @@ impl InProcessWorldRuntime {
         self.session.trade_request(partner_name)
     }
 
+    pub fn has_active_shared_trade_state(&self) -> bool {
+        self.session.has_active_shared_trade_state()
+    }
+
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
         self.session.shared_trade_confirm()
     }
@@ -658,6 +674,25 @@ impl InProcessWorldRuntime {
 
     pub fn apply_shared_trade_delivery(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
         self.session.apply_shared_trade_delivery(offer)
+    }
+
+    pub fn apply_shared_ground_drop_projection(
+        &mut self,
+        event_id: &str,
+        drop: &GroundDropSnapshot,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session
+            .apply_shared_ground_drop_projection(event_id, drop)
+    }
+
+    pub fn apply_shared_trade_settlement_projection(
+        &mut self,
+        event_id: &str,
+        own_offer: &SharedTradeOffer,
+        incoming_offer: &SharedTradeOffer,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session
+            .apply_shared_trade_settlement_projection(event_id, own_offer, incoming_offer)
     }
 
     pub fn rollback_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {

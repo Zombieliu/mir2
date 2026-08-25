@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> 2026-08-26 Slice D durable post-commit recovery is accepted for the bounded
+> item-identity settlement slice. Lookup/transact use one advisory-lock domain;
+> unknown database outcomes remain retryable; ground projection plus save is
+> atomic; detached claim authority survives world-only checkpoints. Teardown and
+> `Drop` consume finalized outcomes only. Ordered recovery runs after StartGame's
+> Zone join and proves exactly one credit across a fresh factory/login boundary.
+>
+> Gates: Simulation 1472/0, shared_zone 195/0, Gateway 642/0/1 ignored out of
+> 643, social_economy 3/0, Web typecheck 0, exact-file Rustfmt 0, Gate18 checks 0,
+> diff check 0. Independent audit: GO, P0=0, P1=0, P2=1. The remaining P2 asks
+> the PostgreSQL service itself to expose missing context as explicit Deferred;
+> current routing already excludes that service call during teardown. This local
+> closure must not be read as full Crystal server/game Accepted parity.
+
 > 2026-08-25 GroundDrop identity Slice C complete: authoritative claim tickets
 > now bind Zone key, object id, monotonic generation, claim id, canonical payload
 > digest, session/owner identity, and the complete drop payload. Player and

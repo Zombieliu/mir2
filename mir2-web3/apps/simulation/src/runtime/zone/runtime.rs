@@ -67,18 +67,19 @@ fn canonical_ground_drop_claim_idempotency_key(
     key: &ZoneKey,
     object_id: u32,
     drop_generation: u64,
-    claim_id: u64,
     payload_digest: &str,
 ) -> String {
+    // Economic settlement is stable for the lifetime of one authoritative drop
+    // generation. A canceled/retried Zone claim receives a new claim_id for ABA
+    // protection, but it must not create a second ledger credit after a crash.
     format!(
-        "ground-drop:{}:{}:{}:{}:{}:{}:{}:{}",
+        "ground-drop:{}:{}:{}:{}:{}:{}:{}",
         key.shard_id,
         key.map_file_name,
         key.channel_id,
         key.instance_id,
         object_id,
         drop_generation,
-        claim_id,
         payload_digest
     )
 }
@@ -482,6 +483,100 @@ impl ZoneRuntime {
         self.claimed_ground_drops
             .get(&ticket.object_id)
             .is_some_and(|claim| self.ground_drop_claim_ticket_matches(claim, session_id, ticket))
+    }
+
+    /// Return the exact, authoritative tickets that are waiting for Gateway
+    /// settlement. The `BTreeMap` backing claims makes this ordering stable for
+    /// checkpoint recovery and tests.
+    pub fn pending_ground_drop_claim_tickets(&self) -> Vec<(SessionId, GroundDropClaimTicket)> {
+        self.claimed_ground_drops
+            .values()
+            .filter_map(|claim| {
+                claim
+                    .ticket
+                    .as_ref()
+                    .map(|ticket| (claim.session_id.clone(), ticket.clone()))
+            })
+            .collect()
+    }
+
+    pub fn detached_ground_drop_claim_ticket_is_canonical(
+        &self,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        ticket.object_id == ticket.drop.object_id
+            && ticket.owner_object_id == ticket.drop.owner_object_id
+            && ticket.drop_generation > 0
+            && !ticket.payload_digest.is_empty()
+            && canonical_ground_drop_payload_digest(&ticket.drop) == ticket.payload_digest
+            && ticket.idempotency_key
+                == canonical_ground_drop_claim_idempotency_key(
+                    &self.key,
+                    ticket.object_id,
+                    ticket.drop_generation,
+                    &ticket.payload_digest,
+                )
+    }
+
+    pub fn has_detached_ground_drop_claim_ticket(&self, ticket: &GroundDropClaimTicket) -> bool {
+        self.detached_ground_drop_claim_ticket_is_canonical(ticket)
+            && self.removed_object_ids.contains(&ticket.object_id)
+            && !self.ground_drops.contains_key(&ticket.object_id)
+            && !self.claimed_ground_drops.contains_key(&ticket.object_id)
+    }
+
+    /// Move an unresolved claim out of session-owned state while retaining the
+    /// removed-object tombstone. The Gateway recovery ledger becomes the sole
+    /// authority until PostgreSQL confirms committed or definitively absent.
+    pub fn detach_ground_drop_claim(
+        &mut self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        if !self.has_pending_ground_drop_claim_ticket(session_id, ticket) {
+            return false;
+        }
+        self.claimed_ground_drops.remove(&ticket.object_id);
+        self.removed_object_ids.insert(ticket.object_id);
+        true
+    }
+
+    pub fn detach_all_ground_drop_claims(&mut self) -> Vec<(SessionId, GroundDropClaimTicket)> {
+        let tickets = self.pending_ground_drop_claim_tickets();
+        for (session_id, ticket) in &tickets {
+            let detached = self.detach_ground_drop_claim(session_id, ticket);
+            debug_assert!(detached, "enumerated ground-drop claim must detach");
+        }
+        tickets
+    }
+
+    /// Restore a definitively rejected detached claim without requiring the
+    /// historical Gateway session to exist. Canonical ticket binding and the
+    /// retained tombstone prevent cross-Zone or duplicate restoration.
+    pub fn restore_detached_ground_drop_claim(
+        &mut self,
+        ticket: &GroundDropClaimTicket,
+        now_ms: u64,
+    ) -> Option<Vec<ZoneOutbound>> {
+        if !self.has_detached_ground_drop_claim_ticket(ticket) {
+            return None;
+        }
+        self.removed_object_ids.remove(&ticket.object_id);
+        self.ground_drops.insert(
+            ticket.object_id,
+            ZoneGroundDrop {
+                owner_expires_at_ms: ticket
+                    .drop
+                    .ownership_remaining_ticks
+                    .filter(|ticks| *ticks > 0)
+                    .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300))),
+                drop: ticket.drop.clone(),
+                drop_generation: ticket.drop_generation,
+                payload_digest: ticket.payload_digest.clone(),
+            },
+        );
+        self.apply_zone_object_packets(&[ground_drop_spawn_packet(&ticket.drop)], now_ms);
+        Some(self.diff_all_zone_object_visibility())
     }
 
     fn allocate_ground_drop_generation(&mut self) -> Option<u64> {
@@ -10120,7 +10215,6 @@ impl ZoneRuntime {
                 &self.key,
                 object_id,
                 stored.drop_generation,
-                claim_id,
                 &stored.payload_digest,
             ),
             session_id: session_id.clone(),
@@ -10215,7 +10309,6 @@ impl ZoneRuntime {
                     &self.key,
                     ticket.object_id,
                     ticket.drop_generation,
-                    ticket.claim_id,
                     &ticket.payload_digest,
                 )
     }

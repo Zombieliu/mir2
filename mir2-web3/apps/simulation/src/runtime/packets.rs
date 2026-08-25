@@ -4988,11 +4988,20 @@ pub(super) fn stage5_trade_request_packet(
     if !is_in_world(world) {
         return Vec::new();
     }
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .is_some()
+    {
+        return Vec::new();
+    }
     let partner = partner_name.unwrap_or_else(|| "Trader".to_string());
     world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems
         .trade = Some(Stage5TradeState {
+        settlement_nonce: new_stage5_mail_delivery_nonce(),
         partner: partner.clone(),
         offered_items: Vec::new(),
         offered_slots: BTreeMap::new(),
@@ -5023,6 +5032,7 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
             .stage5_systems
             .trade
             .get_or_insert_with(|| Stage5TradeState {
+                settlement_nonce: new_stage5_mail_delivery_nonce(),
                 partner: "Trader".to_string(),
                 offered_items: Vec::new(),
                 offered_slots: BTreeMap::new(),

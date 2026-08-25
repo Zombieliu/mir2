@@ -1,5 +1,23 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-26 Slice D durable ground-drop settlement is closed for the bounded
+> item-identity Candidate slice. PostgreSQL lookup and transact paths share the
+> same per-idempotency-key advisory transaction lock, uncertain database results
+> remain `OutcomeUnknown`, and exact ground-drop projection plus account save is
+> atomic. Detached claims retain their complete ticket, payload, Zone, and stable
+> player identity through world-only checkpoints. Teardown and `Drop` process
+> finalized deliveries only; unresolved outcomes are retried only from an ordered,
+> fenced economy context. StartGame recovers them after Zone join. The fresh
+> factory/new-login regression proves one credit and no KeepAlive duplication.
+>
+> Current evidence: Simulation lib 1472/0, shared_zone 195/0, Gateway 642/0/1
+> ignored out of 643, social_economy 3/0, Web typecheck 0, exact-file Rustfmt 0,
+> Gate18 economy/migration bin check 0, and diff check 0. Independent final audit:
+> GO, P0=0, P1=0, P2=1. The P2 is service-layer defense in depth for missing
+> context; routing already prevents that call during teardown. This closes Slice D
+> only. Independent full-project audits estimate backend Crystal semantics at 49%
+> and Windows Candidate automation at 56%; full Crystal Accepted is not claimed.
+
 > 2026-08-25 GroundDrop identity Slice C complete: authoritative claim tickets
 > now bind Zone key, object id, monotonic generation, claim id, canonical payload
 > digest, session/owner identity, and the complete drop payload. Player and
