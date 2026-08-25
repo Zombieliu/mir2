@@ -212,15 +212,25 @@ function Read-PeInfo {
         $stream.Position = $numberDirectoryOffset; $directoryCount = $reader.ReadUInt32(); if ($directoryCount -lt 14) { throw 'PE data directories do not include delay imports' }
         $stream.Position = $dataDirectoryStart + 8; $importRva = $reader.ReadUInt32(); [void]$reader.ReadUInt32()
         $stream.Position = $dataDirectoryStart + (13 * 8); $delayRva = $reader.ReadUInt32(); [void]$reader.ReadUInt32()
-        $sectionStart = $optionalStart + $optionalSize; $sections = @()
-        for ($i = 0; $i -lt $sectionCount; $i++) { $stream.Position = $sectionStart + (40 * $i); $name = ([Text.Encoding]::ASCII.GetString($reader.ReadBytes(8))).Trim([char]0); $virtualSize = $reader.ReadUInt32(); $virtualAddress = $reader.ReadUInt32(); $rawSize = $reader.ReadUInt32(); $rawPointer = $reader.ReadUInt32(); [void]$reader.ReadBytes(16); $sections += [ordered]@{ name = $name; virtualSize = $virtualSize; virtualAddress = $virtualAddress; rawSize = $rawSize; rawPointer = $rawPointer } }
+        if ($sectionCount -lt 1 -or $sectionCount -gt 96) { throw 'invalid PE section count' }
+        $sectionStart = $optionalStart + $optionalSize
+        if ([uint64]$sectionStart + ([uint64]40 * $sectionCount) -gt [uint64]$stream.Length) { throw 'PE section table exceeds file bounds' }
+        $sections = @()
+        for ($i = 0; $i -lt $sectionCount; $i++) {
+            $stream.Position = $sectionStart + (40 * $i)
+            $name = ([Text.Encoding]::ASCII.GetString($reader.ReadBytes(8))).Trim([char]0)
+            $virtualSize = $reader.ReadUInt32(); $virtualAddress = $reader.ReadUInt32(); $rawSize = $reader.ReadUInt32(); $rawPointer = $reader.ReadUInt32()
+            [void]$reader.ReadBytes(12); $characteristics = $reader.ReadUInt32()
+            if ($rawSize -gt 0 -and ($rawPointer -eq 0 -or [uint64]$rawPointer + [uint64]$rawSize -gt [uint64]$stream.Length)) { throw "PE section '$name' raw range exceeds file bounds" }
+            $sections += [ordered]@{ name = $name; virtualSize = $virtualSize; virtualAddress = $virtualAddress; rawSize = $rawSize; rawPointer = $rawPointer; characteristics = $characteristics }
+        }
         function Convert-RvaToOffset([uint32]$Rva) { foreach ($section in $sections) { $span = [Math]::Max([uint32]$section.virtualSize, [uint32]$section.rawSize); if ($Rva -ge $section.virtualAddress -and $Rva -lt ([uint64]$section.virtualAddress + $span)) { return [int64]$section.rawPointer + ($Rva - $section.virtualAddress) } }; throw "RVA 0x$('{0:X8}' -f $Rva) outside PE sections" }
         function Read-AsciiZ([uint32]$Rva) { $stream.Position = Convert-RvaToOffset $Rva; $bytes = New-Object System.Collections.Generic.List[byte]; for ($i = 0; $i -lt 1024; $i++) { $b = $reader.ReadByte(); if ($b -eq 0) { return [Text.Encoding]::ASCII.GetString($bytes.ToArray()) }; [void]$bytes.Add($b) }; throw 'unterminated PE import name' }
         $imports = New-Object System.Collections.Generic.List[string]
         if ($importRva -ne 0) { $offset = Convert-RvaToOffset $importRva; for ($i = 0; $i -lt 4096; $i++) { $stream.Position = $offset + (20 * $i); $fields = @($reader.ReadUInt32(), $reader.ReadUInt32(), $reader.ReadUInt32(), $reader.ReadUInt32(), $reader.ReadUInt32()); if (($fields | Measure-Object -Sum).Sum -eq 0) { break }; if ($fields[3] -eq 0) { throw 'PE import descriptor has no DLL name' }; [void]$imports.Add((Read-AsciiZ $fields[3])); if ($i -eq 4095) { throw 'PE import descriptor limit exceeded' } } }
         $delayImports = New-Object System.Collections.Generic.List[string]
         if ($delayRva -ne 0) { $offset = Convert-RvaToOffset $delayRva; for ($i = 0; $i -lt 4096; $i++) { $stream.Position = $offset + (32 * $i); $fields = @(); for ($j = 0; $j -lt 8; $j++) { $fields += $reader.ReadUInt32() }; if (($fields | Measure-Object -Sum).Sum -eq 0) { break }; $nameValue = [uint64]$fields[1]; if (($fields[0] -band 1) -eq 0) { if ($nameValue -lt $imageBase -or ($nameValue - $imageBase) -gt [uint32]::MaxValue) { throw 'invalid VA-based delay import name' }; $nameValue -= $imageBase }; [void]$delayImports.Add((Read-AsciiZ ([uint32]$nameValue))); if ($i -eq 4095) { throw 'PE delay-import descriptor limit exceeded' } } }
-        return [ordered]@{ valid = $true; imports = @(Get-OrdinalUniqueStrings -Values $imports); delayImports = @(Get-OrdinalUniqueStrings -Values $delayImports) }
+        return [ordered]@{ valid = $true; imports = @(Get-OrdinalUniqueStrings -Values $imports); delayImports = @(Get-OrdinalUniqueStrings -Values $delayImports); sections = @($sections) }
     } finally { $reader.Dispose(); $stream.Dispose() }
 }
 
@@ -232,14 +242,67 @@ function Test-SystemDependency {
     return $allowed -contains $lower
 }
 
+function New-BuildPathLeakRegex {
+    param([switch]$Unicode)
+    # ISO-8859-1 gives a one-byte-to-one-char view. Its ASCII pattern excludes
+    # bytes >= 0x80, so arbitrary machine bytes cannot become replacement '?'
+    # characters and accidentally form a path. UTF-8 and UTF-16 use the Unicode
+    # pattern, which excludes controls, surrogates and decoder U+FFFD markers.
+    $pathChar = if ($Unicode) { '[^\p{C}\p{Zl}\p{Zp}\uFFFD<>:"/\\|?*]' } else { '[\x20-\x21\x23-\x29\x2B-\x2E\x30-\x39\x3B\x3D\x40-\x5B\x5D-\x7B\x7D-\x7E]' }
+    $segment = "(?:$pathChar){1,255}"
+    $relative = "(?:$segment[\\/]){0,32}$segment"
+    $hostName = '[A-Za-z0-9_](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9_])?'
+    $minimumDriveTail = "(?=(?:$pathChar){3}|(?:$pathChar){1,255}[\\/])"
+    $patterns = @(
+        "(?<![A-Za-z0-9])[A-Z]:[\\/]$minimumDriveTail$relative",
+        "\\\\[?.]\\(?:[A-Z]:\\$relative|UNC\\$hostName\\$segment(?:\\$segment){0,32})",
+        "(?<!\\)\\\\$hostName\\$segment(?:\\$segment){0,32}",
+        "(?<!:)//(?!rustc/[0-9a-f]{40}/library(?=$|[\\/]|[\x00-\x1F\x7F]))$hostName/$segment(?:/$segment){0,32}",
+        "(?<![A-Za-z0-9:])/(?:var/tmp|home|Users|workspace|workspaces|build|builds|src|tmp|opt|private|mnt|Volumes)(?:/$segment){0,32}",
+        "(?<!$pathChar)(?:$segment[\\/:]){1,32}$segment\.pdb\b"
+    )
+    $options = [Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [Text.RegularExpressions.RegexOptions]::CultureInvariant
+    return [regex]::new(('(?:' + ($patterns -join '|') + ')'), $options, [TimeSpan]::FromSeconds(30))
+}
+
 function Assert-NoBuildPathStrings {
-    param([string]$ExePath)
+    param([string]$ExePath, [object]$PeInfo = $null)
     $bytes = [IO.File]::ReadAllBytes($ExePath)
-    $views = New-Object System.Collections.Generic.List[string]
-    [void]$views.Add([Text.Encoding]::ASCII.GetString($bytes)); [void]$views.Add([Text.Encoding]::Unicode.GetString($bytes))
-    if ($bytes.Length -gt 1) { [void]$views.Add([Text.Encoding]::Unicode.GetString($bytes, 1, $bytes.Length - 1)) }
-    $pattern = '(?i)(?:(?<![A-Za-z0-9])[A-Z]:(?:\\(?!\\)|/(?!/))[^\x00\r\n]{0,260}|\\\\[^\\/\x00\r\n]+\\[^\\/\x00\r\n]+[^\x00\r\n]{0,260}|(?<!:)//[^/\x00\r\n]+/[^/\x00\r\n]+[^\x00\r\n]{0,260}|(?<![A-Za-z0-9:])/(?:home|Users|workspace|workspaces|build|builds|src|tmp|opt|private|mnt|Volumes|var/tmp)(?:/|\b)[^\x00\r\n]{0,260}|[^\x00\r\n]{0,180}\.pdb\b)'
-    foreach ($view in $views) { $match = [regex]::Match($view, $pattern); if ($match.Success) { $sample = $match.Value; if ($sample.Length -gt 180) { $sample = $sample.Substring(0, 180) }; throw "EXE contains debug/PDB/absolute source path: $sample" } }
+    $ranges = New-Object System.Collections.Generic.List[object]
+    if ($null -eq $PeInfo) {
+        [void]$ranges.Add([pscustomobject]@{ name = '<raw>'; offset = 0; count = $bytes.Length })
+    } else {
+        $sections = @($PeInfo.sections)
+        if ($sections.Count -eq 0) { throw 'PE path inspection has no section metadata' }
+        foreach ($section in $sections) {
+            $offset = [int64]$section.rawPointer; $count = [int64]$section.rawSize
+            if ($count -eq 0 -or (([uint32]$section.characteristics -band [uint32]0x20000000) -ne 0)) { continue }
+            if ($offset -lt 0 -or $count -lt 0 -or [uint64]$offset + [uint64]$count -gt [uint64]$bytes.LongLength) { throw "PE section '$($section.name)' path-scan range exceeds file bounds" }
+            [void]$ranges.Add([pscustomobject]@{ name = [string]$section.name; offset = [int]$offset; count = [int]$count })
+        }
+        if ($ranges.Count -eq 0) { throw 'PE path inspection has no non-executable section data' }
+    }
+
+    $asciiRegex = New-BuildPathLeakRegex
+    $unicodeRegex = New-BuildPathLeakRegex -Unicode
+    $singleByteEncoding = [Text.Encoding]::GetEncoding(28591)
+    $utf8Encoding = [Text.UTF8Encoding]::new($false, $false)
+    foreach ($range in $ranges) {
+        $views = New-Object System.Collections.Generic.List[object]
+        [void]$views.Add([pscustomobject]@{ kind = 'ASCII'; text = $singleByteEncoding.GetString($bytes, $range.offset, $range.count); regex = $asciiRegex })
+        [void]$views.Add([pscustomobject]@{ kind = 'UTF-8'; text = $utf8Encoding.GetString($bytes, $range.offset, $range.count); regex = $unicodeRegex })
+        $evenCount = $range.count - ($range.count % 2)
+        if ($evenCount -ge 2) { [void]$views.Add([pscustomobject]@{ kind = 'UTF-16LE/even'; text = [Text.Encoding]::Unicode.GetString($bytes, $range.offset, $evenCount); regex = $unicodeRegex }) }
+        $oddCount = $range.count - 1; $oddCount -= ($oddCount % 2)
+        if ($oddCount -ge 2) { [void]$views.Add([pscustomobject]@{ kind = 'UTF-16LE/odd'; text = [Text.Encoding]::Unicode.GetString($bytes, $range.offset + 1, $oddCount); regex = $unicodeRegex }) }
+        foreach ($view in $views) {
+            try { $match = $view.regex.Match($view.text) } catch [Text.RegularExpressions.RegexMatchTimeoutException] { throw "PE path inspection timed out in section '$($range.name)' ($($view.kind))" }
+            if ($match.Success) {
+                $sample = $match.Value; if ($sample.Length -gt 180) { $sample = $sample.Substring(0, 180) }
+                throw "EXE contains machine/CI absolute source path or non-basename PDB reference in section '$($range.name)' ($($view.kind)): $sample"
+            }
+        }
+    }
 }
 
 function Clear-NativeDevEnv { foreach ($name in @('MIR2_NATIVE_ASSET_ROOT','MIR2_ASSET_ROOT','MIR2_NATIVE_ACCOUNT','MIR2_NATIVE_PASSWORD','MIR2_GATEWAY_WS_URL','MIR2_NATIVE_CAPTURE_DIR','MIR2_NATIVE_SCREENSHOT_DIR','MIR2_NATIVE_TRACE_RENDER','MIR2_NATIVE_SOAK_METRICS')) { Remove-Item -Path ('Env:' + $name) -ErrorAction SilentlyContinue } }
@@ -284,7 +347,49 @@ if ($SelfTest) {
         $exactAttestation=[pscustomobject]@{buildCommand=[pscustomobject]@{executable='cargo';toolchain='+1.95.0';subcommand='build';manifestPath='apps/game-client/platform-windows/Cargo.toml';bin='mir2-platform-windows';release=$true;locked=$true;target='x86_64-pc-windows-msvc';profile='release';targetDir='target-attested-windows-candidate';extraArgs=@()};pathRemapping=[pscustomobject]@{enabled=$true;environmentVariable='RUSTFLAGS';flags=@([pscustomobject]@{sourceToken='<REPO_ROOT>';destination='.'},[pscustomobject]@{sourceToken='<CARGO_HOME>';destination='cargo-home'})}}
         if(-not(Test-StructuredBuildContract $exactAttestation)){throw 'exact build contract rejected'}; $nearMiss=$exactAttestation|ConvertTo-Json -Depth 8|ConvertFrom-Json; $nearMiss.buildCommand.target='i686-pc-windows-msvc'; if(Test-StructuredBuildContract $nearMiss){throw 'near-miss target accepted'}
         Initialize-Pkcs
-        $pathScanFile=Join-Path $selfRoot 'path-scan.bin';$blockedPaths=@('D:\buildfarm\obj\client.pdb','C:\release\mir2.exe','C:/release/mir2.exe','\\server\share\build\mir2.pdb','//host/share/build/mir2.pdb','/home/runner/work/client','/Users/builder/client','/workspace/mir2/target','/workspaces/mir2/target','/build/output/client','/builds/worker/client','/src/mir2/main.rs','/tmp/cargo-build','/var/tmp/cargo-build','/opt/build/client','/private/tmp/client','/mnt/build/client','/Volumes/build/client');foreach($encoding in @([Text.Encoding]::ASCII,[Text.Encoding]::Unicode)){foreach($candidatePath in $blockedPaths){[IO.File]::WriteAllBytes($pathScanFile,$encoding.GetBytes($candidatePath));$rejected=$false;try{Assert-NoBuildPathStrings -ExePath $pathScanFile}catch{$rejected=$true};if(-not$rejected){throw "build path scanner accepted: $candidatePath ($($encoding.WebName))"}};$allowedPaths=@('https://example.invalid/build/resource.png','wss://gateway.example/workspace/socket','http://host/opt/resource','original-ui/Title/30.png','Magic/10.png','assets\relative\sprite.png','assets/relative/sprite.png');foreach($candidatePath in $allowedPaths){[IO.File]::WriteAllBytes($pathScanFile,$encoding.GetBytes($candidatePath));Assert-NoBuildPathStrings -ExePath $pathScanFile}}
+        $pathScanFile = Join-Path $selfRoot 'path-scan.bin'
+        $blockedPaths = @(
+            'D:\buildfarm\obj\client.pdb','C:\release\mir2.exe','C:/release/mir2.exe',
+            '\\server\share\build\mir2.pdb','//host/share/build/mir2.pdb',
+            '\\?\C:\release\mir2.exe','\\?\UNC\server\share\mir2.exe','\\.\C:\release\mir2.exe',
+            '/home/runner/work/client','/Users/builder/client','/workspace/mir2/target','/workspaces/mir2/target',
+            '/build/output/client','/builds/worker/client','/src/mir2/main.rs','/tmp/cargo-build','/var/tmp/cargo-build',
+            '/opt/build/client','/private/tmp/client','/mnt/build/client','/Volumes/build/client',
+            'target\release\client.pdb','target/release/client.pdb','foo:client.pdb','C:client.pdb',
+            ('dir\' + ('a' * 129) + '.pdb'),
+            ('//rustc/' + ('a' * 39) + '/library/core/src/lib.rs'),
+            ('//rustc/' + ('a' * 40) + '/library?evil'),
+            ('//rustc/' + ('a' * 40) + '/library%evil'),
+            ('//rustc/' + ('a' * 40) + '/library evil')
+        )
+        foreach ($encoding in @([Text.Encoding]::ASCII, [Text.Encoding]::Unicode)) {
+            foreach ($candidatePath in $blockedPaths) {
+                [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($candidatePath))
+                $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
+                if (-not $rejected) { throw "build path scanner accepted: $candidatePath ($($encoding.WebName))" }
+            }
+        }
+        $unicodeBlockedPath = 'C:\' + ([string][char]0x6784) + ([string][char]0x5EFA) + '\' + ([string][char]0x5BA2) + ([string][char]0x6237) + '.pdb'
+        [IO.File]::WriteAllBytes($pathScanFile, [Text.Encoding]::Unicode.GetBytes($unicodeBlockedPath)); $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }; if (-not $rejected) { throw 'build path scanner accepted a Unicode machine path' }
+        [IO.File]::WriteAllBytes($pathScanFile, [Text.Encoding]::UTF8.GetBytes($unicodeBlockedPath)); $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }; if (-not $rejected) { throw 'build path scanner accepted a UTF-8 machine path' }
+        $oddUnicodeBytes = [Text.Encoding]::Unicode.GetBytes('C:\odd\build\client.pdb'); $oddUnicodeVector = New-Object byte[] ($oddUnicodeBytes.Length + 1); $oddUnicodeVector[0] = 0xA5; [Array]::Copy($oddUnicodeBytes, 0, $oddUnicodeVector, 1, $oddUnicodeBytes.Length)
+        [IO.File]::WriteAllBytes($pathScanFile, $oddUnicodeVector); $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }; if (-not $rejected) { throw 'build path scanner accepted an odd-aligned UTF-16LE machine path' }
+        $allowedPaths = @(
+            'https://example.invalid/build/resource.png','wss://gateway.example/workspace/socket','http://host/opt/resource',
+            'original-ui/Title/30.png','Magic/10.png','assets\relative\sprite.png','assets/relative/sprite.png',
+            'mir2_platform_windows.pdb','// comment',
+            ('//rustc/' + ('a' * 40) + '/library/core/src/lib.rs'),
+            ('//rustc/' + ('a' * 40) + '/library\std\src\io\mod.rs'),
+            'cargo-home\registry\src\crate\src\lib.rs','E:\7'
+        )
+        foreach ($encoding in @([Text.Encoding]::ASCII, [Text.Encoding]::Unicode)) { foreach ($candidatePath in $allowedPaths) { [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($candidatePath)); Assert-NoBuildPathStrings -ExePath $pathScanFile } }
+        $nulTerminatedRustPath = [Text.Encoding]::ASCII.GetBytes(('//rustc/' + ('a' * 40) + '/library' + [char]0)); [IO.File]::WriteAllBytes($pathScanFile, $nulTerminatedRustPath); Assert-NoBuildPathStrings -ExePath $pathScanFile
+        [IO.File]::WriteAllBytes($pathScanFile, [byte[]](0x42,0x3A,0x5C,0xA0,0xEC,0x75,0x18,0x40,0x84,0xED,0x0F)); Assert-NoBuildPathStrings -ExePath $pathScanFile
+        $execLeak = [Text.Encoding]::ASCII.GetBytes('C:\buildfarm\client.pdb'); $safeData = [Text.Encoding]::ASCII.GetBytes('assets/relative/sprite.png'); $sectionBytes = New-Object byte[] ($execLeak.Length + $safeData.Length); [Array]::Copy($execLeak, 0, $sectionBytes, 0, $execLeak.Length); [Array]::Copy($safeData, 0, $sectionBytes, $execLeak.Length, $safeData.Length); [IO.File]::WriteAllBytes($pathScanFile, $sectionBytes)
+        $sectionPe = [pscustomobject]@{ sections = @([pscustomobject]@{ name = '.text'; rawPointer = 0; rawSize = $execLeak.Length; characteristics = [uint32]0x60000020 }, [pscustomobject]@{ name = '.rdata'; rawPointer = $execLeak.Length; rawSize = $safeData.Length; characteristics = [uint32]0x40000040 }) }; Assert-NoBuildPathStrings -ExePath $pathScanFile -PeInfo $sectionPe
+        $sectionPe.sections[0].characteristics = [uint32]0x40000040; $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile -PeInfo $sectionPe } catch { $rejected = $true }; if (-not $rejected) { throw 'PE path scanner accepted a leak in a non-executable section' }
+        $sectionPe.sections[0].characteristics = [uint32]0x60000020; $sectionPe.sections[1].rawPointer = $sectionBytes.Length; $sectionPe.sections[1].rawSize = 1; $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile -PeInfo $sectionPe } catch { $rejected = $true }; if (-not $rejected) { throw 'PE path scanner accepted an out-of-bounds section range' }
+        $sectionPe.sections = @($sectionPe.sections[0]); $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile -PeInfo $sectionPe } catch { $rejected = $true }; if (-not $rejected) { throw 'PE path scanner accepted a PE with no non-executable section data' }
         function New-EphemeralCodeSigningCertificate([string]$Name,[ref]$RsaReference){$localRsa=[Security.Cryptography.RSA]::Create(2048);$request=[Security.Cryptography.X509Certificates.CertificateRequest]::new("CN=$Name",$localRsa,[Security.Cryptography.HashAlgorithmName]::SHA256,[Security.Cryptography.RSASignaturePadding]::Pkcs1);$oids=[Security.Cryptography.OidCollection]::new();[void]$oids.Add([Security.Cryptography.Oid]::new('1.3.6.1.5.5.7.3.3'));$request.CertificateExtensions.Add([Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension]::new($oids,$true));$request.CertificateExtensions.Add([Security.Cryptography.X509Certificates.X509KeyUsageExtension]::new([Security.Cryptography.X509Certificates.X509KeyUsageFlags]::DigitalSignature,$true));$RsaReference.Value=$localRsa;return $request.CreateSelfSigned([DateTimeOffset]::UtcNow.AddMinutes(-5),[DateTimeOffset]::UtcNow.AddHours(1))}
         $certificate=New-EphemeralCodeSigningCertificate 'Mir2 Candidate SelfTest' ([ref]$rsa); $wrongCertificate=New-EphemeralCodeSigningCertificate 'Wrong Mir2 Signer' ([ref]$wrongRsa)
         $a='A'*64;$b='B'*64;$c='C'*64;$d='D'*64;$e='E'*64;$f='F'*64
@@ -321,7 +426,7 @@ $exePath = Join-Path $PackageRoot $ExeName; $exeHash = ''; $exeItem = $null; $pe
 if (Test-Path -LiteralPath $exePath -PathType Leaf) {
     $exeItem = Get-Item -LiteralPath $exePath; $exeHash = (Get-FileHash -LiteralPath $exePath -Algorithm SHA256).Hash.ToUpperInvariant()
     try { $pe = Read-PeInfo -Path $exePath; foreach ($dependency in @($pe.imports) + @($pe.delayImports)) { if (-not (Test-SystemDependency -Name $dependency)) { Fail "non-system PE dependency rejected: $dependency" } } } catch { Fail "PE dependency inspection failed closed: $($_.Exception.Message)" }
-    try { Assert-NoBuildPathStrings -ExePath $exePath } catch { Fail $_.Exception.Message }
+    try { Assert-NoBuildPathStrings -ExePath $exePath -PeInfo $pe } catch { Fail $_.Exception.Message }
 } else { Fail 'client EXE unavailable for PE verification' }
 
 $attestationPath = Join-Path $PackageRoot 'BUILD-ATTESTATION.json'; $attestation = $null; $attestationHash = ''; $attestationShapeValid = $false; $buildCompleted = [DateTime]::MinValue
@@ -350,8 +455,8 @@ if (Test-Path -LiteralPath $manifestPath -PathType Leaf) { $manifestHash=(Get-Fi
 if ($null -ne $manifest) {
     $manifestShapeValid = $true
     foreach ($field in @('schema','coverage','fileCount','totalBytes','aggregateSha256','files')) { if ($null -eq $manifest.PSObject.Properties[$field]) { Fail "package manifest missing field: $field"; $manifestShapeValid = $false } }
-    $actualEntries = @(); $totalBytes = [int64]0
-    foreach ($file in $payloadFiles) { $rel = Get-RelativeUnixPath -Root $PackageRoot -Path $file.FullName; $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant(); $totalBytes += [int64]$file.Length; $actualEntries += [ordered]@{ path = $rel; size = [int64]$file.Length; sha256 = $hash } }
+    $actualEntries = @(); $actualPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal); $totalBytes = [int64]0
+    foreach ($file in $payloadFiles) { $rel = Get-RelativeUnixPath -Root $PackageRoot -Path $file.FullName; if (-not $actualPaths.Add($rel)) { Fail "duplicate actual package path: $rel" }; $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant(); $totalBytes += [int64]$file.Length; $actualEntries += [ordered]@{ path = $rel; size = [int64]$file.Length; sha256 = $hash } }
     $canonical = Get-ManifestCanonicalText -Entries $actualEntries; $computedAggregate = Get-TextSha256 -Text $canonical
     if ($manifestShapeValid) {
         if ($manifest.schema -ne 'mir2.windows.package-manifest.v4') { Fail 'package manifest schema mismatch' }
@@ -360,7 +465,7 @@ if ($null -ne $manifest) {
         if ([int]$manifest.fileCount -ne $actualEntries.Count -or [int64]$manifest.totalBytes -ne $totalBytes -or $manifest.aggregateSha256 -ne $computedAggregate) { Fail 'package manifest aggregate/count/bytes mismatch' }
         $declared = @{}; foreach ($entry in @($manifest.files)) { if ($null -eq $entry.PSObject.Properties['path'] -or $null -eq $entry.PSObject.Properties['size'] -or $null -eq $entry.PSObject.Properties['sha256']) { Fail 'malformed package manifest entry'; continue }; if ($declared.ContainsKey([string]$entry.path)) { Fail "duplicate manifest path: $($entry.path)" } else { $declared[[string]$entry.path] = $entry } }
         foreach ($entry in $actualEntries) { if (-not $declared.ContainsKey($entry.path)) { Fail "unmanifested package file: $($entry.path)" } else { $expected = $declared[$entry.path]; if ([int64]$expected.size -ne $entry.size -or $expected.sha256 -ne $entry.sha256) { Fail "manifest file mismatch: $($entry.path)" } } }
-        foreach ($path in $declared.Keys) { if (-not ($actualEntries | Where-Object { $_.path -eq $path })) { Fail "manifest references missing file: $path" } }
+        foreach ($path in $declared.Keys) { if (-not $actualPaths.Contains([string]$path)) { Fail "manifest references missing file: $path" } }
     }
 }
 

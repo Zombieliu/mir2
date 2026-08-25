@@ -1,5 +1,44 @@
 # Backend 1:1 Progress
 
+> Windows vertical-slice evidence closeout (2026-08-26, HEAD
+> `4c7e60baa`): this round records only evidence that actually passed. The
+> ordinary Crystal-shaped player loop passed `ordinary_candidate_loop` 2/2,
+> covering fresh-player progression through movement, combat, quest drop and
+> pickup, quest delivery/reward, persistence, and a new-session relog check.
+> The normal Gateway fresh-account persistence regression passed 1/1. The
+> Zone checkpoint incident was reproduced as the original active/standby
+> mismatch, then the ordered-restore regression passed; the `zone_rpc` library
+> checkpoint group passed 21/21. Clean-HEAD asset generation passed 312/312,
+> and Web typecheck passed.
+>
+> The checkpoint evidence is a repair record, not a claim that the original
+> failure never existed: the old replay sequence could restore a character a
+> second time after journal replay and reintroduce a removed temporary entity.
+> Ordered restore is now covered by a regression that preserves the replay
+> order and refreshes Zone bindings. The resulting source revision is
+> `4c7e60baa5d85e63858a6fd1717af01c5f893f3d`; its attested Windows Release EXE
+> is exactly SHA-256
+> `822C718721EE6F1AB20C137AF00B86F4D887D4828776BD2D36EB231AA1216972`
+> at 66,664,960 bytes. Build-attestation SHA-256 is
+> `60AB3279F50CA85357F535430D5F80708594D1BC10B8831AFBD36971CDEDCCAA`.
+> Candidate `WN-CANDIDATE-01-20260826` contains 10,258 files. Its manifest
+> SHA-256 is
+> `6E6042BEA21F06D8A75612F1EF0AE49EE3AC2ABC4F98601509BEA2D1A4381DC2`
+> and payload aggregate is
+> `22E1391C434F665A0E4071721085FBA4D721A92D7C5D0F733C346408092A16F5`.
+> Formal staging verification passed nonvisually with the clean source revision
+> checked, and the copied artifact passed an independent nonlaunch verification.
+>
+> This closeout does not claim whole-game or strict Candidate 100% parity.
+> Windows pure-UI account-to-quest proof, a same-EXE authenticated live
+> WebSocket run, real 125%/150% DPI, a real 30-minute native-client soak, and
+> human visual/feel acceptance remain open. The package is signed only by the
+> internal self-signed detached-CMS certificate
+> `B179E9D6222332C9DB5E960BAECF9990252CFBC7`; the EXE is Authenticode
+> `NotSigned`, so a formal release certificate/signing path also remains open.
+> Existing user changes outside the scoped evidence files are not reclassified
+> by this entry.
+
 > Crystal map-event binding E1 checkpoint (2026-08-26): all six current
 > `_MAPCOORD` entries are generated as typed conditions/actions with exact
 > script provenance and exactly one linked `Server.MirDB` `NeedMove` row.

@@ -1,5 +1,40 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Windows vertical-slice checkpoint (2026-08-26, HEAD `4c7e60baa`): the
+> bounded server/player-state evidence now includes
+> `ordinary_candidate_loop` 2/2, Gateway fresh-account persistence 1/1, the
+> reproduced Zone checkpoint failure followed by the ordered-restore fix, the
+> `zone_rpc` library group 21/21, clean-HEAD assets 312/312, and Web typecheck.
+> The ordinary loop covers the intended backend sequence: fresh account,
+> character/start-game, Bichon entry, movement, combat, quest drop/pickup,
+> delivery and reward, save, and relog restoration. These are bounded evidence
+> gates, not a strict whole-game completion percentage.
+>
+> Release artifact closeout: source revision
+> `4c7e60baa5d85e63858a6fd1717af01c5f893f3d` produced the attested Release
+> EXE SHA-256
+> `822C718721EE6F1AB20C137AF00B86F4D887D4828776BD2D36EB231AA1216972`
+> (66,664,960 bytes), bound to build-attestation SHA-256
+> `60AB3279F50CA85357F535430D5F80708594D1BC10B8831AFBD36971CDEDCCAA`.
+> Nonvisual packaging produced `WN-CANDIDATE-01-20260826` with 10,258 files;
+> its manifest SHA-256 is
+> `6E6042BEA21F06D8A75612F1EF0AE49EE3AC2ABC4F98601509BEA2D1A4381DC2`
+> and its payload aggregate is
+> `22E1391C434F665A0E4071721085FBA4D721A92D7C5D0F733C346408092A16F5`.
+> Clean-worktree verification passed with `sourceRepoCheck=checked`, and an
+> independent verification of the copied artifact also passed. Both were
+> nonvisual with `launchRequested=false`.
+>
+> The detached CMS signer is the internal self-signed certificate
+> `B179E9D6222332C9DB5E960BAECF9990252CFBC7`, not a formal release
+> certificate; the EXE remains Authenticode `NotSigned`. Remaining roadmap
+> gates are pure-UI account-to-quest execution using this same EXE, one
+> continuous authenticated live-WebSocket run, real 125%/150% OS-DPI behavior,
+> a real 30-minute native soak, human visual/gameplay-feel acceptance, and a
+> formal release certificate/signing path. Do not mark global 1:1 parity or
+> strict Candidate 100% from this checkpoint; it is a verifiable internal
+> vertical slice, while `accepted=false` and the listed gates remain open.
+
 > 2026-08-26 Crystal map-event E1 checkpoint: the six current `_MAPCOORD`
 > source entries now generate typed threshold/action records and bind
 > one-to-one to their current `Server.MirDB` `NeedMove` rows. The runtime no

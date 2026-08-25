@@ -666,9 +666,9 @@ $dryRunNativeKeyedRoot = $null
 try {
     if ($DryRun) {
         $dryRunNativeKeyedRoot = Join-Path ([IO.Path]::GetTempPath()) ('native-keyed-map-dryrun-' + [guid]::NewGuid().ToString('N'))
-        & npm --prefix $webRoot run assets:native-map-keyed:build -- --outputRoot $dryRunNativeKeyedRoot
+        & npm.cmd --prefix $webRoot run assets:native-map-keyed:build -- --outputRoot $dryRunNativeKeyedRoot
     } else {
-        & npm --prefix $webRoot run assets:native-map-keyed:build
+        & npm.cmd --prefix $webRoot run assets:native-map-keyed:build
     }
     if ($LASTEXITCODE -ne 0) { throw "native keyed map generation failed with exit code $LASTEXITCODE" }
     $nativeKeyedMapRoot = if ($DryRun) { $dryRunNativeKeyedRoot } else { Join-Path $PublicRoot 'generated\native-map-keyed' }
