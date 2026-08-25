@@ -559,13 +559,26 @@ pub enum ZoneCommand {
         group_members: Vec<String>,
         now_ms: u64,
     },
+    /// Legacy object-id-only command. The authoritative runtime rejects it;
+    /// callers must use `CommitGroundDropClaimWithTicket`.
     CommitGroundDropClaim {
         session_id: SessionId,
         object_id: u32,
     },
+    CommitGroundDropClaimWithTicket {
+        session_id: SessionId,
+        ticket: GroundDropClaimTicket,
+    },
+    /// Legacy object-id-only command. The authoritative runtime rejects it;
+    /// callers must use `CancelGroundDropClaimWithTicket`.
     CancelGroundDropClaim {
         session_id: SessionId,
         object_id: u32,
+        now_ms: u64,
+    },
+    CancelGroundDropClaimWithTicket {
+        session_id: SessionId,
+        ticket: GroundDropClaimTicket,
         now_ms: u64,
     },
     TickPlayerMovement {
@@ -645,9 +658,15 @@ pub enum ZoneOutbound {
         map_shout: bool,
         server_shout: bool,
     },
+    /// Legacy outbound retained for source compatibility. New claims use the
+    /// ticket-bearing variant exclusively.
     GroundDropClaimed {
         session_id: SessionId,
         drop: GroundDropSnapshot,
+    },
+    GroundDropClaimedWithTicket {
+        session_id: SessionId,
+        ticket: GroundDropClaimTicket,
     },
     MonsterKillAward {
         session_id: SessionId,
@@ -688,11 +707,31 @@ pub(crate) struct ZoneObject {
 pub(crate) struct ZoneGroundDrop {
     pub drop: GroundDropSnapshot,
     pub owner_expires_at_ms: Option<u64>,
+    #[serde(default)]
+    pub drop_generation: u64,
+    #[serde(default)]
+    pub payload_digest: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneGroundDropClaim {
     pub session_id: SessionId,
+    pub drop: GroundDropSnapshot,
+    #[serde(default)]
+    pub ticket: Option<GroundDropClaimTicket>,
+}
+
+/// Authoritative internal capability for a ground-drop claim. This type is
+/// intentionally not exported through the client snapshot or packet layers.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GroundDropClaimTicket {
+    pub claim_id: u64,
+    pub object_id: u32,
+    pub drop_generation: u64,
+    pub payload_digest: String,
+    pub idempotency_key: String,
+    pub session_id: SessionId,
+    pub owner_object_id: Option<u32>,
     pub drop: GroundDropSnapshot,
 }
 

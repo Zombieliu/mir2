@@ -38,7 +38,7 @@ fn abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once() {
             direction: final_direction,
         });
         let _ = state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
-            session_id,
+            session_id: session_id.clone(),
             hp: final_hp,
             max_hp: before.max_hp,
             mp: final_mp,
@@ -67,7 +67,19 @@ fn abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once() {
                 boss_audit: None,
             },
         );
-        state.queue_zone_ground_drop_claim(key.clone(), ground_drop);
+        state.queue_zone_ground_drop_claim(
+            key.clone(),
+            GroundDropClaimTicket {
+                claim_id: 1,
+                object_id: ground_drop.object_id,
+                drop_generation: 1,
+                payload_digest: "teardown-ground-drop-payload".to_string(),
+                idempotency_key: "teardown-ground-drop-claim".to_string(),
+                session_id,
+                owner_object_id: ground_drop.owner_object_id,
+                drop: ground_drop,
+            },
+        );
     }
 
     let owner_lease = ZoneOwnerLease::in_process(&ZoneId::primary());

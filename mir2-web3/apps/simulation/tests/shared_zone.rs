@@ -8,10 +8,11 @@ use mir2_protocol::{
     ServerPacket, Spell, UserItemStat, UserLocation,
 };
 use mir2_simulation::{
-    GroundDropLootSnapshot, GroundDropSnapshot, SessionId, SimulationConfig, SimulationSession,
-    WorldEntityDisposition, WorldEntityKind, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
-    ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterSpawn, ZoneNpcTeleportConfig,
-    ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
+    GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, SessionId, SimulationConfig,
+    SimulationSession, WorldEntityDisposition, WorldEntityKind, ZoneCollision, ZoneCommand,
+    ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterSpawn,
+    ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats,
+    ZoneRuntime,
 };
 
 fn session(value: &str) -> SessionId {
@@ -73,6 +74,24 @@ fn join_with_profile(
 
 fn zone() -> ZoneRuntime {
     ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded())
+}
+
+fn ground_drop_claim_ticket(
+    outbounds: &[ZoneOutbound],
+    expected_session: &SessionId,
+    object_id: u32,
+) -> GroundDropClaimTicket {
+    outbounds
+        .iter()
+        .find_map(|outbound| match outbound {
+            ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+                if session_id == expected_session && ticket.object_id == object_id =>
+            {
+                Some(ticket.clone())
+            }
+            _ => None,
+        })
+        .unwrap_or_else(|| panic!("missing claim ticket for object {object_id}: {outbounds:?}"))
 }
 
 fn sync_combat_admission(
@@ -4538,8 +4557,8 @@ fn zone_native_monster_combat_kill_and_drop_are_authoritative() {
     });
     assert!(claimed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &first && drop.object_id == 9200
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &first && ticket.object_id == 9200
     )));
 }
 
@@ -9601,8 +9620,8 @@ fn zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires() {
     });
     assert!(allowed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &second && drop.object_id == 8001
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &second && ticket.object_id == 8001
     )));
 }
 
@@ -9639,8 +9658,8 @@ fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics(
     });
     assert!(owner_claim.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &owner && drop.object_id == 8101
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &owner && ticket.object_id == 8101
     )));
     let duplicate_owner_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
         session_id: owner.clone(),
@@ -9651,7 +9670,7 @@ fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics(
     });
     assert!(!duplicate_owner_claim
         .iter()
-        .any(|outbound| matches!(outbound, ZoneOutbound::GroundDropClaimed { .. })));
+        .any(|outbound| matches!(outbound, ZoneOutbound::GroundDropClaimedWithTicket { .. })));
 
     zone.handle(ZoneCommand::SyncGroundDrops {
         session_id: owner.clone(),
@@ -9667,8 +9686,8 @@ fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics(
     });
     assert!(group_claim.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &group_member && drop.object_id == 8102
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &group_member && ticket.object_id == 8102
     )));
 
     zone.handle(ZoneCommand::SyncGroundDrops {
@@ -9697,8 +9716,8 @@ fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics(
     });
     assert!(expired_claim.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &stranger && drop.object_id == 8103
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &stranger && ticket.object_id == 8103
     )));
 
     zone.handle(ZoneCommand::SyncGroundDrops {
@@ -9715,7 +9734,7 @@ fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics(
     });
     assert!(unowned_claim.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { drop, .. } if drop.object_id == 8104
+        ZoneOutbound::GroundDropClaimedWithTicket { ticket, .. } if ticket.object_id == 8104
     )));
 }
 
@@ -9740,7 +9759,7 @@ fn zone_ground_drop_object_id_claim_allows_adjacent_player_tile_only() {
     });
     assert!(!tile_only
         .iter()
-        .any(|outbound| matches!(outbound, ZoneOutbound::GroundDropClaimed { .. })));
+        .any(|outbound| matches!(outbound, ZoneOutbound::GroundDropClaimedWithTicket { .. })));
     assert!(zone.has_ground_drop(8001));
 
     let object_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
@@ -9752,8 +9771,8 @@ fn zone_ground_drop_object_id_claim_allows_adjacent_player_tile_only() {
     });
     assert!(object_claim.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &first && drop.object_id == 8001
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &first && ticket.object_id == 8001
     )));
     assert!(!zone.has_ground_drop(8001));
 }
@@ -9769,16 +9788,17 @@ fn zone_ground_drop_claim_commit_removes_for_late_joiners() {
         drops: vec![gold_drop(8001, 330, 270, Some(101), Some(10))],
         now_ms: 0,
     });
-    zone.handle(ZoneCommand::ClaimGroundDrop {
+    let claimed = zone.handle(ZoneCommand::ClaimGroundDrop {
         session_id: first.clone(),
         object_id: Some(8001),
         target: Point { x: 330, y: 270 },
         group_members: Vec::new(),
         now_ms: 0,
     });
-    zone.handle(ZoneCommand::CommitGroundDropClaim {
+    let ticket = ground_drop_claim_ticket(&claimed, &first, 8001);
+    zone.handle(ZoneCommand::CommitGroundDropClaimWithTicket {
         session_id: first,
-        object_id: 8001,
+        ticket,
     });
 
     let late = session("late");
@@ -9802,17 +9822,18 @@ fn zone_ground_drop_claim_cancel_restores_visibility() {
         drops: vec![gold_drop(8001, 330, 270, Some(101), Some(10))],
         now_ms: 0,
     });
-    zone.handle(ZoneCommand::ClaimGroundDrop {
+    let claimed = zone.handle(ZoneCommand::ClaimGroundDrop {
         session_id: first.clone(),
         object_id: Some(8001),
         target: Point { x: 330, y: 270 },
         group_members: Vec::new(),
         now_ms: 0,
     });
+    let ticket = ground_drop_claim_ticket(&claimed, &first, 8001);
 
-    let restored = zone.handle(ZoneCommand::CancelGroundDropClaim {
+    let restored = zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
         session_id: first,
-        object_id: 8001,
+        ticket,
         now_ms: 10,
     });
     assert!(has_packet(&restored, &second, |packet| matches!(
@@ -9821,6 +9842,209 @@ fn zone_ground_drop_claim_cancel_restores_visibility() {
     )));
 }
 
+#[test]
+fn zone_ground_drop_ticket_tampering_and_legacy_commands_fail_closed() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 330, 270)));
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8_101, 330, 270, Some(101), Some(10))],
+        now_ms: 0,
+    });
+    let claimed = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_101),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    let ticket = ground_drop_claim_ticket(&claimed, &first, 8_101);
+
+    assert!(zone
+        .handle(ZoneCommand::CommitGroundDropClaim {
+            session_id: first.clone(),
+            object_id: 8_101,
+        })
+        .is_empty());
+    assert!(zone
+        .handle(ZoneCommand::CancelGroundDropClaim {
+            session_id: first.clone(),
+            object_id: 8_101,
+            now_ms: 1,
+        })
+        .is_empty());
+    assert!(!zone.has_ground_drop(8_101));
+
+    let mut tampered = Vec::new();
+    let mut value = ticket.clone();
+    value.session_id = second.clone();
+    tampered.push(value);
+    let mut value = ticket.clone();
+    value.claim_id += 1;
+    tampered.push(value);
+    let mut value = ticket.clone();
+    value.drop_generation += 1;
+    tampered.push(value);
+    let mut value = ticket.clone();
+    value.payload_digest = "0".repeat(64);
+    tampered.push(value);
+    let mut value = ticket.clone();
+    value.idempotency_key.push_str(":forged");
+    tampered.push(value);
+    let mut value = ticket.clone();
+    value.owner_object_id = Some(999);
+    tampered.push(value);
+    let mut value = ticket.clone();
+    value.drop.quantity += 1;
+    tampered.push(value);
+
+    assert!(zone
+        .handle(ZoneCommand::CommitGroundDropClaimWithTicket {
+            session_id: second,
+            ticket: ticket.clone(),
+        })
+        .is_empty());
+    for forged in tampered {
+        assert!(zone
+            .handle(ZoneCommand::CommitGroundDropClaimWithTicket {
+                session_id: first.clone(),
+                ticket: forged.clone(),
+            })
+            .is_empty());
+        assert!(zone
+            .handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+                session_id: first.clone(),
+                ticket: forged,
+                now_ms: 2,
+            })
+            .is_empty());
+        assert!(!zone.has_ground_drop(8_101));
+    }
+
+    zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+        session_id: first,
+        ticket,
+        now_ms: 3,
+    });
+    assert!(zone.has_ground_drop(8_101));
+}
+
+#[test]
+fn zone_ground_drop_ticket_prevents_aba_and_duplicate_followups() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8_201, 330, 270, None, None)],
+        now_ms: 0,
+    });
+    let first_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_201),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    let old_ticket = ground_drop_claim_ticket(&first_claim, &first, 8_201);
+    zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: old_ticket.clone(),
+        now_ms: 1,
+    });
+
+    let mut reincarnated = gold_drop(8_201, 330, 270, None, None);
+    reincarnated.loot = GroundDropLootSnapshot::Gold { amount: 26 };
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![reincarnated],
+        now_ms: 2,
+    });
+    let second_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_201),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 2,
+    });
+    let new_ticket = ground_drop_claim_ticket(&second_claim, &first, 8_201);
+    assert!(new_ticket.drop_generation > old_ticket.drop_generation);
+    assert!(new_ticket.claim_id > old_ticket.claim_id);
+    assert_ne!(new_ticket.payload_digest, old_ticket.payload_digest);
+    assert_ne!(new_ticket.idempotency_key, old_ticket.idempotency_key);
+
+    zone.handle(ZoneCommand::CommitGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: old_ticket.clone(),
+    });
+    zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: old_ticket,
+        now_ms: 3,
+    });
+    assert!(!zone.has_ground_drop(8_201));
+
+    zone.handle(ZoneCommand::CommitGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: new_ticket.clone(),
+    });
+    zone.handle(ZoneCommand::CommitGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: new_ticket.clone(),
+    });
+    zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+        session_id: first,
+        ticket: new_ticket,
+        now_ms: 4,
+    });
+    assert!(!zone.has_ground_drop(8_201));
+}
+
+#[test]
+fn zone_ground_drop_countdown_changes_keep_generation_but_not_claim_identity() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8_301, 330, 270, Some(101), Some(10))],
+        now_ms: 0,
+    });
+    let first_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_301),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 0,
+    });
+    let first_ticket = ground_drop_claim_ticket(&first_claim, &first, 8_301);
+    zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+        session_id: first.clone(),
+        ticket: first_ticket.clone(),
+        now_ms: 1,
+    });
+    zone.handle(ZoneCommand::SyncGroundDrops {
+        session_id: first.clone(),
+        drops: vec![gold_drop(8_301, 330, 270, Some(101), Some(9))],
+        now_ms: 2,
+    });
+    let second_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+        session_id: first.clone(),
+        object_id: Some(8_301),
+        target: Point { x: 330, y: 270 },
+        group_members: Vec::new(),
+        now_ms: 2,
+    });
+    let second_ticket = ground_drop_claim_ticket(&second_claim, &first, 8_301);
+
+    assert_eq!(second_ticket.drop_generation, first_ticket.drop_generation);
+    assert_eq!(second_ticket.payload_digest, first_ticket.payload_digest);
+    assert!(second_ticket.claim_id > first_ticket.claim_id);
+    assert_ne!(second_ticket.idempotency_key, first_ticket.idempotency_key);
+}
 #[test]
 fn zone_ground_drop_nearest_claim_filters_range_and_allowed_ids() {
     let mut zone = zone();
@@ -9848,8 +10072,8 @@ fn zone_ground_drop_nearest_claim_filters_range_and_allowed_ids() {
 
     assert!(outbounds.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::GroundDropClaimed { session_id, drop }
-            if session_id == &first && drop.object_id == 8001
+        ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+            if session_id == &first && ticket.object_id == 8001
     )));
     assert!(!zone.has_ground_drop(8001));
     assert!(zone.has_ground_drop(8002));

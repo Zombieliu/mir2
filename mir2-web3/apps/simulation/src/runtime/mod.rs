@@ -54,13 +54,13 @@ pub use session::{
 };
 pub use stage5::{GameShopPurchaseExecution, GameShopPurchaseFailure, GameShopPurchaseOutcome};
 pub use zone::{
-    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
-    ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata, ZoneMonsterDefense,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
-    ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
-    ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
-    ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, GroundDropClaimTicket,
+    PlayerId, SessionId, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
+    ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
+    ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
+    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

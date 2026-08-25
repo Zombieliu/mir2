@@ -14,7 +14,8 @@ const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 2;
 
 use super::runtime::ZoneRuntime;
 use super::types::{
-    SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot, ZoneOutbound,
+    GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot,
+    ZoneOutbound,
 };
 
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
@@ -165,7 +166,9 @@ impl ZoneManager {
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
             | ZoneCommand::CommitGroundDropClaim { session_id, .. }
+            | ZoneCommand::CommitGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::CancelGroundDropClaim { session_id, .. }
+            | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. } => {
@@ -183,6 +186,19 @@ impl ZoneManager {
     /// World-level checkpoints must not resurrect Gateway sessions after a
     /// process restart. The Gateway owns session recovery; the Zone manager only
     /// contributes persistent map/world state to those checkpoints.
+    pub fn has_pending_ground_drop_claim_ticket(
+        &self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones
+            .get(key)
+            .is_some_and(|zone| zone.has_pending_ground_drop_claim_ticket(session_id, ticket))
+    }
+
     pub fn leave_all_sessions(&mut self) -> usize {
         let session_ids = self.session_zones.keys().cloned().collect::<Vec<_>>();
         let session_count = session_ids.len();

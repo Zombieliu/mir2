@@ -12,6 +12,7 @@ use mir2_protocol::{
     ObjectStruckInfo, Point, ServerPacket, Spell, UserItem, UserItemStat,
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use crate::runtime::big_map::authoritative_zone_npc_teleport_config;
 use crate::runtime::map_events::map_coordinate_hint_packets;
@@ -35,17 +36,62 @@ use super::packets::{
     shared_object_action_packet, user_location_packet,
 };
 use super::types::{
-    PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand, ZoneGroundDrop, ZoneGroundDropClaim,
-    ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction,
-    ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
-    ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState, ZoneReincarnationOffer,
+    GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand, ZoneGroundDrop,
+    ZoneGroundDropClaim, ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneMovementAction, ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot,
+    ZoneNpcTeleportConfig, ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState,
+    ZoneReincarnationOffer,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
 const ZONE_MOVEMENT_ACTION_QUEUE_LIMIT: usize = 8;
 const ZONE_MOVEMENT_INPUT_BUFFER_MS: u64 = 300;
 const ZONE_DROP_EXPIRE_MS: u64 = 30 * 60 * 300;
+const GROUND_DROP_PAYLOAD_DIGEST_DOMAIN: &[u8] = b"obelisk.mir2.ground-drop.v1\0";
 const ZONE_NATIVE_MONSTER_THINK_MS: u64 = 600;
+
+fn canonical_ground_drop_payload_digest(drop: &GroundDropSnapshot) -> String {
+    let mut canonical = drop.clone();
+    // Ownership countdown is a local projection of an absolute expiry and can
+    // legitimately change while the authoritative item identity does not.
+    canonical.ownership_remaining_ticks = None;
+    let bytes = serde_json::to_vec(&canonical)
+        .expect("GroundDropSnapshot serialization should be infallible");
+    let mut hasher = Sha256::new();
+    hasher.update(GROUND_DROP_PAYLOAD_DIGEST_DOMAIN);
+    hasher.update(bytes);
+    zone_hex_lower(&hasher.finalize())
+}
+
+fn canonical_ground_drop_claim_idempotency_key(
+    key: &ZoneKey,
+    object_id: u32,
+    drop_generation: u64,
+    claim_id: u64,
+    payload_digest: &str,
+) -> String {
+    format!(
+        "ground-drop:{}:{}:{}:{}:{}:{}:{}:{}",
+        key.shard_id,
+        key.map_file_name,
+        key.channel_id,
+        key.instance_id,
+        object_id,
+        drop_generation,
+        claim_id,
+        payload_digest
+    )
+}
+
+fn zone_hex_lower(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut output = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
+}
 const ZONE_NATIVE_MONSTER_AGGRO_X: i32 = 8;
 const ZONE_NATIVE_MONSTER_AGGRO_Y: i32 = 6;
 
@@ -134,6 +180,8 @@ pub struct ZoneRuntime {
     pending_native_ground_spells: Vec<PendingNativeGroundSpellAction>,
     ground_drops: BTreeMap<u32, ZoneGroundDrop>,
     claimed_ground_drops: BTreeMap<u32, ZoneGroundDropClaim>,
+    next_ground_drop_generation: u64,
+    next_ground_drop_claim_id: u64,
     occupancy: BTreeMap<(i32, i32), SessionId>,
     npc_teleport_config: ZoneNpcTeleportConfig,
     /// Open doors → the tick (ms) at which they auto-close. Shared across all
@@ -357,6 +405,8 @@ impl ZoneRuntime {
             pending_native_ground_spells: Vec::new(),
             ground_drops: BTreeMap::new(),
             claimed_ground_drops: BTreeMap::new(),
+            next_ground_drop_generation: 1,
+            next_ground_drop_claim_id: 1,
             occupancy: BTreeMap::new(),
             npc_teleport_config,
             open_doors: BTreeMap::new(),
@@ -394,6 +444,8 @@ impl ZoneRuntime {
         fork.pending_native_ground_spells = self.pending_native_ground_spells.clone();
         fork.ground_drops = self.ground_drops.clone();
         fork.claimed_ground_drops = self.claimed_ground_drops.clone();
+        fork.next_ground_drop_generation = self.next_ground_drop_generation;
+        fork.next_ground_drop_claim_id = self.next_ground_drop_claim_id;
         fork.occupancy = self.occupancy.clone();
         fork.open_doors = self.open_doors.clone();
         fork.hazard = self.hazard.clone();
@@ -420,6 +472,44 @@ impl ZoneRuntime {
 
     pub fn ground_drop_count(&self) -> usize {
         self.ground_drops.len()
+    }
+
+    pub fn has_pending_ground_drop_claim_ticket(
+        &self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.claimed_ground_drops
+            .get(&ticket.object_id)
+            .is_some_and(|claim| self.ground_drop_claim_ticket_matches(claim, session_id, ticket))
+    }
+
+    fn allocate_ground_drop_generation(&mut self) -> Option<u64> {
+        let generation = self.next_ground_drop_generation.max(1);
+        let next = generation.checked_add(1)?;
+        self.next_ground_drop_generation = next;
+        Some(generation)
+    }
+
+    fn allocate_ground_drop_claim_id(&mut self) -> Option<u64> {
+        let claim_id = self.next_ground_drop_claim_id.max(1);
+        let next = claim_id.checked_add(1)?;
+        self.next_ground_drop_claim_id = next;
+        Some(claim_id)
+    }
+
+    fn new_zone_ground_drop(
+        &mut self,
+        drop: GroundDropSnapshot,
+        owner_expires_at_ms: Option<u64>,
+    ) -> Option<ZoneGroundDrop> {
+        let drop_generation = self.allocate_ground_drop_generation()?;
+        Some(ZoneGroundDrop {
+            payload_digest: canonical_ground_drop_payload_digest(&drop),
+            drop_generation,
+            drop,
+            owner_expires_at_ms,
+        })
     }
 
     pub fn native_monster_count(&self) -> usize {
@@ -823,15 +913,16 @@ impl ZoneRuntime {
                 &group_members,
                 now_ms,
             ),
-            ZoneCommand::CommitGroundDropClaim {
+            ZoneCommand::CommitGroundDropClaim { .. }
+            | ZoneCommand::CancelGroundDropClaim { .. } => Vec::new(),
+            ZoneCommand::CommitGroundDropClaimWithTicket { session_id, ticket } => {
+                self.commit_ground_drop_claim(&session_id, &ticket)
+            }
+            ZoneCommand::CancelGroundDropClaimWithTicket {
                 session_id,
-                object_id,
-            } => self.commit_ground_drop_claim(&session_id, object_id),
-            ZoneCommand::CancelGroundDropClaim {
-                session_id,
-                object_id,
+                ticket,
                 now_ms,
-            } => self.cancel_ground_drop_claim(&session_id, object_id, now_ms),
+            } => self.cancel_ground_drop_claim(&session_id, &ticket, now_ms),
             ZoneCommand::TickPlayerMovement { session_id, now_ms } => {
                 self.tick_player_movement(&session_id, now_ms)
             }
@@ -2185,16 +2276,29 @@ impl ZoneRuntime {
                 .ownership_remaining_ticks
                 .filter(|ticks| *ticks > 0)
                 .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300)));
-            self.ground_drops
-                .entry(drop.object_id)
-                .and_modify(|stored| {
-                    stored.drop = drop.clone();
-                    stored.owner_expires_at_ms = owner_expires_at_ms;
-                })
-                .or_insert_with(|| ZoneGroundDrop {
+            let payload_digest = canonical_ground_drop_payload_digest(drop);
+            let drop_generation = match self
+                .ground_drops
+                .get(&drop.object_id)
+                .filter(|stored| stored.payload_digest == payload_digest)
+            {
+                Some(stored) => stored.drop_generation,
+                None => {
+                    let Some(generation) = self.allocate_ground_drop_generation() else {
+                        continue;
+                    };
+                    generation
+                }
+            };
+            self.ground_drops.insert(
+                drop.object_id,
+                ZoneGroundDrop {
                     drop: drop.clone(),
                     owner_expires_at_ms,
-                });
+                    drop_generation,
+                    payload_digest,
+                },
+            );
             if !self.objects.contains_key(&drop.object_id) {
                 spawn_packets.push(ground_drop_spawn_packet(drop));
             }
@@ -9943,13 +10047,10 @@ impl ZoneRuntime {
                 .ownership_remaining_ticks
                 .filter(|ticks| *ticks > 0)
                 .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300)));
-            self.ground_drops.insert(
-                drop.object_id,
-                ZoneGroundDrop {
-                    drop: drop.clone(),
-                    owner_expires_at_ms,
-                },
-            );
+            let Some(stored) = self.new_zone_ground_drop(drop.clone(), owner_expires_at_ms) else {
+                break;
+            };
+            self.ground_drops.insert(drop.object_id, stored);
             packets.push(ground_drop_spawn_packet(&drop));
             spawned.push(drop);
         }
@@ -10004,20 +10105,40 @@ impl ZoneRuntime {
                 }],
             }];
         }
+        let Some(claim_id) = self.allocate_ground_drop_claim_id() else {
+            return Vec::new();
+        };
         let Some(stored) = self.ground_drops.remove(&object_id) else {
             return Vec::new();
+        };
+        let ticket = GroundDropClaimTicket {
+            claim_id,
+            object_id,
+            drop_generation: stored.drop_generation,
+            payload_digest: stored.payload_digest.clone(),
+            idempotency_key: canonical_ground_drop_claim_idempotency_key(
+                &self.key,
+                object_id,
+                stored.drop_generation,
+                claim_id,
+                &stored.payload_digest,
+            ),
+            session_id: session_id.clone(),
+            owner_object_id: stored.drop.owner_object_id,
+            drop: stored.drop.clone(),
         };
         self.claimed_ground_drops.insert(
             object_id,
             ZoneGroundDropClaim {
                 session_id: session_id.clone(),
-                drop: stored.drop.clone(),
+                drop: stored.drop,
+                ticket: Some(ticket.clone()),
             },
         );
         let mut outbounds = self.remove_ground_drop_object_for_claim(object_id);
-        outbounds.push(ZoneOutbound::GroundDropClaimed {
+        outbounds.push(ZoneOutbound::GroundDropClaimedWithTicket {
             session_id: session_id.clone(),
-            drop: stored.drop,
+            ticket,
         });
         outbounds
     }
@@ -10074,38 +10195,66 @@ impl ZoneRuntime {
         self.claim_ground_drop(session_id, Some(object_id), &target, group_members, now_ms)
     }
 
+    fn ground_drop_claim_ticket_matches(
+        &self,
+        claim: &ZoneGroundDropClaim,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        &claim.session_id == session_id
+            && &ticket.session_id == session_id
+            && claim.drop == ticket.drop
+            && claim.ticket.as_ref() == Some(ticket)
+            && ticket.object_id == ticket.drop.object_id
+            && ticket.owner_object_id == ticket.drop.owner_object_id
+            && ticket.drop_generation > 0
+            && !ticket.payload_digest.is_empty()
+            && canonical_ground_drop_payload_digest(&ticket.drop) == ticket.payload_digest
+            && ticket.idempotency_key
+                == canonical_ground_drop_claim_idempotency_key(
+                    &self.key,
+                    ticket.object_id,
+                    ticket.drop_generation,
+                    ticket.claim_id,
+                    &ticket.payload_digest,
+                )
+    }
+
     fn commit_ground_drop_claim(
         &mut self,
         session_id: &SessionId,
-        object_id: u32,
+        ticket: &GroundDropClaimTicket,
     ) -> Vec<ZoneOutbound> {
-        if self
-            .claimed_ground_drops
-            .get(&object_id)
-            .is_some_and(|claim| &claim.session_id == session_id)
-        {
-            self.claimed_ground_drops.remove(&object_id);
-            self.removed_object_ids.insert(object_id);
+        let Some(claim) = self.claimed_ground_drops.get(&ticket.object_id) else {
+            return Vec::new();
+        };
+        if !self.ground_drop_claim_ticket_matches(claim, session_id, ticket) {
+            return Vec::new();
         }
+        self.claimed_ground_drops.remove(&ticket.object_id);
+        self.removed_object_ids.insert(ticket.object_id);
         Vec::new()
     }
 
     fn cancel_ground_drop_claim(
         &mut self,
         session_id: &SessionId,
-        object_id: u32,
+        ticket: &GroundDropClaimTicket,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some(claim) = self.claimed_ground_drops.remove(&object_id) else {
+        let Some(claim) = self.claimed_ground_drops.get(&ticket.object_id) else {
             return Vec::new();
         };
-        if &claim.session_id != session_id {
-            self.claimed_ground_drops.insert(object_id, claim);
+        if !self.ground_drop_claim_ticket_matches(claim, session_id, ticket) {
             return Vec::new();
         }
-        self.removed_object_ids.remove(&object_id);
+        let claim = self
+            .claimed_ground_drops
+            .remove(&ticket.object_id)
+            .expect("validated ground-drop claim should still exist");
+        self.removed_object_ids.remove(&ticket.object_id);
         self.ground_drops.insert(
-            object_id,
+            ticket.object_id,
             ZoneGroundDrop {
                 owner_expires_at_ms: claim
                     .drop
@@ -10113,6 +10262,8 @@ impl ZoneRuntime {
                     .filter(|ticks| *ticks > 0)
                     .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300))),
                 drop: claim.drop.clone(),
+                drop_generation: ticket.drop_generation,
+                payload_digest: ticket.payload_digest.clone(),
             },
         );
         self.apply_zone_object_packets(&[ground_drop_spawn_packet(&claim.drop)], now_ms);

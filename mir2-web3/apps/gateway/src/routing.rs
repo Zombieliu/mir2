@@ -17,8 +17,8 @@ use mir2_protocol::{
 use mir2_simulation::{
     intelligent_creature_allows_ground_drop, zone_ground_drop_snapshots_for_monster_at_tick,
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GameShopPurchaseOutcome,
-    GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime, SessionId,
-    SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
+    GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime,
+    SessionId, SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
     SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
@@ -1322,6 +1322,10 @@ pub enum SharedAccountInventoryCommand {
         request_id: u64,
     },
     GroundDropPickup(GroundDropSnapshot),
+    GroundDropClaimPickup {
+        drop: GroundDropSnapshot,
+        claim_idempotency_key: String,
+    },
     MonsterKillAward(ZoneMonsterKillAward),
     SkillItemConsume {
         spell: Spell,
@@ -1358,6 +1362,23 @@ impl SharedAccountInventoryCommandEnvelope {
                     .map(|byte| format!("{byte:02x}"))
                     .collect::<String>();
                 format!("ground-drop-pickup:{}:{payload_digest}", drop.object_id)
+            }
+            SharedAccountInventoryCommand::GroundDropClaimPickup {
+                drop,
+                claim_idempotency_key,
+            } => {
+                if claim_idempotency_key.trim().is_empty() {
+                    return None;
+                }
+                let payload = serde_json::to_vec(drop).ok()?;
+                let payload_digest = Sha256::digest(payload)
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>();
+                format!(
+                    "ground-drop-claim:{claim_idempotency_key}:{}:{payload_digest}",
+                    drop.object_id
+                )
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => format!(
                 "monster-kill-award:{}:{}:{}:{}",
@@ -1495,7 +1516,8 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { .. } => {
                 SharedAccountInventoryTransactionKind::InventoryItemDrop
             }
-            SharedAccountInventoryCommand::GroundDropPickup(_) => {
+            SharedAccountInventoryCommand::GroundDropPickup(_)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             }
             SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -1523,7 +1545,8 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
                 runtime.commit_shared_inventory_item_drop_transaction(&drop)
             }
-            SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+            SharedAccountInventoryCommand::GroundDropPickup(drop)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(&drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -1930,7 +1953,7 @@ struct SharedItemRentalInvite {
     renting: bool,
 }
 
-const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 2;
+const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 2;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
     crate::zone_rpc::DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES;
@@ -1947,7 +1970,7 @@ struct SharedInProcessZoneState {
     pending_zone_packets: BTreeMap<ZonePresenceKey, Vec<ServerPacket>>,
     pending_zone_transforms: BTreeMap<ZonePresenceKey, (Point, MirDirection)>,
     pending_zone_shout_consumes: BTreeMap<ZonePresenceKey, (bool, bool)>,
-    pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropSnapshot>>,
+    pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropClaimTicket>>,
     pending_zone_monster_kill_awards: BTreeMap<ZonePresenceKey, Vec<ZoneMonsterKillAward>>,
     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<i32>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
@@ -2000,7 +2023,7 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_packet_frames: Vec<(ZonePresenceKey, Vec<Vec<u8>>)>,
     pending_zone_transforms: Vec<(ZonePresenceKey, (Point, MirDirection))>,
     pending_zone_shout_consumes: Vec<(ZonePresenceKey, (bool, bool))>,
-    pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropSnapshot>)>,
+    pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropClaimTicket>)>,
     pending_zone_monster_kill_awards: Vec<(ZonePresenceKey, Vec<ZoneMonsterKillAward>)>,
     pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<i32>)>,
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
@@ -2324,12 +2347,61 @@ impl SharedInProcessZoneState {
                 ));
             }
         }
+        let zone_manager = ZoneManager::restore_checkpoint(&checkpoint.zone_manager_bytes)?;
+        let players = checkpoint
+            .players
+            .iter()
+            .cloned()
+            .collect::<BTreeMap<_, _>>();
+        if players.len() != checkpoint.players.len() {
+            return Err("shared Zone checkpoint contains duplicate player presences".to_string());
+        }
+        let pending_zone_ground_drop_claims = checkpoint
+            .pending_zone_ground_drop_claims
+            .iter()
+            .cloned()
+            .collect::<BTreeMap<_, _>>();
+        if pending_zone_ground_drop_claims.len() != checkpoint.pending_zone_ground_drop_claims.len()
+        {
+            return Err(
+                "shared Zone checkpoint contains duplicate pending drop-claim presences"
+                    .to_string(),
+            );
+        }
+        for (key, tickets) in &pending_zone_ground_drop_claims {
+            let session_id = zone_sessions.get(key).ok_or_else(|| {
+                format!(
+                    "shared Zone checkpoint has pending drop claim without presence for {}/{}",
+                    key.account_id, key.character_index
+                )
+            })?;
+            if !players.contains_key(key) {
+                return Err(format!(
+                    "shared Zone checkpoint has pending drop claim without player for {}/{}",
+                    key.account_id, key.character_index
+                ));
+            }
+            for ticket in tickets {
+                if &ticket.session_id != session_id {
+                    return Err(format!(
+                        "shared Zone checkpoint pending drop claim session mismatch for {}/{}",
+                        key.account_id, key.character_index
+                    ));
+                }
+                if !zone_manager.has_pending_ground_drop_claim_ticket(session_id, ticket) {
+                    return Err(format!(
+                        "shared Zone checkpoint pending drop claim is absent or mismatched in Zone for {}/{} object {}",
+                        key.account_id, key.character_index, ticket.object_id
+                    ));
+                }
+            }
+        }
         Ok(Self {
             next_zone_object_id: checkpoint.next_zone_object_id,
             next_live_outbound_registration_id: checkpoint.next_live_outbound_registration_id,
             #[cfg(test)]
             zone_cadence_tick_count: 0,
-            zone_manager: ZoneManager::restore_checkpoint(&checkpoint.zone_manager_bytes)?,
+            zone_manager,
             zone_sessions,
             zone_session_keys,
             pending_zone_packets: checkpoint
@@ -2356,10 +2428,7 @@ impl SharedInProcessZoneState {
                 .pending_zone_shout_consumes
                 .into_iter()
                 .collect(),
-            pending_zone_ground_drop_claims: checkpoint
-                .pending_zone_ground_drop_claims
-                .into_iter()
-                .collect(),
+            pending_zone_ground_drop_claims,
             pending_zone_monster_kill_awards: checkpoint
                 .pending_zone_monster_kill_awards
                 .into_iter()
@@ -2371,7 +2440,7 @@ impl SharedInProcessZoneState {
             pending_zone_player_heals: checkpoint.pending_zone_player_heals.into_iter().collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
-            players: checkpoint.players.into_iter().collect(),
+            players,
             maps: checkpoint.maps,
             trade_offers: checkpoint.trade_offers.into_iter().collect(),
             pending_trade_deliveries: checkpoint.pending_trade_deliveries.into_iter().collect(),
@@ -2539,7 +2608,9 @@ impl SharedInProcessZoneState {
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
             | ZoneCommand::CommitGroundDropClaim { session_id, .. }
+            | ZoneCommand::CommitGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::CancelGroundDropClaim { session_id, .. }
+            | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. }
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. } => Some(session_id),
@@ -2746,17 +2817,21 @@ impl SharedInProcessZoneState {
         self.pending_zone_shout_consumes.remove(key)
     }
 
-    fn queue_zone_ground_drop_claim(&mut self, key: ZonePresenceKey, drop: GroundDropSnapshot) {
+    fn queue_zone_ground_drop_claim(
+        &mut self,
+        key: ZonePresenceKey,
+        ticket: GroundDropClaimTicket,
+    ) {
         self.pending_zone_ground_drop_claims
             .entry(key)
             .or_default()
-            .push(drop);
+            .push(ticket);
     }
 
     fn take_pending_zone_ground_drop_claims(
         &mut self,
         key: &ZonePresenceKey,
-    ) -> Vec<GroundDropSnapshot> {
+    ) -> Vec<GroundDropClaimTicket> {
         self.pending_zone_ground_drop_claims
             .remove(key)
             .unwrap_or_default()
@@ -2847,7 +2922,7 @@ impl SharedInProcessZoneState {
         Vec<ServerPacket>,
         Option<(Point, MirDirection)>,
         Option<(bool, bool)>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -2864,7 +2939,7 @@ impl SharedInProcessZoneState {
         Vec<ServerPacket>,
         Option<(Point, MirDirection)>,
         Option<(bool, bool)>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -2977,7 +3052,10 @@ impl SharedInProcessZoneState {
                         self.queue_zone_shout_consume(key, map_shout, server_shout);
                     }
                 }
-                ZoneOutbound::GroundDropClaimed { session_id, drop } => {
+                // Legacy object-id-only claims are intentionally ignored. A
+                // modern Zone always emits the authority-bearing ticket form.
+                ZoneOutbound::GroundDropClaimed { .. } => {}
+                ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket } => {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
@@ -2986,11 +3064,11 @@ impl SharedInProcessZoneState {
                     {
                         continue;
                     }
-                    self.remove_shared_drop_for_key(&key, drop.object_id);
+                    self.remove_shared_drop_for_key(&key, ticket.object_id);
                     if current_key == Some(&key) {
-                        current_ground_drop_claims.push(drop);
+                        current_ground_drop_claims.push(ticket);
                     } else {
-                        self.queue_zone_ground_drop_claim(key, drop);
+                        self.queue_zone_ground_drop_claim(key, ticket);
                     }
                 }
                 ZoneOutbound::MonsterKillAward { session_id, award } => {
@@ -7867,7 +7945,7 @@ impl SharedInProcessZoneSessionRuntime {
         tick_after_command: bool,
     ) -> (
         Vec<ServerPacket>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -7886,7 +7964,7 @@ impl SharedInProcessZoneSessionRuntime {
         commands: Vec<ZoneCommand>,
     ) -> (
         Vec<ServerPacket>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -8071,42 +8149,51 @@ impl SharedInProcessZoneSessionRuntime {
 
     fn apply_zone_ground_drop_claims(
         &mut self,
-        claims: Vec<GroundDropSnapshot>,
+        claims: Vec<GroundDropClaimTicket>,
     ) -> (BTreeMap<u32, Vec<ServerPacket>>, BTreeSet<u32>) {
         if claims.is_empty() {
             return (BTreeMap::new(), BTreeSet::new());
         }
-        let Some(identity) = self.inner.active_identity() else {
-            return (BTreeMap::new(), BTreeSet::new());
-        };
-        let Some(session_id) = self.current_zone_session_id() else {
-            return (BTreeMap::new(), BTreeSet::new());
-        };
+        let active_identity = self.inner.active_identity();
+        let current_session_id = self.current_zone_session_id();
         let mut packets_by_object_id = BTreeMap::<u32, Vec<ServerPacket>>::new();
         let mut canceled_claims = BTreeSet::new();
-        for drop in claims {
-            let object_id = drop.object_id;
-            let mut receipt =
-                self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
-                    identity: identity.clone(),
-                    command: SharedAccountInventoryCommand::GroundDropPickup(drop.clone()),
-                });
+        for ticket in claims {
+            let drop = ticket.drop.clone();
+            let object_id = ticket.object_id;
+            let identity_matches_claim = current_session_id.as_ref() == Some(&ticket.session_id);
+            let mut receipt = match active_identity.as_ref().filter(|_| identity_matches_claim) {
+                Some(identity) => {
+                    self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+                        identity: identity.clone(),
+                        command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                            drop: drop.clone(),
+                            claim_idempotency_key: ticket.idempotency_key.clone(),
+                        },
+                    })
+                }
+                None => SharedAccountInventoryTransactionReceipt {
+                    kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                    committed: false,
+                    packets: Vec::new(),
+                },
+            };
             debug_assert_eq!(
                 receipt.kind,
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             );
             let followup = if receipt.committed {
                 self.retire_local_ground_drop_projection(&drop);
-                ZoneCommand::CommitGroundDropClaim {
-                    session_id: session_id.clone(),
-                    object_id,
+                ZoneCommand::CommitGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
                 }
             } else {
-                self.restore_zone_ground_drop_claim(drop.clone());
+                self.restore_zone_ground_drop_claim(drop);
                 canceled_claims.insert(object_id);
-                ZoneCommand::CancelGroundDropClaim {
-                    session_id: session_id.clone(),
-                    object_id,
+                ZoneCommand::CancelGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
                     now_ms: Self::zone_now_ms(),
                 }
             };
@@ -8123,7 +8210,6 @@ impl SharedInProcessZoneSessionRuntime {
         }
         (packets_by_object_id, canceled_claims)
     }
-
     fn restore_zone_ground_drop_claim(&mut self, drop: GroundDropSnapshot) {
         let Some(key) = self.current_presence_key() else {
             return;
@@ -9968,13 +10054,13 @@ impl SharedInProcessZoneSessionRuntime {
     fn apply_shared_intelligent_creature_drop_claims(
         &mut self,
         active_creature: &mir2_protocol::ClientIntelligentCreature,
-        claims: Vec<GroundDropSnapshot>,
+        claims: Vec<GroundDropClaimTicket>,
     ) -> (Vec<ServerPacket>, BTreeSet<u32>) {
         let mut packets = Vec::new();
         let mut canceled_claims = BTreeSet::new();
-        for drop in claims {
+        for ticket in claims {
             let (claim_packets, canceled_object_id) =
-                self.apply_shared_intelligent_creature_drop_claim(active_creature, drop);
+                self.apply_shared_intelligent_creature_drop_claim(active_creature, ticket);
             if let Some(object_id) = canceled_object_id {
                 canceled_claims.insert(object_id);
             }
@@ -9986,58 +10072,66 @@ impl SharedInProcessZoneSessionRuntime {
     fn apply_shared_intelligent_creature_drop_claim(
         &mut self,
         active_creature: &mir2_protocol::ClientIntelligentCreature,
-        drop: GroundDropSnapshot,
+        ticket: GroundDropClaimTicket,
     ) -> (Vec<ServerPacket>, Option<u32>) {
-        let Some(session_id) = self.current_zone_session_id() else {
-            self.restore_zone_ground_drop_claim(drop);
-            return (Vec::new(), None);
+        let drop = ticket.drop.clone();
+        let object_id = ticket.object_id;
+        let session_matches_claim =
+            self.current_zone_session_id().as_ref() == Some(&ticket.session_id);
+        let eligible = session_matches_claim
+            && intelligent_creature_allows_ground_drop(active_creature, &drop);
+        let active_identity = self.inner.active_identity();
+        let mut receipt = match active_identity.as_ref().filter(|_| eligible) {
+            Some(identity) => {
+                self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+                    identity: identity.clone(),
+                    command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                        drop: drop.clone(),
+                        claim_idempotency_key: ticket.idempotency_key.clone(),
+                    },
+                })
+            }
+            None => SharedAccountInventoryTransactionReceipt {
+                kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                committed: false,
+                packets: Vec::new(),
+            },
         };
-        if !intelligent_creature_allows_ground_drop(active_creature, &drop) {
-            let object_id = drop.object_id;
-            self.restore_zone_ground_drop_claim(drop.clone());
-            let packets = self.dispatch_zone_player_command(
-                ZoneCommand::CancelGroundDropClaim {
-                    session_id,
-                    object_id,
-                    now_ms: Self::zone_now_ms(),
-                },
-                false,
-            );
-            return (packets, Some(object_id));
-        }
-        let object_id = drop.object_id;
-        let mut packets = self.inner.apply_shared_ground_drop_pickup(&drop);
-        let gained = packets.iter().any(|packet| {
-            matches!(
-                packet,
-                ServerPacket::GainedGold { .. } | ServerPacket::GainedItem { .. }
-            )
-        });
-        if gained {
+        debug_assert_eq!(
+            receipt.kind,
+            SharedAccountInventoryTransactionKind::GroundDropPickup
+        );
+        let (followup, canceled_object_id) = if receipt.committed {
             self.retire_local_ground_drop_projection(&drop);
-            packets.insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
-            packets.extend(self.dispatch_zone_player_command(
-                ZoneCommand::CommitGroundDropClaim {
-                    session_id,
-                    object_id,
+            receipt
+                .packets
+                .insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
+            (
+                ZoneCommand::CommitGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
                 },
-                false,
-            ));
-            (packets, None)
+                None,
+            )
         } else {
             self.restore_zone_ground_drop_claim(drop);
-            let packets = self.dispatch_zone_player_command(
-                ZoneCommand::CancelGroundDropClaim {
-                    session_id,
-                    object_id,
+            (
+                ZoneCommand::CancelGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
                     now_ms: Self::zone_now_ms(),
                 },
-                false,
-            );
-            (packets, Some(object_id))
-        }
+                Some(object_id),
+            )
+        };
+        let followup_packets = if self.teardown_is_fenced() {
+            self.dispatch_zone_fenced_teardown_followup(followup)
+        } else {
+            self.dispatch_zone_player_command(followup, false)
+        };
+        receipt.packets.extend(followup_packets);
+        (receipt.packets, canceled_object_id)
     }
-
     fn adjacent_remote_player_name(&self) -> Option<String> {
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
@@ -10444,6 +10538,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             } else {
                 shared_packets
             }
+        } else if let Some((mouse_mode, location)) = shared_intelligent_creature_pickup {
+            // Shared creature pickup is authoritative even when it produces no
+            // packets. Never fall back to the personal SimulationSession path.
+            self.pick_up_shared_drop_with_intelligent_creature(location, mouse_mode)
         } else if shared_harvest_direction.is_some() {
             self.inner.execute(command)?
         } else if let Some(attack) = zone_native_player_attack {
@@ -10476,9 +10574,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 command_packets = self.execute_shared_npc_interact(object_id);
             } else if let Some((object_id, key)) = shared_call_npc {
                 command_packets = self.execute_shared_npc_call(object_id, &key);
-            } else if let Some((mouse_mode, location)) = shared_intelligent_creature_pickup {
-                command_packets =
-                    self.pick_up_shared_drop_with_intelligent_creature(location, mouse_mode);
             }
         }
         if is_world_tick
@@ -11151,13 +11246,14 @@ mod tests {
         UserItemStat,
     };
     use mir2_simulation::{
-        GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime, QuestStage, SessionId,
-        SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-        SharedNpcSavedValue, SharedTradeOffer, WorldCommand, WorldEntityDisposition,
-        WorldEntityKind, WorldEntitySnapshot, WorldRuntime, ZoneBossRewardAudit, ZoneChatProfile,
-        ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense,
-        ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination,
-        ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime, ZoneRuntimeHandle,
+        GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime,
+        QuestStage, SessionId, SharedAccountInventoryTransactionKind,
+        SharedAccountInventoryTransactionReceipt, SharedNpcSavedValue, SharedTradeOffer,
+        WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime,
+        ZoneBossRewardAudit, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
+        ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+        ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats,
+        ZoneRuntime, ZoneRuntimeHandle,
     };
     use std::{
         collections::{BTreeMap, BTreeSet},
@@ -11328,6 +11424,98 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn checkpoint_restore_requires_pending_drop_claims_to_match_presence_and_zone() {
+        let mut state = SharedInProcessZoneState::new();
+        let key = ZonePresenceKey {
+            account_id: "claim-restore-account".to_string(),
+            character_index: 0,
+        };
+        let session_id = SessionId::new("claim-restore-session");
+        let zone_object_id = state.upsert_player(
+            key.clone(),
+            "ClaimRestorer",
+            "0".to_string(),
+            shared_picker_entity(101, 330, 270),
+            80,
+        );
+        state.zone_sessions.insert(key.clone(), session_id.clone());
+        state
+            .zone_session_keys
+            .insert(session_id.clone(), key.clone());
+        state.zone_manager.join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: key.account_id.clone(),
+            character_index: key.character_index,
+            object_id: zone_object_id,
+            name: "ClaimRestorer".to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 1,
+            hp: 10,
+            max_hp: 10,
+            mp: 10,
+            map_file_name: "0".to_string(),
+            position: Point { x: 330, y: 270 },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        });
+        let drop = GroundDropSnapshot {
+            object_id: 8_801,
+            name: "Checkpoint Claim Gold".to_string(),
+            name_colour_argb: -1,
+            icon: 0,
+            x: 330,
+            y: 270,
+            quantity: 1,
+            source_monster: "checkpoint-claim-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::Gold { amount: 25 },
+        };
+        state.zone_manager.handle(ZoneCommand::SyncGroundDrops {
+            session_id: session_id.clone(),
+            drops: vec![drop.clone()],
+            now_ms: 1_000,
+        });
+        let outbounds = state.zone_manager.handle(ZoneCommand::ClaimGroundDrop {
+            session_id: session_id.clone(),
+            object_id: Some(drop.object_id),
+            target: Point { x: 330, y: 270 },
+            group_members: Vec::new(),
+            now_ms: 1_001,
+        });
+        let _ = state.dispatch_zone_outbounds(outbounds, None);
+        assert_eq!(state.pending_zone_ground_drop_claims[&key].len(), 1);
+
+        let checkpoint = state.checkpoint().expect("checkpoint with pending claim");
+        SharedInProcessZoneState::restore(checkpoint.clone())
+            .expect("an exact pending claim should restore");
+
+        let mut tampered_ticket = checkpoint.clone();
+        tampered_ticket.pending_zone_ground_drop_claims[0].1[0]
+            .idempotency_key
+            .push_str("-tampered");
+        let error = SharedInProcessZoneState::restore(tampered_ticket)
+            .expect_err("a pending ticket absent from the restored Zone must fail");
+        assert!(error.contains("absent or mismatched in Zone"));
+
+        let mut wrong_session = checkpoint.clone();
+        wrong_session.pending_zone_ground_drop_claims[0].1[0].session_id =
+            SessionId::new("wrong-session");
+        let error = SharedInProcessZoneState::restore(wrong_session)
+            .expect_err("a pending ticket with the wrong presence session must fail");
+        assert!(error.contains("session mismatch"));
+
+        let mut orphaned_presence = checkpoint;
+        orphaned_presence.pending_zone_ground_drop_claims[0]
+            .0
+            .account_id = "orphaned-claim-account".to_string();
+        let error = SharedInProcessZoneState::restore(orphaned_presence)
+            .expect_err("a pending ticket without a presence must fail");
+        assert!(error.contains("without presence"));
+    }
     #[test]
     fn world_checkpoint_removes_sessions_players_and_pending_packets() {
         let mut state = SharedInProcessZoneState::new();
@@ -13901,7 +14089,8 @@ mod tests {
                         }],
                     }
                 }
-                SharedAccountInventoryCommand::GroundDropPickup(_) => {
+                SharedAccountInventoryCommand::GroundDropPickup(_)
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
                     *self
                         .ground_drop_calls
                         .lock()
@@ -14073,8 +14262,21 @@ mod tests {
             ownership_remaining_ticks: None,
             loot: GroundDropLootSnapshot::Gold { amount: 25 },
         };
+        let claim_session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let claim_ticket = GroundDropClaimTicket {
+            claim_id: 1,
+            object_id: gold_drop.object_id,
+            drop_generation: 1,
+            payload_digest: "actor-boundary-payload".to_string(),
+            idempotency_key: "actor-boundary-claim".to_string(),
+            session_id: claim_session_id,
+            owner_object_id: gold_drop.owner_object_id,
+            drop: gold_drop,
+        };
         let (pickup_packets, canceled_claims) =
-            runtime.apply_zone_ground_drop_claims(vec![gold_drop]);
+            runtime.apply_zone_ground_drop_claims(vec![claim_ticket]);
         assert_eq!(
             *ground_drop_calls
                 .lock()
@@ -14090,8 +14292,12 @@ mod tests {
                     && envelope.identity.character_name == "Blade"
                     && matches!(
                         &envelope.command,
-                        SharedAccountInventoryCommand::GroundDropPickup(drop)
-                            if drop.object_id == 9101 && drop.name == "Actor Boundary Gold"
+                        SharedAccountInventoryCommand::GroundDropClaimPickup {
+                            drop,
+                            claim_idempotency_key,
+                        } if drop.object_id == 9101
+                            && drop.name == "Actor Boundary Gold"
+                            && claim_idempotency_key == "actor-boundary-claim"
                     )
             }));
         assert!(canceled_claims.contains(&9101));
@@ -14101,6 +14307,108 @@ mod tests {
             .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
     }
 
+    #[test]
+    fn intelligent_creature_shared_pickup_uses_ticket_bound_account_service() {
+        let commands = Arc::new(Mutex::new(Vec::new()));
+        let ground_drop_calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(RecordingAccountInventoryService {
+            commands: commands.clone(),
+            ground_drop_calls: ground_drop_calls.clone(),
+            monster_award_calls: Arc::new(Mutex::new(0)),
+            skill_item_calls: Arc::new(Mutex::new(0)),
+            ground_drop_committed: true,
+            monster_award_committed: true,
+            skill_item_committed: true,
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "pet-ticket-account-service", "Blade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let drop = shared_gold_drop(9_201, 330, 270, None, None);
+        let ticket = GroundDropClaimTicket {
+            claim_id: 7,
+            object_id: drop.object_id,
+            drop_generation: 3,
+            payload_digest: "pet-ticket-payload".to_string(),
+            idempotency_key: "pet-ticket-claim".to_string(),
+            session_id,
+            owner_object_id: drop.owner_object_id,
+            drop,
+        };
+
+        let (packets, canceled) =
+            runtime.apply_shared_intelligent_creature_drop_claim(&shared_pickup_creature(), ticket);
+
+        assert_eq!(*ground_drop_calls.lock().expect("ground drop calls"), 1);
+        assert!(canceled.is_none());
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::IntelligentCreaturePickup { object_id } if *object_id == 9_201
+        )));
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+        assert!(commands.lock().expect("commands").iter().any(|envelope| {
+            matches!(
+                &envelope.command,
+                SharedAccountInventoryCommand::GroundDropClaimPickup {
+                    drop,
+                    claim_idempotency_key,
+                } if drop.object_id == 9_201 && claim_idempotency_key == "pet-ticket-claim"
+            )
+        }));
+    }
+
+    #[test]
+    fn intelligent_creature_shared_pickup_service_failure_cancels_without_personal_fallback() {
+        let commands = Arc::new(Mutex::new(Vec::new()));
+        let ground_drop_calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(RecordingAccountInventoryService {
+            commands,
+            ground_drop_calls: ground_drop_calls.clone(),
+            monster_award_calls: Arc::new(Mutex::new(0)),
+            skill_item_calls: Arc::new(Mutex::new(0)),
+            ground_drop_committed: false,
+            monster_award_committed: true,
+            skill_item_committed: true,
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "pet-ticket-service-failure", "Blade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let drop = shared_gold_drop(9_202, 330, 270, None, None);
+        let ticket = GroundDropClaimTicket {
+            claim_id: 8,
+            object_id: drop.object_id,
+            drop_generation: 4,
+            payload_digest: "pet-ticket-failure-payload".to_string(),
+            idempotency_key: "pet-ticket-failure-claim".to_string(),
+            session_id,
+            owner_object_id: drop.owner_object_id,
+            drop,
+        };
+
+        let (packets, canceled) =
+            runtime.apply_shared_intelligent_creature_drop_claim(&shared_pickup_creature(), ticket);
+
+        assert_eq!(*ground_drop_calls.lock().expect("ground drop calls"), 1);
+        assert_eq!(canceled, Some(9_202));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::IntelligentCreaturePickup { .. } | ServerPacket::GainedGold { .. }
+        )));
+        assert!(runtime
+            .world_snapshot()
+            .ground_drops
+            .iter()
+            .any(|drop| drop.object_id == 9_202));
+    }
     #[test]
     fn shared_in_process_runtime_prechecks_item_skill_before_consuming_items() {
         let commands = Arc::new(Mutex::new(Vec::new()));

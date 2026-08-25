@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> 2026-08-25 GroundDrop identity Slice C complete: authoritative claim tickets
+> now bind Zone key, object id, monotonic generation, claim id, canonical payload
+> digest, session/owner identity, and the complete drop payload. Player and
+> IntelligentCreature pickup both settle through the same account-inventory
+> boundary; success commits the exact ticket and failure cancels/restores it.
+> Legacy object-id-only follow-ups fail closed, reconnect/checkpoint restore
+> validates pending tickets against presence plus the restored Zone claim, v1
+> checkpoints rebuild unsigned authority fields, and exhausted u64 allocators
+> reject instead of reusing ids. Independent P0/P1 review is closed. Locked
+> serial evidence passes Simulation lib 1465/1465, shared_zone 193/193,
+> Gateway lib 609 passed with 1 ignored, Web typecheck, exact-file Rustfmt, and
+> diff checks. Slice D durable post-commit crash recovery remains the final
+> item-identity settlement blocker; this entry does not pre-claim overall 100%.
 > GroundDrop identity Slice A/B complete (2026-08-25): complete recursive
 > Crystal `UserItem` identity now remains lossless through drop creation,
 > internal snapshots, checkpoints, Zone RPC, state roots, and current

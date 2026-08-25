@@ -953,7 +953,8 @@ impl PostgresEconomyAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
                 runtime.commit_shared_inventory_item_drop_transaction(drop)
             }
-            SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+            SharedAccountInventoryCommand::GroundDropPickup(drop)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -1221,7 +1222,8 @@ fn command_kind(command: &SharedAccountInventoryCommand) -> SharedAccountInvento
         SharedAccountInventoryCommand::InventoryItemDrop { .. } => {
             SharedAccountInventoryTransactionKind::InventoryItemDrop
         }
-        SharedAccountInventoryCommand::GroundDropPickup(_) => {
+        SharedAccountInventoryCommand::GroundDropPickup(_)
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
             SharedAccountInventoryTransactionKind::GroundDropPickup
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -1244,7 +1246,8 @@ fn preflight_projection(
         SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
             runtime.can_commit_shared_inventory_item_drop(drop)
         }
-        SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+        SharedAccountInventoryCommand::GroundDropPickup(drop)
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
             runtime.can_commit_shared_ground_drop_pickup(drop)
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => runtime.active_identity().is_some(),
@@ -1304,7 +1307,8 @@ fn economy_transaction_for_command(
                 }],
             )
         }
-        SharedAccountInventoryCommand::GroundDropPickup(drop) => match &drop.loot {
+        SharedAccountInventoryCommand::GroundDropPickup(drop)
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => match &drop.loot {
             GroundDropLootSnapshot::Gold { amount } => {
                 metadata.insert("operation".to_string(), "groundDropGoldPickup".to_string());
                 metadata.insert("objectId".to_string(), drop.object_id.to_string());
