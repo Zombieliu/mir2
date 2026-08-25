@@ -31,6 +31,15 @@ function Get-ByteSha256 {
     return ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($Bytes))).Replace('-', '')
 }
 
+function ConvertFrom-JsonPreservingDateStrings {
+    param([Parameter(Mandatory = $true)][string]$Text)
+    $command = Get-Command ConvertFrom-Json -ErrorAction Stop
+    if ($command.Parameters.ContainsKey('DateKind')) {
+        return ($Text | ConvertFrom-Json -DateKind String)
+    }
+    return ($Text | ConvertFrom-Json)
+}
+
 function Get-OrdinalSortedStrings {
     param([object[]]$Values)
     $strings = New-Object System.Collections.Generic.List[string]
@@ -423,7 +432,7 @@ function Get-WorktreeState {
 function Read-BuildAttestation {
     param([Parameter(Mandatory = $true)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw "build attestation missing: $Path" }
-    try { $value = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json } catch { throw "invalid build attestation JSON: $Path" }
+    try { $value = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $Path -Raw) } catch { throw "invalid build attestation JSON: $Path" }
     $required = @('schema', 'exeSha256', 'exeSizeBytes', 'gitRevision', 'worktreeDirty', 'worktreeStatusScope', 'worktreeStatusSha256', 'worktreeStatusLineCount', 'cargoVersion', 'rustcVersion', 'buildCommand', 'pathRemapping', 'buildCompletedUtc')
     foreach ($name in $required) { if ($null -eq $value.PSObject.Properties[$name] -or [string]::IsNullOrWhiteSpace([string]$value.$name)) { throw "build attestation missing field: $name" } }
     if ($value.schema -ne 'mir2.windows.build-attestation.v2') { throw 'unsupported build attestation schema' }
@@ -520,6 +529,10 @@ function Assert-PackageAllowlist {
 }
 
 if ($SelfTest) {
+    $dateVector = ConvertFrom-JsonPreservingDateStrings -Text '{"buildCompletedUtc":"2026-08-25T20:51:33.9697458+00:00"}'
+    if (-not ($dateVector.buildCompletedUtc -is [string]) -or [string]$dateVector.buildCompletedUtc -cne '2026-08-25T20:51:33.9697458+00:00') {
+        throw 'JSON parser changed an attestation UTC string into a locale-dependent value'
+    }
     $selfRoot = Join-Path ([IO.Path]::GetTempPath()) ('mir2-package-selftest-' + [guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path $selfRoot | Out-Null
     $junctionPath = Join-Path $selfRoot 'dist\junction'

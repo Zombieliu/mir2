@@ -15,6 +15,7 @@ $ErrorActionPreference = 'Stop'
 function Write-Utf8NoBom { param([string]$Path, [string]$Text); [IO.File]::WriteAllText($Path, $Text, [Text.UTF8Encoding]::new($false)) }
 function Get-TextSha256 { param([string]$Text); return ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($Text)))).Replace('-', '') }
 function Get-ByteSha256 { param([byte[]]$Bytes); return ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($Bytes))).Replace('-', '') }
+function ConvertFrom-JsonPreservingDateStrings { param([Parameter(Mandatory = $true)][string]$Text); $command=Get-Command ConvertFrom-Json -ErrorAction Stop;if($command.Parameters.ContainsKey('DateKind')){return($Text|ConvertFrom-Json -DateKind String)};return($Text|ConvertFrom-Json) }
 function Get-OrdinalSortedStrings { param([object[]]$Values); $strings=New-Object System.Collections.Generic.List[string];foreach($value in @($Values)){[void]$strings.Add([string]$value)};$result=$strings.ToArray();[Array]::Sort($result,[StringComparer]::Ordinal);return $result }
 function Get-OrdinalUniqueStrings { param([object[]]$Values); $set=[Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal);foreach($value in @($Values)){[void]$set.Add([string]$value)};return @(Get-OrdinalSortedStrings -Values $set) }
 function Get-ManifestCanonicalText { param([object[]]$Entries);$records=New-Object System.Collections.Generic.List[string];foreach($entry in @($Entries)){[void]$records.Add([string]::Format([Globalization.CultureInfo]::InvariantCulture,"{0}`t{1}`t{2}",$entry.path,$entry.size,$entry.sha256))};$sorted=$records.ToArray();[Array]::Sort($sorted,[StringComparer]::Ordinal);return(($sorted-join"`n")+"`n") }
@@ -267,6 +268,8 @@ function Get-MissingRequiredCandidateFiles {
 }
 
 if ($SelfTest) {
+    $dateVector = ConvertFrom-JsonPreservingDateStrings -Text '{"buildCompletedUtc":"2026-08-25T20:51:33.9697458+00:00"}'
+    if (-not ($dateVector.buildCompletedUtc -is [string]) -or [string]$dateVector.buildCompletedUtc -cne '2026-08-25T20:51:33.9697458+00:00') { throw 'JSON parser changed an attestation UTC string into a locale-dependent value' }
     $selfRoot = Join-Path ([IO.Path]::GetTempPath()) ('mir2-verify-selftest-' + [guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $selfRoot | Out-Null
     $certificate=$null; $wrongCertificate=$null; $rsa=$null; $wrongRsa=$null
     try {
@@ -324,7 +327,7 @@ if (Test-Path -LiteralPath $exePath -PathType Leaf) {
 $attestationPath = Join-Path $PackageRoot 'BUILD-ATTESTATION.json'; $attestation = $null; $attestationHash = ''; $attestationShapeValid = $false; $buildCompleted = [DateTime]::MinValue
 if (Test-Path -LiteralPath $attestationPath -PathType Leaf) {
     $attestationHash = (Get-FileHash -LiteralPath $attestationPath -Algorithm SHA256).Hash.ToUpperInvariant()
-    try { $attestation = Get-Content -LiteralPath $attestationPath -Raw | ConvertFrom-Json } catch { Fail 'BUILD-ATTESTATION.json invalid JSON' }
+    try { $attestation = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $attestationPath -Raw) } catch { Fail 'BUILD-ATTESTATION.json invalid JSON' }
 }
 if ($null -ne $attestation) {
     $attestationShapeValid = $true
@@ -343,7 +346,7 @@ if ($null -ne $attestation) {
 }
 
 $manifestPath = Join-Path $PackageRoot 'PACKAGE-MANIFEST.json'; $manifest = $null; $manifestShapeValid = $false; $computedAggregate = ''; $manifestHash = ''; $payloadFiles = @(Get-ManifestPayloadFiles -Root $PackageRoot)
-if (Test-Path -LiteralPath $manifestPath -PathType Leaf) { $manifestHash=(Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToUpperInvariant(); try { $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json } catch { Fail 'PACKAGE-MANIFEST.json invalid JSON' } }
+if (Test-Path -LiteralPath $manifestPath -PathType Leaf) { $manifestHash=(Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToUpperInvariant(); try { $manifest = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $manifestPath -Raw) } catch { Fail 'PACKAGE-MANIFEST.json invalid JSON' } }
 if ($null -ne $manifest) {
     $manifestShapeValid = $true
     foreach ($field in @('schema','coverage','fileCount','totalBytes','aggregateSha256','files')) { if ($null -eq $manifest.PSObject.Properties[$field]) { Fail "package manifest missing field: $field"; $manifestShapeValid = $false } }
@@ -362,7 +365,7 @@ if ($null -ne $manifest) {
 }
 
 $versionPath = Join-Path $PackageRoot 'VERSION.json'; $version = $null; $versionShapeValid = $false; $versionHash=''
-if (Test-Path -LiteralPath $versionPath -PathType Leaf) { $versionHash=(Get-FileHash -LiteralPath $versionPath -Algorithm SHA256).Hash.ToUpperInvariant(); try { $version = Get-Content -LiteralPath $versionPath -Raw | ConvertFrom-Json } catch { Fail 'VERSION.json invalid JSON' } }
+if (Test-Path -LiteralPath $versionPath -PathType Leaf) { $versionHash=(Get-FileHash -LiteralPath $versionPath -Algorithm SHA256).Hash.ToUpperInvariant(); try { $version = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $versionPath -Raw) } catch { Fail 'VERSION.json invalid JSON' } }
 if ($null -ne $version) {
     $versionShapeValid = $true
     foreach ($field in @('schema','candidate','gitRevision','worktreeDirty','worktreeStatusScope','worktreeStatusSha256','exeName','exeSha256','exeSizeBytes','buildAttestationSha256','buildCompletedUtc','packageManifestSchema','packageManifestSha256','packageManifestAggregateSha256','packageManifestFileCount','packageFileCount','releaseStatementSchema','signatureFormat','staged','builtByPackagingScript','accepted')) { if ($null -eq $version.PSObject.Properties[$field]) { Fail "VERSION missing field: $field"; $versionShapeValid = $false } }
