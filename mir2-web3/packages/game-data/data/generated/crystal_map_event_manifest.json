@@ -445,6 +445,288 @@
       }
     }
   ],
+  "typedMapCoordinateBindings": [
+    {
+      "mapId": "3",
+      "x": 861,
+      "y": 686,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 12,
+      "conditions": [
+        {
+          "kind": "pkPoints",
+          "operator": ">",
+          "value": 199,
+          "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "A Mysterious evil force seems to be pushing you back.",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 172,
+        "sourceMapFileName": "3",
+        "targetMapIndex": 385,
+        "targetMapFileName": "D1801",
+        "targetMapTitle": "PenalCavern",
+        "source": {
+          "x": 861,
+          "y": 686
+        },
+        "destination": {
+          "x": 128,
+          "y": 171
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 12
+      }
+    },
+    {
+      "mapId": "3",
+      "x": 862,
+      "y": 687,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 41,
+      "conditions": [
+        {
+          "kind": "pkPoints",
+          "operator": ">",
+          "value": 199,
+          "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "A Mysterious evil force seems to be pushing you back.",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/PenalCavern.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 172,
+        "sourceMapFileName": "3",
+        "targetMapIndex": 385,
+        "targetMapFileName": "D1801",
+        "targetMapTitle": "PenalCavern",
+        "source": {
+          "x": 862,
+          "y": 687
+        },
+        "destination": {
+          "x": 128,
+          "y": 171
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 41
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 117,
+      "y": 26,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 16,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 117,
+          "y": 26
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 16
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 118,
+      "y": 27,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 19,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 118,
+          "y": 27
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 19
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 119,
+      "y": 28,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 22,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 119,
+          "y": 28
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 22
+      }
+    },
+    {
+      "mapId": "DogYoArena2",
+      "x": 119,
+      "y": 29,
+      "bindingSourceFile": "SystemScripts/00Default/MapCoords.txt",
+      "bindingSourceLine": 25,
+      "conditions": [
+        {
+          "kind": "level",
+          "operator": ">",
+          "value": 49,
+          "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+          "sourceLine": 4
+        }
+      ],
+      "onPass": {
+        "kind": "enterMap",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 6
+      },
+      "onFail": {
+        "kind": "localMessage",
+        "message": "Doors are locked until you reach level 50!",
+        "chatType": "Hint",
+        "sourceFile": "SystemScripts/00Default/MapCoords/DogYoArena.txt",
+        "sourceLine": 8
+      },
+      "needMove": {
+        "sourceMapIndex": 439,
+        "sourceMapFileName": "DogYoArena2",
+        "targetMapIndex": 440,
+        "targetMapFileName": "DogYoHyun",
+        "targetMapTitle": "DogYoHyun",
+        "source": {
+          "x": 119,
+          "y": 29
+        },
+        "destination": {
+          "x": 21,
+          "y": 765
+        },
+        "conquestIndex": 0,
+        "sourceFile": "SystemScripts/00Default/MapCoords.txt",
+        "sourceLine": 25
+      }
+    }
+  ],
+  "generalEventScripts": {
+    "status": "open",
+    "detail": "Only validated _MAPCOORD E1 bindings are typed and executable; general Crystal event scripts remain imported source data only."
+  },
   "events": [
     {
       "sourceFile": "Events/0-Event-40.txt",

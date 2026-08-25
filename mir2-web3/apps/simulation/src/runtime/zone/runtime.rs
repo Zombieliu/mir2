@@ -15,7 +15,9 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::runtime::big_map::authoritative_zone_npc_teleport_config;
-use crate::runtime::map_events::map_coordinate_hint_packets;
+use crate::runtime::map_events::{
+    crystal_map_coordinate_decision, map_coordinate_hint_packets, CrystalMapCoordinateDecision,
+};
 
 mod checkpoint;
 
@@ -1918,6 +1920,33 @@ impl ZoneRuntime {
         player.direction = action.direction;
         player.movement_ready_at_ms = now_ms.saturating_add(ZONE_TURN_DELAY_MS);
         player.run_step_until_ms = 0;
+        let (position, level, pk_points) = {
+            let player = self
+                .players
+                .get(session_id)
+                .expect("turning player should still exist");
+            (
+                player.position.clone(),
+                player.level,
+                player.chat_profile.pk_points,
+            )
+        };
+        // Crystal CheckMovement runs at the current coordinate after the new
+        // Direction has been applied. The shared zone owns the admission
+        // decision and exact Hint, while the session/gateway remains the
+        // authority that commits a cross-map transfer.
+        let map_coordinate_packets = match crystal_map_coordinate_decision(
+            &self.key.map_file_name,
+            &position,
+            level,
+            pk_points,
+            action.direction,
+        ) {
+            Some(CrystalMapCoordinateDecision::Denied { message, chat_type }) => {
+                vec![ServerPacket::Chat { message, chat_type }]
+            }
+            _ => Vec::new(),
+        };
         let player = self
             .players
             .get(session_id)
@@ -1933,7 +1962,11 @@ impl ZoneRuntime {
             .collect::<Vec<_>>();
         let mut outbounds = vec![ZoneOutbound::ToSession {
             session_id: session_id.clone(),
-            packets: vec![user_location_packet(player)],
+            packets: {
+                let mut packets = vec![user_location_packet(player)];
+                packets.extend(map_coordinate_packets);
+                packets
+            },
         }];
         if !observers.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {

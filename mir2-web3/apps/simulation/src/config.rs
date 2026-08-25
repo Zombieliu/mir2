@@ -3737,6 +3737,7 @@ impl SimulationConfig {
     pub fn with_crystal_map_runtime(mut self) -> Self {
         self.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
         self.map_transfers.clear();
+        self.map_hazards = crystal_map_hazard_records();
         apply_crystal_map_metadata(&mut self.map);
         // Starter mining zone: a small ore vein just east of the Bichon spawn
         // (330, 270) so players can try mining without leaving the starter map.
@@ -3770,7 +3771,8 @@ impl SimulationConfig {
     /// Activate the full Crystal world (every map live when occupied, dormant
     /// when empty). Unlike [`with_crystal_map_runtime`], this does not fence the
     /// player into the starter slice: it keeps every manifest movement so all
-    /// ~463 maps are reachable, and entering any map spawns that map's entire
+    /// All 463 named maps (464 source records including one empty DB placeholder)
+    /// are reachable, and entering any named map spawns that map's entire
     /// Crystal respawn set. The starter map keeps its real manifest NPCs
     /// (spawned per-map from the manifest), so no hand-authored starter
     /// blacksmith/mine overlays are injected here — NOTE that `mine_zones`
@@ -3786,6 +3788,7 @@ impl SimulationConfig {
         self.visible_players.clear();
         self.visible_monsters.clear();
         self.visible_npcs.clear();
+        self.map_hazards = crystal_map_hazard_records();
         apply_crystal_map_metadata(&mut self.map);
         if let Some(start_point) = crystal_map_respawns_by_file_name(&self.map.file_name)
             .and_then(|map| map.safe_zones.into_iter().find(|zone| zone.start_point))
@@ -4548,9 +4551,26 @@ pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {
     map.mini_map = crystal_map.mini_map;
     map.big_map = crystal_map.big_map;
     map.lights = crystal_map.light;
+    map.flags = u8::from(crystal_map.lightning) | (u8::from(crystal_map.fire) << 1);
     map.map_dark_light = crystal_map.map_dark_light;
+    map.music = crystal_map.music;
     map.weather_particles = crystal_map.weather_particles;
     true
+}
+
+fn crystal_map_hazard_records() -> Vec<MapHazardRecord> {
+    crystal_respawn_manifest()
+        .maps
+        .into_iter()
+        .filter(|map| map.lightning || map.fire)
+        .map(|map| MapHazardRecord {
+            map_file_name: map.map_file_name,
+            lightning: map.lightning,
+            fire: map.fire,
+            lightning_damage: map.lightning_damage,
+            fire_damage: map.fire_damage,
+        })
+        .collect()
 }
 
 static ACCOUNT_STORE_FILE_WRITE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();

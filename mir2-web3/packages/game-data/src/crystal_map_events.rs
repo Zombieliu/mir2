@@ -8,9 +8,29 @@ pub struct CrystalMapEventManifest {
     pub source: CrystalMapEventSource,
     pub limits: CrystalMapEventLimits,
     pub map_coordinates: Vec<CrystalMapCoordinateBinding>,
+    #[serde(default)]
+    pub typed_map_coordinate_bindings: Vec<CrystalTypedMapCoordinateBinding>,
+    #[serde(default)]
+    pub general_event_scripts: CrystalGeneralEventScripts,
     pub events: Vec<CrystalEventFile>,
     pub references: Vec<CrystalEventReference>,
     pub diagnostics: CrystalMapEventDiagnostics,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CrystalGeneralEventScripts {
+    pub status: String,
+    pub detail: String,
+}
+
+impl Default for CrystalGeneralEventScripts {
+    fn default() -> Self {
+        Self {
+            status: "open".to_string(),
+            detail: "General Crystal event scripts are not typed or executable.".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -42,6 +62,87 @@ pub struct CrystalMapCoordinateBinding {
     pub binding_source_line: u32,
     pub include: CrystalEventInclude,
     pub resolved_section: CrystalResolvedSection,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CrystalTypedMapCoordinateBinding {
+    pub map_id: String,
+    pub x: i32,
+    pub y: i32,
+    pub binding_source_file: String,
+    pub binding_source_line: u32,
+    pub conditions: Vec<CrystalMapCoordinateCondition>,
+    pub on_pass: CrystalMapCoordinateAction,
+    pub on_fail: CrystalMapCoordinateAction,
+    pub need_move: CrystalNeedMoveBinding,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CrystalMapCoordinateCondition {
+    pub kind: CrystalMapCoordinateConditionKind,
+    pub operator: CrystalMapCoordinateComparison,
+    pub value: i32,
+    pub source_file: String,
+    pub source_line: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CrystalMapCoordinateConditionKind {
+    Level,
+    PkPoints,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CrystalMapCoordinateComparison {
+    #[serde(rename = "<")]
+    LessThan,
+    #[serde(rename = ">")]
+    GreaterThan,
+    #[serde(rename = "<=")]
+    LessThanOrEqual,
+    #[serde(rename = ">=")]
+    GreaterThanOrEqual,
+    #[serde(rename = "==")]
+    Equal,
+    #[serde(rename = "!=")]
+    NotEqual,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+pub enum CrystalMapCoordinateAction {
+    EnterMap {
+        source_file: String,
+        source_line: u32,
+    },
+    LocalMessage {
+        message: String,
+        chat_type: String,
+        source_file: String,
+        source_line: u32,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CrystalNeedMoveBinding {
+    pub source_map_index: i32,
+    pub source_map_file_name: String,
+    pub target_map_index: i32,
+    pub target_map_file_name: String,
+    pub target_map_title: String,
+    pub source: mir2_protocol::Point,
+    pub destination: mir2_protocol::Point,
+    pub conquest_index: i32,
+    pub source_file: String,
+    pub source_line: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

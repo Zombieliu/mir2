@@ -1974,6 +1974,20 @@ pub struct CrystalRespawnMap {
     #[serde(default)]
     pub weather_particles: u16,
     #[serde(default)]
+    pub music: u16,
+    #[serde(default)]
+    pub fire: bool,
+    #[serde(default)]
+    pub fire_damage: i32,
+    #[serde(default)]
+    pub lightning: bool,
+    #[serde(default)]
+    pub lightning_damage: i32,
+    #[serde(default)]
+    pub fire_wall_limit: bool,
+    #[serde(default)]
+    pub fire_wall_count: i32,
+    #[serde(default)]
     pub no_throw_item: bool,
     #[serde(default)]
     pub no_drop_player: bool,
@@ -4089,6 +4103,33 @@ mod tests {
             .expect("DogYoHyun weather map should exist");
         assert_eq!(dog_yo_hyun.weather_particles, 3);
         assert_eq!(dog_yo_hyun.map_dark_light, 0);
+
+        let hazard_maps: Vec<_> = manifest
+            .maps
+            .iter()
+            .filter(|map| map.lightning || map.fire)
+            .collect();
+        assert_eq!(hazard_maps.len(), 12);
+
+        let lightning_cave = crystal_map_respawns_by_file_name("D2081")
+            .expect("Lightning Cave hazard metadata should exist");
+        assert!(lightning_cave.lightning);
+        assert_eq!(lightning_cave.lightning_damage, 100);
+        assert!(!lightning_cave.fire);
+        assert_eq!(lightning_cave.fire_damage, 0);
+        assert_eq!(lightning_cave.music, 0);
+
+        let molten_rock_cave = crystal_map_respawns_by_file_name("D2082")
+            .expect("Molten Rock Cave hazard metadata should exist");
+        assert!(molten_rock_cave.fire);
+        assert_eq!(molten_rock_cave.fire_damage, 100);
+        assert!(!molten_rock_cave.lightning);
+        assert_eq!(molten_rock_cave.lightning_damage, 0);
+
+        assert!(manifest
+            .maps
+            .iter()
+            .all(|map| !map.fire_wall_limit && map.fire_wall_count == 0));
     }
 
     #[test]

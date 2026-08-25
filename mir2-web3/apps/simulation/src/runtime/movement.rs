@@ -785,15 +785,6 @@ impl SimulationSession {
             return packets;
         }
 
-        // See move_to_with_mode_impl: a normal direction key also reactivates
-        // a transfer source restored as the persisted player position.
-        let mut standing_transfer_packets =
-            apply_current_player_position_map_transfer(self.app.world_mut());
-        if !standing_transfer_packets.is_empty() {
-            standing_transfer_packets.extend(advance_world(self.app.world_mut()));
-            return standing_transfer_packets;
-        }
-
         let Some(player) = player_entity(self.app.world()) else {
             return Vec::new();
         };
@@ -804,6 +795,21 @@ impl SimulationSession {
             .world_mut()
             .entity_mut(player)
             .insert(Facing(direction));
+        self.app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>()
+            .player_direction = direction;
+
+        // See move_to_with_mode_impl: a normal direction key also reactivates
+        // a transfer source restored as the persisted player position. Crystal
+        // applies the new facing before CheckMovement, so ENTERMAP receives
+        // the requested direction as well.
+        let mut standing_transfer_packets =
+            apply_current_player_position_map_transfer(self.app.world_mut());
+        if !standing_transfer_packets.is_empty() {
+            standing_transfer_packets.extend(advance_world(self.app.world_mut()));
+            return standing_transfer_packets;
+        }
 
         if running && !crystal_player_can_run(self.app.world_mut()) {
             let mut packets = vec![ServerPacket::UserLocation {

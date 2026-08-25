@@ -1,13 +1,15 @@
 use bevy_ecs::prelude::World;
 use mir2_game_data::crystal_map_events::{
-    crystal_map_event_manifest_ref, CrystalMapCoordinateBinding,
+    crystal_map_event_manifest_ref, CrystalMapCoordinateAction, CrystalMapCoordinateComparison,
+    CrystalMapCoordinateCondition, CrystalMapCoordinateConditionKind,
+    CrystalTypedMapCoordinateBinding,
 };
-use mir2_game_data::{crystal_map_respawns_by_index, crystal_map_respawns_ref, MapBounds};
+use mir2_game_data::{crystal_map_respawns_by_index, MapBounds};
 use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
 
 use crate::MapTransferRecord;
 
-use super::map::{crystal_movement_transfer_key, normalize_map_file_name};
+use super::map::{crystal_movement_transfer_key, normalize_map_file_name, zone_map_collision_data};
 use super::npc_script::player_level;
 use super::resources::{MapRuntimeResource, PlayerRuntimeResource};
 
@@ -18,24 +20,9 @@ pub(super) enum CrystalMapCoordinateDecision {
         message: String,
         chat_type: ChatType,
     },
-    /// A source binding exists, but its imported script or matching NeedMove
-    /// record cannot be executed safely. Unknown data is never admitted.
+    /// A source binding exists, but its generated E1 record is invalid. Unknown
+    /// data is never admitted to the authoritative movement path.
     FailClosed,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ScriptPhase {
-    None,
-    If,
-    Act,
-    ElseAct,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct ParsedMapCoordinateScript {
-    conditions_pass: bool,
-    enter_map: bool,
-    else_message: Option<(String, ChatType)>,
 }
 
 pub(super) fn crystal_map_coordinate_decision(
@@ -46,35 +33,45 @@ pub(super) fn crystal_map_coordinate_decision(
     direction: MirDirection,
 ) -> Option<CrystalMapCoordinateDecision> {
     let normalized_map = normalize_map_file_name(map_file_name);
-    let binding = crystal_map_event_manifest_ref()
-        .map_coordinates
+    let bindings = crystal_map_event_manifest_ref()
+        .typed_map_coordinate_bindings
         .iter()
-        .find(|binding| {
+        .filter(|binding| {
             normalize_map_file_name(&binding.map_id) == normalized_map
                 && binding.x == point.x
                 && binding.y == point.y
-        })?;
-
-    let Some(script) = parse_map_coordinate_script(binding, level, pk_points) else {
-        return Some(CrystalMapCoordinateDecision::FailClosed);
+        })
+        .collect::<Vec<_>>();
+    let binding = match bindings.as_slice() {
+        [] => return None,
+        [binding] => *binding,
+        _ => return Some(CrystalMapCoordinateDecision::FailClosed),
     };
-    if !script.conditions_pass {
-        return Some(match script.else_message {
-            Some((message, chat_type)) => {
-                CrystalMapCoordinateDecision::Denied { message, chat_type }
-            }
-            None => CrystalMapCoordinateDecision::FailClosed,
+
+    if !binding
+        .conditions
+        .iter()
+        .all(|condition| condition_matches(condition, level, pk_points))
+    {
+        return Some(match &binding.on_fail {
+            CrystalMapCoordinateAction::LocalMessage {
+                message, chat_type, ..
+            } if chat_type.eq_ignore_ascii_case("Hint") => CrystalMapCoordinateDecision::Denied {
+                message: message.clone(),
+                chat_type: ChatType::Hint,
+            },
+            _ => CrystalMapCoordinateDecision::FailClosed,
         });
     }
-    if !script.enter_map {
-        return Some(CrystalMapCoordinateDecision::FailClosed);
-    }
 
-    Some(
-        need_move_transfer_for_coordinate(map_file_name, point, direction)
-            .map(CrystalMapCoordinateDecision::EnterMap)
-            .unwrap_or(CrystalMapCoordinateDecision::FailClosed),
-    )
+    Some(match &binding.on_pass {
+        CrystalMapCoordinateAction::EnterMap { .. } => {
+            typed_need_move_transfer(binding, point, direction)
+                .map(CrystalMapCoordinateDecision::EnterMap)
+                .unwrap_or(CrystalMapCoordinateDecision::FailClosed)
+        }
+        _ => CrystalMapCoordinateDecision::FailClosed,
+    })
 }
 
 pub(super) fn crystal_map_coordinate_source_cells(
@@ -82,7 +79,7 @@ pub(super) fn crystal_map_coordinate_source_cells(
 ) -> impl Iterator<Item = (i32, i32)> + '_ {
     let normalized_map = normalize_map_file_name(map_file_name);
     crystal_map_event_manifest_ref()
-        .map_coordinates
+        .typed_map_coordinate_bindings
         .iter()
         .filter(move |binding| normalize_map_file_name(&binding.map_id) == normalized_map)
         .map(|binding| (binding.x, binding.y))
@@ -150,145 +147,74 @@ pub(super) fn map_coordinate_hint_packets(
         .collect()
 }
 
-fn need_move_transfer_for_coordinate(
-    map_file_name: &str,
+fn typed_need_move_transfer(
+    binding: &CrystalTypedMapCoordinateBinding,
     point: &Point,
     direction: MirDirection,
 ) -> Option<MapTransferRecord> {
-    let source_map = crystal_map_respawns_ref(map_file_name)?;
-    let movement = source_map
-        .movements
-        .iter()
-        .find(|movement| movement.need_move && movement.source == *point)?;
-    if movement.destination.x == 0 && movement.destination.y == 0 {
+    let need_move = &binding.need_move;
+    if need_move.source != *point
+        || normalize_map_file_name(&need_move.source_map_file_name)
+            != normalize_map_file_name(&binding.map_id)
+        || !need_move_target_is_valid(need_move)
+    {
         return None;
     }
-    let target = crystal_map_respawns_by_index(movement.map_index)?;
 
     Some(MapTransferRecord {
         key: crystal_movement_transfer_key(
-            &source_map.map_file_name,
+            &need_move.source_map_file_name,
             point.x,
             point.y,
-            movement.map_index,
-            movement.destination.x,
-            movement.destination.y,
+            need_move.target_map_index,
+            need_move.destination.x,
+            need_move.destination.y,
         ),
-        from_map_file_name: source_map.map_file_name.clone(),
+        from_map_file_name: need_move.source_map_file_name.clone(),
         from_bounds: MapBounds {
             min_x: point.x,
             max_x: point.x,
             min_y: point.y,
             max_y: point.y,
         },
-        to_map_file_name: target.map_file_name,
-        to_map_title: target.map_title,
-        to_position: movement.destination.clone(),
+        to_map_file_name: need_move.target_map_file_name.clone(),
+        to_map_title: need_move.target_map_title.clone(),
+        to_position: need_move.destination.clone(),
         // Crystal ENTERMAP calls Teleport without replacing the player's
         // facing, unlike the old generic direct-transfer default.
         to_direction: direction,
-        conquest_index: movement.conquest_index,
+        conquest_index: need_move.conquest_index,
     })
 }
 
-fn parse_map_coordinate_script(
-    binding: &CrystalMapCoordinateBinding,
-    level: u16,
-    pk_points: i32,
-) -> Option<ParsedMapCoordinateScript> {
-    let mut phase = ScriptPhase::None;
-    let mut saw_condition = false;
-    let mut conditions_pass = true;
-    let mut enter_map = false;
-    let mut else_message = None;
-
-    for source_line in &binding.resolved_section.lines {
-        let line = source_line.text.trim();
-        if line.is_empty() || matches!(line, "{" | "}") {
-            continue;
-        }
-        match line.to_ascii_uppercase().as_str() {
-            "#IF" => {
-                phase = ScriptPhase::If;
-                continue;
-            }
-            "#ACT" => {
-                phase = ScriptPhase::Act;
-                continue;
-            }
-            "#ELSEACT" => {
-                phase = ScriptPhase::ElseAct;
-                continue;
-            }
-            _ => {}
-        }
-
-        match phase {
-            ScriptPhase::If => {
-                saw_condition = true;
-                conditions_pass &= evaluate_condition(line, level, pk_points)?;
-            }
-            ScriptPhase::Act => {
-                if line.eq_ignore_ascii_case("ENTERMAP") {
-                    enter_map = true;
-                } else {
-                    return None;
-                }
-            }
-            ScriptPhase::ElseAct => {
-                else_message = Some(parse_local_message(line)?);
-            }
-            ScriptPhase::None => return None,
-        }
-    }
-
-    saw_condition.then_some(ParsedMapCoordinateScript {
-        conditions_pass,
-        enter_map,
-        else_message,
-    })
-}
-
-fn evaluate_condition(line: &str, level: u16, pk_points: i32) -> Option<bool> {
-    let parts = line.split_whitespace().collect::<Vec<_>>();
-    if parts.len() != 3 {
-        return None;
-    }
-    let left = match parts[0].to_ascii_uppercase().as_str() {
-        "LEVEL" => i32::from(level),
-        "CHECKPKPOINT" => pk_points,
-        _ => return None,
+/// Validate a generated `NeedMove` target against the same authoritative map
+/// metadata used by the runtime collision layer.  The generator is data-only;
+/// an index/file mismatch, missing collision metadata, an out-of-bounds point,
+/// or a blocked destination must therefore fail closed instead of becoming an
+/// executable transfer.
+fn need_move_target_is_valid(
+    need_move: &mir2_game_data::crystal_map_events::CrystalNeedMoveBinding,
+) -> bool {
+    let Some(target) = crystal_map_respawns_by_index(need_move.target_map_index) else {
+        return false;
     };
-    let right = parts[2].parse::<i32>().ok()?;
-    compare_i32(parts[1], left, right)
-}
+    if normalize_map_file_name(&target.map_file_name)
+        != normalize_map_file_name(&need_move.target_map_file_name)
+    {
+        return false;
+    }
 
-fn compare_i32(operator: &str, left: i32, right: i32) -> Option<bool> {
-    match operator {
-        "<" => Some(left < right),
-        ">" => Some(left > right),
-        "<=" => Some(left <= right),
-        ">=" => Some(left >= right),
-        "==" => Some(left == right),
-        "!=" => Some(left != right),
-        _ => None,
-    }
-}
-
-fn parse_local_message(line: &str) -> Option<(String, ChatType)> {
-    let command_end = line.find(char::is_whitespace)?;
-    if !line[..command_end].eq_ignore_ascii_case("LocalMessage") {
-        return None;
-    }
-    let remainder = line[command_end..].trim();
-    let message_start = remainder.find('"')? + 1;
-    let message_end = remainder[message_start..].find('"')? + message_start;
-    let message = remainder[message_start..message_end].to_string();
-    let chat_type = remainder[message_end + 1..].trim();
-    if !chat_type.eq_ignore_ascii_case("Hint") {
-        return None;
-    }
-    Some((message, ChatType::Hint))
+    let Some(collision) = zone_map_collision_data(&target.map_file_name) else {
+        return false;
+    };
+    let destination = &need_move.destination;
+    destination.x >= collision.bounds.min_x
+        && destination.x <= collision.bounds.max_x
+        && destination.y >= collision.bounds.min_y
+        && destination.y <= collision.bounds.max_y
+        && !collision
+            .blocked_cells
+            .contains(&(destination.x, destination.y))
 }
 
 #[cfg(test)]
@@ -296,63 +222,53 @@ mod tests {
     use super::*;
 
     #[test]
-    fn all_six_active_bindings_resolve_fail_closed_conditions_and_need_move_targets() {
-        let cases = [
-            ("3", Point { x: 861, y: 686 }, 1, 199, false, "D1801"),
-            ("3", Point { x: 862, y: 687 }, 1, 200, true, "D1801"),
-            (
-                "DogYoArena2",
-                Point { x: 117, y: 26 },
-                49,
-                0,
-                false,
-                "DogYoHyun",
-            ),
-            (
-                "DogYoArena2",
-                Point { x: 118, y: 27 },
-                50,
-                0,
-                true,
-                "DogYoHyun",
-            ),
-            (
-                "DogYoArena2",
-                Point { x: 119, y: 28 },
-                49,
-                0,
-                false,
-                "DogYoHyun",
-            ),
-            (
-                "DogYoArena2",
-                Point { x: 119, y: 29 },
-                50,
-                0,
-                true,
-                "DogYoHyun",
-            ),
-        ];
+    fn need_move_rejects_nonzero_out_of_bounds_target() {
+        let mut binding = crystal_map_event_manifest_ref()
+            .typed_map_coordinate_bindings
+            .iter()
+            .find(|binding| binding.map_id == "3" && binding.x == 861 && binding.y == 686)
+            .expect("Penal Cavern E1 binding")
+            .clone();
+        binding.need_move.destination = Point { x: -1, y: 1 };
 
-        for (map, point, level, pk_points, allowed, target) in cases {
-            let decision = crystal_map_coordinate_decision(
-                map,
-                &point,
-                level,
-                pk_points,
-                MirDirection::UpLeft,
-            )
-            .expect("active coordinate should resolve");
-            match (allowed, decision) {
-                (true, CrystalMapCoordinateDecision::EnterMap(transfer)) => {
-                    assert_eq!(transfer.to_map_file_name, target);
-                    assert_eq!(transfer.to_direction, MirDirection::UpLeft);
-                }
-                (false, CrystalMapCoordinateDecision::Denied { chat_type, .. }) => {
-                    assert_eq!(chat_type, ChatType::Hint);
-                }
-                (_, other) => panic!("unexpected decision for {map} {point:?}: {other:?}"),
-            }
-        }
+        assert!(
+            typed_need_move_transfer(&binding, &Point { x: 861, y: 686 }, MirDirection::Left,)
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn need_move_rejects_target_map_index_file_mismatch() {
+        let mut binding = crystal_map_event_manifest_ref()
+            .typed_map_coordinate_bindings
+            .iter()
+            .find(|binding| binding.map_id == "3" && binding.x == 861 && binding.y == 686)
+            .expect("Penal Cavern E1 binding")
+            .clone();
+        binding.need_move.target_map_file_name = "not-a-crystal-map".to_string();
+
+        assert!(
+            typed_need_move_transfer(&binding, &Point { x: 861, y: 686 }, MirDirection::Left,)
+                .is_none()
+        );
+    }
+}
+
+fn condition_matches(
+    condition: &CrystalMapCoordinateCondition,
+    level: u16,
+    pk_points: i32,
+) -> bool {
+    let left = match condition.kind {
+        CrystalMapCoordinateConditionKind::Level => i32::from(level),
+        CrystalMapCoordinateConditionKind::PkPoints => pk_points,
+    };
+    match condition.operator {
+        CrystalMapCoordinateComparison::LessThan => left < condition.value,
+        CrystalMapCoordinateComparison::GreaterThan => left > condition.value,
+        CrystalMapCoordinateComparison::LessThanOrEqual => left <= condition.value,
+        CrystalMapCoordinateComparison::GreaterThanOrEqual => left >= condition.value,
+        CrystalMapCoordinateComparison::Equal => left == condition.value,
+        CrystalMapCoordinateComparison::NotEqual => left != condition.value,
     }
 }

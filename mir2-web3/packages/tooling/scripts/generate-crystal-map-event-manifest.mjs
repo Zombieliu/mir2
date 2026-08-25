@@ -11,6 +11,7 @@ const DEFAULT_ENVIR_ROOT = path.resolve(PROJECT_ROOT, "../Crystal/Build/Server/D
 const DEFAULT_MAP_COORDS = "SystemScripts/00Default/MapCoords.txt";
 const DEFAULT_EVENTS_DIR = "Events";
 const DEFAULT_OUTPUT = path.resolve(PROJECT_ROOT, "packages/game-data/data/generated/crystal_map_event_manifest.json");
+const DEFAULT_RESPAWN_MANIFEST = path.resolve(PROJECT_ROOT, "packages/game-data/data/generated/crystal_respawn_manifest.json");
 const DEFAULT_LIMITS = Object.freeze({ maxDepth: 32, maxFileBytes: 1024 * 1024, maxTotalBytes: 8 * 1024 * 1024, maxResolvedLines: 200_000 });
 
 class MapEventImportError extends Error {
@@ -63,6 +64,136 @@ function mapCoordinateFromLine(text) {
 }
 
 function sectionName(value) { return value.startsWith("[") && value.endsWith("]") ? value.slice(1, -1) : value; }
+
+function normalizeMapId(value) { return String(value).trim().replace(/\.map$/i, "").toUpperCase(); }
+
+function e1Error(message, source) {
+  const sourceFile = source.sourceFile ?? source.bindingSourceFile;
+  const sourceLine = source.sourceLine ?? source.bindingSourceLine;
+  throw new MapEventImportError(`${message} at ${sourceFile}:${sourceLine}`, { ...diagnostics(), warnings: [{ sourceFile, sourceLine, message }] });
+}
+
+function parseE1Condition(line) {
+  const parts = line.text.trim().split(/\s+/);
+  if (parts.length !== 3) e1Error(`unsupported E1 command ${JSON.stringify(line.text.trim())}`, line);
+  const kind = { LEVEL: "level", CHECKPKPOINT: "pkPoints" }[parts[0].toUpperCase()];
+  if (!kind || !["<", ">", "<=", ">=", "==", "!="].includes(parts[1]) || !/^-?\d+$/.test(parts[2])) {
+    e1Error(`unsupported E1 command ${JSON.stringify(line.text.trim())}`, line);
+  }
+  return { kind, operator: parts[1], value: Number.parseInt(parts[2], 10), sourceFile: line.sourceFile, sourceLine: line.sourceLine };
+}
+
+function parseE1LocalMessage(line) {
+  const match = line.text.trim().match(/^LocalMessage\s+"([^"]*)"\s+(\S+)\s*$/i);
+  if (!match) e1Error(`unsupported E1 command ${JSON.stringify(line.text.trim())}`, line);
+  return { kind: "localMessage", message: match[1], chatType: match[2], sourceFile: line.sourceFile, sourceLine: line.sourceLine };
+}
+
+function parseE1Binding(binding) {
+  let phase = null;
+  const conditions = [];
+  let onPass = null;
+  let onFail = null;
+  for (const line of binding.resolvedSection.lines) {
+    const text = line.text.trim();
+    if (!text || text === "{" || text === "}") continue;
+    const directive = text.toUpperCase();
+    if (directive === "#IF") {
+      if (phase !== null) e1Error("invalid E1 #IF phase", line);
+      phase = "if";
+      continue;
+    }
+    if (directive === "#ACT") {
+      if (phase !== "if") e1Error("invalid E1 #ACT phase", line);
+      phase = "act";
+      continue;
+    }
+    if (directive === "#ELSEACT") {
+      if (phase !== "act" || !onPass) e1Error("invalid E1 #ELSEACT phase", line);
+      phase = "else";
+      continue;
+    }
+    if (phase === "if") {
+      conditions.push(parseE1Condition(line));
+      continue;
+    }
+    if (phase === "act") {
+      if (text.toUpperCase() !== "ENTERMAP") {
+        e1Error(`unsupported E1 command ${JSON.stringify(text)}`, line);
+      }
+      if (onPass) e1Error("multiple E1 pass actions", line);
+      onPass = { kind: "enterMap", sourceFile: line.sourceFile, sourceLine: line.sourceLine };
+      continue;
+    }
+    if (phase === "else") {
+      if (onFail) e1Error("multiple E1 fail actions", line);
+      onFail = parseE1LocalMessage(line);
+      continue;
+    }
+    e1Error(`unsupported E1 command ${JSON.stringify(text)}`, line);
+  }
+  if (!conditions.length) e1Error("E1 binding is missing a condition", binding);
+  if (!onPass) e1Error("E1 binding is missing ENTERMAP", binding);
+  if (!onFail) e1Error("E1 binding is missing #ELSEACT action", binding);
+  return { conditions, onPass, onFail };
+}
+
+function loadRespawnManifest(respawnManifestPath) {
+  let manifest;
+  try { manifest = JSON.parse(fs.readFileSync(respawnManifestPath, "utf8")); } catch (error) {
+    throw new MapEventImportError(`cannot read Crystal respawn manifest ${respawnManifestPath}: ${error instanceof Error ? error.message : error}`, diagnostics());
+  }
+  if (!Array.isArray(manifest.maps)) throw new MapEventImportError(`Crystal respawn manifest has no maps array: ${respawnManifestPath}`, diagnostics());
+  return manifest;
+}
+
+function typedNeedMove(binding, respawnManifest) {
+  const sourceMaps = respawnManifest.maps.filter((map) => normalizeMapId(map.map_file_name) === normalizeMapId(binding.mapId));
+  if (sourceMaps.length !== 1) e1Error(`E1 NeedMove source map is ${sourceMaps.length === 0 ? "missing" : "ambiguous"}`, binding);
+  const sourceMap = sourceMaps[0];
+  const moves = (sourceMap.movements ?? []).filter((movement) => movement.need_move && movement.source?.x === binding.x && movement.source?.y === binding.y);
+  if (moves.length !== 1) e1Error(`E1 NeedMove is ${moves.length === 0 ? "missing" : "ambiguous"} for _MAPCOORD(${binding.mapId},${binding.x},${binding.y})`, binding);
+  const movement = moves[0];
+  const targets = respawnManifest.maps.filter((map) => map.map_index === movement.map_index);
+  if (targets.length !== 1) e1Error(`E1 NeedMove target map index ${movement.map_index} is ${targets.length === 0 ? "missing" : "ambiguous"}`, binding);
+  const target = targets[0];
+  return {
+    sourceMapIndex: sourceMap.map_index,
+    sourceMapFileName: sourceMap.map_file_name,
+    targetMapIndex: target.map_index,
+    targetMapFileName: target.map_file_name,
+    targetMapTitle: target.map_title,
+    source: movement.source,
+    destination: movement.destination,
+    conquestIndex: movement.conquest_index,
+    // Server.MirDB is binary. The MapCoords source location is the exact
+    // textual origin that links this E1 binding to its NeedMove record.
+    sourceFile: binding.bindingSourceFile,
+    sourceLine: binding.bindingSourceLine,
+  };
+}
+
+function buildTypedMapCoordinateBindings(mapCoordinates, respawnManifest) {
+  const seen = new Map();
+  return mapCoordinates.map((binding) => {
+    const key = `${normalizeMapId(binding.mapId)}:${binding.x}:${binding.y}`;
+    const previous = seen.get(key);
+    if (previous) e1Error(`duplicate E1 _MAPCOORD; first declared at ${previous.bindingSourceFile}:${previous.bindingSourceLine}`, binding);
+    seen.set(key, binding);
+    const parsed = parseE1Binding(binding);
+    return {
+      mapId: binding.mapId,
+      x: binding.x,
+      y: binding.y,
+      bindingSourceFile: binding.bindingSourceFile,
+      bindingSourceLine: binding.bindingSourceLine,
+      conditions: parsed.conditions,
+      onPass: parsed.onPass,
+      onFail: parsed.onFail,
+      needMove: typedNeedMove(binding, respawnManifest),
+    };
+  });
+}
 
 function makeImporter(envirRoot, requestedLimits = {}) {
   const root = path.resolve(envirRoot);
@@ -208,7 +339,7 @@ function makeImporter(envirRoot, requestedLimits = {}) {
     return files.sort((left, right) => left.localeCompare(right));
   }
 
-  function build({ mapCoordsRelative = DEFAULT_MAP_COORDS, eventsRelativeDir = DEFAULT_EVENTS_DIR } = {}) {
+  function build({ mapCoordsRelative = DEFAULT_MAP_COORDS, eventsRelativeDir = DEFAULT_EVENTS_DIR, respawnManifestPath = DEFAULT_RESPAWN_MANIFEST } = {}) {
     const mapCoordsPath = checkedRelative(mapCoordsRelative, { sourceFile: "<map-coordinates-root>", sourceLine: 0 });
     const mapFile = loadRaw(mapCoordsPath);
     const mapCoordinates = [];
@@ -234,6 +365,7 @@ function makeImporter(envirRoot, requestedLimits = {}) {
         resolvedSection: resolvedSection(target, include.section, [mapCoordsPath], 0, [`${include.sourceFile}:${include.sourceLine}`]),
       });
     }
+    const typedMapCoordinateBindings = buildTypedMapCoordinateBindings(mapCoordinates, loadRespawnManifest(respawnManifestPath));
     const eventFiles = collectEventFiles(eventsRelativeDir).map((relative) => {
       const resolved = resolvedFile(relative);
       return { sourceFile: resolved.file.path, bytes: resolved.file.bytes, resolvedLines: resolved.lines, sections: sourceFileSections(resolved.file) };
@@ -244,6 +376,8 @@ function makeImporter(envirRoot, requestedLimits = {}) {
       source: { envirRoot: "Envir", mapCoordinates: mapCoordsPath, events: checkedRelative(eventsRelativeDir, { sourceFile: "<events-root>", sourceLine: 0 }) },
       limits,
       mapCoordinates: mapCoordinates.sort((left, right) => `${left.mapId}:${left.x}:${left.y}:${left.bindingSourceLine}`.localeCompare(`${right.mapId}:${right.x}:${right.y}:${right.bindingSourceLine}`)),
+      typedMapCoordinateBindings: typedMapCoordinateBindings.sort((left, right) => `${left.mapId}:${left.x}:${left.y}:${left.bindingSourceLine}`.localeCompare(`${right.mapId}:${right.x}:${right.y}:${right.bindingSourceLine}`)),
+      generalEventScripts: { status: "open", detail: "Only validated _MAPCOORD E1 bindings are typed and executable; general Crystal event scripts remain imported source data only." },
       events: eventFiles, references, diagnostics: state.diagnostics,
     };
   }
@@ -257,33 +391,57 @@ function runSelfTests() {
   const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "mir2-map-events-"));
   try {
     fs.mkdirSync(path.join(fixtureRoot, "Events"), { recursive: true });
-    fs.writeFileSync(path.join(fixtureRoot, "MapCoords.txt"), "[@_MAPCOORD(0,1,2)]\n#INCLUDE [Events/a.txt] @Main\n");
-    fs.writeFileSync(path.join(fixtureRoot, "Events/a.txt"), "[@Main]\n{\n#INSERT [Events/b.txt]\n}\n");
-    fs.writeFileSync(path.join(fixtureRoot, "Events/b.txt"), "ok\n");
-    const good = makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events" });
+    const respawnManifestPath = path.join(fixtureRoot, "respawns.json");
+    const writeFixture = ({ mapCoords = "[@_MAPCOORD(0,1,2)]\n#INCLUDE [Events/a.txt] @Main\n", script = "[@Main]\n{\n#IF\nLevel > 9\n#ACT\nENTERMAP\n#ELSEACT\nLocalMessage \"locked\" Hint\n}\n", movements = [{ map_index: 2, source: { x: 1, y: 2 }, destination: { x: 3, y: 4 }, need_move: true, conquest_index: 0 }] } = {}) => {
+      fs.writeFileSync(path.join(fixtureRoot, "MapCoords.txt"), mapCoords);
+      fs.writeFileSync(path.join(fixtureRoot, "Events/a.txt"), script);
+      fs.writeFileSync(respawnManifestPath, JSON.stringify({ maps: [{ map_index: 1, map_file_name: "0", map_title: "Source", movements }, { map_index: 2, map_file_name: "1", map_title: "Target", movements: [] }] }));
+    };
+    writeFixture();
+    const good = makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath });
     assert(good.mapCoordinates.length === 1, "fixture binding resolves");
+    assert(good.typedMapCoordinateBindings.length === 1, "fixture E1 binding resolves");
     assert(good.references.every((reference) => reference.resolved), "fixture references resolve");
     fs.writeFileSync(path.join(fixtureRoot, "Events/traversal.txt"), "#INSERT [../outside.txt]\n");
     let traversalFailed = false;
-    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events" }); } catch (error) { traversalFailed = error instanceof MapEventImportError && error.diagnostics.pathTraversalRejected.length > 0; }
+    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath }); } catch (error) { traversalFailed = error instanceof MapEventImportError && error.diagnostics.pathTraversalRejected.length > 0; }
     assert(traversalFailed, "path traversal fails closed");
     fs.rmSync(path.join(fixtureRoot, "Events/traversal.txt"));
-    fs.writeFileSync(path.join(fixtureRoot, "Events/a.txt"), "[@Main]\n{\n#INSERT [Events/b.txt]\n}\n");
-    fs.writeFileSync(path.join(fixtureRoot, "Events/b.txt"), "#INSERT [Events/a.txt]\n");
+    fs.writeFileSync(path.join(fixtureRoot, "Events/cycle-a.txt"), "#INSERT [Events/cycle-b.txt]\n");
+    fs.writeFileSync(path.join(fixtureRoot, "Events/cycle-b.txt"), "#INSERT [Events/cycle-a.txt]\n");
     let cycleFailed = false;
-    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events" }); } catch (error) { cycleFailed = error instanceof MapEventImportError && error.diagnostics.cycles.length > 0; }
+    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath }); } catch (error) { cycleFailed = error instanceof MapEventImportError && error.diagnostics.cycles.length > 0; }
     assert(cycleFailed, "include cycle fails closed");
-    console.log("map-event self-test: 3/3 passed");
+    fs.rmSync(path.join(fixtureRoot, "Events/cycle-a.txt"));
+    fs.rmSync(path.join(fixtureRoot, "Events/cycle-b.txt"));
+    writeFixture({ mapCoords: "[@_MAPCOORD(0,1,2)]\n#INCLUDE [Events/a.txt] @Main\n[@_MAPCOORD(0,1,2)]\n#INCLUDE [Events/a.txt] @Main\n" });
+    let duplicateFailed = false;
+    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath }); } catch (error) { duplicateFailed = error instanceof MapEventImportError && /MapCoords\.txt:3/.test(error.message); }
+    assert(duplicateFailed, "duplicate E1 coordinate fails at source line");
+    writeFixture({ movements: [] });
+    let missingNeedMoveFailed = false;
+    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath }); } catch (error) { missingNeedMoveFailed = error instanceof MapEventImportError && /NeedMove is missing.*MapCoords\.txt:1/.test(error.message); }
+    assert(missingNeedMoveFailed, "missing NeedMove fails at source line");
+    writeFixture({ movements: [{ map_index: 2, source: { x: 1, y: 2 }, destination: { x: 3, y: 4 }, need_move: true, conquest_index: 0 }, { map_index: 2, source: { x: 1, y: 2 }, destination: { x: 3, y: 4 }, need_move: true, conquest_index: 0 }] });
+    let multipleNeedMoveFailed = false;
+    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath }); } catch (error) { multipleNeedMoveFailed = error instanceof MapEventImportError && /NeedMove is ambiguous.*MapCoords\.txt:1/.test(error.message); }
+    assert(multipleNeedMoveFailed, "multiple NeedMove records fail at source line");
+    writeFixture({ script: "[@Main]\n{\n#IF\nLevel > 9\n#ACT\nTELEPORT\n#ELSEACT\nLocalMessage \"locked\" Hint\n}\n" });
+    let unsupportedFailed = false;
+    try { makeImporter(fixtureRoot).build({ mapCoordsRelative: "MapCoords.txt", eventsRelativeDir: "Events", respawnManifestPath }); } catch (error) { unsupportedFailed = error instanceof MapEventImportError && /unsupported E1 command.*Events\/a\.txt:6/.test(error.message); }
+    assert(unsupportedFailed, "unsupported E1 command fails at exact source line");
+    console.log("map-event self-test: 7/7 passed");
   } finally { fs.rmSync(fixtureRoot, { recursive: true, force: true }); }
 }
 
 function parseArgs(argv) {
-  const args = { envirRoot: null, output: DEFAULT_OUTPUT, selfTest: false };
+  const args = { envirRoot: null, output: DEFAULT_OUTPUT, respawnManifestPath: DEFAULT_RESPAWN_MANIFEST, selfTest: false };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === "--self-test") args.selfTest = true;
     else if (value === "--envir-root") args.envirRoot = argv[++index];
     else if (value === "--output") args.output = path.resolve(argv[++index]);
+    else if (value === "--respawn-manifest") args.respawnManifestPath = path.resolve(argv[++index]);
     else throw new Error(`unknown argument: ${value}`);
   }
   return args;
@@ -293,7 +451,7 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.selfTest) runSelfTests();
   const envirRoot = args.envirRoot ?? process.env.MIR2_CRYSTAL_ENVIR_ROOT ?? process.env.MIR2_ENVIR_ROOT ?? DEFAULT_ENVIR_ROOT;
-  const manifest = makeImporter(envirRoot).build();
+  const manifest = makeImporter(envirRoot).build({ respawnManifestPath: args.respawnManifestPath });
   if (manifest.diagnostics.danglingPaths.length || manifest.diagnostics.pathTraversalRejected.length || manifest.diagnostics.cycles.length) throw new Error("Crystal map-event manifest contains unsafe or dangling diagnostics");
   fs.mkdirSync(path.dirname(args.output), { recursive: true });
   fs.writeFileSync(args.output, `${JSON.stringify(manifest, null, 2)}\n`);

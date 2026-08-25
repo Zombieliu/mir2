@@ -191,7 +191,7 @@
     "runtime:fetch:prebuilt": "node ./scripts/fetch-prebuilt-bevy-runtime.mjs",
     "runtime:r2:build": "node ./scripts/build-bevy-runtime-r2-release.mjs",
     "test:runtime-fetch": "node --test ./scripts/test-fetch-prebuilt-bevy-runtime.mjs",
-    "typecheck": "next typegen && tsc --noEmit --pretty false",
+    "typecheck": "node ./scripts/test-crystal-respawn-manifest-sync.mjs && next typegen && tsc --noEmit --pretty false",
     "itch:build": "bash ../../scripts/build-itch-html5.sh",
     "itch:certify": "node ../../scripts/certify-itch-alpha.mjs",
     "dev": "npm run assets:map-atlas:ensure && npm run runtime:build:release && next dev",

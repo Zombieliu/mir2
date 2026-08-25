@@ -80,11 +80,14 @@ use super::items::{
     ItemState,
 };
 use super::map::{
-    active_scene_view, crystal_movement_transfer_records_for_map, current_map_disallows_drug,
+    active_scene_view, apply_current_player_position_map_transfer,
+    crystal_movement_transfer_records_for_map, current_map_disallows_drug,
     current_map_disallows_hero, filter_decor_objects, filter_terrain_patches, is_safe_zone_point,
     normalize_map_file_name, rebuild_world, spawn_stage5_hero,
 };
-use super::map_events::authorized_map_coordinate_transfers;
+use super::map_events::{
+    authorized_map_coordinate_transfers, map_coordinate_hint_packets_for_path,
+};
 use super::monster_ai::advance_world;
 use super::monsters::{
     crystal_monster_effect_for_name, crystal_respawn_object_id,
@@ -8650,9 +8653,22 @@ impl SimulationSession {
                         .world_mut()
                         .entity_mut(player)
                         .insert(Facing(direction));
-                    let mut packets = vec![ServerPacket::UserLocation {
-                        location: current_location(self.app.world()),
-                    }];
+                    self.app
+                        .world_mut()
+                        .resource_mut::<PlayerRuntimeResource>()
+                        .player_direction = direction;
+                    let location = current_location(self.app.world());
+                    let mut packets =
+                        apply_current_player_position_map_transfer(self.app.world_mut());
+                    if packets.is_empty() {
+                        packets.push(ServerPacket::UserLocation {
+                            location: location.clone(),
+                        });
+                        packets.extend(map_coordinate_hint_packets_for_path(
+                            self.app.world(),
+                            std::slice::from_ref(&location.position),
+                        ));
+                    }
                     packets.extend(advance_world(self.app.world_mut()));
                     packets
                 } else {

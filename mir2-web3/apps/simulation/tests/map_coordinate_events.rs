@@ -93,6 +93,27 @@ const GATE_CASES: [GateCase; 6] = [
 ];
 
 fn start_session(case: &GateCase, suffix: &str, level: u16, pk_points: i32) -> SimulationSession {
+    start_session_at(
+        case,
+        suffix,
+        level,
+        pk_points,
+        Point {
+            x: case.source.x - 1,
+            y: case.source.y - 1,
+        },
+        MirDirection::DownRight,
+    )
+}
+
+fn start_session_at(
+    case: &GateCase,
+    suffix: &str,
+    level: u16,
+    pk_points: i32,
+    position: Point,
+    direction: MirDirection,
+) -> SimulationSession {
     let account_id = format!("map-coordinate-{suffix}");
     let character = CharacterRecord {
         index: 0,
@@ -104,11 +125,8 @@ fn start_session(case: &GateCase, suffix: &str, level: u16, pk_points: i32) -> S
     let mut save = CharacterSaveRecord::new(character.clone());
     save.map_file_name = case.map.to_string();
     save.map_title = case.map.to_string();
-    save.position = Point {
-        x: case.source.x - 1,
-        y: case.source.y - 1,
-    };
-    save.direction = MirDirection::DownRight;
+    save.position = position;
+    save.direction = direction;
     save.pk_points = pk_points;
 
     let config = SimulationConfig::default().with_crystal_world_runtime();
@@ -160,6 +178,16 @@ fn has_hint(packets: &[ServerPacket], expected: &str) -> bool {
     })
 }
 
+fn self_direction(session: &SimulationSession) -> MirDirection {
+    session
+        .world_snapshot()
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player")
+        .direction
+}
+
 #[test]
 fn personal_session_enforces_all_six_authoritative_map_coordinate_gates() {
     for (index, case) in GATE_CASES.iter().enumerate() {
@@ -209,6 +237,55 @@ fn personal_session_enforces_all_six_authoritative_map_coordinate_gates() {
         );
         assert_eq!(self_position(&allowed), case.destination.clone());
     }
+}
+
+#[test]
+fn personal_turn_applies_direction_before_current_coordinate_map_event() {
+    let denied_case = &GATE_CASES[0];
+    let mut denied = start_session_at(
+        denied_case,
+        "turn-denied",
+        denied_case.denied_level,
+        denied_case.denied_pk_points,
+        denied_case.source.clone(),
+        MirDirection::DownRight,
+    );
+    let denied_packets = denied.handle_packet(ClientPacket::Turn {
+        direction: MirDirection::Left,
+    });
+    assert_eq!(self_position(&denied), denied_case.source);
+    assert_eq!(self_direction(&denied), MirDirection::Left);
+    assert!(
+        has_hint(&denied_packets, denied_case.hint),
+        "{denied_packets:?}"
+    );
+    assert!(!denied_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info } if info.file_name == denied_case.destination_map
+    )));
+
+    let allowed_case = &GATE_CASES[0];
+    let mut allowed = start_session_at(
+        allowed_case,
+        "turn-allowed",
+        allowed_case.allowed_level,
+        allowed_case.allowed_pk_points,
+        allowed_case.source.clone(),
+        MirDirection::DownRight,
+    );
+    let allowed_packets = allowed.handle_packet(ClientPacket::Turn {
+        direction: MirDirection::Left,
+    });
+    assert!(!has_hint(&allowed_packets, allowed_case.hint));
+    assert!(
+        allowed_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MapInformation { info } if info.file_name == allowed_case.destination_map
+        )),
+        "{allowed_packets:?}"
+    );
+    assert_eq!(self_direction(&allowed), MirDirection::Left);
+    assert_eq!(self_position(&allowed), allowed_case.destination);
 }
 
 fn zone_join(case: &GateCase, suffix: &str, level: u16, pk_points: i32) -> ZoneJoin {
