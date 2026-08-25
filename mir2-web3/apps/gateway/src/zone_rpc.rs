@@ -6550,6 +6550,145 @@ pub fn validate_zone_host_bind(address: SocketAddr, auth_token: Option<&str>) ->
 }
 
 #[cfg(test)]
+mod exact_ground_drop_snapshot_tests {
+    use super::*;
+    use mir2_protocol::UserItem;
+    use mir2_simulation::{
+        GroundDropItemPayload, GroundDropLootSnapshot, GroundDropSnapshot, SimulationConfig,
+        SimulationSession,
+    };
+
+    fn snapshot_with_exact_ground_drop(unique_id: u64, awake_type: u8) -> WorldSnapshot {
+        let mut snapshot = SimulationSession::new(SimulationConfig::default()).world_snapshot();
+        let item = UserItem {
+            unique_id,
+            item_index: 222,
+            current_dura: 1_000,
+            max_dura: 2_000,
+            count: 1,
+            soul_bound_id: -1,
+            identified: true,
+            cursed: false,
+            slots: Vec::new(),
+            gem_count: 0,
+            added_stats: Vec::new(),
+            awake_type,
+            awake_values: vec![7],
+            refined_value: 0,
+            refine_added: 0,
+            refine_success_chance: 0,
+            wedding_ring: -1,
+            expire_info: None,
+            rental_information: None,
+            is_shop_item: false,
+            sealed_info: None,
+            gm_made: false,
+        };
+        snapshot.ground_drops.push(GroundDropSnapshot {
+            object_id: 9_001,
+            name: "Dagger".to_string(),
+            name_colour_argb: -1,
+            icon: 1,
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "rpc-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key: "crystal-item-222".to_string(),
+                name: "Dagger".to_string(),
+                description: String::new(),
+                weight: 5,
+                durability_current: Some(1_000),
+                durability_max: Some(2_000),
+                added_attack: 1,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                show_group_pickup: false,
+                exact_item: Some(GroundDropItemPayload {
+                    item,
+                    uid_assigned: true,
+                }),
+            },
+        });
+        snapshot
+    }
+
+    #[test]
+    fn internal_world_snapshot_rpc_roundtrip_is_lossless_but_client_view_is_redacted() {
+        let snapshot = snapshot_with_exact_ground_drop(88_001, 3);
+        let payload = ZoneRpcPayload::WorldSnapshot {
+            snapshot: Box::new(snapshot.clone()),
+        };
+        for codec in [ZoneRpcCodec::Json, ZoneRpcCodec::MessagePack] {
+            let encoded = encode_rpc_value(&payload, codec).expect("RPC payload encodes");
+            let decoded: ZoneRpcPayload =
+                decode_rpc_value(&encoded, codec).expect("RPC payload decodes");
+            let ZoneRpcPayload::WorldSnapshot { snapshot: decoded } = decoded else {
+                panic!("world snapshot RPC payload");
+            };
+            assert_eq!(*decoded, snapshot);
+        }
+
+        let internal = serde_json::to_value(&snapshot).expect("internal snapshot encodes");
+        assert!(internal["groundDrops"][0]["loot"]["exactItem"].is_object());
+        let client = serde_json::to_value(snapshot.client_view()).expect("client view encodes");
+        assert!(client["groundDrops"][0]["loot"].get("exactItem").is_none());
+    }
+
+    #[test]
+    fn zone_base_snapshot_roundtrip_retains_exact_identity_and_digest_covers_metadata() {
+        let zone_state = snapshot_with_exact_ground_drop(88_002, 4);
+        let mut changed = zone_state.clone();
+        let GroundDropLootSnapshot::InventoryItem {
+            exact_item: Some(payload),
+            ..
+        } = &mut changed.ground_drops[0].loot
+        else {
+            panic!("exact ground-drop payload");
+        };
+        payload.item.awake_type = payload.item.awake_type.saturating_add(1);
+        assert_ne!(
+            snapshot_digest(&zone_state).expect("original digest"),
+            snapshot_digest(&changed).expect("changed digest")
+        );
+
+        let durable = durable_session_snapshot(zone_state.clone());
+        assert!(durable.ground_drops.is_empty());
+        let commitment = WireSessionCommitment {
+            session_id: "exact-ground-drop-session".to_string(),
+            zone_id: "primary".to_string(),
+            snapshot_digest: snapshot_digest(&durable).expect("durable digest"),
+            durable_snapshot: Box::new(durable.clone()),
+            active_character_bytes: None,
+            active_identity: None,
+        };
+        let zone_state_bytes = serde_json::to_vec(&zone_state).expect("zone state encodes");
+        let base = ZoneBaseSnapshot::new(
+            "primary".to_string(),
+            "exact-ground-drop-build".to_string(),
+            0,
+            "0".repeat(64),
+            zone_state_bytes,
+            vec![commitment],
+        )
+        .expect("base snapshot builds");
+        let wire = serde_json::to_vec(&base).expect("base snapshot encodes");
+        let restored: ZoneBaseSnapshot =
+            serde_json::from_slice(&wire).expect("base snapshot decodes");
+        restored.verify().expect("restored base verifies");
+        let payload = restored.decode_payload().expect("base payload decodes");
+        assert_eq!(*payload.sessions[0].durable_snapshot, durable);
+        let restored_zone_state: WorldSnapshot =
+            serde_json::from_slice(&payload.zone_state_bytes).expect("zone state decodes");
+        assert_eq!(restored_zone_state, zone_state);
+    }
+}
+
+#[cfg(test)]
 mod zone_rpc_authorization_tests {
     use super::*;
 

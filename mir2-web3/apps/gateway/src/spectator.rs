@@ -684,7 +684,7 @@ impl SpectatorHub {
 }
 
 fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value, String> {
-    let value = serde_json::to_value(snapshot)
+    let value = serde_json::to_value(snapshot.client_view())
         .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))?;
     let source = value
         .as_object()
@@ -1147,8 +1147,66 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
 mod tests {
     use super::*;
     use crate::GatewayConfig;
-    use mir2_protocol::ClientPacket;
-    use mir2_simulation::SimulationSession;
+    use mir2_protocol::{ClientPacket, UserItem};
+    use mir2_simulation::{
+        GroundDropItemPayload, GroundDropLootSnapshot, GroundDropSnapshot, SimulationSession,
+    };
+
+    fn exact_ground_drop() -> GroundDropSnapshot {
+        GroundDropSnapshot {
+            object_id: 9_101,
+            name: "Dagger".to_string(),
+            name_colour_argb: -1,
+            icon: 1,
+            x: 10,
+            y: 20,
+            quantity: 1,
+            source_monster: "spectator-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key: "crystal-item-222".to_string(),
+                name: "Dagger".to_string(),
+                description: String::new(),
+                weight: 5,
+                durability_current: Some(1_000),
+                durability_max: Some(2_000),
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                show_group_pickup: false,
+                exact_item: Some(GroundDropItemPayload {
+                    uid_assigned: true,
+                    item: UserItem {
+                        unique_id: 88_101,
+                        item_index: 222,
+                        current_dura: 1_000,
+                        max_dura: 2_000,
+                        count: 1,
+                        soul_bound_id: -1,
+                        identified: true,
+                        cursed: false,
+                        slots: Vec::new(),
+                        gem_count: 0,
+                        added_stats: Vec::new(),
+                        awake_type: 3,
+                        awake_values: vec![9],
+                        refined_value: 0,
+                        refine_added: 0,
+                        refine_success_chance: 0,
+                        wedding_ring: -1,
+                        expire_info: None,
+                        rental_information: None,
+                        is_shop_item: false,
+                        sealed_info: None,
+                        gm_made: false,
+                    },
+                }),
+            },
+        }
+    }
 
     fn test_config(data_dir: PathBuf) -> SpectatorConfig {
         SpectatorConfig {
@@ -1231,6 +1289,25 @@ mod tests {
             .unwrap();
         assert_eq!(replay.len(), 1);
         assert_eq!(replay[0].digest, frame.digest);
+        fs::remove_dir_all(data_dir).ok();
+    }
+
+    #[test]
+    fn spectator_live_and_replay_redact_exact_ground_item_identity() {
+        let data_dir = temp_dir("exact-ground-drop-redaction");
+        let hub = SpectatorHub::new(test_config(data_dir.clone()));
+        let mut snapshot = started_demo_session().world_snapshot();
+        snapshot.ground_drops.push(exact_ground_drop());
+        let frame = hub.publish(&snapshot).unwrap().unwrap();
+        assert!(frame.world["groundDrops"][0]["loot"]
+            .get("exactItem")
+            .is_none());
+        let replay = hub
+            .load_replay(&frame.recording_id, true, u64::MAX)
+            .unwrap();
+        assert!(replay[0].world["groundDrops"][0]["loot"]
+            .get("exactItem")
+            .is_none());
         fs::remove_dir_all(data_dir).ok();
     }
 

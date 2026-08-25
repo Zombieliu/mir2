@@ -7453,6 +7453,7 @@ fn ground_drop_loot_snapshot(loot: &DropLoot) -> GroundDropLootSnapshot {
             cursed,
             socket_slots,
             show_group_pickup,
+            exact_item,
         } => GroundDropLootSnapshot::InventoryItem {
             key: key.clone(),
             name: name.clone(),
@@ -7466,6 +7467,7 @@ fn ground_drop_loot_snapshot(loot: &DropLoot) -> GroundDropLootSnapshot {
             cursed: *cursed,
             socket_slots: *socket_slots,
             show_group_pickup: *show_group_pickup,
+            exact_item: exact_item.clone(),
         },
     }
 }

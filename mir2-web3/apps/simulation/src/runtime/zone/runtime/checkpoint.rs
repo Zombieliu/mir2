@@ -316,6 +316,125 @@ mod tests {
     use mir2_protocol::{MirClass, MirDirection, MirGender};
 
     #[test]
+    fn exact_ground_drop_identity_is_checkpointed_and_state_root_protected() {
+        use crate::config::{GroundDropItemPayload, GroundDropLootSnapshot, GroundDropSnapshot};
+        use mir2_protocol::{UserItem, UserItemExpireInfo, UserItemStat};
+
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("drop-identity-checkpoint"));
+        let exact_item = GroundDropItemPayload {
+            item: UserItem {
+                unique_id: 8_888,
+                item_index: 404,
+                current_dura: 4_321,
+                max_dura: 5_432,
+                count: 1,
+                soul_bound_id: 17,
+                identified: false,
+                cursed: true,
+                slots: Vec::new(),
+                gem_count: 0,
+                added_stats: vec![UserItemStat { stat: 17, value: 9 }],
+                awake_type: 2,
+                awake_values: vec![3, 4],
+                refined_value: 5,
+                refine_added: 6,
+                refine_success_chance: 77,
+                wedding_ring: 23,
+                expire_info: Some(UserItemExpireInfo {
+                    expiry_binary_datetime: 123_456,
+                }),
+                rental_information: None,
+                is_shop_item: true,
+                sealed_info: None,
+                gm_made: true,
+            },
+            uid_assigned: true,
+        };
+        let snapshot = GroundDropSnapshot {
+            object_id: 91,
+            name: "CopperRing".to_string(),
+            name_colour_argb: -1,
+            icon: 0,
+            x: 12,
+            y: 34,
+            quantity: 1,
+            source_monster: "checkpoint-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::InventoryItem {
+                key: "crystal-item-404".to_string(),
+                name: "CopperRing".to_string(),
+                description: String::new(),
+                weight: 1,
+                durability_current: Some(4_321),
+                durability_max: Some(5_432),
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: vec![UserItemStat { stat: 17, value: 9 }],
+                cursed: true,
+                socket_slots: 0,
+                show_group_pickup: false,
+                exact_item: Some(exact_item),
+            },
+        };
+        runtime.ground_drops.insert(
+            snapshot.object_id,
+            ZoneGroundDrop {
+                drop: snapshot.clone(),
+                owner_expires_at_ms: None,
+            },
+        );
+        let mut claimed_snapshot = snapshot.clone();
+        claimed_snapshot.object_id = 92;
+        runtime.claimed_ground_drops.insert(
+            claimed_snapshot.object_id,
+            ZoneGroundDropClaim {
+                session_id: SessionId::new("drop-identity-claim"),
+                drop: claimed_snapshot.clone(),
+            },
+        );
+
+        let bytes = runtime.checkpoint_bytes().expect("identity checkpoint");
+        let restored = ZoneRuntime::restore_checkpoint(&bytes).expect("identity restore");
+        assert_eq!(
+            restored
+                .ground_drops
+                .get(&snapshot.object_id)
+                .expect("restored ground drop")
+                .drop,
+            snapshot
+        );
+        assert_eq!(
+            restored
+                .claimed_ground_drops
+                .get(&claimed_snapshot.object_id)
+                .expect("restored claimed ground drop")
+                .drop,
+            claimed_snapshot
+        );
+
+        let mut checkpoint: ZoneRuntimeCheckpoint =
+            serde_json::from_slice(&bytes).expect("checkpoint JSON");
+        let GroundDropLootSnapshot::InventoryItem {
+            exact_item: Some(exact_item),
+            ..
+        } = &mut checkpoint
+            .claimed_ground_drops
+            .get_mut(&92)
+            .expect("checkpoint claimed ground drop")
+            .drop
+            .loot
+        else {
+            panic!("exact checkpoint payload");
+        };
+        exact_item.item.awake_type = exact_item.item.awake_type.saturating_add(1);
+        let tampered = serde_json::to_vec(&checkpoint).expect("tampered identity checkpoint");
+        let error = ZoneRuntime::restore_checkpoint(&tampered)
+            .expect_err("identity tamper must fail state-root verification");
+        assert!(error.contains("state root mismatch"), "{error}");
+    }
+
+    #[test]
     fn complete_zone_checkpoint_restores_authoritative_and_derived_state() {
         let session_id = SessionId::new("checkpoint-player");
         let mut runtime = ZoneRuntime::new_with_collision(

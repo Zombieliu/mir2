@@ -1809,9 +1809,22 @@ mod tests {
         assert_eq!(envelope.fencing_generation, 9);
         assert_eq!(envelope.source_sequence, 42);
         assert_eq!(envelope.created_at_ms, 77);
+        assert!(envelope
+            .idempotency_key
+            .starts_with("zone:map:0:alice:3:ground-drop-pickup:9001:"));
         assert_eq!(
-            envelope.idempotency_key,
-            "zone:map:0:alice:3:ground-drop-pickup:9001"
+            envelope.idempotency_key.len(),
+            "zone:map:0:alice:3:ground-drop-pickup:9001:".len() + 64
+        );
+        let mut changed_command = command.clone();
+        let SharedAccountInventoryCommand::GroundDropPickup(drop) = &mut changed_command.command
+        else {
+            unreachable!("ground drop command")
+        };
+        drop.loot = GroundDropLootSnapshot::Gold { amount: 26 };
+        assert_ne!(
+            command.stable_idempotency_key(),
+            changed_command.stable_idempotency_key()
         );
         assert_eq!(envelope.legs.len(), 1);
         assert_eq!(

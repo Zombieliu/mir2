@@ -1,21 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> 2026-08-25 exact item-identity Phase 1 complete: every committed
-> inventory/equipment carrier now preserves the bounded recursive Crystal
-> `UserItem` identity through inventory, belt, storage, hero, equipment,
-> rental, guild storage, mail, trade, auction, refine, save/reload, and
-> StartGame. Stack merge/split and equipment transitions fail closed on
-> incompatible identity. The six temporary Candidate aliases are removed from
-> production behavior and persisted saves are migrated once to exact Crystal
-> templates while preserving UID, quantity, durability, added stats, binding,
-> rental, and seal state. The real Candidate task/drop/pickup/relogin loop uses
-> canonical FireBall, RepairOil, Timber, SkyStingerEgg, RareCopperOre, and
-> CopperRing records. Locked serial evidence passes the complete Simulation
-> library (1445/1445), ordinary Candidate loop (2/2), game-data tests
-> (35/35 + 3/3), Simulation check, Web typecheck, exact-file Rustfmt, and
-> `git diff --check`. Phase 2 remains open for full GroundDrop payload identity,
-> authoritative UID allocation, and recoverable Zone claim -> inventory ->
-> finalize semantics; this checkpoint does not claim overall 100% parity.
+> 2026-08-25 GroundDrop identity Slice A/B complete: the complete recursive
+> Crystal `UserItem` now survives drop creation, internal snapshots,
+> checkpoints, Zone RPC, state-root computation, and current local/shared/quest
+> pickup. A shared staged planner keeps preflight and commit atomic, preserves
+> assigned UIDs or retires an absorbed source UID, emits every changed stack,
+> canonicalizes only unique legacy display names, fails closed on ambiguity,
+> and binds pickup idempotency to the exact payload. External Web/spectator
+> projections remain explicitly redacted. Locked serial evidence passes the
+> Simulation library (1461/1461), Gateway library (606 passed, 1 ignored), Web
+> typecheck, exact-file Rustfmt, and `git diff --check`. Authoritative claim
+> generations/ids, stable canonical digests, pet pickup routing, and durable
+> crash recovery remain Slice C/D; this is not an overall 100% parity claim.
 
 > 2026-08-25 clean-checkout Bichon collision correction: an active map `0`
 > whose title is not `Starter Field` now resolves through the world collision

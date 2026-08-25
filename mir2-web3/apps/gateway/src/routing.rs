@@ -28,6 +28,7 @@ use mir2_simulation::{
     ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
 
 use crate::GatewayConfig;
@@ -1351,7 +1352,12 @@ impl SharedAccountInventoryCommandEnvelope {
                 )
             }
             SharedAccountInventoryCommand::GroundDropPickup(drop) => {
-                format!("ground-drop-pickup:{}", drop.object_id)
+                let payload = serde_json::to_vec(drop).ok()?;
+                let payload_digest = Sha256::digest(payload)
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>();
+                format!("ground-drop-pickup:{}:{payload_digest}", drop.object_id)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => format!(
                 "monster-kill-award:{}:{}:{}:{}",
@@ -5859,6 +5865,7 @@ fn ground_drop_snapshot_from_spawn_packet(packet: &ServerPacket) -> Option<Groun
                 cursed: false,
                 socket_slots: 0,
                 show_group_pickup: false,
+                exact_item: None,
             },
         }),
         _ => None,

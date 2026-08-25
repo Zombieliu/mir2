@@ -31003,6 +31003,7 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
             cursed: true,
             socket_slots: 2,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "SpiritBlade".to_string(),
@@ -32744,6 +32745,7 @@ fn shared_ground_drop_pickup_advances_matching_crystal_item_task() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
     };
 
@@ -35466,6 +35468,7 @@ fn direct_pickup_out_of_cell_rejects_without_runtime_chat_or_mutation() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Out Of Cell Pickup Test Item".to_string(),
@@ -35564,6 +35567,7 @@ fn crystal_pickup_packet_ignores_adjacent_ground_drop() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -35613,6 +35617,7 @@ fn ground_drop_expires_after_crystal_item_timeout() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -35685,6 +35690,7 @@ fn pickup_preserves_ground_drop_when_inventory_is_full() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -35794,6 +35800,7 @@ fn pickup_allows_overweight_item_like_crystal() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -35848,6 +35855,7 @@ fn pickup_respects_crystal_drop_owner_window() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -35928,6 +35936,7 @@ fn pickup_packet_skips_owner_blocked_drop_and_collects_next_current_cell_drop() 
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -36005,6 +36014,7 @@ fn pickup_packet_skips_full_bag_item_and_collects_later_gold() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -36079,6 +36089,7 @@ fn pickup_allows_crystal_drop_owner_group_member() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -36123,6 +36134,7 @@ fn pickup_emits_crystal_group_pickup_notice_for_marked_items() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: template.show_group_pickup,
+            exact_item: None,
         },
         1,
         template.name.clone(),
@@ -36173,6 +36185,7 @@ fn ground_item_object_uses_crystal_grade_and_name_colour() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: template.show_group_pickup,
+            exact_item: None,
         },
         1,
         template.name.clone(),
@@ -36221,6 +36234,7 @@ fn ground_item_object_uses_cyan_name_colour_for_added_stats() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: template.show_group_pickup,
+            exact_item: None,
         },
         1,
         template.name.clone(),
@@ -36257,17 +36271,27 @@ fn pickup_can_stack_into_full_inventory_when_stack_has_room() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     {
+        let template = super::super::items::crystal_item_template_for_item_key("red-potion")
+            .expect("real stackable Crystal potion fixture");
+        let mut potion = super::super::items::embedded_item_state_from_template(
+            &template,
+            ItemContainer::Bag1,
+            0,
+        );
+        potion.unique_id = super::default_item_unique_id(ItemContainer::Bag1, 0);
+        potion.key = "red-potion".to_string();
+        potion.name = "Red Potion".to_string();
+        potion.quantity = 19;
+        potion.description = "Stackable full bag pickup test item.".to_string();
+        potion.weight = 1;
+
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let item = resources
+        let slot_index = resources
             .inventory_items
-            .iter_mut()
-            .find(|item| item.container == ItemContainer::Bag1 && item.slot == 0)
+            .iter()
+            .position(|item| item.container == ItemContainer::Bag1 && item.slot == 0)
             .expect("slot 0 item should exist");
-        item.key = "red-potion".to_string();
-        item.name = "Red Potion".to_string();
-        item.quantity = 19;
-        item.description = "Nearly full Crystal potion stack.".to_string();
-        item.weight = 1;
+        resources.inventory_items[slot_index] = potion;
     }
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -36289,6 +36313,7 @@ fn pickup_can_stack_into_full_inventory_when_stack_has_room() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Red Potion".to_string(),
@@ -36350,6 +36375,7 @@ fn pickup_places_crystal_potion_in_belt_when_bag_is_full() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Red Potion".to_string(),
@@ -64228,6 +64254,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "MirArmour(M)".to_string(),
@@ -64253,6 +64280,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "SharpDagger".to_string(),
@@ -64278,6 +64306,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "SpiritBlade".to_string(),

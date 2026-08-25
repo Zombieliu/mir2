@@ -22,7 +22,7 @@ use mir2_game_data::{
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
-    SelectInfo, Spell, UserItemStat,
+    SelectInfo, Spell, UserItem, UserItemStat,
 };
 use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
 use rand_core::{OsRng, RngCore};
@@ -5582,6 +5582,16 @@ pub struct GroundDropSnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GroundDropItemPayload {
+    /// Complete Crystal item identity frozen when the ground object is created.
+    pub item: UserItem,
+    /// False means the payload still needs an authoritative UID before commit.
+    #[serde(default)]
+    pub uid_assigned: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum GroundDropLootSnapshot {
     Gold {
@@ -5600,6 +5610,15 @@ pub enum GroundDropLootSnapshot {
         cursed: bool,
         socket_slots: u8,
         show_group_pickup: bool,
+        /// Added after the legacy display/template projection. Old checkpoints
+        /// decode as `None`; newly produced drops must carry `Some`.
+        #[serde(
+            default,
+            rename = "exactItem",
+            alias = "exact_item",
+            skip_serializing_if = "Option::is_none"
+        )]
+        exact_item: Option<GroundDropItemPayload>,
     },
 }
 
@@ -6473,6 +6492,37 @@ pub struct WorldSnapshot {
     pub stage5_systems: Stage5SystemsState,
     pub map_transfers: Vec<MapTransferSnapshot>,
     pub interaction_hints: Vec<String>,
+}
+
+/// Lossless server snapshots retain exact ground-item identity. Serialize this
+/// explicit view only at untrusted client boundaries.
+#[derive(Debug, Clone, Copy)]
+pub struct WorldSnapshotClientView<'a> {
+    snapshot: &'a WorldSnapshot,
+}
+
+impl WorldSnapshot {
+    pub fn client_view(&self) -> WorldSnapshotClientView<'_> {
+        WorldSnapshotClientView { snapshot: self }
+    }
+}
+
+impl Serialize for WorldSnapshotClientView<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut value = serde_json::to_value(self.snapshot).map_err(serde::ser::Error::custom)?;
+        if let Some(drops) = value.get_mut("groundDrops").and_then(Value::as_array_mut) {
+            for drop in drops {
+                if let Some(loot) = drop.get_mut("loot").and_then(Value::as_object_mut) {
+                    loot.remove("exactItem");
+                    loot.remove("exact_item");
+                }
+            }
+        }
+        value.serialize(serializer)
+    }
 }
 
 #[cfg(test)]

@@ -8142,7 +8142,8 @@ async fn send_world_snapshot_with_quest_ack(
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
-    let mut payload = serde_json::to_value(snapshot).map_err(|error| error.to_string())?;
+    let mut payload =
+        serde_json::to_value(snapshot.client_view()).map_err(|error| error.to_string())?;
     if let Some(ack) = quest_operation_ack {
         let object = payload
             .as_object_mut()

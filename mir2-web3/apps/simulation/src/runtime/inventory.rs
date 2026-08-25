@@ -2,10 +2,11 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    AccountRecord, CharacterRecord, EquipmentSlot, ItemContainer, ItemGrade, SimulationConfig,
+    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
+    SimulationConfig,
 };
 use bevy_ecs::prelude::World;
-use mir2_game_data::{crystal_item_manifest, localized_text_or_fallback};
+use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
 use mir2_protocol::{
     ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemStat,
 };
@@ -19,8 +20,11 @@ use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
     crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
     crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
-    default_item_unique_id, item_has_rental_bind_flag, item_icon_for_key, item_unique_id,
-    try_user_item_from_item_state, user_item_from_item_state, ItemState, ItemStateUserItemMetadata,
+    default_item_unique_id, embedded_item_state_from_template, item_has_rental_bind_flag,
+    item_icon_for_key, item_unique_id, try_item_state_from_user_item,
+    try_user_item_from_item_state, user_item_from_item_state,
+    validate_committed_item_state_carrier, validate_committed_user_item_carrier, ItemState,
+    ItemStateUserItemMetadata,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
@@ -1758,6 +1762,320 @@ pub(super) fn can_gain_item_quantity(
     needed_slots <= u32::try_from(free_slots).unwrap_or(u32::MAX)
 }
 
+fn ground_drop_user_item_uids_are_assigned(item: &UserItem) -> bool {
+    item.unique_id != 0
+        && item
+            .slots
+            .iter()
+            .flatten()
+            .all(ground_drop_user_item_uids_are_assigned)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn plan_exact_ground_drop_item(
+    resources: &InventoryResource,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> Option<(InventoryResource, Vec<ItemState>)> {
+    validate_committed_user_item_carrier(&payload.item).ok()?;
+    if u32::from(payload.item.count) != expected_quantity || expected_quantity == 0 {
+        return None;
+    }
+    if payload.uid_assigned && !ground_drop_user_item_uids_are_assigned(&payload.item) {
+        return None;
+    }
+
+    let direct_template = crystal_item_template_for_item_key(key);
+    let template = direct_template
+        .clone()
+        .or_else(|| crystal_item_by_index(payload.item.item_index))?;
+    if payload.item.item_index != template.item_index {
+        return None;
+    }
+    let canonical_key = direct_template
+        .map(|_| key.to_string())
+        .unwrap_or_else(|| crystal_item_key_for_template(&template));
+
+    let mut base = embedded_item_state_from_template(&template, container, preferred_slot);
+    base.key = canonical_key.clone();
+    base.name = name.to_string();
+    base.description = description.to_string();
+    let mut canonical = try_item_state_from_user_item(base, &payload.item).ok()?;
+    canonical.container = container;
+    canonical.slot = preferred_slot;
+
+    let max_stack = u32::from(template.stack_size.max(1));
+    if payload.uid_assigned && expected_quantity > max_stack {
+        return None;
+    }
+
+    let mut staged = resources.clone();
+    if payload.uid_assigned {
+        if max_stack > 1 {
+            let mut merge_capacity = 0_u32;
+            if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+                merge_capacity = merge_capacity.saturating_add(
+                    staged
+                        .belt_items
+                        .iter()
+                        .filter(|item| {
+                            item.key == canonical_key
+                                && item.quantity < max_stack
+                                && item_stack_identity_compatible(item, &canonical)
+                        })
+                        .map(|item| max_stack.saturating_sub(item.quantity))
+                        .sum::<u32>(),
+                );
+            }
+            merge_capacity = merge_capacity.saturating_add(
+                staged
+                    .inventory_items
+                    .iter()
+                    .filter(|item| {
+                        item.key == canonical_key
+                            && item_containers_stack_together(item.container, container)
+                            && item.quantity < max_stack
+                            && item_stack_identity_compatible(item, &canonical)
+                    })
+                    .map(|item| max_stack.saturating_sub(item.quantity))
+                    .sum::<u32>(),
+            );
+
+            // An assigned source UID is retired only when the entire source
+            // stack is absorbed. This prevents a partial merge from either
+            // duplicating the source UID or silently changing exact identity.
+            if merge_capacity >= expected_quantity {
+                let mut remaining = expected_quantity;
+                let mut changed = Vec::new();
+                if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+                    for existing in staged.belt_items.iter_mut().filter(|item| {
+                        item.key == canonical_key
+                            && item.quantity < max_stack
+                            && item_stack_identity_compatible(item, &canonical)
+                    }) {
+                        let added = remaining.min(max_stack - existing.quantity);
+                        if added == 0 {
+                            continue;
+                        }
+                        existing.quantity += added;
+                        remaining -= added;
+                        validate_committed_item_state_carrier(existing).ok()?;
+                        changed.push(existing.clone());
+                        if remaining == 0 {
+                            return Some((staged, changed));
+                        }
+                    }
+                }
+                for existing in staged.inventory_items.iter_mut().filter(|item| {
+                    item.key == canonical_key
+                        && item_containers_stack_together(item.container, container)
+                        && item.quantity < max_stack
+                        && item_stack_identity_compatible(item, &canonical)
+                }) {
+                    let added = remaining.min(max_stack - existing.quantity);
+                    if added == 0 {
+                        continue;
+                    }
+                    existing.quantity += added;
+                    remaining -= added;
+                    validate_committed_item_state_carrier(existing).ok()?;
+                    changed.push(existing.clone());
+                    if remaining == 0 {
+                        return Some((staged, changed));
+                    }
+                }
+                return None;
+            }
+        }
+
+        let exact_before = try_user_item_from_item_state(&canonical).ok()?;
+        normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
+        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
+            return None;
+        }
+        let (item_container, slot) =
+            crystal_empty_add_item_slots(&staged, container, &canonical_key)
+                .into_iter()
+                .next()
+                .or_else(|| {
+                    find_empty_inventory_item_slot(&staged.inventory_items, container)
+                        .or(Some((container, preferred_slot)))
+                        .filter(|(candidate_container, candidate_slot)| {
+                            !collection_slot_occupied(
+                                &staged,
+                                *candidate_container,
+                                *candidate_slot,
+                            )
+                        })
+                })?;
+        canonical.container = item_container;
+        canonical.slot = slot;
+        validate_committed_item_state_carrier(&canonical).ok()?;
+        if item_container == ItemContainer::Belt {
+            staged.belt_items.push(canonical.clone());
+        } else {
+            staged.inventory_items.push(canonical.clone());
+        }
+        return Some((staged, vec![canonical]));
+    }
+
+    let mut remaining = expected_quantity;
+    let mut changed = Vec::new();
+    if max_stack > 1 {
+        if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+            for existing in staged.belt_items.iter_mut().filter(|item| {
+                item.key == canonical_key
+                    && item.quantity < max_stack
+                    && item_stack_identity_compatible(item, &canonical)
+            }) {
+                let added = remaining.min(max_stack - existing.quantity);
+                if added == 0 {
+                    continue;
+                }
+                existing.quantity += added;
+                remaining -= added;
+                validate_committed_item_state_carrier(existing).ok()?;
+                changed.push(existing.clone());
+                if remaining == 0 {
+                    return Some((staged, changed));
+                }
+            }
+        }
+        for existing in staged.inventory_items.iter_mut().filter(|item| {
+            item.key == canonical_key
+                && item_containers_stack_together(item.container, container)
+                && item.quantity < max_stack
+                && item_stack_identity_compatible(item, &canonical)
+        }) {
+            let added = remaining.min(max_stack - existing.quantity);
+            if added == 0 {
+                continue;
+            }
+            existing.quantity += added;
+            remaining -= added;
+            validate_committed_item_state_carrier(existing).ok()?;
+            changed.push(existing.clone());
+            if remaining == 0 {
+                return Some((staged, changed));
+            }
+        }
+    }
+
+    while remaining > 0 {
+        let (item_container, slot) =
+            crystal_empty_add_item_slots(&staged, container, &canonical_key)
+                .into_iter()
+                .next()
+                .or_else(|| {
+                    find_empty_inventory_item_slot(&staged.inventory_items, container)
+                        .or(Some((container, preferred_slot)))
+                        .filter(|(candidate_container, candidate_slot)| {
+                            !collection_slot_occupied(
+                                &staged,
+                                *candidate_container,
+                                *candidate_slot,
+                            )
+                        })
+                })?;
+        let mut item = canonical.clone();
+        item.container = item_container;
+        item.slot = slot;
+        item.quantity = remaining.min(max_stack);
+        normalize_fresh_item_tree_unique_ids(&staged, &mut item, &[]);
+        validate_committed_item_state_carrier(&item).ok()?;
+        if item_container == ItemContainer::Belt {
+            staged.belt_items.push(item.clone());
+        } else {
+            staged.inventory_items.push(item.clone());
+        }
+        remaining -= item.quantity;
+        changed.push(item);
+    }
+
+    Some((staged, changed))
+}
+#[allow(clippy::too_many_arguments)]
+pub(super) fn can_gain_exact_ground_drop_item(
+    world: &World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> bool {
+    plan_exact_ground_drop_item(
+        world.resource::<InventoryResource>(),
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        expected_quantity,
+        payload,
+    )
+    .is_some()
+}
+
+#[cfg(test)]
+#[allow(clippy::too_many_arguments)]
+pub(super) fn add_exact_ground_drop_item(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> Option<ItemState> {
+    add_exact_ground_drop_items(
+        world,
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        expected_quantity,
+        payload,
+    )?
+    .into_iter()
+    .last()
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn add_exact_ground_drop_items(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    expected_quantity: u32,
+    payload: &GroundDropItemPayload,
+) -> Option<Vec<ItemState>> {
+    let (staged, changed_items) = {
+        let resources = world.resource::<InventoryResource>();
+        plan_exact_ground_drop_item(
+            resources,
+            container,
+            key,
+            name,
+            description,
+            preferred_slot,
+            expected_quantity,
+            payload,
+        )?
+    };
+    *world.resource_mut::<InventoryResource>() = staged;
+    Some(changed_items)
+}
 pub(super) fn add_or_increment_item(
     world: &mut World,
     container: ItemContainer,
@@ -2578,6 +2896,15 @@ fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
     left_protocol == right_protocol && item_state_functional_identity_compatible(left, right)
 }
 
+fn item_state_socket_authority_is_empty(metadata: &ItemStateUserItemMetadata) -> bool {
+    metadata.slots.is_empty()
+        && metadata
+            .captured_socket_positions
+            .as_ref()
+            .is_none_or(Vec::is_empty)
+        && metadata.captured_socket_position.is_none()
+}
+
 fn item_state_socket_authority_compatible(
     left: Option<&ItemStateUserItemMetadata>,
     right: Option<&ItemStateUserItemMetadata>,
@@ -2590,7 +2917,9 @@ fn item_state_socket_authority_compatible(
                 && left.captured_socket_positions == right.captured_socket_positions
                 && left.captured_socket_position == right.captured_socket_position
         }
-        _ => false,
+        (None, Some(metadata)) | (Some(metadata), None) => {
+            item_state_socket_authority_is_empty(metadata)
+        }
     }
 }
 
