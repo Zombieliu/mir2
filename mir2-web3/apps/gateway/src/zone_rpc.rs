@@ -3955,10 +3955,33 @@ impl ZoneHostServer {
                 })
             }
             ZoneRpcRequest::RestoreActiveCharacterCheckpoint { checkpoint } => {
+                let zone_id = ZoneId::new(zone_id);
+                let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
+                self.owner_lease_authority
+                    .validate_owner_lease(&owner_lease)
+                    .map_err(classify_runtime_error)?;
+                self.journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .next_sequence_for_append(zone_id.as_str())?;
+                let journal_entry = WireHostJournalEntry {
+                    sequence: 0,
+                    session_id: session_id.to_string(),
+                    zone_id: zone_id.as_str().to_string(),
+                    owner_lease: WireZoneOwnerLease::from(&owner_lease),
+                    mode: WireZoneOwnerCommandMode::Direct,
+                    command: Some(WireWorldCommand::RestoreActiveCharacterCheckpoint {
+                        checkpoint: checkpoint.clone(),
+                    }),
+                    closed: false,
+                    zone_tick_ms: None,
+                };
                 session
                     .hosted
                     .restore_active_character_checkpoint(&checkpoint)
                     .map_err(classify_runtime_error)?;
+                self.append_journal(journal_entry)?;
                 Ok(ZoneRpcPayload::Unit)
             }
             ZoneRpcRequest::SaveActiveCharacter => {
@@ -4646,12 +4669,7 @@ impl ZoneHostServer {
                         session
                     }
                 };
-                session.execute_replay_request(
-                    entry
-                        .clone()
-                        .into_request()?
-                        .with_source_sequence(mutation.sequence),
-                )?;
+                entry.replay_session_mutation(&session, mutation.sequence, true)?;
             }
             self.append_journal(entry)?;
             let applied = self
@@ -4773,8 +4791,7 @@ impl ZoneHostServer {
                     self.create_replay_session(&factory, &replay_config, &entry.zone_id)
                 })
                 .clone();
-            let request = entry.clone().into_request()?;
-            session.execute_request(request)?;
+            entry.replay_session_mutation(&session, entry.sequence, false)?;
         }
 
         let installed_zone_count = factory
@@ -4788,6 +4805,21 @@ impl ZoneHostServer {
                     checkpoint.zone_count
                 ),
             ));
+        }
+
+        // Journal replay bootstraps each Session against the temporary Zone
+        // state it creates while replaying StartGame/TransferMap. Installing
+        // the authoritative Zone image replaces that presence state, so every
+        // replayed Session must refresh its movement/AOI binding before its
+        // commitment is checked or the runtime is handed off. Otherwise a
+        // Session can continue serving the pre-install viewport and omit
+        // entities that exist only in the installed checkpoint (for example,
+        // another player that was already visible at checkpoint time).
+        for session in sessions.values() {
+            session
+                .hosted
+                .refresh_replica_zone_binding()
+                .map_err(classify_runtime_error)?;
         }
 
         for commitment in &checkpoint.sessions {
@@ -4811,10 +4843,32 @@ impl ZoneHostServer {
                         format!("active character checkpoint decode failed: {error}"),
                     )
                 })?;
-            session
+            let replayed_character = session
                 .hosted
-                .restore_active_character_checkpoint(&active_character)
+                .active_character_checkpoint()
                 .map_err(classify_runtime_error)?;
+            let replayed_character_bytes = replayed_character
+                .as_ref()
+                .map(serde_json::to_vec)
+                .transpose()
+                .map_err(|error| {
+                    ZoneRpcFault::new(
+                        "checkpoint_encode",
+                        format!("replayed active character checkpoint encode failed: {error}"),
+                    )
+                })?;
+            // A current journal records checkpoint restores at their original
+            // sequence. When replay already produced the exact private image,
+            // restoring it again here is not a no-op: SimulationSession rebuilds
+            // its ECS and can resurrect transient starter-scene actors that a
+            // later map command removed. Keep the fallback only for legacy v4
+            // checkpoints that predate the ordered restore mutation.
+            if replayed_character_bytes.as_deref() != Some(active_character_bytes.as_slice()) {
+                session
+                    .hosted
+                    .restore_active_character_checkpoint(&active_character)
+                    .map_err(classify_runtime_error)?;
+            }
         }
 
         let actual = session_commitments(&sessions)?;
@@ -5308,6 +5362,9 @@ enum WireWorldCommand {
     SetLanguage {
         language: String,
     },
+    RestoreActiveCharacterCheckpoint {
+        checkpoint: Box<CharacterSaveRecord>,
+    },
     Tick,
 }
 
@@ -5454,6 +5511,12 @@ impl WireWorldCommand {
                 renting,
             },
             Self::SetLanguage { language } => WorldCommand::SetLanguage { language },
+            Self::RestoreActiveCharacterCheckpoint { .. } => {
+                return Err(ZoneRpcFault::new(
+                    "checkpoint_command",
+                    "active character checkpoint restore is an internal journal mutation",
+                ));
+            }
             Self::Tick => WorldCommand::Tick,
         })
     }
@@ -5495,6 +5558,34 @@ impl WireHostJournalEntry {
             }
         }
         .with_source_sequence(source_sequence))
+    }
+
+    fn replay_session_mutation(
+        &self,
+        session: &ZoneHostSession,
+        source_sequence: u64,
+        replicated: bool,
+    ) -> Result<(), ZoneRpcFault> {
+        if let Some(WireWorldCommand::RestoreActiveCharacterCheckpoint { checkpoint }) =
+            self.command.as_ref()
+        {
+            session
+                .hosted
+                .restore_active_character_checkpoint(checkpoint)
+                .map_err(classify_runtime_error)?;
+            return Ok(());
+        }
+
+        let request = self
+            .clone()
+            .into_request()?
+            .with_source_sequence(source_sequence);
+        if replicated {
+            session.execute_replay_request(request)?;
+        } else {
+            session.execute_request(request)?;
+        }
+        Ok(())
     }
 }
 
