@@ -174,44 +174,6 @@ fn kill_field_wasp(session: &mut SimulationSession) {
     let _ = attack_until_monster_dies(session, 3002, 5);
 }
 
-fn add_repair_powder(session: &mut SimulationSession, quantity: u32) {
-    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-    resources.inventory_items.push(ItemState {
-        key: "repair-powder".to_string(),
-        name: "Repair Powder".to_string(),
-        icon: super::item_icon_for_key("repair-powder"),
-        slot: 11,
-        unique_id: 11,
-        container: ItemContainer::Bag1,
-        quantity,
-        description: "Starter maintenance powder issued by Village Guide.".to_string(),
-        durability_current: None,
-        durability_max: None,
-        weight: 1,
-        equip_slot: None,
-        grade: ItemGrade::None,
-        added_attack: 0,
-        added_defence: 0,
-        added_stats: Vec::new(),
-        socketed: Vec::new(),
-        cursed: false,
-        socket_slots: 0,
-        gem_count: 0,
-        identified: None,
-        soul_bound_id: None,
-        sealed_expiry_time_binary_datetime: 0,
-        sealed_next_time_binary_datetime: 0,
-        rental_binding_flags: 0,
-        rental_owner_name: String::new(),
-        rental_expiry_binary_datetime: 0,
-        rental_locked: false,
-        attack: 0,
-        defence: 0,
-        heal_hp: 0,
-        heal_mp: 0,
-    });
-}
-
 fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8) {
     let key = format!("credit-token-{token_number}");
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -233,6 +195,7 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -271,6 +234,7 @@ fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -309,6 +273,7 @@ fn add_weapon_oil(session: &mut SimulationSession, key: &str, name: &str, slot: 
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -354,6 +319,7 @@ fn add_repairable_inventory_item(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -398,6 +364,7 @@ fn add_inventory_test_item(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -513,6 +480,7 @@ fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -551,6 +519,7 @@ fn add_socket_source_test_item(session: &mut SimulationSession, slot: u8, quanti
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -596,6 +565,65 @@ fn grant_real_crystal_item(
         u16::from(template.weight),
     );
     item.unique_id
+}
+
+fn assert_start_game_success(session: &mut SimulationSession, character_index: i32) {
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index });
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })),
+        "StartGame should enter the character: {packets:?}"
+    );
+}
+
+fn create_and_start_test_character(session: &mut SimulationSession, name: &str) -> i32 {
+    login_demo_account_for_persistence_test(session);
+    let character_index =
+        new_character_success_index(&session.handle_packet(ClientPacket::NewCharacter {
+            name: name.to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        }));
+    assert_start_game_success(session, character_index);
+    character_index
+}
+
+fn take_real_crystal_item_state(
+    session: &mut SimulationSession,
+    template_name: &str,
+    preferred_slot: u8,
+) -> ItemState {
+    let unique_id = grant_real_crystal_item(session, template_name, preferred_slot);
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    let index = resources
+        .inventory_items
+        .iter()
+        .position(|item| item.unique_id == unique_id)
+        .expect("newly granted Crystal item should be in inventory");
+    resources.inventory_items.remove(index)
+}
+
+fn attach_real_bronze_bell_fixture(session: &mut SimulationSession, unique_id: u64) -> u64 {
+    let mut bells = take_real_crystal_item_state(session, "BronzeBell", 31);
+    bells.unique_id = unique_id;
+    bells.slot = 1;
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    let mount = resources
+        .equipment_items
+        .iter_mut()
+        .find(|item| item.slot == EquipmentSlot::Mount)
+        .expect("equipped RedTiger");
+    assert!(
+        mount.socket_slots > 1,
+        "RedTiger must expose MountSlot.Bells"
+    );
+    assert!(
+        mount.socketed.is_empty(),
+        "fixture mount must start without Bells"
+    );
+    mount.socketed.push(bells);
+    unique_id
 }
 
 fn equip_crystal_bells_to_mount(session: &mut SimulationSession, bells_id: u64) -> u64 {
@@ -701,12 +729,11 @@ fn top_level_and_equipment_parent_unique_ids(
         .chain(resources.storage_items.iter())
         .map(super::item_unique_id)
         .collect::<std::collections::BTreeSet<_>>();
-    ids.extend(
-        resources
-            .equipment_items
-            .iter()
-            .filter_map(|equipment| super::equipment_slot_unique_id(equipment.slot)),
-    );
+    ids.extend(resources.equipment_items.iter().filter_map(|equipment| {
+        equipment
+            .user_item_unique_id
+            .or_else(|| super::equipment_slot_unique_id(equipment.slot))
+    }));
     ids
 }
 
@@ -740,6 +767,8 @@ fn equip_crystal_item_with_quantity(
         added_luck: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
+        user_item_unique_id: None,
         cursed: false,
         socket_slots: template.slots,
         gem_count: 0,
@@ -780,6 +809,8 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
             added_luck: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
+            user_item_unique_id: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -846,6 +877,7 @@ fn add_inventory_crystal_item_with_metadata(
         added_defence,
         added_stats,
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots,
         gem_count,
@@ -893,6 +925,7 @@ fn fishing_slot_item_state(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: template.slots,
         gem_count: 0,
@@ -1009,6 +1042,7 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -1029,9 +1063,9 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
 
 fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
     ItemState {
-        key: "quest-wasp-stinger".to_string(),
-        name: "Wasp Stinger".to_string(),
-        icon: super::item_icon_for_key("quest-wasp-stinger"),
+        key: "crystal-item-876".to_string(),
+        name: "SkyStingerEgg".to_string(),
+        icon: super::item_icon_for_key("crystal-item-876"),
         slot,
         unique_id,
         container: ItemContainer::Quest,
@@ -1046,6 +1080,7 @@ fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -1065,6 +1100,10 @@ fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
 }
 
 fn fill_all_bag_slots(session: &mut SimulationSession) {
+    let template = mir2_game_data::crystal_item_by_name("BronzeHelmet")
+        .expect("real non-stackable Crystal fixture");
+    let key = super::crystal_item_key_for_template(&template);
+    let icon = u16::try_from(template.image).unwrap_or_default();
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.clear();
     for index in 0_u8..80 {
@@ -1074,25 +1113,26 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
             ItemContainer::Bag2
         };
         resources.inventory_items.push(ItemState {
-            key: format!("full-slot-{index}"),
-            name: format!("Full Slot {index}"),
-            icon: super::item_icon_for_key("training-manual"),
+            key: key.clone(),
+            name: template.name.clone(),
+            icon,
             slot: index % 40,
             unique_id: super::default_item_unique_id(container, index % 40),
             container,
             quantity: 1,
             description: "Fills bag capacity for transaction rollback tests.".to_string(),
-            durability_current: None,
-            durability_max: None,
-            weight: 1,
-            equip_slot: None,
+            durability_current: Some(template.durability),
+            durability_max: Some(template.durability),
+            weight: u16::from(template.weight),
+            equip_slot: Some(EquipmentSlot::Helmet),
             grade: ItemGrade::None,
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
-            socket_slots: 0,
+            socket_slots: template.slots,
             gem_count: 0,
             identified: None,
             soul_bound_id: None,
@@ -1109,7 +1149,6 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
         });
     }
 }
-
 fn add_equippable_test_item(
     session: &mut SimulationSession,
     key: &str,
@@ -1138,6 +1177,7 @@ fn add_equippable_test_item(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -6558,132 +6598,95 @@ fn equipment_embedded_unique_ids_are_preserved_across_save_load() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
-    register_test_account(&session, "embedded-id-preserve");
-    session.handle_packet(ClientPacket::Login {
-        account_id: "embedded-id-preserve".to_string(),
-        password: "demo".to_string(),
-    });
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let character_index = create_and_start_test_character(&mut session, "UidBell");
     set_active_character_and_body_class_gender_level(
         &mut session,
         MirClass::Warrior,
         MirGender::Male,
         30,
     );
-    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
-        .expect("real BronzeBell should be equipped");
-    let socket_id = 88_001;
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let mut socket = socket_test_item_state("preserved-equipment-socket", socket_id);
-        socket.slot = 7;
-        resources
-            .equipment_items
-            .iter_mut()
-            .find(|item| item.slot == EquipmentSlot::Weapon)
-            .expect("starter weapon")
-            .socketed
-            .push(socket);
-    }
-    session.save_active_character();
+    let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, false);
+    let bells_id = attach_real_bronze_bell_fixture(&mut session, 88_001);
+
+    // Crystal's RedTiger carries BronzeBell (item index 778) only at the
+    // legal MountSlot.Bells protocol position 1. A fabricated socket item is
+    // intentionally not used as a persistence fixture.
+    assert!(session.save_active_character().is_ok());
     drop(session);
 
     let mut reloaded = SimulationSession::new(
         SimulationConfig::default().with_account_store_path(store_path.clone()),
     );
-    reloaded.handle_packet(ClientPacket::Login {
-        account_id: "embedded-id-preserve".to_string(),
-        password: "demo".to_string(),
-    });
-    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, character_index);
     let first_ids = equipment_embedded_key_ids(&reloaded);
-    assert!(first_ids
-        .iter()
-        .any(|(key, id)| { key == "crystal-item-778" && *id == bells_id }));
-    assert!(first_ids
-        .iter()
-        .any(|(key, id)| { key == "preserved-equipment-socket" && *id == socket_id }));
+    assert_eq!(
+        first_ids
+            .iter()
+            .filter(|(key, _)| key == "crystal-item-778")
+            .map(|(_, id)| *id)
+            .collect::<Vec<_>>(),
+        vec![bells_id],
+        "the real MountSlot.Bells child must retain its exact non-zero UID"
+    );
 
-    reloaded.save_active_character();
+    assert!(reloaded.save_active_character().is_ok());
     drop(reloaded);
     let mut second_reload =
         SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
-    second_reload.handle_packet(ClientPacket::Login {
-        account_id: "embedded-id-preserve".to_string(),
-        password: "demo".to_string(),
-    });
-    second_reload.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    login_demo_account_for_persistence_test(&mut second_reload);
+    assert_start_game_success(&mut second_reload, character_index);
     assert_eq!(equipment_embedded_key_ids(&second_reload), first_ids);
 }
-
 #[test]
 fn legacy_zero_and_duplicate_embedded_unique_ids_normalize_deterministically() {
     let temp_dir = unique_runtime_temp_dir("embedded-id-normalize");
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
-    register_test_account(&session, "embedded-id-normalize");
-    session.handle_packet(ClientPacket::Login {
-        account_id: "embedded-id-normalize".to_string(),
-        password: "demo".to_string(),
-    });
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let character_index = create_and_start_test_character(&mut session, "UidLegacy");
     set_active_character_and_body_class_gender_level(
         &mut session,
         MirClass::Warrior,
         MirGender::Male,
         30,
     );
-    let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true);
-    let conflicting_top_level_id = 77_000;
-    let preserved_embedded_id = 88_002;
+    let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, false);
+    let _ = attach_real_bronze_bell_fixture(&mut session, 88_002);
+    let _ = grant_real_crystal_item(&mut session, "BronzeHelmet", 31);
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        // Legacy saves can contain zero UIDs. Make the top-level item and the
+        // *real* BronzeBell child both zero so load normalization must resolve
+        // both the zero marker and an embedded collision without inventing an
+        // unknown ItemInfo or an illegal socket position.
         resources
             .inventory_items
             .first_mut()
             .expect("starter inventory item")
-            .unique_id = conflicting_top_level_id;
+            .unique_id = 0;
         let mount = resources
             .equipment_items
             .iter_mut()
             .find(|item| item.slot == EquipmentSlot::Mount)
-            .expect("equipped mount");
+            .expect("equipped RedTiger");
+        assert!(
+            mount.socket_slots > 1,
+            "RedTiger must expose MountSlot.Bells"
+        );
+        assert_eq!(mount.socketed.len(), 1, "one legal Bells occupant expected");
+        assert_eq!(mount.socketed[0].key, "crystal-item-778");
+        mount.socketed[0].slot = 1;
         mount.socketed[0].unique_id = 0;
-
-        let mut duplicate =
-            socket_test_item_state("duplicate-equipment-socket", conflicting_top_level_id);
-        duplicate.slot = 8;
-        resources
-            .equipment_items
-            .iter_mut()
-            .find(|item| item.slot == EquipmentSlot::Weapon)
-            .expect("starter weapon")
-            .socketed
-            .push(duplicate);
-
-        let mut preserved =
-            socket_test_item_state("preserved-normalized-socket", preserved_embedded_id);
-        preserved.slot = 9;
-        resources
-            .equipment_items
-            .iter_mut()
-            .find(|item| item.slot == EquipmentSlot::Armour)
-            .expect("starter armour")
-            .socketed
-            .push(preserved);
     }
-    session.save_active_character();
+    assert!(session.save_active_character().is_ok());
     drop(session);
 
     let mut reloaded = SimulationSession::new(
         SimulationConfig::default().with_account_store_path(store_path.clone()),
     );
-    reloaded.handle_packet(ClientPacket::Login {
-        account_id: "embedded-id-normalize".to_string(),
-        password: "demo".to_string(),
-    });
-    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, character_index);
     let first_mapping = equipment_embedded_key_ids(&reloaded);
     let embedded_ids = equipment_embedded_unique_ids(&reloaded);
     let embedded_set = embedded_ids
@@ -6694,23 +6697,142 @@ fn legacy_zero_and_duplicate_embedded_unique_ids_normalize_deterministically() {
     assert!(embedded_ids.iter().all(|id| *id != 0));
     let reserved = top_level_and_equipment_parent_unique_ids(&reloaded);
     assert!(embedded_ids.iter().all(|id| !reserved.contains(id)));
-    assert!(first_mapping
-        .iter()
-        .any(|(key, id)| { key == "preserved-normalized-socket" && *id == preserved_embedded_id }));
-    assert!(first_mapping.iter().any(|(key, id)| {
-        key == "duplicate-equipment-socket" && *id != conflicting_top_level_id
-    }));
+    assert_eq!(
+        first_mapping
+            .iter()
+            .filter(|(key, _)| key == "crystal-item-778")
+            .count(),
+        1,
+        "one legal nested Bells UID must survive normalization"
+    );
 
-    reloaded.save_active_character();
+    assert!(reloaded.save_active_character().is_ok());
     drop(reloaded);
     let mut second_reload =
         SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
-    second_reload.handle_packet(ClientPacket::Login {
-        account_id: "embedded-id-normalize".to_string(),
-        password: "demo".to_string(),
-    });
-    second_reload.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    login_demo_account_for_persistence_test(&mut second_reload);
+    assert_start_game_success(&mut second_reload, character_index);
     assert_eq!(equipment_embedded_key_ids(&second_reload), first_mapping);
+}
+#[test]
+fn exact_root_uid_survives_protocol_equip_save_reload_and_remove() {
+    let temp_dir = unique_runtime_temp_dir("exact-root-uid-equip");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    let character_index = create_and_start_test_character(&mut session, "UidEquip");
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+
+    let exact_uid = 91_001;
+    let granted_uid = grant_real_crystal_item(&mut session, "BronzeHelmet", 31);
+    let expected_key = {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let helmet = resources
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.unique_id == granted_uid)
+            .expect("granted real BronzeHelmet");
+        helmet.unique_id = exact_uid;
+        helmet.key.clone()
+    };
+    let equip = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: exact_uid,
+        to: 2,
+    });
+    assert!(equip.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipItem { grid: MirGridType::Inventory, unique_id, to: 2, success: true }
+            if *unique_id == exact_uid
+    )));
+    let save_result = session.save_active_character();
+    assert!(
+        save_result.is_ok(),
+        "equipped exact UID carrier must save: {save_result:?}"
+    );
+    drop(session);
+
+    let mut reloaded =
+        SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, character_index);
+    assert_eq!(
+        reloaded
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet)
+            .and_then(|item| item.user_item_unique_id),
+        Some(exact_uid),
+        "real protocol equip must retain the original UserItem UID in equipment"
+    );
+
+    let remove = reloaded.handle_packet(ClientPacket::RemoveItem {
+        grid: MirGridType::Inventory,
+        unique_id: exact_uid,
+        to: 31,
+    });
+    assert!(remove.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id,
+            to: 31,
+            success: true
+        } if *unique_id == exact_uid
+    )));
+    assert!(reloaded
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.key == expected_key && item.unique_id == exact_uid && item.slot == 31));
+}
+
+#[test]
+fn qa_apply_native_state_rejects_invalid_carrier_without_mutating_world_or_session() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _character_index = create_and_start_test_character(&mut session, "UidQa");
+    let before_world = format!("{:?}", session.world_snapshot());
+    let before_session = session.app.world().resource::<SessionResource>().clone();
+
+    let invalid_item = socket_test_item_state("unknown-qa-carrier", 91_101);
+    let payload = serde_json::json!({
+        "character": {
+            "name": "MustNotApply",
+            "level": 99,
+            "class": MirClass::Wizard,
+            "gender": MirGender::Female,
+        },
+        "mapFileName": "invalid-map",
+        "mapTitle": "Must not apply",
+        "position": Point { x: 1, y: 1 },
+        "direction": MirDirection::Up,
+        "hp": 1,
+        "mp": 0,
+        "inventoryItemsJson": [serde_json::to_string(&vec![invalid_item]).expect("invalid carrier JSON")],
+        "beltItemsJson": [],
+        "storageItemsJson": [],
+        "equipmentItemsJson": [],
+    });
+    let packets = session.stage5_command("qa.applyNativeState", vec![payload.to_string()]);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    assert_eq!(format!("{:?}", session.world_snapshot()), before_world);
+    assert_eq!(
+        format!("{:?}", session.app.world().resource::<SessionResource>()),
+        format!("{:?}", before_session),
+        "a rejected carrier must not update SessionResource"
+    );
 }
 
 #[test]
@@ -8604,7 +8726,7 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         .world_snapshot()
         .ground_drops
         .iter()
-        .any(|drop| drop.name == "Training Splinter"));
+        .any(|drop| drop.name == "Timber"));
 
     let first_harvest = session.handle_packet(ClientPacket::Harvest {
         direction: MirDirection::Right,
@@ -8634,7 +8756,7 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
 
     let third_harvest = session.handle_packet(ClientPacket::Harvest {
         direction: MirDirection::Right,
@@ -8646,9 +8768,16 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
                 if movement.object_id == training_dummy_object_id
         )
     }));
-    assert!(third_harvest
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::GainedItem { item } if item.item_index == 6)));
+    let timber_item_index = super::crystal_item_template_for_item_key("crystal-item-865")
+        .expect("Timber must resolve to a real Crystal template")
+        .item_index;
+    assert!(third_harvest.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::GainedItem { item }
+                if item.item_index == timber_item_index
+        )
+    }));
     assert!(!third_harvest
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -8656,7 +8785,7 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
     assert!(
         session
             .app
@@ -8812,7 +8941,7 @@ fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .all(|item| item.key != "training-splinter"));
+        .all(|item| item.key != "crystal-item-865"));
 }
 
 #[test]
@@ -14554,7 +14683,7 @@ fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
         .world_snapshot()
         .ground_drops
         .iter()
-        .any(|drop| drop.name == "Training Splinter"));
+        .any(|drop| drop.name == "Timber"));
 }
 
 #[test]
@@ -28772,6 +28901,7 @@ fn crystal_npc_checkitem_takeitem_and_move_with_coordinates_execute_together() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -28848,6 +28978,7 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -30257,9 +30388,10 @@ fn defeating_field_wasp_advances_and_turns_in_quest() {
     kill_field_wasp(&mut session);
     let after_kill = session.world_snapshot();
     assert_eq!(after_kill.quest_log[0].stage, QuestStage::ReadyToTurnIn);
-    assert!(after_kill.inventory_items.iter().any(|item| {
-        item.container == ItemContainer::Quest && item.key == "quest-wasp-stinger"
-    }));
+    assert!(after_kill
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Quest && item.key == "crystal-item-876" }));
 
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
@@ -30279,14 +30411,17 @@ fn defeating_field_wasp_advances_and_turns_in_quest() {
     assert!(after_turn_in
         .equipment_items
         .iter()
-        .any(|item| { item.slot == EquipmentSlot::RingRight && item.name == "Guide Ring" }));
+        .any(|item| { item.slot == EquipmentSlot::RingRight && item.name == "CopperRing" }));
     assert!(after_turn_in.inventory_items.iter().any(|item| {
-        item.container == ItemContainer::Bag1 && item.key == "repair-powder" && item.quantity == 2
+        item.container == ItemContainer::Bag1
+            && item.key == "crystal-item-1135"
+            && item.name == "RareCopperOre"
+            && item.quantity == 2
     }));
     assert!(!after_turn_in
         .inventory_items
         .iter()
-        .any(|item| item.key == "quest-wasp-stinger"));
+        .any(|item| item.key == "crystal-item-876"));
 }
 
 #[test]
@@ -30304,9 +30439,9 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
-            key: "quest-wasp-stinger".to_string(),
-            name: "Wasp Stinger".to_string(),
-            icon: super::item_icon_for_key("quest-wasp-stinger"),
+            key: "crystal-item-876".to_string(),
+            name: "SkyStingerEgg".to_string(),
+            icon: super::item_icon_for_key("crystal-item-876"),
             slot: 0,
             unique_id: 0,
             container: ItemContainer::Quest,
@@ -30321,6 +30456,7 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -30350,15 +30486,15 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     assert!(after
         .inventory_items
         .iter()
-        .any(|item| item.key == "quest-wasp-stinger"));
+        .any(|item| item.key == "crystal-item-876"));
     assert!(!after
         .inventory_items
         .iter()
-        .any(|item| item.key == "repair-powder"));
+        .any(|item| item.key == "crystal-item-1135"));
     assert!(!after
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "Guide Ring"));
+        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "CopperRing"));
 }
 
 #[test]
@@ -30582,7 +30718,7 @@ fn starter_monster_item_drop_has_no_runtime_success_chat() {
         .world_snapshot()
         .ground_drops
         .iter()
-        .any(|drop| drop.name == "Training Splinter"));
+        .any(|drop| drop.name == "Timber"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -30842,6 +30978,9 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
+    let spiritblade = mir2_game_data::crystal_item_by_name("SpiritBlade")
+        .expect("SpiritBlade should exist in Crystal ItemInfo");
+    let spiritblade_key = super::crystal_item_key_for_template(&spiritblade);
 
     super::spawn_ground_drop(
         session.app.world_mut(),
@@ -30849,7 +30988,7 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
         "",
         None,
         super::DropLoot::InventoryItem {
-            key: "spiritblade".to_string(),
+            key: spiritblade_key.clone(),
             name: "SpiritBlade".to_string(),
             description: "Random stat pickup test item.".to_string(),
             weight: 10,
@@ -30887,13 +31026,13 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
                 })
     )));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "spiritblade" && item.added_attack == 2 && item.added_defence == 1
+        item.key == spiritblade_key && item.added_attack == 2 && item.added_defence == 1
     }));
     let resources = session.app.world().resource::<InventoryResource>();
     let item = resources
         .inventory_items
         .iter()
-        .find(|item| item.key == "spiritblade")
+        .find(|item| item.key == spiritblade_key)
         .expect("picked random stat item should be in inventory state");
     assert!(item.cursed);
     assert_eq!(item.socket_slots, 2);
@@ -30936,7 +31075,7 @@ fn crystal_quest_required_drop_routes_to_active_quest_inventory() {
         .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
     assert!(packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::Chat { message, .. } if message == "You found Wasp Stinger."
+        ServerPacket::Chat { message, .. } if message == "You found SkyStingerEgg."
     )));
     assert!(packets.iter().all(|packet| !matches!(
         packet,
@@ -34049,13 +34188,13 @@ fn merge_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_mat
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
+        item.key == "crystal-item-876"
             && item.container == ItemContainer::Quest
             && item.slot == 12
             && item.quantity == 2
     }));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
+        item.key == "crystal-item-876"
             && item.container == ItemContainer::Quest
             && item.slot == 13
             && item.quantity == 1
@@ -34097,7 +34236,7 @@ fn merge_item_packet_inventory_to_quest_inventory_grid_does_not_emit_extra_chat_
         item.key == "red-potion" && item.container == ItemContainer::Bag1 && item.quantity == 5
     }));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
+        item.key == "crystal-item-876"
             && item.container == ItemContainer::Quest
             && item.slot == 12
             && item.quantity == 1
@@ -35086,9 +35225,10 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
     let _ = attack_until_monster_dies(&mut session, field_wasp.object_id, 20);
     let after_kill = session.world_snapshot();
     assert_eq!(after_kill.quest_log[0].stage, QuestStage::ReadyToTurnIn);
-    assert!(after_kill.inventory_items.iter().any(|item| {
-        item.container == ItemContainer::Quest && item.key == "quest-wasp-stinger"
-    }));
+    assert!(after_kill
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Quest && item.key == "crystal-item-876" }));
 
     if let Some(drop) = after_kill.ground_drops.first() {
         let drop_object_id = drop.object_id;
@@ -35132,7 +35272,7 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
     assert!(after_turn_in
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "Guide Ring"));
+        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "CopperRing"));
 
     let transfer_packets = session.transfer_map("crystal:HF1:200:200");
     assert!(transfer_packets.iter().any(|packet| matches!(
@@ -35249,8 +35389,8 @@ fn dropped_item_can_be_picked_up_into_inventory() {
     let drop = after_kill
         .ground_drops
         .iter()
-        .find(|drop| drop.name == "Training Splinter")
-        .expect("training splinter drop");
+        .find(|drop| drop.name == "Timber")
+        .expect("Timber drop");
 
     set_player_position(
         &mut session,
@@ -35265,7 +35405,7 @@ fn dropped_item_can_be_picked_up_into_inventory() {
     assert!(after_pickup
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
 }
 
 #[test]
@@ -35364,8 +35504,8 @@ fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
     let drop = after_kill
         .ground_drops
         .iter()
-        .find(|drop| drop.name == "Training Splinter")
-        .expect("training splinter drop");
+        .find(|drop| drop.name == "Timber")
+        .expect("Timber drop");
     let drop_object_id = drop.object_id;
     set_player_position(
         &mut session,
@@ -35381,7 +35521,7 @@ fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
     assert!(after_pickup
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
     assert!(!after_pickup
         .ground_drops
         .iter()
@@ -35616,6 +35756,7 @@ fn pickup_allows_overweight_item_like_crystal() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -37928,6 +38069,8 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
                 added_luck: 0,
                 added_stats: Vec::new(),
                 socketed: Vec::new(),
+                user_item_metadata: None,
+                user_item_unique_id: None,
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
@@ -38014,6 +38157,8 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
             added_luck: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
+            user_item_unique_id: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -38875,7 +39020,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
         resources.inventory_items.push(ItemState {
             key: format!("split-fill-{slot}"),
             name: format!("Split Fill {slot}"),
-            icon: super::item_icon_for_key("training-manual"),
+            icon: super::item_icon_for_key("crystal-item-990"),
             slot,
             unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
@@ -38890,6 +39035,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -39044,9 +39190,15 @@ fn split_item_packet_inventory_prefers_crystal_belt_slots_for_beltable_items() {
             && item.quantity == 3
     }));
     assert!(resources.belt_items.iter().any(|item| {
-        item.key == "red-potion"
+        item.key == "crystal-item-706"
+            && item.name == "RepairOil"
             && item.container == ItemContainer::Belt
             && item.slot == 2
+    }));
+    assert!(resources.belt_items.iter().any(|item| {
+        item.key == "red-potion"
+            && item.container == ItemContainer::Belt
+            && item.slot == 3
             && item.quantity == 2
     }));
     assert!(!packets
@@ -39178,7 +39330,7 @@ fn equip_and_remove_item_packets_emit_crystal_acks() {
 
     let remove_packets = session.handle_packet(ClientPacket::RemoveItem {
         grid: MirGridType::Inventory,
-        unique_id: 2,
+        unique_id: u64::from(helmet_slot),
         to: 9,
     });
 
@@ -39186,7 +39338,7 @@ fn equip_and_remove_item_packets_emit_crystal_acks() {
         remove_packets,
         vec![ServerPacket::RemoveItem {
             grid: MirGridType::Inventory,
-            unique_id: 2,
+            unique_id: u64::from(helmet_slot),
             to: 9,
             success: true,
         }]
@@ -40027,7 +40179,7 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
     ItemState {
         key: key.to_string(),
         name: key.to_string(),
-        icon: super::item_icon_for_key("repair-powder"),
+        icon: super::item_icon_for_key("crystal-item-1135"),
         slot: 0,
         unique_id,
         container: ItemContainer::Bag1,
@@ -40042,6 +40194,7 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -40058,6 +40211,29 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
         heal_hp: 0,
         heal_mp: 0,
     }
+}
+
+fn real_crystal_socket_host_with_bell(
+    session: &mut SimulationSession,
+    host_slot: u8,
+    bell_slot: u8,
+    bell_cursed: bool,
+) -> (ItemState, u64, u64) {
+    let mut host = take_real_crystal_item_state(session, "RedTiger", host_slot);
+    let mut bell = take_real_crystal_item_state(session, "BronzeBell", bell_slot);
+    bell.cursed = bell_cursed;
+    let bell_unique_id = super::item_unique_id(&bell);
+    let bell_user = super::super::items::try_user_item_from_item_state(&bell)
+        .expect("real BronzeBell should serialize to UserItem");
+    let host_unique_id = super::item_unique_id(&host);
+    let mut host_user = super::super::items::try_user_item_from_item_state(&host)
+        .expect("real RedTiger should serialize to UserItem");
+    assert!(host_user.slots.len() > 1, "RedTiger exposes the Bells slot");
+    host_user.slots[1] = Some(bell_user);
+    host = super::super::items::try_item_state_from_user_item(host, &host_user)
+        .expect("real RedTiger + BronzeBell carrier should hydrate");
+    host.slot = host_slot;
+    (host, host_unique_id, bell_unique_id)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -40081,17 +40257,23 @@ impl IncomingItemTreePath {
     }
 }
 
-fn malformed_incoming_item_tree(label: &str) -> ItemState {
-    let mut root = socket_test_item_state(&format!("{label}-root"), 0);
+fn malformed_incoming_item_tree(session: &mut SimulationSession) -> ItemState {
+    // A real Crystal RedTiger is a legal parent for the real BronzeBell ItemInfo
+    // at MountSlot.Bells (protocol slot 1). Deliberately collide the incoming
+    // child with a separately equipped BronzeBell; all other carrier fields
+    // originate from the Crystal manifest rather than a synthetic socket key.
+    let mut root = take_real_crystal_item_state(session, "RedTiger", 30);
+    let mut bell = take_real_crystal_item_state(session, "BronzeBell", 31);
+    assert!(
+        root.socket_slots > 1,
+        "RedTiger must expose MountSlot.Bells"
+    );
+    root.unique_id = 0;
+    root.user_item_metadata = None;
     root.slot = 30;
-    let global_conflict = socket_test_item_state(&format!("{label}-global-conflict"), 88_000);
-    let mut internal_first = socket_test_item_state(&format!("{label}-internal-first"), 77_001);
-    internal_first.socketed.push(socket_test_item_state(
-        &format!("{label}-internal-duplicate"),
-        77_001,
-    ));
-    let preserved = socket_test_item_state(&format!("{label}-preserved"), 99_123);
-    root.socketed = vec![global_conflict, internal_first, preserved];
+    bell.unique_id = 88_000;
+    bell.slot = 1;
+    root.socketed = vec![bell];
     root
 }
 
@@ -40115,7 +40297,10 @@ fn inventory_global_item_id_occurrences(session: &SimulationSession, unique_id: 
     collect_item_tree_unique_ids(&resources.inventory_items, &mut ids);
     collect_item_tree_unique_ids(&resources.storage_items, &mut ids);
     for equipment in &resources.equipment_items {
-        if let Some(parent_id) = super::equipment_slot_unique_id(equipment.slot) {
+        if let Some(parent_id) = equipment
+            .user_item_unique_id
+            .or_else(|| super::equipment_slot_unique_id(equipment.slot))
+        {
             ids.push(parent_id);
         }
         collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
@@ -40141,7 +40326,7 @@ fn return_incoming_item_tree_through_path(
                 items: vec![super::SharedTradeOfferItem {
                     item_state_json: serde_json::to_string(&item).expect("incoming trade item"),
                     key: item.key.clone(),
-                    unique_id: item.unique_id,
+                    unique_id: super::item_unique_id(&item),
                 }],
             };
             let packets = session.apply_shared_trade_delivery(&offer);
@@ -40156,6 +40341,7 @@ fn return_incoming_item_tree_through_path(
                 .world_mut()
                 .resource_mut::<super::ItemRentalResource>()
                 .active = Some(super::super::resources::ActiveItemRentalState {
+                transaction_nonce: "test-rental-transaction".to_string(),
                 partner_name: "Rental Partner".to_string(),
                 fee: 0,
                 days: 1,
@@ -40217,6 +40403,7 @@ fn return_incoming_item_tree_through_path(
                     .guild
                     .storage_item_states
                     .insert(0, encoded);
+                stage5.stage5_systems.guild.storage_item_users.insert(0, 0);
             }
             let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
                 change_type: 1,
@@ -40246,33 +40433,51 @@ fn incoming_item_tree_paths_normalize_nested_ids_and_remain_save_load_stable() {
     ] {
         let config = SimulationConfig::default();
         let mut session = SimulationSession::new(config.clone());
-        login_demo_account_for_persistence_test(&mut session);
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let character_index = create_and_start_test_character(&mut session, "UidIngress");
+        set_active_character_and_body_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            30,
+        );
 
-        let label = path.label();
-        let root_key = format!("{label}-root");
+        // Reserve a real mounted BronzeBell UID so the incoming tree's real
+        // BronzeBell child has to be rekeyed by every ingress path.
+        let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, false);
+        let reserved_bells_id = attach_real_bronze_bell_fixture(&mut session, 88_000);
         {
             let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-            resources
+            let mount = resources
                 .equipment_items
                 .iter_mut()
-                .find(|equipment| equipment.slot == EquipmentSlot::Weapon)
-                .expect("default weapon")
-                .socketed
-                .push(socket_test_item_state("global-reserved-socket", 88_000));
+                .find(|item| item.slot == EquipmentSlot::Mount)
+                .expect("equipped RedTiger");
+            assert!(
+                mount.socket_slots > 1,
+                "RedTiger must expose MountSlot.Bells"
+            );
+            assert_eq!(mount.socketed.len(), 1, "one legal Bells occupant expected");
+            mount.socketed[0].slot = 1;
+            mount.socketed[0].unique_id = 88_000;
         }
-
-        return_incoming_item_tree_through_path(
-            &mut session,
-            path,
-            malformed_incoming_item_tree(label),
+        assert_eq!(
+            reserved_bells_id, 88_000,
+            "fixture must reserve the exact UID that the incoming child collides with"
         );
+
+        let label = path.label();
+        let root_key = super::crystal_item_key_for_template(
+            &mir2_game_data::crystal_item_by_name("RedTiger").expect("RedTiger template"),
+        );
+        let incoming = malformed_incoming_item_tree(&mut session);
+        return_incoming_item_tree_through_path(&mut session, path, incoming);
 
         let before_reload = incoming_tree_key_ids(&session, &root_key);
         let ids = before_reload
             .iter()
             .map(|(_, unique_id)| *unique_id)
             .collect::<Vec<_>>();
+        assert_eq!(ids.len(), 2, "{path:?} must carry RedTiger plus BronzeBell");
         assert!(ids.iter().all(|unique_id| *unique_id != 0), "{path:?}");
         assert_eq!(
             ids.iter()
@@ -40288,33 +40493,745 @@ fn incoming_item_tree_paths_normalize_nested_ids_and_remain_save_load_stable() {
             }),
             "{path:?} incoming IDs must be globally unique after insertion"
         );
-        assert_eq!(
+        assert_ne!(
             before_reload
                 .iter()
-                .find(|(key, _)| key == &format!("{label}-internal-first"))
+                .find(|(key, _)| key == "crystal-item-778")
                 .map(|(_, unique_id)| *unique_id),
-            Some(77_001),
-            "{path:?} must preserve the first legal internal ID"
+            Some(88_000),
+            "{path:?} must rekey the colliding real BronzeBell child"
         );
-        assert_eq!(
+        assert!(
             before_reload
                 .iter()
-                .find(|(key, _)| key == &format!("{label}-preserved"))
-                .map(|(_, unique_id)| *unique_id),
-            Some(99_123),
-            "{path:?} must preserve a legal non-conflicting ID"
+                .any(|(key, unique_id)| key == &root_key && *unique_id != 0),
+            "{path:?} must normalize the zero-root UID"
         );
 
-        session.save_active_character();
+        assert!(session.save_active_character().is_ok());
         let mut reloaded = SimulationSession::new(config);
         login_demo_account_for_persistence_test(&mut reloaded);
-        reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert_start_game_success(&mut reloaded, character_index);
         assert_eq!(
             incoming_tree_key_ids(&reloaded, &root_key),
             before_reload,
             "{path:?} IDs must remain stable across save/load"
         );
+        assert!(!label.is_empty());
     }
+}
+fn invalid_recursive_incoming_item_tree(session: &mut SimulationSession) -> ItemState {
+    let mut item = malformed_incoming_item_tree(session);
+    item.socketed
+        .first_mut()
+        .expect("real RedTiger fixture should contain BronzeBell")
+        .key = "not-a-crystal-item".to_string();
+    assert!(
+        super::validate_item_state_carrier(&item).is_err(),
+        "fixture must be a syntactically valid JSON tree with an invalid nested Crystal carrier"
+    );
+    item
+}
+
+#[test]
+fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() {
+    for path in [
+        IncomingItemTreePath::SharedTrade,
+        IncomingItemTreePath::RentalRetrieve,
+        IncomingItemTreePath::RentalCancel,
+        IncomingItemTreePath::HeroTakeBack,
+        IncomingItemTreePath::GuildStorageRetrieve,
+    ] {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        create_and_start_test_character(&mut session, "BadIngress");
+        set_active_character_and_body_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            30,
+        );
+        let item = invalid_recursive_incoming_item_tree(&mut session);
+        let before_inventory = serde_json::to_string(
+            &session
+                .app
+                .world()
+                .resource::<InventoryResource>()
+                .inventory_items,
+        )
+        .expect("inventory snapshot");
+        let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+
+        match path {
+            IncomingItemTreePath::SharedTrade => {
+                let offer = super::SharedTradeOffer {
+                    account_id: "sender-account".to_string(),
+                    character_index: 0,
+                    character_name: "Sender".to_string(),
+                    partner_name: "Scout".to_string(),
+                    gold: 77,
+                    items: vec![super::SharedTradeOfferItem {
+                        item_state_json: serde_json::to_string(&item)
+                            .expect("invalid nested trade item should still be JSON"),
+                        key: item.key.clone(),
+                        unique_id: super::item_unique_id(&item),
+                    }],
+                };
+                let packets = session.apply_shared_trade_delivery(&offer);
+                assert!(
+                    packets
+                        .iter()
+                        .any(|packet| matches!(packet, ServerPacket::TradeCancel { .. })),
+                    "{path:?} must reject the invalid recursive carrier"
+                );
+            }
+            IncomingItemTreePath::RentalRetrieve | IncomingItemTreePath::RentalCancel => {
+                let deposited_from =
+                    matches!(path, IncomingItemTreePath::RentalCancel).then_some(30);
+                let expected_item_json =
+                    serde_json::to_string(&item).expect("rental source snapshot");
+                session
+                    .app
+                    .world_mut()
+                    .resource_mut::<super::ItemRentalResource>()
+                    .active = Some(super::super::resources::ActiveItemRentalState {
+                    transaction_nonce: "test-rental-transaction".to_string(),
+                    partner_name: "Rental Partner".to_string(),
+                    fee: 25,
+                    days: 1,
+                    deposited_item: Some(item),
+                    deposited_from,
+                    gold_locked: false,
+                    item_locked: false,
+                });
+
+                let packets = if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                    session.handle_packet(ClientPacket::RetrieveRentalItem { from: 0, to: 30 })
+                } else {
+                    session.handle_packet(ClientPacket::CancelItemRental)
+                };
+                if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                    assert!(matches!(
+                        packets.as_slice(),
+                        [ServerPacket::RetrieveRentalItem { success: false, .. }]
+                    ));
+                } else {
+                    assert!(
+                        !packets
+                            .iter()
+                            .any(|packet| matches!(packet, ServerPacket::CancelItemRental)),
+                        "cancel must not report completion for an invalid retained item"
+                    );
+                }
+                let active = session
+                    .app
+                    .world()
+                    .resource::<super::ItemRentalResource>()
+                    .active
+                    .as_ref()
+                    .expect("failed rental ingress must retain the active transaction");
+                assert_eq!(
+                    serde_json::to_string(
+                        active
+                            .deposited_item
+                            .as_ref()
+                            .expect("failed rental ingress must retain source item")
+                    )
+                    .expect("retained rental item snapshot"),
+                    expected_item_json,
+                    "{path:?} source item must remain byte-for-byte stable"
+                );
+            }
+            IncomingItemTreePath::HeroTakeBack => {
+                session.handle_packet(ClientPacket::NewHero {
+                    name: "BadCarrierHero".to_string(),
+                    gender: MirGender::Female,
+                    class: MirClass::Warrior,
+                });
+                let mut hero_item = item;
+                hero_item.slot = 3;
+                session
+                    .app
+                    .world_mut()
+                    .resource_mut::<super::HeroInventoryResource>()
+                    .items
+                    .push(hero_item);
+                let before_hero = serde_json::to_string(
+                    &session
+                        .app
+                        .world()
+                        .resource::<super::HeroInventoryResource>()
+                        .items,
+                )
+                .expect("hero source snapshot");
+                assert!(matches!(
+                    session
+                        .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                        .as_slice(),
+                    [ServerPacket::TakeBackHeroItem { success: false, .. }]
+                ));
+                assert_eq!(
+                    serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<super::HeroInventoryResource>()
+                            .items
+                    )
+                    .expect("hero retained snapshot"),
+                    before_hero,
+                    "hero source must remain unchanged on validation failure"
+                );
+            }
+            IncomingItemTreePath::GuildStorageRetrieve => {
+                session.stage5_command("guild.create", vec!["BadTreeGuild".to_string()]);
+                let encoded = serde_json::to_string(&item).expect("invalid nested guild item JSON");
+                {
+                    let mut stage5 = session
+                        .app
+                        .world_mut()
+                        .resource_mut::<Stage5SystemsResource>();
+                    let guild = &mut stage5.stage5_systems.guild;
+                    guild.storage_items.insert(0, item.key.clone());
+                    guild.storage_item_states.insert(0, encoded.clone());
+                    guild.storage_item_users.insert(0, 0);
+                }
+                let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                    change_type: 1,
+                    from: 0,
+                    to: 30,
+                });
+                assert!(
+                    !packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GuildStorageItemChange {
+                            change_type: 1,
+                            item: None,
+                            ..
+                        }
+                    )),
+                    "guild retrieve must not report success for an invalid carrier"
+                );
+
+                let move_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                    change_type: 2,
+                    from: 0,
+                    to: 1,
+                });
+                assert!(
+                    !move_packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GuildStorageItemChange {
+                            change_type: 2,
+                            item: Some(_),
+                            ..
+                        }
+                    )),
+                    "guild move must fail before swapping an invalid carrier"
+                );
+                let list_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                    change_type: 3,
+                    from: 0,
+                    to: 0,
+                });
+                assert!(!list_packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::GuildStorageList { .. })));
+                assert!(list_packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::GuildStorageItemChange {
+                        change_type: 6,
+                        item: None,
+                        ..
+                    }
+                )));
+
+                let stage5 = session.app.world().resource::<Stage5SystemsResource>();
+                let guild = &stage5.stage5_systems.guild;
+                assert_eq!(guild.storage_items.get(&0), Some(&item.key));
+                assert!(!guild.storage_items.contains_key(&1));
+                assert_eq!(guild.storage_item_states.get(&0), Some(&encoded));
+                assert!(!guild.storage_item_states.contains_key(&1));
+            }
+        }
+
+        assert_eq!(
+            serde_json::to_string(
+                &session
+                    .app
+                    .world()
+                    .resource::<InventoryResource>()
+                    .inventory_items
+            )
+            .expect("post-failure inventory snapshot"),
+            before_inventory,
+            "{path:?} must not mutate player inventory on recursive validation failure"
+        );
+        assert_eq!(
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
+            before_gold,
+            "{path:?} must not mutate gold on recursive validation failure"
+        );
+    }
+}
+
+#[test]
+fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() {
+    for zero_child in [false, true] {
+        for path in [
+            IncomingItemTreePath::SharedTrade,
+            IncomingItemTreePath::RentalRetrieve,
+            IncomingItemTreePath::RentalCancel,
+            IncomingItemTreePath::HeroTakeBack,
+            IncomingItemTreePath::GuildStorageRetrieve,
+        ] {
+            let mut session = SimulationSession::new(SimulationConfig::default());
+            create_and_start_test_character(&mut session, "ZeroIngress");
+            set_active_character_and_body_class_gender_level(
+                &mut session,
+                MirClass::Warrior,
+                MirGender::Male,
+                30,
+            );
+            let mut item = malformed_incoming_item_tree(&mut session);
+            if zero_child {
+                item.socketed
+                    .first_mut()
+                    .expect("real BronzeBell child")
+                    .quantity = 0;
+            } else {
+                item.quantity = 0;
+            }
+            super::validate_item_state_carrier(&item)
+                .expect("generic carrier must permit transient quantity zero");
+            assert!(
+                super::validate_committed_item_state_carrier(&item).is_err(),
+                "{path:?} fixture must fail only the committed invariant"
+            );
+
+            match path {
+                IncomingItemTreePath::SharedTrade => {
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+                    let offer = super::SharedTradeOffer {
+                        account_id: "sender-account".to_string(),
+                        character_index: 0,
+                        character_name: "Sender".to_string(),
+                        partner_name: "Scout".to_string(),
+                        gold: 77,
+                        items: vec![super::SharedTradeOfferItem {
+                            item_state_json: serde_json::to_string(&item).unwrap(),
+                            key: item.key.clone(),
+                            unique_id: super::item_unique_id(&item),
+                        }],
+                    };
+                    let packets = session.apply_shared_trade_delivery(&offer);
+                    assert!(packets
+                        .iter()
+                        .any(|packet| matches!(packet, ServerPacket::TradeCancel { .. })));
+                    assert!(!packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GainedItem { .. } | ServerPacket::GainedGold { .. }
+                    )));
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                    assert_eq!(
+                        session.app.world().resource::<PlayerRuntimeResource>().gold,
+                        before_gold
+                    );
+                }
+                IncomingItemTreePath::RentalRetrieve | IncomingItemTreePath::RentalCancel => {
+                    let deposited_from =
+                        matches!(path, IncomingItemTreePath::RentalCancel).then_some(30);
+                    let expected_item_json = serde_json::to_string(&item).unwrap();
+                    session
+                        .app
+                        .world_mut()
+                        .resource_mut::<super::ItemRentalResource>()
+                        .active = Some(super::super::resources::ActiveItemRentalState {
+                        transaction_nonce: "test-rental-transaction".to_string(),
+                        partner_name: "Rental Partner".to_string(),
+                        fee: 25,
+                        days: 1,
+                        deposited_item: Some(item),
+                        deposited_from,
+                        gold_locked: false,
+                        item_locked: false,
+                    });
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+                    let packets = if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                        session.handle_packet(ClientPacket::RetrieveRentalItem { from: 0, to: 30 })
+                    } else {
+                        session.handle_packet(ClientPacket::CancelItemRental)
+                    };
+                    if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                        assert!(matches!(
+                            packets.as_slice(),
+                            [ServerPacket::RetrieveRentalItem { success: false, .. }]
+                        ));
+                    } else {
+                        assert!(packets.is_empty());
+                    }
+                    let active = session
+                        .app
+                        .world()
+                        .resource::<super::ItemRentalResource>()
+                        .active
+                        .as_ref()
+                        .expect("failed rental commit must retain active state");
+                    assert_eq!(
+                        serde_json::to_string(
+                            active
+                                .deposited_item
+                                .as_ref()
+                                .expect("retained rental item")
+                        )
+                        .unwrap(),
+                        expected_item_json
+                    );
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                    assert_eq!(
+                        session.app.world().resource::<PlayerRuntimeResource>().gold,
+                        before_gold
+                    );
+                }
+                IncomingItemTreePath::HeroTakeBack => {
+                    session.handle_packet(ClientPacket::NewHero {
+                        name: "ZeroCarrierHero".to_string(),
+                        gender: MirGender::Female,
+                        class: MirClass::Warrior,
+                    });
+                    let mut hero_item = item;
+                    hero_item.slot = 3;
+                    session
+                        .app
+                        .world_mut()
+                        .resource_mut::<super::HeroInventoryResource>()
+                        .items
+                        .push(hero_item);
+                    let before_hero = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<super::HeroInventoryResource>()
+                            .items,
+                    )
+                    .unwrap();
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    assert!(matches!(
+                        session
+                            .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                            .as_slice(),
+                        [ServerPacket::TakeBackHeroItem { success: false, .. }]
+                    ));
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<super::HeroInventoryResource>()
+                                .items
+                        )
+                        .unwrap(),
+                        before_hero
+                    );
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                }
+                IncomingItemTreePath::GuildStorageRetrieve => {
+                    session.stage5_command("guild.create", vec!["ZeroTreeGuild".to_string()]);
+                    let encoded = serde_json::to_string(&item).unwrap();
+                    {
+                        let mut stage5 = session
+                            .app
+                            .world_mut()
+                            .resource_mut::<Stage5SystemsResource>();
+                        let guild = &mut stage5.stage5_systems.guild;
+                        guild.storage_items.insert(0, item.key.clone());
+                        guild.storage_item_states.insert(0, encoded);
+                        guild.storage_item_users.insert(0, 0);
+                    }
+                    let before_guild = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<Stage5SystemsResource>()
+                            .stage5_systems
+                            .guild,
+                    )
+                    .unwrap();
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                        change_type: 1,
+                        from: 0,
+                        to: 30,
+                    });
+                    assert!(!packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GuildStorageItemChange {
+                            change_type: 1,
+                            item: None,
+                            ..
+                        }
+                    )));
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<Stage5SystemsResource>()
+                                .stage5_systems
+                                .guild
+                        )
+                        .unwrap(),
+                        before_guild
+                    );
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn inventory_use_item_equips_metadata_backed_exact_zero_from_nonzero_slot() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    create_and_start_test_character(&mut session, "ExactZeroUse");
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let helmet = take_real_crystal_item_state(&mut session, "BronzeHelmet", 30);
+    let wire = super::super::items::try_user_item_from_item_state(&helmet)
+        .expect("real Crystal helmet should serialize to UserItem");
+    let mut helmet = super::super::items::try_item_state_from_user_item(helmet, &wire)
+        .expect("protocol round-trip should hydrate exact metadata");
+    assert!(helmet.user_item_metadata.is_some());
+    helmet.unique_id = 0;
+    helmet.container = ItemContainer::Bag1;
+    helmet.slot = 30;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(helmet);
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 0,
+        grid: MirGridType::Inventory,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 0,
+            success: true,
+            grid: MirGridType::Inventory
+        }
+    )));
+    let resources = session.app.world().resource::<InventoryResource>();
+    assert!(
+        resources
+            .inventory_items
+            .iter()
+            .all(|item| !(item.container == ItemContainer::Bag1 && item.slot == 30)),
+        "double-click equip must remove the exact-zero item from its nonzero bag slot"
+    );
+    assert_eq!(
+        resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet)
+            .and_then(|item| item.user_item_unique_id),
+        Some(0),
+        "equipment root must retain the exact protocol UID"
+    );
+}
+
+#[test]
+fn rental_deposit_and_confirm_reject_invalid_recursive_carrier_atomically() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    create_and_start_test_character(&mut session, "BadRentalIngress");
+    let mut item = invalid_recursive_incoming_item_tree(&mut session);
+    item.container = ItemContainer::Bag1;
+    item.slot = 30;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(item);
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::ItemRentalResource>()
+        .active = Some(super::super::resources::ActiveItemRentalState {
+        transaction_nonce: "test-rental-transaction".to_string(),
+        partner_name: "Rental Partner".to_string(),
+        fee: 0,
+        days: 1,
+        deposited_item: None,
+        deposited_from: None,
+        gold_locked: false,
+        item_locked: false,
+    });
+    let before_deposit_inventory = serde_json::to_string(
+        &session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items,
+    )
+    .expect("pre-deposit inventory snapshot");
+    assert!(matches!(
+        session
+            .handle_packet(ClientPacket::DepositRentalItem { from: 30, to: 0 })
+            .as_slice(),
+        [ServerPacket::DepositRentalItem { success: false, .. }]
+    ));
+    assert_eq!(
+        serde_json::to_string(
+            &session
+                .app
+                .world()
+                .resource::<InventoryResource>()
+                .inventory_items
+        )
+        .expect("post-deposit inventory snapshot"),
+        before_deposit_inventory
+    );
+    assert!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .active
+            .as_ref()
+            .expect("failed deposit must retain rental")
+            .deposited_item
+            .is_none(),
+        "invalid deposit must not move the item into rental state"
+    );
+
+    let item = session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .pop()
+        .expect("invalid rental fixture should remain in inventory");
+    let expected_item_json = serde_json::to_string(&item).expect("confirm source snapshot");
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::ItemRentalResource>()
+        .active = Some(super::super::resources::ActiveItemRentalState {
+        transaction_nonce: "test-rental-transaction".to_string(),
+        partner_name: "Rental Partner".to_string(),
+        fee: 25,
+        days: 1,
+        deposited_item: Some(item),
+        deposited_from: Some(30),
+        gold_locked: true,
+        item_locked: true,
+    });
+    let before_confirm_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+    assert!(
+        session
+            .handle_packet(ClientPacket::ConfirmItemRental)
+            .is_empty(),
+        "invalid confirmation must fail closed without reporting completion"
+    );
+    let rental = session.app.world().resource::<super::ItemRentalResource>();
+    let active = rental
+        .active
+        .as_ref()
+        .expect("failed confirmation must retain the active rental");
+    assert_eq!(
+        serde_json::to_string(
+            active
+                .deposited_item
+                .as_ref()
+                .expect("failed confirmation must retain the item")
+        )
+        .expect("retained confirm item snapshot"),
+        expected_item_json
+    );
+    assert!(rental.rented_items.is_empty());
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        before_confirm_gold,
+        "failed confirmation must not credit the lender"
+    );
 }
 
 #[test]
@@ -40445,36 +41362,34 @@ fn equip_slot_item_packet_rejects_non_socket_gem() {
 
 #[test]
 fn remove_slot_item_packet_returns_socketed_gem_to_inventory() {
-    // Crystal `PlayerObject.RemoveSlotItem` pops a socketed gem back into the
-    // bag; the socket grid + inventory destination is the supported path.
+    // Crystal `PlayerObject.RemoveSlotItem` pops a real BronzeBell back into the
+    // bag from the real RedTiger mount socket carrier.
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let mut gem = socket_test_item_state("socket-gem-loose", 9301);
-    gem.attack = 3;
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let mut host = socket_test_item_state("crystal-host", 9300);
-        host.slot = 50;
-        host.socket_slots = 1;
-        host.socketed = vec![gem];
-        resources.inventory_items.push(host);
-    }
+    let (host, host_unique_id, bell_unique_id) =
+        real_crystal_socket_host_with_bell(&mut session, 50, 51, false);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(host);
 
     let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
         grid: MirGridType::Socket,
         grid_to: MirGridType::Inventory,
-        unique_id: 9301,
+        unique_id: bell_unique_id,
         to: 7,
-        from_unique_id: 9300,
+        from_unique_id: host_unique_id,
     });
     assert_eq!(
         packets,
         vec![ServerPacket::RemoveSlotItem {
             grid: MirGridType::Socket,
             grid_to: MirGridType::Inventory,
-            unique_id: 9301,
+            unique_id: bell_unique_id,
             to: 7,
             success: true,
         }]
@@ -40483,46 +41398,44 @@ fn remove_slot_item_packet_returns_socketed_gem_to_inventory() {
     let host = resources
         .inventory_items
         .iter()
-        .find(|item| item.unique_id == 9300)
+        .find(|item| super::item_unique_id(item) == host_unique_id)
         .expect("host remains in the bag");
     assert!(host.socketed.is_empty());
     assert!(resources
         .inventory_items
         .iter()
-        .any(|item| item.unique_id == 9301));
+        .any(|item| super::item_unique_id(item) == bell_unique_id));
 }
 
 #[test]
 fn remove_slot_item_packet_rejects_cursed_socketed_gem() {
-    // Crystal refuses to remove cursed socketed gems; the gem stays put.
+    // Crystal refuses to remove a cursed real BronzeBell; the gem stays put.
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let mut gem = socket_test_item_state("socket-gem-cursed", 9401);
-        gem.cursed = true;
-        let mut host = socket_test_item_state("crystal-host", 9400);
-        host.slot = 51;
-        host.socket_slots = 1;
-        host.socketed = vec![gem];
-        resources.inventory_items.push(host);
-    }
+    let (host, host_unique_id, bell_unique_id) =
+        real_crystal_socket_host_with_bell(&mut session, 51, 52, true);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(host);
 
     let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
         grid: MirGridType::Socket,
         grid_to: MirGridType::Inventory,
-        unique_id: 9401,
+        unique_id: bell_unique_id,
         to: 8,
-        from_unique_id: 9400,
+        from_unique_id: host_unique_id,
     });
     assert_eq!(
         packets,
         vec![ServerPacket::RemoveSlotItem {
             grid: MirGridType::Socket,
             grid_to: MirGridType::Inventory,
-            unique_id: 9401,
+            unique_id: bell_unique_id,
             to: 8,
             success: false,
         }]
@@ -40531,14 +41444,11 @@ fn remove_slot_item_packet_rejects_cursed_socketed_gem() {
     let host = resources
         .inventory_items
         .iter()
-        .find(|item| item.unique_id == 9400)
+        .find(|item| super::item_unique_id(item) == host_unique_id)
         .expect("host remains in the bag");
     assert_eq!(host.socketed.len(), 1);
     assert!(host.socketed[0].cursed);
-    assert!(!resources
-        .inventory_items
-        .iter()
-        .any(|item| item.unique_id == 9401));
+    assert_eq!(super::item_unique_id(&host.socketed[0]), bell_unique_id);
 }
 
 /// Pushes a Crystal item (by manifest index) into the bag at a known slot and
@@ -40567,6 +41477,7 @@ fn add_recipe_item(session: &mut SimulationSession, item_index: i32, slot: u8, q
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -40805,52 +41716,29 @@ fn equipping_same_slot_returns_previous_gear_to_bag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        resources.inventory_items.push(ItemState {
-            key: "iron-helmet".to_string(),
-            name: "Iron Helmet".to_string(),
-            icon: super::item_icon_for_key("iron-helmet"),
-            slot: 9,
-            unique_id: 9,
-            container: ItemContainer::Bag1,
-            quantity: 1,
-            description: "Heavier helmet used to validate equipment swapping.".to_string(),
-            durability_current: Some(20),
-            durability_max: Some(20),
-            weight: 2,
-            equip_slot: Some(EquipmentSlot::Helmet),
-            grade: ItemGrade::Rare,
-            added_attack: 0,
-            added_defence: 2,
-            added_stats: Vec::new(),
-            socketed: Vec::new(),
-            cursed: false,
-            socket_slots: 0,
-            gem_count: 0,
-            identified: None,
-            soul_bound_id: None,
-            sealed_expiry_time_binary_datetime: 0,
-            sealed_next_time_binary_datetime: 0,
-            rental_binding_flags: 0,
-            rental_owner_name: String::new(),
-            rental_expiry_binary_datetime: 0,
-            rental_locked: false,
-            attack: 0,
-            defence: 4,
-            heal_hp: 0,
-            heal_mp: 0,
-        });
-    }
+    add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
 
     let _ = session.use_item("bronze-helmet");
-    let _ = session.use_item("iron-helmet");
+    let packets = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: 31,
+        to: 2,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 2,
+            success: true,
+        }
+    )));
     let snapshot = session.world_snapshot();
 
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "Iron Helmet"));
+        .any(|item| { item.slot == EquipmentSlot::Helmet && item.name == "MysteryHelmet" }));
     assert!(snapshot.inventory_items.iter().any(|item| {
         item.name == "Bronze Helmet" && item.grade == ItemGrade::Common && item.added_defence == 1
     }));
@@ -40893,7 +41781,7 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_equippable_test_item(
         &mut session,
-        "shape-dagger",
+        "dagger",
         "Dagger",
         12,
         EquipmentSlot::Weapon,
@@ -40902,7 +41790,7 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
     );
     add_equippable_test_item(
         &mut session,
-        "shape-armour",
+        "leather-armour",
         "Leather Armour",
         13,
         EquipmentSlot::Armour,
@@ -40910,8 +41798,8 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
         2,
     );
 
-    let _ = session.use_item("shape-dagger");
-    let _ = session.use_item("shape-armour");
+    let _ = session.use_item("dagger");
+    let _ = session.use_item("leather-armour");
     let snapshot = session.world_snapshot();
     let player = snapshot
         .entities
@@ -41800,7 +42688,7 @@ fn move_item_packet_inventory_ignores_matching_quest_inventory_slot() {
         item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
     }));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger" && item.slot == 3 && item.container == ItemContainer::Quest
+        item.key == "crystal-item-876" && item.slot == 3 && item.container == ItemContainer::Quest
     }));
 }
 
@@ -42132,12 +43020,10 @@ fn move_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matc
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
-            && item.slot == 12
-            && item.container == ItemContainer::Quest
+        item.key == "crystal-item-876" && item.slot == 12 && item.container == ItemContainer::Quest
     }));
     assert!(!snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger" && item.slot == 2 && item.container == ItemContainer::Quest
+        item.key == "crystal-item-876" && item.slot == 2 && item.container == ItemContainer::Quest
     }));
     assert!(!packets
         .iter()
@@ -43981,98 +44867,6 @@ fn broken_equipment_no_longer_contributes_stats() {
             .expect("armour")
             .defence,
         0
-    );
-}
-
-#[test]
-fn repair_powder_restores_equipped_durability_and_consumes_item() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    login_demo_account_for_persistence_test(&mut session);
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    add_repair_powder(&mut session, 2);
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        for item in resources.equipment_items.iter_mut() {
-            if item.slot == EquipmentSlot::Weapon || item.slot == EquipmentSlot::Armour {
-                item.durability_current = 1;
-            }
-        }
-    }
-
-    let packets = session.use_item("repair-powder");
-    let snapshot = session.world_snapshot();
-
-    assert!(!packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ItemRepaired {
-            unique_id: 0,
-            max_dura: 4000,
-            current_dura: 4000
-        }
-    )));
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ItemRepaired {
-            unique_id: 1,
-            max_dura: 5000,
-            current_dura: 5000
-        }
-    )));
-    assert_eq!(
-        snapshot
-            .equipment_items
-            .iter()
-            .find(|item| item.slot == EquipmentSlot::Weapon)
-            .map(|item| (item.durability_current, item.durability_max)),
-        Some((4000, 4000))
-    );
-    assert_eq!(
-        snapshot
-            .equipment_items
-            .iter()
-            .find(|item| item.slot == EquipmentSlot::Armour)
-            .map(|item| (item.durability_current, item.durability_max)),
-        Some((5000, 5000))
-    );
-    assert_eq!(
-        snapshot
-            .inventory_items
-            .iter()
-            .find(|item| item.key == "repair-powder")
-            .map(|item| item.quantity),
-        Some(1)
-    );
-}
-
-#[test]
-fn repair_powder_not_consumed_when_nothing_needs_repair() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    login_demo_account_for_persistence_test(&mut session);
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    add_repair_powder(&mut session, 1);
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        for item in resources.equipment_items.iter_mut() {
-            item.durability_current = item.durability_max;
-        }
-    }
-
-    let packets = session.use_item("repair-powder");
-    let snapshot = session.world_snapshot();
-
-    assert!(!packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert_eq!(
-        snapshot
-            .inventory_items
-            .iter()
-            .find(|item| item.key == "repair-powder")
-            .map(|item| item.quantity),
-        Some(1)
     );
 }
 
@@ -55535,6 +56329,154 @@ fn guild_packets_update_notice_members_and_storage_like_crystal() {
 }
 
 #[test]
+fn guild_storage_packet_boundaries_reject_orphan_and_malformed_maps_atomically() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.stage5_command("guild.create", vec!["BoundaryGuard".to_string()]);
+
+    let snapshot = |session: &SimulationSession| {
+        let inventory = session.app.world().resource::<InventoryResource>();
+        let stage5 = session.app.world().resource::<Stage5SystemsResource>();
+        (
+            serde_json::to_string(&inventory.inventory_items).unwrap(),
+            serde_json::to_string(&stage5.stage5_systems.guild).unwrap(),
+        )
+    };
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .storage_item_users
+        .insert(1, 77);
+    let orphan_owner_before = snapshot(&session);
+    let list_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 3,
+        from: 0,
+        to: 0,
+    });
+    assert!(!list_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GuildStorageList { .. })));
+    assert!(list_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange { change_type: 6, .. }
+    )));
+    assert_eq!(snapshot(&session), orphan_owner_before);
+
+    let store_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 0,
+        from: 4,
+        to: 1,
+    });
+    assert!(store_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange {
+            change_type: 3,
+            from: 4,
+            to: 1,
+            item: None,
+            ..
+        }
+    )));
+    assert_eq!(snapshot(&session), orphan_owner_before);
+
+    {
+        let source = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 4)
+            .expect("starter dagger")
+            .clone();
+        let encoded = serde_json::to_string(&source).unwrap();
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let guild = &mut stage5.stage5_systems.guild;
+        guild.storage_item_users.clear();
+        guild.storage_item_states.insert(2, encoded);
+    }
+    let orphan_state_before = snapshot(&session);
+    let orphan_state_store = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 0,
+        from: 4,
+        to: 2,
+    });
+    assert!(orphan_state_store.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange { change_type: 3, .. }
+    )));
+    assert_eq!(snapshot(&session), orphan_state_before);
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .storage_item_states
+        .clear();
+    let legal_store = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 0,
+        from: 4,
+        to: 0,
+    });
+    assert!(legal_store.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange {
+            change_type: 0,
+            item: Some(_),
+            ..
+        }
+    )));
+
+    {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let guild = &mut stage5.stage5_systems.guild;
+        guild.storage_items.insert(1, "dagger".to_string());
+        guild
+            .storage_item_states
+            .insert(1, "{malformed destination JSON".to_string());
+        guild.storage_item_users.insert(1, 88);
+    }
+    let malformed_destination_before = snapshot(&session);
+    for (change_type, from, to, failure_type) in [(2, 0, 1, 5), (1, 0, 4, 4), (3, 0, 0, 6)] {
+        let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        });
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GuildStorageList { .. }
+                | ServerPacket::GuildStorageItemChange {
+                    change_type: 0..=2,
+                    ..
+                }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GuildStorageItemChange {
+                change_type,
+                item: None,
+                ..
+            } if *change_type == failure_type
+        )));
+        assert_eq!(snapshot(&session), malformed_destination_before);
+    }
+}
+
+#[test]
 fn guild_storage_preserves_item_state_and_rejects_rank_permission_edges() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
@@ -56732,7 +57674,7 @@ fn stage5_trade_shop_and_auction_are_transactional() {
 
     session.stage5_command(
         "auction.list",
-        vec!["training-splinter".to_string(), "50".to_string()],
+        vec!["crystal-item-865".to_string(), "50".to_string()],
     );
     session.stage5_command("auction.buy", vec!["1".to_string()]);
     let after_auction = session.world_snapshot();
@@ -56744,7 +57686,7 @@ fn stage5_trade_shop_and_auction_are_transactional() {
     assert!(after_auction
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
     // The buyer is also the seller here, so the 50-gold price is debited from the
     // buyer and settled back to the seller (net zero); only the earlier 35-gold
     // shop spend remains.
@@ -57626,7 +58568,7 @@ fn stage5_trade_shop_and_auction_cancel_error_paths_preserve_gold() {
 
     session.stage5_command(
         "auction.list",
-        vec!["training-splinter".to_string(), "50".to_string()],
+        vec!["crystal-item-865".to_string(), "50".to_string()],
     );
     let missing_auction_cancel_packets = session.stage5_command("auction.cancel", Vec::new());
     assert!(missing_auction_cancel_packets.iter().any(|packet| matches!(
@@ -62126,10 +63068,21 @@ fn online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status
     let _ = std::fs::remove_dir_all(dir);
 }
 
+fn strict_mail_attachment_json(key: &str, unique_id: u64) -> String {
+    let mut item = super::seed_inventory_items()
+        .into_iter()
+        .find(|item| item.key == key)
+        .unwrap_or_else(|| panic!("strict mail fixture {key} must be a seeded Crystal item"));
+    item.unique_id = unique_id;
+    super::validate_item_state_carrier(&item)
+        .expect("strict mail fixture must pass the production carrier validator");
+    serde_json::to_string(&item).expect("strict mail fixture should encode")
+}
+
 #[test]
 fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
-    let local_attachment = r#"{"key":"crystal-item-1288","uniqueId":91}"#.to_string();
-    let external_attachment = r#"{"key":"dagger","uniqueId":92}"#.to_string();
+    let local_attachment = strict_mail_attachment_json("bronze-helmet", 91);
+    let external_attachment = strict_mail_attachment_json("dagger", 92);
     let mut local_mail = vec![Stage5MailMessage {
         id: 1,
         delivery_nonce: "local-delivery".to_string(),
@@ -62138,7 +63091,7 @@ fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
         subject: "Game shop purchase".to_string(),
         body: "local purchase".to_string(),
         gold: 0,
-        items: vec!["crystal-item-1288".to_string()],
+        items: vec!["bronze-helmet".to_string()],
         item_states_json: vec![local_attachment],
         opened: true,
         locked: false,
@@ -62202,7 +63155,7 @@ fn identical_mail_content_with_distinct_delivery_nonces_is_never_deduplicated() 
         body: "same content".to_string(),
         gold: 500,
         items: vec!["dagger".to_string()],
-        item_states_json: vec![r#"{"key":"dagger","uniqueId":92}"#.to_string()],
+        item_states_json: vec![strict_mail_attachment_json("dagger", 92)],
         opened: false,
         locked: false,
         claimed: false,
@@ -62338,7 +63291,7 @@ fn legacy_identical_headers_with_different_ids_remain_distinct() {
         body: "Same legacy content".to_string(),
         gold: 500,
         items: vec!["dagger".to_string()],
-        item_states_json: vec![r#"{"key":"dagger","uniqueId":92}"#.to_string()],
+        item_states_json: vec![strict_mail_attachment_json("dagger", 92)],
         opened: false,
         locked: false,
         claimed: false,
@@ -64150,6 +65103,13 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .retain(|item| item.container != ItemContainer::Bag1 || item.slot != 2);
+    add_inventory_crystal_item(&mut session, "BlackIronOre", 2);
 
     let deposit_packets = session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
     assert_eq!(
@@ -64163,12 +65123,12 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     let after_deposit = session.world_snapshot();
     assert_eq!(
         after_deposit.stage5_systems.refine.slots.get(&0),
-        Some(&"training-manual".to_string())
+        Some(&"crystal-item-828".to_string())
     );
     assert!(!after_deposit
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-manual"));
+        .any(|item| item.key == "crystal-item-828"));
 
     let retrieve_packets =
         session.handle_packet(ClientPacket::RetrieveRefineItem { from: 0, to: 2 });
@@ -64184,7 +65144,7 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-manual"));
+        .any(|item| item.key == "crystal-item-828"));
 
     session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
     let cancel_packets = session.handle_packet(ClientPacket::RefineCancel);
@@ -64214,8 +65174,8 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     assert!(in_oven.stage5_systems.refine.ready);
     assert_eq!(in_oven.stage5_systems.refine.pending_unique_id, 4);
 
-    // The starter ingredient has no DC/MC/SC and there is no BlackIronOre, so
-    // Crystal sets RefinedValue::None and the weapon is smashed on test.
+    // BlackIronOre is present, but there is no DC/MC/SC ingredient, so Crystal
+    // sets RefinedValue::None and the weapon is smashed on test.
     let check_packets = session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
     assert!(check_packets
         .iter()
@@ -64264,6 +65224,13 @@ fn refine_outcome_is_deterministic_across_runs() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .retain(|item| item.container != ItemContainer::Bag1 || item.slot != 2);
+        add_inventory_crystal_item(&mut session, "BlackIronOre", 2);
         session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
         session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
         session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
@@ -64734,6 +65701,282 @@ fn item_rental_records_persist_across_restart() {
 }
 
 #[test]
+fn shared_item_rental_lender_rejects_malformed_envelope_without_mutation() {
+    for case in [
+        "json",
+        "id",
+        "name",
+        "zero-root",
+        "zero-child",
+        "invalid-tree",
+    ] {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        create_and_start_test_character(&mut session, "BadLenderEnvelope");
+        let mut item = malformed_incoming_item_tree(&mut session);
+        match case {
+            "zero-root" => item.quantity = 0,
+            "zero-child" => {
+                item.socketed
+                    .first_mut()
+                    .expect("real BronzeBell child")
+                    .quantity = 0;
+            }
+            "invalid-tree" => {
+                item.socketed
+                    .first_mut()
+                    .expect("real BronzeBell child")
+                    .key = "not-a-crystal-item".to_string();
+            }
+            _ => {}
+        }
+        let mut agreement = super::SharedItemRentalAgreement {
+            item: super::SharedItemRentalItemOffer {
+                transaction_nonce: "test-item-transaction".to_string(),
+                account_id: "owner-account".to_string(),
+                character_index: 91,
+                character_name: "BadLenderEnvelope".to_string(),
+                partner_name: "Borrower".to_string(),
+                item_state_json: serde_json::to_string(&item).unwrap(),
+                item_id: super::item_unique_id(&item),
+                item_name: item.name.clone(),
+                days: 3,
+            },
+            fee: super::SharedItemRentalFeeOffer {
+                transaction_nonce: "test-fee-transaction".to_string(),
+                account_id: "borrower-account".to_string(),
+                character_index: 7,
+                character_name: "Borrower".to_string(),
+                partner_name: "BadLenderEnvelope".to_string(),
+                fee: 41,
+            },
+        };
+        match case {
+            "json" => agreement.item.item_state_json = "{malformed".to_string(),
+            "id" => agreement.item.item_id = agreement.item.item_id.saturating_add(1),
+            "name" => agreement.item.item_name = "Mismatched Name".to_string(),
+            _ => {}
+        }
+
+        let retained = super::seed_inventory_items()
+            .into_iter()
+            .find(|candidate| candidate.key == "dagger")
+            .expect("retained rental fixture");
+        {
+            let mut rental = session
+                .app
+                .world_mut()
+                .resource_mut::<super::ItemRentalResource>();
+            rental.active = Some(super::super::resources::ActiveItemRentalState {
+                transaction_nonce: "test-item-transaction".to_string(),
+                partner_name: "Borrower".to_string(),
+                fee: 41,
+                days: 3,
+                deposited_item: Some(retained),
+                deposited_from: Some(7),
+                gold_locked: true,
+                item_locked: true,
+            });
+            rental
+                .rented_items
+                .push(super::super::resources::ItemRentalRecordState {
+                    item_id: 123,
+                    item_name: "Existing".to_string(),
+                    renting_player_name: "ExistingBorrower".to_string(),
+                    item_return_date_binary_datetime: 456,
+                });
+        }
+        let rental_before = {
+            let rental = session.app.world().resource::<super::ItemRentalResource>();
+            let active = rental.active.as_ref().expect("active rental fixture");
+            (
+                rental.has_rented_item,
+                serde_json::to_string(&rental.rented_items).unwrap(),
+                active.partner_name.clone(),
+                active.fee,
+                active.days,
+                active.deposited_from,
+                active.gold_locked,
+                active.item_locked,
+                serde_json::to_string(
+                    active
+                        .deposited_item
+                        .as_ref()
+                        .expect("retained source item"),
+                )
+                .unwrap(),
+            )
+        };
+        let gold_before = session.app.world().resource::<PlayerRuntimeResource>().gold;
+
+        assert_eq!(
+            session.apply_shared_item_rental_delivery(&super::SharedItemRentalDelivery::Lender(
+                agreement
+            ),),
+            vec![ServerPacket::CancelItemRental],
+            "malformed lender case {case} must fail before delivery"
+        );
+
+        let rental_after = session.app.world().resource::<super::ItemRentalResource>();
+        let active_after = rental_after
+            .active
+            .as_ref()
+            .expect("malformed lender delivery must retain active rental");
+        assert_eq!(
+            (
+                rental_after.has_rented_item,
+                serde_json::to_string(&rental_after.rented_items).unwrap(),
+                active_after.partner_name.clone(),
+                active_after.fee,
+                active_after.days,
+                active_after.deposited_from,
+                active_after.gold_locked,
+                active_after.item_locked,
+                serde_json::to_string(
+                    active_after
+                        .deposited_item
+                        .as_ref()
+                        .expect("malformed delivery retains source item"),
+                )
+                .unwrap(),
+            ),
+            rental_before,
+            "malformed lender case {case} must not mutate rental state"
+        );
+        assert_eq!(
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
+            gold_before,
+            "malformed lender case {case} must not credit gold"
+        );
+    }
+}
+
+#[test]
+fn shared_item_rental_lender_delivery_requires_active_match_and_rejects_replay() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let item = {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let index = inventory
+            .inventory_items
+            .iter()
+            .position(|item| item.key == "dagger")
+            .expect("seed dagger should exist");
+        inventory.inventory_items.remove(index)
+    };
+    {
+        let mut rental = session
+            .app
+            .world_mut()
+            .resource_mut::<super::ItemRentalResource>();
+        rental.active = Some(super::super::resources::ActiveItemRentalState {
+            transaction_nonce: "test-item-transaction".to_string(),
+            partner_name: "Borrower".to_string(),
+            fee: 0,
+            days: 3,
+            deposited_item: Some(item.clone()),
+            deposited_from: Some(4),
+            gold_locked: false,
+            item_locked: true,
+        });
+    }
+    let agreement = super::SharedItemRentalAgreement {
+        item: super::SharedItemRentalItemOffer {
+            transaction_nonce: "test-item-transaction".to_string(),
+            account_id: "demo".to_string(),
+            character_index: 0,
+            character_name: "Scout".to_string(),
+            partner_name: "Borrower".to_string(),
+            item_state_json: serde_json::to_string(&item).expect("item should serialize"),
+            item_id: super::item_unique_id(&item),
+            item_name: item.name.clone(),
+            days: 3,
+        },
+        fee: super::SharedItemRentalFeeOffer {
+            transaction_nonce: "test-fee-transaction".to_string(),
+            account_id: "borrower-account".to_string(),
+            character_index: 7,
+            character_name: "Borrower".to_string(),
+            partner_name: "Scout".to_string(),
+            fee: 41,
+        },
+    };
+    let delivery = super::SharedItemRentalDelivery::Lender(agreement);
+    let gold_before = session.app.world().resource::<PlayerRuntimeResource>().gold;
+
+    let packets = session.apply_shared_item_rental_delivery(&delivery);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 41 })));
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        gold_before + 41
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .rented_items
+            .len(),
+        1
+    );
+
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental]
+    );
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        gold_before + 41,
+        "replay must not credit the rental fee twice"
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .rented_items
+            .len(),
+        1,
+        "replay must not duplicate the lender rental record"
+    );
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::ItemRentalResource>()
+        .active = Some(super::super::resources::ActiveItemRentalState {
+        transaction_nonce: "new-item-transaction".to_string(),
+        partner_name: "Borrower".to_string(),
+        fee: 0,
+        days: 3,
+        deposited_item: Some(item),
+        deposited_from: Some(4),
+        gold_locked: false,
+        item_locked: true,
+    });
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental],
+        "an old item-offer nonce must not match a new otherwise-identical rental"
+    );
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        gold_before + 41
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .rented_items
+            .len(),
+        1
+    );
+}
+
+#[test]
 fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
@@ -64751,6 +65994,7 @@ fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() 
         .expect("seed dagger should exist");
     let agreement = super::SharedItemRentalAgreement {
         item: super::SharedItemRentalItemOffer {
+            transaction_nonce: "test-item-transaction".to_string(),
             account_id: "owner-account".to_string(),
             character_index: 91,
             character_name: "Lender".to_string(),
@@ -64761,16 +66005,33 @@ fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() 
             days: 3,
         },
         fee: super::SharedItemRentalFeeOffer {
-            account_id: "borrower-account".to_string(),
+            transaction_nonce: "test-fee-transaction".to_string(),
+            account_id: "demo".to_string(),
             character_index: 0,
             character_name: "Scout".to_string(),
             partner_name: "Lender".to_string(),
             fee: 25,
         },
     };
+    {
+        let mut rental = session
+            .app
+            .world_mut()
+            .resource_mut::<super::ItemRentalResource>();
+        rental.active = Some(super::super::resources::ActiveItemRentalState {
+            transaction_nonce: "test-fee-transaction".to_string(),
+            partner_name: "Lender".to_string(),
+            fee: 25,
+            days: 1,
+            deposited_item: None,
+            deposited_from: None,
+            gold_locked: true,
+            item_locked: false,
+        });
+    }
+    let delivery = super::SharedItemRentalDelivery::Borrower(agreement);
 
-    let packets = session
-        .apply_shared_item_rental_delivery(&super::SharedItemRentalDelivery::Borrower(agreement));
+    let packets = session.apply_shared_item_rental_delivery(&delivery);
 
     assert!(packets.iter().any(|packet| matches!(
         packet,
@@ -64801,6 +66062,56 @@ fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() 
             .world()
             .resource::<super::ItemRentalResource>()
             .has_rented_item
+    );
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental]
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "dagger")
+            .count(),
+        1,
+        "replay must not duplicate the borrower item"
+    );
+
+    {
+        let mut rental = session
+            .app
+            .world_mut()
+            .resource_mut::<super::ItemRentalResource>();
+        rental.has_rented_item = false;
+        rental.active = Some(super::super::resources::ActiveItemRentalState {
+            transaction_nonce: "new-fee-transaction".to_string(),
+            partner_name: "Lender".to_string(),
+            fee: 25,
+            days: 1,
+            deposited_item: None,
+            deposited_from: None,
+            gold_locked: true,
+            item_locked: false,
+        });
+    }
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental],
+        "an old fee-offer nonce must not match a new otherwise-identical rental"
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "dagger")
+            .count(),
+        1
     );
 }
 

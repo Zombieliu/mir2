@@ -1,3 +1,5 @@
+use std::{collections::HashSet, error::Error, fmt, sync::OnceLock};
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
@@ -5,12 +7,12 @@ use crate::config::{
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_item_by_index, crystal_item_by_name, crystal_recipes, localized_text_or_fallback,
-    CrystalItemTemplate, LanguageCode,
+    crystal_item_by_index, crystal_item_by_name, crystal_item_manifest, crystal_recipes,
+    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     ChatType, ClientMagic, ItemInfo, MirClass, MirGender, MirGridType, ServerPacket, UserItem,
-    UserItemRentalInformation, UserItemSealedInfo, UserItemStat,
+    UserItemExpireInfo, UserItemRentalInformation, UserItemSealedInfo, UserItemStat,
 };
 
 use super::buffs::{
@@ -26,9 +28,8 @@ use super::crystal_compat::*;
 use super::drops::drop_item_packet;
 use super::equipment::{
     equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
-    repair_equipped_durability, repair_equipped_weapon_with_oil, slugify_name,
-    toggle_mount_ride_from_use_item, try_equip_item, try_luck_weapon, CrystalLuckWeaponOutcome,
-    EquipmentState,
+    repair_equipped_weapon_with_oil, slugify_name, toggle_mount_ride_from_use_item, try_equip_item,
+    try_luck_weapon, CrystalLuckWeaponOutcome, EquipmentState,
 };
 use super::inventory::{
     add_minutes_to_binary_datetime, add_or_increment_item_with_durability_and_stats,
@@ -90,6 +91,14 @@ pub(super) struct ItemState {
     /// slots; their stats contribute while the item is worn.
     #[serde(default)]
     pub(super) socketed: Vec<ItemState>,
+    /// Protocol identity that is not yet modeled as live ItemState fields.
+    ///
+    /// This is deliberately a serde-default-compatible sidecar. It lets old
+    /// saves decode as before while keeping UserItem-only identity through a
+    /// save/reload boundary. Live ItemState fields remain authoritative when
+    /// the protocol item is rebuilt.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) user_item_metadata: Option<ItemStateUserItemMetadata>,
     #[serde(default)]
     pub(super) cursed: bool,
     #[serde(default)]
@@ -116,6 +125,354 @@ pub(super) struct ItemState {
     pub(super) defence: i32,
     pub(super) heal_hp: i32,
     pub(super) heal_mp: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(super) struct ItemStateUserItemMetadata {
+    /// Exact protocol index. None identifies a pre-sidecar save and keeps the
+    /// legacy template-derived fallback available for that save only.
+    #[serde(default)]
+    pub(super) item_index: Option<i32>,
+    #[serde(default)]
+    pub(super) awake_type: u8,
+    #[serde(default)]
+    pub(super) awake_values: Vec<u8>,
+    #[serde(default)]
+    pub(super) refined_value: u8,
+    #[serde(default)]
+    pub(super) refine_added: u8,
+    #[serde(default)]
+    pub(super) refine_success_chance: i32,
+    #[serde(default = "default_wedding_ring")]
+    pub(super) wedding_ring: i32,
+    #[serde(default)]
+    pub(super) expire_info: Option<UserItemExpireInfo>,
+    /// Preserve protocol Some(default) separately from the live flattened
+    /// rental fields, whose all-default value otherwise looks like None.
+    #[serde(default)]
+    pub(super) rental_information: Option<UserItemRentalInformation>,
+    /// Preserve protocol Some even when both timestamps are zero.
+    #[serde(default)]
+    pub(super) sealed_info: Option<UserItemSealedInfo>,
+    /// Legacy Phase 1 sidecars stored the complete recursive slot tree here.
+    /// Newly hydrated carriers use captured_socket_positions plus live socketed
+    /// children and leave this empty to avoid two recursive truth sources.
+    #[serde(default)]
+    pub(super) slots: Vec<Option<UserItem>>,
+    #[serde(default)]
+    pub(super) is_shop_item: bool,
+    #[serde(default)]
+    pub(super) gm_made: bool,
+    /// Legacy marker retained for serde compatibility.
+    #[serde(default)]
+    pub(super) live_socketed_at_capture: bool,
+    /// True when protocol slots were converted into bounded live ItemState
+    /// children and may be reconciled by position/identity.
+    #[serde(default)]
+    pub(super) socket_layout_hydrated: bool,
+    /// Original direct-slot identity map. Empty slots remain explicit.
+    #[serde(default)]
+    pub(super) captured_socket_positions: Option<Vec<Option<CapturedSocketIdentity>>>,
+    /// Original slot occupied by this embedded item inside its parent.
+    #[serde(default)]
+    pub(super) captured_socket_position: Option<u8>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub(super) struct CapturedSocketIdentity {
+    pub(super) unique_id: u64,
+    pub(super) item_index: i32,
+}
+
+impl CapturedSocketIdentity {
+    fn from_user_item(item: &UserItem) -> Self {
+        Self {
+            unique_id: item.unique_id,
+            item_index: item.item_index,
+        }
+    }
+}
+
+fn default_wedding_ring() -> i32 {
+    -1
+}
+
+impl ItemStateUserItemMetadata {
+    fn from_hydrated_user_item(
+        item: &UserItem,
+        captured_socket_positions: Vec<Option<CapturedSocketIdentity>>,
+        captured_socket_position: Option<u8>,
+    ) -> Self {
+        Self {
+            item_index: Some(item.item_index),
+            awake_type: item.awake_type,
+            awake_values: item.awake_values.clone(),
+            refined_value: item.refined_value,
+            refine_added: item.refine_added,
+            refine_success_chance: item.refine_success_chance,
+            wedding_ring: item.wedding_ring,
+            expire_info: item.expire_info.clone(),
+            rental_information: item.rental_information.clone(),
+            sealed_info: item.sealed_info.clone(),
+            slots: Vec::new(),
+            is_shop_item: item.is_shop_item,
+            gm_made: item.gm_made,
+            live_socketed_at_capture: true,
+            socket_layout_hydrated: true,
+            captured_socket_positions: Some(captured_socket_positions),
+            captured_socket_position,
+        }
+    }
+}
+/// Operational limits for the recursive Crystal UserItem carrier.
+///
+/// The wire format encodes all three collection counts as signed i32. These
+/// stricter limits keep conversion work and saved sidecars bounded well before
+/// that protocol ceiling. They are explicit so callers and tests can reason
+/// about the accepted identity envelope.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) struct UserItemCarrierBudget {
+    pub(super) max_depth: usize,
+    pub(super) max_total_nodes: usize,
+    pub(super) max_slots_per_item: usize,
+    pub(super) max_added_stats_per_item: usize,
+    pub(super) max_awake_values_per_item: usize,
+}
+
+impl Default for UserItemCarrierBudget {
+    fn default() -> Self {
+        Self {
+            max_depth: 8,
+            max_total_nodes: 256,
+            max_slots_per_item: 64,
+            max_added_stats_per_item: 256,
+            max_awake_values_per_item: 64,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) enum UserItemCarrierError {
+    DepthExceeded {
+        depth: usize,
+        max: usize,
+    },
+    TotalNodesExceeded {
+        nodes: usize,
+        max: usize,
+    },
+    SlotsExceeded {
+        count: usize,
+        max: usize,
+    },
+    AddedStatsExceeded {
+        count: usize,
+        max: usize,
+    },
+    AwakeValuesExceeded {
+        count: usize,
+        max: usize,
+    },
+    QuantityExceeded {
+        quantity: u32,
+        max: u16,
+    },
+    CommittedQuantityOutOfRange {
+        item_index: i32,
+        quantity: u32,
+        max: u32,
+    },
+    ProtocolCountExceeded {
+        field: &'static str,
+        count: usize,
+    },
+    SocketSlotWidthExceeded {
+        count: usize,
+    },
+    UnknownItemIndex {
+        item_index: i32,
+    },
+    AmbiguousItemIndex {
+        item_index: i32,
+    },
+    UnknownItemKey {
+        key: String,
+    },
+    MissingExactItemIndex {
+        key: String,
+    },
+    ConflictingItemIdentity {
+        key: String,
+        key_item_index: i32,
+        exact_item_index: i32,
+    },
+    AmbiguousSocketIdentity {
+        unique_id: u64,
+        item_index: i32,
+    },
+    SocketMapping {
+        reason: &'static str,
+    },
+}
+
+impl fmt::Display for UserItemCarrierError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::DepthExceeded { depth, max } => {
+                write!(
+                    formatter,
+                    "UserItem depth {depth} exceeds carrier limit {max}"
+                )
+            }
+            Self::TotalNodesExceeded { nodes, max } => write!(
+                formatter,
+                "UserItem node count {nodes} exceeds carrier limit {max}"
+            ),
+            Self::SlotsExceeded { count, max } => write!(
+                formatter,
+                "UserItem slot count {count} exceeds per-item carrier limit {max}"
+            ),
+            Self::AddedStatsExceeded { count, max } => write!(
+                formatter,
+                "UserItem added-stat count {count} exceeds per-item carrier limit {max}"
+            ),
+            Self::AwakeValuesExceeded { count, max } => write!(
+                formatter,
+                "UserItem awake-value count {count} exceeds per-item carrier limit {max}"
+            ),
+            Self::QuantityExceeded { quantity, max } => write!(
+                formatter,
+                "ItemState quantity {quantity} exceeds UserItem u16 limit {max}"
+            ),
+            Self::CommittedQuantityOutOfRange {
+                item_index,
+                quantity,
+                max,
+            } => write!(
+                formatter,
+                "committed UserItem index {item_index} quantity {quantity} is outside Crystal stack range 1..={max}"
+            ),
+            Self::ProtocolCountExceeded { field, count } => write!(
+                formatter,
+                "UserItem {field} count {count} exceeds the signed i32 protocol count"
+            ),
+            Self::SocketSlotWidthExceeded { count } => write!(
+                formatter,
+                "UserItem slot count {count} cannot fit ItemState's u8 socket width"
+            ),
+            Self::UnknownItemIndex { item_index } => {
+                write!(formatter, "UserItem index {item_index} has no Crystal template")
+            }
+            Self::AmbiguousItemIndex { item_index } => write!(
+                formatter,
+                "UserItem index {item_index} resolves to multiple Crystal templates"
+            ),
+            Self::UnknownItemKey { key } => {
+                write!(formatter, "ItemState key {key:?} has no Crystal template")
+            }
+            Self::MissingExactItemIndex { key } => write!(
+                formatter,
+                "exact ItemState carrier {key:?} is missing metadata.item_index"
+            ),
+            Self::ConflictingItemIdentity {
+                key,
+                key_item_index,
+                exact_item_index,
+            } => write!(
+                formatter,
+                "ItemState key {key:?} resolves to Crystal index {key_item_index}, but exact metadata carries index {exact_item_index}"
+            ),
+            Self::AmbiguousSocketIdentity {
+                unique_id,
+                item_index,
+            } => write!(
+                formatter,
+                "socket identity unique_id={unique_id} item_index={item_index} is ambiguous"
+            ),
+            Self::SocketMapping { reason } => {
+                write!(
+                    formatter,
+                    "UserItem live socket mapping is invalid: {reason}"
+                )
+            }
+        }
+    }
+}
+
+impl Error for UserItemCarrierError {}
+
+fn ambiguous_crystal_item_indexes() -> &'static HashSet<i32> {
+    static AMBIGUOUS: OnceLock<HashSet<i32>> = OnceLock::new();
+    AMBIGUOUS.get_or_init(|| {
+        let mut seen = HashSet::new();
+        let mut ambiguous = HashSet::new();
+        for template in crystal_item_manifest().items {
+            if !seen.insert(template.item_index) {
+                ambiguous.insert(template.item_index);
+            }
+        }
+        ambiguous
+    })
+}
+
+fn unique_crystal_item_by_index(
+    item_index: i32,
+) -> Result<CrystalItemTemplate, UserItemCarrierError> {
+    let template = crystal_item_by_index(item_index)
+        .ok_or(UserItemCarrierError::UnknownItemIndex { item_index })?;
+    if ambiguous_crystal_item_indexes().contains(&item_index) {
+        return Err(UserItemCarrierError::AmbiguousItemIndex { item_index });
+    }
+    Ok(template)
+}
+
+fn crystal_template_for_item_state_key(
+    item: &ItemState,
+) -> Result<CrystalItemTemplate, UserItemCarrierError> {
+    let template = crystal_item_template_for_item_key(&item.key).ok_or_else(|| {
+        UserItemCarrierError::UnknownItemKey {
+            key: item.key.clone(),
+        }
+    })?;
+    unique_crystal_item_by_index(template.item_index)
+}
+
+fn exact_item_index_for_item_state(item: &ItemState) -> Result<i32, UserItemCarrierError> {
+    let key_template = crystal_template_for_item_state_key(item)?;
+    let Some(metadata) = item.user_item_metadata.as_ref() else {
+        return Ok(key_template.item_index);
+    };
+    let exact_item_index =
+        metadata
+            .item_index
+            .ok_or_else(|| UserItemCarrierError::MissingExactItemIndex {
+                key: item.key.clone(),
+            })?;
+    let exact_template = unique_crystal_item_by_index(exact_item_index)?;
+    if exact_template.item_index != key_template.item_index {
+        return Err(UserItemCarrierError::ConflictingItemIdentity {
+            key: item.key.clone(),
+            key_item_index: key_template.item_index,
+            exact_item_index,
+        });
+    }
+    Ok(exact_item_index)
+}
+
+fn validate_item_state_key_for_exact_index(
+    item: &ItemState,
+    exact_item_index: i32,
+) -> Result<(), UserItemCarrierError> {
+    let key_template = crystal_template_for_item_state_key(item)?;
+    let exact_template = unique_crystal_item_by_index(exact_item_index)?;
+    if exact_template.item_index != key_template.item_index {
+        return Err(UserItemCarrierError::ConflictingItemIdentity {
+            key: item.key.clone(),
+            key_item_index: key_template.item_index,
+            exact_item_index,
+        });
+    }
+    Ok(())
 }
 
 impl ItemState {
@@ -159,7 +516,9 @@ pub(super) fn default_item_unique_id(container: ItemContainer, slot: u8) -> u64 
 }
 
 pub(super) fn item_unique_id(item: &ItemState) -> u64 {
-    if item.unique_id == 0 {
+    if item.user_item_metadata.is_some() {
+        item.unique_id
+    } else if item.unique_id == 0 {
         default_item_unique_id(item.container, item.slot)
     } else {
         item.unique_id
@@ -179,14 +538,9 @@ pub(super) fn localized_item_base_key(key: &str) -> Option<&'static str> {
     match key {
         "red-potion" | "belt-red-potion" => Some("content.item.redPotion"),
         "blue-potion" | "belt-blue-potion" => Some("content.item.bluePotion"),
-        "training-manual" => Some("content.item.trainingManual"),
         "bronze-helmet" => Some("content.item.bronzeHelmet"),
         "iron-helmet" => Some("content.item.ironHelmet"),
         "town-teleport" => Some("content.item.townTeleport"),
-        "belt-lantern-oil" => Some("content.item.lanternOil"),
-        "training-splinter" => Some("content.item.trainingSplinter"),
-        "quest-wasp-stinger" => Some("content.item.waspStinger"),
-        "repair-powder" => Some("content.item.repairPowder"),
         _ => None,
     }
 }
@@ -194,7 +548,6 @@ pub(super) fn localized_item_base_key(key: &str) -> Option<&'static str> {
 pub(super) fn localized_drop_name_key(name: &str) -> Option<&'static str> {
     match name {
         "Wasp Gold" => Some("content.item.waspGold.name"),
-        "Training Splinter" => Some("content.item.trainingSplinter.name"),
         _ => None,
     }
 }
@@ -256,7 +609,6 @@ pub(super) fn item_icon_for_key(key: &str) -> u16 {
     match key {
         "red-potion" | "belt-red-potion" => 23,
         "blue-potion" | "belt-blue-potion" => 15,
-        "training-manual" => 121,
         "bronze-helmet" => 106,
         "iron-helmet" => 107,
         "dagger" => 37,
@@ -267,10 +619,6 @@ pub(super) fn item_icon_for_key(key: &str) -> u16 {
         "benediction-oil" => 26,
         "repair-oil" => 3368,
         "war-god-oil" => 3367,
-        "belt-lantern-oil" => 119,
-        "quest-wasp-stinger" => 174,
-        "training-splinter" => 6,
-        "repair-powder" => 118,
         key if key.starts_with("credit-token-") => 1813,
         _ => crystal_item_template_for_dynamic_key(key)
             .map(|template| template.image)
@@ -328,63 +676,892 @@ pub(super) fn item_info_from_crystal_template(template: CrystalItemTemplate) -> 
     }
 }
 
-pub(super) fn user_item_from_item_state(item: &ItemState) -> UserItem {
+fn check_protocol_count(field: &'static str, count: usize) -> Result<(), UserItemCarrierError> {
+    if count > i32::MAX as usize {
+        Err(UserItemCarrierError::ProtocolCountExceeded { field, count })
+    } else {
+        Ok(())
+    }
+}
+
+fn check_user_item_collections(
+    slots: usize,
+    added_stats: usize,
+    awake_values: usize,
+    budget: UserItemCarrierBudget,
+) -> Result<(), UserItemCarrierError> {
+    check_protocol_count("slots", slots)?;
+    check_protocol_count("added_stats", added_stats)?;
+    check_protocol_count("awake_values", awake_values)?;
+    if slots > budget.max_slots_per_item {
+        return Err(UserItemCarrierError::SlotsExceeded {
+            count: slots,
+            max: budget.max_slots_per_item,
+        });
+    }
+    if added_stats > budget.max_added_stats_per_item {
+        return Err(UserItemCarrierError::AddedStatsExceeded {
+            count: added_stats,
+            max: budget.max_added_stats_per_item,
+        });
+    }
+    if awake_values > budget.max_awake_values_per_item {
+        return Err(UserItemCarrierError::AwakeValuesExceeded {
+            count: awake_values,
+            max: budget.max_awake_values_per_item,
+        });
+    }
+    Ok(())
+}
+
+fn check_item_state_quantity(quantity: u32) -> Result<u16, UserItemCarrierError> {
+    // Crystal's binary UserItem carrier can represent count zero while an item
+    // is being assembled. Mutation boundaries decide whether that transient
+    // state may be committed; the carrier only rejects protocol overflow.
+    u16::try_from(quantity).map_err(|_| UserItemCarrierError::QuantityExceeded {
+        quantity,
+        max: u16::MAX,
+    })
+}
+
+fn enter_user_item_node(
+    depth: usize,
+    nodes: &mut usize,
+    budget: UserItemCarrierBudget,
+) -> Result<(), UserItemCarrierError> {
+    if depth > budget.max_depth {
+        return Err(UserItemCarrierError::DepthExceeded {
+            depth,
+            max: budget.max_depth,
+        });
+    }
+    *nodes = nodes.saturating_add(1);
+    if *nodes > budget.max_total_nodes {
+        return Err(UserItemCarrierError::TotalNodesExceeded {
+            nodes: *nodes,
+            max: budget.max_total_nodes,
+        });
+    }
+    Ok(())
+}
+
+fn validate_user_item_tree_with_budget(
+    item: &UserItem,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<(), UserItemCarrierError> {
+    enter_user_item_node(depth, nodes, budget)?;
+    unique_crystal_item_by_index(item.item_index)?;
+    check_user_item_collections(
+        item.slots.len(),
+        item.added_stats.len(),
+        item.awake_values.len(),
+        budget,
+    )?;
+    ensure_unambiguous_socket_identities(
+        &item
+            .slots
+            .iter()
+            .map(|slot| slot.as_ref().map(CapturedSocketIdentity::from_user_item))
+            .collect::<Vec<_>>(),
+    )?;
+    for embedded in item.slots.iter().flatten() {
+        validate_user_item_tree_with_budget(embedded, budget, depth + 1, nodes)?;
+    }
+    Ok(())
+}
+
+/// Complete fail-closed validation for an incoming or persisted protocol
+/// UserItem tree. Save/mail/Stage5 boundaries should call this before storing
+/// a UserItem that may later reach an infallible internal packet builder.
+pub(super) fn validate_user_item_carrier_with_budget(
+    item: &UserItem,
+    budget: UserItemCarrierBudget,
+) -> Result<(), UserItemCarrierError> {
+    let mut nodes = 0;
+    validate_user_item_tree_with_budget(item, budget, 0, &mut nodes)
+}
+
+pub(super) fn validate_user_item_carrier(item: &UserItem) -> Result<(), UserItemCarrierError> {
+    validate_user_item_carrier_with_budget(item, UserItemCarrierBudget::default())
+}
+
+fn validate_committed_item_quantity(
+    item_index: i32,
+    quantity: u32,
+) -> Result<(), UserItemCarrierError> {
+    let template = unique_crystal_item_by_index(item_index)?;
+    let max = u32::from(template.stack_size.max(1));
+    if quantity == 0 || quantity > max {
+        return Err(UserItemCarrierError::CommittedQuantityOutOfRange {
+            item_index,
+            quantity,
+            max,
+        });
+    }
+    Ok(())
+}
+
+fn validate_committed_user_item_tree(item: &UserItem) -> Result<(), UserItemCarrierError> {
+    validate_committed_item_quantity(item.item_index, u32::from(item.count))?;
+    for embedded in item.slots.iter().flatten() {
+        validate_committed_user_item_tree(embedded)?;
+    }
+    Ok(())
+}
+
+/// Validation for a UserItem that is about to become durable or enter a live
+/// item container. The generic wire carrier intentionally permits count zero;
+/// committed roots and every recursive socket child must be real stacks.
+pub(super) fn validate_committed_user_item_carrier(
+    item: &UserItem,
+) -> Result<(), UserItemCarrierError> {
+    validate_user_item_carrier(item)?;
+    validate_committed_user_item_tree(item)
+}
+
+fn ensure_unambiguous_socket_identities(
+    positions: &[Option<CapturedSocketIdentity>],
+) -> Result<(), UserItemCarrierError> {
+    for (index, identity) in positions.iter().enumerate() {
+        let Some(identity) = identity else {
+            continue;
+        };
+        unique_crystal_item_by_index(identity.item_index)?;
+        if positions[..index]
+            .iter()
+            .flatten()
+            .any(|existing| existing == identity)
+        {
+            return Err(UserItemCarrierError::AmbiguousSocketIdentity {
+                unique_id: identity.unique_id,
+                item_index: identity.item_index,
+            });
+        }
+    }
+    Ok(())
+}
+
+fn captured_positions_from_user_item(
+    item: &UserItem,
+) -> Result<Vec<Option<CapturedSocketIdentity>>, UserItemCarrierError> {
+    let positions = item
+        .slots
+        .iter()
+        .map(|slot| slot.as_ref().map(CapturedSocketIdentity::from_user_item))
+        .collect::<Vec<_>>();
+    ensure_unambiguous_socket_identities(&positions)?;
+    Ok(positions)
+}
+
+fn item_grade_from_crystal_carrier(grade: u8) -> ItemGrade {
+    match grade {
+        1 => ItemGrade::Common,
+        2 => ItemGrade::Rare,
+        3 => ItemGrade::Legendary,
+        4 => ItemGrade::Mythical,
+        5 => ItemGrade::Heroic,
+        _ => ItemGrade::None,
+    }
+}
+
+pub(super) fn embedded_item_state_from_template(
+    template: &CrystalItemTemplate,
+    container: ItemContainer,
+    slot: u8,
+) -> ItemState {
+    ItemState {
+        key: crystal_item_key_for_template(template),
+        name: template.name.clone(),
+        icon: template.image,
+        slot,
+        unique_id: 0,
+        container,
+        quantity: 1,
+        description: template.tooltip.clone().unwrap_or_default(),
+        durability_current: (template.durability != 0).then_some(template.durability),
+        durability_max: (template.durability != 0).then_some(template.durability),
+        weight: u16::from(template.weight),
+        equip_slot: crystal_equipment_slot_for_template(template),
+        grade: item_grade_from_crystal_carrier(template.grade),
+        added_attack: 0,
+        added_defence: 0,
+        added_stats: Vec::new(),
+        socketed: Vec::new(),
+        user_item_metadata: None,
+        cursed: false,
+        socket_slots: template.slots,
+        gem_count: 0,
+        identified: Some(!template.need_identify),
+        soul_bound_id: None,
+        sealed_expiry_time_binary_datetime: 0,
+        sealed_next_time_binary_datetime: 0,
+        rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
+        attack: crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC),
+        defence: crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC),
+        heal_hp: crystal_item_stat_value(template, CRYSTAL_STAT_HP),
+        heal_mp: crystal_item_stat_value(template, CRYSTAL_STAT_MP),
+    }
+}
+
+fn hydrate_user_item_into_state(
+    mut state: ItemState,
+    item: &UserItem,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+    captured_socket_position: Option<u8>,
+) -> Result<ItemState, UserItemCarrierError> {
+    validate_item_state_key_for_exact_index(&state, item.item_index)?;
+    enter_user_item_node(depth, nodes, budget)?;
+    check_user_item_collections(
+        item.slots.len(),
+        item.added_stats.len(),
+        item.awake_values.len(),
+        budget,
+    )?;
+    let socket_count = item.slots.len();
+    let socket_slots =
+        u8::try_from(socket_count).map_err(|_| UserItemCarrierError::SocketSlotWidthExceeded {
+            count: socket_count,
+        })?;
+    let captured_socket_positions = captured_positions_from_user_item(item)?;
+    let is_mount = crystal_item_template_for_item_key(&state.key)
+        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT);
+
+    let mut hydrated = Vec::with_capacity(item.slots.iter().flatten().count());
+    for (slot_index, embedded) in item.slots.iter().enumerate() {
+        let Some(embedded) = embedded else {
+            continue;
+        };
+        let template = unique_crystal_item_by_index(embedded.item_index)?;
+        let is_bells = template.item_type == CRYSTAL_ITEM_TYPE_BELLS;
+        if is_mount && is_bells && slot_index != 1 {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "captured mount Bells must occupy protocol slot 1",
+            });
+        }
+        if is_mount && slot_index == 1 && !is_bells {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "captured mount protocol slot 1 is reserved for Bells",
+            });
+        }
+        let slot = u8::try_from(slot_index).map_err(|_| {
+            UserItemCarrierError::SocketSlotWidthExceeded {
+                count: socket_count,
+            }
+        })?;
+        let child = embedded_item_state_from_template(&template, state.container, slot);
+        hydrated.push(hydrate_user_item_into_state(
+            child,
+            embedded,
+            budget,
+            depth + 1,
+            nodes,
+            Some(slot),
+        )?);
+    }
+
+    let (added_attack, added_defence) = user_item_added_attack_defence(item);
+    state.unique_id = item.unique_id;
+    state.quantity = u32::from(item.count);
+    state.durability_current =
+        (item.current_dura != 0 || item.max_dura != 0).then_some(item.current_dura);
+    state.durability_max = (item.max_dura != 0).then_some(item.max_dura);
+    state.soul_bound_id = (item.soul_bound_id != -1).then_some(item.soul_bound_id);
+    state.identified = Some(item.identified);
+    state.cursed = item.cursed;
+    state.gem_count = item.gem_count;
+    state.added_attack = added_attack;
+    state.added_defence = added_defence;
+    state.added_stats = item.added_stats.clone();
+    state.socket_slots = socket_slots;
+    state.socketed = hydrated;
+    state.rental_binding_flags = item
+        .rental_information
+        .as_ref()
+        .map_or(0, |rental| rental.binding_flags);
+    state.rental_owner_name = item
+        .rental_information
+        .as_ref()
+        .map_or_else(String::new, |rental| rental.owner_name.clone());
+    state.rental_expiry_binary_datetime = item
+        .rental_information
+        .as_ref()
+        .map_or(0, |rental| rental.expiry_binary_datetime);
+    state.rental_locked = item
+        .rental_information
+        .as_ref()
+        .is_some_and(|rental| rental.rental_locked);
+    state.sealed_expiry_time_binary_datetime = item
+        .sealed_info
+        .as_ref()
+        .map_or(0, |sealed| sealed.expiry_binary_datetime);
+    state.sealed_next_time_binary_datetime = item
+        .sealed_info
+        .as_ref()
+        .map_or(0, |sealed| sealed.next_seal_binary_datetime);
+    state.user_item_metadata = Some(ItemStateUserItemMetadata::from_hydrated_user_item(
+        item,
+        captured_socket_positions,
+        captured_socket_position,
+    ));
+    Ok(state)
+}
+
+/// Fallible, bounded protocol-to-save conversion. Occupied protocol slots are
+/// recursively hydrated into live ItemState children before the carrier is
+/// returned.
+pub(super) fn try_item_state_from_user_item(
+    state: ItemState,
+    item: &UserItem,
+) -> Result<ItemState, UserItemCarrierError> {
+    try_item_state_from_user_item_with_budget(state, item, UserItemCarrierBudget::default())
+}
+
+fn try_item_state_from_user_item_with_budget(
+    state: ItemState,
+    item: &UserItem,
+    budget: UserItemCarrierBudget,
+) -> Result<ItemState, UserItemCarrierError> {
+    validate_user_item_carrier_with_budget(item, budget)?;
+    let mut nodes = 0;
+    let state = hydrate_user_item_into_state(state, item, budget, 0, &mut nodes, None)?;
+    validate_item_state_carrier_storage_with_budget(&state, budget)?;
+    Ok(state)
+}
+
+fn captured_rental_matches_live(captured: &UserItemRentalInformation, item: &ItemState) -> bool {
+    captured.binding_flags == item.rental_binding_flags
+        && captured.owner_name == item.rental_owner_name
+        && captured.expiry_binary_datetime == item.rental_expiry_binary_datetime
+        && captured.rental_locked == item.rental_locked
+}
+
+fn captured_sealed_matches_live(captured: &UserItemSealedInfo, item: &ItemState) -> bool {
+    captured.expiry_binary_datetime == item.sealed_expiry_time_binary_datetime
+        && captured.next_seal_binary_datetime == item.sealed_next_time_binary_datetime
+}
+
+fn rental_information_from_item_state(
+    item: &ItemState,
+    metadata: Option<&ItemStateUserItemMetadata>,
+) -> Option<UserItemRentalInformation> {
+    let live = user_item_rental_information(
+        item.rental_binding_flags,
+        &item.rental_owner_name,
+        item.rental_expiry_binary_datetime,
+        item.rental_locked,
+    );
+    metadata
+        .and_then(|metadata| metadata.rental_information.as_ref())
+        .filter(|captured| captured_rental_matches_live(captured, item))
+        .cloned()
+        .or(live)
+}
+
+fn sealed_information_from_item_state(
+    item: &ItemState,
+    metadata: Option<&ItemStateUserItemMetadata>,
+) -> Option<UserItemSealedInfo> {
+    let live = (item.sealed_expiry_time_binary_datetime != 0
+        || item.sealed_next_time_binary_datetime != 0)
+        .then_some(UserItemSealedInfo {
+            expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
+            next_seal_binary_datetime: item.sealed_next_time_binary_datetime,
+        });
+    metadata
+        .and_then(|metadata| metadata.sealed_info.as_ref())
+        .filter(|captured| captured_sealed_matches_live(captured, item))
+        .cloned()
+        .or(live)
+}
+
+fn clone_embedded_user_item_with_budget(
+    item: &UserItem,
+    slot: usize,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<UserItem, UserItemCarrierError> {
+    let _ = slot;
+    unique_crystal_item_by_index(item.item_index)?;
+    enter_user_item_node(depth, nodes, budget)?;
+    check_user_item_collections(
+        item.slots.len(),
+        item.added_stats.len(),
+        item.awake_values.len(),
+        budget,
+    )?;
+
+    let mut slots = Vec::with_capacity(item.slots.len());
+    for (child_slot, embedded) in item.slots.iter().enumerate() {
+        slots.push(
+            embedded
+                .as_ref()
+                .map(|embedded| {
+                    clone_embedded_user_item_with_budget(
+                        embedded,
+                        child_slot,
+                        budget,
+                        depth + 1,
+                        nodes,
+                    )
+                })
+                .transpose()?,
+        );
+    }
+
+    Ok(UserItem {
+        unique_id: item.unique_id,
+        item_index: item.item_index,
+        current_dura: item.current_dura,
+        max_dura: item.max_dura,
+        count: item.count,
+        soul_bound_id: item.soul_bound_id,
+        identified: item.identified,
+        cursed: item.cursed,
+        slots,
+        gem_count: item.gem_count,
+        added_stats: item.added_stats.clone(),
+        awake_type: item.awake_type,
+        awake_values: item.awake_values.clone(),
+        refined_value: item.refined_value,
+        refine_added: item.refine_added,
+        refine_success_chance: item.refine_success_chance,
+        wedding_ring: item.wedding_ring,
+        expire_info: item.expire_info.clone(),
+        rental_information: item.rental_information.clone(),
+        is_shop_item: item.is_shop_item,
+        sealed_info: item.sealed_info.clone(),
+        gm_made: item.gm_made,
+    })
+}
+
+fn clone_legacy_captured_slots_with_budget(
+    captured: &[Option<UserItem>],
+    socket_slots: usize,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<Vec<Option<UserItem>>, UserItemCarrierError> {
+    check_user_item_collections(socket_slots, 0, 0, budget)?;
+    check_protocol_count("captured_slots", captured.len())?;
+    if captured.len() > socket_slots {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "live socket slot width would truncate captured protocol slots",
+        });
+    }
+    let mut slots = Vec::with_capacity(socket_slots);
+    for (slot_index, slot) in captured.iter().enumerate() {
+        slots.push(
+            slot.as_ref()
+                .map(|embedded| {
+                    clone_embedded_user_item_with_budget(
+                        embedded,
+                        slot_index,
+                        budget,
+                        depth + 1,
+                        nodes,
+                    )
+                })
+                .transpose()?,
+        );
+    }
+    slots.resize(socket_slots, None);
+    Ok(slots)
+}
+
+fn metadata_captured_positions(
+    metadata: Option<&ItemStateUserItemMetadata>,
+    socket_slots: usize,
+) -> Result<Option<Vec<Option<CapturedSocketIdentity>>>, UserItemCarrierError> {
+    let Some(metadata) = metadata else {
+        return Ok(None);
+    };
+    let positions = if let Some(positions) = &metadata.captured_socket_positions {
+        if positions.len() != socket_slots {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "captured socket position map width differs from live socket width",
+            });
+        }
+        positions.clone()
+    } else if !metadata.slots.is_empty() {
+        if metadata.slots.len() > socket_slots {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "legacy captured slots exceed live socket width",
+            });
+        }
+        let mut positions = metadata
+            .slots
+            .iter()
+            .map(|slot| slot.as_ref().map(CapturedSocketIdentity::from_user_item))
+            .collect::<Vec<_>>();
+        positions.resize(socket_slots, None);
+        positions
+    } else {
+        return Ok(None);
+    };
+    ensure_unambiguous_socket_identities(&positions)?;
+    Ok(Some(positions))
+}
+
+struct LiveSocketCandidate {
+    is_bells: bool,
+    identity: CapturedSocketIdentity,
+    captured_position: Option<usize>,
+    item: UserItem,
+}
+
+fn legacy_item_state_protocol_slots_with_budget(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<Vec<Option<UserItem>>, UserItemCarrierError> {
+    let socket_slots = usize::from(item.socket_slots);
+    check_user_item_collections(socket_slots, 0, 0, budget)?;
+    let mut slots = vec![None; socket_slots];
+
+    // Sidecar-less ItemState is the legacy internal carrier. Preserve its
+    // historical wire behavior: only Mount Bells occupied a protocol slot;
+    // arbitrary internal descendants were not emitted as UserItem sockets.
+    if socket_slots > 1
+        && crystal_item_template_for_item_key(&item.key)
+            .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT)
+    {
+        for embedded in &item.socketed {
+            if crystal_item_template_for_item_key(&embedded.key)
+                .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
+            {
+                slots[1] = Some(try_user_item_from_item_state_inner(
+                    embedded,
+                    budget,
+                    depth + 1,
+                    nodes,
+                )?);
+            }
+        }
+    }
+    Ok(slots)
+}
+
+fn reconcile_live_socket_slots_with_budget(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<Vec<Option<UserItem>>, UserItemCarrierError> {
+    let socket_slots = usize::from(item.socket_slots);
+    check_user_item_collections(socket_slots, 0, 0, budget)?;
+    if item.socketed.len() > socket_slots {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "more live socket items than declared socket slots",
+        });
+    }
+
+    let is_mount = crystal_item_template_for_item_key(&item.key)
+        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT);
+    let captured = metadata_captured_positions(item.user_item_metadata.as_ref(), socket_slots)?
+        .unwrap_or_else(|| vec![None; socket_slots]);
+    let mut candidates = Vec::with_capacity(item.socketed.len());
+    for embedded in &item.socketed {
+        let protocol = try_user_item_from_item_state_inner(embedded, budget, depth + 1, nodes)?;
+        let template = unique_crystal_item_by_index(protocol.item_index)?;
+        candidates.push(LiveSocketCandidate {
+            is_bells: template.item_type == CRYSTAL_ITEM_TYPE_BELLS,
+            identity: CapturedSocketIdentity::from_user_item(&protocol),
+            captured_position: embedded
+                .user_item_metadata
+                .as_ref()
+                .and_then(|metadata| metadata.captured_socket_position)
+                .map(usize::from),
+            item: protocol,
+        });
+    }
+
+    let mut slots = vec![None; socket_slots];
+    let mut unresolved = Vec::new();
+    for candidate in candidates {
+        let target = if is_mount && candidate.is_bells {
+            Some(1)
+        } else if let Some(position) = candidate.captured_position {
+            Some(position)
+        } else {
+            let matches = captured
+                .iter()
+                .enumerate()
+                .filter_map(|(position, identity)| {
+                    (*identity == Some(candidate.identity)).then_some(position)
+                })
+                .collect::<Vec<_>>();
+            if matches.len() > 1 {
+                return Err(UserItemCarrierError::AmbiguousSocketIdentity {
+                    unique_id: candidate.identity.unique_id,
+                    item_index: candidate.identity.item_index,
+                });
+            }
+            matches.first().copied()
+        };
+
+        let Some(target) = target else {
+            unresolved.push(candidate);
+            continue;
+        };
+        if target >= socket_slots {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "captured socket position is outside live socket width",
+            });
+        }
+        if is_mount && !candidate.is_bells && target == 1 {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "mount protocol slot 1 is reserved for Bells",
+            });
+        }
+        if slots[target].is_some() {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "multiple live socket items resolve to the same protocol slot",
+            });
+        }
+        slots[target] = Some(candidate.item);
+    }
+
+    let mut reserved = captured.iter().map(Option::is_some).collect::<Vec<_>>();
+    if is_mount && socket_slots > 1 {
+        reserved[1] = true;
+    }
+    for candidate in unresolved {
+        if is_mount && candidate.is_bells {
+            return Err(UserItemCarrierError::SocketMapping {
+                reason: "mount Bells could not resolve protocol slot 1",
+            });
+        }
+        let target = slots
+            .iter()
+            .enumerate()
+            .find_map(|(position, slot)| {
+                (!reserved[position] && slot.is_none()).then_some(position)
+            })
+            .or_else(|| {
+                slots.iter().enumerate().find_map(|(position, slot)| {
+                    (!(is_mount && position == 1) && slot.is_none()).then_some(position)
+                })
+            })
+            .ok_or(UserItemCarrierError::SocketMapping {
+                reason: "no protocol slot remains for a live socket item",
+            })?;
+        slots[target] = Some(candidate.item);
+        reserved[target] = true;
+    }
+    Ok(slots)
+}
+
+fn try_user_item_from_item_state_inner(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<UserItem, UserItemCarrierError> {
+    enter_user_item_node(depth, nodes, budget)?;
+    let item_index = exact_item_index_for_item_state(item)?;
+    let count = check_item_state_quantity(item.quantity)?;
+    let metadata = item.user_item_metadata.as_ref();
+    let awake_values_len = metadata.map_or(0, |metadata| metadata.awake_values.len());
+    check_user_item_collections(
+        usize::from(item.socket_slots),
+        item.added_stats.len(),
+        awake_values_len,
+        budget,
+    )?;
+
+    let live_socketed_is_authoritative = !item.socketed.is_empty()
+        || metadata.is_some_and(|metadata| {
+            metadata.live_socketed_at_capture || metadata.socket_layout_hydrated
+        });
+    let slots = if metadata.is_none() {
+        legacy_item_state_protocol_slots_with_budget(item, budget, depth, nodes)?
+    } else if live_socketed_is_authoritative {
+        reconcile_live_socket_slots_with_budget(item, budget, depth, nodes)?
+    } else {
+        clone_legacy_captured_slots_with_budget(
+            metadata.map_or(&[], |metadata| metadata.slots.as_slice()),
+            usize::from(item.socket_slots),
+            budget,
+            depth,
+            nodes,
+        )?
+    };
+
     let added_stats = merged_user_item_stats(
         &item.added_stats,
         item.added_defence,
         item.added_attack,
         None,
     );
+    check_user_item_collections(slots.len(), added_stats.len(), awake_values_len, budget)?;
 
-    let mut slots = vec![None; usize::from(item.socket_slots)];
-    if crystal_item_template_for_item_key(&item.key)
-        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_MOUNT)
-    {
-        for embedded in &item.socketed {
-            if crystal_item_template_for_item_key(&embedded.key)
-                .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
-            {
-                if let Some(slot) = slots.get_mut(1) {
-                    *slot = Some(user_item_from_item_state(embedded));
-                }
-            }
-        }
-    }
-
-    UserItem {
-        unique_id: item_unique_id(item),
-        item_index: crystal_item_index_for_item_state(item),
+    Ok(UserItem {
+        unique_id: if metadata.is_some() {
+            item.unique_id
+        } else {
+            item_unique_id(item)
+        },
+        item_index,
         current_dura: item.durability_current.unwrap_or(0),
         max_dura: item.durability_max.unwrap_or(0),
-        count: item.quantity.min(u32::from(u16::MAX)) as u16,
+        count,
         soul_bound_id: item_state_soul_bound_id(item),
         identified: item_state_identified(item),
         cursed: item.cursed,
         slots,
         gem_count: item.gem_count,
         added_stats,
-        awake_type: 0,
-        awake_values: Vec::new(),
-        refined_value: 0,
-        refine_added: 0,
-        refine_success_chance: 0,
-        wedding_ring: -1,
-        expire_info: None,
-        rental_information: user_item_rental_information(
-            item.rental_binding_flags,
-            &item.rental_owner_name,
-            item.rental_expiry_binary_datetime,
-            item.rental_locked,
-        ),
-        is_shop_item: false,
-        sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
-            expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
-            next_seal_binary_datetime: item.sealed_next_time_binary_datetime,
-        }),
-        gm_made: false,
-    }
+        awake_type: metadata.map_or(0, |metadata| metadata.awake_type),
+        awake_values: metadata.map_or_else(Vec::new, |metadata| metadata.awake_values.clone()),
+        refined_value: metadata.map_or(0, |metadata| metadata.refined_value),
+        refine_added: metadata.map_or(0, |metadata| metadata.refine_added),
+        refine_success_chance: metadata.map_or(0, |metadata| metadata.refine_success_chance),
+        wedding_ring: metadata.map_or(-1, |metadata| metadata.wedding_ring),
+        expire_info: metadata.and_then(|metadata| metadata.expire_info.clone()),
+        rental_information: rental_information_from_item_state(item, metadata),
+        is_shop_item: metadata.is_some_and(|metadata| metadata.is_shop_item),
+        sealed_info: sealed_information_from_item_state(item, metadata),
+        gm_made: metadata.is_some_and(|metadata| metadata.gm_made),
+    })
 }
 
+fn validate_legacy_user_item_tree(
+    item: &UserItem,
+    slot: usize,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<(), UserItemCarrierError> {
+    let _ = slot;
+    validate_user_item_tree_with_budget(item, budget, depth, nodes)
+}
+
+fn validate_item_state_carrier_storage_inner(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+    depth: usize,
+    nodes: &mut usize,
+) -> Result<(), UserItemCarrierError> {
+    enter_user_item_node(depth, nodes, budget)?;
+    exact_item_index_for_item_state(item)?;
+    check_item_state_quantity(item.quantity)?;
+    let metadata = item.user_item_metadata.as_ref();
+    check_user_item_collections(
+        usize::from(item.socket_slots).max(item.socketed.len()),
+        item.added_stats.len(),
+        metadata.map_or(0, |metadata| metadata.awake_values.len()),
+        budget,
+    )?;
+    if metadata.is_some() && item.socketed.len() > usize::from(item.socket_slots) {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "more live socket items than declared socket slots",
+        });
+    }
+    if let Some(metadata) = metadata {
+        if let Some(positions) = &metadata.captured_socket_positions {
+            if positions.len() != usize::from(item.socket_slots) {
+                return Err(UserItemCarrierError::SocketMapping {
+                    reason: "captured socket position map width differs from live socket width",
+                });
+            }
+            ensure_unambiguous_socket_identities(positions)?;
+        }
+        check_user_item_collections(metadata.slots.len(), 0, metadata.awake_values.len(), budget)?;
+        for (slot, embedded) in metadata.slots.iter().enumerate() {
+            if let Some(embedded) = embedded {
+                validate_legacy_user_item_tree(embedded, slot, budget, depth + 1, nodes)?;
+            }
+        }
+    }
+    for embedded in &item.socketed {
+        validate_item_state_carrier_storage_inner(embedded, budget, depth + 1, nodes)?;
+    }
+    Ok(())
+}
+
+fn validate_item_state_carrier_storage_with_budget(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+) -> Result<(), UserItemCarrierError> {
+    let mut nodes = 0;
+    validate_item_state_carrier_storage_inner(item, budget, 0, &mut nodes)
+}
+
+/// Reusable loading-boundary validation for a complete ItemState carrier.
+/// Both persisted sidecar data and hydrated live socket children are bounded.
+pub(super) fn validate_item_state_carrier_with_budget(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+) -> Result<(), UserItemCarrierError> {
+    validate_item_state_carrier_storage_with_budget(item, budget)?;
+    let mut output_nodes = 0;
+    try_user_item_from_item_state_inner(item, budget, 0, &mut output_nodes)?;
+    Ok(())
+}
+
+pub(super) fn validate_item_state_carrier(item: &ItemState) -> Result<(), UserItemCarrierError> {
+    validate_item_state_carrier_with_budget(item, UserItemCarrierBudget::default())
+}
+
+fn validate_committed_item_state_tree(item: &ItemState) -> Result<(), UserItemCarrierError> {
+    validate_committed_item_quantity(exact_item_index_for_item_state(item)?, item.quantity)?;
+    if let Some(metadata) = &item.user_item_metadata {
+        for embedded in metadata.slots.iter().flatten() {
+            validate_committed_user_item_tree(embedded)?;
+        }
+    }
+    for embedded in &item.socketed {
+        validate_committed_item_state_tree(embedded)?;
+    }
+    Ok(())
+}
+
+/// ItemState counterpart of `validate_committed_user_item_carrier`. Generic
+/// carrier validation runs first; the committed check then walks both legacy
+/// sidecar slots and live ItemState socket children without relying on lossy
+/// compatibility conversion.
+pub(super) fn validate_committed_item_state_carrier(
+    item: &ItemState,
+) -> Result<(), UserItemCarrierError> {
+    validate_item_state_carrier(item)?;
+    validate_committed_item_state_tree(item)
+}
+
+fn try_user_item_from_item_state_with_budget(
+    item: &ItemState,
+    budget: UserItemCarrierBudget,
+) -> Result<UserItem, UserItemCarrierError> {
+    validate_item_state_carrier_storage_with_budget(item, budget)?;
+    let mut nodes = 0;
+    try_user_item_from_item_state_inner(item, budget, 0, &mut nodes)
+}
+
+/// Fallible, bounded save-carrier-to-protocol conversion.
+pub(super) fn try_user_item_from_item_state(
+    item: &ItemState,
+) -> Result<UserItem, UserItemCarrierError> {
+    try_user_item_from_item_state_with_budget(item, UserItemCarrierBudget::default())
+}
+
+/// Compatibility entry for already-validated internal runtime state only.
+/// Save/mail/incoming data must use `validate_item_state_carrier` and callers
+/// that can propagate errors must use `try_user_item_from_item_state` instead.
+/// Keeping the panic here makes an internal invariant violation loud without
+/// turning malformed external data into a process-level failure.
+#[track_caller]
+pub(super) fn user_item_from_item_state(item: &ItemState) -> UserItem {
+    try_user_item_from_item_state(item)
+        .unwrap_or_else(|error| panic!("internal ItemState carrier rejected: {error}"))
+}
 pub(super) fn upsert_user_item_stat(stats: &mut Vec<UserItemStat>, stat: u8, value: i32) {
     if value == 0 || stats.iter().any(|existing| existing.stat == stat) {
         return;
@@ -1865,18 +3042,6 @@ pub(super) fn use_item(
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
-    if item.key == "repair-powder" {
-        let repair_packets = repair_equipped_durability(world);
-        let repaired_count = repair_packets.len();
-        if repaired_count == 0 {
-            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
-        }
-
-        consume_item_at_use_location(world, location);
-        packets.extend(repair_packets);
-        return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
-    }
-
     if item.key == "benediction-oil" {
         let Some(outcome) = try_luck_weapon(world) else {
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
@@ -2540,5 +3705,643 @@ impl SimulationSession {
         to: i32,
     ) -> Vec<ServerPacket> {
         equip_item_impl(self.app.world_mut(), grid, unique_id, to)
+    }
+}
+
+#[cfg(test)]
+mod item_identity_roundtrip_tests {
+    use super::*;
+
+    fn crystal_template(name: &str) -> CrystalItemTemplate {
+        crystal_item_by_name(name).unwrap_or_else(|| panic!("Crystal template {name} must exist"))
+    }
+
+    fn minimal_user_item_for_template(unique_id: u64, template_name: &str) -> UserItem {
+        UserItem {
+            unique_id,
+            item_index: crystal_template(template_name).item_index,
+            current_dura: 0,
+            max_dura: 0,
+            count: 1,
+            soul_bound_id: -1,
+            identified: true,
+            cursed: false,
+            slots: Vec::new(),
+            gem_count: 0,
+            added_stats: Vec::new(),
+            awake_type: 0,
+            awake_values: Vec::new(),
+            refined_value: 0,
+            refine_added: 0,
+            refine_success_chance: 0,
+            wedding_ring: -1,
+            expire_info: None,
+            rental_information: None,
+            is_shop_item: false,
+            sealed_info: None,
+            gm_made: false,
+        }
+    }
+
+    fn minimal_user_item(unique_id: u64) -> UserItem {
+        minimal_user_item_for_template(unique_id, "BronzeHelmet")
+    }
+
+    fn known_embedded_user_item(unique_id: u64, template_name: &str) -> UserItem {
+        minimal_user_item_for_template(unique_id, template_name)
+    }
+
+    fn complex_user_item() -> UserItem {
+        let mut nested = known_embedded_user_item(9002, "BronzeBell");
+        nested.count = 2;
+        nested.awake_type = 8;
+        nested.awake_values = vec![4, 9];
+
+        let mut recursive = known_embedded_user_item(9003, "DemonicBells");
+        recursive.current_dura = 11;
+        recursive.max_dura = 22;
+        recursive.slots = vec![Some(nested.clone())];
+        recursive.added_stats = vec![UserItemStat { stat: 12, value: 5 }];
+
+        let mut root = minimal_user_item(9001);
+        root.current_dura = 321;
+        root.max_dura = 654;
+        root.count = 7;
+        root.soul_bound_id = 77;
+        root.identified = false;
+        root.cursed = true;
+        root.slots = vec![None, Some(nested), Some(recursive)];
+        root.gem_count = 13;
+        root.added_stats = vec![
+            UserItemStat { stat: 1, value: 70 },
+            UserItemStat { stat: 5, value: 50 },
+            UserItemStat { stat: 17, value: 3 },
+        ];
+        root.awake_type = 6;
+        root.awake_values = vec![2, 7, 8];
+        root.refined_value = 4;
+        root.refine_added = 3;
+        root.refine_success_chance = 61;
+        root.wedding_ring = 1234;
+        root.expire_info = Some(UserItemExpireInfo {
+            expiry_binary_datetime: 987654321,
+        });
+        root.rental_information = Some(UserItemRentalInformation {
+            owner_name: "renter".to_string(),
+            binding_flags: 12,
+            expiry_binary_datetime: 123456789,
+            rental_locked: true,
+        });
+        root.is_shop_item = true;
+        root.sealed_info = Some(UserItemSealedInfo {
+            expiry_binary_datetime: 111,
+            next_seal_binary_datetime: 222,
+        });
+        root.gm_made = true;
+        root
+    }
+
+    fn base_item_state_for_index(item_index: i32) -> ItemState {
+        let template = unique_crystal_item_by_index(item_index).expect("known Crystal index");
+        let mut state = embedded_item_state_from_template(&template, ItemContainer::Bag1, 3);
+        state.unique_id = 1;
+        state.quantity = 1;
+        state.socket_slots = 0;
+        state.socketed.clear();
+        state.user_item_metadata = None;
+        state
+    }
+
+    fn base_item_state() -> ItemState {
+        base_item_state_for_index(crystal_template("BronzeHelmet").item_index)
+    }
+
+    fn state_for_user_item(item: &UserItem) -> ItemState {
+        base_item_state_for_index(item.item_index)
+    }
+
+    fn budget_with(
+        max_depth: usize,
+        max_total_nodes: usize,
+        max_slots_per_item: usize,
+    ) -> UserItemCarrierBudget {
+        UserItemCarrierBudget {
+            max_depth,
+            max_total_nodes,
+            max_slots_per_item,
+            max_added_stats_per_item: 4,
+            max_awake_values_per_item: 4,
+        }
+    }
+
+    #[test]
+    fn complex_user_item_survives_item_state_save_json_reload() {
+        let expected = complex_user_item();
+        validate_user_item_carrier(&expected).expect("incoming protocol carrier should validate");
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+        let save_json = serde_json::to_string(&state).expect("ItemState save JSON should encode");
+        let reloaded: ItemState =
+            serde_json::from_str(&save_json).expect("ItemState save JSON should reload");
+
+        validate_item_state_carrier(&reloaded).expect("saved carrier should validate");
+        assert_eq!(user_item_from_item_state(&reloaded), expected);
+    }
+
+    #[test]
+    fn sidecar_less_legal_crystal_item_state_remains_compatible() {
+        let state = base_item_state();
+        let mut old_json = serde_json::to_value(&state).expect("old ItemState JSON should encode");
+        old_json
+            .as_object_mut()
+            .expect("ItemState should encode as an object")
+            .remove("user_item_metadata");
+        let reloaded: ItemState =
+            serde_json::from_value(old_json).expect("old ItemState JSON should load");
+
+        assert_eq!(reloaded.user_item_metadata, None);
+        validate_item_state_carrier(&reloaded).expect("known sidecar-less Crystal state is legal");
+        let item =
+            try_user_item_from_item_state(&reloaded).expect("legacy output should be fallible");
+        assert_eq!(item.item_index, crystal_template("BronzeHelmet").item_index);
+        assert_eq!(item.awake_type, 0);
+        assert!(item.awake_values.is_empty());
+        assert_eq!(item.wedding_ring, -1);
+        assert!(item.slots.is_empty());
+    }
+
+    #[test]
+    fn unknown_sidecar_less_key_fails_closed_without_icon_fallback() {
+        let mut state = base_item_state();
+        state.key = "not-a-crystal-item".to_string();
+        state.icon = 0;
+
+        assert!(matches!(
+            validate_item_state_carrier(&state),
+            Err(UserItemCarrierError::UnknownItemKey { key }) if key == "not-a-crystal-item"
+        ));
+        assert!(try_user_item_from_item_state(&state).is_err());
+    }
+
+    #[test]
+    fn exact_carrier_requires_known_root_item_index() {
+        let valid = minimal_user_item(9_130);
+        let mut state = try_item_state_from_user_item(state_for_user_item(&valid), &valid)
+            .expect("valid exact carrier");
+        state
+            .user_item_metadata
+            .as_mut()
+            .expect("exact metadata")
+            .item_index = Some(i32::MAX);
+
+        assert!(matches!(
+            validate_item_state_carrier(&state),
+            Err(UserItemCarrierError::UnknownItemIndex {
+                item_index: i32::MAX
+            })
+        ));
+
+        let mut incoming = valid;
+        incoming.item_index = i32::MAX;
+        assert!(matches!(
+            validate_user_item_carrier(&incoming),
+            Err(UserItemCarrierError::UnknownItemIndex {
+                item_index: i32::MAX
+            })
+        ));
+        assert!(try_item_state_from_user_item(base_item_state(), &incoming).is_err());
+    }
+
+    #[test]
+    fn exact_carrier_missing_index_or_conflicting_key_fails_closed() {
+        let valid = minimal_user_item(9_131);
+        let mut missing = try_item_state_from_user_item(state_for_user_item(&valid), &valid)
+            .expect("valid exact carrier");
+        missing
+            .user_item_metadata
+            .as_mut()
+            .expect("exact metadata")
+            .item_index = None;
+        assert!(matches!(
+            validate_item_state_carrier(&missing),
+            Err(UserItemCarrierError::MissingExactItemIndex { .. })
+        ));
+
+        let mut conflicting = try_item_state_from_user_item(state_for_user_item(&valid), &valid)
+            .expect("valid exact carrier");
+        conflicting
+            .user_item_metadata
+            .as_mut()
+            .expect("exact metadata")
+            .item_index = Some(crystal_template("BronzeBell").item_index);
+        assert!(matches!(
+            try_user_item_from_item_state(&conflicting),
+            Err(UserItemCarrierError::ConflictingItemIdentity { .. })
+        ));
+    }
+
+    #[test]
+    fn zero_current_durability_remains_a_live_broken_item() {
+        let mut expected = minimal_user_item(9004);
+        expected.current_dura = 0;
+        expected.max_dura = 500;
+
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+
+        assert_eq!(state.durability_current, Some(0));
+        assert_eq!(state.durability_max, Some(500));
+        assert_eq!(user_item_from_item_state(&state), expected);
+    }
+
+    #[test]
+    fn current_item_state_fields_override_stale_sidecar_values() {
+        let expected = complex_user_item();
+        let mut state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+        state.unique_id = 9010;
+        state.quantity = 99;
+        state.durability_current = Some(111);
+        state.durability_max = Some(222);
+        state.soul_bound_id = None;
+        state.identified = Some(true);
+        state.cursed = false;
+        state.gem_count = 2;
+        state.added_attack = 0;
+        state.added_defence = 0;
+        state.added_stats = vec![UserItemStat { stat: 5, value: 14 }];
+        state.rental_binding_flags = 0;
+        state.rental_owner_name.clear();
+        state.rental_expiry_binary_datetime = 0;
+        state.rental_locked = false;
+        state.sealed_expiry_time_binary_datetime = 0;
+        state.sealed_next_time_binary_datetime = 0;
+
+        let actual = try_user_item_from_item_state(&state).expect("valid exact carrier");
+        assert_eq!(actual.unique_id, 9010);
+        assert_eq!(actual.count, 99);
+        assert_eq!(actual.current_dura, 111);
+        assert_eq!(actual.max_dura, 222);
+        assert_eq!(actual.soul_bound_id, -1);
+        assert!(actual.identified);
+        assert!(!actual.cursed);
+        assert_eq!(actual.gem_count, 2);
+        assert_eq!(
+            actual.added_stats,
+            vec![UserItemStat { stat: 5, value: 14 }]
+        );
+        assert_eq!(actual.rental_information, None);
+        assert_eq!(actual.sealed_info, None);
+        assert_eq!(actual.awake_type, expected.awake_type);
+        assert_eq!(actual.refined_value, expected.refined_value);
+        assert_eq!(actual.wedding_ring, expected.wedding_ring);
+        assert_eq!(actual.expire_info, expected.expire_info);
+        assert!(actual.is_shop_item);
+        assert!(actual.gm_made);
+    }
+
+    #[test]
+    fn recursive_protocol_slots_are_preserved_when_unmodified() {
+        let expected = complex_user_item();
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+        let reloaded: ItemState =
+            serde_json::from_str(&serde_json::to_string(&state).expect("ItemState should encode"))
+                .expect("ItemState should reload");
+        let actual = try_user_item_from_item_state(&reloaded).expect("valid recursive carrier");
+
+        assert_eq!(actual.slots, expected.slots);
+        assert_eq!(
+            actual.slots[1].as_ref().and_then(|item| item.slots.first()),
+            None
+        );
+        assert_eq!(
+            actual.slots[2]
+                .as_ref()
+                .and_then(|item| item.slots.first())
+                .and_then(Option::as_ref)
+                .map(|item| item.unique_id),
+            Some(9002)
+        );
+    }
+
+    #[test]
+    fn carrier_budget_rejects_excessive_depth_total_nodes_and_slots() {
+        let leaf = known_embedded_user_item(9_101, "BronzeBell");
+        let mut child = known_embedded_user_item(9_102, "DemonicBells");
+        child.slots = vec![Some(leaf.clone())];
+        let mut root = minimal_user_item(9_103);
+        root.slots = vec![Some(child)];
+
+        let depth_budget = budget_with(1, 8, 4);
+        let depth_error = validate_user_item_carrier_with_budget(&root, depth_budget)
+            .expect_err("input depth two must exceed a depth-one budget");
+        assert!(matches!(
+            depth_error,
+            UserItemCarrierError::DepthExceeded { depth: 2, max: 1 }
+        ));
+
+        let mut wide = minimal_user_item(9_104);
+        wide.slots = vec![
+            Some(leaf),
+            Some(known_embedded_user_item(9_107, "DemonicBells")),
+        ];
+        let node_error = validate_user_item_carrier_with_budget(&wide, budget_with(2, 2, 4))
+            .expect_err("root plus two children must exceed a two-node budget");
+        assert!(matches!(
+            node_error,
+            UserItemCarrierError::TotalNodesExceeded { nodes: 3, max: 2 }
+        ));
+
+        let slot_error = validate_user_item_carrier_with_budget(&wide, budget_with(2, 8, 1))
+            .expect_err("two slots must exceed a one-slot budget");
+        assert!(matches!(
+            slot_error,
+            UserItemCarrierError::SlotsExceeded { count: 2, max: 1 }
+        ));
+    }
+
+    #[test]
+    fn carrier_budget_rejects_excessive_added_stats_and_awake_values() {
+        let mut stats = minimal_user_item(9_105);
+        stats.added_stats = vec![
+            UserItemStat { stat: 1, value: 1 },
+            UserItemStat { stat: 2, value: 2 },
+        ];
+        let mut budget = budget_with(1, 4, 2);
+        budget.max_added_stats_per_item = 1;
+        assert!(matches!(
+            validate_user_item_carrier_with_budget(&stats, budget),
+            Err(UserItemCarrierError::AddedStatsExceeded { count: 2, max: 1 })
+        ));
+
+        let mut awake = minimal_user_item(9_106);
+        awake.awake_values = vec![1, 2];
+        budget.max_added_stats_per_item = 4;
+        budget.max_awake_values_per_item = 1;
+        assert!(matches!(
+            validate_user_item_carrier_with_budget(&awake, budget),
+            Err(UserItemCarrierError::AwakeValuesExceeded { count: 2, max: 1 })
+        ));
+    }
+
+    #[test]
+    fn captured_socket_positions_and_exact_indices_survive_live_reconciliation() {
+        let socket_a = known_embedded_user_item(9_110, "BronzeBell");
+        let mut host = minimal_user_item(9_109);
+        host.slots = vec![Some(socket_a), None, None];
+        let mut state = try_item_state_from_user_item(state_for_user_item(&host), &host)
+            .expect("captured socket A should hydrate");
+        assert_eq!(
+            state.socketed[0]
+                .user_item_metadata
+                .as_ref()
+                .and_then(|metadata| metadata.captured_socket_position),
+            Some(0)
+        );
+
+        let socket_b = known_embedded_user_item(9_111, "DemonicBells");
+        let socket_b_state =
+            try_item_state_from_user_item(state_for_user_item(&socket_b), &socket_b)
+                .expect("new socket B should hydrate");
+        state.socketed.push(socket_b_state);
+
+        let inserted = try_user_item_from_item_state(&state).expect("A plus B should reconcile");
+        assert_eq!(
+            inserted.slots[0].as_ref().map(|item| item.unique_id),
+            Some(9_110)
+        );
+        assert_eq!(
+            inserted.slots[1].as_ref().map(|item| item.unique_id),
+            Some(9_111)
+        );
+        assert_eq!(inserted.slots[2], None);
+
+        state.socketed.retain(|item| item.unique_id != 9_110);
+        let removed = try_user_item_from_item_state(&state).expect("removing A should reconcile");
+        assert_eq!(removed.slots[0], None);
+        assert_eq!(
+            removed.slots[1].as_ref().map(|item| item.unique_id),
+            Some(9_111)
+        );
+        assert_eq!(removed.slots[2], None);
+        validate_item_state_carrier(&state).expect("reconciled carrier should validate");
+    }
+
+    #[test]
+    fn unknown_captured_socket_index_fails_closed() {
+        let socket = known_embedded_user_item(9_112, "BronzeBell");
+        let mut host = minimal_user_item(9_113);
+        host.slots = vec![Some(socket)];
+        let mut state = try_item_state_from_user_item(state_for_user_item(&host), &host)
+            .expect("captured socket should hydrate");
+        state
+            .user_item_metadata
+            .as_mut()
+            .and_then(|metadata| metadata.captured_socket_positions.as_mut())
+            .and_then(|positions| positions[0].as_mut())
+            .expect("captured identity")
+            .item_index = i32::MAX;
+
+        assert!(matches!(
+            validate_item_state_carrier(&state),
+            Err(UserItemCarrierError::UnknownItemIndex {
+                item_index: i32::MAX
+            })
+        ));
+    }
+
+    #[test]
+    fn hydrated_mount_bells_clear_protocol_slot_one_when_removed() {
+        let mount_template = crystal_template("RedTiger");
+        let bells = known_embedded_user_item(9_121, "BronzeBell");
+
+        let mut host = minimal_user_item_for_template(9_120, "RedTiger");
+        host.slots = vec![None, Some(bells)];
+        let mount_state = base_item_state_for_index(mount_template.item_index);
+        let mut mount_state = try_item_state_from_user_item(mount_state, &host)
+            .expect("captured mount Bells should hydrate");
+
+        let inserted = try_user_item_from_item_state(&mount_state).expect("Bells should reconcile");
+        assert_eq!(inserted.slots[0], None);
+        assert_eq!(
+            inserted.slots[1].as_ref().map(|item| item.unique_id),
+            Some(9_121)
+        );
+
+        mount_state.socketed.clear();
+        let removed =
+            try_user_item_from_item_state(&mount_state).expect("removed Bells should clear");
+        assert_eq!(removed.slots, vec![None, None]);
+    }
+
+    #[test]
+    fn zero_quantity_is_representable_but_overflow_is_rejected() {
+        let mut state = base_item_state();
+        state.quantity = 0;
+
+        let transient = try_user_item_from_item_state(&state)
+            .expect("Crystal carrier should preserve a transient zero count");
+        assert_eq!(transient.count, 0);
+        validate_item_state_carrier(&state)
+            .expect("carrier validation should not impose a commit-boundary invariant");
+
+        state.quantity = u32::from(u16::MAX) + 1;
+
+        assert!(matches!(
+            try_user_item_from_item_state(&state),
+            Err(UserItemCarrierError::QuantityExceeded { quantity, max: u16::MAX })
+                if quantity == u32::from(u16::MAX) + 1
+        ));
+        assert!(matches!(
+            validate_item_state_carrier(&state),
+            Err(UserItemCarrierError::QuantityExceeded { .. })
+        ));
+    }
+
+    #[test]
+    fn committed_validator_rejects_zero_root_child_and_real_stack_overflow() {
+        let mut zero_root = minimal_user_item(9_150);
+        zero_root.count = 0;
+        validate_user_item_carrier(&zero_root)
+            .expect("generic wire carrier must continue accepting transient count zero");
+        assert!(matches!(
+            validate_committed_user_item_carrier(&zero_root),
+            Err(UserItemCarrierError::CommittedQuantityOutOfRange {
+                item_index,
+                quantity: 0,
+                ..
+            }) if item_index == zero_root.item_index
+        ));
+
+        let mut zero_child = known_embedded_user_item(9_152, "BronzeBell");
+        zero_child.count = 0;
+        let mut root_with_zero_child = minimal_user_item_for_template(9_151, "RedTiger");
+        root_with_zero_child.slots = vec![None, Some(zero_child)];
+        validate_user_item_carrier(&root_with_zero_child)
+            .expect("generic wire carrier must accept a transient zero-count child");
+        assert!(matches!(
+            validate_committed_user_item_carrier(&root_with_zero_child),
+            Err(UserItemCarrierError::CommittedQuantityOutOfRange { quantity: 0, .. })
+        ));
+
+        let state = try_item_state_from_user_item(
+            state_for_user_item(&root_with_zero_child),
+            &root_with_zero_child,
+        )
+        .expect("generic ItemState hydration must preserve the transient zero child");
+        validate_item_state_carrier(&state)
+            .expect("generic ItemState carrier must continue accepting quantity zero");
+        assert!(matches!(
+            validate_committed_item_state_carrier(&state),
+            Err(UserItemCarrierError::CommittedQuantityOutOfRange { quantity: 0, .. })
+        ));
+
+        let mut overstack = minimal_user_item(9_153);
+        let max = crystal_template("BronzeHelmet").stack_size.max(1);
+        overstack.count = max.saturating_add(1);
+        validate_user_item_carrier(&overstack)
+            .expect("generic wire carrier only validates representability");
+        assert!(matches!(
+            validate_committed_user_item_carrier(&overstack),
+            Err(UserItemCarrierError::CommittedQuantityOutOfRange {
+                quantity,
+                max: committed_max,
+                ..
+            }) if quantity == u32::from(max) + 1 && committed_max == u32::from(max)
+        ));
+    }
+
+    #[test]
+    fn unknown_and_ambiguous_embedded_identity_fail_closed() {
+        let mut unknown = minimal_user_item(9_130);
+        unknown.item_index = i32::MAX;
+        let mut unknown_host = minimal_user_item(9_129);
+        unknown_host.slots = vec![Some(unknown)];
+        assert!(matches!(
+            validate_user_item_carrier(&unknown_host),
+            Err(UserItemCarrierError::UnknownItemIndex {
+                item_index: i32::MAX
+            })
+        ));
+
+        let duplicate = known_embedded_user_item(9_131, "BronzeBell");
+        let mut ambiguous_host = minimal_user_item(9_132);
+        ambiguous_host.slots = vec![Some(duplicate.clone()), Some(duplicate)];
+        assert!(matches!(
+            try_item_state_from_user_item(state_for_user_item(&ambiguous_host), &ambiguous_host),
+            Err(UserItemCarrierError::AmbiguousSocketIdentity {
+                unique_id: 9_131,
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn exact_item_index_and_default_optional_presence_survive_roundtrip() {
+        let mut expected = minimal_user_item(9_140);
+        expected.rental_information = Some(UserItemRentalInformation {
+            owner_name: String::new(),
+            binding_flags: 0,
+            expiry_binary_datetime: 0,
+            rental_locked: false,
+        });
+        expected.sealed_info = Some(UserItemSealedInfo {
+            expiry_binary_datetime: 0,
+            next_seal_binary_datetime: 0,
+        });
+
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+        let reloaded: ItemState =
+            serde_json::from_str(&serde_json::to_string(&state).expect("state should encode"))
+                .expect("state should reload");
+        let actual = try_user_item_from_item_state(&reloaded).expect("presence roundtrip is valid");
+
+        assert_eq!(actual.item_index, expected.item_index);
+        assert_eq!(actual.rental_information, expected.rental_information);
+        assert_eq!(actual.sealed_info, expected.sealed_info);
+    }
+
+    #[test]
+    fn sidecar_backed_zero_unique_id_is_preserved_without_slot_derivation() {
+        let expected = minimal_user_item(0);
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+
+        assert_eq!(state.unique_id, 0);
+        assert_eq!(
+            try_user_item_from_item_state(&state)
+                .expect("zero identity is preserved by the carrier")
+                .unique_id,
+            0
+        );
+    }
+
+    #[test]
+    fn signed_i32_protocol_collection_ceiling_is_explicit_for_all_counts() {
+        let too_many = i32::MAX as usize + 1;
+        for field in ["slots", "added_stats", "awake_values"] {
+            assert!(matches!(
+                check_protocol_count(field, too_many),
+                Err(UserItemCarrierError::ProtocolCountExceeded {
+                    field: rejected,
+                    count
+                }) if rejected == field && count == too_many
+            ));
+        }
+    }
+
+    #[test]
+    fn save_carrier_to_protocol_conversion_honours_the_same_recursive_budget() {
+        let expected = complex_user_item();
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("complex identity should hydrate");
+        let error = try_user_item_from_item_state_with_budget(&state, budget_with(1, 8, 4))
+            .expect_err("nested saved identity must obey output depth budget");
+        assert!(matches!(
+            error,
+            UserItemCarrierError::DepthExceeded { depth: 2, max: 1 }
+        ));
     }
 }

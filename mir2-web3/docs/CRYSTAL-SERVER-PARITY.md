@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> Exact item-identity Phase 1 checkpoint (2026-08-25): the runtime now
+> preserves complete bounded recursive Crystal `UserItem` identity across every
+> committed personal and Stage5 carrier, including inventory, belt, storage,
+> hero, equipment, rental, guild storage, mail, trade, auction, refine,
+> save/reload, and StartGame. Merge/split/equip transitions fail closed on
+> identity or quantity violations. Six Candidate aliases were removed from
+> production logic and are migrated idempotently in persisted records to exact
+> Crystal templates without losing UID, quantity, durability, added stats,
+> curse/binding, rental, or seal state. Locked serial gates pass the full
+> Simulation library 1445/1445, ordinary Candidate loop 2/2, game-data
+> 35/35 + 3/3, Simulation check, Web typecheck, exact-file Rustfmt, and diff
+> check. The GroundDrop payload remains lossy and its UID/Zone pickup commit is
+> not yet crash-recoverable; those remain Phase 2 and prevent a 100% claim.
+
 > Clean-checkout map-source correction (2026-08-25): active Bichon map `0`
 > now uses the same world collision loader as CrystalWorld hosting, including
 > the tracked gzipped map-pack fallback when no original client is installed.

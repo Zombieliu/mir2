@@ -130,7 +130,8 @@ use super::social_economy::{
 };
 use super::stage5::{
     exact_mail_item_state_is_valid, game_shop_stock_level, push_unique, push_unique_u8,
-    stage5_claim_mail_authoritative, stage5_item_name, stage5_player_name, Stage5MailClaimOutcome,
+    stage5_claim_mail_authoritative, stage5_item_name, stage5_player_name,
+    validate_stage5_guild_storage_item_carriers, Stage5MailClaimOutcome,
 };
 
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
@@ -1281,17 +1282,24 @@ fn take_back_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<Serv
         return vec![failed_packet];
     };
 
-    let mut item = {
-        let mut hero_inventory = world.resource_mut::<HeroInventoryResource>();
-        hero_inventory.items.remove(hero_index)
-    };
+    let mut item = world.resource::<HeroInventoryResource>().items[hero_index].clone();
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return vec![failed_packet];
+    }
     item.slot = to_inventory_slot;
     item.container = to_container;
-    {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        normalize_incoming_item_tree_unique_ids(&inventory, &mut item, &[]);
-        inventory.inventory_items.push(item);
+    normalize_incoming_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return vec![failed_packet];
     }
+    world
+        .resource_mut::<HeroInventoryResource>()
+        .items
+        .remove(hero_index);
+    world
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(item);
 
     vec![ServerPacket::TakeBackHeroItem {
         from,
@@ -2527,24 +2535,67 @@ fn stage5_guild_user_item_for_key(key: &str, unique_id: u64) -> UserItem {
     }
 }
 
-fn stage5_guild_storage_item_from_state(world: &World, key: &str, slot: u8) -> GuildStorageItem {
-    let stage5 = world.resource::<Stage5SystemsResource>();
-    let guild = &stage5.stage5_systems.guild;
-    let user_id = guild
-        .storage_item_users
-        .get(&slot)
-        .copied()
-        .map(i64::from)
-        .unwrap_or_else(|| i64::from(current_stage5_character_index(world)));
-    let item = guild
-        .storage_item_states
-        .get(&slot)
-        .and_then(|json| serde_json::from_str::<ItemState>(json).ok())
-        .map(|item| user_item_from_item_state(&item))
-        .unwrap_or_else(|| stage5_guild_user_item_for_key(key, 90_000 + u64::from(slot)));
-    GuildStorageItem { item, user_id }
+#[derive(Debug, Clone)]
+struct ValidatedStage5GuildStorageItem {
+    state: ItemState,
+    packet: GuildStorageItem,
 }
 
+fn validate_stage5_guild_storage_packet_snapshot(
+    systems: &Stage5SystemsState,
+) -> Result<BTreeMap<u8, ValidatedStage5GuildStorageItem>, String> {
+    validate_stage5_guild_storage_item_carriers(&systems.guild)?;
+    let guild = &systems.guild;
+    if guild.storage_items.len() != guild.storage_item_users.len() {
+        return Err(format!(
+            "stage5 guild storage key/owner length mismatch: {} keys, {} owners",
+            guild.storage_items.len(),
+            guild.storage_item_users.len()
+        ));
+    }
+
+    let mut validated = BTreeMap::new();
+    for (slot, key) in &guild.storage_items {
+        let encoded = guild.storage_item_states.get(slot).ok_or_else(|| {
+            format!("stage5 guild storage slot {slot} is missing exact item state")
+        })?;
+        let owner = guild.storage_item_users.get(slot).copied().ok_or_else(|| {
+            format!("stage5 guild storage slot {slot} is missing exact item owner")
+        })?;
+        let state = serde_json::from_str::<ItemState>(encoded).map_err(|error| {
+            format!("failed to decode stage5 guild storage slot {slot}: {error}")
+        })?;
+        if state.key != *key {
+            return Err(format!(
+                "stage5 guild storage slot {slot} key/state mismatch: {key} != {}",
+                state.key
+            ));
+        }
+        validate_committed_item_state_carrier(&state).map_err(|error| {
+            format!("invalid stage5 guild storage slot {slot} carrier: {error}")
+        })?;
+        let item = try_user_item_from_item_state(&state).map_err(|error| {
+            format!("failed to convert stage5 guild storage slot {slot}: {error}")
+        })?;
+        validated.insert(
+            *slot,
+            ValidatedStage5GuildStorageItem {
+                state,
+                packet: GuildStorageItem {
+                    item,
+                    user_id: i64::from(owner),
+                },
+            },
+        );
+    }
+
+    if validated.len() != guild.storage_item_states.len()
+        || validated.len() != guild.storage_item_users.len()
+    {
+        return Err("stage5 guild storage maps do not have exact slot correspondence".to_string());
+    }
+    Ok(validated)
+}
 fn stage5_swap_guild_storage_map<T>(map: &mut BTreeMap<u8, T>, from: u8, to: u8) {
     if from == to {
         return;
@@ -2980,12 +3031,13 @@ fn stage5_guild_storage_gold_packet(
     }
 }
 
-fn stage5_guild_storage_list_packet(world: &World) -> ServerPacket {
-    let stage5 = world.resource::<Stage5SystemsResource>();
+fn stage5_guild_storage_list_packet(
+    validated: &BTreeMap<u8, ValidatedStage5GuildStorageItem>,
+) -> ServerPacket {
     let mut items = vec![None; GUILD_STORAGE_SLOT_COUNT];
-    for (slot, key) in &stage5.stage5_systems.guild.storage_items {
+    for (slot, stored) in validated {
         if let Some(target) = items.get_mut(usize::from(*slot)) {
-            *target = Some(stage5_guild_storage_item_from_state(world, key, *slot));
+            *target = Some(stored.packet.clone());
         }
     }
     ServerPacket::GuildStorageList { items }
@@ -3019,6 +3071,13 @@ fn stage5_guild_storage_item_packet(
         ];
     }
 
+    let validated_storage = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        match validate_stage5_guild_storage_packet_snapshot(&stage5.stage5_systems) {
+            Ok(validated) => validated,
+            Err(_) => return vec![stage5_guild_storage_failure(change_type, from, to)],
+        }
+    };
     let user = current_stage5_character_index(world);
     match change_type {
         0 => {
@@ -3048,43 +3107,58 @@ fn stage5_guild_storage_item_packet(
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
             let item = world.resource::<InventoryResource>().inventory_items[item_index].clone();
-            if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE) {
+            if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE)
+                || validate_committed_item_state_carrier(&item).is_err()
+            {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
-            if world
-                .resource::<Stage5SystemsResource>()
-                .stage5_systems
-                .guild
-                .storage_items
-                .contains_key(&to_slot)
-            {
+            if validated_storage.contains_key(&to_slot) {
                 return vec![
                     stage5_guild_storage_failure(change_type, from, to),
                     system_message_key(world, "server.TargetSlotNotEmpty"),
                 ];
             }
-            let item = world
-                .resource_mut::<InventoryResource>()
-                .inventory_items
-                .remove(item_index);
-            {
-                let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-                let guild = &mut stage5.stage5_systems.guild;
-                guild.storage_items.insert(to_slot, item.key.clone());
-                if let Ok(encoded) = serde_json::to_string(&item) {
-                    guild.storage_item_states.insert(to_slot, encoded);
-                }
-                guild.storage_item_users.insert(to_slot, user);
+            let Ok(encoded) = serde_json::to_string(&item) else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+
+            let mut next_systems = world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .clone();
+            next_systems
+                .guild
+                .storage_items
+                .insert(to_slot, item.key.clone());
+            next_systems
+                .guild
+                .storage_item_states
+                .insert(to_slot, encoded);
+            next_systems.guild.storage_item_users.insert(to_slot, user);
+            let Ok(next_storage) = validate_stage5_guild_storage_packet_snapshot(&next_systems)
+            else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+            let Some(stored_packet) = next_storage
+                .get(&to_slot)
+                .map(|stored| stored.packet.clone())
+            else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+
+            let mut next_inventory = world.resource::<InventoryResource>().clone();
+            if item_index >= next_inventory.inventory_items.len() {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
+            next_inventory.inventory_items.remove(item_index);
+            *world.resource_mut::<InventoryResource>() = next_inventory;
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = next_systems;
             vec![ServerPacket::GuildStorageItemChange {
                 change_type: 0,
                 to,
                 from,
                 user,
-                item: Some(GuildStorageItem {
-                    item: user_item_from_item_state(&item),
-                    user_id: i64::from(user),
-                }),
+                item: Some(stored_packet),
             }]
         }
         1 => {
@@ -3114,51 +3188,41 @@ fn stage5_guild_storage_item_packet(
                     system_message_key(world, "server.TargetSlotNotEmpty"),
                 ];
             }
-            let (item_key, item_state_json) = {
-                let stage5 = world.resource::<Stage5SystemsResource>();
-                let guild = &stage5.stage5_systems.guild;
-                let Some(item_key) = guild.storage_items.get(&from_slot).cloned() else {
-                    return vec![stage5_guild_storage_failure(change_type, from, to)];
-                };
-                (item_key, guild.storage_item_states.get(&from_slot).cloned())
+            let Some(stored) = validated_storage.get(&from_slot) else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
-            if let Some((container, slot)) = inventory_container_and_slot_for_index(to_slot) {
-                if let Some(mut item) =
-                    item_state_json.and_then(|json| serde_json::from_str::<ItemState>(&json).ok())
-                {
-                    item.container = container;
-                    item.slot = slot;
-                    normalize_incoming_item_tree_unique_ids(
-                        world.resource::<InventoryResource>(),
-                        &mut item,
-                        &[],
-                    );
-                    world
-                        .resource_mut::<InventoryResource>()
-                        .inventory_items
-                        .push(item);
-                } else {
-                    add_or_increment_item(
-                        world,
-                        container,
-                        &item_key,
-                        &stage5_item_name(&item_key),
-                        "Stage 5 guild storage retrieve.",
-                        slot,
-                        1,
-                        1,
-                    );
-                }
-            } else {
+            let Some((container, slot)) = inventory_container_and_slot_for_index(to_slot) else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+            let mut prepared_item = stored.state.clone();
+            prepared_item.container = container;
+            prepared_item.slot = slot;
+            normalize_incoming_item_tree_unique_ids(
+                world.resource::<InventoryResource>(),
+                &mut prepared_item,
+                &[],
+            );
+            if validate_committed_item_state_carrier(&prepared_item).is_err()
+                || try_user_item_from_item_state(&prepared_item).is_err()
+            {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
-            {
-                let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-                let guild = &mut stage5.stage5_systems.guild;
-                guild.storage_items.remove(&from_slot);
-                guild.storage_item_states.remove(&from_slot);
-                guild.storage_item_users.remove(&from_slot);
+
+            let mut next_inventory = world.resource::<InventoryResource>().clone();
+            next_inventory.inventory_items.push(prepared_item);
+            let mut next_systems = world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .clone();
+            next_systems.guild.storage_items.remove(&from_slot);
+            next_systems.guild.storage_item_states.remove(&from_slot);
+            next_systems.guild.storage_item_users.remove(&from_slot);
+            if validate_stage5_guild_storage_packet_snapshot(&next_systems).is_err() {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
+
+            *world.resource_mut::<InventoryResource>() = next_inventory;
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = next_systems;
             vec![ServerPacket::GuildStorageItemChange {
                 change_type: 1,
                 to,
@@ -3182,32 +3246,38 @@ fn stage5_guild_storage_item_packet(
             {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
-            let moved_key = {
-                let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-                let guild = &mut stage5.stage5_systems.guild;
-                let Some(moved) = guild.storage_items.get(&from_slot).cloned() else {
-                    return vec![stage5_guild_storage_failure(change_type, from, to)];
-                };
-                stage5_swap_guild_storage_map(&mut guild.storage_items, from_slot, to_slot);
-                stage5_swap_guild_storage_map(&mut guild.storage_item_states, from_slot, to_slot);
-                stage5_swap_guild_storage_map(&mut guild.storage_item_users, from_slot, to_slot);
-                moved
+            let Some(moved_item) = validated_storage
+                .get(&from_slot)
+                .map(|stored| stored.packet.clone())
+            else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
+
+            let mut next_systems = world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .clone();
+            let guild = &mut next_systems.guild;
+            stage5_swap_guild_storage_map(&mut guild.storage_items, from_slot, to_slot);
+            stage5_swap_guild_storage_map(&mut guild.storage_item_states, from_slot, to_slot);
+            stage5_swap_guild_storage_map(&mut guild.storage_item_users, from_slot, to_slot);
+            if validate_stage5_guild_storage_packet_snapshot(&next_systems).is_err() {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            }
+
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = next_systems;
             vec![ServerPacket::GuildStorageItemChange {
                 change_type: 2,
                 to,
                 from,
                 user,
-                item: Some(stage5_guild_storage_item_from_state(
-                    world, &moved_key, to_slot,
-                )),
+                item: Some(moved_item),
             }]
         }
-        3 => vec![stage5_guild_storage_list_packet(world)],
+        3 => vec![stage5_guild_storage_list_packet(&validated_storage)],
         _ => vec![stage5_guild_storage_failure(change_type, from, to)],
     }
 }
-
 const CRYSTAL_QUEST_STATE_ADD: u8 = 0;
 const CRYSTAL_QUEST_STATE_UPDATE: u8 = 1;
 const CRYSTAL_QUEST_STATE_REMOVE: u8 = 2;

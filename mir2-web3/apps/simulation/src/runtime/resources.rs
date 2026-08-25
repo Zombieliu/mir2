@@ -711,6 +711,7 @@ pub(super) struct ItemRentalRecordState {
 
 #[derive(Debug, Clone)]
 pub(super) struct ActiveItemRentalState {
+    pub(super) transaction_nonce: String,
     pub(super) partner_name: String,
     pub(super) fee: u32,
     pub(super) days: u32,

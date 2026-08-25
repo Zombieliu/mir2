@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> Exact item-identity Phase 1 complete (2026-08-25): committed inventory,
+> belt, storage, hero, equipment, rental, guild-storage, mail, trade, auction,
+> refine, save/reload, and StartGame boundaries now carry the complete bounded
+> recursive Crystal `UserItem` identity. Merge/split/equip paths validate the
+> committed quantity and identity invariants. The six former Candidate-only
+> aliases are no longer production items; a fail-closed, idempotent persisted
+> migration rewrites them to exact Crystal templates while preserving live UID,
+> count, durability, added stats, curse/binding, rental, and seal state. The
+> playable Candidate quest/drop/relogin fixture uses canonical server data.
+> Locked serial evidence is Simulation lib 1445/1445, ordinary Candidate loop
+> 2/2, game-data 35/35 + 3/3, plus Simulation check, Web typecheck,
+> exact-file Rustfmt, and diff check. GroundDrop canonical identity, UID
+> authority, and crash-recoverable Zone claim/finalize remain explicit Phase 2
+> P1 work, so overall backend parity is not yet declared complete.
+
 > Clean-host Bichon collision correction (2026-08-25): active non-starter map
 > `0` now uses `runtime_world_map_collision_data`, preserving the installed
 > Crystal-client preference while adding the repository gzipped map-pack

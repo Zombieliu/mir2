@@ -376,7 +376,7 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
     );
     assert!(
         after_combat.inventory_items.iter().any(|item| {
-            item.container == ItemContainer::Quest && item.key == "quest-wasp-stinger"
+            item.container == ItemContainer::Quest && item.key == "crystal-item-876"
         }),
         "ordinary quest kill must place the Wasp Stinger in quest inventory: {:?}",
         after_combat.inventory_items
@@ -507,29 +507,29 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
     assert!(
         after_finish.inventory_items.iter().any(|item| {
             matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                && item.key == "repair-powder"
+                && item.key == "crystal-item-1135"
                 && item.quantity == 2
         }),
-        "starter quest must place Repair Powder x2 in the ordinary bag: {:?}",
+        "starter quest must place RareCopperOre x2 in the ordinary bag: {:?}",
         after_finish.inventory_items
     );
     assert!(
         !after_finish
             .inventory_items
             .iter()
-            .any(|item| item.key == "quest-wasp-stinger"),
+            .any(|item| item.key == "crystal-item-876"),
         "quest proof must be consumed by the successful hand-in"
     );
     assert!(
         after_finish
             .equipment_items
             .iter()
-            .any(|item| item.name == "Guide Ring")
+            .any(|item| item.name == "CopperRing")
             || after_finish
                 .inventory_items
                 .iter()
-                .any(|item| item.name == "Guide Ring"),
-        "starter quest must grant Guide Ring: {after_finish:?}"
+                .any(|item| item.name == "CopperRing"),
+        "starter quest must grant CopperRing: {after_finish:?}"
     );
 
     let repair_reward = after_finish
@@ -537,7 +537,7 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
         .iter()
         .find(|item| {
             matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                && item.key == "repair-powder"
+                && item.key == "crystal-item-1135"
                 && item.quantity == 2
         })
         .expect("starter reward must expose an ordinary bag item with a unique id");
@@ -560,13 +560,15 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
         .ground_drops
         .iter()
         .find_map(|drop| match &drop.loot {
-            GroundDropLootSnapshot::InventoryItem { key, .. } if key == "repair-powder" => Some((
-                drop.object_id,
-                Point {
-                    x: drop.x,
-                    y: drop.y,
-                },
-            )),
+            GroundDropLootSnapshot::InventoryItem { key, .. } if key == "crystal-item-1135" => {
+                Some((
+                    drop.object_id,
+                    Point {
+                        x: drop.x,
+                        y: drop.y,
+                    },
+                ))
+            }
             _ => None,
         })
         .unwrap_or_else(|| {
@@ -579,7 +581,7 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
         after_item_drop
             .inventory_items
             .iter()
-            .filter(|item| item.key == "repair-powder")
+            .filter(|item| item.key == "crystal-item-1135")
             .map(|item| item.quantity)
             .sum::<u32>(),
         1,
@@ -604,7 +606,7 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
         after_object_pickup
             .inventory_items
             .iter()
-            .filter(|item| item.key == "repair-powder")
+            .filter(|item| item.key == "crystal-item-1135")
             .map(|item| item.quantity)
             .sum::<u32>(),
         2,
@@ -690,7 +692,7 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
     );
     assert!(after_reload.inventory_items.iter().any(|item| {
         matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            && item.key == "repair-powder"
+            && item.key == "crystal-item-1135"
             && item.quantity == 2
     }));
     assert!(after_reload

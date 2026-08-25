@@ -16,7 +16,9 @@ use super::drops::{
 };
 use super::equipment::*;
 use super::inventory::*;
-use super::items::{item_unique_id, user_item_from_item_state, ItemState};
+use super::items::{
+    item_unique_id, try_user_item_from_item_state, validate_committed_item_state_carrier, ItemState,
+};
 use super::map::*;
 use super::monsters::{
     apply_shared_monster_death_state, apply_shared_monster_revive_state,
@@ -144,6 +146,8 @@ pub struct SharedSkillItemConsumptionComponent {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalItemOffer {
+    #[serde(default)]
+    pub transaction_nonce: String,
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
@@ -156,6 +160,8 @@ pub struct SharedItemRentalItemOffer {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedItemRentalFeeOffer {
+    #[serde(default)]
+    pub transaction_nonce: String,
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
@@ -1119,6 +1125,7 @@ fn build_shared_item_rental_fee_offer(world: &World) -> Option<SharedItemRentalF
     }
 
     Some(SharedItemRentalFeeOffer {
+        transaction_nonce: active.transaction_nonce.clone(),
         account_id,
         character_index: character.index,
         character_name: character.name.clone(),
@@ -1137,11 +1144,12 @@ fn build_shared_item_rental_item_offer(world: &World) -> Option<SharedItemRental
     let rental = world.resource::<ItemRentalResource>();
     let active = rental.active.as_ref()?;
     let item = active.deposited_item.as_ref()?;
-    if !active.item_locked {
+    if !active.item_locked || validate_committed_item_state_carrier(item).is_err() {
         return None;
     }
 
     Some(SharedItemRentalItemOffer {
+        transaction_nonce: active.transaction_nonce.clone(),
         account_id,
         character_index: character.index,
         character_name: character.name.clone(),
@@ -1216,6 +1224,12 @@ fn apply_shared_trade_offer(
         let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
             return trade_offer_delivery_failed_packets(world, rollback);
         };
+        if validate_committed_item_state_carrier(&item).is_err()
+            || offered_item.key != item.key
+            || offered_item.unique_id != item_unique_id(&item)
+        {
+            return trade_offer_delivery_failed_packets(world, rollback);
+        }
         let Some((container, slot)) = preferred_or_empty_trade_delivery_slot_for_items(
             &staged_inventory,
             item.container,
@@ -1230,8 +1244,11 @@ fn apply_shared_trade_offer(
             &mut item,
             &staged_inventory,
         );
+        let Ok(user_item) = try_user_item_from_item_state(&item) else {
+            return trade_offer_delivery_failed_packets(world, rollback);
+        };
         staged_inventory.push(item.clone());
-        delivered_items.push(item);
+        delivered_items.push((item, user_item));
     }
 
     if offer.gold > 0 {
@@ -1240,8 +1257,7 @@ fn apply_shared_trade_offer(
         packets.push(ServerPacket::GainedGold { gold: offer.gold });
     }
 
-    for item in delivered_items {
-        let user_item = user_item_from_item_state(&item);
+    for (item, user_item) in delivered_items {
         world
             .resource_mut::<InventoryResource>()
             .inventory_items
@@ -1272,6 +1288,83 @@ fn trade_offer_delivery_failed_packets(world: &mut World, rollback: bool) -> Vec
     packets
 }
 
+fn shared_rental_delivery_matches_active_state(
+    world: &World,
+    delivery: &SharedItemRentalDelivery,
+) -> bool {
+    let agreement = match delivery {
+        SharedItemRentalDelivery::Lender(agreement)
+        | SharedItemRentalDelivery::Borrower(agreement) => agreement,
+    };
+    if agreement.item.transaction_nonce.is_empty()
+        || agreement.fee.transaction_nonce.is_empty()
+        || agreement.item.transaction_nonce == agreement.fee.transaction_nonce
+        || agreement.item.days == 0
+        || agreement.item.days > 30
+        || agreement.fee.fee == 0
+        || !agreement
+            .item
+            .partner_name
+            .eq_ignore_ascii_case(&agreement.fee.character_name)
+        || !agreement
+            .fee
+            .partner_name
+            .eq_ignore_ascii_case(&agreement.item.character_name)
+    {
+        return false;
+    }
+
+    let session = world.resource::<SessionResource>();
+    let Some(account_id) = session.account_id.as_deref() else {
+        return false;
+    };
+    let Some(character) = session.selected_character.as_ref() else {
+        return false;
+    };
+    let rental = world.resource::<ItemRentalResource>();
+    let Some(active) = rental.active.as_ref() else {
+        return false;
+    };
+
+    match delivery {
+        SharedItemRentalDelivery::Lender(_) => {
+            active.transaction_nonce == agreement.item.transaction_nonce
+                && account_id == agreement.item.account_id
+                && character.index == agreement.item.character_index
+                && character
+                    .name
+                    .eq_ignore_ascii_case(&agreement.item.character_name)
+                && active
+                    .partner_name
+                    .eq_ignore_ascii_case(&agreement.fee.character_name)
+                && active.days == agreement.item.days
+                && active.item_locked
+                && active.deposited_item.as_ref().is_some_and(|deposited| {
+                    item_unique_id(deposited) == agreement.item.item_id
+                        && deposited.name == agreement.item.item_name
+                        && serde_json::to_string(deposited).ok().as_deref()
+                            == Some(agreement.item.item_state_json.as_str())
+                })
+                && rental.rented_items.len() < 3
+        }
+        SharedItemRentalDelivery::Borrower(_) => {
+            active.transaction_nonce == agreement.fee.transaction_nonce
+                && account_id == agreement.fee.account_id
+                && character.index == agreement.fee.character_index
+                && character
+                    .name
+                    .eq_ignore_ascii_case(&agreement.fee.character_name)
+                && active
+                    .partner_name
+                    .eq_ignore_ascii_case(&agreement.item.character_name)
+                && active.fee == agreement.fee.fee
+                && active.gold_locked
+                && active.deposited_item.is_none()
+                && !rental.has_rented_item
+        }
+    }
+}
+
 fn apply_shared_item_rental_delivery(
     world: &mut World,
     delivery: &SharedItemRentalDelivery,
@@ -1283,6 +1376,17 @@ fn apply_shared_item_rental_delivery(
         SharedItemRentalDelivery::Lender(agreement)
         | SharedItemRentalDelivery::Borrower(agreement) => agreement,
     };
+    let Ok(agreement_item) = serde_json::from_str::<ItemState>(&agreement.item.item_state_json)
+    else {
+        return vec![ServerPacket::CancelItemRental];
+    };
+    if validate_committed_item_state_carrier(&agreement_item).is_err()
+        || agreement.item.item_id != item_unique_id(&agreement_item)
+        || agreement.item.item_name != agreement_item.name
+        || !shared_rental_delivery_matches_active_state(world, delivery)
+    {
+        return vec![ServerPacket::CancelItemRental];
+    }
     let expiry = future_binary_datetime(u64::from(agreement.item.days));
 
     match delivery {
@@ -1321,10 +1425,7 @@ fn apply_shared_item_rental_delivery(
             ]
         }
         SharedItemRentalDelivery::Borrower(_) => {
-            let Ok(mut item) = serde_json::from_str::<ItemState>(&agreement.item.item_state_json)
-            else {
-                return vec![ServerPacket::CancelItemRental];
-            };
+            let mut item = agreement_item;
             let Some((container, slot)) = preferred_or_empty_trade_delivery_slot(
                 world.resource::<InventoryResource>(),
                 item.container,
@@ -1346,8 +1447,13 @@ fn apply_shared_item_rental_delivery(
                 &mut item,
                 &[],
             );
+            if validate_committed_item_state_carrier(&item).is_err() {
+                return vec![ServerPacket::CancelItemRental];
+            }
 
-            let mut loan_item = user_item_from_item_state(&item);
+            let Ok(mut loan_item) = try_user_item_from_item_state(&item) else {
+                return vec![ServerPacket::CancelItemRental];
+            };
             loan_item.rental_information = Some(UserItemRentalInformation {
                 owner_name: agreement.item.character_name.clone(),
                 binding_flags: super::rental::CRYSTAL_RENTAL_BINDING_FLAGS,

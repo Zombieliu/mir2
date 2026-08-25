@@ -43,7 +43,7 @@ use super::items::{
     crystal_equipment_slot_for_item_key, crystal_item_key_for_template, crystal_item_stat_value,
     crystal_item_template_for_item_key, crystal_seal_minutes_for_source_item,
     crystal_socket_slot_limit_for_item_key, crystal_socket_source_valid_for_item,
-    item_icon_for_key, ItemState,
+    item_icon_for_key, validate_committed_item_state_carrier, ItemState,
 };
 use super::map::spawn_stage5_hero;
 use super::monsters::{
@@ -60,7 +60,7 @@ use super::resources::{
 };
 use super::save::{
     apply_character_save, decode_state_vec, merge_persisted_mail_into_character_save,
-    snapshot_active_character_save,
+    snapshot_active_character_save, validate_character_save_record,
 };
 use super::session::{current_language, system_message, SimulationSession};
 use super::social_economy::{
@@ -92,17 +92,506 @@ pub(super) struct Stage5MailClaimOutcome {
     pub(super) items: Vec<ItemState>,
 }
 
+const STAGE5_GUILD_STORAGE_SLOT_COUNT: usize = 112;
+
+fn validate_exact_stage5_item_state(item: &ItemState) -> Result<(), String> {
+    validate_committed_item_state_carrier(item)
+        .map_err(|error| format!("invalid exact stage5 item carrier: {error}"))?;
+    if item.key.trim().is_empty() || item.name.trim().is_empty() {
+        return Err("exact stage5 item identity is empty".to_string());
+    }
+    if crystal_item_template_for_item_key(&item.key).is_none() {
+        return Err(format!("unknown exact stage5 item key: {}", item.key));
+    }
+    for child in &item.socketed {
+        validate_exact_stage5_item_state(child)?;
+    }
+    Ok(())
+}
+
 pub(super) fn exact_mail_item_state_is_valid(item: &ItemState) -> bool {
-    if item.key.trim().is_empty() || item.name.trim().is_empty() || item.quantity == 0 {
-        return false;
+    validate_exact_stage5_item_state(item).is_ok()
+}
+
+pub(super) fn validate_stage5_mail_item_carriers(mail: &[Stage5MailMessage]) -> Result<(), String> {
+    for (mail_index, message) in mail.iter().enumerate() {
+        for (attachment_index, encoded) in message.item_states_json.iter().enumerate() {
+            let item = serde_json::from_str::<ItemState>(encoded).map_err(|error| {
+                format!(
+                    "failed to decode stage5 mail {mail_index} attachment {attachment_index}: {error}"
+                )
+            })?;
+            validate_exact_stage5_item_state(&item).map_err(|error| {
+                format!("invalid stage5 mail {mail_index} attachment {attachment_index}: {error}")
+            })?;
+        }
     }
-    let Some(template) = crystal_item_template_for_item_key(&item.key) else {
-        return false;
-    };
-    if item.quantity > u32::from(template.stack_size.max(1)) {
-        return false;
+    Ok(())
+}
+
+pub(super) fn validate_stage5_guild_storage_item_carriers(
+    guild: &Stage5GuildState,
+) -> Result<(), String> {
+    let item_slots = guild.storage_items.keys().copied().collect::<Vec<_>>();
+    let state_slots = guild
+        .storage_item_states
+        .keys()
+        .copied()
+        .collect::<Vec<_>>();
+    if item_slots != state_slots {
+        return Err(format!(
+            "stage5 guild storage key/state slot-set mismatch: keys {item_slots:?}, states {state_slots:?}"
+        ));
     }
-    item.socketed.iter().all(exact_mail_item_state_is_valid)
+    let owner_slots = guild.storage_item_users.keys().copied().collect::<Vec<_>>();
+    if item_slots != owner_slots {
+        return Err(format!(
+            "stage5 guild storage key/owner slot-set mismatch: keys {item_slots:?}, owners {owner_slots:?}"
+        ));
+    }
+
+    for (slot, key) in &guild.storage_items {
+        if usize::from(*slot) >= STAGE5_GUILD_STORAGE_SLOT_COUNT {
+            return Err(format!("stage5 guild storage slot {slot} is out of range"));
+        }
+        if key.trim().is_empty() || crystal_item_template_for_item_key(key).is_none() {
+            return Err(format!(
+                "stage5 guild storage slot {slot} has unknown item key: {key}"
+            ));
+        }
+        let encoded = guild.storage_item_states.get(slot).ok_or_else(|| {
+            format!("stage5 guild storage slot {slot} is missing exact item state")
+        })?;
+        let item = serde_json::from_str::<ItemState>(encoded).map_err(|error| {
+            format!("failed to decode stage5 guild storage slot {slot}: {error}")
+        })?;
+        if item.key != *key {
+            return Err(format!(
+                "stage5 guild storage slot {slot} key/state mismatch: {key} != {}",
+                item.key
+            ));
+        }
+        validate_exact_stage5_item_state(&item).map_err(|error| {
+            format!("invalid stage5 guild storage slot {slot} item carrier: {error}")
+        })?;
+    }
+
+    Ok(())
+}
+pub(super) fn validate_stage5_systems_item_carriers(
+    systems: &Stage5SystemsState,
+) -> Result<(), String> {
+    validate_stage5_mail_item_carriers(&systems.mail)?;
+    validate_stage5_guild_storage_item_carriers(&systems.guild)
+}
+
+#[cfg(test)]
+mod stage5_item_carrier_validation_tests {
+    use super::*;
+    use mir2_game_data::LanguageCode;
+    use mir2_protocol::ClientPacket;
+
+    fn mail_with_attachment(encoded: String) -> Stage5MailMessage {
+        Stage5MailMessage {
+            id: 1,
+            delivery_nonce: "stage5-carrier-test".to_string(),
+            from: "System".to_string(),
+            to: "Demo".to_string(),
+            subject: "Carrier".to_string(),
+            body: "Carrier validation".to_string(),
+            gold: 0,
+            items: Vec::new(),
+            item_states_json: vec![encoded],
+            opened: false,
+            locked: false,
+            claimed: false,
+            deleted: false,
+        }
+    }
+
+    fn valid_game_shop_attachment() -> ItemState {
+        let (product, _) =
+            authoritative_game_shop_product(31).expect("fixture game-shop product should exist");
+        let template =
+            crystal_item_by_index(product.item_index).expect("fixture item template should exist");
+        let key = crystal_item_key_for_template(&template);
+        let encoded = game_shop_attachment_states_json(&template, &key, u32::from(product.count))
+            .expect("fixture attachment should be valid");
+        serde_json::from_str(&encoded[0]).expect("fixture attachment should decode")
+    }
+
+    fn over_budget_attachment() -> ItemState {
+        let mut attachment = valid_game_shop_attachment();
+        for _ in 0..=9 {
+            let mut parent = attachment.clone();
+            parent.socket_slots = 1;
+            parent.gem_count = 1;
+            parent.socketed = vec![attachment];
+            parent.user_item_metadata = None;
+            attachment = parent;
+        }
+        attachment
+    }
+
+    fn unknown_index_attachment_json() -> String {
+        let mut attachment = serde_json::to_value(valid_game_shop_attachment()).unwrap();
+        attachment["user_item_metadata"] = serde_json::json!({
+            "item_index": i32::MAX,
+        });
+        serde_json::to_string(&attachment).unwrap()
+    }
+
+    fn metadata_only_attachment_with_child_count(count: u16) -> ItemState {
+        let child_template =
+            mir2_game_data::crystal_item_by_name("BronzeHelmet").expect("BronzeHelmet must exist");
+        let child_key = crystal_item_key_for_template(&child_template);
+        let child_json = game_shop_attachment_states_json(&child_template, &child_key, 1)
+            .expect("BronzeHelmet child fixture should be valid");
+        let child_state: ItemState =
+            serde_json::from_str(&child_json[0]).expect("BronzeHelmet child should decode");
+        let mut child = super::super::items::try_user_item_from_item_state(&child_state)
+            .expect("BronzeHelmet child should convert to UserItem");
+        child.unique_id = 9_801;
+        child.count = count;
+
+        let mut attachment = valid_game_shop_attachment();
+        attachment.unique_id = 9_800;
+        attachment.socket_slots = 1;
+        let root_template = crystal_item_template_for_item_key(&attachment.key)
+            .expect("root attachment template should exist");
+        attachment.user_item_metadata = Some(
+            serde_json::from_value(serde_json::json!({
+                "item_index": root_template.item_index,
+                "slots": [child],
+            }))
+            .expect("metadata-only sidecar should decode"),
+        );
+        assert!(attachment.socketed.is_empty());
+        attachment
+    }
+
+    fn guild_systems_with_state(encoded: String) -> Stage5SystemsState {
+        let key = valid_game_shop_attachment().key;
+        let mut systems = Stage5SystemsState::default();
+        systems.guild.name = "Carrier Test Guild".to_string();
+        systems.guild.storage_items.insert(0, key);
+        systems.guild.storage_item_states.insert(0, encoded);
+        systems.guild.storage_item_users.insert(0, 1);
+        systems
+    }
+
+    #[test]
+    fn stage5_mail_attachment_reuses_complete_carrier_budget() {
+        let attachment = over_budget_attachment();
+        let systems = Stage5SystemsState {
+            mail: vec![mail_with_attachment(
+                serde_json::to_string(&attachment).unwrap(),
+            )],
+            ..Stage5SystemsState::default()
+        };
+
+        let error = validate_stage5_systems_item_carriers(&systems).unwrap_err();
+        assert!(error.contains("attachment 0"));
+        assert!(error.contains("depth") || error.contains("Depth"));
+    }
+
+    #[test]
+    fn stage5_guild_storage_rejects_malformed_unknown_and_over_budget_carriers_without_mutation() {
+        let cases = [
+            "{corrupt guild storage JSON".to_string(),
+            unknown_index_attachment_json(),
+            serde_json::to_string(&over_budget_attachment()).unwrap(),
+        ];
+
+        for encoded in cases {
+            let systems = guild_systems_with_state(encoded);
+            let before = systems.clone();
+            let error = validate_stage5_systems_item_carriers(&systems).unwrap_err();
+            assert!(
+                error.contains("decode")
+                    || error.contains("Unknown")
+                    || error.contains("unknown")
+                    || error.contains("depth")
+                    || error.contains("Depth")
+                    || error.contains("no Crystal template"),
+                "unexpected strict validation error: {error}"
+            );
+            assert_eq!(systems, before);
+        }
+    }
+
+    #[test]
+    fn stage5_guild_storage_rejects_metadata_only_zero_and_overstack_children_without_mutation() {
+        let bronze_helmet =
+            mir2_game_data::crystal_item_by_name("BronzeHelmet").expect("BronzeHelmet must exist");
+        assert_eq!(bronze_helmet.stack_size, 1);
+
+        for count in [0, bronze_helmet.stack_size.saturating_add(1)] {
+            let attachment = metadata_only_attachment_with_child_count(count);
+            super::super::items::validate_item_state_carrier(&attachment)
+                .expect("generic carrier should preserve transient metadata-only child counts");
+            let systems = guild_systems_with_state(
+                serde_json::to_string(&attachment).expect("attachment should encode"),
+            );
+            let before = systems.clone();
+
+            let error = validate_stage5_systems_item_carriers(&systems).unwrap_err();
+            assert!(
+                error.contains("committed UserItem")
+                    && error.contains(&format!("quantity {count}"))
+                    && error.contains("outside Crystal stack range"),
+                "unexpected committed quantity error for count {count}: {error}"
+            );
+            assert_eq!(systems, before);
+        }
+    }
+
+    #[test]
+    fn stage5_guild_storage_accepts_complete_exact_slot_sets_without_mutation() {
+        let item = valid_game_shop_attachment();
+        let systems = guild_systems_with_state(serde_json::to_string(&item).unwrap());
+        let before = systems.clone();
+
+        validate_stage5_systems_item_carriers(&systems)
+            .expect("complete key/state/owner slot sets should validate");
+        assert_eq!(systems, before);
+    }
+
+    #[test]
+    fn stage5_guild_storage_rejects_missing_owner_without_mutation() {
+        let item = valid_game_shop_attachment();
+        let mut systems = guild_systems_with_state(serde_json::to_string(&item).unwrap());
+        systems.guild.storage_item_users.remove(&0);
+        let before = systems.clone();
+
+        assert!(validate_stage5_systems_item_carriers(&systems)
+            .unwrap_err()
+            .contains("key/owner slot-set mismatch"));
+        assert_eq!(systems, before);
+    }
+
+    #[test]
+    fn stage5_guild_storage_rejects_equal_length_orphan_owner_set_without_mutation() {
+        let item = valid_game_shop_attachment();
+        let mut systems = guild_systems_with_state(serde_json::to_string(&item).unwrap());
+        let owner = systems.guild.storage_item_users.remove(&0).unwrap();
+        systems.guild.storage_item_users.insert(1, owner);
+        let before = systems.clone();
+
+        assert!(validate_stage5_systems_item_carriers(&systems)
+            .unwrap_err()
+            .contains("key/owner slot-set mismatch"));
+        assert_eq!(systems, before);
+    }
+
+    #[test]
+    fn stage5_guild_storage_rejects_equal_length_missing_state_set_without_mutation() {
+        let item = valid_game_shop_attachment();
+        let mut systems = guild_systems_with_state(serde_json::to_string(&item).unwrap());
+        let encoded = systems.guild.storage_item_states.remove(&0).unwrap();
+        systems.guild.storage_item_states.insert(1, encoded);
+        let before = systems.clone();
+
+        assert!(validate_stage5_systems_item_carriers(&systems)
+            .unwrap_err()
+            .contains("key/state slot-set mismatch"));
+        assert_eq!(systems, before);
+    }
+    #[test]
+    fn qa_apply_native_state_rejects_corrupt_stage5_without_world_or_session_mutation() {
+        let config = crate::config::SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let active_save = super::super::save::default_save_for_character(
+            &config,
+            config.default_character.clone(),
+        );
+        apply_character_save(session.app.world_mut(), &active_save)
+            .expect("qa atomicity fixture should enter a valid active state");
+        super::super::map::rebuild_world(session.app.world_mut());
+
+        let save = snapshot_active_character_save(session.app.world()).unwrap();
+        let payload = serde_json::json!({
+            "character": {
+                "name": save.character.name,
+                "level": save.character.level,
+                "class": save.character.class,
+                "gender": save.character.gender,
+            },
+            "mapFileName": save.map_file_name,
+            "mapTitle": save.map_title,
+            "position": save.position,
+            "direction": save.direction,
+            "hp": save.hp,
+            "maxHp": save.max_hp,
+            "mp": save.mp,
+            "maxMp": save.max_mp,
+            "experience": save.experience,
+            "maxExperience": save.max_experience,
+            "gold": save.gold,
+            "credit": save.credit,
+            "cityCurrencies": save.city_currencies,
+            "inventoryItemsJson": save.inventory_items_json,
+            "beltItemsJson": save.belt_items_json,
+            "storageItemsJson": save.storage_items_json,
+            "equipmentItemsJson": save.equipment_items_json,
+        })
+        .to_string();
+
+        let mut invalid_carrier_payload =
+            serde_json::from_str::<serde_json::Value>(&payload).unwrap();
+        invalid_carrier_payload["inventoryItemsJson"] =
+            serde_json::json!(["{corrupt inventory item JSON"]);
+        let carrier_world_before = session.world_snapshot();
+        let carrier_active_before =
+            serde_json::to_value(snapshot_active_character_save(session.app.world()).unwrap())
+                .unwrap();
+        let carrier_session_before = {
+            let state = session.app.world().resource::<SessionResource>();
+            (
+                state.selected_character.clone(),
+                state.active_save_revision(),
+            )
+        };
+        let carrier_packets =
+            session.stage5_qa_apply_native_state(vec![invalid_carrier_payload.to_string()]);
+        let expected = format_localized_text(
+            LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["qa.applyNativeState item state".to_string()],
+        );
+        assert!(carrier_packets.iter().any(
+            |packet| matches!(packet, ServerPacket::Chat { message, .. } if message == &expected)
+        ));
+        assert_eq!(session.world_snapshot(), carrier_world_before);
+        assert_eq!(
+            serde_json::to_value(snapshot_active_character_save(session.app.world()).unwrap())
+                .unwrap(),
+            carrier_active_before
+        );
+        let state = session.app.world().resource::<SessionResource>();
+        assert_eq!(
+            (
+                state.selected_character.clone(),
+                state.active_save_revision(),
+            ),
+            carrier_session_before
+        );
+
+        session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .mail
+            .push(mail_with_attachment("{corrupt exact item JSON".to_string()));
+
+        let world_before = session.world_snapshot();
+        let active_before =
+            serde_json::to_value(snapshot_active_character_save(session.app.world()).unwrap())
+                .unwrap();
+        let session_before = {
+            let state = session.app.world().resource::<SessionResource>();
+            (
+                state.selected_character.clone(),
+                state.active_save_revision(),
+            )
+        };
+
+        let packets = session.stage5_qa_apply_native_state(vec![payload.clone()]);
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::Chat { message, .. } if message == &expected)
+        ));
+        assert_eq!(session.world_snapshot(), world_before);
+        assert_eq!(
+            serde_json::to_value(snapshot_active_character_save(session.app.world()).unwrap())
+                .unwrap(),
+            active_before
+        );
+        let state = session.app.world().resource::<SessionResource>();
+        assert_eq!(
+            (
+                state.selected_character.clone(),
+                state.active_save_revision(),
+            ),
+            session_before
+        );
+
+        session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .mail
+            .clear();
+        let guild_cases = [
+            "{corrupt guild storage JSON".to_string(),
+            unknown_index_attachment_json(),
+            serde_json::to_string(&over_budget_attachment()).unwrap(),
+        ];
+        for encoded in guild_cases {
+            let replacement = guild_systems_with_state(encoded).guild;
+            session
+                .app
+                .world_mut()
+                .resource_mut::<Stage5SystemsResource>()
+                .stage5_systems
+                .guild = replacement;
+
+            let world_before = session.world_snapshot();
+            let guild_before = session
+                .app
+                .world()
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .guild
+                .clone();
+            let active_before =
+                serde_json::to_value(snapshot_active_character_save(session.app.world()).unwrap())
+                    .unwrap();
+            let session_before = {
+                let state = session.app.world().resource::<SessionResource>();
+                (
+                    state.selected_character.clone(),
+                    state.active_save_revision(),
+                )
+            };
+
+            let packets = session.stage5_qa_apply_native_state(vec![payload.clone()]);
+            assert!(packets.iter().any(
+                |packet| matches!(packet, ServerPacket::Chat { message, .. } if message == &expected)
+            ));
+            assert_eq!(session.world_snapshot(), world_before);
+            assert_eq!(
+                session
+                    .app
+                    .world()
+                    .resource::<Stage5SystemsResource>()
+                    .stage5_systems
+                    .guild,
+                guild_before
+            );
+            assert_eq!(
+                serde_json::to_value(snapshot_active_character_save(session.app.world()).unwrap())
+                    .unwrap(),
+                active_before
+            );
+            let state = session.app.world().resource::<SessionResource>();
+            assert_eq!(
+                (
+                    state.selected_character.clone(),
+                    state.active_save_revision(),
+                ),
+                session_before
+            );
+        }
+    }
 }
 
 pub(super) fn stage5_claim_mail_authoritative(
@@ -143,7 +632,7 @@ pub(super) fn stage5_claim_mail_authoritative(
             .map_err(|_| Stage5MailClaimError::InvalidExactItemState)?;
         if parsed
             .iter()
-            .any(|item| !exact_mail_item_state_is_valid(item))
+            .any(|item| validate_exact_stage5_item_state(item).is_err())
         {
             return Err(Stage5MailClaimError::InvalidExactItemState);
         }
@@ -889,6 +1378,7 @@ fn game_shop_attachment_states_json(
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: template.slots,
             gem_count: 0,
@@ -905,6 +1395,8 @@ fn game_shop_attachment_states_json(
             heal_hp,
             heal_mp,
         };
+        validate_exact_stage5_item_state(&state)
+            .map_err(|_| GameShopPurchaseFailure::InvalidQuantity)?;
         attachments.push(
             serde_json::to_string(&state).map_err(|_| GameShopPurchaseFailure::InvalidQuantity)?,
         );
@@ -3595,6 +4087,7 @@ impl SimulationSession {
                     .transpose()
                     .map_err(|error| format!("failed to decode native GameShop ledger: {error}"))?
                     .unwrap_or_default();
+                validate_stage5_systems_item_carriers(&systems)?;
                 if let Some(existing) = record_native_game_shop_ledger_outcome(
                     &mut systems,
                     &player_name,
@@ -3613,6 +4106,7 @@ impl SimulationSession {
                     Some(serde_json::to_string(&systems).map_err(|error| {
                         format!("failed to encode native GameShop ledger: {error}")
                     })?);
+                validate_character_save_record(&staged_save)?;
                 let committed_revision = baseline_revision
                     .checked_add(1)
                     .ok_or_else(|| "native GameShop character revision exhausted".to_string())?;
@@ -3865,6 +4359,7 @@ impl SimulationSession {
                 .transpose()
                 .map_err(|error| format!("failed to decode committed game-shop systems: {error}"))?
                 .unwrap_or_default();
+            validate_stage5_systems_item_carriers(&systems)?;
 
             if let Some(request) = idempotent_request_for_commit.as_ref() {
                 if let Some(existing) = native_game_shop_ledger_outcome(&systems, request)? {
@@ -3973,6 +4468,7 @@ impl SimulationSession {
                         format!("failed to encode committed native GameShop ledger: {error}")
                     })?);
             }
+            validate_character_save_record(&staged_save)?;
             let committed_revision = baseline_revision
                 .checked_add(1)
                 .ok_or_else(|| "game-shop character revision exhausted".to_string())?;
@@ -4997,6 +5493,7 @@ impl SimulationSession {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -5108,7 +5605,13 @@ impl SimulationSession {
         save.equipment_items_json = state.equipment_items_json;
         save.equipment_items_explicit_empty = true;
 
-        apply_character_save(self.app.world_mut(), &save);
+        if apply_character_save(self.app.world_mut(), &save).is_err() {
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["qa.applyNativeState item state".to_string()],
+            ))];
+        }
         if let Some(player) = player_entity(self.app.world()) {
             self.app.world_mut().entity_mut(player).insert((
                 Position(save.position),

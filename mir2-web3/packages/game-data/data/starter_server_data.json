@@ -145,10 +145,10 @@
       "drops": [
         {
           "kind": "item",
-          "key": "training-splinter",
-          "name": "Training Splinter",
-          "description": "A chipped fragment from the practice dummy.",
-          "weight": 1,
+          "key": "crystal-item-865",
+          "name": "Timber",
+          "description": "A real Crystal Timber material dropped during field training.",
+          "weight": 3,
           "quantity": 1
         }
       ]
@@ -159,7 +159,7 @@
       "quest_id": 1001,
       "title": "Field Wasp Trial",
       "summary": "Village Guide wants proof that you can handle the training road safely.",
-      "reward_preview": "300 gold, Guide Ring, Repair Powder x2",
+      "reward_preview": "300 gold, CopperRing, RareCopperOre x2",
       "required": 1,
       "stages": {
         "available": {
@@ -168,12 +168,12 @@
           "tracker": "Village Guide is waiting near the west banner."
         },
         "in_progress": {
-          "objective": "Defeat the Field Wasp east of the road and secure a Wasp Stinger.",
+          "objective": "Defeat the Field Wasp east of the road and secure a SkyStingerEgg.",
           "progress_label": "{current}/{required} wasps cleared",
           "tracker": "Field Wasp {current}/{required} defeated. Bring back proof."
         },
         "ready_to_turn_in": {
-          "objective": "Return to Village Guide and hand in the Wasp Stinger.",
+          "objective": "Return to Village Guide and hand in the SkyStingerEgg.",
           "progress_label": "Objective complete",
           "tracker": "Return to Village Guide for your starter reward."
         },
@@ -184,9 +184,9 @@
         }
       },
       "quest_item": {
-        "key": "quest-wasp-stinger",
-        "name": "Wasp Stinger",
-        "description": "Proof for Village Guide that the road-side Field Wasp has been cleared.",
+        "key": "crystal-item-876",
+        "name": "SkyStingerEgg",
+        "description": "A real Crystal SkyStingerEgg used as proof of the field kill.",
         "weight": 0,
         "quantity": 1,
         "preferred_slot": 0
@@ -195,9 +195,9 @@
         "gold": 300,
         "items": [
           {
-            "key": "repair-powder",
-            "name": "Repair Powder",
-            "description": "Starter maintenance powder issued by Village Guide.",
+            "key": "crystal-item-1135",
+            "name": "RareCopperOre",
+            "description": "A real Crystal RareCopperOre reward issued by Village Guide.",
             "weight": 1,
             "quantity": 2,
             "preferred_slot": 6
@@ -206,11 +206,11 @@
         "equipment": [
           {
             "slot": "ring_right",
-            "name": "Guide Ring",
+            "name": "CopperRing",
             "shape": null,
-            "description": "Issued after the first live field assignment.",
-            "durability_current": 12,
-            "durability_max": 12,
+            "description": "A real Crystal CopperRing issued after the first live field assignment.",
+            "durability_current": 5000,
+            "durability_max": 5000,
             "attack": 0,
             "defence": 1
           }
