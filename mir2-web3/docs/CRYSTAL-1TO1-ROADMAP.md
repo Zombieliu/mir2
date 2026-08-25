@@ -1,5 +1,32 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-08-26 Crystal map-event E1 checkpoint: the six current `_MAPCOORD`
+> source entries now generate typed threshold/action records and bind
+> one-to-one to their current `Server.MirDB` `NeedMove` rows. The runtime no
+> longer reparses imported script strings on the authority path; malformed,
+> duplicate, missing, or ambiguous data fails generation/runtime closed.
+> Generator 7/7, focused manifest/runtime 3/3, personal/shared integration 3/3,
+> and the Gateway allowed-turn transfer regression 1/1 pass. This is not full
+> map-event parity: all 18 general event files, delayed action ordering,
+> doors/gates/walls, the complete six-gate Gateway matrix, live cross-map packet
+> traces, and RNG remain open.
+
+> 2026-08-26 Crystal map-environment data checkpoint: the generated world
+> manifest now imports `Music`, `Fire`/`FireDamage`,
+> `Lightning`/`LightningDamage`, and `FireWallLimit`/`FireWallCount` from the
+> real `Server.MirDB` `MapInfo` binary layout instead of discarding those
+> fields. The current database contains 464 source records (463 named maps plus
+> one empty source placeholder) and exactly 12 hazard-enabled maps. Crystal
+> map/world configs derive their complete hazard table from that
+> manifest, while `MapInformation` receives the matching fire/lightning flags,
+> music, light, dark-light, and weather values. Exact D2081/D2082 fixtures,
+> all-map config comparison, and the existing personal/shared hazard behavior
+> tests pass. Package/Web manifests are byte-identical, their sync gate passes,
+> and Web typecheck remains green. This closes the DB-to-runtime
+> configuration and packet-data gap
+> only; exact RNG trace parity, ordinary doors, gate/wall script actions, and
+> general Event execution remain open and block full map parity.
+
 > 2026-08-26 Slice D durable ground-drop settlement is closed for the bounded
 > item-identity Candidate slice. PostgreSQL lookup and transact paths share the
 > same per-idempotency-key advisory transaction lock, uncertain database results

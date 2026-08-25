@@ -1,5 +1,31 @@
 # Backend 1:1 Progress
 
+> Crystal map-event binding E1 checkpoint (2026-08-26): all six current
+> `_MAPCOORD` entries are generated as typed conditions/actions with exact
+> script provenance and exactly one linked `Server.MirDB` `NeedMove` row.
+> Personal-session and shared-Zone movement now consume only those typed
+> bindings and fail closed on invalid or duplicate data. Generator 7/7,
+> manifest/runtime 3/3, personal/shared integration 3/3, and the Gateway
+> allowed-turn transfer regression 1/1 pass. The 18 general event files remain
+> explicitly `open`; delayed event actions, doors/gates/walls, the complete
+> six-gate Gateway matrix, live cross-map packet traces, and RNG remain P0 map
+> work.
+
+> Crystal map-environment import checkpoint (2026-08-26): the current
+> `Server.MirDB` generator now preserves map music, fire/lightning enablement
+> and damage caps, plus fire-wall limit metadata. The regenerated manifest has
+> 464 maps and 12 hazard-enabled maps; `SimulationConfig` no longer relies on
+> hand-seeded hazard rows for Crystal map/world profiles. The source count is
+> 464 records: 463 named maps and one empty Crystal DB placeholder. The selected
+> map's
+> `MapInformation` now carries the exact hazard flag bits and music alongside
+> the already imported light/dark-light/weather values. Game-data 1/1,
+> map-hazard integration 3/3, and existing personal/shared hazard behavior 5/5
+> focused tests pass; both generated consumers are byte-identical, their sync
+> gate passes, and Web typecheck is green. This is a bounded
+> data/packet closure, not complete map-event parity: general scripts,
+> door/gate/wall actions, and exact RNG trace comparison remain open.
+
 > 2026-08-26 Slice D durable settlement is closed for its bounded item-identity
 > scope. PostgreSQL idempotency lookup/transact share an advisory transaction lock;
 > uncertainty remains `OutcomeUnknown`; exact ground projection and save are atomic;

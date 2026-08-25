@@ -1,5 +1,30 @@
 # Crystal Server Parity
 
+> 2026-08-26 map-event E1 parity checkpoint: six current `_MAPCOORD` bindings
+> retain exact script source provenance, typed `LEVEL`/`CHECKPKPOINT`
+> thresholds, exact Hint failure text, `ENTERMAP`, and a one-to-one current
+> `NeedMove` destination. Generator validation fails closed for duplicate,
+> missing, ambiguous, and unsupported input. Generator 7/7, focused runtime
+> 3/3, personal/shared integration 3/3, and the Gateway allowed-turn transfer
+> regression 1/1 pass. The 18 general event scripts are still marked `open`;
+> this checkpoint does not claim their execution, the complete six-gate
+> Gateway matrix, live Crystal packet traces, door/gate/wall behavior, exact
+> delayed ordering, or RNG parity.
+
+> 2026-08-26 map-environment data parity checkpoint: binary import follows
+> `MapInfo.Load/Save` order for `Music`, `Fire`/`FireDamage`,
+> `Lightning`/`LightningDamage`, and `FireWallLimit`/`FireWallCount`. The real
+> database currently yields 464 records (463 named maps and one empty source
+> placeholder), 12 hazard maps, no enabled fire-wall
+> limits, and no nonzero map-music values. Crystal runtime profiles construct
+> hazard configuration from those records and expose the corresponding
+> `MapInformation` bits. Exact LightningCave/MoltenRockCave fixtures and
+> personal/shared hazard regressions pass; Package/Web manifests are
+> byte-identical, their sync gate passes, and Web typecheck is green. The
+> checkpoint does not claim exact
+> `System.Random` trace equivalence, general delayed map actions, or
+> door/gate/wall event semantics; those remain open P0 map-parity work.
+
 > 2026-08-26 Slice D durable post-commit recovery is accepted for the bounded
 > item-identity settlement slice. Lookup/transact use one advisory-lock domain;
 > unknown database outcomes remain retryable; ground projection plus save is

@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> MAP-E0/E1 bounded closure (2026-08-26): the real `Server.MirDB` map records
+> now drive hazard/music packet metadata for all 464 source records, and all six
+> current `_MAPCOORD` entries are typed and one-to-one bound to `NeedMove`.
+> Package/Web respawn manifests are byte-identical; Web typecheck, generator
+> 7/7, focused map tests 6/6, personal/shared coordinate tests 3/3, and the
+> Gateway allowed-turn transfer regression 1/1 pass. General event scripts,
+> doors/gates/walls, the complete six-gate Gateway matrix, exact delayed packet
+> ordering, RNG traces, and persistent map state remain open; no whole-map or
+> full-game parity claim is made. Reports:
+> `docs/generated/player-qa/map-environment/MAP-HAZARD-DATA-SLICE-E0-REPORT.md`
+> and `MAP-EVENT-BINDING-SLICE-E1-REPORT.md`.
+
 > WN-UI-FUNC-01 R7.2 BuySell UI closure (2026-08-23): the targeted frontier
 > re-review found one remaining P1 after the R7.1 model fix: the Buy renderer
 > still gated on the legacy single `service_mode`, so a valid
@@ -4581,7 +4593,7 @@ R248 completed the previously blocked R39 data-import follow-up on Windows. The 
 | [x] | NPC buy-back expiry / used-goods persistence | Buy-back entries now persist across save/reload, carry Crystal 60-minute expiry, expire into NPC used goods, and used goods can be bought back through Buy/BuyUsed flows. |
 | [~] | Full gem/socket validation | Socket slot-capacity validation, source gem validation, the real inventory-grid `CombineItem` packet path, shape-1/2/5/6 repair-hammer/sewing parity, bounded shape-3/4 gem/orb upgrade parity with `ItemUpgraded` / persisted `gem_count`, shared Crystal target-type gating, rental `DontUpgrade` rejection for current socket/upgrade combine branches, equipment-backed player `GemRatePercent` success bonus, current bag-item unique-id lookup cleanup, current item packet `UseItem` / `EquipItem` / `MergeItem` unique-id cleanup, Crystal `DeleteItem` hero-flag ignore semantics, and bounded current `DropItem` / `CombineItem` hero-inventory no-player-mutation guards are in. Broader hero-inventory handling and other gem-family branches remain. |
 | [~] | Full seal-source validation | Already-sealed rejection, source item validation, reseal-delay metadata, save/reload, the real inventory-grid `CombineItem` packet path, and shared Crystal target-type gating are in. Hero-inventory handling and remaining shared combine-branch gaps remain. |
-| [ ] | Map event script bindings | Import map event scripts, weather/lightning/fire/door/wall/gate behavior. |
+| [~] | Map event script bindings | Six `_MAPCOORD` gates and real DB light/dark-light/weather/music/fire/lightning metadata are wired fail-closed. General Event commands, exact RNG traces, and door/wall/gate bindings remain open. |
 | [ ] | Broader combat/skill parity | Spell tables, projectile objects, buff edge cases, live packet comparison. |
 
 ## Frontend Queue
