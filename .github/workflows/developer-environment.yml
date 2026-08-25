@@ -113,6 +113,16 @@ jobs:
       - name: Verify developer release locks and Starter resources
         run: node mir2-web3/scripts/check-developer-release.mjs
 
+      - name: Restore tracked Bevy runtime release lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The source build above writes a host-local manifest so its output can
+          # be hash-checked. It is not a publication step and must not replace
+          # the tracked manifest for the separately published runtime bundle.
+          git restore --source=HEAD --worktree -- \
+            mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
+
       - name: Parse developer PowerShell scripts
         shell: pwsh
         run: |

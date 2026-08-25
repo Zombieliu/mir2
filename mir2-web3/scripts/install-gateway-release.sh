@@ -61,7 +61,7 @@ reject_caller_release_authority() {
     MIR2_GATEWAY_ENV_PATH \
     MIR2_GATEWAY_SERVICE_PATH \
     MIR2_GATEWAY_USER; do
-    if [[ -v "$name" ]]; then
+    if builtin declare -p "$name" >/dev/null 2>&1; then
       installer_error "$name is caller-controlled and is not accepted"
       return 1
     fi
@@ -4165,7 +4165,7 @@ case "${1:-}" in
     ((EUID != 0)) || { installer_error "selftest modes refuse uid 0"; exit 1; }
     sanitize_exported_environment
     for unsafe_name in SYSTEMD_BUS_ADDRESS DBUS_SESSION_BUS_ADDRESS LD_LIBRARY_PATH PYTHONPATH CURL_HOME HTTPS_PROXY; do
-      if [[ -v "$unsafe_name" ]]; then
+      if builtin declare -p "$unsafe_name" >/dev/null 2>&1; then
         installer_error "unsafe inherited environment survived sanitization"
         exit 1
       fi
