@@ -4499,3 +4499,31 @@ visual/feel acceptance.
   and `visualAccepted=false`; it does not close same-EXE human UI/live WSS,
   real 125%/150% DPI, 30-minute native soak, human visual/feel, semantic
   inventory/denominator completion, or formal publisher certificate gates.
+
+## 2026-08-26 Taoist q13-q15 and clean-runner closure
+
+- Candidate: the original level-four Taoist branch now has a complete automated
+  q13-q15 journey. It enforces the Taoist-only class gate, follows Assistant
+  Jane -> HighPriest Jude -> MirGuide Peter, credits ten real Oma plus ten real
+  RakingCat player-owned deaths, and proves the original 48/180/48 EXP plus
+  60/45/60 gold rewards.
+- Candidate: q14 retains `OldLoafer` and the `Healing` skill book in the bag;
+  the reward does not invent an automatic learned skill. Quest, inventory,
+  gold, level, experience, position, direction, and empty known-skill state are
+  stable after logout and a new session.
+- Candidate: the Windows runner now captures normal native stderr under
+  PowerShell 5.1 without weakening exit-code failure, and the gate generates
+  the ignored map atlas from repository sources before native host tests. This
+  closes both clean-runner failures observed during rollout: Cargo index output
+  becoming `NativeCommandError`, and 42 asset-root-dependent native tests
+  failing when `generated/map-atlas/manifest.json` was absent.
+- Clean revision `23ac6012adfd4132896f01642b96ab210320065b` passed all
+  eight fixed controls in 640,891 ms: map-atlas preparation, native host
+  312/312, functional vertical slice 11/11, ordinary loop 2/2, security 18/18,
+  shared Zone 195/195, Gateway reload 1/1, and Web typecheck. The summary
+  SHA-256 is
+  `23593A5E4CC564DA9D38729ED4FEE36C6EC93C54D7EEB9629377BDCFACE8EE80`.
+- The new 100% value remains scoped to these eight declared automated controls.
+  Whole-game Crystal parity is still unscored, and same-EXE human UI/live WSS,
+  real DPI, 30-minute native soak, human visual/gameplay-feel, complete semantic
+  inventory/denominator, and formal publisher signing remain open.

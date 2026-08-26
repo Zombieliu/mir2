@@ -2603,3 +2603,27 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   set. Whole-game completion remains undefined while the semantic inventory is
   incomplete, and same-EXE UI/live WSS, real DPI, 30-minute native soak, human
   visual/feel, and formal release signing remain explicit external gates.
+
+## 2026-08-26 Taoist instructor branch and hosted-runner hardening
+
+- The original Taoist q13-q15 branch is now an integration journey rather than
+  manifest-only evidence. It proves the level/class prerequisite, Assistant
+  Jane and HighPriest Jude links, ten Oma plus ten RakingCat player-owned kill
+  credits, exact EXP/gold, the retained `OldLoafer` and `Healing` book rewards,
+  MirGuide Peter completion, and logout/new-session persistence.
+- The Windows gate is now self-contained on a clean checkout. Its first fixed
+  control builds the ignored map atlas from repository sources; the resulting
+  local evidence used 2,305 source images, 57 atlas pages, and content hash
+  `732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7`.
+- Native stderr is captured compatibly with Windows PowerShell 5.1 while the
+  real process exit code remains authoritative. The self-test includes a native
+  stderr probe, so normal Cargo progress cannot abort evidence publication.
+- Revision `23ac6012adfd4132896f01642b96ab210320065b` passed 8/8 fixed
+  controls in 640,891 ms. The functional journey is 11/11 in 561.116 s; the
+  remaining results are native 312/312, ordinary 2/2, security 18/18, shared
+  Zone 195/195, Gateway 1/1, and Web typecheck. Summary SHA-256:
+  `23593A5E4CC564DA9D38729ED4FEE36C6EC93C54D7EEB9629377BDCFACE8EE80`.
+- This is 100% only for the declared automated control set. The summary retains
+  `globalParityPercent=null`, `accepted=false`, and `visualAccepted=false`; the
+  same-EXE UI/live-WSS, real-DPI, 30-minute native-soak, human visual/feel,
+  complete-inventory, and formal-signing gates are not closed.

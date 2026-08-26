@@ -146,6 +146,35 @@ seven declared controls. It deliberately records `globalParityPercent=null`,
 `accepted=false`, and `visualAccepted=false` and lists the human/release gates
 below as exclusions.
 
+## Clean-runner and Taoist follow-on
+
+Source revision `23ac6012adfd4132896f01642b96ab210320065b` extends the
+functional source gate; it is not a new packaged Candidate EXE and does not
+change Candidate-03's attested artifact identity above.
+
+Two hosted-runner defects were reproduced and closed. Windows PowerShell 5.1
+had promoted Cargo's normal stderr progress to a terminating
+`NativeCommandError`; native stderr is now captured while the real exit code
+remains fail-closed. A clean checkout also lacked the ignored map-atlas
+manifest, so the gate now builds the atlas from repository sources as its first
+fixed control instead of depending on a local cache.
+
+The expanded original journey adds Taoist q13-q15: Assistant Jane,
+HighPriest Jude, ten real Oma plus ten real RakingCat player-owned deaths,
+`OldLoafer`, the retained but not auto-learned `Healing` book, MirGuide Peter,
+exact rewards, and logout/new-session reload.
+
+The clean gate ran from `2026-08-26T07:14:04.1368581Z` through
+`2026-08-26T07:24:45.0277271Z` and passed 8/8 controls. The functional suite
+was 11/11 in 561.116 s; native was 312/312, ordinary 2/2, security 18/18,
+shared Zone 195/195, Gateway 1/1, and Web typecheck passed. `SUMMARY.json`
+SHA-256 is
+`23593A5E4CC564DA9D38729ED4FEE36C6EC93C54D7EEB9629377BDCFACE8EE80`.
+
+Its 100% is only the expanded eight-control automation set. The evidence still
+records `globalParityPercent=null`, `accepted=false`, and
+`visualAccepted=false`.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend

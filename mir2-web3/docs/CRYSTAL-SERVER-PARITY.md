@@ -2349,3 +2349,32 @@ green, but global Crystal parity remains unscored (`globalParityPercent=null`)
 until the semantic inventory and denominator are complete. It does not replace
 same-EXE human UI/live-WebSocket, real DPI, 30-minute native soak, human
 visual/gameplay-feel, or official signing acceptance.
+
+## 2026-08-26 Taoist q13-q15 source journey
+
+The next original newcomer branch is now automated for a level-four Taoist.
+Quest 13 is absent for the same-level Wizard control, becomes available for the
+Taoist, and follows Assistant Jane to loaded object 11, HighPriest Jude, on map
+`0`. Quest 14 credits ten real Oma and ten real RakingCat deaths through player
+combat authority. Quest 15 returns to loaded object 26, MirGuide Peter.
+
+The journey proves the original q13/q14/q15 reward sequence: 48/180/48 EXP and
+60/45/60 gold. `OldLoafer` and `Healing` are retained in inventory, and
+`Healing` remains a skill book rather than becoming an invented automatic
+learn. Completed quests, rewards, transform, class, level, experience, gold,
+and known-skill state survive logout and a new `SimulationSession`.
+
+The Windows functional gate now begins with deterministic map-atlas generation
+so a clean hosted checkout exposes the complete native asset root. It also
+captures Cargo stderr correctly under Windows PowerShell 5.1 while still using
+the native exit code as the fail-closed result. Revision
+`23ac6012adfd4132896f01642b96ab210320065b` passed 8/8 fixed controls in
+640,891 ms, including native 312/312 and the expanded functional slice 11/11.
+The summary SHA-256 is
+`23593A5E4CC564DA9D38729ED4FEE36C6EC93C54D7EEB9629377BDCFACE8EE80`.
+
+This closes another bounded source-backed functional branch, not whole-game
+parity. The global percentage remains undefined until the semantic inventory
+and denominator are complete, and same-EXE UI/live WSS, real DPI, 30-minute
+native soak, human visual/gameplay-feel, and formal release signing remain
+external gates.
