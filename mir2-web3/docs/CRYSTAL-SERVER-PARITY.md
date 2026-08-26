@@ -2458,3 +2458,36 @@ Assassin, and Archer, but remains bounded source evidence. Global parity is
 undefined until the semantic inventory and denominator are complete; same-EXE
 UI/live WSS, real DPI, 30-minute native soak, human visual/gameplay feel, and
 formal publisher signing remain open.
+
+## 2026-08-27 Gateway original q1-q4 lifecycle parity
+
+The original Bichon q1-q4 chain now crosses the Gateway/shared-Zone boundary as
+one ordinary-packet journey. It covers the initial five-leaf transfer, real
+Scarecrow kills and probabilistic `GingerTea`, the original three-choice q3
+weapon dialog and selected `SharpDagger`, then neutral Deer melee, multi-pass
+Crystal corpse harvesting, five probabilistic `DeerMeat`, exact hand-in rewards,
+logout, and a new-session reload. Navigation uses the bundled `0.map` collision
+atlas; no runtime movement, direct quest mutation, synthesized item, or QA/admin
+command substitutes for the player path.
+
+The acceptance rerun caught a stale harvest tombstone from a preceding monster
+incarnation. Gateway map reconciliation now enforces that a live Zone-native
+monster is not harvested, and a fresh live-to-dead transition clears only the
+older incarnation marker. A repeated death packet after current-corpse harvest
+does not reopen it. Focused unit regressions and the strict q1-q4 journey both
+pass, so this is a lifecycle repair rather than a test retry/skip.
+
+Clean revision `e1290bea3de1bdcd1663ee0f823c849c937eff3d` passed all 8/8
+Windows controls from `2026-08-26T21:16:58.2471471Z` through
+`2026-08-26T21:45:46.6861359Z`: native 312/312, functional 13/13, ordinary 2/2,
+security 18/18, shared Zone 196/196, Gateway 5/5, Web typecheck, and deterministic
+map-atlas preparation. Summary SHA-256 is
+`8C942979F9D59178C33BC72D5BAAD0F3986348B76F331EAF6B0C0DF003714849`.
+The Gateway-only 10 ms QA movement wait is recorded in the evidence and does not
+change combat, drop, harvest, reward, or persistence semantics.
+
+This is 100% only for the declared eight automated controls and is follow-on
+source evidence, not a newly packaged Candidate EXE. `globalParityPercent`
+remains `null`; same-EXE UI/live WSS, real 125%/150% DPI, a real 30-minute native
+soak, human original-client visual/gameplay-feel acceptance, the complete
+semantic denominator, and formal publisher signing remain open.

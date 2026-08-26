@@ -4601,3 +4601,37 @@ visual/feel acceptance.
   whole-game denominator. Semantic inventory completion, same-EXE UI/live-WSS,
   real-DPI, 30-minute native soak, human visual/gameplay-feel, and formal
   publisher signing remain open.
+
+## 2026-08-27 Gateway original q1-q4 verifiable journey
+
+- Candidate: a fresh Warrior now completes original Bichon quests 1 through 4
+  through `GatewaySession` using ordinary client packets and the bundled `0.map`
+  collision planner. Q1 transfers and consumes five `CannibalLeaves`; q2 earns
+  `GingerTea` from real player-owned Scarecrow deaths; q3 exposes the original
+  three-item choice and selects/equips `SharpDagger`; q4 reaches the western Deer
+  field, performs adjacent neutral-Deer melee, completes the multi-pass
+  `ObjectHarvest`/`ObjectHarvested` lifecycle, and obtains five real 1/2-roll
+  `DeerMeat` quest items. Exact EXP, gold, potion, jewellery, weapon, quest-item
+  consumption, logout, and fresh-session reload assertions remain strict.
+- Candidate: the shared Gateway action index now treats live Zone-native state
+  and a fresh live-to-dead transition as a new monster incarnation. It clears a
+  stale prior-corpse harvest marker without allowing a duplicate late death
+  packet to reopen an already harvested corpse. Dedicated unit tests cover both
+  invariants; the end-to-end q1-q4 journey retains its hard corpse and quest
+  assertions instead of skipping an unavailable body.
+- Clean implementation revision `e1290bea3de1bdcd1663ee0f823c849c937eff3d`
+  passed all eight controls from `2026-08-26T21:16:58.2471471Z` through
+  `2026-08-26T21:45:46.6861359Z`: map-atlas preparation, native 312/312,
+  functional journey 13/13, ordinary loop 2/2, security 18/18, shared Zone
+  196/196, Gateway persistence 5/5, and Web typecheck. `SUMMARY.json` SHA-256 is
+  `8C942979F9D59178C33BC72D5BAAD0F3986348B76F331EAF6B0C0DF003714849`.
+- The Gateway control records `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10`; this only
+  shortens test movement waits and does not alter combat, random drops,
+  harvesting, rewards, persistence, or establish a native-soak timing claim.
+  Candidate-03's packaged EXE remains unchanged; these are follow-on source and
+  nonvisual gate results.
+- `automatedFunctionalCoveragePercent=100` applies only to the eight declared
+  controls. The evidence retains `globalParityPercent=null`, `accepted=false`,
+  and `visualAccepted=false`; same-EXE UI/live WSS, real 125%/150% DPI, a real
+  30-minute native soak, human original-client visual/gameplay-feel acceptance,
+  the complete semantic denominator, and formal publisher signing remain open.

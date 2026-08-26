@@ -2690,3 +2690,30 @@ Every time backend parity meaningfully moves, this file should be updated togeth
 - The evidence retains `globalParityPercent=null`, `accepted=false`, and
   `visualAccepted=false`. The scoped 8/8 does not close the incomplete semantic
   denominator or same-EXE UI/live-WSS, real-DPI, soak, human, and signing gates.
+
+## 2026-08-27 Gateway original Bichon q1-q4 boundary
+
+- The Gateway integration journey now drives original q1-q4 from a fresh
+  account with ordinary packets only. It proves NPC-dialog ownership and range,
+  collision-aware `0.map` movement, q1 `CannibalLeaves` transfer, probabilistic
+  q2 `GingerTea`, q3's three-option weapon dialog with `SharpDagger` selection,
+  q4 neutral-Deer melee, multi-pass Crystal harvesting, probabilistic five-item
+  `DeerMeat` collection, exact rewards, logout, and authoritative reload.
+- A formal rerun exposed a real fifth-corpse rejection: the Gateway map action
+  index could retain an older incarnation's harvested tombstone. The repaired
+  boundary clears that marker on live native reconciliation and fresh death,
+  while preserving it for duplicate death packets after the current corpse was
+  harvested. Two focused unit regressions and the unchanged strict q1-q4
+  end-to-end assertion pass.
+- Revision `e1290bea3de1bdcd1663ee0f823c849c937eff3d` passed the clean Windows
+  functional gate 8/8. Results are map-atlas preparation, native 312/312,
+  functional 13/13 in 933.42 s, ordinary 2/2, security 18/18, shared Zone
+  196/196, Gateway 5/5 in 472.95 s, and Web typecheck. The run lasted from
+  `2026-08-26T21:16:58.2471471Z` to `2026-08-26T21:45:46.6861359Z`;
+  `SUMMARY.json` SHA-256 is
+  `8C942979F9D59178C33BC72D5BAAD0F3986348B76F331EAF6B0C0DF003714849`.
+- The recorded Gateway-only `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10` accelerates
+  movement waits, not combat/drop/harvest/reward rules. This is follow-on source
+  evidence and does not change Candidate-03's packaged EXE. The summary remains
+  `globalParityPercent=null`, `accepted=false`, and `visualAccepted=false`; its
+  100% is only the fixed eight-control set, not whole-game Crystal parity.

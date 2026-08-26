@@ -253,6 +253,56 @@ The 100% result remains limited to the eight declared automated controls. The
 evidence still records `globalParityPercent=null`, `accepted=false`, and
 `visualAccepted=false`.
 
+## Gateway original q1-q4 follow-on (2026-08-27)
+
+Clean source revision `e1290bea3de1bdcd1663ee0f823c849c937eff3d`
+completes the original Bichon q1-q4 journey through `GatewaySession` and ordinary
+client packets. This is follow-on source evidence, not a rebuilt Candidate EXE;
+Candidate-03's attested executable and package identity in this report are
+unchanged.
+
+The journey uses collision-aware bundled `0.map` movement and proves: q1 grants
+and consumes five `CannibalLeaves`, awards 10 EXP and one small HP potion; q2
+obtains `GingerTea` from real player-owned Scarecrow deaths, consumes it, and
+awards 30 EXP, 200 gold, `GoldenPendant`, and `CopperRing`; q3 exposes the
+original `SharpDagger`/`ToughHoaSword`/`StiffWoodenBow` selection and awards the
+selected `SharpDagger` plus 10 EXP; q4 uses adjacent neutral-Deer melee and the
+real multi-pass `ObjectHarvest`/`ObjectHarvested` path until five 1/2-roll
+`DeerMeat` are collected, then consumes them and awards 80 EXP, 20 gold, and
+`OldCopperRing`. Completed quests, inventory/equipment, gold, experience, and
+authoritative transform survive logout and a newly constructed Gateway session.
+
+A pre-acceptance formal rerun exposed a fifth-corpse failure in which the shared
+Gateway action index retained an older incarnation's harvest tombstone. The
+implementation now clears stale markers when a Zone-native monster is live or
+enters a fresh live-to-dead transition, while a duplicate late death packet does
+not reopen the current harvested corpse. Two focused unit regressions passed,
+and the strict end-to-end journey completed without skipping or synthesizing a
+corpse or quest item.
+
+The clean final gate ran from `2026-08-26T21:16:58.2471471Z` through
+`2026-08-26T21:45:46.6861359Z` and passed 8/8 controls:
+
+- map-atlas preparation: PASS, 2,305 sources, 57 pages, content hash
+  `732065c9e021a7939b2797dc26b283310eb625c5869972c3da27a072eab0e7a7`;
+- native host: 312/312;
+- five-class functional journey: 13/13 in 933.42 s;
+- ordinary loop: 2/2;
+- security lifecycle: 18/18;
+- shared Zone: 196/196;
+- Gateway persistence: 5/5 in 472.95 s;
+- Web respawn-manifest/typecheck: PASS.
+
+The evidence is at
+`artifacts/windows-vertical-slice/gateway-q1-q4-20260827-e1290bea3-rerun2/SUMMARY.json`;
+its SHA-256 is
+`8C942979F9D59178C33BC72D5BAAD0F3986348B76F331EAF6B0C0DF003714849`.
+It records `worktreeClean=true`, `automatedFunctionalCoveragePercent=100`,
+`globalParityPercent=null`, `accepted=false`, and `visualAccepted=false`.
+`MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10` is scoped only to the Gateway control and
+shortens movement waits; combat, probability, harvesting, rewards, persistence,
+and native-soak timing are not altered or inferred.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend
