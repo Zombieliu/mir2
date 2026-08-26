@@ -1,13 +1,15 @@
 # Crystal Server Parity
 
 > Windows vertical-slice server evidence closeout (2026-08-26, HEAD
-> `4c7e60baa`): the bounded ordinary-player flow passed
+> `f0ab4936c`): the bounded ordinary-player flow passed
 > `ordinary_candidate_loop` 2/2. The normal Gateway fresh-account login,
 > character/start-game, authoritative transform, logout/save, and new-session
 > restore regression passed 1/1. The Zone checkpoint mismatch was first
 > reproduced against the original replay behavior; the ordered restore
 > regression then passed, and the `zone_rpc` library checkpoint group passed
 > 21/21. Clean-HEAD asset generation passed 312/312 and Web typecheck passed.
+> The current 15-case combat milestone certificate also passes after delayed
+> packet attacks retain Crystal's declared weapon-skill defence type.
 >
 > The ordered-restore result closes the specific checkpoint replay defect: the
 > replay path records/restores the character mutation in sequence and refreshes
@@ -15,17 +17,17 @@
 > reintroduce a removed temporary entity. It does not erase the historical
 > failing evidence and does not expand the result into full Crystal server
 > parity. The exact source revision
-> `4c7e60baa5d85e63858a6fd1717af01c5f893f3d` is now bound to Windows Release
+> `f0ab4936c44df304e60e66e08529913201636b51` is now bound to Windows Release
 > EXE SHA-256
-> `822C718721EE6F1AB20C137AF00B86F4D887D4828776BD2D36EB231AA1216972`
-> (66,664,960 bytes) and build-attestation SHA-256
-> `60AB3279F50CA85357F535430D5F80708594D1BC10B8831AFBD36971CDEDCCAA`.
-> Nonvisual Candidate `WN-CANDIDATE-01-20260826` passed clean-source staging
+> `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6`
+> (66,665,472 bytes) and build-attestation SHA-256
+> `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979`.
+> Nonvisual Candidate `WN-CANDIDATE-02-20260826` passed clean-source staging
 > verification and copied-artifact verification. Its 10,254-payload manifest
 > SHA-256 is
-> `6E6042BEA21F06D8A75612F1EF0AE49EE3AC2ABC4F98601509BEA2D1A4381DC2`
+> `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467`
 > with aggregate
-> `22E1391C434F665A0E4071721085FBA4D721A92D7C5D0F733C346408092A16F5`;
+> `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B`;
 > the complete package has 10,258 files.
 >
 > Open acceptance gates remain Windows pure-UI execution, same-EXE live

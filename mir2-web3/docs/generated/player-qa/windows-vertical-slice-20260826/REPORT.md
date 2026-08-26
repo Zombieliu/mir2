@@ -2,7 +2,7 @@
 
 - Date: 2026-08-26
 - Branch: `codex/wn-candidate-recovery`
-- Packaged source revision: `4c7e60baa5d85e63858a6fd1717af01c5f893f3d`
+- Packaged source revision: `f0ab4936c44df304e60e66e08529913201636b51`
 
 ## Scope
 
@@ -22,26 +22,28 @@ human-accepted release.
 | `zone_rpc` library checkpoint group | 21/21 | Focused checkpoint/replay library coverage passed. |
 | Clean-HEAD asset generation | 312/312 | Asset generation/checks from a clean HEAD completed successfully. |
 | Web typecheck | PASS | The Web typecheck gate remained green for this closeout. |
+| `platinum_176_combat_milestones` | 15/15, repeated twice | The current combat certificate is reproducible; Warrior D504 now records real `FlamingSword` damage against an auto-revive Zuma Guardian. |
+| Focused melee packet regressions | 2/2 | `FlamingSword` and `Thrusting` retain their declared Crystal defence types through delayed packet damage. |
 
 ## Exact release artifact
 
 | Field | Recorded value |
 | --- | --- |
-| Candidate | `WN-CANDIDATE-01-20260826` |
-| Repository-relative artifact | `dist/mir2-windows-candidate/WN-CANDIDATE-01-20260826` (ignored build output, not committed) |
-| Source revision | `4c7e60baa5d85e63858a6fd1717af01c5f893f3d` |
-| Source worktree at build | clean; source-status digest `8416164439BB1BAACFAEAB827D65844FA92C2669F2F6AF2F69745ABF8986CC4A` |
-| EXE SHA-256 | `822C718721EE6F1AB20C137AF00B86F4D887D4828776BD2D36EB231AA1216972` |
-| EXE size | 66,664,960 bytes |
-| Build completed | `2026-08-25T21:14:50.8743267+00:00` |
-| Build attestation SHA-256 | `60AB3279F50CA85357F535430D5F80708594D1BC10B8831AFBD36971CDEDCCAA` |
-| Package manifest SHA-256 | `6E6042BEA21F06D8A75612F1EF0AE49EE3AC2ABC4F98601509BEA2D1A4381DC2` |
-| Manifest payload aggregate | `22E1391C434F665A0E4071721085FBA4D721A92D7C5D0F733C346408092A16F5` |
-| Manifest coverage | 10,254 payload files / 322,284,094 payload bytes |
-| Complete package | 10,258 files / 325,280,137 bytes |
-| VERSION.json SHA-256 | `73F2B3E949622337D74B871D1FE2441408F9EF0A722EA0AE57DACB46CB3DD998` |
-| RELEASE-STATEMENT.json SHA-256 | `E3330D08E1AD8CB1DA63B2576A33C634061DE4E417932B22E352B9A91B078646` |
-| Detached CMS SHA-256 | `5A700EF488E24FD105B77E95A79878BE966614A1EB8F3C811FAD597A0BC93702` |
+| Candidate | `WN-CANDIDATE-02-20260826` |
+| Repository-relative artifact | `dist/mir2-windows-candidate/WN-CANDIDATE-02-20260826` (ignored build output, not committed) |
+| Source revision | `f0ab4936c44df304e60e66e08529913201636b51` |
+| Source worktree at build | clean; source-status digest `2C6A5536992A07D01499AA8736926B357808E699DA1A978C3D873C6A8D2EB1B1`; 0 status lines |
+| EXE SHA-256 | `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6` |
+| EXE size | 66,665,472 bytes |
+| Build completed | `2026-08-26T02:00:54.7847597+00:00` |
+| Build attestation SHA-256 | `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979` |
+| Package manifest SHA-256 | `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467` |
+| Manifest payload aggregate | `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B` |
+| Manifest coverage | 10,254 payload files / 322,285,374 payload bytes |
+| Complete package | 10,258 files / 325,281,417 bytes |
+| VERSION.json SHA-256 | `590E42F9D535E49E7712878E6FB4E6CA654CB8F3DF0812ED25E20C470D5D8E79` |
+| RELEASE-STATEMENT.json SHA-256 | `A11FF0BBF6C6BCF8B208AE463F00160780955465959050FA5F0D571FAD313B8B` |
+| Detached CMS SHA-256 | `BB12437B56ECEB4B79282D5D2330666A1D663B52AF48CD0133AEDA8C79DC89D5` |
 | Truth fields | `staged=true`, `builtByPackagingScript=false`, `accepted=false`, `visual=false` |
 
 The four files excluded from the payload manifest are the manifest itself,
@@ -52,13 +54,12 @@ therefore explicit rather than an uncovered payload gap.
 ## Nonvisual package and verification evidence
 
 No command in this round used `-Launch`, and no client executable was started.
-The post-build package driver and verifier were copied into the clean
-worktree's ignored `dist/.candidate-tools` directory, leaving tracked source at
-the attested revision. Their exact SHA-256 values were
+The package driver and verifier ran directly from the attested clean source
+revision; dependency and generated-asset outputs remained ignored, and tracked
+source stayed clean. Their exact SHA-256 values were
 `3688B47E499C4B920DAE1E46297663DDB410555C9AEDE2DFE8EA2AE7A3119640`
 and `70AEEE83F4CAAF5126B1460EFB6DFBC3E653A74901C22D7FC2FB60190AB21170`.
-Those tool changes are part of the follow-up documentation/tooling commit, not
-the already-built runtime revision.
+Both tools are part of the packaged source revision.
 
 | Gate | Result |
 | --- | --- |
@@ -84,14 +85,14 @@ were also compared with the clean verified package before that final run.
 
 Durable generated evidence:
 
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-01-20260826-package-summary.json`
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-01-20260826-verification.json`
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-01-20260826-verification-copied-artifact.json`
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-01-20260826-verification-initial-failure.json`
+- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-02-20260826-package-summary.json`
+- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-02-20260826-verification.json`
+- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-02-20260826-verification-copied-artifact.json`
 
-## Verification failure and recovery record
+## Predecessor recovery record
 
-The first package attempt safely failed before publication because the old
+The superseded `WN-CANDIDATE-01-20260826` package attempt safely failed before
+publication because the old
 scanner decoded arbitrary `.text` machine bytes through replacement ASCII and
 misread the bytes at EXE offset 4,044,970 as `B:\...`. The replacement scanner
 now bounds-checks PE sections, scans only non-executable section data, uses a
@@ -99,14 +100,17 @@ one-byte-preserving printable ASCII view, UTF-8, and both UTF-16LE alignments, a
 retains fail-closed checks for machine/CI absolute paths, extended Windows
 paths, UNC paths, Unix build roots, and non-basename PDB references.
 
-The first hardened rerun then exposed a boundary bug in the exact standard Rust
+Its first hardened rerun then exposed a boundary bug in the exact standard Rust
 virtual-root allowance: the real `//rustc/<40-hex>/library` value is NUL
-terminated. That failure is preserved in the initial-failure JSON above. The
-boundary was corrected and covered by a NUL-terminated regression. The final
+terminated. That predecessor failure remains preserved in
+`WN-CANDIDATE-01-20260826-verification-initial-failure.json`. The boundary was
+corrected and covered by a NUL-terminated regression. The final
 scanner permits only the canonical Rust virtual root and a basename-only RSDS
 PDB name; it still rejects near-miss Rust roots and directory-, drive-, URI-, or
-ADS-qualified PDB references. The real EXE path scan and both full package
-verifications then passed.
+ADS-qualified PDB references. Those fixes remain in the current tools. The
+`WN-CANDIDATE-02-20260826` dry-run, formal staging verification, independent
+final-directory verification, and copied-artifact verification all passed
+without a new packaging failure.
 
 This scanner is deliberately a machine/CI path-leak heuristic over bounded
 non-executable PE section data, not a claim to classify every arbitrary byte in

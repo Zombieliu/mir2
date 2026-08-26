@@ -1,7 +1,7 @@
 # Backend 1:1 Progress
 
 > Windows vertical-slice evidence closeout (2026-08-26, HEAD
-> `4c7e60baa`): this round records only evidence that actually passed. The
+> `f0ab4936c`): this round records only evidence that actually passed. The
 > ordinary Crystal-shaped player loop passed `ordinary_candidate_loop` 2/2,
 > covering fresh-player progression through movement, combat, quest drop and
 > pickup, quest delivery/reward, persistence, and a new-session relog check.
@@ -9,23 +9,25 @@
 > Zone checkpoint incident was reproduced as the original active/standby
 > mismatch, then the ordered-restore regression passed; the `zone_rpc` library
 > checkpoint group passed 21/21. Clean-HEAD asset generation passed 312/312,
-> and Web typecheck passed.
+> and Web typecheck passed. The 15-case combat milestone certificate now also
+> passes with Crystal's declared `FlamingSword`/`Thrusting` defence types
+> preserved through delayed packet damage.
 >
 > The checkpoint evidence is a repair record, not a claim that the original
 > failure never existed: the old replay sequence could restore a character a
 > second time after journal replay and reintroduce a removed temporary entity.
 > Ordered restore is now covered by a regression that preserves the replay
 > order and refreshes Zone bindings. The resulting source revision is
-> `4c7e60baa5d85e63858a6fd1717af01c5f893f3d`; its attested Windows Release EXE
+> `f0ab4936c44df304e60e66e08529913201636b51`; its attested Windows Release EXE
 > is exactly SHA-256
-> `822C718721EE6F1AB20C137AF00B86F4D887D4828776BD2D36EB231AA1216972`
-> at 66,664,960 bytes. Build-attestation SHA-256 is
-> `60AB3279F50CA85357F535430D5F80708594D1BC10B8831AFBD36971CDEDCCAA`.
-> Candidate `WN-CANDIDATE-01-20260826` contains 10,258 files. Its manifest
+> `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6`
+> at 66,665,472 bytes. Build-attestation SHA-256 is
+> `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979`.
+> Candidate `WN-CANDIDATE-02-20260826` contains 10,258 files. Its manifest
 > SHA-256 is
-> `6E6042BEA21F06D8A75612F1EF0AE49EE3AC2ABC4F98601509BEA2D1A4381DC2`
+> `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467`
 > and payload aggregate is
-> `22E1391C434F665A0E4071721085FBA4D721A92D7C5D0F733C346408092A16F5`.
+> `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B`.
 > Formal staging verification passed nonvisually with the clean source revision
 > checked, and the copied artifact passed an independent nonlaunch verification.
 >

@@ -1,0 +1,51 @@
+{
+    "schema":  "mir2.windows.package-verification.v4",
+    "packageRoot":  "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-candidate-f0ab4936c\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-02-20260826",
+    "nonvisual":  true,
+    "launchRequested":  false,
+    "sourceRepoCheck":  "checked",
+    "currentSourceRevision":  "f0ab4936c44df304e60e66e08529913201636b51",
+    "attestationPresent":  true,
+    "attestationSha256":  "387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979",
+    "packageManifestPresent":  true,
+    "packageManifestSha256":  "FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467",
+    "packageManifestAggregateSha256":  "B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B",
+    "trustedSignerThumbprint":  "B179E9D6222332C9DB5E960BAECF9990252CFBC7",
+    "detachedSignatureValid":  true,
+    "exeSha256":  "F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6",
+    "peValid":  true,
+    "peImports":  [
+                      "VCRUNTIME140.dll",
+                      "api-ms-win-core-synch-l1-2-0.dll",
+                      "api-ms-win-crt-heap-l1-1-0.dll",
+                      "api-ms-win-crt-locale-l1-1-0.dll",
+                      "api-ms-win-crt-math-l1-1-0.dll",
+                      "api-ms-win-crt-runtime-l1-1-0.dll",
+                      "api-ms-win-crt-stdio-l1-1-0.dll",
+                      "api-ms-win-crt-string-l1-1-0.dll",
+                      "bcryptprimitives.dll",
+                      "combase.dll",
+                      "dwmapi.dll",
+                      "gdi32.dll",
+                      "imm32.dll",
+                      "kernel32.dll",
+                      "ntdll.dll",
+                      "ole32.dll",
+                      "oleaut32.dll",
+                      "setupapi.dll",
+                      "shell32.dll",
+                      "uiautomationcore.dll",
+                      "user32.dll",
+                      "uxtheme.dll",
+                      "ws2_32.dll"
+                  ],
+    "peDelayImports":  [
+
+                       ],
+    "packageFileCount":  10258,
+    "failures":  [
+
+                 ],
+    "passed":  true,
+    "visualAccepted":  false
+}
