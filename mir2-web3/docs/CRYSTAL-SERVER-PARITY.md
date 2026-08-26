@@ -2378,3 +2378,30 @@ parity. The global percentage remains undefined until the semantic inventory
 and denominator are complete, and same-EXE UI/live WSS, real DPI, 30-minute
 native soak, human visual/gameplay-feel, and formal release signing remain
 external gates.
+
+## 2026-08-26 Gateway ordinary-packet quest boundary
+
+The Bichon starter loop now crosses the Gateway and shared-Zone boundary using
+only ordinary Crystal client packets. A fresh account and Warrior walk to
+Village Guide, open the server-owned dialog, accept quest 1001, kill a real
+Field Wasp through authoritative combat, pick up its visible tile gold, finish
+the quest, log out, and reload through a fresh Gateway session. No high-level
+runtime action or QA/admin command substitutes for these packet paths.
+
+The test also proves the security boundary: remote accept and finish packets
+without a nearby active dialog do not mutate quest state. The valid path grants
+and consumes the Wasp Stinger proof, awards exactly 300 gold, two
+`RareCopperOre`, and `CopperRing`, then preserves completed quest state,
+inventory, equipment, gold, position, and direction across reload.
+
+Clean revision `f676a2a81f9fae949d6640df747dedf493d913e9` passed 8/8 Windows
+functional controls from `2026-08-26T07:32:31.5299048Z` through
+`2026-08-26T07:43:42.0626754Z`. Gateway persistence is 2/2 in 33.917 s; native
+is 312/312, the functional journey 11/11, ordinary 2/2, security 18/18, shared
+Zone 195/195, and Web typecheck passes. The summary SHA-256 is
+`DE942CEB2D105AD039C3758FF00C7160880BC213BAA4FFC99A6AA826B118C0B6`.
+
+This expands a bounded automated vertical slice. It does not define global
+Crystal parity: the semantic inventory and denominator remain incomplete, and
+same-EXE UI/live WSS, real DPI, 30-minute native soak, human visual/gameplay
+feel, and formal publisher signing remain open gates.

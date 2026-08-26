@@ -4527,3 +4527,30 @@ visual/feel acceptance.
   Whole-game Crystal parity is still unscored, and same-EXE human UI/live WSS,
   real DPI, 30-minute native soak, human visual/gameplay-feel, complete semantic
   inventory/denominator, and formal publisher signing remain open.
+
+## 2026-08-26 Gateway ordinary-packet Bichon journey
+
+- Candidate: a fresh account and Warrior now complete the Bichon starter loop
+  through `GatewaySession` using only ordinary `ClientPacket` traffic:
+  `NewAccount`, `Login`, `NewCharacter`, `StartGame`, `Walk`, `CallNpc`,
+  `AcceptQuest`, `Turn`, `Attack`, tile `PickUp`, `FinishQuest`, and `LogOut`.
+  The test does not use runtime movement, NPC, combat, pickup, or QA/admin
+  helpers.
+- Candidate: quest acceptance and completion fail closed without a nearby
+  server-owned active dialog. The accepted path walks to Village Guide, kills a
+  real Field Wasp through Gateway/Zone authority, receives the Wasp Stinger
+  quest proof, picks up the monster's visible gold on its tile, consumes the
+  proof, and receives exactly 300 gold, two `RareCopperOre`, and `CopperRing`.
+  Quest, inventory, equipment, gold, and authoritative transform survive logout
+  and a newly constructed Gateway session.
+- Clean revision `f676a2a81f9fae949d6640df747dedf493d913e9` passed all eight
+  fixed controls from `2026-08-26T07:32:31.5299048Z` through
+  `2026-08-26T07:43:42.0626754Z`: map-atlas preparation, native 312/312,
+  functional journey 11/11, ordinary loop 2/2, security 18/18, shared Zone
+  195/195, expanded Gateway persistence 2/2, and Web typecheck. The summary
+  SHA-256 is
+  `DE942CEB2D105AD039C3758FF00C7160880BC213BAA4FFC99A6AA826B118C0B6`.
+- This is 100% only for the eight declared automated controls. It does not
+  define a whole-game Crystal percentage or close the incomplete semantic
+  inventory, same-EXE UI/live-WSS, real-DPI, 30-minute native-soak, human
+  visual/gameplay-feel, or formal publisher-signing gates.

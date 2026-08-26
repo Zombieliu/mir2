@@ -2627,3 +2627,25 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   `globalParityPercent=null`, `accepted=false`, and `visualAccepted=false`; the
   same-EXE UI/live-WSS, real-DPI, 30-minute native-soak, human visual/feel,
   complete-inventory, and formal-signing gates are not closed.
+
+## 2026-08-26 Gateway ordinary-client starter loop
+
+- A new Gateway integration journey creates an ordinary account/Warrior and
+  drives Bichon exclusively with normal client packets. It walks through shared
+  Zone authority, opens Village Guide's server-owned dialog, accepts quest
+  1001, attacks a real Field Wasp, picks up its tile gold, finishes the quest,
+  logs out, and reloads through a fresh Gateway session.
+- The boundary is fail closed: remote `AcceptQuest` and `FinishQuest` packets do
+  not mutate state without the active nearby NPC dialog. The successful path
+  proves Wasp Stinger grant/consumption, 300 quest gold, two `RareCopperOre`,
+  `CopperRing`, completed quest state, inventory/equipment, and authoritative
+  transform persistence. No direct runtime action or QA/admin command is used.
+- Revision `f676a2a81f9fae949d6640df747dedf493d913e9` passed the clean Windows
+  gate 8/8. Gateway persistence is now 2/2 in 33.917 s; the full run also passed
+  native 312/312, functional 11/11, ordinary 2/2, security 18/18, shared Zone
+  195/195, and Web typecheck. `SUMMARY.json` SHA-256 is
+  `DE942CEB2D105AD039C3758FF00C7160880BC213BAA4FFC99A6AA826B118C0B6`.
+- The summary still records `globalParityPercent=null`, `accepted=false`, and
+  `visualAccepted=false`. The scoped eight-control 100% does not establish a
+  whole-game denominator or close same-EXE UI/live-WSS, real-DPI, native soak,
+  human visual/feel, complete semantic inventory, or formal signing.

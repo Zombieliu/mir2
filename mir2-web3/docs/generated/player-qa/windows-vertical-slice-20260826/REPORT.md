@@ -175,6 +175,32 @@ Its 100% is only the expanded eight-control automation set. The evidence still
 records `globalParityPercent=null`, `accepted=false`, and
 `visualAccepted=false`.
 
+## Gateway ordinary-client follow-on
+
+Source revision `f676a2a81f9fae949d6640df747dedf493d913e9` adds a second Gateway
+journey; it remains source evidence and is not represented as a replacement
+Candidate EXE. Candidate-03's attested executable identity is unchanged.
+
+The journey uses only ordinary `ClientPacket` traffic from fresh account and
+character creation through Bichon play. It walks to Village Guide, proves that
+remote accept/finish packets fail without the nearby server-owned dialog,
+accepts quest 1001 through that dialog, kills a real Field Wasp, receives the
+Wasp Stinger proof, picks up visible gold from the drop tile, completes for
+exactly 300 gold, two `RareCopperOre`, and `CopperRing`, then logs out and
+reloads quest, inventory, equipment, gold, position, and direction through a
+new Gateway session. No direct runtime action or QA/admin command is used.
+
+The clean gate ran from `2026-08-26T07:32:31.5299048Z` through
+`2026-08-26T07:43:42.0626754Z` and passed 8/8 controls. Map-atlas preparation
+passed; native was 312/312, functional 11/11 in 563.256 s, ordinary 2/2,
+security 18/18, shared Zone 195/195, Gateway 2/2 in 33.917 s, and Web typecheck
+passed. `SUMMARY.json` SHA-256 is
+`DE942CEB2D105AD039C3758FF00C7160880BC213BAA4FFC99A6AA826B118C0B6`.
+
+The result is 100% only for the same eight declared automated controls. It
+retains `globalParityPercent=null`, `accepted=false`, and
+`visualAccepted=false`.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend
