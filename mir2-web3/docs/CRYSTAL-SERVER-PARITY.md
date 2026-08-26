@@ -2405,3 +2405,29 @@ This expands a bounded automated vertical slice. It does not define global
 Crystal parity: the semantic inventory and denominator remain incomplete, and
 same-EXE UI/live WSS, real DPI, 30-minute native soak, human visual/gameplay
 feel, and formal publisher signing remain open gates.
+
+## 2026-08-26 Assassin q16-q18 journey
+
+The original level-four Assassin branch now runs as one continuous source-backed
+journey. A non-Assassin control cannot see q16. The Assassin accepts from
+Assistant Jane, hands q16 to HighAssassin Cloud at loaded object 13 on map `0`,
+completes Cloud's q17 test through ten real Oma and ten real RakingCat
+player-owned deaths, then hands q18 to MirGuide Peter at loaded object 26.
+
+The three hand-ins preserve the original 48/180/48 EXP and 60/45/60 gold
+sequence. `OldLoafer` and `FatalSword` remain inventory rewards;
+`FatalSword` is a skill book and is not silently converted into a learned
+skill. Completed quests, inventory, equipment, class, experience, gold,
+position, direction, and empty known-skill state survive logout and reload.
+
+Clean revision `82441f7b1257486d6f2b51206f5cffa4ef20f9b8` passed all 8/8
+Windows functional controls from `2026-08-26T08:04:06.0201767Z` through
+`2026-08-26T08:17:03.3518161Z`. The functional suite is 12/12 in 670.046 s;
+native is 312/312, ordinary 2/2, security 18/18, shared Zone 195/195, Gateway
+2/2, and Web typecheck passes. Summary SHA-256 is
+`D1A9ACE4920A834541B5798BBE53F38DEE1D37DD261226DD91394C82AA8BC105`.
+
+This is another bounded automated branch, not whole-game parity. Global parity
+remains undefined until the semantic inventory and denominator are complete;
+same-EXE UI/live WSS, real DPI, 30-minute native soak, human visual/gameplay
+feel, and formal publisher signing remain open.

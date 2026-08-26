@@ -4554,3 +4554,27 @@ visual/feel acceptance.
   define a whole-game Crystal percentage or close the incomplete semantic
   inventory, same-EXE UI/live-WSS, real-DPI, 30-minute native-soak, human
   visual/gameplay-feel, or formal publisher-signing gates.
+
+## 2026-08-26 Assassin q16-q18 source journey
+
+- Candidate: the original level-four Assassin instructor branch is now a
+  complete automated q16-q18 journey. A same-level non-Assassin cannot see q16;
+  the Assassin follows Assistant Jane -> HighAssassin Cloud -> MirGuide Peter
+  on map `0`, with the original prerequisite chain enforced.
+- Candidate: q17 credits ten real Oma plus ten real RakingCat player-owned
+  deaths. The journey proves the exact 48/180/48 EXP and 60/45/60 gold reward
+  sequence, retains `OldLoafer` and the `FatalSword` skill book in inventory,
+  does not invent an automatic learned skill, and preserves class, quests,
+  rewards, equipment, gold, experience, transform, and known-skill state after
+  logout and a newly constructed session.
+- Clean revision `82441f7b1257486d6f2b51206f5cffa4ef20f9b8` passed all eight
+  fixed controls from `2026-08-26T08:04:06.0201767Z` through
+  `2026-08-26T08:17:03.3518161Z`: map-atlas preparation, native 312/312,
+  functional journey 12/12 in 670.046 s, ordinary loop 2/2, security 18/18,
+  shared Zone 195/195, Gateway persistence 2/2, and Web typecheck. The summary
+  SHA-256 is
+  `D1A9ACE4920A834541B5798BBE53F38DEE1D37DD261226DD91394C82AA8BC105`.
+- The result is still 100% only for the eight declared automated controls.
+  Whole-game Crystal parity remains unscored until the semantic inventory and
+  denominator are complete; same-EXE UI/live-WSS, real-DPI, 30-minute native
+  soak, human visual/gameplay-feel, and formal publisher signing remain open.

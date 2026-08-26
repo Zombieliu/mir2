@@ -2649,3 +2649,24 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   `visualAccepted=false`. The scoped eight-control 100% does not establish a
   whole-game denominator or close same-EXE UI/live-WSS, real-DPI, native soak,
   human visual/feel, complete semantic inventory, or formal signing.
+
+## 2026-08-26 Assassin instructor branch
+
+- The original q16-q18 Assassin journey now has integration coverage. It proves
+  the Assassin-only class gate and prerequisite chain across Assistant Jane,
+  loaded object 13 HighAssassin Cloud, and loaded object 26 MirGuide Peter on
+  map `0`.
+- Q17 receives player-owned credit from ten real Oma and ten real RakingCat
+  deaths. Hand-ins award exactly 48/180/48 EXP and 60/45/60 gold;
+  `OldLoafer` and `FatalSword` remain bag items, `FatalSword` is not
+  auto-learned, and the complete quest/reward/equipment/transform state reloads
+  through a new `SimulationSession`.
+- Revision `82441f7b1257486d6f2b51206f5cffa4ef20f9b8` passed the clean Windows
+  functional gate 8/8. The expanded journey is 12/12 in 670.046 s; native is
+  312/312, ordinary 2/2, security 18/18, shared Zone 195/195, Gateway 2/2, and
+  Web typecheck passes. `SUMMARY.json` SHA-256 is
+  `D1A9ACE4920A834541B5798BBE53F38DEE1D37DD261226DD91394C82AA8BC105`.
+- The evidence retains `globalParityPercent=null`, `accepted=false`, and
+  `visualAccepted=false`. This expands the bounded automated journey; it does
+  not close the semantic denominator, same-EXE UI/live-WSS, real-DPI, native
+  soak, human visual/feel, or formal-signing gates.

@@ -201,6 +201,32 @@ The result is 100% only for the same eight declared automated controls. It
 retains `globalParityPercent=null`, `accepted=false`, and
 `visualAccepted=false`.
 
+## Assassin q16-q18 follow-on
+
+Source revision `82441f7b1257486d6f2b51206f5cffa4ef20f9b8` adds the original
+Assassin q16-q18 instructor journey. It is follow-on source evidence, not a new
+packaged Candidate EXE; Candidate-03's exact attested artifact remains
+unchanged.
+
+The journey enforces the level-four Assassin class gate, follows Assistant Jane
+to HighAssassin Cloud and then MirGuide Peter on map `0`, credits ten real Oma
+and ten real RakingCat player-owned deaths, and verifies the original
+48/180/48 EXP plus 60/45/60 gold reward sequence. `OldLoafer` and
+`FatalSword` remain inventory items, the skill book is not auto-learned, and
+quest, inventory, equipment, class, experience, gold, position, direction, and
+known-skill state survive logout and a new session.
+
+The clean gate ran from `2026-08-26T08:04:06.0201767Z` through
+`2026-08-26T08:17:03.3518161Z` and passed 8/8 controls. Map-atlas preparation
+passed; native was 312/312, the expanded functional journey was 12/12 in
+670.046 s, ordinary 2/2, security 18/18, shared Zone 195/195, Gateway 2/2, and
+Web typecheck passed. `SUMMARY.json` SHA-256 is
+`D1A9ACE4920A834541B5798BBE53F38DEE1D37DD261226DD91394C82AA8BC105`.
+
+The 100% result remains limited to the eight declared automated controls. The
+evidence still records `globalParityPercent=null`, `accepted=false`, and
+`visualAccepted=false`.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend
