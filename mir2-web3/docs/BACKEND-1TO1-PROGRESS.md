@@ -2554,3 +2554,22 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   `cargo check -p mir2-simulation -p mir2-gateway` passes. A browser QA-spawn is
   not used as server proof because Stage 5 `event.spawn` remains personal-session
   state while normal attacks are shared-Zone authoritative.
+
+## 2026-08-26 Melee defence-type certificate fix
+
+- `FlamingSword` and `Thrusting` packet attacks now carry their declared
+  Crystal defence type into delayed damage scheduling instead of inheriting the
+  ordinary melee `AcAgility` default. The previous leak could turn a valid
+  FlamingSword hit into an Agility miss even though Crystal declares AC-only
+  defence for that skill.
+- The Platinum 1.76 combat-milestone fixture re-arms consumed one-shot melee
+  skills for every bounded attempt. Two deterministic 15-case runs produced
+  identical case data and all seven assertions passed; Warrior level 45 on
+  D504 dealt 23 real-runtime damage to ZumaGuardian and survived at 788 HP.
+- Focused FlamingSword/Slaying and Thrusting unit regressions pass. Whole-repo
+  formatting remains independently blocked by unrelated local edits in
+  `apps/simulation/tests/vertical_slice.rs`; both task files pass standalone
+  Rustfmt and `git diff --check`.
+- Backend Candidate evidence is improved, but strict 100% and final frontend
+  acceptance remain gated by same-EXE UI/live-WebSocket execution, real DPI,
+  native soak, human visual/feel review, and an official release certificate.

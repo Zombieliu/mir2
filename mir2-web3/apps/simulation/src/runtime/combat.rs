@@ -3483,6 +3483,21 @@ impl SimulationSession {
             .world_mut()
             .entity_mut(monster_entity)
             .insert(agent);
+        // Weapon skills still enter through the melee packet path, but Crystal
+        // resolves their declared defence type rather than the default
+        // auto-attack AcAgility defence. Capture it only while scheduling so
+        // unrelated queued combat retains the surrounding cast scope.
+        let previous_defence = match attack_spell {
+            Spell::FlamingSword => Some(set_cast_defence(
+                self.app.world_mut(),
+                Some(CrystalDefence::Ac),
+            )),
+            Spell::Thrusting => Some(set_cast_defence(
+                self.app.world_mut(),
+                Some(CrystalDefence::Agility),
+            )),
+            _ => None,
+        };
         schedule_damage_to_monster_with_due_packet(
             self.app.world_mut(),
             hit_due_tick,
@@ -3496,6 +3511,9 @@ impl SimulationSession {
             }),
             due_packet,
         );
+        if let Some(previous_defence) = previous_defence {
+            set_cast_defence(self.app.world_mut(), previous_defence);
+        }
         queue_melee_passive_skill_progression(self.app.world_mut(), hit_due_tick, current_tick);
 
         packets.extend(advance_world(self.app.world_mut()));

@@ -4443,3 +4443,21 @@ visual/feel acceptance.
   through prebuilt atlases with zero live rebuilds, asset gaps, 404s, or console
   errors. Remaining acceptance boundary is R2 upload/deployment followed by
   human combat observation of move, attack, Die, and persistent Dead frames.
+
+## 2026-08-26 Weapon-skill defence regression closure
+
+- Candidate: packet-path melee skills now retain their Crystal defence type
+  while delayed monster damage is scheduled. `FlamingSword` resolves against
+  AC without the ordinary attack's Agility dodge, while `Thrusting` retains its
+  Agility defence type; unrelated queued combat keeps the surrounding cast
+  scope.
+- The Platinum 1.76 milestone certificate now re-arms one-shot melee skills on
+  every measured attempt. This prevents a real miss or zero-damage armour roll
+  from silently converting later attempts into plain swings.
+- The 15-case headless milestone test passed twice with byte-identical case and
+  assertion payloads. The level-45 Warrior/D504 case measured 23 damage to a
+  real ZumaGuardian, 7 MP spent, and 788 HP remaining; both focused
+  FlamingSword/Slaying and Thrusting packet regressions also pass.
+- This closes a deterministic backend certificate failure, not the remaining
+  same-EXE UI/live-WebSocket, real-DPI, 30-minute native soak, human visual/feel,
+  or official release-certificate gates.

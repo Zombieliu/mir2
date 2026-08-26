@@ -2300,3 +2300,19 @@ proves a killed monster emits its authoritative death/drop sequence, remains a
 dead corpse, and seeds as dead to a late joiner. All 157 shared-zone integration
 tests and simulation/gateway checks pass. Production rollout remains separate
 from this local parity result.
+
+## 2026-08-26 Packet melee defence parity
+
+The personal-session melee packet path now captures Crystal's declared defence
+type when it queues delayed weapon-skill damage: `FlamingSword` uses AC without
+Agility dodge and `Thrusting` uses Agility. The scope is restored immediately
+after scheduling so other pending combat is unchanged. The milestone harness
+also re-arms consumed one-shot melee skills before each bounded attempt.
+
+Verification passed the 15-case Platinum 1.76 combat milestone twice with
+identical case/assertion payloads and all seven assertions true. The previously
+stable failure now records Warrior level 45 / D504 / ZumaGuardian at 23 damage,
+7 MP spent, and 788 HP remaining. Focused FlamingSword/Slaying and Thrusting
+packet tests also pass. This is backend Candidate evidence only; same-EXE UI,
+live WebSocket, real-DPI, 30-minute native soak, human visual/feel, and official
+release-signing gates remain open.
