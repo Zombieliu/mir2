@@ -20,7 +20,8 @@ function New-Control {
         [Parameter(Mandatory = $true)][string]$Id,
         [Parameter(Mandatory = $true)][string]$Description,
         [Parameter(Mandatory = $true)][string]$Executable,
-        [Parameter(Mandatory = $true)][string[]]$Arguments
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [System.Collections.IDictionary]$EnvironmentVariables = ([ordered]@{})
     )
 
     [pscustomobject][ordered]@{
@@ -28,6 +29,7 @@ function New-Control {
         description = $Description
         executable = $Executable
         arguments = @($Arguments)
+        environmentVariables = $EnvironmentVariables
     }
 }
 
@@ -35,6 +37,7 @@ function Invoke-NativeControl {
     param(
         [Parameter(Mandatory = $true)][string]$Executable,
         [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [System.Collections.IDictionary]$EnvironmentVariables = ([ordered]@{}),
         [switch]$Quiet
     )
 
@@ -43,7 +46,19 @@ function Invoke-NativeControl {
     # index update to stderr, so capture it without treating the stream itself
     # as failure. The native process exit code remains the fail-closed signal.
     $previousErrorActionPreference = $ErrorActionPreference
+    $previousEnvironment = @{}
     try {
+        foreach ($entry in $EnvironmentVariables.GetEnumerator()) {
+            $previousEnvironment[$entry.Key] = [Environment]::GetEnvironmentVariable(
+                [string]$entry.Key,
+                [EnvironmentVariableTarget]::Process
+            )
+            [Environment]::SetEnvironmentVariable(
+                [string]$entry.Key,
+                [string]$entry.Value,
+                [EnvironmentVariableTarget]::Process
+            )
+        }
         $ErrorActionPreference = "Continue"
         $capturedLines = @(& $Executable @Arguments 2>&1 | ForEach-Object {
             $line = $_.ToString()
@@ -56,6 +71,13 @@ function Invoke-NativeControl {
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
+        foreach ($entry in $previousEnvironment.GetEnumerator()) {
+            [Environment]::SetEnvironmentVariable(
+                [string]$entry.Key,
+                $entry.Value,
+                [EnvironmentVariableTarget]::Process
+            )
+        }
     }
 
     [pscustomobject][ordered]@{
@@ -159,7 +181,10 @@ $controls = @(
             "vertical_slice_gateway_persistence",
             "--",
             "--test-threads=1"
-        )
+        ) `
+        -EnvironmentVariables ([ordered]@{
+            MIR2_QA_NATURAL_MOVEMENT_DELAY_MS = "10"
+        })
     New-Control `
         -Id "web-shared-code-regression" `
         -Description "Player Web type safety for the shared Gateway and read-model surface" `
@@ -225,6 +250,15 @@ function Assert-Contract {
     if ($gateway.arguments -cnotcontains "vertical_slice_gateway_persistence") {
         throw "the Gateway control must execute its exact persistence integration target"
     }
+    if ($gateway.environmentVariables.Count -ne 1 -or
+        [string]$gateway.environmentVariables.MIR2_QA_NATURAL_MOVEMENT_DELAY_MS -cne "10") {
+        throw "the Gateway journey must declare its bounded QA-only movement delay"
+    }
+    foreach ($control in $controls | Where-Object { $_.id -cne "gateway-logout-reload" }) {
+        if ($control.environmentVariables.Count -ne 0) {
+            throw "only the Gateway journey may declare a QA-only environment override"
+        }
+    }
 }
 
 Assert-Contract
@@ -241,12 +275,36 @@ if ($SelfTest) {
         throw "native stderr capture compatibility probe failed"
     }
 
+    $probeName = "MIR2_VERTICAL_SLICE_ENV_PROBE"
+    $previousProbeValue = [Environment]::GetEnvironmentVariable(
+        $probeName,
+        [EnvironmentVariableTarget]::Process
+    )
+    $environmentProbe = Invoke-NativeControl `
+        -Executable "cmd.exe" `
+        -Arguments @("/d", "/s", "/c", "echo %$probeName%") `
+        -EnvironmentVariables ([ordered]@{ $probeName = "scoped-pass" }) `
+        -Quiet
+    $environmentProbeMatched = @($environmentProbe.lines | Where-Object {
+        $_.Trim() -ceq "scoped-pass"
+    }).Count -eq 1
+    $restoredProbeValue = [Environment]::GetEnvironmentVariable(
+        $probeName,
+        [EnvironmentVariableTarget]::Process
+    )
+    if ($environmentProbe.exitCode -ne 0 -or
+        -not $environmentProbeMatched -or
+        $restoredProbeValue -cne $previousProbeValue) {
+        throw "native environment scoping compatibility probe failed"
+    }
+
     [pscustomobject][ordered]@{
         schema = "mir2.windows.vertical-slice-gate-self-test.v1"
         status = "PASS"
         controlCount = $controls.Count
         controlIds = $expectedControlIds
         nativeStderrCapture = "PASS"
+        nativeEnvironmentScoping = "PASS"
         globalParityPercent = $null
     } | ConvertTo-Json -Depth 4
     exit 0
@@ -314,10 +372,17 @@ try {
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
         Write-Host "`n==> [$($control.id)] $($control.description)"
         Write-Host ("    {0} {1}" -f $control.executable, [string]::Join(" ", $control.arguments))
+        if ($control.environmentVariables.Count -gt 0) {
+            $environmentText = @($control.environmentVariables.GetEnumerator() | ForEach-Object {
+                "{0}={1}" -f $_.Key, $_.Value
+            }) -join ";"
+            Write-Host "    environment: $environmentText"
+        }
 
         $nativeResult = Invoke-NativeControl `
             -Executable $control.executable `
-            -Arguments @($control.arguments)
+            -Arguments @($control.arguments) `
+            -EnvironmentVariables $control.environmentVariables
         $lines = @($nativeResult.lines)
         $exitCode = $nativeResult.exitCode
         $stopwatch.Stop()
@@ -337,6 +402,7 @@ try {
             durationMilliseconds = [int64]$stopwatch.ElapsedMilliseconds
             executable = $control.executable
             arguments = @($control.arguments)
+            environmentVariables = $control.environmentVariables
             logFile = [System.IO.Path]::GetFileName($logPath)
             logSha256 = $logSha256
         })
