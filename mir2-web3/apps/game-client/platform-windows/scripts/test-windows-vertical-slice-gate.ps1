@@ -68,6 +68,11 @@ $cargo = "cargo"
 $cargoToolchainArgument = "+$RustToolchain"
 $controls = @(
     New-Control `
+        -Id "native-asset-root-preparation" `
+        -Description "Generate the ignored native map-atlas prerequisite from repository sources" `
+        -Executable "npm.cmd" `
+        -Arguments @("--prefix", "apps/web", "run", "assets:map-atlas:build")
+    New-Control `
         -Id "native-host-contract" `
         -Description "Windows native host and client contract tests" `
         -Executable $cargo `
@@ -163,6 +168,7 @@ $controls = @(
 )
 
 $expectedControlIds = @(
+    "native-asset-root-preparation",
     "native-host-contract",
     "five-class-bichon-functional-slice",
     "ordinary-unprivileged-candidate-loop",
@@ -200,6 +206,14 @@ function Assert-Contract {
         if ($control.executable -cnotin @("cargo", "npm.cmd")) {
             throw "control '$($control.id)' uses an unapproved executable"
         }
+    }
+
+    $assetPreparation = $controls | Where-Object {
+        $_.id -ceq "native-asset-root-preparation"
+    }
+    if ($assetPreparation.executable -cne "npm.cmd" -or
+        $assetPreparation.arguments -cnotcontains "assets:map-atlas:build") {
+        throw "the native asset-root preparation must build the repository map atlas"
     }
 
     $vertical = $controls | Where-Object { $_.id -ceq "five-class-bichon-functional-slice" }
