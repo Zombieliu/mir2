@@ -3979,6 +3979,10 @@ impl SharedInProcessZoneState {
                     }
                     if died {
                         map.revived_entity_ids.remove(&info.object_id);
+                        // A live -> dead transition starts a new corpse
+                        // incarnation. A retained Harvest marker belongs to an
+                        // older incarnation and must not reject this corpse.
+                        map.harvested_entity_ids.remove(&info.object_id);
                         let location = map.entities.get(&info.object_id).map(|entity| Point {
                             x: entity.x,
                             y: entity.y,
@@ -4006,6 +4010,10 @@ impl SharedInProcessZoneState {
                     }
                 }
                 ServerPacket::ObjectDied { info } => {
+                    let starts_new_corpse = map
+                        .entities
+                        .get(&info.object_id)
+                        .is_some_and(|entity| !entity.dead && entity.hp.map_or(true, |hp| hp > 0));
                     if let Some(entity) = map.entities.get_mut(&info.object_id) {
                         entity.x = info.location.x;
                         entity.y = info.location.y;
@@ -4013,7 +4021,15 @@ impl SharedInProcessZoneState {
                         entity.hp = Some(0);
                         entity.dead = true;
                     }
-                    map.revived_entity_ids.remove(&info.object_id);
+                    let follows_revive = map.revived_entity_ids.remove(&info.object_id);
+                    if starts_new_corpse || follows_revive {
+                        // Object ids are reused across Crystal monster
+                        // incarnations. Clear an older completed-Harvest marker
+                        // only on the authoritative live -> dead boundary; a
+                        // duplicate late ObjectDied for the same corpse must not
+                        // reopen an already harvested body.
+                        map.harvested_entity_ids.remove(&info.object_id);
+                    }
                     map.dead_entity_ids.insert(
                         info.object_id,
                         SharedDeadEntityState {
@@ -5784,6 +5800,10 @@ fn reconcile_shared_entity_with_native_monster(
 
     map.removed_entity_ids.remove(&monster.object_id);
     map.dead_entity_ids.remove(&monster.object_id);
+    // A live Zone-native monster can never still be harvested. Keep the shared
+    // action index self-healing even when the explicit ObjectRevived fan-out was
+    // interleaved with a snapshot merge.
+    map.harvested_entity_ids.remove(&monster.object_id);
     if was_dead {
         // Normally ObjectRevived already performs these transitions. Keep the
         // map self-healing if a snapshot is read between the single-writer
@@ -5791,7 +5811,6 @@ fn reconcile_shared_entity_with_native_monster(
         // legacy ObjectMonster packet as a revive.
         map.revived_entity_ids.insert(monster.object_id);
         map.committed_death_drop_anchors.remove(&monster.object_id);
-        map.harvested_entity_ids.remove(&monster.object_id);
     }
 }
 
@@ -12516,8 +12535,8 @@ mod tests {
         delayed_player_action_packets, filter_stale_owner_dead_entity_packets,
         gateway_zone_magic_requires_item_consumption, gateway_zone_magic_targets_ground,
         gateway_zone_magic_targets_summon, ground_drop_spawn_packet,
-        shared_entity_observer_packet_object_id, shared_gateway_now_ms,
-        shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
+        reconcile_shared_entity_with_native_monster, shared_entity_observer_packet_object_id,
+        shared_gateway_now_ms, shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
         suppress_personal_tick_shared_monster_motion, sync_zone_movement_transform,
         world_entity_from_monster_info, zone_monster_spawn_from_shared_entity,
         HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
@@ -12532,7 +12551,7 @@ mod tests {
         SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt, SharedSessionRouter,
         SharedTradeSettlementOutcome, SharedZoneMovementIngress, SharedZoneMutationGate,
         SharedZoneRuntimeFactory, TradeProjectionReconciliationState,
-        UnresolvedSharedTradeSettlement, ZoneId, ZoneNativePlayerAttack,
+        UnresolvedSharedTradeSettlement, ZoneId, ZoneMapSnapshotLayer, ZoneNativePlayerAttack,
         ZoneNativePlayerAttackKind, ZoneOwnerCommandRequest, ZoneOwnerLease, ZonePresenceKey,
         ZoneRegistry, ZoneRuntimeFactory,
     };
@@ -12552,8 +12571,8 @@ mod tests {
         WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime,
         ZoneBossRewardAudit, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
         ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-        ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats,
-        ZoneRuntime, ZoneRuntimeHandle,
+        ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
+        ZonePlayerCombatStats, ZoneRuntime, ZoneRuntimeHandle,
     };
     use std::{
         collections::{BTreeMap, BTreeSet},
@@ -18779,6 +18798,83 @@ mod tests {
             BTreeSet::new(),
         );
         assert!(!state.shared_harvest_allows_action("0", &picker, MirDirection::Right));
+    }
+
+    #[test]
+    fn shared_zone_state_clears_stale_harvest_only_for_a_new_corpse_incarnation() {
+        let mut state = SharedInProcessZoneState::new();
+        let mut entity = shared_monster_entity(77);
+        entity.hp = Some(12);
+        entity.max_hp = Some(12);
+        entity.dead = false;
+        state.sync_map_layer(
+            "0".to_string(),
+            vec![entity],
+            BTreeSet::new(),
+            Vec::new(),
+            BTreeSet::new(),
+        );
+        let harvested = ServerPacket::ObjectHarvested {
+            movement: ObjectMovement {
+                object_id: 77,
+                position: Point { x: 329, y: 269 },
+                direction: MirDirection::Down,
+            },
+        };
+        let died = ServerPacket::ObjectDied {
+            info: ObjectDiedInfo {
+                object_id: 77,
+                location: Point { x: 329, y: 269 },
+                direction: MirDirection::Down,
+                kind: 0,
+            },
+        };
+
+        // Reproduce a missed-incarnation projection: the entity is live while
+        // the map layer still carries the preceding corpse's Harvest marker.
+        state.apply_shared_entity_packets("0", &[harvested.clone()]);
+        state.apply_shared_entity_packets("0", &[died.clone()]);
+        assert!(!state
+            .map_layer(Some("0"))
+            .expect("shared map layer should exist")
+            .harvested_entity_ids
+            .contains(&77));
+
+        // Once this corpse is harvested, a duplicate late death packet for the
+        // same corpse must not reopen it.
+        state.apply_shared_entity_packets("0", &[harvested]);
+        state.apply_shared_entity_packets("0", &[died]);
+        assert!(state
+            .map_layer(Some("0"))
+            .expect("shared map layer should exist")
+            .harvested_entity_ids
+            .contains(&77));
+    }
+
+    #[test]
+    fn live_native_reconcile_clears_stale_harvest_marker() {
+        let mut map = ZoneMapSnapshotLayer::default();
+        map.harvested_entity_ids.insert(77);
+        let mut entity = shared_monster_entity(77);
+        let monster = ZoneNativeMonsterSnapshot {
+            object_id: 77,
+            name: entity.name.clone(),
+            position: Point {
+                x: entity.x,
+                y: entity.y,
+            },
+            hp: 12,
+            max_hp: 12,
+            dead: false,
+            disposition: Some(WorldEntityDisposition::Neutral),
+            hostile_to_player: false,
+        };
+
+        reconcile_shared_entity_with_native_monster(&mut map, &mut entity, &monster);
+
+        assert!(!map.harvested_entity_ids.contains(&77));
+        assert!(!entity.dead);
+        assert_eq!(entity.hp, Some(12));
     }
 
     #[test]
