@@ -2733,3 +2733,12 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   rejects any regenerated-manifest drift. No production R2 or deployment was
   mutated. This does not expand backend parity or alter the remaining live
   database, remote Zone, crash-recovery, UI, soak, human, and signing gates.
+- Exact-head run `33020542728` then exposed an installation-only runner race:
+  pinned Cargo started rustc through the default stable rustup proxy while that
+  proxy updated. The fallback now pins `RUSTUP_TOOLCHAIN` and `RUSTC` before
+  installing wasm-bindgen. The developer image locks Rust `1.95.0`, wasm32, and
+  wasm-bindgen `0.2.118`; Bash/PowerShell developer wrappers source-build the
+  current runtime after an immutable-object failure. Both fault-injected wrapper
+  contracts, Compose configuration, the developer-release checker, and runtime
+  downloader 4/4 pass locally. A new exact-head real Docker/Compose CI run is
+  still required; no CI-green or merge-ready claim is made here.

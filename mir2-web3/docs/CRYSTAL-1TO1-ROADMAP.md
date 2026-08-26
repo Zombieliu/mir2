@@ -4647,6 +4647,15 @@ visual/feel acceptance.
   package first, then uses the runtime-pinned Rust `1.95.0`, wasm32 target, and
   wasm-bindgen `0.2.118` source fallback when that object is unavailable. The
   final build fails if the regenerated manifest differs from the tracked pin.
+- Candidate: the first exact-head fallback run exposed a Windows rustup race
+  before the source build: wasm-bindgen installation used pinned Cargo but its
+  child rustc still resolved through the runner's default `stable` proxy.
+  Handoff now pins both `RUSTUP_TOOLCHAIN` and `RUSTC` in that same installation
+  step. The developer image also carries the exact runtime toolchain and
+  wasm-bindgen lock, and both `dev.sh` and `dev.ps1` fall back from a missing
+  immutable object to a current-source build. Fault-injected Bash and Windows
+  wrapper contracts pass; the next exact-head real Linux image/Compose smoke is
+  still required before this PR is merge-ready.
 - Current dual-backend budget passes at WebGPU 27,468,107 raw / 5,954,427 gzip
   and WebGL2 28,836,375 raw / 6,399,104 gzip. The complete Player Web production
   build also passes 9,650 entity frames, 40,763 original assets, the 57-page map

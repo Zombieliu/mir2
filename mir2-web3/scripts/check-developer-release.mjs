@@ -330,10 +330,27 @@ function checkDeveloperReleaseLock() {
     "rust-toolchain.toml must install wasm32-unknown-unknown",
   );
 
+  const runtimeToolchain = readFileSync(
+    projectPath("apps/game-client/runtime/rust-toolchain.toml"),
+    "utf8",
+  );
+  const runtimeRustVersion = runtimeToolchain.match(/^channel\s*=\s*"([^"]+)"$/m)?.[1];
+  assert(runtimeRustVersion, "Bevy runtime Rust toolchain lock is missing");
+  const runtimeCargoLock = readFileSync(
+    projectPath("apps/game-client/runtime/Cargo.lock"),
+    "utf8",
+  );
+  const runtimeWasmBindgenVersion = runtimeCargoLock.match(
+    /\[\[package\]\]\s*\r?\nname = "wasm-bindgen"\s*\r?\nversion = "([^"]+)"/,
+  )?.[1];
+  assert(runtimeWasmBindgenVersion, "Bevy runtime wasm-bindgen lock is missing");
+
   const dockerfile = readFileSync(projectPath("infra/developer.Dockerfile"), "utf8");
   for (const needle of [
     release.container.baseImage,
     `ARG RUST_VERSION=${REQUIRED_RUST_TOOLCHAIN}`,
+    `ARG BEVY_RUNTIME_RUST_VERSION=${runtimeRustVersion}`,
+    `ARG WASM_BINDGEN_VERSION=${runtimeWasmBindgenVersion}`,
     `ARG NPM_VERSION=${REQUIRED_NPM_VERSION}`,
     `ARG GH_VERSION=${REQUIRED_GH_VERSION}`,
     "ARG MIR2_DEVELOPER_IMAGE_REVISION=unknown",
@@ -343,6 +360,12 @@ function checkDeveloperReleaseLock() {
   }
 
   const compose = readFileSync(projectPath("infra/compose.developer.yml"), "utf8");
+  for (const needle of [
+    `BEVY_RUNTIME_RUST_VERSION: "${runtimeRustVersion}"`,
+    `WASM_BINDGEN_VERSION: "${runtimeWasmBindgenVersion}"`,
+  ]) {
+    assert(compose.includes(needle), `developer Compose is missing runtime lock: ${needle}`);
+  }
   for (const service of ["workspace:", "asset-fetch:", "gateway:", "web:"]) {
     assert(compose.includes(service), `developer Compose is missing ${service}`);
   }
@@ -403,6 +426,8 @@ function checkDeveloperReleaseLock() {
         "compose run --rm --no-deps -T asset-fetch",
         "compose run --rm --no-deps \\",
         '--user "$(id -u):$(id -g)"',
+        "Pinned Bevy runtime is unavailable; rebuilding it from current source.",
+        "MIR2_USE_PREBUILT_BEVY_RUNTIME=0 node apps/web/scripts/build-bevy-runtime.mjs release",
         "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs",
       ],
     ],
@@ -415,6 +440,8 @@ function checkDeveloperReleaseLock() {
         "DOCKER_CONFIG",
         '"run", "--rm", "--no-deps", "-T", "asset-fetch"',
         '"--user", "node"',
+        "Pinned Bevy runtime is unavailable; rebuilding it from current source.",
+        "MIR2_USE_PREBUILT_BEVY_RUNTIME=0 node apps/web/scripts/build-bevy-runtime.mjs release",
         "node apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs && node scripts/check-developer-release.mjs",
       ],
     ],

@@ -127,6 +127,8 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $runtimeRustc)) {
             throw "Unable to resolve rustc for runtime toolchain $toolchain"
           }
+          $env:RUSTUP_TOOLCHAIN = $toolchain
+          $env:RUSTC = $runtimeRustc
           & $runtimeCargo install wasm-bindgen-cli --version $wasmBindgenVersion --locked
           if ($LASTEXITCODE -ne 0) {
             throw "Unable to install wasm-bindgen-cli $wasmBindgenVersion"

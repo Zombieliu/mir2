@@ -2506,3 +2506,12 @@ absent, compiles with runtime-pinned Rust `1.95.0` and wasm-bindgen `0.2.118`.
 It then requires the generated manifest to match the repository pin. This is a
 clean-checkout artifact gate only: no production R2/deployment was changed, no
 server parity percentage is added, and all live/human/release gates remain open.
+
+The first exact-head source-fallback attempt failed before compilation because
+the wasm-bindgen install pinned Cargo but not its rustc child, allowing the
+Windows runner's default stable toolchain to update concurrently. The install
+now pins `RUSTUP_TOOLCHAIN` plus `RUSTC` in-process. The developer image and both
+developer wrappers additionally carry a missing-prebuilt source fallback, with
+fault-injected Bash/PowerShell contracts proving the branch is taken. This is
+CI/developer-environment hardening only; the real exact-head Linux Compose smoke
+remains pending and does not change any parity numerator or acceptance field.

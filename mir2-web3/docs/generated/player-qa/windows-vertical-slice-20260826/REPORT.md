@@ -327,6 +327,19 @@ then rejects any regenerated-manifest drift. This is follow-on source/CI
 evidence and does not alter Candidate-03's packaged EXE or close a deployed
 runtime, same-EXE UI/live-WSS, DPI, soak, human, or publisher-certificate gate.
 
+The first exact-head fallback attempt, GitHub Actions run `33020542728`, failed
+before runtime compilation. Its wasm-bindgen install launched pinned Cargo but
+allowed the child rustc to resolve through the runner's default stable rustup
+proxy, which updated concurrently and produced component conflicts. The fixed
+step now sets both `RUSTUP_TOOLCHAIN` and `RUSTC` before installation. The
+repository developer image also locks Rust `1.95.0`, its wasm32 target, and
+wasm-bindgen `0.2.118`; `dev.sh` and `dev.ps1` source-build the current runtime
+when the immutable object is absent. Fault-injected Bash and PowerShell wrapper
+contracts, real Compose parsing, the developer-release checker, and downloader
+4/4 pass locally. Docker Desktop was not running on the evidence host, so the
+next exact-head GitHub Linux image/Compose smoke remains a required CI result,
+not an inferred pass.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend
