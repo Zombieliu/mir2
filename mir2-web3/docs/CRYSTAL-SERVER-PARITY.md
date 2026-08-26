@@ -2491,3 +2491,18 @@ source evidence, not a newly packaged Candidate EXE. `globalParityPercent`
 remains `null`; same-EXE UI/live WSS, real 125%/150% DPI, a real 30-minute native
 soak, human original-client visual/gameplay-feel acceptance, the complete
 semantic denominator, and formal publisher signing remain open.
+
+## 2026-08-27 Web runtime artifact consistency
+
+The current runtime source reproducibly generates
+`bevy-5046abca14947f40`, replacing the stale tracked manifest for
+`bevy-1813be587ef98bc1`. Two locked Windows builds produced the same manifest
+SHA-256, `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1`, and
+the full production build passed both WASM budgets, 9,650 entity frames, 40,763
+original assets, the 57-page map atlas, TypeScript, and 13/13 static pages.
+
+Developer Handoff first verifies the immutable prebuilt package and, when it is
+absent, compiles with runtime-pinned Rust `1.95.0` and wasm-bindgen `0.2.118`.
+It then requires the generated manifest to match the repository pin. This is a
+clean-checkout artifact gate only: no production R2/deployment was changed, no
+server parity percentage is added, and all live/human/release gates remain open.

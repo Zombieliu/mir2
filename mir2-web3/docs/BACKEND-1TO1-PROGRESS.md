@@ -2717,3 +2717,19 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   evidence and does not change Candidate-03's packaged EXE. The summary remains
   `globalParityPercent=null`, `accepted=false`, and `visualAccepted=false`; its
   100% is only the fixed eight-control set, not whole-game Crystal parity.
+
+## 2026-08-27 Web runtime clean-checkout follow-up
+
+- The Developer Handoff failure was outside Gateway semantics: current and
+  fallback R2 prefixes both lacked the tracked `bevy-1813be587ef98bc1` package,
+  while six later runtime changes had not refreshed the generated manifest.
+- Locked current-source builds reproducibly generate
+  `bevy-5046abca14947f40`; two runs produced manifest SHA-256
+  `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1`.
+  Runtime download tests pass 4/4, policy passes 5/5, both size budgets pass,
+  and the full Web production pipeline completes through 13/13 static pages.
+- Handoff CI remains fail-closed: it prefers the four SHA-verified prebuilt
+  files, builds with pinned Rust/wasm-bindgen when they are unavailable, and
+  rejects any regenerated-manifest drift. No production R2 or deployment was
+  mutated. This does not expand backend parity or alter the remaining live
+  database, remote Zone, crash-recovery, UI, soak, human, and signing gates.

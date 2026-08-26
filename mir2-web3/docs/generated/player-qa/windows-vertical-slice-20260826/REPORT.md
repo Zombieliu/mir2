@@ -303,6 +303,30 @@ It records `worktreeClean=true`, `automatedFunctionalCoveragePercent=100`,
 shortens movement waits; combat, probability, harvesting, rewards, persistence,
 and native-soak timing are not altered or inferred.
 
+## Web runtime and CI reproducibility follow-on (2026-08-27)
+
+The first PR check exposed an independent Developer Handoff failure: the
+current/fallback R2 prefixes did not contain the tracked
+`bevy-1813be587ef98bc1` package, and subsequent native runtime changes had not
+refreshed the generated manifest. No production R2 publication was performed as
+part of this Candidate work.
+
+Current branch source was rebuilt twice with runtime-pinned Rust `1.95.0`, the
+`wasm32-unknown-unknown` target, and wasm-bindgen `0.2.118`. Both runs generated
+`bevy-5046abca14947f40` with manifest SHA-256
+`4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1` and
+identical file hashes. WebGPU is 27,468,107 raw / 5,954,427 gzip; WebGL2 is
+28,836,375 raw / 6,399,104 gzip. Both runtime budgets pass, runtime policy is
+5/5, prebuilt downloader tests are 4/4, and the complete Player Web production
+build passes 9,650 entity frames, 40,763 original assets, 57 map-atlas pages,
+TypeScript, and 13/13 static pages.
+
+Developer Handoff now prefers the SHA-verified prebuilt package but falls back
+to that exact locked source build when the immutable object is unavailable; it
+then rejects any regenerated-manifest drift. This is follow-on source/CI
+evidence and does not alter Candidate-03's packaged EXE or close a deployed
+runtime, same-EXE UI/live-WSS, DPI, soak, human, or publisher-certificate gate.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend

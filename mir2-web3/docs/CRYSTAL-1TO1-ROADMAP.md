@@ -4635,3 +4635,24 @@ visual/feel acceptance.
   and `visualAccepted=false`; same-EXE UI/live WSS, real 125%/150% DPI, a real
   30-minute native soak, human original-client visual/gameplay-feel acceptance,
   the complete semantic denominator, and formal publisher signing remain open.
+
+## 2026-08-27 Web runtime handoff reproducibility
+
+- Candidate: the tracked Web runtime manifest is refreshed from the current
+  branch source to `bevy-5046abca14947f40`. Two identical locked Windows source
+  builds produced the same manifest SHA-256
+  `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1` and the
+  same four JS/WASM hashes.
+- Candidate: Developer Handoff now attempts the SHA-verified immutable prebuilt
+  package first, then uses the runtime-pinned Rust `1.95.0`, wasm32 target, and
+  wasm-bindgen `0.2.118` source fallback when that object is unavailable. The
+  final build fails if the regenerated manifest differs from the tracked pin.
+- Current dual-backend budget passes at WebGPU 27,468,107 raw / 5,954,427 gzip
+  and WebGL2 28,836,375 raw / 6,399,104 gzip. The complete Player Web production
+  build also passes 9,650 entity frames, 40,763 original assets, the 57-page map
+  atlas budget, TypeScript, and 13/13 static pages; runtime policy passes 5/5
+  and downloader tests pass 4/4.
+- No production R2 object, Worker, or Vercel deployment was changed. The local
+  source fallback closes a clean-checkout CI reproducibility gap only; deployed
+  runtime publication, same-EXE UI/live WSS, real DPI/soak, human acceptance,
+  and formal signing remain open, and the global denominator remains undefined.
