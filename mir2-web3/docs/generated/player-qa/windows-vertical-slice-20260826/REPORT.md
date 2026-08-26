@@ -2,7 +2,8 @@
 
 - Date: 2026-08-26
 - Branch: `codex/wn-candidate-recovery`
-- Packaged source revision: `f0ab4936c44df304e60e66e08529913201636b51`
+- Packaged runtime source: `b5c0ecb604946a858bf5d060a2cca306032c0e62`
+- Candidate: `WN-CANDIDATE-03-20260826`
 
 ## Scope
 
@@ -11,55 +12,64 @@ exact attested Release EXE and one exact nonvisual Candidate package. It does
 not certify global Crystal parity, strict Windows Candidate 100%, or a
 human-accepted release.
 
-## Passed evidence
+## Passed functional evidence
 
 | Gate | Result | Meaning |
 | --- | ---: | --- |
+| Simulation `vertical_slice` | 8/8 in 283.03 s | The complete current suite passed, including five-class entry/basic play, Bichon quest/drop/reward, the original newcomer quest 1-to-9 route, and shared multiplayer ownership surfaces. |
+| Original Bichon quest 1-to-9 focused run | PASS in 216.69 s | A fresh Warrior completes the authoritative quest chain without QA gold, damage multipliers, or direct HP mutation. The route buys and accounts for the original eight small HP drugs and uses safe-zone natural regeneration between field trips. |
+| Simulation `shared_zone` | 195/195 in 3.15 s | Current shared-Zone movement, AOI, combat, ownership, checkpoint, and settlement regressions passed. |
+| Accuracy-roll regression | 1/1 | An agility-eight target receives both hit and dodge outcomes across successive deterministic ticks. |
+| Native Zone high-evasion and replay checks | PASS | The physical-hit correction remains deterministic across identical runs while no longer locking one attacker/target pair into a permanent hit or miss. |
 | `ordinary_candidate_loop` | 2/2 | Fresh ordinary-player backend loop through Bichon movement, combat, quest drop/pickup, delivery/reward, save, and new-session relog restoration. |
 | Gateway fresh-account persistence | 1/1 | Normal account/login/character/start-game path, authoritative transform persistence, logout/save, and restore in a new Gateway session. |
-| Original Zone checkpoint incident | Reproduced | The historical active/standby mismatch was observed; it is retained as failure evidence, not hidden. |
 | Ordered Zone restore regression | PASS | Restore is replayed in order and Zone bindings are refreshed without reintroducing the removed temporary entity. |
 | `zone_rpc` library checkpoint group | 21/21 | Focused checkpoint/replay library coverage passed. |
-| Clean-HEAD asset generation | 312/312 | Asset generation/checks from a clean HEAD completed successfully. |
+| Clean-HEAD asset generation | 312/312 | Asset generation/checks from a clean source revision completed successfully. |
 | Web typecheck | PASS | The Web typecheck gate remained green for this closeout. |
-| `platinum_176_combat_milestones` | 15/15, repeated twice | The current combat certificate is reproducible; Warrior D504 now records real `FlamingSword` damage against an auto-revive Zuma Guardian. |
-| Focused melee packet regressions | 2/2 | `FlamingSword` and `Thrusting` retain their declared Crystal defence types through delayed packet damage. |
+| `platinum_176_combat_milestones` | 15/15, repeated twice | The combat certificate is reproducible and preserves Crystal weapon-skill defence types through delayed packet damage. |
+
+The accuracy correction fixes a real deterministic modulo-resonance defect.
+The former tick coefficient was divisible by Scarecrow's agility modulus, so a
+given attacker/target pair could remain permanently hit or permanently missed.
+The same avalanche-mixed accuracy roll now serves personal-session and native
+Zone physical attack paths. The vertical-slice assertions also use the current
+authoritative quest item/reward identities and validate the full
+`GroundDropClaimedWithTicket` authority surface.
 
 ## Exact release artifact
 
 | Field | Recorded value |
 | --- | --- |
-| Candidate | `WN-CANDIDATE-02-20260826` |
-| Repository-relative artifact | `dist/mir2-windows-candidate/WN-CANDIDATE-02-20260826` (ignored build output, not committed) |
-| Source revision | `f0ab4936c44df304e60e66e08529913201636b51` |
-| Source worktree at build | clean; source-status digest `2C6A5536992A07D01499AA8736926B357808E699DA1A978C3D873C6A8D2EB1B1`; 0 status lines |
-| EXE SHA-256 | `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6` |
+| Candidate | `WN-CANDIDATE-03-20260826` |
+| Repository-relative artifact | `dist/mir2-windows-candidate/WN-CANDIDATE-03-20260826` (ignored build output, not committed) |
+| Source revision | `b5c0ecb604946a858bf5d060a2cca306032c0e62` |
+| Source worktree at build | clean; source-status digest `924B56D335CCE786AEB34ED9C17512F006F1626212BC536D01723EF573ED4267`; 0 status lines |
+| EXE SHA-256 | `9E51CBF3E81D50A182F08CE11D02D9829268881A2124BAFC1D963829CC634E8C` |
 | EXE size | 66,665,472 bytes |
-| Build completed | `2026-08-26T02:00:54.7847597+00:00` |
-| Build attestation SHA-256 | `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979` |
-| Package manifest SHA-256 | `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467` |
-| Manifest payload aggregate | `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B` |
+| Build completed | `2026-08-26T03:31:28.6100700+00:00` |
+| Build attestation SHA-256 | `74F7D06336D486C6430263519282AED02C3B0429C6711FE0829DA7BE08311370` |
+| Package manifest SHA-256 | `58F88AD84D1F7F9C9CC1CC44E59932D2A39136FD62FCA1F56CDAB0CF6C861884` |
+| Manifest payload aggregate | `6788698E6ED19209D5463B10FF15E5D7972D714C62C6D0093808571C97ABF83A` |
 | Manifest coverage | 10,254 payload files / 322,285,374 payload bytes |
 | Complete package | 10,258 files / 325,281,417 bytes |
-| VERSION.json SHA-256 | `590E42F9D535E49E7712878E6FB4E6CA654CB8F3DF0812ED25E20C470D5D8E79` |
-| RELEASE-STATEMENT.json SHA-256 | `A11FF0BBF6C6BCF8B208AE463F00160780955465959050FA5F0D571FAD313B8B` |
-| Detached CMS SHA-256 | `BB12437B56ECEB4B79282D5D2330666A1D663B52AF48CD0133AEDA8C79DC89D5` |
+| `VERSION.json` SHA-256 | `037E88048C174AF1FC7BBBE6CA23698FB69EA42A9A3CD3A46B793817C570568C` |
+| `RELEASE-STATEMENT.json` SHA-256 | `6770C8F5802423B4B1D290A9453FBFAD663891DE9325725733C382242331DC34` |
+| Detached CMS SHA-256 | `B00B93D27D9E722D5C653377D25EA432076732CA1569AEA0B5E484F41D1D0F82` |
 | Truth fields | `staged=true`, `builtByPackagingScript=false`, `accepted=false`, `visual=false` |
 
 The four files excluded from the payload manifest are the manifest itself,
 `VERSION.json`, the release statement, and its detached signature. Those files
 are cross-bound by `VERSION.json` and `RELEASE-STATEMENT.json`; the exclusion is
-therefore explicit rather than an uncovered payload gap.
+explicit rather than an uncovered payload gap.
 
 ## Nonvisual package and verification evidence
 
 No command in this round used `-Launch`, and no client executable was started.
-The package driver and verifier ran directly from the attested clean source
-revision; dependency and generated-asset outputs remained ignored, and tracked
-source stayed clean. Their exact SHA-256 values were
-`3688B47E499C4B920DAE1E46297663DDB410555C9AEDE2DFE8EA2AE7A3119640`
-and `70AEEE83F4CAAF5126B1460EFB6DFBC3E653A74901C22D7FC2FB60190AB21170`.
-Both tools are part of the packaged source revision.
+The package driver and verifier ran from the clean packaged runtime source.
+Their source-tree SHA-256 values were
+`37B47EF2298201907922233F9A167002D4639E1ADB8DFC58F65C7A0BAFEA5AB0`
+and `50461D0977DEAFB3C27800DDFA7704837B3B181E73C40588B12D187E5F1D42EF`.
 
 | Gate | Result |
 | --- | --- |
@@ -70,54 +80,27 @@ Both tools are part of the packaged source revision.
 | Attested-build self-test | PASS |
 | Supply-chain static test | PASS; 15 immutable actions |
 | Publisher-contract self-test | PASS |
-| Windows `npm.cmd` package invocation | PASS in dry-run and formal branches; avoids PowerShell resolving `npm` as `pm` |
+| Windows `npm.cmd` package invocation | PASS in dry-run and formal branches; prevents PowerShell from resolving `npm` as `pm` |
 | Native keyed map generation | PASS; 4,650 emitted, 4,648 keyed, 2 additive, 50,595,486 image bytes; manifest `86478e87d93597432521f3b0345c07eb9bfe9ec489eacbc26774a9983fadfe7e` |
-| Formal staging verification | PASS; `sourceRepoCheck=checked`, `nonvisual=true`, `launchRequested=false`, 0 failures |
-| Independent clean-worktree final-directory verification | PASS; `sourceRepoCheck=checked`, `nonvisual=true`, 0 failures |
+| Formal staging/final-directory verification | PASS; `sourceRepoCheck=checked`, `nonvisual=true`, `launchRequested=false`, 0 failures |
 | Copied-artifact verification | PASS; `sourceRepoCheck=unavailable`, `nonvisual=true`, `launchRequested=false`, detached CMS valid, 0 failures |
+| Six copied root anchors | 6/6 byte-identical by SHA-256 |
 
 The copied-artifact run reports source checking as unavailable because its
 package root is outside the clean verification repository. It still recomputed
-all package hashes and verified the detached signature. Source identity was
-already checked in both the staging and clean final-directory runs; the copied
-artifact's EXE, attestation, manifest, version, statement, and signature hashes
-were also compared with the clean verified package before that final run.
+all package hashes and verified the detached signature. The clean-package run
+checked the exact source revision. The copied EXE, attestation, manifest,
+version, statement, and signature hashes all match the clean verified package.
 
 Durable generated evidence:
 
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-02-20260826-package-summary.json`
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-02-20260826-verification.json`
-- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-02-20260826-verification-copied-artifact.json`
+- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-03-20260826-package-summary.json`
+- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-03-20260826-verification.json`
+- `docs/generated/player-qa/windows-package-preflight/WN-CANDIDATE-03-20260826-verification-copied-artifact.json`
 
-## Predecessor recovery record
-
-The superseded `WN-CANDIDATE-01-20260826` package attempt safely failed before
-publication because the old
-scanner decoded arbitrary `.text` machine bytes through replacement ASCII and
-misread the bytes at EXE offset 4,044,970 as `B:\...`. The replacement scanner
-now bounds-checks PE sections, scans only non-executable section data, uses a
-one-byte-preserving printable ASCII view, UTF-8, and both UTF-16LE alignments, and
-retains fail-closed checks for machine/CI absolute paths, extended Windows
-paths, UNC paths, Unix build roots, and non-basename PDB references.
-
-Its first hardened rerun then exposed a boundary bug in the exact standard Rust
-virtual-root allowance: the real `//rustc/<40-hex>/library` value is NUL
-terminated. That predecessor failure remains preserved in
-`WN-CANDIDATE-01-20260826-verification-initial-failure.json`. The boundary was
-corrected and covered by a NUL-terminated regression. The final
-scanner permits only the canonical Rust virtual root and a basename-only RSDS
-PDB name; it still rejects near-miss Rust roots and directory-, drive-, URI-, or
-ADS-qualified PDB references. Those fixes remain in the current tools. The
-`WN-CANDIDATE-02-20260826` dry-run, formal staging verification, independent
-final-directory verification, and copied-artifact verification all passed
-without a new packaging failure.
-
-This scanner is deliberately a machine/CI path-leak heuristic over bounded
-non-executable PE section data, not a claim to classify every arbitrary byte in
-headers, overlay data, or executable machine-code sections. That scope avoids
-the reproduced `.text` false positive while covering the compiler/debug string
-locations relevant to this release check. Every regex view has a 30-second
-timeout that fails closed.
+`WN-CANDIDATE-03-20260826` supersedes Candidate-02 as evidence for the current
+runtime because Candidate-02 predates the deterministic accuracy correction.
+Candidate-01/02 remain historical recovery records and are not overwritten.
 
 ## Signing boundary
 
@@ -132,9 +115,10 @@ claimed.
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend
-tests:
+tests or nonvisual package verification:
 
-- Windows pure-UI execution from account creation through the quest flow;
+- Windows pure-UI execution from account creation through the quest flow using
+  this same EXE;
 - one continuous authenticated live WebSocket run using this exact final EXE;
 - real Windows 125% and 150% OS-DPI behavior;
 - a real 30-minute native-client soak with Gateway, client-log, crash-event,

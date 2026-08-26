@@ -1,41 +1,45 @@
 # Backend 1:1 Progress
 
-> Windows vertical-slice evidence closeout (2026-08-26, HEAD
-> `f0ab4936c`): this round records only evidence that actually passed. The
-> ordinary Crystal-shaped player loop passed `ordinary_candidate_loop` 2/2,
-> covering fresh-player progression through movement, combat, quest drop and
-> pickup, quest delivery/reward, persistence, and a new-session relog check.
-> The normal Gateway fresh-account persistence regression passed 1/1. The
-> Zone checkpoint incident was reproduced as the original active/standby
-> mismatch, then the ordered-restore regression passed; the `zone_rpc` library
-> checkpoint group passed 21/21. Clean-HEAD asset generation passed 312/312,
-> and Web typecheck passed. The 15-case combat milestone certificate now also
-> passes with Crystal's declared `FlamingSword`/`Thrusting` defence types
-> preserved through delayed packet damage.
+> Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged
+> runtime source `b5c0ecb60`): this round records only evidence that passed.
+> Simulation `vertical_slice` passes 8/8 in 283.03 seconds, including the
+> focused original Bichon quest 1-to-9 route in 216.69 seconds; `shared_zone`
+> passes 195/195. The newcomer flow uses the current authoritative quest item
+> and CopperRing reward identities, safe-zone natural regeneration, and exact
+> `GroundDropClaimedWithTicket` authority without QA gold, damage multipliers,
+> or direct HP mutation. `ordinary_candidate_loop` remains 2/2, Gateway
+> fresh-account persistence 1/1, ordered Zone restore plus `zone_rpc` 21/21,
+> clean-source assets 312/312, Web typecheck, and the 15-case combat milestone
+> certificate also pass.
 >
-> The checkpoint evidence is a repair record, not a claim that the original
-> failure never existed: the old replay sequence could restore a character a
-> second time after journal replay and reintroduce a removed temporary entity.
-> Ordered restore is now covered by a regression that preserves the replay
-> order and refreshes Zone bindings. The resulting source revision is
-> `f0ab4936c44df304e60e66e08529913201636b51`; its attested Windows Release EXE
-> is exactly SHA-256
-> `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6`
+> A deterministic accuracy defect was corrected in both personal-session and
+> native Zone physical paths. The old tick coefficient was divisible by
+> Scarecrow's agility modulus, allowing a fixed attacker/target pair to remain
+> permanently hit or missed; the new avalanche-mixed roll varies across ticks
+> while remaining deterministic across identical runs. Its exact agility-eight
+> unit regression and focused native Zone high-evasion/replay checks pass.
+>
+> Runtime source revision `b5c0ecb604946a858bf5d060a2cca306032c0e62`
+> produced an attested Windows Release EXE with SHA-256
+> `9E51CBF3E81D50A182F08CE11D02D9829268881A2124BAFC1D963829CC634E8C`
 > at 66,665,472 bytes. Build-attestation SHA-256 is
-> `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979`.
-> Candidate `WN-CANDIDATE-02-20260826` contains 10,258 files. Its manifest
+> `74F7D06336D486C6430263519282AED02C3B0429C6711FE0829DA7BE08311370`.
+> Candidate `WN-CANDIDATE-03-20260826` contains 10,258 files. Its manifest
 > SHA-256 is
-> `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467`
+> `58F88AD84D1F7F9C9CC1CC44E59932D2A39136FD62FCA1F56CDAB0CF6C861884`
 > and payload aggregate is
-> `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B`.
-> Formal staging verification passed nonvisually with the clean source revision
-> checked, and the copied artifact passed an independent nonlaunch verification.
+> `6788698E6ED19209D5463B10FF15E5D7972D714C62C6D0093808571C97ABF83A`.
+> Clean-source verification passed nonvisually with
+> `sourceRepoCheck=checked`; the copied artifact passed an independent
+> nonlaunch verification with `sourceRepoCheck=unavailable`, and all six root
+> anchors matched. Candidate-03 supersedes Candidate-02 for current runtime
+> evidence.
 >
 > This closeout does not claim whole-game or strict Candidate 100% parity.
 > Windows pure-UI account-to-quest proof, a same-EXE authenticated live
 > WebSocket run, real 125%/150% DPI, a real 30-minute native-client soak, and
-> human visual/feel acceptance remain open. The package is signed only by the
-> internal self-signed detached-CMS certificate
+> human visual/feel acceptance remain open. The statement is signed only by
+> the internal self-signed detached-CMS certificate
 > `B179E9D6222332C9DB5E960BAECF9990252CFBC7`; the EXE is Authenticode
 > `NotSigned`, so a formal release certificate/signing path also remains open.
 > Existing user changes outside the scoped evidence files are not reclassified

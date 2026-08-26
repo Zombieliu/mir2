@@ -1,31 +1,39 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Windows vertical-slice checkpoint (2026-08-26, HEAD `f0ab4936c`): the
-> bounded server/player-state evidence now includes
-> `ordinary_candidate_loop` 2/2, Gateway fresh-account persistence 1/1, the
-> reproduced Zone checkpoint failure followed by the ordered-restore fix, the
-> `zone_rpc` library group 21/21, clean-HEAD assets 312/312, and Web typecheck.
-> The ordinary loop covers the intended backend sequence: fresh account,
-> character/start-game, Bichon entry, movement, combat, quest drop/pickup,
-> delivery and reward, save, and relog restoration. These are bounded evidence
-> gates, not a strict whole-game completion percentage. The current combat
-> certificate also passes all 15 `platinum_176_combat_milestones` cases after
-> preserving Crystal's weapon-skill defence type for delayed packet damage.
+> Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
+> source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes
+> 8/8, including the original Bichon newcomer quest 1-to-9 route; `shared_zone`
+> passes 195/195. `ordinary_candidate_loop` remains 2/2, Gateway fresh-account
+> persistence 1/1, the ordered Zone restore regression and `zone_rpc` group
+> 21/21, clean-source assets 312/312, Web typecheck, and all 15
+> `platinum_176_combat_milestones` cases also pass. The newcomer route uses
+> authoritative quest/reward identities, natural safe-zone regeneration, and
+> exact ground-drop claim tickets without QA gold, damage multipliers, or
+> direct HP mutation.
 >
-> Release artifact closeout: source revision
-> `f0ab4936c44df304e60e66e08529913201636b51` produced the attested Release
-> EXE SHA-256
-> `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6`
+> This round also fixes a deterministic accuracy defect: the former tick
+> coefficient resonated with Scarecrow's agility modulus and could leave one
+> attacker/target pair permanently hitting or permanently missing. The
+> avalanche-mixed roll now serves personal-session and native Zone physical
+> paths; its exact unit regression proves both outcomes over successive ticks.
+> These are bounded evidence gates, not a strict whole-game completion
+> percentage.
+>
+> Runtime source revision `b5c0ecb604946a858bf5d060a2cca306032c0e62`
+> produced the attested Release EXE SHA-256
+> `9E51CBF3E81D50A182F08CE11D02D9829268881A2124BAFC1D963829CC634E8C`
 > (66,665,472 bytes), bound to build-attestation SHA-256
-> `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979`.
-> Nonvisual packaging produced `WN-CANDIDATE-02-20260826` with 10,258 files;
-> its manifest SHA-256 is
-> `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467`
-> and its payload aggregate is
-> `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B`.
-> Clean-worktree verification passed with `sourceRepoCheck=checked`, and an
-> independent verification of the copied artifact also passed. Both were
-> nonvisual with `launchRequested=false`.
+> `74F7D06336D486C6430263519282AED02C3B0429C6711FE0829DA7BE08311370`.
+> Nonvisual Candidate `WN-CANDIDATE-03-20260826` contains 10,258 files; its
+> manifest SHA-256 is
+> `58F88AD84D1F7F9C9CC1CC44E59932D2A39136FD62FCA1F56CDAB0CF6C861884`
+> and payload aggregate is
+> `6788698E6ED19209D5463B10FF15E5D7972D714C62C6D0093808571C97ABF83A`.
+> Clean-source verification passed with `sourceRepoCheck=checked`; independent
+> copied-artifact verification passed with `sourceRepoCheck=unavailable` after
+> all six root anchors matched. Both were nonvisual with
+> `launchRequested=false`. Candidate-03 supersedes Candidate-02 for current
+> runtime evidence.
 >
 > The detached CMS signer is the internal self-signed certificate
 > `B179E9D6222332C9DB5E960BAECF9990252CFBC7`, not a formal release
@@ -34,8 +42,8 @@
 > continuous authenticated live-WebSocket run, real 125%/150% OS-DPI behavior,
 > a real 30-minute native soak, human visual/gameplay-feel acceptance, and a
 > formal release certificate/signing path. Do not mark global 1:1 parity or
-> strict Candidate 100% from this checkpoint; it is a verifiable internal
-> vertical slice, while `accepted=false` and the listed gates remain open.
+> strict Candidate 100% from this checkpoint; `accepted=false` and the listed
+> gates remain open.
 
 > 2026-08-26 Crystal map-event E1 checkpoint: the six current `_MAPCOORD`
 > source entries now generate typed threshold/action records and bind

@@ -1,39 +1,42 @@
 # Crystal Server Parity
 
-> Windows vertical-slice server evidence closeout (2026-08-26, HEAD
-> `f0ab4936c`): the bounded ordinary-player flow passed
-> `ordinary_candidate_loop` 2/2. The normal Gateway fresh-account login,
-> character/start-game, authoritative transform, logout/save, and new-session
-> restore regression passed 1/1. The Zone checkpoint mismatch was first
-> reproduced against the original replay behavior; the ordered restore
-> regression then passed, and the `zone_rpc` library checkpoint group passed
-> 21/21. Clean-HEAD asset generation passed 312/312 and Web typecheck passed.
-> The current 15-case combat milestone certificate also passes after delayed
-> packet attacks retain Crystal's declared weapon-skill defence type.
+> Windows verifiable vertical-slice server closeout (2026-08-26; packaged
+> runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,
+> including the original Bichon quest 1-to-9 route, and `shared_zone` passes
+> 195/195. `ordinary_candidate_loop` remains 2/2; Gateway fresh-account
+> persistence 1/1; ordered Zone restore plus `zone_rpc` 21/21; clean-source
+> assets 312/312; Web typecheck; and all 15 combat milestone cases also pass.
+> The newcomer proof follows authoritative quest/drop/reward identities and
+> ground-drop claim tickets without QA gold, damage multipliers, or direct HP
+> mutation.
 >
-> The ordered-restore result closes the specific checkpoint replay defect: the
-> replay path records/restores the character mutation in sequence and refreshes
-> Zone bindings, avoiding a second unconditional character restore that could
-> reintroduce a removed temporary entity. It does not erase the historical
-> failing evidence and does not expand the result into full Crystal server
-> parity. The exact source revision
-> `f0ab4936c44df304e60e66e08529913201636b51` is now bound to Windows Release
-> EXE SHA-256
-> `F516F3C9B9122D719F809F8F903147FCB4E999822DF3183AC7CC1F17C8172CA6`
+> The runtime now uses one avalanche-mixed deterministic accuracy roll across
+> personal-session and native Zone physical attacks. This removes the prior
+> modulo resonance that could make a Scarecrow permanently hit or missed for a
+> fixed attacker/target pair. The agility-eight unit regression proves both
+> outcomes across successive ticks; focused native Zone high-evasion and
+> deterministic replay checks also pass. This closes that accuracy defect, not
+> full Crystal server parity.
+>
+> Runtime source revision `b5c0ecb604946a858bf5d060a2cca306032c0e62` is
+> bound to Windows Release EXE SHA-256
+> `9E51CBF3E81D50A182F08CE11D02D9829268881A2124BAFC1D963829CC634E8C`
 > (66,665,472 bytes) and build-attestation SHA-256
-> `387D922E8EB4EB04FD72A895986F5F0ECC0F701A324C740DDB21A94B0B2EB979`.
-> Nonvisual Candidate `WN-CANDIDATE-02-20260826` passed clean-source staging
-> verification and copied-artifact verification. Its 10,254-payload manifest
-> SHA-256 is
-> `FEEEEED6E78096171285A011181E9EAED11F0073367224EA8F1DC8C3E49FF467`
+> `74F7D06336D486C6430263519282AED02C3B0429C6711FE0829DA7BE08311370`.
+> Nonvisual Candidate `WN-CANDIDATE-03-20260826` passed clean-source
+> verification (`sourceRepoCheck=checked`) and copied-artifact verification
+> (`sourceRepoCheck=unavailable`). All six copied root anchors match. Its
+> 10,254-payload manifest SHA-256 is
+> `58F88AD84D1F7F9C9CC1CC44E59932D2A39136FD62FCA1F56CDAB0CF6C861884`
 > with aggregate
-> `B3A83FB815555494AC9DDC18A1FA76975E31B5D1CD68A74BE8A4049ED74FEF5B`;
-> the complete package has 10,258 files.
+> `6788698E6ED19209D5463B10FF15E5D7972D714C62C6D0093808571C97ABF83A`;
+> the complete package has 10,258 files. Candidate-03 supersedes Candidate-02
+> for current runtime evidence.
 >
 > Open acceptance gates remain Windows pure-UI execution, same-EXE live
 > WebSocket continuity, real 125%/150% OS-DPI validation, a real 30-minute
-> native-client soak, and human visual/feel review. The current detached CMS
-> signer is an internal self-signed certificate, not a formal release
+> native-client soak, and human visual/feel review. The statement's detached
+> CMS signer is an internal self-signed certificate, not a formal release
 > certificate, and the EXE is Authenticode `NotSigned`; formal release signing
 > remains open. Therefore this entry must not be read as global or strict
 > Windows Candidate 100%.
