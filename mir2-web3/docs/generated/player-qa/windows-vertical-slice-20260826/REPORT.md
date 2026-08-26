@@ -340,6 +340,15 @@ contracts, real Compose parsing, the developer-release checker, and downloader
 next exact-head GitHub Linux image/Compose smoke remains a required CI result,
 not an inferred pass.
 
+Developer Environment run `33023066209` subsequently proved the Linux source
+build but failed an over-strict cross-host hash assertion: Linux generated
+`bevy-a314c804ae9919d3`, while this Windows Candidate tracks
+`bevy-5046abca14947f40`. The corrected matrix retains source builds on all four
+hosts, uses Windows as the canonical zero-diff release-manifest check, and
+restores only the generated host-local manifest on Unix/macOS before the final
+clean-checkout assertion. This host distinction does not change the Candidate
+EXE, its hashes, or any open acceptance gate.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend

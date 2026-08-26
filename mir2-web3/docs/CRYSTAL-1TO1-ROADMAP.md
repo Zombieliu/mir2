@@ -4647,6 +4647,11 @@ visual/feel acceptance.
   package first, then uses the runtime-pinned Rust `1.95.0`, wasm32 target, and
   wasm-bindgen `0.2.118` source fallback when that object is unavailable. The
   final build fails if the regenerated manifest differs from the tracked pin.
+- Candidate: Developer Environment still source-builds the runtime on Windows,
+  Linux, Apple Silicon macOS, and Intel macOS. Windows is the canonical tracked
+  release-manifest host and must produce zero diff; Unix/macOS builds emit
+  host-local hashes and restore only that generated manifest before the final
+  clean-checkout assertion.
 - Candidate: the first exact-head fallback run exposed a Windows rustup race
   before the source build: wasm-bindgen installation used pinned Cargo but its
   child rustc still resolved through the runner's default `stable` proxy.

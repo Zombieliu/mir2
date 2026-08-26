@@ -2742,3 +2742,9 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   contracts, Compose configuration, the developer-release checker, and runtime
   downloader 4/4 pass locally. A new exact-head real Docker/Compose CI run is
   still required; no CI-green or merge-ready claim is made here.
+- Developer Environment run `33023066209` proved Linux source compilation but
+  also showed that Linux host-local JS/WASM hashes differ from the canonical
+  Windows release hashes (`bevy-a314c804ae9919d3` versus tracked
+  `bevy-5046abca14947f40`). The matrix now keeps source-build success on all four
+  hosts, enforces zero manifest diff on Windows, and restores only the generated
+  host-local manifest on Unix/macOS before its clean-checkout assertion.

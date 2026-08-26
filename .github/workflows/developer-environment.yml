@@ -114,10 +114,19 @@ jobs:
         run: node mir2-web3/scripts/check-developer-release.mjs
 
       - name: Verify tracked Bevy runtime release lock
+        if: runner.os == 'Windows'
         shell: bash
         run: |
           set -euo pipefail
           git diff --exit-code -- \
+            mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
+
+      - name: Restore host-local Bevy runtime release lock
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git restore --source=HEAD --worktree -- \
             mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
 
       - name: Parse developer PowerShell scripts

@@ -2515,3 +2515,10 @@ developer wrappers additionally carry a missing-prebuilt source fallback, with
 fault-injected Bash/PowerShell contracts proving the branch is taken. This is
 CI/developer-environment hardening only; the real exact-head Linux Compose smoke
 remains pending and does not change any parity numerator or acceptance field.
+
+Linux clean-checkout source compilation produced a valid host-local
+`bevy-a314c804ae9919d3`, distinct from the canonical Windows
+`bevy-5046abca14947f40`. The Developer Environment matrix therefore verifies
+the tracked manifest exactly on Windows while still requiring successful source
+builds on Linux and both macOS runners, where it restores only the generated
+host-local manifest before proving the checkout is otherwise clean.
