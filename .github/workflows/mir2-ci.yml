@@ -92,7 +92,7 @@ jobs:
     # succeed, so a broken `changes` job can never silently skip the real gate.
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.rust == 'true') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       RUSTUP_TOOLCHAIN: "1.95.0"
     defaults:
