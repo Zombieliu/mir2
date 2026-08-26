@@ -4471,3 +4471,31 @@ visual/feel acceptance.
 - This closes a deterministic backend certificate failure, not the remaining
   same-EXE UI/live-WebSocket, real-DPI, 30-minute native soak, human visual/feel,
   or official release-certificate gates.
+
+## 2026-08-26 Automated Windows functional vertical-slice gate
+
+- Candidate: full Crystal `NewCharacter -> StartGame` now uses the imported
+  `Envir.StartItems` class/gender filter whenever the Crystal current-map world
+  is active, not the legacy demo equipment seed. Warrior/Wizard/Taoist retain
+  `WoodenSword`; Assassin receives `HoaSword`; Archer receives `WoodenBow`;
+  dress, small HP drug, and candle remain source-filtered. The intentionally
+  bounded Platinum 1.76 profile still allows only Warrior/Wizard/Taoist.
+- Candidate: the real Bichon Wizard branch now has an automated q10-q12 journey:
+  Assistant Jane -> MasterMage_Don on map `0115`, ten Oma plus ten RakingCat
+  player-owned deaths, original 48/180/48 EXP and 60/45/60 gold rewards,
+  `OldLoafer` plus the `FireBall` book without auto-learning, MirGuide_Peter
+  completion, logout/save, and new-session reload.
+- Candidate: `test-windows-vertical-slice-gate.ps1` runs seven fixed,
+  fail-closed controls from a clean revision, records per-control logs and
+  SHA-256 values, and writes `SUMMARY.json`. Candidate CI now has a Windows
+  lane plus an aggregate job that requires both Linux and Windows lanes.
+- Clean revision `004549e9f15ca6fa4b7fad119cb305fcad7d3230`
+  passed all seven controls in 692,198 ms: native host 312/312, functional
+  vertical slice 10/10, ordinary loop 2/2, security lifecycle 18/18, shared
+  Zone 195/195, Gateway reload 1/1, and Web typecheck. Summary SHA-256:
+  `0590F2CEA720E69FA8755C34A0D22580A3F631647351BBF3C6F4DC136631753B`.
+- `automatedFunctionalCoveragePercent=100` is scoped only to those seven fixed
+  controls. The evidence keeps `globalParityPercent=null`, `accepted=false`,
+  and `visualAccepted=false`; it does not close same-EXE human UI/live WSS,
+  real 125%/150% DPI, 30-minute native soak, human visual/feel, semantic
+  inventory/denominator completion, or formal publisher certificate gates.

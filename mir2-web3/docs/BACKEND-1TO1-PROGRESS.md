@@ -2579,3 +2579,27 @@ Every time backend parity meaningfully moves, this file should be updated togeth
 - Backend Candidate evidence is improved, but strict 100% and final frontend
   acceptance remain gated by same-EXE UI/live-WebSocket execution, real DPI,
   native soak, human visual/feel review, and an official release certificate.
+
+## 2026-08-26 Windows functional vertical-slice automation
+
+- Full Crystal character creation now selects the source `Envir.StartItems`
+  loadout for all five classes when the Crystal current-map runtime is active.
+  This removes the legacy demo-equipment fallback while preserving the
+  Platinum 1.76 three-class allowlist as a separate bounded contract.
+- The integration slice now proves a level-four Wizard's original q10-q12 path
+  across Bichon and map `0115`, including NPC links, ten Oma and ten RakingCat
+  player-owned kill credits, exact rewards, `FireBall` as a retained book rather
+  than an auto-learned spell, and save/reload stability.
+- A PowerShell 5.1 fail-closed orchestrator now runs native host, complete
+  `vertical_slice`, ordinary unprivileged loop, security lifecycle, shared Zone,
+  Gateway reload, and Web typecheck controls from a clean Git revision. It
+  hashes every log and emits one summary. Candidate CI includes this Windows
+  lane and an aggregate job requiring both Candidate lanes.
+- Revision `004549e9f15ca6fa4b7fad119cb305fcad7d3230` passed 7/7 fixed controls:
+  native 312/312, vertical slice 10/10 in 440.27 s, ordinary 2/2, security
+  18/18, shared Zone 195/195, Gateway 1/1, and Web typecheck. Summary SHA-256 is
+  `0590F2CEA720E69FA8755C34A0D22580A3F631647351BBF3C6F4DC136631753B`.
+- The summary's 100% value is only the declared automated functional-control
+  set. Whole-game completion remains undefined while the semantic inventory is
+  incomplete, and same-EXE UI/live WSS, real DPI, 30-minute native soak, human
+  visual/feel, and formal release signing remain explicit external gates.

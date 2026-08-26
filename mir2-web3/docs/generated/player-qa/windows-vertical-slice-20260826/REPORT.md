@@ -112,6 +112,40 @@ Candidate signer only. The EXE's Authenticode status is `NotSigned`; neither an
 official publisher certificate nor a formal release-signing ceremony is
 claimed.
 
+## Follow-on automated functional gate
+
+After Candidate-03 was packaged, clean revision
+`004549e9f15ca6fa4b7fad119cb305fcad7d3230` added a repeatable Windows
+functional gate. This follow-on source revision is not represented as a new
+packaged EXE in this report; Candidate-03's exact artifact identity above is
+unchanged.
+
+The gate ran from a clean worktree from `2026-08-26T06:12:37.0089754Z` through
+`2026-08-26T06:24:09.2072237Z`. `SUMMARY.json` has SHA-256
+`0590F2CEA720E69FA8755C34A0D22580A3F631647351BBF3C6F4DC136631753B`.
+
+| Fixed automated control | Result | Duration |
+| --- | ---: | ---: |
+| Windows native host/client contract | 312/312 | 114.166 s including first compile |
+| Five-class Bichon functional slice | 10/10 | 440.602 s |
+| Ordinary unprivileged candidate loop | 2/2 | 3.377 s |
+| Security lifecycle | 18/18 | 33.286 s |
+| Shared Zone authority | 195/195 | 3.481 s |
+| Gateway logout/reload | 1/1 | 88.898 s including first compile |
+| Player Web typecheck | PASS | 8.364 s |
+
+The functional slice adds normal five-class Crystal creation with source start
+items and the original Wizard q10-q12 route across Bichon and `0115`, including
+twenty real player-owned monster deaths, exact reward semantics, and logout /
+new-session reload. The PowerShell 5.1 runner is fail-closed, requires a clean
+revision, refuses evidence overwrite, hashes every log, and is wired into a
+Windows Candidate CI lane plus a Linux/Windows aggregate job.
+
+The summary reports `automatedFunctionalCoveragePercent=100` only for these
+seven declared controls. It deliberately records `globalParityPercent=null`,
+`accepted=false`, and `visualAccepted=false` and lists the human/release gates
+below as exclusions.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend

@@ -2321,3 +2321,31 @@ stable failure now records Warrior level 45 / D504 / ZumaGuardian at 23 damage,
 packet tests also pass. This is backend Candidate evidence only; same-EXE UI,
 live WebSocket, real-DPI, 30-minute native soak, human visual/feel, and official
 release-signing gates remain open.
+
+## 2026-08-26 Five-class creation and Wizard q10-q12 slice
+
+The full Crystal runtime now creates all five classes with the imported
+class/gender-filtered `Envir.StartItems` loadout. Assassin and Archer creation
+are covered through normal `NewCharacter -> StartGame`, including their
+`HoaSword` and `WoodenBow` starts. The Platinum 1.76 content profile remains a
+separate three-class contract and was revalidated unchanged.
+
+The original Wizard newcomer branch is now automated from q10 through q12. It
+crosses from Assistant Jane to MasterMage_Don on `0115`, earns kill credit from
+ten real Oma and ten real RakingCat deaths, retains the original `OldLoafer` and
+`FireBall` book rewards, completes with MirGuide_Peter, and preserves quest,
+inventory, experience, gold, position, direction, and class state across
+logout and a new session.
+
+Clean revision `004549e9f15ca6fa4b7fad119cb305fcad7d3230` passed the new Windows
+functional gate's seven fixed controls in 692,198 ms. The aggregate includes
+native host 312/312, `vertical_slice` 10/10, ordinary loop 2/2, security 18/18,
+shared Zone 195/195, Gateway reload 1/1, and Web typecheck. The evidence summary
+SHA-256 is
+`0590F2CEA720E69FA8755C34A0D22580A3F631647351BBF3C6F4DC136631753B`.
+
+This is a bounded automated functional slice. Its scoped controls are 100%
+green, but global Crystal parity remains unscored (`globalParityPercent=null`)
+until the semantic inventory and denominator are complete. It does not replace
+same-EXE human UI/live-WebSocket, real DPI, 30-minute native soak, human
+visual/gameplay-feel, or official signing acceptance.
