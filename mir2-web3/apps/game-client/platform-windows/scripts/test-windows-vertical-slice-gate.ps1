@@ -31,6 +31,39 @@ function New-Control {
     }
 }
 
+function Invoke-NativeControl {
+    param(
+        [Parameter(Mandatory = $true)][string]$Executable,
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [switch]$Quiet
+    )
+
+    # Windows PowerShell 5.1 promotes native stderr to NativeCommandError when
+    # ErrorActionPreference is Stop. Cargo writes ordinary progress such as an
+    # index update to stderr, so capture it without treating the stream itself
+    # as failure. The native process exit code remains the fail-closed signal.
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $capturedLines = @(& $Executable @Arguments 2>&1 | ForEach-Object {
+            $line = $_.ToString()
+            if (-not $Quiet) {
+                Write-Host $line
+            }
+            $line
+        })
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    [pscustomobject][ordered]@{
+        lines = $capturedLines
+        exitCode = $exitCode
+    }
+}
+
 $cargo = "cargo"
 $cargoToolchainArgument = "+$RustToolchain"
 $controls = @(
@@ -183,11 +216,23 @@ function Assert-Contract {
 Assert-Contract
 
 if ($SelfTest) {
+    $stderrProbe = Invoke-NativeControl `
+        -Executable "cmd.exe" `
+        -Arguments @("/d", "/s", "/c", "echo native-stderr-probe 1>&2") `
+        -Quiet
+    $stderrProbeMatched = @($stderrProbe.lines | Where-Object {
+        $_.Trim() -ceq "native-stderr-probe"
+    }).Count -eq 1
+    if ($stderrProbe.exitCode -ne 0 -or -not $stderrProbeMatched) {
+        throw "native stderr capture compatibility probe failed"
+    }
+
     [pscustomobject][ordered]@{
         schema = "mir2.windows.vertical-slice-gate-self-test.v1"
         status = "PASS"
         controlCount = $controls.Count
         controlIds = $expectedControlIds
+        nativeStderrCapture = "PASS"
         globalParityPercent = $null
     } | ConvertTo-Json -Depth 4
     exit 0
@@ -256,12 +301,11 @@ try {
         Write-Host "`n==> [$($control.id)] $($control.description)"
         Write-Host ("    {0} {1}" -f $control.executable, [string]::Join(" ", $control.arguments))
 
-        $lines = @(& $control.executable @($control.arguments) 2>&1 | ForEach-Object {
-            $line = $_.ToString()
-            Write-Host $line
-            $line
-        })
-        $exitCode = $LASTEXITCODE
+        $nativeResult = Invoke-NativeControl `
+            -Executable $control.executable `
+            -Arguments @($control.arguments)
+        $lines = @($nativeResult.lines)
+        $exitCode = $nativeResult.exitCode
         $stopwatch.Stop()
 
         [System.IO.File]::WriteAllText(

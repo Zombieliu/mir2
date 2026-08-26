@@ -58,7 +58,7 @@ jobs:
             mir2-web3/docs/stage5-screenshots/
 
   windows-vertical-slice:
-    name: Windows verifiable vertical slice
+    name: Windows functional vertical slice
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
@@ -79,7 +79,7 @@ jobs:
           cache-dependency-path: mir2-web3/apps/web/package-lock.json
 
       - name: Install Player Web dependencies
-        run: npm ci --prefix mir2-web3/apps/web
+        run: npm.cmd ci --prefix mir2-web3/apps/web
 
       - name: Verify vertical-slice gate contract
         shell: powershell
