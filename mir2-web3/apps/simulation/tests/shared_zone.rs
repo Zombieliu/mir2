@@ -4643,10 +4643,7 @@ fn zone_native_harvestable_monster_cannot_respawn_before_object_harvested() {
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
     admit_melee(&mut zone, &first);
 
-    let mut initial = native_neutral_monster_spawn(9_102, "Deer", 2, 331, 270);
-    // This test exercises the harvest/respawn lifecycle, so its corpse source
-    // must be explicitly player-attackable under the trusted disposition gate.
-    initial.disposition = Some(WorldEntityDisposition::Hostile);
+    let initial = native_neutral_monster_spawn(9_102, "Deer", 2, 331, 270);
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: initial.clone(),
@@ -4716,6 +4713,74 @@ fn zone_native_harvestable_monster_cannot_respawn_before_object_harvested() {
         .expect("harvested Deer should respawn as a new incarnation");
     assert!(!live.dead);
     assert!(live.hp > 0);
+}
+
+#[test]
+fn zone_neutral_harvestable_monster_accepts_only_adjacent_melee() {
+    let attacker = session("melee-attacker");
+    let mut melee_zone = zone();
+    melee_zone.handle(ZoneCommand::Join(join(
+        "melee-attacker",
+        101,
+        "MeleeAttacker",
+        330,
+        270,
+    )));
+    admit_melee(&mut melee_zone, &attacker);
+    let deer = native_neutral_monster_spawn(9_150, "Deer", 2, 331, 270);
+    melee_zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: deer.clone(),
+        now_ms: 0,
+    });
+
+    let direct = melee_zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9_150,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    assert!(has_packet(&direct, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 101
+    )));
+    assert!(damage_indicator_for(&melee_zone.tick(10), 9_150).is_some());
+
+    let materialized_attacker = session("materialized-attacker");
+    let mut materialized_zone = zone();
+    materialized_zone.handle(ZoneCommand::Join(join(
+        "materialized-attacker",
+        201,
+        "MaterializedAttacker",
+        330,
+        270,
+    )));
+    admit_melee(&mut materialized_zone, &materialized_attacker);
+    let materialized = materialized_zone.handle(ZoneCommand::PlayerAttackMaterializedObject {
+        session_id: materialized_attacker.clone(),
+        object_id: 9_151,
+        monster: Some(ZoneMonsterSpawn {
+            object_id: 9_151,
+            ..deer
+        }),
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    assert!(materialized_zone.has_native_monster(9_151));
+    assert!(has_packet(
+        &materialized,
+        &materialized_attacker,
+        |packet| matches!(packet, ServerPacket::ObjectAttack { info } if info.object_id == 201)
+    ));
+    assert!(damage_indicator_for(&materialized_zone.tick(10), 9_151).is_some());
 }
 
 #[test]

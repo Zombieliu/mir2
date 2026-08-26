@@ -49,6 +49,15 @@ fn default_npc_condition_context() -> super::CrystalNpcContextState {
     }
 }
 
+#[test]
+fn stale_monster_entity_handle_is_not_damageable() {
+    let mut world = bevy_ecs::prelude::World::new();
+    let stale = world.spawn_empty().id();
+    assert!(world.despawn(stale));
+
+    assert!(!super::monster_is_damageable(&world, stale));
+}
+
 fn evaluate_crystal_npc_condition(world: &mut bevy_ecs::prelude::World, condition: &str) -> bool {
     super::evaluate_crystal_npc_condition(world, condition, &default_npc_condition_context())
 }
@@ -9291,6 +9300,73 @@ fn hen_is_passive_and_requires_two_skin_passes_then_transfer() {
         .inventory_items
         .iter()
         .any(|item| item.key == "crystal-item-850" && item.name == "Chicken"));
+}
+
+#[test]
+fn due_harvestable_respawn_waits_for_final_harvest_boundary() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_world_runtime());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let deer = find_monster_entity_by(&session, |name, _, _| name == "Deer");
+    let spawn_ref = session
+        .app
+        .world()
+        .entity(deer)
+        .get::<SpawnSlotRef>()
+        .copied()
+        .expect("Crystal-world Deer must retain its respawn slot");
+    {
+        let mut entry = session.app.world_mut().entity_mut(deer);
+        entry.get_mut::<MonsterAgent>().expect("Deer agent").dead = true;
+        entry.get_mut::<MonsterVitals>().expect("Deer vitals").hp = 0;
+        entry.insert(super::initial_harvest_monster_state(2).expect("Deer harvest state"));
+    }
+    let current_tick = runtime_tick(session.app.world());
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MonsterSpawnTable>()
+        .rules[spawn_ref.rule_index]
+        .slots[spawn_ref.slot_index]
+        .next_respawn_tick = Some(current_tick);
+
+    assert!(super::tick_respawns(session.app.world_mut()).is_empty());
+    assert!(
+        session
+            .app
+            .world()
+            .entity(deer)
+            .get::<MonsterAgent>()
+            .expect("Deer agent")
+            .dead
+    );
+    assert_eq!(
+        session.app.world().resource::<MonsterSpawnTable>().rules[spawn_ref.rule_index].slots
+            [spawn_ref.slot_index]
+            .next_respawn_tick,
+        Some(current_tick),
+        "due schedule must stay pending while the corpse is harvestable"
+    );
+
+    session
+        .app
+        .world_mut()
+        .entity_mut(deer)
+        .get_mut::<HarvestMonsterState>()
+        .expect("Deer harvest state")
+        .harvested = true;
+    assert_eq!(super::tick_respawns(session.app.world_mut()), vec![deer]);
+    assert!(
+        !session
+            .app
+            .world()
+            .entity(deer)
+            .get::<MonsterAgent>()
+            .expect("Deer agent")
+            .dead
+    );
 }
 
 #[test]

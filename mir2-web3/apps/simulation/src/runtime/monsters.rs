@@ -973,7 +973,13 @@ pub(super) fn is_hidden_or_sleeping_target(
 }
 
 pub(super) fn monster_is_damageable(world: &World, monster_entity: Entity) -> bool {
-    let entry = world.entity(monster_entity);
+    let Ok(entry) = world.get_entity(monster_entity) else {
+        // Activation/respawn queues can retain an entity generation for one
+        // boundary after another system despawns it. A stale handle is not an
+        // attackable monster and must fail closed instead of panicking the
+        // authoritative runtime.
+        return false;
+    };
     let Some(agent) = entry.get::<MonsterAgent>() else {
         return false;
     };
@@ -1651,6 +1657,16 @@ pub(super) fn crystal_monster_effect_for_name(name: &str) -> u8 {
 #[allow(deprecated)]
 pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
     let tick = super::session::runtime_tick(world);
+    let awaiting_harvest = world
+        .iter_entities()
+        .filter_map(|entity| {
+            let agent = entity.get::<MonsterAgent>()?;
+            let harvest = entity.get::<HarvestMonsterState>()?;
+            let spawn_ref = entity.get::<SpawnSlotRef>()?;
+            (agent.dead && !harvest.harvested)
+                .then_some((spawn_ref.rule_index, spawn_ref.slot_index))
+        })
+        .collect::<BTreeSet<_>>();
     let mut due_respawns = Vec::new();
     {
         let mut spawn_table = world.resource_mut::<MonsterSpawnTable>();
@@ -1660,6 +1676,14 @@ pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
                     continue;
                 };
                 if tick < respawn_tick {
+                    continue;
+                }
+                // A harvestable Crystal corpse is an authoritative lifecycle
+                // boundary. Keep its due respawn pending until the final
+                // ObjectHarvested pass; otherwise every compatibility tick
+                // can revive it and reset multi-pass skinning progress while
+                // the shared Zone correctly retains the corpse.
+                if awaiting_harvest.contains(&(rule_index, slot_index)) {
                     continue;
                 }
                 let Some(entity) = slot.entity else {

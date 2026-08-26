@@ -38,11 +38,11 @@ use super::packets::{
     shared_object_action_packet, user_location_packet,
 };
 use super::types::{
-    GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand, ZoneGroundDrop,
-    ZoneGroundDropClaim, ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneMovementAction, ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot,
-    ZoneNpcTeleportConfig, ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState,
-    ZoneReincarnationOffer,
+    zone_native_monster_requires_harvest, GroundDropClaimTicket, PlayerId, SessionId,
+    ZoneBossRewardAudit, ZoneCommand, ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey,
+    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction, ZoneMovementActionKind,
+    ZoneNativeMonster, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneObject, ZoneOutbound,
+    ZonePlayer, ZonePlayerCombatState, ZoneReincarnationOffer,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
@@ -101,6 +101,12 @@ const ZONE_NATIVE_MONSTER_AGGRO_Y: i32 = 6;
 fn zone_native_monster_is_authoritatively_hostile(monster: &ZoneNativeMonster) -> bool {
     monster.hostile_to_player
         && monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile)
+}
+
+fn zone_native_monster_is_authoritatively_melee_attackable(monster: &ZoneNativeMonster) -> bool {
+    zone_native_monster_is_authoritatively_hostile(monster)
+        || (monster.disposition == Some(crate::config::WorldEntityDisposition::Neutral)
+            && zone_native_monster_requires_harvest(monster.ai))
 }
 const ZONE_NATIVE_MONSTER_RANGED_MAX: i32 = 8;
 const ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX: i32 = 9;
@@ -2634,7 +2640,8 @@ impl ZoneRuntime {
             return Vec::new();
         };
         if !self.native_monsters.contains_key(&object_id)
-            && monster.is_some_and(|monster| !monster.is_authoritatively_hostile_to_player())
+            && monster
+                .is_some_and(|monster| !monster.is_authoritatively_melee_attackable_by_player())
         {
             return self.owner_location_correction(session_id);
         }
@@ -2766,10 +2773,9 @@ impl ZoneRuntime {
             .values()
             .any(|target| target.object_id == object_id);
         if !is_player_target
-            && self
-                .native_monsters
-                .get(&object_id)
-                .is_some_and(|monster| !zone_native_monster_is_authoritatively_hostile(monster))
+            && self.native_monsters.get(&object_id).is_some_and(|monster| {
+                !zone_native_monster_is_authoritatively_melee_attackable(monster)
+            })
         {
             return self.owner_location_correction(session_id);
         }
@@ -2805,7 +2811,7 @@ impl ZoneRuntime {
         else {
             return self.correct_player_location(session_id, now_ms);
         };
-        if !zone_native_monster_is_authoritatively_hostile(&monster) {
+        if !zone_native_monster_is_authoritatively_melee_attackable(&monster) {
             return self.owner_location_correction(session_id);
         }
         let attack_spell = Spell::try_from(spell).unwrap_or(Spell::None);
@@ -11815,10 +11821,6 @@ impl ZoneRuntime {
                     .any(|member| member.eq_ignore_ascii_case(&owner.name))
             })
     }
-}
-
-fn zone_native_monster_requires_harvest(ai: u8) -> bool {
-    matches!(ai, 1 | 2 | 7 | 9 | 28 | 35)
 }
 
 fn tile_key(point: &Point) -> (i32, i32) {

@@ -3934,6 +3934,29 @@ impl SharedInProcessZoneState {
             .into_iter()
             .map(|monster| (monster.object_id, monster))
             .collect::<BTreeMap<_, _>>();
+        // `ObjectRemove` is also the Crystal AOI-leave packet. This method is
+        // the final global map-index mutation boundary, so defend it directly
+        // instead of relying on every caller to pre-classify observer-local
+        // packets. A retained Zone object remains globally actionable even
+        // while absent from one recipient's viewport.
+        let zone_key = ZoneKey::for_map(map_file_name);
+        let retained_remove_ids = self
+            .zone_manager
+            .zone(&zone_key)
+            .map(|zone| {
+                packets
+                    .iter()
+                    .filter_map(|packet| match packet {
+                        ServerPacket::ObjectRemove { object_id }
+                            if zone.retains_object_id(*object_id) =>
+                        {
+                            Some(*object_id)
+                        }
+                        _ => None,
+                    })
+                    .collect::<BTreeSet<_>>()
+            })
+            .unwrap_or_default();
         let map = self.maps.entry(map_file_name.to_string()).or_default();
         for packet in packets {
             match packet {
@@ -4013,6 +4036,9 @@ impl SharedInProcessZoneState {
                     }
                 }
                 ServerPacket::ObjectRemove { object_id } => {
+                    if retained_remove_ids.contains(object_id) {
+                        continue;
+                    }
                     map.entities.remove(object_id);
                     map.removed_entity_ids.insert(*object_id);
                     map.ground_drops.remove(object_id);
@@ -8995,11 +9021,60 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
+        let Some(current_key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let packets = {
+            let zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let Some(map_file_name) = zone_state
+                .players
+                .get(&current_key)
+                .map(|presence| presence.map_file_name.as_str())
+            else {
+                return Vec::new();
+            };
+            let zone_key = ZoneKey::for_map(map_file_name);
+            packets
+                .iter()
+                .filter(|packet| {
+                    // BroadcastPackets carries a personal SimulationSession's
+                    // player-action projection. Its ObjectRemove can mean only
+                    // that a static object left this one session's private
+                    // viewport. Do not feed that visibility event back into
+                    // the single-writer Zone as a world deletion. Player-owned
+                    // summons remain eligible for their real lifecycle remove.
+                    !matches!(
+                        packet,
+                        ServerPacket::ObjectRemove { object_id }
+                            if zone_state
+                                .shared_entity(map_file_name, *object_id)
+                                .is_some_and(|entity| {
+                                    entity.owner_name.is_none()
+                                        && matches!(
+                                            entity.kind,
+                                            WorldEntityKind::Npc | WorldEntityKind::Monster
+                                        )
+                                })
+                                && zone_state
+                                    .zone_manager
+                                    .zone(&zone_key)
+                                    .is_some_and(|zone| zone.retains_object_id(*object_id))
+                    )
+                })
+                .cloned()
+                .collect::<Vec<_>>()
+        };
+        if packets.is_empty() {
+            return Vec::new();
+        }
         self.dispatch_zone_player_command(
             ZoneCommand::BroadcastPackets {
                 session_id,
                 owner_local_object_id,
-                packets: packets.to_vec(),
+                packets,
                 now_ms: Self::zone_now_ms(),
             },
             false,
@@ -9085,6 +9160,27 @@ impl SharedInProcessZoneSessionRuntime {
             let observer_packets = packets
                 .iter()
                 .filter(|packet| {
+                    // A personal SimulationSession also emits ObjectRemove
+                    // when a static shared object leaves its private data
+                    // range. Feeding that viewport packet back into the Zone
+                    // would turn it into a real world deletion. Static NPCs
+                    // and unowned native monsters are already single-writer
+                    // Zone objects; only their Zone lifecycle may remove them.
+                    let personal_viewport_remove = match packet {
+                        ServerPacket::ObjectRemove { object_id } => zone_state
+                            .shared_entity(&map_file_name, *object_id)
+                            .is_some_and(|entity| {
+                                entity.owner_name.is_none()
+                                    && matches!(
+                                        entity.kind,
+                                        WorldEntityKind::Npc | WorldEntityKind::Monster
+                                    )
+                            }),
+                        _ => false,
+                    };
+                    if personal_viewport_remove {
+                        return false;
+                    }
                     let shared_actor_packet = shared_entity_observer_packet_object_id(packet)
                         .is_some_and(|object_id| {
                             observer_object_ids.contains(&object_id)
@@ -9248,26 +9344,40 @@ impl SharedInProcessZoneSessionRuntime {
                 .as_ref()
                 .and_then(|key| zone_state.players.get(key))
                 .map(|presence| presence.zone_object_id);
-            if let (Some(local_self_object_id), Some(zone_object_id)) =
-                (local_self_object_id, zone_object_id)
-            {
-                let packets = packets
-                    .iter()
-                    .map(|packet| match packet {
+            // The command tail includes Zone-generated AOI diffs as well as
+            // true shared-world lifecycle packets. `ObjectRemove` only means a
+            // global deletion when the single-writer Zone no longer retains the
+            // object; otherwise it is local viewport bookkeeping. Filtering at
+            // this second map-layer application boundary is essential because
+            // the initial Zone outbound dispatch already made the same
+            // distinction before the aggregate packet list reached us again.
+            let zone_key = ZoneKey::for_map(map_file_name);
+            let packets = packets
+                .iter()
+                .filter(|packet| {
+                    !matches!(
+                        packet,
+                        ServerPacket::ObjectRemove { object_id }
+                            if zone_state
+                                .zone_manager
+                                .zone(&zone_key)
+                                .is_some_and(|zone| zone.retains_object_id(*object_id))
+                    )
+                })
+                .map(|packet| match packet {
+                    ServerPacket::ObjectMonster { info }
+                        if local_self_object_id.is_some_and(|local_self_object_id| {
+                            info.master_object_id == local_self_object_id
+                        }) && zone_object_id.is_some() =>
+                    {
+                        let mut info = info.clone();
+                        info.master_object_id = zone_object_id.expect("checked above");
                         ServerPacket::ObjectMonster { info }
-                            if info.master_object_id == local_self_object_id =>
-                        {
-                            let mut info = info.clone();
-                            info.master_object_id = zone_object_id;
-                            ServerPacket::ObjectMonster { info }
-                        }
-                        packet => packet.clone(),
-                    })
-                    .collect::<Vec<_>>();
-                zone_state.apply_shared_entity_packets(map_file_name, &packets);
-            } else {
-                zone_state.apply_shared_entity_packets(map_file_name, packets);
-            }
+                    }
+                    packet => packet.clone(),
+                })
+                .collect::<Vec<_>>();
+            zone_state.apply_shared_entity_packets(map_file_name, &packets);
         }
     }
 
@@ -9612,14 +9722,22 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
+        let trusted_physical_monster_target = match &attack.kind {
+            ZoneNativePlayerAttackKind::Melee { .. } => attack
+                .monster
+                .as_ref()
+                .is_some_and(ZoneMonsterSpawn::is_authoritatively_melee_attackable_by_player),
+            ZoneNativePlayerAttackKind::Range { .. } => attack
+                .monster
+                .as_ref()
+                .is_some_and(ZoneMonsterSpawn::is_authoritatively_hostile_to_player),
+            ZoneNativePlayerAttackKind::Magic { .. } => true,
+        };
         if matches!(
             &attack.kind,
             ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
         ) && !is_player_target
-            && !attack
-                .monster
-                .as_ref()
-                .is_some_and(ZoneMonsterSpawn::is_authoritatively_hostile_to_player)
+            && !trusted_physical_monster_target
         {
             return self.authoritative_zone_owner_correction();
         }
@@ -13571,6 +13689,147 @@ mod tests {
     }
 
     #[test]
+    fn command_tail_aoi_remove_does_not_tombstone_retained_shared_npc_globally() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-command-tail-aoi-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Assistant_Jane")
+            .expect("full Crystal runtime should expose Assistant Jane");
+
+        assert!(
+            zone_state
+                .lock()
+                .expect("shared zone state should lock")
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .is_some_and(|zone| zone.retains_object_id(npc.object_id)),
+            "shared NPC should remain authoritative while outside one observer's AOI"
+        );
+
+        runtime.apply_shared_entity_packets_to_current_map(&[ServerPacket::ObjectRemove {
+            object_id: npc.object_id,
+        }]);
+
+        let state = zone_state.lock().expect("shared zone state should lock");
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
+    fn final_shared_entity_apply_does_not_tombstone_retained_shared_npc_globally() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-final-apply-aoi-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc)
+            .expect("full Crystal runtime should expose a nearby shared NPC");
+
+        let mut state = zone_state.lock().expect("shared zone state should lock");
+        assert!(
+            state
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .is_some_and(|zone| zone.retains_object_id(npc.object_id)),
+            "shared NPC should remain authoritative while outside one observer's AOI"
+        );
+
+        state.apply_shared_entity_packets(
+            "0",
+            &[ServerPacket::ObjectRemove {
+                object_id: npc.object_id,
+            }],
+        );
+
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
+    fn personal_viewport_remove_does_not_delete_retained_shared_npc_from_zone() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-personal-viewport-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Assistant_Jane")
+            .expect("full Crystal runtime should expose Assistant Jane");
+
+        runtime.dispatch_shared_entity_observer_packets(&[ServerPacket::ObjectRemove {
+            object_id: npc.object_id,
+        }]);
+
+        let state = zone_state.lock().expect("shared zone state should lock");
+        let zone = state
+            .zone_manager
+            .zone(&ZoneKey::for_map("0"))
+            .expect("started runtime should retain its shared Zone");
+        assert!(zone.retains_object_id(npc.object_id));
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
+    fn player_observer_broadcast_does_not_delete_retained_shared_npc_from_zone() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-player-observer-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Merchant_John")
+            .expect("full Crystal runtime should expose Merchant John");
+        let owner_local_object_id = runtime
+            .local_self_object_id()
+            .expect("started runtime should expose its local self object id");
+
+        runtime.dispatch_zone_observer_packets(
+            owner_local_object_id,
+            &[ServerPacket::ObjectRemove {
+                object_id: npc.object_id,
+            }],
+        );
+
+        let state = zone_state.lock().expect("shared zone state should lock");
+        let zone = state
+            .zone_manager
+            .zone(&ZoneKey::for_map("0"))
+            .expect("started runtime should retain its shared Zone");
+        assert!(zone.retains_object_id(npc.object_id));
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
     fn shared_zone_seeds_current_map_npcs_for_later_owner_aoi_entry() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
@@ -13608,6 +13867,127 @@ mod tests {
                     && info.name == "MirGuide_Peter"
                     && info.location == (Point { x: 328, y: 258 })
         )));
+    }
+
+    #[test]
+    fn retained_shared_npc_survives_owner_aoi_leave_and_reentry() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-aoi-round-trip", "Walker");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session");
+        let jane_object_id = 3;
+
+        let away = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id: session_id.clone(),
+                position: Point { x: 324, y: 262 },
+                direction: MirDirection::UpLeft,
+            },
+            false,
+        );
+        assert!(away.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRemove { object_id } if *object_id == jane_object_id
+        )));
+        runtime.apply_shared_entity_packets_to_current_map(&away);
+        {
+            let state = zone_state.lock().expect("shared zone state should lock");
+            let map = state
+                .map_layer(Some("0"))
+                .expect("shared map layer should still exist");
+            assert!(map.entities.contains_key(&jane_object_id));
+            assert!(!map.removed_entity_ids.contains(&jane_object_id));
+        }
+
+        let returned = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: Point { x: 284, y: 606 },
+                direction: MirDirection::Down,
+            },
+            false,
+        );
+        assert!(returned.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectNpc { info }
+                if info.object_id == jane_object_id && info.name == "Assistant_Jane"
+        )));
+        runtime.apply_shared_entity_packets_to_current_map(&returned);
+
+        let snapshot = runtime.world_snapshot();
+        assert!(snapshot.entities.iter().any(|entity| {
+            entity.object_id == jane_object_id
+                && entity.kind == WorldEntityKind::Npc
+                && entity.name == "Assistant_Jane"
+        }));
+    }
+
+    #[test]
+    fn retained_shared_npc_survives_personal_ticks_outside_aoi() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-personal-tick-aoi", "Walker");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session");
+        let jane_object_id = 3;
+
+        let away = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id: session_id.clone(),
+                position: Point { x: 290, y: 625 },
+                direction: MirDirection::Down,
+            },
+            false,
+        );
+        runtime.apply_shared_entity_packets_to_current_map(&away);
+        runtime.force_inner_to_current_zone_transform();
+        for _ in 0..32 {
+            runtime
+                .execute(WorldCommand::Tick)
+                .expect("personal world tick outside Jane AOI should execute");
+        }
+        {
+            let state = zone_state.lock().expect("shared zone state should lock");
+            assert!(
+                state
+                    .zone_manager
+                    .zone(&ZoneKey::for_map("0"))
+                    .is_some_and(|zone| zone.retains_object_id(jane_object_id)),
+                "personal viewport ticks must not delete Jane from the Zone"
+            );
+            let map = state
+                .map_layer(Some("0"))
+                .expect("shared map layer should still exist");
+            assert!(map.entities.contains_key(&jane_object_id));
+            assert!(!map.removed_entity_ids.contains(&jane_object_id));
+        }
+
+        let returned = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: Point { x: 284, y: 606 },
+                direction: MirDirection::Down,
+            },
+            false,
+        );
+        runtime.apply_shared_entity_packets_to_current_map(&returned);
+        runtime.force_inner_to_current_zone_transform();
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("personal world tick after returning to Jane should execute");
+
+        assert!(runtime.world_snapshot().entities.iter().any(|entity| {
+            entity.object_id == jane_object_id
+                && entity.kind == WorldEntityKind::Npc
+                && entity.name == "Assistant_Jane"
+        }));
     }
 
     #[test]
@@ -21467,6 +21847,56 @@ mod tests {
                 .expect("Zone checkpoint"),
             before
         );
+    }
+
+    #[test]
+    fn gateway_melee_materializes_neutral_harvestable_deer() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "neutral-deer-melee", "DeerBlade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 330, y: 270 }, MirDirection::UpLeft);
+        let mut target = shared_monster_entity(260_904);
+        target.ai = Some(2);
+        target.x = 329;
+        target.y = 269;
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("neutral Deer should be representable");
+        assert_eq!(monster.disposition, Some(WorldEntityDisposition::Neutral));
+        assert!(monster.is_authoritatively_melee_attackable_by_player());
+        assert!(!monster.is_authoritatively_hostile_to_player());
+
+        let packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(monster),
+            kind: ZoneNativePlayerAttackKind::Melee {
+                spell: Spell::None as u8,
+                attack_type: 0,
+            },
+        });
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+        assert!(zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .iter()
+            .any(|monster| monster.object_id == target.object_id));
     }
 
     #[test]

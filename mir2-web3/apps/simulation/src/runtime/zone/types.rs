@@ -806,6 +806,19 @@ impl ZoneMonsterSpawn {
     pub fn is_authoritatively_hostile_to_player(&self) -> bool {
         self.disposition == Some(WorldEntityDisposition::Hostile)
     }
+
+    /// Crystal passive livestock can be struck by an adjacent physical melee
+    /// attack even though it must never acquire or attack a player itself.
+    /// Friendly entities and incomplete legacy records continue to fail closed.
+    pub fn is_authoritatively_melee_attackable_by_player(&self) -> bool {
+        self.is_authoritatively_hostile_to_player()
+            || (self.disposition == Some(WorldEntityDisposition::Neutral)
+                && zone_native_monster_requires_harvest(self.ai))
+    }
+}
+
+pub(super) fn zone_native_monster_requires_harvest(ai: u8) -> bool {
+    matches!(ai, 1 | 2 | 7 | 9 | 28 | 35)
 }
 
 impl ZoneNativeMonster {
