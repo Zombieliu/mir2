@@ -649,6 +649,53 @@ fn crystal_monster_agility(world: &World, monster_entity: Entity) -> i32 {
         .unwrap_or(0)
 }
 
+/// Stable accuracy roll with enough avalanche mixing to avoid modulo resonance.
+///
+/// The generic world roll is intentionally cheap and linear. Reusing it here
+/// made some agility spans pathological: its tick coefficient is divisible by
+/// nine, so an agility-eight target could be a permanent hit or permanent miss
+/// for one attacker/target pair. Crystal rolls accuracy again on every swing;
+/// mix tick and identities before reducing to the requested span so successive
+/// attacks retain that behaviour while remaining replay-deterministic.
+pub(super) fn crystal_accuracy_roll(
+    current_tick: u64,
+    attacker_id: u32,
+    target_object_id: u32,
+    span: u64,
+) -> u64 {
+    if span <= 1 {
+        return 0;
+    }
+
+    let mut value = current_tick.wrapping_add(0x9E37_79B9_7F4A_7C15)
+        ^ u64::from(attacker_id).wrapping_mul(0xBF58_476D_1CE4_E5B9)
+        ^ u64::from(target_object_id).wrapping_mul(0x94D0_49BB_1331_11EB);
+    value = (value ^ (value >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    (value ^ (value >> 31)) % span
+}
+
+#[cfg(test)]
+mod crystal_accuracy_roll_tests {
+    use super::crystal_accuracy_roll;
+
+    #[test]
+    fn agility_eight_roll_changes_across_successive_ticks() {
+        let rolls = (0..32)
+            .map(|tick| crystal_accuracy_roll(tick, 1_000, 206_629, 9))
+            .collect::<Vec<_>>();
+
+        assert!(
+            rolls.contains(&0),
+            "zero-accuracy attacker must sometimes hit"
+        );
+        assert!(
+            rolls.iter().any(|roll| *roll > 0),
+            "agility-eight target must sometimes dodge"
+        );
+    }
+}
+
 fn crystal_player_hit_roll_succeeds(
     world: &World,
     attacker_id: u32,
@@ -664,10 +711,11 @@ fn crystal_player_hit_roll_succeeds(
         return true;
     }
 
-    let roll = deterministic_roll(
+    let target_object_id = entity_object_id(world, target_entity).unwrap_or(target_entity.index());
+    let roll = crystal_accuracy_roll(
         current_tick,
-        usize::try_from(attacker_id).unwrap_or_default(),
-        target_entity.index() as usize,
+        attacker_id,
+        target_object_id,
         u64::try_from(agility.saturating_add(1)).unwrap_or(1),
     );
     roll <= u64::try_from(crystal_player_accuracy(world).max(0)).unwrap_or(0)

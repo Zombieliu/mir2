@@ -531,6 +531,42 @@ fn use_newcomer_hp_drug_if_needed(session: &mut SimulationSession) -> Vec<Server
     packets
 }
 
+fn rest_newcomer_before_hunt_if_needed(session: &mut SimulationSession) -> Vec<ServerPacket> {
+    let snapshot = session.world_snapshot();
+    let (Some(hp), Some(max_hp)) = (snapshot.player_hp, snapshot.player_max_hp) else {
+        return Vec::new();
+    };
+    if hp <= 0 || hp.saturating_mul(4) > max_hp.saturating_mul(3) {
+        return Vec::new();
+    }
+
+    // The long original quest chain has only the gold for its eight explicitly
+    // asserted starter-potion purchases. A real newcomer can recover between
+    // field trips instead of spending QA-only currency, so return to Border
+    // Village's start safe zone and exercise passive Crystal regeneration.
+    let mut packets = session.transfer_map("crystal:0:288:616");
+    let max_ticks = usize::try_from(max_hp.max(1))
+        .unwrap_or(1)
+        .saturating_mul(10)
+        .saturating_add(20);
+    for _ in 0..max_ticks {
+        if session
+            .world_snapshot()
+            .player_hp
+            .is_some_and(|current_hp| current_hp >= max_hp)
+        {
+            break;
+        }
+        packets.extend(session.tick());
+    }
+    assert_eq!(
+        session.world_snapshot().player_hp,
+        Some(max_hp),
+        "newcomer should finish resting at full HP before the next field hunt"
+    );
+    packets
+}
+
 fn assert_newcomer_alive(session: &SimulationSession, context: &str) {
     let snapshot = session.world_snapshot();
     let player = snapshot
@@ -586,6 +622,7 @@ fn kill_original_monsters(
 
     for kill_index in 0..count {
         packets.extend(use_newcomer_hp_drug_if_needed(session));
+        packets.extend(rest_newcomer_before_hunt_if_needed(session));
         assert_newcomer_alive(
             session,
             &format!("hunting {monster_name_prefix} #{kill_index}"),
@@ -1763,11 +1800,11 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
     assert!(
         ready_snapshot.inventory_items.iter().any(|item| {
             item.container == mir2_simulation::ItemContainer::Quest
-                && item.key == "quest-wasp-stinger"
+                && item.key == "crystal-item-876"
         }) || ready_snapshot.ground_drops.iter().any(|drop| {
             matches!(
                 &drop.loot,
-                GroundDropLootSnapshot::InventoryItem { key, .. } if key == "quest-wasp-stinger"
+                GroundDropLootSnapshot::InventoryItem { key, .. } if key == "crystal-item-876"
             )
         }),
         "quest proof should exist in quest inventory or visible drops: {:?}",
@@ -1823,12 +1860,12 @@ fn bichon_starter_npc_monster_quest_drop_and_level_loop_closes() {
         after_turn_in
             .equipment_items
             .iter()
-            .any(|item| item.name == "Guide Ring")
+            .any(|item| item.key == "crystal-item-404" && item.name == "CopperRing")
             || after_turn_in
                 .inventory_items
                 .iter()
-                .any(|item| item.name == "Guide Ring"),
-        "turn-in should award Guide Ring: {:?}",
+                .any(|item| item.key == "crystal-item-404" && item.name == "CopperRing"),
+        "turn-in should award the authoritative Crystal CopperRing: {:?}",
         after_turn_in.equipment_items
     );
 }
@@ -2746,10 +2783,13 @@ fn shared_multiplayer_presence_movement_chat_and_drop_ownership_are_stable() {
     assert!(first_claim.iter().any(|outbound| {
         matches!(
             outbound,
-            ZoneOutbound::GroundDropClaimed {
+            ZoneOutbound::GroundDropClaimedWithTicket {
                 session_id,
-                drop
-            } if session_id.as_str() == "slice-a" && drop.object_id == 9_001
+                ticket
+            } if session_id.as_str() == "slice-a"
+                && ticket.drop.object_id == 9_001
+                && ticket.claim_id > 0
+                && !ticket.idempotency_key.is_empty()
         )
     }));
 }

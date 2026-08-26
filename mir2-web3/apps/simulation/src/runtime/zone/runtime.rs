@@ -12140,10 +12140,10 @@ fn zone_resolve_player_physical_attack(
 
     let agility = monster.defense.agility.max(0);
     if agility > 0 {
-        let roll = zone_deterministic_roll(
+        let roll = crate::runtime::combat::crystal_accuracy_roll(
             now_ms,
-            usize::try_from(player.object_id).unwrap_or_default(),
-            usize::try_from(monster_object_id).unwrap_or_default(),
+            player.object_id,
+            monster_object_id,
             u64::try_from(agility.saturating_add(1)).unwrap_or(1),
         );
         if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
@@ -12401,10 +12401,10 @@ fn zone_resolve_player_pvp_physical_attack(
 ) -> Option<i32> {
     let stats = attacker.combat_stats;
     if stats.has_authoritative_damage() && target.combat_stats.agility > 0 {
-        let roll = zone_deterministic_roll(
+        let roll = crate::runtime::combat::crystal_accuracy_roll(
             now_ms,
-            usize::try_from(attacker.object_id).unwrap_or_default(),
-            usize::try_from(target.object_id).unwrap_or_default(),
+            attacker.object_id,
+            target.object_id,
             u64::try_from(target.combat_stats.agility.saturating_add(1)).unwrap_or(1),
         );
         if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
