@@ -353,6 +353,8 @@ fn start_original_bichon_intro_session() -> SimulationSession {
         )),
         "fresh warrior should enter the Crystal world: {start_packets:?}"
     );
+    equip_inventory_item_by_name(&mut session, "WoodenSword", 0);
+    equip_inventory_item_by_name(&mut session, "BaseDress(M)", 1);
     session
 }
 
@@ -1044,6 +1046,91 @@ fn packets_for(outbounds: &[ZoneOutbound], session_id: &SessionId) -> Vec<Server
     packets
 }
 
+fn assert_fresh_class_creation(
+    config: SimulationConfig,
+    profile_label: &str,
+    class: MirClass,
+    gender: MirGender,
+) {
+    let account_id = format!("slice-create-{profile_label}-{class:?}-{gender:?}");
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        store
+            .accounts
+            .insert(account_id.clone(), AccountRecord::empty());
+    }
+    let mut session = SimulationSession::new(config);
+    login(&mut session, &account_id);
+    let create_packets = session.handle_packet(ClientPacket::NewCharacter {
+        name: format!("New{class:?}"),
+        gender,
+        class,
+    });
+    let character_index = create_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+            _ => None,
+        })
+        .unwrap_or_else(|| {
+            panic!(
+                "{profile_label} {class:?}/{gender:?} character should be created: {create_packets:?}"
+            )
+        });
+
+    session.handle_packet(ClientPacket::StartGame { character_index });
+    let snapshot = session.world_snapshot();
+    let created = self_player(&session);
+    let expected = CharacterSaveRecord::new(CharacterRecord {
+        index: character_index,
+        name: created.name.clone(),
+        level: 1,
+        class,
+        gender,
+    });
+
+    assert_eq!(created.class, Some(class));
+    assert_eq!(created.gender, Some(gender));
+    assert_eq!(created.level, Some(1));
+    assert_eq!(snapshot.player_hp, Some(expected.max_hp));
+    assert_eq!(snapshot.player_max_hp, Some(expected.max_hp));
+    assert_eq!(snapshot.player_mp, Some(expected.mp));
+    assert_eq!(snapshot.gold, 0);
+    let expected_dress = match gender {
+        MirGender::Male => "BaseDress(M)",
+        MirGender::Female => "BaseDress(F)",
+    };
+    let expected_weapon = match class {
+        MirClass::Assassin => "HoaSword",
+        MirClass::Archer => "WoodenBow",
+        MirClass::Warrior | MirClass::Wizard | MirClass::Taoist => "WoodenSword",
+    };
+    assert_eq!(
+        snapshot
+            .inventory_items
+            .iter()
+            .map(|item| item.name.as_str())
+            .collect::<Vec<_>>(),
+        vec![expected_weapon, expected_dress, "(HP)DrugSmall", "Candle"]
+    );
+    assert!(snapshot
+        .inventory_items
+        .iter()
+        .all(|item| item.key.starts_with("crystal-item-")));
+    assert!(snapshot.belt_items.is_empty());
+    assert!(snapshot.storage_items.is_empty());
+    assert!(snapshot.equipment_items.is_empty());
+    assert!(snapshot.quest_log.iter().all(|quest| {
+        quest.stage == QuestStage::Available
+            && quest.current == 0
+            && quest.required >= quest.current
+    }));
+    assert!(snapshot.known_skills.is_empty());
+}
+
 #[test]
 fn platinum_classes_create_with_filtered_crystal_start_items() {
     for (class, gender) in [
@@ -1051,76 +1138,30 @@ fn platinum_classes_create_with_filtered_crystal_start_items() {
         (MirClass::Wizard, MirGender::Female),
         (MirClass::Taoist, MirGender::Male),
     ] {
-        let account_id = format!("slice-create-{:?}-{:?}", class, gender);
-        let config = SimulationConfig::default().with_platinum_176_profile();
-        {
-            let mut store = config
-                .account_store
-                .lock()
-                .expect("account store mutex should not be poisoned");
-            store
-                .accounts
-                .insert(account_id.clone(), AccountRecord::empty());
-        }
-        let mut session = SimulationSession::new(config);
-        login(&mut session, &account_id);
-        let create_packets = session.handle_packet(ClientPacket::NewCharacter {
-            name: format!("New{:?}", class),
-            gender,
-            class,
-        });
-        let character_index = create_packets
-            .iter()
-            .find_map(|packet| match packet {
-                ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
-                _ => None,
-            })
-            .expect("new character should be created");
-
-        session.handle_packet(ClientPacket::StartGame { character_index });
-        let snapshot = session.world_snapshot();
-        let created = self_player(&session);
-        let expected = CharacterSaveRecord::new(CharacterRecord {
-            index: character_index,
-            name: created.name.clone(),
-            level: 1,
+        assert_fresh_class_creation(
+            SimulationConfig::default().with_platinum_176_profile(),
+            "platinum-176",
             class,
             gender,
-        });
-
-        assert_eq!(created.class, Some(class));
-        assert_eq!(created.gender, Some(gender));
-        assert_eq!(created.level, Some(1));
-        assert_eq!(snapshot.player_hp, Some(expected.max_hp));
-        assert_eq!(snapshot.player_max_hp, Some(expected.max_hp));
-        assert_eq!(snapshot.player_mp, Some(expected.mp));
-        assert_eq!(snapshot.gold, 0);
-        let expected_weapon = "WoodenSword";
-        let expected_dress = match gender {
-            MirGender::Male => "BaseDress(M)",
-            MirGender::Female => "BaseDress(F)",
-        };
-        assert_eq!(
-            snapshot
-                .inventory_items
-                .iter()
-                .map(|item| item.name.as_str())
-                .collect::<Vec<_>>(),
-            vec![expected_weapon, expected_dress, "(HP)DrugSmall", "Candle"]
         );
-        assert!(snapshot
-            .inventory_items
-            .iter()
-            .all(|item| item.key.starts_with("crystal-item-")));
-        assert!(snapshot.belt_items.is_empty());
-        assert!(snapshot.storage_items.is_empty());
-        assert!(snapshot.equipment_items.is_empty());
-        assert!(snapshot.quest_log.iter().all(|quest| {
-            quest.stage == QuestStage::Available
-                && quest.current == 0
-                && quest.required >= quest.current
-        }));
-        assert!(snapshot.known_skills.is_empty());
+    }
+}
+
+#[test]
+fn all_five_crystal_classes_create_and_enter_bichon() {
+    for (class, gender) in [
+        (MirClass::Warrior, MirGender::Male),
+        (MirClass::Wizard, MirGender::Female),
+        (MirClass::Taoist, MirGender::Male),
+        (MirClass::Assassin, MirGender::Female),
+        (MirClass::Archer, MirGender::Male),
+    ] {
+        assert_fresh_class_creation(
+            SimulationConfig::default().with_crystal_world_runtime(),
+            "full-crystal",
+            class,
+            gender,
+        );
     }
 }
 
@@ -2644,6 +2685,267 @@ fn original_bichon_fresh_warrior_reaches_level_six_through_quests_1_to_9() {
                     .any(|item| item.name == reward_name),
             "{reward_name} should be retained at the end of the newcomer arc"
         );
+    }
+}
+
+#[test]
+fn original_level_four_wizard_completes_quests_10_to_12_and_reloads() {
+    let (warrior, warrior_save) =
+        combat_save_at_level(MirClass::Warrior, MirGender::Male, 4, &[], &[]);
+    let warrior_session = start_character_with_config(
+        "slice-bichon-q10-non-wizard",
+        SimulationConfig::default().with_crystal_world_runtime(),
+        warrior,
+        warrior_save,
+    );
+    assert!(
+        quest_snapshot(&warrior_session, 10).is_none(),
+        "Crystal q10 must remain unavailable to a level-four non-Wizard"
+    );
+
+    let account_id = "slice-bichon-wizard-q10-q12";
+    let config = SimulationConfig::default().with_crystal_world_runtime();
+    let (wizard, wizard_save) = combat_save_at_level(
+        MirClass::Wizard,
+        MirGender::Female,
+        4,
+        &[],
+        &[("SpiritBlade", EquipmentSlot::Weapon)],
+    );
+    let character_index = wizard.index;
+    let mut session = start_character_with_config(account_id, config.clone(), wizard, wizard_save);
+    let initial_gold = session.world_snapshot().gold;
+    assert_quest_stage(&session, 10, QuestStage::Available);
+    assert!(quest_snapshot(&session, 11).is_none());
+    assert!(quest_snapshot(&session, 12).is_none());
+    let _ = session.transfer_map("crystal:0:283:606");
+    open_original_npc_dialog(
+        &mut session,
+        3,
+        Point { x: 283, y: 606 },
+        MirDirection::Right,
+        "@quest:accept:10",
+    );
+    let accept_q10 = session.select_npc_dialog_target("@quest:accept:10");
+    assert!(accept_q10.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 10,
+            taken: true,
+            completed: true,
+            ..
+        }
+    )));
+    assert_quest_stage(&session, 10, QuestStage::ReadyToTurnIn);
+
+    let _ = session.transfer_map("crystal:0115:7:11");
+    open_original_npc_dialog(
+        &mut session,
+        451,
+        Point { x: 7, y: 11 },
+        MirDirection::Right,
+        "@quest:finish:10",
+    );
+    let before_q10_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q10 = session.select_npc_dialog_target("@quest:finish:10");
+    assert!(finish_q10.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&10)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q10_reward_exp,
+        48,
+        "q10 hand-in must grant its original 48 EXP"
+    );
+    assert_eq!(session.world_snapshot().gold - initial_gold, 60);
+    assert_quest_stage(&session, 10, QuestStage::Completed);
+    assert_quest_stage(&session, 11, QuestStage::Available);
+
+    const HUNT_POTION_COUNT: u16 = 20;
+    const HUNT_POTION_COST: u32 = (HUNT_POTION_COUNT as u32) * 40;
+    let _ = buy_original_small_hp_drugs(&mut session, HUNT_POTION_COUNT);
+    let _ = session.transfer_map("crystal:0115:7:11");
+    open_original_npc_dialog(
+        &mut session,
+        451,
+        Point { x: 7, y: 11 },
+        MirDirection::Right,
+        "@quest:accept:11",
+    );
+    let accept_q11 = session.select_npc_dialog_target("@quest:accept:11");
+    assert!(accept_q11.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 11,
+            taken: true,
+            completed: false,
+            ..
+        }
+    )));
+    assert_quest_stage(&session, 11, QuestStage::InProgress);
+
+    const OMA_FIELDS: [Point; 5] = [
+        Point { x: 220, y: 470 },
+        Point { x: 180, y: 420 },
+        Point { x: 90, y: 240 },
+        Point { x: 110, y: 440 },
+        Point { x: 140, y: 500 },
+    ];
+    const RAKING_CAT_FIELDS: [Point; 4] = [
+        Point { x: 140, y: 100 },
+        Point { x: 180, y: 420 },
+        Point { x: 340, y: 550 },
+        Point { x: 510, y: 410 },
+    ];
+    let oma_packets = kill_original_monsters(&mut session, "0", &OMA_FIELDS, "Oma", 10);
+    let cat_packets =
+        kill_original_monsters(&mut session, "0", &RAKING_CAT_FIELDS, "RakingCat", 10);
+    assert_eq!(
+        oma_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::GainExperience { amount: 30 }))
+            .count(),
+        10,
+        "q11 must receive player-owned EXP credit for ten real Oma deaths"
+    );
+    assert_eq!(
+        cat_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::GainExperience { amount: 27 }))
+            .count(),
+        10,
+        "q11 must receive player-owned EXP credit for ten real RakingCat deaths"
+    );
+    assert_quest_stage(&session, 11, QuestStage::ReadyToTurnIn);
+
+    let _ = session.transfer_map("crystal:0115:7:11");
+    open_original_npc_dialog(
+        &mut session,
+        451,
+        Point { x: 7, y: 11 },
+        MirDirection::Right,
+        "@quest:finish:11",
+    );
+    let before_q11_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q11 = session.select_npc_dialog_target("@quest:finish:11");
+    assert!(finish_q11.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&11)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q11_reward_exp,
+        180,
+        "q11 hand-in must grant its original 180 EXP"
+    );
+    assert_eq!(
+        session.world_snapshot().gold,
+        initial_gold - HUNT_POTION_COST + 105
+    );
+    assert_quest_stage(&session, 11, QuestStage::Completed);
+    assert_quest_stage(&session, 12, QuestStage::Available);
+    let q11_rewards = session.world_snapshot();
+    for reward_name in ["OldLoafer", "FireBall"] {
+        assert!(
+            q11_rewards
+                .inventory_items
+                .iter()
+                .any(|item| item.name == reward_name),
+            "q11 must retain the original {reward_name} reward in the bag"
+        );
+    }
+    assert!(
+        q11_rewards.known_skills.is_empty(),
+        "the FireBall reward is a skill book and must not auto-learn the spell"
+    );
+
+    open_original_npc_dialog(
+        &mut session,
+        451,
+        Point { x: 7, y: 11 },
+        MirDirection::Right,
+        "@quest:accept:12",
+    );
+    let accept_q12 = session.select_npc_dialog_target("@quest:accept:12");
+    assert!(accept_q12.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id: 12,
+            taken: true,
+            completed: true,
+            ..
+        }
+    )));
+    assert_quest_stage(&session, 12, QuestStage::ReadyToTurnIn);
+
+    let _ = session.transfer_map("crystal:0:327:258");
+    open_original_npc_dialog(
+        &mut session,
+        26,
+        Point { x: 327, y: 258 },
+        MirDirection::Right,
+        "@quest:finish:12",
+    );
+    let before_q12_reward_exp = newcomer_cumulative_experience(&session);
+    let finish_q12 = session.select_npc_dialog_target("@quest:finish:12");
+    assert!(finish_q12.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&12)
+    )));
+    assert_eq!(
+        newcomer_cumulative_experience(&session) - before_q12_reward_exp,
+        48,
+        "q12 hand-in must grant its original 48 EXP"
+    );
+    assert_eq!(
+        session.world_snapshot().gold,
+        initial_gold - HUNT_POTION_COST + 165
+    );
+    for quest_id in 10..=12 {
+        assert_quest_stage(&session, quest_id, QuestStage::Completed);
+    }
+
+    let before_logout = session.world_snapshot();
+    let before_player = self_player(&session);
+    let logout = session.handle_packet(ClientPacket::LogOut);
+    assert!(logout
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
+    drop(session);
+
+    let mut reloaded = SimulationSession::new(config);
+    login(&mut reloaded, account_id);
+    let start_packets = reloaded.handle_packet(ClientPacket::StartGame { character_index });
+    assert!(start_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::StartGame {
+            result: 4,
+            resolution
+        } if *resolution > 0
+    )));
+    let after_reload = reloaded.world_snapshot();
+    let reloaded_player = self_player(&reloaded);
+    assert_eq!(after_reload.gold, before_logout.gold);
+    assert_eq!(after_reload.inventory_items, before_logout.inventory_items);
+    assert_eq!(after_reload.quest_log, before_logout.quest_log);
+    assert_eq!(after_reload.known_skills, before_logout.known_skills);
+    assert_eq!(
+        (
+            reloaded_player.x,
+            reloaded_player.y,
+            reloaded_player.direction,
+            reloaded_player.level,
+            after_reload.player_experience,
+        ),
+        (
+            before_player.x,
+            before_player.y,
+            before_player.direction,
+            before_player.level,
+            before_logout.player_experience,
+        )
+    );
+    for quest_id in 10..=12 {
+        assert_quest_stage(&reloaded, quest_id, QuestStage::Completed);
     }
 }
 

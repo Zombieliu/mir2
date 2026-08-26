@@ -64,17 +64,22 @@ pub(super) struct ActiveCharacterRuntimeState {
     pub(super) vitals: PlayerVitals,
 }
 
+fn uses_crystal_starter_loadout(config: &SimulationConfig) -> bool {
+    config.content_profile.is_some() || config.monster_spawn_source.uses_crystal_current_map()
+}
+
 pub(super) fn default_save_for_character(
     config: &SimulationConfig,
     character: CharacterRecord,
 ) -> CharacterSaveRecord {
-    let starter_equipment = if config.content_profile.is_some() {
+    let crystal_starter_loadout = uses_crystal_starter_loadout(config);
+    let starter_equipment = if crystal_starter_loadout {
         Vec::new()
     } else {
         seed_equipment_items_for_character(character.class, character.gender)
     };
     let mut save = CharacterSaveRecord::new(character);
-    let starter_inventory = if config.content_profile.is_some() {
+    let starter_inventory = if crystal_starter_loadout {
         crystal_start_inventory_items(&save.character)
     } else {
         Vec::new()
@@ -97,7 +102,7 @@ pub(super) fn default_save_for_character(
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
     save.equipment_items_json = encode_state_vec(&starter_equipment);
-    save.equipment_items_explicit_empty = config.content_profile.is_some();
+    save.equipment_items_explicit_empty = crystal_starter_loadout;
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
     save.npc_flag_states_json = Vec::new();
@@ -1596,7 +1601,8 @@ pub(super) fn crystal_new_character_save(
     config: &SimulationConfig,
     character: CharacterRecord,
 ) -> CharacterSaveRecord {
-    let starter_equipment = if config.content_profile.is_some() {
+    let crystal_starter_loadout = uses_crystal_starter_loadout(config);
+    let starter_equipment = if crystal_starter_loadout {
         Vec::new()
     } else {
         seed_equipment_items_for_character(character.class, character.gender)
@@ -1604,7 +1610,7 @@ pub(super) fn crystal_new_character_save(
     let mut save = CharacterSaveRecord::new(character);
     save.max_experience = config.experience_required_for_level(save.character.level);
     save.gold = 0;
-    save.inventory_items_json = if config.content_profile.is_some() {
+    save.inventory_items_json = if crystal_starter_loadout {
         encode_state_vec(&crystal_start_inventory_items(&save.character))
     } else {
         Vec::new()
@@ -1612,7 +1618,7 @@ pub(super) fn crystal_new_character_save(
     save.belt_items_json = Vec::new();
     save.storage_items_json = Vec::new();
     save.equipment_items_json = encode_state_vec(&starter_equipment);
-    save.equipment_items_explicit_empty = config.content_profile.is_some();
+    save.equipment_items_explicit_empty = crystal_starter_loadout;
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
     save.item_rental_records_json = Vec::new();

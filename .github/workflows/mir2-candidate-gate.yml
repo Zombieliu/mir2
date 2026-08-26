@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
 
@@ -22,7 +22,7 @@ jobs:
         run: rustup toolchain install 1.89.0 --profile minimal --component rustfmt
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "22"
           cache: npm
@@ -45,7 +45,7 @@ jobs:
 
       - name: Upload Candidate evidence
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mir2-candidate-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: error
@@ -56,3 +56,65 @@ jobs:
             mir2-web3/docs/generated/packet-traces/
             mir2-web3/docs/stage2-screenshots/
             mir2-web3/docs/stage5-screenshots/
+
+  windows-vertical-slice:
+    name: Windows verifiable vertical slice
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+
+      - name: Install Rust 1.95
+        shell: pwsh
+        run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+
+      - name: Install Player Web dependencies
+        run: npm ci --prefix mir2-web3/apps/web
+
+      - name: Verify vertical-slice gate contract
+        shell: powershell
+        run: >-
+          mir2-web3/apps/game-client/platform-windows/scripts/test-windows-vertical-slice-gate.ps1
+          -SelfTest
+
+      - name: Run Windows verifiable vertical-slice functional gate
+        shell: powershell
+        run: >-
+          mir2-web3/apps/game-client/platform-windows/scripts/test-windows-vertical-slice-gate.ps1
+          -RustToolchain 1.95.0
+          -EvidenceDirectory artifacts/windows-vertical-slice
+
+      - name: Upload Windows vertical-slice evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-windows-vertical-slice-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: mir2-web3/artifacts/windows-vertical-slice/
+
+  candidate-gate:
+    name: Candidate gate aggregate
+    if: ${{ always() }}
+    needs:
+      - local-candidate-gate
+      - windows-vertical-slice
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every Candidate lane
+        env:
+          LOCAL_RESULT: ${{ needs.local-candidate-gate.result }}
+          WINDOWS_RESULT: ${{ needs.windows-vertical-slice.result }}
+        run: |
+          test "$LOCAL_RESULT" = success
+          test "$WINDOWS_RESULT" = success
