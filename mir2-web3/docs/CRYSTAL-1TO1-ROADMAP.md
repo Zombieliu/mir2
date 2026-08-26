@@ -4578,3 +4578,26 @@ visual/feel acceptance.
   Whole-game Crystal parity remains unscored until the semantic inventory and
   denominator are complete; same-EXE UI/live-WSS, real-DPI, 30-minute native
   soak, human visual/gameplay-feel, and formal publisher signing remain open.
+
+## 2026-08-26 Archer q19-q21 source journey
+
+- Candidate: the original level-four Archer instructor branch is now a complete
+  automated q19-q21 journey. A same-level non-Archer cannot see q19; the Archer
+  follows Assistant Jane -> Captain Jerald -> MirGuide Peter on map `0`, with
+  the original class mask and prerequisite chain enforced.
+- Candidate: q20 credits ten real Oma plus ten real RakingCat player-owned
+  deaths. The journey proves the exact 48/180/48 EXP and 60/45/60 gold reward
+  sequence, retains `OldLoafer` and the `Focus` skill book, does not invent an
+  automatic learned skill, and preserves class, quests, rewards, equipment,
+  gold, experience, transform, and known-skill state after logout and reload.
+- Clean revision `d01910a1694d45e85dc54eafab6e61c43a063f5f` passed all eight
+  fixed controls from `2026-08-26T08:36:39.4707209Z` through
+  `2026-08-26T08:51:19.8844889Z`: map-atlas preparation, native 312/312,
+  functional journey 13/13 in 773.360 s, ordinary loop 2/2, security 18/18,
+  shared Zone 195/195, Gateway persistence 2/2, and Web typecheck. The summary
+  SHA-256 is
+  `BE47F67645A9DF165635C173CF2F04BB85895B5DC6666F8F8DE3E963BC721197`.
+- The eight declared automated controls remain 100%, but this does not create a
+  whole-game denominator. Semantic inventory completion, same-EXE UI/live-WSS,
+  real-DPI, 30-minute native soak, human visual/gameplay-feel, and formal
+  publisher signing remain open.

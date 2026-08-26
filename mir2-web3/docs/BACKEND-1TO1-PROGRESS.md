@@ -2670,3 +2670,23 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   `visualAccepted=false`. This expands the bounded automated journey; it does
   not close the semantic denominator, same-EXE UI/live-WSS, real-DPI, native
   soak, human visual/feel, or formal-signing gates.
+
+## 2026-08-26 Archer instructor branch
+
+- The original q19-q21 Archer journey now has integration coverage. It proves
+  the Archer-only class gate and prerequisite chain across Assistant Jane,
+  loaded object 14 Captain Jerald, and loaded object 26 MirGuide Peter on map
+  `0`.
+- Q20 receives player-owned credit from ten real Oma and ten real RakingCat
+  deaths. Hand-ins award exactly 48/180/48 EXP and 60/45/60 gold;
+  `OldLoafer` and `Focus` remain bag items, `Focus` is not auto-learned, and
+  the complete quest/reward/equipment/transform state reloads through a new
+  `SimulationSession`.
+- Revision `d01910a1694d45e85dc54eafab6e61c43a063f5f` passed the clean Windows
+  functional gate 8/8. The expanded journey is 13/13 in 773.360 s; native is
+  312/312, ordinary 2/2, security 18/18, shared Zone 195/195, Gateway 2/2, and
+  Web typecheck passes. `SUMMARY.json` SHA-256 is
+  `BE47F67645A9DF165635C173CF2F04BB85895B5DC6666F8F8DE3E963BC721197`.
+- The evidence retains `globalParityPercent=null`, `accepted=false`, and
+  `visualAccepted=false`. The scoped 8/8 does not close the incomplete semantic
+  denominator or same-EXE UI/live-WSS, real-DPI, soak, human, and signing gates.

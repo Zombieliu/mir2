@@ -2431,3 +2431,30 @@ This is another bounded automated branch, not whole-game parity. Global parity
 remains undefined until the semantic inventory and denominator are complete;
 same-EXE UI/live WSS, real DPI, 30-minute native soak, human visual/gameplay
 feel, and formal publisher signing remain open.
+
+## 2026-08-26 Archer q19-q21 journey
+
+The original level-four Archer branch now runs as one continuous source-backed
+journey. A non-Archer control cannot see q19. The Archer accepts from Assistant
+Jane, hands q19 to Captain Jerald at loaded object 14 on map `0`, completes
+Jerald's q20 test through ten real Oma and ten real RakingCat player-owned
+deaths, then hands q21 to MirGuide Peter at loaded object 26.
+
+The three hand-ins preserve the original 48/180/48 EXP and 60/45/60 gold
+sequence. `OldLoafer` and `Focus` remain inventory rewards; `Focus` is a skill
+book and is not silently converted into a learned skill. Completed quests,
+inventory, equipment, class, experience, gold, position, direction, and empty
+known-skill state survive logout and reload.
+
+Clean revision `d01910a1694d45e85dc54eafab6e61c43a063f5f` passed all 8/8
+Windows functional controls from `2026-08-26T08:36:39.4707209Z` through
+`2026-08-26T08:51:19.8844889Z`. The functional suite is 13/13 in 773.360 s;
+native is 312/312, ordinary 2/2, security 18/18, shared Zone 195/195, Gateway
+2/2, and Web typecheck passes. Summary SHA-256 is
+`BE47F67645A9DF165635C173CF2F04BB85895B5DC6666F8F8DE3E963BC721197`.
+
+This completes automated original instructor journeys for Wizard, Taoist,
+Assassin, and Archer, but remains bounded source evidence. Global parity is
+undefined until the semantic inventory and denominator are complete; same-EXE
+UI/live WSS, real DPI, 30-minute native soak, human visual/gameplay feel, and
+formal publisher signing remain open.

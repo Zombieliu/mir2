@@ -227,6 +227,32 @@ The 100% result remains limited to the eight declared automated controls. The
 evidence still records `globalParityPercent=null`, `accepted=false`, and
 `visualAccepted=false`.
 
+## Archer q19-q21 follow-on
+
+Source revision `d01910a1694d45e85dc54eafab6e61c43a063f5f` adds the original
+Archer q19-q21 instructor journey. It is follow-on source evidence, not a new
+packaged Candidate EXE; Candidate-03's exact attested artifact remains
+unchanged.
+
+The journey enforces the level-four Archer class gate, follows Assistant Jane
+to Captain Jerald and then MirGuide Peter on map `0`, credits ten real Oma and
+ten real RakingCat player-owned deaths, and verifies the original 48/180/48 EXP
+plus 60/45/60 gold reward sequence. `OldLoafer` and `Focus` remain inventory
+items, the skill book is not auto-learned, and quest, inventory, equipment,
+class, experience, gold, position, direction, and known-skill state survive
+logout and a new session.
+
+The clean gate ran from `2026-08-26T08:36:39.4707209Z` through
+`2026-08-26T08:51:19.8844889Z` and passed 8/8 controls. Map-atlas preparation
+passed; native was 312/312, the expanded functional journey was 13/13 in
+773.360 s, ordinary 2/2, security 18/18, shared Zone 195/195, Gateway 2/2, and
+Web typecheck passed. `SUMMARY.json` SHA-256 is
+`BE47F67645A9DF165635C173CF2F04BB85895B5DC6666F8F8DE3E963BC721197`.
+
+The 100% result remains limited to the eight declared automated controls. The
+evidence still records `globalParityPercent=null`, `accepted=false`, and
+`visualAccepted=false`.
+
 ## Not closed
 
 The following gates remain open and are not inferred from the passed backend
