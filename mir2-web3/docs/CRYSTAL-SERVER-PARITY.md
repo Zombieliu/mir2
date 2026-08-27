@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> Player combat-state server-client note (2026-08-28): revision
+> `9eaa62283ec453bfa42f8bc3cbddb4c8811abf09` adds no server authority. It
+> makes the clients preserve the Zone's existing health-before-death packet
+> order, authoritative death pose and one death incarnation, and separates
+> revive action/effect handling from later authoritative HP. Native/Web mounted
+> Die/Dead/Revive now use ordinary player frames without a standing mount;
+> PlayerRevive Magic2/M79 assets and Candidate required-file gates are bounded.
+> Windows 360/360 and Web/package checks pass with no reviewed P0/P1 inside the
+> claim. Crystal Struck ActionFeed queuing, Native generic struck/death audio,
+> authenticated live delivery and all real-window/final gates remain open, so
+> no server or global percentage is emitted.
+
 > VIS-02 FlamingSword server-client note (2026-08-28): revision
 > `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` changes no simulation or shared-
 > Zone combat authority. It closes only Gateway preservation and native/Web

@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> Player combat-state client-boundary checkpoint (2026-08-28): revision
+> `9eaa62283ec453bfa42f8bc3cbddb4c8811abf09` changes no simulation or shared-
+> Zone combat authority. It repairs consumption of the existing authoritative
+> `ObjectHealth(0) -> ObjectDied` order, keeps numeric health separate from
+> death/revive state, preserves one death incarnation across snapshots and
+> consumes self/remote revive with the source effect gate. Windows 360/360,
+> Web full logic/type and package/verifier self-tests pass; independent final
+> review found no P0/P1 within the bounded claim. The Web one-slot Struck model
+> still is not Crystal ActionFeed queuing, and Native generic hit/flinch/death
+> audio is absent. No backend, visual or global percentage is claimed.
+
 > VIS-02 FlamingSword client-boundary checkpoint (2026-08-28): revision
 > `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` adds no gameplay authority. It
 > preserves `ObjectAttack.spell=8` through Gateway and closes bounded native/

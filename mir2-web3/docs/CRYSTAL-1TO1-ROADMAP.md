@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Player combat-state bounded checkpoint (2026-08-28): implementation
+> `9eaa62283ec453bfa42f8bc3cbddb4c8811abf09` binds Web/Native player
+> Struck/Die/Dead/Revive state, corrects mounted death/revive to ordinary
+> `384/387/384` body frames with no mount layer, and exports the exact actor-
+> bound `Magic2/1220..1239` PlayerRevive plus M79-1. Health packets no longer
+> own death/revive or fabricate HP; a durable death-incarnation marker survives
+> snapshot refresh. Web normal/mounted struck and 100 ms death audio are
+> bounded; Windows 360/360, Web full logic/type, exporter and package/verifier
+> self-tests pass, and final review found no P0/P1 inside this claim. Crystal
+> ActionFeed Struck queuing, Native generic struck/death audio, same-EXE/live-
+> WSS/GPU/DPI/soak/human/signing and the incomplete denominator remain open.
+> This is not visual or whole-game 100%; `globalParityPercent` remains null.
+
 > VIS-02 FlamingSword bounded checkpoint (2026-08-28): implementation revision
 > `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` binds only typed
 > `ObjectAttack(spell=8)` Attack1 to the live attacker. Eight directions use
