@@ -93,6 +93,10 @@ pub struct UiOptions {
     pub hp_view: bool,
     #[serde(default)]
     pub new_move: bool,
+    /// Crystal `Settings.HighlightTarget`. This persisted renderer switch is
+    /// intentionally not one of OptionDialog's seven visible checkboxes.
+    #[serde(default = "default_true")]
+    pub highlight_target: bool,
     pub music_enabled: bool,
     pub music_volume: u8,
     pub sound_enabled: bool,
@@ -184,6 +188,7 @@ impl Default for UiOptions {
             name_view: true,
             hp_view: true,
             new_move: false,
+            highlight_target: true,
             music_enabled: true,
             music_volume: 80,
             sound_enabled: true,

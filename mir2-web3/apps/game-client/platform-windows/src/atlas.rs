@@ -59,7 +59,17 @@ struct StarterAtlasIndex {
     rect_by_path: HashMap<String, (usize, usize)>,
 }
 
+#[derive(Debug, Clone)]
+struct StarterAtlasPixelPage {
+    width: u32,
+    height: u32,
+    rgba: Vec<u8>,
+}
+
+type StarterAtlasPixels = HashMap<String, StarterAtlasPixelPage>;
+
 static STARTER_ATLAS_INDEX: OnceLock<Option<StarterAtlasIndex>> = OnceLock::new();
+static STARTER_ATLAS_PIXELS: OnceLock<Option<StarterAtlasPixels>> = OnceLock::new();
 static RENDER_TRACE_STATE_LOGS: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(bevy::prelude::Resource, Default)]
@@ -306,17 +316,27 @@ pub fn load_starter_entity_atlas() -> bool {
         return false;
     };
 
+    let mut pixel_pages = StarterAtlasPixels::new();
     for (key, width, height, pixels, path) in decoded {
         if !mir2_bevy_runtime::native_ingest::push_native_entity_render_atlas(
             key.clone(),
             width,
             height,
-            pixels,
+            pixels.clone(),
         ) {
             return false;
         }
+        pixel_pages.insert(
+            key.clone(),
+            StarterAtlasPixelPage {
+                width,
+                height,
+                rgba: pixels,
+            },
+        );
         eprintln!("[atlas] pushed {key} {width}x{height} ({path:?})");
     }
+    let _ = STARTER_ATLAS_PIXELS.set(Some(pixel_pages));
     true
 }
 
@@ -738,6 +758,7 @@ fn build_entity_render_state_internal(
         pose_overrides,
         effect_visible,
         index,
+        STARTER_ATLAS_PIXELS.get().and_then(Option::as_ref),
     )
 }
 
@@ -747,21 +768,27 @@ fn build_entity_render_state_with_index(
     pose_overrides: Option<&HashMap<String, (i64, AnimationAction)>>,
     effect_visible: bool,
     index: &StarterAtlasIndex,
+    pixels: Option<&StarterAtlasPixels>,
 ) -> Option<Value> {
     let (center_x, center_y) = scene_center(payload);
     let entity_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
     let entity_origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
     let mut used_rects: HashMap<String, HashSet<String>> = HashMap::new();
     let selected_object_id = normalized_object_id(payload.get("selectedObjectId"));
+    let highlight_target = payload
+        .get("_nativeHighlightTarget")
+        .and_then(Value::as_bool)
+        .unwrap_or(true);
 
-    let entities = payload
+    let mut entities = payload
         .get("entities")
         .and_then(Value::as_array)
         .map(|entities| {
             entities
                 .iter()
                 .map(|entity| {
-                    let object_id = normalized_object_id(entity.get("objectId")).unwrap_or_default();
+                    let object_id =
+                        normalized_object_id(entity.get("objectId")).unwrap_or_default();
                     let kind = entity
                         .get("kind")
                         .and_then(Value::as_str)
@@ -935,51 +962,80 @@ fn build_entity_render_state_with_index(
                             layer["opacity"] = json!(0.5);
                         }
                     }
-                    let explicitly_selectable = entity
-                        .get("kind")
-                        .and_then(Value::as_str)
-                        .is_some_and(|kind| matches!(kind, "player" | "monster"));
-                    if explicitly_selectable
-                        && selected_object_id.as_deref() == Some(object_id.as_str())
-                    {
-                        let highlights = layers[..actor_layer_count]
-                            .iter()
-                            .map(|layer| {
-                                let key = layer.get("key").and_then(Value::as_str)?;
-                                let role = key.strip_prefix(&format!("{object_id}:"))?;
-                                // Candidate target redraw is exact-atlas only. A
-                                // missing rect in any rendered actor layer must
-                                // suppress the whole composite, never leave a
-                                // partially highlighted player or monster.
-                                layer.get("atlasKey").and_then(Value::as_str)?;
-                                layer.get("atlasRectKey").and_then(Value::as_str)?;
-                                let normal_z = layer.get("z").and_then(Value::as_f64)? as f32;
-                                let mut highlight = layer.clone();
-                                highlight["key"] =
-                                    json!(format!("{object_id}:target-highlight:{role}"));
-                                highlight["z"] = json!(post_world_highlight_z(payload, normal_z));
-                                highlight["opacity"] = json!(TARGET_HIGHLIGHT_OPACITY);
-                                highlight["additive"] = json!(false);
-                                Some(highlight)
-                            })
-                            .collect::<Option<Vec<_>>>();
-                        if let Some(highlights) = highlights {
-                            layers.extend(highlights);
-                        }
-                    }
-
                     json!({
                         "objectId": object_id,
+                        "kind": kind,
                         "isSelf": kind == "selfPlayer",
                         "dead": entity.get("dead").and_then(Value::as_bool).unwrap_or(false),
                         "gridX": x,
                         "gridY": y,
+                        "_nativeTargetable": entity
+                            .get("kind")
+                            .and_then(Value::as_str)
+                            .is_some_and(|kind| matches!(kind, "player" | "monster" | "npc")),
+                        "_nativeActorLayerCount": actor_layer_count,
                         "layers": layers,
                     })
                 })
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
+
+    let hovered_object_id = highlight_target
+        .then(|| hovered_object_at_cursor(payload, &entities, index, pixels))
+        .flatten();
+    if highlight_target {
+        for entity in &mut entities {
+            let object_id = entity
+                .get("objectId")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_owned();
+            let kind = entity
+                .get("kind")
+                .and_then(Value::as_str)
+                .unwrap_or_default();
+            let actor_layer_count = entity
+                .get("_nativeActorLayerCount")
+                .and_then(Value::as_u64)
+                .and_then(|count| usize::try_from(count).ok())
+                .unwrap_or(0);
+            let selected = entity
+                .get("_nativeTargetable")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+                && matches!(kind, "player" | "monster")
+                && selected_object_id.as_deref() == Some(object_id.as_str());
+            let hovered = hovered_object_id.as_deref() == Some(object_id.as_str()) && !selected;
+            let Some(layers) = entity.get_mut("layers").and_then(Value::as_array_mut) else {
+                continue;
+            };
+            if hovered {
+                append_actor_highlight(
+                    layers,
+                    actor_layer_count,
+                    &object_id,
+                    HighlightBand::Hover,
+                    payload,
+                );
+            }
+            if selected {
+                append_actor_highlight(
+                    layers,
+                    actor_layer_count,
+                    &object_id,
+                    HighlightBand::Selected,
+                    payload,
+                );
+            }
+        }
+    }
+    for entity in &mut entities {
+        entity.as_object_mut().map(|object| {
+            object.remove("_nativeActorLayerCount");
+            object.remove("_nativeTargetable");
+        });
+    }
 
     let atlases = index
         .pages
@@ -1070,6 +1126,39 @@ pub(crate) fn build_entity_render_state_with_manifest_for_test(
         Some(pose_overrides),
         effect_visible,
         &index,
+        None,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn build_entity_render_state_with_manifest_and_pixels_for_test(
+    payload: &Value,
+    pose_overrides: &HashMap<String, (i64, AnimationAction)>,
+    effect_visible: bool,
+    manifest: &Value,
+    pixels: &HashMap<String, (u32, u32, Vec<u8>)>,
+) -> Option<Value> {
+    let index = parse_starter_atlas_manifest(manifest)?;
+    let pixels = pixels
+        .iter()
+        .map(|(key, (width, height, rgba))| {
+            (
+                key.clone(),
+                StarterAtlasPixelPage {
+                    width: *width,
+                    height: *height,
+                    rgba: rgba.clone(),
+                },
+            )
+        })
+        .collect::<StarterAtlasPixels>();
+    build_entity_render_state_with_index(
+        payload,
+        &HashMap::new(),
+        Some(pose_overrides),
+        effect_visible,
+        &index,
+        Some(&pixels),
     )
 }
 
@@ -1085,15 +1174,185 @@ fn normalized_object_id(value: Option<&Value>) -> Option<String> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum HighlightBand {
+    Hover,
+    Selected,
+}
+
+fn append_actor_highlight(
+    layers: &mut Vec<Value>,
+    actor_layer_count: usize,
+    object_id: &str,
+    band: HighlightBand,
+    payload: &Value,
+) {
+    let Some(actor_layers) = layers.get(..actor_layer_count) else {
+        return;
+    };
+    let prefix = format!("{object_id}:");
+    let highlights = actor_layers
+        .iter()
+        .map(|layer| {
+            let key = layer.get("key").and_then(Value::as_str)?;
+            let role = key.strip_prefix(&prefix)?;
+            // DrawBlend is atomic exact-atlas presentation. One missing rect
+            // suppresses the whole composite instead of tinting only a body,
+            // weapon, hair, or mount fragment.
+            layer.get("atlasKey").and_then(Value::as_str)?;
+            layer.get("atlasRectKey").and_then(Value::as_str)?;
+            let normal_z = layer.get("z").and_then(Value::as_f64)? as f32;
+            let (name, z) = match band {
+                HighlightBand::Hover => ("hover-highlight", post_world_hover_z(payload, normal_z)),
+                HighlightBand::Selected => {
+                    ("target-highlight", post_world_selected_z(payload, normal_z))
+                }
+            };
+            let mut highlight = layer.clone();
+            highlight["key"] = json!(format!("{object_id}:{name}:{role}"));
+            highlight["z"] = json!(z);
+            highlight["opacity"] = json!(TARGET_HIGHLIGHT_OPACITY);
+            highlight["additive"] = json!(false);
+            Some(highlight)
+        })
+        .collect::<Option<Vec<_>>>();
+    if let Some(highlights) = highlights {
+        layers.extend(highlights);
+    }
+}
+
+fn hovered_object_at_cursor(
+    payload: &Value,
+    entities: &[Value],
+    index: &StarterAtlasIndex,
+    pixels: Option<&StarterAtlasPixels>,
+) -> Option<String> {
+    let cursor = payload.get("_nativeHoverCursor")?;
+    let cursor_x = cursor.get("x").and_then(Value::as_f64)? as f32;
+    let cursor_y = cursor.get("y").and_then(Value::as_f64)? as f32;
+    if !(0.0..STAGE_WIDTH).contains(&cursor_x) || !(0.0..STAGE_HEIGHT).contains(&cursor_y) {
+        return None;
+    }
+    let (center_x, center_y) = scene_center(payload);
+    let cursor_grid_x = center_x + i64::from((cursor_x / CELL_WIDTH).floor() as i32) - 10;
+    let cursor_grid_y = center_y + i64::from((cursor_y / CELL_HEIGHT).floor() as i32) - 11;
+
+    // Crystal scans the cursor tile's 5x5 neighbourhood from bottom-right to
+    // top-left and each cell's object list in reverse insertion order.
+    for y in ((cursor_grid_y - 2)..=(cursor_grid_y + 2)).rev() {
+        for x in ((cursor_grid_x - 2)..=(cursor_grid_x + 2)).rev() {
+            for entity in entities.iter().rev() {
+                if entity.get("gridX").and_then(Value::as_i64) != Some(x)
+                    || entity.get("gridY").and_then(Value::as_i64) != Some(y)
+                    || entity.get("isSelf").and_then(Value::as_bool) == Some(true)
+                    || entity.get("dead").and_then(Value::as_bool) == Some(true)
+                    || entity.get("_nativeTargetable").and_then(Value::as_bool) != Some(true)
+                {
+                    continue;
+                }
+                let object_id = entity.get("objectId").and_then(Value::as_str)?;
+                if (x == cursor_grid_x && y == cursor_grid_y)
+                    || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
+                {
+                    return Some(object_id.to_owned());
+                }
+            }
+        }
+    }
+    None
+}
+
+fn body_visible_pixel(
+    entity: &Value,
+    object_id: &str,
+    cursor_x: f32,
+    cursor_y: f32,
+    index: &StarterAtlasIndex,
+    pixels: Option<&StarterAtlasPixels>,
+) -> bool {
+    let actor_layer_count = entity
+        .get("_nativeActorLayerCount")
+        .and_then(Value::as_u64)
+        .and_then(|count| usize::try_from(count).ok())
+        .unwrap_or(0);
+    let body_key = format!("{object_id}:body");
+    let Some(body) = entity
+        .get("layers")
+        .and_then(Value::as_array)
+        .and_then(|layers| layers.get(..actor_layer_count))
+        .and_then(|layers| layers.iter().find(|layer| layer["key"] == body_key))
+    else {
+        return false;
+    };
+    let Some(left) = body.get("left").and_then(Value::as_f64).map(|v| v as f32) else {
+        return false;
+    };
+    let Some(top) = body.get("top").and_then(Value::as_f64).map(|v| v as f32) else {
+        return false;
+    };
+    let Some(width) = body.get("width").and_then(Value::as_f64).map(|v| v as f32) else {
+        return false;
+    };
+    let Some(height) = body.get("height").and_then(Value::as_f64).map(|v| v as f32) else {
+        return false;
+    };
+    if cursor_x < left || cursor_y < top || cursor_x >= left + width || cursor_y >= top + height {
+        return false;
+    }
+    let Some(atlas_key) = body.get("atlasKey").and_then(Value::as_str) else {
+        return false;
+    };
+    let Some(rect_key) = body.get("atlasRectKey").and_then(Value::as_str) else {
+        return false;
+    };
+    let Some(page) = index.pages.iter().find(|page| page.key == atlas_key) else {
+        return false;
+    };
+    let Some(rect) = page.rects.iter().find(|rect| rect.key == rect_key) else {
+        return false;
+    };
+    let Some(pixel_page) = pixels.and_then(|pages| pages.get(atlas_key)) else {
+        return false;
+    };
+    if pixel_page.width != page.width || pixel_page.height != page.height {
+        return false;
+    }
+    let local_x = (cursor_x - left).floor() as u32;
+    let local_y = (cursor_y - top).floor() as u32;
+    if local_x >= rect.width || local_y >= rect.height {
+        return false;
+    }
+    let Some(pixel_x) = rect.x.checked_add(local_x) else {
+        return false;
+    };
+    let Some(pixel_y) = rect.y.checked_add(local_y) else {
+        return false;
+    };
+    if pixel_x >= pixel_page.width || pixel_y >= pixel_page.height {
+        return false;
+    }
+    let Some(alpha_index) = pixel_y
+        .checked_mul(pixel_page.width)
+        .and_then(|row| row.checked_add(pixel_x))
+        .and_then(|pixel| pixel.checked_mul(4))
+        .and_then(|offset| offset.checked_add(3))
+        .and_then(|offset| usize::try_from(offset).ok())
+    else {
+        return false;
+    };
+    pixel_page.rgba.get(alpha_index).copied().unwrap_or(0) > 0
+}
+
 #[cfg(test)]
 pub(crate) fn map_tile_draw_z_for_test(x: i32, y: i32, layer_z: f32) -> f32 {
     ((y.saturating_mul(1_000).saturating_add(x.saturating_mul(10))) as f32 + layer_z)
         * ENTITY_DEPTH_GAIN
 }
 
-/// Crystal draws the selected object once more at 30% after the complete world
-/// pass, then calls `MirObject.DrawEffects`. Keep those two post-world passes in
-/// non-overlapping GPU depth bands while retaining normal object/layer order.
+/// Crystal redraws the hovered object and then the selected object at 30%
+/// after the complete world pass, then calls `MirObject.DrawEffects`. Keep all
+/// three post-world passes in non-overlapping GPU depth bands while retaining
+/// normal object/layer order inside each band.
 pub(crate) fn post_world_depth_bounds(payload: &Value) -> (f32, f32) {
     let viewport = crate::map_parser::MapViewport::from_gateway_payload(payload);
     let start_x = viewport.center_x.saturating_sub(viewport.draw_margin_x());
@@ -1116,9 +1375,19 @@ pub(crate) fn post_world_depth_bounds(payload: &Value) -> (f32, f32) {
     (min_world_z, max_world_z)
 }
 
-fn post_world_highlight_z(payload: &Value, normal_layer_z: f32) -> f32 {
+fn post_world_hover_z(payload: &Value, normal_layer_z: f32) -> f32 {
     let (min_world_z, max_world_z) = post_world_depth_bounds(payload);
     max_world_z + POST_WORLD_BAND_GAP + (normal_layer_z - min_world_z)
+}
+
+fn post_world_selected_z(payload: &Value, normal_layer_z: f32) -> f32 {
+    let (min_world_z, max_world_z) = post_world_depth_bounds(payload);
+    let world_span = max_world_z - min_world_z;
+    max_world_z
+        + POST_WORLD_BAND_GAP
+        + world_span
+        + POST_WORLD_BAND_GAP
+        + (normal_layer_z - min_world_z)
 }
 
 pub(crate) fn post_world_effect_z_from_bounds(
@@ -1130,12 +1399,15 @@ pub(crate) fn post_world_effect_z_from_bounds(
         + POST_WORLD_BAND_GAP
         + world_span
         + POST_WORLD_BAND_GAP
+        + world_span
+        + POST_WORLD_BAND_GAP
         + (normal_layer_z - min_world_z).max(0.0)
 }
 
 #[cfg(test)]
 pub(crate) fn post_world_highlight_band_ceiling((min_world_z, max_world_z): (f32, f32)) -> f32 {
-    max_world_z + POST_WORLD_BAND_GAP + (max_world_z - min_world_z)
+    let world_span = max_world_z - min_world_z;
+    max_world_z + POST_WORLD_BAND_GAP + world_span + POST_WORLD_BAND_GAP + world_span
 }
 
 fn post_world_effect_z(payload: &Value, object_x: i64, object_y: i64) -> f32 {
@@ -1888,6 +2160,203 @@ mod tests {
         assert!(dead_layers
             .iter()
             .all(|layer| layer.get("opacity").is_none()));
+    }
+
+    fn hover_fixture_manifest() -> Value {
+        json!({
+            "atlases": [{
+                "key": "hover-fixture",
+                "width": 8,
+                "height": 8,
+                "imageUrl": "/test-only/hover.png",
+                "rects": [{
+                    "key": "/original-ui/Monster/001/0.png|4x4",
+                    "x": 2,
+                    "y": 1,
+                    "width": 4,
+                    "height": 4,
+                    "offsetX": -47,
+                    "offsetY": 0
+                }, {
+                    "key": "/original-ui/NPC/00/0.png|4x4",
+                    "x": 2,
+                    "y": 1,
+                    "width": 4,
+                    "height": 4,
+                    "offsetX": -47,
+                    "offsetY": 0
+                }]
+            }]
+        })
+    }
+
+    fn hover_fixture_pixels(
+        alpha_local_x: u32,
+        alpha_local_y: u32,
+    ) -> HashMap<String, (u32, u32, Vec<u8>)> {
+        let mut rgba = vec![0; 8 * 8 * 4];
+        let pixel_x = 2 + alpha_local_x;
+        let pixel_y = 1 + alpha_local_y;
+        rgba[((pixel_y * 8 + pixel_x) * 4 + 3) as usize] = 255;
+        HashMap::from([("hover-fixture".to_owned(), (8, 8, rgba))])
+    }
+
+    fn hover_fixture_entity(object_id: u32, kind: &str, x: i64, dead: bool) -> Value {
+        let body_library = if kind == "npc" {
+            "NPC/00"
+        } else {
+            "Monster/001"
+        };
+        json!({
+            "objectId": object_id,
+            "kind": kind,
+            "x": x,
+            "y": 10,
+            "direction": "up",
+            "dead": dead,
+            "sprite": {"bodyLibrary": body_library, "frameBaseOffset": 0}
+        })
+    }
+
+    fn has_layer(state: &Value, key: &str) -> bool {
+        state["entities"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .flat_map(|entity| entity["layers"].as_array().into_iter().flatten())
+            .any(|layer| layer["key"].as_str() == Some(key))
+    }
+
+    #[test]
+    fn hover_uses_body_alpha_and_same_tile_shortcut_but_fails_closed_without_pixels() {
+        let manifest = hover_fixture_manifest();
+        let pixels = hover_fixture_pixels(1, 1);
+        let poses = HashMap::from([("2001".to_owned(), (0, AnimationAction::Standing))]);
+        let mut payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
+            "_nativeHighlightTarget": true,
+            // The frame is offset left into the centre tile. This cursor hits
+            // its one opaque body pixel while not sharing the actor's tile.
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [hover_fixture_entity(2001, "monster", 11, false)]
+        });
+        let opaque = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload, &poses, true, &manifest, &pixels,
+        )
+        .expect("opaque hover state");
+        assert!(has_layer(&opaque, "2001:hover-highlight:body"));
+
+        payload["_nativeHoverCursor"] = json!({"x": 481.2, "y": 352.2});
+        let transparent = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload, &poses, true, &manifest, &pixels,
+        )
+        .expect("transparent hover state");
+        assert!(!has_layer(&transparent, "2001:hover-highlight:body"));
+
+        payload["_nativeHoverCursor"] = json!({"x": 482.2, "y": 353.2});
+        let missing_pixels = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload,
+            &poses,
+            true,
+            &manifest,
+            &HashMap::new(),
+        )
+        .expect("missing pixel cache state");
+        assert!(!has_layer(&missing_pixels, "2001:hover-highlight:body"));
+
+        payload["_nativeHoverCursor"] = json!({"x": 529.0, "y": 353.0});
+        let same_tile = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload,
+            &poses,
+            true,
+            &manifest,
+            &HashMap::new(),
+        )
+        .expect("same-tile shortcut state");
+        assert!(has_layer(&same_tile, "2001:hover-highlight:body"));
+    }
+
+    #[test]
+    fn hover_scan_allows_npc_excludes_self_and_dead_and_uses_reverse_cell_order() {
+        let manifest = hover_fixture_manifest();
+        let pixels = hover_fixture_pixels(1, 1);
+        let poses = HashMap::from([
+            ("1000".to_owned(), (0, AnimationAction::Standing)),
+            ("2001".to_owned(), (0, AnimationAction::Standing)),
+            ("3001".to_owned(), (0, AnimationAction::Standing)),
+            ("3002".to_owned(), (0, AnimationAction::Standing)),
+        ]);
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [
+                hover_fixture_entity(1000, "selfPlayer", 11, false),
+                hover_fixture_entity(2001, "monster", 11, true),
+                hover_fixture_entity(3001, "npc", 11, false),
+                hover_fixture_entity(3002, "npc", 11, false)
+            ]
+        });
+        let state = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload, &poses, true, &manifest, &pixels,
+        )
+        .expect("NPC hover state");
+        assert!(has_layer(&state, "3002:hover-highlight:body"));
+        assert!(!has_layer(&state, "3001:hover-highlight:body"));
+        assert!(!has_layer(&state, "2001:hover-highlight:body"));
+        assert!(!has_layer(&state, "1000:hover-highlight:body"));
+    }
+
+    #[test]
+    fn highlight_setting_gates_hover_and_selection_and_selected_band_follows_hover() {
+        let manifest = hover_fixture_manifest();
+        let pixels = hover_fixture_pixels(1, 1);
+        let poses = HashMap::from([
+            ("2001".to_owned(), (0, AnimationAction::Standing)),
+            ("2002".to_owned(), (0, AnimationAction::Standing)),
+        ]);
+        let mut payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "selectedObjectId": 2002,
+            "_nativeHighlightTarget": true,
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [
+                hover_fixture_entity(2001, "monster", 11, false),
+                hover_fixture_entity(2002, "monster", 12, false)
+            ]
+        });
+        let state = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload, &poses, true, &manifest, &pixels,
+        )
+        .expect("hover and selected state");
+        let hover = state["entities"][0]["layers"]
+            .as_array()
+            .expect("hover layers")
+            .iter()
+            .find(|layer| layer["key"] == "2001:hover-highlight:body")
+            .expect("hover redraw");
+        let selected = state["entities"][1]["layers"]
+            .as_array()
+            .expect("selected layers")
+            .iter()
+            .find(|layer| layer["key"] == "2002:target-highlight:body")
+            .expect("selected redraw");
+        assert!(hover["z"].as_f64() < selected["z"].as_f64());
+
+        payload["selectedObjectId"] = json!(2001);
+        let same = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload, &poses, true, &manifest, &pixels,
+        )
+        .expect("same hover and selection state");
+        assert!(has_layer(&same, "2001:target-highlight:body"));
+        assert!(!has_layer(&same, "2001:hover-highlight:body"));
+
+        payload["_nativeHighlightTarget"] = json!(false);
+        let disabled = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &payload, &poses, true, &manifest, &pixels,
+        )
+        .expect("disabled highlight state");
+        assert!(!has_layer(&disabled, "2001:target-highlight:body"));
+        assert!(!has_layer(&disabled, "2001:hover-highlight:body"));
     }
 
     #[test]

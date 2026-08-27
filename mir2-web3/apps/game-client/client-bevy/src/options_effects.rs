@@ -22,10 +22,11 @@ use mir2_ui_core::state::{UiOptions, UiPlatformSettings, UiWindowMode};
 
 pub const MAX_OPTIONS_EFFECTS_PER_TICK: usize = 8;
 
-/// Version 2 adds the seven local switches owned by Crystal's OptionDialog.
-/// Version 1 remains readable so an existing local audio/window configuration
-/// is upgraded with Crystal's defaults rather than discarded.
-const OPTIONS_SCHEMA_VERSION: u8 = 2;
+/// Version 3 adds Crystal's persisted `HighlightTarget` renderer setting.
+/// Versions 1 and 2 remain readable so existing local configurations are
+/// upgraded with the source default rather than discarded.
+const OPTIONS_SCHEMA_VERSION: u8 = 3;
+const PREVIOUS_OPTIONS_SCHEMA_VERSION: u8 = 2;
 const LEGACY_OPTIONS_SCHEMA_VERSION: u8 = 1;
 const OPTIONS_DIRECTORY: &str = "mir2-web3";
 const OPTIONS_FILE: &str = "options.json";
@@ -138,6 +139,8 @@ struct PersistedOptions {
     hp_view: bool,
     #[serde(default)]
     new_move: bool,
+    #[serde(default = "default_true")]
+    highlight_target: bool,
     music_enabled: bool,
     music_volume: u8,
     sound_enabled: bool,
@@ -160,6 +163,7 @@ impl From<&UiOptions> for PersistedOptions {
             name_view: options.name_view,
             hp_view: options.hp_view,
             new_move: options.new_move,
+            highlight_target: options.highlight_target,
             music_enabled: options.music_enabled,
             music_volume: options.music_volume,
             sound_enabled: options.sound_enabled,
@@ -175,7 +179,9 @@ impl TryFrom<PersistedOptions> for UiOptions {
     fn try_from(value: PersistedOptions) -> Result<Self, Self::Error> {
         if !matches!(
             value.version,
-            LEGACY_OPTIONS_SCHEMA_VERSION | OPTIONS_SCHEMA_VERSION
+            LEGACY_OPTIONS_SCHEMA_VERSION
+                | PREVIOUS_OPTIONS_SCHEMA_VERSION
+                | OPTIONS_SCHEMA_VERSION
         ) || value.music_volume > UiOptions::MAX_VOLUME
             || value.sound_volume > UiOptions::MAX_VOLUME
         {
@@ -189,6 +195,7 @@ impl TryFrom<PersistedOptions> for UiOptions {
             name_view: value.name_view,
             hp_view: value.hp_view,
             new_move: value.new_move,
+            highlight_target: value.highlight_target,
             music_enabled: value.music_enabled,
             music_volume: value.music_volume,
             sound_enabled: value.sound_enabled,
@@ -483,6 +490,7 @@ mod tests {
             name_view: false,
             hp_view: false,
             new_move: true,
+            highlight_target: false,
             music_enabled: false,
             music_volume: 35,
             sound_enabled: true,
@@ -670,6 +678,7 @@ mod tests {
             vec![
                 "drop_view",
                 "effect",
+                "highlight_target",
                 "hp_view",
                 "music_enabled",
                 "music_volume",
@@ -704,13 +713,38 @@ mod tests {
         }"#;
         let options = decode_options(legacy).expect("legacy options should load");
         assert_eq!(options.crystal(), UiOptions::default().crystal());
+        assert!(options.highlight_target);
         assert!(!options.music_enabled);
         assert_eq!(options.music_volume, 25);
         assert_eq!(options.window_mode, UiWindowMode::Fullscreen);
     }
 
     #[test]
-    fn all_crystal_option_fields_round_trip_through_persistence() {
+    fn version_two_options_upgrade_with_highlight_target_enabled() {
+        let previous = br#"{
+            "version": 2,
+            "skill_mode": true,
+            "skill_bar": false,
+            "effect": true,
+            "drop_view": false,
+            "name_view": true,
+            "hp_view": false,
+            "new_move": true,
+            "music_enabled": false,
+            "music_volume": 25,
+            "sound_enabled": true,
+            "sound_volume": 75,
+            "window_mode": "Fullscreen"
+        }"#;
+        let options = decode_options(previous).expect("version two options should load");
+        assert!(options.highlight_target);
+        assert!(options.skill_mode);
+        assert!(!options.skill_bar);
+        assert_eq!(options.music_volume, 25);
+    }
+
+    #[test]
+    fn all_crystal_option_and_highlight_fields_round_trip_through_persistence() {
         let test_path = TestPath::new("crystal-fields");
         let expected = sample_options();
         persist_options_to_path(&test_path.file, &expected).expect("persist options");
@@ -726,6 +760,7 @@ mod tests {
             "name_view",
             "hp_view",
             "new_move",
+            "highlight_target",
         ] {
             assert!(payload.contains(field), "missing persisted field: {field}");
         }

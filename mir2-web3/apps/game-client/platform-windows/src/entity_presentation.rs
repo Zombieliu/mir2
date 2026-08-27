@@ -7,7 +7,8 @@
 
 use std::collections::{HashMap, HashSet};
 
-use bevy::prelude::{Res, ResMut, Resource, Time};
+use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
+use bevy::window::PrimaryWindow;
 use mir2_bevy_runtime::entity_animation::{
     AnimationAction, AnimationCatalog, AnimationEvent, AnimationWorld, Direction, EntityKind,
     TransitionReason,
@@ -38,6 +39,8 @@ pub struct NativeEntityPresentation {
     last_frames: HashMap<String, (i64, AnimationAction)>,
     hidden_after_hide: HashSet<String>,
     last_effect_visible: Option<bool>,
+    hover_cursor_stage: Option<(f32, f32)>,
+    highlight_target: bool,
     payload_dirty: bool,
 }
 
@@ -52,6 +55,8 @@ impl Default for NativeEntityPresentation {
             last_frames: HashMap::new(),
             hidden_after_hide: HashSet::new(),
             last_effect_visible: None,
+            hover_cursor_stage: None,
+            highlight_target: true,
             payload_dirty: false,
         }
     }
@@ -64,6 +69,20 @@ impl NativeEntityPresentation {
 
     pub fn replace_payload(&mut self, payload: Value) {
         self.pending_payload = Some(payload);
+    }
+
+    fn set_hover_presentation(
+        &mut self,
+        hover_cursor_stage: Option<(f32, f32)>,
+        highlight_target: bool,
+    ) {
+        if self.hover_cursor_stage != hover_cursor_stage
+            || self.highlight_target != highlight_target
+        {
+            self.hover_cursor_stage = hover_cursor_stage;
+            self.highlight_target = highlight_target;
+            self.payload_dirty = true;
+        }
     }
 
     fn sync_pending_payload(&mut self, now_ms: u64) {
@@ -236,6 +255,20 @@ impl NativeEntityPresentation {
         }
 
         let mut visible_payload = payload.clone();
+        if let Some(object) = visible_payload.as_object_mut() {
+            object.insert(
+                "_nativeHighlightTarget".to_owned(),
+                Value::Bool(self.highlight_target),
+            );
+            if let Some((x, y)) = self.hover_cursor_stage {
+                object.insert(
+                    "_nativeHoverCursor".to_owned(),
+                    serde_json::json!({"x": x, "y": y}),
+                );
+            } else {
+                object.remove("_nativeHoverCursor");
+            }
+        }
         if let Some(entities) = visible_payload
             .get_mut("entities")
             .and_then(Value::as_array_mut)
@@ -258,18 +291,60 @@ pub fn tick_native_entity_presentation(
     time: Res<Time>,
     mut presentation: ResMut<NativeEntityPresentation>,
     player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let effect_visible = player_ui
         .as_deref()
         .map(|state| state.core.options.effect)
         .unwrap_or(true);
+    let highlight_target = player_ui
+        .as_deref()
+        .map(|state| state.core.options.highlight_target)
+        .unwrap_or(true);
+    let hover_cursor_stage = native_hover_cursor(
+        windows.iter().next(),
+        shell.as_deref(),
+        player_ui.as_deref(),
+        highlight_target,
+    );
+    presentation.set_hover_presentation(hover_cursor_stage, highlight_target);
     let Some(state) = presentation.render_state_if_changed(now_ms, effect_visible) else {
         return;
     };
     if let Ok(json) = serde_json::to_string(&state) {
         let _ = mir2_bevy_runtime::native_ingest::push_native_entity_render_state(json);
     }
+}
+
+fn native_hover_cursor(
+    window: Option<&Window>,
+    shell: Option<&mir2_client_bevy::native_shell::NativeShellModel>,
+    player_ui: Option<&mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    highlight_target: bool,
+) -> Option<(f32, f32)> {
+    use mir2_client_bevy::native_shell::NativeShellScreen;
+
+    if !highlight_target
+        || shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
+        || player_ui.is_some_and(|ui| ui.blocks_world_click())
+    {
+        return None;
+    }
+    let window = window?;
+    if !window.focused {
+        return None;
+    }
+    let cursor = window.cursor_position()?;
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    if !transform.contains_physical_point(cursor.x, cursor.y) {
+        return None;
+    }
+    Some(transform.physical_to_logical(cursor.x, cursor.y))
 }
 
 fn parse_observed_entity(entity: &Value) -> Option<ObservedEntity> {
@@ -465,6 +540,77 @@ mod tests {
             .render_state_if_changed(200, true)
             .expect("continued frame");
         assert!(rendered_path(&third).ends_with("/58.png"));
+    }
+
+    #[test]
+    fn hover_cursor_and_highlight_setting_republish_without_authoritative_packet() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        let initial = presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .expect("initial local presentation payload");
+        assert_eq!(initial["_nativeHighlightTarget"], json!(true));
+        assert!(initial.get("_nativeHoverCursor").is_none());
+
+        presentation.set_hover_presentation(Some((482.25, 353.5)), true);
+        let hovered = presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .expect("cursor-only redraw");
+        assert_eq!(hovered["_nativeHoverCursor"]["x"], json!(482.25));
+        assert_eq!(hovered["_nativeHoverCursor"]["y"], json!(353.5));
+        assert!(presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .is_none());
+
+        presentation.set_hover_presentation(None, true);
+        let cleared = presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .expect("cursor-leave redraw");
+        assert!(cleared.get("_nativeHoverCursor").is_none());
+
+        presentation.set_hover_presentation(None, false);
+        let disabled = presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .expect("setting-only redraw");
+        assert_eq!(disabled["_nativeHighlightTarget"], json!(false));
+    }
+
+    #[test]
+    fn native_hover_cursor_uses_shared_letterbox_transform_and_runtime_gates() {
+        use bevy::prelude::Vec2;
+        use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+
+        let mut window = Window::default();
+        window.resolution.set(1280.0, 720.0);
+        window.focused = true;
+        window.set_cursor_position(Some(Vec2::new(100.0, 360.0)));
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::InGame;
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, true),
+            None
+        );
+
+        window.set_cursor_position(Some(Vec2::new(640.0, 360.0)));
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, true),
+            Some((512.0, 384.0))
+        );
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, false),
+            None
+        );
+        shell.screen = NativeShellScreen::Login;
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, true),
+            None
+        );
+        shell.screen = NativeShellScreen::InGame;
+        window.focused = false;
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, true),
+            None
+        );
     }
 
     #[test]
@@ -774,8 +920,7 @@ mod tests {
             ("hair", "/original-ui/CHair/00/980.png"),
         ] {
             let normal = rendered_layer(layers, &format!("1001:{role}"));
-            let highlight =
-                rendered_layer(layers, &format!("1001:target-highlight:{role}"));
+            let highlight = rendered_layer(layers, &format!("1001:target-highlight:{role}"));
             assert_eq!(normal["path"], json!(expected_path));
             for field in [
                 "path",
@@ -945,9 +1090,7 @@ mod tests {
                     .expect("FlamingSword render state"),
             )
             .expect("FlamingSword JSON");
-            state["effects"][0]["z"]
-                .as_f64()
-                .expect("FlamingSword z")
+            state["effects"][0]["z"].as_f64().expect("FlamingSword z")
         };
 
         assert!(
@@ -997,9 +1140,7 @@ mod tests {
         let front = crate::map_parser::resolve_map_tile_draws(&map)
             .into_iter()
             .find(|draw| {
-                draw.x == 285
-                    && draw.y == 614
-                    && draw.layer == crate::map_parser::TileLayer::Front
+                draw.x == 285 && draw.y == 614 && draw.layer == crate::map_parser::TileLayer::Front
             })
             .expect("VIS-01 source coordinate is a real 0.map front tile");
         let front_z = f64::from(crate::atlas::map_tile_draw_z_for_test(
