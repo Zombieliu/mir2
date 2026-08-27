@@ -3236,6 +3236,25 @@
         "source": "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived",
         "symbol": "PlayerRevive"
       }
+    },
+    {
+      "effect": "RightGuardRangeHit",
+      "kind": "impact",
+      "library": "Magic2",
+      "base": 10,
+      "count": 5,
+      "interval": 60,
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4",
+        "symbol": "RightGuardRangeHit"
+      }
     }
   ],
   "object_effects": [

@@ -59,6 +59,7 @@ const WORLD_SPELL_SOURCE = "Crystal/Client/MirObjects/SpellObject.cs::Load";
 const OBJECT_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect";
 const MAP_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapEffect";
 const PLAYER_REVIVE_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived";
+const RIGHT_GUARD_RANGE_HIT_SOURCE = "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4";
 
 const spell = (name, library, base, count, interval, kind = "cast", directionStride) => ({
   spell: name,
@@ -345,9 +346,10 @@ const clientEffect = (effect, library, base, count, interval, source, extra = {}
 });
 
 // Client-owned effects that are not SpellEffect enum packets. Crystal creates
-// this exact actor-bound glow from both self Revived and effectful ObjectRevived.
+// these exact actor-bound effects from packet-driven client object actions.
 export const CLIENT_EFFECTS = [
   clientEffect("PlayerRevive", "Magic2", 1220, 20, 100, PLAYER_REVIVE_SOURCE),
+  clientEffect("RightGuardRangeHit", "Magic2", 10, 5, 60, RIGHT_GUARD_RANGE_HIT_SOURCE, { kind: "impact" }),
 ];
 
 // Single-layer ObjectEffect cases whose frame selection is fully determined by the packet effect.
@@ -425,7 +427,7 @@ export function validateEffectDefinitions() {
     if (spec.spell && !Number.isInteger(spec.spellId)) throw new Error(`${name} lacks an authoritative Spell id`);
     if (
       spec.effect
-      && spec.provenance.source !== PLAYER_REVIVE_SOURCE
+      && !CLIENT_EFFECTS.includes(spec)
       && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))
     ) throw new Error(`${name} lacks an authoritative SpellEffect id`);
     if (typeof spec.blend !== "boolean" || typeof spec.repeat !== "boolean" || !Number.isInteger(spec.light)) throw new Error(`${name} lacks explicit render flags`);

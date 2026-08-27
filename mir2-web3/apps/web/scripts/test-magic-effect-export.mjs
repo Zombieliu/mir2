@@ -144,6 +144,22 @@ async function testAssembleMode() {
       symbol: "PlayerRevive",
     },
   });
+  assert.deepEqual(manifest.client_effects[1], {
+    effect: "RightGuardRangeHit",
+    library: "Magic2",
+    base: 10,
+    count: 5,
+    interval: 60,
+    kind: "impact",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4",
+      symbol: "RightGuardRangeHit",
+    },
+  });
   const trapWorldSpell = manifest.ground_effects.find(
     (entry) => entry.spell === "TrapHexagon" && entry.provenance.source.includes("SpellObject.cs"),
   );

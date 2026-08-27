@@ -851,6 +851,19 @@ impl EffectCatalog {
         self.map_animation(&name, value)
     }
 
+    fn right_guard_range_hit_animation(&self) -> Option<Animation> {
+        let animation = self.map_animation("RightGuardRangeHit", 0)?;
+        (animation.kind == "impact"
+            && animation.frames.len() == 5
+            && animation.interval == 60
+            && animation.duration_ms == 300
+            && animation.blend
+            && (animation.opacity - 1.0).abs() < f32::EPSILON
+            && animation.light == Some(6)
+            && !animation.repeat)
+            .then_some(animation)
+    }
+
     fn effect_name_for_number(&self, effect: u32) -> Option<String> {
         self.effect_name_by_number
             .get(&effect)
@@ -1132,6 +1145,9 @@ pub(crate) fn native_effect_light_snapshots() -> Vec<NativeEffectLightSnapshot> 
 pub(crate) struct NativeEffects {
     active: Vec<EffectInstance>,
     anchor_object_ids: HashMap<String, u32>,
+    /// Delayed client-owned effects may depend on their source actor only
+    /// until the Crystal action-frame boundary creates the target-owned effect.
+    prestart_source_object_ids: HashMap<String, u32>,
     anchor_player_keys: HashSet<String>,
     zone_tiles: HashMap<u32, (i32, i32)>,
     /// The Rust simulation currently emits a compatibility ObjectProjectile
@@ -1167,6 +1183,7 @@ impl Default for NativeEffects {
         Self {
             active: Vec::new(),
             anchor_object_ids: HashMap::new(),
+            prestart_source_object_ids: HashMap::new(),
             anchor_player_keys: HashSet::new(),
             zone_tiles: HashMap::new(),
             local_projectile_dedupe: HashMap::new(),
@@ -1361,6 +1378,7 @@ impl NativeEffects {
     fn clear_active_effects(&mut self) {
         self.active.clear();
         self.anchor_object_ids.clear();
+        self.prestart_source_object_ids.clear();
         self.anchor_player_keys.clear();
         self.local_projectile_dedupe.clear();
         self.local_projectile_targets.clear();
@@ -1373,6 +1391,24 @@ impl NativeEffects {
     fn refresh_anchor_tiles(&mut self) {
         let now_ms = self.now_ms;
         let zone_tiles = &self.zone_tiles;
+        let active_start_times = self
+            .active
+            .iter()
+            .map(|instance| (instance.key.clone(), instance.start_at))
+            .collect::<HashMap<_, _>>();
+        let missing_prestart_sources = self
+            .prestart_source_object_ids
+            .iter()
+            .filter_map(|(key, source_id)| {
+                let start_at = active_start_times.get(key).copied()?;
+                (now_ms <= start_at && !zone_tiles.contains_key(source_id)).then_some(key.clone())
+            })
+            .collect::<Vec<_>>();
+        self.prestart_source_object_ids.retain(|key, _| {
+            active_start_times
+                .get(key)
+                .is_some_and(|start_at| now_ms <= *start_at)
+        });
         for instance in &mut self.active {
             if self.anchor_player_keys.contains(&instance.key) {
                 instance.tile_x = self.player_x;
@@ -1460,7 +1496,7 @@ impl NativeEffects {
         self.pending_sounds.extend(launch_impact_sounds);
 
         let anchors = &self.anchor_object_ids;
-        let mut missing = Vec::new();
+        let mut missing = missing_prestart_sources;
         let mut local_projectile_impact_due = Vec::new();
         for instance in &mut self.active {
             let Some(object_id) = anchors.get(&instance.key) else {
@@ -1513,6 +1549,8 @@ impl NativeEffects {
                 .retain(|instance| !missing.contains(&instance.key));
             self.anchor_object_ids
                 .retain(|key, _| !missing.contains(key));
+            self.prestart_source_object_ids
+                .retain(|key, _| !missing.contains(key));
             self.pending_sounds
                 .retain(|pending| !missing.contains(&pending.key));
             self.local_projectile_targets
@@ -1555,6 +1593,9 @@ impl NativeEffects {
             "Struck" | "ObjectStruck" => self.apply_player_struck_sound(payload, provenance),
             "Death" | "ObjectDied" => self.apply_player_death_sound(payload, provenance),
             "ObjectAttack" => self.apply_object_attack(payload, provenance),
+            "ObjectRangeAttack" => {
+                self.apply_object_range_attack(payload, zone_tiles, provenance)
+            }
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
             "ObjectProjectile" => self.apply_object_projectile(payload, zone_tiles, provenance),
             "ObjectEffect" => self.apply_object_effect(payload, zone_tiles, provenance),
@@ -2270,6 +2311,77 @@ impl NativeEffects {
         });
     }
 
+    fn apply_object_range_attack(
+        &mut self,
+        payload: &Value,
+        zone_tiles: &HashMap<u32, (i32, i32)>,
+        provenance: &EffectProvenance,
+    ) {
+        let Some(attacker) = payload.get("_nativeAttacker") else {
+            return;
+        };
+        if !actor_sprite_library(attacker, "bodyLibrary").is_some_and(|library| {
+            matches!(library, "Monster/099" | "/original-ui/Monster/099")
+        }) {
+            return;
+        }
+        let Some(source_id) = payload
+            .get("objectId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+        else {
+            return;
+        };
+        let Some(target_id) = payload
+            .get("targetId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+        else {
+            return;
+        };
+        if !zone_tiles.contains_key(&source_id) {
+            return;
+        }
+        let Some((tile_x, tile_y)) = zone_tiles.get(&target_id).copied() else {
+            return;
+        };
+        let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(EffectCatalog::right_guard_range_hit_animation)
+        else {
+            return;
+        };
+
+        // Monster/099 creates the target-owned Magic2 effect on AttackRange1's
+        // fourth 100 ms action-frame boundary. A new authoritative attack for
+        // the same pair restarts that one semantic instance; distinct targets
+        // remain independent, matching Crystal's target-owned effect list.
+        const ACTION_FRAME_DELAY_MS: u64 = 400;
+        let now = self.now_ms;
+        let key = format!("right-guard-range:{source_id}:{target_id}");
+        self.active.retain(|instance| instance.key != key);
+        self.anchor_object_ids.remove(&key);
+        self.prestart_source_object_ids.remove(&key);
+        self.active.push(EffectInstance {
+            key: key.clone(),
+            kind: EffectKindTag::Impact,
+            tile_x,
+            tile_y,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: now,
+            start_at: now.saturating_add(ACTION_FRAME_DELAY_MS),
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+        self.anchor_object_ids.insert(key, target_id);
+        self.prestart_source_object_ids
+            .insert(format!("right-guard-range:{source_id}:{target_id}"), source_id);
+    }
+
     fn apply_map_effect(&mut self, payload: &Value, provenance: &EffectProvenance) {
         let Some(catalog) = effect_catalog() else {
             return;
@@ -2397,15 +2509,31 @@ impl NativeEffects {
             .iter()
             .filter_map(|(key, anchored_id)| (*anchored_id == object_id).then_some(key.clone()))
             .collect::<Vec<_>>();
+        let prestart_source_keys = self
+            .prestart_source_object_ids
+            .iter()
+            .filter_map(|(key, source_id)| (*source_id == object_id).then_some(key.clone()))
+            .collect::<Vec<_>>();
         self.active.retain(|instance| {
-            instance.key != remove_key && !anchored_keys.contains(&instance.key)
+            instance.key != remove_key
+                && !anchored_keys.contains(&instance.key)
+                && !prestart_source_keys.contains(&instance.key)
         });
-        self.anchor_object_ids
-            .retain(|_, anchored_id| *anchored_id != object_id);
+        self.anchor_object_ids.retain(|key, anchored_id| {
+            *anchored_id != object_id && !prestart_source_keys.contains(key)
+        });
+        self.prestart_source_object_ids.retain(|key, source_id| {
+            *source_id != object_id && !anchored_keys.contains(key)
+        });
         self.pending_sounds
-            .retain(|pending| !anchored_keys.contains(&pending.key));
+            .retain(|pending| {
+                !anchored_keys.contains(&pending.key)
+                    && !prestart_source_keys.contains(&pending.key)
+            });
         self.local_projectile_targets
-            .retain(|key, _| !anchored_keys.contains(key));
+            .retain(|key, _| {
+                !anchored_keys.contains(key) && !prestart_source_keys.contains(key)
+            });
     }
 
     /// Advance the effect clock and build the EffectRenderState JSON. Returns
@@ -2541,6 +2669,8 @@ impl NativeEffects {
             .map(|instance| instance.key.as_str())
             .collect::<Vec<_>>();
         self.anchor_object_ids
+            .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.prestart_source_object_ids
             .retain(|key, _| live_keys.contains(&key.as_str()));
         self.anchor_player_keys
             .retain(|key| live_keys.contains(&key.as_str()));
@@ -5771,6 +5901,417 @@ mod tests {
                 ["payload"]
                 .clone(),
         }
+    }
+
+    fn right_guard_range_event(
+        sequence: u64,
+        source_id: u32,
+        target_id: u32,
+        body_library: &str,
+    ) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 17,
+            packet: "ObjectRangeAttack".to_owned(),
+            payload: json!({
+                "objectId": source_id,
+                "location": {"x": 287, "y": 616},
+                "direction": "Down",
+                "targetId": target_id,
+                "target": {"x": 289, "y": 616},
+                "attackType": 0,
+                "spell": 0,
+                "level": 0,
+                "_nativeAttacker": {
+                    "objectId": source_id,
+                    "kind": "monster",
+                    "sprite": {"bodyLibrary": body_library}
+                },
+                "_nativeTarget": {"objectId": target_id}
+            }),
+        }
+    }
+
+    fn lifecycle_effect_event(sequence: u64, packet: &str, object_id: Option<u32>) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 17,
+            packet: packet.to_owned(),
+            payload: object_id.map_or_else(|| json!({}), |id| json!({"objectId": id})),
+        }
+    }
+
+    #[test]
+    fn right_guard_range_hit_catalog_is_exact_crystal_contract() {
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        let animation = catalog
+            .right_guard_range_hit_animation()
+            .expect("RightGuard Magic2 hit frames");
+        assert_eq!(animation.name, "RightGuardRangeHit");
+        assert_eq!(animation.kind, "impact");
+        assert_eq!(animation.interval, 60);
+        assert_eq!(animation.duration_ms, 300);
+        assert_eq!(animation.frames.len(), 5);
+        assert!(animation.blend);
+        assert!((animation.opacity - 1.0).abs() < f32::EPSILON);
+        assert_eq!(animation.light, Some(6));
+        assert!(!animation.repeat);
+        for (frame, index) in animation.frames.iter().zip(10..=14) {
+            assert!(frame.path.ends_with(&format!("/Magic2/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+    }
+
+    #[test]
+    fn right_guard_range_hit_waits_four_frames_tracks_target_and_expires() {
+        let mut zone = HashMap::from([(371, (287, 616)), (2001, (289, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[right_guard_range_event(1, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "right-guard-range:371:2001");
+        assert_eq!(fx.active[0].kind, EffectKindTag::Impact);
+        assert_eq!(fx.active[0].start_at, 400);
+        assert_eq!(fx.anchor_object_ids["right-guard-range:371:2001"], 2001);
+        assert_eq!(
+            fx.prestart_source_object_ids["right-guard-range:371:2001"],
+            371
+        );
+        assert!(fx.current_light_snapshots(399).is_empty());
+
+        let before: Value = serde_json::from_str(
+            &fx.tick_with_visibility(399, true)
+                .expect("delayed RightGuard state"),
+        )
+        .expect("delayed RightGuard JSON");
+        assert_eq!(before["effects"], json!([]));
+
+        for (now_ms, index) in [(400, 10), (460, 11), (520, 12), (580, 13), (640, 14)] {
+            if now_ms == 520 {
+                zone.insert(2001, (290, 617));
+                fx.observe(now_ms, 288, 616, &[], &zone);
+                assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (290, 617));
+            }
+            let rendered: Value = serde_json::from_str(
+                &fx.tick_with_visibility(now_ms, true)
+                    .expect("RightGuard visible frame"),
+            )
+            .expect("RightGuard frame JSON");
+            assert_eq!(rendered["effects"].as_array().map(Vec::len), Some(1));
+            assert!(rendered["effects"][0]["imageUrl"]
+                .as_str()
+                .is_some_and(|path| path.ends_with(&format!("/Magic2/{index}.png"))));
+            assert_eq!(rendered["effects"][0]["additive"], true);
+            assert_eq!(rendered["effects"][0]["opacity"], 1.0);
+            let lights = fx.current_light_snapshots(now_ms);
+            assert_eq!(lights.len(), 1);
+            assert_eq!(lights[0].light, 6);
+        }
+
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(700, true)
+                .expect("expired RightGuard state"),
+        )
+        .expect("expired RightGuard JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.prestart_source_object_ids.is_empty());
+    }
+
+    #[test]
+    fn right_guard_range_hit_restarts_per_pair_and_obeys_target_lifecycle() {
+        let zone = HashMap::from([
+            (371, (287, 616)),
+            (2001, (289, 616)),
+            (2002, (290, 616)),
+        ]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[right_guard_range_event(1, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            100,
+            288,
+            616,
+            &[right_guard_range_event(
+                2,
+                371,
+                2001,
+                "/original-ui/Monster/099",
+            )],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "same pair restarts one effect");
+        assert_eq!(fx.active[0].start_at, 500);
+
+        let other_target = right_guard_range_event(3, 371, 2002, "Monster/099");
+        fx.observe(120, 288, 616, &[other_target.clone()], &zone);
+        assert_eq!(fx.active.len(), 2, "different targets remain independent");
+        let replay_start_at = fx
+            .active
+            .iter()
+            .find(|instance| instance.key == "right-guard-range:371:2002")
+            .map(|instance| (instance.start_at, instance.provenance.sequence))
+            .expect("second target effect");
+        fx.observe(130, 288, 616, &[other_target], &zone);
+        assert_eq!(fx.active.len(), 2, "replayed sequence is deduplicated");
+        assert_eq!(
+            fx.active
+                .iter()
+                .find(|instance| instance.key == "right-guard-range:371:2002")
+                .map(|instance| (instance.start_at, instance.provenance.sequence)),
+            Some(replay_start_at),
+            "replay must not restart or rewrite provenance"
+        );
+
+        fx.observe(
+            140,
+            288,
+            616,
+            &[lifecycle_effect_event(4, "ObjectRemove", Some(371))],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "prestart attacker removal cancels both effects");
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.prestart_source_object_ids.is_empty());
+
+        fx.observe(
+            200,
+            288,
+            616,
+            &[right_guard_range_event(5, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            300,
+            288,
+            616,
+            &[lifecycle_effect_event(6, "ObjectHide", Some(371))],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "prestart attacker hide cancels the effect");
+
+        fx.observe(
+            400,
+            288,
+            616,
+            &[right_guard_range_event(7, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(801, 288, 616, &[], &zone);
+        assert!(fx.prestart_source_object_ids.is_empty());
+        fx.observe(
+            810,
+            288,
+            616,
+            &[lifecycle_effect_event(8, "ObjectRemove", Some(371))],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "post-start attacker removal keeps target-owned effect");
+        fx.observe(
+            820,
+            288,
+            616,
+            &[lifecycle_effect_event(9, "ObjectRemove", Some(2001))],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "target removal always cancels the effect");
+
+        fx.observe(
+            900,
+            288,
+            616,
+            &[right_guard_range_event(10, 371, 2002, "Monster/099")],
+            &zone,
+        );
+        fx.observe(1_301, 288, 616, &[], &zone);
+        fx.observe(
+            1_310,
+            288,
+            616,
+            &[lifecycle_effect_event(11, "ObjectHide", Some(371))],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "post-start attacker hide keeps target-owned effect");
+        fx.observe(
+            1_320,
+            288,
+            616,
+            &[lifecycle_effect_event(12, "ObjectHide", Some(2002))],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "target hide always cancels the effect");
+
+        fx.observe(
+            1_400,
+            288,
+            616,
+            &[right_guard_range_event(13, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            1_410,
+            288,
+            616,
+            &[lifecycle_effect_event(14, "MapChanged", None)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.prestart_source_object_ids.is_empty());
+        fx.observe(
+            1_420,
+            288,
+            616,
+            &[right_guard_range_event(15, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            1_430,
+            288,
+            616,
+            &[lifecycle_effect_event(16, "LogOutSuccess", None)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.prestart_source_object_ids.is_empty());
+
+        fx.observe(
+            1_440,
+            288,
+            616,
+            &[right_guard_range_event(17, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        let mut next_generation = right_guard_range_event(1, 371, 2002, "Monster/099");
+        next_generation.generation = 18;
+        fx.observe(1_450, 288, 616, &[next_generation], &zone);
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "right-guard-range:371:2002");
+        assert_eq!(fx.last_generation, 18);
+        assert_eq!(fx.last_effect_sequence, 1);
+        assert_eq!(fx.anchor_object_ids.len(), 1);
+        assert_eq!(fx.prestart_source_object_ids.len(), 1);
+        fx.reset_session();
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.prestart_source_object_ids.is_empty());
+    }
+
+    #[test]
+    fn right_guard_range_hit_source_boundary_is_prestart_through_400ms() {
+        let zone = HashMap::from([(371, (287, 616)), (2001, (289, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[right_guard_range_event(1, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            400,
+            288,
+            616,
+            &[lifecycle_effect_event(2, "ObjectRemove", Some(371))],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "source remove at 400 ms cancels before ownership transfer");
+
+        fx.observe(
+            500,
+            288,
+            616,
+            &[right_guard_range_event(3, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            900,
+            288,
+            616,
+            &[lifecycle_effect_event(4, "ObjectHide", Some(371))],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "source hide at 400 ms cancels before ownership transfer");
+
+        fx.observe(
+            1_000,
+            288,
+            616,
+            &[right_guard_range_event(5, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            1_401,
+            288,
+            616,
+            &[lifecycle_effect_event(6, "ObjectRemove", Some(371))],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "source remove after 400 ms keeps target ownership");
+        fx.observe(
+            1_410,
+            288,
+            616,
+            &[lifecycle_effect_event(7, "ObjectRemove", Some(2001))],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+
+        fx.observe(
+            1_500,
+            288,
+            616,
+            &[right_guard_range_event(8, 371, 2001, "Monster/099")],
+            &zone,
+        );
+        fx.observe(
+            1_901,
+            288,
+            616,
+            &[lifecycle_effect_event(9, "ObjectHide", Some(371))],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "source hide after 400 ms keeps target ownership");
+        fx.observe(
+            1_910,
+            288,
+            616,
+            &[lifecycle_effect_event(10, "ObjectHide", Some(2001))],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn right_guard_range_hit_fails_closed_for_other_packets_sources_and_missing_target() {
+        let zone = HashMap::from([(371, (287, 616)), (2001, (289, 616))]);
+        let mut fx = NativeEffects::default();
+        let mut ordinary = ordinary_attack_event(4);
+        ordinary.generation = 17;
+        fx.observe(
+            0,
+            288,
+            616,
+            &[
+                right_guard_range_event(1, 371, 2001, "Monster/100"),
+                right_guard_range_event(2, 371, 9999, "Monster/099"),
+                right_guard_range_event(3, 9999, 2001, "Monster/099"),
+                ordinary,
+            ],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
     }
 
     #[test]

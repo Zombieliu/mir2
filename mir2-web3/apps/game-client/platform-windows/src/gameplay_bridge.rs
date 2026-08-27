@@ -612,7 +612,20 @@ impl NativeGameplayAdapter {
                     self.record_effect("ObjectAttack", payload);
                     changed
                 }
-                "ObjectRangeAttack" => self.patch_zone_entity_action(payload, "attackRange1", true),
+                "ObjectRangeAttack" => {
+                    let changed =
+                        self.patch_zone_entity_action(payload, "attackRange1", true);
+                    // Crystal resolves monster-specific client VFX from the
+                    // attacking actor type at action-frame boundaries. Carry
+                    // both actor identities without changing the wire packet.
+                    self.record_actor_effect(
+                        "ObjectRangeAttack",
+                        payload,
+                        packet_body(payload).get("targetId").and_then(value_u32),
+                        packet_object_id(payload),
+                    );
+                    changed
+                }
                 "ObjectMagic" => {
                     // Keep the existing entity action hint for the caster, then
                     // hand the authoritative cast packet to the effect system.
@@ -4112,6 +4125,56 @@ mod tests {
         assert_eq!(adapter.effect_events[0].payload["spell"], 8);
         assert_eq!(adapter.effect_events[0].payload["level"], 3);
         assert_eq!(adapter.effect_events[0].payload["attackType"], 0);
+    }
+
+    #[test]
+    fn right_guard_range_attack_preserves_wire_fields_and_actor_context() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut snapshot = gameplay_payload();
+        snapshot["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId": 371,
+                "kind": "monster",
+                "name": "RightGuard",
+                "x": 287,
+                "y": 616,
+                "sprite": {"bodyLibrary": "Monster/099"}
+            }));
+        adapter.observe_world_snapshot(&snapshot);
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRangeAttack".to_owned(),
+            payload: json!({
+                "objectId": 371,
+                "location": {"x": 287, "y": 616},
+                "direction": "Down",
+                "targetId": 2001,
+                "target": {"x": 289, "y": 616},
+                "attackType": 0,
+                "spell": 0,
+                "level": 0
+            }),
+        }));
+
+        assert_eq!(adapter.effect_events.len(), 1);
+        let event = &adapter.effect_events[0];
+        assert_eq!(event.packet, "ObjectRangeAttack");
+        assert_eq!(event.payload["objectId"], 371);
+        assert_eq!(event.payload["targetId"], 2001);
+        assert_eq!(event.payload["attackType"], 0);
+        assert_eq!(event.payload["spell"], 0);
+        assert_eq!(event.payload["level"], 0);
+        assert_eq!(
+            event.payload["_nativeAttacker"]["sprite"]["bodyLibrary"],
+            "Monster/099"
+        );
+        assert_eq!(event.payload["_nativeTarget"]["objectId"], 2001);
+        assert_eq!(
+            adapter.zone_entities[&371]["_nativeAnimationAction"],
+            "attackRange1"
+        );
     }
 
     #[test]
