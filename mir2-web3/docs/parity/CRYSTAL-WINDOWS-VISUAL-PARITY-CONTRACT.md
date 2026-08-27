@@ -124,6 +124,17 @@ state-clock, frame/audio identity and lifecycle automation only. It does not
 pass the same-EXE, live-WSS, GPU-raster or human-audio gates, and the other four
 first-slice spells remain open.
 
+VIS-03 has one bounded automated checkpoint at implementation revision
+`448db4f72`. The 1024x768 HUD base and Inventory control are source-bound to
+`Prguse/1` and normal/hover/pressed `Prguse/1903..1905`. BigMap Teleport keeps
+`Title/821/822/823` for normal/hover/pressed and now explicitly uses
+`Title/823` while disabled. Its enable gate also requires the active target
+map to equal the authoritative current map, matching Crystal's
+`TargetMapIndex == map.Index` rule. Buttons without explicit disabled art
+continue to render their normal frame. This passes render-state, input-gate,
+asset-closure and package/verifier automation only; no same-EXE capture, GPU
+raster, real-DPI or human acceptance is implied.
+
 ## Delivery waves
 
 1. `VIS-00` routes native text through Arial, applies the 8pt-at-96-DPI
@@ -169,6 +180,12 @@ The bounded Lightning evidence is recorded in
 The Windows functional gate also generates the native keyed/additive map pack
 before its host tests; this keeps VIS-01's real `0.map` front-cell binding
 fail-closed on clean runners rather than weakening the visual assertion.
+
+The bounded VIS-03 evidence is recorded in
+`docs/generated/player-qa/windows-visual-parity/VIS-03-BUTTON-STATE-REPORT.md`.
+It closes only the listed source-bound button-state and same-map intent checks;
+the wider HUD, Inventory and BigMap denominators remain incomplete and
+unaccepted.
 
 ## Evidence and final gates
 

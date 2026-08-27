@@ -1,6 +1,6 @@
 # Backend 1:1 Progress
 
-> Windows visual projection VIS-00 baseline / VIS-01 and VIS-02 in-progress checkpoint
+> Windows visual projection VIS-00 baseline / VIS-01 and VIS-02 in-progress / VIS-03 bounded checkpoint
 > (2026-08-27): shared authority
 > still owns actor identity and state, while the Gateway/native projection now
 > preserves remote player class, gender, guild, hair, armour, weapon,
@@ -32,7 +32,14 @@
 > gate was corrected to generate its required keyed/additive map pack. This is a
 > presentation-boundary repair, not a claim
 > that shared-Zone gameplay, whole-game semantics or Windows visuals are
-> complete; the other four first-slice spells remain open. Real Gateway/WSS order, GPU raster proof, additive weapon/wing
+> complete; the other four first-slice spells remain open. VIS-03 revision
+> `448db4f72` adds no server authority: it preserves the source 1024x768
+> Inventory three-state assets, gives BigMap Teleport its exact `Title/823`
+> disabled art, and rejects teleport intents when the active search map is not
+> the authoritative current map. This bounded client-state checkpoint passes
+> Bevy native-ui 393/393 and Windows 333/333 plus package/verifier self-tests
+> and an independent no-P0/P1 review; it is not live-WSS or raster evidence.
+> Real Gateway/WSS order, GPU raster proof, additive weapon/wing
 > layers, full assets, same-EXE live evidence, DPI, soak and human gates stay
 > open under the visual
 > contract.

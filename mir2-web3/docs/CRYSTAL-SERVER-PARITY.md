@@ -1,6 +1,6 @@
 # Crystal Server Parity
 
-> Windows VIS-00 baseline / VIS-01 and VIS-02 in-progress server/client-boundary note
+> Windows VIS-00 baseline / VIS-01 and VIS-02 in-progress / VIS-03 bounded server-client note
 > (2026-08-27): no new server
 > completion percentage is claimed. The authoritative `ObjectPlayerInfo`
 > identity, guild, normal/Transform body and equipment routes now survive the
@@ -26,7 +26,12 @@
 > scheduling remains the gameplay authority and was not changed. Fresh-source
 > Windows tests pass 333/333 after the gate began generating its required
 > keyed/additive map pack. This closes only bounded
-> projection/action-loss and render-state defects; it does not prove live WSS
+> projection/action-loss and render-state defects. VIS-03 revision
+> `448db4f72` is intentionally client-boundary-only: BigMap Teleport is disabled
+> on non-current active maps, uses Crystal `Title/823` when disabled, and keeps
+> legacy normal-frame fallback for controls without explicit disabled art.
+> Full Bevy native-ui 393/393, Windows 333/333 and package/verifier self-tests
+> pass; independent review found no P0/P1. It does not prove live WSS
 > ordering or GPU pixels. Monster special rendering, effect/wing overlays,
 > complete assets, the other first-slice skill effects, environment visuals and all real-window
 > acceptance gates remain open.

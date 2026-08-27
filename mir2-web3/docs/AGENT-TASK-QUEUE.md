@@ -29,8 +29,15 @@
 > Windows suite at 333/333, and the vertical-slice gate explicitly generates
 > both packs. VIS-01 and VIS-02 still require real Gateway/WSS sequence, GPU
 > raster pixels and same-EXE captures; the remaining VIS-02 spells are
-> FlamingSword, FireBall, SoulFireBall and FireWall. The next ordered UI slice
-> is `VIS-03` HUD/Inventory/BigMap button states. Do not
+> FlamingSword, FireBall, SoulFireBall and FireWall. The first bounded VIS-03
+> UI-state checkpoint is now implemented at `448db4f72`: the 1024x768
+> Inventory button remains source-bound to `Prguse/1903..1905`, BigMap
+> Teleport uses Crystal's explicit disabled `Title/823` frame, and cached
+> non-current-map search results cannot enable Teleport. Full Bevy native-ui
+> passes 393/393, full Windows source-root tests pass 333/333, package and
+> verifier self-tests pass, and independent read-only review found no P0/P1.
+> This is render-state/semantic automation, not a same-EXE or visual
+> acceptance result. Do not
 > report full-game 90% or visual 100%: clean source binding, the semantic
 > inventory, full legal assets, additive weapon/wing layers, same-EXE live WSS,
 > 100/125/150% DPI, 30-minute native soak, human visual/audio/feel and

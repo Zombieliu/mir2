@@ -1,6 +1,6 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Windows visual-parity VIS-00 baseline / VIS-01 and VIS-02 in-progress checkpoint
+> Windows visual-parity VIS-00 baseline / VIS-01 and VIS-02 in-progress / VIS-03 bounded checkpoint
 > (2026-08-27): a new source-bound
 > contract and machine-readable Phase-A ledger establish known registries for
 > 410 fixed/template UI leaves, player/monster libraries and action records,
@@ -35,8 +35,16 @@
 > both ordinary and keyed/additive map packs. This is one of five first-slice
 > spells, not VIS-02 completion. HUD/damage typography, hover corpse labels, additive
 > weapon/wing layers, real Gateway/WSS replay, same-EXE visual capture,
-> complete legal assets, skill VFX, fixed-scene/real-map GPU raster captures,
-> button state/DPI evidence, native
+> complete legal assets, skill VFX, fixed-scene/real-map GPU raster captures.
+> VIS-03 now closes one bounded automated UI-state defect at implementation
+> revision `448db4f72`: the normal 1024x768 HUD/Inventory route is pinned to
+> `Prguse/1` and `Prguse/1903..1905`, BigMap Teleport's disabled state uses
+> `Title/823`, and a cached remote-map NPC cannot enable the current-map-only
+> teleport intent. The optional disabled-frame path preserves normal-frame
+> fallback for buttons without Crystal disabled art. Bevy native-ui 393/393,
+> Windows 333/333, package/verifier self-tests and independent P0/P1 review
+> pass. This does not supply GPU pixels, same-EXE interaction or DPI/human
+> acceptance. Button state/DPI evidence, native
 > soak and human acceptance remain open. VIS-01 is not visually accepted.
 
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
