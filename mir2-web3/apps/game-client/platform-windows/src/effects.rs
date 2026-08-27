@@ -92,6 +92,11 @@ const FIREBALL_IMPACT_SOUND_FILE: &str = "M31-2.wav";
 const FIREBALL_CAST_SOUND_CUE: &str = "FireBall.cast";
 const FIREBALL_PROJECTILE_SOUND_CUE: &str = "FireBall.projectile";
 const FIREBALL_IMPACT_SOUND_CUE: &str = "FireBall.impact";
+const FIREWALL_SPELL_ACTION_MS: u64 = 600;
+const FIREWALL_CAST_SOUND_FILE: &str = "M39-0.wav";
+const FIREWALL_COMPLETE_SOUND_FILE: &str = "M39-1.wav";
+const FIREWALL_CAST_SOUND_CUE: &str = "FireWall.cast";
+const FIREWALL_COMPLETE_SOUND_CUE: &str = "FireWall.complete";
 const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
 const SOUL_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M64-1.wav";
@@ -1388,6 +1393,17 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
+        if spell == "FireWall" {
+            // Crystal plays M39-0 and the attached Magic/1620..1629 cast at
+            // action start even when Cast=false. Only the post-Spell-action
+            // M39-1 completion branch is gated by Cast=true; ObjectSpell owns
+            // the authoritative persistent ground flames independently.
+            self.queue_immediate_sound(
+                provenance,
+                FIREWALL_CAST_SOUND_CUE,
+                FIREWALL_CAST_SOUND_FILE,
+            );
+        }
         if spell == "SoulFireBall" {
             // Crystal has no SoulFireBall cast bitmap. The action start always
             // plays M64-0, while Cast=false suppresses only the completion
@@ -1459,6 +1475,23 @@ impl NativeEffects {
                     sequence: provenance.sequence,
                     cue: FIREBALL_CAST_SOUND_CUE.to_owned(),
                     file_name: FIREBALL_CAST_SOUND_FILE.to_owned(),
+                },
+            });
+        }
+        if spell == "FireWall"
+            && payload
+                .get("cast")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: now.saturating_add(FIREWALL_SPELL_ACTION_MS),
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: FIREWALL_COMPLETE_SOUND_CUE.to_owned(),
+                    file_name: FIREWALL_COMPLETE_SOUND_FILE.to_owned(),
                 },
             });
         }
@@ -4130,6 +4163,202 @@ mod tests {
             let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
                 .expect("packaged SoulFireBall sound path");
             let bytes = fs::read(path).expect("read SoulFireBall sound");
+            assert_eq!(bytes.len(), audio["sourceBytes"]);
+            assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
+        }
+    }
+
+    fn firewall_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-firewall-v1.json"
+        ))
+        .expect("VIS-02 FireWall fixture JSON")
+    }
+
+    fn firewall_magic_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = firewall_fixture();
+        let payload = if cast {
+            fixture["timeline"][0]["event"]["payload"].clone()
+        } else {
+            fixture["compatibilityCases"]["castFalse"]["event"]["payload"].clone()
+        };
+        NativeEffectEvent {
+            sequence,
+            generation: 15,
+            packet: "ObjectMagic".to_owned(),
+            payload,
+        }
+    }
+
+    fn firewall_spell_events() -> Vec<NativeEffectEvent> {
+        let fixture = firewall_fixture();
+        (1..=5)
+            .map(|index| NativeEffectEvent {
+                sequence: index as u64 + 1,
+                generation: 15,
+                packet: "ObjectSpell".to_owned(),
+                payload: fixture["timeline"][index]["event"]["payload"].clone(),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn firewall_cast_true_plays_two_source_sounds_across_spell_action() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[firewall_magic_event(1, true)], &zone);
+        assert_eq!(fx.active.len(), 1);
+        let cast = fx.active.first().expect("FireWall cast");
+        let animation = cast.current.as_ref().expect("FireWall cast animation");
+        assert_eq!(animation.frames.len(), 10);
+        assert_eq!(animation.interval, 60);
+        assert_eq!(animation.duration_ms, FIREWALL_SPELL_ACTION_MS);
+        assert!(animation.frames[0].path.ends_with("/Magic/1620.png"));
+
+        let start_sound = fx.take_due_sound_events(0);
+        assert_eq!(start_sound.len(), 1);
+        assert_eq!(start_sound[0].cue, FIREWALL_CAST_SOUND_CUE);
+        assert_eq!(start_sound[0].file_name, FIREWALL_CAST_SOUND_FILE);
+        assert!(fx.take_due_sound_events(599).is_empty());
+        let complete_sound = fx.take_due_sound_events(600);
+        assert_eq!(complete_sound.len(), 1);
+        assert_eq!(complete_sound[0].cue, FIREWALL_COMPLETE_SOUND_CUE);
+        assert_eq!(
+            complete_sound[0].file_name,
+            FIREWALL_COMPLETE_SOUND_FILE
+        );
+        let completed: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("FireWall cast completion"),
+        )
+        .expect("FireWall completion JSON");
+        assert_eq!(completed["effects"], json!([]));
+    }
+
+    #[test]
+    fn firewall_cast_false_keeps_cast_and_first_sound_but_no_completion_sound() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[firewall_magic_event(1, false)], &zone);
+        assert_eq!(fx.active.len(), 1, "Crystal still plays the Spell action");
+        assert_eq!(
+            fx.active[0]
+                .current
+                .as_ref()
+                .and_then(|animation| animation.frames.first())
+                .map(|frame| frame.path.as_str()),
+            Some("/original-effects/Magic/1620.png")
+        );
+        let sound = fx.take_due_sound_events(0);
+        assert_eq!(sound.len(), 1);
+        assert_eq!(sound[0].cue, FIREWALL_CAST_SOUND_CUE);
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn firewall_five_object_spells_repeat_until_each_authoritative_remove() {
+        let zone = HashMap::new();
+        let mut fx = NativeEffects::default();
+        let spells = firewall_spell_events();
+        fx.observe(500, 288, 616, &spells, &zone);
+        assert_eq!(fx.active.len(), 5);
+        for instance in &fx.active {
+            assert_eq!(instance.kind, EffectKindTag::Persistent);
+            assert!(instance.persistent_object_id.is_some());
+            let animation = instance.current.as_ref().expect("FireWall ground");
+            assert_eq!(animation.frames.len(), 6);
+            assert_eq!(animation.interval, 120);
+            assert!(animation.repeat);
+            assert_eq!(animation.light, Some(3));
+            assert!(animation.frames[0].path.ends_with("/Magic/1630.png"));
+        }
+        let later: Value = serde_json::from_str(
+            &fx.tick_with_visibility(10_000, true)
+                .expect("repeating FireWall ground"),
+        )
+        .expect("FireWall ground JSON");
+        assert_eq!(later["effects"].as_array().map(Vec::len), Some(5));
+
+        fx.observe(
+            10_001,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 7,
+                generation: 15,
+                packet: "ObjectRemove".to_owned(),
+                payload: json!({"objectId": 81000}),
+            }],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 4);
+
+        let mut duplicate = spells[1].clone();
+        duplicate.sequence = 8;
+        fx.observe(10_002, 288, 616, &[duplicate], &zone);
+        assert_eq!(
+            fx.active.len(),
+            4,
+            "replayed ObjectSpell identity replaces rather than duplicates"
+        );
+    }
+
+    #[test]
+    fn firewall_map_change_clears_ground_cast_and_pending_completion_audio() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[firewall_magic_event(1, true)], &zone);
+        let _ = fx.take_due_sound_events(0);
+        fx.observe(500, 288, 616, &firewall_spell_events(), &zone);
+        assert_eq!(fx.active.len(), 6);
+        fx.observe(
+            550,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 20,
+                generation: 15,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn firewall_source_cast_ground_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = firewall_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        let cast = catalog
+            .spell_cast_animation("FireWall", 0)
+            .expect("FireWall cast");
+        assert_eq!(cast.frames.len(), 10);
+        for (frame, index) in cast.frames.iter().zip(1620..1630) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        let ground = catalog
+            .spell_world_animation("FireWall", 0, 0)
+            .expect("FireWall ground");
+        assert_eq!(ground.frames.len(), 6);
+        assert!(ground.repeat);
+        assert_eq!(ground.light, Some(3));
+        for (frame, index) in ground.frames.iter().zip(1630..1636) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        for audio in fixture["source"]["audio"]
+            .as_array()
+            .expect("FireWall audio catalog")
+        {
+            let file = audio["file"].as_str().expect("FireWall audio file");
+            let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+                .expect("packaged FireWall sound path");
+            let bytes = fs::read(path).expect("read FireWall sound");
             assert_eq!(bytes.len(), audio["sourceBytes"]);
             assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
         }

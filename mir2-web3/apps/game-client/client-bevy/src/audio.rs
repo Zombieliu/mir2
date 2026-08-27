@@ -30,6 +30,8 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "M31-0.wav",
     "M31-1.wav",
     "M31-2.wav",
+    "M39-0.wav",
+    "M39-1.wav",
     "M40-0.wav",
     "M64-0.wav",
     "M64-1.wav",
@@ -847,13 +849,21 @@ mod tests {
                 file_name: file_name.to_owned(),
             }));
         }
+        for (sequence, file_name) in ["M39-0.wav", "M39-1.wav"].into_iter().enumerate() {
+            assert!(queue.push(NativeGameplaySoundEvent {
+                generation: 5,
+                sequence: sequence as u64 + 5,
+                cue: format!("FireWall.{sequence}"),
+                file_name: file_name.to_owned(),
+            }));
+        }
         for (sequence, file_name) in ["M64-0.wav", "M64-1.wav", "M64-2.wav"]
             .into_iter()
             .enumerate()
         {
             assert!(queue.push(NativeGameplaySoundEvent {
                 generation: 5,
-                sequence: sequence as u64 + 5,
+                sequence: sequence as u64 + 7,
                 cue: format!("SoulFireBall.{sequence}"),
                 file_name: file_name.to_owned(),
             }));

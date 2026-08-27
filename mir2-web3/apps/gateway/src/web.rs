@@ -11836,8 +11836,8 @@ mod tests {
         ClientQuestInfo, GroupMember, IntelligentCreatureItemFilter, IntelligentCreatureRules,
         MapInformation, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo,
         ObjectAttackInfo, ObjectDiedInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo,
-        ObjectStruckInfo, Point, RankCharacterInfo, SelectInfo, ServerPacket, ServerPacketId,
-        Spell, UserItem, UserItemStat, UserLocation,
+        ObjectSpellInfo, ObjectStruckInfo, Point, RankCharacterInfo, SelectInfo, ServerPacket,
+        ServerPacketId, Spell, UserItem, UserItemStat, UserLocation,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailMessage, Stage5MailTargetKind,
@@ -18976,6 +18976,58 @@ mod tests {
                 "VIS-02 SoulFireBall packet event projection mismatch at event {index}"
             );
         }
+    }
+
+    #[test]
+    fn vis02_bichon_firewall_fixture_is_exact_packet_event_projection() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../game-client/platform-windows/tests/fixtures/vis02-bichon-firewall-v1.json"
+        ))
+        .expect("VIS-02 FireWall fixture JSON");
+        let magic = |cast| ServerPacket::ObjectMagic {
+            object_id: 1000,
+            location: Point { x: 288, y: 616 },
+            direction: MirDirection::Up,
+            spell: Spell::FireWall,
+            target_id: 0,
+            target: Point { x: 288, y: 611 },
+            cast,
+            level: 1,
+            self_broadcast: false,
+            secondary_target_ids: Vec::new(),
+        };
+        let ground = |object_id, x, y| ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id,
+                location: Point { x, y },
+                spell: Spell::FireWall,
+                direction: MirDirection::Up,
+                param: false,
+            },
+        };
+        // This locks only the typed ServerPacket -> client event projection.
+        // It is not an authenticated production transcript and does not assert
+        // exact Gateway wall-clock delivery.
+        let production_projection = vec![
+            magic(true),
+            ground(81_000, 288, 611),
+            ground(81_001, 288, 610),
+            ground(81_002, 289, 611),
+            ground(81_003, 288, 612),
+            ground(81_004, 287, 611),
+        ];
+        for (index, packet) in production_projection.iter().enumerate() {
+            assert_eq!(
+                super::server_packet_to_event(packet),
+                fixture["timeline"][index]["event"],
+                "VIS-02 FireWall packet event projection mismatch at event {index}"
+            );
+        }
+        assert_eq!(
+            super::server_packet_to_event(&magic(false)),
+            fixture["compatibilityCases"]["castFalse"]["event"],
+            "VIS-02 FireWall synthetic Cast=false compatibility projection mismatch"
+        );
     }
 
     #[test]
