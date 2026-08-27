@@ -92,6 +92,13 @@ const FIREBALL_IMPACT_SOUND_FILE: &str = "M31-2.wav";
 const FIREBALL_CAST_SOUND_CUE: &str = "FireBall.cast";
 const FIREBALL_PROJECTILE_SOUND_CUE: &str = "FireBall.projectile";
 const FIREBALL_IMPACT_SOUND_CUE: &str = "FireBall.impact";
+const GREAT_FIREBALL_SPELL_ACTION_MS: u64 = 600;
+const GREAT_FIREBALL_CAST_SOUND_FILE: &str = "M34-0.wav";
+const GREAT_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M34-1.wav";
+const GREAT_FIREBALL_IMPACT_SOUND_FILE: &str = "M34-2.wav";
+const GREAT_FIREBALL_CAST_SOUND_CUE: &str = "GreatFireBall.cast";
+const GREAT_FIREBALL_PROJECTILE_SOUND_CUE: &str = "GreatFireBall.projectile";
+const GREAT_FIREBALL_IMPACT_SOUND_CUE: &str = "GreatFireBall.impact";
 const FIREWALL_SPELL_ACTION_MS: u64 = 600;
 const FIREWALL_CAST_SOUND_FILE: &str = "M39-0.wav";
 const FIREWALL_COMPLETE_SOUND_FILE: &str = "M39-1.wav";
@@ -1358,6 +1365,11 @@ impl NativeEffects {
                         FIREBALL_IMPACT_SOUND_CUE,
                         FIREBALL_IMPACT_SOUND_FILE,
                     ),
+                    "GreatFireBall" => (
+                        "GreatFireBall",
+                        GREAT_FIREBALL_IMPACT_SOUND_CUE,
+                        GREAT_FIREBALL_IMPACT_SOUND_FILE,
+                    ),
                     "SoulFireBall" => (
                         "SoulFireBall",
                         SOUL_FIREBALL_IMPACT_SOUND_CUE,
@@ -1429,6 +1441,7 @@ impl NativeEffects {
                 instance.tile_y = *tile_y;
                 let local_projectile = match instance.provenance.spell.as_str() {
                     "FireBall" => Some(FIREBALL_IMPACT_SOUND_CUE),
+                    "GreatFireBall" => Some(GREAT_FIREBALL_IMPACT_SOUND_CUE),
                     "SoulFireBall" => Some(SOUL_FIREBALL_IMPACT_SOUND_CUE),
                     _ => None,
                 };
@@ -1970,6 +1983,19 @@ impl NativeEffects {
                 },
             });
         }
+        if spell == "GreatFireBall" {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: now,
+                requires_active_effect: true,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: GREAT_FIREBALL_CAST_SOUND_CUE.to_owned(),
+                    file_name: GREAT_FIREBALL_CAST_SOUND_FILE.to_owned(),
+                },
+            });
+        }
         if spell == "FireWall"
             && payload
                 .get("cast")
@@ -2035,6 +2061,18 @@ impl NativeEffects {
                 FIREBALL_PROJECTILE_SOUND_FILE,
             );
         }
+        if spell == "GreatFireBall" {
+            self.schedule_local_projectile_from_object_magic(
+                payload,
+                catalog,
+                provenance,
+                "GreatFireBall",
+                "great-fireball",
+                GREAT_FIREBALL_SPELL_ACTION_MS,
+                GREAT_FIREBALL_PROJECTILE_SOUND_CUE,
+                GREAT_FIREBALL_PROJECTILE_SOUND_FILE,
+            );
+        }
     }
 
     fn apply_object_projectile(
@@ -2052,11 +2090,11 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
-        // Crystal's primary SoulFireBall path never consumes ObjectProjectile;
-        // current Rust servers emit it only as a compatibility supplement.
-        // Ignore it regardless of order/replay and let ObjectMagic own the
-        // delayed local missile.
-        if spell == "SoulFireBall" {
+        // Crystal's SoulFireBall and GreatFireBall player paths never consume
+        // ObjectProjectile; current Rust servers emit it only as a
+        // compatibility supplement. Ignore it regardless of order/replay and
+        // let ObjectMagic own the delayed local missile.
+        if matches!(spell, "SoulFireBall" | "GreatFireBall") {
             return;
         }
         let open_id = |name: &str| -> Option<u32> {
@@ -4853,6 +4891,242 @@ mod tests {
             let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
                 .expect("packaged FireBall sound path");
             let bytes = fs::read(path).expect("read FireBall sound");
+            assert_eq!(bytes.len(), audio["sourceBytes"]);
+            assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
+        }
+    }
+
+    fn great_fireball_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-great-fireball-v1.json"
+        ))
+        .expect("VIS-02 GreatFireBall fixture JSON")
+    }
+
+    fn great_fireball_magic_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = great_fireball_fixture();
+        let index = if cast { 0 } else { 2 };
+        NativeEffectEvent {
+            sequence,
+            generation: 17,
+            packet: "ObjectMagic".to_owned(),
+            payload: fixture["timeline"][index]["event"]["payload"].clone(),
+        }
+    }
+
+    fn great_fireball_compat_projectile_event(sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 17,
+            packet: "ObjectProjectile".to_owned(),
+            payload: great_fireball_fixture()["timeline"][1]["compatibilityEvent"]["payload"]
+                .clone(),
+        }
+    }
+
+    #[test]
+    fn great_fireball_object_magic_owns_three_source_phases_and_sounds() {
+        let zone = HashMap::from([(1000, (288, 616)), (2034, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[
+                great_fireball_magic_event(1, true),
+                great_fireball_compat_projectile_event(2),
+            ],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 2, "compatibility projectile is ignored");
+        let cast = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-cast-"))
+            .expect("GreatFireBall cast");
+        assert!(cast
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/400.png")));
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-great-fireball-"))
+            .expect("GreatFireBall projectile");
+        assert_eq!(projectile.start_at, GREAT_FIREBALL_SPELL_ACTION_MS);
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/410.png")));
+        assert_eq!(
+            fx.take_due_sound_events(0)[0].cue,
+            GREAT_FIREBALL_CAST_SOUND_CUE
+        );
+        assert!(fx.take_due_sound_events(599).is_empty());
+        assert_eq!(
+            fx.take_due_sound_events(600)[0].cue,
+            GREAT_FIREBALL_PROJECTILE_SOUND_CUE
+        );
+        let launch: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("GreatFireBall projectile launch"),
+        )
+        .expect("GreatFireBall launch JSON");
+        assert!(launch["effects"].as_array().is_some_and(|effects| {
+            effects.iter().any(|effect| {
+                effect["imageUrl"]
+                    .as_str()
+                    .is_some_and(|path| path.ends_with("/Magic/410.png"))
+            })
+        }));
+        assert!(fx.active.iter().any(|instance| {
+            instance.key.starts_with("fx-great-fireball-")
+                && instance
+                    .queued
+                    .as_ref()
+                    .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/570.png"))
+        }));
+        assert!(fx.take_due_sound_events(849).is_empty());
+        assert_eq!(
+            fx.take_due_sound_events(850)[0].cue,
+            GREAT_FIREBALL_IMPACT_SOUND_CUE
+        );
+        let impact: Value = serde_json::from_str(
+            &fx.tick_with_visibility(850, true)
+                .expect("GreatFireBall impact"),
+        )
+        .expect("GreatFireBall impact JSON");
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/570.png")));
+    }
+
+    #[test]
+    fn great_fireball_cast_false_keeps_cast_and_first_sound_only() {
+        let zone = HashMap::from([(1000, (288, 616)), (2034, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[great_fireball_magic_event(1, false)],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert!(fx.active[0].key.starts_with("fx-cast-"));
+        let sounds = fx.take_due_sound_events(0);
+        assert_eq!(sounds.len(), 1);
+        assert_eq!(sounds[0].cue, GREAT_FIREBALL_CAST_SOUND_CUE);
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn great_fireball_target_removal_suppresses_impact_and_compatibility_replay() {
+        let source_only = HashMap::from([(1000, (288, 616))]);
+        let mut compatibility_only = NativeEffects::default();
+        compatibility_only.observe(
+            0,
+            288,
+            616,
+            &[great_fireball_compat_projectile_event(1)],
+            &source_only,
+        );
+        assert!(compatibility_only.active.is_empty());
+
+        let initial = HashMap::from([(1000, (288, 616)), (2034, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[great_fireball_magic_event(1, true)],
+            &initial,
+        );
+        let _ = fx.take_due_sound_events(0);
+        fx.observe(600, 288, 616, &[], &source_only);
+        assert_eq!(
+            fx.take_due_sound_events(600)[0].cue,
+            GREAT_FIREBALL_PROJECTILE_SOUND_CUE
+        );
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-great-fireball-"))
+            .expect("point-flight GreatFireBall");
+        assert!(projectile.queued.is_none());
+        assert!(!fx.anchor_object_ids.contains_key(&projectile.key));
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn great_fireball_map_change_clears_all_phases_and_audio() {
+        let zone = HashMap::from([(1000, (288, 616)), (2034, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[great_fireball_magic_event(1, true)],
+            &zone,
+        );
+        let _ = fx.take_due_sound_events(0);
+        fx.observe(
+            100,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 17,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn great_fireball_source_frames_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = great_fireball_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        let cast = catalog
+            .spell_cast_animation("GreatFireBall", 0)
+            .expect("GreatFireBall cast");
+        assert_eq!(cast.frames.len(), 10);
+        for (frame, index) in cast.frames.iter().zip(400..410) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        for direction in 0..16_u32 {
+            let projectile = catalog
+                .spell_projectile_animation("GreatFireBall", direction)
+                .expect("all GreatFireBall directions resolve");
+            assert_eq!(projectile.frames.len(), 6);
+            for (frame, source) in projectile.frames.iter().zip(0..6_u32) {
+                let index = 410 + direction * 10 + source;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        let impact = catalog
+            .spell_impact_animation("GreatFireBall")
+            .expect("GreatFireBall impact");
+        assert_eq!(impact.frames.len(), 10);
+        for (frame, index) in impact.frames.iter().zip(570..580) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        for audio in fixture["source"]["audio"]
+            .as_array()
+            .expect("GreatFireBall audio catalog")
+        {
+            let file = audio["file"].as_str().expect("GreatFireBall audio file");
+            let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+                .expect("GreatFireBall source sound path");
+            let bytes = fs::read(path).expect("read GreatFireBall sound");
             assert_eq!(bytes.len(), audio["sourceBytes"]);
             assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
         }

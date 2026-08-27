@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-27T18:57:08.917Z",
+  "generatedAt": "2026-08-27T20:36:20.820Z",
   "clientRoot": "E:\\mir2\\Crystal\\Build\\Client\\Debug",
   "soundDir": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound",
   "soundListPath": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound\\SoundList.lst",
-  "soundListEntryCount": 454,
-  "exportedSoundCount": 454,
+  "soundListEntryCount": 457,
+  "exportedSoundCount": 457,
   "fallbackSoundCount": 3,
   "sourceWavCount": 1607,
   "missingSoundCount": 0,
@@ -3395,6 +3395,30 @@
       "exactSourceExists": true,
       "fallback": false,
       "sourceBytes": 132720
+    },
+    "20340": {
+      "fileName": "M34-0.wav",
+      "path": "/original-ui/Sound/M34-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 430124
+    },
+    "20341": {
+      "fileName": "M34-1.wav",
+      "path": "/original-ui/Sound/M34-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 319532
+    },
+    "20342": {
+      "fileName": "M34-2.wav",
+      "path": "/original-ui/Sound/M34-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 229420
     },
     "20390": {
       "fileName": "M39-0.wav",

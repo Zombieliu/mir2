@@ -155,7 +155,9 @@ export const SPELL_EFFECTS = [
     impact: phase("Magic", 770, 10, 100, "target"),
   }),
   withPhases(spell("GreatFireBall", "Magic", 400, 10, 60), {
-    projectile: phase("Magic", 410, 6, 30, "projectile"),
+    projectile: phase("Magic", 410, 6, 30, "projectile", {
+      ...direction16(410, 6, 10),
+    }),
     impact: phase("Magic", 570, 10, 60, "target"),
   }),
   withPhases(spell("HellFire", "Magic", 920, 10, 60), {

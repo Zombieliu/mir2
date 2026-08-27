@@ -46,6 +46,9 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "M31-0.wav",
     "M31-1.wav",
     "M31-2.wav",
+    "M34-0.wav",
+    "M34-1.wav",
+    "M34-2.wav",
     "M39-0.wav",
     "M39-1.wav",
     "M40-0.wav",
@@ -870,6 +873,17 @@ mod tests {
                 generation: 5,
                 sequence: sequence as u64 + 3,
                 cue: format!("FireBall.{sequence}"),
+                file_name: file_name.to_owned(),
+            }));
+        }
+        for (sequence, file_name) in ["M34-0.wav", "M34-1.wav", "M34-2.wav"]
+            .into_iter()
+            .enumerate()
+        {
+            assert!(queue.push(NativeGameplaySoundEvent {
+                generation: 5,
+                sequence: sequence as u64 + 6,
+                cue: format!("GreatFireBall.{sequence}"),
                 file_name: file_name.to_owned(),
             }));
         }

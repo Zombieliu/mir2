@@ -1067,7 +1067,91 @@
         "offset": {
           "x": 0,
           "y": 0
-        }
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 410,
+            "end": 415
+          },
+          {
+            "direction": 1,
+            "base": 420,
+            "end": 425
+          },
+          {
+            "direction": 2,
+            "base": 430,
+            "end": 435
+          },
+          {
+            "direction": 3,
+            "base": 440,
+            "end": 445
+          },
+          {
+            "direction": 4,
+            "base": 450,
+            "end": 455
+          },
+          {
+            "direction": 5,
+            "base": 460,
+            "end": 465
+          },
+          {
+            "direction": 6,
+            "base": 470,
+            "end": 475
+          },
+          {
+            "direction": 7,
+            "base": 480,
+            "end": 485
+          },
+          {
+            "direction": 8,
+            "base": 490,
+            "end": 495
+          },
+          {
+            "direction": 9,
+            "base": 500,
+            "end": 505
+          },
+          {
+            "direction": 10,
+            "base": 510,
+            "end": 515
+          },
+          {
+            "direction": 11,
+            "base": 520,
+            "end": 525
+          },
+          {
+            "direction": 12,
+            "base": 530,
+            "end": 535
+          },
+          {
+            "direction": 13,
+            "base": 540,
+            "end": 545
+          },
+          {
+            "direction": 14,
+            "base": 550,
+            "end": 555
+          },
+          {
+            "direction": 15,
+            "base": 560,
+            "end": 565
+          }
+        ]
       },
       "impact": {
         "library": "Magic",

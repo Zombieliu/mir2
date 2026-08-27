@@ -45,6 +45,9 @@ const FALLBACK_SOUND_FILES = new Map([
 // closed over every locally implemented effect/audio checkpoint.
 export const DIRECT_CRYSTAL_SOUND_ENTRIES = [
   { id: 20081, fileName: "M8-1.wav" },
+  { id: 20340, fileName: "M34-0.wav" },
+  { id: 20341, fileName: "M34-1.wav" },
+  { id: 20342, fileName: "M34-2.wav" },
   { id: 20390, fileName: "M39-0.wav" },
   { id: 20391, fileName: "M39-1.wav" },
   { id: 20791, fileName: "M79-1.wav" },

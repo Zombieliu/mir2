@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "mir2-present-sound-manifest",
   "soundDir": "public/original-ui/Sound",
-  "presentSoundCount": 331,
+  "presentSoundCount": 334,
   "files": [
     "006-0.wav",
     "008-0.wav",
@@ -287,6 +287,9 @@
     "M31-0.wav",
     "M31-1.wav",
     "M31-2.wav",
+    "M34-0.wav",
+    "M34-1.wav",
+    "M34-2.wav",
     "M39-0.wav",
     "M39-1.wav",
     "M40-0.wav",
