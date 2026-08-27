@@ -11,10 +11,15 @@
 > bounded checkpoint renders Scarecrow `Monster/005` Die-phase frames
 > `224..233` through the packed-atlas additive material, above the real map
 > producer's full six-cell guard band, and removes/restores the layer when the
-> Effect option changes without another packet. Runtime passes 191/191; the
-> frozen-asset Windows suite remains FAIL at 323/325 only because the same
-> Archer and Mount pixels are absent. `VIS-01` is still in progress: its fixed
-> scene, real-map raster occlusion and same-EXE captures remain open. Later
+> Effect option changes without another packet. Commit `ef619b551` now adds a
+> source-bound 17-event typed Bichon transcript for male/female Warriors, Hen,
+> Deer, Scarecrow and CannibalPlant, with 15 exact render checkpoints, exact
+> layer sets, authoritative monster sprite/disposition/death projection,
+> Candidate `CWeapon/01` atlas closure and production frame-set/real-`0.map`
+> render-state binding. Focused latest-head gates pass; the composite-production
+> Windows suite remains FAIL at 327/329 only because the same Archer and Mount
+> pixels are absent. `VIS-01` is still in progress: real Gateway/WSS sequence,
+> GPU raster occlusion/additive pixels and same-EXE captures remain open. Later
 > ordered slices are `VIS-02` FlamingSword/FireBall/Lightning/SoulFireBall/
 > FireWall effects and `VIS-03`
 > HUD/Inventory/BigMap button states. Do not

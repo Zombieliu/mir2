@@ -14,13 +14,20 @@
 > and adds Scarecrow `Monster/005` Die-phase `224..233` as a packed-atlas
 > additive post-world layer. Its depth shares the actual map producer's
 > six-cell guard-band/front contract, and the layer follows the Effect option
-> without a new Gateway packet. The complete client runtime library passes
-> 191/191; the frozen-asset Windows suite is 323/325 with only the two existing
+> without a new Gateway packet. Commit `ef619b551` closes the bounded typed
+> projection transcript: incremental monster packets carry authoritative
+> sprite data, preserve snapshot disposition or fail closed to neutral, and
+> retain death location/direction/kind. Seventeen typed events drive the six
+> VIS-01 actors through 15 exact render checkpoints and production frame-set,
+> atlas and real-`0.map` render-state bindings. The complete client runtime
+> library passes 191/191; focused latest-head Gateway/native gates pass. The
+> composite-production Windows suite is 327/329 with only the two existing
 > missing Archer/Mount pixels. This is a
 > presentation-boundary repair, not a claim
 > that shared-Zone gameplay, whole-game semantics or Windows visuals are
-> complete. Fixed-scene/raster proof, additive weapon/wing layers, full assets,
-> same-EXE live evidence, DPI, soak and human gates stay open under the visual
+> complete. Real Gateway/WSS order, GPU raster proof, additive weapon/wing
+> layers, full assets, same-EXE live evidence, DPI, soak and human gates stay
+> open under the visual
 > contract.
 
 > Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged

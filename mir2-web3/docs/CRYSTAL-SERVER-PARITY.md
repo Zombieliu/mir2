@@ -11,11 +11,18 @@
 > source-timed Hide/Show while leaving other Crystal Hide completion policies
 > fail-closed. The next increment adds Scarecrow source `DrawEffects` frames
 > `224..233` as a packed-atlas additive layer, sharing map guard-band depth and
-> obeying the local Effect option. Windows is 323/325 against the frozen assets,
-> with only the known missing Archer/Mount pixels. This closes only bounded
-> projection/action-loss defects; monster special rendering, effect/wing
-> overlays, complete assets, skill effects, environment visuals and all
-> real-window acceptance gates remain open.
+> obeying the local Effect option. Commit `ef619b551` adds a 17-event exact
+> typed Gateway/native fixture for six Bichon actors. Incremental monster
+> packets now carry their sprite contract, preserve snapshot disposition or
+> fail closed to neutral, and retain death location/direction/kind. Fifteen
+> exact render checkpoints bind production frame-set hashes, Candidate atlas
+> entries and a real `0.map` front-tile render state. Focused latest-head tests
+> pass; Windows is 327/329 against the composite production root, with only the
+> known missing Archer/Mount pixels. This closes only bounded
+> projection/action-loss and render-state defects; it does not prove live WSS
+> ordering or GPU pixels. Monster special rendering, effect/wing overlays,
+> complete assets, skill effects, environment visuals and all real-window
+> acceptance gates remain open.
 
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,

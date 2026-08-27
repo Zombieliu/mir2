@@ -141,8 +141,13 @@ CannibalPlant's `Monster/010` Show/Hide clock and native packet lifecycle plus
 Scarecrow's `Monster/005` Die-phase `224..233` additive source path. The latter
 shares the real map producer's six-cell guard-band/front-depth contract, obeys
 the Effect option without another packet, and has ECS material/cache/reset
-coverage. The fixed scene, real-map raster occlusion, same-EXE capture and
-visual acceptance remain open; source/ECS tests are not raster acceptance.
+coverage. Commit `ef619b551` also closes the automated fixed-scene transcript:
+17 exact typed events drive six actors through 15 exact render checkpoints and
+one damage checkpoint, checking production frame-set hashes, exact layers,
+Candidate atlas routes, death transforms and a real `0.map` front-tile binding
+and geometry intersection. Real Gateway/WSS ordering, opaque-pixel and blend
+raster evidence, same-EXE capture and visual acceptance remain open;
+source/render-state tests are not raster acceptance.
 
 ## Evidence and final gates
 

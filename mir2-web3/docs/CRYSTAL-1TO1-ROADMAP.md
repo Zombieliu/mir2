@@ -18,14 +18,20 @@
 > increment also renders Scarecrow `Monster/005` Die effects from source frames
 > `224..233` with packed-atlas additive UVs, the real map producer's full
 > guard-band post-world ordering, Effect-option toggling and bounded
-> cache/reset/mode-switch cleanup. Runtime 191/191, focused native regressions,
-> client typography 1/1 and Gateway appearance 1/1 pass. The full Windows
-> suite against the frozen Candidate
-> asset pack remains FAIL with 323/325 passing; the two failures require absent
+> cache/reset/mode-switch cleanup. Commit `ef619b551` adds the fixed VIS-01
+> Bichon actor transcript: 17 exact typed events drive six actors through 15
+> render checkpoints and one damage checkpoint, with exact layers/z ordering,
+> packet-first monster sprite projection, fail-closed disposition, death
+> transform/kind retention, `CWeapon/01` atlas closure, production frame-set
+> hash binding and real `0.map` tile-binding/intersection evidence. Focused
+> latest-head tests pass. The full Windows suite against the composite
+> production asset root remains FAIL with 327/329 passing; the two failures
+> require absent
 > `ARArmour/00/24.png` and
 > `Mount/00/32.png`. HUD/damage typography, hover corpse labels, additive
-> weapon/wing layers, same-EXE visual capture, complete legal assets, skill
-> VFX, fixed-scene/real-map raster captures, button state/DPI evidence, native
+> weapon/wing layers, real Gateway/WSS replay, same-EXE visual capture,
+> complete legal assets, skill VFX, fixed-scene/real-map GPU raster captures,
+> button state/DPI evidence, native
 > soak and human acceptance remain open. VIS-01 is not visually accepted.
 
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
