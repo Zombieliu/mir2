@@ -11858,6 +11858,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.inner.execute(command)?
         } else if let Some(attack) = zone_native_player_attack {
             self.execute_zone_native_player_attack(attack)
+        } else if is_world_tick {
+            // Session is personal; Zone is world. Drain the shared Zone above,
+            // then advance only personal compatibility timers here. Running
+            // the full private world tick would create a second monster/hazard
+            // authority that can move, kill, or damage the same objects and
+            // player independently of the Zone.
+            self.inner.tick_shared_zone_personal_state()
         } else if is_game_shop_buy {
             let execution = self.inner.execute_with_outcome(command)?;
             self.last_game_shop_purchase_outcome = execution.game_shop_purchase_outcome;
@@ -20881,6 +20888,106 @@ mod tests {
                 .zone_cadence_tick_count,
             1,
             "one Zone cadence event should advance the global Zone exactly once"
+        );
+    }
+
+    #[test]
+    fn shared_gateway_tick_does_not_run_private_monster_authority() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+
+        let before = runtime.inner.world_snapshot();
+        let player_object_id = before
+            .player_object_id
+            .expect("started session should expose its local player id");
+        let target = before
+            .entities
+            .iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 0)
+            })
+            .cloned()
+            .expect("starter scene should expose a live hostile monster");
+        let adjacent = Point {
+            x: target.x.saturating_sub(1),
+            y: target.y,
+        };
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started session should have a shared-Zone session");
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: adjacent.clone(),
+                direction: MirDirection::Right,
+            },
+            false,
+        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(adjacent, MirDirection::Right);
+        let before = runtime.inner.world_snapshot();
+        let before_hp = before.player_hp;
+        let before_tick = before.tick;
+        let before_target = before
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == target.object_id)
+            .cloned()
+            .expect("private compatibility world should retain the target");
+
+        let mut packets = Vec::new();
+        for _ in 0..64 {
+            packets.extend(
+                runtime
+                    .execute(WorldCommand::Tick)
+                    .expect("shared Gateway personal tick should execute"),
+            );
+        }
+
+        let after = runtime.inner.world_snapshot();
+        let after_target = after
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == target.object_id)
+            .expect("passive personal ticks must not retire the Zone-owned target");
+        assert_eq!(after.tick, before_tick.saturating_add(64));
+        assert_eq!(after.player_hp, before_hp);
+        assert_eq!(
+            (
+                after_target.x,
+                after_target.y,
+                after_target.direction,
+                after_target.hp,
+                after_target.dead,
+            ),
+            (
+                before_target.x,
+                before_target.y,
+                before_target.direction,
+                before_target.hp,
+                before_target.dead,
+            ),
+            "the personal compatibility clock must not move or damage a Zone-owned monster"
+        );
+        assert!(
+            !packets.iter().any(|packet| match packet {
+                ServerPacket::ObjectWalk { movement }
+                | ServerPacket::ObjectRun { movement }
+                | ServerPacket::ObjectTurn { movement } => {
+                    movement.object_id == target.object_id
+                }
+                ServerPacket::ObjectAttack { info } => info.object_id == target.object_id,
+                ServerPacket::ObjectDied { info } => {
+                    info.object_id == target.object_id || info.object_id == player_object_id
+                }
+                ServerPacket::Death { .. } => true,
+                _ => false,
+            }),
+            "shared Gateway ticks must not emit private monster movement/combat/death: {packets:?}"
         );
     }
 

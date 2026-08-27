@@ -5480,7 +5480,7 @@ pub(super) fn stage5_intelligent_creature_pickup_packet(
     packets
 }
 
-pub(super) fn tick_stage5_intelligent_creatures(
+pub(super) fn tick_stage5_intelligent_creature_maintenance(
     world: &mut World,
     tick: u64,
     packets: &mut Vec<ServerPacket>,
@@ -5519,6 +5519,14 @@ pub(super) fn tick_stage5_intelligent_creatures(
     if changed {
         packets.push(stage5_intelligent_creature_list_packet(world));
     }
+}
+
+pub(super) fn tick_stage5_intelligent_creatures(
+    world: &mut World,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    tick_stage5_intelligent_creature_maintenance(world, tick, packets);
     if let Some(location) = stage5_intelligent_creature_auto_pickup_location(world) {
         packets.extend(stage5_intelligent_creature_pickup_packet(
             world, location, None,

@@ -506,6 +506,12 @@ impl InProcessWorldRuntime {
         self.session.current_map_hazard_config()
     }
 
+    /// Advance only the personal compatibility state for a session whose map
+    /// monsters and hazards are owned by a shared Zone runtime.
+    pub fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
+        self.session.tick_shared_zone_personal_state()
+    }
+
     pub fn zone_melee_attack_damage(&self) -> i32 {
         self.session.zone_melee_attack_damage()
     }

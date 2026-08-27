@@ -159,6 +159,12 @@ const WESTERN_DEER_HARVEST_BOUNDS: HuntBounds = HuntBounds {
     max_y: 330,
 };
 
+// The final Gateway snapshot retains a 16-tile Crystal data range, while the
+// walk helper only guarantees stopping within 8 tiles of a search point. A
+// 16-tile grid therefore gives every covered spawn an observation point within
+// the remaining 8-tile radius; the old 36-tile grid left blind strips.
+const FIELD_SEARCH_OFFSETS: [i32; 7] = [-48, -32, -16, 0, 16, 32, 48];
+
 struct CrystalMapWalkability {
     width: i32,
     height: i32,
@@ -471,7 +477,6 @@ fn field_search_points_nearest_first(
     centers: &[Point],
     hunt_bounds: Option<HuntBounds>,
 ) -> Vec<Point> {
-    const SEARCH_OFFSETS: [i32; 3] = [-36, 0, 36];
     let current = player(session);
     let current = Point {
         x: current.x,
@@ -480,8 +485,8 @@ fn field_search_points_nearest_first(
     let mut unique = BTreeSet::new();
     let mut points = Vec::new();
     for center in centers {
-        for dx in SEARCH_OFFSETS {
-            for dy in SEARCH_OFFSETS {
+        for dx in FIELD_SEARCH_OFFSETS {
+            for dy in FIELD_SEARCH_OFFSETS {
                 let point = Point {
                     x: center.x + dx,
                     y: center.y + dy,
@@ -537,11 +542,35 @@ fn bundled_bichon_walk_planner_routes_to_isolated_deer_field() {
     let safe_slots = mir2_simulation::crystal_world_respawn_spawns("0", &deer_group)
         .into_iter()
         .filter(|(_, point, _)| WESTERN_DEER_HARVEST_BOUNDS.contains(point))
-        .count();
+        .map(|(_, point, _)| point)
+        .collect::<Vec<_>>();
     assert!(
-        safe_slots >= 10,
-        "western Deer field must retain enough static northern slots for the probabilistic q4 harvest: {safe_slots}"
+        safe_slots.len() >= 10,
+        "western Deer field must retain enough static northern slots for the probabilistic q4 harvest: {}",
+        safe_slots.len()
     );
+    let search_points = FIELD_SEARCH_OFFSETS
+        .into_iter()
+        .flat_map(|dx| {
+            FIELD_SEARCH_OFFSETS.into_iter().filter_map(move |dy| {
+                let point = Point {
+                    x: target.x + dx,
+                    y: target.y + dy,
+                };
+                WESTERN_DEER_HARVEST_BOUNDS
+                    .contains(&point)
+                    .then_some(point)
+            })
+        })
+        .collect::<Vec<_>>();
+    for slot in safe_slots {
+        assert!(
+            search_points
+                .iter()
+                .any(|search_point| tile_distance(search_point, &slot) <= 8),
+            "Gateway search grid must expose western Deer slot {slot:?} inside the retained AOI"
+        );
+    }
 }
 
 fn quest_stage(session: &GatewaySession, quest_id: i32) -> Option<QuestStage> {
@@ -1731,10 +1760,14 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
     assert_eq!(
         quest_stage(&first, 2),
         Some(QuestStage::ReadyToTurnIn),
-        "ordinary Gateway Scarecrow kills must collect GingerTea: player-owned deaths={}, gained-items={:?}",
+        "ordinary Gateway Scarecrow kills must collect GingerTea: observed death packets={}, revives={}, gained-items={:?}",
         q2_hunt_packets
             .iter()
             .filter(|packet| matches!(packet, ServerPacket::ObjectDied { .. }))
+            .count(),
+        q2_hunt_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::Revived { .. }))
             .count(),
         q2_hunt_packets
             .iter()
