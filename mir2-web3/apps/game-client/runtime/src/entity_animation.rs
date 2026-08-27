@@ -42,6 +42,8 @@ impl Direction {
 pub enum AnimationAction {
     Standing,
     Harvest,
+    Show,
+    Hide,
     Walking,
     Running,
     Attack1,
@@ -318,6 +320,8 @@ impl AnimationEvent {
 pub enum TransitionReason {
     Event(u64),
     IdleCycle,
+    ShowCompleted,
+    HideCompleted,
     DeathCompleted,
     ReviveCompleted,
 }
@@ -654,6 +658,12 @@ impl EntityAnimationState {
         }
 
         match self.current_action {
+            AnimationAction::Show => {
+                self.enter_idle(at_ms, TransitionReason::ShowCompleted, transitions)?;
+            }
+            AnimationAction::Hide => {
+                self.enter_idle(at_ms, TransitionReason::HideCompleted, transitions)?;
+            }
             AnimationAction::Die => {
                 self.action_feed.clear();
                 self.start_action(
@@ -697,6 +707,8 @@ impl EntityAnimationState {
                     ))
                     || (self.current_action == AnimationAction::Skeleton
                         && event.action == AnimationAction::Revive)
+                    || (self.current_action == AnimationAction::Hide
+                        && event.action == AnimationAction::Show)
             });
         if !can_start {
             return Ok(false);
@@ -1107,6 +1119,130 @@ mod tests {
         assert_eq!(world.state(&key).unwrap().frame_index, 0);
         assert_eq!(transitions.len(), 1);
         assert_eq!(transitions[0].reason, TransitionReason::IdleCycle);
+    }
+
+    #[test]
+    fn show_and_hide_use_source_frames_and_complete_deterministically() {
+        let mut catalog = AnimationCatalog::new();
+        for (action, descriptor) in [
+            (
+                AnimationAction::Standing,
+                FrameDescriptor::from_crystal(0, 4, -4, 500, false),
+            ),
+            (
+                AnimationAction::Show,
+                FrameDescriptor::from_crystal(4, 8, -8, 200, false),
+            ),
+            (
+                AnimationAction::Hide,
+                FrameDescriptor::from_crystal(12, 8, -8, 200, true),
+            ),
+        ] {
+            catalog.insert(action, descriptor).unwrap();
+        }
+
+        let mut world = AnimationWorld::new(0x10);
+        let key = world
+            .spawn(
+                "cannibal-plant",
+                EntityKind::Monster,
+                Direction::Down,
+                catalog,
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Hide, Direction::Down),
+                0,
+            )
+            .unwrap();
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 12);
+        assert!(world.tick(200).unwrap().is_empty());
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 11);
+        assert!(world.tick(1_400).unwrap().is_empty());
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 5);
+        assert!(world.tick(1_599).unwrap().is_empty());
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 5);
+        let hidden = world.tick(1_600).unwrap();
+        assert!(hidden.iter().any(|transition| {
+            transition.from == AnimationAction::Hide
+                && transition.to == AnimationAction::Standing
+                && transition.reason == TransitionReason::HideCompleted
+        }));
+
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Show, Direction::Down),
+                1_600,
+            )
+            .unwrap();
+        assert_eq!(world.state(&key).unwrap().pose().draw_frame_index, 4);
+        let shown = world.tick(3_200).unwrap();
+        assert!(shown.iter().any(|transition| {
+            transition.from == AnimationAction::Show
+                && transition.to == AnimationAction::Standing
+                && transition.reason == TransitionReason::ShowCompleted
+        }));
+    }
+
+    #[test]
+    fn show_interrupts_an_in_progress_hide_instead_of_stalling_in_the_queue() {
+        let mut catalog = AnimationCatalog::new();
+        for (action, descriptor) in [
+            (
+                AnimationAction::Standing,
+                FrameDescriptor::from_crystal(0, 4, -4, 500, false),
+            ),
+            (
+                AnimationAction::Show,
+                FrameDescriptor::from_crystal(4, 8, -8, 200, false),
+            ),
+            (
+                AnimationAction::Hide,
+                FrameDescriptor::from_crystal(12, 8, -8, 200, true),
+            ),
+        ] {
+            catalog.insert(action, descriptor).unwrap();
+        }
+
+        let mut world = AnimationWorld::new(0x10);
+        let key = world
+            .spawn(
+                "cannibal-plant",
+                EntityKind::Monster,
+                Direction::Down,
+                catalog,
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Hide, Direction::Down),
+                0,
+            )
+            .unwrap();
+        let update = world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Show, Direction::Down),
+                800,
+            )
+            .unwrap();
+
+        assert_eq!(update.disposition, QueueDisposition::Started);
+        assert!(update.transitions.iter().any(|transition| {
+            transition.from == AnimationAction::Hide
+                && transition.to == AnimationAction::Show
+                && transition.reason == TransitionReason::Event(2)
+        }));
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Show);
+        assert_eq!(state.pose().draw_frame_index, 4);
+        assert_eq!(state.queue_depth(), 0);
     }
 
     #[test]

@@ -5,9 +5,7 @@
 
 use bevy::prelude::*;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
-use mir2_client_bevy::crystal_ui::typography::{
-    crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX,
-};
+use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use serde_json::Value;
 

@@ -1113,20 +1113,16 @@ mod tests {
         let second = runtime.capture_dir_path(&cfg, "login");
 
         assert_ne!(first, second);
-        assert!(
-            first
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or("")
-                .starts_with("native-slice-login-")
-        );
-        assert!(
-            second
-                .file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or("")
-                .contains("login")
-        );
+        assert!(first
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("")
+            .starts_with("native-slice-login-"));
+        assert!(second
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("")
+            .contains("login"));
     }
 
     #[test]

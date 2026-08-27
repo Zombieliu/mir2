@@ -517,6 +517,8 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         .unwrap_or("standing")
     {
         "harvest" => AnimationAction::Harvest,
+        "show" => AnimationAction::Show,
+        "hide" => AnimationAction::Hide,
         "walking" => AnimationAction::Walking,
         "running" => AnimationAction::Running,
         "attack1" => AnimationAction::Attack1,
@@ -1196,7 +1198,10 @@ mod tests {
             }),
             AnimationAction::Standing,
         );
-        assert_eq!(transformed_mount.body_library, "/original-ui/TransformRide2/04");
+        assert_eq!(
+            transformed_mount.body_library,
+            "/original-ui/TransformRide2/04"
+        );
         assert_eq!(transformed_mount.body_base_offset, -416);
     }
 

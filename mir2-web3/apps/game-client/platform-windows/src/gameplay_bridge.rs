@@ -630,10 +630,42 @@ impl NativeGameplayAdapter {
                 "ObjectHealth" => self.patch_zone_entity_health(payload),
                 "ObjectDied" => self.patch_zone_entity_death(payload, true),
                 "ObjectRevived" => self.patch_zone_entity_death(payload, false),
-                "ObjectRemove" | "ObjectHide" => {
+                "ObjectHide" => {
+                    let Some(object_id) = packet_object_id(payload) else {
+                        return false;
+                    };
+                    let changed = if self.zone_entity_is_cannibal_plant(object_id) {
+                        self.patch_zone_entity_action(payload, "hide", false)
+                    } else {
+                        // VIS-01 currently scopes animated Hide handling to
+                        // CannibalPlant only.
+                        // Preserve the previous removal behavior for every
+                        // other or unknown object until its distinct Crystal
+                        // completion policy (stoned/body swap/remove) is
+                        // implemented.
+                        self.remove_zone_object(payload)
+                    };
+                    // The native presentation plays the source Hide action
+                    // before suppressing libraries whose Crystal Hide
+                    // completion removes the object (VIS-01 starts with
+                    // CannibalPlant). Persistent effects keyed by the object
+                    // still clear at the authoritative Hide packet boundary.
+                    self.record_effect(packet.as_str(), payload);
+                    changed
+                }
+                "ObjectShow" => {
+                    let Some(object_id) = packet_object_id(payload) else {
+                        return false;
+                    };
+                    if !self.zone_entity_is_cannibal_plant(object_id) {
+                        return false;
+                    }
+                    self.patch_zone_entity_action(payload, "show", false)
+                }
+                "ObjectRemove" => {
                     let changed = self.remove_zone_object(payload);
-                    // ObjectRemove/ObjectHide clears any persistent spell keyed by
-                    // the same object id in the effect system.
+                    // ObjectRemove clears any persistent spell keyed by the
+                    // same object id in the effect system.
                     self.record_effect(packet.as_str(), payload);
                     changed
                 }
@@ -878,6 +910,31 @@ impl NativeGameplayAdapter {
         copy_packet_fields(body, overlay, &["direction"]);
         apply_animation_hint_to_map(overlay, &hint);
         true
+    }
+
+    fn zone_entity_is_cannibal_plant(&self, object_id: u32) -> bool {
+        let Some(overlay) = self.zone_entities.get(&object_id) else {
+            return false;
+        };
+        if overlay.get("kind").and_then(Value::as_str) != Some("monster") {
+            return false;
+        }
+        if let Some(image) = overlay.get("image").and_then(value_u32) {
+            return image == 10;
+        }
+        overlay
+            .get("sprite")
+            .and_then(Value::as_object)
+            .and_then(|sprite| sprite.get("bodyLibrary"))
+            .and_then(Value::as_str)
+            .is_some_and(|library| {
+                let normalized = library.trim().replace('\\', "/");
+                let normalized = normalized
+                    .trim_matches('/')
+                    .strip_prefix("original-ui/")
+                    .unwrap_or_else(|| normalized.trim_matches('/'));
+                normalized == "Monster/010"
+            })
     }
 
     fn patch_zone_entity_health(&mut self, payload: &Value) -> bool {
@@ -4011,6 +4068,103 @@ mod tests {
         assert_eq!(respawned["kind"], json!("monster"));
         assert_eq!(respawned["x"], json!(300));
         assert_eq!(respawned["y"], json!(598));
+    }
+
+    #[test]
+    fn object_hide_and_show_preserve_entity_for_source_animation() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2010,
+                "name": "CannibalPlant",
+                "location": {"x": 300, "y": 598},
+                "direction": "Down",
+                "image": 10,
+                "effect": 0,
+                "ai": 5
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHide".to_owned(),
+            payload: json!({"objectId": 2010}),
+        }));
+
+        let mut hiding = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut hiding);
+        let plant = hiding["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2010))
+            .expect("Hide must retain the actor until its animation completes");
+        assert_eq!(plant["_nativeAnimationAction"], json!("hide"));
+        let hide_sequence = plant["_nativeAnimationSequence"]
+            .as_u64()
+            .expect("hide sequence");
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2010,
+                "name": "CannibalPlant",
+                "location": {"x": 300, "y": 598},
+                "direction": "Down",
+                "image": 10,
+                "effect": 0,
+                "ai": 5
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectShow".to_owned(),
+            payload: json!({"objectId": 2010}),
+        }));
+        let mut showing = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut showing);
+        let plant = showing["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2010))
+            .expect("Show must restore the retained actor");
+        assert_eq!(plant["_nativeAnimationAction"], json!("show"));
+        assert!(plant["_nativeAnimationSequence"]
+            .as_u64()
+            .is_some_and(|sequence| sequence > hide_sequence));
+    }
+
+    #[test]
+    fn unknown_show_is_a_noop_and_unknown_or_non_cannibal_hide_removes() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectShow".to_owned(),
+            payload: json!({"objectId": 9999}),
+        }));
+        assert!(adapter.zone_entities.is_empty());
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHide".to_owned(),
+            payload: json!({"objectId": 9999}),
+        }));
+        assert!(adapter.zone_tombstones.contains(&9999));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2003,
+                "name": "Oma",
+                "location": {"x": 301, "y": 598},
+                "direction": "Down",
+                "image": 3,
+                "effect": 0,
+                "ai": 0
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHide".to_owned(),
+            payload: json!({"objectId": 2003}),
+        }));
+        assert!(!adapter.zone_entities.contains_key(&2003));
+        assert!(adapter.zone_tombstones.contains(&2003));
     }
 
     #[test]

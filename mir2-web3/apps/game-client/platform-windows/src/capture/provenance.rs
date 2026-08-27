@@ -5,7 +5,7 @@
 //! bind the exact executable bytes. Development builds deliberately return an
 //! empty provenance record and therefore stay on the draft sidecar schema.
 
-use super::{NativeCaptureBuild, is_sha256_hex, sha256_hex};
+use super::{is_sha256_hex, sha256_hex, NativeCaptureBuild};
 use serde_json::Value;
 use std::{env, fs, sync::OnceLock};
 
@@ -159,25 +159,21 @@ mod tests {
     fn package_contract_rejects_any_executable_mismatch() {
         let executable_hash = "a".repeat(64);
         let (version, manifest) = fixture(&executable_hash);
-        assert!(
-            parse_trusted_build_provenance(
-                &version,
-                &manifest,
-                "mir2-platform-windows.exe",
-                1234,
-                &"b".repeat(64),
-            )
-            .is_none()
-        );
-        assert!(
-            parse_trusted_build_provenance(
-                &version,
-                &manifest,
-                "renamed.exe",
-                1234,
-                &executable_hash,
-            )
-            .is_none()
-        );
+        assert!(parse_trusted_build_provenance(
+            &version,
+            &manifest,
+            "mir2-platform-windows.exe",
+            1234,
+            &"b".repeat(64),
+        )
+        .is_none());
+        assert!(parse_trusted_build_provenance(
+            &version,
+            &manifest,
+            "renamed.exe",
+            1234,
+            &executable_hash,
+        )
+        .is_none());
     }
 }

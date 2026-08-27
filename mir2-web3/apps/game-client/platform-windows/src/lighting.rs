@@ -10,10 +10,10 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Mutex, OnceLock};
 
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
-use super::{MapViewport, ParsedMap, native_map_light_cells};
-use crate::effects::{NativeEffectLightSnapshot, native_effect_light_snapshots};
+use super::{native_map_light_cells, MapViewport, ParsedMap};
+use crate::effects::{native_effect_light_snapshots, NativeEffectLightSnapshot};
 
 pub const STAGE_WIDTH: f32 = 1024.0;
 pub const STAGE_HEIGHT: f32 = 768.0;
@@ -1034,11 +1034,9 @@ mod tests {
         assert_eq!(lights.len(), MAX_NATIVE_LIGHTS);
         assert_eq!(lights[0]["key"], "1");
         assert_eq!(lights.last().unwrap()["key"], "effect:fx-a");
-        assert!(
-            lights
-                .iter()
-                .all(|value| value["key"] != "effect:fx-invalid-range")
-        );
+        assert!(lights
+            .iter()
+            .all(|value| value["key"] != "effect:fx-invalid-range"));
 
         let missing = NativeLightAssets {
             ranges: [
@@ -1059,13 +1057,11 @@ mod tests {
                 light: 6,
             }],
         );
-        assert!(
-            state["entityLights"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .all(|value| value["kind"] != "effect")
-        );
+        assert!(state["entityLights"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|value| value["kind"] != "effect"));
     }
 
     #[test]
@@ -1095,12 +1091,10 @@ mod tests {
                 },
             ],
         );
-        assert!(
-            state["entityLights"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .all(|value| value["kind"] != "effect")
-        );
+        assert!(state["entityLights"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|value| value["kind"] != "effect"));
     }
 }

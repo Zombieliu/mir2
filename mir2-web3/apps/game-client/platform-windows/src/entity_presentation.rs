@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::{Res, ResMut, Resource, Time};
 use mir2_bevy_runtime::entity_animation::{
-    AnimationAction, AnimationEvent, AnimationWorld, Direction, EntityKind,
+    AnimationAction, AnimationEvent, AnimationWorld, Direction, EntityKind, TransitionReason,
 };
 use serde_json::Value;
 
@@ -35,6 +35,7 @@ pub struct NativeEntityPresentation {
     last_applied_sequence: HashMap<String, u64>,
     last_libraries: HashMap<String, String>,
     last_frames: HashMap<String, (i64, AnimationAction)>,
+    hidden_after_hide: HashSet<String>,
     payload_dirty: bool,
 }
 
@@ -47,6 +48,7 @@ impl Default for NativeEntityPresentation {
             last_applied_sequence: HashMap::new(),
             last_libraries: HashMap::new(),
             last_frames: HashMap::new(),
+            hidden_after_hide: HashSet::new(),
             payload_dirty: false,
         }
     }
@@ -72,8 +74,23 @@ impl NativeEntityPresentation {
             .flatten()
             .filter_map(parse_observed_entity)
             .collect::<Vec<_>>();
+        let observed_ids = observed
+            .iter()
+            .map(|entity| entity.object_id.clone())
+            .collect::<HashSet<_>>();
+        self.hidden_after_hide
+            .retain(|object_id| observed_ids.contains(object_id));
+        for entity in &observed {
+            if entity
+                .action
+                .is_some_and(|(_, action)| action == AnimationAction::Show)
+            {
+                self.hidden_after_hide.remove(&entity.object_id);
+            }
+        }
         let visible = observed
             .iter()
+            .filter(|entity| !self.hidden_after_hide.contains(&entity.object_id))
             .map(|entity| entity.object_id.clone())
             .collect::<HashSet<_>>();
 
@@ -92,6 +109,9 @@ impl NativeEntityPresentation {
         }
 
         for entity in observed {
+            if self.hidden_after_hide.contains(&entity.object_id) {
+                continue;
+            }
             let catalog_key = format!("{}#mounted={}", entity.body_library, entity.mounted);
             if self
                 .last_libraries
@@ -164,7 +184,18 @@ impl NativeEntityPresentation {
     fn render_state_if_changed(&mut self, now_ms: u64) -> Option<Value> {
         self.sync_pending_payload(now_ms);
         let payload = self.latest_payload.as_ref()?;
-        self.world.tick(now_ms).ok()?;
+        let transitions = self.world.tick(now_ms).ok()?;
+        for transition in transitions {
+            if transition.reason == TransitionReason::HideCompleted
+                && self
+                    .last_libraries
+                    .get(&transition.key.object_id)
+                    .is_some_and(|library| hide_removes_rendered_entity(library))
+            {
+                self.hidden_after_hide
+                    .insert(transition.key.object_id.clone());
+            }
+        }
         let frames = self
             .world
             .active_states()
@@ -180,7 +211,19 @@ impl NativeEntityPresentation {
             return None;
         }
 
-        let state = crate::atlas::build_entity_render_state_with_poses(payload, &frames)?;
+        let mut visible_payload = payload.clone();
+        if let Some(entities) = visible_payload
+            .get_mut("entities")
+            .and_then(Value::as_array_mut)
+        {
+            entities.retain(|entity| {
+                entity
+                    .get("objectId")
+                    .and_then(value_object_id)
+                    .is_none_or(|object_id| !self.hidden_after_hide.contains(&object_id))
+            });
+        }
+        let state = crate::atlas::build_entity_render_state_with_poses(&visible_payload, &frames)?;
         self.last_frames = frames;
         self.payload_dirty = false;
         Some(state)
@@ -263,6 +306,8 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
     match action {
         "standing" => Some(AnimationAction::Standing),
         "harvest" => Some(AnimationAction::Harvest),
+        "show" => Some(AnimationAction::Show),
+        "hide" => Some(AnimationAction::Hide),
         "walking" => Some(AnimationAction::Walking),
         "running" => Some(AnimationAction::Running),
         "attack1" => Some(AnimationAction::Attack1),
@@ -278,6 +323,27 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
         "revive" => Some(AnimationAction::Revive),
         _ => None,
     }
+}
+
+fn value_object_id(value: &Value) -> Option<String> {
+    match value {
+        Value::Number(number) => Some(number.to_string()),
+        Value::String(value) => Some(value.clone()),
+        _ => None,
+    }
+}
+
+fn hide_removes_rendered_entity(catalog_key: &str) -> bool {
+    let library = catalog_key
+        .split_once("#mounted=")
+        .map_or(catalog_key, |(library, _)| library)
+        .trim()
+        .replace('\\', "/");
+    let library = library
+        .trim_matches('/')
+        .strip_prefix("original-ui/")
+        .unwrap_or_else(|| library.trim_matches('/'));
+    library == "Monster/010"
 }
 
 fn normalize_action(kind: EntityKind, action: AnimationAction) -> Option<AnimationAction> {
@@ -370,5 +436,95 @@ mod tests {
             normalize_action(EntityKind::Npc, AnimationAction::Attack1),
             None
         );
+    }
+
+    #[test]
+    fn cannibal_plant_hide_finishes_before_visual_suppression_and_show_restores_it() {
+        let mut presentation = NativeEntityPresentation::default();
+        let payload = |sequence: u64, action: &str| {
+            json!({
+                "sceneView": {"center": {"x": 10, "y": 10}},
+                "entities": [{
+                    "objectId": 10,
+                    "kind": "monster",
+                    "x": 10,
+                    "y": 10,
+                    "direction": "down",
+                    "_nativeAnimationAction": action,
+                    "_nativeAnimationSequence": sequence,
+                    "sprite": {
+                        "bodyLibrary": "Monster/010",
+                        "directionStride": 0,
+                        "frameBaseOffset": 0
+                    }
+                }]
+            })
+        };
+
+        presentation.replace_payload(payload(1, "hide"));
+        let hide_start = presentation
+            .render_state_if_changed(0)
+            .expect("hide starts before suppression");
+        assert!(rendered_path(&hide_start).ends_with("/Monster/010/12.png"));
+
+        let hidden = presentation
+            .render_state_if_changed(1_600)
+            .expect("hide completion changes visible set");
+        assert!(hidden["entities"]
+            .as_array()
+            .expect("rendered entities")
+            .is_empty());
+
+        presentation.replace_payload(payload(2, "show"));
+        let show_start = presentation
+            .render_state_if_changed(1_600)
+            .expect("ObjectShow restores the entity before animation");
+        assert!(rendered_path(&show_start).ends_with("/Monster/010/4.png"));
+    }
+
+    #[test]
+    fn removed_hidden_object_does_not_suppress_a_reused_object_id() {
+        let mut presentation = NativeEntityPresentation::default();
+        let payload = |sequence: u64, action: &str, body_library: &str| {
+            json!({
+                "sceneView": {"center": {"x": 10, "y": 10}},
+                "entities": [{
+                    "objectId": 10,
+                    "kind": "monster",
+                    "x": 10,
+                    "y": 10,
+                    "direction": "down",
+                    "_nativeAnimationAction": action,
+                    "_nativeAnimationSequence": sequence,
+                    "sprite": {
+                        "bodyLibrary": body_library,
+                        "directionStride": 0,
+                        "frameBaseOffset": 0
+                    }
+                }]
+            })
+        };
+
+        presentation.replace_payload(payload(1, "hide", "Monster/010"));
+        presentation
+            .render_state_if_changed(0)
+            .expect("hide starts before suppression");
+        presentation
+            .render_state_if_changed(1_600)
+            .expect("hide completion suppresses the plant");
+
+        presentation.replace_payload(json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "entities": []
+        }));
+        presentation
+            .render_state_if_changed(1_601)
+            .expect("ObjectRemove changes the rendered entity set");
+
+        presentation.replace_payload(payload(1, "standing", "Monster/003"));
+        let reused = presentation
+            .render_state_if_changed(1_602)
+            .expect("a later actor may reuse the removed object id");
+        assert!(rendered_path(&reused).contains("/Monster/003/"));
     }
 }

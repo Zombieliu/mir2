@@ -238,6 +238,14 @@ fn build_animation_catalog(source: &HashMap<String, SourceAction>) -> Option<Ani
         }
         catalog.insert(action, descriptor).ok()?;
     }
+    for (action, source_name) in [
+        (AnimationAction::Show, "Show"),
+        (AnimationAction::Hide, "Hide"),
+    ] {
+        if let Some(source_action) = source.get(source_name) {
+            catalog.insert(action, source_action.descriptor).ok()?;
+        }
+    }
     Some(catalog)
 }
 
@@ -248,6 +256,8 @@ fn resolve_source_action<'a>(
     let candidates: &[&str] = match action {
         AnimationAction::Standing => &["Standing"],
         AnimationAction::Harvest => &["Harvest", "Standing"],
+        AnimationAction::Show => &["Show"],
+        AnimationAction::Hide => &["Hide"],
         AnimationAction::Walking => &["Walking", "Standing"],
         AnimationAction::Running => &["Running", "Walking", "Standing"],
         AnimationAction::Attack1 => &["Attack1", "Standing"],
@@ -287,6 +297,14 @@ mod tests {
                             "skip": 1, "interval": 125, "reverse": false
                         },
                         {
+                            "actionName": "Show", "start": 4, "count": 8,
+                            "skip": -8, "interval": 200, "reverse": false
+                        },
+                        {
+                            "actionName": "Hide", "start": 12, "count": 8,
+                            "skip": -8, "interval": 200, "reverse": true
+                        },
+                        {
                             "actionName": "Die", "start": 40, "count": 5,
                             "skip": -1, "interval": 90, "reverse": false
                         }
@@ -303,6 +321,14 @@ mod tests {
         assert_eq!(
             catalog.descriptor(AnimationAction::Walking),
             Some(&FrameDescriptor::from_crystal(20, 3, 1, 125, false))
+        );
+        assert_eq!(
+            catalog.descriptor(AnimationAction::Show),
+            Some(&FrameDescriptor::from_crystal(4, 8, -8, 200, false))
+        );
+        assert_eq!(
+            catalog.descriptor(AnimationAction::Hide),
+            Some(&FrameDescriptor::from_crystal(12, 8, -8, 200, true))
         );
         assert_eq!(
             catalog.descriptor(AnimationAction::Running),

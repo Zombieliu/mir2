@@ -266,6 +266,8 @@ fn parse_direction(value: Option<&str>) -> Direction {
 fn parse_action(value: &str) -> Option<AnimationAction> {
     match value {
         "harvest" => Some(AnimationAction::Harvest),
+        "show" => Some(AnimationAction::Show),
+        "hide" => Some(AnimationAction::Hide),
         "walking" => Some(AnimationAction::Walking),
         "running" => Some(AnimationAction::Running),
         "attack1" => Some(AnimationAction::Attack1),
@@ -302,6 +304,8 @@ fn action_name(action: AnimationAction) -> &'static str {
     match action {
         AnimationAction::Standing => "standing",
         AnimationAction::Harvest => "harvest",
+        AnimationAction::Show => "show",
+        AnimationAction::Hide => "hide",
         AnimationAction::Walking => "walking",
         AnimationAction::Running => "running",
         AnimationAction::Attack1 => "attack1",
@@ -322,6 +326,8 @@ fn animation_state_name(action: AnimationAction) -> &'static str {
     match action {
         AnimationAction::Standing => "standing",
         AnimationAction::Harvest => "harvesting",
+        AnimationAction::Show => "showing",
+        AnimationAction::Hide => "hiding",
         AnimationAction::Walking => "walking",
         AnimationAction::Running => "running",
         AnimationAction::Attack1
