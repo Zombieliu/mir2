@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-02 FlamingSword client-boundary checkpoint (2026-08-28): revision
+> `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` adds no gameplay authority. It
+> preserves `ObjectAttack.spell=8` through Gateway and closes bounded native/
+> Web Attack1 overlay and audio consumption, including ordinary-attack
+> isolation and lifecycle cleanup. Windows 357/357, runtime 191/191, Bevy
+> native-ui 393/393, focused effects 5/5, Gateway projection 1/1, Web/full
+> resource gates and package/verifier self-tests pass; final review found no
+> P0/P1. Existing personal/shared toggle and next-melee consumption code was
+> not changed or live-revalidated here. Authenticated single-consumption/order
+> evidence, the wider combat/backend matrix and all same-EXE/GPU/DPI/soak/
+> human/signing gates remain open. No server or global percentage is claimed.
+
 > VIS-02 FireWall client-boundary checkpoint (2026-08-28): revision
 > `f6f78f3eddb813897cf4ce4c6056183130ab7f35` adds no gameplay authority. It
 > closes bounded Windows presentation automation for the 600 ms cast,

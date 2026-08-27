@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 FlamingSword bounded checkpoint (2026-08-28): implementation revision
+> `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` binds only typed
+> `ObjectAttack(spell=8)` Attack1 to the live attacker. Eight directions use
+> six `Magic/3480 + direction*10` frames at 100 ms, additive opacity 0.7 and no
+> light/shadow; exact M8-1 is immediate and the generic swing stays on frame 1
+> at 100 ms. Native/Web state, lifecycle cleanup and package identities are
+> automated. Windows 357/357, runtime 191/191, Bevy 393/393, focused 5/5,
+> Gateway 1/1, Web full logic/type, 74-spell export, offline assets and script
+> self-tests pass; final review found no P0/P1. All first-five presentation
+> checkpoints are now bounded, but VIS-02 is not accepted: the combat-state
+> chain, live backend path, same-EXE/WSS/GPU/DPI/soak/human/signing and complete
+> denominator remain open. `globalParityPercent` remains null.
+
 > VIS-02 FireWall bounded checkpoint (2026-08-28): implementation revision
 > `f6f78f3eddb813897cf4ce4c6056183130ab7f35` preserves Crystal's immediate
 > `Magic/1620..1629` cast and M39-0, successful 600 ms M39-1 completion, and

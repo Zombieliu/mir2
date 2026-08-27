@@ -167,6 +167,21 @@ verifier self-test automation only. No exact-head package was produced.
 FlamingSword, the complete backend negative/lifecycle matrix and every same-
 EXE/live-WSS/GPU/DPI/human gate remain open.
 
+FlamingSword is the fifth bounded automated checkpoint at revision
+`160e8d3ccc0eb17f8e49b6505c5a58666a35029f`. `SpellToggle` is presentation-
+silent; only typed `ObjectAttack(spell=8)` starts the Attack1-bound overlay.
+The live attacker owns six 100 ms frames for each of eight directions at
+`Magic/3480 + direction*10`, with additive opacity 0.7, no light and no
+generated shadow. Exact M8-1 starts at time zero and the generic weapon swing
+remains on frame 1 at 100 ms; actor/map/session lifecycle cancels pending work.
+Ordinary attacks do not create the overlay or dedicated sound. The Gateway
+fixture proves typed projection, not production reachability or authenticated
+timing. This passes packet projection, state-clock, frame/audio, Web/native
+consumer, source asset and package/verifier self-test automation only. All five
+initial presentation checkpoints are now bounded, but VIS-02 still requires
+the Struck/Die/Dead/Revive chain plus every same-EXE/live-WSS/GPU/DPI/human
+gate, and the full semantic inventory remains incomplete.
+
 VIS-03 has one bounded automated checkpoint at implementation revision
 `448db4f72`. The 1024x768 HUD base and Inventory control are source-bound to
 `Prguse/1` and normal/hover/pressed `Prguse/1903..1905`. BigMap Teleport keeps

@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> VIS-02 FlamingSword bounded automated checkpoint (2026-08-28): revision
+> `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` preserves Crystal's silent
+> toggle and starts presentation only from `ObjectAttack(spell=8)` Attack1.
+> Native and Web use the attacker-bound eight-direction, six-frame
+> `Magic/3480 + direction*10` overlay at 100 ms/frame, additive opacity 0.7,
+> no light/shadow, exact M8-1 at time zero and the ordinary swing at 100 ms.
+> Lifecycle cleanup, 48-frame/audio package closure and ordinary-attack
+> isolation fail closed. Windows 357/357, runtime 191/191, Bevy native-ui
+> 393/393, focused effects 5/5, Gateway projection 1/1, Web type/full logic,
+> 74-spell exporter, offline assets and package/verifier self-tests pass;
+> independent final review found no P0/P1. The first five automated
+> presentation checkpoints are now bounded, but VIS-02, the combat-state
+> chain, backend live semantics, same-EXE/live-WSS/GPU/DPI/soak/human/signing
+> and the incomplete denominator remain open. Do not emit a global percentage.
+
 > VIS-02 FireWall bounded automated checkpoint (2026-08-28): revision
 > `f6f78f3eddb813897cf4ce4c6056183130ab7f35` binds typed
 > `ObjectMagic(FireWall)` to the 600 ms `Magic/1620..1629` caster action and

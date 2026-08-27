@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> VIS-02 FlamingSword server-client note (2026-08-28): revision
+> `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` changes no simulation or shared-
+> Zone combat authority. It closes only Gateway preservation and native/Web
+> consumption of typed `ObjectAttack(spell=8)` as the source Attack1 overlay,
+> exact M8-1 plus frame-1 swing, with ordinary attacks and lifecycle cleanup
+> fail-closed. Windows 357/357, runtime 191/191, Bevy 393/393, focused 5/5,
+> Gateway 1/1, Web/resource and package/verifier gates pass; review found no
+> P0/P1. The fixture is projection-only and does not prove the live silent-
+> toggle/next-valid-melee/single-consumption path. The broader backend matrix
+> and same-EXE/live-WSS/GPU/DPI/soak/human/signing gates remain open. No server
+> or global percentage is claimed.
+
 > VIS-02 FireWall server-client note (2026-08-28): revision
 > `f6f78f3eddb813897cf4ce4c6056183130ab7f35` changes no server combat
 > authority. It closes only the bounded native projection of the source cast,
