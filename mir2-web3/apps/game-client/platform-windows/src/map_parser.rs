@@ -28,6 +28,8 @@ const STAGE_WIDTH: f32 = 1024.0;
 const STAGE_HEIGHT: f32 = 768.0;
 const CELL_WIDTH: f32 = 48.0;
 const CELL_HEIGHT: f32 = 32.0;
+pub(crate) const MAP_RENDER_GUARD_CELLS: i32 = 6;
+pub(crate) const MAP_FRONT_DEPTH_ORDER: f32 = 1.0;
 
 /// A parsed type-100 map cell.
 #[derive(Debug, Clone)]
@@ -432,7 +434,7 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
                     additive: front_is_additive(cell.front_animation_frame),
                     frame_count: u32::from(front_animation_count(cell.front_animation_frame))
                         .max(1),
-                    z: 1.0,
+                    z: MAP_FRONT_DEPTH_ORDER,
                 });
             }
         }
@@ -790,6 +792,19 @@ impl MapViewport {
                 .clamp(1, 128) as i32,
         }
     }
+
+    pub(crate) fn draw_margin_x(self) -> i32 {
+        self.width / 2 + MAP_RENDER_GUARD_CELLS
+    }
+
+    pub(crate) fn draw_margin_y(self) -> i32 {
+        self.height / 2 + MAP_RENDER_GUARD_CELLS
+    }
+
+    pub(crate) fn retains_cell(self, x: i32, y: i32) -> bool {
+        x.abs_diff(self.center_x) <= self.draw_margin_x() as u32
+            && y.abs_diff(self.center_y) <= self.draw_margin_y() as u32
+    }
 }
 
 /// Build a viewport-relative `MapRenderState` with the exact rect geometry the
@@ -812,16 +827,12 @@ fn build_map_render_state_with_indexes(
     let mut tiles: Vec<Value> = Vec::new();
     let mut standalone_tiles: Vec<Value> = Vec::new();
     let mut missing_standalone = HashSet::new();
-    let margin_x = viewport.width / 2 + 6;
-    let margin_y = viewport.height / 2 + 6;
     let tile_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH
         - (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor();
     let tile_origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
 
     for draw in &draws {
-        if (draw.x - viewport.center_x).abs() > margin_x
-            || (draw.y - viewport.center_y).abs() > margin_y
-        {
+        if !viewport.retains_cell(draw.x, draw.y) {
             continue;
         }
         let rect_key = atlas_rect_key(&draw.library, draw.frame_index);

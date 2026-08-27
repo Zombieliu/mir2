@@ -35,6 +35,13 @@ pub(crate) struct CrystalAdditiveMaterial {
     texture: Handle<Image>,
 }
 
+impl CrystalAdditiveMaterial {
+    #[cfg(test)]
+    pub(crate) fn uv_scale_offset(&self) -> Vec4 {
+        self.uv_scale_offset
+    }
+}
+
 impl Material2d for CrystalAdditiveMaterial {
     fn fragment_shader() -> ShaderRef {
         ShaderRef::Path(
@@ -81,8 +88,24 @@ impl CrystalAdditiveMaterialCache {
         opacity: f32,
         materials: &mut Assets<CrystalAdditiveMaterial>,
     ) -> Handle<CrystalAdditiveMaterial> {
+        self.material_with_uv(
+            cache_key,
+            texture,
+            opacity,
+            Vec4::new(1.0, 1.0, 0.0, 0.0),
+            materials,
+        )
+    }
+
+    pub(crate) fn material_with_uv(
+        &mut self,
+        cache_key: &str,
+        texture: Handle<Image>,
+        opacity: f32,
+        uv_scale_offset: Vec4,
+        materials: &mut Assets<CrystalAdditiveMaterial>,
+    ) -> Handle<CrystalAdditiveMaterial> {
         let tint = LinearRgba::new(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
-        let uv_scale_offset = Vec4::new(1.0, 1.0, 0.0, 0.0);
         if let Some(handle) = self.materials.get(cache_key) {
             if let Some(mut material) = materials.get_mut(handle) {
                 material.texture = texture;
@@ -191,5 +214,18 @@ mod tests {
         }
         assert!(cache.len() <= 100);
         assert_eq!(cache.len(), materials.len());
+    }
+
+    #[test]
+    fn additive_material_cache_retains_exact_atlas_uv_rect() {
+        let mut cache = CrystalAdditiveMaterialCache::default();
+        let mut materials = Assets::<CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let image = images.add(Image::default());
+        let uv = Vec4::new(0.25, 0.125, 0.5, 0.75);
+        let handle = cache.material_with_uv("scarecrow", image, 0.8, uv, &mut materials);
+        let material = materials.get(&handle).expect("cached additive material");
+        assert_eq!(material.uv_scale_offset, uv);
+        assert_eq!(material.tint.alpha, 0.8);
     }
 }

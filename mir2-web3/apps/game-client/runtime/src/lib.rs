@@ -409,12 +409,14 @@ struct EntityRenderLayerHandle {
     image_key: String,
     atlas_key: Option<String>,
     atlas_rect_key: Option<String>,
+    additive: bool,
 }
 
 #[derive(Clone)]
 struct EntityRenderAtlasHandle {
     layout: Handle<TextureAtlasLayout>,
     rects: HashMap<String, usize>,
+    uv_rects: HashMap<String, URect>,
     size: UVec2,
     image_key: Option<String>,
     image: Option<Handle<Image>>,
@@ -678,6 +680,8 @@ struct EntityRenderLayer {
     z: f32,
     #[serde(default)]
     opacity: Option<f32>,
+    #[serde(default)]
+    additive: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -3210,8 +3214,11 @@ fn clear_scene_registry(
     for (_, handles) in registry.entities.drain() {
         commands.entity(handles.root).despawn();
     }
-    for (_, handle) in registry.entity_render_layers.drain() {
+    for (key, handle) in registry.entity_render_layers.drain() {
         commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
+        }
     }
     registry.entity_render_atlases.clear();
 
@@ -4153,6 +4160,9 @@ fn sync_entity_render_layers(
     asset_server: Res<AssetServer>,
     atlas_assets: Res<RuntimeEntityRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
     mut local_motion: ResMut<local_motion::LocalMotionPresentationShadow>,
@@ -4161,15 +4171,28 @@ fn sync_entity_render_layers(
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
+    mut additive_material_query: Query<
+        &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
+    >,
 ) {
     let Some(snapshot) = &entity_render_state.snapshot else {
-        clear_entity_render_layers(&mut commands, &mut registry);
+        clear_entity_render_layers(
+            &mut commands,
+            &mut registry,
+            &mut additive_cache,
+            &mut additive_materials,
+        );
         presentation_poses.set_applied_entity_center(None);
         return;
     };
 
     if !snapshot.enabled {
-        clear_entity_render_layers(&mut commands, &mut registry);
+        clear_entity_render_layers(
+            &mut commands,
+            &mut registry,
+            &mut additive_cache,
+            &mut additive_materials,
+        );
         presentation_poses.set_applied_entity_center(None);
         return;
     }
@@ -4289,46 +4312,105 @@ fn sync_entity_render_layers(
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 
+            if registry
+                .entity_render_layers
+                .get(&layer_key)
+                .is_some_and(|handle| handle.additive != layer.additive)
+            {
+                if let Some(old) = registry.entity_render_layers.remove(&layer_key) {
+                    commands.entity(old.entity).despawn();
+                    if old.additive {
+                        additive_cache.evict(
+                            &entity_additive_material_key(&layer_key),
+                            &mut additive_materials,
+                        );
+                    }
+                }
+            }
+
             if let Some(handle) = registry.entity_render_layers.get_mut(&layer_key) {
-                if handle.image_key != image_binding.image_key
+                let binding_changed = handle.image_key != image_binding.image_key
                     || handle.atlas_key != image_binding.atlas_key
-                    || handle.atlas_rect_key != image_binding.atlas_rect_key
-                {
+                    || handle.atlas_rect_key != image_binding.atlas_rect_key;
+                if layer.additive {
+                    let material = additive_cache.material_with_uv(
+                        &entity_additive_material_key(&layer_key),
+                        image_binding.image.clone(),
+                        opacity,
+                        image_binding.uv_scale_offset,
+                        &mut additive_materials,
+                    );
+                    if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                        *binding = MeshMaterial2d(material);
+                    }
+                } else if binding_changed {
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.image = image_binding.image.clone();
                         sprite.texture_atlas = image_binding.texture_atlas.clone();
                         sprite.rect = None;
                     }
-                    handle.image_key = image_binding.image_key.clone();
-                    handle.atlas_key = image_binding.atlas_key.clone();
-                    handle.atlas_rect_key = image_binding.atlas_rect_key.clone();
                 }
-                if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
-                    sprite.custom_size =
-                        Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
-                    sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
-                    sprite.texture_atlas = image_binding.texture_atlas.clone();
-                    sprite.rect = None;
+                handle.image_key = image_binding.image_key.clone();
+                handle.atlas_key = image_binding.atlas_key.clone();
+                handle.atlas_rect_key = image_binding.atlas_rect_key.clone();
+                if !layer.additive {
+                    if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                        sprite.custom_size =
+                            Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
+                        sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
+                        sprite.texture_atlas = image_binding.texture_atlas.clone();
+                        sprite.rect = None;
+                    }
                 }
                 if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
                     transform.translation = position;
+                    if layer.additive {
+                        transform.scale =
+                            Vec3::new(layer.width.max(1.0), layer.height.max(1.0), 1.0);
+                    }
                 }
                 continue;
             }
 
-            let sprite_entity = commands
-                .spawn((
-                    MirEntityRenderLayer,
-                    Sprite {
-                        image: image_binding.image.clone(),
-                        texture_atlas: image_binding.texture_atlas.clone(),
-                        custom_size: Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0))),
-                        color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
-                        ..default()
-                    },
-                    Transform::from_translation(position),
-                ))
-                .id();
+            let sprite_entity = if layer.additive {
+                let mesh = additive_cache.unit_quad(&mut meshes);
+                let material = additive_cache.material_with_uv(
+                    &entity_additive_material_key(&layer_key),
+                    image_binding.image.clone(),
+                    opacity,
+                    image_binding.uv_scale_offset,
+                    &mut additive_materials,
+                );
+                commands
+                    .spawn((
+                        MirEntityRenderLayer,
+                        Mesh2d(mesh),
+                        MeshMaterial2d(material),
+                        Transform::from_translation(position).with_scale(Vec3::new(
+                            layer.width.max(1.0),
+                            layer.height.max(1.0),
+                            1.0,
+                        )),
+                    ))
+                    .id()
+            } else {
+                commands
+                    .spawn((
+                        MirEntityRenderLayer,
+                        Sprite {
+                            image: image_binding.image.clone(),
+                            texture_atlas: image_binding.texture_atlas.clone(),
+                            custom_size: Some(Vec2::new(
+                                layer.width.max(1.0),
+                                layer.height.max(1.0),
+                            )),
+                            color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
+                            ..default()
+                        },
+                        Transform::from_translation(position),
+                    ))
+                    .id()
+            };
             registry.entity_render_layers.insert(
                 layer_key,
                 EntityRenderLayerHandle {
@@ -4336,6 +4418,7 @@ fn sync_entity_render_layers(
                     image_key: image_binding.image_key,
                     atlas_key: image_binding.atlas_key,
                     atlas_rect_key: image_binding.atlas_rect_key,
+                    additive: layer.additive,
                 },
             );
         }
@@ -4351,6 +4434,9 @@ fn sync_entity_render_layers(
     for key in stale_keys {
         if let Some(handle) = registry.entity_render_layers.remove(&key) {
             commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&entity_additive_material_key(&key), &mut additive_materials);
+            }
         }
     }
 
@@ -4363,6 +4449,11 @@ struct EntityRenderImageBinding {
     atlas_key: Option<String>,
     atlas_rect_key: Option<String>,
     texture_atlas: Option<TextureAtlas>,
+    uv_scale_offset: Vec4,
+}
+
+fn entity_additive_material_key(layer_key: &str) -> String {
+    format!("entity:{layer_key}")
 }
 
 fn sync_entity_render_atlas_layouts(
@@ -4410,12 +4501,15 @@ fn sync_entity_render_atlas_layouts(
 
         let mut layout = TextureAtlasLayout::new_empty(size);
         let mut rects = HashMap::new();
+        let mut uv_rects = HashMap::new();
         for rect in &atlas.rects {
-            let index = layout.add_texture(URect {
+            let uv_rect = URect {
                 min: UVec2::new(rect.x, rect.y),
                 max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
-            });
+            };
+            let index = layout.add_texture(uv_rect);
             rects.insert(rect.key.clone(), index);
+            uv_rects.insert(rect.key.clone(), uv_rect);
         }
         let layout = texture_atlas_layouts.add(layout);
         registry.entity_render_atlases.insert(
@@ -4423,6 +4517,7 @@ fn sync_entity_render_atlas_layouts(
             EntityRenderAtlasHandle {
                 layout,
                 rects,
+                uv_rects,
                 size,
                 image_key,
                 image,
@@ -4451,6 +4546,11 @@ fn entity_render_image_binding(
     if let (Some(atlas_key), Some(rect_key)) = (&layer.atlas_key, &layer.atlas_rect_key) {
         if let Some(atlas) = registry.entity_render_atlases.get(atlas_key) {
             if let Some(index) = atlas.rects.get(rect_key) {
+                let uv_scale_offset = atlas
+                    .uv_rects
+                    .get(rect_key)
+                    .map(|rect| entity_atlas_uv_scale_offset(atlas.size, *rect))
+                    .unwrap_or(Vec4::new(1.0, 1.0, 0.0, 0.0));
                 if let (Some(image_key), Some(image)) = (&atlas.image_key, &atlas.image) {
                     return EntityRenderImageBinding {
                         image: image.clone(),
@@ -4461,6 +4561,7 @@ fn entity_render_image_binding(
                             layout: atlas.layout.clone(),
                             index: *index,
                         }),
+                        uv_scale_offset,
                     };
                 }
 
@@ -4474,6 +4575,7 @@ fn entity_render_image_binding(
                             layout: atlas.layout.clone(),
                             index: *index,
                         }),
+                        uv_scale_offset,
                     };
                 }
             }
@@ -4487,12 +4589,35 @@ fn entity_render_image_binding(
         atlas_key: None,
         atlas_rect_key: None,
         texture_atlas: None,
+        uv_scale_offset: Vec4::new(1.0, 1.0, 0.0, 0.0),
     }
 }
 
-fn clear_entity_render_layers(commands: &mut Commands, registry: &mut SceneRegistry) {
-    for (_, handle) in registry.entity_render_layers.drain() {
+fn entity_atlas_uv_scale_offset(size: UVec2, rect: URect) -> Vec4 {
+    if size.x == 0 || size.y == 0 {
+        return Vec4::new(1.0, 1.0, 0.0, 0.0);
+    }
+    let width = size.x as f32;
+    let height = size.y as f32;
+    Vec4::new(
+        (rect.max.x - rect.min.x) as f32 / width,
+        (rect.max.y - rect.min.y) as f32 / height,
+        rect.min.x as f32 / width,
+        rect.min.y as f32 / height,
+    )
+}
+
+fn clear_entity_render_layers(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+) {
+    for (key, handle) in registry.entity_render_layers.drain() {
         commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
+        }
     }
     registry.entity_render_atlases.clear();
 }
@@ -5407,6 +5532,30 @@ fn publish_map_status(phase: &str, message: &str, ack_key: &str, image_keys: &[S
 mod entity_atlas_tests {
     use super::*;
 
+    fn entity_sync_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_asset::<Mesh>()
+            .init_asset::<TextureAtlasLayout>()
+            .init_asset::<additive_material::CrystalAdditiveMaterial>()
+            .init_resource::<RuntimeEntityRenderState>()
+            .init_resource::<RuntimeEntityRenderAtlases>()
+            .init_resource::<motion::EntityMotionTable>()
+            .init_resource::<local_motion::LocalMotionPresentationShadow>()
+            .init_resource::<remote_motion::RemoteMotionPresentation>()
+            .init_resource::<presentation_pose::PresentationPoseBuffer>()
+            .init_resource::<SceneRegistry>()
+            .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
+            .init_resource::<Assets<Image>>()
+            .init_resource::<Assets<Mesh>>()
+            .init_resource::<Assets<TextureAtlasLayout>>()
+            .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .add_systems(Update, sync_entity_render_layers);
+        app
+    }
+
     fn rect(key: &str) -> EntityRenderAtlasRect {
         EntityRenderAtlasRect {
             key: key.to_string(),
@@ -5428,6 +5577,253 @@ mod entity_atlas_tests {
             &existing,
             &[rect("standing"), rect("attack")]
         ));
+    }
+
+    #[test]
+    fn additive_entity_layer_keeps_exact_atlas_uv_subrect() {
+        let state: EntityRenderState = serde_json::from_str(
+            r#"{
+                "enabled":true,
+                "stageWidth":1024,
+                "stageHeight":768,
+                "atlases":[{
+                    "key":"starter:p6",
+                    "width":100,
+                    "height":200,
+                    "imageUrl":"/bevy-entity-atlases/starter-p6.png",
+                    "rects":[{
+                        "key":"effect",
+                        "x":10,
+                        "y":20,
+                        "width":30,
+                        "height":40
+                    }]
+                }],
+                "entities":[{
+                    "objectId":"2005",
+                    "layers":[{
+                        "key":"2005:scarecrow-die-effect",
+                        "path":"/original-ui/Monster/005/227.png",
+                        "atlasKey":"starter:p6",
+                        "atlasRectKey":"effect",
+                        "left":0,
+                        "top":0,
+                        "width":76,
+                        "height":72,
+                        "z":1,
+                        "additive":true
+                    }]
+                }]
+            }"#,
+        )
+        .expect("additive entity state");
+        assert!(state.entities[0].layers[0].additive);
+
+        let uv = entity_atlas_uv_scale_offset(
+            UVec2::new(2048, 1024),
+            URect {
+                min: UVec2::new(512, 256),
+                max: UVec2::new(768, 384),
+            },
+        );
+        assert_eq!(uv, Vec4::new(0.125, 0.125, 0.25, 0.25));
+    }
+
+    #[test]
+    fn additive_entity_layer_uses_material_mesh_and_evicts_on_removal() {
+        let mut app = entity_sync_test_app();
+        let colliding_effect_key = "2005:scarecrow-die-effect";
+        let colliding_effect_image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut().resource_scope(
+            |world, mut cache: Mut<additive_material::CrystalAdditiveMaterialCache>| {
+                let mut materials =
+                    world.resource_mut::<Assets<additive_material::CrystalAdditiveMaterial>>();
+                cache.material(
+                    colliding_effect_key,
+                    colliding_effect_image,
+                    1.0,
+                    &mut materials,
+                );
+            },
+        );
+        let snapshot: EntityRenderState = serde_json::from_str(
+            r#"{
+                "enabled":true,
+                "stageWidth":1024,
+                "stageHeight":768,
+                "atlases":[{
+                    "key":"starter:p6",
+                    "width":100,
+                    "height":200,
+                    "imageUrl":"/bevy-entity-atlases/starter-p6.png",
+                    "rects":[{
+                        "key":"effect",
+                        "x":10,
+                        "y":20,
+                        "width":30,
+                        "height":40
+                    }]
+                }],
+                "entities":[{
+                    "objectId":"2005",
+                    "layers":[{
+                        "key":"2005:scarecrow-die-effect",
+                        "path":"/original-ui/Monster/005/227.png",
+                        "atlasKey":"starter:p6",
+                        "atlasRectKey":"effect",
+                        "left":480,
+                        "top":352,
+                        "width":76,
+                        "height":72,
+                        "z":50008,
+                        "additive":true
+                    }]
+                }]
+            }"#,
+        )
+        .expect("additive entity snapshot");
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot);
+        app.update();
+
+        let entity = app.world().resource::<SceneRegistry>().entity_render_layers
+            ["2005:scarecrow-die-effect"]
+            .entity;
+        assert!(app
+            .world()
+            .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+            .is_some());
+        assert!(app.world().get::<Sprite>(entity).is_none());
+        let material_handle = app
+            .world()
+            .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+            .expect("additive binding")
+            .0
+            .clone();
+        let material = app
+            .world()
+            .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .get(&material_handle)
+            .expect("additive atlas material");
+        assert_eq!(material.uv_scale_offset(), Vec4::new(0.3, 0.2, 0.1, 0.1));
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            2,
+            "standalone effect and namespaced entity material coexist"
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(
+            serde_json::from_str(
+                r#"{"enabled":true,"stageWidth":1024,"stageHeight":768,"entities":[]}"#,
+            )
+            .unwrap(),
+        );
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .entity_render_layers
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1,
+            "removing the entity cannot evict a standalone effect with the same raw key"
+        );
+        assert!(!app.world().entities().contains(entity));
+    }
+
+    #[test]
+    fn entity_layer_rebuilds_between_sprite_and_additive_mesh_with_same_stable_key() {
+        let snapshot = |additive: bool| -> EntityRenderState {
+            serde_json::from_value(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "starter:p6",
+                    "width": 100,
+                    "height": 200,
+                    "imageUrl": "/bevy-entity-atlases/starter-p6.png",
+                    "rects": [{
+                        "key": "effect",
+                        "x": 10,
+                        "y": 20,
+                        "width": 30,
+                        "height": 40
+                    }]
+                }],
+                "entities": [{
+                    "objectId": "2005",
+                    "layers": [{
+                        "key": "stable-layer",
+                        "path": "/original-ui/Monster/005/227.png",
+                        "atlasKey": "starter:p6",
+                        "atlasRectKey": "effect",
+                        "left": 480,
+                        "top": 352,
+                        "width": 76,
+                        "height": 72,
+                        "z": 50008,
+                        "additive": additive
+                    }]
+                }]
+            }))
+            .expect("entity layer mode snapshot")
+        };
+
+        let mut app = entity_sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot(false));
+        app.update();
+        let sprite_entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["stable-layer"].entity;
+        assert!(app.world().get::<Sprite>(sprite_entity).is_some());
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot(true));
+        app.update();
+        let additive_entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["stable-layer"].entity;
+        assert_ne!(additive_entity, sprite_entity);
+        assert!(!app.world().entities().contains(sprite_entity));
+        assert!(app
+            .world()
+            .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(additive_entity)
+            .is_some());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot(false));
+        app.update();
+        let restored_sprite =
+            app.world().resource::<SceneRegistry>().entity_render_layers["stable-layer"].entity;
+        assert_ne!(restored_sprite, additive_entity);
+        assert!(!app.world().entities().contains(additive_entity));
+        assert!(app.world().get::<Sprite>(restored_sprite).is_some());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
     }
 
     #[test]
@@ -6834,6 +7230,19 @@ mod native_data_path_tests {
 
         let map_entity = app.world_mut().spawn_empty().id();
         let effect_entity = app.world_mut().spawn_empty().id();
+        let additive_entity = app.world_mut().spawn_empty().id();
+        app.world_mut().resource_scope(
+            |world, mut cache: Mut<additive_material::CrystalAdditiveMaterialCache>| {
+                let mut materials =
+                    world.resource_mut::<Assets<additive_material::CrystalAdditiveMaterial>>();
+                cache.material(
+                    &entity_additive_material_key("scene-additive"),
+                    Handle::<Image>::default(),
+                    1.0,
+                    &mut materials,
+                );
+            },
+        );
         {
             let mut registry = app.world_mut().resource_mut::<SceneRegistry>();
             registry.map.spawned.push(map_entity);
@@ -6843,6 +7252,16 @@ mod native_data_path_tests {
                     entity: effect_entity,
                     image_key: "fx.png".to_owned(),
                     additive: false,
+                },
+            );
+            registry.entity_render_layers.insert(
+                "scene-additive".to_owned(),
+                EntityRenderLayerHandle {
+                    entity: additive_entity,
+                    image_key: "atlas:scene".to_owned(),
+                    atlas_key: Some("scene".to_owned()),
+                    atlas_rect_key: Some("effect".to_owned()),
+                    additive: true,
                 },
             );
         }
@@ -6923,8 +7342,16 @@ mod native_data_path_tests {
         let registry = app.world().resource::<SceneRegistry>();
         assert!(registry.map.spawned.is_empty());
         assert!(registry.effect_render.is_empty());
+        assert!(registry.entity_render_layers.is_empty());
         assert!(!app.world().entities().contains(map_entity));
         assert!(!app.world().entities().contains(effect_entity));
+        assert!(!app.world().entities().contains(additive_entity));
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
 
         assert_eq!(
             app.world()
@@ -7250,6 +7677,7 @@ mod native_soak_metrics_tests {
                 image_key: "player.png".to_owned(),
                 atlas_key: None,
                 atlas_rect_key: None,
+                additive: false,
             },
         );
         registry.entities.insert(
@@ -7268,6 +7696,7 @@ mod native_soak_metrics_tests {
             EntityRenderAtlasHandle {
                 layout: Handle::default(),
                 rects: HashMap::new(),
+                uv_rects: HashMap::new(),
                 size: UVec2::new(1, 1),
                 image_key: None,
                 image: None,

@@ -26,6 +26,8 @@ const ENTITY_REAR_WEAPON_ORDER: f32 = 4.0;
 const ENTITY_BODY_ORDER: f32 = 5.0;
 const ENTITY_HAIR_ORDER: f32 = 6.0;
 const ENTITY_FRONT_WEAPON_ORDER: f32 = 7.0;
+const MAP_FRONT_ORDER: f32 = crate::map_parser::MAP_FRONT_DEPTH_ORDER * ENTITY_DEPTH_GAIN;
+const POST_WORLD_EFFECT_GAP: f32 = 20.0;
 
 #[derive(Debug, Clone)]
 struct StarterAtlasRect {
@@ -638,20 +640,34 @@ pub fn build_entity_render_state_with_frames(
     payload: &Value,
     frame_overrides: &HashMap<String, i64>,
 ) -> Option<Value> {
-    build_entity_render_state_internal(payload, frame_overrides, None)
+    build_entity_render_state_internal(payload, frame_overrides, None, true)
 }
 
 pub(crate) fn build_entity_render_state_with_poses(
     payload: &Value,
     pose_overrides: &HashMap<String, (i64, AnimationAction)>,
 ) -> Option<Value> {
-    build_entity_render_state_internal(payload, &HashMap::new(), Some(pose_overrides))
+    build_entity_render_state_with_poses_and_effect_visibility(payload, pose_overrides, true)
+}
+
+pub(crate) fn build_entity_render_state_with_poses_and_effect_visibility(
+    payload: &Value,
+    pose_overrides: &HashMap<String, (i64, AnimationAction)>,
+    effect_visible: bool,
+) -> Option<Value> {
+    build_entity_render_state_internal(
+        payload,
+        &HashMap::new(),
+        Some(pose_overrides),
+        effect_visible,
+    )
 }
 
 fn build_entity_render_state_internal(
     payload: &Value,
     frame_overrides: &HashMap<String, i64>,
     pose_overrides: Option<&HashMap<String, (i64, AnimationAction)>>,
+    effect_visible: bool,
 ) -> Option<Value> {
     let index = starter_atlas_index()?;
     let (center_x, center_y) = scene_center(payload);
@@ -713,8 +729,7 @@ fn build_entity_render_state_internal(
                         .saturating_add(relative_frame);
                     let root_left = entity_origin_x + (x - center_x) as f32 * CELL_WIDTH;
                     let root_top = entity_origin_y + (y - center_y) as f32 * CELL_HEIGHT;
-                    let cell_depth = (y * 1_000 + x * 10) as f32;
-                    let z_base = cell_depth * ENTITY_DEPTH_GAIN;
+                    let z_base = entity_z_base(x, y);
                     let mut layers = Vec::new();
 
                     let mount_library = resolved_sprite.mount_library.as_ref();
@@ -809,6 +824,32 @@ fn build_entity_render_state_internal(
                             layers.push(layer);
                         }
                     }
+                    if let Some(effect_frame) = effect_visible
+                        .then(|| {
+                            scarecrow_die_effect_frame(
+                                &resolved_sprite.body_library,
+                                action,
+                                relative_frame,
+                                direction,
+                            )
+                        })
+                        .flatten()
+                    {
+                        if let Some(mut layer) = build_entity_layer(
+                            index,
+                            &mut used_rects,
+                            format!("{object_id}:scarecrow-die-effect"),
+                            &resolved_sprite.body_library,
+                            effect_frame,
+                            root_left,
+                            root_top,
+                            post_world_effect_z(payload, x, y),
+                            false,
+                        ) {
+                            layer["additive"] = json!(true);
+                            layers.push(layer);
+                        }
+                    }
                     if entity.get("hidden").and_then(Value::as_bool) == Some(true) {
                         for layer in &mut layers {
                             layer["opacity"] = json!(0.5);
@@ -898,6 +939,66 @@ fn build_entity_render_state_internal(
         );
     }
     Some(state)
+}
+
+fn entity_z_base(x: i64, y: i64) -> f32 {
+    y.saturating_mul(1_000).saturating_add(x.saturating_mul(10)) as f32 * ENTITY_DEPTH_GAIN
+}
+
+/// Crystal draws `MirObject.DrawEffects` only after the complete world pass.
+/// Keep the GPU sort deterministic by putting every object effect above the
+/// deepest visible map/entity layer, then retaining the objects' normal
+/// top-to-bottom order inside that post-world band.
+fn post_world_effect_z(payload: &Value, object_x: i64, object_y: i64) -> f32 {
+    let viewport = crate::map_parser::MapViewport::from_gateway_payload(payload);
+    let start_x = viewport.center_x.saturating_sub(viewport.draw_margin_x());
+    let start_y = viewport.center_y.saturating_sub(viewport.draw_margin_y());
+    let end_x = viewport.center_x.saturating_add(viewport.draw_margin_x());
+    let end_y = viewport.center_y.saturating_add(viewport.draw_margin_y());
+
+    let mut min_world_z = entity_z_base(i64::from(start_x), i64::from(start_y));
+    let mut max_world_z = entity_z_base(i64::from(end_x), i64::from(end_y)) + MAP_FRONT_ORDER;
+    if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
+        for entity in entities {
+            let x = entity.get("x").and_then(Value::as_i64).unwrap_or(0);
+            let y = entity.get("y").and_then(Value::as_i64).unwrap_or(0);
+            let Ok(view_x) = i32::try_from(x) else {
+                continue;
+            };
+            let Ok(view_y) = i32::try_from(y) else {
+                continue;
+            };
+            if !viewport.retains_cell(view_x, view_y) {
+                continue;
+            }
+            let z = entity_z_base(x, y);
+            min_world_z = min_world_z.min(z);
+            max_world_z = max_world_z.max(z + MAP_FRONT_ORDER);
+        }
+    }
+
+    max_world_z + POST_WORLD_EFFECT_GAP + (entity_z_base(object_x, object_y) - min_world_z)
+}
+
+fn scarecrow_die_effect_frame(
+    body_library: &str,
+    action: AnimationAction,
+    draw_frame: i64,
+    direction: &str,
+) -> Option<i64> {
+    if action != AnimationAction::Die || normalized_library_key(body_library) != "Monster/005" {
+        return None;
+    }
+    const DIE_START: i64 = 144;
+    const DIE_DIRECTION_STRIDE: i64 = 10;
+    const DIE_FRAME_COUNT: i64 = 10;
+    const EFFECT_START: i64 = 224;
+    let action_start = DIE_START
+        .saturating_add(i64::from(direction_index(direction)).saturating_mul(DIE_DIRECTION_STRIDE));
+    let phase = draw_frame.saturating_sub(action_start);
+    (0..DIE_FRAME_COUNT)
+        .contains(&phase)
+        .then_some(EFFECT_START.saturating_add(phase))
 }
 
 #[cfg(test)]
@@ -1032,6 +1133,187 @@ mod tests {
         assert!(state["entities"][0]["layers"][0]["path"]
             .as_str()
             .is_some_and(|path| path.ends_with("/Monster/003/25.png")));
+    }
+
+    #[test]
+    fn scarecrow_die_adds_source_frame_224_plus_phase_as_additive_layer() {
+        let payload = json!({
+            "sceneView": {
+                "center": { "x": 9, "y": 7 },
+                "width": 19,
+                "height": 15
+            },
+            "entities": [
+                {
+                    "objectId": 2005,
+                    "kind": "monster",
+                    "x": 9,
+                    "y": 7,
+                    "direction": "down",
+                    "sprite": {
+                        "bodyLibrary": "Monster/005",
+                        "directionStride": 10,
+                        "frameBaseOffset": 0
+                    }
+                },
+                {
+                    "objectId": 2003,
+                    "kind": "monster",
+                    "x": 9,
+                    "y": 13,
+                    "direction": "down",
+                    "sprite": {
+                        "bodyLibrary": "Monster/003",
+                        "directionStride": 4,
+                        "frameBaseOffset": 0
+                    }
+                }
+            ]
+        });
+        // Monster/005 Die starts at 144 with stride 10. Down is direction 4,
+        // so draw frame 187 is phase 3 and Crystal's effect frame is 224 + 3.
+        let dying = build_entity_render_state_with_poses(
+            &payload,
+            &HashMap::from([("2005".to_owned(), (187, AnimationAction::Die))]),
+        )
+        .expect("Scarecrow dying render state");
+        let layers = dying["entities"][0]["layers"]
+            .as_array()
+            .expect("Scarecrow layers");
+        let effect = layers
+            .iter()
+            .find(|layer| layer["key"] == json!("2005:scarecrow-die-effect"))
+            .expect("source additive death layer");
+        assert!(effect["path"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Monster/005/227.png")));
+        assert_eq!(effect["additive"], json!(true));
+        assert!(effect["atlasRectKey"].as_str().is_some());
+        let effect_z = effect["z"].as_f64().expect("post-world z");
+        let deeper_body_z = dying["entities"][1]["layers"]
+            .as_array()
+            .expect("deeper object layers")
+            .iter()
+            .find(|layer| layer["key"] == json!("2003:body"))
+            .and_then(|layer| layer["z"].as_f64())
+            .expect("deeper object body z");
+        let viewport = crate::map_parser::MapViewport::from_gateway_payload(&payload);
+        let deepest_x = viewport.center_x + viewport.draw_margin_x();
+        let deepest_y = viewport.center_y + viewport.draw_margin_y();
+        let empty_cell = crate::map_parser::MapCell {
+            back_index: -1,
+            back_image: 0,
+            middle_index: -1,
+            middle_image: 0,
+            front_index: -1,
+            front_image: 0,
+            front_animation_frame: 0,
+            front_animation_tick: 0,
+            middle_animation_frame: 0,
+            middle_animation_tick: 0,
+            light: 0,
+        };
+        let map_width = u16::try_from(deepest_x + 1).expect("test map width");
+        let map_height = u16::try_from(deepest_y + 1).expect("test map height");
+        let mut map = crate::map_parser::ParsedMap {
+            width: map_width,
+            height: map_height,
+            cells: vec![empty_cell; usize::from(map_width) * usize::from(map_height)],
+        };
+        let deepest_index = deepest_x as usize * usize::from(map_height) + deepest_y as usize;
+        map.cells[deepest_index].front_index = 2;
+        map.cells[deepest_index].front_image = 1;
+        let deepest_margin_front = crate::map_parser::resolve_map_tile_draws(&map)
+            .into_iter()
+            .find(|draw| {
+                draw.layer == crate::map_parser::TileLayer::Front
+                    && viewport.retains_cell(draw.x, draw.y)
+            })
+            .expect("actual map parser retains the deepest guard-band front tile");
+        let deepest_visible_front_z = f64::from(
+            ((deepest_margin_front.y * 1_000 + deepest_margin_front.x * 10) as f32
+                + deepest_margin_front.z)
+                * ENTITY_DEPTH_GAIN,
+        );
+        assert!(effect_z > deeper_body_z);
+        assert!(effect_z > deepest_visible_front_z);
+
+        let standing = build_entity_render_state(&payload).expect("Scarecrow standing state");
+        assert!(standing["entities"][0]["layers"]
+            .as_array()
+            .expect("standing layers")
+            .iter()
+            .all(|layer| layer["additive"] != json!(true)));
+
+        let effects_disabled = build_entity_render_state_with_poses_and_effect_visibility(
+            &payload,
+            &HashMap::from([("2005".to_owned(), (187, AnimationAction::Die))]),
+            false,
+        )
+        .expect("effects disabled state");
+        assert!(effects_disabled["entities"][0]["layers"]
+            .as_array()
+            .expect("disabled layers")
+            .iter()
+            .all(|layer| layer["additive"] != json!(true)));
+    }
+
+    #[test]
+    fn scarecrow_die_effect_phase_covers_all_directions_and_rejects_boundaries() {
+        for (direction_index, direction) in [
+            "up",
+            "upright",
+            "right",
+            "downright",
+            "down",
+            "downleft",
+            "left",
+            "upleft",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let start = 144 + i64::try_from(direction_index).unwrap() * 10;
+            assert_eq!(
+                scarecrow_die_effect_frame("Monster/005", AnimationAction::Die, start, direction),
+                Some(224)
+            );
+            assert_eq!(
+                scarecrow_die_effect_frame(
+                    "Monster/005",
+                    AnimationAction::Die,
+                    start + 9,
+                    direction
+                ),
+                Some(233)
+            );
+            assert_eq!(
+                scarecrow_die_effect_frame(
+                    "Monster/005",
+                    AnimationAction::Die,
+                    start - 1,
+                    direction
+                ),
+                None
+            );
+            assert_eq!(
+                scarecrow_die_effect_frame(
+                    "Monster/005",
+                    AnimationAction::Die,
+                    start + 10,
+                    direction
+                ),
+                None
+            );
+        }
+        assert_eq!(
+            scarecrow_die_effect_frame("Monster/003", AnimationAction::Die, 144, "up"),
+            None
+        );
+        assert_eq!(
+            scarecrow_die_effect_frame("Monster/005", AnimationAction::Dead, 144, "up"),
+            None
+        );
     }
 
     #[test]

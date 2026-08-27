@@ -36,6 +36,7 @@ pub struct NativeEntityPresentation {
     last_libraries: HashMap<String, String>,
     last_frames: HashMap<String, (i64, AnimationAction)>,
     hidden_after_hide: HashSet<String>,
+    last_effect_visible: Option<bool>,
     payload_dirty: bool,
 }
 
@@ -49,6 +50,7 @@ impl Default for NativeEntityPresentation {
             last_libraries: HashMap::new(),
             last_frames: HashMap::new(),
             hidden_after_hide: HashSet::new(),
+            last_effect_visible: None,
             payload_dirty: false,
         }
     }
@@ -181,9 +183,11 @@ impl NativeEntityPresentation {
         self.payload_dirty = true;
     }
 
-    fn render_state_if_changed(&mut self, now_ms: u64) -> Option<Value> {
+    fn render_state_if_changed(&mut self, now_ms: u64, effect_visible: bool) -> Option<Value> {
         self.sync_pending_payload(now_ms);
         let payload = self.latest_payload.as_ref()?;
+        let effect_visibility_changed =
+            self.last_effect_visible.replace(effect_visible) != Some(effect_visible);
         let transitions = self.world.tick(now_ms).ok()?;
         for transition in transitions {
             if transition.reason == TransitionReason::HideCompleted
@@ -207,7 +211,7 @@ impl NativeEntityPresentation {
                 )
             })
             .collect::<HashMap<_, _>>();
-        if !self.payload_dirty && frames == self.last_frames {
+        if !self.payload_dirty && frames == self.last_frames && !effect_visibility_changed {
             return None;
         }
 
@@ -223,7 +227,11 @@ impl NativeEntityPresentation {
                     .is_none_or(|object_id| !self.hidden_after_hide.contains(&object_id))
             });
         }
-        let state = crate::atlas::build_entity_render_state_with_poses(&visible_payload, &frames)?;
+        let state = crate::atlas::build_entity_render_state_with_poses_and_effect_visibility(
+            &visible_payload,
+            &frames,
+            effect_visible,
+        )?;
         self.last_frames = frames;
         self.payload_dirty = false;
         Some(state)
@@ -233,9 +241,14 @@ impl NativeEntityPresentation {
 pub fn tick_native_entity_presentation(
     time: Res<Time>,
     mut presentation: ResMut<NativeEntityPresentation>,
+    player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
-    let Some(state) = presentation.render_state_if_changed(now_ms) else {
+    let effect_visible = player_ui
+        .as_deref()
+        .map(|state| state.core.options.effect)
+        .unwrap_or(true);
+    let Some(state) = presentation.render_state_if_changed(now_ms, effect_visible) else {
         return;
     };
     if let Ok(json) = serde_json::to_string(&state) {
@@ -390,17 +403,25 @@ mod tests {
             .expect("rendered frame path")
     }
 
+    fn has_additive_layer(state: &Value) -> bool {
+        state["entities"][0]["layers"]
+            .as_array()
+            .expect("entity layers")
+            .iter()
+            .any(|layer| layer["additive"].as_bool() == Some(true))
+    }
+
     #[test]
     fn animation_advances_without_another_gateway_payload() {
         let mut presentation = NativeEntityPresentation::default();
         presentation.replace_payload(player_payload(1));
         let first = presentation
-            .render_state_if_changed(0)
+            .render_state_if_changed(0, true)
             .expect("initial walking frame");
         assert!(rendered_path(&first).ends_with("/56.png"));
-        assert!(presentation.render_state_if_changed(99).is_none());
+        assert!(presentation.render_state_if_changed(99, true).is_none());
         let second = presentation
-            .render_state_if_changed(100)
+            .render_state_if_changed(100, true)
             .expect("next timed walking frame");
         assert!(rendered_path(&second).ends_with("/57.png"));
     }
@@ -409,19 +430,19 @@ mod tests {
     fn duplicate_action_sequence_does_not_restart_animation() {
         let mut presentation = NativeEntityPresentation::default();
         presentation.replace_payload(player_payload(7));
-        let _ = presentation.render_state_if_changed(0);
+        let _ = presentation.render_state_if_changed(0, true);
         let second = presentation
-            .render_state_if_changed(100)
+            .render_state_if_changed(100, true)
             .expect("second frame");
         assert!(rendered_path(&second).ends_with("/57.png"));
 
         presentation.replace_payload(player_payload(7));
         let repeated = presentation
-            .render_state_if_changed(100)
+            .render_state_if_changed(100, true)
             .expect("authoritative payload refresh");
         assert!(rendered_path(&repeated).ends_with("/57.png"));
         let third = presentation
-            .render_state_if_changed(200)
+            .render_state_if_changed(200, true)
             .expect("continued frame");
         assert!(rendered_path(&third).ends_with("/58.png"));
     }
@@ -436,6 +457,44 @@ mod tests {
             normalize_action(EntityKind::Npc, AnimationAction::Attack1),
             None
         );
+    }
+
+    #[test]
+    fn effect_option_removes_and_restores_scarecrow_post_world_layer_without_new_packet() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(json!({
+            "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
+            "entities": [{
+                "objectId": 2005,
+                "kind": "monster",
+                "x": 10,
+                "y": 10,
+                "direction": "down",
+                "_nativeAnimationAction": "die",
+                "_nativeAnimationSequence": 1,
+                "sprite": {
+                    "bodyLibrary": "Monster/005",
+                    "directionStride": 10,
+                    "frameBaseOffset": 0
+                }
+            }]
+        }));
+
+        let visible = presentation
+            .render_state_if_changed(0, true)
+            .expect("effect enabled state");
+        assert!(has_additive_layer(&visible));
+
+        let hidden = presentation
+            .render_state_if_changed(0, false)
+            .expect("option transition rebuilds the same authoritative pose");
+        assert!(!has_additive_layer(&hidden));
+        assert!(presentation.render_state_if_changed(0, false).is_none());
+
+        let restored = presentation
+            .render_state_if_changed(0, true)
+            .expect("re-enabling effects rebuilds without another gateway packet");
+        assert!(has_additive_layer(&restored));
     }
 
     #[test]
@@ -463,12 +522,12 @@ mod tests {
 
         presentation.replace_payload(payload(1, "hide"));
         let hide_start = presentation
-            .render_state_if_changed(0)
+            .render_state_if_changed(0, true)
             .expect("hide starts before suppression");
         assert!(rendered_path(&hide_start).ends_with("/Monster/010/12.png"));
 
         let hidden = presentation
-            .render_state_if_changed(1_600)
+            .render_state_if_changed(1_600, true)
             .expect("hide completion changes visible set");
         assert!(hidden["entities"]
             .as_array()
@@ -477,7 +536,7 @@ mod tests {
 
         presentation.replace_payload(payload(2, "show"));
         let show_start = presentation
-            .render_state_if_changed(1_600)
+            .render_state_if_changed(1_600, true)
             .expect("ObjectShow restores the entity before animation");
         assert!(rendered_path(&show_start).ends_with("/Monster/010/4.png"));
     }
@@ -507,10 +566,10 @@ mod tests {
 
         presentation.replace_payload(payload(1, "hide", "Monster/010"));
         presentation
-            .render_state_if_changed(0)
+            .render_state_if_changed(0, true)
             .expect("hide starts before suppression");
         presentation
-            .render_state_if_changed(1_600)
+            .render_state_if_changed(1_600, true)
             .expect("hide completion suppresses the plant");
 
         presentation.replace_payload(json!({
@@ -518,12 +577,12 @@ mod tests {
             "entities": []
         }));
         presentation
-            .render_state_if_changed(1_601)
+            .render_state_if_changed(1_601, true)
             .expect("ObjectRemove changes the rendered entity set");
 
         presentation.replace_payload(payload(1, "standing", "Monster/003"));
         let reused = presentation
-            .render_state_if_changed(1_602)
+            .render_state_if_changed(1_602, true)
             .expect("a later actor may reuse the removed object id");
         assert!(rendered_path(&reused).contains("/Monster/003/"));
     }
