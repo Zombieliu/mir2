@@ -27,6 +27,9 @@ export type EffectSubSpec = {
   base: number;
   count: number;
   interval?: number;
+  directionCount?: number;
+  directionStride?: number;
+  directionRanges?: Array<{ direction: number; base: number; end: number }>;
   kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "return";
   light?: number;
   blend?: boolean;

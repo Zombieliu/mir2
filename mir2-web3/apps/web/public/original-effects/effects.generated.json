@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "generatedAt": null,
   "source": "Crystal client source (see per-entry provenance)",
-  "mode": "assemble-from-full-pack",
+  "mode": "extract-from-lib",
   "available": [
     "Effect",
     "Magic",
@@ -654,7 +654,91 @@
         "offset": {
           "x": 0,
           "y": 0
-        }
+        },
+        "directionCount": 16,
+        "directionStride": 10,
+        "directionRanges": [
+          {
+            "direction": 0,
+            "base": 10,
+            "end": 15
+          },
+          {
+            "direction": 1,
+            "base": 20,
+            "end": 25
+          },
+          {
+            "direction": 2,
+            "base": 30,
+            "end": 35
+          },
+          {
+            "direction": 3,
+            "base": 40,
+            "end": 45
+          },
+          {
+            "direction": 4,
+            "base": 50,
+            "end": 55
+          },
+          {
+            "direction": 5,
+            "base": 60,
+            "end": 65
+          },
+          {
+            "direction": 6,
+            "base": 70,
+            "end": 75
+          },
+          {
+            "direction": 7,
+            "base": 80,
+            "end": 85
+          },
+          {
+            "direction": 8,
+            "base": 90,
+            "end": 95
+          },
+          {
+            "direction": 9,
+            "base": 100,
+            "end": 105
+          },
+          {
+            "direction": 10,
+            "base": 110,
+            "end": 115
+          },
+          {
+            "direction": 11,
+            "base": 120,
+            "end": 125
+          },
+          {
+            "direction": 12,
+            "base": 130,
+            "end": 135
+          },
+          {
+            "direction": 13,
+            "base": 140,
+            "end": 145
+          },
+          {
+            "direction": 14,
+            "base": 150,
+            "end": 155
+          },
+          {
+            "direction": 15,
+            "base": 160,
+            "end": 165
+          }
+        ]
       },
       "impact": {
         "library": "Magic",

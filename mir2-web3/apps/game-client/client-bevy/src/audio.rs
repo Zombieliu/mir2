@@ -26,7 +26,8 @@ const MAX_PENDING_GAMEPLAY_SOUND_EVENTS: usize = 32;
 /// Gameplay clips are an internal, fail-closed allowlist. Packet payloads never
 /// become file paths: the platform effect adapter can only request a cue listed
 /// here and packaging verifies the same exact files.
-pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &["M40-0.wav"];
+pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] =
+    &["M31-0.wav", "M31-1.wav", "M31-2.wav", "M40-0.wav"];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NativeGameplaySoundEvent {
@@ -827,6 +828,18 @@ mod tests {
             ..lightning
         }));
         assert_eq!(queue.len(), 1, "new generation clears stale pending cues");
+
+        for (sequence, file_name) in ["M31-0.wav", "M31-1.wav", "M31-2.wav"]
+            .into_iter()
+            .enumerate()
+        {
+            assert!(queue.push(NativeGameplaySoundEvent {
+                generation: 5,
+                sequence: sequence as u64 + 2,
+                cue: format!("FireBall.{sequence}"),
+                file_name: file_name.to_owned(),
+            }));
+        }
     }
 
     #[test]

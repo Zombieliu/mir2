@@ -83,6 +83,15 @@ pub const MAX_ACTIVE_EFFECTS: usize = 96;
 const LIGHTNING_SPELL_ACTION_MS: u64 = 600;
 const LIGHTNING_SOUND_FILE: &str = "M40-0.wav";
 const LIGHTNING_SOUND_CUE: &str = "Lightning.complete";
+const FIREBALL_SPELL_ACTION_MS: u64 = 600;
+const FIREBALL_PROJECTILE_STEP_MS: u64 = 30;
+const FIREBALL_TILE_TRAVEL_MS: u64 = 50;
+const FIREBALL_CAST_SOUND_FILE: &str = "M31-0.wav";
+const FIREBALL_PROJECTILE_SOUND_FILE: &str = "M31-1.wav";
+const FIREBALL_IMPACT_SOUND_FILE: &str = "M31-2.wav";
+const FIREBALL_CAST_SOUND_CUE: &str = "FireBall.cast";
+const FIREBALL_PROJECTILE_SOUND_CUE: &str = "FireBall.projectile";
+const FIREBALL_IMPACT_SOUND_CUE: &str = "FireBall.impact";
 
 const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
 
@@ -124,6 +133,35 @@ pub(crate) fn direction_index(direction: &str) -> u32 {
         "upleft" => 7,
         _ => 4,
     }
+}
+
+/// Crystal `MapControl.Direction16`: 0 is up and values advance clockwise in
+/// 22.5-degree sectors. FireBall's missile uses this 16-way index with a
+/// ten-frame stride (`6` visible frames plus `skip=4`).
+fn projectile_direction16(source: (i32, i32), destination: (i32, i32)) -> u32 {
+    let dx = (destination.0 - source.0) as f32;
+    let dy = (destination.1 - source.1) as f32;
+    if dx == 0.0 && dy == 0.0 {
+        return 0;
+    }
+    let degrees = dx.atan2(-dy).to_degrees().rem_euclid(360.0);
+    (((degrees + 11.25).rem_euclid(360.0) / 22.5).floor() as u32) % 16
+}
+
+fn max_tile_distance(source: (i32, i32), destination: (i32, i32)) -> u64 {
+    u64::from(
+        source
+            .0
+            .abs_diff(destination.0)
+            .max(source.1.abs_diff(destination.1)),
+    )
+}
+
+fn fireball_projectile_clock(distance: u64) -> (u64, u64) {
+    let duration_ms = distance.saturating_mul(FIREBALL_TILE_TRAVEL_MS).max(1);
+    let process_frame_count = (duration_ms / FIREBALL_PROJECTILE_STEP_MS).max(1);
+    let frame_interval_ms = (duration_ms / process_frame_count).max(1);
+    (duration_ms, frame_interval_ms)
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -173,6 +211,10 @@ struct SubSpec {
     count: i64,
     #[serde(default)]
     interval: Option<i64>,
+    #[serde(default)]
+    direction_count: Option<i64>,
+    #[serde(default)]
+    direction_stride: Option<i64>,
     #[serde(default)]
     kind: Option<String>,
     #[serde(default)]
@@ -292,15 +334,17 @@ pub(crate) struct Animation {
 }
 
 impl Animation {
-    /// The source frame for the given elapsed ms, honouring repeat (mirrors
-    /// Web effectFrameAt). None once finished (and not repeating).
+    /// The source frame for the given elapsed ms. Crystal missiles cycle their
+    /// visible `FrameCount` with `% FrameCount` while their separate movement
+    /// `Count` remains in flight; that frame cycling must not make the effect's
+    /// lifecycle repeat forever.
     pub(crate) fn frame_at(&self, elapsed_ms: u64) -> Option<&EffectFrameMeta> {
         if self.frames.is_empty() {
             return None;
         }
         let mut index = elapsed_ms / self.interval.max(1);
         if index >= self.frames.len() as u64 {
-            if !self.repeat {
+            if !self.repeat && self.kind != "projectile" {
                 return None;
             }
             index %= self.frames.len() as u64;
@@ -417,8 +461,21 @@ impl EffectCatalog {
         frames
     }
 
-    fn resolve_sub(&self, sub: &SubSpec, name: &str, fallback_kind: &str) -> Option<Animation> {
-        let frames = self.resolve_frames(&sub.library, sub.base, sub.count);
+    fn resolve_sub(
+        &self,
+        sub: &SubSpec,
+        name: &str,
+        fallback_kind: &str,
+        direction: u32,
+    ) -> Option<Animation> {
+        if sub
+            .direction_count
+            .is_some_and(|count| count > 0 && direction >= count as u32)
+        {
+            return None;
+        }
+        let base = sub.base + i64::from(direction) * sub.direction_stride.unwrap_or(0);
+        let frames = self.resolve_frames(&sub.library, base, sub.count);
         if frames.is_empty() {
             return None;
         }
@@ -515,22 +572,26 @@ impl EffectCatalog {
         self.resolve_animation(entry, direction, 0)
     }
 
-    pub(crate) fn spell_projectile_animation(&self, spell: &str) -> Option<Animation> {
+    pub(crate) fn spell_projectile_animation(
+        &self,
+        spell: &str,
+        direction: u32,
+    ) -> Option<Animation> {
         let entry = self.spell_by_name.get(spell)?;
         let sub = entry.projectile.as_ref()?;
-        self.resolve_sub(sub, spell, "projectile")
+        self.resolve_sub(sub, spell, "projectile", direction)
     }
 
     pub(crate) fn spell_impact_animation(&self, spell: &str) -> Option<Animation> {
         let entry = self.spell_by_name.get(spell)?;
         let sub = entry.impact.as_ref()?;
-        self.resolve_sub(sub, spell, "impact")
+        self.resolve_sub(sub, spell, "impact", 0)
     }
 
     pub(crate) fn spell_return_animation(&self, spell: &str) -> Option<Animation> {
         let entry = self.spell_by_name.get(spell)?;
         let sub = entry.return_effect.as_ref()?;
-        self.resolve_sub(sub, spell, "return")
+        self.resolve_sub(sub, spell, "return", 0)
     }
 
     pub(crate) fn map_animation(&self, name: &str, value: u32) -> Option<Animation> {
@@ -805,6 +866,11 @@ pub(crate) struct NativeEffects {
     active: Vec<EffectInstance>,
     anchor_object_ids: HashMap<String, u32>,
     zone_tiles: HashMap<u32, (i32, i32)>,
+    /// The Rust simulation currently emits a compatibility ObjectProjectile
+    /// immediately after FireBall's ObjectMagic. Crystal's FireBall client
+    /// path creates that missile locally from ObjectMagic, so consume the
+    /// adjacent compatibility packet instead of drawing a duplicate.
+    fireball_projectile_dedupe: HashMap<(u32, u32), u64>,
     pending_sounds: Vec<PendingEffectSound>,
     last_effect_sequence: u64,
     last_generation: u64,
@@ -823,6 +889,7 @@ impl Default for NativeEffects {
             active: Vec::new(),
             anchor_object_ids: HashMap::new(),
             zone_tiles: HashMap::new(),
+            fireball_projectile_dedupe: HashMap::new(),
             pending_sounds: Vec::new(),
             last_effect_sequence: 0,
             last_generation: 0,
@@ -957,6 +1024,9 @@ impl NativeEffects {
             };
             self.apply_event(&event.packet, &event.payload, zone_tiles, &provenance);
         }
+        let latest_sequence = self.last_effect_sequence;
+        self.fireball_projectile_dedupe
+            .retain(|_, sequence| latest_sequence.saturating_sub(*sequence) <= 2);
         while self.active.len() > MAX_ACTIVE_EFFECTS {
             self.active.remove(0);
         }
@@ -987,6 +1057,7 @@ impl NativeEffects {
     fn clear_active_effects(&mut self) {
         self.active.clear();
         self.anchor_object_ids.clear();
+        self.fireball_projectile_dedupe.clear();
         self.pending_sounds.clear();
     }
 
@@ -994,6 +1065,7 @@ impl NativeEffects {
         let anchors = &self.anchor_object_ids;
         let zone_tiles = &self.zone_tiles;
         let mut missing = Vec::new();
+        let mut fireball_impact_due = Vec::new();
         for instance in &mut self.active {
             let Some(object_id) = anchors.get(&instance.key) else {
                 continue;
@@ -1001,8 +1073,48 @@ impl NativeEffects {
             if let Some((tile_x, tile_y)) = zone_tiles.get(object_id) {
                 instance.tile_x = *tile_x;
                 instance.tile_y = *tile_y;
+                if instance.provenance.spell == "FireBall" {
+                    if let (Some(from_x), Some(from_y), Some(projectile)) =
+                        (instance.from_x, instance.from_y, instance.current.as_mut())
+                    {
+                        if projectile.kind == "projectile"
+                            && self.now_ms
+                                < instance.start_at.saturating_add(projectile.duration_ms)
+                        {
+                            let source = (from_x as i32, from_y as i32);
+                            let destination = (*tile_x, *tile_y);
+                            let (duration_ms, frame_interval_ms) =
+                                fireball_projectile_clock(max_tile_distance(source, destination));
+                            if self.now_ms <= instance.start_at {
+                                let direction = projectile_direction16(source, destination);
+                                if let Some(mut launch_animation) =
+                                    effect_catalog().as_ref().and_then(|catalog| {
+                                        catalog.spell_projectile_animation("FireBall", direction)
+                                    })
+                                {
+                                    launch_animation.duration_ms = duration_ms;
+                                    launch_animation.interval = frame_interval_ms;
+                                    *projectile = launch_animation;
+                                }
+                            }
+                            projectile.duration_ms = duration_ms;
+                            projectile.interval = frame_interval_ms;
+                            fireball_impact_due.push((
+                                instance.key.clone(),
+                                instance.start_at.saturating_add(duration_ms),
+                            ));
+                        }
+                    }
+                }
             } else {
                 missing.push(instance.key.clone());
+            }
+        }
+        for (key, due_at_ms) in fireball_impact_due {
+            for pending in &mut self.pending_sounds {
+                if pending.key == key && pending.event.cue == FIREBALL_IMPACT_SOUND_CUE {
+                    pending.due_at_ms = due_at_ms;
+                }
             }
         }
         if missing.is_empty() {
@@ -1055,6 +1167,102 @@ impl NativeEffects {
             "ObjectSpell" => self.apply_object_spell(payload, zone_tiles, provenance),
             "ObjectRemove" | "ObjectHide" => self.apply_object_remove(payload),
             _ => {}
+        }
+    }
+
+    fn schedule_fireball_from_object_magic(
+        &mut self,
+        payload: &Value,
+        catalog: &EffectCatalog,
+        provenance: &EffectProvenance,
+    ) {
+        if !payload
+            .get("cast")
+            .and_then(Value::as_bool)
+            .unwrap_or(false)
+        {
+            return;
+        }
+        let (Some(source_x), Some(source_y), Some(packet_target_x), Some(packet_target_y)) = (
+            value_f32(payload, "location", "x").map(|value| value as i32),
+            value_f32(payload, "location", "y").map(|value| value as i32),
+            value_f32(payload, "target", "x").map(|value| value as i32),
+            value_f32(payload, "target", "y").map(|value| value as i32),
+        ) else {
+            return;
+        };
+        let source_id = payload
+            .get("objectId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok());
+        let target_id = payload
+            .get("targetId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+            .filter(|value| *value != 0);
+        let target_is_bound = target_id.and_then(|id| self.zone_tiles.get(&id)).copied();
+        let destination = target_is_bound.unwrap_or((packet_target_x, packet_target_y));
+        let source = (source_x, source_y);
+        let direction = projectile_direction16(source, destination);
+        let Some(mut projectile) = catalog.spell_projectile_animation("FireBall", direction) else {
+            return;
+        };
+        let (duration_ms, frame_interval_ms) =
+            fireball_projectile_clock(max_tile_distance(source, destination));
+        projectile.duration_ms = duration_ms;
+        projectile.interval = frame_interval_ms;
+
+        // Crystal only attaches the impact callback when the target object is
+        // present when the missile is created. A packet target point still
+        // permits the projectile, but cannot invent a target-bound impact.
+        let impact = target_is_bound.and_then(|_| catalog.spell_impact_animation("FireBall"));
+        let now = self.now_ms;
+        let start_at = now.saturating_add(FIREBALL_SPELL_ACTION_MS);
+        let impact_at = start_at.saturating_add(duration_ms);
+        let key = self.next_key("fireball");
+        if let Some(target_id) = target_id.filter(|_| target_is_bound.is_some()) {
+            self.anchor_object_ids.insert(key.clone(), target_id);
+        }
+        self.pending_sounds.push(PendingEffectSound {
+            key: key.clone(),
+            due_at_ms: start_at,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: FIREBALL_PROJECTILE_SOUND_CUE.to_owned(),
+                file_name: FIREBALL_PROJECTILE_SOUND_FILE.to_owned(),
+            },
+        });
+        if impact.is_some() {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: impact_at,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: FIREBALL_IMPACT_SOUND_CUE.to_owned(),
+                    file_name: FIREBALL_IMPACT_SOUND_FILE.to_owned(),
+                },
+            });
+        }
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::Projectile,
+            tile_x: destination.0,
+            tile_y: destination.1,
+            from_x: Some(source_x as f32),
+            from_y: Some(source_y as f32),
+            current: Some(projectile),
+            queued: impact,
+            return_queued: None,
+            started_at: now,
+            start_at,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+        if let (Some(source_id), Some(target_id)) = (source_id, target_id) {
+            self.fireball_projectile_dedupe
+                .insert((source_id, target_id), provenance.sequence);
         }
     }
 
@@ -1116,6 +1324,18 @@ impl NativeEffects {
             now
         };
         let key = self.next_key("cast");
+        if spell == "FireBall" {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: now,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: FIREBALL_CAST_SOUND_CUE.to_owned(),
+                    file_name: FIREBALL_CAST_SOUND_FILE.to_owned(),
+                },
+            });
+        }
         if spell == "Lightning" {
             if let Some(object_id) = payload
                 .get("objectId")
@@ -1150,6 +1370,9 @@ impl NativeEffects {
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
+        if spell == "FireBall" {
+            self.schedule_fireball_from_object_magic(payload, catalog, provenance);
+        }
     }
 
     fn apply_object_projectile(
@@ -1176,12 +1399,26 @@ impl NativeEffects {
             // Without authoritative source/destination we must not fabricate a path.
             return;
         };
+        if spell == "FireBall"
+            && self
+                .fireball_projectile_dedupe
+                .get(&(source_id, destination_id))
+                .is_some_and(|cast_sequence| {
+                    provenance.sequence > *cast_sequence
+                        && provenance.sequence.saturating_sub(*cast_sequence) <= 2
+                })
+        {
+            self.fireball_projectile_dedupe
+                .remove(&(source_id, destination_id));
+            return;
+        }
         let (Some(&(from_x, from_y)), Some(&(to_x, to_y))) =
             (zone_tiles.get(&source_id), zone_tiles.get(&destination_id))
         else {
             return;
         };
-        let projectile = catalog.spell_projectile_animation(spell);
+        let direction = projectile_direction16((from_x, from_y), (to_x, to_y));
+        let projectile = catalog.spell_projectile_animation(spell, direction);
         let impact = catalog.spell_impact_animation(spell);
         let return_anim = catalog.spell_return_animation(spell);
         // Vampirism has no projectile but has impact+return; FireBall has projectile+impact.
@@ -1425,6 +1662,7 @@ impl NativeEffects {
     /// mutate the server-owned world. A still-active effect is therefore
     /// immediately visible again if the option is restored before it expires.
     pub(crate) fn tick_with_visibility(&mut self, now_ms: u64, visible: bool) -> Option<String> {
+        self.now_ms = now_ms;
         let player_x = self.player_x;
         let player_y = self.player_y;
         let _ = effect_catalog();
@@ -1860,7 +2098,7 @@ mod tests {
     fn fireball_projectile_and_impact_resolve_via_subspec() {
         let catalog = EffectCatalog::load().expect("load");
         let projectile = catalog
-            .spell_projectile_animation("FireBall")
+            .spell_projectile_animation("FireBall", 0)
             .expect("projectile via resolve_sub");
         assert!(
             projectile.frames[0].path.ends_with("/Magic/10.png"),
@@ -1926,12 +2164,34 @@ mod tests {
             }],
             &zone,
         );
+        let projectile_instance = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-proj-"))
+            .expect("projectile instance");
+        assert_eq!(
+            projectile_instance
+                .current
+                .as_ref()
+                .map(|anim| anim.kind.as_str()),
+            Some("projectile")
+        );
+        assert_eq!(
+            projectile_instance
+                .current
+                .as_ref()
+                .map(|anim| anim.duration_ms),
+            Some(180)
+        );
         let moving = fx
             .current_light_snapshots(90)
             .into_iter()
             .find(|snapshot| snapshot.key.starts_with("fx-proj-"))
             .expect("projectile light");
-        assert!(moving.tile_x > 10.0 && moving.tile_x < 14.0);
+        assert!(
+            moving.tile_x > 10.0 && moving.tile_x < 14.0,
+            "unexpected projectile light: {moving:?}"
+        );
         let later = fx
             .current_light_snapshots(120)
             .into_iter()
@@ -2478,7 +2738,7 @@ mod tests {
         assert!(inst
             .current
             .as_ref()
-            .is_some_and(|anim| anim.frames[0].path.ends_with("/Magic/10.png")));
+            .is_some_and(|anim| anim.frames[0].path.ends_with("/Magic/50.png")));
         assert!(inst
             .queued
             .as_ref()
@@ -3088,7 +3348,7 @@ mod tests {
     #[test]
     fn lightning_target_anchored_no_fake_projectile() {
         let catalog = EffectCatalog::load().expect("load");
-        assert!(catalog.spell_projectile_animation("Lightning").is_none());
+        assert!(catalog.spell_projectile_animation("Lightning", 0).is_none());
         assert!(catalog.spell_impact_animation("Lightning").is_none());
         let cast = catalog.spell_cast_animation("Lightning", 4).expect("cast");
         assert!(cast.frames[0].path.contains("Magic/"));
@@ -3110,6 +3370,309 @@ mod tests {
             &zone_tiles,
         );
         assert!(fx.active.is_empty(), "Lightning must not create projectile");
+    }
+
+    fn fireball_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-fireball-v1.json"
+        ))
+        .expect("VIS-02 FireBall fixture JSON")
+    }
+
+    fn fireball_magic_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = fireball_fixture();
+        let index = if cast { 0 } else { 2 };
+        NativeEffectEvent {
+            sequence,
+            generation: 11,
+            packet: "ObjectMagic".to_owned(),
+            payload: fixture["timeline"][index]["event"]["payload"].clone(),
+        }
+    }
+
+    fn fireball_compat_projectile_event(sequence: u64) -> NativeEffectEvent {
+        let fixture = fireball_fixture();
+        NativeEffectEvent {
+            sequence,
+            generation: 11,
+            packet: "ObjectProjectile".to_owned(),
+            payload: fixture["timeline"][1]["compatibilityEvent"]["payload"].clone(),
+        }
+    }
+
+    #[test]
+    fn fireball_object_magic_owns_cast_delayed_projectile_impact_and_three_sounds() {
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[
+                fireball_magic_event(1, true),
+                fireball_compat_projectile_event(2),
+            ],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            2,
+            "compatibility packet must not duplicate"
+        );
+        let cast = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-cast-"))
+            .expect("FireBall cast");
+        assert_eq!(cast.start_at, 0);
+        assert!(cast
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/0.png")));
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-fireball-"))
+            .expect("FireBall projectile");
+        assert_eq!(projectile.start_at, FIREBALL_SPELL_ACTION_MS);
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.duration_ms),
+            Some(250)
+        );
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.interval),
+            Some(31)
+        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")));
+        assert!(projectile
+            .queued
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/170.png")));
+
+        let cast_sound = fx.take_due_sound_events(0);
+        assert_eq!(cast_sound.len(), 1);
+        assert_eq!(cast_sound[0].cue, FIREBALL_CAST_SOUND_CUE);
+        assert_eq!(cast_sound[0].file_name, FIREBALL_CAST_SOUND_FILE);
+        assert!(fx.take_due_sound_events(599).is_empty());
+        let before: Value = serde_json::from_str(
+            &fx.tick_with_visibility(599, true)
+                .expect("FireBall before projectile"),
+        )
+        .expect("FireBall pre-projectile JSON");
+        assert_eq!(before["effects"].as_array().map(Vec::len), Some(1));
+
+        let projectile_sound = fx.take_due_sound_events(600);
+        assert_eq!(projectile_sound.len(), 1);
+        assert_eq!(projectile_sound[0].cue, FIREBALL_PROJECTILE_SOUND_CUE);
+        assert_eq!(
+            projectile_sound[0].file_name,
+            FIREBALL_PROJECTILE_SOUND_FILE
+        );
+        let launch: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("FireBall projectile launch"),
+        )
+        .expect("FireBall launch JSON");
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/10.png")));
+        assert!(fx.take_due_sound_events(849).is_empty());
+
+        let impact_sound = fx.take_due_sound_events(850);
+        assert_eq!(impact_sound.len(), 1);
+        assert_eq!(impact_sound[0].cue, FIREBALL_IMPACT_SOUND_CUE);
+        assert_eq!(impact_sound[0].file_name, FIREBALL_IMPACT_SOUND_FILE);
+        let impact: Value =
+            serde_json::from_str(&fx.tick_with_visibility(850, true).expect("FireBall impact"))
+                .expect("FireBall impact JSON");
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/170.png")));
+        assert!(fx.take_due_sound_events(850).is_empty());
+    }
+
+    #[test]
+    fn fireball_direction16_is_locked_from_the_target_position_at_launch() {
+        assert_eq!(projectile_direction16((0, 0), (0, -10)), 0);
+        assert_eq!(projectile_direction16((0, 0), (10, -10)), 2);
+        assert_eq!(projectile_direction16((0, 0), (10, 0)), 4);
+        assert_eq!(projectile_direction16((0, 0), (10, 10)), 6);
+        assert_eq!(projectile_direction16((0, 0), (0, 10)), 8);
+        assert_eq!(projectile_direction16((0, 0), (-10, 10)), 10);
+        assert_eq!(projectile_direction16((0, 0), (-10, 0)), 12);
+        assert_eq!(projectile_direction16((0, 0), (-10, -10)), 14);
+
+        let mut zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fireball_magic_event(1, true)], &zone);
+        zone.insert(2005, (295, 616));
+        fx.observe(600, 288, 616, &[], &zone);
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-fireball-"))
+            .expect("FireBall launch");
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/50.png")));
+        assert_eq!(
+            projectile
+                .current
+                .as_ref()
+                .map(|animation| animation.duration_ms),
+            Some(350)
+        );
+    }
+
+    #[test]
+    fn fireball_cast_false_keeps_cast_but_never_projectile_impact_or_phase_audio() {
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fireball_magic_event(1, false)], &zone);
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "Crystal still plays the cast action effect"
+        );
+        assert!(fx.active[0].key.starts_with("fx-cast-"));
+        let sound = fx.take_due_sound_events(0);
+        assert_eq!(sound.len(), 1);
+        assert_eq!(sound[0].cue, FIREBALL_CAST_SOUND_CUE);
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("cast-false expiration"),
+        )
+        .expect("cast-false JSON");
+        assert_eq!(expired["effects"], json!([]));
+    }
+
+    #[test]
+    fn fireball_tracks_bound_target_and_recomputes_distance_clock_before_arrival() {
+        let mut zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fireball_magic_event(1, true)], &zone);
+        assert_eq!(fx.take_due_sound_events(0)[0].cue, FIREBALL_CAST_SOUND_CUE);
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-fireball-"))
+            .expect("bound projectile");
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.duration_ms),
+            Some(250)
+        );
+
+        zone.insert(2005, (288, 609));
+        fx.observe(650, 288, 616, &[], &zone);
+        assert_eq!(
+            fx.take_due_sound_events(650)[0].cue,
+            FIREBALL_PROJECTILE_SOUND_CUE
+        );
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-fireball-"))
+            .expect("moving bound projectile");
+        assert_eq!((projectile.tile_x, projectile.tile_y), (288, 609));
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.duration_ms),
+            Some(350)
+        );
+        assert!(fx.take_due_sound_events(949).is_empty());
+        assert_eq!(
+            fx.take_due_sound_events(950)[0].cue,
+            FIREBALL_IMPACT_SOUND_CUE
+        );
+    }
+
+    #[test]
+    fn fireball_unbound_target_point_has_projectile_but_no_invented_impact() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fireball_magic_event(1, true)], &zone);
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-fireball-"))
+            .expect("point-target projectile");
+        assert!(projectile.queued.is_none());
+        assert!(!fx.anchor_object_ids.contains_key(&projectile.key));
+        assert_eq!(fx.take_due_sound_events(0)[0].cue, FIREBALL_CAST_SOUND_CUE);
+        assert_eq!(
+            fx.take_due_sound_events(600)[0].cue,
+            FIREBALL_PROJECTILE_SOUND_CUE
+        );
+        let late_flight: Value = serde_json::from_str(
+            &fx.tick_with_visibility(830, true)
+                .expect("bounded projectile still visible late in flight"),
+        )
+        .expect("late-flight JSON");
+        assert_eq!(late_flight["effects"].as_array().map(Vec::len), Some(1));
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(850, true)
+                .expect("bounded projectile expiration"),
+        )
+        .expect("expired projectile JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.active.is_empty(), "point-target missile must not repeat");
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn fireball_map_change_clears_pending_projectile_and_all_phase_audio() {
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fireball_magic_event(1, true)], &zone);
+        let _ = fx.take_due_sound_events(0);
+        fx.observe(
+            100,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 11,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn fireball_production_direction_frames_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = fireball_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        for direction in 0..16_u32 {
+            let animation = catalog
+                .spell_projectile_animation("FireBall", direction)
+                .expect("all FireBall directions resolve");
+            assert_eq!(animation.frames.len(), 6);
+            for (frame, source) in animation.frames.iter().zip(0..6_u32) {
+                let index = 10 + direction * 10 + source;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        for audio in fixture["source"]["audio"]
+            .as_array()
+            .expect("FireBall audio catalog")
+        {
+            let file = audio["file"].as_str().expect("FireBall audio file");
+            let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+                .expect("packaged FireBall sound path");
+            let bytes = fs::read(path).expect("read FireBall sound");
+            assert_eq!(bytes.len(), audio["sourceBytes"]);
+            assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
+        }
     }
 
     fn lightning_fixture() -> Value {
@@ -3234,7 +3797,10 @@ mod tests {
         fx.observe(2_000, 288, 616, &[lightning_event(4, true)], &zone);
         assert_eq!(fx.active.len(), 1);
         fx.observe(2_100, 288, 616, &[], &HashMap::new());
-        assert!(fx.active.is_empty(), "a departed caster cannot anchor Lightning");
+        assert!(
+            fx.active.is_empty(),
+            "a departed caster cannot anchor Lightning"
+        );
         assert!(fx.take_due_sound_events(2_600).is_empty());
     }
 

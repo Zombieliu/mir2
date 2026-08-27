@@ -100,7 +100,15 @@ const withPhases = (effect, phases) => ({ ...effect, ...phases });
 // Cast effects constructed immediately by PlayerObject's MirAction.Spell switch.
 export const SPELL_EFFECTS = [
   withPhases(spell("FireBall", "Magic", 0, 10, 60), {
-    projectile: phase("Magic", 10, 6, 30, "projectile"),
+    projectile: phase("Magic", 10, 6, 30, "projectile", {
+      directionCount: 16,
+      directionStride: 10,
+      directionRanges: Array.from({ length: 16 }, (_, direction) => ({
+        direction,
+        base: 10 + direction * 10,
+        end: 15 + direction * 10,
+      })),
+    }),
     impact: phase("Magic", 170, 10, 60, "target"),
   }),
   withPhases(spell("Healing", "Magic", 200, 10, 60), {
@@ -355,6 +363,15 @@ export function validateEffectDefinitions() {
       if (!sub.library || !sub.kind) throw new Error(`${name}.${phaseName} lacks library/kind`);
       for (const field of ["base", "count", "interval"]) {
         assertInteger(sub[field], `${name}.${phaseName}.${field}`, field === "base" ? 0 : 1);
+      }
+      if (sub.directionStride !== undefined) {
+        assertInteger(sub.directionCount, `${name}.${phaseName}.directionCount`, 1);
+        assertInteger(sub.directionStride, `${name}.${phaseName}.directionStride`, sub.count);
+        if (sub.directionRanges?.length !== sub.directionCount) throw new Error(`${name}.${phaseName} lacks explicit direction ranges`);
+        sub.directionRanges.forEach((range, direction) => {
+          const base = sub.base + direction * sub.directionStride;
+          if (range.direction !== direction || range.base !== base || range.end !== base + sub.count - 1) throw new Error(`${name}.${phaseName} has an invalid direction range`);
+        });
       }
       if (typeof sub.blend !== "boolean" || typeof sub.repeat !== "boolean" || !Number.isInteger(sub.light)) {
         throw new Error(`${name}.${phaseName} lacks explicit render flags`);
