@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> Native player combat-audio server-client note (2026-08-28): revision
+> `144226df3c7a81ae7e7b15866ae4091d610fffb8` adds no server authority. It
+> consumes the existing authoritative Struck/Death/Revive/MountUpdate stream
+> for exact player body/armour, mount, flinch, delayed death and revive cues;
+> lethal hit order, delayed-cue cancellation, owner revive-alias deduplication
+> and mounted-attacker numeric weapon identity are regression-covered. Native
+> allowlist/package/verifier closure now binds 15 combat WAVs plus M79. Windows
+> 367/367, rustfmt and script self-tests pass, and independent review found no
+> P0/P1 inside this bounded claim. Web ActionFeed, Crystal-random tiger choice,
+> authenticated live delivery/audio and all same-EXE/GPU/DPI/soak/human/
+> signing/denominator gates remain open; no server or global percentage is
+> emitted.
+
 > Player combat-state server-client note (2026-08-28): revision
 > `9eaa62283ec453bfa42f8bc3cbddb4c8811abf09` adds no server authority. It
 > makes the clients preserve the Zone's existing health-before-death packet

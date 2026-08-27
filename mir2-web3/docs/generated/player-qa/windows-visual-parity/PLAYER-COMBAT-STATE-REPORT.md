@@ -7,10 +7,12 @@ Date: 2026-08-28
 ```text
 Crystal source revision: 484983404e3d6afa584e93801f8006ae3429bea9
 implementation base: 6606c043300d63380088c59be148eab274061fb9
-implementation revision: 9eaa62283ec453bfa42f8bc3cbddb4c8811abf09
+combat-state implementation revision: 9eaa62283ec453bfa42f8bc3cbddb4c8811abf09
+native-audio implementation revision: 144226df3c7a81ae7e7b15866ae4091d610fffb8
 branch: codex/windows-visual-parity
 playerCombatStateCheckpoint: bounded
 struckActionFeedParityComplete: false
+nativeGenericStruckDeathAudioAutomatedCheckpoint: bounded
 nativeGenericStruckDeathAudioComplete: false
 semanticLeafInventoryComplete: false
 globalParityPercent: null
@@ -21,9 +23,9 @@ authenticatedLiveWssTranscriptProduced: false
 exactHeadCandidatePackageProduced: false
 ```
 
-This report closes a bounded automated player Struck/Die/Dead/Revive state and
-PlayerRevive presentation checkpoint. It does not close VIS-01, VIS-02,
-Windows visual parity or whole-game parity.
+This report closes bounded automated player Struck/Die/Dead/Revive state,
+PlayerRevive presentation and Native generic player combat-audio checkpoints.
+It does not close VIS-01, VIS-02, Windows visual parity or whole-game parity.
 
 ## Source-bound behavior implemented
 
@@ -46,16 +48,33 @@ Windows visual parity or whole-game parity.
 - Web ordinary player Struck audio resolves attacker weapon family, target
   armour class and gender flinch. A riding target instead uses Crystal's
   tiger/wolf mount-hit family followed by flinch, with no ordinary body-hit.
+- Native now resolves the same ordinary body/armour weapon families, mounted
+  tiger/wolf families and male/female flinch. The authoritative top-level
+  attacker weapon wins over the derived sprite library, so a mounted attacker
+  whose weapon layer is intentionally hidden is not misclassified as unarmed.
+  `MountUpdate` overlays riding state before the next snapshot and therefore
+  before the next `Struck` cue decision.
+- Native male/female death cries wait 100 ms. A real frame-sequence regression
+  proves the delayed cue survives intervening effect ticks, while revive,
+  remove/hide, map change, logout and generation/session reset cancel it. A
+  lethal `Struck -> ObjectDied` batch retains body/mount hit plus flinch before
+  the delayed death cry. Owner `Revived + ObjectRevived(effect=true)` aliases
+  are deduplicated to one revive effect and one M79 cue per actor incarnation.
+- The Native audio allowlist now admits the 15 repository-approved player
+  combat clips (`70..73`, `80..83`, `138`, `139`, `144`, `145`, two tiger
+  clips and one wolf clip) plus `M79-1.wav`. This also fixes the earlier path
+  where PlayerRevive queued M79 but the Native allowlist rejected playback.
 - Windows package and copied-Candidate verification require all 20 Magic2
-  frames and the exact M79-1 identity. Their self-tests remove the final frame
-  or sound and fail closed. No Candidate package was built from this revision.
+  frames, exact M79-1 identity and all 15 exact combat-audio identities. The
+  packaging self-test and copied-Candidate verifier self-test remove required
+  inputs and fail closed. No Candidate package was built from this revision.
 
 ## Automated evidence
 
 | Gate | Result |
 |---|---|
 | Independent Crystal/source and final P0/P1 review | PASS for the bounded claim |
-| Windows native suite | PASS, 360/360 |
+| Windows native suite | PASS, 367/367 |
 | Rustfmt | PASS |
 | Web typecheck | PASS |
 | Web full frontend logic | PASS |
@@ -73,9 +92,10 @@ Windows visual parity or whole-game parity.
 The Web renderer still has one transient Struck slot rather than Crystal's
 ActionFeed. A second real hit is no longer discarded, but it restarts the
 current three-frame Struck action instead of queuing one pending action. Native
-still lacks the generic player body/mount hit plus flinch chain and the 100 ms
-male/female death cry, including delayed-cue cancellation on remove/revive/map
-change/logout. Those gaps are excluded from this checkpoint.
+combat-audio automation is bounded, but Crystal's random tiger-cue distribution
+is represented by deterministic event-sequence selection for replay stability,
+and audible timing/mix still requires the real-machine human gate. Those gaps
+are excluded from the completed automated checkpoint.
 
 The complete player classes/equipment/mount/wing matrix, monster special
 renderers, all skill/buff/poison/environment effects, HUD/buttons/panels and

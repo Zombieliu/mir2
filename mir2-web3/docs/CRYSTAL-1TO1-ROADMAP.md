@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Native player combat-audio bounded follow-up (2026-08-28): implementation
+> `144226df3c7a81ae7e7b15866ae4091d610fffb8` binds existing authoritative
+> Struck/Death/Revive packets to the exact body/armour weapon-hit, tiger/wolf
+> mount-hit, gender flinch, 100 ms gender death and M79 revive sources. It also
+> preserves lethal hit/flinch before death, cancels delayed death on lifecycle
+> boundaries, deduplicates the owner's Revived/ObjectRevived alias pair, and
+> consumes MountUpdate before the next hit; mounted attacker weapon identity
+> comes from the authoritative numeric field rather than its hidden sprite
+> layer. The Native allowlist and package/verifier identity closure now cover
+> 15 combat WAVs plus M79. Windows 367/367, rustfmt and both script self-tests
+> pass; independent final review found no P0/P1 in this bounded claim. No new
+> Candidate or live-audio evidence was produced. Web ActionFeed Struck queuing,
+> Crystal-random tiger selection, same-EXE/live-WSS/GPU/DPI/soak/human audio/
+> feel/signing and the incomplete denominator remain open. This is not visual
+> or whole-game 100%; `globalParityPercent` remains null.
+
 > Player combat-state bounded checkpoint (2026-08-28): implementation
 > `9eaa62283ec453bfa42f8bc3cbddb4c8811abf09` binds Web/Native player
 > Struck/Die/Dead/Revive state, corrects mounted death/revive to ordinary

@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> Native player combat-audio client-boundary follow-up (2026-08-28): revision
+> `144226df3c7a81ae7e7b15866ae4091d610fffb8` changes no simulation or shared-
+> Zone combat authority. It consumes existing Struck/Death/Revive/MountUpdate
+> state for exact body/armour, mount, flinch, delayed death and revive audio;
+> preserves lethal hit ordering, cancels delayed cues on lifecycle boundaries,
+> deduplicates the owner's two revive aliases and uses authoritative numeric
+> weapon identity for mounted attackers. The Native allowlist and Candidate
+> scripts now identity-bind 15 combat WAVs plus M79. Windows 367/367, rustfmt,
+> package/verifier self-tests and independent no-P0/P1 review pass. Web
+> ActionFeed queuing, Crystal-random tiger selection, authenticated live audio
+> and all same-EXE/GPU/DPI/soak/human/signing/denominator gates remain open. No
+> backend, visual or global percentage is claimed.
+
 > Player combat-state client-boundary checkpoint (2026-08-28): revision
 > `9eaa62283ec453bfa42f8bc3cbddb4c8811abf09` changes no simulation or shared-
 > Zone combat authority. It repairs consumption of the existing authoritative
