@@ -63,7 +63,7 @@ use super::panel_layouts::{
     SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
 };
 use super::spec::{CrystalButtonSpec, CrystalRect};
-use super::widget::spawn_crystal_image_button;
+use super::widget::{spawn_crystal_image_button, CrystalImageButton};
 
 const BIG_MAP_SEARCH_COOLDOWN_MS: u64 = 1_000;
 
@@ -497,6 +497,19 @@ impl NativePlayerUiState {
     }
     pub fn toggle_equipment(&mut self) {
         self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
+    }
+    fn activate_character_hud_button(&mut self) {
+        // Crystal's main Character button closes only when the dialog is
+        // already showing CharacterPage. From a stats/spells page it keeps
+        // the dialog open and returns to CharacterPage instead.
+        if self.equipment_open() && self.character_page == CharacterPage::Character {
+            self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
+            return;
+        }
+        if !self.equipment_open() {
+            self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
+        }
+        self.character_page = CharacterPage::Character;
     }
     pub fn toggle_menu(&mut self) {
         self.apply(mir2_ui_core::action::UiAction::OpenMenu);
@@ -2195,7 +2208,14 @@ fn spawn_overlay_root(mut commands: Commands) {
 
 fn consume_hud_buttons(
     mut state: ResMut<NativePlayerUiState>,
-    buttons: Query<(&Interaction, &CrystalHudAction), Changed<Interaction>>,
+    buttons: Query<
+        (
+            &Interaction,
+            &CrystalHudAction,
+            Option<&CrystalImageButton>,
+        ),
+        Changed<Interaction>,
+    >,
     shell: Option<Res<NativeShellModel>>,
     inventory: Res<InventoryModel>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
@@ -2204,16 +2224,19 @@ fn consume_hud_buttons(
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame) {
         return;
     }
-    for (interaction, action) in buttons.iter() {
-        if *interaction != Interaction::Pressed {
+    for (interaction, action, image_button) in buttons.iter() {
+        if *interaction != Interaction::Pressed
+            || image_button.is_some_and(|button| !button.enabled)
+        {
             continue;
+        }
+        if matches!(action, CrystalHudAction::Inventory | CrystalHudAction::Character) {
+            // Crystal MirControl.OnMouseClick plays ButtonA before the click
+            // callback. Only source-audited buttons enter this allowlist.
+            ui_audio.push(crate::audio::NativeUiSound::ButtonA);
         }
         match action {
             CrystalHudAction::Inventory => {
-                // Crystal MirControl.OnMouseClick plays ButtonA before the
-                // click callback. Preserve that event order in the local
-                // queue; keyboard inventory toggles do not pass this branch.
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 state.toggle_inventory();
                 if !state.inventory_open() {
                     state.inspect = None;
@@ -2222,7 +2245,7 @@ fn consume_hud_buttons(
                 }
             }
             CrystalHudAction::Character => {
-                state.toggle_equipment();
+                state.activate_character_hud_button();
             }
             CrystalHudAction::Menu => {
                 state.toggle_menu();
@@ -2745,8 +2768,11 @@ pub(crate) fn process_overlay_keyboard(
             // already handled
         }
     }
-    if keys.just_pressed(KeyCode::KeyC) {
-        state.toggle_equipment();
+    if keys.just_pressed(KeyCode::KeyC) || keys.just_pressed(KeyCode::F10) {
+        // Crystal's Equipment shortcut shares the CharacterButton page
+        // state machine but does not invoke MirControl.OnMouseClick, so it is
+        // intentionally silent.
+        state.activate_character_hud_button();
     }
     if keys.just_pressed(KeyCode::KeyM) {
         state.toggle_mail();
@@ -8974,6 +9000,132 @@ mod tests {
     }
 
     #[test]
+    fn character_hud_pointer_uses_button_a_and_restores_character_page() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, consume_hud_buttons);
+
+        // Crystal keeps CharacterDialog visible and switches a non-character
+        // page back to CharacterPage on the first HUD click.
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.character_page = CharacterPage::Stats1;
+            state.toggle_equipment();
+        }
+        let button = app
+            .world_mut()
+            .spawn((
+                Interaction::None,
+                CrystalHudAction::Character,
+                CrystalImageButton {
+                    assets: super::super::assets::CrystalButtonAssetSet::from_spec(
+                        super::super::spec::hud::CHARACTER,
+                    ),
+                    focused: false,
+                    enabled: true,
+                },
+            ))
+            .id();
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.equipment_open());
+        assert_eq!(state.character_page, CharacterPage::Character);
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+
+        // A held press neither repeats ButtonA nor invokes the callback.
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        app.world_mut()
+            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .drain_bounded(8);
+
+        // A second edge closes the already-visible CharacterPage and plays
+        // exactly one new ButtonA cue.
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().equipment_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        app.world_mut()
+            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .drain_bounded(8);
+
+        // Disabled image buttons are not valid clicks even if a synthetic
+        // Interaction component changes under test.
+        app.world_mut()
+            .entity_mut(button)
+            .get_mut::<CrystalImageButton>()
+            .expect("image button")
+            .enabled = false;
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().equipment_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+
+        // Keyboard activation shares the source page-state transition but
+        // stays outside the pointer/audio producer.
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .activate_character_hud_button();
+        assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+    }
+
+    #[test]
+    fn character_hud_activation_restores_every_non_character_page_before_closing() {
+        for page in [
+            CharacterPage::Stats1,
+            CharacterPage::Stats2,
+            CharacterPage::Spells,
+        ] {
+            let mut state = NativePlayerUiState::default();
+            state.character_page = page;
+            state.toggle_equipment();
+            assert!(state.equipment_open());
+
+            state.activate_character_hud_button();
+            assert!(state.equipment_open());
+            assert_eq!(state.character_page, CharacterPage::Character);
+
+            state.activate_character_hud_button();
+            assert!(!state.equipment_open());
+        }
+    }
+
+    #[test]
     fn compact_labels_use_supported_ascii_and_bag_cells_hide_durability() {
         assert_eq!(short_name("DestructionDrug", "fallback"), "Destruct..");
         assert_eq!(short_slot_name("Potion", "fallback"), "Poti.");
@@ -9902,6 +10054,70 @@ mod tests {
             .world()
             .resource::<NativePlayerUiState>()
             .inventory_open());
+    }
+
+    #[test]
+    fn character_c_and_f10_share_source_page_semantics_without_click_audio() {
+        for key in [KeyCode::KeyC, KeyCode::F10] {
+            let mut app = App::new();
+            app.init_resource::<NativePlayerUiState>()
+                .init_resource::<MailComposeUi>()
+                .init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<PendingOperations>()
+                .init_resource::<NativeUiIntentQueue>()
+                .init_resource::<InventoryModel>()
+                .init_resource::<MailModel>()
+                .init_resource::<MapModel>()
+                .init_resource::<ShopModel>()
+                .init_resource::<StorageModel>()
+                .init_resource::<ButtonInput<KeyCode>>()
+                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .add_message::<KeyboardInput>()
+                .add_systems(Update, process_overlay_keyboard);
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.character_page = CharacterPage::Stats2;
+                state.toggle_equipment();
+            }
+
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            app.update();
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.equipment_open());
+            assert_eq!(state.character_page, CharacterPage::Character);
+
+            {
+                let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+                keys.release(key);
+                keys.clear();
+                keys.press(key);
+            }
+            app.update();
+            assert!(!app.world().resource::<NativePlayerUiState>().equipment_open());
+
+            {
+                let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+                keys.release(key);
+                keys.clear();
+                keys.press(key);
+            }
+            app.update();
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.equipment_open());
+            assert_eq!(state.character_page, CharacterPage::Character);
+            assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiIntentQueue>()
+                .intents
+                .is_empty());
+        }
     }
 
     #[test]

@@ -1120,6 +1120,19 @@ mod tests {
     }
 
     #[test]
+    fn character_button_uses_exact_crystal_three_state_assets_and_geometry() {
+        let assets = CrystalButtonAssetSet::from_spec(spec::CHARACTER);
+        assert_eq!(assets.normal, "original-ui/Prguse/1900.png");
+        assert_eq!(assets.hover, "original-ui/Prguse/1901.png");
+        assert_eq!(assets.pressed, "original-ui/Prguse/1902.png");
+        assert_eq!(assets.disabled, None);
+        assert_eq!(
+            spec::CHARACTER.rect,
+            CrystalRect::new(905.0, 692.0, 20.0, 20.0)
+        );
+    }
+
+    #[test]
     fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
         let mut app = App::new();
         app.insert_resource(NativeShellModel::default());
