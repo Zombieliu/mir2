@@ -121,8 +121,21 @@ then attaches six 100 ms `Magic` frames at `970 + direction*20` to the caster
 and emits the exact allowlisted `M40-0.wav` once. `cast=false` emits neither;
 no projectile or impact is fabricated. The fixed fixture closes typed packet,
 state-clock, frame/audio identity and lifecycle automation only. It does not
-pass the same-EXE, live-WSS, GPU-raster or human-audio gates, and the other four
-first-slice spells remain open.
+pass the same-EXE, live-WSS, GPU-raster or human-audio gates.
+
+FireBall is the second bounded automated checkpoint at revision
+`d85d7368119053e6b2609316c4f5c76faaa298cb`. Typed `ObjectMagic` owns its
+immediate `Magic/0..9` cast, 600 ms actor-action boundary and local missile;
+the adjacent simulation compatibility `ObjectProjectile` is deduplicated.
+The missile locks Crystal Direction16 at launch, uses all 16 ranges
+`10 + direction*10 .. +5`, tracks the bound destination with a finite
+`MaxDistance*50 ms` movement clock, and promotes only a bound target to
+`Magic/170..179` impact. M31-0/1/2 have exact byte/hash closure. Frame cycling
+does not extend projectile lifetime. This passes packet, clock, frame/audio,
+asset, package and verifier automation only. The explicit
+`Target.CurrentAction == Dead` impact suppression branch remains open until
+dead state reaches the effect input. FlamingSword, SoulFireBall and FireWall
+remain open, as do every same-EXE/live-WSS/GPU/DPI/human gate.
 
 VIS-03 has one bounded automated checkpoint at implementation revision
 `448db4f72`. The 1024x768 HUD base and Inventory control are source-bound to

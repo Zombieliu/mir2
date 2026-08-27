@@ -28,8 +28,8 @@
 > regressions fail closed. Fresh source map and keyed packs now drive the full
 > Windows suite at 333/333, and the vertical-slice gate explicitly generates
 > both packs. VIS-01 and VIS-02 still require real Gateway/WSS sequence, GPU
-> raster pixels and same-EXE captures; the remaining VIS-02 spells are
-> FlamingSword, FireBall, SoulFireBall and FireWall. The first bounded VIS-03
+> raster pixels and same-EXE captures; at that checkpoint the remaining
+> VIS-02 spells were FlamingSword, FireBall, SoulFireBall and FireWall. The first bounded VIS-03
 > UI-state checkpoint is now implemented at `448db4f72`: the 1024x768
 > Inventory button remains source-bound to `Prguse/1903..1905`, BigMap
 > Teleport uses Crystal's explicit disabled `Title/823` frame, and cached
@@ -42,6 +42,23 @@
 > inventory, full legal assets, additive weapon/wing layers, same-EXE live WSS,
 > 100/125/150% DPI, 30-minute native soak, human visual/audio/feel and
 > publisher-signing gates remain open.
+
+> VIS-02 FireBall bounded automated checkpoint (2026-08-27): revision
+> `d85d7368119053e6b2609316c4f5c76faaa298cb` now derives FireBall's local
+> missile from typed `ObjectMagic` after the 600 ms Spell action and consumes
+> the Rust simulation's adjacent compatibility `ObjectProjectile` without a
+> duplicate. Cast `Magic/0..9`, all 16 directional six-frame missile ranges,
+> target-bound `Magic/170..179` impact, finite `MaxDistance * 50 ms` flight,
+> launch-time direction locking and exact M31-0/1/2 audio identities are
+> closed across runtime, exporter, package and verifier. Review remediation
+> separates projectile frame cycling from lifecycle repeat, so unbound
+> point-target missiles expire. Independent final review found no P0/P1;
+> effects pass 59/59, Windows 340/340, Bevy native-ui 393/393, Gateway fixture
+> 1/1, Web typecheck and the complete offline resource/audio gate pass. This
+> does not close VIS-02: FlamingSword, SoulFireBall, FireWall, target-dead
+> impact suppression and the Struck/Die/Dead/Revive chain remain open, as do
+> same-EXE/live-WSS/GPU/DPI/soak/human/signing gates. Do not emit a global
+> percentage.
 
 > MAP-E0/E1 bounded closure (2026-08-26): the real `Server.MirDB` map records
 > now drive hazard/music packet metadata for all 464 source records, and all six

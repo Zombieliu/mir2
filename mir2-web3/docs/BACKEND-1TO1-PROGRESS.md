@@ -44,6 +44,21 @@
 > open under the visual
 > contract.
 
+> VIS-02 FireBall client-boundary checkpoint (2026-08-27): no new gameplay
+> authority or server-completion percentage is claimed. Typed Gateway
+> `ObjectMagic` now drives the source-timed native cast, delayed local missile
+> and bound impact; the existing simulation compatibility `ObjectProjectile`
+> is consumed only to avoid a duplicate visual. Sixteen direction ranges,
+> finite target-tracking flight, M31-0/1/2 identities and full package/verify
+> closure are automated at revision
+> `d85d7368119053e6b2609316c4f5c76faaa298cb`. Gateway typed fixture 1/1,
+> effects 59/59, Windows 340/340, Bevy native-ui 393/393, Web typecheck,
+> offline resource/audio verification and independent no-P0/P1 review pass.
+> Shared-Zone damage remains the authority. Target-dead impact suppression
+> still needs an explicit authoritative dead bit at the effect boundary;
+> FlamingSword, SoulFireBall, FireWall and all final visual/real-window gates
+> remain open, so no global percentage is emitted.
+
 > Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): this round records only evidence that passed.
 > Simulation `vertical_slice` passes 8/8 in 283.03 seconds, including the

@@ -47,6 +47,21 @@
 > acceptance. Button state/DPI evidence, native
 > soak and human acceptance remain open. VIS-01 is not visually accepted.
 
+> VIS-02 FireBall bounded checkpoint (2026-08-27): implementation revision
+> `d85d7368119053e6b2609316c4f5c76faaa298cb` follows Crystal's client-owned
+> `ObjectMagic` route rather than depending on the compatibility
+> `ObjectProjectile`. It preserves the immediate 600 ms cast, launch-time
+> Direction16 selection, 16 six-frame missile ranges with ten-frame stride,
+> target tracking and finite distance clock, target-bound impact and exact
+> M31-0/1/2 audio. Runtime/package/verifier require every FireBall cast,
+> projectile and impact frame plus exact audio byte/hash identities. Final
+> review is no-P0/P1; native effects 59/59, Windows 340/340, Bevy native-ui
+> 393/393, Gateway fixture 1/1, Web typecheck and the offline resource/audio
+> gate pass. This closes only FireBall automation. FlamingSword, SoulFireBall,
+> FireWall, the still-present-target Dead suppression branch, same-EXE live
+> WSS/GPU pixels/DPI/soak/human/signing and the incomplete denominator remain
+> open; `globalParityPercent` stays null.
+
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
 > source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes
 > 8/8, including the original Bichon newcomer quest 1-to-9 route; `shared_zone`

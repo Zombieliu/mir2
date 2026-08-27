@@ -36,6 +36,20 @@
 > complete assets, the other first-slice skill effects, environment visuals and all real-window
 > acceptance gates remain open.
 
+> VIS-02 FireBall server-client note (2026-08-27): revision
+> `d85d7368119053e6b2609316c4f5c76faaa298cb` changes no server combat
+> authority. It makes the Windows projection follow Crystal's local
+> `ObjectMagic` post-action missile while deduplicating the simulation's
+> compatibility `ObjectProjectile`. The cast, 16-direction finite missile,
+> target-bound impact, M31-0/1/2 audio and asset closure are automated;
+> Gateway fixture 1/1, effects 59/59, Windows 340/340, Bevy native-ui 393/393,
+> Web typecheck and offline resource/audio verification pass, and final
+> independent review found no P0/P1. This is not whole-spell/server parity:
+> an explicit target-dead input is still required to suppress impact for a
+> corpse that remains in AOI, and FlamingSword, SoulFireBall, FireWall plus
+> same-EXE/live-WSS/GPU/DPI/soak/human/signing gates remain open. No completion
+> percentage is claimed.
+
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,
 > including the original Bichon quest 1-to-9 route, and `shared_zone` passes

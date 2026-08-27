@@ -2,6 +2,18 @@
 
 Last updated: 2026-08-27
 
+> 2026-08-27 Windows-native VIS-02 FireBall bounded checkpoint: revision
+> `d85d7368119053e6b2609316c4f5c76faaa298cb` now renders the source cast,
+> 16-direction finite missile and bound impact from typed `ObjectMagic`, with
+> exact M31-0/1/2 audio and fail-closed package/verify frame closure. The
+> simulation compatibility projectile is deduplicated. Independent final
+> review found no P0/P1; effects pass 59/59, Windows 340/340, Bevy native-ui
+> 393/393, Gateway fixture 1/1, Web typecheck and the complete offline resource
+> gate pass. No EXE was launched and no GPU/same-EXE/DPI/human evidence was
+> created. Target-dead impact suppression, FlamingSword, SoulFireBall,
+> FireWall, the full semantic denominator and every final acceptance gate
+> remain open; global parity stays unreported.
+
 > 2026-08-27 Windows-native VIS-00 baseline / VIS-01 in-progress checkpoint:
 > the new visual contract binds
 > the current implementation base to Crystal source and records known Phase-A
