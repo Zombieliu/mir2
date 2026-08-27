@@ -24,7 +24,7 @@ const DEFAULT_PACK_INDEX_PATH = "/generated/crystal-packs/full/index.json";
 const DIRECTION_COUNT = 8;
 
 const SPELL_IDS = {
-  TwinDrakeBlade: 6, Entrapment: 7, LionRoar: 9, BladeAvalanche: 11,
+  TwinDrakeBlade: 6, Entrapment: 7, FlamingSword: 8, LionRoar: 9, BladeAvalanche: 11,
   ProtectionField: 12, Rage: 13, CounterAttack: 14, SlashingBurst: 15, Fury: 16,
   ImmortalSkin: 17, FireBall: 31, Repulsion: 32, ElectricShock: 33,
   GreatFireBall: 34, HellFire: 35, ThunderBolt: 36, Teleport: 37, FireBang: 38,
@@ -54,6 +54,7 @@ export const SPELL_EFFECT_ENUM = [
 ].map((name, id) => ({ id, name }));
 
 const PLAYER_SPELL_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell";
+const PLAYER_ATTACK_OVERLAY_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1";
 const WORLD_SPELL_SOURCE = "Crystal/Client/MirObjects/SpellObject.cs::Load";
 const OBJECT_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect";
 const MAP_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapEffect";
@@ -97,6 +98,29 @@ const phase = (library, base, count, interval, kind, extra = {}) => ({
 
 const withPhases = (effect, phases) => ({ ...effect, ...phases });
 
+const attackOverlay = (name, library, base, count, interval, directionStride, rate) => ({
+  spell: name,
+  spellId: SPELL_IDS[name],
+  library,
+  base,
+  count,
+  interval,
+  kind: "attackOverlay",
+  directionCount: DIRECTION_COUNT,
+  directionStride,
+  directionRanges: Array.from({ length: DIRECTION_COUNT }, (_, direction) => ({
+    direction,
+    base: base + direction * directionStride,
+    end: base + direction * directionStride + count - 1,
+  })),
+  blend: true,
+  rate,
+  light: 0,
+  repeat: false,
+  offset: { x: 0, y: 0 },
+  provenance: { source: PLAYER_ATTACK_OVERLAY_SOURCE, symbol: `Spell.${name}` },
+});
+
 const direction16 = (base, count, directionStride) => ({
   directionCount: 16,
   directionStride,
@@ -107,8 +131,12 @@ const direction16 = (base, count, directionStride) => ({
   })),
 });
 
-// Cast effects constructed immediately by PlayerObject's MirAction.Spell switch.
+// PlayerObject spell/cast effects plus explicitly-labelled action overlays.
 export const SPELL_EFFECTS = [
+  // FlamingSword is not a MirAction.Spell cast. SpellToggle arms it and the
+  // next valid Attack1 consumes it; ObjectAttack carries spell=8 and selects
+  // this attacker-bound six-frame overlay.
+  attackOverlay("FlamingSword", "Magic", 3480, 6, 100, 10, 0.7),
   withPhases(spell("FireBall", "Magic", 0, 10, 60), {
     projectile: phase("Magic", 10, 6, 30, "projectile", {
       ...direction16(10, 6, 10),
@@ -367,6 +395,9 @@ export function validateEffectDefinitions() {
     if (spec.spell && !Number.isInteger(spec.spellId)) throw new Error(`${name} lacks an authoritative Spell id`);
     if (spec.effect && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))) throw new Error(`${name} lacks an authoritative SpellEffect id`);
     if (typeof spec.blend !== "boolean" || typeof spec.repeat !== "boolean" || !Number.isInteger(spec.light)) throw new Error(`${name} lacks explicit render flags`);
+    if (spec.rate !== undefined && (typeof spec.rate !== "number" || !Number.isFinite(spec.rate) || spec.rate < 0 || spec.rate > 1)) {
+      throw new Error(`${name}.rate must be a finite number between 0 and 1`);
+    }
     for (const phaseName of ["projectile", "impact", "returnEffect"]) {
       const sub = spec[phaseName];
       if (!sub) continue;

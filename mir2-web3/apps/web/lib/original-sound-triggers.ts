@@ -23,6 +23,26 @@ import { playOriginalSoundId, playOriginalSoundIdWithFallback } from "./original
 const MONSTER_ATTACK_OFFSET = 1;
 const MONSTER_SWING_OFFSET = 4;
 const MONSTER_DIE_OFFSET = 3;
+const FLAMING_SWORD_SPELL_ID = 8;
+const FLAMING_SWORD_ATTACK_SOUND_ID = 20081;
+const pendingEntityAttackSoundTimers = new Map<ReturnType<typeof setTimeout>, string | null>();
+
+/** Cancel delayed animation-frame attack sounds when their actor/session lifetime ends. */
+export function cancelPendingEntityAttackSounds(objectId?: string | null): void {
+  for (const [timer, timerObjectId] of pendingEntityAttackSoundTimers) {
+    if (objectId !== undefined && timerObjectId !== objectId) continue;
+    globalThis.clearTimeout(timer);
+    pendingEntityAttackSoundTimers.delete(timer);
+  }
+}
+
+function scheduleEntityAttackSound(soundId: number, delayMs: number, objectId?: string | null): void {
+  const timer = globalThis.setTimeout(() => {
+    pendingEntityAttackSoundTimers.delete(timer);
+    playOriginalSoundId(soundId);
+  }, delayMs);
+  pendingEntityAttackSoundTimers.set(timer, objectId ?? null);
+}
 
 export type SoundEntityKind = "selfPlayer" | "player" | "monster" | "npc";
 
@@ -60,7 +80,11 @@ function monsterBaseSound(entity: SoundEntityRef): number | null {
 }
 
 /** Attack swing / roar for an object that just attacked (ObjectAttack / ObjectRangeAttack). */
-export function playEntityAttackSound(entity: SoundEntityRef | null | undefined): void {
+export function playEntityAttackSound(
+  entity: SoundEntityRef | null | undefined,
+  spell?: number | string | null,
+  objectId?: string | null,
+): void {
   if (!entity) {
     return;
   }
@@ -73,6 +97,14 @@ export function playEntityAttackSound(entity: SoundEntityRef | null | undefined)
     return;
   }
   if (isPlayer(entity.kind)) {
+    // Crystal sets the FlamingSword-specific cue when Attack1 begins, then
+    // plays the weapon swing on attack frame 1 (100 ms later). SpellToggle
+    // itself is silent and never calls this path.
+    if (spell === FLAMING_SWORD_SPELL_ID || spell === "FlamingSword") {
+      playOriginalSoundId(FLAMING_SWORD_ATTACK_SOUND_ID);
+      scheduleEntityAttackSound(ORIGINAL_SOUND_IDS.swingSword, 100, objectId);
+      return;
+    }
     // Player melee swing — weapon class is not tracked client-side, so use the common sword swing.
     playOriginalSoundId(ORIGINAL_SOUND_IDS.swingSword);
   }

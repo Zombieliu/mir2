@@ -38,7 +38,11 @@ export type AudioSink = {
   /** Loop background music by Crystal SoundList id (original-audio.ts `setOriginalMusicId`). */
   setOriginalMusicId(musicId: number | string | null | undefined): void;
   /** Entity attack sound (original-sound-triggers.ts `playEntityAttackSound`). */
-  playEntityAttackSound(entity: SoundEntityRef | null | undefined): void;
+  playEntityAttackSound(
+    entity: SoundEntityRef | null | undefined,
+    spell?: number | string | null,
+    objectId?: string | null,
+  ): void;
   /** Entity struck sound (original-sound-triggers.ts `playEntityStruckSound`). */
   playEntityStruckSound(entity: SoundEntityRef | null | undefined): void;
   /** Entity death sound (original-sound-triggers.ts `playEntityDieSound`). */
@@ -66,7 +70,7 @@ export function registerSoundSubscriber(bus: GameEventBus, audio: AudioSink): Un
   // entityAttack -> attack swing / roar
   unsubs.push(
     bus.on("entityAttack", (event) => {
-      audio.playEntityAttackSound(audio.soundEntityRefFor(event.objectId));
+      audio.playEntityAttackSound(audio.soundEntityRefFor(event.objectId), event.spell, event.objectId);
     }),
   );
 

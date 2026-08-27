@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "mir2-present-sound-manifest",
   "soundDir": "public/original-ui/Sound",
-  "presentSoundCount": 329,
+  "presentSoundCount": 330,
   "files": [
     "006-0.wav",
     "008-0.wav",
@@ -294,6 +294,7 @@
     "M64-1.wav",
     "M64-2.wav",
     "M69-0.wav",
+    "M8-1.wav",
     "NewChar.wav",
     "pet_blackdragon.wav",
     "pet_chick.wav",

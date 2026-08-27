@@ -19031,6 +19031,56 @@ mod tests {
     }
 
     #[test]
+    fn vis02_bichon_flaming_sword_fixture_is_exact_packet_event_projection() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../game-client/platform-windows/tests/fixtures/vis02-bichon-flaming-sword-v1.json"
+        ))
+        .expect("VIS-02 FlamingSword fixture JSON");
+        let directions = [
+            MirDirection::Up,
+            MirDirection::UpRight,
+            MirDirection::Right,
+            MirDirection::DownRight,
+            MirDirection::Down,
+            MirDirection::DownLeft,
+            MirDirection::Left,
+            MirDirection::UpLeft,
+        ];
+        for (index, direction) in directions.into_iter().enumerate() {
+            let packet = ServerPacket::ObjectAttack {
+                info: ObjectAttackInfo {
+                    object_id: 1000,
+                    location: Point { x: 288, y: 616 },
+                    direction,
+                    spell: 8,
+                    level: 3,
+                    attack_type: 0,
+                },
+            };
+            assert_eq!(
+                super::server_packet_to_event(&packet),
+                fixture["directionCases"][index]["event"],
+                "VIS-02 FlamingSword packet event projection mismatch for direction {index}"
+            );
+        }
+
+        let ordinary = ServerPacket::ObjectAttack {
+            info: ObjectAttackInfo {
+                object_id: 1000,
+                location: Point { x: 288, y: 616 },
+                direction: MirDirection::Down,
+                spell: 0,
+                level: 0,
+                attack_type: 0,
+            },
+        };
+        assert_eq!(
+            super::server_packet_to_event(&ordinary),
+            fixture["compatibilityCases"]["ordinaryAttack"]["event"]
+        );
+    }
+
+    #[test]
     fn bootstrap_state_packets_force_snapshot() {
         let responses = vec![
             ServerPacket::StartGame {

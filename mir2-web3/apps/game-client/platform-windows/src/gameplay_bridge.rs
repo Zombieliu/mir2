@@ -589,7 +589,15 @@ impl NativeGameplayAdapter {
                     }
                     changed
                 }
-                "ObjectAttack" => self.patch_zone_entity_action(payload, "attack1", true),
+                "ObjectAttack" => {
+                    let changed = self.patch_zone_entity_action(payload, "attack1", true);
+                    // Most attacks are ignored by the effect consumer. Preserve
+                    // the typed packet so spell-bearing Attack1 overlays such
+                    // as FlamingSword can be resolved without inventing a
+                    // client-side ObjectMagic packet.
+                    self.record_effect("ObjectAttack", payload);
+                    changed
+                }
                 "ObjectRangeAttack" => self.patch_zone_entity_action(payload, "attackRange1", true),
                 "ObjectMagic" => {
                     // Keep the existing entity action hint for the caster, then
@@ -3966,6 +3974,29 @@ mod tests {
             .expect("monster");
         assert_eq!(monster["_nativeAnimationAction"], json!("struck"));
         assert_eq!(monster["_nativeAnimationSequence"], json!(3));
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectAttack");
+    }
+
+    #[test]
+    fn object_attack_preserves_spell_fields_for_native_attack_overlays() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".to_owned(),
+            payload: json!({
+                "objectId": 1000,
+                "location": {"x": 288, "y": 616},
+                "direction": "UpLeft",
+                "spell": 8,
+                "level": 3,
+                "attackType": 0
+            }),
+        }));
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectAttack");
+        assert_eq!(adapter.effect_events[0].payload["spell"], 8);
+        assert_eq!(adapter.effect_events[0].payload["level"], 3);
+        assert_eq!(adapter.effect_events[0].payload["attackType"], 0);
     }
 
     #[test]

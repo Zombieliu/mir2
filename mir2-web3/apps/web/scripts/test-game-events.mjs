@@ -57,6 +57,32 @@ const soundTriggersStub = {
   monsterImageFromBodyLibrary: () => null,
 };
 
+const triggerPlayedIds = [];
+const originalSoundTriggersModule = loadTypeScriptModule(
+  new URL("../lib/original-sound-triggers.ts", import.meta.url),
+  {
+    "./original-sound-events": {
+      ORIGINAL_SOUND_IDS: {
+        swingSword: 10052,
+        struckSword: 10110,
+        struckBodySword: 10120,
+        femaleDie: 10131,
+        maleDie: 10130,
+      },
+    },
+    "./original-audio": {
+      playOriginalSoundId(soundId) {
+        triggerPlayedIds.push(soundId);
+        return true;
+      },
+      playOriginalSoundIdWithFallback(soundIds) {
+        triggerPlayedIds.push(soundIds[0]);
+        return true;
+      },
+    },
+  },
+);
+
 const BASE = new URL("../lib/game-events/", import.meta.url);
 
 const eventsModule = loadTypeScriptModule(new URL("events.ts", BASE), {
@@ -112,7 +138,9 @@ function makeAudioSink(entityRef = null) {
       playOriginalSoundId(soundId) { calls.push({ fn: "playOriginalSoundId", soundId }); },
       playOriginalSoundEvent(event) { calls.push({ fn: "playOriginalSoundEvent", event }); },
       setOriginalMusicId(musicId) { calls.push({ fn: "setOriginalMusicId", musicId }); },
-      playEntityAttackSound(entity) { calls.push({ fn: "playEntityAttackSound", entity }); },
+      playEntityAttackSound(entity, spell, objectId) {
+        calls.push({ fn: "playEntityAttackSound", entity, spell, objectId });
+      },
       playEntityStruckSound(entity) { calls.push({ fn: "playEntityStruckSound", entity }); },
       playEntityDieSound(entity) { calls.push({ fn: "playEntityDieSound", entity }); },
       playMagicSoundId(spell) { calls.push({ fn: "playMagicSoundId", spell }); },
@@ -261,6 +289,86 @@ check("entityAttack -> playEntityAttackSound with resolved entity ref", () => {
   assert.equal(calls.length, 1);
   assert.equal(calls[0].fn, "playEntityAttackSound");
   assert.deepEqual(calls[0].entity, fakeRef);
+  assert.equal(calls[0].spell, undefined);
+  assert.equal(calls[0].objectId, "42");
+});
+
+check("entityAttack preserves FlamingSword spell identity for the audio sink", () => {
+  const bus = createGameEventBus();
+  const fakeRef = { kind: "player", sprite: null, genderKey: "male" };
+  const { calls, sink } = makeAudioSink(fakeRef);
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "entityAttack", objectId: "42", spell: 8 });
+  assert.deepEqual(calls, [
+    { fn: "playEntityAttackSound", entity: fakeRef, spell: 8, objectId: "42" },
+  ]);
+});
+
+check("FlamingSword player attack plays exact M8-1 now and normal swing at frame 1", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 1;
+  };
+  try {
+    originalSoundTriggersModule.playEntityAttackSound(
+      { kind: "player", sprite: null, genderKey: "male" },
+      8,
+      "42",
+    );
+    assert.deepEqual(triggerPlayedIds, [20081]);
+    assert.equal(scheduled.length, 1);
+    assert.equal(scheduled[0].delay, 100);
+    scheduled[0].callback();
+    assert.deepEqual(triggerPlayedIds, [20081, 10052]);
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
+});
+
+check("FlamingSword delayed swing is cancelled with its removed actor", () => {
+  triggerPlayedIds.length = 0;
+  const cleared = [];
+  const realSetTimeout = globalThis.setTimeout;
+  const realClearTimeout = globalThis.clearTimeout;
+  globalThis.setTimeout = () => 77;
+  globalThis.clearTimeout = (timer) => cleared.push(timer);
+  try {
+    originalSoundTriggersModule.playEntityAttackSound(
+      { kind: "player", sprite: null, genderKey: "male" },
+      "FlamingSword",
+      "actor-77",
+    );
+    originalSoundTriggersModule.cancelPendingEntityAttackSounds("actor-77");
+    assert.deepEqual(triggerPlayedIds, [20081]);
+    assert.deepEqual(cleared, [77]);
+  } finally {
+    originalSoundTriggersModule.cancelPendingEntityAttackSounds();
+    globalThis.setTimeout = realSetTimeout;
+    globalThis.clearTimeout = realClearTimeout;
+  }
+});
+
+check("ordinary player attack never plays the FlamingSword-specific sound", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 1;
+  };
+  try {
+    originalSoundTriggersModule.playEntityAttackSound(
+      { kind: "player", sprite: null, genderKey: "male" },
+      0,
+    );
+    assert.deepEqual(triggerPlayedIds, [10052]);
+    assert.equal(scheduled.length, 0);
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
 });
 
 check("entityStruck -> playEntityStruckSound", () => {

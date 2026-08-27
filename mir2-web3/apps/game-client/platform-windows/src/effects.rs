@@ -97,6 +97,8 @@ const FIREWALL_CAST_SOUND_FILE: &str = "M39-0.wav";
 const FIREWALL_COMPLETE_SOUND_FILE: &str = "M39-1.wav";
 const FIREWALL_CAST_SOUND_CUE: &str = "FireWall.cast";
 const FIREWALL_COMPLETE_SOUND_CUE: &str = "FireWall.complete";
+const FLAMING_SWORD_SOUND_FILE: &str = "M8-1.wav";
+const FLAMING_SWORD_SOUND_CUE: &str = "FlamingSword.attack";
 const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
 const SOUL_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M64-1.wav";
@@ -232,6 +234,8 @@ struct SubSpec {
     #[serde(default)]
     blend: Option<bool>,
     #[serde(default)]
+    rate: Option<f32>,
+    #[serde(default)]
     light: Option<i32>,
     #[serde(default)]
     repeat: Option<bool>,
@@ -290,6 +294,8 @@ struct EffectSpec {
     #[serde(default)]
     blend: Option<bool>,
     #[serde(default)]
+    rate: Option<f32>,
+    #[serde(default)]
     light: Option<i32>,
     #[serde(default)]
     repeat: Option<bool>,
@@ -337,6 +343,9 @@ pub(crate) struct Animation {
     pub frames: Vec<EffectFrameMeta>,
     pub interval: u64,
     pub blend: bool,
+    /// Crystal DrawBlend rate. `1.0` preserves the historical full-strength
+    /// default; FlamingSword's Attack1 overlay uses `0.7`.
+    pub opacity: f32,
     pub repeat: bool,
     pub offset_x: f32,
     pub offset_y: f32,
@@ -503,6 +512,7 @@ impl EffectCatalog {
             frames,
             interval,
             blend: sub.blend.unwrap_or(true),
+            opacity: sub.rate.unwrap_or(1.0).clamp(0.0, 1.0),
             repeat: sub.repeat.unwrap_or(false),
             offset_x: offset.x,
             offset_y: offset.y,
@@ -550,6 +560,7 @@ impl EffectCatalog {
             frames,
             interval,
             blend: entry.blend.unwrap_or(true),
+            opacity: entry.rate.unwrap_or(1.0).clamp(0.0, 1.0),
             repeat: entry.repeat.unwrap_or(false),
             offset_x: offset.x,
             offset_y: offset.y,
@@ -562,8 +573,20 @@ impl EffectCatalog {
         let entry = self.spell_by_name.get(spell)?;
         if matches!(
             entry.kind.as_deref().unwrap_or(""),
-            "projectile" | "impact" | "target"
+            "projectile" | "impact" | "target" | "attackOverlay"
         ) {
+            return None;
+        }
+        self.resolve_animation(entry, direction, 0)
+    }
+
+    pub(crate) fn spell_attack_overlay_animation(
+        &self,
+        spell: &str,
+        direction: u32,
+    ) -> Option<Animation> {
+        let entry = self.spell_by_name.get(spell)?;
+        if entry.kind.as_deref() != Some("attackOverlay") {
             return None;
         }
         self.resolve_animation(entry, direction, 0)
@@ -781,6 +804,7 @@ fn effect_catalog() -> &'static Option<EffectCatalog> {
 enum EffectKindTag {
     Ground,
     Cast,
+    AttackOverlay,
     Projectile,
     Impact,
     Persistent,
@@ -789,9 +813,10 @@ enum EffectKindTag {
 impl EffectKindTag {
     fn z_order(self) -> f32 {
         match self {
-            EffectKindTag::Cast | EffectKindTag::Projectile | EffectKindTag::Impact => {
-                EFFECT_TRANSIENT_ORDER
-            }
+            EffectKindTag::Cast
+            | EffectKindTag::AttackOverlay
+            | EffectKindTag::Projectile
+            | EffectKindTag::Impact => EFFECT_TRANSIENT_ORDER,
             _ => EFFECT_GROUND_ORDER,
         }
     }
@@ -1015,16 +1040,21 @@ impl NativeEffects {
             let spell = event
                 .payload
                 .get("spell")
-                .and_then(Value::as_str)
+                .and_then(|value| {
+                    value.as_str().map(ToOwned::to_owned).or_else(|| {
+                        value
+                            .as_u64()
+                            .and_then(|id| spell_name_by_number(id as u32))
+                    })
+                })
                 .or_else(|| {
                     event
                         .payload
                         .get("effect")
                         .and_then(Value::as_u64)
-                        .map(|_| "effect")
+                        .map(|_| "effect".to_owned())
                 })
-                .unwrap_or("-")
-                .to_owned();
+                .unwrap_or_else(|| "-".to_owned());
             let src = event.payload.get("sourceId").and_then(Value::as_u64);
             let dst = event.payload.get("destinationId").and_then(Value::as_u64);
             let src_tile = src.and_then(|id| zone_tiles.get(&(id as u32)).copied());
@@ -1261,6 +1291,7 @@ impl NativeEffects {
     ) {
         match packet {
             "MapChanged" | "LogOutSuccess" => self.clear_active_effects(),
+            "ObjectAttack" => self.apply_object_attack(payload, provenance),
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
             "ObjectProjectile" => self.apply_object_projectile(payload, zone_tiles, provenance),
             "ObjectEffect" => self.apply_object_effect(payload, zone_tiles, provenance),
@@ -1271,12 +1302,68 @@ impl NativeEffects {
         }
     }
 
-    fn queue_immediate_sound(
-        &mut self,
-        provenance: &EffectProvenance,
-        cue: &str,
-        file_name: &str,
-    ) {
+    fn apply_object_attack(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let flaming_sword = payload.get("spell").is_some_and(|value| {
+            value.as_u64() == Some(8) || value.as_str() == Some("FlamingSword")
+        });
+        if !flaming_sword {
+            return;
+        }
+        let Some(catalog) = effect_catalog() else {
+            return;
+        };
+        let Some(object_id) = payload
+            .get("objectId")
+            .and_then(Value::as_u64)
+            .and_then(|value| u32::try_from(value).ok())
+        else {
+            return;
+        };
+        let (Some(x), Some(y)) = (
+            value_f32(payload, "location", "x"),
+            value_f32(payload, "location", "y"),
+        ) else {
+            return;
+        };
+        let direction = payload
+            .get("direction")
+            .and_then(Value::as_str)
+            .map(direction_index)
+            .unwrap_or(4);
+        let Some(animation) = catalog.spell_attack_overlay_animation("FlamingSword", direction)
+        else {
+            return;
+        };
+
+        // One overlay per attacker: a newer authoritative attack restarts its
+        // six-frame clock while distinct attackers remain independent.
+        let key = format!("flaming-sword-{object_id}");
+        self.active.retain(|instance| instance.key != key);
+        self.pending_sounds.retain(|pending| pending.key != key);
+        self.anchor_object_ids.insert(key.clone(), object_id);
+        self.queue_immediate_sound(
+            provenance,
+            FLAMING_SWORD_SOUND_CUE,
+            FLAMING_SWORD_SOUND_FILE,
+        );
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::AttackOverlay,
+            tile_x: x as i32,
+            tile_y: y as i32,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at: self.now_ms,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+    }
+
+    fn queue_immediate_sound(&mut self, provenance: &EffectProvenance, cue: &str, file_name: &str) {
         self.ready_sounds
             .push(mir2_client_bevy::audio::NativeGameplaySoundEvent {
                 generation: provenance.generation,
@@ -1583,11 +1670,8 @@ impl NativeEffects {
                         && provenance.sequence.saturating_sub(*cast_sequence) <= 2
                 })
         {
-            self.local_projectile_dedupe.remove(&(
-                spell.to_owned(),
-                source_id,
-                destination_id,
-            ));
+            self.local_projectile_dedupe
+                .remove(&(spell.to_owned(), source_id, destination_id));
             return;
         }
         let (Some(&(from_x, from_y)), Some(&(to_x, to_y))) =
@@ -1825,7 +1909,20 @@ impl NativeEffects {
             return;
         };
         let remove_key = format!("spell-{object_id}");
-        self.active.retain(|instance| instance.key != remove_key);
+        let anchored_keys = self
+            .anchor_object_ids
+            .iter()
+            .filter_map(|(key, anchored_id)| (*anchored_id == object_id).then_some(key.clone()))
+            .collect::<Vec<_>>();
+        self.active.retain(|instance| {
+            instance.key != remove_key && !anchored_keys.contains(&instance.key)
+        });
+        self.anchor_object_ids
+            .retain(|_, anchored_id| *anchored_id != object_id);
+        self.pending_sounds
+            .retain(|pending| !anchored_keys.contains(&pending.key));
+        self.local_projectile_targets
+            .retain(|key, _| !anchored_keys.contains(key));
     }
 
     /// Advance the effect clock and build the EffectRenderState JSON. Returns
@@ -1894,9 +1991,15 @@ impl NativeEffects {
                 // Shadow is treated as a WHOLE: a legal offset may have one axis
                 // zero (e.g. (0, -5) or (4, 0)). Only when both are absent (None)
                 // is there no shadow at all.
-                let shadow_pair = match (frame.shadow_x, frame.shadow_y) {
-                    (Some(sx), Some(sy)) => Some((sx, sy)),
-                    _ => None,
+                let shadow_pair = if instance.kind == EffectKindTag::AttackOverlay {
+                    // PlayerObject.DrawEffects adds only the source bitmap;
+                    // the actor body owns its own shadow.
+                    None
+                } else {
+                    match (frame.shadow_x, frame.shadow_y) {
+                        (Some(sx), Some(sy)) => Some((sx, sy)),
+                        _ => None,
+                    }
                 };
                 let mut entry = json!({
                     "key": instance.key,
@@ -1907,6 +2010,7 @@ impl NativeEffects {
                     "height": frame.height,
                     "z": effect_z(tile_x, tile_y, instance.kind.z_order()),
                     "additive": animation.blend,
+                    "opacity": animation.opacity,
                 });
                 if let Some(mask) = mask_image_url {
                     entry["maskImageUrl"] = json!(mask);
@@ -2226,6 +2330,7 @@ mod tests {
             interval,
             frames: frames.clone(),
             blend: true,
+            opacity: 1.0,
             repeat,
             offset_x: 0.0,
             offset_y: 0.0,
@@ -3627,7 +3732,10 @@ mod tests {
             .current
             .as_ref()
             .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")));
-        assert!(projectile.queued.is_none(), "target binding occurs at launch");
+        assert!(
+            projectile.queued.is_none(),
+            "target binding occurs at launch"
+        );
 
         let cast_sound = fx.take_due_sound_events(0);
         assert_eq!(cast_sound.len(), 1);
@@ -3658,9 +3766,10 @@ mod tests {
             .is_some_and(|path| path.ends_with("/Magic/10.png")));
         assert!(fx.active.iter().any(|instance| {
             instance.key.starts_with("fx-fireball-")
-                && instance.queued.as_ref().is_some_and(|animation| {
-                    animation.frames[0].path.ends_with("/Magic/170.png")
-                })
+                && instance
+                    .queued
+                    .as_ref()
+                    .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/170.png"))
         }));
         assert!(fx.take_due_sound_events(849).is_empty());
 
@@ -3923,7 +4032,10 @@ mod tests {
             .current
             .as_ref()
             .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1160.png")));
-        assert!(projectile.queued.is_none(), "target binding occurs at launch");
+        assert!(
+            projectile.queued.is_none(),
+            "target binding occurs at launch"
+        );
 
         let cast_sound = fx.take_due_sound_events(0);
         assert_eq!(cast_sound.len(), 1);
@@ -3954,9 +4066,10 @@ mod tests {
             .is_some_and(|path| path.ends_with("/Magic/1160.png")));
         assert!(fx.active.iter().any(|instance| {
             instance.key.starts_with("fx-soul-fireball-")
-                && instance.queued.as_ref().is_some_and(|animation| {
-                    animation.frames[0].path.ends_with("/Magic/1360.png")
-                })
+                && instance
+                    .queued
+                    .as_ref()
+                    .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1360.png"))
         }));
         assert!(fx.take_due_sound_events(849).is_empty());
 
@@ -3978,14 +4091,11 @@ mod tests {
     fn soul_fireball_cast_false_is_audio_only_and_never_creates_later_phases() {
         let zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
         let mut fx = NativeEffects::default();
-        fx.observe(
-            0,
-            288,
-            616,
-            &[soul_fireball_magic_event(1, false)],
-            &zone,
+        fx.observe(0, 288, 616, &[soul_fireball_magic_event(1, false)], &zone);
+        assert!(
+            fx.active.is_empty(),
+            "Crystal has no SoulFireBall cast bitmap"
         );
-        assert!(fx.active.is_empty(), "Crystal has no SoulFireBall cast bitmap");
         let sound = fx.take_due_sound_events(0);
         assert_eq!(sound.len(), 1);
         assert_eq!(sound[0].cue, SOUL_FIREBALL_CAST_SOUND_CUE);
@@ -3996,13 +4106,7 @@ mod tests {
     fn soul_fireball_locks_direction_at_launch_then_tracks_target_distance() {
         let mut zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
         let mut fx = NativeEffects::default();
-        fx.observe(
-            0,
-            288,
-            616,
-            &[soul_fireball_magic_event(1, true)],
-            &zone,
-        );
+        fx.observe(0, 288, 616, &[soul_fireball_magic_event(1, true)], &zone);
         let _ = fx.take_due_sound_events(0);
         zone.insert(2014, (295, 616));
         fx.observe(600, 288, 616, &[], &zone);
@@ -4049,7 +4153,10 @@ mod tests {
             &[soul_fireball_compat_projectile_event(1)],
             &source_only,
         );
-        assert!(fx.active.is_empty(), "isolated compatibility packet is ignored");
+        assert!(
+            fx.active.is_empty(),
+            "isolated compatibility packet is ignored"
+        );
 
         fx.observe(
             0,
@@ -4106,13 +4213,7 @@ mod tests {
     fn soul_fireball_map_change_clears_audio_only_and_delayed_projectile_state() {
         let zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
         let mut fx = NativeEffects::default();
-        fx.observe(
-            0,
-            288,
-            616,
-            &[soul_fireball_magic_event(1, true)],
-            &zone,
-        );
+        fx.observe(0, 288, 616, &[soul_fireball_magic_event(1, true)], &zone);
         fx.observe(
             100,
             288,
@@ -4135,9 +4236,7 @@ mod tests {
 
         let fixture = soul_fireball_fixture();
         let catalog = EffectCatalog::load().expect("production effect catalog");
-        assert!(catalog
-            .spell_cast_animation("SoulFireBall", 0)
-            .is_none());
+        assert!(catalog.spell_cast_animation("SoulFireBall", 0).is_none());
         for direction in 0..16_u32 {
             let animation = catalog
                 .spell_projectile_animation("SoulFireBall", direction)
@@ -4223,10 +4322,7 @@ mod tests {
         let complete_sound = fx.take_due_sound_events(600);
         assert_eq!(complete_sound.len(), 1);
         assert_eq!(complete_sound[0].cue, FIREWALL_COMPLETE_SOUND_CUE);
-        assert_eq!(
-            complete_sound[0].file_name,
-            FIREWALL_COMPLETE_SOUND_FILE
-        );
+        assert_eq!(complete_sound[0].file_name, FIREWALL_COMPLETE_SOUND_FILE);
         let completed: Value = serde_json::from_str(
             &fx.tick_with_visibility(600, true)
                 .expect("FireWall cast completion"),
@@ -4362,6 +4458,232 @@ mod tests {
             assert_eq!(bytes.len(), audio["sourceBytes"]);
             assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
         }
+    }
+
+    fn flaming_sword_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-flaming-sword-v1.json"
+        ))
+        .expect("VIS-02 FlamingSword fixture JSON")
+    }
+
+    fn flaming_sword_event(sequence: u64, direction: usize) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 16,
+            packet: "ObjectAttack".to_owned(),
+            payload: flaming_sword_fixture()["directionCases"][direction]["event"]["payload"]
+                .clone(),
+        }
+    }
+
+    fn ordinary_attack_event(sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 16,
+            packet: "ObjectAttack".to_owned(),
+            payload: flaming_sword_fixture()["compatibilityCases"]["ordinaryAttack"]["event"]
+                ["payload"]
+                .clone(),
+        }
+    }
+
+    #[test]
+    fn flaming_sword_all_directions_resolve_six_source_frames_at_crystal_rate() {
+        let fixture = flaming_sword_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        assert!(catalog.spell_cast_animation("FlamingSword", 0).is_none());
+        for direction in 0..8_u32 {
+            let animation = catalog
+                .spell_attack_overlay_animation("FlamingSword", direction)
+                .expect("all FlamingSword directions resolve");
+            assert_eq!(animation.kind, "attackOverlay");
+            assert_eq!(animation.frames.len(), 6);
+            assert_eq!(animation.interval, 100);
+            assert_eq!(animation.duration_ms, 600);
+            assert!(animation.blend);
+            assert!((animation.opacity - 0.7).abs() < f32::EPSILON);
+            assert_eq!(animation.light, Some(0));
+            for (frame, source_frame) in animation.frames.iter().zip(0..6_u32) {
+                let index = 3480 + direction * 10 + source_frame;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+            assert_eq!(
+                fixture["directionCases"][direction as usize]["firstFrame"],
+                3480 + direction * 10
+            );
+            assert_eq!(
+                fixture["directionCases"][direction as usize]["lastFrame"],
+                3485 + direction * 10
+            );
+        }
+    }
+
+    #[test]
+    fn flaming_sword_object_attack_tracks_attacker_and_expires_at_six_frames() {
+        let mut zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[flaming_sword_event(1, 0)], &zone);
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].kind, EffectKindTag::AttackOverlay);
+        assert_eq!(fx.active[0].key, "flaming-sword-1000");
+        assert_eq!(fx.active[0].start_at, 0);
+        assert!(fx.current_light_snapshots(0).is_empty());
+
+        let sound = fx.take_due_sound_events(0);
+        assert_eq!(sound.len(), 1);
+        assert_eq!(sound[0].cue, FLAMING_SWORD_SOUND_CUE);
+        assert_eq!(sound[0].file_name, FLAMING_SWORD_SOUND_FILE);
+        assert!(fx.take_due_sound_events(0).is_empty());
+
+        let first: Value = serde_json::from_str(
+            &fx.tick_with_visibility(0, true)
+                .expect("first FlamingSword frame"),
+        )
+        .expect("first FlamingSword JSON");
+        let entry = &first["effects"][0];
+        assert!(entry["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3480.png")));
+        assert_eq!(entry["additive"], true);
+        assert!(entry["opacity"]
+            .as_f64()
+            .is_some_and(|opacity| (opacity - 0.7).abs() < 0.000_001));
+        assert!(entry.get("shadowX").is_none());
+        assert!(entry.get("shadowY").is_none());
+
+        zone.insert(1000, (289, 616));
+        fx.observe(200, 288, 616, &[], &zone);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (289, 616));
+        let moved: Value = serde_json::from_str(
+            &fx.tick_with_visibility(200, true)
+                .expect("moved FlamingSword frame"),
+        )
+        .expect("moved FlamingSword JSON");
+        assert!(moved["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3482.png")));
+
+        let hidden: Value = serde_json::from_str(
+            &fx.tick_with_visibility(300, false)
+                .expect("hidden FlamingSword state"),
+        )
+        .expect("hidden FlamingSword JSON");
+        assert_eq!(hidden["effects"], json!([]));
+        let restored: Value = serde_json::from_str(
+            &fx.tick_with_visibility(400, true)
+                .expect("restored FlamingSword state"),
+        )
+        .expect("restored FlamingSword JSON");
+        assert!(restored["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3484.png")));
+
+        let last: Value = serde_json::from_str(
+            &fx.tick_with_visibility(599, true)
+                .expect("last FlamingSword frame"),
+        )
+        .expect("last FlamingSword JSON");
+        assert!(last["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3485.png")));
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("expired FlamingSword state"),
+        )
+        .expect("expired FlamingSword JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn flaming_sword_ordinary_attack_is_noop_and_new_attack_restarts_per_attacker() {
+        let zone = HashMap::from([(1000, (288, 616)), (1001, (289, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[ordinary_attack_event(1)], &zone);
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(0).is_empty());
+
+        fx.observe(10, 288, 616, &[flaming_sword_event(2, 0)], &zone);
+        assert_eq!(fx.active.len(), 1);
+        fx.observe(210, 288, 616, &[flaming_sword_event(3, 2)], &zone);
+        assert_eq!(fx.active.len(), 1, "same attacker replaces old overlay");
+        assert_eq!(fx.active[0].started_at, 210);
+        assert!(fx.active[0]
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/3500.png")));
+
+        let mut other = flaming_sword_event(4, 4);
+        other.payload["objectId"] = json!(1001);
+        other.payload["location"] = json!({"x": 289, "y": 616});
+        fx.observe(220, 288, 616, &[other], &zone);
+        assert_eq!(fx.active.len(), 2, "different attackers coexist");
+        assert!(fx
+            .active
+            .iter()
+            .any(|entry| entry.key == "flaming-sword-1000"));
+        assert!(fx
+            .active
+            .iter()
+            .any(|entry| entry.key == "flaming-sword-1001"));
+    }
+
+    #[test]
+    fn flaming_sword_remove_map_change_and_session_reset_clear_overlay_and_audio() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[flaming_sword_event(1, 0)], &zone);
+        fx.observe(
+            1,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 16,
+                packet: "ObjectRemove".to_owned(),
+                payload: json!({"objectId": 1000}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+
+        fx.observe(10, 288, 616, &[flaming_sword_event(3, 0)], &zone);
+        fx.observe(
+            11,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 4,
+                generation: 16,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(11).is_empty());
+
+        fx.observe(20, 288, 616, &[flaming_sword_event(5, 0)], &zone);
+        fx.reset_session();
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(20).is_empty());
+    }
+
+    #[test]
+    fn flaming_sword_source_audio_identity_is_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = flaming_sword_fixture();
+        let path = assets::asset_path("original-ui/Sound/M8-1.wav")
+            .expect("packaged FlamingSword sound path");
+        let bytes = fs::read(path).expect("read FlamingSword sound");
+        assert_eq!(bytes.len(), fixture["source"]["audio"]["sourceBytes"]);
+        assert_eq!(
+            format!("{:x}", Sha256::digest(&bytes)),
+            fixture["source"]["audio"]["sha256"]
+        );
     }
 
     fn lightning_fixture() -> Value {

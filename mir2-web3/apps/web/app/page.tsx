@@ -77,6 +77,7 @@ import {
   type BevyMovementShadowMode,
 } from "../lib/bevy-movement-shadow";
 import {
+  cancelPendingEntityAttackSounds,
   type SoundEntityRef,
 } from "../lib/original-sound-triggers";
 import { createGameEventBus, makeRealAudioSink, registerSoundSubscriber, registerVfxSubscriber } from "../lib/game-events";
@@ -150,6 +151,9 @@ import type {
   SceneView,
   TerrainPatch,
 } from "../lib/scene-types";
+import {
+  applyObjectAttackSceneState,
+} from "../lib/scene-effect-runtime";
 import type { ClientScreen } from "../lib/original-ui";
 import {
   attackModeChatMessage,
@@ -725,7 +729,7 @@ type ProjectileState = {
 
 type SceneEffectState = {
   key: string;
-  source: "spell" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "objectSpell" | "map" | "object";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;
@@ -2193,6 +2197,7 @@ export default function HomePage() {
     return () => {
       unsubSound();
       unsubVfx();
+      cancelPendingEntityAttackSounds();
     };
     // soundEntityRefFor, pushDamageFloaterFromBus, markEntityStruckFlash are
     // stable hoisted closures over refs; intentionally excluded from deps.
@@ -5954,6 +5959,7 @@ export default function HomePage() {
 
     socket.addEventListener("close", () => {
       if (socketRef.current !== socket) return;
+      cancelPendingEntityAttackSounds();
       const closedManually = manualSocketCloseRef.current;
       socketRef.current = null;
       manualSocketCloseRef.current = false;
@@ -6311,6 +6317,7 @@ export default function HomePage() {
   }
 
   function resetClient() {
+    cancelPendingEntityAttackSounds();
     const socketToClose = socketRef.current;
     manualSocketCloseRef.current = Boolean(
       socketToClose &&
@@ -8903,6 +8910,7 @@ export default function HomePage() {
       case "ObjectRemove":
       case "ObjectHide": {
         const removedObjectId = stringifyId(payload.objectId);
+        cancelPendingEntityAttackSounds(removedObjectId);
         if (removedObjectId !== worldRef.current.playerObjectId) {
           observeBevyMovementShadow({
             type: "remoteRemove",
@@ -9241,6 +9249,7 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
+        cancelPendingEntityAttackSounds();
         setIdentitySessionToken(null);
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -10379,6 +10388,9 @@ export default function HomePage() {
       // Map / navigation -------------------------------------------------------
       case "MapChanged": {
         const fileName = stringOrNull(payload.fileName);
+        if (normalizeMapFileName(fileName) !== normalizeMapFileName(worldRef.current.mapFileName)) {
+          cancelPendingEntityAttackSounds();
+        }
         const miniMap = numberOrUndefined(payload.miniMap);
         const bigMap = numberOrUndefined(payload.bigMap);
         const mapLightSetting = numberOrUndefined(payload.lights);
@@ -11491,25 +11503,26 @@ export default function HomePage() {
 
   function markWorldEntityAttack(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
-    gameBusRef.current!.emit({ type: "entityAttack", objectId });
-    const location = payload.location as { x?: number; y?: number } | undefined;
+    const spell =
+      typeof payload.spell === "number" || typeof payload.spell === "string"
+        ? payload.spell
+        : undefined;
+    gameBusRef.current!.emit({ type: "entityAttack", objectId, spell });
     const now = Date.now();
 
-    updateWorld((current) => ({
-      ...current,
-      entities: patchEntityInList(current.entities, objectId, (entity) => {
-        const animation = attackAnimationVariant(payload);
-        return {
-          ...entity,
-          x: typeof location?.x === "number" ? location.x : entity.x,
-          y: typeof location?.y === "number" ? location.y : entity.y,
-          direction: stringOrNull(payload.direction) ?? entity.direction,
-          attackAnimation: animation,
-          attackStartedAt: now,
-          attackUntil: now + crystalAttackActionDurationMs(entity, animation),
-        };
-      }),
-    }));
+    updateWorld((current) => {
+      const attackState = applyObjectAttackSceneState(
+        current.entities,
+        current.effects,
+        payload,
+        now,
+        crystalAttackActionDurationMs,
+      );
+      return {
+        ...current,
+        ...attackState,
+      };
+    });
   }
 
   function markWorldEntityMagic(payload: Record<string, unknown>) {
@@ -15271,25 +15284,6 @@ function setOriginalMapDoorClosed(
     return { ...cell, closedDoor: closed };
   });
   return changed ? { ...region, cells } : region;
-}
-
-function attackAnimationVariant(
-  payload: Record<string, unknown>,
-): "melee1" | "melee2" | "melee3" | "melee4" | "range" {
-  if (typeof payload.spell === "string") {
-    return "range";
-  }
-
-  switch (numberOrUndefined(payload.attackType)) {
-    case 1:
-      return "melee2";
-    case 2:
-      return "melee3";
-    case 3:
-      return "melee4";
-    default:
-      return "melee1";
-  }
 }
 
 function crystalAttackActionDurationMs(

@@ -30,9 +30,10 @@ export type EffectSubSpec = {
   directionCount?: number;
   directionStride?: number;
   directionRanges?: Array<{ direction: number; base: number; end: number }>;
-  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "return";
+  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "return" | "attackOverlay";
   light?: number;
   blend?: boolean;
+  rate?: number;
   repeat?: boolean;
   offset?: { x: number; y: number };
 };
@@ -42,7 +43,7 @@ export type EffectSpec = {
   spellId?: number;
   effect?: string;
   effectId?: number;
-  kind?: "cast" | "projectile" | "impact" | "target" | "ground";
+  kind?: "cast" | "projectile" | "impact" | "target" | "ground" | "attackOverlay";
   library: string;
   base: number;
   count: number;
@@ -55,6 +56,7 @@ export type EffectSpec = {
   valueRanges?: Array<{ value: number; base: number; end: number }>;
   light?: number;
   blend?: boolean;
+  rate?: number;
   repeat?: boolean;
   offset?: { x: number; y: number };
   provenance?: { source: string; symbol: string };
@@ -69,6 +71,7 @@ export type EffectAnimation = {
   frames: EffectFrameMeta[];
   interval: number;
   blend: boolean;
+  opacity: number;
   light: number;
   repeat: boolean;
   offset: { x: number; y: number };
@@ -219,6 +222,7 @@ function resolveSub(
     frames,
     interval,
     blend: sub.blend ?? true,
+    opacity: Math.min(1, Math.max(0, sub.rate ?? 1)),
     light: sub.light ?? 0,
     repeat: sub.repeat ?? false,
     offset: sub.offset ?? { x: 0, y: 0 },
@@ -256,6 +260,7 @@ export function resolveAnimation(
     frames,
     interval: entry.interval,
     blend: entry.blend ?? true,
+    opacity: Math.min(1, Math.max(0, entry.rate ?? 1)),
     light: entry.light ?? 6,
     repeat: entry.repeat ?? false,
     offset: entry.offset ?? { x: 0, y: 0 },
@@ -288,10 +293,20 @@ export function resolveSpellCastEffect(
   direction = 0,
 ): EffectAnimation | null {
   const entry = assets.spellByName.get(spell);
-  if (!entry || entry.kind === "projectile" || entry.kind === "impact" || entry.kind === "target") {
+  if (!entry || entry.kind === "projectile" || entry.kind === "impact" || entry.kind === "target" || entry.kind === "attackOverlay") {
     return null;
   }
   return resolveAnimation(assets, entry, direction);
+}
+
+/** Resolve an attacker-bound Attack1 overlay without treating it as ObjectMagic cast art. */
+export function resolveSpellAttackOverlayEffect(
+  assets: EffectAssets,
+  spell: string,
+  direction = 0,
+): EffectAnimation | null {
+  const entry = assets.spellByName.get(spell);
+  return entry?.kind === "attackOverlay" ? resolveAnimation(assets, entry, direction) : null;
 }
 
 export function resolveSpellProjectileEffect(

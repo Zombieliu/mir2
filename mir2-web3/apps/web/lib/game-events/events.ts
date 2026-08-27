@@ -32,6 +32,8 @@ export type EntityAttackEvent = {
   type: "entityAttack";
   /** Stringified objectId of the attacker. */
   objectId: string;
+  /** Optional Crystal Spell identity carried by ObjectAttack. */
+  spell?: number | string | null;
 };
 
 /** An entity was struck (took a hit). Triggers struck sound + hit-flash. */

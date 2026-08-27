@@ -904,6 +904,71 @@
       }
     },
     {
+      "spell": "FlamingSword",
+      "spellId": 8,
+      "library": "Magic",
+      "base": 3480,
+      "count": 6,
+      "interval": 100,
+      "kind": "attackOverlay",
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 3480,
+          "end": 3485
+        },
+        {
+          "direction": 1,
+          "base": 3490,
+          "end": 3495
+        },
+        {
+          "direction": 2,
+          "base": 3500,
+          "end": 3505
+        },
+        {
+          "direction": 3,
+          "base": 3510,
+          "end": 3515
+        },
+        {
+          "direction": 4,
+          "base": 3520,
+          "end": 3525
+        },
+        {
+          "direction": 5,
+          "base": 3530,
+          "end": 3535
+        },
+        {
+          "direction": 6,
+          "base": 3540,
+          "end": 3545
+        },
+        {
+          "direction": 7,
+          "base": 3550,
+          "end": 3555
+        }
+      ],
+      "blend": true,
+      "rate": 0.7,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "Spell.FlamingSword"
+      }
+    },
+    {
       "spell": "FrostCrunch",
       "spellId": 41,
       "library": "Magic2",

@@ -855,6 +855,9 @@ struct EffectRenderEntry {
     z: f32,
     #[serde(default)]
     additive: bool,
+    /// Crystal DrawBlend rate; omitted legacy entries retain full strength.
+    #[serde(default)]
+    opacity: Option<f32>,
     #[serde(default)]
     mask_image_url: Option<String>,
     /// Mask geometry (optional). mask_x/mask_y and frame_x/frame_y are both
@@ -2870,6 +2873,7 @@ fn sync_effect_render(
     let mut stale_images: HashSet<String> = registry.effect_render_images.keys().cloned().collect();
     for effect in &snapshot.effects {
         alive.insert(effect.key.clone());
+        let opacity = effect.opacity.unwrap_or(1.0).clamp(0.0, 1.0);
         let image_key = effect.image_url.as_ref().map(|url| browser_asset_path(url));
         if let Some(image_key) = &image_key {
             stale_images.remove(image_key);
@@ -2901,23 +2905,28 @@ fn sync_effect_render(
                 }
                 // Rebuild below.
             } else if let Some(handle) = registry.effect_render.get_mut(&effect.key) {
-                if handle.image_key != image_key.as_deref().unwrap_or_default() {
-                    if let Some(image) = bound_image.clone() {
-                        if effect.additive {
-                            let material = additive_cache.material(
-                                &effect.key,
-                                image,
-                                1.0,
-                                &mut additive_materials,
-                            );
-                            if let Ok(mut binding) = additive_material_query.get_mut(handle.entity)
-                            {
-                                *binding = MeshMaterial2d(material);
-                            }
-                        } else if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                let image_changed = handle.image_key != image_key.as_deref().unwrap_or_default();
+                if let Some(image) = bound_image.clone() {
+                    if effect.additive {
+                        // Refresh on every snapshot because opacity can change
+                        // without a frame/image change.
+                        let material = additive_cache.material(
+                            &effect.key,
+                            image,
+                            opacity,
+                            &mut additive_materials,
+                        );
+                        if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                            *binding = MeshMaterial2d(material);
+                        }
+                    } else if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                        if image_changed {
                             sprite.image = image;
                         }
+                        sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity);
                     }
+                }
+                if image_changed {
                     handle.image_key = image_key.clone().unwrap_or_default();
                 }
                 if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
@@ -2937,7 +2946,7 @@ fn sync_effect_render(
                         let material = additive_cache.material(
                             &effect.key,
                             image,
-                            1.0,
+                            opacity,
                             &mut additive_materials,
                         );
                         commands
@@ -2962,6 +2971,7 @@ fn sync_effect_render(
                                         effect.width.max(1.0),
                                         effect.height.max(1.0),
                                     )),
+                                    color: Color::srgba(1.0, 1.0, 1.0, opacity),
                                     ..default()
                                 },
                                 Transform::from_translation(position),
@@ -3008,14 +3018,16 @@ fn sync_effect_render(
                 effect.z / 100_000.0 + 0.0001,
             );
             if let Some(handle) = registry.effect_render_masks.get_mut(&mask_key) {
-                if handle.image_key != *mask_image_key {
-                    if let Some(image) = bound_mask_image.clone() {
-                        let material =
-                            additive_cache.material(&mask_key, image, 1.0, &mut additive_materials);
-                        if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
-                            *binding = MeshMaterial2d(material);
-                        }
+                if let Some(image) = bound_mask_image.clone() {
+                    // Keep the mask at the same DrawBlend rate as the primary,
+                    // including an opacity-only retained update.
+                    let material =
+                        additive_cache.material(&mask_key, image, opacity, &mut additive_materials);
+                    if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                        *binding = MeshMaterial2d(material);
                     }
+                }
+                if handle.image_key != *mask_image_key {
                     handle.image_key = mask_image_key.clone();
                 }
                 if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
@@ -3025,7 +3037,7 @@ fn sync_effect_render(
             } else if let Some(image) = bound_mask_image.clone() {
                 let mesh = additive_cache.unit_quad(&mut meshes);
                 let material =
-                    additive_cache.material(&mask_key, image, 1.0, &mut additive_materials);
+                    additive_cache.material(&mask_key, image, opacity, &mut additive_materials);
                 let entity = commands
                     .spawn((
                         MirEffectRenderLayer,
@@ -6027,7 +6039,8 @@ mod entity_atlas_tests {
                     "width": 44.0,
                     "height": 75.0,
                     "z": 9.0,
-                    "additive": true
+                    "additive": true,
+                    "opacity": 0.7
                 }]
             }"#,
         )
@@ -6036,6 +6049,7 @@ mod entity_atlas_tests {
         let entry = &state.effects[0];
         assert_eq!(entry.key, "fx-cast-1");
         assert!(entry.additive);
+        assert_eq!(entry.opacity, Some(0.7));
         assert_eq!(
             entry.image_url.as_deref(),
             Some("/original-effects/Magic/0.png")
@@ -6094,6 +6108,7 @@ mod effect_mask_shadow_tests {
                 height: 48.0,
                 z: 9.0,
                 additive: true,
+                opacity: None,
                 mask_image_url: mask.map(|s| s.to_owned()),
                 mask_width: mask.map(|_| 32.0),
                 mask_height: mask.map(|_| 32.0),
@@ -6229,6 +6244,7 @@ mod effect_mask_shadow_tests {
                 height: 48.0,
                 z: 9.0,
                 additive: true,
+                opacity: Some(0.7),
                 mask_image_url: Some("/original-effects/Magic/0.png".to_owned()),
                 mask_width: Some(32.0),
                 mask_height: Some(32.0),
@@ -6274,6 +6290,28 @@ mod effect_mask_shadow_tests {
         assert_eq!(registry.effect_render_shadows.len(), 1, "shadow spawned");
         let shadow_entity = registry.effect_render_shadows["fx-e2e:shadow"].entity;
         let primary_entity = registry.effect_render["fx-e2e"].entity;
+        let primary_binding = app
+            .world()
+            .get::<MeshMaterial2d<crate::additive_material::CrystalAdditiveMaterial>>(
+                primary_entity,
+            )
+            .expect("primary additive material binding");
+        let primary_material = app
+            .world()
+            .resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
+            .get(&primary_binding.0)
+            .expect("primary additive material");
+        assert!((primary_material.opacity() - 0.7).abs() < f32::EPSILON);
+        let mask_binding = app
+            .world()
+            .get::<MeshMaterial2d<crate::additive_material::CrystalAdditiveMaterial>>(mask_entity)
+            .expect("mask additive material binding");
+        let mask_material = app
+            .world()
+            .resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
+            .get(&mask_binding.0)
+            .expect("mask additive material");
+        assert!((mask_material.opacity() - 0.7).abs() < f32::EPSILON);
         let primary_transform = *app.world().get::<Transform>(primary_entity).unwrap();
         let shadow_transform = *app.world().get::<Transform>(shadow_entity).unwrap();
         assert!(shadow_transform.translation.z < primary_transform.translation.z);
@@ -6389,6 +6427,7 @@ mod effect_mask_shadow_tests {
                 height: 48.0,
                 z: 9.0,
                 additive: true,
+                opacity: None,
                 mask_image_url: None,
                 mask_width: None,
                 mask_height: None,
@@ -6426,6 +6465,7 @@ mod effect_mask_shadow_tests {
                 height: 48.0,
                 z: 9.0,
                 additive: true,
+                opacity: None,
                 mask_image_url: None,
                 mask_width: None,
                 mask_height: None,
@@ -6540,6 +6580,7 @@ mod effect_mask_shadow_tests {
                 height: 48.0,
                 z: 9.0,
                 additive: true,
+                opacity: None,
                 mask_image_url: Some("/original-effects/Magic/0.png".to_owned()),
                 mask_width: Some(48.0),
                 mask_height: Some(48.0),
@@ -6586,6 +6627,7 @@ mod effect_mask_shadow_tests {
                 height: 48.0,
                 z: 9.0,
                 additive: true,
+                opacity: None,
                 mask_image_url: Some("/original-effects/Magic/0.png".to_owned()),
                 mask_width: Some(32.0),
                 mask_height: Some(32.0),

@@ -40,6 +40,11 @@ impl CrystalAdditiveMaterial {
     pub(crate) fn uv_scale_offset(&self) -> Vec4 {
         self.uv_scale_offset
     }
+
+    #[cfg(test)]
+    pub(crate) fn opacity(&self) -> f32 {
+        self.tint.alpha
+    }
 }
 
 impl Material2d for CrystalAdditiveMaterial {

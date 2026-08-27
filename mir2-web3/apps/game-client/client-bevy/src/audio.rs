@@ -27,6 +27,7 @@ const MAX_PENDING_GAMEPLAY_SOUND_EVENTS: usize = 32;
 /// become file paths: the platform effect adapter can only request a cue listed
 /// here and packaging verifies the same exact files.
 pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
+    "M8-1.wav",
     "M31-0.wav",
     "M31-1.wav",
     "M31-2.wav",
@@ -838,13 +839,20 @@ mod tests {
         }));
         assert_eq!(queue.len(), 1, "new generation clears stale pending cues");
 
+        assert!(queue.push(NativeGameplaySoundEvent {
+            generation: 5,
+            sequence: 2,
+            cue: "FlamingSword.attack".to_owned(),
+            file_name: "M8-1.wav".to_owned(),
+        }));
+
         for (sequence, file_name) in ["M31-0.wav", "M31-1.wav", "M31-2.wav"]
             .into_iter()
             .enumerate()
         {
             assert!(queue.push(NativeGameplaySoundEvent {
                 generation: 5,
-                sequence: sequence as u64 + 2,
+                sequence: sequence as u64 + 3,
                 cue: format!("FireBall.{sequence}"),
                 file_name: file_name.to_owned(),
             }));

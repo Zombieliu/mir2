@@ -160,7 +160,7 @@ export type DisplayProjectile = {
 
 export type DisplaySceneEffect = {
   key: string;
-  source: "spell" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "objectSpell" | "map" | "object";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;

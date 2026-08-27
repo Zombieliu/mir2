@@ -186,6 +186,42 @@ async function testAssembleMode() {
   assert.equal(lightning.spellId, 40);
   assert.equal(lightning.directionStride, 20);
   assert.deepEqual(lightning.directionRanges[7], { direction: 7, base: 1110, end: 1115 });
+  const flamingSword = manifest.spell_effects.find((entry) => entry.spell === "FlamingSword");
+  assert.deepEqual(
+    {
+      spellId: flamingSword.spellId,
+      kind: flamingSword.kind,
+      library: flamingSword.library,
+      base: flamingSword.base,
+      count: flamingSword.count,
+      interval: flamingSword.interval,
+      directionCount: flamingSword.directionCount,
+      directionStride: flamingSword.directionStride,
+      blend: flamingSword.blend,
+      rate: flamingSword.rate,
+      light: flamingSword.light,
+      repeat: flamingSword.repeat,
+    },
+    {
+      spellId: 8,
+      kind: "attackOverlay",
+      library: "Magic",
+      base: 3480,
+      count: 6,
+      interval: 100,
+      directionCount: 8,
+      directionStride: 10,
+      blend: true,
+      rate: 0.7,
+      light: 0,
+      repeat: false,
+    },
+  );
+  assert.deepEqual(flamingSword.directionRanges[7], { direction: 7, base: 3550, end: 3555 });
+  assert.deepEqual(flamingSword.provenance, {
+    source: "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+    symbol: "Spell.FlamingSword",
+  });
   assert.deepEqual(
     manifest.spell_effects.find((entry) => entry.spell === "SummonHolyDeva"),
     {
@@ -224,6 +260,13 @@ async function testAssembleMode() {
   assert.equal(effects.resolveMapEffect(assets, "FireWall").frames.at(-1).path, "/original-ui/Magic/1635.png");
   assert.equal(effects.resolveMapEffect(assets, "FireWall").repeat, true);
   assert.equal(effects.resolveMapEffect(assets, "FireWall").light, 3);
+  assert.equal(effects.resolveSpellCastEffect(assets, "FlamingSword"), null);
+  const flamingSwordUpLeft = effects.resolveSpellAttackOverlayEffect(assets, "FlamingSword", 7);
+  assert.equal(flamingSwordUpLeft.frames.length, 6);
+  assert.equal(flamingSwordUpLeft.frames[0].path, "/original-ui/Magic/3550.png");
+  assert.equal(flamingSwordUpLeft.frames.at(-1).path, "/original-ui/Magic/3555.png");
+  assert.equal(flamingSwordUpLeft.opacity, 0.7);
+  assert.equal(flamingSwordUpLeft.light, 0);
   assert.equal(effects.resolveSpellReturnEffect(assets, "Vampirism").frames[0].path, "/original-ui/Magic2/1090.png");
   assert.equal(effects.spellNameForNumber(12), "ProtectionField", "Spell ids do not collide with SpellEffect names");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").frames[0].path, "/original-ui/Magic/1390.png");
