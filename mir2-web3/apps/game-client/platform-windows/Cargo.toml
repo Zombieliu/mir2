@@ -37,6 +37,7 @@ mir2-ui-core = { path = "../ui-core" }
 png = "0.18"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sha2 = "0.10"
 tokio = { version = "1.52", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
 tokio-tungstenite = "0.29"
 toml = { version = "0.8", default-features = false, features = ["parse"] }

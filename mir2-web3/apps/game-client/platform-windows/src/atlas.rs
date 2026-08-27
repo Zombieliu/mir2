@@ -2,13 +2,14 @@
 
 use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::path::Path;
+use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     OnceLock,
 };
 
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 
 use crate::assets;
 use mir2_bevy_runtime::entity_animation::AnimationAction;
@@ -46,6 +47,8 @@ struct StarterAtlasPage {
     image_url: String,
     width: u32,
     height: u32,
+    expected_sha256: Option<String>,
+    expected_image_bytes: Option<u64>,
     rects: Vec<StarterAtlasRect>,
 }
 
@@ -108,6 +111,10 @@ fn load_starter_atlas_index() -> Option<StarterAtlasIndex> {
 fn parse_starter_atlas_manifest(manifest: &Value) -> Option<StarterAtlasIndex> {
     let mut pages = Vec::new();
     let mut rect_by_path = HashMap::new();
+    let integrity_required = manifest
+        .get("schemaVersion")
+        .and_then(Value::as_u64)
+        .is_some_and(|version| version >= 2);
 
     for atlas in manifest.get("atlases")?.as_array()? {
         let atlas_key = atlas.get("key")?.as_str()?;
@@ -138,6 +145,20 @@ fn parse_starter_atlas_manifest(manifest: &Value) -> Option<StarterAtlasIndex> {
                 .get("height")
                 .or_else(|| atlas.get("height"))?
                 .as_u64()? as u32;
+            let expected_sha256 = descriptor
+                .get("sha256")
+                .and_then(Value::as_str)
+                .map(str::to_ascii_lowercase)
+                .filter(|hash| {
+                    hash.len() == 64 && hash.bytes().all(|byte| byte.is_ascii_hexdigit())
+                });
+            let expected_image_bytes = descriptor.get("imageBytes").and_then(Value::as_u64);
+            if integrity_required
+                && (expected_sha256.is_none()
+                    || expected_image_bytes.is_none_or(|bytes| bytes == 0))
+            {
+                return None;
+            }
             let page_vector_index = pages.len();
             let mut rects = Vec::new();
 
@@ -178,6 +199,8 @@ fn parse_starter_atlas_manifest(manifest: &Value) -> Option<StarterAtlasIndex> {
                 image_url,
                 width,
                 height,
+                expected_sha256,
+                expected_image_bytes,
                 rects,
             });
         }
@@ -190,8 +213,7 @@ fn parse_starter_atlas_manifest(manifest: &Value) -> Option<StarterAtlasIndex> {
 }
 
 /// Decode a generated PNG into raw RGBA pixels.
-fn decode_png_rgba(path: &Path) -> Option<(u32, u32, Vec<u8>)> {
-    let bytes = fs::read(path).ok()?;
+fn decode_png_rgba(bytes: &[u8]) -> Option<(u32, u32, Vec<u8>)> {
     let decoder = png::Decoder::new(std::io::Cursor::new(bytes));
     let mut reader = decoder.read_info().ok()?;
     let output_size = reader.output_buffer_size().unwrap_or(0);
@@ -206,6 +228,60 @@ fn decode_png_rgba(path: &Path) -> Option<(u32, u32, Vec<u8>)> {
         }
     };
     Some((info.width, info.height, rgba))
+}
+
+type DecodedStarterAtlasPage = (String, u32, u32, Vec<u8>, PathBuf);
+
+fn decode_starter_entity_atlas_pages(
+    index: &StarterAtlasIndex,
+) -> Option<Vec<DecodedStarterAtlasPage>> {
+    let mut decoded = Vec::new();
+    for page in &index.pages {
+        let path = assets::asset_path(&page.image_url)?;
+        let bytes = fs::read(&path).ok()?;
+        if page
+            .expected_image_bytes
+            .is_some_and(|expected| expected != bytes.len() as u64)
+        {
+            eprintln!(
+                "[atlas] page {} byte count is {}, manifest expects {:?}",
+                page.key,
+                bytes.len(),
+                page.expected_image_bytes
+            );
+            return None;
+        }
+        if let Some(expected) = &page.expected_sha256 {
+            let actual = format!("{:x}", Sha256::digest(&bytes));
+            if &actual != expected {
+                eprintln!(
+                    "[atlas] page {} SHA-256 is {actual}, manifest expects {expected}",
+                    page.key
+                );
+                return None;
+            }
+        }
+        let Some((width, height, pixels)) = decode_png_rgba(&bytes) else {
+            eprintln!("[atlas] failed to decode {path:?}");
+            return None;
+        };
+        if width != page.width || height != page.height {
+            eprintln!(
+                "[atlas] page {} dimensions are {width}x{height}, manifest expects {}x{}",
+                page.key, page.width, page.height
+            );
+            return None;
+        }
+        decoded.push((page.key.clone(), width, height, pixels, path));
+    }
+    Some(decoded)
+}
+
+#[cfg(test)]
+pub(crate) fn validate_starter_entity_atlas_pages_for_test() -> bool {
+    starter_atlas_index()
+        .and_then(decode_starter_entity_atlas_pages)
+        .is_some()
 }
 
 fn rgb_to_rgba(rgb: &[u8]) -> Vec<u8> {
@@ -224,25 +300,10 @@ pub fn load_starter_entity_atlas() -> bool {
         return false;
     };
 
-    let mut decoded = Vec::new();
-    for page in &index.pages {
-        let Some(path) = assets::asset_path(&page.image_url) else {
-            eprintln!("[atlas] invalid entity atlas path {}", page.image_url);
-            return false;
-        };
-        let Some((width, height, pixels)) = decode_png_rgba(&path) else {
-            eprintln!("[atlas] failed to decode {path:?}");
-            return false;
-        };
-        if width != page.width || height != page.height {
-            eprintln!(
-                "[atlas] page {} dimensions are {width}x{height}, manifest expects {}x{}",
-                page.key, page.width, page.height
-            );
-            return false;
-        }
-        decoded.push((page.key.clone(), width, height, pixels, path));
-    }
+    let Some(decoded) = decode_starter_entity_atlas_pages(index) else {
+        eprintln!("[atlas] entity atlas page closure failed; keeping colored fallback");
+        return false;
+    };
 
     for (key, width, height, pixels, path) in decoded {
         if !mir2_bevy_runtime::native_ingest::push_native_entity_render_atlas(

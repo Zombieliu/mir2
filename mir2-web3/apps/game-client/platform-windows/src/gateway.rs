@@ -2948,6 +2948,7 @@ where
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
             validate_quest_operation_ack(&payload)?;
+            gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
             gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);

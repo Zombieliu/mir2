@@ -965,6 +965,10 @@ mod tests {
         ))
         .expect("VIS-01 fixture JSON");
         crate::assets::require_asset_root().expect("complete Candidate asset root");
+        assert!(
+            crate::atlas::validate_starter_entity_atlas_pages_for_test(),
+            "every Candidate entity-atlas page must exist, decode, and match manifest dimensions/hash"
+        );
         let frame_set_path = crate::assets::asset_path("original-ui/frame-sets.generated.json")
             .expect("Candidate frame-set path");
         let frame_sets: Value = serde_json::from_str(

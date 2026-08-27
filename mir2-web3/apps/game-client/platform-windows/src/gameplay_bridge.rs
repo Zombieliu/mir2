@@ -573,13 +573,9 @@ impl NativeGameplayAdapter {
                     self.authoritative_player_animation = Some(self.next_animation_hint("revive"));
                     true
                 }
-                "ObjectMonster" | "NewMonsterInfo" => {
-                    self.upsert_zone_entity(payload, "monster", "neutral")
-                }
-                "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc", "neutral"),
-                "ObjectPlayer" | "ObjectHero" => {
-                    self.upsert_zone_entity(payload, "player", "friendly")
-                }
+                "ObjectMonster" | "NewMonsterInfo" => self.upsert_zone_entity(payload, "monster"),
+                "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc"),
+                "ObjectPlayer" | "ObjectHero" => self.upsert_zone_entity(payload, "player"),
                 "ObjectWalk" => self.patch_zone_entity_transform(payload, Some("walking")),
                 "ObjectRun" => self.patch_zone_entity_transform(payload, Some("running")),
                 "ObjectTurn" => self.patch_zone_entity_transform(payload, None),
@@ -726,9 +722,21 @@ impl NativeGameplayAdapter {
                     .find(|entity| entity.get("objectId").and_then(value_u32) == Some(*object_id))
                 {
                     merge_zone_entity(entity, overlay);
+                    ensure_zone_entity_disposition(
+                        entity,
+                        self.zone_snapshot_dispositions
+                            .get(object_id)
+                            .map(String::as_str),
+                    );
                 } else if overlay.get("kind").is_some() {
                     let mut entity = Value::Object(overlay.clone());
                     normalize_packet_health(&mut entity);
+                    ensure_zone_entity_disposition(
+                        &mut entity,
+                        self.zone_snapshot_dispositions
+                            .get(object_id)
+                            .map(String::as_str),
+                    );
                     entities.push(entity);
                 }
             }
@@ -813,23 +821,22 @@ impl NativeGameplayAdapter {
         }
     }
 
-    fn upsert_zone_entity(&mut self, payload: &Value, kind: &str, disposition: &str) -> bool {
+    fn upsert_zone_entity(&mut self, payload: &Value, kind: &str) -> bool {
         let body = packet_body(payload);
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
-        let disposition = body
-            .get("disposition")
-            .and_then(Value::as_str)
-            .map(str::to_owned)
-            .or_else(|| self.zone_snapshot_dispositions.get(&object_id).cloned())
-            .unwrap_or_else(|| disposition.to_owned());
         self.zone_tombstones.remove(&object_id);
         self.zone_ground_drops.remove(&object_id);
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
         overlay.insert("kind".to_owned(), Value::from(kind));
-        overlay.insert("disposition".to_owned(), Value::from(disposition));
+        // Relationship is owned by the authoritative world snapshot. Object
+        // packets do not carry that contract, so retaining a snapshot-derived
+        // value in the packet overlay would overwrite a later relationship
+        // change. Packet-only entities receive a fail-closed presentation
+        // fallback only while the overlay is applied.
+        overlay.remove("disposition");
         copy_packet_fields(
             body,
             overlay,
@@ -1062,16 +1069,10 @@ impl NativeGameplayAdapter {
         true
     }
 
-    pub fn observe_world_snapshot(&mut self, payload: &Value) {
-        let map_index = payload
-            .get("mapIndex")
-            .or_else(|| payload.get("map_index"))
-            .and_then(value_i32)
-            .filter(|index| *index > 0);
-        if let Some((x, y)) = authoritative_player_position(payload) {
-            self.big_map
-                .set_player_location(map_index, BigMapPoint { x, y });
-        }
+    pub fn observe_world_snapshot_dispositions(&mut self, payload: &Value) {
+        // Capture relationship before packet overlays are merged. Otherwise a
+        // retained overlay could feed its old value back into this cache and
+        // permanently mask an authoritative snapshot transition.
         self.zone_snapshot_dispositions.clear();
         if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
             for entity in entities {
@@ -1084,6 +1085,18 @@ impl NativeGameplayAdapter {
                 self.zone_snapshot_dispositions
                     .insert(object_id, disposition.to_owned());
             }
+        }
+    }
+
+    pub fn observe_world_snapshot(&mut self, payload: &Value) {
+        let map_index = payload
+            .get("mapIndex")
+            .or_else(|| payload.get("map_index"))
+            .and_then(value_i32)
+            .filter(|index| *index > 0);
+        if let Some((x, y)) = authoritative_player_position(payload) {
+            self.big_map
+                .set_player_location(map_index, BigMapPoint { x, y });
         }
     }
 
@@ -1998,6 +2011,17 @@ fn merge_object_fields(target: &mut Value, overlay: &serde_json::Map<String, Val
 fn merge_zone_entity(target: &mut Value, overlay: &serde_json::Map<String, Value>) {
     merge_object_fields(target, overlay);
     normalize_packet_health(target);
+}
+
+fn ensure_zone_entity_disposition(entity: &mut Value, snapshot_disposition: Option<&str>) {
+    if entity.get("disposition").and_then(Value::as_str).is_some() {
+        return;
+    }
+    let fallback = match entity.get("kind").and_then(Value::as_str) {
+        Some("player") => "friendly",
+        _ => "neutral",
+    };
+    entity["disposition"] = Value::from(snapshot_disposition.unwrap_or(fallback));
 }
 
 /// `ObjectHealth` always carries an authoritative percentage, while exact HP
@@ -4193,6 +4217,76 @@ mod tests {
         assert_eq!(plant["y"], json!(615));
         assert_eq!(plant["direction"], json!("Right"));
         assert_eq!(plant["deathKind"], json!(2));
+    }
+
+    #[test]
+    fn later_authoritative_snapshot_relationship_supersedes_monster_packet_overlay() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut hostile = gameplay_payload();
+        hostile["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId": 2010,
+                "kind": "monster",
+                "disposition": "hostile",
+                "x": 285,
+                "y": 614,
+                "direction": "Down"
+            }));
+        adapter.observe_world_snapshot_dispositions(&hostile);
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2010,
+                "location": {"x": 285, "y": 614},
+                "direction": "Down",
+                "image": 10,
+                "sprite": {"bodyLibrary": "Monster/010"}
+            }),
+        }));
+        adapter.apply_authoritative_overlay(&mut hostile);
+        assert_eq!(
+            hostile["entities"]
+                .as_array()
+                .expect("entities")
+                .iter()
+                .find(|entity| entity["objectId"] == json!(2010))
+                .expect("hostile monster")["disposition"],
+            json!("hostile")
+        );
+        assert!(!adapter
+            .zone_entities
+            .get(&2010)
+            .expect("packet overlay")
+            .contains_key("disposition"));
+
+        for disposition in ["neutral", "friendly"] {
+            let mut changed = gameplay_payload();
+            changed["entities"]
+                .as_array_mut()
+                .expect("entities")
+                .push(json!({
+                    "objectId": 2010,
+                    "kind": "monster",
+                    "disposition": disposition,
+                    "x": 285,
+                    "y": 614,
+                    "direction": "Down"
+                }));
+            // This is the production ordering: observe the raw authoritative
+            // relationship, then merge packet-first transform/animation data.
+            adapter.observe_world_snapshot_dispositions(&changed);
+            adapter.apply_authoritative_overlay(&mut changed);
+            let monster = changed["entities"]
+                .as_array()
+                .expect("entities")
+                .iter()
+                .find(|entity| entity["objectId"] == json!(2010))
+                .expect("relationship-changed monster");
+            assert_eq!(monster["disposition"], json!(disposition));
+            assert_eq!(monster["sprite"]["bodyLibrary"], json!("Monster/010"));
+        }
     }
 
     #[test]

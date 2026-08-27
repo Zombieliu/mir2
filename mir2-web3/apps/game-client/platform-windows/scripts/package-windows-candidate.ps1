@@ -15,6 +15,9 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$EntityAtlasClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'entity-atlas-closure.ps1'
+if (-not (Test-Path -LiteralPath $EntityAtlasClosureScript -PathType Leaf)) { throw "entity atlas closure validator missing: $EntityAtlasClosureScript" }
+. $EntityAtlasClosureScript
 
 function Write-Utf8NoBom {
     param([Parameter(Mandatory = $true)][string]$Path, [Parameter(Mandatory = $true)][string]$Text)
@@ -681,7 +684,9 @@ foreach ($required in $requiredSources) { if (-not (Test-Path -LiteralPath $requ
 $requiredSourceTrees = @((Join-Path $PublicRoot 'bevy-entity-atlases'), (Join-Path $PublicRoot 'generated\map-atlas'), $nativeKeyedMapRoot, $MapPackRoot, (Join-Path $PublicRoot 'original-effects'), (Join-Path $PublicRoot 'original-ui\ChrSel'), (Join-Path $PublicRoot 'original-ui\MMap'), (Join-Path $PublicRoot 'original-ui\Prguse'), (Join-Path $PublicRoot 'original-ui\Prguse2'), (Join-Path $PublicRoot 'original-ui\UI_32bit'), (Join-Path $PublicRoot 'original-ui\Title'), (Join-Path $PublicRoot 'original-ui\AArmour\00'), (Join-Path $PublicRoot 'original-ui\Monster\000'), (Join-Path $PublicRoot 'original-ui\NPC\00'))
 foreach ($sourceTree in $requiredSourceTrees) { if (-not (Test-Path -LiteralPath $sourceTree -PathType Container)) { throw "required source tree missing: $sourceTree" }; Assert-NoReparseTree -Path $sourceTree; Assert-NoAlternateDataStreams -Path $sourceTree }
 foreach ($sound in @((Join-Path $PublicRoot 'original-ui\Sound\Login2.wav'), (Join-Path $PublicRoot 'original-ui\Sound\Select2.wav'))) { Assert-NoReparseTree -Path $sound; Assert-NoAlternateDataStreams -Path $sound }
-foreach ($manifestPath in $requiredSources | Where-Object { $_ -like '*.json' }) { try { $json = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json } catch { throw "invalid required JSON manifest: $manifestPath" }; if ($null -eq $json) { throw "empty required JSON manifest: $manifestPath" } }
+ foreach ($manifestPath in $requiredSources | Where-Object { $_ -like '*.json' }) { try { $json = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json } catch { throw "invalid required JSON manifest: $manifestPath" }; if ($null -eq $json) { throw "empty required JSON manifest: $manifestPath" } }
+ $entityAtlasClosure = Assert-EntityAtlasClosure -ManifestPath (Join-Path $PublicRoot 'bevy-entity-atlases\manifest.json') -AssetRoot $PublicRoot
+ Write-Host "entityAtlasClosure=atlases:$($entityAtlasClosure.atlasCount),pages:$($entityAtlasClosure.pageCount)"
 
 $output = if ([string]::IsNullOrWhiteSpace($OutputRoot)) { Join-Path $DistRoot ('mir2-windows-candidate\' + $CandidateVersion) } else { $OutputRoot }
 $output = Assert-SafeDistTarget -Path $output -DistRoot $DistRoot
