@@ -1,6 +1,20 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-27
+Last updated: 2026-08-28
+
+> 2026-08-28 Windows-native VIS-02 SoulFireBall bounded checkpoint: revision
+> `19991af6ddb289dc2fb22569849599caabf9195e` implements the source audio-only
+> start, 600 ms local launch, all 16 three-frame missile directions, launch-
+> time target binding/direction lock, finite target-following flight, bound
+> impact and exact M64-0/1/2 assets. Compatibility `ObjectProjectile` is
+> ignored in every replay order. Native 346/346, Bevy native-ui 393/393,
+> focused SoulFireBall 6/6, FireBall regression 11/11, Gateway event projection
+> 1/1, Web/export/resource and package/verifier self-tests pass. No EXE was
+> launched or packaged from this head. The projection fixture is serializer-
+> only; production no-amulet `cast=false` is not proved. Target-dead impact
+> suppression, backend Soul timing/revalidation/PvP gaps, FlamingSword,
+> FireWall, the full denominator and all same-EXE/GPU/DPI/soak/human/signing
+> gates remain open; global parity stays unreported.
 
 > 2026-08-27 Windows-native VIS-02 FireBall bounded checkpoint: revision
 > `d85d7368119053e6b2609316c4f5c76faaa298cb` now renders the source cast,

@@ -60,6 +60,21 @@
 > same-EXE/live-WSS/GPU/DPI/soak/human/signing gates. Do not emit a global
 > percentage.
 
+> VIS-02 SoulFireBall bounded automated checkpoint (2026-08-28): revision
+> `19991af6ddb289dc2fb22569849599caabf9195e` now follows Crystal's
+> `ObjectMagic`-owned client presentation: immediate M64-0 with no cast bitmap,
+> a local missile after the 600 ms Spell action, all 16 three-frame directional
+> ranges at ten-frame stride, launch-time target binding/direction lock, finite
+> target-following flight, target-bound impact and exact M64-0/1/2 identities.
+> The native adapter ignores the Rust compatibility `ObjectProjectile` in every
+> replay order. Windows 346/346, Bevy native-ui 393/393, focused SoulFireBall
+> 6/6, FireBall regressions 11/11, Gateway projection 1/1, Web typecheck,
+> exporter/resource gates and package/verifier self-tests pass. The Gateway
+> fixture is serializer-only: the production no-amulet `cast=false` route is
+> not wired. Target-dead suppression, backend timing/revalidation/PvP gaps,
+> FlamingSword, FireWall, same-EXE/live-WSS/GPU/DPI/soak/human/signing and the
+> incomplete denominator remain open. Do not emit a global percentage.
+
 > MAP-E0/E1 bounded closure (2026-08-26): the real `Server.MirDB` map records
 > now drive hazard/music packet metadata for all 464 source records, and all six
 > current `_MAPCOORD` entries are typed and one-to-one bound to `NeedMove`.

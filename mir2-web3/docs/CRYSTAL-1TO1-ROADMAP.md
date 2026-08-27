@@ -62,6 +62,20 @@
 > WSS/GPU pixels/DPI/soak/human/signing and the incomplete denominator remain
 > open; `globalParityPercent` stays null.
 
+> VIS-02 SoulFireBall bounded checkpoint (2026-08-28): implementation revision
+> `19991af6ddb289dc2fb22569849599caabf9195e` preserves Crystal's audio-only
+> cast start, 600 ms local launch, Direction16 three-frame missile with
+> ten-frame stride, launch-time target binding, direction lock, finite moving-
+> target flight, target-bound `Magic/1360..1369` impact and exact M64-0/1/2
+> identities. The compatibility `ObjectProjectile` is ignored in all replay
+> orders. Native 346/346, Bevy native-ui 393/393, focused effects and Gateway
+> event projection, Web typecheck, exporter/offline resource checks and
+> package/verifier self-tests pass. This closes only automated presentation.
+> The fixture does not prove the absent production no-amulet `cast=false`
+> route; target-dead suppression, Zone timing/revalidation/PvP fidelity,
+> FlamingSword, FireWall and all same-EXE/live-WSS/GPU/DPI/soak/human/signing
+> gates remain open. `globalParityPercent` remains null.
+
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
 > source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes
 > 8/8, including the original Bichon newcomer quest 1-to-9 route; `shared_zone`

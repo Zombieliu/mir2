@@ -59,6 +59,20 @@
 > FlamingSword, SoulFireBall, FireWall and all final visual/real-window gates
 > remain open, so no global percentage is emitted.
 
+> VIS-02 SoulFireBall client-boundary checkpoint (2026-08-28): revision
+> `19991af6ddb289dc2fb22569849599caabf9195e` adds no gameplay authority. The
+> Windows adapter implements Crystal's audio-only cast start, 600 ms local
+> missile launch, 16-direction finite target tracking, target-bound impact and
+> exact M64-0/1/2 asset closure while ignoring the Rust compatibility
+> `ObjectProjectile`. Native 346/346, Bevy native-ui 393/393, focused effect
+> and Gateway projection gates, Web gates and package/verifier self-tests pass.
+> The Gateway fixture proves only `ServerPacket -> event` projection; the
+> current production no-amulet branch emits no `cast=false` packet. Shared-Zone
+> monster timing, PvP, authoritative target/range/flight validation and
+> preflight/item atomicity remain backend gaps. Target-dead impact suppression
+> and every real-window/final acceptance gate also remain open; no completion
+> percentage is claimed.
+
 > Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): this round records only evidence that passed.
 > Simulation `vertical_slice` passes 8/8 in 283.03 seconds, including the

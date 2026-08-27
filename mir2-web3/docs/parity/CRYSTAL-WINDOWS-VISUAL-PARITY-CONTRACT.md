@@ -137,6 +137,22 @@ asset, package and verifier automation only. The explicit
 dead state reaches the effect input. FlamingSword, SoulFireBall and FireWall
 remain open, as do every same-EXE/live-WSS/GPU/DPI/human gate.
 
+SoulFireBall is the third bounded automated checkpoint at revision
+`19991af6ddb289dc2fb22569849599caabf9195e`. `ObjectMagic` immediately emits
+M64-0 with no cast bitmap, then a successful cast launches the local missile at
+the 600 ms Spell-action boundary. At launch, a live target supplies the locked
+Direction16 and bound destination; the three frames are
+`1160 + direction*10 .. +2`, flight is finite at `distance*50 ms`, and only a
+bound completion promotes to `Magic/1360..1369` plus M64-2. M64-0/1/2 have
+exact byte/hash closure. The Rust compatibility `ObjectProjectile` is ignored
+in all replay orders. The Gateway fixture is explicitly a
+`server_packet_to_event` projection contract, not proof of the currently
+absent production no-amulet `cast=false` route. Target-dead impact suppression,
+post-launch removal fidelity and shared-Zone timing/revalidation/PvP gaps
+remain open. This passes packet projection, clock, frame/audio, asset, package
+and verifier automation only; FlamingSword, FireWall and every same-EXE/live-
+WSS/GPU/DPI/human gate remain open.
+
 VIS-03 has one bounded automated checkpoint at implementation revision
 `448db4f72`. The 1024x768 HUD base and Inventory control are source-bound to
 `Prguse/1` and normal/hover/pressed `Prguse/1903..1905`. BigMap Teleport keeps
@@ -190,6 +206,9 @@ source packaging and copied-Candidate verification.
 
 The bounded Lightning evidence is recorded in
 `docs/generated/player-qa/windows-visual-parity/VIS-02-LIGHTNING-REPORT.md`.
+The bounded FireBall and SoulFireBall evidence is recorded in
+`docs/generated/player-qa/windows-visual-parity/VIS-02-FIREBALL-REPORT.md` and
+`docs/generated/player-qa/windows-visual-parity/VIS-02-SOUL-FIREBALL-REPORT.md`.
 The Windows functional gate also generates the native keyed/additive map pack
 before its host tests; this keeps VIS-01's real `0.map` front-cell binding
 fail-closed on clean runners rather than weakening the visual assertion.

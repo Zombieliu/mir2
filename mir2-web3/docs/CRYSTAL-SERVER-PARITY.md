@@ -50,6 +50,19 @@
 > same-EXE/live-WSS/GPU/DPI/soak/human/signing gates remain open. No completion
 > percentage is claimed.
 
+> VIS-02 SoulFireBall server-client note (2026-08-28): revision
+> `19991af6ddb289dc2fb22569849599caabf9195e` changes no server combat
+> authority. It closes the bounded Windows presentation path for Crystal's
+> audio-only start, 600 ms local missile, Direction16 finite target tracking,
+> bound impact and M64-0/1/2 assets, and ignores the Rust compatibility
+> `ObjectProjectile`. Native 346/346, Bevy native-ui 393/393, focused effects,
+> Gateway event projection, Web resource/type gates and package/verifier
+> self-tests pass. The projection fixture is not an authenticated transcript;
+> production no-amulet `cast=false` emission remains absent. Shared-Zone
+> damage delay, PvP, target/range/flight revalidation and item-commit atomicity
+> remain open, as do target-dead impact suppression and all same-EXE/live-WSS/
+> GPU/DPI/soak/human/signing gates. No server or global percentage is claimed.
+
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,
 > including the original Bichon quest 1-to-9 route, and `shared_zone` passes
