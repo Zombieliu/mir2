@@ -1671,6 +1671,7 @@ struct OverlayButtonControls<'w, 's> {
     mail_ui: ResMut<'w, MailUiState>,
     storage_ui: ResMut<'w, StorageUiState>,
     shop_ui: ResMut<'w, ShopUiState>,
+    ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
     buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
 }
 
@@ -1772,9 +1773,9 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
-                    crate::audio::sync_native_ui_audio,
                     process_overlay_keyboard,
                     process_overlay_buttons,
+                    crate::audio::sync_native_ui_audio,
                     consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
                     reconcile_native_game_shop_ui_state,
@@ -2883,6 +2884,7 @@ fn process_overlay_buttons(
         mut mail_ui,
         mut storage_ui,
         mut shop_ui,
+        mut ui_audio,
         buttons,
     } = button_controls;
     let mut fallback_effects = UiEffectQueue::default();
@@ -3735,6 +3737,11 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::SelectCharacterPage(page) => {
+                // Crystal CharacterDialog page buttons inherit
+                // MirButton.Sound = SoundList.ButtonA. Keep the cue on the
+                // local Changed<Interaction> press edge; switching pages must
+                // never manufacture a gateway intent.
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 state.character_page = page;
                 state.inspect = None;
             }
@@ -9451,6 +9458,7 @@ mod tests {
         app.init_resource::<MailUiState>()
             .init_resource::<StorageUiState>()
             .init_resource::<ShopUiState>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapGatewayIntentQueue>()
             .init_resource::<BigMapUiState>()
@@ -11245,6 +11253,70 @@ mod tests {
         init_overlay_button_test_resources(&mut app);
         app.add_systems(Update, process_overlay_buttons);
 
+        for page in [
+            CharacterPage::Stats1,
+            CharacterPage::Stats2,
+            CharacterPage::Spells,
+            CharacterPage::Character,
+        ] {
+            let entity = app
+                .world_mut()
+                .spawn((
+                    Button,
+                    Interaction::Pressed,
+                    OverlayButton::SelectCharacterPage(page),
+                ))
+                .id();
+            app.update();
+            assert_eq!(
+                app.world().resource::<NativePlayerUiState>().character_page,
+                page
+            );
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .drain_bounded(8),
+                vec![crate::audio::NativeUiSound::ButtonA]
+            );
+
+            // A held button is not another Crystal click edge.
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .len(),
+                0
+            );
+
+            // Release and press again produces exactly one new cue.
+            app.world_mut().entity_mut(entity).insert(Interaction::None);
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .len(),
+                0
+            );
+            app.world_mut()
+                .entity_mut(entity)
+                .insert(Interaction::Pressed);
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .drain_bounded(8),
+                vec![crate::audio::NativeUiSound::ButtonA]
+            );
+            app.world_mut().despawn(entity);
+        }
+
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+        assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+
         let press = |app: &mut App, action: OverlayButton| {
             let entity = app
                 .world_mut()
@@ -11253,15 +11325,6 @@ mod tests {
             app.update();
             app.world_mut().despawn(entity);
         };
-
-        press(
-            &mut app,
-            OverlayButton::SelectCharacterPage(CharacterPage::Stats1),
-        );
-        assert_eq!(
-            app.world().resource::<NativePlayerUiState>().character_page,
-            CharacterPage::Stats1
-        );
         press(&mut app, OverlayButton::SelectInventoryPage(1));
         assert_eq!(
             app.world().resource::<NativePlayerUiState>().inventory_page,
