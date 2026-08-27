@@ -23,9 +23,12 @@
 > render checkpoints and one damage checkpoint, with exact layers/z ordering,
 > packet-first monster sprite projection, fail-closed disposition, death
 > transform/kind retention, `CWeapon/01` atlas closure, production frame-set
-> hash binding and real `0.map` tile-binding/intersection evidence. Focused
+> hash binding and real `0.map` tile-binding/intersection evidence. Follow-up
+> `434bb06e6` makes raw snapshot relationship changes supersede retained packet
+> overlays and verifies all seven atlas pages by existence, bytes, SHA-256, PNG
+> decode and dimensions in runtime/test/package/verify paths. Focused
 > latest-head tests pass. The full Windows suite against the composite
-> production asset root remains FAIL with 327/329 passing; the two failures
+> production asset root remains FAIL with 328/330 passing; the two failures
 > require absent
 > `ARArmour/00/24.png` and
 > `Mount/00/32.png`. HUD/damage typography, hover corpse labels, additive

@@ -19,9 +19,13 @@
 > sprite data, preserve snapshot disposition or fail closed to neutral, and
 > retain death location/direction/kind. Seventeen typed events drive the six
 > VIS-01 actors through 15 exact render checkpoints and production frame-set,
-> atlas and real-`0.map` render-state bindings. The complete client runtime
-> library passes 191/191; focused latest-head Gateway/native gates pass. The
-> composite-production Windows suite is 327/329 with only the two existing
+> atlas and real-`0.map` render-state bindings. Review follow-up `434bb06e6`
+> observes raw snapshot disposition before overlay merge so relationship
+> changes remain authoritative, and integrity-checks all seven atlas pages in
+> runtime, production test, source package and copied-Candidate verification.
+> The complete client runtime library passes 191/191; focused latest-head
+> Gateway/native gates pass. The composite-production Windows suite is 328/330
+> with only the two existing
 > missing Archer/Mount pixels. This is a
 > presentation-boundary repair, not a claim
 > that shared-Zone gameplay, whole-game semantics or Windows visuals are

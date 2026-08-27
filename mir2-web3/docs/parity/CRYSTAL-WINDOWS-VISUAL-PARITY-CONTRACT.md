@@ -90,7 +90,7 @@ Crystal initializes 14 equipment cells in `CharacterDialog.cs:227-342`, not
 
 The starter atlas' included PNG pixels and `MImage.X/Y` anchors are reliable.
 No fake ellipse shadow may be added: Crystal's monster/player PNGs already
-contain the shadow pixels and the current 9,650 atlas rects have zero
+contain the shadow pixels and the current 10,482 atlas rects have zero
 `shadowX/Y`.
 
 ### Skills, combat effects and environment
@@ -148,6 +148,12 @@ Candidate atlas routes, death transforms and a real `0.map` front-tile binding
 and geometry intersection. Real Gateway/WSS ordering, opaque-pixel and blend
 raster evidence, same-EXE capture and visual acceptance remain open;
 source/render-state tests are not raster acceptance.
+
+Review follow-up `434bb06e6` preserves raw-snapshot relationship authority over
+retained packet overlays and makes every schema-v2 entity-atlas page fail closed
+on missing content, byte/hash mismatch, PNG decode failure or wrong dimensions.
+That page closure is shared by runtime loading, the VIS-01 production test,
+source packaging and copied-Candidate verification.
 
 ## Evidence and final gates
 

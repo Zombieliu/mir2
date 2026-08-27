@@ -16,8 +16,11 @@
 > packets now carry their sprite contract, preserve snapshot disposition or
 > fail closed to neutral, and retain death location/direction/kind. Fifteen
 > exact render checkpoints bind production frame-set hashes, Candidate atlas
-> entries and a real `0.map` front-tile render state. Focused latest-head tests
-> pass; Windows is 327/329 against the composite production root, with only the
+> entries and a real `0.map` front-tile render state. Follow-up `434bb06e6`
+> preserves later raw-snapshot relationship changes over retained packet data
+> and closes all seven atlas pages by byte count, SHA-256, PNG decode and
+> dimensions across runtime/test/package/verify. Focused latest-head tests pass;
+> Windows is 328/330 against the composite production root, with only the
 > known missing Archer/Mount pixels. This closes only bounded
 > projection/action-loss and render-state defects; it does not prove live WSS
 > ordering or GPU pixels. Monster special rendering, effect/wing overlays,

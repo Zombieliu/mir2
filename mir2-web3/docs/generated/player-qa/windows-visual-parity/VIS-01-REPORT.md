@@ -7,7 +7,7 @@ Date: 2026-08-27
 ```text
 Crystal source revision: 484983404e3d6afa584e93801f8006ae3429bea9
 implementation base: 4eefa6019251110f24f5f1aa203d51dc59bc3131
-implementation revision: ef619b55158539dacae19deb2a428a19c02becab
+implementation revision: 434bb06e603d813bbbc072b9d5ce3b7c0bb0e4ca
 branch: codex/windows-visual-parity
 phaseStatus: in_progress
 semanticLeafInventoryComplete: false
@@ -35,8 +35,10 @@ Crystal visual acceptance or a percentage.
   `ObjectMonster` events now carry the authoritative monster sprite contract,
   so a packet-first monster cannot silently route through `Monster/000`.
 - Monster disposition fails closed to neutral when neither a snapshot nor an
-  authoritative relationship provides it. Incremental monster packets retain
-  an earlier snapshot disposition instead of inventing hostility.
+  authoritative relationship provides it. Packet overlays no longer persist a
+  snapshot-derived relationship: the raw authoritative snapshot is observed
+  before overlay merge, and the regression proves hostile -> neutral ->
+  friendly changes supersede retained packet sprite/animation data.
 - `ObjectDied` now retains the packet location, direction and numeric death
   kind. The fixture deliberately changes Deer and Scarecrow death transforms,
   preventing a state-only test from masking a stale pre-death pose.
@@ -48,6 +50,11 @@ Crystal visual acceptance or a percentage.
 - The Candidate entity atlas now includes the Harvest-only `CWeapon/01`
   library. The regenerated seven-page pack has 10,482 sprites, and the fixed
   transcript proves the male Warrior harvest layer uses that packed path.
+- Schema-v2 entity-atlas pages are now integrity-closed before rendering or
+  packaging: every referenced page must exist, match declared byte count and
+  SHA-256, decode as PNG, and match its declared dimensions. The runtime loader,
+  VIS-01 production test, package source gate and copied-Candidate verifier use
+  the closure; verifier self-test proves a missing referenced page fails.
 
 - `Show` and `Hide` are explicit shared animation actions. Generated Crystal
   frame sets are used only when the actor library defines those actions; no
@@ -88,14 +95,16 @@ Crystal visual acceptance or a percentage.
 |---|---|
 | `mir2-client-runtime --lib` | PASS, 191/191 |
 | Gateway exact typed VIS-01 fixture projection | PASS, 1/1 on `ef619b551` |
-| Native adapter sprite/disposition/death regressions | PASS, 2/2 |
+| Native adapter sprite/disposition/death regressions | PASS, 3/3 |
 | Self-contained ordered transcript/render-state test | PASS, 1/1 |
-| Production frame-set/atlas/real-map transcript test | PASS, 1/1 |
+| Production frame-set/7-page atlas/real-map transcript test | PASS, 1/1 |
 | Player-frame generator and entity-pack tests | PASS |
 | Release asset preflight | PASS for atlas/render coverage; original-asset integrity unavailable in this isolated checkout |
 | Rustfmt and diff checks | PASS |
+| Candidate verifier self-test, including missing atlas page | PASS |
+| Windows Candidate supply-chain static test | PASS |
 | Phase-A ledger integrity verifier | PASS; integrity only |
-| Windows full suite using the composite production asset root | FAIL, 327/329 passed |
+| Windows full suite using the composite production asset root | FAIL, 328/330 passed |
 
 The production-root test combined the newly generated entity atlas with the
 frozen Candidate map/effect/frame-set assets. It is not a new exact-head
