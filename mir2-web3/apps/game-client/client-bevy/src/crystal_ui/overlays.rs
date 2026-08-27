@@ -1520,6 +1520,7 @@ struct OverlaySocial;
 enum OverlayButton {
     ExitApplication,
     CloseWindows,
+    CloseCharacter,
     CloseInspect,
     CloseMail,
     CloseBigMap,
@@ -2944,7 +2945,13 @@ fn process_overlay_buttons(
             OverlayButton::ExitApplication => {
                 effects.push(mir2_ui_core::effect::UiEffect::ExitApplication);
             }
-            OverlayButton::CloseWindows => {
+            OverlayButton::CloseWindows | OverlayButton::CloseCharacter => {
+                if matches!(*button, OverlayButton::CloseCharacter) {
+                    // Crystal CharacterDialog.CloseButton uses ButtonA. Keep
+                    // the source-audited cue local to this control rather than
+                    // assigning sound to every generic CloseWindows caller.
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                }
                 state.close_windows();
                 state.shop_quantity = 1;
                 if let Some(skill_binding) = skill_binding.as_deref_mut() {
@@ -4974,7 +4981,7 @@ fn render_equipment(
             361,
             362,
             CrystalRect::new(241.0, 3.0, 24.0, 21.0),
-            OverlayButton::CloseWindows,
+            OverlayButton::CloseCharacter,
         );
         overlay_text_at(
             parent,
@@ -11309,6 +11316,94 @@ mod tests {
             );
             app.world_mut().despawn(entity);
         }
+
+        for page in [
+            CharacterPage::Character,
+            CharacterPage::Stats1,
+            CharacterPage::Stats2,
+            CharacterPage::Spells,
+        ] {
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.core.panel = mir2_ui_core::state::UiPanel::Character;
+                state.character_page = page;
+            }
+            let entity = app
+                .world_mut()
+                .spawn((Button, Interaction::Pressed, OverlayButton::CloseCharacter))
+                .id();
+            app.update();
+            assert!(!app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .equipment_open());
+            assert_eq!(
+                app.world().resource::<NativePlayerUiState>().character_page,
+                CharacterPage::Character,
+                "the shared close lifecycle resets transient page state"
+            );
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .drain_bounded(8),
+                vec![crate::audio::NativeUiSound::ButtonA]
+            );
+
+            // A held close control is not a second Crystal click edge.
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .len(),
+                0
+            );
+
+            app.world_mut().entity_mut(entity).insert(Interaction::None);
+            app.update();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = mir2_ui_core::state::UiPanel::Character;
+            app.world_mut()
+                .entity_mut(entity)
+                .insert(Interaction::Pressed);
+            app.update();
+            assert!(!app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .equipment_open());
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .drain_bounded(8),
+                vec![crate::audio::NativeUiSound::ButtonA]
+            );
+            app.world_mut().despawn(entity);
+        }
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Character;
+        app.world_mut().resource_mut::<NativeShellModel>().screen =
+            NativeShellScreen::ConnectionLost;
+        let blocked_close = app
+            .world_mut()
+            .spawn((Button, Interaction::Pressed, OverlayButton::CloseCharacter))
+            .id();
+        app.update();
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
+        app.world_mut().despawn(blocked_close);
+        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::InGame;
 
         assert!(app
             .world()
