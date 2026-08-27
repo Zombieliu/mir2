@@ -1,5 +1,23 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Windows visual-parity VIS-00 checkpoint (2026-08-27): a new source-bound
+> contract and machine-readable Phase-A ledger establish known registries for
+> 410 fixed/template UI leaves, player/monster libraries and action records,
+> effects, weather, lighting and 32 rendering rules. The inventories are
+> explicitly incomplete, so no global percentage is emitted. The first code
+> slice routes text through Arial, applies the 8pt logical default to chat and
+> ordinary nameplates, restores Crystal's four-pass outline, preserves remote
+> normal/Transform body and equipment routing through Gateway-to-native
+> projection, adds Harvest/CWeapon-01/Skeleton actions, omits dead objects from
+> the ordinary NameView pass, and corrects Hidden/corpse opacity semantics.
+> Runtime 185/185, focused native 6/6, client typography 1/1 and Gateway
+> appearance 1/1 pass. The full Windows suite against the frozen Candidate
+> asset pack remains FAIL with 316/318 passing; the two failures require absent
+> `ARArmour/00/24.png` and
+> `Mount/00/32.png`. HUD/damage typography, hover corpse labels, additive
+> weapon/wing layers, same-EXE visual capture, complete legal assets, skill
+> VFX, button state/DPI evidence, native soak and human acceptance remain open.
+
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
 > source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes
 > 8/8, including the original Bichon newcomer quest 1-to-9 route; `shared_zone`

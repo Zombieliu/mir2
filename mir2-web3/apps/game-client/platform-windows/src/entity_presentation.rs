@@ -24,6 +24,7 @@ struct ObservedEntity {
     direction: Direction,
     action: Option<(u64, AnimationAction)>,
     initially_dead: bool,
+    initially_skeleton: bool,
 }
 
 #[derive(Resource, Debug)]
@@ -124,9 +125,15 @@ impl NativeEntityPresentation {
             self.last_libraries
                 .insert(entity.object_id.clone(), catalog_key);
 
-            let action = entity.action.or_else(|| {
-                (update.spawned && entity.initially_dead).then_some((0, AnimationAction::Dead))
-            });
+            let action = entity
+                .action
+                .or_else(|| {
+                    (update.spawned && entity.initially_skeleton)
+                        .then_some((0, AnimationAction::Skeleton))
+                })
+                .or_else(|| {
+                    (update.spawned && entity.initially_dead).then_some((0, AnimationAction::Dead))
+                });
             let Some((sequence, action)) = action else {
                 continue;
             };
@@ -235,6 +242,7 @@ fn parse_observed_entity(entity: &Value) -> Option<ObservedEntity> {
         direction,
         action,
         initially_dead: entity.get("dead").and_then(Value::as_bool) == Some(true),
+        initially_skeleton: entity.get("skeleton").and_then(Value::as_bool) == Some(true),
     })
 }
 
@@ -254,6 +262,7 @@ fn parse_direction(direction: &str) -> Direction {
 fn parse_action(action: &str) -> Option<AnimationAction> {
     match action {
         "standing" => Some(AnimationAction::Standing),
+        "harvest" => Some(AnimationAction::Harvest),
         "walking" => Some(AnimationAction::Walking),
         "running" => Some(AnimationAction::Running),
         "attack1" => Some(AnimationAction::Attack1),
@@ -265,6 +274,7 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
         "struck" => Some(AnimationAction::Struck),
         "die" => Some(AnimationAction::Die),
         "dead" => Some(AnimationAction::Dead),
+        "skeleton" => Some(AnimationAction::Skeleton),
         "revive" => Some(AnimationAction::Revive),
         _ => None,
     }

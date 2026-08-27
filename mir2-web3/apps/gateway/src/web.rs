@@ -24,9 +24,9 @@ use mir2_protocol::{
     UserItem, UserItemStat,
 };
 use mir2_simulation::{
-    deliver_stage5_system_mail, GameShopPurchaseFailure, GameShopPurchaseOutcome,
-    NativeGameShopPurchaseRequest, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
-    NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+    deliver_stage5_system_mail, world_entity_sprite_from_object_player, GameShopPurchaseFailure,
+    GameShopPurchaseOutcome, NativeGameShopPurchaseRequest, Stage5MailDelivery,
+    Stage5MailTargetKind, WorldCommand, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
 };
 use rand::rngs::OsRng;
 use rand::RngCore;
@@ -9550,7 +9550,9 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "guildRankName": info.guild_rank_name,
                 "nameColourArgb": info.name_colour_argb,
                 "class": format!("{:?}", info.class),
+                "classKey": format!("{:?}", info.class).to_ascii_lowercase(),
                 "gender": format!("{:?}", info.gender),
+                "genderKey": format!("{:?}", info.gender).to_ascii_lowercase(),
                 "level": info.level,
                 "location": {
                     "x": info.location.x,
@@ -9576,7 +9578,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "elementOrbLevel": info.element_orb_level,
                 "elementOrbMax": info.element_orb_max,
                 "buffs": info.buffs,
-                "levelEffects": info.level_effects
+                "levelEffects": info.level_effects,
+                "sprite": world_entity_sprite_from_object_player(info)
             }
         }),
         ServerPacket::ObjectHero { info, owner_name } => json!({
@@ -9586,16 +9589,40 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "objectId": info.object_id,
                 "name": info.name,
                 "ownerName": owner_name,
+                "guildName": info.guild_name,
+                "guildRankName": info.guild_rank_name,
+                "nameColourArgb": info.name_colour_argb,
                 "class": format!("{:?}", info.class),
+                "classKey": format!("{:?}", info.class).to_ascii_lowercase(),
                 "gender": format!("{:?}", info.gender),
+                "genderKey": format!("{:?}", info.gender).to_ascii_lowercase(),
                 "level": info.level,
                 "location": {
                     "x": info.location.x,
                     "y": info.location.y
                 },
                 "direction": format!("{:?}", info.direction),
+                "hair": info.hair,
+                "light": info.light,
+                "weapon": info.weapon,
+                "weaponEffect": info.weapon_effect,
+                "armour": info.armour,
+                "poison": info.poison,
+                "dead": info.dead,
+                "hidden": info.hidden,
+                "effect": info.effect,
+                "wingEffect": info.wing_effect,
+                "extra": info.extra,
+                "mountType": info.mount_type,
+                "ridingMount": info.riding_mount,
+                "fishing": info.fishing,
+                "transformType": info.transform_type,
+                "elementOrbEffect": info.element_orb_effect,
+                "elementOrbLevel": info.element_orb_level,
+                "elementOrbMax": info.element_orb_max,
                 "buffs": info.buffs,
-                "levelEffects": info.level_effects
+                "levelEffects": info.level_effects,
+                "sprite": world_entity_sprite_from_object_player(info)
             }
         }),
         ServerPacket::ObjectRemove { object_id } => json!({

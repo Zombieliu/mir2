@@ -21,8 +21,8 @@ use mir2_game_data::{
     SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
-    ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
-    SelectInfo, Spell, UserItem, UserItemStat,
+    ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, ObjectPlayerInfo,
+    Point, SelectInfo, Spell, UserItem, UserItemStat,
 };
 use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
 use rand_core::{OsRng, RngCore};
@@ -5485,6 +5485,146 @@ pub struct WorldEntitySpriteSnapshot {
     pub mount_frame_offset: Option<u16>,
 }
 
+/// Convert Crystal's authoritative `ObjectPlayerInfo` appearance fields into
+/// the renderer-neutral layered sprite contract shared by Gateway snapshots
+/// and native clients. Keeping this conversion server-side prevents clients
+/// from guessing another player's equipment or class-specific library route.
+pub fn world_entity_sprite_from_object_player(
+    info: &ObjectPlayerInfo,
+) -> WorldEntitySpriteSnapshot {
+    if info.transform_type >= 0 {
+        let show_mount = !matches!(info.transform_type, 6 | 9);
+        let transform_mount = info.riding_mount && info.mount_type > 6;
+        return WorldEntitySpriteSnapshot {
+            body_library: format!(
+                "{}/{:02}",
+                if transform_mount {
+                    "TransformRide2"
+                } else {
+                    "Transform"
+                },
+                info.transform_type
+            ),
+            hair_library: None,
+            weapon_library: None,
+            weapon_library_secondary: None,
+            frame_base_offset: 0,
+            weapon_frame_offset: None,
+            alt_body_library: None,
+            alt_hair_library: None,
+            alt_weapon_library: None,
+            alt_weapon_library_secondary: None,
+            alt_frame_base_offset: None,
+            alt_weapon_frame_offset: None,
+            frame_count: 4,
+            direction_stride: 4,
+            mount_library: (show_mount && info.riding_mount && info.mount_type >= 0)
+                .then(|| format!("Mount/{:02}", info.mount_type)),
+            mount_frame_offset: (show_mount && info.riding_mount && info.mount_type >= 0)
+                .then_some(0),
+        };
+    }
+
+    let armour_shape = u16::try_from(info.armour).unwrap_or(0);
+    let weapon_shape = u16::try_from(info.weapon).ok();
+    let hair_shape = u16::from(info.hair);
+    let uses_assassin_weapon = matches!(weapon_shape, Some(shape) if (100..200).contains(&shape));
+    let uses_assassin_alt_body = info.weapon < 0 || uses_assassin_weapon;
+    let uses_archer_weapon = matches!(weapon_shape, Some(shape) if shape >= 200);
+    let body_library = format!("CArmour/{armour_shape:02}");
+    let hair_library = Some(format!("CHair/{hair_shape:02}"));
+    let (alt_body_library, alt_hair_library) = match info.class {
+        MirClass::Assassin if uses_assassin_alt_body => (
+            Some(format!("AArmour/{armour_shape:02}")),
+            Some(format!("AHair/{hair_shape:02}")),
+        ),
+        MirClass::Archer if uses_archer_weapon => (
+            Some(format!("ARArmour/{armour_shape:02}")),
+            Some(format!("ARHair/{hair_shape:02}")),
+        ),
+        _ => (None, None),
+    };
+    let (
+        mut weapon_library,
+        mut weapon_library_secondary,
+        mut alt_weapon_library,
+        mut alt_weapon_library_secondary,
+    ) = match weapon_shape {
+        Some(shape) if (100..200).contains(&shape) => {
+            let index = shape - 100;
+            (
+                None,
+                None,
+                Some(format!("AWeapon/{index:02} R")),
+                Some(format!("AWeapon/{index:02} L")),
+            )
+        }
+        Some(shape) if shape >= 200 => {
+            let index = shape - 200;
+            (
+                Some(format!("ARWeapon/{index:02}")),
+                None,
+                Some(format!("ARWeapon/{index:02} S")),
+                None,
+            )
+        }
+        Some(shape) => (Some(format!("CWeapon/{shape:02}")), None, None, None),
+        None => (None, None, None, None),
+    };
+    let frame_base_offset = match info.gender {
+        MirGender::Male => 0,
+        MirGender::Female => 808,
+    };
+    let mut weapon_frame_offset = weapon_library.as_ref().map(|_| match info.gender {
+        MirGender::Male => 0,
+        MirGender::Female => 416,
+    });
+    let alt_frame_base_offset = match info.class {
+        MirClass::Archer if uses_archer_weapon => Some(match info.gender {
+            MirGender::Male => 0,
+            MirGender::Female => 352,
+        }),
+        MirClass::Assassin if uses_assassin_alt_body => Some(match info.gender {
+            MirGender::Male => 0,
+            MirGender::Female => 512,
+        }),
+        _ => None,
+    };
+    let alt_weapon_frame_offset = alt_frame_base_offset;
+    let (mount_library, mount_frame_offset) = if info.riding_mount && info.mount_type >= 0 {
+        weapon_library = None;
+        weapon_library_secondary = None;
+        alt_weapon_library = None;
+        alt_weapon_library_secondary = None;
+        weapon_frame_offset = None;
+        (
+            Some(format!("Mount/{:02}", info.mount_type)),
+            Some(frame_base_offset),
+        )
+    } else {
+        (None, None)
+    };
+
+    WorldEntitySpriteSnapshot {
+        body_library,
+        hair_library,
+        weapon_library,
+        weapon_library_secondary,
+        frame_base_offset,
+        weapon_frame_offset,
+        alt_body_library,
+        alt_hair_library,
+        alt_weapon_library,
+        alt_weapon_library_secondary,
+        alt_frame_base_offset,
+        alt_weapon_frame_offset,
+        frame_count: 4,
+        direction_stride: 4,
+        mount_library,
+        mount_frame_offset,
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldEntitySnapshot {
@@ -5508,8 +5648,8 @@ pub struct WorldEntitySnapshot {
     pub light: u8,
     pub name_colour_argb: i32,
     pub dead: bool,
-    /// Authoritative local-player mount state. Remote/session-external players
-    /// remain `None` until their shared-zone state carries the same predicate.
+    /// Authoritative player mount state. Remote/session-external players use
+    /// the value carried by Crystal `ObjectPlayerInfo`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub riding_mount: Option<bool>,
     /// Crystal `CanRideAttack`, derived from authoritative mount type, riding
@@ -5523,8 +5663,8 @@ pub struct WorldEntitySnapshot {
     /// Whether Crystal Dazed poison is active in the authoritative buff set.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dazed: Option<bool>,
-    /// Whether the authoritative local player is currently fishing. This is
-    /// self-only because remote fishing admission is owned by shared Zone state.
+    /// Whether the authoritative player is currently fishing. Remote players
+    /// use the value carried by Crystal `ObjectPlayerInfo`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fishing: Option<bool>,
     pub disposition: WorldEntityDisposition,

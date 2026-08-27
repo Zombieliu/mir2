@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> Windows visual projection VIS-00 checkpoint (2026-08-27): shared authority
+> still owns actor identity and state, while the Gateway/native projection now
+> preserves remote player class, gender, guild, hair, armour, weapon,
+> mount/fishing mode and normal/Transform body selection instead of reducing
+> every remote player to an unstyled body. `ObjectHarvest` and
+> `ObjectHarvested` now reach native
+> Harvest/Skeleton actions; Skeleton is persistent until Revive. The focused
+> Gateway appearance regression passes 1/1 and the complete client runtime
+> library passes 185/185. This is a presentation-boundary repair, not a claim
+> that shared-Zone gameplay, whole-game semantics or Windows visuals are
+> complete. Additive weapon/wing layers, full assets, same-EXE live evidence,
+> DPI, soak and human gates stay open under the visual contract.
+
 > Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): this round records only evidence that passed.
 > Simulation `vertical_slice` passes 8/8 in 283.03 seconds, including the

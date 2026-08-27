@@ -15,17 +15,18 @@ use mir2_protocol::{
     ServerPacket, Spell, UserLocation,
 };
 use mir2_simulation::{
-    intelligent_creature_allows_ground_drop, zone_ground_drop_snapshots_for_monster_at_tick,
-    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GameShopPurchaseOutcome,
-    GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime,
-    SessionId, SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-    SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
-    SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
-    WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
-    WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneBossRewardAudit, ZoneCommand,
-    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
+    intelligent_creature_allows_ground_drop, world_entity_sprite_from_object_player,
+    zone_ground_drop_snapshots_for_monster_at_tick, ActiveSessionIdentity, CharacterSaveRecord,
+    ChatPacketPreparation, GameShopPurchaseOutcome, GroundDropClaimTicket, GroundDropLootSnapshot,
+    GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
+    SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
+    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
+    SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
+    WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
+    ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
+    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
+    ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -6023,20 +6024,20 @@ fn world_entity_from_object_player_info(
         class: Some(info.class),
         gender: Some(info.gender),
         level: Some(info.level),
-        // ObjectPlayerInfo does not carry these authoritative combat flags.
-        // Keep them unknown rather than fabricating a permissive `false`.
-        riding_mount: None,
+        // Preserve the explicit remote appearance/presentation predicates;
+        // combat-only predicates not present in ObjectPlayerInfo stay unknown.
+        riding_mount: Some(info.riding_mount),
         can_mount_attack: None,
         has_class_weapon: None,
         dazed: None,
-        fishing: None,
+        fishing: Some(info.fishing),
         hp: None,
         max_hp: None,
         light: info.light,
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
         disposition: WorldEntityDisposition::Friendly,
-        sprite: None,
+        sprite: Some(world_entity_sprite_from_object_player(info)),
         quest_ids: Vec::new(),
     }
 }
@@ -12545,13 +12546,14 @@ mod tests {
         reconcile_shared_entity_with_native_monster, shared_entity_observer_packet_object_id,
         shared_gateway_now_ms, shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
         suppress_personal_tick_shared_monster_motion, sync_zone_movement_transform,
-        world_entity_from_monster_info, zone_monster_spawn_from_shared_entity,
-        HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
-        InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
-        MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
-        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
-        SharedAccountInventoryCommitOutcome, SharedAccountInventoryExecutionContext,
-        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        world_entity_from_monster_info, world_entity_from_object_player_info,
+        zone_monster_spawn_from_shared_entity, HostedZoneOwnerCommandClient,
+        InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
+        InProcessNpcWorldService, InProcessZoneRuntimeFactory, MapZoneSessionRouter,
+        PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
+        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryCommitOutcome,
+        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
+        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneFactoryCheckpoint, SharedInProcessZoneRuntimeFactory,
         SharedInProcessZoneSessionRuntime, SharedInProcessZoneState, SharedNpcEntitySideEffect,
         SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope, SharedNpcWorldService,
@@ -14711,6 +14713,72 @@ mod tests {
                 .map(|sprite| sprite.body_library.as_str()),
             Some("NPC/12")
         );
+    }
+
+    #[test]
+    fn object_player_info_preserves_authoritative_layered_appearance() {
+        let mut info = shared_object_player_info(602, "RemoteArcher", 331, 271);
+        info.class = MirClass::Archer;
+        info.gender = MirGender::Female;
+        info.hair = 2;
+        info.armour = 3;
+        info.weapon = 201;
+        info.weapon_effect = 7;
+        info.wing_effect = 6;
+        info.transform_type = -1;
+        info.riding_mount = false;
+        info.fishing = true;
+
+        let entity = world_entity_from_object_player_info(&info, None);
+        assert_eq!(entity.riding_mount, Some(false));
+        assert_eq!(entity.fishing, Some(true));
+        let sprite = entity.sprite.expect("remote appearance sprite");
+        assert_eq!(sprite.body_library, "CArmour/03");
+        assert_eq!(sprite.hair_library.as_deref(), Some("CHair/02"));
+        assert_eq!(sprite.weapon_library.as_deref(), Some("ARWeapon/01"));
+        assert_eq!(sprite.alt_body_library.as_deref(), Some("ARArmour/03"));
+        assert_eq!(sprite.alt_hair_library.as_deref(), Some("ARHair/02"));
+        assert_eq!(sprite.alt_weapon_library.as_deref(), Some("ARWeapon/01 S"));
+        assert_eq!(sprite.frame_base_offset, 808);
+        assert_eq!(sprite.weapon_frame_offset, Some(416));
+        assert_eq!(sprite.alt_frame_base_offset, Some(352));
+        assert_eq!(sprite.alt_weapon_frame_offset, Some(352));
+
+        info.transform_type = 4;
+        let transformed = world_entity_from_object_player_info(&info, None)
+            .sprite
+            .expect("transformed remote sprite");
+        assert_eq!(transformed.body_library, "Transform/04");
+        assert_eq!(transformed.hair_library, None);
+        assert_eq!(transformed.weapon_library, None);
+
+        info.class = MirClass::Assassin;
+        info.gender = MirGender::Female;
+        info.weapon = -1;
+        info.transform_type = -1;
+        let empty_hand_assassin = world_entity_from_object_player_info(&info, None)
+            .sprite
+            .expect("empty-hand assassin sprite");
+        assert_eq!(
+            empty_hand_assassin.alt_body_library.as_deref(),
+            Some("AArmour/03")
+        );
+        assert_eq!(
+            empty_hand_assassin.alt_hair_library.as_deref(),
+            Some("AHair/02")
+        );
+        assert_eq!(empty_hand_assassin.alt_weapon_library, None);
+        assert_eq!(empty_hand_assassin.alt_weapon_library_secondary, None);
+        assert_eq!(empty_hand_assassin.alt_frame_base_offset, Some(512));
+
+        info.transform_type = 6;
+        info.riding_mount = true;
+        info.mount_type = 7;
+        let hidden_independent_mount = world_entity_from_object_player_info(&info, None)
+            .sprite
+            .expect("transform-mounted sprite with hidden independent mount");
+        assert_eq!(hidden_independent_mount.body_library, "TransformRide2/06");
+        assert_eq!(hidden_independent_mount.mount_library, None);
     }
 
     #[test]
@@ -25224,7 +25292,7 @@ mod tests {
             mount_type: -1,
             riding_mount: false,
             fishing: false,
-            transform_type: 0,
+            transform_type: -1,
             element_orb_effect: 0,
             element_orb_level: 0,
             element_orb_max: 0,

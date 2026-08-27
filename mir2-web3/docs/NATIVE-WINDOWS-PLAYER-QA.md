@@ -1,5 +1,17 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-27 VIS-00 code gate: the independent visual-parity branch now has a
+> source-bound Phase-A ledger plus tested repairs for Arial routing,
+> 8pt chat/nameplates, outlined ordinary NameView labels, remote
+> normal/Transform body routing, Harvest/CWeapon-01/Skeleton transitions and
+> Hidden/corpse opacity. HUD/damage typography, hover corpse names and additive
+> weapon/wing layers remain open. This entry has no same-EXE
+> capture and does not supersede the currently running frozen Candidate.
+> Focused gates pass; the full suite remains FAIL because the frozen asset pack
+> is missing the Archer walk and Mount frames required by two of 318 Windows
+> tests. Treat VIS-00 as an
+> implementation checkpoint only, with `visualAccepted=false`.
+
 > 2026-08-19 alternate-class/combat-overlay update: the native resolver now
 > mirrors the Web alternate libraries for Archer walk/run/range actions
 > (`ARArmour` / `ARHair` / `ARWeapon`) and Assassin body/hair plus directional

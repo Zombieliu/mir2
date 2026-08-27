@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> Windows VIS-00 server/client-boundary note (2026-08-27): no new server
+> completion percentage is claimed. The authoritative `ObjectPlayerInfo`
+> identity, guild, normal/Transform body and equipment routes now survive the
+> Gateway projection into the native renderer, and harvest/corpse packets
+> drive Harvest then persistent Skeleton rather than being dropped. Focused
+> Gateway 1/1 and runtime 185/185 tests
+> pass. This closes only the bounded projection/action-loss defects; monster
+> special rendering, effect/wing overlays, complete assets, skill effects,
+> environment visuals and all real-window acceptance gates remain open.
+
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,
 > including the original Bichon quest 1-to-9 route, and `shared_zone` passes

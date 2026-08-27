@@ -15,6 +15,7 @@ use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
+use super::typography::crystal_text_font;
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
@@ -709,10 +710,7 @@ fn spawn_text<T: Component>(
         marker,
         absolute_node(rect),
         Text::new(value.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(font_size),
-            ..default()
-        },
+        crystal_text_font(font_size),
         TextColor(color),
         TextLayout::justify(justify),
         TextShadow {

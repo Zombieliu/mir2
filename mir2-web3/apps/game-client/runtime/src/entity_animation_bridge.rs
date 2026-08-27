@@ -265,6 +265,7 @@ fn parse_direction(value: Option<&str>) -> Direction {
 
 fn parse_action(value: &str) -> Option<AnimationAction> {
     match value {
+        "harvest" => Some(AnimationAction::Harvest),
         "walking" => Some(AnimationAction::Walking),
         "running" => Some(AnimationAction::Running),
         "attack1" => Some(AnimationAction::Attack1),
@@ -276,6 +277,7 @@ fn parse_action(value: &str) -> Option<AnimationAction> {
         "struck" => Some(AnimationAction::Struck),
         "die" => Some(AnimationAction::Die),
         "dead" => Some(AnimationAction::Dead),
+        "skeleton" => Some(AnimationAction::Skeleton),
         "revive" => Some(AnimationAction::Revive),
         _ => None,
     }
@@ -311,6 +313,7 @@ fn action_name(action: AnimationAction) -> &'static str {
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "die",
         AnimationAction::Dead => "dead",
+        AnimationAction::Skeleton => "skeleton",
         AnimationAction::Revive => "revive",
     }
 }
@@ -329,6 +332,7 @@ fn animation_state_name(action: AnimationAction) -> &'static str {
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "dying",
         AnimationAction::Dead => "dead",
+        AnimationAction::Skeleton => "skeleton",
         AnimationAction::Revive => "reviving",
     }
 }

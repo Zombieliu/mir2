@@ -224,6 +224,7 @@ fn build_animation_catalog(source: &HashMap<String, SourceAction>) -> Option<Ani
         AnimationAction::Struck,
         AnimationAction::Die,
         AnimationAction::Dead,
+        AnimationAction::Skeleton,
         AnimationAction::Revive,
     ] {
         let (source_name, source_action) = resolve_source_action(source, action)?;
@@ -258,6 +259,7 @@ fn resolve_source_action<'a>(
         AnimationAction::Struck => &["Struck", "Standing"],
         AnimationAction::Die => &["Die", "Dead", "Standing"],
         AnimationAction::Dead => &["Dead", "Die", "Standing"],
+        AnimationAction::Skeleton => &["Skeleton", "Dead", "Die", "Standing"],
         AnimationAction::Revive => &["Revive", "Die", "Standing"],
     };
     candidates

@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> Active Windows visual-parity goal (2026-08-27): `VIS-00` is the first
+> bounded implementation checkpoint on `codex/windows-visual-parity`. It adds
+> the Phase-A denominator ledger and repairs Arial routing plus 8pt
+> chat/nameplates, remote normal/Transform body routing, Harvest/CWeapon-01/
+> Skeleton, ordinary NameView alive-only labels and Hidden/corpse opacity.
+> Focused code gates pass; the next ordered slices are `VIS-01` fixed Bichon
+> actor/monster scene, `VIS-02` FlamingSword/FireBall/Lightning/SoulFireBall/
+> FireWall effects, and `VIS-03` HUD/Inventory/BigMap button states. Do not
+> report full-game 90% or visual 100%: clean source binding, the semantic
+> inventory, full legal assets, additive weapon/wing layers, same-EXE live WSS,
+> 100/125/150% DPI, 30-minute native soak, human visual/audio/feel and
+> publisher-signing gates remain open.
+
 > MAP-E0/E1 bounded closure (2026-08-26): the real `Server.MirDB` map records
 > now drive hazard/music packet metadata for all 464 source records, and all six
 > current `_MAPCOORD` entries are typed and one-to-one bound to `NeedMove`.

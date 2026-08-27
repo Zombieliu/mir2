@@ -14,6 +14,7 @@ pub mod panel_layouts;
 pub mod preview_data;
 pub mod select;
 pub mod spec;
+pub mod typography;
 pub mod widget;
 
 pub use metrics::CrystalStageTransform;

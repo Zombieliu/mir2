@@ -5,6 +5,9 @@
 
 use bevy::prelude::*;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+use mir2_client_bevy::crystal_ui::typography::{
+    crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX,
+};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use serde_json::Value;
 
@@ -247,26 +250,35 @@ pub fn sync_native_entity_overlays(
                     });
                 }
 
+                for offset in crystal_outline_offsets() {
+                    root.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(entry.left + offset.x),
+                            top: Val::Px(entry.top + offset.y),
+                            width: Val::Px(entry.width),
+                            min_width: Val::Px(entry.width),
+                            ..default()
+                        },
+                        Text::new(entry.name.clone()),
+                        crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+                        TextColor(Color::BLACK),
+                        TextLayout::justify(Justify::Center),
+                    ));
+                }
                 root.spawn((
                     Node {
                         position_type: PositionType::Absolute,
-                        left: Val::Px(entry.left),
-                        top: Val::Px(entry.top),
+                        left: Val::Px(entry.left + 1.0),
+                        top: Val::Px(entry.top + 1.0),
                         width: Val::Px(entry.width),
                         min_width: Val::Px(entry.width),
                         ..default()
                     },
                     Text::new(entry.name),
-                    TextFont {
-                        font_size: FontSize::Px(11.0),
-                        ..default()
-                    },
+                    crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
                     TextColor(entry.color),
                     TextLayout::justify(Justify::Center),
-                    TextShadow {
-                        offset: Vec2::splat(1.0),
-                        color: Color::BLACK,
-                    },
                 ));
             }
             for floater in floaters {
@@ -281,10 +293,7 @@ pub fn sync_native_entity_overlays(
                         ..default()
                     },
                     Text::new(floater.text),
-                    TextFont {
-                        font_size: FontSize::Px(floater.font_size),
-                        ..default()
-                    },
+                    crystal_text_font(floater.font_size),
                     TextColor(floater.color),
                     TextLayout::justify(Justify::Center),
                     TextShadow {
@@ -294,6 +303,18 @@ pub fn sync_native_entity_overlays(
                 ));
             }
         });
+}
+
+/// `MirLabel.DrawControl` renders the black outline in this exact order before
+/// drawing the foreground at `(1, 1)`. Keep this as geometry rather than a
+/// renderer shadow so all four source pixels remain independently auditable.
+fn crystal_outline_offsets() -> [Vec2; 4] {
+    [
+        Vec2::new(1.0, 0.0),
+        Vec2::new(0.0, 1.0),
+        Vec2::new(2.0, 1.0),
+        Vec2::new(1.0, 2.0),
+    ]
 }
 
 fn damage_floater_entries(
@@ -424,6 +445,9 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                     let x = entity.get("x").and_then(value_i64).unwrap_or(0);
                     let y = entity.get("y").and_then(value_i64).unwrap_or(0);
                     let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
+                    if dead {
+                        return None;
+                    }
                     let is_self = kind == "selfPlayer";
                     let lines = if matches!(kind, "npc" | "monster") {
                         name.split('_')
@@ -432,10 +456,7 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                     } else {
                         vec![name]
                     };
-                    let mut display_name = lines.join("\n");
-                    if dead {
-                        display_name.push_str("\nDead");
-                    }
+                    let display_name = lines.join("\n");
                     let line_adjustment = if matches!(kind, "npc" | "monster") {
                         -((lines.len().saturating_sub(1) as f32) * 10.0) / 2.0
                     } else {
@@ -445,8 +466,7 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                         -18.0
                     } else {
                         -17.0
-                    } + line_adjustment
-                        + if dead { 35.0 } else { 0.0 };
+                    } + line_adjustment;
                     let color = entity
                         .get("nameColourArgb")
                         .and_then(value_i64)
@@ -617,12 +637,44 @@ mod tests {
     }
 
     #[test]
+    fn dead_entities_do_not_emit_crystal_nameplates() {
+        let entries = overlay_entries(
+            &json!({
+                "sceneView": {"center": {"x": 10, "y": 20}},
+                "entities": [
+                    {"objectId": 1, "kind": "selfPlayer", "name": "Fallen", "x": 10, "y": 20, "dead": true},
+                    {"objectId": 2, "kind": "monster", "name": "Living_Deer", "x": 11, "y": 20, "dead": false}
+                ]
+            }),
+            OverlayVisibility {
+                name_view: true,
+                drop_view: false,
+            },
+        );
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].name, "Living\nDeer");
+    }
+
+    #[test]
     fn argb_requires_alpha_and_preserves_channels() {
         assert!(argb_color(-1).is_none());
         assert!(argb_color(0x00ff_0000).is_none());
         assert_eq!(
             argb_color(0xff12_3456),
             Some(Color::srgba_u8(0x12, 0x34, 0x56, 0xff))
+        );
+    }
+
+    #[test]
+    fn nameplate_outline_matches_mir_label_four_pass_geometry() {
+        assert_eq!(
+            crystal_outline_offsets(),
+            [
+                Vec2::new(1.0, 0.0),
+                Vec2::new(0.0, 1.0),
+                Vec2::new(2.0, 1.0),
+                Vec2::new(1.0, 2.0),
+            ]
         );
     }
 

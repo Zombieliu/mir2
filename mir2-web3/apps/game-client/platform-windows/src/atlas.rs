@@ -376,10 +376,9 @@ fn uses_assassin_alt(action: AnimationAction) -> bool {
             | AnimationAction::Attack2
             | AnimationAction::Attack3
             | AnimationAction::Attack4
+            | AnimationAction::Spell
             | AnimationAction::Struck
             | AnimationAction::Die
-            | AnimationAction::Dead
-            | AnimationAction::Revive
     )
 }
 
@@ -395,11 +394,21 @@ pub(crate) fn resolved_native_sprite(
     let (fallback_library, _) = starter_frame(kind, "0", "down", None, None);
     let body_library = sprite_library(sprite, "bodyLibrary").unwrap_or(fallback_library);
     let hair_library = sprite_library(sprite, "hairLibrary");
-    let weapon_library = sprite_library(sprite, "weaponLibrary");
-    let weapon_library_secondary = sprite_library(sprite, "weaponLibrarySecondary");
+    let mut weapon_library = sprite_library(sprite, "weaponLibrary");
+    let mut weapon_library_secondary = sprite_library(sprite, "weaponLibrarySecondary");
     let mount_library = sprite_library(sprite, "mountLibrary");
-    let body_base_offset = sprite_number(sprite, "frameBaseOffset").unwrap_or(0);
-    let weapon_frame_offset = sprite_number(sprite, "weaponFrameOffset");
+    let transform_mounted = entity
+        .get("transformType")
+        .and_then(Value::as_i64)
+        .is_some_and(|value| value >= 0)
+        && entity.get("ridingMount").and_then(Value::as_bool) == Some(true)
+        && entity
+            .get("mountType")
+            .and_then(Value::as_i64)
+            .is_some_and(|value| value > 6);
+    let body_base_offset = sprite_number(sprite, "frameBaseOffset").unwrap_or(0)
+        + if transform_mounted { -416 } else { 0 };
+    let mut weapon_frame_offset = sprite_number(sprite, "weaponFrameOffset");
     let mount_frame_offset = sprite_number(sprite, "mountFrameOffset").unwrap_or(0);
 
     if !matches!(kind, "selfPlayer" | "player" | "hero") || mount_library.is_some() {
@@ -427,6 +436,16 @@ pub(crate) fn resolved_native_sprite(
         .to_ascii_lowercase();
     let gender_body_offset = if gender_key == "female" { 808 } else { 0 };
     let gender_weapon_offset = if gender_key == "female" { 416 } else { 0 };
+    let untransformed = entity
+        .get("transformType")
+        .and_then(Value::as_i64)
+        .unwrap_or(-1)
+        < 0;
+    if action == AnimationAction::Harvest && untransformed {
+        weapon_library = Some("/original-ui/CWeapon/01".to_owned());
+        weapon_library_secondary = None;
+        weapon_frame_offset = Some(gender_weapon_offset);
+    }
     let alt_body_library = available_sprite_library(sprite, "altBodyLibrary");
     let alt_hair_library = available_sprite_library(sprite, "altHairLibrary");
     let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary");
@@ -497,6 +516,7 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         .and_then(Value::as_str)
         .unwrap_or("standing")
     {
+        "harvest" => AnimationAction::Harvest,
         "walking" => AnimationAction::Walking,
         "running" => AnimationAction::Running,
         "attack1" => AnimationAction::Attack1,
@@ -508,6 +528,7 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         "struck" => AnimationAction::Struck,
         "die" => AnimationAction::Die,
         "dead" => AnimationAction::Dead,
+        "skeleton" => AnimationAction::Skeleton,
         "revive" => AnimationAction::Revive,
         _ => AnimationAction::Standing,
     }
@@ -784,6 +805,11 @@ fn build_entity_render_state_internal(
                             false,
                         ) {
                             layers.push(layer);
+                        }
+                    }
+                    if entity.get("hidden").and_then(Value::as_bool) == Some(true) {
+                        for layer in &mut layers {
+                            layer["opacity"] = json!(0.5);
                         }
                     }
 
@@ -1134,6 +1160,47 @@ mod tests {
     }
 
     #[test]
+    fn harvest_forces_crystal_cweapon_one_for_untransformed_player() {
+        let resolved = resolved_native_sprite(
+            &json!({
+                "kind": "player",
+                "genderKey": "female",
+                "weapon": -1,
+                "transformType": -1,
+                "sprite": {
+                    "bodyLibrary": "CArmour/00",
+                    "frameBaseOffset": 808,
+                    "weaponFrameOffset": null
+                }
+            }),
+            AnimationAction::Harvest,
+        );
+        assert_eq!(
+            resolved.weapon_library.as_deref(),
+            Some("/original-ui/CWeapon/01")
+        );
+        assert_eq!(resolved.weapon_frame_offset, Some(416));
+
+        let transformed_mount = resolved_native_sprite(
+            &json!({
+                "kind": "player",
+                "transformType": 4,
+                "ridingMount": true,
+                "mountType": 7,
+                "sprite": {
+                    "bodyLibrary": "TransformRide2/04",
+                    "mountLibrary": "Mount/07",
+                    "frameBaseOffset": 0,
+                    "mountFrameOffset": 0
+                }
+            }),
+            AnimationAction::Standing,
+        );
+        assert_eq!(transformed_mount.body_library, "/original-ui/TransformRide2/04");
+        assert_eq!(transformed_mount.body_base_offset, -416);
+    }
+
+    #[test]
     fn assassin_melee_uses_alt_body_hair_and_dual_directional_weapons() {
         let payload = json!({
             "sceneView": { "center": { "x": 9, "y": 7 } },
@@ -1194,6 +1261,20 @@ mod tests {
             .as_str()
             .is_some_and(|path| path.ends_with("/AWeapon/00 L/160.png")));
         assert!(primary["z"].as_f64().unwrap() > secondary["z"].as_f64().unwrap());
+
+        let entity = &payload["entities"][0];
+        assert_eq!(
+            resolved_native_sprite(entity, AnimationAction::Die).body_library,
+            "/original-ui/AArmour/00"
+        );
+        assert_eq!(
+            resolved_native_sprite(entity, AnimationAction::Dead).body_library,
+            "/original-ui/CArmour/00"
+        );
+        assert_eq!(
+            resolved_native_sprite(entity, AnimationAction::Revive).body_library,
+            "/original-ui/CArmour/00"
+        );
     }
 
     #[test]
@@ -1236,6 +1317,52 @@ mod tests {
                 .as_str()
                 .is_some_and(|key| key.contains("weapon"))
         }));
+    }
+
+    #[test]
+    fn hidden_is_half_opacity_but_dead_is_not_implicitly_faded() {
+        let payload = json!({
+            "sceneView": { "center": { "x": 9, "y": 7 } },
+            "entities": [
+                {
+                    "objectId": 1001,
+                    "kind": "player",
+                    "x": 9,
+                    "y": 7,
+                    "direction": "down",
+                    "hidden": true,
+                    "dead": false,
+                    "sprite": {"bodyLibrary": "CArmour/00", "frameBaseOffset": 0}
+                },
+                {
+                    "objectId": 1002,
+                    "kind": "monster",
+                    "x": 10,
+                    "y": 7,
+                    "direction": "down",
+                    "hidden": false,
+                    "dead": true,
+                    "sprite": {"bodyLibrary": "Monster/004", "frameBaseOffset": 0}
+                }
+            ]
+        });
+        let state = build_entity_render_state_with_frames(
+            &payload,
+            &HashMap::from([("1001".to_owned(), 0), ("1002".to_owned(), 153)]),
+        )
+        .expect("entity render state");
+        let hidden_layers = state["entities"][0]["layers"]
+            .as_array()
+            .expect("hidden layers");
+        assert!(hidden_layers
+            .iter()
+            .all(|layer| layer["opacity"] == json!(0.5)));
+        let dead_layers = state["entities"][1]["layers"]
+            .as_array()
+            .expect("dead layers");
+        assert!(dead_layers
+            .iter()
+            .all(|layer| layer.get("opacity").is_none()));
     }
 
     #[test]

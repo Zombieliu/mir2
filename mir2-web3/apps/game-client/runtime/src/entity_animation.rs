@@ -53,6 +53,7 @@ pub enum AnimationAction {
     Struck,
     Die,
     Dead,
+    Skeleton,
     Revive,
 }
 
@@ -231,6 +232,10 @@ impl AnimationCatalog {
         );
         catalog.add_default(
             AnimationAction::Dead,
+            FrameDescriptor::from_crystal(153, 1, 9, 1000, false),
+        );
+        catalog.add_default(
+            AnimationAction::Skeleton,
             FrameDescriptor::from_crystal(153, 1, 9, 1000, false),
         );
         catalog.add_default(
@@ -660,7 +665,7 @@ impl EntityAnimationState {
                     transitions,
                 )?;
             }
-            AnimationAction::Dead => {
+            AnimationAction::Dead | AnimationAction::Skeleton => {
                 self.next_motion_at_ms = None;
             }
             AnimationAction::Revive => {
@@ -684,11 +689,12 @@ impl EntityAnimationState {
         transitions: &mut Vec<ActionTransition>,
     ) -> Result<bool, AnimationError> {
         let can_start = self.current_action.is_interruptible_idle(self.kind)
-            || (self.current_action == AnimationAction::Dead
-                && self
-                    .action_feed
-                    .front()
-                    .is_some_and(|event| event.action == AnimationAction::Revive));
+            || self.action_feed.front().is_some_and(|event| {
+                (self.current_action == AnimationAction::Dead
+                    && matches!(event.action, AnimationAction::Skeleton | AnimationAction::Revive))
+                    || (self.current_action == AnimationAction::Skeleton
+                        && event.action == AnimationAction::Revive)
+            });
         if !can_start {
             return Ok(false);
         }
@@ -759,7 +765,7 @@ impl EntityAnimationState {
         self.direction = direction;
         self.frame_index = 0;
         self.last_started_event_sequence = event_sequence;
-        self.next_motion_at_ms = if action == AnimationAction::Dead {
+        self.next_motion_at_ms = if matches!(action, AnimationAction::Dead | AnimationAction::Skeleton) {
             None
         } else {
             Some(deadline(at_ms, descriptor.frame_interval_ms)?)
@@ -1244,6 +1250,40 @@ mod tests {
         assert_eq!(
             world.state(&key).unwrap().current_action,
             AnimationAction::Dead
+        );
+    }
+
+    #[test]
+    fn harvested_monster_transitions_from_dead_to_persistent_skeleton() {
+        let mut world = AnimationWorld::new(22);
+        let key = spawn_default(&mut world, "deer", EntityKind::Monster, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Die, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world.tick(1_000).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().current_action,
+            AnimationAction::Dead
+        );
+
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Skeleton, Direction::Right),
+                1_001,
+            )
+            .unwrap();
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Skeleton);
+        assert_eq!(state.next_motion_at_ms, None);
+        world.tick(50_000).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().current_action,
+            AnimationAction::Skeleton
         );
     }
 

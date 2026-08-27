@@ -635,8 +635,6 @@ struct EntityRenderAtlasRect {
 struct EntityRenderEntry {
     object_id: String,
     #[serde(default)]
-    dead: bool,
-    #[serde(default)]
     is_self: bool,
     #[serde(default)]
     grid_x: Option<i32>,
@@ -4289,7 +4287,7 @@ fn sync_entity_render_layers(
             let position = entity_render_layer_position(snapshot, layer, motion_offset);
             let opacity = layer
                 .opacity
-                .unwrap_or(if entity.dead { 0.45 } else { 1.0 });
+                .unwrap_or(1.0);
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 

@@ -579,6 +579,16 @@ impl NativeGameplayAdapter {
                 "ObjectWalk" => self.patch_zone_entity_transform(payload, Some("walking")),
                 "ObjectRun" => self.patch_zone_entity_transform(payload, Some("running")),
                 "ObjectTurn" => self.patch_zone_entity_transform(payload, None),
+                "ObjectHarvest" => self.patch_zone_entity_action(payload, "harvest", true),
+                "ObjectHarvested" => {
+                    let changed = self.patch_zone_entity_action(payload, "skeleton", true);
+                    if let Some(object_id) = packet_object_id(payload) {
+                        let entity = self.zone_entities.entry(object_id).or_default();
+                        entity.insert("dead".to_owned(), Value::Bool(true));
+                        entity.insert("skeleton".to_owned(), Value::Bool(true));
+                    }
+                    changed
+                }
                 "ObjectAttack" => self.patch_zone_entity_action(payload, "attack1", true),
                 "ObjectRangeAttack" => self.patch_zone_entity_action(payload, "attackRange1", true),
                 "ObjectMagic" => {
@@ -782,14 +792,44 @@ impl NativeGameplayAdapter {
             overlay,
             &[
                 "name",
+                "ownerName",
+                "guildName",
+                "guildRankName",
                 "direction",
                 "class",
+                "classKey",
                 "gender",
+                "genderKey",
                 "level",
                 "image",
                 "light",
                 "nameColourArgb",
                 "dead",
+                "hair",
+                "weapon",
+                "weaponEffect",
+                "armour",
+                "poison",
+                "hidden",
+                "skeleton",
+                "effect",
+                "wingEffect",
+                "extra",
+                "extraByte",
+                "rarity",
+                "shockTime",
+                "bindingShotCenter",
+                "masterObjectId",
+                "mountType",
+                "ridingMount",
+                "fishing",
+                "transformType",
+                "elementOrbEffect",
+                "elementOrbLevel",
+                "elementOrbMax",
+                "buffs",
+                "levelEffects",
+                "sprite",
                 "hp",
                 "maxHp",
                 "questIds",
@@ -866,6 +906,7 @@ impl NativeGameplayAdapter {
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
         overlay.insert("dead".to_owned(), Value::from(dead));
+        overlay.insert("skeleton".to_owned(), Value::Bool(false));
         if dead {
             overlay.insert("hp".to_owned(), Value::from(0));
             overlay.insert("_packetHealthPercent".to_owned(), Value::from(0));
@@ -3988,6 +4029,107 @@ mod tests {
         assert_eq!(payload["entities"][0]["hp"], json!(9));
         assert_eq!(payload["entities"][0]["maxHp"], json!(18));
         assert_eq!(payload["entities"][0]["dead"], json!(false));
+    }
+
+    #[test]
+    fn object_player_packet_preserves_authoritative_appearance_for_native_rendering() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectPlayer".to_owned(),
+            payload: json!({
+                "objectId": 2201,
+                "name": "RemoteArcher",
+                "guildName": "BichonGuard",
+                "guildRankName": "Scout",
+                "location": {"x": 291, "y": 616},
+                "direction": "Left",
+                "class": "Archer",
+                "classKey": "archer",
+                "gender": "Female",
+                "genderKey": "female",
+                "hair": 2,
+                "weapon": 201,
+                "weaponEffect": 7,
+                "armour": 3,
+                "poison": 4,
+                "hidden": true,
+                "wingEffect": 6,
+                "ridingMount": false,
+                "fishing": false,
+                "sprite": {
+                    "bodyLibrary": "CArmour/03",
+                    "hairLibrary": "CHair/02",
+                    "weaponLibrary": "ARWeapon/01",
+                    "altBodyLibrary": "ARArmour/03",
+                    "altHairLibrary": "ARHair/02",
+                    "altWeaponLibrary": "ARWeapon/01 S",
+                    "frameBaseOffset": 808,
+                    "weaponFrameOffset": 416,
+                    "altFrameBaseOffset": 352,
+                    "altWeaponFrameOffset": 352
+                }
+            }),
+        }));
+
+        let entity = adapter.zone_entities.get(&2201).expect("remote player");
+        assert_eq!(entity.get("classKey"), Some(&json!("archer")));
+        assert_eq!(entity.get("guildName"), Some(&json!("BichonGuard")));
+        assert_eq!(entity.get("guildRankName"), Some(&json!("Scout")));
+        assert_eq!(entity.get("hidden"), Some(&json!(true)));
+        assert_eq!(entity.get("weaponEffect"), Some(&json!(7)));
+        assert_eq!(entity.get("wingEffect"), Some(&json!(6)));
+        assert_eq!(
+            entity
+                .get("sprite")
+                .and_then(|sprite| sprite.get("altBodyLibrary")),
+            Some(&json!("ARArmour/03"))
+        );
+    }
+
+    #[test]
+    fn harvest_packets_drive_player_harvest_and_corpse_skeleton_actions() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHarvest".to_owned(),
+            payload: json!({
+                "objectId": 1000,
+                "x": 288,
+                "y": 616,
+                "direction": "Right"
+            }),
+        }));
+        let player = adapter.zone_entities.get(&1000).expect("harvester");
+        assert_eq!(player.get("x"), Some(&json!(288)));
+        assert_eq!(player.get("y"), Some(&json!(616)));
+        assert_eq!(
+            player.get("_nativeAnimationAction"),
+            Some(&json!("harvest"))
+        );
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHarvested".to_owned(),
+            payload: json!({
+                "objectId": 2001,
+                "x": 289,
+                "y": 616,
+                "direction": "Down"
+            }),
+        }));
+        let corpse = adapter.zone_entities.get(&2001).expect("harvested corpse");
+        assert_eq!(corpse.get("dead"), Some(&json!(true)));
+        assert_eq!(corpse.get("skeleton"), Some(&json!(true)));
+        assert_eq!(
+            corpse.get("_nativeAnimationAction"),
+            Some(&json!("skeleton"))
+        );
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRevived".to_owned(),
+            payload: json!({"objectId": 2001}),
+        }));
+        let revived = adapter.zone_entities.get(&2001).expect("revived entity");
+        assert_eq!(revived.get("dead"), Some(&json!(false)));
+        assert_eq!(revived.get("skeleton"), Some(&json!(false)));
     }
 
     #[test]

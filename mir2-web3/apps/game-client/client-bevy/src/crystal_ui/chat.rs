@@ -15,6 +15,7 @@ use mir2_ui_core::action::UiAction;
 use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
 use super::spec;
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 #[cfg(test)]
 use super::spec::CrystalRect;
 
@@ -1090,10 +1091,7 @@ fn spawn_chat_settings_footer(parent: &mut ChildSpawnerCommands, asset_server: &
             },
             BackgroundColor(Color::srgba(0.20, 0.14, 0.08, 0.96)),
             Text::new(label),
-            TextFont {
-                font_size: FontSize::Px(8.0),
-                ..default()
-            },
+            crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
             TextColor(Color::WHITE),
         ));
     }
@@ -1227,10 +1225,7 @@ fn spawn_chat_line(
         },
         BackgroundColor(chat_color(colors.background, transparent)),
         Text::new(line.text.clone()),
-        TextFont {
-            font_size: FontSize::Px(8.0),
-            ..default()
-        },
+        crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
         TextColor(chat_color(colors.foreground, transparent)),
     ));
 }
