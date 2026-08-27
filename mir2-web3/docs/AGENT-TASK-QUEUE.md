@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> VIS-01 hover-target additional bounded automated checkpoint (2026-08-28):
+> revision `1deb930483f3eca5f26f11020f091454fc96b183` retains the verified
+> entity-atlas RGBA pages for Crystal body-only transparent-pixel MouseOver,
+> including the same-tile shortcut and Y/X descending five-by-five/reverse-
+> object scan. Self/dead are excluded, NPC/player/monster are eligible, and
+> the exact-atlas full composite redraw is atomic. Separate world, hover,
+> selected and foreground-effect depth bands preserve source order; identical
+> hover/selection emits only selected. Persisted `HighlightTarget` schema v3
+> defaults true for old v1/v2 configs and gates both redraws without adding an
+> OptionDialog row, Gateway command or combat-target mutation. Windows
+> 381/381, Bevy native-ui 402/402, ui-core 42/42, runtime 191/191 and focused
+> 5/5 pass; two final reviews report P0=0/P1=0. No EXE, package, live WSS,
+> GPU screenshot or DPI/human-feel evidence was produced. General
+> DrawBehind/special composites, Web symmetry and every same-EXE/DPI/soak/
+> human/signing/denominator gate remain open. Do not emit a global percentage.
+
 > VIS-03 Character HUD additional bounded automated checkpoint (2026-08-28):
 > revision `849f1f0b5120867d1358e0e7db9ba675e9866f9c` source-binds the
 > 20x20 `(905,692)` main Character control to exact `Prguse/1900/1901/1902`

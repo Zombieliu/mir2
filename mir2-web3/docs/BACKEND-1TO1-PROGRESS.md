@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-01 hover-target client-boundary checkpoint (2026-08-28): revision
+> `1deb930483f3eca5f26f11020f091454fc96b183` changes no simulation, combat,
+> Gateway or shared-Zone authority. The Windows client locally applies
+> Crystal's body-alpha/same-tile hover scan, atomic 30% actor redraw,
+> hover-before-selected depth and persisted `HighlightTarget` gate. Cursor and
+> option-only changes republish presentation without a packet or selected-
+> target mutation. Windows 381/381, Bevy 402/402, ui-core 42/42, runtime
+> 191/191 and focused 5/5 pass; two reviews have P0=0/P1=0. No live WSS, EXE,
+> package, GPU pixels, real DPI or human feel was recertified. Wider actor/
+> effect semantics and every final gate remain open. No backend, visual or
+> global percentage is claimed.
+
 > VIS-03 Character HUD client-boundary checkpoint (2026-08-28): revision
 > `849f1f0b5120867d1358e0e7db9ba675e9866f9c` changes no simulation, Zone,
 > Gateway or gameplay authority. The native client locally binds the exact

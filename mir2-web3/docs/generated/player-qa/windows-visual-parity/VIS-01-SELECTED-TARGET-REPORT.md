@@ -116,3 +116,11 @@ revision above was committed; the final review found no P0/P1.
 
 Until every required denominator and final gate closes,
 `globalParityPercent` stays null and `visualAccepted` stays false.
+
+## Later bounded follow-up
+
+Revision `1deb930483f3eca5f26f11020f091454fc96b183` subsequently closes the
+automated hover `MouseObject`, transparent body-pixel hit test and persisted
+`HighlightTarget` gates listed above. See `VIS-01-HOVER-TARGET-REPORT.md`.
+All same-EXE/live-WSS/GPU/DPI/soak/human/signing/denominator gates and the
+wider actor/effect inventories remain open, so VIS-01 is still in progress.

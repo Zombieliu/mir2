@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> VIS-01 hover-target server-client note (2026-08-28): revision
+> `1deb930483f3eca5f26f11020f091454fc96b183` adds no server packet or
+> authority. The native client consumes the existing authoritative actor
+> projection for Crystal's body-alpha/same-tile hover scan and local 30%
+> redraw. `HighlightTarget` is persisted locally and neither changes the
+> selected combat object nor emits Gateway traffic. Windows 381/381, Bevy
+> 402/402, ui-core 42/42, runtime 191/191 and focused 5/5 pass with two final
+> P0=0/P1=0 reviews. Authenticated live delivery, same-EXE GPU pixels, real
+> DPI/mouse feel, wider DrawBehind/special composites, Web symmetry, soak,
+> human/signing and denominator gates remain open. No server or global
+> percentage is emitted.
+
 > VIS-03 Character HUD server-client note (2026-08-28): revision
 > `849f1f0b5120867d1358e0e7db9ba675e9866f9c` adds no server packet or
 > authority. Exact Character button normal/hover/pressed pixels, pointer-only

@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-01 hover-target additional bounded checkpoint (2026-08-28):
+> implementation revision `1deb930483f3eca5f26f11020f091454fc96b183`
+> reproduces Crystal's body-alpha MouseOver, same-tile shortcut, five-by-five
+> reverse scan, NPC/player/monster eligibility, dead/self exclusion and 30%
+> atomic full-composite redraw. Hover now occupies its own depth band below
+> selected and foreground effects. Persisted `HighlightTarget` v3 gates both
+> local redraws, migrates v1/v2 with default true, adds no visible OptionDialog
+> row and emits no network intent. Windows 381/381, Bevy 402/402, ui-core
+> 42/42, runtime 191/191 and focused 5/5 pass; two independent final reviews
+> have P0=0/P1=0. This closes one automated semantic leaf, not VIS-01, actor
+> presentation or visual acceptance. Same-EXE/live-WSS/GPU/DPI/mouse-feel,
+> general DrawBehind/special composites, Web parity, soak, human/signing and
+> the incomplete denominator remain open; `globalParityPercent` remains null.
+
 > VIS-03 Character HUD additional bounded checkpoint (2026-08-28): revision
 > `849f1f0b5120867d1358e0e7db9ba675e9866f9c` binds exact
 > `Prguse/1900/1901/1902`, `(905,692,20,20)`, one enabled pointer ButtonA
