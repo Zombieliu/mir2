@@ -23,6 +23,10 @@ assert.equal(
   ledger.implementationBaseRevision,
   "67a55b37900ced07d66bd788cbe06ef429ede8aa",
 );
+assert.equal(
+  ledger.implementationRevision,
+  "76f61ddabadd976f36c360fe2a942d4e67426dff",
+);
 assert.equal(ledger.branch, "codex/windows-visual-parity");
 assert.equal(ledger.claims.semanticLeafInventoryComplete, false);
 assert.equal(ledger.claims.inventoryComplete, false);

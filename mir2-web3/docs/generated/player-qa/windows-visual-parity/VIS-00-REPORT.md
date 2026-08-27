@@ -8,6 +8,7 @@ Date: 2026-08-27
 Crystal source revision: 484983404e3d6afa584e93801f8006ae3429bea9
 Crystal sourceRootClean: false
 implementation base: 67a55b37900ced07d66bd788cbe06ef429ede8aa
+implementation revision: 76f61ddabadd976f36c360fe2a942d4e67426dff
 branch: codex/windows-visual-parity
 semanticLeafInventoryComplete: false
 inventoryComplete: false
