@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> VIS-03 CharacterDialog tabs additional bounded automated checkpoint
+> (2026-08-28): revision `ac4ae1686ff60c01437100554c7a5d4cd6c78a65`
+> source-binds the four 64x20 Character/Status/State/Skill controls at
+> `(8,70)/(70,70)/(132,70)/(194,70)` to active `Title/500..503` frames and
+> exact local `ButtonA=10103 -> 103.wav`. Every Changed-to-Pressed pointer edge
+> queues one cue before its local page transition; held state does not repeat,
+> release/re-press emits once, all four pages are covered and neither UI intent
+> queue receives Gateway work. UI audio synchronization now follows all local
+> input producers in the same update. Focused 1/1, Bevy native-ui 402/402,
+> Windows 381/381, Rust 1.95 fmt and diff checks pass. Independent review's
+> same-update audio P1 was remediated; final P0=0/P1=0. No asset, EXE, package,
+> live audio/WSS or screenshot was produced. Page contents, remaining panel/UI,
+> same-EXE/DPI/soak/human/signing and incomplete semantic-denominator gates
+> remain open. Do not emit a global percentage.
+
 > VIS-01 hover-target additional bounded automated checkpoint (2026-08-28):
 > revision `1deb930483f3eca5f26f11020f091454fc96b183` retains the verified
 > entity-atlas RGBA pages for Crystal body-only transparent-pixel MouseOver,

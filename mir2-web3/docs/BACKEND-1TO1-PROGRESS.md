@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-03 CharacterDialog tabs client-boundary checkpoint (2026-08-28):
+> revision `ac4ae1686ff60c01437100554c7a5d4cd6c78a65` changes no simulation,
+> shared-Zone, Gateway or gameplay authority. The native client locally plays
+> exact ButtonA once for each of the four Character/Status/State/Skill tab
+> pointer edges before switching its existing exact-geometry/active-frame page
+> state. Held and keyboard paths do not invent repeats, both outbound intent
+> queues stay empty, and audio is consumed in the same update. Focused 1/1,
+> Bevy 402/402, Windows 381/381 and final P0=0/P1=0 review pass. No live WSS,
+> EXE, package or visual/audible-device evidence was produced. Page contents
+> and all same-EXE/DPI/soak/human/signing/denominator gates remain open. No
+> backend, visual or global percentage is claimed.
+
 > VIS-01 hover-target client-boundary checkpoint (2026-08-28): revision
 > `1deb930483f3eca5f26f11020f091454fc96b183` changes no simulation, combat,
 > Gateway or shared-Zone authority. The Windows client locally applies

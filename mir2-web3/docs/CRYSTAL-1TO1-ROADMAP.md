@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 CharacterDialog tabs additional bounded checkpoint (2026-08-28):
+> implementation revision `ac4ae1686ff60c01437100554c7a5d4cd6c78a65`
+> preserves the four exact 64x20 tab hit regions and `Title/500..503` active
+> frames, and now reproduces Crystal's pointer-only `ButtonA=10103 -> 103.wav`
+> once before each Character/Status/State/Skill page transition. Held state is
+> silent, release/re-press emits once, the cue is consumed in the same update,
+> and no Gateway intent is created. Focused 1/1, Bevy 402/402, Windows 381/381
+> and final P0=0/P1=0 review pass. This closes one Character panel interaction
+> leaf, not the page contents, CharacterDialog, VIS-03 or visual acceptance.
+> Same-EXE audio/pixels, live WSS, real DPI, soak, human/signing and the
+> incomplete denominator remain open; `globalParityPercent` remains null.
+
 > VIS-01 hover-target additional bounded checkpoint (2026-08-28):
 > implementation revision `1deb930483f3eca5f26f11020f091454fc96b183`
 > reproduces Crystal's body-alpha MouseOver, same-tile shortcut, five-by-five

@@ -73,7 +73,7 @@ This revision introduces no new source asset, allowlist entry or copied file.
 ## Open gates
 
 This checkpoint proves one fixed HUD control and its default shortcuts. It
-does not prove Character panel equipment cells, tabs, stats, spells,
+does not prove Character panel equipment cells, tab contents, stats, spells,
 typography, dragging, z-order, other HUD controls, remappable key persistence
 or complete disabled policies. Same-EXE playback and GPU capture must still
 confirm the actual normal/hover/pressed pixels, click timing, audio device and

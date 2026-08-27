@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> VIS-03 CharacterDialog tabs server-client note (2026-08-28): revision
+> `ac4ae1686ff60c01437100554c7a5d4cd6c78a65` adds no server packet or
+> authority. Exact tab geometry/active frames, pointer-only ButtonA and local
+> Character/Status/State/Skill selection are client concerns. Four-page edge,
+> held/re-press and empty-intent tests pass with Bevy 402/402, Windows 381/381
+> and final P0=0/P1=0 review. No EXE, live WSS/audio or screenshot was created.
+> Page contents, remaining UI and every final real-window gate stay open;
+> global parity remains unreported.
+
 > VIS-01 hover-target server-client note (2026-08-28): revision
 > `1deb930483f3eca5f26f11020f091454fc96b183` adds no server packet or
 > authority. The native client consumes the existing authoritative actor
