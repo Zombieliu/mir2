@@ -215,6 +215,8 @@ async function testAssembleMode() {
   assert.equal(effects.resolveSpellImpactEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/170.png");
   assert.equal(effects.resolveSpellCastEffect(assets, "SoulFireBall"), null);
   assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1160.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall", 15).frames[0].path, "/original-ui/Magic/1310.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall", 15).frames.at(-1).path, "/original-ui/Magic/1312.png");
   assert.equal(effects.resolveSpellImpactEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1360.png");
   assert.equal(effects.resolveSpellReturnEffect(assets, "Vampirism").frames[0].path, "/original-ui/Magic2/1090.png");
   assert.equal(effects.spellNameForNumber(12), "ProtectionField", "Spell ids do not collide with SpellEffect names");

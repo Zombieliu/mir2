@@ -203,8 +203,12 @@ function resolveSub(
   sub: EffectSubSpec,
   name: string,
   fallbackKind: EffectSubSpec["kind"],
+  direction = 0,
 ): EffectAnimation | undefined {
-  const frames = resolveFrames(assets, sub.library, sub.base, sub.count);
+  if (!Number.isInteger(direction) || direction < 0) return undefined;
+  if (sub.directionCount !== undefined && direction >= sub.directionCount) return undefined;
+  const base = sub.base + direction * (sub.directionStride ?? 0);
+  const frames = resolveFrames(assets, sub.library, base, sub.count);
   if (frames.length === 0) {
     return undefined;
   }
@@ -293,11 +297,12 @@ export function resolveSpellCastEffect(
 export function resolveSpellProjectileEffect(
   assets: EffectAssets,
   spell: string,
+  direction = 0,
 ): EffectAnimation | null {
   const entry = assets.spellByName.get(spell);
   if (!entry) return null;
   if (entry.projectile) {
-    return resolveSub(assets, entry.projectile, spell, "projectile") ?? null;
+    return resolveSub(assets, entry.projectile, spell, "projectile", direction) ?? null;
   }
   return entry.kind === "projectile" ? resolveAnimation(assets, entry) : null;
 }

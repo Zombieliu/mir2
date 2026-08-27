@@ -18933,6 +18933,52 @@ mod tests {
     }
 
     #[test]
+    fn vis02_bichon_soul_fireball_fixture_is_exact_packet_event_projection() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../game-client/platform-windows/tests/fixtures/vis02-bichon-soul-fireball-v1.json"
+        ))
+        .expect("VIS-02 SoulFireBall fixture JSON");
+        let magic = |cast, target_id| ServerPacket::ObjectMagic {
+            object_id: 1000,
+            location: Point { x: 288, y: 616 },
+            direction: MirDirection::Up,
+            spell: Spell::SoulFireBall,
+            target_id,
+            target: Point { x: 288, y: 611 },
+            cast,
+            level: 1,
+            self_broadcast: false,
+            secondary_target_ids: Vec::new(),
+        };
+        // This fixture locks only the typed ServerPacket -> client event
+        // projection. It does not assert production reachability: the current
+        // no-amulet Gateway path emits no cast=false ObjectMagic packet.
+        // ObjectProjectile is a current Rust compatibility supplement. The
+        // Crystal SoulFireBall client path consumes ObjectMagic only.
+        let packets = [
+            magic(true, 2014),
+            ServerPacket::ObjectProjectile {
+                spell: Spell::SoulFireBall,
+                source_id: 1000,
+                destination_id: 2014,
+            },
+            magic(false, 0),
+        ];
+        let expected = [
+            &fixture["timeline"][0]["event"],
+            &fixture["timeline"][1]["compatibilityEvent"],
+            &fixture["timeline"][2]["event"],
+        ];
+        for (index, (packet, expected)) in packets.iter().zip(expected).enumerate() {
+            assert_eq!(
+                super::server_packet_to_event(packet),
+                *expected,
+                "VIS-02 SoulFireBall packet event projection mismatch at event {index}"
+            );
+        }
+    }
+
+    #[test]
     fn bootstrap_state_packets_force_snapshot() {
         let responses = vec![
             ServerPacket::StartGame {

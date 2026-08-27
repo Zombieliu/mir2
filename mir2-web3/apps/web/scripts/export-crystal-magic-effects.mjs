@@ -97,17 +97,21 @@ const phase = (library, base, count, interval, kind, extra = {}) => ({
 
 const withPhases = (effect, phases) => ({ ...effect, ...phases });
 
+const direction16 = (base, count, directionStride) => ({
+  directionCount: 16,
+  directionStride,
+  directionRanges: Array.from({ length: 16 }, (_, direction) => ({
+    direction,
+    base: base + direction * directionStride,
+    end: base + direction * directionStride + count - 1,
+  })),
+});
+
 // Cast effects constructed immediately by PlayerObject's MirAction.Spell switch.
 export const SPELL_EFFECTS = [
   withPhases(spell("FireBall", "Magic", 0, 10, 60), {
     projectile: phase("Magic", 10, 6, 30, "projectile", {
-      directionCount: 16,
-      directionStride: 10,
-      directionRanges: Array.from({ length: 16 }, (_, direction) => ({
-        direction,
-        base: 10 + direction * 10,
-        end: 15 + direction * 10,
-      })),
+      ...direction16(10, 6, 10),
     }),
     impact: phase("Magic", 170, 10, 60, "target"),
   }),
@@ -212,7 +216,13 @@ export const SPELL_EFFECTS = [
   spell("PoisonShot", "Magic3", 2300, 8, 125),
   spell("OneWithNature", "Magic3", 2710, 8, 150, "ground"),
   spell("FireBounce", "Magic", 400, 10, 60),
-  withPhases(spell("SoulFireBall", "Magic", 1160, 3, 30, "projectile"), {
+  withPhases({
+    ...spell("SoulFireBall", "Magic", 1160, 3, 30, "projectile"),
+    ...direction16(1160, 3, 10),
+  }, {
+    projectile: phase("Magic", 1160, 3, 30, "projectile", {
+      ...direction16(1160, 3, 10),
+    }),
     impact: phase("Magic", 1360, 10, 60, "target"),
   }),
   withPhases(spell("MassHiding", "Magic", 1160, 3, 30, "projectile"), {

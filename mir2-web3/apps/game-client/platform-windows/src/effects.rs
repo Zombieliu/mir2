@@ -92,6 +92,13 @@ const FIREBALL_IMPACT_SOUND_FILE: &str = "M31-2.wav";
 const FIREBALL_CAST_SOUND_CUE: &str = "FireBall.cast";
 const FIREBALL_PROJECTILE_SOUND_CUE: &str = "FireBall.projectile";
 const FIREBALL_IMPACT_SOUND_CUE: &str = "FireBall.impact";
+const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
+const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
+const SOUL_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M64-1.wav";
+const SOUL_FIREBALL_IMPACT_SOUND_FILE: &str = "M64-2.wav";
+const SOUL_FIREBALL_CAST_SOUND_CUE: &str = "SoulFireBall.cast";
+const SOUL_FIREBALL_PROJECTILE_SOUND_CUE: &str = "SoulFireBall.projectile";
+const SOUL_FIREBALL_IMPACT_SOUND_CUE: &str = "SoulFireBall.impact";
 
 const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
 
@@ -157,7 +164,7 @@ fn max_tile_distance(source: (i32, i32), destination: (i32, i32)) -> u64 {
     )
 }
 
-fn fireball_projectile_clock(distance: u64) -> (u64, u64) {
+fn crystal_projectile_clock(distance: u64) -> (u64, u64) {
     let duration_ms = distance.saturating_mul(FIREBALL_TILE_TRAVEL_MS).max(1);
     let process_frame_count = (duration_ms / FIREBALL_PROJECTILE_STEP_MS).max(1);
     let frame_interval_ms = (duration_ms / process_frame_count).max(1);
@@ -821,6 +828,13 @@ struct PendingEffectSound {
     event: mir2_client_bevy::audio::NativeGameplaySoundEvent,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct LocalProjectileTarget {
+    target_id: Option<u32>,
+    fallback: (i32, i32),
+    resolved_at_launch: bool,
+}
+
 /// Renderer-neutral light emitted by one currently-active effect phase.
 ///
 /// The lighting producer runs on the gateway task while effect animation runs
@@ -867,10 +881,18 @@ pub(crate) struct NativeEffects {
     anchor_object_ids: HashMap<String, u32>,
     zone_tiles: HashMap<u32, (i32, i32)>,
     /// The Rust simulation currently emits a compatibility ObjectProjectile
-    /// immediately after FireBall's ObjectMagic. Crystal's FireBall client
-    /// path creates that missile locally from ObjectMagic, so consume the
-    /// adjacent compatibility packet instead of drawing a duplicate.
-    fireball_projectile_dedupe: HashMap<(u32, u32), u64>,
+    /// immediately after some ObjectMagic packets. Crystal creates FireBall
+    /// and SoulFireBall missiles locally after the Spell action completes, so
+    /// consume the adjacent compatibility packet instead of drawing twice.
+    local_projectile_dedupe: HashMap<(String, u32, u32), u64>,
+    /// Target presence is resolved at Crystal's Spell-completion boundary,
+    /// not when ObjectMagic first arrives. This preserves point-flight when a
+    /// target disappears during wind-up and binds a target that appears before
+    /// launch.
+    local_projectile_targets: HashMap<String, LocalProjectileTarget>,
+    /// Audio-only cast branches (SoulFireBall has no cast bitmap) still need a
+    /// one-shot queue that does not depend on an active render instance.
+    ready_sounds: Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent>,
     pending_sounds: Vec<PendingEffectSound>,
     last_effect_sequence: u64,
     last_generation: u64,
@@ -889,7 +911,9 @@ impl Default for NativeEffects {
             active: Vec::new(),
             anchor_object_ids: HashMap::new(),
             zone_tiles: HashMap::new(),
-            fireball_projectile_dedupe: HashMap::new(),
+            local_projectile_dedupe: HashMap::new(),
+            local_projectile_targets: HashMap::new(),
+            ready_sounds: Vec::new(),
             pending_sounds: Vec::new(),
             last_effect_sequence: 0,
             last_generation: 0,
@@ -1025,7 +1049,7 @@ impl NativeEffects {
             self.apply_event(&event.packet, &event.payload, zone_tiles, &provenance);
         }
         let latest_sequence = self.last_effect_sequence;
-        self.fireball_projectile_dedupe
+        self.local_projectile_dedupe
             .retain(|_, sequence| latest_sequence.saturating_sub(*sequence) <= 2);
         while self.active.len() > MAX_ACTIVE_EFFECTS {
             self.active.remove(0);
@@ -1057,15 +1081,92 @@ impl NativeEffects {
     fn clear_active_effects(&mut self) {
         self.active.clear();
         self.anchor_object_ids.clear();
-        self.fireball_projectile_dedupe.clear();
+        self.local_projectile_dedupe.clear();
+        self.local_projectile_targets.clear();
+        self.ready_sounds.clear();
         self.pending_sounds.clear();
     }
 
     fn refresh_anchor_tiles(&mut self) {
-        let anchors = &self.anchor_object_ids;
+        let now_ms = self.now_ms;
         let zone_tiles = &self.zone_tiles;
+        let mut anchors_to_insert = Vec::new();
+        let mut launch_impact_sounds = Vec::new();
+        for instance in &mut self.active {
+            let Some(target_state) = self.local_projectile_targets.get_mut(&instance.key) else {
+                continue;
+            };
+            if target_state.resolved_at_launch || now_ms < instance.start_at {
+                continue;
+            }
+            let (spell, impact_sound_cue, impact_sound_file) =
+                match instance.provenance.spell.as_str() {
+                    "FireBall" => (
+                        "FireBall",
+                        FIREBALL_IMPACT_SOUND_CUE,
+                        FIREBALL_IMPACT_SOUND_FILE,
+                    ),
+                    "SoulFireBall" => (
+                        "SoulFireBall",
+                        SOUL_FIREBALL_IMPACT_SOUND_CUE,
+                        SOUL_FIREBALL_IMPACT_SOUND_FILE,
+                    ),
+                    _ => continue,
+                };
+            let bound_target = target_state
+                .target_id
+                .and_then(|object_id| zone_tiles.get(&object_id).copied());
+            let destination = bound_target.unwrap_or(target_state.fallback);
+            let (Some(from_x), Some(from_y), Some(projectile)) =
+                (instance.from_x, instance.from_y, instance.current.as_mut())
+            else {
+                target_state.resolved_at_launch = true;
+                continue;
+            };
+            let source = (from_x as i32, from_y as i32);
+            let direction = projectile_direction16(source, destination);
+            let (duration_ms, frame_interval_ms) =
+                crystal_projectile_clock(max_tile_distance(source, destination));
+            if let Some(mut launch_animation) = effect_catalog()
+                .as_ref()
+                .and_then(|catalog| catalog.spell_projectile_animation(spell, direction))
+            {
+                launch_animation.duration_ms = duration_ms;
+                launch_animation.interval = frame_interval_ms;
+                *projectile = launch_animation;
+            }
+            instance.tile_x = destination.0;
+            instance.tile_y = destination.1;
+            instance.queued = bound_target.and_then(|_| {
+                effect_catalog()
+                    .as_ref()
+                    .and_then(|catalog| catalog.spell_impact_animation(spell))
+            });
+            target_state.resolved_at_launch = true;
+            if let Some(target_id) = target_state.target_id.filter(|_| bound_target.is_some()) {
+                anchors_to_insert.push((instance.key.clone(), target_id));
+            }
+            if instance.queued.is_some() {
+                launch_impact_sounds.push(PendingEffectSound {
+                    key: instance.key.clone(),
+                    due_at_ms: instance.start_at.saturating_add(duration_ms),
+                    event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                        generation: instance.provenance.generation,
+                        sequence: instance.provenance.sequence,
+                        cue: impact_sound_cue.to_owned(),
+                        file_name: impact_sound_file.to_owned(),
+                    },
+                });
+            }
+        }
+        for (key, object_id) in anchors_to_insert {
+            self.anchor_object_ids.insert(key, object_id);
+        }
+        self.pending_sounds.extend(launch_impact_sounds);
+
+        let anchors = &self.anchor_object_ids;
         let mut missing = Vec::new();
-        let mut fireball_impact_due = Vec::new();
+        let mut local_projectile_impact_due = Vec::new();
         for instance in &mut self.active {
             let Some(object_id) = anchors.get(&instance.key) else {
                 continue;
@@ -1073,7 +1174,12 @@ impl NativeEffects {
             if let Some((tile_x, tile_y)) = zone_tiles.get(object_id) {
                 instance.tile_x = *tile_x;
                 instance.tile_y = *tile_y;
-                if instance.provenance.spell == "FireBall" {
+                let local_projectile = match instance.provenance.spell.as_str() {
+                    "FireBall" => Some(FIREBALL_IMPACT_SOUND_CUE),
+                    "SoulFireBall" => Some(SOUL_FIREBALL_IMPACT_SOUND_CUE),
+                    _ => None,
+                };
+                if let Some(impact_sound_cue) = local_projectile {
                     if let (Some(from_x), Some(from_y), Some(projectile)) =
                         (instance.from_x, instance.from_y, instance.current.as_mut())
                     {
@@ -1084,24 +1190,13 @@ impl NativeEffects {
                             let source = (from_x as i32, from_y as i32);
                             let destination = (*tile_x, *tile_y);
                             let (duration_ms, frame_interval_ms) =
-                                fireball_projectile_clock(max_tile_distance(source, destination));
-                            if self.now_ms <= instance.start_at {
-                                let direction = projectile_direction16(source, destination);
-                                if let Some(mut launch_animation) =
-                                    effect_catalog().as_ref().and_then(|catalog| {
-                                        catalog.spell_projectile_animation("FireBall", direction)
-                                    })
-                                {
-                                    launch_animation.duration_ms = duration_ms;
-                                    launch_animation.interval = frame_interval_ms;
-                                    *projectile = launch_animation;
-                                }
-                            }
+                                crystal_projectile_clock(max_tile_distance(source, destination));
                             projectile.duration_ms = duration_ms;
                             projectile.interval = frame_interval_ms;
-                            fireball_impact_due.push((
+                            local_projectile_impact_due.push((
                                 instance.key.clone(),
                                 instance.start_at.saturating_add(duration_ms),
+                                impact_sound_cue,
                             ));
                         }
                     }
@@ -1110,22 +1205,23 @@ impl NativeEffects {
                 missing.push(instance.key.clone());
             }
         }
-        for (key, due_at_ms) in fireball_impact_due {
+        for (key, due_at_ms, impact_sound_cue) in local_projectile_impact_due {
             for pending in &mut self.pending_sounds {
-                if pending.key == key && pending.event.cue == FIREBALL_IMPACT_SOUND_CUE {
+                if pending.key == key && pending.event.cue == impact_sound_cue {
                     pending.due_at_ms = due_at_ms;
                 }
             }
         }
-        if missing.is_empty() {
-            return;
+        if !missing.is_empty() {
+            self.active
+                .retain(|instance| !missing.contains(&instance.key));
+            self.anchor_object_ids
+                .retain(|key, _| !missing.contains(key));
+            self.pending_sounds
+                .retain(|pending| !missing.contains(&pending.key));
+            self.local_projectile_targets
+                .retain(|key, _| !missing.contains(key));
         }
-        self.active
-            .retain(|instance| !missing.contains(&instance.key));
-        self.anchor_object_ids
-            .retain(|key, _| !missing.contains(key));
-        self.pending_sounds
-            .retain(|pending| !missing.contains(&pending.key));
     }
 
     fn take_due_sound_events(
@@ -1137,7 +1233,7 @@ impl NativeEffects {
             .iter()
             .map(|instance| instance.key.as_str())
             .collect::<Vec<_>>();
-        let mut due = Vec::new();
+        let mut due = std::mem::take(&mut self.ready_sounds);
         self.pending_sounds.retain(|pending| {
             if !active_keys.contains(&pending.key.as_str()) {
                 return false;
@@ -1170,11 +1266,31 @@ impl NativeEffects {
         }
     }
 
-    fn schedule_fireball_from_object_magic(
+    fn queue_immediate_sound(
+        &mut self,
+        provenance: &EffectProvenance,
+        cue: &str,
+        file_name: &str,
+    ) {
+        self.ready_sounds
+            .push(mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: cue.to_owned(),
+                file_name: file_name.to_owned(),
+            });
+    }
+
+    fn schedule_local_projectile_from_object_magic(
         &mut self,
         payload: &Value,
         catalog: &EffectCatalog,
         provenance: &EffectProvenance,
+        spell: &'static str,
+        tag: &'static str,
+        spell_action_ms: u64,
+        projectile_sound_cue: &'static str,
+        projectile_sound_file: &'static str,
     ) {
         if !payload
             .get("cast")
@@ -1200,51 +1316,38 @@ impl NativeEffects {
             .and_then(Value::as_u64)
             .and_then(|value| u32::try_from(value).ok())
             .filter(|value| *value != 0);
-        let target_is_bound = target_id.and_then(|id| self.zone_tiles.get(&id)).copied();
-        let destination = target_is_bound.unwrap_or((packet_target_x, packet_target_y));
+        let destination = (packet_target_x, packet_target_y);
         let source = (source_x, source_y);
         let direction = projectile_direction16(source, destination);
-        let Some(mut projectile) = catalog.spell_projectile_animation("FireBall", direction) else {
+        let Some(mut projectile) = catalog.spell_projectile_animation(spell, direction) else {
             return;
         };
         let (duration_ms, frame_interval_ms) =
-            fireball_projectile_clock(max_tile_distance(source, destination));
+            crystal_projectile_clock(max_tile_distance(source, destination));
         projectile.duration_ms = duration_ms;
         projectile.interval = frame_interval_ms;
 
-        // Crystal only attaches the impact callback when the target object is
-        // present when the missile is created. A packet target point still
-        // permits the projectile, but cannot invent a target-bound impact.
-        let impact = target_is_bound.and_then(|_| catalog.spell_impact_animation("FireBall"));
         let now = self.now_ms;
-        let start_at = now.saturating_add(FIREBALL_SPELL_ACTION_MS);
-        let impact_at = start_at.saturating_add(duration_ms);
-        let key = self.next_key("fireball");
-        if let Some(target_id) = target_id.filter(|_| target_is_bound.is_some()) {
-            self.anchor_object_ids.insert(key.clone(), target_id);
-        }
+        let start_at = now.saturating_add(spell_action_ms);
+        let key = self.next_key(tag);
+        self.local_projectile_targets.insert(
+            key.clone(),
+            LocalProjectileTarget {
+                target_id,
+                fallback: destination,
+                resolved_at_launch: false,
+            },
+        );
         self.pending_sounds.push(PendingEffectSound {
             key: key.clone(),
             due_at_ms: start_at,
             event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
                 generation: provenance.generation,
                 sequence: provenance.sequence,
-                cue: FIREBALL_PROJECTILE_SOUND_CUE.to_owned(),
-                file_name: FIREBALL_PROJECTILE_SOUND_FILE.to_owned(),
+                cue: projectile_sound_cue.to_owned(),
+                file_name: projectile_sound_file.to_owned(),
             },
         });
-        if impact.is_some() {
-            self.pending_sounds.push(PendingEffectSound {
-                key: key.clone(),
-                due_at_ms: impact_at,
-                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
-                    generation: provenance.generation,
-                    sequence: provenance.sequence,
-                    cue: FIREBALL_IMPACT_SOUND_CUE.to_owned(),
-                    file_name: FIREBALL_IMPACT_SOUND_FILE.to_owned(),
-                },
-            });
-        }
         self.active.push(EffectInstance {
             key,
             kind: EffectKindTag::Projectile,
@@ -1253,7 +1356,7 @@ impl NativeEffects {
             from_x: Some(source_x as f32),
             from_y: Some(source_y as f32),
             current: Some(projectile),
-            queued: impact,
+            queued: None,
             return_queued: None,
             started_at: now,
             start_at,
@@ -1261,8 +1364,10 @@ impl NativeEffects {
             provenance: provenance.clone(),
         });
         if let (Some(source_id), Some(target_id)) = (source_id, target_id) {
-            self.fireball_projectile_dedupe
-                .insert((source_id, target_id), provenance.sequence);
+            self.local_projectile_dedupe.insert(
+                (spell.to_owned(), source_id, target_id),
+                provenance.sequence,
+            );
         }
     }
 
@@ -1283,6 +1388,27 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
+        if spell == "SoulFireBall" {
+            // Crystal has no SoulFireBall cast bitmap. The action start always
+            // plays M64-0, while Cast=false suppresses only the completion
+            // branch (missile, impact and their two sounds).
+            self.queue_immediate_sound(
+                provenance,
+                SOUL_FIREBALL_CAST_SOUND_CUE,
+                SOUL_FIREBALL_CAST_SOUND_FILE,
+            );
+            self.schedule_local_projectile_from_object_magic(
+                payload,
+                catalog,
+                provenance,
+                "SoulFireBall",
+                "soul-fireball",
+                SOUL_FIREBALL_SPELL_ACTION_MS,
+                SOUL_FIREBALL_PROJECTILE_SOUND_CUE,
+                SOUL_FIREBALL_PROJECTILE_SOUND_FILE,
+            );
+            return;
+        }
         // Crystal still plays the caster's Spell actor action for Cast=false,
         // but Lightning itself is created only by the action-completion branch
         // when Cast=true.
@@ -1371,7 +1497,16 @@ impl NativeEffects {
             provenance: provenance.clone(),
         });
         if spell == "FireBall" {
-            self.schedule_fireball_from_object_magic(payload, catalog, provenance);
+            self.schedule_local_projectile_from_object_magic(
+                payload,
+                catalog,
+                provenance,
+                "FireBall",
+                "fireball",
+                FIREBALL_SPELL_ACTION_MS,
+                FIREBALL_PROJECTILE_SOUND_CUE,
+                FIREBALL_PROJECTILE_SOUND_FILE,
+            );
         }
     }
 
@@ -1390,6 +1525,13 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
+        // Crystal's primary SoulFireBall path never consumes ObjectProjectile;
+        // current Rust servers emit it only as a compatibility supplement.
+        // Ignore it regardless of order/replay and let ObjectMagic own the
+        // delayed local missile.
+        if spell == "SoulFireBall" {
+            return;
+        }
         let open_id = |name: &str| -> Option<u32> {
             payload.get(name).and_then(Value::as_u64).map(|v| v as u32)
         };
@@ -1399,17 +1541,20 @@ impl NativeEffects {
             // Without authoritative source/destination we must not fabricate a path.
             return;
         };
-        if spell == "FireBall"
+        if matches!(spell, "FireBall" | "SoulFireBall")
             && self
-                .fireball_projectile_dedupe
-                .get(&(source_id, destination_id))
+                .local_projectile_dedupe
+                .get(&(spell.to_owned(), source_id, destination_id))
                 .is_some_and(|cast_sequence| {
                     provenance.sequence > *cast_sequence
                         && provenance.sequence.saturating_sub(*cast_sequence) <= 2
                 })
         {
-            self.fireball_projectile_dedupe
-                .remove(&(source_id, destination_id));
+            self.local_projectile_dedupe.remove(&(
+                spell.to_owned(),
+                source_id,
+                destination_id,
+            ));
             return;
         }
         let (Some(&(from_x, from_y)), Some(&(to_x, to_y))) =
@@ -1767,6 +1912,8 @@ impl NativeEffects {
             .map(|instance| instance.key.as_str())
             .collect::<Vec<_>>();
         self.anchor_object_ids
+            .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.local_projectile_targets
             .retain(|key, _| live_keys.contains(&key.as_str()));
         self.pending_sounds
             .retain(|pending| live_keys.contains(&pending.key.as_str()));
@@ -3447,10 +3594,7 @@ mod tests {
             .current
             .as_ref()
             .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")));
-        assert!(projectile
-            .queued
-            .as_ref()
-            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/170.png")));
+        assert!(projectile.queued.is_none(), "target binding occurs at launch");
 
         let cast_sound = fx.take_due_sound_events(0);
         assert_eq!(cast_sound.len(), 1);
@@ -3479,6 +3623,12 @@ mod tests {
         assert!(launch["effects"][0]["imageUrl"]
             .as_str()
             .is_some_and(|path| path.ends_with("/Magic/10.png")));
+        assert!(fx.active.iter().any(|instance| {
+            instance.key.starts_with("fx-fireball-")
+                && instance.queued.as_ref().is_some_and(|animation| {
+                    animation.frames[0].path.ends_with("/Magic/170.png")
+                })
+        }));
         assert!(fx.take_due_sound_events(849).is_empty());
 
         let impact_sound = fx.take_due_sound_events(850);
@@ -3670,6 +3820,316 @@ mod tests {
             let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
                 .expect("packaged FireBall sound path");
             let bytes = fs::read(path).expect("read FireBall sound");
+            assert_eq!(bytes.len(), audio["sourceBytes"]);
+            assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
+        }
+    }
+
+    fn soul_fireball_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-soul-fireball-v1.json"
+        ))
+        .expect("VIS-02 SoulFireBall fixture JSON")
+    }
+
+    fn soul_fireball_magic_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = soul_fireball_fixture();
+        let index = if cast { 0 } else { 2 };
+        NativeEffectEvent {
+            sequence,
+            generation: 13,
+            packet: "ObjectMagic".to_owned(),
+            payload: fixture["timeline"][index]["event"]["payload"].clone(),
+        }
+    }
+
+    fn soul_fireball_compat_projectile_event(sequence: u64) -> NativeEffectEvent {
+        let fixture = soul_fireball_fixture();
+        NativeEffectEvent {
+            sequence,
+            generation: 13,
+            packet: "ObjectProjectile".to_owned(),
+            payload: fixture["timeline"][1]["compatibilityEvent"]["payload"].clone(),
+        }
+    }
+
+    #[test]
+    fn soul_fireball_object_magic_owns_delayed_projectile_impact_and_three_sounds() {
+        let zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[
+                soul_fireball_magic_event(1, true),
+                soul_fireball_compat_projectile_event(2),
+            ],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "SoulFireBall has no cast bitmap and the compatibility packet is deduplicated"
+        );
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
+            .expect("SoulFireBall projectile");
+        assert_eq!(projectile.start_at, SOUL_FIREBALL_SPELL_ACTION_MS);
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.duration_ms),
+            Some(250)
+        );
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.interval),
+            Some(31)
+        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1160.png")));
+        assert!(projectile.queued.is_none(), "target binding occurs at launch");
+
+        let cast_sound = fx.take_due_sound_events(0);
+        assert_eq!(cast_sound.len(), 1);
+        assert_eq!(cast_sound[0].cue, SOUL_FIREBALL_CAST_SOUND_CUE);
+        assert_eq!(cast_sound[0].file_name, SOUL_FIREBALL_CAST_SOUND_FILE);
+        assert!(fx.take_due_sound_events(599).is_empty());
+        let before: Value = serde_json::from_str(
+            &fx.tick_with_visibility(599, true)
+                .expect("SoulFireBall before projectile"),
+        )
+        .expect("SoulFireBall pre-projectile JSON");
+        assert_eq!(before["effects"], json!([]));
+
+        let projectile_sound = fx.take_due_sound_events(600);
+        assert_eq!(projectile_sound.len(), 1);
+        assert_eq!(projectile_sound[0].cue, SOUL_FIREBALL_PROJECTILE_SOUND_CUE);
+        assert_eq!(
+            projectile_sound[0].file_name,
+            SOUL_FIREBALL_PROJECTILE_SOUND_FILE
+        );
+        let launch: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("SoulFireBall projectile launch"),
+        )
+        .expect("SoulFireBall launch JSON");
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/1160.png")));
+        assert!(fx.active.iter().any(|instance| {
+            instance.key.starts_with("fx-soul-fireball-")
+                && instance.queued.as_ref().is_some_and(|animation| {
+                    animation.frames[0].path.ends_with("/Magic/1360.png")
+                })
+        }));
+        assert!(fx.take_due_sound_events(849).is_empty());
+
+        let impact_sound = fx.take_due_sound_events(850);
+        assert_eq!(impact_sound.len(), 1);
+        assert_eq!(impact_sound[0].cue, SOUL_FIREBALL_IMPACT_SOUND_CUE);
+        assert_eq!(impact_sound[0].file_name, SOUL_FIREBALL_IMPACT_SOUND_FILE);
+        let impact: Value = serde_json::from_str(
+            &fx.tick_with_visibility(850, true)
+                .expect("SoulFireBall impact"),
+        )
+        .expect("SoulFireBall impact JSON");
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/1360.png")));
+    }
+
+    #[test]
+    fn soul_fireball_cast_false_is_audio_only_and_never_creates_later_phases() {
+        let zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[soul_fireball_magic_event(1, false)],
+            &zone,
+        );
+        assert!(fx.active.is_empty(), "Crystal has no SoulFireBall cast bitmap");
+        let sound = fx.take_due_sound_events(0);
+        assert_eq!(sound.len(), 1);
+        assert_eq!(sound[0].cue, SOUL_FIREBALL_CAST_SOUND_CUE);
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn soul_fireball_locks_direction_at_launch_then_tracks_target_distance() {
+        let mut zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[soul_fireball_magic_event(1, true)],
+            &zone,
+        );
+        let _ = fx.take_due_sound_events(0);
+        zone.insert(2014, (295, 616));
+        fx.observe(600, 288, 616, &[], &zone);
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
+            .expect("SoulFireBall launch");
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1200.png")));
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.duration_ms),
+            Some(350)
+        );
+
+        zone.insert(2014, (298, 616));
+        fx.observe(650, 288, 616, &[], &zone);
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
+            .expect("moving SoulFireBall projectile");
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1200.png")));
+        assert_eq!(
+            projectile.current.as_ref().map(|anim| anim.duration_ms),
+            Some(500)
+        );
+        assert_eq!((projectile.tile_x, projectile.tile_y), (298, 616));
+    }
+
+    #[test]
+    fn soul_fireball_resolves_target_presence_at_launch_and_ignores_all_compat_packets() {
+        let mut fx = NativeEffects::default();
+        let source_only = HashMap::from([(1000, (288, 616))]);
+        fx.observe(
+            0,
+            288,
+            616,
+            &[soul_fireball_compat_projectile_event(1)],
+            &source_only,
+        );
+        assert!(fx.active.is_empty(), "isolated compatibility packet is ignored");
+
+        fx.observe(
+            0,
+            288,
+            616,
+            &[soul_fireball_magic_event(2, true)],
+            &source_only,
+        );
+        assert_eq!(fx.active.len(), 1);
+        let target_appears = HashMap::from([(1000, (288, 616)), (2014, (295, 616))]);
+        fx.observe(600, 288, 616, &[], &target_appears);
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
+            .expect("launch-bound SoulFireBall");
+        assert_eq!((projectile.tile_x, projectile.tile_y), (295, 616));
+        assert!(projectile.queued.is_some());
+        assert!(fx.anchor_object_ids.contains_key(&projectile.key));
+
+        let mut reverse = NativeEffects::default();
+        reverse.observe(
+            0,
+            288,
+            616,
+            &[
+                soul_fireball_compat_projectile_event(1),
+                soul_fireball_magic_event(2, true),
+            ],
+            &target_appears,
+        );
+        assert_eq!(reverse.active.len(), 1, "reverse order never duplicates");
+
+        let mut disappears = NativeEffects::default();
+        disappears.observe(
+            0,
+            288,
+            616,
+            &[soul_fireball_magic_event(1, true)],
+            &target_appears,
+        );
+        disappears.observe(600, 288, 616, &[], &source_only);
+        let projectile = disappears
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
+            .expect("point-flight SoulFireBall");
+        assert_eq!((projectile.tile_x, projectile.tile_y), (288, 611));
+        assert!(projectile.queued.is_none());
+        assert!(!disappears.anchor_object_ids.contains_key(&projectile.key));
+    }
+
+    #[test]
+    fn soul_fireball_map_change_clears_audio_only_and_delayed_projectile_state() {
+        let zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[soul_fireball_magic_event(1, true)],
+            &zone,
+        );
+        fx.observe(
+            100,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 13,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn soul_fireball_production_direction_frames_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = soul_fireball_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        assert!(catalog
+            .spell_cast_animation("SoulFireBall", 0)
+            .is_none());
+        for direction in 0..16_u32 {
+            let animation = catalog
+                .spell_projectile_animation("SoulFireBall", direction)
+                .expect("all SoulFireBall directions resolve");
+            assert_eq!(animation.frames.len(), 3);
+            for (frame, source) in animation.frames.iter().zip(0..3_u32) {
+                let index = 1160 + direction * 10 + source;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        let impact = catalog
+            .spell_impact_animation("SoulFireBall")
+            .expect("SoulFireBall impact");
+        assert_eq!(impact.frames.len(), 10);
+        assert!(impact.frames[0].path.ends_with("/Magic/1360.png"));
+        assert!(impact.frames[9].path.ends_with("/Magic/1369.png"));
+        for audio in fixture["source"]["audio"]
+            .as_array()
+            .expect("SoulFireBall audio catalog")
+        {
+            let file = audio["file"].as_str().expect("SoulFireBall audio file");
+            let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+                .expect("packaged SoulFireBall sound path");
+            let bytes = fs::read(path).expect("read SoulFireBall sound");
             assert_eq!(bytes.len(), audio["sourceBytes"]);
             assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
         }
