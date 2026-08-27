@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> VIS-03 CharacterDialog close additional bounded automated checkpoint
+> (2026-08-28): revision `225ae951d95894458b7f1cbd30d78ee100fe4362`
+> source-binds the common Character close control to exact
+> `Prguse2/360/361/362`, `(241,3,24,21)`, local Hide semantics and
+> `ButtonA=10103 -> 103.wav`. A dedicated CloseCharacter action prevents
+> unaudited generic close controls from inheriting the cue. All four pages,
+> held/re-press, non-InGame blocking, page/panel reset and both empty intent
+> queues are covered. Focused 1/1, Bevy 402/402, Windows 381/381, Rust 1.95
+> fmt/diff and independent P0=0/P1=0 review pass. No asset, EXE, package, live
+> audio/WSS or screenshot was produced. Page contents, other controls,
+> same-EXE/DPI/soak/human/signing and the incomplete denominator remain open.
+> Do not emit a global percentage.
+
 > VIS-03 CharacterDialog tabs additional bounded automated checkpoint
 > (2026-08-28): revision `ac4ae1686ff60c01437100554c7a5d4cd6c78a65`
 > source-binds the four 64x20 Character/Status/State/Skill controls at

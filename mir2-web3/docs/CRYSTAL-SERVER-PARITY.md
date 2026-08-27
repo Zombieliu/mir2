@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> VIS-03 CharacterDialog close server-client note (2026-08-28): revision
+> `225ae951d95894458b7f1cbd30d78ee100fe4362` adds no server packet or
+> authority. Exact close geometry/frames, pointer-only ButtonA and local
+> panel/page reset are client concerns. Four-page edge, held/re-press,
+> non-InGame and empty-intent tests pass with Bevy 402/402, Windows 381/381 and
+> final P0=0/P1=0 review. No EXE, live WSS/audio or screenshot was created.
+> Remaining Character/UI and every final real-window gate stay open; global
+> parity remains unreported.
+
 > VIS-03 CharacterDialog tabs server-client note (2026-08-28): revision
 > `ac4ae1686ff60c01437100554c7a5d4cd6c78a65` adds no server packet or
 > authority. Exact tab geometry/active frames, pointer-only ButtonA and local

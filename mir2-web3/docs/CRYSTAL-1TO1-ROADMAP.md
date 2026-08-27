@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 CharacterDialog close additional bounded checkpoint (2026-08-28):
+> implementation revision `225ae951d95894458b7f1cbd30d78ee100fe4362`
+> preserves exact `Prguse2/360..362` and `(241,3,24,21)`, and now reproduces
+> Crystal's one pointer ButtonA edge before the local close lifecycle. The
+> Character-specific action avoids assigning this source rule to unaudited
+> generic close controls; four pages, held/re-press, non-InGame and no-intent
+> behavior are automated. Focused 1/1, Bevy 402/402, Windows 381/381 and final
+> P0=0/P1=0 review pass. This closes one control leaf, not CharacterDialog,
+> VIS-03 or visual acceptance. Same-EXE audio/pixels, live WSS, real DPI, soak,
+> human/signing and the incomplete denominator remain open;
+> `globalParityPercent` remains null.
+
 > VIS-03 CharacterDialog tabs additional bounded checkpoint (2026-08-28):
 > implementation revision `ac4ae1686ff60c01437100554c7a5d4cd6c78a65`
 > preserves the four exact 64x20 tab hit regions and `Title/500..503` active

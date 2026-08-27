@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> VIS-03 CharacterDialog close client-boundary checkpoint (2026-08-28):
+> revision `225ae951d95894458b7f1cbd30d78ee100fe4362` changes no simulation,
+> shared-Zone, Gateway or gameplay authority. The native client locally plays
+> exact ButtonA once for the Character-specific close pointer edge before its
+> existing panel/page reset. Held and non-InGame paths do not act or repeat,
+> and both outbound intent queues stay empty. Focused 1/1, Bevy 402/402,
+> Windows 381/381 and final P0=0/P1=0 review pass. No live WSS, EXE, package or
+> visual/audible-device evidence was produced. Page contents and all same-EXE/
+> DPI/soak/human/signing/denominator gates remain open. No backend, visual or
+> global percentage is claimed.
+
 > VIS-03 CharacterDialog tabs client-boundary checkpoint (2026-08-28):
 > revision `ac4ae1686ff60c01437100554c7a5d4cd6c78a65` changes no simulation,
 > shared-Zone, Gateway or gameplay authority. The native client locally plays
