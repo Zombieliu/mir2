@@ -49,7 +49,7 @@ assert.equal(combat.CRYSTAL_PLAYER_REVIVE_EFFECT_DURATION_MS, 2_000);
 const struck = combat.applyActorStruck(actor, 1_000, combat.CRYSTAL_PLAYER_STRUCK_DURATION_MS, {
   x: 289,
   direction: "Right",
-});
+}, "monster-1");
 assert.equal(struck.x, 289);
 assert.equal(struck.y, 616);
 assert.equal(struck.direction, "Right");
@@ -62,7 +62,73 @@ assert.equal(
 );
 assert.equal(combat.actorStruckIsAlreadyPending(struck, 1_300), false);
 
-const healthZeroBeforeDeath = { ...struck, hp: 0, dead: true };
+const queuedStruck = combat.applyActorStruck(
+  struck,
+  1_100,
+  combat.CRYSTAL_PLAYER_STRUCK_DURATION_MS,
+  { x: 290, y: 615, direction: "Up" },
+  "monster-2",
+);
+assert.equal(queuedStruck.struckStartedAt, 1_000, "queueing cannot restart the current action");
+assert.equal(queuedStruck.struckUntil, 1_300, "queueing cannot extend the current action");
+assert.equal(queuedStruck.x, 289, "queued packet location is applied when its action starts");
+assert.deepEqual(queuedStruck.pendingStruck, {
+  x: 290,
+  y: 615,
+  direction: "Up",
+  attackerId: "monster-2",
+  durationMs: 300,
+});
+assert.equal(combat.actorStruckIsAlreadyPending(queuedStruck, 1_101), true);
+assert.equal(
+  combat.applyActorStruck(queuedStruck, 1_200, 300, { x: 999 }, "monster-3"),
+  queuedStruck,
+  "a third Struck is dropped while the ActionFeed tail already contains Struck",
+);
+assert.equal(combat.advanceActorStruck(queuedStruck, 1_299), queuedStruck);
+
+const advancedStruck = combat.advanceActorStruck(queuedStruck, 1_300);
+assert.equal(advancedStruck.x, 290);
+assert.equal(advancedStruck.y, 615);
+assert.equal(advancedStruck.direction, "Up");
+assert.equal(advancedStruck.struckStartedAt, 1_300);
+assert.equal(advancedStruck.struckUntil, 1_600);
+assert.equal(advancedStruck.pendingStruck, undefined);
+
+const delayedAdvance = combat.advanceActorStruck(queuedStruck, 1_350);
+assert.equal(delayedAdvance.struckStartedAt, 1_350, "a suspended renderer starts queued work on resume");
+assert.equal(delayedAdvance.struckUntil, 1_650);
+
+const thirdQueuedStruck = combat.applyActorStruck(
+  advancedStruck,
+  1_350,
+  300,
+  { direction: "Left" },
+  "monster-3",
+);
+const thirdAdvancedStruck = combat.advanceActorStruck(thirdQueuedStruck, 1_600);
+assert.equal(thirdAdvancedStruck.struckStartedAt, 1_600);
+assert.equal(thirdAdvancedStruck.struckUntil, 1_900);
+assert.equal(thirdAdvancedStruck.direction, "Left");
+assert.equal(thirdAdvancedStruck.pendingStruck, undefined);
+
+const mapChangedActor = combat.clearActorActionFeed({
+  ...thirdQueuedStruck,
+  dieStartedAt: 1_400,
+  dieUntil: 1_800,
+  deathHandled: true,
+  reviveStartedAt: 1_500,
+  reviveUntil: 1_900,
+});
+assert.equal(mapChangedActor.attackAnimation, undefined);
+assert.equal(mapChangedActor.attackUntil, undefined);
+assert.equal(mapChangedActor.struckUntil, undefined);
+assert.equal(mapChangedActor.pendingStruck, undefined, "MapChanged clears the ActionFeed tail");
+assert.equal(mapChangedActor.dieUntil, undefined);
+assert.equal(mapChangedActor.reviveUntil, undefined);
+assert.equal(mapChangedActor.deathHandled, false);
+
+const healthZeroBeforeDeath = { ...queuedStruck, hp: 0, dead: true };
 const deathAfterHealthZero = combat.applyActorDeath(
   healthZeroBeforeDeath,
   2_000,
@@ -85,6 +151,7 @@ assert.equal(dying.dieUntil, 2_400);
 assert.equal(dying.deathHandled, true);
 assert.equal(dying.attackAnimation, undefined);
 assert.equal(dying.struckUntil, undefined);
+assert.equal(dying.pendingStruck, undefined, "death clears queued Struck actions");
 assert.equal(
   combat.applyActorDeath(dying, 2_100, combat.CRYSTAL_PLAYER_DIE_DURATION_MS),
   dying,
@@ -103,6 +170,7 @@ assert.equal(remoteRevived.reviveUntil, 3_400);
 assert.equal(remoteRevived.dieUntil, undefined);
 assert.equal(remoteRevived.deathHandled, false);
 assert.equal(remoteRevived.hp, 0, "ObjectRevived cannot invent an authoritative HP value");
+assert.equal(remoteRevived.pendingStruck, undefined, "revive cannot retain stale queued Struck actions");
 
 const selfRevived = combat.applyActorRevive(
   dying,
@@ -154,5 +222,30 @@ assert.doesNotMatch(
   /playerMaxHp|maxHp\) \? Math\.max\(1/,
   "Revived/ObjectRevived must wait for authoritative health instead of fabricating max HP",
 );
+assert.match(
+  pageSource,
+  /function advanceQueuedActorStruckActions[\s\S]*?advanceActorStruck\(entity, now\)[\s\S]*?emitInlineEntityStruck/,
+  "the renderer must consume a queued Struck action before emitting its deferred sound event",
+);
+assert.match(
+  pageSource,
+  /function markWorldEntityStruck[\s\S]*?const queued = actorStruckIsActive[\s\S]*?if \(!queued\) \{[\s\S]*?emitInlineEntityStruck/,
+  "remote queued Struck audio must not play until the queued action starts",
+);
+assert.match(
+  pageSource,
+  /function markPlayerStruck[\s\S]*?queued = actorStruckIsActive[\s\S]*?if \(accepted && !queued && playerObjectId\)/,
+  "self queued Struck audio must not play until the queued action starts",
+);
+assert.match(
+  pageSource,
+  /const tickMovementPlan = \(\) => \{[\s\S]*?advanceQueuedActorStruckActions\(tickNow\)/,
+  "the live render clock must advance the queued Struck action",
+);
+assert.match(
+  pageSource,
+  /case "MapChanged"[\s\S]*?clearActorActionFeed\(preservedSelfEntity\)/,
+  "MapChanged must clear the preserved self actor's Crystal ActionFeed",
+);
 
-console.log("actor combat state: Crystal struck/death/revive contracts passed");
+console.log("actor combat state: Crystal ActionFeed struck/death/revive contracts passed");

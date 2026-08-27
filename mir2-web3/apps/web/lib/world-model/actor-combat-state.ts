@@ -19,6 +19,7 @@ export type ActorCombatEntity = {
   attackUntil?: number;
   struckStartedAt?: number;
   struckUntil?: number;
+  pendingStruck?: ActorPendingStruck;
   dieStartedAt?: number;
   dieUntil?: number;
   deathHandled?: boolean;
@@ -32,22 +33,35 @@ export type ActorLocationPatch = {
   direction?: string;
 };
 
+export type ActorPendingStruck = ActorLocationPatch & {
+  attackerId?: string;
+  durationMs: number;
+};
+
 /**
- * Crystal drops an ObjectStruck while the same struck action is already queued.
- * The web renderer has one transient slot rather than an ActionFeed, so an
- * active struck window is the fail-closed equivalent: it must not restart the
- * animation or replay its two player hit sounds.
+ * Crystal drops an ObjectStruck only when the ActionFeed tail already contains
+ * Struck. The currently-playing action has already been removed from the feed,
+ * so one later real hit may wait behind it; a third hit while that tail exists
+ * is the duplicate that must be ignored.
  */
 export function actorStruckIsAlreadyPending(
-  entity: Pick<ActorCombatEntity, "dead" | "dieUntil" | "reviveUntil"> | null | undefined,
+  entity:
+    | Pick<ActorCombatEntity, "dead" | "dieUntil" | "reviveUntil" | "pendingStruck">
+    | null
+    | undefined,
   now: number,
 ): boolean {
-  // Crystal removes the active Struck action from ActionFeed before playing
-  // it, so another real hit during the three-frame action may queue next. Do
-  // not treat the current struck window itself as a duplicate.
   return entity?.dead === true
     || (typeof entity?.dieUntil === "number" && entity.dieUntil > now)
-    || (typeof entity?.reviveUntil === "number" && entity.reviveUntil > now);
+    || (typeof entity?.reviveUntil === "number" && entity.reviveUntil > now)
+    || entity?.pendingStruck !== undefined;
+}
+
+export function actorStruckIsActive(
+  entity: Pick<ActorCombatEntity, "struckUntil"> | null | undefined,
+  now: number,
+): boolean {
+  return typeof entity?.struckUntil === "number" && entity.struckUntil > now;
 }
 
 export function applyActorStruck<T extends ActorCombatEntity>(
@@ -55,7 +69,19 @@ export function applyActorStruck<T extends ActorCombatEntity>(
   now: number,
   durationMs: number,
   location: ActorLocationPatch = {},
+  attackerId?: string,
 ): T {
+  if (actorStruckIsAlreadyPending(entity, now)) return entity;
+  if (actorStruckIsActive(entity, now)) {
+    return {
+      ...entity,
+      pendingStruck: {
+        ...location,
+        attackerId,
+        durationMs,
+      },
+    };
+  }
   return {
     ...entity,
     x: typeof location.x === "number" ? location.x : entity.x,
@@ -63,6 +89,48 @@ export function applyActorStruck<T extends ActorCombatEntity>(
     direction: location.direction ?? entity.direction,
     struckStartedAt: now,
     struckUntil: now + durationMs,
+    pendingStruck: undefined,
+  };
+}
+
+/** Consume the one Struck action waiting at the Crystal ActionFeed tail. */
+export function advanceActorStruck<T extends ActorCombatEntity>(entity: T, now: number): T {
+  const pending = entity.pendingStruck;
+  if (!pending || actorStruckIsActive(entity, now)) return entity;
+  if (
+    entity.dead === true
+    || (typeof entity.dieUntil === "number" && entity.dieUntil > now)
+    || (typeof entity.reviveUntil === "number" && entity.reviveUntil > now)
+  ) {
+    return { ...entity, pendingStruck: undefined };
+  }
+  const startedAt = Math.max(entity.struckUntil ?? now, now);
+  return {
+    ...entity,
+    x: typeof pending.x === "number" ? pending.x : entity.x,
+    y: typeof pending.y === "number" ? pending.y : entity.y,
+    direction: pending.direction ?? entity.direction,
+    struckStartedAt: startedAt,
+    struckUntil: startedAt + pending.durationMs,
+    pendingStruck: undefined,
+  };
+}
+
+/** Crystal MapChanged clears the active action feed before re-establishing the self pose. */
+export function clearActorActionFeed<T extends ActorCombatEntity>(entity: T): T {
+  return {
+    ...entity,
+    attackAnimation: undefined,
+    attackStartedAt: undefined,
+    attackUntil: undefined,
+    struckStartedAt: undefined,
+    struckUntil: undefined,
+    pendingStruck: undefined,
+    dieStartedAt: undefined,
+    dieUntil: undefined,
+    deathHandled: false,
+    reviveStartedAt: undefined,
+    reviveUntil: undefined,
   };
 }
 
@@ -91,6 +159,7 @@ export function applyActorDeath<T extends ActorCombatEntity>(
     attackUntil: undefined,
     struckStartedAt: undefined,
     struckUntil: undefined,
+    pendingStruck: undefined,
     reviveStartedAt: undefined,
     reviveUntil: undefined,
   };
@@ -126,6 +195,7 @@ export function applyActorRevive<T extends ActorCombatEntity>(
     attackUntil: undefined,
     struckStartedAt: undefined,
     struckUntil: undefined,
+    pendingStruck: undefined,
     // Crystal's self Revived handler calls User.SetAction immediately. Remote
     // ObjectRevived instead queues the reverse four-frame Revive action.
     reviveStartedAt: mode === "animated" ? now : undefined,

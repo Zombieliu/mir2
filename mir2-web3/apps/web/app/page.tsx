@@ -81,11 +81,14 @@ import {
   type SoundEntityRef,
 } from "../lib/original-sound-triggers";
 import {
+  actorStruckIsActive,
   actorStruckIsAlreadyPending,
+  advanceActorStruck,
   applyActorDeath,
   applyActorHealth,
   applyActorRevive,
   applyActorStruck,
+  clearActorActionFeed,
   createPlayerReviveSceneEffect,
 } from "../lib/world-model/actor-combat-state";
 import { createGameEventBus, makeRealAudioSink, registerSoundSubscriber, registerVfxSubscriber } from "../lib/game-events";
@@ -703,6 +706,13 @@ type WorldEntity = {
   attackUntil?: number;
   struckStartedAt?: number;
   struckUntil?: number;
+  pendingStruck?: {
+    attackerId?: string;
+    x?: number;
+    y?: number;
+    direction?: string;
+    durationMs: number;
+  };
   dieStartedAt?: number;
   dieUntil?: number;
   deathHandled?: boolean;
@@ -3192,6 +3202,7 @@ export default function HomePage() {
       currentEntity.attackUntil > now;
     const struckActive =
       typeof currentEntity.struckUntil === "number" && currentEntity.struckUntil > now;
+    const struckRetained = struckActive || currentEntity.pendingStruck !== undefined;
     const dieActive = typeof currentEntity.dieUntil === "number" && currentEntity.dieUntil > now;
     const reviveActive = typeof currentEntity.reviveUntil === "number" && currentEntity.reviveUntil > now;
 
@@ -3211,8 +3222,9 @@ export default function HomePage() {
           ? currentEntity.attackStartedAt
           : snapshotEntity.attackStartedAt,
       attackUntil: attackActive ? currentEntity.attackUntil : undefined,
-      struckStartedAt: struckActive ? currentEntity.struckStartedAt : undefined,
-      struckUntil: struckActive ? currentEntity.struckUntil : undefined,
+      struckStartedAt: struckRetained ? currentEntity.struckStartedAt : undefined,
+      struckUntil: struckRetained ? currentEntity.struckUntil : undefined,
+      pendingStruck: struckRetained ? currentEntity.pendingStruck : undefined,
       dieStartedAt: dieActive ? currentEntity.dieStartedAt : undefined,
       dieUntil: dieActive ? currentEntity.dieUntil : undefined,
       // Death packets are incarnation events, not transient animation state.
@@ -5080,6 +5092,7 @@ export default function HomePage() {
     let animationFrame = 0;
     const tickMovementPlan = () => {
       const tickNow = Date.now();
+      advanceQueuedActorStruckActions(tickNow);
       pruneCrystalSelfActionFeed(tickNow);
       pruneLocallySettledDirectionStepPending(tickNow);
       clearSettledPredictedPlayer(tickNow);
@@ -10395,12 +10408,14 @@ export default function HomePage() {
           const movedSelf =
             preservedSelfEntity && location
               ? {
-                  ...preservedSelfEntity,
+                  ...clearActorActionFeed(preservedSelfEntity),
                   x: numberOrZero(location.x),
                   y: numberOrZero(location.y),
                   direction: stringOrNull(payload.direction) ?? preservedSelfEntity.direction,
                 }
-              : preservedSelfEntity;
+              : preservedSelfEntity
+                ? clearActorActionFeed(preservedSelfEntity)
+                : undefined;
           const nextMapLightSetting =
             typeof mapLightSetting === "number" && mapLightSetting >= 0 && mapLightSetting <= 4
               ? mapLightSetting
@@ -11655,6 +11670,43 @@ export default function HomePage() {
     }));
   }
 
+  function emitInlineEntityStruck(objectId: string, attackerId: string) {
+    suppressStruckFlashRef.current = true;
+    try {
+      gameBusRef.current!.emit({ type: "entityStruck", objectId, attackerId });
+    } finally {
+      suppressStruckFlashRef.current = false;
+    }
+  }
+
+  function advanceQueuedActorStruckActions(now: number) {
+    const due = worldRef.current.entities
+      .filter(
+        (entity) =>
+          entity.pendingStruck !== undefined &&
+          !actorStruckIsActive(entity, now) &&
+          entity.dead !== true &&
+          !(typeof entity.dieUntil === "number" && entity.dieUntil > now) &&
+          !(typeof entity.reviveUntil === "number" && entity.reviveUntil > now),
+      )
+      .map((entity) => ({
+        objectId: entity.objectId,
+        attackerId: entity.pendingStruck?.attackerId ?? "0",
+      }));
+    if (due.length === 0) return;
+
+    const dueIds = new Set(due.map((entry) => entry.objectId));
+    updateWorld((current) => ({
+      ...current,
+      entities: current.entities.map((entity) =>
+        dueIds.has(entity.objectId) ? advanceActorStruck(entity, now) : entity,
+      ),
+    }));
+    for (const event of due) {
+      emitInlineEntityStruck(event.objectId, event.attackerId);
+    }
+  }
+
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const attackerId = stringifyId(payload.attackerId);
@@ -11662,34 +11714,39 @@ export default function HomePage() {
     const now = Date.now();
     const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
     if (!currentEntity || actorStruckIsAlreadyPending(currentEntity, now)) return;
-    // Stage-2: emit `entityStruck` only for the SOUND subscriber; suppress the VFX subscriber's
-    // flash callback (markEntityStruckFlash) so it does not re-enter updateWorld for a redundant
-    // clone — the same struck-flash fields are applied inline in the single updater below. The
-    // bus dispatch is synchronous, so the flag is read + reset within this emit.
-    suppressStruckFlashRef.current = true;
-    gameBusRef.current!.emit({ type: "entityStruck", objectId, attackerId });
-    suppressStruckFlashRef.current = false;
+    const queued = actorStruckIsActive(currentEntity, now);
     updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) =>
-        applyActorStruck(entity, now, crystalStruckActionDurationMs(entity), {
-          x: numberOrUndefined(location?.x),
-          y: numberOrUndefined(location?.y),
-          direction: stringOrNull(payload.direction) ?? undefined,
-        }),
+        applyActorStruck(
+          entity,
+          now,
+          crystalStruckActionDurationMs(entity),
+          {
+            x: numberOrUndefined(location?.x),
+            y: numberOrUndefined(location?.y),
+            direction: stringOrNull(payload.direction) ?? undefined,
+          },
+          attackerId,
+        ),
       ),
     }));
+    if (!queued) {
+      emitInlineEntityStruck(objectId, attackerId);
+    }
   }
 
   function markPlayerStruck(payload: Record<string, unknown>) {
     const attackerId = stringifyId(payload.attackerId);
     const playerObjectId = worldRef.current.playerObjectId;
     const now = Date.now();
-    // Sound + hit-flash via bus; selection update stays inline.
+    let accepted = false;
+    let queued = false;
     if (playerObjectId) {
       const player = worldRef.current.entities.find((entity) => entity.objectId === playerObjectId);
       if (player && !actorStruckIsAlreadyPending(player, now)) {
-        gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId, attackerId });
+        accepted = true;
+        queued = actorStruckIsActive(player, now);
       }
     }
     updateWorld((current) => ({
@@ -11700,13 +11757,25 @@ export default function HomePage() {
       // animation: it proves this exact entity just damaged the player. Keep
       // that timestamp on the rendered entity for bounded autonomous threat
       // handling without inferring hostility from proximity alone.
-      entities: attackerId === "0"
-        ? current.entities
-        : patchEntityInList(current.entities, attackerId, (entity) => ({
-            ...entity,
-            attackStartedAt: now,
-          })),
+      entities: patchEntityInList(
+        current.entities.map((entity) =>
+          accepted && entity.objectId === playerObjectId
+            ? applyActorStruck(
+                entity,
+                now,
+                crystalStruckActionDurationMs(entity),
+                {},
+                attackerId,
+              )
+            : entity,
+        ),
+        attackerId,
+        (entity) => (attackerId === "0" ? entity : { ...entity, attackStartedAt: now }),
+      ),
     }));
+    if (accepted && !queued && playerObjectId) {
+      emitInlineEntityStruck(playerObjectId, attackerId);
+    }
   }
 
   function spawnRangeProjectile(payload: Record<string, unknown>) {
@@ -12338,6 +12407,7 @@ export default function HomePage() {
             attackUntil: entity.attackUntil,
             struckStartedAt: entity.struckStartedAt,
             struckUntil: entity.struckUntil,
+            pendingStruck: entity.pendingStruck,
             dieStartedAt: entity.dieStartedAt,
             dieUntil: entity.dieUntil,
             deathHandled: entity.deathHandled,
@@ -12368,13 +12438,16 @@ export default function HomePage() {
               ? transient.attackUntil
               : undefined,
           struckStartedAt:
-            typeof transient.struckUntil === "number" && transient.struckUntil > currentTime
+            transient.pendingStruck !== undefined ||
+            (typeof transient.struckUntil === "number" && transient.struckUntil > currentTime)
               ? transient.struckStartedAt
               : undefined,
           struckUntil:
-            typeof transient.struckUntil === "number" && transient.struckUntil > currentTime
+            transient.pendingStruck !== undefined ||
+            (typeof transient.struckUntil === "number" && transient.struckUntil > currentTime)
               ? transient.struckUntil
               : undefined,
+          pendingStruck: transient.pendingStruck,
           dieStartedAt:
             typeof transient.dieUntil === "number" && transient.dieUntil > currentTime
               ? transient.dieStartedAt
