@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-03 Character HUD additional bounded
+> checkpoint: revision `849f1f0b5120867d1358e0e7db9ba675e9866f9c`
+> verifies exact `Prguse/1900/1901/1902` at `(905,692,20,20)`, enabled
+> pointer-only ButtonA ordering and the source CharacterPage-aware callback.
+> A non-Character tab stays open and returns home; a visible CharacterPage
+> closes. C/F10 share the state machine while remaining silent and local.
+> Bevy 401/401, Windows 376/376, focused 4/4 and script self-tests pass; final
+> independent review is P0=0/P1=0 after fixing the initially found keyboard
+> gap. No package, EXE, live audio or screenshot was produced. Character
+> content, other controls, actual scaled hitboxes, same-EXE pixels/audio and
+> human feel remain open, so this is not HUD, UI or visual 100% and
+> `globalParityPercent` remains null.
+
 > 2026-08-28 Windows-native VIS-03 Inventory ButtonA additional bounded
 > checkpoint: revision `5b70511316b084ac677b5978f7f03e440241ca4c`
 > closes automated behavior for one local HUD interaction only. The enabled

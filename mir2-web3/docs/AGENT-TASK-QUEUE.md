@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> VIS-03 Character HUD additional bounded automated checkpoint (2026-08-28):
+> revision `849f1f0b5120867d1358e0e7db9ba675e9866f9c` source-binds the
+> 20x20 `(905,692)` main Character control to exact `Prguse/1900/1901/1902`
+> normal/hover/pressed assets. Enabled pointer edges queue exact ButtonA once
+> before the callback; held or disabled states do not repeat/act. The callback
+> now follows Crystal: closed opens CharacterPage, Stats1/Stats2/Spells stay
+> open and return to CharacterPage, and an already visible CharacterPage
+> closes. Default C and F10 share that state machine without click audio or
+> network intent. Bevy native-ui 401/401, Windows 376/376, focused Character
+> 4/4, package/verifier self-tests, rustfmt and diff checks pass. Independent
+> review's one keyboard P1 was remediated; final P0=0/P1=0. No new asset, EXE,
+> package, live audio or screenshot was produced. Character panel content,
+> remaining controls, real DPI/hit feel and every same-EXE/live-WSS/soak/
+> human/signing/denominator gate remain open. Do not emit a global percentage.
+
 > VIS-03 Inventory ButtonA additional bounded automated checkpoint
 > (2026-08-28): revision `5b70511316b084ac677b5978f7f03e440241ca4c`
 > binds the enabled InGame Inventory HUD pointer-press edge to Crystal

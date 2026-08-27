@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> VIS-03 Character HUD client-boundary checkpoint (2026-08-28): revision
+> `849f1f0b5120867d1358e0e7db9ba675e9866f9c` changes no simulation, Zone,
+> Gateway or gameplay authority. The native client locally binds the exact
+> Character control assets/geometry, one enabled pointer ButtonA edge and the
+> source CharacterPage-aware callback. C/F10 reuse the state transition but
+> emit neither sound nor network intent. Bevy 401/401, Windows 376/376,
+> focused 4/4, script self-tests and final P0=0/P1=0 review pass. No live WSS,
+> EXE, package or visual/audio evidence was produced. The panel contents and
+> all same-EXE/DPI/soak/human/signing/denominator gates remain open. No
+> backend, visual or global percentage is claimed.
+
 > VIS-03 Inventory ButtonA client-boundary checkpoint (2026-08-28): revision
 > `5b70511316b084ac677b5978f7f03e440241ca4c` changes no simulation, shared-
 > Zone, Gateway or gameplay authority. The native client locally reproduces

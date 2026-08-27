@@ -13,6 +13,7 @@ native implementation base: 67a55b37900ced07d66bd788cbe06ef429ede8aa
 visual branch: codex/windows-visual-parity
 selectedTargetCheckpointRevision: a58ab0aaa2202731a5c55e7a684261d6c15c2f8d
 inventoryButtonACheckpointRevision: 5b70511316b084ac677b5978f7f03e440241ca4c
+characterHudCheckpointRevision: 849f1f0b5120867d1358e0e7db9ba675e9866f9c
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -32,6 +33,33 @@ Its counts are known source-backed scope registries, not a full-game
 percentage. `node scripts/verify-windows-visual-parity-ledger.mjs` checks its
 internal counting and fail-closed claim invariants; it is not a substitute for
 complete source extraction.
+
+## Character HUD bounded checkpoint
+
+Revision `849f1f0b5120867d1358e0e7db9ba675e9866f9c` closes automated evidence
+for one VIS-03 HUD control. The native Character button uses Crystal's exact
+`Prguse/1900`, `1901` and `1902` normal/hover/pressed images in the 20x20
+control at logical `(905,692)`. There is no dedicated disabled image; a
+disabled image-button state is not a valid click and falls back to the normal
+visual through the shared button contract.
+
+An enabled pointer transition to Pressed queues typed `ButtonA` exactly once
+before invoking the callback. Held Pressed cannot repeat and no outbound UI or
+gameplay intent is produced. The callback matches Crystal's page-aware rule:
+a closed dialog opens on CharacterPage; Stats1, Stats2 or Spells remains open
+and switches to CharacterPage; an already visible CharacterPage closes.
+Default C and F10 use the same state transition but bypass the pointer sound
+producer and remain silent.
+
+Bevy native-ui 401/401, Windows 376/376, focused Character 4/4, Candidate
+package/verifier self-tests, rustfmt and diff checks pass. Independent review
+initially identified the missing F10/page-aware keyboard route; after
+remediation its final result is P0=0/P1=0. The prior Inventory checkpoint has
+already closed the exact `103.wav` source/package identity used here, so this
+revision adds no asset or package rule. No Candidate, EXE, live audio, GPU
+capture or human evidence was created. Character panel contents, every other
+control, same-EXE/live WSS, 100/125/150% DPI hit testing, native 30-minute
+soak, human visual/audio/feel and publisher signing remain required.
 
 ## Inventory ButtonA bounded checkpoint
 

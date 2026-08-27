@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 Character HUD additional bounded checkpoint (2026-08-28): revision
+> `849f1f0b5120867d1358e0e7db9ba675e9866f9c` binds exact
+> `Prguse/1900/1901/1902`, `(905,692,20,20)`, one enabled pointer ButtonA
+> edge before callback, and Crystal's CharacterPage-aware open/return/close
+> state machine. C and F10 now use the same state semantics without sound or
+> network intent. Bevy 401/401, Windows 376/376, focused 4/4 and script
+> self-tests pass; after remediating the keyboard shortcut finding, final
+> review has P0=0/P1=0. This closes one HUD control leaf, not the Character
+> panel, main HUD or VIS-03. Same-EXE audio/pixels, DPI hitboxes, live WSS,
+> soak, human acceptance, signing and the incomplete denominator remain open;
+> `globalParityPercent` remains null.
+
 > VIS-03 Inventory ButtonA additional bounded checkpoint (2026-08-28):
 > implementation revision `5b70511316b084ac677b5978f7f03e440241ca4c`
 > reproduces Crystal's enabled Inventory HUD mouse-click cue: exact

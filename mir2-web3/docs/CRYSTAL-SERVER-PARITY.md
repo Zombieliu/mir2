@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> VIS-03 Character HUD server-client note (2026-08-28): revision
+> `849f1f0b5120867d1358e0e7db9ba675e9866f9c` adds no server packet or
+> authority. Exact Character button normal/hover/pressed pixels, pointer-only
+> ButtonA and CharacterPage-aware open/return/close behavior are local client
+> concerns. Default C/F10 shares the transition without audio or outbound
+> intent. Bevy 401/401, Windows 376/376, focused 4/4, script self-tests and
+> final P0=0/P1=0 review pass. No EXE, live WSS/audio or screenshot was
+> created. Remaining Character/HUD and all final real-window gates stay open;
+> global parity remains unreported.
+
 > VIS-03 Inventory ButtonA server-client note (2026-08-28): revision
 > `5b70511316b084ac677b5978f7f03e440241ca4c` adds no server packet or gameplay
 > authority. As in Crystal `MirControl.OnMouseClick`, the native client alone
