@@ -2762,3 +2762,30 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   full Player Web build, and failed only the superseded tracked-manifest byte
   comparison. The corrected Handoff now runs the active-bundle budget/integrity
   gate before restoring a fallback manifest.
+
+## 2026-08-27 Shared-Zone tick recovery
+
+- Hosted q2 evidence exposed dual world authority: 121 aggregate
+  `ObjectDied` packets were observed, but none was a confirmed player-owned
+  kill. A shared Gateway `WorldCommand::Tick` still ran the complete personal
+  `SimulationSession` monster/hazard tick after draining `ZoneRuntime`, so the
+  private ECS could move, damage, or kill the same objects and player.
+- Revision `fb7cd29e8a0afdd09cd7f3f3592ed5fa1c6c5dff` restricts that shared
+  path to personal compatibility timers and pet maintenance. It skips private
+  movement retry, pet ground-drop pickup, hero/monster combat, hazards, drops,
+  status/vitals, dynamic spawns, activation, and monster AI. Public movement,
+  combat, death, drops, experience, and hazards remain Zone-owned.
+- The personal spawn table currently retains only the Crystal respawn schedule
+  and emits the revive boundary consumed by the Zone. A Zone-native
+  wall-clock/checkpointed respawn scheduler remains an open architecture item;
+  this bounded recovery does not claim it as strict parity.
+- The 16-tile q4 search grid closes AOI blind strips and is covered against all
+  safe western Deer slots. Final-source validation passed Gateway unit 653
+  passed, 0 failed, 1 ignored; authority regression 1/1; Deer geometry 1/1;
+  and the strict ordinary-packet q1-q4 journey 1/1 in 455.10 s (q2: three confirmed
+  kills; q4: seven confirmed kills). Windows gate self-test remains 8/8.
+- Only `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10` was set; combat, damage, drops,
+  harvesting, rewards, and persistence were unmodified. The prior attested EXE
+  is older-source evidence and must be rebuilt from the new exact head. Global
+  parity remains undefined, and same-EXE UI/live WSS, real DPI, native soak,
+  human acceptance, complete semantic inventory, and formal signing stay open.

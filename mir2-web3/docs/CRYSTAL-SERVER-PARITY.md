@@ -2536,3 +2536,37 @@ Exact-head Handoff run `33023777224` independently rebuilt the same CI-host
 only the superseded tracked-manifest comparison. The repeated host-local id
 supports the corrected integrity/budget gate and is not a server-parity or
 deployed-runtime claim.
+
+## 2026-08-27 Shared-Zone single-authority correction
+
+Hosted Candidate q2 produced 121 aggregate `ObjectDied` packets while recording
+zero confirmed player-owned kills. The diagnosis was not insufficient player
+damage: shared Gateway ticks drained the authoritative Zone and then ran the
+full personal-session monster/hazard tick, creating an independent second world
+writer. Revision `fb7cd29e8a0afdd09cd7f3f3592ed5fa1c6c5dff` advances only
+personal compatibility state in this path. Zone remains the public authority
+for monster movement, combat, death, drops, experience, and hazards; private
+movement retry and intelligent-pet ECS drop pickup are also excluded.
+
+The existing personal spawn table continues to provide the Crystal respawn
+schedule and an explicit revive boundary that the Zone reconciles. Moving that
+timer to a Zone-native wall-clock/checkpointed scheduler is still required for
+strict whole-game architecture parity and is not counted as closed here.
+
+The q4 western-Deer search changed from a 36-tile grid to 16-tile spacing so no
+safe static slot falls outside the final snapshot AOI plus walk-stop radius.
+Final-source results are Gateway unit 653 passed, 0 failed, 1 ignored; focused
+single-authority 1/1, geometry 1/1, and ordinary-packet q1-q4 1/1 in 455.10 s.
+Q2 completed after three confirmed player-owned kills; q4 collected five meat
+after seven confirmed player-owned kills. The Windows evidence self-test is
+8/8. Only `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10` was active; no combat,
+damage, drop, harvest, or reward acceleration was used.
+
+The older attested EXE from
+`4c7e60baa5d85e63858a6fd1717af01c5f893f3d` does not contain this source
+correction, so it cannot be promoted as the new exact-head Candidate. The
+declared automated controls remain 100%, but `globalParityPercent=null`,
+`accepted=false`, and `visualAccepted=false`. Same-EXE UI/live WSS, real
+125%/150% DPI, native 30-minute soak, human original-client visual/gameplay
+feel, the complete semantic denominator, and formal publisher signing remain
+open.

@@ -388,3 +388,42 @@ package is staged and cryptographically bound, but its truth fields remain
 `accepted=false` and `visualAccepted=false`. The open same-EXE UI, live,
 DPI, soak, human, and formal-certificate gates must be completed before an
 Accepted claim is made.
+
+## Shared-Zone tick recovery follow-on (2026-08-27)
+
+Hosted q2 initially observed 121 aggregate `ObjectDied` packets but confirmed
+zero player-owned kills. The failure was a dual-authority bug: after shared
+Zone output was drained, the Gateway also advanced the full private
+`SimulationSession` monster/hazard tick. Revision
+`fb7cd29e8a0afdd09cd7f3f3592ed5fa1c6c5dff` now advances only personal
+compatibility state in shared sessions. Zone owns public monster movement,
+combat, death, drops, experience, and hazards; private movement retries and
+intelligent-pet pickup from private ECS drops are suppressed.
+
+The current personal spawn table still retains the Crystal respawn schedule and
+emits a revive boundary reconciled into Zone state. A Zone-native real
+wall-clock/checkpointed respawn scheduler remains an open architecture and
+strict-parity item. The q4 Deer search grid was also narrowed from 36-tile to
+16-tile spacing; a geometry regression proves all safe western Deer slots are
+within the retained observation radius.
+
+Final-source validation passed:
+
+- Gateway unit: 653 passed, 0 failed, 1 ignored in 584.04 s;
+- focused shared-authority regression: 1/1;
+- bundled-map Deer geometry regression: 1/1;
+- ordinary-packet Gateway q1-q4 journey: 1/1 in 455.10 s, with q2 complete
+  after three confirmed player-owned kills and q4 complete after seven;
+- Windows vertical-slice evidence self-test: 8/8.
+
+`MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10` was the only QA timing override. No
+damage, combat, drop, harvest, or reward multiplier was enabled. The attested
+EXE recorded earlier in this report was built from
+`4c7e60baa5d85e63858a6fd1717af01c5f893f3d`; it does not contain this fix and
+requires an exact-head rebuild/package before promotion.
+
+This follow-on remains 100% only for the declared automated controls. It leaves
+`globalParityPercent=null`, `accepted=false`, and `visualAccepted=false` and
+does not close same-EXE UI/live WSS, real 125%/150% DPI, a native 30-minute
+soak, human original-client visual/gameplay-feel acceptance, the complete
+semantic denominator, or formal publisher signing.

@@ -4688,3 +4688,38 @@ visual/feel acceptance.
   source fallback closes a clean-checkout CI reproducibility gap only; deployed
   runtime publication, same-EXE UI/live WSS, real DPI/soak, human acceptance,
   and formal signing remain open, and the global denominator remains undefined.
+
+## 2026-08-27 Shared-Zone monster-authority recovery
+
+- Candidate source revision `fb7cd29e8a0afdd09cd7f3f3592ed5fa1c6c5dff`
+  removes a second monster/hazard authority from the shared Gateway world tick.
+  The failed hosted run had observed 121 aggregate `ObjectDied` packets but no
+  confirmed player-owned q2 kill because the personal `SimulationSession` tick
+  was independently moving, damaging, and killing objects already owned by the
+  shared `ZoneRuntime`. Shared sessions now advance personal compatibility
+  state only; the Zone remains authoritative for public movement, combat,
+  death, drops, experience, and hazards.
+- Pet maintenance no longer performs private ECS ground-drop pickup in shared
+  sessions, and private movement retries are not replayed. The existing
+  personal spawn table still supplies the Crystal respawn schedule while the
+  Zone owns each public incarnation boundary. Migrating that timer to a
+  Zone-native wall-clock/checkpointed respawn scheduler remains an explicit
+  whole-game architecture gap, not a closed strict-parity item.
+- The q4 Deer search grid is now spaced at 16 tiles, matching the retained AOI
+  and walk-stop bounds; its geometry regression proves every safe western Deer
+  slot is observable. Final-source validation passed Gateway unit 653 passed,
+  0 failed, 1 ignored; focused authority 1/1; Deer geometry 1/1; and the
+  ordinary-packet q1-q4 journey 1/1 in 455.10 s. Q2 completed after three confirmed
+  player-owned kills and q4 after seven confirmed player-owned kills. Windows
+  vertical-slice self-test remains 8/8.
+- The only QA timing override was
+  `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10`; no damage, combat, drop, harvest, or
+  reward multiplier was enabled. `automatedFunctionalCoveragePercent=100`
+  remains scoped to the declared controls; `globalParityPercent=null`,
+  `accepted=false`, and `visualAccepted=false` remain unchanged.
+- The previously attested Candidate EXE was built from older source
+  `4c7e60baa5d85e63858a6fd1717af01c5f893f3d` and does not contain this fix. A
+  new exact-head attested build/package is required before promotion. Same-EXE
+  UI/live WSS, real 125%/150% DPI, native 30-minute soak, human
+  original-client visual/gameplay-feel acceptance, the complete semantic
+  denominator, and formal publisher signing remain open.
