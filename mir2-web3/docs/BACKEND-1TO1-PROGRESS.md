@@ -1,5 +1,19 @@
 # Backend 1:1 Progress
 
+> VIS-02 FireWall client-boundary checkpoint (2026-08-28): revision
+> `f6f78f3eddb813897cf4ce4c6056183130ab7f35` adds no gameplay authority. It
+> closes bounded Windows presentation automation for the 600 ms cast,
+> M39-0/M39-1, and five persistent center/cardinal `ObjectSpell` projections
+> using repeating `Magic/1630..1635`. Native 351/351, Bevy native-ui 393/393,
+> focused effects, Gateway projection, Web resource/type gates and package/
+> verifier self-tests pass. The fixture is not an authenticated transcript;
+> its `cast=false` branch is labeled synthetic and outside the canonical
+> production timeline. Existing Zone 500 ms geometry, 2,000 ms damage tick and
+> duration support were not changed. Collision/duplicate omissions, caster
+> cleanup, expiry, oldest-group replacement and observer identity still need a
+> complete exact current-head backend matrix. No server or global percentage
+> is claimed.
+
 > Windows visual projection VIS-00 baseline / VIS-01 and VIS-02 in-progress / VIS-03 bounded checkpoint
 > (2026-08-27): shared authority
 > still owns actor identity and state, while the Gateway/native projection now

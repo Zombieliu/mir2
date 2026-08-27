@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> VIS-02 FireWall server-client note (2026-08-28): revision
+> `f6f78f3eddb813897cf4ce4c6056183130ab7f35` changes no server combat
+> authority. It closes only the bounded native projection of the source cast,
+> exact M39-0/M39-1, and independently persistent `ObjectSpell` ground cells.
+> Windows 351/351, Bevy native-ui 393/393, FireWall 5/5, Gateway projection,
+> Web resource/type gates and package/verifier self-tests pass. The typed
+> fixture represents the all-valid five-cell case and does not prove live
+> timing; `cast=false` is a separate synthetic compatibility case. Shared Zone
+> already schedules the cross after 500 ms with 2,000 ms damage cadence, but
+> the full collision/duplicate, caster-lifecycle, expiry, oldest-group and AOI
+> identity matrix remains unaccepted. FlamingSword and all same-EXE/live-WSS/
+> GPU/DPI/soak/human/signing gates remain open. No server or global percentage
+> is claimed.
+
 > Windows VIS-00 baseline / VIS-01 and VIS-02 in-progress / VIS-03 bounded server-client note
 > (2026-08-27): no new server
 > completion percentage is claimed. The authoritative `ObjectPlayerInfo`

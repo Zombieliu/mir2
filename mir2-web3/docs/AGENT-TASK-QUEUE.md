@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> VIS-02 FireWall bounded automated checkpoint (2026-08-28): revision
+> `f6f78f3eddb813897cf4ce4c6056183130ab7f35` binds typed
+> `ObjectMagic(FireWall)` to the 600 ms `Magic/1620..1629` caster action and
+> exact M39-0/M39-1 phase audio, while five independent `ObjectSpell` objects
+> use repeating `Magic/1630..1635`, light 3 and authoritative `ObjectRemove`
+> lifecycle. Windows 351/351, Bevy native-ui 393/393, focused effects 5/5,
+> Gateway projection 1/1, Web typecheck/export/offline assets and package/
+> verifier self-tests pass. Final review found no P0 and its two P1 evidence-
+> boundary findings were corrected: `cast=false` is a labeled synthetic
+> compatibility case outside the canonical timeline, and source-asset tests
+> do not claim a packaged Candidate. This is the fourth bounded first-five
+> spell checkpoint; FlamingSword remains open, as do backend negative/
+> lifecycle coverage, same-EXE/live-WSS/GPU/DPI/soak/human/signing and the
+> incomplete denominator. Do not emit a global percentage.
+
 > Active Windows visual-parity goal (2026-08-27): `VIS-00` is the first
 > bounded implementation checkpoint on `codex/windows-visual-parity`. It adds
 > the Phase-A denominator ledger and repairs Arial routing plus 8pt

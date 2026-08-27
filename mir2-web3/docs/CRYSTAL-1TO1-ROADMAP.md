@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 FireWall bounded checkpoint (2026-08-28): implementation revision
+> `f6f78f3eddb813897cf4ce4c6056183130ab7f35` preserves Crystal's immediate
+> `Magic/1620..1629` cast and M39-0, successful 600 ms M39-1 completion, and
+> five independently persistent center/cardinal `ObjectSpell` projections at
+> the source 500 ms boundary. Ground cells use repeating `Magic/1630..1635`,
+> light 3 and authoritative removal. Native 351/351, Bevy native-ui 393/393,
+> focused FireWall 5/5, Gateway projection 1/1, Web type/export/offline asset
+> gates and package/verifier self-tests pass. The fixture is projection-only;
+> `cast=false` is explicitly synthetic compatibility evidence, and no exact-
+> head package or real-time Gateway delivery was proved. This is only the
+> fourth bounded automated first-five checkpoint. FlamingSword, the wider
+> combat-state chain, backend negative/lifecycle matrix and all same-EXE/live-
+> WSS/GPU/DPI/soak/human/signing gates remain open. `globalParityPercent`
+> remains null.
+
 > Windows visual-parity VIS-00 baseline / VIS-01 and VIS-02 in-progress / VIS-03 bounded checkpoint
 > (2026-08-27): a new source-bound
 > contract and machine-readable Phase-A ledger establish known registries for

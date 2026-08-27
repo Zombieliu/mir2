@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-02 FireWall bounded checkpoint: revision
+> `f6f78f3eddb813897cf4ce4c6056183130ab7f35` binds the source 600 ms
+> `Magic/1620..1629` cast, exact M39-0/M39-1 phase sounds and five persistent
+> center/cardinal `ObjectSpell` cells using repeating `Magic/1630..1635` and
+> light 3. Native 351/351, Bevy native-ui 393/393, focused FireWall 5/5,
+> Gateway projection 1/1, Web type/export/offline asset gates and package/
+> verifier self-tests pass. The fixture is serializer-only, with `cast=false`
+> labeled synthetic outside the canonical timeline; no EXE was launched or
+> packaged from this head. FlamingSword remains open in the first five-skill
+> slice, along with the full combat chain, backend negative/lifecycle matrix,
+> denominator and same-EXE/GPU/DPI/soak/human/signing gates. Global parity
+> stays unreported.
+
 > 2026-08-28 Windows-native VIS-02 SoulFireBall bounded checkpoint: revision
 > `19991af6ddb289dc2fb22569849599caabf9195e` implements the source audio-only
 > start, 600 ms local launch, all 16 three-frame missile directions, launch-

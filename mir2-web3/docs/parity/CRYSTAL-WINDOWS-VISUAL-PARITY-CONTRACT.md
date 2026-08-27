@@ -153,6 +153,20 @@ remain open. This passes packet projection, clock, frame/audio, asset, package
 and verifier automation only; FlamingSword, FireWall and every same-EXE/live-
 WSS/GPU/DPI/human gate remain open.
 
+FireWall is the fourth bounded automated checkpoint at revision
+`f6f78f3eddb813897cf4ce4c6056183130ab7f35`. Typed `ObjectMagic` starts the
+600 ms `Magic/1620..1629` caster action and exact M39-0; successful `cast=true`
+queues M39-1 at action completion. Five all-valid center/cardinal
+`ObjectSpell` projections use repeating `Magic/1630..1635`, light 3 and remain
+until authoritative removal. Exact M39 byte/hash identities and required
+source/package paths are fail-closed. The Gateway fixture proves typed
+projection only, not authenticated wall-clock delivery; its `cast=false`
+compatibility case is labeled synthetic outside the canonical timeline. This
+passes packet projection, clock, frame/audio, source asset and package/
+verifier self-test automation only. No exact-head package was produced.
+FlamingSword, the complete backend negative/lifecycle matrix and every same-
+EXE/live-WSS/GPU/DPI/human gate remain open.
+
 VIS-03 has one bounded automated checkpoint at implementation revision
 `448db4f72`. The 1024x768 HUD base and Inventory control are source-bound to
 `Prguse/1` and normal/hover/pressed `Prguse/1903..1905`. BigMap Teleport keeps
@@ -206,9 +220,11 @@ source packaging and copied-Candidate verification.
 
 The bounded Lightning evidence is recorded in
 `docs/generated/player-qa/windows-visual-parity/VIS-02-LIGHTNING-REPORT.md`.
-The bounded FireBall and SoulFireBall evidence is recorded in
+The bounded FireBall, SoulFireBall and FireWall evidence is recorded in
 `docs/generated/player-qa/windows-visual-parity/VIS-02-FIREBALL-REPORT.md` and
-`docs/generated/player-qa/windows-visual-parity/VIS-02-SOUL-FIREBALL-REPORT.md`.
+`docs/generated/player-qa/windows-visual-parity/VIS-02-SOUL-FIREBALL-REPORT.md`
+and
+`docs/generated/player-qa/windows-visual-parity/VIS-02-FIREWALL-REPORT.md`.
 The Windows functional gate also generates the native keyed/additive map pack
 before its host tests; this keeps VIS-01's real `0.map` front-cell binding
 fail-closed on clean runners rather than weakening the visual assertion.
