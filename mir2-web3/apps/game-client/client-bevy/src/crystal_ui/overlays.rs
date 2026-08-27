@@ -1722,6 +1722,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<crate::social::SocialModel>()
             .init_resource::<crate::options_effects::OptionsRuntime>()
             .init_resource::<crate::audio::NativeAudioRuntime>()
+            .init_resource::<crate::audio::NativeGameplayAudioQueue>()
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(
                 Startup,

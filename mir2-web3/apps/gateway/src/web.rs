@@ -18857,6 +18857,41 @@ mod tests {
     }
 
     #[test]
+    fn vis02_bichon_lightning_fixture_is_exact_gateway_typed_packet_output() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../game-client/platform-windows/tests/fixtures/vis02-bichon-lightning-v1.json"
+        ))
+        .expect("VIS-02 Lightning fixture JSON");
+        let packet = |cast| ServerPacket::ObjectMagic {
+            object_id: 1000,
+            location: Point { x: 288, y: 616 },
+            direction: MirDirection::Up,
+            spell: Spell::Lightning,
+            target_id: 2005,
+            target: Point { x: 288, y: 611 },
+            cast,
+            level: 1,
+            self_broadcast: false,
+            secondary_target_ids: Vec::new(),
+        };
+        let packets = [packet(true), packet(false)];
+        let fixture_events = fixture["timeline"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(|step| step.get("event"))
+            .collect::<Vec<_>>();
+        assert_eq!(packets.len(), fixture_events.len());
+        for (index, (packet, expected)) in packets.iter().zip(fixture_events).enumerate() {
+            assert_eq!(
+                super::server_packet_to_event(packet),
+                *expected,
+                "VIS-02 typed packet mismatch at transcript event {index}"
+            );
+        }
+    }
+
+    #[test]
     fn bootstrap_state_packets_force_snapshot() {
         let responses = vec![
             ServerPacket::StartGame {

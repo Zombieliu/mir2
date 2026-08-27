@@ -167,6 +167,8 @@ fn main() {
             entity_presentation::tick_native_entity_presentation,
             entity_overlays::sync_native_entity_overlays,
             effects::tick_native_effects,
+            mir2_client_bevy::audio::sync_native_gameplay_audio
+                .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
         )
             .chain(),
     );

@@ -79,6 +79,11 @@ const EFFECT_TRANSIENT_ORDER: f32 = 9.0;
 /// Upper bound on simultaneously-active transient effects.
 pub const MAX_ACTIVE_EFFECTS: usize = 96;
 
+/// Crystal completes the six-frame Spell actor action before Lightning begins.
+const LIGHTNING_SPELL_ACTION_MS: u64 = 600;
+const LIGHTNING_SOUND_FILE: &str = "M40-0.wav";
+const LIGHTNING_SOUND_CUE: &str = "Lightning.complete";
+
 const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
 
 fn native_soak_metrics_enabled() -> bool {
@@ -748,6 +753,13 @@ struct EffectProvenance {
     spell: String,
 }
 
+#[derive(Debug, Clone)]
+struct PendingEffectSound {
+    key: String,
+    due_at_ms: u64,
+    event: mir2_client_bevy::audio::NativeGameplaySoundEvent,
+}
+
 /// Renderer-neutral light emitted by one currently-active effect phase.
 ///
 /// The lighting producer runs on the gateway task while effect animation runs
@@ -791,6 +803,9 @@ pub(crate) fn native_effect_light_snapshots() -> Vec<NativeEffectLightSnapshot> 
 #[derive(Resource)]
 pub(crate) struct NativeEffects {
     active: Vec<EffectInstance>,
+    anchor_object_ids: HashMap<String, u32>,
+    zone_tiles: HashMap<u32, (i32, i32)>,
+    pending_sounds: Vec<PendingEffectSound>,
     last_effect_sequence: u64,
     last_generation: u64,
     instance_seq: u64,
@@ -806,6 +821,9 @@ impl Default for NativeEffects {
     fn default() -> Self {
         Self {
             active: Vec::new(),
+            anchor_object_ids: HashMap::new(),
+            zone_tiles: HashMap::new(),
+            pending_sounds: Vec::new(),
             last_effect_sequence: 0,
             last_generation: 0,
             instance_seq: 0,
@@ -886,11 +904,13 @@ impl NativeEffects {
         self.now_ms = now_ms;
         self.player_x = player_x;
         self.player_y = player_y;
+        self.zone_tiles.clone_from(zone_tiles);
+        self.refresh_anchor_tiles();
         for event in events {
             if event.generation != self.last_generation {
                 self.last_generation = event.generation;
                 self.last_effect_sequence = 0;
-                self.active.clear();
+                self.clear_active_effects();
             }
             if event.sequence <= self.last_effect_sequence {
                 continue;
@@ -946,7 +966,8 @@ impl NativeEffects {
     pub(crate) fn reset_for_new_connection(&mut self) {
         self.last_generation = self.last_generation.wrapping_add(1);
         self.last_effect_sequence = 0;
-        self.active.clear();
+        self.clear_active_effects();
+        self.zone_tiles.clear();
         publish_effect_lights(Vec::new());
         crate::map_parser::lighting::publish_effect_lighting_frame(
             self.last_generation,
@@ -963,6 +984,61 @@ impl NativeEffects {
         format!("fx-{tag}-{}", self.instance_seq)
     }
 
+    fn clear_active_effects(&mut self) {
+        self.active.clear();
+        self.anchor_object_ids.clear();
+        self.pending_sounds.clear();
+    }
+
+    fn refresh_anchor_tiles(&mut self) {
+        let anchors = &self.anchor_object_ids;
+        let zone_tiles = &self.zone_tiles;
+        let mut missing = Vec::new();
+        for instance in &mut self.active {
+            let Some(object_id) = anchors.get(&instance.key) else {
+                continue;
+            };
+            if let Some((tile_x, tile_y)) = zone_tiles.get(object_id) {
+                instance.tile_x = *tile_x;
+                instance.tile_y = *tile_y;
+            } else {
+                missing.push(instance.key.clone());
+            }
+        }
+        if missing.is_empty() {
+            return;
+        }
+        self.active
+            .retain(|instance| !missing.contains(&instance.key));
+        self.anchor_object_ids
+            .retain(|key, _| !missing.contains(key));
+        self.pending_sounds
+            .retain(|pending| !missing.contains(&pending.key));
+    }
+
+    fn take_due_sound_events(
+        &mut self,
+        now_ms: u64,
+    ) -> Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent> {
+        let active_keys = self
+            .active
+            .iter()
+            .map(|instance| instance.key.as_str())
+            .collect::<Vec<_>>();
+        let mut due = Vec::new();
+        self.pending_sounds.retain(|pending| {
+            if !active_keys.contains(&pending.key.as_str()) {
+                return false;
+            }
+            if now_ms >= pending.due_at_ms {
+                due.push(pending.event.clone());
+                return false;
+            }
+            true
+        });
+        due
+    }
+
     fn apply_event(
         &mut self,
         packet: &str,
@@ -971,7 +1047,7 @@ impl NativeEffects {
         provenance: &EffectProvenance,
     ) {
         match packet {
-            "MapChanged" | "LogOutSuccess" => self.active.clear(),
+            "MapChanged" | "LogOutSuccess" => self.clear_active_effects(),
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
             "ObjectProjectile" => self.apply_object_projectile(payload, zone_tiles, provenance),
             "ObjectEffect" => self.apply_object_effect(payload, zone_tiles, provenance),
@@ -999,6 +1075,17 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
+        // Crystal still plays the caster's Spell actor action for Cast=false,
+        // but Lightning itself is created only by the action-completion branch
+        // when Cast=true.
+        if spell == "Lightning"
+            && !payload
+                .get("cast")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        {
+            return;
+        }
         let direction = payload
             .get("direction")
             .and_then(Value::as_str)
@@ -1023,7 +1110,31 @@ impl NativeEffects {
             );
         }
         let now = self.now_ms;
+        let start_at = if spell == "Lightning" {
+            now.saturating_add(LIGHTNING_SPELL_ACTION_MS)
+        } else {
+            now
+        };
         let key = self.next_key("cast");
+        if spell == "Lightning" {
+            if let Some(object_id) = payload
+                .get("objectId")
+                .and_then(Value::as_u64)
+                .and_then(|value| u32::try_from(value).ok())
+            {
+                self.anchor_object_ids.insert(key.clone(), object_id);
+            }
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: start_at,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: LIGHTNING_SOUND_CUE.to_owned(),
+                    file_name: LIGHTNING_SOUND_FILE.to_owned(),
+                },
+            });
+        }
         self.active.push(EffectInstance {
             key,
             kind: EffectKindTag::Cast,
@@ -1035,7 +1146,7 @@ impl NativeEffects {
             queued: None,
             return_queued: None,
             started_at: now,
-            start_at: now,
+            start_at,
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
@@ -1317,6 +1428,7 @@ impl NativeEffects {
         let player_x = self.player_x;
         let player_y = self.player_y;
         let _ = effect_catalog();
+        self.refresh_anchor_tiles();
 
         let rendered = self
             .active
@@ -1411,6 +1523,15 @@ impl NativeEffects {
 
         self.active
             .retain(|instance| instance_still_active(instance, now_ms));
+        let live_keys = self
+            .active
+            .iter()
+            .map(|instance| instance.key.as_str())
+            .collect::<Vec<_>>();
+        self.anchor_object_ids
+            .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.pending_sounds
+            .retain(|pending| live_keys.contains(&pending.key.as_str()));
 
         self.publish_current_light_snapshots(now_ms, visible);
 
@@ -1602,11 +1723,19 @@ fn spell_number_u32(value: &Value) -> u32 {
 pub(crate) fn tick_native_effects(
     time: bevy::prelude::Res<bevy::prelude::Time>,
     mut effects: bevy::prelude::ResMut<NativeEffects>,
+    mut gameplay_audio: Option<
+        bevy::prelude::ResMut<mir2_client_bevy::audio::NativeGameplayAudioQueue>,
+    >,
     player_ui: Option<
         bevy::prelude::Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
     >,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    if let Some(queue) = gameplay_audio.as_deref_mut() {
+        for event in effects.take_due_sound_events(now_ms) {
+            queue.push(event);
+        }
+    }
     let effect_visible = player_ui
         .as_deref()
         .map(|state| state.core.options.effect)
@@ -2981,6 +3110,162 @@ mod tests {
             &zone_tiles,
         );
         assert!(fx.active.is_empty(), "Lightning must not create projectile");
+    }
+
+    fn lightning_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-lightning-v1.json"
+        ))
+        .expect("VIS-02 Lightning fixture JSON")
+    }
+
+    fn lightning_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = lightning_fixture();
+        let index = usize::from(!cast);
+        NativeEffectEvent {
+            sequence,
+            generation: 7,
+            packet: "ObjectMagic".to_owned(),
+            payload: fixture["timeline"][index]["event"]["payload"].clone(),
+        }
+    }
+
+    #[test]
+    fn lightning_waits_for_spell_completion_follows_caster_and_sounds_once() {
+        let mut zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[lightning_event(1, true)], &zone);
+        let fixture = lightning_fixture();
+        assert_eq!(fixture["schemaVersion"], json!(1));
+        assert_eq!(
+            fixture["source"]["actorActionDurationMs"],
+            LIGHTNING_SPELL_ACTION_MS
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].start_at, LIGHTNING_SPELL_ACTION_MS);
+
+        let before: Value = serde_json::from_str(
+            &fx.tick_with_visibility(599, true)
+                .expect("pre-completion render state"),
+        )
+        .expect("pre-completion JSON");
+        assert_eq!(before["effects"], json!([]));
+        assert!(fx.take_due_sound_events(599).is_empty());
+
+        zone.insert(1000, (289, 616));
+        fx.observe(599, 288, 616, &[], &zone);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (289, 616));
+
+        let due = fx.take_due_sound_events(600);
+        assert_eq!(due.len(), 1);
+        assert_eq!(due[0].generation, 7);
+        assert_eq!(due[0].sequence, 1);
+        assert_eq!(due[0].cue, LIGHTNING_SOUND_CUE);
+        assert_eq!(due[0].file_name, LIGHTNING_SOUND_FILE);
+        assert!(fx.take_due_sound_events(600).is_empty());
+
+        let first: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("first Lightning frame"),
+        )
+        .expect("first frame JSON");
+        assert!(first["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/970.png")));
+
+        let hidden: Value = serde_json::from_str(
+            &fx.tick_with_visibility(750, false)
+                .expect("hidden Lightning state"),
+        )
+        .expect("hidden JSON");
+        assert_eq!(hidden["effects"], json!([]));
+        let restored: Value = serde_json::from_str(
+            &fx.tick_with_visibility(800, true)
+                .expect("restored Lightning state"),
+        )
+        .expect("restored JSON");
+        assert!(restored["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/972.png")));
+        assert!(fx.take_due_sound_events(800).is_empty());
+
+        let last: Value = serde_json::from_str(
+            &fx.tick_with_visibility(1_199, true)
+                .expect("last Lightning frame"),
+        )
+        .expect("last frame JSON");
+        assert!(last["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/975.png")));
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(1_200, true)
+                .expect("expired Lightning state"),
+        )
+        .expect("expired JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn lightning_cast_false_and_session_reset_never_emit_effect_or_sound() {
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[lightning_event(1, false)], &zone);
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(600).is_empty());
+
+        fx.observe(1_000, 288, 616, &[lightning_event(2, true)], &zone);
+        assert_eq!(fx.active.len(), 1);
+        fx.observe(
+            1_100,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 3,
+                generation: 7,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(1_600).is_empty());
+
+        fx.observe(2_000, 288, 616, &[lightning_event(4, true)], &zone);
+        assert_eq!(fx.active.len(), 1);
+        fx.observe(2_100, 288, 616, &[], &HashMap::new());
+        assert!(fx.active.is_empty(), "a departed caster cannot anchor Lightning");
+        assert!(fx.take_due_sound_events(2_600).is_empty());
+    }
+
+    #[test]
+    fn lightning_production_frames_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = lightning_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        for direction in 0..8_u32 {
+            let animation = catalog
+                .spell_cast_animation("Lightning", direction)
+                .expect("all Lightning directions resolve");
+            assert_eq!(animation.frames.len(), 6);
+            assert_eq!(animation.interval, 100);
+            assert_eq!(animation.duration_ms, 600);
+            for (frame, source) in animation.frames.iter().zip(0..6_u32) {
+                let index = 970 + direction * 20 + source;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+
+        let path = assets::asset_path("original-ui/Sound/M40-0.wav")
+            .expect("packaged Lightning sound path");
+        let bytes = fs::read(path).expect("read Lightning sound");
+        assert_eq!(bytes.len(), fixture["source"]["audio"]["sourceBytes"]);
+        assert_eq!(
+            format!("{:x}", Sha256::digest(&bytes)),
+            fixture["source"]["audio"]["sha256"]
+        );
     }
 
     #[test]

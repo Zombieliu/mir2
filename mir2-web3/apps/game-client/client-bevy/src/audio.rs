@@ -5,6 +5,7 @@
 //! silent/generated source when a file is missing: the client simply keeps the
 //! UI settings and continues without sound.
 
+use std::collections::{HashMap, VecDeque};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -20,6 +21,71 @@ const MUSIC_FILE: &str = "Main.wav";
 const PACKAGED_MUSIC_FALLBACK_FILE: &str = "Login2.wav";
 const SOUND_FILE: &str = "Select2.wav";
 const MAX_PENDING_SOUND_ENTITIES: usize = 8;
+const MAX_PENDING_GAMEPLAY_SOUND_EVENTS: usize = 32;
+
+/// Gameplay clips are an internal, fail-closed allowlist. Packet payloads never
+/// become file paths: the platform effect adapter can only request a cue listed
+/// here and packaging verifies the same exact files.
+pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &["M40-0.wav"];
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NativeGameplaySoundEvent {
+    pub generation: u64,
+    pub sequence: u64,
+    pub cue: String,
+    pub file_name: String,
+}
+
+/// Bounded cross-adapter queue for packet-authoritative gameplay sounds.
+/// Sequence dedupe is scoped to a transport generation and cue so reconnects
+/// can start cleanly while one packet can still own multiple named phases.
+#[derive(Debug, Default, Resource)]
+pub struct NativeGameplayAudioQueue {
+    generation: Option<u64>,
+    last_sequence_by_cue: HashMap<String, u64>,
+    events: VecDeque<NativeGameplaySoundEvent>,
+}
+
+impl NativeGameplayAudioQueue {
+    pub fn push(&mut self, event: NativeGameplaySoundEvent) -> bool {
+        if !NATIVE_GAMEPLAY_SOUND_FILES.contains(&event.file_name.as_str()) {
+            return false;
+        }
+        if self.generation != Some(event.generation) {
+            self.generation = Some(event.generation);
+            self.last_sequence_by_cue.clear();
+            self.events.clear();
+        }
+        if self
+            .last_sequence_by_cue
+            .get(&event.cue)
+            .is_some_and(|last| event.sequence <= *last)
+        {
+            return false;
+        }
+        self.last_sequence_by_cue
+            .insert(event.cue.clone(), event.sequence);
+        if self.events.len() >= MAX_PENDING_GAMEPLAY_SOUND_EVENTS {
+            self.events.pop_front();
+        }
+        self.events.push_back(event);
+        true
+    }
+
+    fn drain_bounded(&mut self, max: usize) -> Vec<NativeGameplaySoundEvent> {
+        let count = max.min(self.events.len());
+        self.events.drain(..count).collect()
+    }
+
+    fn clear_pending(&mut self) {
+        self.events.clear();
+    }
+
+    #[cfg(test)]
+    fn len(&self) -> usize {
+        self.events.len()
+    }
+}
 
 /// Runtime state for the native audio adapter.
 #[derive(Debug, Default, Resource)]
@@ -28,6 +94,8 @@ pub struct NativeAudioRuntime {
     pub sound_path: Option<PathBuf>,
     pub music_source: Option<bevy::asset::Handle<AudioSource>>,
     pub sound_source: Option<bevy::asset::Handle<AudioSource>>,
+    pub gameplay_paths: HashMap<String, PathBuf>,
+    pub gameplay_sources: HashMap<String, bevy::asset::Handle<AudioSource>>,
     pub last_audio_revision: u64,
     pub source_available: bool,
     initialized: bool,
@@ -37,7 +105,7 @@ pub struct NativeAudioRuntime {
 pub(crate) struct NativeMusicTrack;
 
 #[derive(Component)]
-pub(crate) struct NativeSoundEffectTrack;
+pub struct NativeSoundEffectTrack;
 
 /// Load the existing Crystal WAVs and start the persisted music setting.
 pub(crate) fn initialize_native_audio(
@@ -63,7 +131,20 @@ pub(crate) fn initialize_native_audio(
     runtime.sound_path = sound_path;
     runtime.music_source = music_source;
     runtime.sound_source = sound_source;
-    runtime.source_available = runtime.music_source.is_some() || runtime.sound_source.is_some();
+    runtime.gameplay_paths.clear();
+    runtime.gameplay_sources.clear();
+    for file_name in NATIVE_GAMEPLAY_SOUND_FILES {
+        let (path, source) = load_first_valid_wav(&[file_name], &mut sources);
+        if let (Some(path), Some(source)) = (path, source) {
+            runtime.gameplay_paths.insert((*file_name).to_owned(), path);
+            runtime
+                .gameplay_sources
+                .insert((*file_name).to_owned(), source);
+        }
+    }
+    runtime.source_available = runtime.music_source.is_some()
+        || runtime.sound_source.is_some()
+        || !runtime.gameplay_sources.is_empty();
     options.audio.audible_backend = runtime.source_available;
 
     if let (Some(source), true) = (runtime.music_source.clone(), options.audio.music_enabled) {
@@ -133,6 +214,38 @@ pub(crate) fn sync_native_audio(
     }
     for _ in 0..trigger_count {
         spawn_sound_effect(&mut commands, source.clone(), options.audio.sound_volume);
+    }
+}
+
+/// Consume gameplay cues after the platform effect clock has crossed their
+/// exact semantic boundary. Keeping this separate from Options Apply avoids a
+/// one-frame delay and prevents gameplay packets from being consumed by UI code.
+pub fn sync_native_gameplay_audio(
+    mut commands: Commands,
+    options: Res<OptionsRuntime>,
+    runtime: Res<NativeAudioRuntime>,
+    mut queue: ResMut<NativeGameplayAudioQueue>,
+    sound_entities: Query<Entity, bevy::ecs::query::With<NativeSoundEffectTrack>>,
+) {
+    if !options.audio.sound_enabled || options.audio.sound_volume == 0 {
+        queue.clear_pending();
+        for entity in sound_entities.iter() {
+            commands.entity(entity).despawn();
+        }
+        return;
+    }
+
+    let trigger_sources = queue
+        .drain_bounded(MAX_PENDING_SOUND_ENTITIES)
+        .into_iter()
+        .filter_map(|event| runtime.gameplay_sources.get(&event.file_name).cloned())
+        .collect::<Vec<_>>();
+    let trigger_count = trigger_sources.len();
+    for entity in sound_entities.iter().take(trigger_count) {
+        commands.entity(entity).despawn();
+    }
+    for source in trigger_sources {
+        spawn_sound_effect(&mut commands, source, options.audio.sound_volume);
     }
 }
 
@@ -380,12 +493,14 @@ mod tests {
         app.init_resource::<UiEffectQueue>()
             .init_resource::<OptionsRuntime>()
             .init_resource::<NativeAudioRuntime>()
+            .init_resource::<NativeGameplayAudioQueue>()
             .init_resource::<Assets<AudioSource>>()
             .add_systems(Update, crate::options_effects::consume_options_effects)
             .add_systems(
                 Update,
                 sync_native_audio.after(crate::options_effects::consume_options_effects),
-            );
+            )
+            .add_systems(Update, sync_native_gameplay_audio.after(sync_native_audio));
         app
     }
 
@@ -687,6 +802,86 @@ mod tests {
         assert!(sounds
             .iter()
             .all(|(_, settings)| matches!(settings.mode, PlaybackMode::Despawn)));
+    }
+
+    #[test]
+    fn gameplay_sound_queue_is_allowlisted_bounded_and_generation_scoped() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        let lightning = NativeGameplaySoundEvent {
+            generation: 4,
+            sequence: 10,
+            cue: "Lightning.complete".to_owned(),
+            file_name: "M40-0.wav".to_owned(),
+        };
+        assert!(queue.push(lightning.clone()));
+        assert!(!queue.push(lightning.clone()));
+        assert!(!queue.push(NativeGameplaySoundEvent {
+            file_name: "arbitrary.wav".to_owned(),
+            ..lightning.clone()
+        }));
+        assert_eq!(queue.len(), 1);
+
+        assert!(queue.push(NativeGameplaySoundEvent {
+            generation: 5,
+            sequence: 1,
+            ..lightning
+        }));
+        assert_eq!(queue.len(), 1, "new generation clears stale pending cues");
+    }
+
+    #[test]
+    fn gameplay_sound_uses_real_loaded_handle_once_and_disabled_audio_drops_pending() {
+        let mut app = app();
+        let source = bevy::asset::Handle::<AudioSource>::default();
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .gameplay_sources
+            .insert("M40-0.wav".to_owned(), source);
+        {
+            let audio = &mut app.world_mut().resource_mut::<OptionsRuntime>().audio;
+            audio.sound_enabled = true;
+            audio.sound_volume = 50;
+        }
+        let event = NativeGameplaySoundEvent {
+            generation: 7,
+            sequence: 1,
+            cue: "Lightning.complete".to_owned(),
+            file_name: "M40-0.wav".to_owned(),
+        };
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .push(event.clone()));
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 1);
+        assert!(!app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .push(event));
+
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_enabled = false;
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .push(NativeGameplaySoundEvent {
+                generation: 7,
+                sequence: 2,
+                cue: "Lightning.complete".to_owned(),
+                file_name: "M40-0.wav".to_owned(),
+            }));
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 0);
+        assert_eq!(app.world().resource::<NativeGameplayAudioQueue>().len(), 0);
+
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_enabled = true;
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 0);
     }
 
     #[test]
