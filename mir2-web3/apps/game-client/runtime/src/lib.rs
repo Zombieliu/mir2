@@ -4285,9 +4285,7 @@ fn sync_entity_render_layers(
             };
             alive.insert(layer_key.clone());
             let position = entity_render_layer_position(snapshot, layer, motion_offset);
-            let opacity = layer
-                .opacity
-                .unwrap_or(1.0);
+            let opacity = layer.opacity.unwrap_or(1.0);
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 

@@ -15,9 +15,9 @@ use mir2_ui_core::action::UiAction;
 use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
 use super::spec;
-use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 #[cfg(test)]
 use super::spec::CrystalRect;
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 
 /// The Crystal 1024x768 chat panel's screen-space origin.
 pub const CHAT_PANEL_ORIGIN: (f32, f32) = (230.0, 671.0);

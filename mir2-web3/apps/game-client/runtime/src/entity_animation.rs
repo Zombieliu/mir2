@@ -691,7 +691,10 @@ impl EntityAnimationState {
         let can_start = self.current_action.is_interruptible_idle(self.kind)
             || self.action_feed.front().is_some_and(|event| {
                 (self.current_action == AnimationAction::Dead
-                    && matches!(event.action, AnimationAction::Skeleton | AnimationAction::Revive))
+                    && matches!(
+                        event.action,
+                        AnimationAction::Skeleton | AnimationAction::Revive
+                    ))
                     || (self.current_action == AnimationAction::Skeleton
                         && event.action == AnimationAction::Revive)
             });
@@ -765,11 +768,12 @@ impl EntityAnimationState {
         self.direction = direction;
         self.frame_index = 0;
         self.last_started_event_sequence = event_sequence;
-        self.next_motion_at_ms = if matches!(action, AnimationAction::Dead | AnimationAction::Skeleton) {
-            None
-        } else {
-            Some(deadline(at_ms, descriptor.frame_interval_ms)?)
-        };
+        self.next_motion_at_ms =
+            if matches!(action, AnimationAction::Dead | AnimationAction::Skeleton) {
+                None
+            } else {
+                Some(deadline(at_ms, descriptor.frame_interval_ms)?)
+            };
         transitions.push(ActionTransition {
             key: self.key.clone(),
             at_ms,
