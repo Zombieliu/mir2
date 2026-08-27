@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 RightGuard range-hit additional bounded checkpoint (2026-08-28):
+> implementation revision `7d08b53f8d78161655254bb83ebd519ecbd62fed`
+> reproduces the exact `Monster/099` frame-4 target hit as delayed
+> `Magic2/10..14`: 400 ms action delay, five 60 ms additive frames, opacity 1
+> and light 6. Source plus target existence is enforced through 400 ms; from
+> 401 ms the target owns movement and cleanup. Replay, remove/hide, expiry and
+> reset paths are covered. Focused 6/6, Windows 387/387, the 74-spell
+> exporter/validator and final P0=0/P1=0 review pass. This closes one
+> automated VFX leaf, not RightGuard audio, monster ActionFeed, VIS-02,
+> monster presentation or visual acceptance. `995.wav`, same-EXE/live-WSS/
+> DPI/soak/human/signing and the incomplete denominator remain open;
+> `globalParityPercent` remains null.
+
 > VIS-03 CharacterDialog close additional bounded checkpoint (2026-08-28):
 > implementation revision `225ae951d95894458b7f1cbd30d78ee100fe4362`
 > preserves exact `Prguse2/360..362` and `(241,3,24,21)`, and now reproduces

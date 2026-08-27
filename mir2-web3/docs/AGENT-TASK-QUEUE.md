@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> VIS-02 RightGuard range-hit additional bounded automated checkpoint
+> (2026-08-28): revision `7d08b53f8d78161655254bb83ebd519ecbd62fed`
+> routes typed `ObjectRangeAttack` through the exact `Monster/099`
+> frame-4 client branch. At 400 ms it starts target-bound `Magic2/10..14`,
+> five 60 ms additive frames with opacity 1 and light 6. Source and target
+> presence are required through the exact 400 ms boundary; from 401 ms the
+> effect is target-owned. Replay, movement, remove/hide, expiry and
+> generation/session reset behavior are automated. Focused 6/6, Windows
+> 387/387, the 74-spell exporter/validator, Rust 1.95 fmt/diff and final
+> P0=0/P1=0 review pass. This adds no server/Gateway authority, new asset,
+> EXE/package, live WSS or device capture. Missing `995.wav`, the complete
+> monster ActionFeed, same-EXE/DPI/soak/human/signing gates and the incomplete
+> semantic denominator remain open. VIS-02 stays in progress; do not emit a
+> global percentage.
+
 > VIS-03 CharacterDialog close additional bounded automated checkpoint
 > (2026-08-28): revision `225ae951d95894458b7f1cbd30d78ee100fe4362`
 > source-binds the common Character close control to exact

@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-02 RightGuard range-hit client-boundary checkpoint (2026-08-28):
+> revision `7d08b53f8d78161655254bb83ebd519ecbd62fed` changes no simulation,
+> shared-Zone, Gateway, protocol or combat authority. The Windows client
+> consumes existing typed `ObjectRangeAttack` projection and, only for exact
+> `Monster/099`, reproduces the delayed target-bound `Magic2/10..14` hit with
+> its 400/401 ms ownership boundary. Focused 6/6, Windows 387/387, the
+> 74-spell exporter/validator, Rust 1.95 fmt/diff and final P0=0/P1=0 review
+> pass. No new asset, live WSS, EXE/package or visual/audio device evidence
+> was produced. Missing `995.wav`, monster ActionFeed and every same-EXE/DPI/
+> soak/human/signing/denominator gate remain open. No backend, visual or
+> global percentage is claimed.
+
 > VIS-03 CharacterDialog close client-boundary checkpoint (2026-08-28):
 > revision `225ae951d95894458b7f1cbd30d78ee100fe4362` changes no simulation,
 > shared-Zone, Gateway or gameplay authority. The native client locally plays
