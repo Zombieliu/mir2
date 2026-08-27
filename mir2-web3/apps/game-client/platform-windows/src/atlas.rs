@@ -810,10 +810,17 @@ fn build_entity_render_state_with_index(
                     let mut layers = Vec::new();
 
                     let mount_library = resolved_sprite.mount_library.as_ref();
-                    if let Some(library) = &mount_library {
-                        let mount_frame = relative_frame
-                            .saturating_sub(416)
-                            .saturating_add(resolved_sprite.mount_frame_offset);
+                    // Crystal DrawMount subtracts the mounted-player base (416)
+                    // before asking the mount library to draw. Player death and
+                    // revive use the ordinary 384/387 body frames, so that lookup
+                    // is negative and produces no mount layer. Do not clamp it to
+                    // frame zero: that incorrectly leaves a standing mount under
+                    // a dead player.
+                    if let (Some(library), Some(mount_relative_frame)) =
+                        (&mount_library, relative_frame.checked_sub(416))
+                    {
+                        let mount_frame =
+                            mount_relative_frame.saturating_add(resolved_sprite.mount_frame_offset);
                         if let Some(layer) = build_entity_layer(
                             index,
                             &mut used_rects,
@@ -1760,6 +1767,25 @@ mod tests {
             layer["key"]
                 .as_str()
                 .is_some_and(|key| key.contains("weapon"))
+        }));
+
+        let dead_state = build_entity_render_state_with_poses(
+            &payload,
+            &HashMap::from([("1001".to_owned(), (387, AnimationAction::Dead))]),
+        )
+        .expect("mounted player death render state");
+        let dead_layers = dead_state["entities"][0]["layers"]
+            .as_array()
+            .expect("mounted player death layers");
+        assert!(dead_layers.iter().any(|layer| {
+            layer["path"]
+                .as_str()
+                .is_some_and(|path| path.ends_with("/CArmour/00/387.png"))
+        }));
+        assert!(!dead_layers.iter().any(|layer| {
+            layer["key"]
+                .as_str()
+                .is_some_and(|key| key.ends_with(":mount"))
         }));
     }
 

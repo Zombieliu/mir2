@@ -52,7 +52,7 @@ function loadTypeScriptModule(url, requireMap = {}) {
 const soundTriggersStub = {
   playEntityAttackSound: () => {},
   playEntityStruckSound: () => {},
-  playEntityDieSound: () => {},
+  scheduleEntityDieSound: () => {},
   playMagicSoundId: () => false,
   monsterImageFromBodyLibrary: () => null,
 };
@@ -66,6 +66,14 @@ const originalSoundTriggersModule = loadTypeScriptModule(
         swingSword: 10052,
         struckSword: 10110,
         struckBodySword: 10120,
+        struckBodyAxe: 10121,
+        struckBodyLongStick: 10122,
+        struckBodyFist: 10123,
+        mountStruckTiger1: 10179,
+        mountStruckTiger2: 10180,
+        mountStruckWolf: 10193,
+        femaleFlinch: 10129,
+        maleFlinch: 10128,
         femaleDie: 10131,
         maleDie: 10130,
       },
@@ -141,8 +149,13 @@ function makeAudioSink(entityRef = null) {
       playEntityAttackSound(entity, spell, objectId) {
         calls.push({ fn: "playEntityAttackSound", entity, spell, objectId });
       },
-      playEntityStruckSound(entity) { calls.push({ fn: "playEntityStruckSound", entity }); },
-      playEntityDieSound(entity) { calls.push({ fn: "playEntityDieSound", entity }); },
+      playEntityStruckSound(entity, attacker) {
+        calls.push({ fn: "playEntityStruckSound", entity, attacker });
+      },
+      scheduleEntityDieSound(entity, objectId) {
+        calls.push({ fn: "scheduleEntityDieSound", entity, objectId });
+      },
+      playReviveSound() { calls.push({ fn: "playReviveSound" }); },
       playMagicSoundId(spell) { calls.push({ fn: "playMagicSoundId", spell }); },
       soundEntityRefFor(_objectId) { return entityRef; },
       playGoldSound() { calls.push({ fn: "playGoldSound" }); },
@@ -371,26 +384,103 @@ check("ordinary player attack never plays the FlamingSword-specific sound", () =
   }
 });
 
-check("entityStruck -> playEntityStruckSound", () => {
+check("entityStruck -> playEntityStruckSound with attacker context", () => {
   const bus = createGameEventBus();
-  const fakeRef = { kind: "selfPlayer", genderKey: "male" };
-  const { calls, sink } = makeAudioSink(fakeRef);
+  const targetRef = { kind: "selfPlayer", genderKey: "male" };
+  const attackerRef = {
+    kind: "player",
+    genderKey: "female",
+    sprite: { weaponLibrary: "CWeapon/04" },
+  };
+  const { calls, sink } = makeAudioSink();
+  sink.soundEntityRefFor = (objectId) => objectId === "7" ? targetRef : attackerRef;
   registerSoundSubscriber(bus, sink);
-  bus.emit({ type: "entityStruck", objectId: "7" });
+  bus.emit({ type: "entityStruck", objectId: "7", attackerId: "8" });
   assert.equal(calls.length, 1);
   assert.equal(calls[0].fn, "playEntityStruckSound");
-  assert.equal(calls[0].entity, fakeRef);
+  assert.equal(calls[0].entity, targetRef);
+  assert.equal(calls[0].attacker, attackerRef);
 });
 
-check("entityDied -> playEntityDieSound", () => {
+check("player struck audio follows Crystal weapon/armour body cue then flinch", () => {
+  triggerPlayedIds.length = 0;
+  originalSoundTriggersModule.playEntityStruckSound(
+    {
+      kind: "player",
+      classKey: "warrior",
+      genderKey: "female",
+      sprite: { bodyLibrary: "CArmour/03" },
+    },
+    { kind: "player", classKey: "warrior", sprite: { weaponLibrary: "CWeapon/04" } },
+  );
+  assert.deepEqual(triggerPlayedIds, [10131, 10129], "axe hit + heavy armour offset, then female flinch");
+});
+
+check("mounted player struck audio uses the mount family then flinch", () => {
+  triggerPlayedIds.length = 0;
+  const realRandom = Math.random;
+  Math.random = () => 0;
+  try {
+    originalSoundTriggersModule.playEntityStruckSound(
+      {
+        kind: "player",
+        classKey: "warrior",
+        genderKey: "male",
+        sprite: { bodyLibrary: "CArmour/03", mountLibrary: "Mount/05" },
+      },
+      { kind: "player", classKey: "warrior", sprite: { weaponLibrary: "CWeapon/04" } },
+    );
+  } finally {
+    Math.random = realRandom;
+  }
+  assert.deepEqual(triggerPlayedIds, [10179, 10128], "tiger mount hit then male flinch, no body hit");
+});
+
+check("entityDied -> scheduleEntityDieSound with actor identity", () => {
   const bus = createGameEventBus();
   const fakeRef = { kind: "player", genderKey: "female" };
   const { calls, sink } = makeAudioSink(fakeRef);
   registerSoundSubscriber(bus, sink);
   bus.emit({ type: "entityDied", objectId: "9" });
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].fn, "playEntityDieSound");
+  assert.equal(calls[0].fn, "scheduleEntityDieSound");
   assert.equal(calls[0].entity, fakeRef);
+  assert.equal(calls[0].objectId, "9");
+});
+
+check("player death cue is delayed to Die frame 1 and can be cancelled", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const cleared = [];
+  const realSetTimeout = globalThis.setTimeout;
+  const realClearTimeout = globalThis.clearTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 91;
+  };
+  globalThis.clearTimeout = (timer) => cleared.push(timer);
+  try {
+    originalSoundTriggersModule.scheduleEntityDieSound(
+      { kind: "player", genderKey: "female" },
+      "player-9",
+    );
+    assert.deepEqual(triggerPlayedIds, []);
+    assert.equal(scheduled[0].delay, 100);
+    originalSoundTriggersModule.cancelPendingEntitySounds("player-9");
+    assert.deepEqual(cleared, [91]);
+  } finally {
+    originalSoundTriggersModule.cancelPendingEntitySounds();
+    globalThis.setTimeout = realSetTimeout;
+    globalThis.clearTimeout = realClearTimeout;
+  }
+});
+
+check("entityRevived -> playReviveSound", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "entityRevived", objectId: "9" });
+  assert.deepEqual(calls, [{ fn: "playReviveSound" }]);
 });
 
 check("magicCast -> playMagicSoundId with the spell value", () => {
@@ -622,7 +712,7 @@ check("full combat sequence wires both subscribers correctly", () => {
 
   assert.equal(audio.calls.filter((c) => c.fn === "playEntityAttackSound").length, 1);
   assert.equal(audio.calls.filter((c) => c.fn === "playEntityStruckSound").length, 1);
-  assert.equal(audio.calls.filter((c) => c.fn === "playEntityDieSound").length, 1);
+  assert.equal(audio.calls.filter((c) => c.fn === "scheduleEntityDieSound").length, 1);
   assert.equal(vfx.calls.filter((c) => c.fn === "markEntityStruck").length, 1);
   assert.equal(vfx.calls.filter((c) => c.fn === "addDamageFloater").length, 1);
   assert.equal(vfx.calls.find((c) => c.fn === "addDamageFloater").damage, -120);

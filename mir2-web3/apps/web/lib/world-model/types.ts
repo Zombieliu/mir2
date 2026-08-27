@@ -106,6 +106,7 @@ export type WorldEntity = {
   struckUntil?: number;
   dieStartedAt?: number;
   dieUntil?: number;
+  deathHandled?: boolean;
   reviveStartedAt?: number;
   reviveUntil?: number;
 };
@@ -128,7 +129,7 @@ export type ProjectileState = {
 
 export type SceneEffectState = {
   key: string;
-  source: "spell" | "attackOverlay" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;

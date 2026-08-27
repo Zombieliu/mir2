@@ -123,6 +123,7 @@ export async function loadEffectAssets(
     spell_effect_map?: NumericEffectName[];
     spell_effects?: EffectSpec[];
     ground_effects?: EffectSpec[];
+    client_effects?: EffectSpec[];
     object_effects?: EffectSpec[];
     map_effects?: EffectSpec[];
   };
@@ -160,6 +161,9 @@ export async function loadEffectAssets(
     if (entry.spell) groundBySpell.set(entry.spell, entry);
   }
   const mapByName = new Map<string, EffectSpec>();
+  for (const entry of manifest.client_effects ?? []) {
+    if (entry.effect) mapByName.set(entry.effect, entry);
+  }
   for (const entry of manifest.object_effects ?? []) {
     if (entry.effect) mapByName.set(entry.effect, entry);
   }

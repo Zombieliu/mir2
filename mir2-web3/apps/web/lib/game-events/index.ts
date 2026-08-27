@@ -13,6 +13,7 @@ export type {
   EntityAttackEvent,
   EntityStruckEvent,
   EntityDiedEvent,
+  EntityRevivedEvent,
   MagicCastEvent,
   PlaySoundEvent,
   UiSoundEvent,

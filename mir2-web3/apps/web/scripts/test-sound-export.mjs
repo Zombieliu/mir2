@@ -15,7 +15,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-import { parseSoundList, runCrystalSoundExport } from "./export-crystal-sounds.mjs";
+import {
+  DIRECT_CRYSTAL_SOUND_ENTRIES,
+  mergeSoundEntries,
+  parseSoundList,
+  runCrystalSoundExport,
+} from "./export-crystal-sounds.mjs";
 
 const nodeRequire = createRequire(import.meta.url);
 
@@ -39,6 +44,19 @@ function makeWav(seed = 0) {
   buf.writeUInt32LE(dataLen, 40);
   for (let i = 0; i < dataLen; i += 1) buf[44 + i] = (seed + i) % 256;
   return buf;
+}
+
+{
+  const merged = mergeSoundEntries(
+    [{ id: 10100, fileName: "100.wav" }, { id: 20081, fileName: "M8-1.wav" }],
+    DIRECT_CRYSTAL_SOUND_ENTRIES,
+  );
+  assert.equal(merged.filter((entry) => entry.id === 20081).length, 1);
+  assert.equal(merged.find((entry) => entry.id === 20791).fileName, "M79-1.wav");
+  assert.throws(
+    () => mergeSoundEntries([{ id: 20791, fileName: "wrong.wav" }], DIRECT_CRYSTAL_SOUND_ENTRIES),
+    /maps to both/,
+  );
 }
 
 // --- 1. SoundList parser handles the real-world quirks ----------------------------------------
@@ -90,6 +108,10 @@ try {
     ["ride_walk_l.wav", 3],
     ["wolf_attack1.wav", 4],
     ["23.wav", 5],
+    ["M8-1.wav", 6],
+    ["M39-0.wav", 7],
+    ["M39-1.wav", 8],
+    ["M79-1.wav", 9],
   ]) {
     writeFileSync(path.join(soundSrc, name), makeWav(seed));
   }
@@ -104,8 +126,8 @@ try {
     strict: false,
   });
 
-  assert.equal(summary.soundListEntryCount, 7);
-  assert.equal(summary.exportedSoundCount, 6, "5 exact + 1 fallback copy");
+  assert.equal(summary.soundListEntryCount, 11);
+  assert.equal(summary.exportedSoundCount, 10, "9 exact + 1 fallback copy");
   assert.equal(summary.fallbackSoundCount, 1, "22.wav must fall back to 23.wav");
   assert.equal(summary.missingSoundCount, 1, "9999.wav must be recorded missing");
   assert.equal(summary.sounds["10100"].path, "/original-ui/Sound/100.wav");
@@ -114,10 +136,24 @@ try {
   assert.equal(summary.sounds["10022"].fallbackSourceFileName, "23.wav");
   assert.equal(summary.sounds["19999"].sourceExists, false);
   assert.equal(summary.sounds["19999"].path, null);
+  assert.equal(summary.sounds["20081"].path, "/original-ui/Sound/M8-1.wav");
+  assert.equal(summary.sounds["20390"].path, "/original-ui/Sound/M39-0.wav");
+  assert.equal(summary.sounds["20391"].path, "/original-ui/Sound/M39-1.wav");
+  assert.equal(summary.sounds["20791"].path, "/original-ui/Sound/M79-1.wav");
 
   // Files actually landed on disk.
   const copied = new Set(readdirSync(outputDir));
-  for (const f of ["100.wav", "Login2.wav", "ride_walk_l.wav", "wolf_attack1.wav", "22.wav"]) {
+  for (const f of [
+    "100.wav",
+    "Login2.wav",
+    "ride_walk_l.wav",
+    "wolf_attack1.wav",
+    "22.wav",
+    "M8-1.wav",
+    "M39-0.wav",
+    "M39-1.wav",
+    "M79-1.wav",
+  ]) {
     assert.ok(copied.has(f), `exported Sound dir must contain ${f}`);
   }
   assert.ok(!copied.has("9999.wav"), "missing sound must not be written");

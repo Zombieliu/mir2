@@ -9,6 +9,7 @@ import ts from "typescript";
 
 import {
   assembleMagicEffectsFromMeta,
+  CLIENT_EFFECTS,
   cropPackedRgba,
   MAP_EFFECTS,
   normalizeAdditiveRgba,
@@ -46,7 +47,7 @@ function effectsFetch(outputDir) {
 
 function allRequiredIndices() {
   const byLibrary = new Map();
-  for (const spec of [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS]) {
+  for (const spec of [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...CLIENT_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS]) {
     for (const phaseSpec of [spec, spec.projectile, spec.impact, spec.returnEffect].filter(Boolean)) {
       if (!byLibrary.has(phaseSpec.library)) byLibrary.set(phaseSpec.library, new Set());
       for (let value = 0; value < (phaseSpec.valueCount ?? 1); value += 1) {
@@ -126,6 +127,23 @@ async function testAssembleMode() {
   assert.equal(manifest.schemaVersion, 2);
   assert.equal(manifest.generatedAt, null, "manifest has no clock-dependent data");
   assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length);
+  assert.deepEqual(manifest.client_effects, CLIENT_EFFECTS);
+  assert.deepEqual(manifest.client_effects[0], {
+    effect: "PlayerRevive",
+    library: "Magic2",
+    base: 1220,
+    count: 20,
+    interval: 100,
+    kind: "target",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived",
+      symbol: "PlayerRevive",
+    },
+  });
   const trapWorldSpell = manifest.ground_effects.find(
     (entry) => entry.spell === "TrapHexagon" && entry.provenance.source.includes("SpellObject.cs"),
   );
@@ -271,6 +289,12 @@ async function testAssembleMode() {
   assert.equal(effects.spellNameForNumber(12), "ProtectionField", "Spell ids do not collide with SpellEffect names");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").frames[0].path, "/original-ui/Magic/1390.png");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").repeat, true);
+  const playerRevive = effects.resolveMapEffect(assets, "PlayerRevive");
+  assert.equal(playerRevive.frames.length, 20);
+  assert.equal(playerRevive.frames[0].path, "/original-ui/Magic2/1220.png");
+  assert.equal(playerRevive.frames.at(-1).path, "/original-ui/Magic2/1239.png");
+  assert.equal(playerRevive.durationMs, 2_000);
+  assert.equal(playerRevive.light, 6);
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 7).frames[0].path, "/original-ui/Magic2/2210.png");
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 8), null);
   assert.equal(effects.effectNameForNumber(assets, 12), "Mine");

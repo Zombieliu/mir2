@@ -58,6 +58,7 @@ const PLAYER_ATTACK_OVERLAY_SOURCE = "Crystal/Client/MirObjects/PlayerObject.cs:
 const WORLD_SPELL_SOURCE = "Crystal/Client/MirObjects/SpellObject.cs::Load";
 const OBJECT_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect";
 const MAP_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapEffect";
+const PLAYER_REVIVE_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived";
 
 const spell = (name, library, base, count, interval, kind = "cast", directionStride) => ({
   spell: name,
@@ -326,6 +327,27 @@ const packetEffect = (effect, library, base, count, interval, source, extra = {}
   provenance: { source, symbol: `SpellEffect.${effect}` },
 });
 
+const clientEffect = (effect, library, base, count, interval, source, extra = {}) => ({
+  effect,
+  kind: "target",
+  library,
+  base,
+  count,
+  interval,
+  blend: true,
+  light: 6,
+  repeat: false,
+  offset: { x: 0, y: 0 },
+  ...extra,
+  provenance: { source, symbol: effect },
+});
+
+// Client-owned effects that are not SpellEffect enum packets. Crystal creates
+// this exact actor-bound glow from both self Revived and effectful ObjectRevived.
+export const CLIENT_EFFECTS = [
+  clientEffect("PlayerRevive", "Magic2", 1220, 20, 100, PLAYER_REVIVE_SOURCE),
+];
+
 // Single-layer ObjectEffect cases whose frame selection is fully determined by the packet effect.
 export const OBJECT_EFFECTS = [
   packetEffect("FatalSword", "Magic2", 1940, 4, 100, OBJECT_EFFECT_SOURCE),
@@ -351,7 +373,13 @@ export const MAP_EFFECTS = [
   packetEffect("Tester", "Effect", 328, 10, 50, MAP_EFFECT_SOURCE, { light: 0 }),
 ];
 
-const allSpecs = () => [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS];
+const allSpecs = () => [
+  ...SPELL_EFFECTS,
+  ...WORLD_SPELL_EFFECTS,
+  ...CLIENT_EFFECTS,
+  ...OBJECT_EFFECTS,
+  ...MAP_EFFECTS,
+];
 
 function assertInteger(value, label, minimum = 0) {
   if (!Number.isInteger(value) || value < minimum) throw new Error(`${label} must be an integer >= ${minimum}`);
@@ -393,7 +421,11 @@ export function validateEffectDefinitions() {
       });
     }
     if (spec.spell && !Number.isInteger(spec.spellId)) throw new Error(`${name} lacks an authoritative Spell id`);
-    if (spec.effect && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))) throw new Error(`${name} lacks an authoritative SpellEffect id`);
+    if (
+      spec.effect
+      && spec.provenance.source !== PLAYER_REVIVE_SOURCE
+      && (!Number.isInteger(spec.effectId) || !enumNames.has(spec.effect))
+    ) throw new Error(`${name} lacks an authoritative SpellEffect id`);
     if (typeof spec.blend !== "boolean" || typeof spec.repeat !== "boolean" || !Number.isInteger(spec.light)) throw new Error(`${name} lacks explicit render flags`);
     if (spec.rate !== undefined && (typeof spec.rate !== "number" || !Number.isFinite(spec.rate) || spec.rate < 0 || spec.rate > 1)) {
       throw new Error(`${name}.rate must be a finite number between 0 and 1`);
@@ -500,6 +532,7 @@ async function writeEffectsManifest(outputDir, available, mode) {
       ...SPELL_EFFECTS.filter((entry) => entry.kind === "ground"),
       ...WORLD_SPELL_EFFECTS,
     ].map(manifestSpec).sort(byName),
+    client_effects: CLIENT_EFFECTS.map(manifestSpec).sort(byName),
     object_effects: OBJECT_EFFECTS.map(manifestSpec).sort(byName),
     map_effects: MAP_EFFECTS.map(manifestSpec).sort(byName),
   };

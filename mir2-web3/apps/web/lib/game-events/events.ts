@@ -41,12 +41,20 @@ export type EntityStruckEvent = {
   type: "entityStruck";
   /** Stringified objectId of the struck entity. */
   objectId: string;
+  /** Stringified attacker id; the client resolves weapon/class from live actor state. */
+  attackerId?: string;
 };
 
 /** An entity died. Triggers death sound. */
 export type EntityDiedEvent = {
   type: "entityDied";
   /** Stringified objectId of the dead entity. */
+  objectId: string;
+};
+
+/** A player revive effect/audio was authorized by Revived or ObjectRevived(effect=true). */
+export type EntityRevivedEvent = {
+  type: "entityRevived";
   objectId: string;
 };
 
@@ -115,6 +123,7 @@ export type GameEvent =
   | EntityAttackEvent
   | EntityStruckEvent
   | EntityDiedEvent
+  | EntityRevivedEvent
   | MagicCastEvent
   | PlaySoundEvent
   | UiSoundEvent

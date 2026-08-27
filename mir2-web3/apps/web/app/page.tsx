@@ -77,9 +77,17 @@ import {
   type BevyMovementShadowMode,
 } from "../lib/bevy-movement-shadow";
 import {
-  cancelPendingEntityAttackSounds,
+  cancelPendingEntitySounds,
   type SoundEntityRef,
 } from "../lib/original-sound-triggers";
+import {
+  actorStruckIsAlreadyPending,
+  applyActorDeath,
+  applyActorHealth,
+  applyActorRevive,
+  applyActorStruck,
+  createPlayerReviveSceneEffect,
+} from "../lib/world-model/actor-combat-state";
 import { createGameEventBus, makeRealAudioSink, registerSoundSubscriber, registerVfxSubscriber } from "../lib/game-events";
 import type { GameEventBus } from "../lib/game-events";
 import {
@@ -697,6 +705,7 @@ type WorldEntity = {
   struckUntil?: number;
   dieStartedAt?: number;
   dieUntil?: number;
+  deathHandled?: boolean;
   reviveStartedAt?: number;
   reviveUntil?: number;
 };
@@ -729,7 +738,7 @@ type ProjectileState = {
 
 type SceneEffectState = {
   key: string;
-  source: "spell" | "attackOverlay" | "objectSpell" | "map" | "object";
+  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
   spellOrEffect: string | number;
   objectId?: string;
   x: number;
@@ -2197,7 +2206,7 @@ export default function HomePage() {
     return () => {
       unsubSound();
       unsubVfx();
-      cancelPendingEntityAttackSounds();
+      cancelPendingEntitySounds();
     };
     // soundEntityRefFor, pushDamageFloaterFromBus, markEntityStruckFlash are
     // stable hoisted closures over refs; intentionally excluded from deps.
@@ -3206,6 +3215,10 @@ export default function HomePage() {
       struckUntil: struckActive ? currentEntity.struckUntil : undefined,
       dieStartedAt: dieActive ? currentEntity.dieStartedAt : undefined,
       dieUntil: dieActive ? currentEntity.dieUntil : undefined,
+      // Death packets are incarnation events, not transient animation state.
+      // Preserve their consumption marker until Revived/ObjectRemove clears
+      // the actor so a delayed replay cannot restart Die or its audio.
+      deathHandled: currentEntity.deathHandled,
       reviveStartedAt: reviveActive ? currentEntity.reviveStartedAt : undefined,
       reviveUntil: reviveActive ? currentEntity.reviveUntil : undefined,
     };
@@ -5959,7 +5972,7 @@ export default function HomePage() {
 
     socket.addEventListener("close", () => {
       if (socketRef.current !== socket) return;
-      cancelPendingEntityAttackSounds();
+      cancelPendingEntitySounds();
       const closedManually = manualSocketCloseRef.current;
       socketRef.current = null;
       manualSocketCloseRef.current = false;
@@ -6317,7 +6330,7 @@ export default function HomePage() {
   }
 
   function resetClient() {
-    cancelPendingEntityAttackSounds();
+    cancelPendingEntitySounds();
     const socketToClose = socketRef.current;
     manualSocketCloseRef.current = Boolean(
       socketToClose &&
@@ -8910,7 +8923,7 @@ export default function HomePage() {
       case "ObjectRemove":
       case "ObjectHide": {
         const removedObjectId = stringifyId(payload.objectId);
-        cancelPendingEntityAttackSounds(removedObjectId);
+        cancelPendingEntitySounds(removedObjectId);
         if (removedObjectId !== worldRef.current.playerObjectId) {
           observeBevyMovementShadow({
             type: "remoteRemove",
@@ -9249,7 +9262,7 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
-        cancelPendingEntityAttackSounds();
+        cancelPendingEntitySounds();
         setIdentitySessionToken(null);
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -9475,37 +9488,12 @@ export default function HomePage() {
         appendLog(t("ui.poisoned", [], "You are poisoned."), "system");
         break;
       case "Death":
-        // Crystal `S.Death` (self only): mark the player dead and surface the
-        // revive-in-town prompt. Reset any stale request flag so the button is live.
         setReviveRequested(false);
-        updateWorld((current) => ({
-          ...current,
-          playerHp: 0,
-          entities: current.playerObjectId
-            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
-                ...entity,
-                hp: 0,
-                dead: true,
-              }))
-            : current.entities,
-        }));
+        markSelfPlayerDead(payload);
         break;
       case "Revived":
-        // Crystal `S.Revived`: the town-revive request succeeded — restore HP and
-        // dismiss the prompt (the overlay clears once the player is no longer dead).
         setReviveRequested(false);
-        updateWorld((current) => ({
-          ...current,
-          playerHp:
-            typeof current.playerMaxHp === "number" ? Math.max(1, current.playerMaxHp) : current.playerHp,
-          entities: current.playerObjectId
-            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
-                ...entity,
-                dead: false,
-                hp: typeof entity.maxHp === "number" ? Math.max(1, entity.maxHp) : entity.hp,
-              }))
-            : current.entities,
-        }));
+        markSelfPlayerRevived();
         break;
 
       // Inventory / item lifecycle --------------------------------------------
@@ -10389,7 +10377,7 @@ export default function HomePage() {
       case "MapChanged": {
         const fileName = stringOrNull(payload.fileName);
         if (normalizeMapFileName(fileName) !== normalizeMapFileName(worldRef.current.mapFileName)) {
-          cancelPendingEntityAttackSounds();
+          cancelPendingEntitySounds();
         }
         const miniMap = numberOrUndefined(payload.miniMap);
         const bigMap = numberOrUndefined(payload.bigMap);
@@ -11498,7 +11486,12 @@ export default function HomePage() {
     if (!entity) {
       return null;
     }
-    return { kind: entity.kind, sprite: entity.sprite, genderKey: entity.genderKey };
+    return {
+      kind: entity.kind,
+      sprite: entity.sprite,
+      genderKey: entity.genderKey,
+      classKey: entity.classKey,
+    };
   }
 
   function markWorldEntityAttack(payload: Record<string, unknown>) {
@@ -11652,38 +11645,39 @@ export default function HomePage() {
     // redundant clone. The sound subscriber still ran on the same emit.
     if (suppressStruckFlashRef.current) return;
     const now = Date.now();
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity || actorStruckIsAlreadyPending(currentEntity, now)) return;
     updateWorld((current) => ({
       ...current,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        struckStartedAt: now,
-        struckUntil: now + crystalStruckActionDurationMs(entity),
-      })),
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorStruck(entity, now, crystalStruckActionDurationMs(entity)),
+      ),
     }));
   }
 
   function markWorldEntityStruck(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    const attackerId = stringifyId(payload.attackerId);
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity || actorStruckIsAlreadyPending(currentEntity, now)) return;
     // Stage-2: emit `entityStruck` only for the SOUND subscriber; suppress the VFX subscriber's
     // flash callback (markEntityStruckFlash) so it does not re-enter updateWorld for a redundant
     // clone — the same struck-flash fields are applied inline in the single updater below. The
     // bus dispatch is synchronous, so the flag is read + reset within this emit.
     suppressStruckFlashRef.current = true;
-    gameBusRef.current!.emit({ type: "entityStruck", objectId });
+    gameBusRef.current!.emit({ type: "entityStruck", objectId, attackerId });
     suppressStruckFlashRef.current = false;
     updateWorld((current) => ({
       ...current,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        x: typeof location?.x === "number" ? location.x : entity.x,
-        y: typeof location?.y === "number" ? location.y : entity.y,
-        direction: stringOrNull(payload.direction) ?? entity.direction,
-        // Folds markEntityStruckFlash's body (crystalStruckActionDurationMs) into this one map.
-        struckStartedAt: now,
-        struckUntil: now + crystalStruckActionDurationMs(entity),
-      })),
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorStruck(entity, now, crystalStruckActionDurationMs(entity), {
+          x: numberOrUndefined(location?.x),
+          y: numberOrUndefined(location?.y),
+          direction: stringOrNull(payload.direction) ?? undefined,
+        }),
+      ),
     }));
   }
 
@@ -11693,7 +11687,10 @@ export default function HomePage() {
     const now = Date.now();
     // Sound + hit-flash via bus; selection update stays inline.
     if (playerObjectId) {
-      gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId });
+      const player = worldRef.current.entities.find((entity) => entity.objectId === playerObjectId);
+      if (player && !actorStruckIsAlreadyPending(player, now)) {
+        gameBusRef.current!.emit({ type: "entityStruck", objectId: playerObjectId, attackerId });
+      }
     }
     updateWorld((current) => ({
       ...current,
@@ -11859,54 +11856,82 @@ export default function HomePage() {
     });
   }
 
+  function appendPlayerReviveEffect(current: WorldState, entity: WorldEntity, now: number): SceneEffectState[] {
+    const effect = createPlayerReviveSceneEffect(entity, now);
+    return [
+      ...current.effects.filter((entry) => entry.expiresAt > now && entry.key !== effect.key).slice(-95),
+      effect,
+    ];
+  }
+
+  function markSelfPlayerDead(payload: Record<string, unknown>) {
+    const objectId = worldRef.current.playerObjectId;
+    if (!objectId) return;
+    markWorldEntityDead({ ...payload, objectId });
+  }
+
+  function markSelfPlayerRevived() {
+    const objectId = worldRef.current.playerObjectId;
+    if (!objectId) return;
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity) return;
+    const now = Date.now();
+    cancelPendingEntitySounds(objectId);
+    gameBusRef.current!.emit({ type: "entityRevived", objectId });
+    updateWorld((current) => ({
+      ...current,
+      // Crystal Revived changes action/dead/effect state only. Authoritative
+      // HealthChanged/ObjectHealth owns the restored HP value.
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorRevive(entity, now, crystalReviveActionDurationMs(entity), "standing"),
+      ),
+      effects: appendPlayerReviveEffect(current, currentEntity, now),
+    }));
+  }
+
   function markWorldEntityDead(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity || currentEntity.deathHandled === true) return;
     gameBusRef.current!.emit({ type: "entityDied", objectId });
     const now = Date.now();
 
     updateWorld((current) => ({
       ...current,
       playerHp: current.playerObjectId === objectId ? 0 : current.playerHp,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        x: numberOrZero(location?.x),
-        y: numberOrZero(location?.y),
-        direction: stringOrNull(payload.direction) ?? entity.direction,
-        hp: 0,
-        dead: true,
-        dieStartedAt: now,
-        dieUntil: now + crystalDeathActionDurationMs(entity),
-        attackAnimation: undefined,
-        attackStartedAt: undefined,
-        attackUntil: undefined,
-        struckStartedAt: undefined,
-        struckUntil: undefined,
-        reviveStartedAt: undefined,
-        reviveUntil: undefined,
-      })),
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorDeath(entity, now, crystalDeathActionDurationMs(entity), {
+          x: numberOrUndefined(location?.x),
+          y: numberOrUndefined(location?.y),
+          direction: stringOrNull(payload.direction) ?? undefined,
+        }),
+      ),
     }));
   }
 
   function markWorldEntityRevived(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const now = Date.now();
+    const withEffect = payload.effect === true;
+    const currentEntity = worldRef.current.entities.find((entity) => entity.objectId === objectId);
+    if (!currentEntity) return;
+    const duplicateRevive = typeof currentEntity.reviveUntil === "number" && currentEntity.reviveUntil > now;
+    cancelPendingEntitySounds(objectId);
+    if (withEffect && !duplicateRevive) {
+      gameBusRef.current!.emit({ type: "entityRevived", objectId });
+    }
 
     updateWorld((current) => ({
       ...current,
-      playerHp:
-        current.playerObjectId === objectId && typeof current.playerMaxHp === "number"
-          ? Math.max(1, current.playerMaxHp)
-          : current.playerHp,
-      entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        hp: typeof entity.maxHp === "number" ? Math.max(1, entity.maxHp) : entity.hp,
-        dead: false,
-        dieStartedAt: undefined,
-        dieUntil: undefined,
-        reviveStartedAt: now,
-        reviveUntil: now + crystalReviveActionDurationMs(entity),
-      })),
+      // ObjectRevived does not carry HP; retain the last value until
+      // ObjectHealth supplies the authoritative post-revive percentage/value.
+      entities: patchEntityInList(current.entities, objectId, (entity) =>
+        applyActorRevive(entity, now, crystalReviveActionDurationMs(entity), "animated"),
+      ),
+      effects: withEffect && !duplicateRevive
+        ? appendPlayerReviveEffect(current, currentEntity, now)
+        : current.effects,
     }));
   }
 
@@ -12024,8 +12049,6 @@ export default function HomePage() {
             : isSelf && percent <= 0
               ? 0
               : current.playerHp;
-      const now = Date.now();
-
       return {
         ...current,
         playerHp: nextPlayerHp,
@@ -12047,19 +12070,7 @@ export default function HomePage() {
               : typeof entity.maxHp === "number"
                 ? entity.maxHp
                 : undefined;
-          const died = percent <= 0;
-          const revived = percent > 0 && entity.dead;
-
-          return {
-            ...entity,
-            hp: nextHp,
-            maxHp: nextMaxHp,
-            dead: died,
-            dieStartedAt: died && !entity.dead ? now : entity.dieStartedAt,
-            dieUntil: died && !entity.dead ? now + crystalDeathActionDurationMs(entity) : entity.dieUntil,
-            reviveStartedAt: revived ? now : entity.reviveStartedAt,
-            reviveUntil: revived ? now + crystalReviveActionDurationMs(entity) : entity.reviveUntil,
-          };
+          return applyActorHealth(entity, nextHp, nextMaxHp);
         }),
       };
     });
@@ -12329,6 +12340,7 @@ export default function HomePage() {
             struckUntil: entity.struckUntil,
             dieStartedAt: entity.dieStartedAt,
             dieUntil: entity.dieUntil,
+            deathHandled: entity.deathHandled,
             reviveStartedAt: entity.reviveStartedAt,
             reviveUntil: entity.reviveUntil,
           },
@@ -12371,6 +12383,7 @@ export default function HomePage() {
             typeof transient.dieUntil === "number" && transient.dieUntil > currentTime
               ? transient.dieUntil
               : undefined,
+          deathHandled: transient.deathHandled,
           reviveStartedAt:
             typeof transient.reviveUntil === "number" && transient.reviveUntil > currentTime
               ? transient.reviveStartedAt

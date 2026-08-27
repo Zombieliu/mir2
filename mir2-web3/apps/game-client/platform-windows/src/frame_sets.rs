@@ -124,15 +124,15 @@ fn build_mounted_player_catalog() -> AnimationCatalog {
         ),
         (
             AnimationAction::Die,
-            FrameDescriptor::from_crystal(416, 1, 3, 500, false),
+            FrameDescriptor::from_crystal(384, 4, 0, 100, false),
         ),
         (
             AnimationAction::Dead,
-            FrameDescriptor::from_crystal(416, 1, 3, 1000, false),
+            FrameDescriptor::from_crystal(387, 1, 3, 1000, false),
         ),
         (
             AnimationAction::Revive,
-            FrameDescriptor::from_crystal(416, 1, 3, 100, false),
+            FrameDescriptor::from_crystal(384, 4, 0, 100, true),
         ),
     ];
     for (action, descriptor) in entries {
@@ -411,6 +411,18 @@ mod tests {
         assert_eq!(
             catalog.descriptor(AnimationAction::AttackRange1),
             Some(&FrameDescriptor::from_crystal(584, 6, 0, 100, false))
+        );
+        assert_eq!(
+            catalog.descriptor(AnimationAction::Die),
+            Some(&FrameDescriptor::from_crystal(384, 4, 0, 100, false))
+        );
+        assert_eq!(
+            catalog.descriptor(AnimationAction::Dead),
+            Some(&FrameDescriptor::from_crystal(387, 1, 3, 1000, false))
+        );
+        assert_eq!(
+            catalog.descriptor(AnimationAction::Revive),
+            Some(&FrameDescriptor::from_crystal(384, 4, 0, 100, true))
         );
     }
 

@@ -1,15 +1,21 @@
 {
-  "generatedAt": "2026-07-12T23:44:17.669Z",
+  "generatedAt": "2026-08-27T18:57:08.917Z",
   "clientRoot": "E:\\mir2\\Crystal\\Build\\Client\\Debug",
   "soundDir": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound",
   "soundListPath": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound\\SoundList.lst",
-  "soundListEntryCount": 450,
-  "exportedSoundCount": 450,
+  "soundListEntryCount": 454,
+  "exportedSoundCount": 454,
   "fallbackSoundCount": 3,
   "sourceWavCount": 1607,
   "missingSoundCount": 0,
   "missingSounds": [],
   "fallbackSounds": [
+    {
+      "id": 705,
+      "fileName": "ZombieRevive.wav",
+      "fallbackSourceFileName": "64.wav",
+      "fallbackReason": "ClZombie revive clip ZombieRevive.wav is absent from the current Crystal source; nearby undead BoneFamiliar clip 64.wav keeps id 705 playable until the exact source appears."
+    },
     {
       "id": 10022,
       "fileName": "22.wav",
@@ -21,12 +27,6 @@
       "fileName": "109.wav",
       "fallbackSourceFileName": "110.wav",
       "fallbackReason": "SoundList struck clip 109.wav is absent from the current Crystal source; adjacent struck clip 110.wav keeps id 10109 playable."
-    },
-    {
-      "id": 705,
-      "fileName": "ZombieRevive.wav",
-      "fallbackSourceFileName": "64.wav",
-      "fallbackReason": "ClZombie revive clip ZombieRevive.wav is absent from the current Crystal source; nearby undead BoneFamiliar clip 64.wav keeps id 705 playable until the exact source appears."
     }
   ],
   "sounds": {
@@ -3388,6 +3388,30 @@
       "fallback": false,
       "sourceBytes": 77774
     },
+    "20081": {
+      "fileName": "M8-1.wav",
+      "path": "/original-ui/Sound/M8-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 132720
+    },
+    "20390": {
+      "fileName": "M39-0.wav",
+      "path": "/original-ui/Sound/M39-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 246912
+    },
+    "20391": {
+      "fileName": "M39-1.wav",
+      "path": "/original-ui/Sound/M39-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 525980
+    },
     "20710": {
       "fileName": "M69-0.wav",
       "path": "/original-ui/Sound/M69-0.wav",
@@ -3395,6 +3419,14 @@
       "exactSourceExists": true,
       "fallback": false,
       "sourceBytes": 152196
+    },
+    "20791": {
+      "fileName": "M79-1.wav",
+      "path": "/original-ui/Sound/M79-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 484496
     },
     "30001": {
       "fileName": "30001.wav",

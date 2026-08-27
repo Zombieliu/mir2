@@ -39,6 +39,17 @@ const FALLBACK_SOUND_FILES = new Map([
   ],
 ]);
 
+// Crystal derives magic sound ids arithmetically (20000 + Spell*10 + variant),
+// so these clips are not necessarily listed in SoundList.lst even though the
+// client invokes the numeric id directly. Keep the index and exported bytes
+// closed over every locally implemented effect/audio checkpoint.
+export const DIRECT_CRYSTAL_SOUND_ENTRIES = [
+  { id: 20081, fileName: "M8-1.wav" },
+  { id: 20390, fileName: "M39-0.wav" },
+  { id: 20391, fileName: "M39-1.wav" },
+  { id: 20791, fileName: "M79-1.wav" },
+];
+
 // Only auto-run when invoked directly (node scripts/export-crystal-sounds.mjs ...). When the
 // module is imported (e.g. by the e2e test) main() must not fire so tests can call the core
 // function with isolated paths.
@@ -101,7 +112,10 @@ export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, 
   }
 
   const sourceFiles = indexSourceWavs(soundDir);
-  const entries = parseSoundList(await readFile(soundListPath, "utf8"));
+  const entries = mergeSoundEntries(
+    parseSoundList(await readFile(soundListPath, "utf8")),
+    DIRECT_CRYSTAL_SOUND_ENTRIES,
+  );
   const sounds = {};
   const missing = [];
   const fallbackSounds = [];
@@ -193,6 +207,18 @@ export function indexSourceWavs(soundDir) {
     files.set(entry.name.toLowerCase(), path.join(soundDir, entry.name));
   }
   return files;
+}
+
+export function mergeSoundEntries(soundListEntries, directEntries) {
+  const merged = new Map();
+  for (const entry of [...soundListEntries, ...directEntries]) {
+    const existing = merged.get(entry.id);
+    if (existing && existing.fileName.toLowerCase() !== entry.fileName.toLowerCase()) {
+      throw new Error(`Crystal sound id ${entry.id} maps to both ${existing.fileName} and ${entry.fileName}`);
+    }
+    merged.set(entry.id, entry);
+  }
+  return [...merged.values()].sort((left, right) => left.id - right.id);
 }
 
 export function parseSoundList(text) {

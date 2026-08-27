@@ -8,7 +8,7 @@
 //! It never fabricates client game state and never draws a fake/fallback
 //! sprite for a missing asset - a frame whose PNG is absent yields no sprite.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::sync::{Mutex, OnceLock};
 
@@ -99,6 +99,8 @@ const FIREWALL_CAST_SOUND_CUE: &str = "FireWall.cast";
 const FIREWALL_COMPLETE_SOUND_CUE: &str = "FireWall.complete";
 const FLAMING_SWORD_SOUND_FILE: &str = "M8-1.wav";
 const FLAMING_SWORD_SOUND_CUE: &str = "FlamingSword.attack";
+const PLAYER_REVIVE_SOUND_FILE: &str = "M79-1.wav";
+const PLAYER_REVIVE_SOUND_CUE: &str = "PlayerRevive";
 const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
 const SOUL_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M64-1.wav";
@@ -331,6 +333,8 @@ struct EffectsManifest {
     #[serde(default)]
     ground_effects: Vec<EffectSpec>,
     #[serde(default)]
+    client_effects: Vec<EffectSpec>,
+    #[serde(default)]
     object_effects: Vec<EffectSpec>,
     #[serde(default)]
     map_effects: Vec<EffectSpec>,
@@ -423,8 +427,9 @@ impl EffectCatalog {
         }
         let mut map_by_name = HashMap::new();
         for entry in manifest
-            .object_effects
+            .client_effects
             .iter()
+            .chain(manifest.object_effects.iter())
             .chain(manifest.map_effects.iter())
         {
             if let Some(name) = &entry.effect {
@@ -909,6 +914,7 @@ pub(crate) fn native_effect_light_snapshots() -> Vec<NativeEffectLightSnapshot> 
 pub(crate) struct NativeEffects {
     active: Vec<EffectInstance>,
     anchor_object_ids: HashMap<String, u32>,
+    anchor_player_keys: HashSet<String>,
     zone_tiles: HashMap<u32, (i32, i32)>,
     /// The Rust simulation currently emits a compatibility ObjectProjectile
     /// immediately after some ObjectMagic packets. Crystal creates FireBall
@@ -940,6 +946,7 @@ impl Default for NativeEffects {
         Self {
             active: Vec::new(),
             anchor_object_ids: HashMap::new(),
+            anchor_player_keys: HashSet::new(),
             zone_tiles: HashMap::new(),
             local_projectile_dedupe: HashMap::new(),
             local_projectile_targets: HashMap::new(),
@@ -1116,6 +1123,7 @@ impl NativeEffects {
     fn clear_active_effects(&mut self) {
         self.active.clear();
         self.anchor_object_ids.clear();
+        self.anchor_player_keys.clear();
         self.local_projectile_dedupe.clear();
         self.local_projectile_targets.clear();
         self.ready_sounds.clear();
@@ -1125,6 +1133,12 @@ impl NativeEffects {
     fn refresh_anchor_tiles(&mut self) {
         let now_ms = self.now_ms;
         let zone_tiles = &self.zone_tiles;
+        for instance in &mut self.active {
+            if self.anchor_player_keys.contains(&instance.key) {
+                instance.tile_x = self.player_x;
+                instance.tile_y = self.player_y;
+            }
+        }
         let mut anchors_to_insert = Vec::new();
         let mut launch_impact_sounds = Vec::new();
         for instance in &mut self.active {
@@ -1297,9 +1311,84 @@ impl NativeEffects {
             "ObjectEffect" => self.apply_object_effect(payload, zone_tiles, provenance),
             "MapEffect" => self.apply_map_effect(payload, provenance),
             "ObjectSpell" => self.apply_object_spell(payload, zone_tiles, provenance),
+            "Revived" => self.apply_player_revived(payload, zone_tiles, provenance, true),
+            "ObjectRevived" => self.apply_player_revived(payload, zone_tiles, provenance, false),
             "ObjectRemove" | "ObjectHide" => self.apply_object_remove(payload),
             _ => {}
         }
+    }
+
+    fn apply_player_revived(
+        &mut self,
+        payload: &Value,
+        zone_tiles: &HashMap<u32, (i32, i32)>,
+        provenance: &EffectProvenance,
+        self_player: bool,
+    ) {
+        if !self_player
+            && !payload
+                .get("effect")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        {
+            return;
+        }
+        let (key, tile_x, tile_y, object_id) = if self_player {
+            (
+                "player-revive-self".to_owned(),
+                self.player_x,
+                self.player_y,
+                None,
+            )
+        } else {
+            let Some(object_id) = payload
+                .get("objectId")
+                .and_then(Value::as_u64)
+                .and_then(|value| u32::try_from(value).ok())
+            else {
+                return;
+            };
+            let Some((x, y)) = zone_tiles.get(&object_id).copied() else {
+                return;
+            };
+            (format!("player-revive-{object_id}"), x, y, Some(object_id))
+        };
+
+        self.queue_immediate_sound(
+            provenance,
+            PLAYER_REVIVE_SOUND_CUE,
+            PLAYER_REVIVE_SOUND_FILE,
+        );
+        let Some(animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation("PlayerRevive", 0))
+        else {
+            return;
+        };
+
+        self.active.retain(|instance| instance.key != key);
+        self.anchor_object_ids.remove(&key);
+        self.anchor_player_keys.remove(&key);
+        if let Some(object_id) = object_id {
+            self.anchor_object_ids.insert(key.clone(), object_id);
+        } else {
+            self.anchor_player_keys.insert(key.clone());
+        }
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::Impact,
+            tile_x,
+            tile_y,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: self.now_ms,
+            start_at: self.now_ms,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
     }
 
     fn apply_object_attack(&mut self, payload: &Value, provenance: &EffectProvenance) {
@@ -2050,6 +2139,8 @@ impl NativeEffects {
             .collect::<Vec<_>>();
         self.anchor_object_ids
             .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.anchor_player_keys
+            .retain(|key| live_keys.contains(&key.as_str()));
         self.local_projectile_targets
             .retain(|key, _| live_keys.contains(&key.as_str()));
         self.pending_sounds
@@ -2344,6 +2435,109 @@ mod tests {
         let catalog = EffectCatalog::load().expect("manifest should load");
         assert!(!catalog.spell_by_name.is_empty());
         assert!(!catalog.libraries.is_empty());
+    }
+
+    #[test]
+    fn player_revive_catalog_is_exact_magic2_twenty_frame_sequence() {
+        let catalog = EffectCatalog::load().expect("manifest should load");
+        let animation = catalog
+            .map_animation("PlayerRevive", 0)
+            .expect("PlayerRevive animation");
+        assert_eq!(animation.kind, "target");
+        assert_eq!(animation.frames.len(), 20);
+        assert_eq!(animation.interval, 100);
+        assert_eq!(animation.duration_ms, 2_000);
+        assert_eq!(animation.light, Some(6));
+        assert!(animation.frames[0].path.ends_with("/Magic2/1220.png"));
+        assert!(animation.frames[19].path.ends_with("/Magic2/1239.png"));
+    }
+
+    #[test]
+    fn player_revive_effect_and_audio_follow_self_remote_and_effect_gates() {
+        let mut self_fx = NativeEffects::default();
+        self_fx.observe(
+            1_000,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 1,
+                generation: 0,
+                packet: "Revived".to_owned(),
+                payload: json!({"location": {"x": 288, "y": 616}}),
+            }],
+            &HashMap::new(),
+        );
+        assert_eq!(self_fx.active.len(), 1);
+        assert_eq!(self_fx.active[0].key, "player-revive-self");
+        assert_eq!(
+            (self_fx.active[0].tile_x, self_fx.active[0].tile_y),
+            (288, 616)
+        );
+        assert!(self_fx.anchor_player_keys.contains("player-revive-self"));
+        let self_audio = self_fx.take_due_sound_events(1_000);
+        assert_eq!(self_audio.len(), 1);
+        assert_eq!(self_audio[0].cue, PLAYER_REVIVE_SOUND_CUE);
+        assert_eq!(self_audio[0].file_name, PLAYER_REVIVE_SOUND_FILE);
+
+        self_fx.observe(1_100, 289, 617, &[], &HashMap::new());
+        assert_eq!(
+            (self_fx.active[0].tile_x, self_fx.active[0].tile_y),
+            (289, 617)
+        );
+        let _ = self_fx.tick(3_000);
+        assert!(self_fx.active.is_empty());
+        assert!(self_fx.anchor_player_keys.is_empty());
+
+        let zone = HashMap::from([(2_001_u32, (300, 610))]);
+        let mut remote_fx = NativeEffects::default();
+        remote_fx.observe(
+            2_000,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 1,
+                generation: 0,
+                packet: "ObjectRevived".to_owned(),
+                payload: json!({"objectId": 2001, "effect": false}),
+            }],
+            &zone,
+        );
+        assert!(remote_fx.active.is_empty());
+        assert!(remote_fx.take_due_sound_events(2_000).is_empty());
+
+        remote_fx.observe(
+            2_100,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 0,
+                packet: "ObjectRevived".to_owned(),
+                payload: json!({"objectId": 2001, "effect": true}),
+            }],
+            &zone,
+        );
+        assert_eq!(remote_fx.active.len(), 1);
+        assert_eq!(remote_fx.active[0].key, "player-revive-2001");
+        assert_eq!(
+            (remote_fx.active[0].tile_x, remote_fx.active[0].tile_y),
+            (300, 610)
+        );
+        assert_eq!(remote_fx.take_due_sound_events(2_100).len(), 1);
+
+        remote_fx.observe(
+            2_200,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 3,
+                generation: 0,
+                packet: "ObjectRemove".to_owned(),
+                payload: json!({"objectId": 2001}),
+            }],
+            &zone,
+        );
+        assert!(remote_fx.active.is_empty());
     }
 
     #[test]

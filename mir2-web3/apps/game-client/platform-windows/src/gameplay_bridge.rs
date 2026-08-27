@@ -570,7 +570,12 @@ impl NativeGameplayAdapter {
                 }
                 "Revived" => {
                     self.authoritative_player_dead = Some(false);
-                    self.authoritative_player_animation = Some(self.next_animation_hint("revive"));
+                    // Crystal's local Revived handler calls User.SetAction()
+                    // immediately; only ObjectRevived queues the reverse
+                    // four-frame revive action for a remote actor.
+                    self.authoritative_player_animation =
+                        Some(self.next_animation_hint("standing"));
+                    self.record_effect("Revived", payload);
                     true
                 }
                 "ObjectMonster" | "NewMonsterInfo" => self.upsert_zone_entity(payload, "monster"),
@@ -637,7 +642,11 @@ impl NativeGameplayAdapter {
                 }
                 "ObjectHealth" => self.patch_zone_entity_health(payload),
                 "ObjectDied" => self.patch_zone_entity_death(payload, true),
-                "ObjectRevived" => self.patch_zone_entity_death(payload, false),
+                "ObjectRevived" => {
+                    let changed = self.patch_zone_entity_death(payload, false);
+                    self.record_effect("ObjectRevived", payload);
+                    changed
+                }
                 "ObjectHide" => {
                     let Some(object_id) = packet_object_id(payload) else {
                         return false;
@@ -4039,7 +4048,7 @@ mod tests {
     }
 
     #[test]
-    fn self_run_death_and_revive_keep_distinct_animation_sequences() {
+    fn self_run_death_and_revive_keep_crystal_local_action_semantics() {
         let mut adapter = NativeGameplayAdapter::default();
         adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
             x: 288,
@@ -4074,9 +4083,36 @@ mod tests {
         adapter.apply_authoritative_overlay(&mut revived);
         assert_eq!(
             revived["entities"][0]["_nativeAnimationAction"],
-            json!("revive")
+            json!("standing")
         );
         assert_eq!(revived["entities"][0]["_nativeAnimationSequence"], json!(3));
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "Revived");
+        assert_eq!(adapter.effect_events[0].payload["location"]["x"], 288);
+    }
+
+    #[test]
+    fn remote_revive_always_animates_but_preserves_effect_gate_for_native_vfx() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectPlayer".to_owned(),
+            payload: json!({
+                "objectId": 2001,
+                "location": {"x": 289, "y": 616},
+                "direction": "Down",
+                "dead": true
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRevived".to_owned(),
+            payload: json!({"objectId": 2001, "effect": false}),
+        }));
+        let remote = adapter.zone_entities.get(&2001).expect("remote player");
+        assert_eq!(remote.get("dead"), Some(&json!(false)));
+        assert_eq!(remote.get("_nativeAnimationAction"), Some(&json!("revive")));
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectRevived");
+        assert_eq!(adapter.effect_events[0].payload["effect"], false);
     }
 
     #[test]

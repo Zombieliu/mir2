@@ -3133,6 +3133,27 @@
       }
     }
   ],
+  "client_effects": [
+    {
+      "effect": "PlayerRevive",
+      "kind": "target",
+      "library": "Magic2",
+      "base": 1220,
+      "count": 20,
+      "interval": 100,
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived",
+        "symbol": "PlayerRevive"
+      }
+    }
+  ],
   "object_effects": [
     {
       "effect": "Bleeding",

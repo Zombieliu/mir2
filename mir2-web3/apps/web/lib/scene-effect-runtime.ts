@@ -41,7 +41,7 @@ export function crystalSceneEffectLayerOffset(
   source: DisplaySceneEffect["source"],
   mask = false,
 ): number {
-  const base = source === "spell" || source === "attackOverlay"
+  const base = source === "spell" || source === "attackOverlay" || source === "actorEffect"
     ? CRYSTAL_TRANSIENT_SPELL_LAYER_OFFSET
     : CRYSTAL_GROUND_EFFECT_LAYER_OFFSET;
   return base + (mask ? 1 : 0);

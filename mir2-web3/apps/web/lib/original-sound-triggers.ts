@@ -25,23 +25,37 @@ const MONSTER_SWING_OFFSET = 4;
 const MONSTER_DIE_OFFSET = 3;
 const FLAMING_SWORD_SPELL_ID = 8;
 const FLAMING_SWORD_ATTACK_SOUND_ID = 20081;
-const pendingEntityAttackSoundTimers = new Map<ReturnType<typeof setTimeout>, string | null>();
+type PendingEntitySound = {
+  objectId: string | null;
+  kind: "attack" | "death";
+};
+const pendingEntitySoundTimers = new Map<ReturnType<typeof setTimeout>, PendingEntitySound>();
+
+/** Cancel every delayed combat cue owned by an actor/session lifetime. */
+export function cancelPendingEntitySounds(objectId?: string | null): void {
+  for (const [timer, pending] of pendingEntitySoundTimers) {
+    if (objectId !== undefined && pending.objectId !== objectId) continue;
+    globalThis.clearTimeout(timer);
+    pendingEntitySoundTimers.delete(timer);
+  }
+}
 
 /** Cancel delayed animation-frame attack sounds when their actor/session lifetime ends. */
 export function cancelPendingEntityAttackSounds(objectId?: string | null): void {
-  for (const [timer, timerObjectId] of pendingEntityAttackSoundTimers) {
-    if (objectId !== undefined && timerObjectId !== objectId) continue;
+  for (const [timer, pending] of pendingEntitySoundTimers) {
+    if (pending.kind !== "attack") continue;
+    if (objectId !== undefined && pending.objectId !== objectId) continue;
     globalThis.clearTimeout(timer);
-    pendingEntityAttackSoundTimers.delete(timer);
+    pendingEntitySoundTimers.delete(timer);
   }
 }
 
 function scheduleEntityAttackSound(soundId: number, delayMs: number, objectId?: string | null): void {
   const timer = globalThis.setTimeout(() => {
-    pendingEntityAttackSoundTimers.delete(timer);
+    pendingEntitySoundTimers.delete(timer);
     playOriginalSoundId(soundId);
   }, delayMs);
-  pendingEntityAttackSoundTimers.set(timer, objectId ?? null);
+  pendingEntitySoundTimers.set(timer, { objectId: objectId ?? null, kind: "attack" });
 }
 
 export type SoundEntityKind = "selfPlayer" | "player" | "monster" | "npc";
@@ -49,8 +63,13 @@ export type SoundEntityKind = "selfPlayer" | "player" | "monster" | "npc";
 /** The minimal entity shape the sound triggers read (a structural subset of WorldEntity). */
 export type SoundEntityRef = {
   kind: SoundEntityKind;
-  sprite?: { bodyLibrary?: string | null } | null;
+  sprite?: {
+    bodyLibrary?: string | null;
+    weaponLibrary?: string | null;
+    mountLibrary?: string | null;
+  } | null;
   genderKey?: string | null;
+  classKey?: string | null;
 };
 
 function isPlayer(kind: SoundEntityKind): boolean {
@@ -77,6 +96,39 @@ export function monsterImageFromBodyLibrary(bodyLibrary: string | null | undefin
 function monsterBaseSound(entity: SoundEntityRef): number | null {
   const image = monsterImageFromBodyLibrary(entity.sprite?.bodyLibrary);
   return image === null ? null : image * 10;
+}
+
+function playerLibraryIndex(library: string | null | undefined): number | null {
+  const match = /\/0*(\d+)(?:\D|$)/.exec(String(library ?? ""));
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isInteger(value) ? value : null;
+}
+
+function playerWeaponIndex(entity: SoundEntityRef | null | undefined): number {
+  if (!entity || !isPlayer(entity.kind)) return -2;
+  const weapon = playerLibraryIndex(entity.sprite?.weaponLibrary) ?? -1;
+  return String(entity.classKey ?? "").toLowerCase() === "assassin" && weapon !== -1 ? 1 : weapon;
+}
+
+function playerArmourSoundOffset(entity: SoundEntityRef): number {
+  if (String(entity.classKey ?? "").toLowerCase() === "assassin") return 0;
+  const armour = playerLibraryIndex(entity.sprite?.bodyLibrary);
+  return armour === 3 || armour === 6 || armour === 9 ? 10 : 0;
+}
+
+function playerStruckBodySoundId(target: SoundEntityRef, attacker: SoundEntityRef | null | undefined): number | null {
+  const weapon = playerWeaponIndex(attacker);
+  const add = playerArmourSoundOffset(target);
+  if ([0, 1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 15, 18, 19, 20, 23, 24, 25, 26, 28, 29, 31, 32, 33, 34, 35, 37, 40, 41].includes(weapon)) {
+    return ORIGINAL_SOUND_IDS.struckBodySword + add;
+  }
+  if ([4, 14, 16, 38].includes(weapon)) return ORIGINAL_SOUND_IDS.struckBodyAxe + add;
+  if ([6, 10, 17, 21, 22, 27, 30, 36, 39].includes(weapon)) {
+    return ORIGINAL_SOUND_IDS.struckBodyLongStick + add;
+  }
+  if (weapon === -1) return ORIGINAL_SOUND_IDS.struckBodyFist + add;
+  return null;
 }
 
 /** Attack swing / roar for an object that just attacked (ObjectAttack / ObjectRangeAttack). */
@@ -111,18 +163,43 @@ export function playEntityAttackSound(
 }
 
 /** Hit reaction for an object that was just struck (ObjectStruck / Struck). */
-export function playEntityStruckSound(entity: SoundEntityRef | null | undefined): void {
-  if (!entity) {
+export function playEntityStruckSound(
+  target: SoundEntityRef | null | undefined,
+  attacker?: SoundEntityRef | null,
+): void {
+  if (!target) {
     return;
   }
-  if (entity.kind === "monster") {
+  if (target.kind === "monster") {
     // MonsterObject.PlayStruckSound: weapon clang (default StruckSword) — always present.
     playOriginalSoundId(ORIGINAL_SOUND_IDS.struckSword);
     return;
   }
-  if (isPlayer(entity.kind)) {
-    // PlayerObject.PlayStruckSound default: flesh hit on the body (StruckBodySword).
-    playOriginalSoundId(ORIGINAL_SOUND_IDS.struckBodySword);
+  if (isPlayer(target.kind)) {
+    // RidingMount returns from PlayerObject.PlayStruckSound before the normal
+    // weapon/armour body-hit switch. PlayFlinchSound is called separately and
+    // still follows the mount cue.
+    if (target.sprite?.mountLibrary) {
+      const mountType = playerLibraryIndex(target.sprite.mountLibrary);
+      if (mountType !== null && mountType < 7) {
+        playOriginalSoundId(
+          Math.random() < 0.5
+            ? ORIGINAL_SOUND_IDS.mountStruckTiger1
+            : ORIGINAL_SOUND_IDS.mountStruckTiger2,
+        );
+      } else if (mountType !== null && mountType < 12) {
+        playOriginalSoundId(ORIGINAL_SOUND_IDS.mountStruckWolf);
+      }
+      playOriginalSoundId(isFemale(target) ? ORIGINAL_SOUND_IDS.femaleFlinch : ORIGINAL_SOUND_IDS.maleFlinch);
+      return;
+    }
+    // PlayerObject.PlayStruckSound resolves the attacking player's weapon and
+    // the target's armour class. A non-player/unknown attacker leaves
+    // StruckWeapon=-2 and intentionally has no body-hit sample.
+    const bodySound = playerStruckBodySoundId(target, attacker);
+    if (bodySound !== null) playOriginalSoundId(bodySound);
+    // PlayerObject always follows PlayStruckSound with PlayFlinchSound.
+    playOriginalSoundId(isFemale(target) ? ORIGINAL_SOUND_IDS.femaleFlinch : ORIGINAL_SOUND_IDS.maleFlinch);
   }
 }
 
@@ -141,6 +218,19 @@ export function playEntityDieSound(entity: SoundEntityRef | null | undefined): v
   if (isPlayer(entity.kind)) {
     playOriginalSoundId(isFemale(entity) ? ORIGINAL_SOUND_IDS.femaleDie : ORIGINAL_SOUND_IDS.maleDie);
   }
+}
+
+/** Crystal PlayerObject plays the death cry on Die frame 1 (100 ms). */
+export function scheduleEntityDieSound(
+  entity: SoundEntityRef | null | undefined,
+  objectId?: string | null,
+): void {
+  if (!entity) return;
+  const timer = globalThis.setTimeout(() => {
+    pendingEntitySoundTimers.delete(timer);
+    playEntityDieSound(entity);
+  }, 100);
+  pendingEntitySoundTimers.set(timer, { objectId: objectId ?? null, kind: "death" });
 }
 
 // PlayerObject.cs / MonsterObject.cs magic: SoundManager.PlaySound(20000 + (ushort)Spell * 10 [+ variant]).

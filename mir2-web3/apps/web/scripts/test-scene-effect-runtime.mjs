@@ -56,6 +56,21 @@ const flamingSwordAnimation = (direction) => ({
   offset: { x: 0, y: 0 },
   durationMs: 600,
 });
+const playerReviveAnimation = {
+  ...animation,
+  name: "PlayerRevive",
+  kind: "target",
+  frames: Array.from({ length: 20 }, (_, frame) => ({
+    path: `/fx/revive-${1220 + frame}.png`,
+    width: 64,
+    height: 72,
+    x: -24,
+    y: -52,
+  })),
+  interval: 100,
+  light: 6,
+  durationMs: 2_000,
+};
 const crystal = {
   // Spell 12 and SpellEffect 12 deliberately have different names. The scene
   // runtime must resolve spell packets through the Spell enum, not Effect.
@@ -79,7 +94,11 @@ const crystal = {
     name === "FlamingSword" && direction >= 0 && direction < 8
       ? flamingSwordAnimation(direction)
       : null,
-  resolveMapEffect: (_assets, name) => name === "FireBall" ? { ...animation, repeat: true } : null,
+  resolveMapEffect: (_assets, name) => {
+    if (name === "FireBall") return { ...animation, repeat: true };
+    if (name === "PlayerRevive") return playerReviveAnimation;
+    return null;
+  },
   resolveMapEffectByNumber: () => null,
   effectFrameAt: (instance, now) => {
     let index = Math.floor((now - instance.startedAt) / instance.animation.interval);
@@ -168,6 +187,11 @@ assert.equal(
   90,
   "attacker-bound overlays remain above the actor layer",
 );
+assert.equal(
+  runtime.crystalSceneEffectLayerOffset("actorEffect"),
+  90,
+  "actor-bound revive effects remain above the actor layer",
+);
 assert.deepEqual(
   runtime.sceneEffectAnimationAssetUrls({
     ...animation,
@@ -236,6 +260,26 @@ assert.equal(
   runtime.collectResolvedSceneEffectFrames({}, [base, { ...base, key: "unknown", spellOrEffect: 999 }], 1_000).length,
   1,
 );
+
+const reviveEffect = {
+  ...base,
+  key: "crystal-player-revive:42",
+  source: "actorEffect",
+  spellOrEffect: "PlayerRevive",
+  objectId: "42",
+  direction: 0,
+  startedAt: 5_000,
+  expiresAt: 7_000,
+};
+assert.equal(
+  runtime.resolveSceneEffectFrame({}, reviveEffect, 5_000).frame.path,
+  "/fx/revive-1220.png",
+);
+assert.equal(
+  runtime.resolveSceneEffectFrame({}, reviveEffect, 6_999).frame.path,
+  "/fx/revive-1239.png",
+);
+assert.equal(runtime.resolveSceneEffectFrame({}, reviveEffect, 7_000), null);
 
 for (const [direction, directionName] of [
   [0, "Up"],
