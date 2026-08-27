@@ -22,6 +22,12 @@ const PACKAGED_MUSIC_FALLBACK_FILE: &str = "Login2.wav";
 const SOUND_FILE: &str = "Select2.wav";
 const MAX_PENDING_SOUND_ENTITIES: usize = 8;
 const MAX_PENDING_GAMEPLAY_SOUND_EVENTS: usize = 32;
+const MAX_PENDING_UI_SOUND_EVENTS: usize = 8;
+
+/// Crystal `SoundList.ButtonA = 10103`, mapped by `SoundList.lst` to 103.wav.
+/// UI cues stay separate from packet-authoritative gameplay audio so a local
+/// pointer edge can never manufacture or deduplicate a gameplay packet cue.
+pub const NATIVE_UI_BUTTON_A_FILE: &str = "103.wav";
 
 /// Gameplay clips are an internal, fail-closed allowlist. Packet payloads never
 /// become file paths: the platform effect adapter can only request a cue listed
@@ -64,6 +70,49 @@ pub struct NativeGameplaySoundEvent {
     pub sequence: u64,
     pub cue: String,
     pub file_name: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NativeUiSound {
+    ButtonA,
+}
+
+impl NativeUiSound {
+    fn file_name(self) -> &'static str {
+        match self {
+            Self::ButtonA => NATIVE_UI_BUTTON_A_FILE,
+        }
+    }
+}
+
+/// Bounded local UI queue. Its typed enum is the allowlist: callers cannot
+/// turn control text or network data into an asset path.
+#[derive(Debug, Default, Resource)]
+pub struct NativeUiAudioQueue {
+    events: VecDeque<NativeUiSound>,
+}
+
+impl NativeUiAudioQueue {
+    pub fn push(&mut self, sound: NativeUiSound) {
+        if self.events.len() >= MAX_PENDING_UI_SOUND_EVENTS {
+            self.events.pop_front();
+        }
+        self.events.push_back(sound);
+    }
+
+    pub(crate) fn drain_bounded(&mut self, max: usize) -> Vec<NativeUiSound> {
+        let count = max.min(self.events.len());
+        self.events.drain(..count).collect()
+    }
+
+    fn clear_pending(&mut self) {
+        self.events.clear();
+    }
+
+    #[cfg(test)]
+    pub(crate) fn len(&self) -> usize {
+        self.events.len()
+    }
 }
 
 /// Bounded cross-adapter queue for packet-authoritative gameplay sounds.
@@ -126,6 +175,8 @@ pub struct NativeAudioRuntime {
     pub sound_source: Option<bevy::asset::Handle<AudioSource>>,
     pub gameplay_paths: HashMap<String, PathBuf>,
     pub gameplay_sources: HashMap<String, bevy::asset::Handle<AudioSource>>,
+    pub ui_paths: HashMap<String, PathBuf>,
+    pub ui_sources: HashMap<String, bevy::asset::Handle<AudioSource>>,
     pub last_audio_revision: u64,
     pub source_available: bool,
     initialized: bool,
@@ -136,6 +187,12 @@ pub(crate) struct NativeMusicTrack;
 
 #[derive(Component)]
 pub struct NativeSoundEffectTrack;
+
+#[derive(Component)]
+pub struct NativeGameplaySoundEffectTrack;
+
+#[derive(Component)]
+pub struct NativeUiSoundEffectTrack;
 
 /// Load the existing Crystal WAVs and start the persisted music setting.
 pub(crate) fn initialize_native_audio(
@@ -172,9 +229,21 @@ pub(crate) fn initialize_native_audio(
                 .insert((*file_name).to_owned(), source);
         }
     }
+    runtime.ui_paths.clear();
+    runtime.ui_sources.clear();
+    let (path, source) = load_first_valid_wav(&[NATIVE_UI_BUTTON_A_FILE], &mut sources);
+    if let (Some(path), Some(source)) = (path, source) {
+        runtime
+            .ui_paths
+            .insert(NATIVE_UI_BUTTON_A_FILE.to_owned(), path);
+        runtime
+            .ui_sources
+            .insert(NATIVE_UI_BUTTON_A_FILE.to_owned(), source);
+    }
     runtime.source_available = runtime.music_source.is_some()
         || runtime.sound_source.is_some()
-        || !runtime.gameplay_sources.is_empty();
+        || !runtime.gameplay_sources.is_empty()
+        || !runtime.ui_sources.is_empty();
     options.audio.audible_backend = runtime.source_available;
 
     if let (Some(source), true) = (runtime.music_source.clone(), options.audio.music_enabled) {
@@ -255,7 +324,7 @@ pub fn sync_native_gameplay_audio(
     options: Res<OptionsRuntime>,
     runtime: Res<NativeAudioRuntime>,
     mut queue: ResMut<NativeGameplayAudioQueue>,
-    sound_entities: Query<Entity, bevy::ecs::query::With<NativeSoundEffectTrack>>,
+    sound_entities: Query<Entity, bevy::ecs::query::With<NativeGameplaySoundEffectTrack>>,
 ) {
     if !options.audio.sound_enabled || options.audio.sound_volume == 0 {
         queue.clear_pending();
@@ -275,7 +344,38 @@ pub fn sync_native_gameplay_audio(
         commands.entity(entity).despawn();
     }
     for source in trigger_sources {
-        spawn_sound_effect(&mut commands, source, options.audio.sound_volume);
+        spawn_gameplay_sound_effect(&mut commands, source, options.audio.sound_volume);
+    }
+}
+
+/// Play bounded local UI cues. Producers enqueue typed cues only on real input
+/// edges; missing files are dropped without falling back to another sound.
+pub(crate) fn sync_native_ui_audio(
+    mut commands: Commands,
+    options: Res<OptionsRuntime>,
+    runtime: Res<NativeAudioRuntime>,
+    mut queue: ResMut<NativeUiAudioQueue>,
+    sound_entities: Query<Entity, bevy::ecs::query::With<NativeUiSoundEffectTrack>>,
+) {
+    if !options.audio.sound_enabled || options.audio.sound_volume == 0 {
+        queue.clear_pending();
+        for entity in sound_entities.iter() {
+            commands.entity(entity).despawn();
+        }
+        return;
+    }
+
+    let trigger_sources = queue
+        .drain_bounded(MAX_PENDING_SOUND_ENTITIES)
+        .into_iter()
+        .filter_map(|sound| runtime.ui_sources.get(sound.file_name()).cloned())
+        .collect::<Vec<_>>();
+    let trigger_count = trigger_sources.len();
+    for entity in sound_entities.iter().take(trigger_count) {
+        commands.entity(entity).despawn();
+    }
+    for source in trigger_sources {
+        spawn_ui_sound_effect(&mut commands, source, options.audio.sound_volume);
     }
 }
 
@@ -294,6 +394,32 @@ fn spawn_sound_effect(
 ) {
     commands.spawn((
         NativeSoundEffectTrack,
+        AudioPlayer::new(source),
+        PlaybackSettings::DESPAWN.with_volume(sound_volume(volume)),
+    ));
+}
+
+fn spawn_gameplay_sound_effect(
+    commands: &mut Commands,
+    source: bevy::asset::Handle<AudioSource>,
+    volume: u8,
+) {
+    commands.spawn((
+        NativeSoundEffectTrack,
+        NativeGameplaySoundEffectTrack,
+        AudioPlayer::new(source),
+        PlaybackSettings::DESPAWN.with_volume(sound_volume(volume)),
+    ));
+}
+
+fn spawn_ui_sound_effect(
+    commands: &mut Commands,
+    source: bevy::asset::Handle<AudioSource>,
+    volume: u8,
+) {
+    commands.spawn((
+        NativeSoundEffectTrack,
+        NativeUiSoundEffectTrack,
         AudioPlayer::new(source),
         PlaybackSettings::DESPAWN.with_volume(sound_volume(volume)),
     ));
@@ -524,13 +650,15 @@ mod tests {
             .init_resource::<OptionsRuntime>()
             .init_resource::<NativeAudioRuntime>()
             .init_resource::<NativeGameplayAudioQueue>()
+            .init_resource::<NativeUiAudioQueue>()
             .init_resource::<Assets<AudioSource>>()
             .add_systems(Update, crate::options_effects::consume_options_effects)
             .add_systems(
                 Update,
                 sync_native_audio.after(crate::options_effects::consume_options_effects),
             )
-            .add_systems(Update, sync_native_gameplay_audio.after(sync_native_audio));
+            .add_systems(Update, sync_native_ui_audio.after(sync_native_audio))
+            .add_systems(Update, sync_native_gameplay_audio.after(sync_native_ui_audio));
         app
     }
 
@@ -934,6 +1062,145 @@ mod tests {
                 file_name: file_name.to_owned(),
             }));
         }
+    }
+
+    #[test]
+    fn ui_button_a_queue_is_typed_bounded_and_not_gameplay_audio() {
+        let mut queue = NativeUiAudioQueue::default();
+        for _ in 0..(MAX_PENDING_UI_SOUND_EVENTS + 3) {
+            queue.push(NativeUiSound::ButtonA);
+        }
+        assert_eq!(queue.len(), MAX_PENDING_UI_SOUND_EVENTS);
+        assert_eq!(
+            queue.drain_bounded(MAX_PENDING_UI_SOUND_EVENTS + 1),
+            vec![NativeUiSound::ButtonA; MAX_PENDING_UI_SOUND_EVENTS]
+        );
+
+        let mut gameplay = NativeGameplayAudioQueue::default();
+        assert!(!gameplay.push(NativeGameplaySoundEvent {
+            generation: 1,
+            sequence: 1,
+            cue: "ui.ButtonA".to_owned(),
+            file_name: NATIVE_UI_BUTTON_A_FILE.to_owned(),
+        }));
+        assert_eq!(gameplay.len(), 0);
+    }
+
+    #[test]
+    fn ui_button_a_uses_only_its_loaded_handle_and_disabled_audio_drops_pending() {
+        let mut app = app();
+        let source = bevy::asset::Handle::<AudioSource>::default();
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .ui_sources
+            .insert(NATIVE_UI_BUTTON_A_FILE.to_owned(), source);
+        {
+            let audio = &mut app.world_mut().resource_mut::<OptionsRuntime>().audio;
+            audio.sound_enabled = true;
+            audio.sound_volume = 50;
+        }
+        app.world_mut()
+            .resource_mut::<NativeUiAudioQueue>()
+            .push(NativeUiSound::ButtonA);
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 1);
+        assert_eq!(app.world().resource::<NativeUiAudioQueue>().len(), 0);
+
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_enabled = false;
+        app.world_mut()
+            .resource_mut::<NativeUiAudioQueue>()
+            .push(NativeUiSound::ButtonA);
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 0);
+        assert_eq!(app.world().resource::<NativeUiAudioQueue>().len(), 0);
+
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_enabled = true;
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .ui_sources
+            .clear();
+        app.world_mut()
+            .resource_mut::<NativeUiAudioQueue>()
+            .push(NativeUiSound::ButtonA);
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 0, "missing 103.wav has no fallback");
+        assert_eq!(app.world().resource::<NativeUiAudioQueue>().len(), 0);
+
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .ui_sources
+            .insert(
+                NATIVE_UI_BUTTON_A_FILE.to_owned(),
+                bevy::asset::Handle::<AudioSource>::default(),
+            );
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_volume = 0;
+        app.world_mut()
+            .resource_mut::<NativeUiAudioQueue>()
+            .push(NativeUiSound::ButtonA);
+        app.update();
+        assert_eq!(count_sound_entities(&mut app), 0);
+        assert_eq!(app.world().resource::<NativeUiAudioQueue>().len(), 0);
+    }
+
+    #[test]
+    fn same_frame_ui_and_gameplay_sounds_keep_independent_players() {
+        let mut app = app();
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .ui_sources
+            .insert(
+                NATIVE_UI_BUTTON_A_FILE.to_owned(),
+                bevy::asset::Handle::<AudioSource>::default(),
+            );
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .gameplay_sources
+            .insert(
+                "M40-0.wav".to_owned(),
+                bevy::asset::Handle::<AudioSource>::default(),
+            );
+        {
+            let audio = &mut app.world_mut().resource_mut::<OptionsRuntime>().audio;
+            audio.sound_enabled = true;
+            audio.sound_volume = 50;
+        }
+        app.world_mut()
+            .resource_mut::<NativeUiAudioQueue>()
+            .push(NativeUiSound::ButtonA);
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeGameplayAudioQueue>()
+            .push(NativeGameplaySoundEvent {
+                generation: 3,
+                sequence: 1,
+                cue: "Lightning.complete".to_owned(),
+                file_name: "M40-0.wav".to_owned(),
+            }));
+
+        app.update();
+
+        let ui_count = app
+            .world_mut()
+            .query_filtered::<Entity, bevy::ecs::query::With<NativeUiSoundEffectTrack>>()
+            .iter(app.world())
+            .count();
+        let gameplay_count = app
+            .world_mut()
+            .query_filtered::<Entity, bevy::ecs::query::With<NativeGameplaySoundEffectTrack>>()
+            .iter(app.world())
+            .count();
+        assert_eq!(ui_count, 1);
+        assert_eq!(gameplay_count, 1);
+        assert_eq!(count_sound_entities(&mut app), 2);
     }
 
     #[test]

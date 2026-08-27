@@ -1723,6 +1723,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<crate::options_effects::OptionsRuntime>()
             .init_resource::<crate::audio::NativeAudioRuntime>()
             .init_resource::<crate::audio::NativeGameplayAudioQueue>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(
                 Startup,
@@ -1758,6 +1759,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
+                    crate::audio::sync_native_ui_audio,
                     process_overlay_keyboard,
                     process_overlay_buttons,
                     consume_exit_application,
@@ -2197,6 +2199,7 @@ fn consume_hud_buttons(
     shell: Option<Res<NativeShellModel>>,
     inventory: Res<InventoryModel>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
+    mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
 ) {
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame) {
         return;
@@ -2207,6 +2210,10 @@ fn consume_hud_buttons(
         }
         match action {
             CrystalHudAction::Inventory => {
+                // Crystal MirControl.OnMouseClick plays ButtonA before the
+                // click callback. Preserve that event order in the local
+                // queue; keyboard inventory toggles do not pass this branch.
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 state.toggle_inventory();
                 if !state.inventory_open() {
                     state.inspect = None;
@@ -8891,6 +8898,80 @@ mod tests {
     use crate::shop::ShopGood;
     use bevy::asset::{AssetApp, AssetPlugin};
     use bevy::input::keyboard::Key;
+
+    #[test]
+    fn inventory_hud_pointer_edges_enqueue_one_crystal_button_a_sound() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, consume_hud_buttons);
+
+        let button = app
+            .world_mut()
+            .spawn((Interaction::None, CrystalHudAction::Inventory))
+            .id();
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+
+        // Changed<Interaction> consumes the pointer edge, never the held state.
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonA]
+        );
+
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        app.world_mut()
+            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .drain_bounded(8);
+
+        // A stale press outside InGame is neither a click nor a sound.
+        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::Login;
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+
+        // Keyboard inventory toggles call the state directly and never enter
+        // the HUD pointer producer.
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+    }
 
     #[test]
     fn compact_labels_use_supported_ascii_and_bag_cells_hide_durability() {
