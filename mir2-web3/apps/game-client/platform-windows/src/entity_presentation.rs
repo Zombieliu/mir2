@@ -9,7 +9,8 @@ use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::{Res, ResMut, Resource, Time};
 use mir2_bevy_runtime::entity_animation::{
-    AnimationAction, AnimationEvent, AnimationWorld, Direction, EntityKind, TransitionReason,
+    AnimationAction, AnimationCatalog, AnimationEvent, AnimationWorld, Direction, EntityKind,
+    TransitionReason,
 };
 use serde_json::Value;
 
@@ -66,6 +67,13 @@ impl NativeEntityPresentation {
     }
 
     fn sync_pending_payload(&mut self, now_ms: u64) {
+        self.sync_pending_payload_with(now_ms, crate::frame_sets::animation_catalog_for);
+    }
+
+    fn sync_pending_payload_with<F>(&mut self, now_ms: u64, catalog_for: F)
+    where
+        F: Fn(EntityKind, &str, bool) -> AnimationCatalog,
+    {
         let Some(payload) = self.pending_payload.take() else {
             return;
         };
@@ -134,11 +142,7 @@ impl NativeEntityPresentation {
                 entity.object_id.clone(),
                 entity.kind,
                 entity.direction,
-                crate::frame_sets::animation_catalog_for(
-                    entity.kind,
-                    &entity.body_library,
-                    entity.mounted,
-                ),
+                catalog_for(entity.kind, &entity.body_library, entity.mounted),
                 now_ms,
             );
             let Ok(update) = update else {
@@ -184,6 +188,22 @@ impl NativeEntityPresentation {
     }
 
     fn render_state_if_changed(&mut self, now_ms: u64, effect_visible: bool) -> Option<Value> {
+        self.render_state_if_changed_with(
+            now_ms,
+            effect_visible,
+            crate::atlas::build_entity_render_state_with_poses_and_effect_visibility,
+        )
+    }
+
+    fn render_state_if_changed_with<F>(
+        &mut self,
+        now_ms: u64,
+        effect_visible: bool,
+        render: F,
+    ) -> Option<Value>
+    where
+        F: FnOnce(&Value, &HashMap<String, (i64, AnimationAction)>, bool) -> Option<Value>,
+    {
         self.sync_pending_payload(now_ms);
         let payload = self.latest_payload.as_ref()?;
         let effect_visibility_changed =
@@ -227,11 +247,7 @@ impl NativeEntityPresentation {
                     .is_none_or(|object_id| !self.hidden_after_hide.contains(&object_id))
             });
         }
-        let state = crate::atlas::build_entity_render_state_with_poses_and_effect_visibility(
-            &visible_payload,
-            &frames,
-            effect_visible,
-        )?;
+        let state = render(&visible_payload, &frames, effect_visible)?;
         self.last_frames = frames;
         self.payload_dirty = false;
         Some(state)
@@ -374,7 +390,11 @@ fn normalize_action(kind: EntityKind, action: AnimationAction) -> Option<Animati
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::gameplay_bridge::NativeGameplayAdapter;
+    use crate::native_protocol::PacketEvent;
+    use mir2_bevy_runtime::entity_animation::FrameDescriptor;
     use serde_json::json;
+    use std::io::Read;
 
     fn player_payload(sequence: u64) -> Value {
         json!({
@@ -462,6 +482,7 @@ mod tests {
     #[test]
     fn effect_option_removes_and_restores_scarecrow_post_world_layer_without_new_packet() {
         let mut presentation = NativeEntityPresentation::default();
+        let manifest = crate::atlas::scarecrow_routing_atlas_manifest_fixture();
         presentation.replace_payload(json!({
             "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
             "entities": [{
@@ -479,20 +500,54 @@ mod tests {
                 }
             }]
         }));
+        // Keep this unit test independent from a packaged frame-set manifest.
+        // Monster/005 uses the compiled Crystal monster descriptor, whose
+        // source ranges are separately locked against the generated catalog.
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_monster());
 
         let visible = presentation
-            .render_state_if_changed(0, true)
+            .render_state_if_changed_with(0, true, |payload, poses, effect_visible| {
+                crate::atlas::build_entity_render_state_with_manifest_for_test(
+                    payload,
+                    poses,
+                    effect_visible,
+                    &manifest,
+                )
+            })
             .expect("effect enabled state");
         assert!(has_additive_layer(&visible));
 
         let hidden = presentation
-            .render_state_if_changed(0, false)
+            .render_state_if_changed_with(0, false, |payload, poses, effect_visible| {
+                crate::atlas::build_entity_render_state_with_manifest_for_test(
+                    payload,
+                    poses,
+                    effect_visible,
+                    &manifest,
+                )
+            })
             .expect("option transition rebuilds the same authoritative pose");
         assert!(!has_additive_layer(&hidden));
-        assert!(presentation.render_state_if_changed(0, false).is_none());
+        assert!(presentation
+            .render_state_if_changed_with(0, false, |payload, poses, effect_visible| {
+                crate::atlas::build_entity_render_state_with_manifest_for_test(
+                    payload,
+                    poses,
+                    effect_visible,
+                    &manifest,
+                )
+            })
+            .is_none());
 
         let restored = presentation
-            .render_state_if_changed(0, true)
+            .render_state_if_changed_with(0, true, |payload, poses, effect_visible| {
+                crate::atlas::build_entity_render_state_with_manifest_for_test(
+                    payload,
+                    poses,
+                    effect_visible,
+                    &manifest,
+                )
+            })
             .expect("re-enabling effects rebuilds without another gateway packet");
         assert!(has_additive_layer(&restored));
     }
@@ -585,5 +640,495 @@ mod tests {
             .render_state_if_changed(1_602, true)
             .expect("a later actor may reuse the removed object id");
         assert!(rendered_path(&reused).contains("/Monster/003/"));
+    }
+
+    fn vis01_catalog(kind: EntityKind, library: &str, _: bool) -> AnimationCatalog {
+        let normalized = library
+            .trim()
+            .trim_matches('/')
+            .strip_prefix("original-ui/")
+            .unwrap_or_else(|| library.trim().trim_matches('/'));
+        if normalized == "Monster/010" {
+            let mut catalog = AnimationCatalog::new();
+            for (action, descriptor) in [
+                (
+                    AnimationAction::Standing,
+                    FrameDescriptor::from_crystal(0, 4, -4, 500, false),
+                ),
+                (
+                    AnimationAction::Show,
+                    FrameDescriptor::from_crystal(4, 8, -8, 200, false),
+                ),
+                (
+                    AnimationAction::Hide,
+                    FrameDescriptor::from_crystal(12, 8, -8, 200, true),
+                ),
+            ] {
+                catalog
+                    .insert(action, descriptor)
+                    .expect("VIS-01 CannibalPlant source descriptor");
+            }
+            return catalog;
+        }
+
+        let mut catalog = AnimationCatalog::crystal_default(kind);
+        if normalized == "Monster/004" {
+            catalog
+                .insert(
+                    AnimationAction::Skeleton,
+                    FrameDescriptor::from_crystal(224, 1, 0, 1_000, false),
+                )
+                .expect("VIS-01 Deer skeleton source descriptor");
+        }
+        catalog
+    }
+
+    fn checkpoint_frame_paths(fixture: &Value) -> Vec<String> {
+        let mut paths = fixture["timeline"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(|step| step.get("checkpoint"))
+            .filter_map(|checkpoint| checkpoint.get("layers"))
+            .flat_map(|layers| layers.as_array().into_iter().flatten())
+            .filter_map(|layer| layer.get("path").and_then(Value::as_str))
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        paths.sort_unstable();
+        paths.dedup();
+        paths
+    }
+
+    fn assert_vis01_checkpoint(
+        presentation: &NativeEntityPresentation,
+        payload: &Value,
+        state: &Value,
+        checkpoint: &Value,
+    ) {
+        let object_id = checkpoint["objectId"]
+            .as_u64()
+            .expect("checkpoint objectId")
+            .to_string();
+        let rendered = state["entities"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|entity| entity["objectId"].as_str() == Some(object_id.as_str()));
+        let visible = checkpoint["visible"].as_bool().unwrap_or(true);
+        assert_eq!(rendered.is_some(), visible, "object {object_id} visibility");
+
+        let payload_entity = payload["entities"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|entity| {
+                entity["objectId"]
+                    .as_u64()
+                    .is_some_and(|id| id.to_string() == object_id)
+            })
+            .expect("checkpoint payload entity");
+        if let Some(sequence) = checkpoint.get("sequence").and_then(Value::as_u64) {
+            assert_eq!(
+                payload_entity["_nativeAnimationSequence"].as_u64(),
+                Some(sequence),
+                "object {object_id} derived packet sequence"
+            );
+        }
+        if let Some(dead) = checkpoint.get("dead").and_then(Value::as_bool) {
+            assert_eq!(payload_entity["dead"].as_bool(), Some(dead));
+        }
+        for field in ["x", "y", "deathKind"] {
+            if let Some(expected) = checkpoint.get(field).and_then(Value::as_i64) {
+                assert_eq!(
+                    payload_entity[field].as_i64(),
+                    Some(expected),
+                    "object {object_id} authoritative {field}"
+                );
+            }
+        }
+        for field in ["direction", "disposition"] {
+            if let Some(expected) = checkpoint.get(field).and_then(Value::as_str) {
+                assert_eq!(
+                    payload_entity[field].as_str(),
+                    Some(expected),
+                    "object {object_id} authoritative {field}"
+                );
+            }
+        }
+        if let Some(expected) = checkpoint.get("bodyLibrary").and_then(Value::as_str) {
+            assert_eq!(
+                payload_entity["sprite"]["bodyLibrary"].as_str(),
+                Some(expected),
+                "object {object_id} authoritative body library"
+            );
+        }
+        if let Some(action) = checkpoint.get("action").and_then(Value::as_str) {
+            let actual = presentation
+                .world
+                .active_state(&object_id)
+                .map(|state| format!("{:?}", state.pose().action).to_ascii_lowercase())
+                .expect("checkpoint animation state");
+            assert_eq!(actual, action, "object {object_id} presentation action");
+        }
+
+        let Some(rendered) = rendered else {
+            return;
+        };
+        let layers = rendered["layers"].as_array().expect("rendered layers");
+        let expected_layers = checkpoint["layers"].as_array().expect("checkpoint layers");
+        assert_eq!(
+            layers.len(),
+            expected_layers.len(),
+            "object {object_id} must have no extra or missing layers"
+        );
+        let unique_keys = layers
+            .iter()
+            .filter_map(|layer| layer["key"].as_str())
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            unique_keys.len(),
+            layers.len(),
+            "object {object_id} layer keys must be unique"
+        );
+        for expected in expected_layers {
+            let key = expected["key"].as_str().expect("layer key");
+            let layer = layers
+                .iter()
+                .find(|layer| layer["key"].as_str() == Some(key))
+                .unwrap_or_else(|| panic!("missing layer {key} for object {object_id}"));
+            assert_eq!(layer["path"], expected["path"], "layer {key} path");
+            assert!(
+                layer["atlasRectKey"].as_str().is_some(),
+                "layer {key} must route through the selected atlas manifest"
+            );
+            if let Some(additive) = expected.get("additive").and_then(Value::as_bool) {
+                assert_eq!(layer["additive"].as_bool(), Some(additive));
+            }
+        }
+
+        if let (Some(x), Some(y)) = (
+            checkpoint.get("x").and_then(Value::as_i64),
+            checkpoint.get("y").and_then(Value::as_i64),
+        ) {
+            assert_eq!(rendered["gridX"].as_i64(), Some(x));
+            assert_eq!(rendered["gridY"].as_i64(), Some(y));
+        }
+        let layer_z = |suffix: &str| {
+            layers
+                .iter()
+                .find(|layer| {
+                    layer["key"]
+                        .as_str()
+                        .is_some_and(|key| key.ends_with(suffix))
+                })
+                .and_then(|layer| layer["z"].as_f64())
+        };
+        if object_id == "1001" {
+            assert!(layer_z(":weapon-primary") < layer_z(":body"));
+            assert!(layer_z(":body") < layer_z(":hair"));
+        } else if object_id == "1000" {
+            assert!(layer_z(":body") < layer_z(":hair"));
+            assert!(layer_z(":hair") < layer_z(":weapon-primary"));
+        } else if object_id == "2005" && expected_layers.len() == 2 {
+            assert!(layer_z(":body") < layer_z(":scarecrow-die-effect"));
+        }
+    }
+
+    #[test]
+    fn vis01_bichon_actor_transcript_drives_packets_clocks_layers_and_real_front_occlusion() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/vis01-bichon-actors-v1.json"
+        ))
+        .expect("VIS-01 fixture JSON");
+        assert_eq!(fixture["schemaVersion"], json!(1));
+        assert_eq!(
+            fixture["source"]["crystalRevision"],
+            json!("484983404e3d6afa584e93801f8006ae3429bea9")
+        );
+        let fixture_text = serde_json::to_string(&fixture).expect("fixture serializes");
+        assert!(
+            !fixture_text.contains("_nativeAnimation"),
+            "the fixture must contain server/Gateway output, never client-derived animation fields"
+        );
+
+        let frame_paths = checkpoint_frame_paths(&fixture);
+        let frame_path_refs = frame_paths.iter().map(String::as_str).collect::<Vec<_>>();
+        let manifest = crate::atlas::routing_atlas_manifest_fixture(&frame_path_refs);
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut payload = fixture["worldSnapshot"].clone();
+        adapter.observe_world_snapshot(&payload);
+        let mut presentation = NativeEntityPresentation::default();
+        let mut checked_real_occlusion = false;
+
+        for step in fixture["timeline"].as_array().expect("VIS-01 timeline") {
+            let at_ms = step["atMs"].as_u64().expect("timeline atMs");
+            let event_applied = if let Some(event) = step.get("event") {
+                let packet = event["packet"].as_str().expect("packet name").to_owned();
+                let packet_event = PacketEvent::Other {
+                    packet,
+                    payload: event["payload"].clone(),
+                };
+                assert!(adapter.observe_packet(&packet_event));
+                adapter.apply_authoritative_overlay(&mut payload);
+                true
+            } else {
+                false
+            };
+
+            if let Some(expected) = step.get("damageCheckpoint") {
+                let snapshot = adapter.snapshot(&payload);
+                let damage = snapshot.damage_events.last().expect("damage event");
+                assert_eq!(damage.sequence, expected["sequence"].as_u64().unwrap());
+                assert_eq!(
+                    u64::from(damage.object_id),
+                    expected["objectId"].as_u64().unwrap()
+                );
+                assert_eq!(
+                    i64::from(damage.damage),
+                    expected["damage"].as_i64().unwrap()
+                );
+                assert_eq!(
+                    i64::from(damage.damage_type),
+                    expected["damageType"].as_i64().unwrap()
+                );
+            }
+
+            let Some(checkpoint) = step.get("checkpoint") else {
+                continue;
+            };
+            if event_applied {
+                presentation.replace_payload(payload.clone());
+                presentation.sync_pending_payload_with(at_ms, vis01_catalog);
+            }
+            let state = presentation
+                .render_state_if_changed_with(at_ms, true, |payload, poses, effect_visible| {
+                    crate::atlas::build_entity_render_state_with_manifest_for_test(
+                        payload,
+                        poses,
+                        effect_visible,
+                        &manifest,
+                    )
+                })
+                .expect("VIS-01 checkpoint must produce a render-state change");
+            assert_vis01_checkpoint(&presentation, &payload, &state, checkpoint);
+
+            if !checked_real_occlusion && checkpoint["objectId"] == json!(2010) {
+                let compressed =
+                    include_bytes!("../../../web/lib/generated/crystal-map-pack/0.map.gz");
+                let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
+                let mut bytes = Vec::new();
+                decoder
+                    .read_to_end(&mut bytes)
+                    .expect("decode real 0.map.gz");
+                let map = crate::map_parser::parse_type100_map(&bytes).expect("parse real 0.map");
+                let front = crate::map_parser::resolve_map_tile_draws(&map)
+                    .into_iter()
+                    .find(|draw| {
+                        draw.x
+                            == fixture["source"]["frontOcclusionCell"]["x"]
+                                .as_i64()
+                                .unwrap() as i32
+                            && draw.y
+                                == fixture["source"]["frontOcclusionCell"]["y"]
+                                    .as_i64()
+                                    .unwrap() as i32
+                            && draw.layer == crate::map_parser::TileLayer::Front
+                    })
+                    .expect("fixture coordinate is an actual 0.map front cell");
+                let front_z = crate::atlas::map_tile_draw_z_for_test(front.x, front.y, front.z);
+                let body_z = state["entities"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .find(|entity| entity["objectId"] == json!("2010"))
+                    .and_then(|entity| entity["layers"].as_array())
+                    .into_iter()
+                    .flatten()
+                    .find(|layer| layer["key"] == json!("2010:body"))
+                    .and_then(|layer| layer["z"].as_f64())
+                    .expect("CannibalPlant body z") as f32;
+                assert!(
+                    front_z > body_z,
+                    "real front cell must occlude same-cell body"
+                );
+                checked_real_occlusion = true;
+            }
+        }
+
+        assert!(checked_real_occlusion);
+    }
+
+    #[test]
+    fn vis01_bichon_actor_transcript_routes_through_candidate_manifests_and_map_state() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/vis01-bichon-actors-v1.json"
+        ))
+        .expect("VIS-01 fixture JSON");
+        crate::assets::require_asset_root().expect("complete Candidate asset root");
+        let frame_set_path = crate::assets::asset_path("original-ui/frame-sets.generated.json")
+            .expect("Candidate frame-set path");
+        let frame_sets: Value = serde_json::from_str(
+            &std::fs::read_to_string(frame_set_path).expect("read Candidate frame-set catalog"),
+        )
+        .expect("parse Candidate frame-set catalog");
+        assert_eq!(
+            frame_sets["sourceContentHash"], fixture["source"]["frameSetSourceContentHash"],
+            "fixture clocks must be locked to the packaged generated frame-set source hash"
+        );
+
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut payload = fixture["worldSnapshot"].clone();
+        adapter.observe_world_snapshot(&payload);
+        let mut presentation = NativeEntityPresentation::default();
+        let mut cannibal_body_bounds = None;
+
+        for step in fixture["timeline"].as_array().expect("VIS-01 timeline") {
+            let at_ms = step["atMs"].as_u64().expect("timeline atMs");
+            let event_applied = if let Some(event) = step.get("event") {
+                let packet = event["packet"].as_str().expect("packet name").to_owned();
+                assert!(adapter.observe_packet(&PacketEvent::Other {
+                    packet,
+                    payload: event["payload"].clone(),
+                }));
+                adapter.apply_authoritative_overlay(&mut payload);
+                true
+            } else {
+                false
+            };
+
+            let Some(checkpoint) = step.get("checkpoint") else {
+                continue;
+            };
+            if event_applied {
+                presentation.replace_payload(payload.clone());
+                presentation.sync_pending_payload(at_ms);
+            }
+            let state = presentation
+                .render_state_if_changed(at_ms, true)
+                .expect("Candidate manifest checkpoint must produce render state");
+            assert_vis01_checkpoint(&presentation, &payload, &state, checkpoint);
+
+            if cannibal_body_bounds.is_none()
+                && checkpoint["objectId"] == json!(2010)
+                && checkpoint["visible"] == json!(true)
+            {
+                let body = state["entities"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .find(|entity| entity["objectId"] == json!("2010"))
+                    .and_then(|entity| entity["layers"].as_array())
+                    .into_iter()
+                    .flatten()
+                    .find(|layer| layer["key"] == json!("2010:body"))
+                    .expect("Candidate CannibalPlant body layer");
+                cannibal_body_bounds = Some((
+                    body["left"].as_f64().expect("body left"),
+                    body["top"].as_f64().expect("body top"),
+                    body["width"].as_f64().expect("body width"),
+                    body["height"].as_f64().expect("body height"),
+                ));
+            }
+        }
+
+        let compressed = include_bytes!("../../../web/lib/generated/crystal-map-pack/0.map.gz");
+        let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
+        let mut bytes = Vec::new();
+        decoder
+            .read_to_end(&mut bytes)
+            .expect("decode real 0.map.gz");
+        let map = crate::map_parser::parse_type100_map(&bytes).expect("parse real 0.map");
+        let front_draw = crate::map_parser::resolve_map_tile_draws(&map)
+            .into_iter()
+            .find(|draw| {
+                draw.x
+                    == fixture["source"]["frontOcclusionCell"]["x"]
+                        .as_i64()
+                        .unwrap() as i32
+                    && draw.y
+                        == fixture["source"]["frontOcclusionCell"]["y"]
+                            .as_i64()
+                            .unwrap() as i32
+                    && draw.layer == crate::map_parser::TileLayer::Front
+            })
+            .expect("real front draw");
+        let map_state = crate::map_parser::build_map_render_state(
+            &map,
+            crate::map_parser::MapViewport::from_gateway_payload(&fixture["worldSnapshot"]),
+        )
+        .expect("Candidate map render state");
+        let key = format!(
+            "front:{}:{}",
+            fixture["source"]["frontOcclusionCell"]["x"]
+                .as_i64()
+                .expect("front x"),
+            fixture["source"]["frontOcclusionCell"]["y"]
+                .as_i64()
+                .expect("front y")
+        );
+        let atlas_tile = map_state["tiles"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|tile| tile["key"].as_str() == Some(key.as_str()));
+        let standalone_tile = map_state["standaloneTiles"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|tile| {
+                tile["key"].as_str().is_some_and(|tile_key| {
+                    tile_key
+                        == format!(
+                            "standalone:{}:{}:{}:{}",
+                            if front_draw.additive {
+                                "additive"
+                            } else {
+                                "normal"
+                            },
+                            front_draw.x,
+                            front_draw.y,
+                            crate::map_parser::atlas_rect_key(
+                                &front_draw.library,
+                                front_draw.frame_index,
+                            )
+                        )
+                })
+            });
+        let front = atlas_tile
+            .or(standalone_tile)
+            .expect("real front cell must survive production map binding");
+        if atlas_tile.is_some() {
+            let atlas_key = front["atlasKey"].as_str().expect("front atlas key");
+            let rect_key = front["rectKey"].as_str().expect("front rect key");
+            let atlas = map_state["atlases"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .find(|atlas| atlas["key"].as_str() == Some(atlas_key))
+                .expect("front atlas page retained");
+            assert!(atlas["rects"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .any(|rect| rect["key"].as_str() == Some(rect_key)));
+        } else {
+            let image_url = front["imageUrl"].as_str().expect("front standalone image");
+            assert!(crate::assets::asset_path(image_url).is_some_and(|path| path.is_file()));
+        }
+
+        let front_bounds = (
+            front["left"].as_f64().expect("front left"),
+            front["top"].as_f64().expect("front top"),
+            front["width"].as_f64().expect("front width"),
+            front["height"].as_f64().expect("front height"),
+        );
+        let body_bounds = cannibal_body_bounds.expect("CannibalPlant body geometry");
+        assert!(
+            front_bounds.0 < body_bounds.0 + body_bounds.2
+                && front_bounds.0 + front_bounds.2 > body_bounds.0
+                && front_bounds.1 < body_bounds.1 + body_bounds.3
+                && front_bounds.1 + front_bounds.3 > body_bounds.1,
+            "real front tile and actor body geometry must overlap"
+        );
     }
 }

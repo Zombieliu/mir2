@@ -9230,6 +9230,27 @@ fn quest_time_limit_label(time_limit_in_seconds: i32) -> Option<String> {
     }
 }
 
+fn monster_packet_sprite(image: u16) -> Value {
+    json!({
+        "bodyLibrary": format!("Monster/{image:03}"),
+        "hairLibrary": null,
+        "weaponLibrary": null,
+        "weaponLibrarySecondary": null,
+        "frameBaseOffset": 0,
+        "weaponFrameOffset": null,
+        "altBodyLibrary": null,
+        "altHairLibrary": null,
+        "altWeaponLibrary": null,
+        "altWeaponLibrarySecondary": null,
+        "altFrameBaseOffset": null,
+        "altWeaponFrameOffset": null,
+        "frameCount": 4,
+        "directionStride": 4,
+        "mountLibrary": null,
+        "mountFrameOffset": null
+    })
+}
+
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
         ServerPacket::Raw { packet_id, payload } => {
@@ -10416,7 +10437,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "extraByte": info.extra_byte,
                 "masterObjectId": info.master_object_id,
                 "rarity": info.rarity,
-                "buffs": info.buffs
+                "buffs": info.buffs,
+                "sprite": monster_packet_sprite(info.image)
             }
         }),
         ServerPacket::ObjectMonster { info } => json!({
@@ -10445,7 +10467,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "extraByte": info.extra_byte,
                 "masterObjectId": info.master_object_id,
                 "rarity": info.rarity,
-                "buffs": info.buffs
+                "buffs": info.buffs,
+                "sprite": monster_packet_sprite(info.image)
             }
         }),
         ServerPacket::ObjectAttack { info } => json!({
@@ -11811,9 +11834,10 @@ mod tests {
         decode_server_packet, encode_frame, ClientAuction, ClientBuff, ClientFriend,
         ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientMapInfo, ClientPacket,
         ClientQuestInfo, GroupMember, IntelligentCreatureItemFilter, IntelligentCreatureRules,
-        MapInformation, MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo, Point,
-        RankCharacterInfo, SelectInfo, ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
-        UserLocation,
+        MapInformation, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo,
+        ObjectAttackInfo, ObjectDiedInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo,
+        ObjectStruckInfo, Point, RankCharacterInfo, SelectInfo, ServerPacket, ServerPacketId,
+        Spell, UserItem, UserItemStat, UserLocation,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailMessage, Stage5MailTargetKind,
@@ -18596,6 +18620,240 @@ mod tests {
         let responses = vec![ServerPacket::ObjectShow { object_id: 42 }];
 
         assert!(responses_require_world_snapshot(&responses));
+    }
+
+    fn vis01_monster(
+        object_id: u32,
+        name: &str,
+        image: u16,
+        ai: u8,
+        x: i32,
+        y: i32,
+        direction: MirDirection,
+    ) -> MonsterInfo {
+        MonsterInfo {
+            object_id,
+            name: name.to_owned(),
+            name_colour_argb: -1,
+            location: Point { x, y },
+            image,
+            direction,
+            effect: 0,
+            ai,
+            light: 0,
+            dead: false,
+            skeleton: false,
+            poison: 0,
+            hidden: false,
+            shock_time: 0,
+            binding_shot_center: false,
+            extra: false,
+            extra_byte: 0,
+            master_object_id: 0,
+            rarity: 0,
+            buffs: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn vis01_bichon_actor_fixture_is_exact_gateway_typed_packet_output() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../game-client/platform-windows/tests/fixtures/vis01-bichon-actors-v1.json"
+        ))
+        .expect("VIS-01 fixture JSON");
+        let remote = ObjectPlayerInfo {
+            object_id: 1001,
+            name: "RemoteWarrior".to_owned(),
+            guild_name: "BichonGuard".to_owned(),
+            guild_rank_name: "Scout".to_owned(),
+            name_colour_argb: -1,
+            class: MirClass::Warrior,
+            gender: MirGender::Female,
+            level: 9,
+            location: Point { x: 289, y: 616 },
+            direction: MirDirection::Left,
+            hair: 0,
+            light: 0,
+            weapon: 0,
+            weapon_effect: 0,
+            armour: 0,
+            poison: 0,
+            dead: false,
+            hidden: false,
+            effect: 0,
+            wing_effect: 0,
+            extra: false,
+            mount_type: -1,
+            riding_mount: false,
+            fishing: false,
+            transform_type: -1,
+            element_orb_effect: 0,
+            element_orb_level: 0,
+            element_orb_max: 0,
+            buffs: Vec::new(),
+            level_effects: 0,
+        };
+        let self_player = ObjectPlayerInfo {
+            object_id: 1000,
+            name: "CandidateWarrior".to_owned(),
+            guild_name: String::new(),
+            guild_rank_name: String::new(),
+            name_colour_argb: -1,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 7,
+            location: Point { x: 288, y: 616 },
+            direction: MirDirection::Down,
+            hair: 0,
+            light: 0,
+            weapon: 0,
+            weapon_effect: 0,
+            armour: 0,
+            poison: 0,
+            dead: false,
+            hidden: false,
+            effect: 0,
+            wing_effect: 0,
+            extra: false,
+            mount_type: -1,
+            riding_mount: false,
+            fishing: false,
+            transform_type: -1,
+            element_orb_effect: 0,
+            element_orb_level: 0,
+            element_orb_max: 0,
+            buffs: Vec::new(),
+            level_effects: 0,
+        };
+        let hen = vis01_monster(2003, "Hen", 3, 1, 287, 615, MirDirection::Right);
+        let deer = vis01_monster(2004, "Deer", 4, 2, 290, 617, MirDirection::Down);
+        let scarecrow = vis01_monster(2005, "Scarecrow", 5, 0, 291, 616, MirDirection::Down);
+        let cannibal = vis01_monster(2010, "CannibalPlant", 10, 5, 285, 614, MirDirection::Down);
+        let packets = vec![
+            ServerPacket::ObjectPlayer { info: remote },
+            ServerPacket::ObjectMonster { info: hen },
+            ServerPacket::ObjectMonster { info: deer.clone() },
+            ServerPacket::ObjectMonster {
+                info: scarecrow.clone(),
+            },
+            ServerPacket::ObjectMonster {
+                info: cannibal.clone(),
+            },
+            ServerPacket::ObjectShow { object_id: 2010 },
+            ServerPacket::ObjectWalk {
+                movement: ObjectMovement {
+                    object_id: 2003,
+                    position: Point { x: 288, y: 615 },
+                    direction: MirDirection::Right,
+                },
+            },
+            ServerPacket::ObjectAttack {
+                info: ObjectAttackInfo {
+                    object_id: 1001,
+                    location: Point { x: 289, y: 616 },
+                    direction: MirDirection::Left,
+                    spell: 0,
+                    level: 0,
+                    attack_type: 0,
+                },
+            },
+            ServerPacket::ObjectStruck {
+                info: ObjectStruckInfo {
+                    object_id: 2005,
+                    attacker_id: 1001,
+                    location: Point { x: 291, y: 616 },
+                    direction: MirDirection::Down,
+                },
+            },
+            ServerPacket::DamageIndicator {
+                damage: 7,
+                damage_type: 0,
+                object_id: 2005,
+            },
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 2005,
+                    location: Point { x: 292, y: 616 },
+                    direction: MirDirection::Right,
+                    kind: 2,
+                },
+            },
+            ServerPacket::ObjectHarvest {
+                movement: ObjectMovement {
+                    object_id: 1000,
+                    position: Point { x: 288, y: 616 },
+                    direction: MirDirection::Down,
+                },
+            },
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 2004,
+                    location: Point { x: 290, y: 618 },
+                    direction: MirDirection::Up,
+                    kind: 1,
+                },
+            },
+            ServerPacket::ObjectHarvested {
+                movement: ObjectMovement {
+                    object_id: 2004,
+                    position: Point { x: 290, y: 617 },
+                    direction: MirDirection::Down,
+                },
+            },
+            ServerPacket::ObjectHide { object_id: 2010 },
+            ServerPacket::ObjectMonster { info: cannibal },
+            ServerPacket::ObjectShow { object_id: 2010 },
+        ];
+        let fixture_events = fixture["timeline"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(|step| step.get("event"))
+            .collect::<Vec<_>>();
+        assert_eq!(packets.len(), fixture_events.len());
+        for (index, (packet, expected)) in packets.iter().zip(fixture_events).enumerate() {
+            assert_eq!(
+                super::server_packet_to_event(packet),
+                *expected,
+                "VIS-01 typed packet mismatch at transcript event {index}"
+            );
+        }
+
+        let entities = fixture["worldSnapshot"]["entities"]
+            .as_array()
+            .expect("VIS-01 world entities");
+        let self_snapshot = entities
+            .iter()
+            .find(|entity| entity["objectId"] == json!(1000))
+            .expect("male Warrior self snapshot");
+        assert_eq!(
+            self_snapshot["sprite"],
+            serde_json::to_value(mir2_simulation::world_entity_sprite_from_object_player(
+                &self_player
+            ))
+            .expect("self sprite serializes")
+        );
+        let remote_snapshot = entities
+            .iter()
+            .find(|entity| entity["objectId"] == json!(1001))
+            .expect("female Warrior remote snapshot");
+        assert_eq!(
+            remote_snapshot["sprite"],
+            fixture["timeline"][0]["event"]["payload"]["sprite"]
+        );
+        for (object_id, image, library) in [
+            (2003, 3, "Monster/003"),
+            (2004, 4, "Monster/004"),
+            (2005, 5, "Monster/005"),
+            (2010, 10, "Monster/010"),
+        ] {
+            let entity = entities
+                .iter()
+                .find(|entity| entity["objectId"] == json!(object_id))
+                .expect("monster snapshot");
+            assert_eq!(entity["image"], json!(image));
+            assert_eq!(entity["sprite"]["bodyLibrary"], json!(library));
+        }
     }
 
     #[test]

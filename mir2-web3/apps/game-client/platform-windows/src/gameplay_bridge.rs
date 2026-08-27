@@ -68,6 +68,10 @@ pub struct NativeGameplayAdapter {
     effect_sequence: u64,
     effect_events: VecDeque<NativeEffectEvent>,
     zone_entities: HashMap<u32, serde_json::Map<String, Value>>,
+    /// Relationship comes from the retained authoritative world snapshot.
+    /// Incremental ObjectMonster packets do not carry it, so packet-only
+    /// entities must remain neutral instead of being guessed hostile.
+    zone_snapshot_dispositions: HashMap<u32, String>,
     zone_ground_drops: HashMap<u32, serde_json::Map<String, Value>>,
     zone_tombstones: HashSet<u32>,
     big_map: BigMapModel,
@@ -570,7 +574,7 @@ impl NativeGameplayAdapter {
                     true
                 }
                 "ObjectMonster" | "NewMonsterInfo" => {
-                    self.upsert_zone_entity(payload, "monster", "hostile")
+                    self.upsert_zone_entity(payload, "monster", "neutral")
                 }
                 "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc", "neutral"),
                 "ObjectPlayer" | "ObjectHero" => {
@@ -775,6 +779,7 @@ impl NativeGameplayAdapter {
         self.authoritative_player_dead = None;
         self.authoritative_player_animation = None;
         self.zone_entities.clear();
+        self.zone_snapshot_dispositions.clear();
         self.zone_ground_drops.clear();
         self.zone_tombstones.clear();
         self.damage_events.clear();
@@ -813,6 +818,12 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        let disposition = body
+            .get("disposition")
+            .and_then(Value::as_str)
+            .map(str::to_owned)
+            .or_else(|| self.zone_snapshot_dispositions.get(&object_id).cloned())
+            .unwrap_or_else(|| disposition.to_owned());
         self.zone_tombstones.remove(&object_id);
         self.zone_ground_drops.remove(&object_id);
         let overlay = self.zone_entities.entry(object_id).or_default();
@@ -956,6 +967,7 @@ impl NativeGameplayAdapter {
     }
 
     fn patch_zone_entity_death(&mut self, payload: &Value, dead: bool) -> bool {
+        let body = packet_body(payload);
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
@@ -964,6 +976,14 @@ impl NativeGameplayAdapter {
         overlay.insert("objectId".to_owned(), Value::from(object_id));
         overlay.insert("dead".to_owned(), Value::from(dead));
         overlay.insert("skeleton".to_owned(), Value::Bool(false));
+        patch_location_fields(body, overlay);
+        copy_packet_fields(body, overlay, &["direction"]);
+        if let Some(kind) = body.get("kind").and_then(value_i32) {
+            // Packet `kind` is a numeric Crystal death-mode discriminator;
+            // do not overwrite the renderer's string entity kind. Retain it
+            // explicitly until each death-mode visual has a sourced policy.
+            overlay.insert("deathKind".to_owned(), Value::from(kind));
+        }
         if dead {
             overlay.insert("hp".to_owned(), Value::from(0));
             overlay.insert("_packetHealthPercent".to_owned(), Value::from(0));
@@ -1051,6 +1071,19 @@ impl NativeGameplayAdapter {
         if let Some((x, y)) = authoritative_player_position(payload) {
             self.big_map
                 .set_player_location(map_index, BigMapPoint { x, y });
+        }
+        self.zone_snapshot_dispositions.clear();
+        if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
+            for entity in entities {
+                let Some(object_id) = entity.get("objectId").and_then(value_u32) else {
+                    continue;
+                };
+                let Some(disposition) = entity.get("disposition").and_then(Value::as_str) else {
+                    continue;
+                };
+                self.zone_snapshot_dispositions
+                    .insert(object_id, disposition.to_owned());
+            }
         }
     }
 
@@ -4068,6 +4101,98 @@ mod tests {
         assert_eq!(respawned["kind"], json!("monster"));
         assert_eq!(respawned["x"], json!(300));
         assert_eq!(respawned["y"], json!(598));
+    }
+
+    #[test]
+    fn packet_first_monster_uses_gateway_sprite_and_neutral_relationship() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2010,
+                "name": "CannibalPlant",
+                "location": {"x": 285, "y": 614},
+                "direction": "Down",
+                "image": 10,
+                "sprite": {
+                    "bodyLibrary": "Monster/010",
+                    "frameBaseOffset": 0,
+                    "directionStride": 4
+                }
+            }),
+        }));
+        let mut payload = gameplay_payload();
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .retain(|entity| entity["objectId"] != json!(2010));
+        adapter.apply_authoritative_overlay(&mut payload);
+        let plant = payload["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2010))
+            .expect("packet-only monster");
+        assert_eq!(plant["disposition"], json!("neutral"));
+        assert_eq!(plant["sprite"]["bodyLibrary"], json!("Monster/010"));
+        assert_eq!(
+            crate::atlas::resolved_native_sprite(
+                plant,
+                mir2_bevy_runtime::entity_animation::AnimationAction::Standing,
+            )
+            .body_library,
+            "/original-ui/Monster/010"
+        );
+    }
+
+    #[test]
+    fn monster_packet_preserves_snapshot_relationship_and_death_transform() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut payload = gameplay_payload();
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId": 2010,
+                "kind": "monster",
+                "disposition": "hostile",
+                "x": 285,
+                "y": 614,
+                "direction": "Down"
+            }));
+        adapter.observe_world_snapshot(&payload);
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMonster".to_owned(),
+            payload: json!({
+                "objectId": 2010,
+                "location": {"x": 285, "y": 614},
+                "direction": "Down",
+                "image": 10,
+                "sprite": {"bodyLibrary": "Monster/010"}
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectDied".to_owned(),
+            payload: json!({
+                "objectId": 2010,
+                "location": {"x": 286, "y": 615},
+                "direction": "Right",
+                "kind": 2
+            }),
+        }));
+        adapter.apply_authoritative_overlay(&mut payload);
+        let plant = payload["entities"]
+            .as_array()
+            .expect("entities")
+            .iter()
+            .find(|entity| entity["objectId"] == json!(2010))
+            .expect("snapshot monster");
+        assert_eq!(plant["disposition"], json!("hostile"));
+        assert_eq!(plant["kind"], json!("monster"));
+        assert_eq!(plant["x"], json!(286));
+        assert_eq!(plant["y"], json!(615));
+        assert_eq!(plant["direction"], json!("Right"));
+        assert_eq!(plant["deathKind"], json!(2));
     }
 
     #[test]

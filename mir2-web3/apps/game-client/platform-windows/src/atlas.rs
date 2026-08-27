@@ -670,6 +670,22 @@ fn build_entity_render_state_internal(
     effect_visible: bool,
 ) -> Option<Value> {
     let index = starter_atlas_index()?;
+    build_entity_render_state_with_index(
+        payload,
+        frame_overrides,
+        pose_overrides,
+        effect_visible,
+        index,
+    )
+}
+
+fn build_entity_render_state_with_index(
+    payload: &Value,
+    frame_overrides: &HashMap<String, i64>,
+    pose_overrides: Option<&HashMap<String, (i64, AnimationAction)>>,
+    effect_visible: bool,
+    index: &StarterAtlasIndex,
+) -> Option<Value> {
     let (center_x, center_y) = scene_center(payload);
     let entity_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
     let entity_origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
@@ -941,8 +957,34 @@ fn build_entity_render_state_internal(
     Some(state)
 }
 
+/// Unit-test seam for packet/animation-to-atlas routing. Production callers
+/// remain fail-closed on `starter_atlas_index()` and the complete Candidate
+/// asset root; this helper cannot replace packaging or asset-closure gates.
+#[cfg(test)]
+pub(crate) fn build_entity_render_state_with_manifest_for_test(
+    payload: &Value,
+    pose_overrides: &HashMap<String, (i64, AnimationAction)>,
+    effect_visible: bool,
+    manifest: &Value,
+) -> Option<Value> {
+    let index = parse_starter_atlas_manifest(manifest)?;
+    build_entity_render_state_with_index(
+        payload,
+        &HashMap::new(),
+        Some(pose_overrides),
+        effect_visible,
+        &index,
+    )
+}
+
 fn entity_z_base(x: i64, y: i64) -> f32 {
     y.saturating_mul(1_000).saturating_add(x.saturating_mul(10)) as f32 * ENTITY_DEPTH_GAIN
+}
+
+#[cfg(test)]
+pub(crate) fn map_tile_draw_z_for_test(x: i32, y: i32, layer_z: f32) -> f32 {
+    ((y.saturating_mul(1_000).saturating_add(x.saturating_mul(10))) as f32 + layer_z)
+        * ENTITY_DEPTH_GAIN
 }
 
 /// Crystal draws `MirObject.DrawEffects` only after the complete world pass.
@@ -999,6 +1041,50 @@ fn scarecrow_die_effect_frame(
     (0..DIE_FRAME_COUNT)
         .contains(&phase)
         .then_some(EFFECT_START.saturating_add(phase))
+}
+
+/// Minimal in-memory atlas geometry used only to prove VIS-01 routing. The
+/// rectangle coordinates are intentionally synthetic; source frame semantics
+/// stay locked by the production animation descriptors and explicit path
+/// assertions, while Candidate packaging still verifies the real manifest.
+#[cfg(test)]
+pub(crate) fn scarecrow_routing_atlas_manifest_fixture() -> Value {
+    routing_atlas_manifest_fixture(&[
+        "/original-ui/Monster/003/16.png",
+        "/original-ui/Monster/005/40.png",
+        "/original-ui/Monster/005/184.png",
+        "/original-ui/Monster/005/187.png",
+        "/original-ui/Monster/005/224.png",
+        "/original-ui/Monster/005/227.png",
+    ])
+}
+
+#[cfg(test)]
+pub(crate) fn routing_atlas_manifest_fixture(frame_paths: &[&str]) -> Value {
+    let rects = frame_paths
+        .iter()
+        .enumerate()
+        .map(|(index, frame_path)| {
+            json!({
+                "key": format!("{frame_path}|48x64"),
+                "x": 1 + index * 50,
+                "y": 2,
+                "width": 48,
+                "height": 64,
+                "offsetX": 0,
+                "offsetY": 0
+            })
+        })
+        .collect::<Vec<_>>();
+    json!({
+        "atlases": [{
+            "key": "vis01-routing-fixture",
+            "width": 2048,
+            "height": 128,
+            "imageUrl": "/test-only/vis01-scarecrow-routing.png",
+            "rects": rects
+        }]
+    })
 }
 
 #[cfg(test)]
@@ -1137,6 +1223,7 @@ mod tests {
 
     #[test]
     fn scarecrow_die_adds_source_frame_224_plus_phase_as_additive_layer() {
+        let manifest = scarecrow_routing_atlas_manifest_fixture();
         let payload = json!({
             "sceneView": {
                 "center": { "x": 9, "y": 7 },
@@ -1172,9 +1259,11 @@ mod tests {
         });
         // Monster/005 Die starts at 144 with stride 10. Down is direction 4,
         // so draw frame 187 is phase 3 and Crystal's effect frame is 224 + 3.
-        let dying = build_entity_render_state_with_poses(
+        let dying = build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("2005".to_owned(), (187, AnimationAction::Die))]),
+            true,
+            &manifest,
         )
         .expect("Scarecrow dying render state");
         let layers = dying["entities"][0]["layers"]
@@ -1238,17 +1327,24 @@ mod tests {
         assert!(effect_z > deeper_body_z);
         assert!(effect_z > deepest_visible_front_z);
 
-        let standing = build_entity_render_state(&payload).expect("Scarecrow standing state");
+        let standing = build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::new(),
+            true,
+            &manifest,
+        )
+        .expect("Scarecrow standing state");
         assert!(standing["entities"][0]["layers"]
             .as_array()
             .expect("standing layers")
             .iter()
             .all(|layer| layer["additive"] != json!(true)));
 
-        let effects_disabled = build_entity_render_state_with_poses_and_effect_visibility(
+        let effects_disabled = build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("2005".to_owned(), (187, AnimationAction::Die))]),
             false,
+            &manifest,
         )
         .expect("effects disabled state");
         assert!(effects_disabled["entities"][0]["layers"]

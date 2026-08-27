@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "crystalRevision": "484983404e3d6afa584e93801f8006ae3429bea9",
+    "frameSetSourceContentHash": "712e5fdc080c66916e89eded26302778623ad3c9ee01013dd9eb37f28529889d",
+    "mapFileName": "0.map",
+    "mapSource": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+    "frontOcclusionCell": { "x": 285, "y": 614 }
+  },
+  "worldSnapshot": {
+    "mapFileName": "0.map",
+    "mapIndex": 0,
+    "playerObjectId": 1000,
+    "sceneView": {
+      "center": { "x": 288, "y": 616 },
+      "width": 19,
+      "height": 15
+    },
+    "entities": [
+      {
+        "objectId": 1000,
+        "kind": "selfPlayer",
+        "disposition": "friendly",
+        "name": "CandidateWarrior",
+        "class": "Warrior",
+        "classKey": "warrior",
+        "gender": "Male",
+        "genderKey": "male",
+        "level": 7,
+        "x": 288,
+        "y": 616,
+        "direction": "Down",
+        "hair": 0,
+        "light": 0,
+        "weapon": 0,
+        "weaponEffect": 0,
+        "armour": 0,
+        "poison": 0,
+        "dead": false,
+        "hidden": false,
+        "effect": 0,
+        "wingEffect": 0,
+        "mountType": -1,
+        "ridingMount": false,
+        "fishing": false,
+        "transformType": -1,
+        "buffs": [],
+        "levelEffects": 0,
+        "sprite": {
+          "bodyLibrary": "CArmour/00",
+          "hairLibrary": "CHair/00",
+          "weaponLibrary": "CWeapon/00",
+          "weaponLibrarySecondary": null,
+          "frameBaseOffset": 0,
+          "weaponFrameOffset": 0,
+          "altBodyLibrary": null,
+          "altHairLibrary": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "altFrameBaseOffset": null,
+          "altWeaponFrameOffset": null,
+          "frameCount": 4,
+          "directionStride": 4,
+          "mountLibrary": null,
+          "mountFrameOffset": null
+        }
+      },
+      {
+        "objectId": 1001,
+        "kind": "player",
+        "disposition": "friendly",
+        "name": "RemoteWarrior",
+        "guildName": "BichonGuard",
+        "guildRankName": "Scout",
+        "nameColourArgb": -1,
+        "class": "Warrior",
+        "classKey": "warrior",
+        "gender": "Female",
+        "genderKey": "female",
+        "level": 9,
+        "x": 289,
+        "y": 616,
+        "direction": "Left",
+        "hair": 0,
+        "light": 0,
+        "weapon": 0,
+        "weaponEffect": 0,
+        "armour": 0,
+        "poison": 0,
+        "dead": false,
+        "hidden": false,
+        "effect": 0,
+        "wingEffect": 0,
+        "extra": false,
+        "mountType": -1,
+        "ridingMount": false,
+        "fishing": false,
+        "transformType": -1,
+        "elementOrbEffect": 0,
+        "elementOrbLevel": 0,
+        "elementOrbMax": 0,
+        "buffs": [],
+        "levelEffects": 0,
+        "sprite": {
+          "bodyLibrary": "CArmour/00",
+          "hairLibrary": "CHair/00",
+          "weaponLibrary": "CWeapon/00",
+          "weaponLibrarySecondary": null,
+          "frameBaseOffset": 808,
+          "weaponFrameOffset": 416,
+          "altBodyLibrary": null,
+          "altHairLibrary": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "altFrameBaseOffset": null,
+          "altWeaponFrameOffset": null,
+          "frameCount": 4,
+          "directionStride": 4,
+          "mountLibrary": null,
+          "mountFrameOffset": null
+        }
+      },
+      {
+        "objectId": 2003,
+        "kind": "monster",
+        "disposition": "hostile",
+        "name": "Hen",
+        "nameColourArgb": -1,
+        "image": 3,
+        "ai": 1,
+        "effect": 0,
+        "x": 287,
+        "y": 615,
+        "direction": "Right",
+        "dead": false,
+        "skeleton": false,
+        "hidden": false,
+        "sprite": { "bodyLibrary": "Monster/003", "frameBaseOffset": 0, "directionStride": 4 }
+      },
+      {
+        "objectId": 2004,
+        "kind": "monster",
+        "disposition": "hostile",
+        "name": "Deer",
+        "nameColourArgb": -1,
+        "image": 4,
+        "ai": 2,
+        "effect": 0,
+        "x": 290,
+        "y": 617,
+        "direction": "Down",
+        "dead": false,
+        "skeleton": false,
+        "hidden": false,
+        "sprite": { "bodyLibrary": "Monster/004", "frameBaseOffset": 0, "directionStride": 4 }
+      },
+      {
+        "objectId": 2005,
+        "kind": "monster",
+        "disposition": "hostile",
+        "name": "Scarecrow",
+        "nameColourArgb": -1,
+        "image": 5,
+        "ai": 0,
+        "effect": 0,
+        "x": 291,
+        "y": 616,
+        "direction": "Down",
+        "dead": false,
+        "skeleton": false,
+        "hidden": false,
+        "sprite": { "bodyLibrary": "Monster/005", "frameBaseOffset": 0, "directionStride": 10 }
+      },
+      {
+        "objectId": 2010,
+        "kind": "monster",
+        "disposition": "hostile",
+        "name": "CannibalPlant",
+        "nameColourArgb": -1,
+        "image": 10,
+        "ai": 5,
+        "effect": 0,
+        "x": 285,
+        "y": 614,
+        "direction": "Down",
+        "dead": false,
+        "skeleton": false,
+        "hidden": false,
+        "sprite": { "bodyLibrary": "Monster/010", "frameBaseOffset": 0, "directionStride": 0 }
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectPlayer",
+        "payload": {
+          "objectId": 1001,
+          "name": "RemoteWarrior",
+          "guildName": "BichonGuard",
+          "guildRankName": "Scout",
+          "nameColourArgb": -1,
+          "class": "Warrior",
+          "classKey": "warrior",
+          "gender": "Female",
+          "genderKey": "female",
+          "level": 9,
+          "location": { "x": 289, "y": 616 },
+          "direction": "Left",
+          "hair": 0,
+          "light": 0,
+          "weapon": 0,
+          "weaponEffect": 0,
+          "armour": 0,
+          "poison": 0,
+          "dead": false,
+          "hidden": false,
+          "effect": 0,
+          "wingEffect": 0,
+          "extra": false,
+          "mountType": -1,
+          "ridingMount": false,
+          "fishing": false,
+          "transformType": -1,
+          "elementOrbEffect": 0,
+          "elementOrbLevel": 0,
+          "elementOrbMax": 0,
+          "buffs": [],
+          "levelEffects": 0,
+          "sprite": {
+            "bodyLibrary": "CArmour/00",
+            "hairLibrary": "CHair/00",
+            "weaponLibrary": "CWeapon/00",
+            "weaponLibrarySecondary": null,
+            "frameBaseOffset": 808,
+            "weaponFrameOffset": 416,
+            "altBodyLibrary": null,
+            "altHairLibrary": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "altFrameBaseOffset": null,
+            "altWeaponFrameOffset": null,
+            "frameCount": 4,
+            "directionStride": 4,
+            "mountLibrary": null,
+            "mountFrameOffset": null
+          }
+        }
+      }
+    },
+    {
+      "atMs": 1,
+      "event": { "type": "packet", "packet": "ObjectMonster", "payload": { "objectId": 2003, "name": "Hen", "nameColourArgb": -1, "location": { "x": 287, "y": 615 }, "image": 3, "direction": "Right", "effect": 0, "ai": 1, "light": 0, "dead": false, "skeleton": false, "poison": 0, "hidden": false, "shockTime": 0, "bindingShotCenter": false, "extra": false, "extraByte": 0, "masterObjectId": 0, "rarity": 0, "buffs": [], "sprite": { "bodyLibrary": "Monster/003", "hairLibrary": null, "weaponLibrary": null, "weaponLibrarySecondary": null, "frameBaseOffset": 0, "weaponFrameOffset": null, "altBodyLibrary": null, "altHairLibrary": null, "altWeaponLibrary": null, "altWeaponLibrarySecondary": null, "altFrameBaseOffset": null, "altWeaponFrameOffset": null, "frameCount": 4, "directionStride": 4, "mountLibrary": null, "mountFrameOffset": null } } }
+    },
+    {
+      "atMs": 2,
+      "event": { "type": "packet", "packet": "ObjectMonster", "payload": { "objectId": 2004, "name": "Deer", "nameColourArgb": -1, "location": { "x": 290, "y": 617 }, "image": 4, "direction": "Down", "effect": 0, "ai": 2, "light": 0, "dead": false, "skeleton": false, "poison": 0, "hidden": false, "shockTime": 0, "bindingShotCenter": false, "extra": false, "extraByte": 0, "masterObjectId": 0, "rarity": 0, "buffs": [], "sprite": { "bodyLibrary": "Monster/004", "hairLibrary": null, "weaponLibrary": null, "weaponLibrarySecondary": null, "frameBaseOffset": 0, "weaponFrameOffset": null, "altBodyLibrary": null, "altHairLibrary": null, "altWeaponLibrary": null, "altWeaponLibrarySecondary": null, "altFrameBaseOffset": null, "altWeaponFrameOffset": null, "frameCount": 4, "directionStride": 4, "mountLibrary": null, "mountFrameOffset": null } } }
+    },
+    {
+      "atMs": 3,
+      "event": { "type": "packet", "packet": "ObjectMonster", "payload": { "objectId": 2005, "name": "Scarecrow", "nameColourArgb": -1, "location": { "x": 291, "y": 616 }, "image": 5, "direction": "Down", "effect": 0, "ai": 0, "light": 0, "dead": false, "skeleton": false, "poison": 0, "hidden": false, "shockTime": 0, "bindingShotCenter": false, "extra": false, "extraByte": 0, "masterObjectId": 0, "rarity": 0, "buffs": [], "sprite": { "bodyLibrary": "Monster/005", "hairLibrary": null, "weaponLibrary": null, "weaponLibrarySecondary": null, "frameBaseOffset": 0, "weaponFrameOffset": null, "altBodyLibrary": null, "altHairLibrary": null, "altWeaponLibrary": null, "altWeaponLibrarySecondary": null, "altFrameBaseOffset": null, "altWeaponFrameOffset": null, "frameCount": 4, "directionStride": 4, "mountLibrary": null, "mountFrameOffset": null } } }
+    },
+    {
+      "atMs": 4,
+      "event": { "type": "packet", "packet": "ObjectMonster", "payload": { "objectId": 2010, "name": "CannibalPlant", "nameColourArgb": -1, "location": { "x": 285, "y": 614 }, "image": 10, "direction": "Down", "effect": 0, "ai": 5, "light": 0, "dead": false, "skeleton": false, "poison": 0, "hidden": false, "shockTime": 0, "bindingShotCenter": false, "extra": false, "extraByte": 0, "masterObjectId": 0, "rarity": 0, "buffs": [], "sprite": { "bodyLibrary": "Monster/010", "hairLibrary": null, "weaponLibrary": null, "weaponLibrarySecondary": null, "frameBaseOffset": 0, "weaponFrameOffset": null, "altBodyLibrary": null, "altHairLibrary": null, "altWeaponLibrarySecondary": null, "altWeaponLibrary": null, "altFrameBaseOffset": null, "altWeaponFrameOffset": null, "frameCount": 4, "directionStride": 4, "mountLibrary": null, "mountFrameOffset": null } } }
+    },
+    {
+      "atMs": 5,
+      "event": { "type": "packet", "packet": "ObjectShow", "payload": { "objectId": 2010 } },
+      "checkpoint": { "objectId": 2010, "action": "show", "sequence": 1, "disposition": "hostile", "bodyLibrary": "Monster/010", "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/4.png" } ] }
+    },
+    {
+      "atMs": 1800,
+      "event": { "type": "packet", "packet": "ObjectWalk", "payload": { "objectId": 2003, "x": 288, "y": 615, "direction": "Right" } },
+      "checkpoint": { "objectId": 2003, "action": "walking", "sequence": 2, "visible": true, "layers": [ { "key": "2003:body", "path": "/original-ui/Monster/003/44.png" } ] }
+    },
+    {
+      "atMs": 2500,
+      "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1001, "location": { "x": 289, "y": 616 }, "direction": "Left", "spell": 0, "level": 0, "attackType": 0 } },
+      "checkpoint": { "objectId": 1001, "action": "attack1", "sequence": 3, "visible": true, "layers": [ { "key": "1001:body", "path": "/original-ui/CArmour/00/980.png" }, { "key": "1001:hair", "path": "/original-ui/CHair/00/980.png" }, { "key": "1001:weapon-primary", "path": "/original-ui/CWeapon/00/588.png" } ] }
+    },
+    {
+      "atMs": 2600,
+      "event": { "type": "packet", "packet": "ObjectStruck", "payload": { "objectId": 2005, "attackerId": 1001, "location": { "x": 291, "y": 616 }, "direction": "Down" } },
+      "checkpoint": { "objectId": 2005, "action": "struck", "sequence": 4, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/136.png" } ] }
+    },
+    {
+      "atMs": 2601,
+      "event": { "type": "packet", "packet": "DamageIndicator", "payload": { "damage": 7, "damageType": 0, "objectId": 2005, "typed": true } },
+      "damageCheckpoint": { "sequence": 1, "objectId": 2005, "damage": 7, "damageType": 0 }
+    },
+    {
+      "atMs": 3000,
+      "event": { "type": "packet", "packet": "ObjectDied", "payload": { "objectId": 2005, "location": { "x": 292, "y": 616 }, "direction": "Right", "kind": 2 } },
+      "checkpoint": { "objectId": 2005, "action": "die", "sequence": 5, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/164.png" }, { "key": "2005:scarecrow-die-effect", "path": "/original-ui/Monster/005/224.png", "additive": true } ] }
+    },
+    {
+      "atMs": 3900,
+      "checkpoint": { "objectId": 2005, "action": "die", "sequence": 5, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/173.png" }, { "key": "2005:scarecrow-die-effect", "path": "/original-ui/Monster/005/233.png", "additive": true } ] }
+    },
+    {
+      "atMs": 4000,
+      "checkpoint": { "objectId": 2005, "action": "dead", "sequence": 5, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/173.png" } ] }
+    },
+    {
+      "atMs": 4200,
+      "event": { "type": "packet", "packet": "ObjectHarvest", "payload": { "objectId": 1000, "x": 288, "y": 616, "direction": "Down" } },
+      "checkpoint": { "objectId": 1000, "action": "harvest", "sequence": 6, "visible": true, "layers": [ { "key": "1000:body", "path": "/original-ui/CArmour/00/352.png" }, { "key": "1000:hair", "path": "/original-ui/CHair/00/352.png" }, { "key": "1000:weapon-primary", "path": "/original-ui/CWeapon/01/352.png" } ] }
+    },
+    {
+      "atMs": 5000,
+      "event": { "type": "packet", "packet": "ObjectDied", "payload": { "objectId": 2004, "location": { "x": 290, "y": 618 }, "direction": "Up", "kind": 1 } },
+      "checkpoint": { "objectId": 2004, "action": "die", "sequence": 7, "dead": true, "x": 290, "y": 618, "direction": "Up", "deathKind": 1, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/144.png" } ] }
+    },
+    {
+      "atMs": 6000,
+      "checkpoint": { "objectId": 2004, "action": "dead", "sequence": 7, "dead": true, "x": 290, "y": 618, "direction": "Up", "deathKind": 1, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/153.png" } ] }
+    },
+    {
+      "atMs": 6001,
+      "event": { "type": "packet", "packet": "ObjectHarvested", "payload": { "objectId": 2004, "x": 290, "y": 617, "direction": "Down" } },
+      "checkpoint": { "objectId": 2004, "action": "skeleton", "sequence": 8, "dead": true, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/228.png" } ] }
+    },
+    {
+      "atMs": 6500,
+      "event": { "type": "packet", "packet": "ObjectHide", "payload": { "objectId": 2010 } },
+      "checkpoint": { "objectId": 2010, "action": "hide", "sequence": 9, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/12.png" } ] }
+    },
+    {
+      "atMs": 8099,
+      "checkpoint": { "objectId": 2010, "action": "hide", "sequence": 9, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/5.png" } ] }
+    },
+    {
+      "atMs": 8100,
+      "checkpoint": { "objectId": 2010, "sequence": 9, "visible": false, "layers": [] }
+    },
+    {
+      "atMs": 8200,
+      "event": { "type": "packet", "packet": "ObjectMonster", "payload": { "objectId": 2010, "name": "CannibalPlant", "nameColourArgb": -1, "location": { "x": 285, "y": 614 }, "image": 10, "direction": "Down", "effect": 0, "ai": 5, "light": 0, "dead": false, "skeleton": false, "poison": 0, "hidden": false, "shockTime": 0, "bindingShotCenter": false, "extra": false, "extraByte": 0, "masterObjectId": 0, "rarity": 0, "buffs": [], "sprite": { "bodyLibrary": "Monster/010", "hairLibrary": null, "weaponLibrary": null, "weaponLibrarySecondary": null, "frameBaseOffset": 0, "weaponFrameOffset": null, "altBodyLibrary": null, "altHairLibrary": null, "altWeaponLibrary": null, "altWeaponLibrarySecondary": null, "altFrameBaseOffset": null, "altWeaponFrameOffset": null, "frameCount": 4, "directionStride": 4, "mountLibrary": null, "mountFrameOffset": null } } }
+    },
+    {
+      "atMs": 8201,
+      "event": { "type": "packet", "packet": "ObjectShow", "payload": { "objectId": 2010 } },
+      "checkpoint": { "objectId": 2010, "action": "show", "sequence": 10, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/4.png" } ] }
+    }
+  ]
+}
