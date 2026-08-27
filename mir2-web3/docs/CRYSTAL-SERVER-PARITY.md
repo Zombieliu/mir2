@@ -2570,3 +2570,22 @@ declared automated controls remain 100%, but `globalParityPercent=null`,
 125%/150% DPI, native 30-minute soak, human original-client visual/gameplay
 feel, the complete semantic denominator, and formal publisher signing remain
 open.
+
+## 2026-08-27 Exact-head native artifact binding
+
+`WN-CANDIDATE-04-20260827` now binds the correction to clean revision
+`4074445ccac7c73adcf34c2e6fc775210d6c8a50`. Its 66,665,472-byte EXE has
+SHA-256 `60A3C78D401385E6294FB129FABA50BA9E0EE0253F1C1A572FF0B9F2B70C6CB9`;
+the build-attestation SHA-256 is
+`25643FE5883152FBB7BE7EC6AE68340B5810FF9712A43DB6F579885047429765`.
+The package holds 10,258 files / 325,281,417 bytes. Manifest SHA-256 is
+`043F565024955ED4570D898FB7CE6C20CBEBE02D0993895E80A1E43CBB8ED2E9`,
+and its aggregate SHA-256 is
+`3DCEADF75D9EE64607B5322525886C0EF0946F170A40CAB8C105E6F17AC1A325`.
+
+The formal package command exercised `npm.cmd`; built-in and independent
+verification both passed with exact-source checking, PE validation, detached
+CMS validation, `nonvisual=true`, and `launchRequested=false`. No client was
+started. The CMS certificate is internal/self-signed and does not satisfy the
+formal Authenticode publisher gate. This artifact closes only the exact-head
+nonvisual binding; it does not increase or define whole-game server parity.

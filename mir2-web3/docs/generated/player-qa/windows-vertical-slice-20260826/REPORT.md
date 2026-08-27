@@ -427,3 +427,39 @@ This follow-on remains 100% only for the declared automated controls. It leaves
 does not close same-EXE UI/live WSS, real 125%/150% DPI, a native 30-minute
 soak, human original-client visual/gameplay-feel acceptance, the complete
 semantic denominator, or formal publisher signing.
+
+## Exact-head Candidate-04 package follow-on (2026-08-27)
+
+The shared-Zone correction is now bound to a new clean native artifact rather
+than the older EXE. `WN-CANDIDATE-04-20260827` was built and packaged from
+revision `4074445ccac7c73adcf34c2e6fc775210d6c8a50` without launching the
+client. The PowerShell 5.1 package path executed `npm.cmd` successfully.
+
+- EXE: 66,665,472 bytes, SHA-256
+  `60A3C78D401385E6294FB129FABA50BA9E0EE0253F1C1A572FF0B9F2B70C6CB9`;
+- build attestation SHA-256:
+  `25643FE5883152FBB7BE7EC6AE68340B5810FF9712A43DB6F579885047429765`;
+- package: 10,258 files, 325,281,417 bytes;
+- package manifest SHA-256:
+  `043F565024955ED4570D898FB7CE6C20CBEBE02D0993895E80A1E43CBB8ED2E9`;
+- 10,254-entry manifest aggregate SHA-256:
+  `3DCEADF75D9EE64607B5322525886C0EF0946F170A40CAB8C105E6F17AC1A325`;
+- release-statement SHA-256:
+  `713555BE2BB5018EF77492C76D3A91D664EEA5607A6DC9EA9E20260FCCFF6F5B`;
+- detached CMS SHA-256:
+  `D5DE9AF66951478B47400E2B27F2A3D8372AE1C31D49332AD5F2DCB78DC9FCAA`.
+
+The built-in preflight and an independent final-directory verification both
+passed with `sourceRepoCheck=checked`, `nonvisual=true`,
+`launchRequested=false`, `peValid=true`, and `detachedSignatureValid=true`.
+The final verification evidence SHA-256 is
+`70B8B0753E906F8E205083EF1FE3C660B367C7C3F9E9042E815B92690A4A34A3`;
+its failure list is empty. The package summary SHA-256 is
+`5BF4BB351F513D7E2CAF7B0CAC9338CFF88D3C7EDCC98ECB39942AEB2D944A7E`.
+
+The detached statement was signed with internal self-signed certificate
+`B179E9D6222332C9DB5E960BAECF9990252CFBC7`. The EXE does not carry formal
+publisher Authenticode, and this package was not run for UI, live-WSS, DPI, or
+soak evidence. Candidate-04 therefore replaces the stale package only for
+exact-head nonvisual internal evidence; `accepted=false` and visual acceptance
+remain false.

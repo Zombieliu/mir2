@@ -2789,3 +2789,22 @@ Every time backend parity meaningfully moves, this file should be updated togeth
   is older-source evidence and must be rebuilt from the new exact head. Global
   parity remains undefined, and same-EXE UI/live WSS, real DPI, native soak,
   human acceptance, complete semantic inventory, and formal signing stay open.
+
+## 2026-08-27 Exact-head nonvisual Candidate-04
+
+- Revision `4074445ccac7c73adcf34c2e6fc775210d6c8a50` was clean-built and
+  packaged as `WN-CANDIDATE-04-20260827`, so the shared-Zone correction is now
+  present in the attested native artifact. EXE SHA-256 is
+  `60A3C78D401385E6294FB129FABA50BA9E0EE0253F1C1A572FF0B9F2B70C6CB9`
+  at 66,665,472 bytes; build-attestation SHA-256 is
+  `25643FE5883152FBB7BE7EC6AE68340B5810FF9712A43DB6F579885047429765`.
+- The real package path exercised the `npm.cmd` PowerShell fix, staged 10,258
+  files / 325,281,417 bytes, and passed its built-in plus independent
+  verification with source-repository checking, PE validation, detached CMS,
+  `nonvisual=true`, and `launchRequested=false`. Manifest SHA-256 is
+  `043F565024955ED4570D898FB7CE6C20CBEBE02D0993895E80A1E43CBB8ED2E9`;
+  aggregate SHA-256 is
+  `3DCEADF75D9EE64607B5322525886C0EF0946F170A40CAB8C105E6F17AC1A325`.
+- The CMS signer is internal/self-signed and the EXE is not Authenticode-signed
+  by a formal publisher. This closes the exact-head nonvisual packaging gap,
+  not the UI/live/DPI/soak/human/formal-signing gates or global parity.

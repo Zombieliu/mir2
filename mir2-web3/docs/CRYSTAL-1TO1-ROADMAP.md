@@ -4723,3 +4723,27 @@ visual/feel acceptance.
   UI/live WSS, real 125%/150% DPI, native 30-minute soak, human
   original-client visual/gameplay-feel acceptance, the complete semantic
   denominator, and formal publisher signing remain open.
+
+## 2026-08-27 Exact-head Windows Candidate-04 package
+
+- Clean revision `4074445ccac7c73adcf34c2e6fc775210d6c8a50` was rebuilt as
+  `WN-CANDIDATE-04-20260827`. The attested EXE is 66,665,472 bytes with
+  SHA-256 `60A3C78D401385E6294FB129FABA50BA9E0EE0253F1C1A572FF0B9F2B70C6CB9`;
+  build-attestation SHA-256 is
+  `25643FE5883152FBB7BE7EC6AE68340B5810FF9712A43DB6F579885047429765`.
+- The repaired PowerShell 5.1 path executed `npm.cmd` successfully while
+  regenerating the native keyed map. The final package contains 10,258 files
+  and 325,281,417 bytes. Package-manifest SHA-256 is
+  `043F565024955ED4570D898FB7CE6C20CBEBE02D0993895E80A1E43CBB8ED2E9`;
+  its 10,254-entry aggregate is
+  `3DCEADF75D9EE64607B5322525886C0EF0946F170A40CAB8C105E6F17AC1A325`.
+- Both the packaging preflight and an independent final-directory verification
+  passed with `sourceRepoCheck=checked`, `nonvisual=true`,
+  `launchRequested=false`, valid PE structure, and a valid detached CMS release
+  statement. Verification evidence SHA-256 is
+  `70B8B0753E906F8E205083EF1FE3C660B367C7C3F9E9042E815B92690A4A34A3`.
+- The signer is the documented internal self-signed certificate, not a formal
+  publisher Authenticode certificate; the EXE was not launched. Candidate-04
+  supersedes the older EXE only for exact-head nonvisual internal evidence and
+  leaves every live, UI, DPI, soak, human, semantic-denominator, and formal
+  signing gate open. Its acceptance and visual truth fields remain false.
