@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 Inventory ButtonA additional bounded checkpoint (2026-08-28):
+> implementation revision `5b70511316b084ac677b5978f7f03e440241ca4c`
+> reproduces Crystal's enabled Inventory HUD mouse-click cue: exact
+> `ButtonA=10103 -> 103.wav`, one edge before the click callback, no held-state
+> repeat and no sound for the independent F9/I toggle. UI and gameplay queues
+> and audio-player cleanup are isolated, missing/disabled/zero-volume paths
+> fail closed, and Candidate scripts require the exact 26,546-byte/hash-bound
+> WAV. Windows 376/376, Bevy 397/397, focused 4/4 and both script self-tests
+> pass; final review has P0=0/P1=0. This closes one interaction/audio leaf,
+> not Inventory, HUD, VIS-03 or visual acceptance. Same-EXE audio, pointer
+> feel, real DPI, live WSS, soak, human acceptance, signing and the complete
+> denominator remain open; `globalParityPercent` remains null.
+
 > VIS-01 selected-target additional bounded checkpoint (2026-08-28):
 > implementation revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d`
 > reproduces Crystal's selected remote player/monster full-composite redraw at

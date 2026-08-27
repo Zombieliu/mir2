@@ -12,6 +12,7 @@ Crystal sourceRootClean: false
 native implementation base: 67a55b37900ced07d66bd788cbe06ef429ede8aa
 visual branch: codex/windows-visual-parity
 selectedTargetCheckpointRevision: a58ab0aaa2202731a5c55e7a684261d6c15c2f8d
+inventoryButtonACheckpointRevision: 5b70511316b084ac677b5978f7f03e440241ca4c
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -31,6 +32,34 @@ Its counts are known source-backed scope registries, not a full-game
 percentage. `node scripts/verify-windows-visual-parity-ledger.mjs` checks its
 internal counting and fail-closed claim invariants; it is not a substitute for
 complete source extraction.
+
+## Inventory ButtonA bounded checkpoint
+
+Revision `5b70511316b084ac677b5978f7f03e440241ca4c` closes automated evidence
+for one VIS-03 interaction/audio rule. Crystal defines `ButtonA=10103`, maps
+it to `103.wav`, and plays it once on an enabled `MirControl.OnMouseClick`
+before invoking the click callback. The Windows Inventory HUD now queues that
+typed local sound exactly once on a changed pointer transition to Pressed,
+immediately before toggling the panel. Holding Pressed cannot repeat it;
+releasing and pressing again can. The independent F9/I state toggle never
+enters the pointer producer and remains silent.
+
+The bounded UI queue and its spawned-player marker are separate from packet-
+authoritative gameplay audio, including simultaneous same-frame playback.
+Missing `103.wav`, disabled sound and zero volume discard the pending cue
+without selecting a fallback. Package and verifier scripts allowlist,
+require, copy and identity-bind the existing source file at 26,546 bytes and
+SHA-256
+`7A55D27DEA18F70EB4FF4F324B682EFAB4996406EFAE3E94467D3C39CCCC674A`;
+their self-tests reject missing, wrong-size and wrong-hash probes.
+
+Windows 376/376, Bevy native-ui 397/397, focused ButtonA/audio 4/4,
+package/verifier self-tests, rustfmt and diff checks pass. Independent final
+review reports P0=0/P1=0 after separating UI and gameplay player lifecycles.
+No Candidate, EXE, live audio device, GPU capture or human evidence was
+created. This is not completion of the Inventory panel, main HUD, VIS-03 or
+UI parity. All other controls, same-EXE/live WSS, 100/125/150% DPI, native
+30-minute soak, human visual/audio/feel and publisher signing remain required.
 
 ## Selected-target bounded checkpoint
 

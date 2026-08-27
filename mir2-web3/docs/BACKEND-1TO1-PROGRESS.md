@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-03 Inventory ButtonA client-boundary checkpoint (2026-08-28): revision
+> `5b70511316b084ac677b5978f7f03e440241ca4c` changes no simulation, shared-
+> Zone, Gateway or gameplay authority. The native client locally reproduces
+> Crystal's enabled Inventory mouse-click `ButtonA=10103 -> 103.wav` edge
+> before the panel toggle; keyboard F9/I is intentionally silent. Typed UI
+> audio is isolated from packet-authoritative gameplay audio, and package/
+> verify identity-bind the exact WAV. Windows 376/376, Bevy 397/397, focused
+> 4/4, both script self-tests and independent P0=0/P1=0 review pass. No live
+> WSS, EXE, package or audible-device evidence was produced. Other controls
+> and all same-EXE/DPI/soak/human/signing/denominator gates remain open. No
+> backend, visual or global percentage is claimed.
+
 > VIS-01 selected-target client-boundary checkpoint (2026-08-28): revision
 > `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` changes no simulation, combat or
 > shared-Zone authority. It consumes the existing selected object ID and typed

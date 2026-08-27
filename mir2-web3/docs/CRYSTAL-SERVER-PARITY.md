@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> VIS-03 Inventory ButtonA server-client note (2026-08-28): revision
+> `5b70511316b084ac677b5978f7f03e440241ca4c` adds no server packet or gameplay
+> authority. As in Crystal `MirControl.OnMouseClick`, the native client alone
+> emits exact local `ButtonA=10103 -> 103.wav` once for the enabled Inventory
+> HUD pointer edge before its callback; the keyboard toggle remains silent.
+> UI/gameplay audio lifecycles are independent and the Candidate scripts bind
+> the exact sound bytes. Windows 376/376, Bevy 397/397, focused 4/4, script
+> self-tests and P0=0/P1=0 final review pass. No EXE, live audio/WSS or visual
+> evidence was created. The rest of HUD interaction and every final real-
+> window gate remain open; global parity stays unreported.
+
 > VIS-01 selected-target server-client note (2026-08-28): revision
 > `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` adds no server authority. The
 > Windows client now consumes the existing selected object identity and

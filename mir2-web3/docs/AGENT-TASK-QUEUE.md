@@ -1,5 +1,24 @@
 # Agent Task Queue
 
+> VIS-03 Inventory ButtonA additional bounded automated checkpoint
+> (2026-08-28): revision `5b70511316b084ac677b5978f7f03e440241ca4c`
+> binds the enabled InGame Inventory HUD pointer-press edge to Crystal
+> `SoundList.ButtonA = 10103`, whose exact source mapping is `103.wav`.
+> The sound is queued once immediately before the inventory click callback;
+> a held press cannot repeat it, a later press can, and the direct F9/I
+> keyboard toggle remains silent. Typed UI and packet-authoritative gameplay
+> queues plus their spawned-player lifecycles are separate, including a
+> same-frame regression. Missing source, disabled sound and zero volume fail
+> closed without fallback. Candidate package/verify now allowlist, require,
+> copy and identity-bind the existing 26,546-byte WAV at SHA-256
+> `7A55D27DEA18F70EB4FF4F324B682EFAB4996406EFAE3E94467D3C39CCCC674A`.
+> Windows 376/376, Bevy native-ui 397/397, focused ButtonA/audio 4/4,
+> package/verifier self-tests, rustfmt and diff checks pass; independent final
+> review found no P0/P1 after lifecycle remediation. No EXE, package, live
+> audio or screenshot was produced. Other controls, hover/pressed feel,
+> same-EXE/live-WSS/audio-device/DPI/soak/human/signing and the incomplete
+> denominator remain open. Do not emit a global percentage.
+
 > VIS-01 selected-target additional bounded automated checkpoint (2026-08-28):
 > revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` implements
 > Crystal's post-world `DrawBlend` redraw for explicitly selected remote

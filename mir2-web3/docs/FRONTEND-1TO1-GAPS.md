@@ -2,6 +2,21 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-03 Inventory ButtonA additional bounded
+> checkpoint: revision `5b70511316b084ac677b5978f7f03e440241ca4c`
+> closes automated behavior for one local HUD interaction only. The enabled
+> InGame Inventory mouse press queues Crystal `ButtonA=10103 -> 103.wav`
+> exactly once before toggling the panel; held presses do not repeat,
+> subsequent presses do, and F9/I remains silent. UI/gameplay queues and
+> spawned-player cleanup are independent; missing source, disabled sound and
+> zero volume never fall back. The exact 26,546-byte sound is package/verify
+> required and SHA-256 bound. Windows 376/376, Bevy 397/397, focused 4/4 and
+> script self-tests pass, with final review P0=0/P1=0. No live audio,
+> same-EXE capture or package was produced. Character and every other
+> control's source binding, hover/pressed/disabled feel, real DPI and human
+> acceptance remain open, so this is not HUD, UI or visual 100% and
+> `globalParityPercent` remains null.
+
 > 2026-08-28 Windows-native VIS-01 selected-target additional bounded
 > checkpoint: revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d`
 > redraws an explicitly selected remote player or monster's complete resolved
