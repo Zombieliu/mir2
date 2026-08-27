@@ -2723,16 +2723,20 @@ Every time backend parity meaningfully moves, this file should be updated togeth
 - The Developer Handoff failure was outside Gateway semantics: current and
   fallback R2 prefixes both lacked the tracked `bevy-1813be587ef98bc1` package,
   while six later runtime changes had not refreshed the generated manifest.
-- Locked current-source builds reproducibly generate
-  `bevy-5046abca14947f40`; two runs produced manifest SHA-256
+- Two locked current-source builds on the same Windows evidence host generated
+  `bevy-5046abca14947f40` and manifest SHA-256
   `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1`.
   Runtime download tests pass 4/4, policy passes 5/5, both size budgets pass,
   and the full Web production pipeline completes through 13/13 static pages.
+  This proves same-host repeatability, not cross-machine byte reproducibility.
 - Handoff CI remains fail-closed: it prefers the four SHA-verified prebuilt
-  files, builds with pinned Rust/wasm-bindgen when they are unavailable, and
-  rejects any regenerated-manifest drift. No production R2 or deployment was
-  mutated. This does not expand backend parity or alter the remaining live
-  database, remote Zone, crash-recovery, UI, soak, human, and signing gates.
+  files and keeps that exact content lock when they are available. When they are
+  unavailable, it builds with pinned Rust/wasm-bindgen and requires the active
+  manifest/file hashes, WASM validation, dual-backend budgets, and complete Web
+  build to pass before restoring the tracked manifest. No production R2 or
+  deployment was mutated. This does not expand backend parity or alter the
+  remaining live database, remote Zone, crash-recovery, UI, soak, human, and
+  signing gates.
 - Exact-head run `33020542728` then exposed an installation-only runner race:
   pinned Cargo started rustc through the default stable rustup proxy while that
   proxy updated. The fallback now pins `RUSTUP_TOOLCHAIN` and `RUSTC` before
@@ -2745,6 +2749,16 @@ Every time backend parity meaningfully moves, this file should be updated togeth
 - Developer Environment run `33023066209` proved Linux source compilation but
   also showed that Linux host-local JS/WASM hashes differ from the canonical
   Windows release hashes (`bevy-a314c804ae9919d3` versus tracked
-  `bevy-5046abca14947f40`). The matrix now keeps source-build success on all four
-  hosts, enforces zero manifest diff on Windows, and restores only the generated
-  host-local manifest on Unix/macOS before its clean-checkout assertion.
+  `bevy-5046abca14947f40`). Exact-head run `33023784689` then proved all four
+  source builds but showed Windows CI also emits a host-local
+  `bevy-efe7c0554bdf9a45`; its JS wrappers matched and only the WASM hashes
+  differed. The WASM contains absolute Cargo-registry source paths, invalidating
+  the prior cross-machine zero-diff assumption. The matrix now validates each
+  active source-built bundle and restores its generated manifest on every host
+  before the clean-checkout assertion; the immutable prebuilt content lock
+  remains exact.
+- Exact-head Handoff run `33023777224` independently produced the same
+  CI-host `bevy-efe7c0554bdf9a45`, passed the current-source runtime build and
+  full Player Web build, and failed only the superseded tracked-manifest byte
+  comparison. The corrected Handoff now runs the active-bundle budget/integrity
+  gate before restoring a fallback manifest.

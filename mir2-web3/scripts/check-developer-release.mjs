@@ -462,7 +462,21 @@ function checkDeveloperReleaseLock() {
     ],
     [
       ".github/workflows/developer-environment.yml",
-      ["macos-15-intel", "developer-environment-starter-${ACCEPTED_REVISION}"],
+      [
+        "macos-15-intel",
+        "developer-environment-starter-${ACCEPTED_REVISION}",
+        "Verify current-source Bevy runtime bundle",
+        "npm run test:bevy-runtime-budget",
+        "Restore tracked Bevy runtime release lock after source validation",
+      ],
+    ],
+    [
+      ".github/workflows/developer-handoff.yml",
+      [
+        "Verify active Bevy runtime bundle",
+        "Verify pinned prebuilt Bevy runtime manifest remains exact",
+        "Restore current-source Bevy runtime manifest after fallback validation",
+      ],
     ],
     [
       ".github/workflows/developer-full-assets.yml",

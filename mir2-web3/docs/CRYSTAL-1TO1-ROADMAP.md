@@ -4639,19 +4639,23 @@ visual/feel acceptance.
 ## 2026-08-27 Web runtime handoff reproducibility
 
 - Candidate: the tracked Web runtime manifest is refreshed from the current
-  branch source to `bevy-5046abca14947f40`. Two identical locked Windows source
-  builds produced the same manifest SHA-256
+  branch source to `bevy-5046abca14947f40`. Two identical locked source builds
+  on the same Windows evidence host produced the same manifest SHA-256
   `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1` and the
-  same four JS/WASM hashes.
+  same four JS/WASM hashes; that result is not promoted to cross-machine byte
+  reproducibility.
 - Candidate: Developer Handoff now attempts the SHA-verified immutable prebuilt
   package first, then uses the runtime-pinned Rust `1.95.0`, wasm32 target, and
   wasm-bindgen `0.2.118` source fallback when that object is unavailable. The
-  final build fails if the regenerated manifest differs from the tracked pin.
+  successful prebuilt path retains the exact tracked four-file content lock. A
+  source fallback instead fails unless its generated manifest matches its own
+  JS/WASM files, both WASM modules validate, both backend budgets pass, and the
+  complete Player Web build succeeds; it then restores the tracked manifest.
 - Candidate: Developer Environment still source-builds the runtime on Windows,
-  Linux, Apple Silicon macOS, and Intel macOS. Windows is the canonical tracked
-  release-manifest host and must produce zero diff; Unix/macOS builds emit
-  host-local hashes and restore only that generated manifest before the final
-  clean-checkout assertion.
+  Linux, Apple Silicon macOS, and Intel macOS. Every host must pass the same
+  generated-manifest/file integrity, valid-WASM, and dual-backend budget checks,
+  then restore only its generated manifest before the final clean-checkout
+  assertion.
 - Candidate: the first exact-head fallback run exposed a Windows rustup race
   before the source build: wasm-bindgen installation used pinned Cargo but its
   child rustc still resolved through the runner's default `stable` proxy.
@@ -4661,6 +4665,20 @@ visual/feel acceptance.
   immutable object to a current-source build. Fault-injected Bash and Windows
   wrapper contracts pass; the next exact-head real Linux image/Compose smoke is
   still required before this PR is merge-ready.
+- Candidate: exact-head Developer Environment run `33023784689` passed source
+  compilation on Windows, Linux, Apple Silicon macOS, and Intel macOS, but the
+  old Windows zero-diff assertion exposed another host-local runtime id:
+  `bevy-efe7c0554bdf9a45` instead of tracked `bevy-5046abca14947f40`; only the
+  WASM hashes differed. Inspection confirms the release WASM contains absolute
+  Cargo-registry source paths, so same-host repeatability cannot establish
+  cross-account byte identity. The corrected gate keeps the immutable prebuilt
+  content lock strict while validating source fallbacks by their active bundle,
+  not by a known-invalid cross-machine byte comparison.
+- Candidate: exact-head Handoff run `33023777224` independently rebuilt the
+  runtime as the same CI-host `bevy-efe7c0554bdf9a45` and completed the full
+  Player Web build; it failed only at the superseded tracked-manifest byte
+  comparison. This confirms a stable host-local result rather than a transient
+  compiler failure and is the direct regression case for the corrected gate.
 - Current dual-backend budget passes at WebGPU 27,468,107 raw / 5,954,427 gzip
   and WebGL2 28,836,375 raw / 6,399,104 gzip. The complete Player Web production
   build also passes 9,650 entity frames, 40,763 original assets, the 57-page map

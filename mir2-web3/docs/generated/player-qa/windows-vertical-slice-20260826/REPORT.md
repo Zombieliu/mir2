@@ -311,21 +311,26 @@ current/fallback R2 prefixes did not contain the tracked
 refreshed the generated manifest. No production R2 publication was performed as
 part of this Candidate work.
 
-Current branch source was rebuilt twice with runtime-pinned Rust `1.95.0`, the
-`wasm32-unknown-unknown` target, and wasm-bindgen `0.2.118`. Both runs generated
-`bevy-5046abca14947f40` with manifest SHA-256
+Current branch source was rebuilt twice on the same evidence host with
+runtime-pinned Rust `1.95.0`, the `wasm32-unknown-unknown` target, and
+wasm-bindgen `0.2.118`. Both runs generated `bevy-5046abca14947f40` with
+manifest SHA-256
 `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1` and
-identical file hashes. WebGPU is 27,468,107 raw / 5,954,427 gzip; WebGL2 is
+identical file hashes. This is same-host repeatability, not cross-machine byte
+reproducibility. WebGPU is 27,468,107 raw / 5,954,427 gzip; WebGL2 is
 28,836,375 raw / 6,399,104 gzip. Both runtime budgets pass, runtime policy is
 5/5, prebuilt downloader tests are 4/4, and the complete Player Web production
 build passes 9,650 entity frames, 40,763 original assets, 57 map-atlas pages,
 TypeScript, and 13/13 static pages.
 
 Developer Handoff now prefers the SHA-verified prebuilt package but falls back
-to that exact locked source build when the immutable object is unavailable; it
-then rejects any regenerated-manifest drift. This is follow-on source/CI
-evidence and does not alter Candidate-03's packaged EXE or close a deployed
-runtime, same-EXE UI/live-WSS, DPI, soak, human, or publisher-certificate gate.
+to the pinned current-source toolchain when the immutable object is unavailable.
+The prebuilt path keeps the exact four-file manifest lock; the fallback path
+requires its active manifest/file hashes, valid WASM, both size budgets, and the
+complete Player Web build to pass, then restores the tracked manifest. This is
+follow-on source/CI evidence and does not alter Candidate-03's packaged EXE or
+close a deployed runtime, same-EXE UI/live-WSS, DPI, soak, human, or
+publisher-certificate gate.
 
 The first exact-head fallback attempt, GitHub Actions run `33020542728`, failed
 before runtime compilation. Its wasm-bindgen install launched pinned Cargo but
@@ -343,11 +348,22 @@ not an inferred pass.
 Developer Environment run `33023066209` subsequently proved the Linux source
 build but failed an over-strict cross-host hash assertion: Linux generated
 `bevy-a314c804ae9919d3`, while this Windows Candidate tracks
-`bevy-5046abca14947f40`. The corrected matrix retains source builds on all four
-hosts, uses Windows as the canonical zero-diff release-manifest check, and
-restores only the generated host-local manifest on Unix/macOS before the final
-clean-checkout assertion. This host distinction does not change the Candidate
-EXE, its hashes, or any open acceptance gate.
+`bevy-5046abca14947f40`. Exact-head run `33023784689` then compiled successfully
+on Windows, Linux, Apple Silicon macOS, and Intel macOS, but Windows CI generated
+host-local `bevy-efe7c0554bdf9a45`; its JS wrappers matched and only the two WASM
+hashes differed. Inspection confirms release WASM contains absolute
+Cargo-registry source paths, so the prior Windows cross-account zero-diff check
+was not a valid source-equivalence gate. The corrected matrix validates each
+generated active bundle and restores its host-local manifest on all four hosts
+before the final clean-checkout assertion. The fetched immutable prebuilt
+package remains strictly SHA-locked. This distinction does not change the
+Candidate EXE, its hashes, or any open acceptance gate.
+
+Exact-head Handoff run `33023777224` independently produced the same CI-host
+`bevy-efe7c0554bdf9a45`, passed the current-source runtime build and full Player
+Web build, and failed only the superseded tracked-manifest byte comparison. The
+corrected Handoff uses that path as the active-bundle integrity/budget regression
+case and restores the tracked manifest only after the source fallback passes.
 
 ## Not closed
 

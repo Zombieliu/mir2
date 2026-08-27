@@ -2494,18 +2494,22 @@ semantic denominator, and formal publisher signing remain open.
 
 ## 2026-08-27 Web runtime artifact consistency
 
-The current runtime source reproducibly generates
-`bevy-5046abca14947f40`, replacing the stale tracked manifest for
-`bevy-1813be587ef98bc1`. Two locked Windows builds produced the same manifest
-SHA-256, `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1`, and
-the full production build passed both WASM budgets, 9,650 entity frames, 40,763
-original assets, the 57-page map atlas, TypeScript, and 13/13 static pages.
+The current runtime source generated `bevy-5046abca14947f40` twice on the same
+Windows evidence host, replacing the stale tracked manifest for
+`bevy-1813be587ef98bc1`. Both local builds produced manifest SHA-256
+`4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1`, and the
+full production build passed both WASM budgets, 9,650 entity frames, 40,763
+original assets, the 57-page map atlas, TypeScript, and 13/13 static pages. This
+is same-host repeatability, not a cross-machine byte-reproducibility claim.
 
 Developer Handoff first verifies the immutable prebuilt package and, when it is
 absent, compiles with runtime-pinned Rust `1.95.0` and wasm-bindgen `0.2.118`.
-It then requires the generated manifest to match the repository pin. This is a
-clean-checkout artifact gate only: no production R2/deployment was changed, no
-server parity percentage is added, and all live/human/release gates remain open.
+The prebuilt path retains its exact four-file repository content lock. A source
+fallback instead verifies that the active manifest matches its generated files,
+both WASM modules validate, both backend budgets pass, and the complete Web
+build succeeds before restoring the tracked manifest. This is a clean-checkout
+artifact gate only: no production R2/deployment was changed, no server parity
+percentage is added, and all live/human/release gates remain open.
 
 The first exact-head source-fallback attempt failed before compilation because
 the wasm-bindgen install pinned Cargo but not its rustc child, allowing the
@@ -2516,9 +2520,19 @@ fault-injected Bash/PowerShell contracts proving the branch is taken. This is
 CI/developer-environment hardening only; the real exact-head Linux Compose smoke
 remains pending and does not change any parity numerator or acceptance field.
 
-Linux clean-checkout source compilation produced a valid host-local
-`bevy-a314c804ae9919d3`, distinct from the canonical Windows
-`bevy-5046abca14947f40`. The Developer Environment matrix therefore verifies
-the tracked manifest exactly on Windows while still requiring successful source
-builds on Linux and both macOS runners, where it restores only the generated
-host-local manifest before proving the checkout is otherwise clean.
+Linux clean-checkout source compilation produced valid host-local
+`bevy-a314c804ae9919d3`, distinct from tracked `bevy-5046abca14947f40`.
+Exact-head run `33023784689` then passed source compilation on all four matrix
+hosts but showed Windows CI emits `bevy-efe7c0554bdf9a45`; its JS wrappers were
+unchanged and only the WASM hashes differed. Inspection confirms release WASM
+contains absolute Cargo-registry source paths, so a cross-account byte comparison
+is not a valid source-equivalence gate. The matrix now validates the generated
+bundle on every host and restores only its host-local manifest before proving
+the checkout is otherwise clean. The separately fetched immutable prebuilt
+package remains SHA-locked to the tracked manifest.
+
+Exact-head Handoff run `33023777224` independently rebuilt the same CI-host
+`bevy-efe7c0554bdf9a45` and passed the complete Player Web build before failing
+only the superseded tracked-manifest comparison. The repeated host-local id
+supports the corrected integrity/budget gate and is not a server-parity or
+deployed-runtime claim.

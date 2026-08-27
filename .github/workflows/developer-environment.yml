@@ -113,16 +113,11 @@ jobs:
       - name: Verify developer release locks and Starter resources
         run: node mir2-web3/scripts/check-developer-release.mjs
 
-      - name: Verify tracked Bevy runtime release lock
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --exit-code -- \
-            mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
+      - name: Verify current-source Bevy runtime bundle
+        working-directory: mir2-web3/apps/web
+        run: npm run test:bevy-runtime-budget
 
-      - name: Restore host-local Bevy runtime release lock
-        if: runner.os != 'Windows'
+      - name: Restore tracked Bevy runtime release lock after source validation
         shell: bash
         run: |
           set -euo pipefail

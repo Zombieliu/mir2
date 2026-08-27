@@ -143,15 +143,25 @@ jobs:
           MIR2_USE_PREBUILT_BEVY_RUNTIME: "0"
         run: npm run runtime:build:release
 
-      - name: Build Player Web with tracked runtime
+      - name: Build Player Web with verified runtime
         working-directory: mir2-web3/apps/web
         env:
           MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
         run: npm run build
 
-      - name: Verify tracked Bevy runtime manifest remains exact
+      - name: Verify active Bevy runtime bundle
+        working-directory: mir2-web3/apps/web
+        run: npm run test:bevy-runtime-budget
+
+      - name: Verify pinned prebuilt Bevy runtime manifest remains exact
+        if: ${{ steps.bevy_prebuilt.outcome == 'success' }}
         shell: pwsh
         run: git diff --exit-code -- mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
+
+      - name: Restore current-source Bevy runtime manifest after fallback validation
+        if: ${{ steps.bevy_prebuilt.outcome == 'failure' }}
+        shell: pwsh
+        run: git restore --source=HEAD --worktree -- mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
 
       - name: Typecheck and build Admin Web
         working-directory: mir2-web3/apps/admin-web
