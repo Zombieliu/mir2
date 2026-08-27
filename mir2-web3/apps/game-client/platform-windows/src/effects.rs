@@ -101,6 +101,22 @@ const FLAMING_SWORD_SOUND_FILE: &str = "M8-1.wav";
 const FLAMING_SWORD_SOUND_CUE: &str = "FlamingSword.attack";
 const PLAYER_REVIVE_SOUND_FILE: &str = "M79-1.wav";
 const PLAYER_REVIVE_SOUND_CUE: &str = "PlayerRevive";
+const PLAYER_STRUCK_BODY_SWORD_FILE: &str = "70.wav";
+const PLAYER_STRUCK_BODY_AXE_FILE: &str = "71.wav";
+const PLAYER_STRUCK_BODY_LONG_STICK_FILE: &str = "72.wav";
+const PLAYER_STRUCK_BODY_FIST_FILE: &str = "73.wav";
+const PLAYER_STRUCK_ARMOUR_SWORD_FILE: &str = "80.wav";
+const PLAYER_STRUCK_ARMOUR_AXE_FILE: &str = "81.wav";
+const PLAYER_STRUCK_ARMOUR_LONG_STICK_FILE: &str = "82.wav";
+const PLAYER_STRUCK_ARMOUR_FIST_FILE: &str = "83.wav";
+const PLAYER_MALE_FLINCH_FILE: &str = "138.wav";
+const PLAYER_FEMALE_FLINCH_FILE: &str = "139.wav";
+const PLAYER_MALE_DIE_FILE: &str = "144.wav";
+const PLAYER_FEMALE_DIE_FILE: &str = "145.wav";
+const PLAYER_TIGER_STRUCK_1_FILE: &str = "tiger_struck_1.wav";
+const PLAYER_TIGER_STRUCK_2_FILE: &str = "tiger_struck_2.wav";
+const PLAYER_WOLF_STRUCK_FILE: &str = "wolf_struck1.wav";
+const PLAYER_DIE_SOUND_DELAY_MS: u64 = 100;
 const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
 const SOUL_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M64-1.wav";
@@ -178,6 +194,186 @@ fn crystal_projectile_clock(distance: u64) -> (u64, u64) {
     let process_frame_count = (duration_ms / FIREBALL_PROJECTILE_STEP_MS).max(1);
     let frame_interval_ms = (duration_ms / process_frame_count).max(1);
     (duration_ms, frame_interval_ms)
+}
+
+fn actor_is_player(actor: &Value) -> bool {
+    actor
+        .get("kind")
+        .and_then(Value::as_str)
+        .is_some_and(|kind| {
+            matches!(
+                kind.to_ascii_lowercase().as_str(),
+                "selfplayer" | "player" | "hero"
+            )
+        })
+}
+
+fn actor_sound_key(actor: &Value) -> Option<String> {
+    actor
+        .get("objectId")
+        .and_then(|value| {
+            value
+                .as_u64()
+                .map(|id| id.to_string())
+                .or_else(|| value.as_str().map(str::to_owned))
+        })
+        .filter(|value| !value.is_empty() && value != "0")
+}
+
+fn actor_sprite_library<'a>(actor: &'a Value, field: &str) -> Option<&'a str> {
+    actor
+        .get("sprite")
+        .and_then(Value::as_object)
+        .and_then(|sprite| sprite.get(field))
+        .or_else(|| actor.get(field))
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+}
+
+fn actor_is_female(actor: &Value) -> bool {
+    actor
+        .get("genderKey")
+        .or_else(|| actor.get("gender"))
+        .and_then(Value::as_str)
+        .is_some_and(|gender| gender.eq_ignore_ascii_case("female"))
+}
+
+fn actor_is_assassin(actor: &Value) -> bool {
+    actor
+        .get("classKey")
+        .or_else(|| actor.get("class"))
+        .and_then(Value::as_str)
+        .is_some_and(|class| class.eq_ignore_ascii_case("assassin"))
+}
+
+fn player_library_index(library: &str) -> Option<i32> {
+    let normalized = library.trim().replace('\\', "/");
+    let tail = normalized.trim_end_matches('/').rsplit('/').next()?;
+    let digits = tail
+        .chars()
+        .skip_while(|character| !character.is_ascii_digit())
+        .take_while(char::is_ascii_digit)
+        .collect::<String>();
+    (!digits.is_empty())
+        .then(|| digits.parse::<i32>().ok())
+        .flatten()
+}
+
+fn player_weapon_index(attacker: Option<&Value>) -> i32 {
+    let Some(attacker) = attacker.filter(|actor| actor_is_player(actor)) else {
+        return -2;
+    };
+    let weapon = attacker
+        .get("weapon")
+        .and_then(Value::as_i64)
+        .and_then(|value| i32::try_from(value).ok())
+        .or_else(|| actor_sprite_library(attacker, "weaponLibrary").and_then(player_library_index))
+        .unwrap_or(-1);
+    if actor_is_assassin(attacker) && weapon != -1 {
+        1
+    } else {
+        weapon
+    }
+}
+
+fn player_mount_index(actor: &Value) -> Option<i32> {
+    match actor.get("ridingMount").and_then(Value::as_bool) {
+        Some(false) => return None,
+        Some(true) => {
+            if let Some(mount_type) = actor
+                .get("mountType")
+                .and_then(Value::as_i64)
+                .and_then(|value| i32::try_from(value).ok())
+                .filter(|value| *value >= 0)
+            {
+                return Some(mount_type);
+            }
+        }
+        None => {}
+    }
+    actor_sprite_library(actor, "mountLibrary").and_then(player_library_index)
+}
+
+fn player_struck_body_file(target: &Value, attacker: Option<&Value>) -> Option<&'static str> {
+    let heavy_armour = !actor_is_assassin(target)
+        && actor_sprite_library(target, "bodyLibrary")
+            .and_then(player_library_index)
+            .is_some_and(|armour| matches!(armour, 3 | 6 | 9));
+    let weapon = player_weapon_index(attacker);
+    if matches!(
+        weapon,
+        0 | 1
+            | 2
+            | 3
+            | 5
+            | 7
+            | 8
+            | 9
+            | 11
+            | 12
+            | 13
+            | 15
+            | 18
+            | 19
+            | 20
+            | 23
+            | 24
+            | 25
+            | 26
+            | 28
+            | 29
+            | 31
+            | 32
+            | 33
+            | 34
+            | 35
+            | 37
+            | 40
+            | 41
+    ) {
+        Some(if heavy_armour {
+            PLAYER_STRUCK_ARMOUR_SWORD_FILE
+        } else {
+            PLAYER_STRUCK_BODY_SWORD_FILE
+        })
+    } else if matches!(weapon, 4 | 14 | 16 | 38) {
+        Some(if heavy_armour {
+            PLAYER_STRUCK_ARMOUR_AXE_FILE
+        } else {
+            PLAYER_STRUCK_BODY_AXE_FILE
+        })
+    } else if matches!(weapon, 6 | 10 | 17 | 21 | 22 | 27 | 30 | 36 | 39) {
+        Some(if heavy_armour {
+            PLAYER_STRUCK_ARMOUR_LONG_STICK_FILE
+        } else {
+            PLAYER_STRUCK_BODY_LONG_STICK_FILE
+        })
+    } else if weapon == -1 {
+        Some(if heavy_armour {
+            PLAYER_STRUCK_ARMOUR_FIST_FILE
+        } else {
+            PLAYER_STRUCK_BODY_FIST_FILE
+        })
+    } else {
+        None
+    }
+}
+
+fn player_sound_actor_key(payload: &Value, self_player: bool) -> Option<String> {
+    payload
+        .get("_nativeTarget")
+        .and_then(actor_sound_key)
+        .or_else(|| {
+            (!self_player)
+                .then(|| {
+                    payload
+                        .get("objectId")
+                        .and_then(|value| value.as_u64().map(|id| id.to_string()))
+                })
+                .flatten()
+        })
+        .or_else(|| self_player.then(|| "self".to_owned()))
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -860,6 +1056,7 @@ struct EffectProvenance {
 struct PendingEffectSound {
     key: String,
     due_at_ms: u64,
+    requires_active_effect: bool,
     event: mir2_client_bevy::audio::NativeGameplaySoundEvent,
 }
 
@@ -930,6 +1127,8 @@ pub(crate) struct NativeEffects {
     /// one-shot queue that does not depend on an active render instance.
     ready_sounds: Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent>,
     pending_sounds: Vec<PendingEffectSound>,
+    dead_player_sound_keys: HashSet<String>,
+    revived_player_effect_keys: HashSet<String>,
     last_effect_sequence: u64,
     last_generation: u64,
     instance_seq: u64,
@@ -952,6 +1151,8 @@ impl Default for NativeEffects {
             local_projectile_targets: HashMap::new(),
             ready_sounds: Vec::new(),
             pending_sounds: Vec::new(),
+            dead_player_sound_keys: HashSet::new(),
+            revived_player_effect_keys: HashSet::new(),
             last_effect_sequence: 0,
             last_generation: 0,
             instance_seq: 0,
@@ -1128,6 +1329,8 @@ impl NativeEffects {
         self.local_projectile_targets.clear();
         self.ready_sounds.clear();
         self.pending_sounds.clear();
+        self.dead_player_sound_keys.clear();
+        self.revived_player_effect_keys.clear();
     }
 
     fn refresh_anchor_tiles(&mut self) {
@@ -1199,6 +1402,7 @@ impl NativeEffects {
                 launch_impact_sounds.push(PendingEffectSound {
                     key: instance.key.clone(),
                     due_at_ms: instance.start_at.saturating_add(duration_ms),
+                    requires_active_effect: true,
                     event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
                         generation: instance.provenance.generation,
                         sequence: instance.provenance.sequence,
@@ -1284,7 +1488,7 @@ impl NativeEffects {
             .collect::<Vec<_>>();
         let mut due = std::mem::take(&mut self.ready_sounds);
         self.pending_sounds.retain(|pending| {
-            if !active_keys.contains(&pending.key.as_str()) {
+            if pending.requires_active_effect && !active_keys.contains(&pending.key.as_str()) {
                 return false;
             }
             if now_ms >= pending.due_at_ms {
@@ -1305,6 +1509,8 @@ impl NativeEffects {
     ) {
         match packet {
             "MapChanged" | "LogOutSuccess" => self.clear_active_effects(),
+            "Struck" | "ObjectStruck" => self.apply_player_struck_sound(payload, provenance),
+            "Death" | "ObjectDied" => self.apply_player_death_sound(payload, provenance),
             "ObjectAttack" => self.apply_object_attack(payload, provenance),
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
             "ObjectProjectile" => self.apply_object_projectile(payload, zone_tiles, provenance),
@@ -1325,11 +1531,22 @@ impl NativeEffects {
         provenance: &EffectProvenance,
         self_player: bool,
     ) {
+        let actor_key = player_sound_actor_key(payload, self_player);
+        if let Some(actor_key) = actor_key.as_deref() {
+            self.cancel_player_sounds(actor_key);
+            self.dead_player_sound_keys.remove(actor_key);
+        }
         if !self_player
             && !payload
                 .get("effect")
                 .and_then(Value::as_bool)
                 .unwrap_or(false)
+        {
+            return;
+        }
+        if actor_key
+            .as_ref()
+            .is_some_and(|actor_key| !self.revived_player_effect_keys.insert(actor_key.clone()))
         {
             return;
         }
@@ -1462,6 +1679,103 @@ impl NativeEffects {
             });
     }
 
+    fn apply_player_struck_sound(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(target) = payload
+            .get("_nativeTarget")
+            .filter(|actor| actor_is_player(actor))
+        else {
+            return;
+        };
+        let Some(actor_key) = actor_sound_key(target) else {
+            return;
+        };
+        if self.dead_player_sound_keys.contains(&actor_key) {
+            return;
+        }
+        if let Some(mount_index) = player_mount_index(target) {
+            let mount_file = if mount_index < 7 {
+                if provenance.sequence & 1 == 0 {
+                    Some(PLAYER_TIGER_STRUCK_2_FILE)
+                } else {
+                    Some(PLAYER_TIGER_STRUCK_1_FILE)
+                }
+            } else if mount_index < 12 {
+                Some(PLAYER_WOLF_STRUCK_FILE)
+            } else {
+                None
+            };
+            if let Some(mount_file) = mount_file {
+                self.queue_immediate_sound(
+                    provenance,
+                    &format!("Player.{actor_key}.StruckMount"),
+                    mount_file,
+                );
+            }
+        } else if let Some(body_file) =
+            player_struck_body_file(target, payload.get("_nativeAttacker"))
+        {
+            self.queue_immediate_sound(
+                provenance,
+                &format!("Player.{actor_key}.StruckBody"),
+                body_file,
+            );
+        }
+        self.queue_immediate_sound(
+            provenance,
+            &format!("Player.{actor_key}.Flinch"),
+            if actor_is_female(target) {
+                PLAYER_FEMALE_FLINCH_FILE
+            } else {
+                PLAYER_MALE_FLINCH_FILE
+            },
+        );
+    }
+
+    fn apply_player_death_sound(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(target) = payload
+            .get("_nativeTarget")
+            .filter(|actor| actor_is_player(actor))
+        else {
+            return;
+        };
+        let Some(actor_key) = actor_sound_key(target) else {
+            return;
+        };
+        if !self.dead_player_sound_keys.insert(actor_key.clone()) {
+            return;
+        }
+        self.revived_player_effect_keys.remove(&actor_key);
+        self.cancel_pending_player_sound(&actor_key);
+        self.pending_sounds.push(PendingEffectSound {
+            key: format!("player-sound-{actor_key}"),
+            due_at_ms: self.now_ms.saturating_add(PLAYER_DIE_SOUND_DELAY_MS),
+            requires_active_effect: false,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: format!("Player.{actor_key}.Die"),
+                file_name: if actor_is_female(target) {
+                    PLAYER_FEMALE_DIE_FILE.to_owned()
+                } else {
+                    PLAYER_MALE_DIE_FILE.to_owned()
+                },
+            },
+        });
+    }
+
+    fn cancel_player_sounds(&mut self, actor_key: &str) {
+        let cue_prefix = format!("Player.{actor_key}.");
+        self.ready_sounds
+            .retain(|event| !event.cue.starts_with(&cue_prefix));
+        self.cancel_pending_player_sound(actor_key);
+    }
+
+    fn cancel_pending_player_sound(&mut self, actor_key: &str) {
+        let pending_key = format!("player-sound-{actor_key}");
+        self.pending_sounds
+            .retain(|pending| pending.key != pending_key);
+    }
+
     fn schedule_local_projectile_from_object_magic(
         &mut self,
         payload: &Value,
@@ -1522,6 +1836,7 @@ impl NativeEffects {
         self.pending_sounds.push(PendingEffectSound {
             key: key.clone(),
             due_at_ms: start_at,
+            requires_active_effect: true,
             event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
                 generation: provenance.generation,
                 sequence: provenance.sequence,
@@ -1646,6 +1961,7 @@ impl NativeEffects {
             self.pending_sounds.push(PendingEffectSound {
                 key: key.clone(),
                 due_at_ms: now,
+                requires_active_effect: true,
                 event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
                     generation: provenance.generation,
                     sequence: provenance.sequence,
@@ -1663,6 +1979,7 @@ impl NativeEffects {
             self.pending_sounds.push(PendingEffectSound {
                 key: key.clone(),
                 due_at_ms: now.saturating_add(FIREWALL_SPELL_ACTION_MS),
+                requires_active_effect: true,
                 event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
                     generation: provenance.generation,
                     sequence: provenance.sequence,
@@ -1682,6 +1999,7 @@ impl NativeEffects {
             self.pending_sounds.push(PendingEffectSound {
                 key: key.clone(),
                 due_at_ms: start_at,
+                requires_active_effect: true,
                 event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
                     generation: provenance.generation,
                     sequence: provenance.sequence,
@@ -1997,6 +2315,10 @@ impl NativeEffects {
         else {
             return;
         };
+        let actor_key = object_id.to_string();
+        self.cancel_player_sounds(&actor_key);
+        self.dead_player_sound_keys.remove(&actor_key);
+        self.revived_player_effect_keys.remove(&actor_key);
         let remove_key = format!("spell-{object_id}");
         let anchored_keys = self
             .anchor_object_ids
@@ -2143,8 +2465,9 @@ impl NativeEffects {
             .retain(|key| live_keys.contains(&key.as_str()));
         self.local_projectile_targets
             .retain(|key, _| live_keys.contains(&key.as_str()));
-        self.pending_sounds
-            .retain(|pending| live_keys.contains(&pending.key.as_str()));
+        self.pending_sounds.retain(|pending| {
+            !pending.requires_active_effect || live_keys.contains(&pending.key.as_str())
+        });
 
         self.publish_current_light_snapshots(now_ms, visible);
 
@@ -2538,6 +2861,380 @@ mod tests {
             &zone,
         );
         assert!(remote_fx.active.is_empty());
+    }
+
+    fn player_actor(
+        object_id: u32,
+        gender: &str,
+        class: &str,
+        body: &str,
+        weapon: Option<&str>,
+        mount: Option<&str>,
+    ) -> Value {
+        let mut sprite =
+            serde_json::Map::from_iter([("bodyLibrary".to_owned(), Value::from(body))]);
+        if let Some(weapon) = weapon {
+            sprite.insert("weaponLibrary".to_owned(), Value::from(weapon));
+        }
+        if let Some(mount) = mount {
+            sprite.insert("mountLibrary".to_owned(), Value::from(mount));
+        }
+        json!({
+            "objectId": object_id,
+            "kind": "player",
+            "genderKey": gender,
+            "classKey": class,
+            "sprite": sprite,
+        })
+    }
+
+    fn player_sound_event(
+        sequence: u64,
+        packet: &str,
+        target: Value,
+        attacker: Option<Value>,
+    ) -> NativeEffectEvent {
+        let mut payload = serde_json::Map::from_iter([
+            ("objectId".to_owned(), target["objectId"].clone()),
+            ("_nativeTarget".to_owned(), target),
+        ]);
+        if let Some(attacker) = attacker {
+            payload.insert("_nativeAttacker".to_owned(), attacker);
+        }
+        NativeEffectEvent {
+            sequence,
+            generation: 0,
+            packet: packet.to_owned(),
+            payload: Value::Object(payload),
+        }
+    }
+
+    #[test]
+    fn owner_revive_alias_packets_emit_one_effect_and_one_sound() {
+        let owner = player_actor(
+            1_000,
+            "male",
+            "warrior",
+            "/original-ui/CArmour/00",
+            None,
+            None,
+        );
+        let events = [
+            player_sound_event(1, "Revived", owner.clone(), None),
+            NativeEffectEvent {
+                sequence: 2,
+                generation: 0,
+                packet: "ObjectRevived".to_owned(),
+                payload: json!({
+                    "objectId": 1000,
+                    "effect": true,
+                    "_nativeTarget": owner,
+                }),
+            },
+        ];
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            1_000,
+            288,
+            616,
+            &events,
+            &HashMap::from([(1_000_u32, (288, 616))]),
+        );
+
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "player-revive-self");
+        let sounds = fx.take_due_sound_events(1_000);
+        assert_eq!(sounds.len(), 1);
+        assert_eq!(sounds[0].file_name, PLAYER_REVIVE_SOUND_FILE);
+    }
+
+    #[test]
+    fn player_struck_audio_resolves_weapon_armour_mount_and_gender_families() {
+        let heavy_female = player_actor(
+            2_001,
+            "female",
+            "warrior",
+            "/original-ui/CArmour/03",
+            None,
+            None,
+        );
+        let axe_attacker = player_actor(
+            2_002,
+            "male",
+            "warrior",
+            "/original-ui/CArmour/00",
+            Some("/original-ui/CWeapon/04"),
+            None,
+        );
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            1_000,
+            288,
+            616,
+            &[player_sound_event(
+                1,
+                "ObjectStruck",
+                heavy_female,
+                Some(axe_attacker),
+            )],
+            &HashMap::new(),
+        );
+        let sounds = fx.take_due_sound_events(1_000);
+        assert_eq!(sounds.len(), 2);
+        assert_eq!(sounds[0].file_name, PLAYER_STRUCK_ARMOUR_AXE_FILE);
+        assert_eq!(sounds[1].file_name, PLAYER_FEMALE_FLINCH_FILE);
+
+        let mounted_male = player_actor(
+            2_003,
+            "male",
+            "warrior",
+            "/original-ui/CArmour/00",
+            None,
+            Some("/original-ui/Mount/03"),
+        );
+        fx.observe(
+            1_100,
+            288,
+            616,
+            &[player_sound_event(2, "ObjectStruck", mounted_male, None)],
+            &HashMap::new(),
+        );
+        let sounds = fx.take_due_sound_events(1_100);
+        assert_eq!(sounds.len(), 2);
+        assert_eq!(sounds[0].file_name, PLAYER_TIGER_STRUCK_2_FILE);
+        assert_eq!(sounds[1].file_name, PLAYER_MALE_FLINCH_FILE);
+        assert!(!sounds.iter().any(|sound| {
+            matches!(
+                sound.file_name.as_str(),
+                PLAYER_STRUCK_BODY_SWORD_FILE
+                    | PLAYER_STRUCK_BODY_AXE_FILE
+                    | PLAYER_STRUCK_BODY_LONG_STICK_FILE
+                    | PLAYER_STRUCK_BODY_FIST_FILE
+            )
+        }));
+
+        let ordinary_male = player_actor(
+            2_004,
+            "male",
+            "warrior",
+            "/original-ui/CArmour/00",
+            None,
+            None,
+        );
+        let mut mounted_axe_attacker = player_actor(
+            2_005,
+            "male",
+            "warrior",
+            "/original-ui/CArmour/00",
+            None,
+            Some("/original-ui/Mount/03"),
+        );
+        mounted_axe_attacker["weapon"] = Value::from(4);
+        mounted_axe_attacker["ridingMount"] = Value::Bool(true);
+        fx.observe(
+            1_200,
+            288,
+            616,
+            &[player_sound_event(
+                3,
+                "ObjectStruck",
+                ordinary_male,
+                Some(mounted_axe_attacker),
+            )],
+            &HashMap::new(),
+        );
+        let sounds = fx.take_due_sound_events(1_200);
+        assert_eq!(sounds.len(), 2);
+        assert_eq!(sounds[0].file_name, PLAYER_STRUCK_BODY_AXE_FILE);
+        assert_eq!(sounds[1].file_name, PLAYER_MALE_FLINCH_FILE);
+    }
+
+    #[test]
+    fn lethal_struck_batch_keeps_hit_and_flinch_before_delayed_death_cry() {
+        let target = player_actor(
+            2_001,
+            "female",
+            "warrior",
+            "/original-ui/CArmour/03",
+            None,
+            None,
+        );
+        let attacker = player_actor(
+            2_002,
+            "male",
+            "warrior",
+            "/original-ui/CArmour/00",
+            Some("/original-ui/CWeapon/04"),
+            None,
+        );
+        let events = [
+            player_sound_event(1, "ObjectStruck", target.clone(), Some(attacker)),
+            player_sound_event(2, "ObjectDied", target, None),
+        ];
+        let mut fx = NativeEffects::default();
+        fx.observe(1_000, 288, 616, &events, &HashMap::new());
+
+        let struck = fx.take_due_sound_events(1_000);
+        assert_eq!(struck.len(), 2);
+        assert_eq!(struck[0].file_name, PLAYER_STRUCK_ARMOUR_AXE_FILE);
+        assert_eq!(struck[1].file_name, PLAYER_FEMALE_FLINCH_FILE);
+        let _ = fx.tick_with_visibility(1_050, true);
+        let death = fx.take_due_sound_events(1_100);
+        assert_eq!(death.len(), 1);
+        assert_eq!(death[0].file_name, PLAYER_FEMALE_DIE_FILE);
+    }
+
+    #[test]
+    fn native_gameplay_audio_allowlist_contains_every_player_combat_clip() {
+        for file_name in [
+            PLAYER_STRUCK_BODY_SWORD_FILE,
+            PLAYER_STRUCK_BODY_AXE_FILE,
+            PLAYER_STRUCK_BODY_LONG_STICK_FILE,
+            PLAYER_STRUCK_BODY_FIST_FILE,
+            PLAYER_STRUCK_ARMOUR_SWORD_FILE,
+            PLAYER_STRUCK_ARMOUR_AXE_FILE,
+            PLAYER_STRUCK_ARMOUR_LONG_STICK_FILE,
+            PLAYER_STRUCK_ARMOUR_FIST_FILE,
+            PLAYER_MALE_FLINCH_FILE,
+            PLAYER_FEMALE_FLINCH_FILE,
+            PLAYER_MALE_DIE_FILE,
+            PLAYER_FEMALE_DIE_FILE,
+            PLAYER_TIGER_STRUCK_1_FILE,
+            PLAYER_TIGER_STRUCK_2_FILE,
+            PLAYER_WOLF_STRUCK_FILE,
+            PLAYER_REVIVE_SOUND_FILE,
+        ] {
+            assert!(
+                mir2_client_bevy::audio::NATIVE_GAMEPLAY_SOUND_FILES.contains(&file_name),
+                "native gameplay audio rejected {file_name}"
+            );
+        }
+    }
+
+    #[test]
+    fn player_death_audio_waits_one_frame_and_lifecycle_packets_cancel_it() {
+        let female = player_actor(
+            2_001,
+            "female",
+            "wizard",
+            "/original-ui/CArmour/00",
+            None,
+            None,
+        );
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            1_000,
+            288,
+            616,
+            &[player_sound_event(1, "ObjectDied", female.clone(), None)],
+            &HashMap::new(),
+        );
+        let _ = fx.tick_with_visibility(1_000, true);
+        let _ = fx.tick_with_visibility(1_050, true);
+        assert!(fx.take_due_sound_events(1_099).is_empty());
+        let due = fx.take_due_sound_events(1_100);
+        assert_eq!(due.len(), 1);
+        assert_eq!(due[0].file_name, PLAYER_FEMALE_DIE_FILE);
+
+        fx.observe(
+            1_200,
+            288,
+            616,
+            &[player_sound_event(2, "ObjectDied", female.clone(), None)],
+            &HashMap::new(),
+        );
+        assert!(fx.take_due_sound_events(1_300).is_empty());
+
+        fx.observe(
+            1_400,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 3,
+                generation: 0,
+                packet: "ObjectRevived".to_owned(),
+                payload: json!({
+                    "objectId": 2001,
+                    "effect": false,
+                    "_nativeTarget": female.clone(),
+                }),
+            }],
+            &HashMap::new(),
+        );
+        fx.observe(
+            1_500,
+            288,
+            616,
+            &[player_sound_event(4, "ObjectDied", female.clone(), None)],
+            &HashMap::new(),
+        );
+        fx.observe(
+            1_550,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 5,
+                generation: 0,
+                packet: "ObjectRemove".to_owned(),
+                payload: json!({"objectId": 2001}),
+            }],
+            &HashMap::new(),
+        );
+        assert!(fx.take_due_sound_events(1_600).is_empty());
+
+        fx.observe(
+            1_700,
+            288,
+            616,
+            &[player_sound_event(6, "ObjectDied", female, None)],
+            &HashMap::new(),
+        );
+        fx.observe(
+            1_750,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 7,
+                generation: 0,
+                packet: "MapChanged".to_owned(),
+                payload: json!({"mapIndex": 1}),
+            }],
+            &HashMap::new(),
+        );
+        assert!(fx.take_due_sound_events(1_800).is_empty());
+
+        fx.observe(
+            1_900,
+            288,
+            616,
+            &[player_sound_event(
+                8,
+                "ObjectDied",
+                player_actor(
+                    2_001,
+                    "female",
+                    "wizard",
+                    "/original-ui/CArmour/00",
+                    None,
+                    None,
+                ),
+                None,
+            )],
+            &HashMap::new(),
+        );
+        fx.observe(
+            1_950,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 9,
+                generation: 0,
+                packet: "LogOutSuccess".to_owned(),
+                payload: json!({}),
+            }],
+            &HashMap::new(),
+        );
+        assert!(fx.take_due_sound_events(2_000).is_empty());
     }
 
     #[test]

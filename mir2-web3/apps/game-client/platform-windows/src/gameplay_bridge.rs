@@ -67,6 +67,11 @@ pub struct NativeGameplayAdapter {
     damage_events: VecDeque<NativeDamageEvent>,
     effect_sequence: u64,
     effect_events: VecDeque<NativeEffectEvent>,
+    /// Latest authoritative actor payloads used only to resolve Crystal's
+    /// client-owned player sound family when a later packet contains ids but
+    /// not class/gender/equipment/mount presentation fields.
+    actor_sound_contexts: HashMap<u32, Value>,
+    latest_player_object_id: Option<u32>,
     zone_entities: HashMap<u32, serde_json::Map<String, Value>>,
     /// Relationship comes from the retained authoritative world snapshot.
     /// Incremental ObjectMonster packets do not carry it, so packet-only
@@ -566,6 +571,8 @@ impl NativeGameplayAdapter {
                 "Death" => {
                     self.authoritative_player_dead = Some(true);
                     self.authoritative_player_animation = Some(self.next_animation_hint("die"));
+                    let player_object_id = self.latest_player_object_id;
+                    self.record_actor_effect("Death", payload, player_object_id, None);
                     true
                 }
                 "Revived" => {
@@ -575,12 +582,14 @@ impl NativeGameplayAdapter {
                     // four-frame revive action for a remote actor.
                     self.authoritative_player_animation =
                         Some(self.next_animation_hint("standing"));
-                    self.record_effect("Revived", payload);
+                    let player_object_id = self.latest_player_object_id;
+                    self.record_actor_effect("Revived", payload, player_object_id, None);
                     true
                 }
                 "ObjectMonster" | "NewMonsterInfo" => self.upsert_zone_entity(payload, "monster"),
                 "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc"),
                 "ObjectPlayer" | "ObjectHero" => self.upsert_zone_entity(payload, "player"),
+                "MountUpdate" => self.patch_zone_entity_mount(payload),
                 "ObjectWalk" => self.patch_zone_entity_transform(payload, Some("walking")),
                 "ObjectRun" => self.patch_zone_entity_transform(payload, Some("running")),
                 "ObjectTurn" => self.patch_zone_entity_transform(payload, None),
@@ -634,17 +643,48 @@ impl NativeGameplayAdapter {
                     // separate packets. Keep accepting coalesced compatibility
                     // payloads, but the authoritative path is DamageIndicator.
                     self.record_damage_event(payload);
+                    self.record_actor_effect(
+                        "ObjectStruck",
+                        payload,
+                        packet_object_id(payload),
+                        packet_body(payload).get("attackerId").and_then(value_u32),
+                    );
                     changed
+                }
+                "Struck" => {
+                    self.authoritative_player_animation = Some(self.next_animation_hint("struck"));
+                    let player_object_id = self.latest_player_object_id;
+                    self.record_actor_effect(
+                        "Struck",
+                        payload,
+                        player_object_id,
+                        packet_body(payload).get("attackerId").and_then(value_u32),
+                    );
+                    true
                 }
                 "DamageIndicator" => {
                     self.record_damage_event(payload);
                     true
                 }
                 "ObjectHealth" => self.patch_zone_entity_health(payload),
-                "ObjectDied" => self.patch_zone_entity_death(payload, true),
+                "ObjectDied" => {
+                    let changed = self.patch_zone_entity_death(payload, true);
+                    self.record_actor_effect(
+                        "ObjectDied",
+                        payload,
+                        packet_object_id(payload),
+                        None,
+                    );
+                    changed
+                }
                 "ObjectRevived" => {
                     let changed = self.patch_zone_entity_death(payload, false);
-                    self.record_effect("ObjectRevived", payload);
+                    self.record_actor_effect(
+                        "ObjectRevived",
+                        payload,
+                        packet_object_id(payload),
+                        None,
+                    );
                     changed
                 }
                 "ObjectHide" => {
@@ -809,6 +849,8 @@ impl NativeGameplayAdapter {
         self.zone_tombstones.clear();
         self.damage_events.clear();
         self.effect_events.clear();
+        self.actor_sound_contexts.clear();
+        self.latest_player_object_id = None;
     }
 
     pub(crate) fn set_generation(&mut self, generation: u64) {
@@ -835,6 +877,47 @@ impl NativeGameplayAdapter {
         });
         while self.effect_events.len() > MAX_BUFFERED_EFFECT_EVENTS {
             self.effect_events.pop_front();
+        }
+    }
+
+    fn record_actor_effect(
+        &mut self,
+        packet: &str,
+        payload: &Value,
+        target_object_id: Option<u32>,
+        attacker_object_id: Option<u32>,
+    ) {
+        let mut enriched = payload.clone();
+        let Some(body) = enriched.as_object_mut() else {
+            self.record_effect(packet, payload);
+            return;
+        };
+        if let Some(target) = target_object_id.and_then(|id| self.actor_sound_context(id)) {
+            body.insert("_nativeTarget".to_owned(), target);
+        }
+        if let Some(attacker) = attacker_object_id.and_then(|id| self.actor_sound_context(id)) {
+            body.insert("_nativeAttacker".to_owned(), attacker);
+        }
+        self.record_effect(packet, &enriched);
+    }
+
+    fn actor_sound_context(&self, object_id: u32) -> Option<Value> {
+        let mut context = self
+            .actor_sound_contexts
+            .get(&object_id)
+            .cloned()
+            .unwrap_or_else(|| Value::Object(serde_json::Map::new()));
+        let context_map = context.as_object_mut()?;
+        if let Some(overlay) = self.zone_entities.get(&object_id) {
+            for (key, value) in overlay {
+                context_map.insert(key.clone(), value.clone());
+            }
+        }
+        if context_map.is_empty() {
+            None
+        } else {
+            context_map.insert("objectId".to_owned(), Value::from(object_id));
+            Some(context)
         }
     }
 
@@ -923,6 +1006,17 @@ impl NativeGameplayAdapter {
         if let Some(hint) = &hint {
             apply_animation_hint_to_map(overlay, hint);
         }
+        true
+    }
+
+    fn patch_zone_entity_mount(&mut self, payload: &Value) -> bool {
+        let body = packet_body(payload);
+        let Some(object_id) = packet_object_id(payload) else {
+            return false;
+        };
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        overlay.insert("objectId".to_owned(), Value::from(object_id));
+        copy_packet_fields(body, overlay, &["mountType", "ridingMount"]);
         true
     }
 
@@ -1114,6 +1208,15 @@ impl NativeGameplayAdapter {
         if let Some((x, y)) = authoritative_player_position(payload) {
             self.big_map
                 .set_player_location(map_index, BigMapPoint { x, y });
+        }
+        self.latest_player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        self.actor_sound_contexts.clear();
+        if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
+            for entity in entities {
+                if let Some(object_id) = entity.get("objectId").and_then(value_u32) {
+                    self.actor_sound_contexts.insert(object_id, entity.clone());
+                }
+            }
         }
     }
 
@@ -3942,6 +4045,7 @@ mod tests {
     #[test]
     fn movement_and_combat_packets_emit_monotonic_animation_hints() {
         let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&gameplay_payload());
         adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
             x: 288,
             y: 616,
@@ -3983,8 +4087,9 @@ mod tests {
             .expect("monster");
         assert_eq!(monster["_nativeAnimationAction"], json!("struck"));
         assert_eq!(monster["_nativeAnimationSequence"], json!(3));
-        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events.len(), 2);
         assert_eq!(adapter.effect_events[0].packet, "ObjectAttack");
+        assert_eq!(adapter.effect_events[1].packet, "ObjectStruck");
     }
 
     #[test]
@@ -4050,6 +4155,7 @@ mod tests {
     #[test]
     fn self_run_death_and_revive_keep_crystal_local_action_semantics() {
         let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&gameplay_payload());
         adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
             x: 288,
             y: 616,
@@ -4086,9 +4192,113 @@ mod tests {
             json!("standing")
         );
         assert_eq!(revived["entities"][0]["_nativeAnimationSequence"], json!(3));
-        assert_eq!(adapter.effect_events.len(), 1);
-        assert_eq!(adapter.effect_events[0].packet, "Revived");
-        assert_eq!(adapter.effect_events[0].payload["location"]["x"], 288);
+        assert_eq!(adapter.effect_events.len(), 2);
+        assert_eq!(adapter.effect_events[0].packet, "Death");
+        assert_eq!(
+            adapter.effect_events[0].payload["_nativeTarget"]["objectId"],
+            1000
+        );
+        assert_eq!(adapter.effect_events[1].packet, "Revived");
+        assert_eq!(adapter.effect_events[1].payload["location"]["x"], 288);
+        assert_eq!(
+            adapter.effect_events[1].payload["_nativeTarget"]["objectId"],
+            1000
+        );
+    }
+
+    #[test]
+    fn self_struck_captures_authoritative_target_and_attacker_sound_context() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut payload = gameplay_payload();
+        payload["entities"][0]["genderKey"] = json!("female");
+        payload["entities"][0]["classKey"] = json!("warrior");
+        payload["entities"][0]["sprite"] = json!({
+            "bodyLibrary": "/original-ui/CArmour/03"
+        });
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId": 2002,
+                "kind": "player",
+                "classKey": "warrior",
+                "sprite": {"weaponLibrary": "/original-ui/CWeapon/04"},
+                "x": 287,
+                "y": 616
+            }));
+        adapter.observe_world_snapshot(&payload);
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "Struck".to_owned(),
+            payload: json!({"attackerId": 2002}),
+        }));
+
+        let event = adapter.effect_events.back().expect("struck sound event");
+        assert_eq!(event.packet, "Struck");
+        assert_eq!(event.payload["_nativeTarget"]["genderKey"], "female");
+        assert_eq!(
+            event.payload["_nativeTarget"]["sprite"]["bodyLibrary"],
+            "/original-ui/CArmour/03"
+        );
+        assert_eq!(
+            event.payload["_nativeAttacker"]["sprite"]["weaponLibrary"],
+            "/original-ui/CWeapon/04"
+        );
+        assert_eq!(
+            adapter
+                .authoritative_player_animation
+                .as_ref()
+                .map(|hint| hint.action),
+            Some("struck")
+        );
+    }
+
+    #[test]
+    fn mount_update_overlays_the_next_struck_sound_context_before_a_snapshot() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut payload = gameplay_payload();
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId": 2001,
+                "kind": "player",
+                "genderKey": "male",
+                "classKey": "warrior",
+                "ridingMount": false,
+                "mountType": -1,
+                "sprite": {"bodyLibrary": "/original-ui/CArmour/00"},
+                "x": 289,
+                "y": 616
+            }));
+        adapter.observe_world_snapshot(&payload);
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "MountUpdate".to_owned(),
+            payload: json!({"objectId": 2001, "mountType": 3, "ridingMount": true}),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectStruck".to_owned(),
+            payload: json!({"objectId": 2001, "attackerId": 1000}),
+        }));
+        let mounted = adapter.effect_events.back().expect("mounted struck event");
+        assert_eq!(mounted.payload["_nativeTarget"]["mountType"], 3);
+        assert_eq!(mounted.payload["_nativeTarget"]["ridingMount"], true);
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "MountUpdate".to_owned(),
+            payload: json!({"objectId": 2001, "mountType": 3, "ridingMount": false}),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectStruck".to_owned(),
+            payload: json!({"objectId": 2001, "attackerId": 1000}),
+        }));
+        let dismounted = adapter
+            .effect_events
+            .back()
+            .expect("dismounted struck event");
+        assert_eq!(dismounted.payload["_nativeTarget"]["mountType"], 3);
+        assert_eq!(dismounted.payload["_nativeTarget"]["ridingMount"], false);
     }
 
     #[test]

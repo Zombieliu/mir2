@@ -27,6 +27,21 @@ const MAX_PENDING_GAMEPLAY_SOUND_EVENTS: usize = 32;
 /// become file paths: the platform effect adapter can only request a cue listed
 /// here and packaging verifies the same exact files.
 pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
+    "70.wav",
+    "71.wav",
+    "72.wav",
+    "73.wav",
+    "80.wav",
+    "81.wav",
+    "82.wav",
+    "83.wav",
+    "138.wav",
+    "139.wav",
+    "144.wav",
+    "145.wav",
+    "tiger_struck_1.wav",
+    "tiger_struck_2.wav",
+    "wolf_struck1.wav",
     "M8-1.wav",
     "M31-0.wav",
     "M31-1.wav",
@@ -37,6 +52,7 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "M64-0.wav",
     "M64-1.wav",
     "M64-2.wav",
+    "M79-1.wav",
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -873,6 +889,34 @@ mod tests {
                 generation: 5,
                 sequence: sequence as u64 + 7,
                 cue: format!("SoulFireBall.{sequence}"),
+                file_name: file_name.to_owned(),
+            }));
+        }
+        for (sequence, file_name) in [
+            "70.wav",
+            "71.wav",
+            "72.wav",
+            "73.wav",
+            "80.wav",
+            "81.wav",
+            "82.wav",
+            "83.wav",
+            "138.wav",
+            "139.wav",
+            "144.wav",
+            "145.wav",
+            "tiger_struck_1.wav",
+            "tiger_struck_2.wav",
+            "wolf_struck1.wav",
+            "M79-1.wav",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            assert!(queue.push(NativeGameplaySoundEvent {
+                generation: 5,
+                sequence: sequence as u64 + 10,
+                cue: format!("Player.test.{sequence}"),
                 file_name: file_name.to_owned(),
             }));
         }
