@@ -92,7 +92,9 @@ jobs:
     # succeed, so a broken `changes` job can never silently skip the real gate.
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.rust == 'true') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The serial deterministic core suite exceeded 52 minutes twice after its
+    # setup/build steps; retain the full suite and provide a non-flaky margin.
+    timeout-minutes: 90
     env:
       RUSTUP_TOOLCHAIN: "1.95.0"
     defaults:
