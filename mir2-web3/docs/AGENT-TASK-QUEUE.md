@@ -20,13 +20,17 @@
 > packet overlays from masking hostile/neutral/friendly snapshot changes and
 > makes all seven schema-v2 atlas pages fail closed on missing bytes, hash,
 > decode or dimensions in runtime, VIS-01, packaging and copied-Candidate
-> verification. Focused latest-head gates pass; the composite-production
-> Windows suite remains FAIL at 328/330 only because the same Archer and Mount
-> pixels are absent. `VIS-01` is still in progress: real Gateway/WSS sequence,
-> GPU raster occlusion/additive pixels and same-EXE captures remain open. Later
-> ordered slices are `VIS-02` FlamingSword/FireBall/Lightning/SoulFireBall/
-> FireWall effects and `VIS-03`
-> HUD/Inventory/BigMap button states. Do not
+> verification. VIS-02 has now closed its first bounded automated spell
+> checkpoint: Lightning waits for the 600 ms Spell-action completion, follows
+> the caster through `Magic/970 + direction*20` six-frame playback, emits the
+> exact allowlisted `M40-0.wav` once, and fabricates neither projectile nor
+> impact. Cast-false, reconnect/map/logout/departure and Effect-option
+> regressions fail closed. Fresh source map and keyed packs now drive the full
+> Windows suite at 333/333, and the vertical-slice gate explicitly generates
+> both packs. VIS-01 and VIS-02 still require real Gateway/WSS sequence, GPU
+> raster pixels and same-EXE captures; the remaining VIS-02 spells are
+> FlamingSword, FireBall, SoulFireBall and FireWall. The next ordered UI slice
+> is `VIS-03` HUD/Inventory/BigMap button states. Do not
 > report full-game 90% or visual 100%: clean source binding, the semantic
 > inventory, full legal assets, additive weapon/wing layers, same-EXE live WSS,
 > 100/125/150% DPI, 30-minute native soak, human visual/audio/feel and

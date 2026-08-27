@@ -1,6 +1,6 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Windows visual-parity VIS-00 baseline / VIS-01 in-progress checkpoint
+> Windows visual-parity VIS-00 baseline / VIS-01 and VIS-02 in-progress checkpoint
 > (2026-08-27): a new source-bound
 > contract and machine-readable Phase-A ledger establish known registries for
 > 410 fixed/template UI leaves, player/monster libraries and action records,
@@ -27,11 +27,13 @@
 > `434bb06e6` makes raw snapshot relationship changes supersede retained packet
 > overlays and verifies all seven atlas pages by existence, bytes, SHA-256, PNG
 > decode and dimensions in runtime/test/package/verify paths. Focused
-> latest-head tests pass. The full Windows suite against the composite
-> production asset root remains FAIL with 328/330 passing; the two failures
-> require absent
-> `ARArmour/00/24.png` and
-> `Mount/00/32.png`. HUD/damage typography, hover corpse labels, additive
+> latest-head tests pass. The first VIS-02 spell checkpoint now binds Lightning
+> to Crystal's post-Spell-action 600 ms boundary, owner-attached `Magic` frames
+> `970 + direction*20 .. +5`, exact one-shot `M40-0.wav`, no
+> projectile/impact and fail-closed lifecycle/audio rules. A fresh-source
+> Windows run passes 333/333 after the functional gate was corrected to build
+> both ordinary and keyed/additive map packs. This is one of five first-slice
+> spells, not VIS-02 completion. HUD/damage typography, hover corpse labels, additive
 > weapon/wing layers, real Gateway/WSS replay, same-EXE visual capture,
 > complete legal assets, skill VFX, fixed-scene/real-map GPU raster captures,
 > button state/DPI evidence, native

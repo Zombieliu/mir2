@@ -115,6 +115,15 @@ projectile/target tracking, impact/persistence, sound and the actor
 Struck/Die/Dead/Revive chain. Source-routed assets without same-EXE playback do
 not pass the slice.
 
+Lightning is the first bounded automated checkpoint inside that slice. At
+revision `53483ccf4`, `cast=true` waits for the 600 ms Spell-action completion,
+then attaches six 100 ms `Magic` frames at `970 + direction*20` to the caster
+and emits the exact allowlisted `M40-0.wav` once. `cast=false` emits neither;
+no projectile or impact is fabricated. The fixed fixture closes typed packet,
+state-clock, frame/audio identity and lifecycle automation only. It does not
+pass the same-EXE, live-WSS, GPU-raster or human-audio gates, and the other four
+first-slice spells remain open.
+
 ## Delivery waves
 
 1. `VIS-00` routes native text through Arial, applies the 8pt-at-96-DPI
@@ -154,6 +163,12 @@ retained packet overlays and makes every schema-v2 entity-atlas page fail closed
 on missing content, byte/hash mismatch, PNG decode failure or wrong dimensions.
 That page closure is shared by runtime loading, the VIS-01 production test,
 source packaging and copied-Candidate verification.
+
+The bounded Lightning evidence is recorded in
+`docs/generated/player-qa/windows-visual-parity/VIS-02-LIGHTNING-REPORT.md`.
+The Windows functional gate also generates the native keyed/additive map pack
+before its host tests; this keeps VIS-01's real `0.map` front-cell binding
+fail-closed on clean runners rather than weakening the visual assertion.
 
 ## Evidence and final gates
 

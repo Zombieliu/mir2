@@ -1,6 +1,6 @@
 # Backend 1:1 Progress
 
-> Windows visual projection VIS-00 baseline / VIS-01 in-progress checkpoint
+> Windows visual projection VIS-00 baseline / VIS-01 and VIS-02 in-progress checkpoint
 > (2026-08-27): shared authority
 > still owns actor identity and state, while the Gateway/native projection now
 > preserves remote player class, gender, guild, hair, armour, weapon,
@@ -24,12 +24,15 @@
 > changes remain authoritative, and integrity-checks all seven atlas pages in
 > runtime, production test, source package and copied-Candidate verification.
 > The complete client runtime library passes 191/191; focused latest-head
-> Gateway/native gates pass. The composite-production Windows suite is 328/330
-> with only the two existing
-> missing Archer/Mount pixels. This is a
+> Gateway/native gates pass. VIS-02 now adds one bounded Lightning projection:
+> typed `ObjectMagic` cast authority reaches the native 600 ms delayed,
+> caster-attached six-frame effect and exact one-shot audio without fabricated
+> projectile/impact. The existing shared Zone six-tile gameplay scheduling is
+> unchanged. Fresh-source Windows assets now pass 333/333 after the functional
+> gate was corrected to generate its required keyed/additive map pack. This is a
 > presentation-boundary repair, not a claim
 > that shared-Zone gameplay, whole-game semantics or Windows visuals are
-> complete. Real Gateway/WSS order, GPU raster proof, additive weapon/wing
+> complete; the other four first-slice spells remain open. Real Gateway/WSS order, GPU raster proof, additive weapon/wing
 > layers, full assets, same-EXE live evidence, DPI, soak and human gates stay
 > open under the visual
 > contract.

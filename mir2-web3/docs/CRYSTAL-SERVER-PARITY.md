@@ -1,6 +1,6 @@
 # Crystal Server Parity
 
-> Windows VIS-00 baseline / VIS-01 in-progress server/client-boundary note
+> Windows VIS-00 baseline / VIS-01 and VIS-02 in-progress server/client-boundary note
 > (2026-08-27): no new server
 > completion percentage is claimed. The authoritative `ObjectPlayerInfo`
 > identity, guild, normal/Transform body and equipment routes now survive the
@@ -19,12 +19,16 @@
 > entries and a real `0.map` front-tile render state. Follow-up `434bb06e6`
 > preserves later raw-snapshot relationship changes over retained packet data
 > and closes all seven atlas pages by byte count, SHA-256, PNG decode and
-> dimensions across runtime/test/package/verify. Focused latest-head tests pass;
-> Windows is 328/330 against the composite production root, with only the
-> known missing Archer/Mount pixels. This closes only bounded
+> dimensions across runtime/test/package/verify. Focused latest-head tests pass.
+> The first VIS-02 checkpoint preserves typed Lightning `cast` authority into a
+> post-Spell-action, caster-attached native effect and one exact audio cue; no
+> client projectile or impact is invented. Shared Zone six-tile Lightning
+> scheduling remains the gameplay authority and was not changed. Fresh-source
+> Windows tests pass 333/333 after the gate began generating its required
+> keyed/additive map pack. This closes only bounded
 > projection/action-loss and render-state defects; it does not prove live WSS
 > ordering or GPU pixels. Monster special rendering, effect/wing overlays,
-> complete assets, skill effects, environment visuals and all real-window
+> complete assets, the other first-slice skill effects, environment visuals and all real-window
 > acceptance gates remain open.
 
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
