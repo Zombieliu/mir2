@@ -71,9 +71,10 @@ pub const ENTITY_ORIGIN_Y: f32 = 352.0;
 
 /// Entity depth gain + effect band orders (mirrors atlas.rs ENTITY_DEPTH_GAIN).
 const EFFECT_DEPTH_GAIN: f32 = 10.0;
-/// Ground/map/object/persistent effects sit just below the body layer (order 5).
+/// Persistent ObjectSpell effects sit just below the body layer (order 5).
 const EFFECT_GROUND_ORDER: f32 = 4.8;
-/// Transient cast/projectile/impact spell effects sit above the front weapon (7).
+/// Relative ordering for scene/actor effects that Crystal draws in the final
+/// post-world pass, after selected-target DrawBlend.
 const EFFECT_TRANSIENT_ORDER: f32 = 9.0;
 
 /// Upper bound on simultaneously-active transient effects.
@@ -1011,6 +1012,7 @@ fn effect_catalog() -> &'static Option<EffectCatalog> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum EffectKindTag {
     Ground,
+    SceneForeground,
     Cast,
     AttackOverlay,
     Projectile,
@@ -1021,12 +1023,24 @@ enum EffectKindTag {
 impl EffectKindTag {
     fn z_order(self) -> f32 {
         match self {
-            EffectKindTag::Cast
+            EffectKindTag::SceneForeground
+            | EffectKindTag::Cast
             | EffectKindTag::AttackOverlay
             | EffectKindTag::Projectile
             | EffectKindTag::Impact => EFFECT_TRANSIENT_ORDER,
             _ => EFFECT_GROUND_ORDER,
         }
+    }
+
+    fn draws_post_world(self) -> bool {
+        matches!(
+            self,
+            EffectKindTag::SceneForeground
+                | EffectKindTag::Cast
+                | EffectKindTag::AttackOverlay
+                | EffectKindTag::Projectile
+                | EffectKindTag::Impact
+        )
     }
 }
 
@@ -1142,6 +1156,7 @@ pub(crate) struct NativeEffects {
     now_ms: u64,
     player_x: i32,
     player_y: i32,
+    post_world_depth_bounds: Option<(f32, f32)>,
     last_state: Option<String>,
     soak_metrics_enabled: bool,
     last_soak_metrics_at_ms: Option<u64>,
@@ -1166,6 +1181,7 @@ impl Default for NativeEffects {
             now_ms: 0,
             player_x: 0,
             player_y: 0,
+            post_world_depth_bounds: None,
             last_state: None,
             soak_metrics_enabled: native_soak_metrics_enabled(),
             last_soak_metrics_at_ms: None,
@@ -1174,6 +1190,10 @@ impl Default for NativeEffects {
 }
 
 impl NativeEffects {
+    pub(crate) fn observe_render_payload(&mut self, payload: &Value) {
+        self.post_world_depth_bounds = Some(crate::atlas::post_world_depth_bounds(payload));
+    }
+
     fn maybe_emit_native_soak_metrics(&mut self, now_ms: u64) {
         if !self.soak_metrics_enabled
             || !should_emit_native_soak_metrics(self.last_soak_metrics_at_ms, now_ms)
@@ -1240,6 +1260,15 @@ impl NativeEffects {
         self.now_ms = now_ms;
         self.player_x = player_x;
         self.player_y = player_y;
+        if self.post_world_depth_bounds.is_none() {
+            self.post_world_depth_bounds = Some(crate::atlas::post_world_depth_bounds(&json!({
+                "sceneView": {
+                    "center": {"x": player_x, "y": player_y},
+                    "width": 19,
+                    "height": 15
+                }
+            })));
+        }
         self.zone_tiles.clone_from(zone_tiles);
         self.refresh_anchor_tiles();
         for event in events {
@@ -1312,6 +1341,7 @@ impl NativeEffects {
         self.last_effect_sequence = 0;
         self.clear_active_effects();
         self.zone_tiles.clear();
+        self.post_world_depth_bounds = None;
         publish_effect_lights(Vec::new());
         crate::map_parser::lighting::publish_effect_lighting_frame(
             self.last_generation,
@@ -2223,7 +2253,9 @@ impl NativeEffects {
         let key = self.next_key("obj");
         self.active.push(EffectInstance {
             key,
-            kind: EffectKindTag::Ground,
+            // Crystal attaches ObjectEffect to MirObject.Effects and renders it
+            // from DrawEffects, after the selected-target DrawBlend pass.
+            kind: EffectKindTag::SceneForeground,
             tile_x,
             tile_y,
             from_x: None,
@@ -2270,7 +2302,9 @@ impl NativeEffects {
         let key = self.next_key("map");
         self.active.push(EffectInstance {
             key,
-            kind: EffectKindTag::Ground,
+            // MapEffect enters MapControl.Effects with DrawBehind=false by
+            // default, so GameScene draws it after the selected target pass.
+            kind: EffectKindTag::SceneForeground,
             tile_x: x as i32,
             tile_y: y as i32,
             from_x: None,
@@ -2389,6 +2423,7 @@ impl NativeEffects {
         self.now_ms = now_ms;
         let player_x = self.player_x;
         let player_y = self.player_y;
+        let post_world_depth_bounds = self.post_world_depth_bounds;
         let _ = effect_catalog();
         self.refresh_anchor_tiles();
 
@@ -2450,6 +2485,14 @@ impl NativeEffects {
                         _ => None,
                     }
                 };
+                let normal_z = effect_z(tile_x, tile_y, instance.kind.z_order());
+                let z = if instance.kind.draws_post_world() {
+                    post_world_depth_bounds
+                        .map(|bounds| crate::atlas::post_world_effect_z_from_bounds(bounds, normal_z))
+                        .unwrap_or(normal_z)
+                } else {
+                    normal_z
+                };
                 let mut entry = json!({
                     "key": instance.key,
                     "imageUrl": frame.path,
@@ -2457,7 +2500,7 @@ impl NativeEffects {
                     "top": top,
                     "width": frame.width,
                     "height": frame.height,
-                    "z": effect_z(tile_x, tile_y, instance.kind.z_order()),
+                    "z": z,
                     "additive": animation.blend,
                     "opacity": animation.opacity,
                 });
@@ -2757,6 +2800,95 @@ mod tests {
         assert_eq!(payload["activeEffects"], 7);
         assert_eq!(payload["activeEffectsCap"], MAX_ACTIVE_EFFECTS);
         assert!(!native_soak_metrics_json(4_242, 12_345, 7).contains('\n'));
+    }
+
+    #[test]
+    fn crystal_foreground_scene_and_actor_effects_render_after_selected_redraw() {
+        for kind in [
+            EffectKindTag::SceneForeground,
+            EffectKindTag::Cast,
+            EffectKindTag::AttackOverlay,
+            EffectKindTag::Projectile,
+            EffectKindTag::Impact,
+        ] {
+            assert!(kind.draws_post_world());
+        }
+        for kind in [EffectKindTag::Ground, EffectKindTag::Persistent] {
+            assert!(!kind.draws_post_world());
+        }
+
+        let payload = json!({
+            "sceneView": {"center": {"x": 288, "y": 616}, "width": 19, "height": 15},
+            "entities": [{"objectId": 1, "kind": "player", "x": 292, "y": 618}]
+        });
+        let mut effects = NativeEffects::default();
+        effects.observe_render_payload(&payload);
+        assert_eq!(
+            effects.post_world_depth_bounds,
+            Some(crate::atlas::post_world_depth_bounds(&payload))
+        );
+
+        let bounds = effects.post_world_depth_bounds.expect("observed bounds");
+        let animation = fake_anim("foreground", 1_000, 1, false);
+        effects.active.extend([
+            EffectInstance {
+                key: "object-or-map-effect".to_owned(),
+                kind: EffectKindTag::SceneForeground,
+                tile_x: 280,
+                tile_y: 608,
+                from_x: None,
+                from_y: None,
+                current: Some(animation.clone()),
+                queued: None,
+                return_queued: None,
+                started_at: 0,
+                start_at: 0,
+                persistent_object_id: None,
+                provenance: EffectProvenance::default(),
+            },
+            EffectInstance {
+                key: "persistent-object-spell".to_owned(),
+                kind: EffectKindTag::Persistent,
+                tile_x: 292,
+                tile_y: 618,
+                from_x: None,
+                from_y: None,
+                current: Some(animation),
+                queued: None,
+                return_queued: None,
+                started_at: 0,
+                start_at: 0,
+                persistent_object_id: Some(7),
+                provenance: EffectProvenance::default(),
+            },
+        ]);
+        let state: Value = serde_json::from_str(&effects.tick(0).expect("render state"))
+            .expect("render-state JSON");
+        let foreground_z = state["effects"]
+            .as_array()
+            .expect("effects")
+            .iter()
+            .find(|effect| effect["key"] == "object-or-map-effect")
+            .and_then(|effect| effect["z"].as_f64())
+            .expect("foreground z") as f32;
+        let persistent_z = state["effects"]
+            .as_array()
+            .expect("effects")
+            .iter()
+            .find(|effect| effect["key"] == "persistent-object-spell")
+            .and_then(|effect| effect["z"].as_f64())
+            .expect("persistent z") as f32;
+        assert!(
+            foreground_z > crate::atlas::post_world_highlight_band_ceiling(bounds),
+            "ObjectEffect/MapEffect must remain visible above the selected redraw"
+        );
+        assert!(
+            persistent_z < crate::atlas::post_world_highlight_band_ceiling(bounds),
+            "persistent ObjectSpell remains in the world pass"
+        );
+
+        effects.reset_session();
+        assert_eq!(effects.post_world_depth_bounds, None);
     }
 
     fn fake_anim(kind: &str, interval: u64, count: u64, repeat: bool) -> Animation {

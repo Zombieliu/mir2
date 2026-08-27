@@ -1454,6 +1454,7 @@ pub fn drain_gameplay_events(
     entity_overlays.observe_damage_events(&snapshot.damage_events, now_ms);
     if let Some(payload) = snapshot.entity_render_payload {
         let (player_x, player_y) = authoritative_player_position(&payload).unwrap_or((0, 0));
+        effects.observe_render_payload(&payload);
         effects.observe(
             now_ms,
             player_x,

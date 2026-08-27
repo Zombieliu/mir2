@@ -699,6 +699,443 @@ mod tests {
         paths
     }
 
+    fn rendered_layers<'a>(state: &'a Value, object_id: &str) -> &'a [Value] {
+        state["entities"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|entity| entity["objectId"].as_str() == Some(object_id))
+            .and_then(|entity| entity["layers"].as_array())
+            .map(Vec::as_slice)
+            .unwrap_or_else(|| panic!("rendered layers for object {object_id}"))
+    }
+
+    fn rendered_layer<'a>(layers: &'a [Value], key: &str) -> &'a Value {
+        layers
+            .iter()
+            .find(|layer| layer["key"].as_str() == Some(key))
+            .unwrap_or_else(|| panic!("rendered layer {key}"))
+    }
+
+    fn highlight_layer_count(state: &Value) -> usize {
+        state["entities"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .flat_map(|entity| entity["layers"].as_array().into_iter().flatten())
+            .filter(|layer| {
+                layer["key"]
+                    .as_str()
+                    .is_some_and(|key| key.contains(":target-highlight:"))
+            })
+            .count()
+    }
+
+    #[test]
+    fn crystal_selected_remote_player_redraws_exact_composite_at_thirty_percent() {
+        let manifest = crate::atlas::routing_atlas_manifest_fixture(&[
+            "/original-ui/CArmour/00/980.png",
+            "/original-ui/CHair/00/980.png",
+            "/original-ui/CWeapon/00/588.png",
+        ]);
+        let mut payload = json!({
+            "sceneView": {"center": {"x": 288, "y": 616}, "width": 19, "height": 15},
+            "selectedObjectId": "1001",
+            "entities": [{
+                "objectId": 1001,
+                "kind": "player",
+                "classKey": "warrior",
+                "genderKey": "female",
+                "x": 289,
+                "y": 616,
+                "direction": "Left",
+                "hidden": false,
+                "sprite": {
+                    "bodyLibrary": "CArmour/00",
+                    "hairLibrary": "CHair/00",
+                    "weaponLibrary": "CWeapon/00",
+                    "frameBaseOffset": 808,
+                    "weaponFrameOffset": 416,
+                    "directionStride": 4
+                }
+            }]
+        });
+        let poses = HashMap::from([("1001".to_owned(), (172, AnimationAction::Attack1))]);
+        let state = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload, &poses, true, &manifest,
+        )
+        .expect("selected remote player render state");
+        let layers = rendered_layers(&state, "1001");
+        assert_eq!(layers.len(), 6, "three source layers plus three redraws");
+
+        for (role, expected_path) in [
+            ("weapon-primary", "/original-ui/CWeapon/00/588.png"),
+            ("body", "/original-ui/CArmour/00/980.png"),
+            ("hair", "/original-ui/CHair/00/980.png"),
+        ] {
+            let normal = rendered_layer(layers, &format!("1001:{role}"));
+            let highlight =
+                rendered_layer(layers, &format!("1001:target-highlight:{role}"));
+            assert_eq!(normal["path"], json!(expected_path));
+            for field in [
+                "path",
+                "left",
+                "top",
+                "width",
+                "height",
+                "atlasKey",
+                "atlasRectKey",
+            ] {
+                assert_eq!(highlight[field], normal[field], "redraw {role} {field}");
+            }
+            assert_eq!(highlight["opacity"], json!(0.3));
+            assert_eq!(highlight["additive"], json!(false));
+            assert!(highlight["z"].as_f64() > normal["z"].as_f64());
+        }
+        assert!(
+            rendered_layer(layers, "1001:target-highlight:weapon-primary")["z"].as_f64()
+                < rendered_layer(layers, "1001:target-highlight:body")["z"].as_f64()
+        );
+        assert!(
+            rendered_layer(layers, "1001:target-highlight:body")["z"].as_f64()
+                < rendered_layer(layers, "1001:target-highlight:hair")["z"].as_f64()
+        );
+
+        payload["entities"][0]["hidden"] = json!(true);
+        let hidden = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload, &poses, true, &manifest,
+        )
+        .expect("hidden selected remote player render state");
+        let hidden_layers = rendered_layers(&hidden, "1001");
+        assert_eq!(
+            rendered_layer(hidden_layers, "1001:body")["opacity"],
+            json!(0.5)
+        );
+        assert_eq!(
+            rendered_layer(hidden_layers, "1001:target-highlight:body")["opacity"],
+            json!(0.3),
+            "Crystal DrawBlend is independent of the hidden draw opacity"
+        );
+
+        let partial_manifest = crate::atlas::routing_atlas_manifest_fixture(&[
+            "/original-ui/CHair/00/980.png",
+            "/original-ui/CWeapon/00/588.png",
+        ]);
+        let partial = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &poses,
+            true,
+            &partial_manifest,
+        )
+        .expect("partially resolved player render state");
+        assert_eq!(
+            highlight_layer_count(&partial),
+            0,
+            "one missing actor rect suppresses the entire selected composite"
+        );
+
+        payload["entities"][0]["kind"] = json!("selfPlayer");
+        let self_selected = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload, &poses, true, &manifest,
+        )
+        .expect("self player render state");
+        assert_eq!(highlight_layer_count(&self_selected), 0);
+
+        payload["entities"][0]["kind"] = json!("npc");
+        let npc_selected = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload, &poses, true, &manifest,
+        )
+        .expect("NPC render state");
+        assert_eq!(highlight_layer_count(&npc_selected), 0);
+
+        payload["entities"][0]
+            .as_object_mut()
+            .expect("player object")
+            .remove("kind");
+        let missing_kind = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload, &poses, true, &manifest,
+        )
+        .expect("missing-kind render state");
+        assert_eq!(highlight_layer_count(&missing_kind), 0);
+    }
+
+    #[test]
+    fn crystal_selected_redraw_precedes_same_and_cross_actor_flaming_sword_effects() {
+        let manifest = crate::atlas::routing_atlas_manifest_fixture(&[
+            "/original-ui/CArmour/00/980.png",
+            "/original-ui/CHair/00/980.png",
+            "/original-ui/CWeapon/00/588.png",
+        ]);
+        let payload = json!({
+            "sceneView": {"center": {"x": 288, "y": 616}, "width": 19, "height": 15},
+            "selectedObjectId": 1001,
+            "entities": [
+                {
+                    "objectId": 1000,
+                    "kind": "selfPlayer",
+                    "classKey": "warrior",
+                    "genderKey": "male",
+                    "x": 285,
+                    "y": 614,
+                    "direction": "Up",
+                    "sprite": {"bodyLibrary": "CArmour/00", "frameBaseOffset": 0}
+                },
+                {
+                    "objectId": 1001,
+                    "kind": "player",
+                    "classKey": "warrior",
+                    "genderKey": "female",
+                    "x": 292,
+                    "y": 618,
+                    "direction": "Left",
+                    "sprite": {
+                        "bodyLibrary": "CArmour/00",
+                        "hairLibrary": "CHair/00",
+                        "weaponLibrary": "CWeapon/00",
+                        "frameBaseOffset": 808,
+                        "weaponFrameOffset": 416
+                    }
+                }
+            ]
+        });
+        let selected = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::from([("1001".to_owned(), (172, AnimationAction::Attack1))]),
+            true,
+            &manifest,
+        )
+        .expect("selected player state");
+        let selected_layers = rendered_layers(&selected, "1001");
+        let max_highlight_z = selected_layers
+            .iter()
+            .filter(|layer| {
+                layer["key"]
+                    .as_str()
+                    .is_some_and(|key| key.contains(":target-highlight:"))
+            })
+            .filter_map(|layer| layer["z"].as_f64())
+            .reduce(f64::max)
+            .expect("selected composite z");
+
+        let effect_z_for = |object_id: u32, x: i32, y: i32| {
+            let mut effects = crate::effects::NativeEffects::default();
+            effects.observe_render_payload(&payload);
+            effects.observe(
+                0,
+                288,
+                616,
+                &[crate::gameplay_bridge::NativeEffectEvent {
+                    sequence: 1,
+                    generation: 1,
+                    packet: "ObjectAttack".to_owned(),
+                    payload: json!({
+                        "objectId": object_id,
+                        "location": {"x": x, "y": y},
+                        "direction": "Up",
+                        "spell": 8,
+                        "level": 3,
+                        "attackType": 0
+                    }),
+                }],
+                &HashMap::from([(object_id, (x, y))]),
+            );
+            let state: Value = serde_json::from_str(
+                &effects
+                    .tick_with_visibility(0, true)
+                    .expect("FlamingSword render state"),
+            )
+            .expect("FlamingSword JSON");
+            state["effects"][0]["z"]
+                .as_f64()
+                .expect("FlamingSword z")
+        };
+
+        assert!(
+            max_highlight_z < effect_z_for(1001, 292, 618),
+            "same-actor DrawEffects must follow selected DrawBlend"
+        );
+        assert!(
+            max_highlight_z < effect_z_for(1000, 285, 614),
+            "even a shallower actor effect must follow the deeper selected redraw"
+        );
+    }
+
+    #[test]
+    fn crystal_selected_monster_redraw_stays_between_real_front_tiles_and_effects() {
+        let manifest = crate::atlas::routing_atlas_manifest_fixture(&[
+            "/original-ui/Monster/005/136.png",
+            "/original-ui/Monster/005/164.png",
+            "/original-ui/Monster/005/173.png",
+            "/original-ui/Monster/005/224.png",
+            "/original-ui/Monster/005/233.png",
+        ]);
+        let mut payload = json!({
+            "sceneView": {"center": {"x": 288, "y": 616}, "width": 19, "height": 15},
+            "selectedObjectId": 2005,
+            "entities": [{
+                "objectId": 2005,
+                "kind": "monster",
+                "x": 285,
+                "y": 614,
+                "direction": "Right",
+                "hidden": false,
+                "sprite": {
+                    "bodyLibrary": "Monster/005",
+                    "frameBaseOffset": 0,
+                    "directionStride": 10
+                }
+            }]
+        });
+
+        let compressed = include_bytes!("../../../web/lib/generated/crystal-map-pack/0.map.gz");
+        let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
+        let mut bytes = Vec::new();
+        decoder
+            .read_to_end(&mut bytes)
+            .expect("decode real 0.map.gz");
+        let map = crate::map_parser::parse_type100_map(&bytes).expect("parse real 0.map");
+        let front = crate::map_parser::resolve_map_tile_draws(&map)
+            .into_iter()
+            .find(|draw| {
+                draw.x == 285
+                    && draw.y == 614
+                    && draw.layer == crate::map_parser::TileLayer::Front
+            })
+            .expect("VIS-01 source coordinate is a real 0.map front tile");
+        let front_z = f64::from(crate::atlas::map_tile_draw_z_for_test(
+            front.x, front.y, front.z,
+        ));
+
+        for (frame, action, expected_body, expected_effect) in [
+            (
+                136,
+                AnimationAction::Struck,
+                "/original-ui/Monster/005/136.png",
+                None,
+            ),
+            (
+                164,
+                AnimationAction::Die,
+                "/original-ui/Monster/005/164.png",
+                Some("/original-ui/Monster/005/224.png"),
+            ),
+            (
+                173,
+                AnimationAction::Die,
+                "/original-ui/Monster/005/173.png",
+                Some("/original-ui/Monster/005/233.png"),
+            ),
+            (
+                173,
+                AnimationAction::Dead,
+                "/original-ui/Monster/005/173.png",
+                None,
+            ),
+        ] {
+            let poses = HashMap::from([("2005".to_owned(), (frame, action))]);
+            let state = crate::atlas::build_entity_render_state_with_manifest_for_test(
+                &payload, &poses, true, &manifest,
+            )
+            .expect("selected Scarecrow phase render state");
+            let layers = rendered_layers(&state, "2005");
+            let normal = rendered_layer(layers, "2005:body");
+            let highlight = rendered_layer(layers, "2005:target-highlight:body");
+            assert_eq!(normal["path"], json!(expected_body));
+            assert_eq!(highlight["path"], normal["path"]);
+            assert_eq!(highlight["opacity"], json!(0.3));
+            assert_eq!(highlight["additive"], json!(false));
+            assert!(normal["z"].as_f64().unwrap() < front_z);
+            assert!(front_z < highlight["z"].as_f64().unwrap());
+
+            let effects = layers
+                .iter()
+                .filter(|layer| layer["additive"].as_bool() == Some(true))
+                .collect::<Vec<_>>();
+            assert_eq!(effects.len(), usize::from(expected_effect.is_some()));
+            if let Some(expected_effect) = expected_effect {
+                let effect = effects[0];
+                assert_eq!(effect["path"], json!(expected_effect));
+                assert!(highlight["z"].as_f64() < effect["z"].as_f64());
+                assert!(!layers.iter().any(|layer| {
+                    layer["key"]
+                        .as_str()
+                        .is_some_and(|key| key.contains("target-highlight:scarecrow-die-effect"))
+                }));
+            }
+        }
+
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .push(json!({
+                "objectId": "2006",
+                "kind": "monster",
+                "x": 286,
+                "y": 614,
+                "direction": "Right",
+                "sprite": {"bodyLibrary": "Monster/005", "frameBaseOffset": 0, "directionStride": 10}
+            }));
+        payload["selectedObjectId"] = json!("2006");
+        let switched = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::from([
+                ("2005".to_owned(), (136, AnimationAction::Struck)),
+                ("2006".to_owned(), (136, AnimationAction::Struck)),
+            ]),
+            true,
+            &manifest,
+        )
+        .expect("selection switch render state");
+        assert!(!rendered_layers(&switched, "2005").iter().any(|layer| {
+            layer["key"]
+                .as_str()
+                .is_some_and(|key| key.contains(":target-highlight:"))
+        }));
+        assert_eq!(
+            rendered_layers(&switched, "2006")
+                .iter()
+                .filter(|layer| {
+                    layer["key"]
+                        .as_str()
+                        .is_some_and(|key| key.contains(":target-highlight:"))
+                })
+                .count(),
+            1
+        );
+
+        for selected in [Value::Null, json!(2999)] {
+            payload["selectedObjectId"] = selected;
+            let unselected = crate::atlas::build_entity_render_state_with_manifest_for_test(
+                &payload,
+                &HashMap::from([
+                    ("2005".to_owned(), (136, AnimationAction::Struck)),
+                    ("2006".to_owned(), (136, AnimationAction::Struck)),
+                ]),
+                true,
+                &manifest,
+            )
+            .expect("unselected render state");
+            assert_eq!(highlight_layer_count(&unselected), 0);
+        }
+
+        payload["selectedObjectId"] = json!(2005);
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .truncate(1);
+        let missing_rect = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::from([("2005".to_owned(), (136, AnimationAction::Struck))]),
+            true,
+            &crate::atlas::routing_atlas_manifest_fixture(&[]),
+        )
+        .expect("missing target rect state");
+        assert_eq!(highlight_layer_count(&missing_rect), 0);
+        assert!(rendered_layers(&missing_rect, "2005")[0]
+            .get("atlasRectKey")
+            .is_none());
+    }
+
     fn assert_vis01_checkpoint(
         presentation: &NativeEntityPresentation,
         payload: &Value,

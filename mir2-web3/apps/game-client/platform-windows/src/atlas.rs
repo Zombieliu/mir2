@@ -28,7 +28,8 @@ const ENTITY_BODY_ORDER: f32 = 5.0;
 const ENTITY_HAIR_ORDER: f32 = 6.0;
 const ENTITY_FRONT_WEAPON_ORDER: f32 = 7.0;
 const MAP_FRONT_ORDER: f32 = crate::map_parser::MAP_FRONT_DEPTH_ORDER * ENTITY_DEPTH_GAIN;
-const POST_WORLD_EFFECT_GAP: f32 = 20.0;
+const POST_WORLD_BAND_GAP: f32 = 20.0;
+const TARGET_HIGHLIGHT_OPACITY: f64 = 0.3;
 
 #[derive(Debug, Clone)]
 struct StarterAtlasRect {
@@ -751,6 +752,7 @@ fn build_entity_render_state_with_index(
     let entity_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
     let entity_origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
     let mut used_rects: HashMap<String, HashSet<String>> = HashMap::new();
+    let selected_object_id = normalized_object_id(payload.get("selectedObjectId"));
 
     let entities = payload
         .get("entities")
@@ -759,14 +761,7 @@ fn build_entity_render_state_with_index(
             entities
                 .iter()
                 .map(|entity| {
-                    let object_id = entity
-                        .get("objectId")
-                        .and_then(|value| match value {
-                            Value::Number(number) => Some(number.to_string()),
-                            Value::String(string) => Some(string.clone()),
-                            _ => None,
-                        })
-                        .unwrap_or_default();
+                    let object_id = normalized_object_id(entity.get("objectId")).unwrap_or_default();
                     let kind = entity
                         .get("kind")
                         .and_then(Value::as_str)
@@ -908,6 +903,7 @@ fn build_entity_render_state_with_index(
                             layers.push(layer);
                         }
                     }
+                    let actor_layer_count = layers.len();
                     if let Some(effect_frame) = effect_visible
                         .then(|| {
                             scarecrow_die_effect_frame(
@@ -937,6 +933,38 @@ fn build_entity_render_state_with_index(
                     if entity.get("hidden").and_then(Value::as_bool) == Some(true) {
                         for layer in &mut layers {
                             layer["opacity"] = json!(0.5);
+                        }
+                    }
+                    let explicitly_selectable = entity
+                        .get("kind")
+                        .and_then(Value::as_str)
+                        .is_some_and(|kind| matches!(kind, "player" | "monster"));
+                    if explicitly_selectable
+                        && selected_object_id.as_deref() == Some(object_id.as_str())
+                    {
+                        let highlights = layers[..actor_layer_count]
+                            .iter()
+                            .map(|layer| {
+                                let key = layer.get("key").and_then(Value::as_str)?;
+                                let role = key.strip_prefix(&format!("{object_id}:"))?;
+                                // Candidate target redraw is exact-atlas only. A
+                                // missing rect in any rendered actor layer must
+                                // suppress the whole composite, never leave a
+                                // partially highlighted player or monster.
+                                layer.get("atlasKey").and_then(Value::as_str)?;
+                                layer.get("atlasRectKey").and_then(Value::as_str)?;
+                                let normal_z = layer.get("z").and_then(Value::as_f64)? as f32;
+                                let mut highlight = layer.clone();
+                                highlight["key"] =
+                                    json!(format!("{object_id}:target-highlight:{role}"));
+                                highlight["z"] = json!(post_world_highlight_z(payload, normal_z));
+                                highlight["opacity"] = json!(TARGET_HIGHLIGHT_OPACITY);
+                                highlight["additive"] = json!(false);
+                                Some(highlight)
+                            })
+                            .collect::<Option<Vec<_>>>();
+                        if let Some(highlights) = highlights {
+                            layers.extend(highlights);
                         }
                     }
 
@@ -1049,17 +1077,24 @@ fn entity_z_base(x: i64, y: i64) -> f32 {
     y.saturating_mul(1_000).saturating_add(x.saturating_mul(10)) as f32 * ENTITY_DEPTH_GAIN
 }
 
+fn normalized_object_id(value: Option<&Value>) -> Option<String> {
+    match value? {
+        Value::Number(number) => Some(number.to_string()),
+        Value::String(string) if !string.is_empty() => Some(string.clone()),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 pub(crate) fn map_tile_draw_z_for_test(x: i32, y: i32, layer_z: f32) -> f32 {
     ((y.saturating_mul(1_000).saturating_add(x.saturating_mul(10))) as f32 + layer_z)
         * ENTITY_DEPTH_GAIN
 }
 
-/// Crystal draws `MirObject.DrawEffects` only after the complete world pass.
-/// Keep the GPU sort deterministic by putting every object effect above the
-/// deepest visible map/entity layer, then retaining the objects' normal
-/// top-to-bottom order inside that post-world band.
-fn post_world_effect_z(payload: &Value, object_x: i64, object_y: i64) -> f32 {
+/// Crystal draws the selected object once more at 30% after the complete world
+/// pass, then calls `MirObject.DrawEffects`. Keep those two post-world passes in
+/// non-overlapping GPU depth bands while retaining normal object/layer order.
+pub(crate) fn post_world_depth_bounds(payload: &Value) -> (f32, f32) {
     let viewport = crate::map_parser::MapViewport::from_gateway_payload(payload);
     let start_x = viewport.center_x.saturating_sub(viewport.draw_margin_x());
     let start_y = viewport.center_y.saturating_sub(viewport.draw_margin_y());
@@ -1072,22 +1107,42 @@ fn post_world_effect_z(payload: &Value, object_x: i64, object_y: i64) -> f32 {
         for entity in entities {
             let x = entity.get("x").and_then(Value::as_i64).unwrap_or(0);
             let y = entity.get("y").and_then(Value::as_i64).unwrap_or(0);
-            let Ok(view_x) = i32::try_from(x) else {
-                continue;
-            };
-            let Ok(view_y) = i32::try_from(y) else {
-                continue;
-            };
-            if !viewport.retains_cell(view_x, view_y) {
-                continue;
-            }
             let z = entity_z_base(x, y);
             min_world_z = min_world_z.min(z);
             max_world_z = max_world_z.max(z + MAP_FRONT_ORDER);
         }
     }
 
-    max_world_z + POST_WORLD_EFFECT_GAP + (entity_z_base(object_x, object_y) - min_world_z)
+    (min_world_z, max_world_z)
+}
+
+fn post_world_highlight_z(payload: &Value, normal_layer_z: f32) -> f32 {
+    let (min_world_z, max_world_z) = post_world_depth_bounds(payload);
+    max_world_z + POST_WORLD_BAND_GAP + (normal_layer_z - min_world_z)
+}
+
+pub(crate) fn post_world_effect_z_from_bounds(
+    (min_world_z, max_world_z): (f32, f32),
+    normal_layer_z: f32,
+) -> f32 {
+    let world_span = max_world_z - min_world_z;
+    max_world_z
+        + POST_WORLD_BAND_GAP
+        + world_span
+        + POST_WORLD_BAND_GAP
+        + (normal_layer_z - min_world_z).max(0.0)
+}
+
+#[cfg(test)]
+pub(crate) fn post_world_highlight_band_ceiling((min_world_z, max_world_z): (f32, f32)) -> f32 {
+    max_world_z + POST_WORLD_BAND_GAP + (max_world_z - min_world_z)
+}
+
+fn post_world_effect_z(payload: &Value, object_x: i64, object_y: i64) -> f32 {
+    post_world_effect_z_from_bounds(
+        post_world_depth_bounds(payload),
+        entity_z_base(object_x, object_y),
+    )
 }
 
 fn scarecrow_die_effect_frame(
