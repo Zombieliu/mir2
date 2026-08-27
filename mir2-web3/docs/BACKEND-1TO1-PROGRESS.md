@@ -1,5 +1,19 @@
 # Backend 1:1 Progress
 
+> Web Crystal ActionFeed client-boundary follow-up (2026-08-28): revision
+> `7bc42cfd77e196297b165436716484732db18d83` changes no simulation or shared-
+> Zone authority. It consumes consecutive authoritative Struck packets as the
+> source client does: one current action, one queued tail, tail duplicate drop,
+> deferred queued location/direction and deferred second audio. Death, revive
+> and MapChanged clear the client queue; snapshot refresh retains it otherwise.
+> Full Web logic/type checks, focused state/store/event coverage and the offline
+> resource/audio gate pass, and independent review found no P0/P1. The same
+> revision regenerates the deterministic sound manifest for existing
+> `M79-1.wav`, fixing the prior exact-head CI resource-gate omission locally.
+> Authenticated live packet/audio ordering, final-head CI and every same-EXE/
+> GPU/DPI/soak/human/signing/denominator gate remain open. No backend, visual or
+> global percentage is claimed.
+
 > Native player combat-audio client-boundary follow-up (2026-08-28): revision
 > `144226df3c7a81ae7e7b15866ae4091d610fffb8` changes no simulation or shared-
 > Zone combat authority. It consumes existing Struck/Death/Revive/MountUpdate

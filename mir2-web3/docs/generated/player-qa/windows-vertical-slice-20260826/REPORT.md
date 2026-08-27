@@ -463,3 +463,31 @@ publisher Authenticode, and this package was not run for UI, live-WSS, DPI, or
 soak evidence. Candidate-04 therefore replaces the stale package only for
 exact-head nonvisual internal evidence; `accepted=false` and visual acceptance
 remain false.
+
+## Web Crystal ActionFeed follow-on (2026-08-28)
+
+Revision `7bc42cfd77e196297b165436716484732db18d83` closes one bounded Web
+combat-presentation mismatch without changing the packaged Candidate EXE or
+server authority. Consecutive authoritative Struck packets now keep the current
+Struck action and one queued Struck tail instead of restarting the current
+animation. A further Struck is dropped only while that tail exists. The queued
+packet's location, direction and second audio cue are consumed when the queued
+action starts. Death, revive and MapChanged clear the queue, and packet-first
+snapshot refreshes retain it until one of those lifecycle boundaries.
+
+Local verification passed:
+
+- `npm.cmd run test:frontend-logic`;
+- `npm.cmd run typecheck`;
+- focused actor-combat, game-event and framework-free store regressions;
+- `npm.cmd run assets:verify:offline` after regenerating the deterministic
+  present-sound manifest to include existing `M79-1.wav` (331/331);
+- `git diff --check`;
+- independent read-only final review with no P0/P1 in this bounded diff.
+
+The manifest update is the evidence-backed fix for the prior exact-head
+`web-resource-gate` failure; the next pushed head still requires a fresh CI
+result. No client was launched and no same-EXE browser/live-WSS, real-DPI,
+native-soak or human action/audio evidence was created. This follow-on leaves
+`globalParityPercent=null`, `accepted=false` and `visualAccepted=false`; the
+complete semantic denominator and formal publisher signing also remain open.

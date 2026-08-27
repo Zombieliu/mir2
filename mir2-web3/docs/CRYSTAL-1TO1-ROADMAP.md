@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Web Crystal ActionFeed bounded follow-up (2026-08-28): implementation
+> `7bc42cfd77e196297b165436716484732db18d83` replaces the Web renderer's
+> restart-on-hit transient with Crystal's current Struck action plus one queued
+> Struck tail. A later third Struck is dropped while that tail exists; queued
+> location/direction and its second audio cue are applied only when the queued
+> action starts. Death, revive and MapChanged clear the queue, while packet-
+> first snapshot merges retain it until a legitimate lifecycle boundary. The
+> framework-free store follows the same MapChanged contract. Full frontend
+> logic, TypeScript typecheck, focused state/store/event tests and the complete
+> offline resource/audio gate pass; independent final review found no P0/P1.
+> The same revision regenerates the deterministic present-sound manifest to
+> include the already exported `M79-1.wav` (331/331), closing the exact prior
+> `web-resource-gate` failure locally. No same-EXE browser/live-WSS capture or
+> human action/audio acceptance was produced, and final-head CI must rerun.
+> This is not UI, visual or whole-game 100%; `globalParityPercent` remains null.
+
 > Native player combat-audio bounded follow-up (2026-08-28): implementation
 > `144226df3c7a81ae7e7b15866ae4091d610fffb8` binds existing authoritative
 > Struck/Death/Revive packets to the exact body/armour weapon-hit, tiger/wolf

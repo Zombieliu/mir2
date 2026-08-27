@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> Web Crystal ActionFeed server-client note (2026-08-28): revision
+> `7bc42cfd77e196297b165436716484732db18d83` adds no server authority. It makes
+> the Web client preserve the server's consecutive Struck order as one current
+> action and one queued Struck tail, applies queued pose/audio only at action
+> start, and drops only a further tail duplicate. Death, revive and MapChanged
+> clear the queue; packet-first snapshots preserve it otherwise. Full Web
+> logic/type, state/store/event and offline resource/audio gates pass with no
+> reviewed P0/P1. Regenerating the 331-entry present-sound manifest also closes
+> the prior CI omission of existing `M79-1.wav` locally. Authenticated live
+> delivery/audio ordering, final-head CI, same-EXE/GPU/DPI/soak/human/signing
+> and the incomplete denominator remain open; no server or global percentage
+> is emitted.
+
 > Native player combat-audio server-client note (2026-08-28): revision
 > `144226df3c7a81ae7e7b15866ae4091d610fffb8` adds no server authority. It
 > consumes the existing authoritative Struck/Death/Revive/MountUpdate stream
