@@ -95,6 +95,11 @@ $controls = @(
         -Executable "npm.cmd" `
         -Arguments @("--prefix", "apps/web", "run", "assets:map-atlas:build")
     New-Control `
+        -Id "native-keyed-map-preparation" `
+        -Description "Generate keyed and additive native map pages required by production map binding" `
+        -Executable "npm.cmd" `
+        -Arguments @("--prefix", "apps/web", "run", "assets:native-map-keyed:build")
+    New-Control `
         -Id "native-host-contract" `
         -Description "Windows native host and client contract tests" `
         -Executable $cargo `
@@ -194,6 +199,7 @@ $controls = @(
 
 $expectedControlIds = @(
     "native-asset-root-preparation",
+    "native-keyed-map-preparation",
     "native-host-contract",
     "five-class-bichon-functional-slice",
     "ordinary-unprivileged-candidate-loop",
@@ -239,6 +245,14 @@ function Assert-Contract {
     if ($assetPreparation.executable -cne "npm.cmd" -or
         $assetPreparation.arguments -cnotcontains "assets:map-atlas:build") {
         throw "the native asset-root preparation must build the repository map atlas"
+    }
+
+    $nativeKeyedPreparation = $controls | Where-Object {
+        $_.id -ceq "native-keyed-map-preparation"
+    }
+    if ($nativeKeyedPreparation.executable -cne "npm.cmd" -or
+        $nativeKeyedPreparation.arguments -cnotcontains "assets:native-map-keyed:build") {
+        throw "the native asset-root preparation must build keyed and additive native map pages"
     }
 
     $vertical = $controls | Where-Object { $_.id -ceq "five-class-bichon-functional-slice" }
