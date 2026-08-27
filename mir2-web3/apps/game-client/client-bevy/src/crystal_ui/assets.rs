@@ -7,6 +7,7 @@ pub struct CrystalButtonAssetSet {
     pub normal: String,
     pub hover: String,
     pub pressed: String,
+    pub disabled: Option<String>,
 }
 
 impl CrystalButtonAssetSet {
@@ -15,7 +16,13 @@ impl CrystalButtonAssetSet {
             normal: spec.asset_path(spec.normal),
             hover: spec.asset_path(spec.hover),
             pressed: spec.asset_path(spec.pressed),
+            disabled: None,
         }
+    }
+
+    pub fn with_disabled(mut self, path: impl Into<String>) -> Self {
+        self.disabled = Some(path.into());
+        self
     }
 }
 

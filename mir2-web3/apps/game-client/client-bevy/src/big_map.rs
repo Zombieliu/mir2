@@ -606,6 +606,10 @@ impl BigMapModel {
     /// Build metadata for a server-gated teleport request.  No local map
     /// change occurs and no success is implied by this method.
     pub fn selected_teleport_intent(&self) -> Option<BigMapTeleportIntent> {
+        let current_map_index = self.current_map_index?;
+        if self.active_map_index != Some(current_map_index) {
+            return None;
+        }
         let npc = self.selected_npc()?;
         if !self.world.enabled || !npc.can_teleport_to || npc.object_id == 0 {
             return None;
@@ -964,6 +968,26 @@ mod tests {
 
         model.apply_world_map_setup(false, Vec::new(), 3_000);
         assert!(model.selected_teleport_intent().is_none());
+    }
+
+    #[test]
+    fn cached_non_current_search_result_cannot_enable_teleport() {
+        let mut model = BigMapModel::default();
+        model.apply_new_map_info(1, info(vec![npc(42, "Bichon Teleporter", true)]));
+        let mut remote_npc = npc(77, "Remote Teleporter", true);
+        remote_npc.map_index = 2;
+        model.apply_new_map_info(2, info(vec![remote_npc]));
+        model.set_current_map(1);
+        model.apply_world_map_setup(true, Vec::new(), 3_000);
+
+        model.apply_search_result(2, 77);
+        assert_eq!(model.current_map_index, Some(1));
+        assert_eq!(model.active_map_index, Some(2));
+        assert_eq!(model.selected_npc_object_id, Some(77));
+        assert!(model.selected_teleport_intent().is_none());
+
+        model.apply_search_result(1, 42);
+        assert!(model.selected_teleport_intent().is_some());
     }
 
     #[test]

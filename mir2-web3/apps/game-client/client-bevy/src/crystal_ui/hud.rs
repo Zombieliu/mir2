@@ -1107,6 +1107,19 @@ mod tests {
     use crate::inventory::ItemModel;
 
     #[test]
+    fn inventory_button_uses_exact_crystal_three_state_assets_and_geometry() {
+        let assets = CrystalButtonAssetSet::from_spec(spec::INVENTORY);
+        assert_eq!(assets.normal, "original-ui/Prguse/1903.png");
+        assert_eq!(assets.hover, "original-ui/Prguse/1904.png");
+        assert_eq!(assets.pressed, "original-ui/Prguse/1905.png");
+        assert_eq!(assets.disabled, None);
+        assert_eq!(
+            spec::INVENTORY.rect,
+            CrystalRect::new(928.0, 692.0, 20.0, 20.0)
+        );
+    }
+
+    #[test]
     fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
         let mut app = App::new();
         app.insert_resource(NativeShellModel::default());

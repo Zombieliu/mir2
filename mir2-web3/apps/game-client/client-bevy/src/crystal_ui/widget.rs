@@ -17,9 +17,10 @@ pub enum CrystalButtonVisualState {
 impl CrystalButtonVisualState {
     pub fn asset_path(self, assets: &CrystalButtonAssetSet) -> &str {
         match self {
-            Self::Normal | Self::Disabled => assets.normal.as_str(),
+            Self::Normal => assets.normal.as_str(),
             Self::Hover => assets.hover.as_str(),
             Self::Pressed => assets.pressed.as_str(),
+            Self::Disabled => assets.disabled.as_deref().unwrap_or(assets.normal.as_str()),
         }
     }
 }
@@ -153,6 +154,7 @@ mod tests {
             normal: "normal.png".to_owned(),
             hover: "hover.png".to_owned(),
             pressed: "pressed.png".to_owned(),
+            disabled: None,
         }
     }
 
@@ -182,6 +184,15 @@ mod tests {
         assert_eq!(
             CrystalButtonVisualState::Disabled.asset_path(&assets),
             "normal.png"
+        );
+    }
+
+    #[test]
+    fn explicit_disabled_asset_overrides_normal_frame_path() {
+        let assets = demo_assets().with_disabled("disabled.png");
+        assert_eq!(
+            CrystalButtonVisualState::Disabled.asset_path(&assets),
+            "disabled.png"
         );
     }
 

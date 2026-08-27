@@ -5489,6 +5489,33 @@ fn spawn_overlay_crystal_button_enabled(
     action: OverlayButton,
     enabled: bool,
 ) {
+    spawn_overlay_crystal_button_enabled_with_disabled(
+        parent,
+        asset_server,
+        library,
+        normal,
+        hover,
+        pressed,
+        None,
+        rect,
+        action,
+        enabled,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_overlay_crystal_button_enabled_with_disabled(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    library: &'static str,
+    normal: u16,
+    hover: u16,
+    pressed: u16,
+    disabled: Option<u16>,
+    rect: CrystalRect,
+    action: OverlayButton,
+    enabled: bool,
+) {
     let spec = CrystalButtonSpec::new(
         library,
         normal,
@@ -5498,15 +5525,11 @@ fn spawn_overlay_crystal_button_enabled(
         rect.width,
         rect.height,
     );
-    spawn_crystal_image_button(
-        parent,
-        asset_server,
-        spec,
-        CrystalButtonAssetSet::from_spec(spec),
-        action,
-        false,
-        enabled,
-    );
+    let mut assets = CrystalButtonAssetSet::from_spec(spec);
+    if let Some(disabled) = disabled {
+        assets = assets.with_disabled(spec.asset_path(disabled));
+    }
+    spawn_crystal_image_button(parent, asset_server, spec, assets, action, false, enabled);
 }
 
 fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>) {
@@ -7522,13 +7545,14 @@ fn render_bigmap(
         OverlayButton::BigMapMyLocation,
         model.current_map_index.is_some(),
     );
-    spawn_overlay_crystal_button_enabled(
+    spawn_overlay_crystal_button_enabled_with_disabled(
         parent,
         asset_server,
         "Title",
         821,
         822,
         823,
+        Some(823),
         CrystalRect::new(638.0, 432.0, 72.0, 25.0),
         OverlayButton::BigMapTeleport,
         model.selected_teleport_intent().is_some(),
@@ -8862,6 +8886,7 @@ fn overlay_button(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::crystal_ui::widget::CrystalImageButton;
     use crate::mail::MailMessage;
     use crate::shop::ShopGood;
     use bevy::asset::{AssetApp, AssetPlugin};
@@ -10018,6 +10043,47 @@ mod tests {
             world.query::<&BigMapImageEntity>().iter(world).count(),
             0,
             "waiting for authority must not fabricate a map image"
+        );
+    }
+
+    #[test]
+    fn big_map_disabled_teleport_uses_explicit_crystal_title_823_frame() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<BigMapModel>()
+            .init_resource::<BigMapUiState>()
+            .init_resource::<UiReadModel>()
+            .add_systems(Startup, spawn_big_map_render_test);
+        app.update();
+
+        let world = app.world_mut();
+        let (entity, button, sprite_entity) = {
+            let mut buttons =
+                world.query::<(Entity, &OverlayButton, &CrystalImageButton, &Children)>();
+            let (entity, _, button, children) = buttons
+                .iter(world)
+                .find(|(_, action, _, _)| matches!(action, OverlayButton::BigMapTeleport))
+                .expect("BigMap Teleport button");
+            let sprite_entity = children.iter().next().expect("Teleport button sprite");
+            (entity, button.clone(), sprite_entity)
+        };
+        assert!(!button.enabled);
+        assert!(!world.entity(entity).contains::<Button>());
+        assert_eq!(
+            button.assets.disabled.as_deref(),
+            Some("original-ui/Title/823.png")
+        );
+        let image = world
+            .get::<ImageNode>(sprite_entity)
+            .expect("Teleport sprite image");
+        assert_eq!(
+            world
+                .resource::<AssetServer>()
+                .get_path(image.image.id())
+                .map(|path| path.path().to_string_lossy().replace('\\', "/")),
+            Some("original-ui/Title/823.png".to_owned())
         );
     }
 
