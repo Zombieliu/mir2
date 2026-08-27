@@ -137,9 +137,12 @@ not pass the slice.
 
 The current VIS-01 source/test checkpoint is bound in
 `docs/generated/player-qa/windows-visual-parity/VIS-01-REPORT.md`. It closes
-only CannibalPlant's `Monster/010` Show/Hide clock and native packet lifecycle.
-The fixed scene, Scarecrow additive death, real-map occlusion, same-EXE capture
-and visual acceptance remain open.
+CannibalPlant's `Monster/010` Show/Hide clock and native packet lifecycle plus
+Scarecrow's `Monster/005` Die-phase `224..233` additive source path. The latter
+shares the real map producer's six-cell guard-band/front-depth contract, obeys
+the Effect option without another packet, and has ECS material/cache/reset
+coverage. The fixed scene, real-map raster occlusion, same-EXE capture and
+visual acceptance remain open; source/ECS tests are not raster acceptance.
 
 ## Evidence and final gates
 

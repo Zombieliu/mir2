@@ -14,15 +14,19 @@
 > The first VIS-01 code increment additionally routes real Gateway
 > `ObjectMonster(image=10)` Hide/Show through the source `Monster/010` frames,
 > suppresses the plant only after Hide completes and restores it on Show while
-> keeping all other Hide completion policies fail-closed. Runtime 187/187,
-> focused native 6/6, client typography 1/1 and Gateway
-> appearance 1/1 pass. The full Windows suite against the frozen Candidate
-> asset pack remains FAIL with 320/322 passing; the two failures require absent
+> keeping all other Hide completion policies fail-closed. The current bounded
+> increment also renders Scarecrow `Monster/005` Die effects from source frames
+> `224..233` with packed-atlas additive UVs, the real map producer's full
+> guard-band post-world ordering, Effect-option toggling and bounded
+> cache/reset/mode-switch cleanup. Runtime 191/191, focused native regressions,
+> client typography 1/1 and Gateway appearance 1/1 pass. The full Windows
+> suite against the frozen Candidate
+> asset pack remains FAIL with 323/325 passing; the two failures require absent
 > `ARArmour/00/24.png` and
 > `Mount/00/32.png`. HUD/damage typography, hover corpse labels, additive
 > weapon/wing layers, same-EXE visual capture, complete legal assets, skill
-> VFX, fixed-scene/occlusion captures, button state/DPI evidence, native soak
-> and human acceptance remain open. VIS-01 is not visually accepted.
+> VFX, fixed-scene/real-map raster captures, button state/DPI evidence, native
+> soak and human acceptance remain open. VIS-01 is not visually accepted.
 
 > Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
 > source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes

@@ -11,11 +11,17 @@
 > Gateway appearance regression passes 1/1. The first VIS-01 increment now
 > treats real `ObjectMonster(image=10)` as CannibalPlant, plays its source
 > Show/Hide lifecycle, keeps unknown/non-Cannibal Hide on the old removal path
-> and passes the complete client runtime library 187/187. This is a
+> and adds Scarecrow `Monster/005` Die-phase `224..233` as a packed-atlas
+> additive post-world layer. Its depth shares the actual map producer's
+> six-cell guard-band/front contract, and the layer follows the Effect option
+> without a new Gateway packet. The complete client runtime library passes
+> 191/191; the frozen-asset Windows suite is 323/325 with only the two existing
+> missing Archer/Mount pixels. This is a
 > presentation-boundary repair, not a claim
 > that shared-Zone gameplay, whole-game semantics or Windows visuals are
-> complete. Additive weapon/wing layers, full assets, same-EXE live evidence,
-> DPI, soak and human gates stay open under the visual contract.
+> complete. Fixed-scene/raster proof, additive weapon/wing layers, full assets,
+> same-EXE live evidence, DPI, soak and human gates stay open under the visual
+> contract.
 
 > Windows verifiable vertical-slice evidence closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): this round records only evidence that passed.

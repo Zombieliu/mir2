@@ -7,12 +7,16 @@
 > Skeleton, ordinary NameView alive-only labels and Hidden/corpse opacity.
 > The first `VIS-01` code checkpoint now preserves the real `image=10`
 > CannibalPlant through Crystal Show/Hide frame timing, including early Show,
-> non-Cannibal/unknown packet behavior and object-ID reuse regressions. Runtime
-> passes 187/187; the frozen-asset Windows suite remains FAIL at 320/322 only
-> because the same Archer and Mount pixels are absent. `VIS-01` is still in
-> progress: its fixed scene, Scarecrow additive death, real-map occlusion and
-> same-EXE captures remain open. Later ordered slices are `VIS-02`
-> FlamingSword/FireBall/Lightning/SoulFireBall/FireWall effects and `VIS-03`
+> non-Cannibal/unknown packet behavior and object-ID reuse regressions. The next
+> bounded checkpoint renders Scarecrow `Monster/005` Die-phase frames
+> `224..233` through the packed-atlas additive material, above the real map
+> producer's full six-cell guard band, and removes/restores the layer when the
+> Effect option changes without another packet. Runtime passes 191/191; the
+> frozen-asset Windows suite remains FAIL at 323/325 only because the same
+> Archer and Mount pixels are absent. `VIS-01` is still in progress: its fixed
+> scene, real-map raster occlusion and same-EXE captures remain open. Later
+> ordered slices are `VIS-02` FlamingSword/FireBall/Lightning/SoulFireBall/
+> FireWall effects and `VIS-03`
 > HUD/Inventory/BigMap button states. Do not
 > report full-game 90% or visual 100%: clean source binding, the semantic
 > inventory, full legal assets, additive weapon/wing layers, same-EXE live WSS,

@@ -6,12 +6,16 @@
 > identity, guild, normal/Transform body and equipment routes now survive the
 > Gateway projection into the native renderer, and harvest/corpse packets
 > drive Harvest then persistent Skeleton rather than being dropped. Focused
-> Gateway 1/1 and runtime 187/187 tests pass. The first VIS-01 code increment
+> Gateway 1/1 and runtime 191/191 tests pass. The first VIS-01 code increment
 > additionally preserves real `ObjectMonster(image=10)` CannibalPlant through
 > source-timed Hide/Show while leaving other Crystal Hide completion policies
-> fail-closed. This closes only bounded projection/action-loss defects; monster
-> special rendering, effect/wing overlays, complete assets, skill effects,
-> environment visuals and all real-window acceptance gates remain open.
+> fail-closed. The next increment adds Scarecrow source `DrawEffects` frames
+> `224..233` as a packed-atlas additive layer, sharing map guard-band depth and
+> obeying the local Effect option. Windows is 323/325 against the frozen assets,
+> with only the known missing Archer/Mount pixels. This closes only bounded
+> projection/action-loss defects; monster special rendering, effect/wing
+> overlays, complete assets, skill effects, environment visuals and all
+> real-window acceptance gates remain open.
 
 > Windows verifiable vertical-slice server closeout (2026-08-26; packaged
 > runtime source `b5c0ecb60`): Simulation `vertical_slice` passes 8/8,
