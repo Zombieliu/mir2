@@ -2,7 +2,8 @@
 
 Last updated: 2026-08-27
 
-> 2026-08-27 Windows-native VIS-00 checkpoint: the new visual contract binds
+> 2026-08-27 Windows-native VIS-00 baseline / VIS-01 in-progress checkpoint:
+> the new visual contract binds
 > the current implementation base to Crystal source and records known Phase-A
 > registries without manufacturing a global percentage. The first repair
 > routes text through Arial, applies 8pt logical sizing to chat/nameplates, and
@@ -10,12 +11,18 @@ Last updated: 2026-08-27
 > alive-only labels, Hidden alpha 0.5 and ordinary corpse alpha 1.0.
 > Gateway-to-native projection now retains remote class/gender/equipment and
 > normal/Transform body metadata; Harvest and Harvested packets drive Harvest,
-> CWeapon/01 and persistent Skeleton actions. Runtime 185/185, focused Windows 6/6,
+> CWeapon/01 and persistent Skeleton actions. The first VIS-01 increment now
+> recognizes the real no-sprite `ObjectMonster(image=10)` packet, plays
+> CannibalPlant `Monster/010` Show/Hide frames, hides only after completion,
+> restores on Show and avoids applying that lifecycle to other monster types.
+> Runtime 187/187, focused Windows 6/6,
 > typography 1/1 and Gateway projection 1/1 pass. The full Windows suite
-> against frozen Candidate assets is FAIL with 316/318 passing: the package
+> against frozen Candidate assets is FAIL with 320/322 passing: the package
 > lacks the asserted Archer and Mount frames. No new same-EXE screenshot was
 > taken, so none of these leaves is visually Accepted yet; HUD/damage text
-> sizing/bold, hover corpse names, additive weapon/wing layers, actor/effect
+> sizing/bold, hover corpse names, Scarecrow additive death, real-map
+> occlusion, the fixed VIS-01 scene/captures, additive weapon/wing layers,
+> actor/effect
 > assets, VFX/audio, UI states, DPI, soak and human feel remain open.
 
 > 2026-08-19 Windows-native alternate-class/combat checkpoint: Archer

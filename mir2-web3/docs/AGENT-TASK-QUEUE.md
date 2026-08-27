@@ -5,9 +5,15 @@
 > the Phase-A denominator ledger and repairs Arial routing plus 8pt
 > chat/nameplates, remote normal/Transform body routing, Harvest/CWeapon-01/
 > Skeleton, ordinary NameView alive-only labels and Hidden/corpse opacity.
-> Focused code gates pass; the next ordered slices are `VIS-01` fixed Bichon
-> actor/monster scene, `VIS-02` FlamingSword/FireBall/Lightning/SoulFireBall/
-> FireWall effects, and `VIS-03` HUD/Inventory/BigMap button states. Do not
+> The first `VIS-01` code checkpoint now preserves the real `image=10`
+> CannibalPlant through Crystal Show/Hide frame timing, including early Show,
+> non-Cannibal/unknown packet behavior and object-ID reuse regressions. Runtime
+> passes 187/187; the frozen-asset Windows suite remains FAIL at 320/322 only
+> because the same Archer and Mount pixels are absent. `VIS-01` is still in
+> progress: its fixed scene, Scarecrow additive death, real-map occlusion and
+> same-EXE captures remain open. Later ordered slices are `VIS-02`
+> FlamingSword/FireBall/Lightning/SoulFireBall/FireWall effects and `VIS-03`
+> HUD/Inventory/BigMap button states. Do not
 > report full-game 90% or visual 100%: clean source binding, the semantic
 > inventory, full legal assets, additive weapon/wing layers, same-EXE live WSS,
 > 100/125/150% DPI, 30-minute native soak, human visual/audio/feel and

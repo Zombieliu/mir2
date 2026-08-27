@@ -80,7 +80,7 @@ Crystal initializes 14 equipment cells in `CharacterDialog.cs:227-342`, not
 |---|---:|---:|---|
 | Player pixel libraries | 477 libraries / 541,010 frames | 7 roots / 7,360 frames | open |
 | Monster-family pixel libraries | 546 libraries / 219,607 frames | 8 Monster libraries / 1,742 frames | open |
-| Player action records | 33 | 15 after adding Skeleton to the shared vocabulary; only 14 apply to players | open |
+| Player action records | 33 | 17 after adding Skeleton plus Show/Hide to the shared vocabulary; only 14 apply to players | open |
 | Player body direction/phase | 1,384 | 560 expressible at the audit base | open |
 | Player effect/wing direction/phase | 1,240 | 0 | open |
 | Explicit monster action records | 3,332 across 455 libraries | 3,205 expressible at the audit base | open |
@@ -105,7 +105,7 @@ These are source registries, not a single closed semantic denominator:
 | Map event spells | 19 | 0; the 2 map-manifest entries are `SpellEffect.Mine`/`Tester`, not map-event spells |
 | Non-None poison types | 11 | no complete status renderer |
 | Buff types | 59; 17 world-observable branches | no complete world overlay |
-| `MirAction` values | 45 | 15 shared runtime actions after Skeleton |
+| `MirAction` values | 45 | 17 shared runtime actions after Show/Hide; full action parity remains open |
 | Weather flags | 10 | missing |
 | Light settings | 5 plus darkness/blindness paths | blindness missing |
 
@@ -134,6 +134,12 @@ not pass the slice.
 5. Subsequent waves expand the source-derived actor, monster, spell,
    environment and UI registries. The denominator may grow; existing leaf IDs
    and failures may not be silently removed.
+
+The current VIS-01 source/test checkpoint is bound in
+`docs/generated/player-qa/windows-visual-parity/VIS-01-REPORT.md`. It closes
+only CannibalPlant's `Monster/010` Show/Hide clock and native packet lifecycle.
+The fixed scene, Scarecrow additive death, real-map occlusion, same-EXE capture
+and visual acceptance remain open.
 
 ## Evidence and final gates
 

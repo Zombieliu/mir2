@@ -1,14 +1,18 @@
 # Backend 1:1 Progress
 
-> Windows visual projection VIS-00 checkpoint (2026-08-27): shared authority
+> Windows visual projection VIS-00 baseline / VIS-01 in-progress checkpoint
+> (2026-08-27): shared authority
 > still owns actor identity and state, while the Gateway/native projection now
 > preserves remote player class, gender, guild, hair, armour, weapon,
 > mount/fishing mode and normal/Transform body selection instead of reducing
 > every remote player to an unstyled body. `ObjectHarvest` and
 > `ObjectHarvested` now reach native
 > Harvest/Skeleton actions; Skeleton is persistent until Revive. The focused
-> Gateway appearance regression passes 1/1 and the complete client runtime
-> library passes 185/185. This is a presentation-boundary repair, not a claim
+> Gateway appearance regression passes 1/1. The first VIS-01 increment now
+> treats real `ObjectMonster(image=10)` as CannibalPlant, plays its source
+> Show/Hide lifecycle, keeps unknown/non-Cannibal Hide on the old removal path
+> and passes the complete client runtime library 187/187. This is a
+> presentation-boundary repair, not a claim
 > that shared-Zone gameplay, whole-game semantics or Windows visuals are
 > complete. Additive weapon/wing layers, full assets, same-EXE live evidence,
 > DPI, soak and human gates stay open under the visual contract.

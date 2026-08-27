@@ -1,12 +1,15 @@
 # Crystal Server Parity
 
-> Windows VIS-00 server/client-boundary note (2026-08-27): no new server
+> Windows VIS-00 baseline / VIS-01 in-progress server/client-boundary note
+> (2026-08-27): no new server
 > completion percentage is claimed. The authoritative `ObjectPlayerInfo`
 > identity, guild, normal/Transform body and equipment routes now survive the
 > Gateway projection into the native renderer, and harvest/corpse packets
 > drive Harvest then persistent Skeleton rather than being dropped. Focused
-> Gateway 1/1 and runtime 185/185 tests
-> pass. This closes only the bounded projection/action-loss defects; monster
+> Gateway 1/1 and runtime 187/187 tests pass. The first VIS-01 code increment
+> additionally preserves real `ObjectMonster(image=10)` CannibalPlant through
+> source-timed Hide/Show while leaving other Crystal Hide completion policies
+> fail-closed. This closes only bounded projection/action-loss defects; monster
 > special rendering, effect/wing overlays, complete assets, skill effects,
 > environment visuals and all real-window acceptance gates remain open.
 
