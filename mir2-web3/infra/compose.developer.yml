@@ -63,18 +63,14 @@ services:
       - bash
       - -lc
       - >-
-        secret_file=/run/secrets/mir2_save_recovery_mac_key;
-        if [ ! -r "$$secret_file" ]; then
+        if [ -z "$${MIR2_SAVE_RECOVERY_MAC_KEY:-}" ]; then
           echo '[gateway preflight] Missing local save-recovery secret. Windows: powershell -NoProfile -File scripts/Initialize-LocalSaveRecovery.ps1 ; Unix: bash scripts/Initialize-LocalSaveRecovery.sh' >&2;
           exit 78;
         fi;
-        recovery_key="$$(tr -d '\r\n' < "$$secret_file")";
-        if ! [[ "$$recovery_key" =~ ^[0-9a-f]{64}$$ ]]; then
+        if ! [[ "$${MIR2_SAVE_RECOVERY_MAC_KEY}" =~ ^[0-9a-f]{64}$$ ]]; then
           echo '[gateway preflight] Invalid local save-recovery secret. Windows: powershell -NoProfile -File scripts/Initialize-LocalSaveRecovery.ps1 ; Unix: bash scripts/Initialize-LocalSaveRecovery.sh' >&2;
           exit 78;
         fi;
-        export MIR2_SAVE_RECOVERY_MAC_KEY="$$recovery_key";
-        unset recovery_key;
         exec cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
     environment:
       <<: *developer-environment

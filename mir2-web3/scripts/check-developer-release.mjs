@@ -359,6 +359,23 @@ function checkDeveloperReleaseLock() {
     assert(dockerfile.includes(needle), `developer.Dockerfile is missing lock: ${needle}`);
   }
 
+  const entrypointRelativePath = "infra/developer-entrypoint.sh";
+  assertTracked(`mir2-web3/${entrypointRelativePath}`);
+  const entrypoint = readFileSync(projectPath(entrypointRelativePath), "utf8");
+  for (const needle of [
+    "/run/secrets/mir2_save_recovery_mac_key",
+    '[[ "${save_recovery_mac_key}" =~ ^[0-9a-f]{64}$ ]]',
+    'export MIR2_SAVE_RECOVERY_MAC_KEY="${save_recovery_mac_key}"',
+    'exec gosu node "$@"',
+  ]) {
+    assert(entrypoint.includes(needle), `${entrypointRelativePath} is missing ${needle}`);
+  }
+  assert(
+    entrypoint.indexOf("/run/secrets/mir2_save_recovery_mac_key") <
+      entrypoint.indexOf('exec gosu node "$@"'),
+    `${entrypointRelativePath} must import the mounted secret before dropping privileges`,
+  );
+
   const compose = readFileSync(projectPath("infra/compose.developer.yml"), "utf8");
   for (const needle of [
     `BEVY_RUNTIME_RUST_VERSION: "${runtimeRustVersion}"`,
@@ -394,6 +411,17 @@ function checkDeveloperReleaseLock() {
   assert(
     !compose.includes("GH_TOKEN"),
     "developer Compose must not declare a persistent GitHub token environment",
+  );
+  for (const needle of [
+    "source: mir2_save_recovery_mac_key",
+    "target: mir2_save_recovery_mac_key",
+    "file: ../.mir2-data/local-secrets/save-recovery-mac-key.hex",
+  ]) {
+    assert(compose.includes(needle), `developer Compose is missing secret lock: ${needle}`);
+  }
+  assert(
+    !compose.includes("\n      MIR2_SAVE_RECOVERY_MAC_KEY:"),
+    "developer Compose must not inject the save-recovery key through container configuration",
   );
 
   const fetcherRelativePath = "infra/developer-asset-fetch.sh";
@@ -468,6 +496,7 @@ function checkDeveloperReleaseLock() {
         "Verify current-source Bevy runtime bundle",
         "npm run test:bevy-runtime-budget",
         "Restore tracked Bevy runtime release lock after source validation",
+        "Verify host-private developer secret handoff",
       ],
     ],
     [

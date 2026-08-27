@@ -253,6 +253,34 @@ jobs:
               "$MIR2_DEV_IMAGE"
           )" = "$GITHUB_SHA"
 
+      - name: Verify host-private developer secret handoff
+        run: |
+          set -euo pipefail
+          secret_file="${RUNNER_TEMP}/mir2-save-recovery-mac-key.hex"
+          cleanup_secret() {
+            rm -f -- "$secret_file"
+          }
+          trap cleanup_secret EXIT
+
+          openssl rand -hex 32 >"$secret_file"
+          chmod 600 "$secret_file"
+          docker run --rm \
+            --mount "type=bind,source=${secret_file},target=/run/secrets/mir2_save_recovery_mac_key,readonly" \
+            "$MIR2_DEV_IMAGE" \
+            bash -lc '
+              set -euo pipefail
+              test "$(id -un)" = "node"
+              [[ "${MIR2_SAVE_RECOVERY_MAC_KEY:-}" =~ ^[0-9a-f]{64}$ ]]
+            '
+
+          printf 'invalid\n' >"$secret_file"
+          if docker run --rm \
+            --mount "type=bind,source=${secret_file},target=/run/secrets/mir2_save_recovery_mac_key,readonly" \
+            "$MIR2_DEV_IMAGE" true; then
+            echo "Developer entrypoint accepted an invalid save-recovery secret." >&2
+            exit 1
+          fi
+
       - name: Validate real Compose definitions
         env:
           MIR2_ACCEPTANCE_DOMAIN: play-dev.example.com
