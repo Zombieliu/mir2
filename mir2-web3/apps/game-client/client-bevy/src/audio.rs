@@ -658,7 +658,10 @@ mod tests {
                 sync_native_audio.after(crate::options_effects::consume_options_effects),
             )
             .add_systems(Update, sync_native_ui_audio.after(sync_native_audio))
-            .add_systems(Update, sync_native_gameplay_audio.after(sync_native_ui_audio));
+            .add_systems(
+                Update,
+                sync_native_gameplay_audio.after(sync_native_ui_audio),
+            );
         app
     }
 
@@ -1129,7 +1132,11 @@ mod tests {
             .resource_mut::<NativeUiAudioQueue>()
             .push(NativeUiSound::ButtonA);
         app.update();
-        assert_eq!(count_sound_entities(&mut app), 0, "missing 103.wav has no fallback");
+        assert_eq!(
+            count_sound_entities(&mut app),
+            0,
+            "missing 103.wav has no fallback"
+        );
         assert_eq!(app.world().resource::<NativeUiAudioQueue>().len(), 0);
 
         app.world_mut()

@@ -5137,13 +5137,7 @@ mod tests {
     fn great_fireball_cast_false_keeps_cast_and_first_sound_only() {
         let zone = HashMap::from([(1000, (288, 616)), (2034, (288, 611))]);
         let mut fx = NativeEffects::default();
-        fx.observe(
-            0,
-            288,
-            616,
-            &[great_fireball_magic_event(1, false)],
-            &zone,
-        );
+        fx.observe(0, 288, 616, &[great_fireball_magic_event(1, false)], &zone);
         assert_eq!(fx.active.len(), 1);
         assert!(fx.active[0].key.starts_with("fx-cast-"));
         let sounds = fx.take_due_sound_events(0);
@@ -5194,13 +5188,7 @@ mod tests {
     fn great_fireball_map_change_clears_all_phases_and_audio() {
         let zone = HashMap::from([(1000, (288, 616)), (2034, (288, 611))]);
         let mut fx = NativeEffects::default();
-        fx.observe(
-            0,
-            288,
-            616,
-            &[great_fireball_magic_event(1, true)],
-            &zone,
-        );
+        fx.observe(0, 288, 616, &[great_fireball_magic_event(1, true)], &zone);
         let _ = fx.take_due_sound_events(0);
         fx.observe(
             100,

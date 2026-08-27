@@ -2209,11 +2209,7 @@ fn spawn_overlay_root(mut commands: Commands) {
 fn consume_hud_buttons(
     mut state: ResMut<NativePlayerUiState>,
     buttons: Query<
-        (
-            &Interaction,
-            &CrystalHudAction,
-            Option<&CrystalImageButton>,
-        ),
+        (&Interaction, &CrystalHudAction, Option<&CrystalImageButton>),
         Changed<Interaction>,
     >,
     shell: Option<Res<NativeShellModel>>,
@@ -2230,7 +2226,10 @@ fn consume_hud_buttons(
         {
             continue;
         }
-        if matches!(action, CrystalHudAction::Inventory | CrystalHudAction::Character) {
+        if matches!(
+            action,
+            CrystalHudAction::Inventory | CrystalHudAction::Character
+        ) {
             // Crystal MirControl.OnMouseClick plays ButtonA before the click
             // callback. Only source-audited buttons enter this allowlist.
             ui_audio.push(crate::audio::NativeUiSound::ButtonA);
@@ -8943,20 +8942,44 @@ mod tests {
             .spawn((Interaction::None, CrystalHudAction::Inventory))
             .id();
         app.update();
-        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
 
         app.world_mut()
             .entity_mut(button)
             .insert(Interaction::Pressed);
         app.update();
-        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            1
+        );
 
         // Changed<Interaction> consumes the pointer edge, never the held state.
         app.update();
-        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            1
+        );
         assert_eq!(
             app.world_mut()
                 .resource_mut::<crate::audio::NativeUiAudioQueue>()
@@ -8964,39 +8987,56 @@ mod tests {
             vec![crate::audio::NativeUiSound::ButtonA]
         );
 
-        app.world_mut()
-            .entity_mut(button)
-            .insert(Interaction::None);
+        app.world_mut().entity_mut(button).insert(Interaction::None);
         app.update();
         app.world_mut()
             .entity_mut(button)
             .insert(Interaction::Pressed);
         app.update();
-        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            1
+        );
         app.world_mut()
             .resource_mut::<crate::audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // A stale press outside InGame is neither a click nor a sound.
         app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::Login;
-        app.world_mut()
-            .entity_mut(button)
-            .insert(Interaction::None);
+        app.world_mut().entity_mut(button).insert(Interaction::None);
         app.update();
         app.world_mut()
             .entity_mut(button)
             .insert(Interaction::Pressed);
         app.update();
-        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
 
         // Keyboard inventory toggles call the state directly and never enter
         // the HUD pointer producer.
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .toggle_inventory();
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
     }
 
     #[test]
@@ -9041,7 +9081,12 @@ mod tests {
         let state = app.world().resource::<NativePlayerUiState>();
         assert!(state.equipment_open());
         assert_eq!(state.character_page, CharacterPage::Character);
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            1
+        );
         assert!(app
             .world()
             .resource::<NativePlayerUiIntentQueue>()
@@ -9050,24 +9095,38 @@ mod tests {
 
         // A held press neither repeats ButtonA nor invokes the callback.
         app.update();
-        assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            1
+        );
         app.world_mut()
             .resource_mut::<crate::audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // A second edge closes the already-visible CharacterPage and plays
         // exactly one new ButtonA cue.
-        app.world_mut()
-            .entity_mut(button)
-            .insert(Interaction::None);
+        app.world_mut().entity_mut(button).insert(Interaction::None);
         app.update();
         app.world_mut()
             .entity_mut(button)
             .insert(Interaction::Pressed);
         app.update();
-        assert!(!app.world().resource::<NativePlayerUiState>().equipment_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 1);
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            1
+        );
         app.world_mut()
             .resource_mut::<crate::audio::NativeUiAudioQueue>()
             .drain_bounded(8);
@@ -9079,24 +9138,38 @@ mod tests {
             .get_mut::<CrystalImageButton>()
             .expect("image button")
             .enabled = false;
-        app.world_mut()
-            .entity_mut(button)
-            .insert(Interaction::None);
+        app.world_mut().entity_mut(button).insert(Interaction::None);
         app.update();
         app.world_mut()
             .entity_mut(button)
             .insert(Interaction::Pressed);
         app.update();
-        assert!(!app.world().resource::<NativePlayerUiState>().equipment_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
 
         // Keyboard activation shares the source page-state transition but
         // stays outside the pointer/audio producer.
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .activate_character_hud_button();
-        assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
-        assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
         assert!(app
             .world()
             .resource::<NativePlayerUiIntentQueue>()
@@ -10099,7 +10172,10 @@ mod tests {
                 keys.press(key);
             }
             app.update();
-            assert!(!app.world().resource::<NativePlayerUiState>().equipment_open());
+            assert!(!app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .equipment_open());
 
             {
                 let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
@@ -10111,7 +10187,12 @@ mod tests {
             let state = app.world().resource::<NativePlayerUiState>();
             assert!(state.equipment_open());
             assert_eq!(state.character_page, CharacterPage::Character);
-            assert_eq!(app.world().resource::<crate::audio::NativeUiAudioQueue>().len(), 0);
+            assert_eq!(
+                app.world()
+                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .len(),
+                0
+            );
             assert!(app
                 .world()
                 .resource::<NativePlayerUiIntentQueue>()
