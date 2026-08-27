@@ -11,6 +11,7 @@ Crystal source revision: 484983404e3d6afa584e93801f8006ae3429bea9
 Crystal sourceRootClean: false
 native implementation base: 67a55b37900ced07d66bd788cbe06ef429ede8aa
 visual branch: codex/windows-visual-parity
+selectedTargetCheckpointRevision: a58ab0aaa2202731a5c55e7a684261d6c15c2f8d
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -30,6 +31,34 @@ Its counts are known source-backed scope registries, not a full-game
 percentage. `node scripts/verify-windows-visual-parity-ledger.mjs` checks its
 internal counting and fail-closed claim invariants; it is not a substitute for
 complete source extraction.
+
+## Selected-target bounded checkpoint
+
+Revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` closes automated evidence
+for one VIS-01 rendering rule: an explicitly selected remote player or monster
+is redrawn as its complete resolved exact-atlas composite at opacity 0.3 after
+the world pass. Selection accepts the Gateway's numeric or string identity,
+has no Crystal death restriction for monsters, and fails closed for self,
+NPCs, missing type or any rendered layer without exact atlas identity. Stable
+clone keys make selection replacement, removal and unknown targets remove the
+old redraw without retained geometry.
+
+The implementation reserves three non-overlapping depth bands. Normal map and
+actors remain in the world band; the selected composite is next; Crystal
+foreground scene/actor effects are last. ObjectEffect and default-foreground
+MapEffect are explicitly post-world, as are Cast, AttackOverlay, Projectile
+and Impact. Persistent ObjectSpell remains in-world. This is only the currently
+modelled subset of Crystal's `Effect.DrawBehind` contract, not a complete
+classification of every effect producer.
+
+Windows 376/376, Bevy native-ui 393/393, shared runtime 191/191, focused
+selected 3/3 and foreground-depth 1/1 pass, and independent review reports
+P0=0/P1=0. No Candidate, EXE, GPU capture or human evidence was created from
+this revision, so the rule is automated-only and `visualAccepted` remains
+false. Hover `MouseObject`, HighlightTarget option wiring, transparent-pixel
+hit testing, special wing/behind/internal-blend composites, Web symmetry,
+same-EXE/live WSS, 100/125/150% DPI, native 30-minute soak, human visual/feel
+and publisher signing remain required.
 
 ## Counting rule
 

@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-01 selected-target additional bounded
+> checkpoint: revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d`
+> redraws an explicitly selected remote player or monster's complete resolved
+> exact-atlas composite at Crystal opacity 0.3 after world rendering. Missing
+> atlas identity suppresses the whole clone; self/NPC/missing-kind objects do
+> not highlight, dead monsters remain eligible, Hidden and selected opacity
+> are independent, and Scarecrow's additive death effect is not duplicated.
+> World, target and foreground-effect depth bands now preserve ObjectEffect,
+> default MapEffect and actor/transient effects above the redraw while
+> Persistent ObjectSpell remains in-world. Windows 376/376, Bevy 393/393,
+> runtime 191/191, selected 3/3 and depth 1/1 pass; final review found no
+> P0/P1. No EXE/package/screenshot was produced. Hover highlight, the setting
+> toggle, general DrawBehind export, special composites, Web symmetry and all
+> live/GPU/DPI/soak/human/signing gates remain open; global parity stays
+> unreported.
+
 > 2026-08-28 Windows-native VIS-02 GreatFireBall additional bounded
 > checkpoint: revision `9457e5618449d22350baedd01e3775f5b1fe59c6`
 > implements immediate `Magic/400..409`, a 600 ms delayed 16-direction local

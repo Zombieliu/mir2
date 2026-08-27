@@ -1,5 +1,23 @@
 # Agent Task Queue
 
+> VIS-01 selected-target additional bounded automated checkpoint (2026-08-28):
+> revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` implements
+> Crystal's post-world `DrawBlend` redraw for explicitly selected remote
+> players and monsters. The complete resolved mount/weapon/body/hair or
+> monster body composite is cloned from exact atlas geometry at opacity 0.3;
+> any missing rendered-layer atlas identity suppresses the whole highlight.
+> Numeric/string object IDs, live selection replacement/removal, dead monsters,
+> Hidden opacity independence, real front-map occlusion and Scarecrow's
+> non-duplicated `DrawEffects` layer are regression-covered. Separate world,
+> target and post-world effect bands preserve Crystal ordering for
+> ObjectEffect/MapEffect and actor effects while Persistent ObjectSpell remains
+> in-world. Windows 376/376, Bevy native-ui 393/393, shared runtime 191/191,
+> focused selected 3/3 and foreground-depth 1/1 pass; independent review found
+> no P0/P1. No EXE, package or screenshot was produced. Hover `MouseObject`,
+> HighlightTarget option wiring, complete `Effect.DrawBehind` extraction,
+> special actor/effect composites, Web symmetry and every same-EXE/live-WSS/
+> GPU/DPI/soak/human/signing gate remain open. Do not emit a global percentage.
+
 > VIS-02 GreatFireBall additional bounded automated checkpoint (2026-08-28):
 > revision `9457e5618449d22350baedd01e3775f5b1fe59c6` binds typed
 > `ObjectMagic(spell=34)` to Crystal's immediate `Magic/400..409` cast,

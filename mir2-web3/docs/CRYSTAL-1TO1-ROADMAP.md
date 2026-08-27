@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-01 selected-target additional bounded checkpoint (2026-08-28):
+> implementation revision `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d`
+> reproduces Crystal's selected remote player/monster full-composite redraw at
+> opacity 0.3 after the world pass. Exact atlas geometry, layer order, stable
+> keys, dead-monster eligibility and atomic fail-closed behavior are covered;
+> self/NPC/missing-kind entities do not inherit the rule. The GPU depth model
+> now reserves non-overlapping world, selected and post-world effect bands:
+> ObjectEffect, default-foreground MapEffect and actor/transient effects remain
+> visible above the redraw, while Persistent ObjectSpell stays in-world.
+> Windows 376/376, Bevy 393/393, shared runtime 191/191, focused selected 3/3
+> and foreground-depth 1/1 pass, with independent P0=0/P1=0 review. This closes
+> one automated VIS-01 semantic leaf, not VIS-01 or visual acceptance. Hover,
+> option wiring, general DrawBehind metadata, Web parity and all real-window
+> gates remain open; `globalParityPercent` remains null.
+
 > VIS-02 GreatFireBall additional bounded checkpoint (2026-08-28):
 > implementation revision `9457e5618449d22350baedd01e3775f5b1fe59c6`
 > preserves Crystal's immediate ten-frame cast and M34-0, local missile launch

@@ -1,5 +1,19 @@
 # Backend 1:1 Progress
 
+> VIS-01 selected-target client-boundary checkpoint (2026-08-28): revision
+> `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` changes no simulation, combat or
+> shared-Zone authority. It consumes the existing selected object ID and typed
+> player/monster projection to reproduce Crystal's full actor redraw at 0.3
+> opacity, with atomic atlas closure and lifecycle cleanup. It also separates
+> client render depth so default-foreground ObjectEffect/MapEffect and actor
+> effects draw after selection, while persistent ObjectSpell stays in the
+> world pass. Windows 376/376, Bevy 393/393, shared runtime 191/191 and focused
+> depth/selection tests pass; independent review found no P0/P1. No live WSS,
+> server ownership, package, EXE or visual evidence was recertified. Hover,
+> HighlightTarget setting, general DrawBehind classification and every final
+> real-window gate remain open. No backend, visual or global percentage is
+> claimed.
+
 > VIS-02 GreatFireBall client-boundary checkpoint (2026-08-28): revision
 > `9457e5618449d22350baedd01e3775f5b1fe59c6` adds no gameplay or shared-Zone
 > authority. It consumes existing typed `ObjectMagic(GreatFireBall)` as

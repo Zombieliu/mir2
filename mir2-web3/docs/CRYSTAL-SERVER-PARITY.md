@@ -1,5 +1,18 @@
 # Crystal Server Parity
 
+> VIS-01 selected-target server-client note (2026-08-28): revision
+> `a58ab0aaa2202731a5c55e7a684261d6c15c2f8d` adds no server authority. The
+> Windows client now consumes the existing selected object identity and
+> authoritative actor projection as Crystal's post-world 30% full-composite
+> redraw. Exact-atlas fail-closed behavior, dead-monster eligibility, selection
+> lifecycle and the world/target/foreground-effect ordering are automated;
+> Persistent ObjectSpell remains in the world pass. Windows 376/376, Bevy
+> 393/393, shared runtime 191/191 and focused tests pass with no reviewed
+> P0/P1. This does not prove authenticated live selection delivery, transparent
+> pixel mouse targeting, hover behavior, general DrawBehind semantics or any
+> same-EXE/GPU/DPI/soak/human/signing gate. No server or global percentage is
+> emitted.
+
 > VIS-02 GreatFireBall server-client note (2026-08-28): revision
 > `9457e5618449d22350baedd01e3775f5b1fe59c6` changes no server combat
 > authority. The Windows projection now follows Crystal's client-owned
