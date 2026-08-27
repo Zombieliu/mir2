@@ -1,5 +1,24 @@
 # Agent Task Queue
 
+> VIS-02 GreatFireBall additional bounded automated checkpoint (2026-08-28):
+> revision `9457e5618449d22350baedd01e3775f5b1fe59c6` binds typed
+> `ObjectMagic(spell=34)` to Crystal's immediate `Magic/400..409` cast,
+> 600 ms action-completion launch, all sixteen six-frame projectile ranges
+> `410 + direction*10 .. +5`, target-bound `Magic/570..579` impact and exact
+> M34-0/M34-1/M34-2 phase audio. The Rust compatibility
+> `ObjectProjectile` is ignored so the client-owned missile cannot double
+> draw. Target removal and map/session lifecycle fail closed. Ninety formerly
+> missing direction PNGs, their source metadata and the three exact WAVs are
+> now tracked; package/verifier require all 116 frames and verify sound
+> byte/hash identities. Windows 372/372, Bevy native-ui 393/393, focused
+> GreatFireBall 5/5, Gateway projection 1/1, Web type/full logic, 74-spell
+> exporter, offline assets and both script self-tests pass; independent review
+> found no remaining P0/P1 after the clean-checkout asset closure. This is an
+> additional checkpoint beyond the original first-five list, not VIS-02 or
+> visual acceptance. A retained-but-dead target, authenticated live WSS,
+> same-EXE/GPU/DPI/soak/human/signing and the incomplete denominator remain
+> open. Do not emit a global percentage.
+
 > VIS-02 FlamingSword bounded automated checkpoint (2026-08-28): revision
 > `160e8d3ccc0eb17f8e49b6505c5a58666a35029f` preserves Crystal's silent
 > toggle and starts presentation only from `ObjectAttack(spell=8)` Attack1.

@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-02 GreatFireBall additional bounded
+> checkpoint: revision `9457e5618449d22350baedd01e3775f5b1fe59c6`
+> implements immediate `Magic/400..409`, a 600 ms delayed 16-direction local
+> missile, bound `Magic/570..579` impact and exact M34-0/M34-1/M34-2 audio.
+> The compatibility projectile is ignored and lifecycle cleanup fails closed.
+> All 90 previously absent direction PNGs plus their source metadata and exact
+> WAVs are now committed and required by package/verify. Windows 372/372,
+> Bevy 393/393, focused 5/5, Gateway 1/1, Web full logic/type, exporter,
+> offline resources and script self-tests pass; review has no remaining P0/P1.
+> No EXE was launched or packaged from this head. Retained-dead target
+> suppression, live WSS, same-EXE/GPU/DPI/soak/human/signing and the semantic
+> denominator remain open; global parity stays unreported.
+
 > 2026-08-28 Windows-native VIS-02 FireWall bounded checkpoint: revision
 > `f6f78f3eddb813897cf4ce4c6056183130ab7f35` binds the source 600 ms
 > `Magic/1620..1629` cast, exact M39-0/M39-1 phase sounds and five persistent

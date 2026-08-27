@@ -182,6 +182,23 @@ initial presentation checkpoints are now bounded, but VIS-02 still requires
 the Struck/Die/Dead/Revive chain plus every same-EXE/live-WSS/GPU/DPI/human
 gate, and the full semantic inventory remains incomplete.
 
+GreatFireBall is an additional bounded automated checkpoint after the initial
+five at revision `9457e5618449d22350baedd01e3775f5b1fe59c6`. Typed
+`ObjectMagic` starts `Magic/400..409` and exact M34-0 immediately. Successful
+cast completion launches the client-owned missile at 600 ms with six frames
+from `410 + direction*10` for all sixteen Crystal directions and exact M34-1;
+only a still-bound target promotes to `Magic/570..579` plus M34-2. The Rust
+compatibility `ObjectProjectile` is ignored to prevent a duplicate. Target
+removal and map/session lifecycle cancel retained impact/audio. The source
+export now tracks all 90 previously absent direction PNGs plus their metadata,
+and package/verifier require all 116 cast/projectile/impact frames and exact
+M34 byte/hash identities. The fixture proves typed projection only and labels
+`cast=false` as compatibility-only. A target that remains in AOI while already
+Dead still lacks an explicit dead bit at the effect boundary, so Crystal's
+dead-target impact suppression remains open. This checkpoint supplies no
+exact-head package, authenticated live-WSS timing, same-EXE pixels, DPI, soak
+or human acceptance and does not change VIS-02 or global completion state.
+
 VIS-03 has one bounded automated checkpoint at implementation revision
 `448db4f72`. The 1024x768 HUD base and Inventory control are source-bound to
 `Prguse/1` and normal/hover/pressed `Prguse/1903..1905`. BigMap Teleport keeps

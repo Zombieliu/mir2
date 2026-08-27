@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 GreatFireBall additional bounded checkpoint (2026-08-28):
+> implementation revision `9457e5618449d22350baedd01e3775f5b1fe59c6`
+> preserves Crystal's immediate ten-frame cast and M34-0, local missile launch
+> at the 600 ms Spell-action boundary, all sixteen `Magic/410 + direction*10`
+> six-frame paths, bound ten-frame impact and exact M34-1/M34-2 phase audio.
+> Compatibility `ObjectProjectile` is ignored; removal/map/session lifecycle
+> cancels retained work. The exporter, source metadata, 90 newly tracked
+> direction frames and package/verifier rules close the clean-checkout asset
+> chain. Windows 372/372, Bevy 393/393, focused 5/5, Gateway projection 1/1,
+> Web full logic/type, 74-spell export, offline assets and script self-tests
+> pass; independent final review found no remaining P0/P1. This is an
+> additional bounded VFX checkpoint, not completion of VIS-02. Retained-dead
+> target suppression, live WSS, same-EXE/GPU/DPI/soak/human/signing and the
+> incomplete denominator remain open; `globalParityPercent` remains null.
+
 > Web Crystal ActionFeed bounded follow-up (2026-08-28): implementation
 > `7bc42cfd77e196297b165436716484732db18d83` replaces the Web renderer's
 > restart-on-hit transient with Crystal's current Struck action plus one queued

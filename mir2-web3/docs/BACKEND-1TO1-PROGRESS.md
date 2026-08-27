@@ -1,5 +1,21 @@
 # Backend 1:1 Progress
 
+> VIS-02 GreatFireBall client-boundary checkpoint (2026-08-28): revision
+> `9457e5618449d22350baedd01e3775f5b1fe59c6` adds no gameplay or shared-Zone
+> authority. It consumes existing typed `ObjectMagic(GreatFireBall)` as
+> Crystal's client-owned immediate cast plus delayed local projectile and
+> target-bound impact, while ignoring the Rust compatibility
+> `ObjectProjectile`. Sixteen direction ranges, M34-0/M34-1/M34-2 identities,
+> target-removal/lifecycle cleanup and clean-checkout package closure are
+> automated. Windows 372/372, Bevy native-ui 393/393, focused effects 5/5,
+> Gateway projection 1/1, Web type/full logic, exporter/offline assets and
+> package/verifier self-tests pass; final review has no remaining P0/P1. The
+> fixture is projection-only and its `cast=false` event is compatibility-only.
+> Server cast/damage/revalidation semantics were not recertified here;
+> retained-dead impact suppression, authenticated delivery and every same-EXE/
+> GPU/DPI/soak/human/signing/denominator gate remain open. No backend or global
+> percentage is claimed.
+
 > Web Crystal ActionFeed client-boundary follow-up (2026-08-28): revision
 > `7bc42cfd77e196297b165436716484732db18d83` changes no simulation or shared-
 > Zone authority. It consumes consecutive authoritative Struck packets as the

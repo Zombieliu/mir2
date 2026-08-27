@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> VIS-02 GreatFireBall server-client note (2026-08-28): revision
+> `9457e5618449d22350baedd01e3775f5b1fe59c6` changes no server combat
+> authority. The Windows projection now follows Crystal's client-owned
+> `ObjectMagic` cast, 600 ms local launch, sixteen directional six-frame
+> missile ranges, target-bound impact and exact M34-0/M34-1/M34-2 audio; the
+> compatibility `ObjectProjectile` cannot duplicate it. Source metadata, 90
+> new direction frames, package requirements and byte/hash verification close
+> the clean-checkout asset path. Windows 372/372, Bevy 393/393, focused 5/5,
+> Gateway projection, Web full logic/type, offline resources and script
+> self-tests pass with no remaining reviewed P0/P1. This does not prove live
+> WSS timing, server damage/revalidation or a retained dead target's impact
+> suppression. Same-EXE/GPU/DPI/soak/human/signing and denominator gates stay
+> open; no server or global percentage is emitted.
+
 > Web Crystal ActionFeed server-client note (2026-08-28): revision
 > `7bc42cfd77e196297b165436716484732db18d83` adds no server authority. It makes
 > the Web client preserve the server's consecutive Struck order as one current
