@@ -130,6 +130,7 @@ const PLAYER_TIGER_STRUCK_1_FILE: &str = "tiger_struck_1.wav";
 const PLAYER_TIGER_STRUCK_2_FILE: &str = "tiger_struck_2.wav";
 const PLAYER_WOLF_STRUCK_FILE: &str = "wolf_struck1.wav";
 const PLAYER_DIE_SOUND_DELAY_MS: u64 = 100;
+const SCARECROW_ATTACK_SOUND_FILE: &str = "005-1.wav";
 const SCARECROW_DIE_SOUND_FILE: &str = "005-3.wav";
 const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
@@ -1928,6 +1929,7 @@ impl NativeEffects {
     }
 
     fn apply_object_attack(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        self.apply_scarecrow_attack_sound(payload, provenance);
         let flaming_sword = payload.get("spell").is_some_and(|value| {
             value.as_u64() == Some(8) || value.as_str() == Some("FlamingSword")
         });
@@ -1986,6 +1988,26 @@ impl NativeEffects {
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
+    }
+
+    fn apply_scarecrow_attack_sound(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(attacker) = payload
+            .get("_nativeAttacker")
+            .filter(|actor| actor_is_scarecrow(actor))
+        else {
+            return;
+        };
+        let Some(actor_key) = actor_sound_key(attacker) else {
+            return;
+        };
+        if self.dead_scarecrow_sound_keys.contains(&actor_key) {
+            return;
+        }
+        self.queue_immediate_sound(
+            provenance,
+            &format!("Scarecrow.{actor_key}.Attack"),
+            SCARECROW_ATTACK_SOUND_FILE,
+        );
     }
 
     fn queue_immediate_sound(&mut self, provenance: &EffectProvenance, cue: &str, file_name: &str) {
@@ -3854,6 +3876,7 @@ mod tests {
     #[test]
     fn native_gameplay_audio_allowlist_contains_every_implemented_combat_clip() {
         for file_name in [
+            SCARECROW_ATTACK_SOUND_FILE,
             SCARECROW_DIE_SOUND_FILE,
             PLAYER_STRUCK_BODY_SWORD_FILE,
             PLAYER_STRUCK_BODY_AXE_FILE,
@@ -4013,12 +4036,7 @@ mod tests {
             1_000,
             288,
             616,
-            &[player_sound_event(
-                1,
-                "ObjectDied",
-                scarecrow.clone(),
-                None,
-            )],
+            &[player_sound_event(1, "ObjectDied", scarecrow.clone(), None)],
             &HashMap::new(),
         );
         let due = fx.take_due_sound_events(1_000);
@@ -4034,6 +4052,97 @@ mod tests {
             &HashMap::new(),
         );
         assert!(fx.take_due_sound_events(1_100).is_empty());
+    }
+
+    #[test]
+    fn scarecrow_attack_audio_uses_exact_actor_context_and_repeats_per_action() {
+        let event = |sequence| NativeEffectEvent {
+            sequence,
+            generation: 0,
+            packet: "ObjectAttack".to_owned(),
+            payload: json!({
+                "objectId": 5030,
+                "_nativeAttacker": monster_actor(5_030, "Monster/005"),
+            }),
+        };
+        let mut fx = NativeEffects::default();
+        fx.observe(1_000, 288, 616, &[event(1)], &HashMap::new());
+        let first = fx.take_due_sound_events(1_000);
+        assert_eq!(first.len(), 1);
+        assert_eq!(first[0].file_name, SCARECROW_ATTACK_SOUND_FILE);
+        assert_eq!(first[0].cue, "Scarecrow.5030.Attack");
+
+        fx.observe(1_100, 288, 616, &[event(2)], &HashMap::new());
+        let second = fx.take_due_sound_events(1_100);
+        assert_eq!(
+            second.len(),
+            1,
+            "a distinct Attack1 action must sound again"
+        );
+        assert_eq!(second[0].file_name, SCARECROW_ATTACK_SOUND_FILE);
+    }
+
+    #[test]
+    fn scarecrow_attack_audio_is_exact_and_same_batch_lifecycle_scoped() {
+        for attacker in [
+            monster_actor(5_040, "Monster/004"),
+            json!({
+                "objectId": 5041,
+                "kind": "player",
+                "sprite": { "bodyLibrary": "Monster/005" },
+            }),
+            json!({
+                "objectId": 5042,
+                "kind": "monster",
+                "name": "Scarecrow",
+                "sprite": { "bodyLibrary": "Monster/006" },
+            }),
+        ] {
+            let mut fx = NativeEffects::default();
+            fx.observe(
+                1_000,
+                288,
+                616,
+                &[NativeEffectEvent {
+                    sequence: 1,
+                    generation: 0,
+                    packet: "ObjectAttack".to_owned(),
+                    payload: json!({"objectId": attacker["objectId"], "_nativeAttacker": attacker}),
+                }],
+                &HashMap::new(),
+            );
+            assert!(fx.take_due_sound_events(1_000).is_empty());
+        }
+
+        for lifecycle_packet in ["ObjectRemove", "ObjectHide", "MapChanged", "LogOutSuccess"] {
+            let mut fx = NativeEffects::default();
+            let events = [
+                NativeEffectEvent {
+                    sequence: 1,
+                    generation: 0,
+                    packet: "ObjectAttack".to_owned(),
+                    payload: json!({
+                        "objectId": 5050,
+                        "_nativeAttacker": monster_actor(5_050, "Monster/005"),
+                    }),
+                },
+                NativeEffectEvent {
+                    sequence: 2,
+                    generation: 0,
+                    packet: lifecycle_packet.to_owned(),
+                    payload: if matches!(lifecycle_packet, "ObjectRemove" | "ObjectHide") {
+                        json!({"objectId": 5050})
+                    } else {
+                        json!({})
+                    },
+                },
+            ];
+            fx.observe(1_000, 288, 616, &events, &HashMap::new());
+            assert!(
+                fx.take_due_sound_events(1_000).is_empty(),
+                "{lifecycle_packet} must cancel the same-batch Scarecrow attack cue"
+            );
+        }
     }
 
     #[test]
@@ -4063,12 +4172,7 @@ mod tests {
             assert!(fx.take_due_sound_events(1_000).is_empty());
         }
 
-        for lifecycle_packet in [
-            "ObjectRemove",
-            "ObjectHide",
-            "MapChanged",
-            "LogOutSuccess",
-        ] {
+        for lifecycle_packet in ["ObjectRemove", "ObjectHide", "MapChanged", "LogOutSuccess"] {
             let mut fx = NativeEffects::default();
             let mut events = vec![player_sound_event(
                 1,
@@ -7835,7 +7939,11 @@ mod tests {
 
         let moved_zone = HashMap::from([(2005, (291, 613))]);
         fx.observe(200, 288, 616, &[event], &moved_zone);
-        assert_eq!(fx.active.len(), 1, "same sequence must not replay the effect");
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "same sequence must not replay the effect"
+        );
         assert_eq!(fx.active[0].key, key);
         assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (291, 613));
         assert!(fx.take_due_sound_events(200).is_empty());
@@ -7859,13 +7967,7 @@ mod tests {
     #[test]
     fn healing_target_missing_anchor_and_scene_boundaries_fail_closed() {
         let mut missing = NativeEffects::default();
-        missing.observe(
-            0,
-            288,
-            616,
-            &[healing_target_event(1)],
-            &HashMap::new(),
-        );
+        missing.observe(0, 288, 616, &[healing_target_event(1)], &HashMap::new());
         assert!(missing.active.is_empty());
         assert!(missing.take_due_sound_events(0).is_empty());
 

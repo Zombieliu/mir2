@@ -393,6 +393,16 @@ check("ordinary player attack never plays the FlamingSword-specific sound", () =
   }
 });
 
+check("Scarecrow Attack1 resolves BaseImage + 1 immediately", () => {
+  triggerPlayedIds.length = 0;
+  originalSoundTriggersModule.playEntityAttackSound(
+    { kind: "monster", sprite: { bodyLibrary: "/original-ui/Monster/005" } },
+    0,
+    "scarecrow-5",
+  );
+  assert.deepEqual(triggerPlayedIds, [51]);
+});
+
 check("entityStruck -> playEntityStruckSound with attacker context", () => {
   const bus = createGameEventBus();
   const targetRef = { kind: "selfPlayer", genderKey: "male" };

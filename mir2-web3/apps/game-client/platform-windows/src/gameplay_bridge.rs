@@ -607,14 +607,19 @@ impl NativeGameplayAdapter {
                     let changed = self.patch_zone_entity_action(payload, "attack1", true);
                     // Most attacks are ignored by the effect consumer. Preserve
                     // the typed packet so spell-bearing Attack1 overlays such
-                    // as FlamingSword can be resolved without inventing a
-                    // client-side ObjectMagic packet.
-                    self.record_effect("ObjectAttack", payload);
+                    // as FlamingSword and source-owned monster audio can be
+                    // resolved without inventing a client-side ObjectMagic
+                    // packet or trusting a packet-supplied asset path.
+                    self.record_actor_effect(
+                        "ObjectAttack",
+                        payload,
+                        None,
+                        packet_object_id(payload),
+                    );
                     changed
                 }
                 "ObjectRangeAttack" => {
-                    let changed =
-                        self.patch_zone_entity_action(payload, "attackRange1", true);
+                    let changed = self.patch_zone_entity_action(payload, "attackRange1", true);
                     // Crystal resolves monster-specific client VFX from the
                     // attacking actor type at action-frame boundaries. Carry
                     // both actor identities without changing the wire packet.
@@ -3745,7 +3750,11 @@ mod tests {
                 {"objectId":1000,"kind":"selfPlayer","name":"Hero","x":288,"y":616},
                 {"objectId":3,"kind":"npc","name":"Assistant_Jane","x":284,"y":606,"questIds":[1]},
                 {"objectId":4,"kind":"npc","name":"CraftsLady_Jude","x":294,"y":619,"questIds":[1]},
-                {"objectId":2001,"kind":"monster","name":"Scarecrow","x":289,"y":616,"hp":8,"maxHp":20,"dead":false,"disposition":"hostile"}
+                {
+                    "objectId":2001,"kind":"monster","name":"Scarecrow","x":289,"y":616,
+                    "hp":8,"maxHp":20,"dead":false,"disposition":"hostile","image":5,
+                    "sprite":{"bodyLibrary":"Monster/005"}
+                }
             ],
             "questLog": [{
                 "questId":1,"title":"Assistant's Request","stage":"available",
@@ -4103,6 +4112,10 @@ mod tests {
         assert_eq!(monster["_nativeAnimationSequence"], json!(3));
         assert_eq!(adapter.effect_events.len(), 2);
         assert_eq!(adapter.effect_events[0].packet, "ObjectAttack");
+        assert_eq!(
+            adapter.effect_events[0].payload["_nativeAttacker"]["sprite"]["bodyLibrary"],
+            "Monster/005"
+        );
         assert_eq!(adapter.effect_events[1].packet, "ObjectStruck");
     }
 
