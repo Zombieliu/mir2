@@ -2414,13 +2414,8 @@ fn consume_hud_buttons(
         {
             continue;
         }
-        if matches!(
-            action,
-            CrystalHudAction::Inventory | CrystalHudAction::Character
-        ) {
-            // Crystal MirControl.OnMouseClick plays ButtonA before the click
-            // callback. Only source-audited buttons enter this allowlist.
-            ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+        if let Some(sound) = hud_pointer_sound(*action) {
+            ui_audio.push(sound);
         }
         match action {
             CrystalHudAction::Inventory => {
@@ -2470,6 +2465,24 @@ fn consume_hud_buttons(
                 }
             }
         }
+    }
+}
+
+fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::audio::NativeUiSound> {
+    match action {
+        // Crystal `MainDialog` assigns ButtonA to the five small lower-right
+        // HUD buttons. Keep this bounded to source-audited controls.
+        CrystalHudAction::Inventory
+        | CrystalHudAction::Character
+        | CrystalHudAction::Skill
+        | CrystalHudAction::Quest
+        | CrystalHudAction::Option => Some(crate::audio::NativeUiSound::ButtonA),
+        // Crystal `MenuButton` and `GameShopButton` use the distinct
+        // `SoundList.ButtonC` local UI cue.
+        CrystalHudAction::Menu | CrystalHudAction::GameShop => {
+            Some(crate::audio::NativeUiSound::ButtonC)
+        }
+        _ => None,
     }
 }
 
@@ -9769,6 +9782,147 @@ mod tests {
             state.activate_character_hud_button();
             assert!(!state.equipment_open());
         }
+    }
+
+    #[test]
+    fn menu_hud_pointer_uses_button_c_and_toggles_menu_without_gameplay_intents() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, consume_hud_buttons);
+
+        let button = app
+            .world_mut()
+            .spawn((Interaction::None, CrystalHudAction::Menu))
+            .id();
+        app.update();
+
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().menu_open());
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonC]
+        );
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+    }
+
+    #[test]
+    fn five_small_main_hud_buttons_emit_button_a_on_real_press_edges() {
+        for action in [
+            CrystalHudAction::Inventory,
+            CrystalHudAction::Character,
+            CrystalHudAction::Skill,
+            CrystalHudAction::Quest,
+            CrystalHudAction::Option,
+        ] {
+            let mut app = App::new();
+            app.init_resource::<NativePlayerUiState>()
+                .init_resource::<InventoryModel>()
+                .init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..Default::default()
+                })
+                .add_systems(Update, consume_hud_buttons);
+            let button = app.world_mut().spawn((Interaction::None, action)).id();
+            app.update();
+
+            app.world_mut()
+                .entity_mut(button)
+                .insert(Interaction::Pressed);
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .drain_bounded(8),
+                vec![crate::audio::NativeUiSound::ButtonA],
+                "{action:?} must emit exactly one Crystal ButtonA edge"
+            );
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiIntentQueue>()
+                .intents
+                .is_empty());
+        }
+    }
+
+    #[test]
+    fn game_shop_hud_pointer_uses_button_c_and_resets_quantity_only_on_close() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, consume_hud_buttons);
+
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.shop_quantity = 7;
+        }
+        let button = app
+            .world_mut()
+            .spawn((Interaction::None, CrystalHudAction::GameShop))
+            .id();
+        app.update();
+
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        {
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.shop_open());
+            assert_eq!(state.shop_quantity, 7);
+        }
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonC]
+        );
+
+        app.world_mut().entity_mut(button).insert(Interaction::None);
+        app.update();
+        app.world_mut()
+            .entity_mut(button)
+            .insert(Interaction::Pressed);
+        app.update();
+        {
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(!state.shop_open());
+            assert_eq!(state.shop_quantity, 1);
+        }
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonC]
+        );
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
     }
 
     #[test]

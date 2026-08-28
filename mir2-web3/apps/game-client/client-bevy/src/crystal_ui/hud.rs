@@ -1133,6 +1133,55 @@ mod tests {
     }
 
     #[test]
+    fn main_hud_button_matrix_uses_exact_crystal_assets_and_geometry() {
+        let cases = [
+            (
+                spec::SKILL,
+                1906,
+                CrystalRect::new(951.0, 692.0, 20.0, 20.0),
+            ),
+            (
+                spec::QUEST,
+                1909,
+                CrystalRect::new(974.0, 692.0, 20.0, 20.0),
+            ),
+            (
+                spec::OPTION,
+                1912,
+                CrystalRect::new(997.0, 692.0, 20.0, 20.0),
+            ),
+            (
+                spec::MENU,
+                1960,
+                CrystalRect::new(969.0, 651.0, 40.0, 40.0),
+            ),
+            (
+                spec::GAME_SHOP,
+                826,
+                CrystalRect::new(919.0, 651.0, 40.0, 38.0),
+            ),
+        ];
+
+        for (button, first_index, expected_rect) in cases {
+            let assets = CrystalButtonAssetSet::from_spec(button);
+            assert_eq!(
+                assets.normal,
+                format!("original-ui/Prguse/{first_index}.png")
+            );
+            assert_eq!(
+                assets.hover,
+                format!("original-ui/Prguse/{}.png", first_index + 1)
+            );
+            assert_eq!(
+                assets.pressed,
+                format!("original-ui/Prguse/{}.png", first_index + 2)
+            );
+            assert_eq!(assets.disabled, None);
+            assert_eq!(button.rect, expected_rect);
+        }
+    }
+
+    #[test]
     fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
         let mut app = App::new();
         app.insert_resource(NativeShellModel::default());
