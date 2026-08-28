@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-27T20:36:20.820Z",
+  "generatedAt": "2026-08-28T02:06:08.916Z",
   "clientRoot": "E:\\mir2\\Crystal\\Build\\Client\\Debug",
   "soundDir": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound",
   "soundListPath": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound\\SoundList.lst",
-  "soundListEntryCount": 457,
-  "exportedSoundCount": 457,
+  "soundListEntryCount": 459,
+  "exportedSoundCount": 459,
   "fallbackSoundCount": 3,
   "sourceWavCount": 1607,
   "missingSoundCount": 0,
@@ -3435,6 +3435,22 @@
       "exactSourceExists": true,
       "fallback": false,
       "sourceBytes": 525980
+    },
+    "20610": {
+      "fileName": "M61-0.wav",
+      "path": "/original-ui/Sound/M61-0.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 194008
+    },
+    "20611": {
+      "fileName": "M61-1.wav",
+      "path": "/original-ui/Sound/M61-1.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 308496
     },
     "20710": {
       "fileName": "M69-0.wav",

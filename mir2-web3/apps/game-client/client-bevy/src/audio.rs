@@ -58,6 +58,8 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "M39-0.wav",
     "M39-1.wav",
     "M40-0.wav",
+    "M61-0.wav",
+    "M61-1.wav",
     "M64-0.wav",
     "M64-1.wav",
     "M64-2.wav",

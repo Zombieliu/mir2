@@ -52,8 +52,8 @@ export type AudioSink = {
   scheduleEntityDieSound(entity: SoundEntityRef | null | undefined, objectId?: string | null): void;
   /** Revive cue (SoundList.Revive). */
   playReviveSound(): void;
-  /** Magic cast sound by spell id (original-sound-triggers.ts `playMagicSoundId`). */
-  playMagicSoundId(spell: number | null | undefined): void;
+  /** Magic phase sound by spell id (variant 0 = cast, variant 1 = target/effect). */
+  playMagicSoundId(spell: number | string | null | undefined, variantOne?: boolean): void;
   /** Look up a SoundEntityRef for a given objectId (from world state). */
   soundEntityRefFor(objectId: string | null | undefined): SoundEntityRef | null;
   /** Play the gold-gained sound (ORIGINAL_SOUND_IDS.gold). */
@@ -106,6 +106,17 @@ export function registerSoundSubscriber(bus: GameEventBus, audio: AudioSink): Un
   unsubs.push(
     bus.on("magicCast", (event) => {
       audio.playMagicSoundId(event.spell);
+    }),
+  );
+
+  // Crystal ObjectEffect.Healing -> 20000 + Spell.Healing*10 + 1.
+  // Other ObjectEffect families remain silent until their source branch has
+  // an independently-audited audio contract.
+  unsubs.push(
+    bus.on("magicEffect", (event) => {
+      if (event.effect === 3) {
+        audio.playMagicSoundId(61, true);
+      }
     }),
   );
 

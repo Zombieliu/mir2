@@ -88,6 +88,11 @@ const originalSoundTriggersModule = loadTypeScriptModule(
         return true;
       },
     },
+    "./crystal-magic-effects": {
+      spellNumberForName(spell) {
+        return spell === "Healing" ? 61 : null;
+      },
+    },
   },
 );
 
@@ -156,7 +161,9 @@ function makeAudioSink(entityRef = null) {
         calls.push({ fn: "scheduleEntityDieSound", entity, objectId });
       },
       playReviveSound() { calls.push({ fn: "playReviveSound" }); },
-      playMagicSoundId(spell) { calls.push({ fn: "playMagicSoundId", spell }); },
+      playMagicSoundId(spell, variantOne) {
+        calls.push({ fn: "playMagicSoundId", spell, variantOne: variantOne === true });
+      },
       soundEntityRefFor(_objectId) { return entityRef; },
       playGoldSound() { calls.push({ fn: "playGoldSound" }); },
     },
@@ -247,6 +254,7 @@ check("onAny handler receives every event type", () => {
   bus.emit({ type: "entityStruck", objectId: "2" });
   bus.emit({ type: "entityDied", objectId: "3" });
   bus.emit({ type: "magicCast", objectId: "4", spell: 31 });
+  bus.emit({ type: "magicEffect", objectId: "5", effect: 3 });
   bus.emit({ type: "playSound", soundId: 100 });
   bus.emit({ type: "gainedGold", amount: 500 });
   bus.emit({ type: "mapMusicChanged", musicId: 146 });
@@ -256,6 +264,7 @@ check("onAny handler receives every event type", () => {
     "entityStruck",
     "entityDied",
     "magicCast",
+    "magicEffect",
     "playSound",
     "gainedGold",
     "mapMusicChanged",
@@ -501,6 +510,44 @@ check("magicCast with null spell still calls playMagicSoundId (graceful no-op pa
   assert.equal(calls.length, 1);
   assert.equal(calls[0].fn, "playMagicSoundId");
   assert.equal(calls[0].spell, null);
+});
+
+check("Healing string magicCast preserves the protocol enum name", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "magicCast", objectId: "1000", spell: "Healing" });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].spell, "Healing");
+  assert.equal(calls[0].variantOne, false);
+});
+
+check("Healing name and numeric id resolve exact cast and target sound ids", () => {
+  triggerPlayedIds.length = 0;
+  assert.equal(originalSoundTriggersModule.playMagicSoundId("Healing"), true);
+  assert.equal(originalSoundTriggersModule.playMagicSoundId(61, true), true);
+  assert.deepEqual(triggerPlayedIds, [20610, 20611]);
+});
+
+check("Healing magicEffect -> playMagicSoundId variant one", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "magicEffect", objectId: "2005", effect: 3 });
+  assert.deepEqual(calls, [
+    { fn: "playMagicSoundId", spell: 61, variantOne: true },
+  ]);
+});
+
+check("unknown magicEffect stays silent and unsubscribe stops Healing", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  const unsubscribe = registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "magicEffect", objectId: "2005", effect: 2 });
+  assert.equal(calls.length, 0);
+  unsubscribe();
+  bus.emit({ type: "magicEffect", objectId: "2005", effect: 3 });
+  assert.equal(calls.length, 0);
 });
 
 check("playSound -> playOriginalSoundId with correct id", () => {

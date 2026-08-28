@@ -106,6 +106,10 @@ const FIREWALL_CAST_SOUND_FILE: &str = "M39-0.wav";
 const FIREWALL_COMPLETE_SOUND_FILE: &str = "M39-1.wav";
 const FIREWALL_CAST_SOUND_CUE: &str = "FireWall.cast";
 const FIREWALL_COMPLETE_SOUND_CUE: &str = "FireWall.complete";
+const HEALING_CAST_SOUND_FILE: &str = "M61-0.wav";
+const HEALING_TARGET_SOUND_FILE: &str = "M61-1.wav";
+const HEALING_CAST_SOUND_CUE: &str = "Healing.cast";
+const HEALING_TARGET_SOUND_CUE: &str = "Healing.target";
 const FLAMING_SWORD_SOUND_FILE: &str = "M8-1.wav";
 const FLAMING_SWORD_SOUND_CUE: &str = "FlamingSword.attack";
 const PLAYER_REVIVE_SOUND_FILE: &str = "M79-1.wav";
@@ -2275,6 +2279,19 @@ impl NativeEffects {
                 },
             });
         }
+        if spell == "Healing" {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: now,
+                requires_active_effect: true,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: HEALING_CAST_SOUND_CUE.to_owned(),
+                    file_name: HEALING_CAST_SOUND_FILE.to_owned(),
+                },
+            });
+        }
         if spell == "FireWall"
             && payload
                 .get("cast")
@@ -2484,22 +2501,47 @@ impl NativeEffects {
         else {
             return;
         };
-        let object_id = payload
+        let Some(object_id) = payload
             .get("objectId")
             .and_then(Value::as_u64)
-            .map(|v| v as u32);
-        let Some((tile_x, tile_y)) = object_id.and_then(|id| zone_tiles.get(&id)).copied() else {
+            .and_then(|value| u32::try_from(value).ok())
+        else {
+            return;
+        };
+        let Some((tile_x, tile_y)) = zone_tiles.get(&object_id).copied() else {
             return;
         };
         let Some(anim) = catalog.map_animation_by_number(effect, 0) else {
             return;
         };
         let now = self.now_ms;
-        let delay_ms = payload
-            .get("delayTime")
-            .and_then(Value::as_u64)
-            .unwrap_or(0);
+        // Crystal's ObjectEffect Healing branch ignores Packet.DelayTime and
+        // attaches Magic/370..379 immediately to the target object. Other
+        // ObjectEffect families retain the generic packet delay contract.
+        let is_healing = effect == 3;
+        let delay_ms = if is_healing {
+            0
+        } else {
+            payload
+                .get("delayTime")
+                .and_then(Value::as_u64)
+                .unwrap_or(0)
+        };
         let key = self.next_key("obj");
+        self.anchor_object_ids.insert(key.clone(), object_id);
+        if is_healing {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: now,
+                requires_active_effect: true,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: HEALING_TARGET_SOUND_CUE.to_owned(),
+                    file_name: HEALING_TARGET_SOUND_FILE.to_owned(),
+                },
+            });
+        }
         self.active.push(EffectInstance {
             key,
             // Crystal attaches ObjectEffect to MirObject.Effects and renders it
@@ -7548,6 +7590,191 @@ mod tests {
             format!("{:x}", Sha256::digest(&bytes)),
             fixture["source"]["audio"]["sha256"]
         );
+    }
+
+    fn healing_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-healing-v1.json"
+        ))
+        .expect("VIS-02 Healing fixture JSON")
+    }
+
+    fn healing_magic_event(sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 17,
+            packet: "ObjectMagic".to_owned(),
+            payload: healing_fixture()["timeline"][0]["event"]["payload"].clone(),
+        }
+    }
+
+    fn healing_target_event(sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 17,
+            packet: "ObjectEffect".to_owned(),
+            payload: healing_fixture()["timeline"][1]["event"]["payload"].clone(),
+        }
+    }
+
+    #[test]
+    fn healing_cast_and_target_follow_crystal_clocks_and_audio_phases() {
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[healing_magic_event(1)], &zone);
+
+        assert_eq!(fx.active.len(), 1);
+        let cast = fx.active.first().expect("Healing cast");
+        let cast_animation = cast.current.as_ref().expect("Healing cast animation");
+        assert_eq!(cast.kind, EffectKindTag::Cast);
+        assert_eq!(cast.start_at, 0);
+        assert_eq!(cast_animation.frames.len(), 10);
+        assert_eq!(cast_animation.interval, 60);
+        assert_eq!(cast_animation.duration_ms, 600);
+        assert_eq!(cast_animation.light, Some(6));
+        assert!(cast_animation.frames[0].path.ends_with("/Magic/200.png"));
+        assert!(cast_animation.frames[9].path.ends_with("/Magic/209.png"));
+        let cast_sound = fx.take_due_sound_events(0);
+        assert_eq!(cast_sound.len(), 1);
+        assert_eq!(cast_sound[0].cue, HEALING_CAST_SOUND_CUE);
+        assert_eq!(cast_sound[0].file_name, HEALING_CAST_SOUND_FILE);
+
+        fx.observe(600, 288, 616, &[healing_target_event(2)], &zone);
+        let target = fx
+            .active
+            .iter()
+            .find(|instance| instance.kind == EffectKindTag::SceneForeground)
+            .expect("Healing target effect");
+        let target_animation = target.current.as_ref().expect("Healing target animation");
+        assert_eq!(target.start_at, 600, "Crystal ignores Healing DelayTime");
+        assert_eq!((target.tile_x, target.tile_y), (288, 611));
+        assert_eq!(fx.anchor_object_ids[&target.key], 2005);
+        assert_eq!(target_animation.frames.len(), 10);
+        assert_eq!(target_animation.interval, 80);
+        assert_eq!(target_animation.duration_ms, 800);
+        assert_eq!(target_animation.light, Some(6));
+        assert!(target_animation.frames[0].path.ends_with("/Magic/370.png"));
+        assert!(target_animation.frames[9].path.ends_with("/Magic/379.png"));
+        let target_sound = fx.take_due_sound_events(600);
+        assert_eq!(target_sound.len(), 1);
+        assert_eq!(target_sound[0].cue, HEALING_TARGET_SOUND_CUE);
+        assert_eq!(target_sound[0].file_name, HEALING_TARGET_SOUND_FILE);
+    }
+
+    #[test]
+    fn healing_target_tracks_authoritative_object_and_replay_is_one_shot() {
+        let original_zone = HashMap::from([(2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        let event = healing_target_event(1);
+        fx.observe(100, 288, 616, &[event.clone()], &original_zone);
+        assert_eq!(fx.active.len(), 1);
+        let key = fx.active[0].key.clone();
+        assert_eq!(fx.take_due_sound_events(100).len(), 1);
+
+        let moved_zone = HashMap::from([(2005, (291, 613))]);
+        fx.observe(200, 288, 616, &[event], &moved_zone);
+        assert_eq!(fx.active.len(), 1, "same sequence must not replay the effect");
+        assert_eq!(fx.active[0].key, key);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (291, 613));
+        assert!(fx.take_due_sound_events(200).is_empty());
+
+        fx.observe(
+            300,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 2,
+                generation: 17,
+                packet: "ObjectRemove".to_owned(),
+                payload: json!({"objectId": 2005}),
+            }],
+            &HashMap::new(),
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
+    }
+
+    #[test]
+    fn healing_target_missing_anchor_and_scene_boundaries_fail_closed() {
+        let mut missing = NativeEffects::default();
+        missing.observe(
+            0,
+            288,
+            616,
+            &[healing_target_event(1)],
+            &HashMap::new(),
+        );
+        assert!(missing.active.is_empty());
+        assert!(missing.take_due_sound_events(0).is_empty());
+
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[healing_magic_event(1), healing_target_event(2)],
+            &zone,
+        );
+        fx.observe(
+            1,
+            288,
+            616,
+            &[NativeEffectEvent {
+                sequence: 3,
+                generation: 17,
+                packet: "MapChanged".to_owned(),
+                payload: json!({}),
+            }],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.take_due_sound_events(1).is_empty());
+
+        fx.observe(2, 288, 616, &[healing_magic_event(4)], &zone);
+        fx.reset_session();
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(2).is_empty());
+    }
+
+    #[test]
+    fn healing_source_frames_and_audio_identities_are_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = healing_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        let cast = catalog
+            .spell_cast_animation("Healing", 0)
+            .expect("Healing cast");
+        assert_eq!(cast.frames.len(), 10);
+        for (frame, index) in cast.frames.iter().zip(200..210) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        let target = catalog
+            .map_animation_by_number(3, 0)
+            .expect("Healing ObjectEffect");
+        assert_eq!(target.frames.len(), 10);
+        for (frame, index) in target.frames.iter().zip(370..380) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        for audio in fixture["source"]["audio"]
+            .as_array()
+            .expect("Healing audio catalog")
+        {
+            let file = audio["file"].as_str().expect("Healing audio file");
+            assert!(
+                mir2_client_bevy::audio::NATIVE_GAMEPLAY_SOUND_FILES.contains(&file),
+                "native gameplay audio rejected {file}"
+            );
+            let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+                .expect("packaged Healing sound path");
+            let bytes = fs::read(path).expect("read Healing sound");
+            assert_eq!(bytes.len(), audio["sourceBytes"]);
+            assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
+        }
     }
 
     fn lightning_fixture() -> Value {

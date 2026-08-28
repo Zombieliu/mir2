@@ -50,6 +50,8 @@ export const DIRECT_CRYSTAL_SOUND_ENTRIES = [
   { id: 20342, fileName: "M34-2.wav" },
   { id: 20390, fileName: "M39-0.wav" },
   { id: 20391, fileName: "M39-1.wav" },
+  { id: 20610, fileName: "M61-0.wav" },
+  { id: 20611, fileName: "M61-1.wav" },
   { id: 20791, fileName: "M79-1.wav" },
 ];
 

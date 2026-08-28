@@ -14,6 +14,7 @@
 
 import { ORIGINAL_SOUND_IDS } from "./original-sound-events";
 import { playOriginalSoundId, playOriginalSoundIdWithFallback } from "./original-audio";
+import { spellNumberForName } from "./crystal-magic-effects";
 
 // MonsterObject.cs: BaseSound = (ushort)BaseImage * 10, then a per-action offset.
 //   PlayAttackSound -> BaseSound + 1   (the monster's attack roar)
@@ -236,10 +237,13 @@ export function scheduleEntityDieSound(
 // PlayerObject.cs / MonsterObject.cs magic: SoundManager.PlaySound(20000 + (ushort)Spell * 10 [+ variant]).
 // Most 20000-range ids are not in the current SoundList, so these resolve to null and are skipped
 // (graceful) — kept for parity completeness and forward-compatibility with a fuller SoundList.
-export function playMagicSoundId(spell: number | null | undefined, genderVariant = false): boolean {
-  const spellId = Number(spell);
-  if (!Number.isFinite(spellId) || spellId <= 0) {
+export function playMagicSoundId(
+  spell: number | string | null | undefined,
+  variantOne = false,
+): boolean {
+  const spellId = typeof spell === "string" ? spellNumberForName(spell) : Number(spell);
+  if (spellId === null || !Number.isFinite(spellId) || spellId <= 0) {
     return false;
   }
-  return playOriginalSoundId(20000 + spellId * 10 + (genderVariant ? 1 : 0));
+  return playOriginalSoundId(20000 + Number(spellId) * 10 + (variantOne ? 1 : 0));
 }

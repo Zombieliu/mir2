@@ -332,6 +332,8 @@ async function testAssembleMode() {
   assert.equal(flamingSwordUpLeft.light, 0);
   assert.equal(effects.resolveSpellReturnEffect(assets, "Vampirism").frames[0].path, "/original-ui/Magic2/1090.png");
   assert.equal(effects.spellNameForNumber(12), "ProtectionField", "Spell ids do not collide with SpellEffect names");
+  assert.equal(effects.spellNumberForName("Healing"), 61);
+  assert.equal(effects.spellNumberForName("UnknownSpell"), null);
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").frames[0].path, "/original-ui/Magic/1390.png");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").repeat, true);
   const playerRevive = effects.resolveMapEffect(assets, "PlayerRevive");

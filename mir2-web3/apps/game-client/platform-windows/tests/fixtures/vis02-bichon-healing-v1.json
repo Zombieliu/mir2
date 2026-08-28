@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-windows-vis02-healing-packet-event-projection",
+  "contractScope": "server_packet_to_event-projection",
+  "productionReachability": "not-asserted",
+  "source": {
+    "crystalRevision": "484983404e3d6afa584e93801f8006ae3429bea9",
+    "spell": "Healing",
+    "spellId": 61,
+    "objectEffectId": 3,
+    "actorAction": "Spell",
+    "cast": {
+      "library": "Magic",
+      "base": 200,
+      "count": 10,
+      "intervalMs": 60,
+      "durationMs": 600,
+      "blend": true,
+      "light": 6
+    },
+    "target": {
+      "library": "Magic",
+      "base": 370,
+      "count": 10,
+      "intervalMs": 80,
+      "durationMs": 800,
+      "blend": true,
+      "light": 6,
+      "anchor": "objectId",
+      "delayTimeIgnoredByCrystal": true
+    },
+    "audio": [
+      {
+        "cue": "Healing.cast",
+        "file": "M61-0.wav",
+        "soundId": 20610,
+        "sourceBytes": 194008,
+        "sha256": "aade9db9a46762b8c319a2fd3611fbb4cdc86d444b5c3fd14dc92aec812f94a1",
+        "phase": "actionStart"
+      },
+      {
+        "cue": "Healing.target",
+        "file": "M61-1.wav",
+        "soundId": 20611,
+        "sourceBytes": 308496,
+        "sha256": "9e3942a729f886197b30d1ca0084aa020179f62bca64c6044e36d6e080d74ed5",
+        "phase": "objectEffect"
+      }
+    ],
+    "provenance": [
+      "Crystal/Client/MirObjects/PlayerObject.cs::Spell.Healing",
+      "Crystal/Client/MirScenes/GameScene.cs::ObjectEffect/Healing"
+    ]
+  },
+  "world": {
+    "caster": { "objectId": 1000, "location": { "x": 288, "y": 616 } },
+    "target": { "objectId": 2005, "location": { "x": 288, "y": 611 } }
+  },
+  "timeline": [
+    {
+      "atMs": 0,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "location": { "x": 288, "y": 616 },
+          "direction": "Up",
+          "spell": "Healing",
+          "targetId": 2005,
+          "target": { "x": 288, "y": 611 },
+          "cast": true,
+          "level": 1,
+          "selfBroadcast": false,
+          "secondaryTargetIds": []
+        }
+      }
+    },
+    {
+      "atMs": 600,
+      "event": {
+        "type": "packet",
+        "packet": "ObjectEffect",
+        "payload": {
+          "objectId": 2005,
+          "effect": 3,
+          "delayTime": 500
+        }
+      }
+    }
+  ],
+  "claimBoundary": {
+    "typedGatewayProjection": true,
+    "nativeStateTiming": true,
+    "productionFrameAndAudioClosure": true,
+    "healingGameplayAuthority": false,
+    "authenticatedLiveWssPlayback": false,
+    "gpuRasterAccepted": false,
+    "humanAudioAccepted": false
+  }
+}

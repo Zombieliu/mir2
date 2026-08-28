@@ -10310,10 +10310,19 @@ export default function HomePage() {
         pushDamageFloater(payload);
         break;
       }
-      case "ObjectEffect":
+      case "ObjectEffect": {
+        const objectId = stringifyId(payload.objectId);
+        const effect = numberOrUndefined(payload.effect);
+        const hasAuthoritativeTarget = objectId !== "0" && worldRef.current.entities.some(
+          (entity) => entity.objectId === objectId,
+        );
         enqueueSceneEffect(payload, "object");
-        restoreObjectSelection(stringifyId(payload.objectId));
+        if (effect === 3 && hasAuthoritativeTarget) {
+          gameBusRef.current!.emit({ type: "magicEffect", objectId, effect });
+        }
+        restoreObjectSelection(objectId);
         break;
+      }
 
       // Quests -----------------------------------------------------------------
       case "CompleteQuest": {
@@ -11535,9 +11544,12 @@ export default function HomePage() {
 
   function markWorldEntityMagic(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    const spell = typeof payload.spell === "number" || typeof payload.spell === "string"
+      ? payload.spell
+      : undefined;
     // Crystal plays magic-cast sounds (20000 + Spell*10); most are not yet in SoundList, so this
     // resolves only for the few that are and is otherwise a graceful no-op.
-    gameBusRef.current!.emit({ type: "magicCast", objectId, spell: numberOrUndefined(payload.spell) });
+    gameBusRef.current!.emit({ type: "magicCast", objectId, spell });
     const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
@@ -11857,10 +11869,16 @@ export default function HomePage() {
     if (typeof rawId !== "string" && typeof rawId !== "number") return;
 
     const now = Date.now();
-    const delayMs = Math.max(
-      0,
-      numberOrUndefined(payload.delayTime ?? payload.delay_time) ?? 0,
-    );
+    // Crystal's ObjectEffect.Healing branch ignores DelayTime and creates the
+    // target-owned Magic/370..379 effect immediately. Other effect families
+    // retain the packet delay used by the generic scene-effect path.
+    const ignoresPacketDelay = source === "object" && Number(rawId) === 3;
+    const delayMs = ignoresPacketDelay
+      ? 0
+      : Math.max(
+          0,
+          numberOrUndefined(payload.delayTime ?? payload.delay_time) ?? 0,
+        );
     const explicitTimeMs = Math.max(0, numberOrUndefined(payload.time) ?? 0);
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId ?? payload.sourceId);

@@ -491,6 +491,9 @@ const SPELL_NAME_BY_ID: Record<number, string> = {
   217: "HornedCommanderRockFall",
   218: "HornedCommanderRockSpike",
 };
+const SPELL_ID_BY_NAME = new Map(
+  Object.entries(SPELL_NAME_BY_ID).map(([id, name]) => [name, Number(id)]),
+);
 
 /**
  * Resolves a `MapEffect` / `ObjectEffect` packet's numeric `effect` (a raw SpellEffect byte) to a
@@ -518,6 +521,11 @@ export function effectNameForNumber(assets: EffectAssets, effect: number): strin
 /** Spell packets use the protocol Spell enum, not the overlapping SpellEffect enum. */
 export function spellNameForNumber(spell: number): string | null {
   return SPELL_NAME_BY_ID[Math.trunc(spell)] ?? null;
+}
+
+/** Convert an exact protocol Spell enum name back to its numeric wire id. */
+export function spellNumberForName(spell: string): number | null {
+  return SPELL_ID_BY_NAME.get(spell) ?? null;
 }
 
 /** A live effect placed at a tile, used by the render loop. */

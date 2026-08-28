@@ -64,7 +64,16 @@ export type MagicCastEvent = {
   /** Stringified objectId of the caster. */
   objectId: string;
   /** Crystal Spell enum value (used to derive the 20000+spell*10 sound id). */
-  spell: number | null | undefined;
+  spell: number | string | null | undefined;
+};
+
+/** A Crystal ObjectEffect reached an authoritative target object. */
+export type MagicEffectEvent = {
+  type: "magicEffect";
+  /** Stringified target object id. */
+  objectId: string;
+  /** Raw Crystal ObjectEffect enum value. */
+  effect: number;
 };
 
 /** Play a raw Crystal SoundList id directly (from a PlaySound server packet). */
@@ -125,6 +134,7 @@ export type GameEvent =
   | EntityDiedEvent
   | EntityRevivedEvent
   | MagicCastEvent
+  | MagicEffectEvent
   | PlaySoundEvent
   | UiSoundEvent
   | GainedGoldEvent
