@@ -115,9 +115,43 @@ impl ParsedMapCache {
         }
     }
 
+    fn cell_blocks_movement(&mut self, key: &str, x: i32, y: i32) -> Option<bool> {
+        let blocked = self
+            .entries
+            .get(key)
+            .map(|map| map.cell_blocks_movement(x, y))?;
+        self.touch(key);
+        Some(blocked)
+    }
+
     fn touch(&mut self, key: &str) {
         self.least_recent.retain(|entry| entry != key);
         self.least_recent.push_back(key.to_owned());
+    }
+}
+
+impl ParsedMap {
+    /// Crystal `MapControl.EmptyCell` static half of the check. Type-100 maps
+    /// encode an impassable floor in `BackImage` bit `0x20000000` and an
+    /// impassable front object in `FrontImage` bit `0x8000`. Dynamic actors
+    /// remain a separate input-layer occupancy check.
+    pub fn cell_blocks_movement(&self, x: i32, y: i32) -> bool {
+        let Ok(x) = usize::try_from(x) else {
+            return true;
+        };
+        let Ok(y) = usize::try_from(y) else {
+            return true;
+        };
+        if x >= usize::from(self.width) || y >= usize::from(self.height) {
+            return true;
+        }
+        let Some(cell) = self
+            .cells
+            .get(x.saturating_mul(usize::from(self.height)).saturating_add(y))
+        else {
+            return true;
+        };
+        (cell.back_image & 0x2000_0000) != 0 || (cell.front_image as u16 & 0x8000) != 0
     }
 }
 
@@ -979,6 +1013,20 @@ pub fn load_map(map_file_name: &str) -> Option<ParsedMap> {
     Some(map)
 }
 
+/// Query one static collision cell without cloning the cached 700x700 map on
+/// every held-mouse movement frame. `None` means the local map pack is not
+/// available, so callers must leave the final decision to the Zone authority.
+pub fn map_cell_blocks_movement(map_file_name: &str, x: i32, y: i32) -> Option<bool> {
+    let cache_key = map_cache_key(map_file_name)?;
+    if let Ok(mut cache) = parsed_map_cache().lock() {
+        if let Some(blocked) = cache.cell_blocks_movement(&cache_key, x, y) {
+            return Some(blocked);
+        }
+    }
+    let map = load_map(map_file_name)?;
+    Some(map.cell_blocks_movement(x, y))
+}
+
 /// Validate and normalize the map cache key before touching the filesystem.
 /// This mirrors `find_map_file`'s path policy, but turns equivalent `0`,
 /// `0.map`, and `0.map.gz` payload spellings into one retained parse.
@@ -1126,6 +1174,26 @@ mod tests {
         assert_eq!(map.width, 2);
         assert_eq!(map.height, 2);
         assert_eq!(map.cells.len(), 4);
+    }
+
+    #[test]
+    fn type100_collision_bits_and_bounds_match_crystal_empty_cell() {
+        let mut cells = vec![middle_cell(0, 0); 4];
+        cells[1].back_image = 0x2000_0000;
+        cells[2].front_image = i16::MIN;
+        let map = ParsedMap {
+            width: 2,
+            height: 2,
+            cells,
+        };
+
+        assert!(!map.cell_blocks_movement(0, 0));
+        assert!(map.cell_blocks_movement(0, 1));
+        assert!(map.cell_blocks_movement(1, 0));
+        assert!(!map.cell_blocks_movement(1, 1));
+        assert!(map.cell_blocks_movement(-1, 0));
+        assert!(map.cell_blocks_movement(2, 0));
+        assert!(map.cell_blocks_movement(0, 2));
     }
 
     #[test]

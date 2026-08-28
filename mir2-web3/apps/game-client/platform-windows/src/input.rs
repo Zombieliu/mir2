@@ -65,6 +65,8 @@ const CRYSTAL_MOVE_PRESENTATION_MS: f64 = 600.0;
 const CRYSTAL_RUN_PRIME_MS: f64 = 1_200.0;
 const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
 const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
+const MOVEMENT_BLOCKED_STEP_MAX_AGE_MS: f64 = 3_000.0;
+const MOVEMENT_BLOCKED_STEP_LIMIT: usize = 16;
 const NPC_APPROACH_MAX_AGE_MS: f64 = 15_000.0;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -81,6 +83,14 @@ struct PendingSelfMove {
 struct PendingNpcInteraction {
     object_id: u32,
     started_at_ms: f64,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct BlockedSelfMove {
+    from: (i32, i32),
+    direction: &'static str,
+    mode: WorldPointerMovementMode,
+    observed_at_ms: f64,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -107,6 +117,7 @@ pub struct WorldPointerMovementState {
     input_blocked_until_ms: f64,
     last_packet_ack_at_ms: Option<f64>,
     pending_npc_interaction: Option<PendingNpcInteraction>,
+    blocked_steps: Vec<BlockedSelfMove>,
 }
 
 impl WorldPointerMovementState {
@@ -142,6 +153,47 @@ impl WorldPointerMovementState {
         } else {
             WorldPointerMovementMode::Walk
         }
+    }
+
+    fn prune_blocked_steps(&mut self, now_ms: f64) {
+        self.blocked_steps.retain(|step| {
+            now_ms >= step.observed_at_ms
+                && now_ms <= step.observed_at_ms + MOVEMENT_BLOCKED_STEP_MAX_AGE_MS
+        });
+    }
+
+    fn remember_blocked_step(&mut self, pending: &PendingSelfMove, now_ms: f64) {
+        self.prune_blocked_steps(now_ms);
+        self.blocked_steps.retain(|step| {
+            step.from != pending.from
+                || step.direction != pending.direction
+                || step.mode != pending.mode
+        });
+        self.blocked_steps.push(BlockedSelfMove {
+            from: pending.from,
+            direction: pending.direction,
+            mode: pending.mode,
+            observed_at_ms: now_ms,
+        });
+        if self.blocked_steps.len() > MOVEMENT_BLOCKED_STEP_LIMIT {
+            self.blocked_steps
+                .drain(..self.blocked_steps.len() - MOVEMENT_BLOCKED_STEP_LIMIT);
+        }
+    }
+
+    fn step_was_rejected(
+        &self,
+        origin: (i32, i32),
+        direction: &str,
+        mode: WorldPointerMovementMode,
+    ) -> bool {
+        self.blocked_steps.iter().any(|step| {
+            step.from == origin
+                && step.direction.eq_ignore_ascii_case(direction)
+                && (step.mode == mode
+                    || (mode == WorldPointerMovementMode::Run
+                        && step.mode == WorldPointerMovementMode::Walk))
+        })
     }
 
     fn observe_identity(&mut self, object_id: &str, position: (i32, i32), direction: &str) -> bool {
@@ -188,6 +240,7 @@ impl WorldPointerMovementState {
             self.next_move_send_at_ms = self.next_move_send_at_ms.max(pending.visual_until_ms);
             self.run_primed_until_ms = now_ms + CRYSTAL_RUN_PRIME_MS;
         } else {
+            self.remember_blocked_step(&pending, now_ms);
             self.run_primed_until_ms = 0.0;
             self.input_blocked_until_ms = now_ms + CRYSTAL_CORRECTION_BLOCK_MS;
             self.next_move_send_at_ms = self.next_move_send_at_ms.max(self.input_blocked_until_ms);
@@ -340,6 +393,133 @@ fn movement_target(origin: (i32, i32), direction: &str, distance: i32) -> (i32, 
         _ => (0, 0),
     };
     (origin.0 + dx * distance, origin.1 + dy * distance)
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct PlannedPointerMove {
+    direction: &'static str,
+    mode: WorldPointerMovementMode,
+}
+
+fn entity_blocks_movement(
+    entities: &EntityModelSet,
+    presentation: Option<&NativeEntityPresentation>,
+    self_object_id: &str,
+    point: (i32, i32),
+) -> bool {
+    if let Some(blocked) = presentation
+        .and_then(|presentation| presentation.tile_has_blocking_entity(self_object_id, point))
+    {
+        return blocked;
+    }
+    entities
+        .entities
+        .iter()
+        .any(|entity| entity.object_id != self_object_id && (entity.x, entity.y) == point)
+}
+
+fn movement_step_blocked(
+    movement: &WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: Option<&NativeEntityPresentation>,
+    self_object_id: &str,
+    map_file_name: Option<&str>,
+    origin: (i32, i32),
+    direction: &'static str,
+    mode: WorldPointerMovementMode,
+) -> bool {
+    if movement.step_was_rejected(origin, direction, mode) {
+        return true;
+    }
+    let distance = if mode == WorldPointerMovementMode::Run {
+        2
+    } else {
+        1
+    };
+    (1..=distance).any(|step| {
+        let point = movement_target(origin, direction, step);
+        entity_blocks_movement(entities, presentation, self_object_id, point)
+            || map_file_name.is_some_and(|map_file_name| {
+                crate::map_parser::map_cell_blocks_movement(map_file_name, point.0, point.1)
+                    == Some(true)
+            })
+    })
+}
+
+/// Mirror Crystal's held-pointer movement choice: try the requested direct
+/// step, degrade a blocked run to a walk, then steer one direction clockwise
+/// or counter-clockwise around an occupied cell. The Zone still validates the
+/// chosen intent and every correction is retained briefly as a route hint.
+fn plan_crystal_pointer_move(
+    movement: &mut WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: Option<&NativeEntityPresentation>,
+    self_object_id: &str,
+    map_file_name: Option<&str>,
+    origin: (i32, i32),
+    direction: &'static str,
+    requested_mode: WorldPointerMovementMode,
+    now_ms: f64,
+) -> Option<PlannedPointerMove> {
+    movement.prune_blocked_steps(now_ms);
+    if !movement_step_blocked(
+        movement,
+        entities,
+        presentation,
+        self_object_id,
+        map_file_name,
+        origin,
+        direction,
+        requested_mode,
+    ) {
+        return Some(PlannedPointerMove {
+            direction,
+            mode: requested_mode,
+        });
+    }
+
+    if requested_mode == WorldPointerMovementMode::Run
+        && !movement_step_blocked(
+            movement,
+            entities,
+            presentation,
+            self_object_id,
+            map_file_name,
+            origin,
+            direction,
+            WorldPointerMovementMode::Walk,
+        )
+    {
+        return Some(PlannedPointerMove {
+            direction,
+            mode: WorldPointerMovementMode::Walk,
+        });
+    }
+
+    for alternate in [
+        rotate_direction(direction, 1),
+        rotate_direction(direction, -1),
+    ] {
+        let Some(alternate) = alternate else {
+            continue;
+        };
+        if !movement_step_blocked(
+            movement,
+            entities,
+            presentation,
+            self_object_id,
+            map_file_name,
+            origin,
+            alternate,
+            WorldPointerMovementMode::Walk,
+        ) {
+            return Some(PlannedPointerMove {
+                direction: alternate,
+                mode: WorldPointerMovementMode::Walk,
+            });
+        }
+    }
+    None
 }
 
 fn tile_distance(left: (i32, i32), right: (i32, i32)) -> i32 {
@@ -773,14 +953,28 @@ pub fn mouse_world_interaction_system(
         } else {
             WorldPointerMovementMode::Walk
         };
+        let map_file_name = presentation.current_map_file_name().map(ToOwned::to_owned);
+        let Some(planned) = plan_crystal_pointer_move(
+            &mut movement,
+            &entities,
+            Some(presentation),
+            &object_id,
+            map_file_name.as_deref(),
+            origin,
+            direction,
+            requested_mode,
+            now_ms,
+        ) else {
+            return;
+        };
         let _ = send_pointer_move(
             commands,
             presentation,
             &mut movement,
             &object_id,
             origin,
-            direction,
-            requested_mode,
+            planned.direction,
+            planned.mode,
             now_ms,
             animation_now_ms,
         );
@@ -813,14 +1007,28 @@ pub fn mouse_world_interaction_system(
     ) else {
         return;
     };
+    let map_file_name = presentation.current_map_file_name().map(ToOwned::to_owned);
+    let Some(planned) = plan_crystal_pointer_move(
+        &mut movement,
+        &entities,
+        Some(presentation),
+        &object_id,
+        map_file_name.as_deref(),
+        origin,
+        direction,
+        mode,
+        now_ms,
+    ) else {
+        return;
+    };
     let _ = send_pointer_move(
         commands,
         presentation,
         &mut movement,
         &object_id,
         origin,
-        direction,
-        mode,
+        planned.direction,
+        planned.mode,
         now_ms,
         animation_now_ms,
     );
@@ -1248,6 +1456,17 @@ mod tests {
         }
     }
 
+    fn movement_entities() -> EntityModelSet {
+        let mut entities = world_entities();
+        for entity in &mut entities.entities {
+            if entity.kind != EntityKind::SelfPlayer {
+                entity.x += 100;
+                entity.y += 100;
+            }
+        }
+        entities
+    }
+
     #[derive(Clone, Copy, Debug)]
     enum BlockedInputContext {
         Inventory,
@@ -1428,6 +1647,66 @@ mod tests {
         assert_eq!(pickup_tile_intent(Some((11, 10)), &entities), None);
         assert_eq!(new_move_draw_offset((576.0, 352.0)), (-8.0, -15.0));
         assert_eq!(new_move_draw_offset((600.0, 368.0)), (16.0, 1.0));
+    }
+
+    #[test]
+    fn crystal_pointer_plan_degrades_run_then_steers_around_occupied_first_tile() {
+        let mut entities = movement_entities();
+        entities.entities.push(EntityModel {
+            object_id: "blocker".to_owned(),
+            kind: EntityKind::Monster,
+            name: "Blocker".to_owned(),
+            x: 12,
+            y: 10,
+            level: Some(1),
+            direction: Some("left".to_owned()),
+        });
+        let mut movement = WorldPointerMovementState::default();
+
+        assert_eq!(
+            plan_crystal_pointer_move(
+                &mut movement,
+                &entities,
+                None,
+                "1000",
+                None,
+                (10, 10),
+                "right",
+                WorldPointerMovementMode::Run,
+                0.0,
+            ),
+            Some(PlannedPointerMove {
+                direction: "right",
+                mode: WorldPointerMovementMode::Walk,
+            })
+        );
+
+        entities.entities.push(EntityModel {
+            object_id: "near-blocker".to_owned(),
+            kind: EntityKind::Npc,
+            name: "Near blocker".to_owned(),
+            x: 11,
+            y: 10,
+            level: None,
+            direction: Some("left".to_owned()),
+        });
+        assert_eq!(
+            plan_crystal_pointer_move(
+                &mut movement,
+                &entities,
+                None,
+                "1000",
+                None,
+                (10, 10),
+                "right",
+                WorldPointerMovementMode::Run,
+                1.0,
+            ),
+            Some(PlannedPointerMove {
+                direction: "downright",
+                mode: WorldPointerMovementMode::Walk,
+            })
+        );
     }
 
     #[test]
@@ -1664,7 +1943,7 @@ mod tests {
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
-        app.insert_resource(world_entities());
+        app.insert_resource(movement_entities());
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
@@ -1705,7 +1984,7 @@ mod tests {
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
-        app.insert_resource(world_entities());
+        app.insert_resource(movement_entities());
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
@@ -1758,7 +2037,7 @@ mod tests {
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
-        app.insert_resource(world_entities());
+        app.insert_resource(movement_entities());
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
@@ -1810,7 +2089,7 @@ mod tests {
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
-        app.insert_resource(world_entities());
+        app.insert_resource(movement_entities());
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
@@ -1859,7 +2138,7 @@ mod tests {
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
-        app.insert_resource(world_entities());
+        app.insert_resource(movement_entities());
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
@@ -1891,7 +2170,7 @@ mod tests {
     }
 
     #[test]
-    fn unchanged_user_location_is_a_correction_and_blocks_resend() {
+    fn unchanged_user_location_blocks_immediate_resend_then_steers_around_rejection() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -1899,7 +2178,7 @@ mod tests {
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
-        app.insert_resource(world_entities());
+        app.insert_resource(movement_entities());
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
@@ -1923,12 +2202,32 @@ mod tests {
         app.update();
 
         assert!(receiver.try_recv().is_err(), "correction resent movement");
-        let state = app.world().resource::<WorldPointerMovementState>();
-        assert!(state.pending.is_none());
-        assert_eq!(state.authoritative_position, Some((10, 10)));
-        assert_eq!(state.run_primed_until_ms, 0.0);
-        assert_eq!(state.input_blocked_until_ms, 500.0);
-        assert!(!state.can_send(499.0));
+        {
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert!(state.pending.is_none());
+            assert_eq!(state.authoritative_position, Some((10, 10)));
+            assert_eq!(state.run_primed_until_ms, 0.0);
+            assert_eq!(state.input_blocked_until_ms, 500.0);
+            assert!(!state.can_send(499.0));
+            assert!(state.step_was_rejected((10, 10), "right", WorldPointerMovementMode::Walk));
+        }
+
+        advance_movement_clock(&mut app, 400);
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction }))
+                if direction == "downright"
+        ));
+        let pending = app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .pending
+            .as_ref()
+            .expect("Crystal alternate walk pending");
+        assert_eq!(pending.from, (10, 10));
+        assert_eq!(pending.to, (11, 11));
     }
 
     #[test]

@@ -138,6 +138,27 @@ impl NativeEntityPresentation {
         self.hover_cursor_stage
     }
 
+    pub(crate) fn current_map_file_name(&self) -> Option<&str> {
+        self.latest_payload.as_ref()?.get("mapFileName")?.as_str()
+    }
+
+    pub(crate) fn tile_has_blocking_entity(
+        &self,
+        self_object_id: &str,
+        point: (i32, i32),
+    ) -> Option<bool> {
+        let entities = self.latest_payload.as_ref()?.get("entities")?.as_array()?;
+        Some(entities.iter().any(|entity| {
+            let kind = entity.get("kind").and_then(Value::as_str);
+            matches!(kind, Some("selfPlayer" | "player" | "monster" | "npc"))
+                && entity.get("dead").and_then(Value::as_bool) != Some(true)
+                && entity.get("x").and_then(Value::as_i64) == Some(i64::from(point.0))
+                && entity.get("y").and_then(Value::as_i64) == Some(i64::from(point.1))
+                && entity.get("objectId").and_then(value_object_id).as_deref()
+                    != Some(self_object_id)
+        }))
+    }
+
     pub(crate) fn has_active_motion(&self, now_ms: u64) -> bool {
         self.motion_windows
             .values()
@@ -1284,6 +1305,48 @@ mod tests {
             .expect("entity layers")
             .iter()
             .any(|layer| layer["additive"].as_bool() == Some(true))
+    }
+
+    #[test]
+    fn movement_collision_uses_live_payload_and_does_not_block_on_corpses() {
+        let mut payload = player_payload(1);
+        payload["mapFileName"] = json!("0.map");
+        payload["entities"]
+            .as_array_mut()
+            .expect("entities")
+            .extend([
+                json!({
+                    "objectId": 2,
+                    "kind": "monster",
+                    "x": 11,
+                    "y": 10,
+                    "dead": true
+                }),
+                json!({
+                    "objectId": 3,
+                    "kind": "npc",
+                    "x": 12,
+                    "y": 10,
+                    "dead": false
+                }),
+            ]);
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.latest_payload = Some(payload);
+
+        assert_eq!(presentation.current_map_file_name(), Some("0.map"));
+        assert_eq!(
+            presentation.tile_has_blocking_entity("1", (11, 10)),
+            Some(false)
+        );
+        assert_eq!(
+            presentation.tile_has_blocking_entity("1", (12, 10)),
+            Some(true)
+        );
+        assert_eq!(
+            presentation.tile_has_blocking_entity("1", (10, 10)),
+            Some(false),
+            "self never blocks its own route"
+        );
     }
 
     #[test]
