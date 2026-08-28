@@ -1,5 +1,36 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 command-time self-motion follow-up (2026-08-29): the
+> user reported that exact Candidate
+> `WN-CANDIDATE-VIS01-DIRECTION-INPUT-20260829` still felt visibly jerky. A
+> local spectator trace showed why: native presentation began only after each
+> authoritative `UserLocation` arrived (normally about 255--264 ms, with
+> observed 525--780 ms gaps), unlike the Web controller's command-time visual
+> step plus later reconciliation. Revision
+> `a1fba63d601466e90d652015f21bd86f3eb2d5cc` now starts one bounded,
+> presentation-only self Walk/Run window after the movement intent is
+> successfully queued, preserves its original 600 ms Crystal phase window
+> across a matching ACK, and leaves the shared Zone as the sole tile
+> authority. Exact packet-first ACKs remain ordered and bounded; collision
+> corrections restore the authoritative tile, a matching world snapshot can
+> release a pending step if the exact ACK is lost, and session/self removal
+> clears stale pending movement. Standstill Run still presents/succeeds as the
+> first one-tile Walk and primes the following two-tile Run; no server delay or
+> cooldown was weakened. Windows tests pass 459/459 and runtime local-motion
+> tests pass 20/20. Exact Candidate
+> `WN-CANDIDATE-VIS01-SMOOTH-MOVEMENT-20260829` passed packaging plus an
+> independent final-directory verifier with `sourceRepoCheck=checked`; its
+> 67,494,400-byte EXE has SHA-256
+> `89AE872E29DF6187C6B62E20745D1FD84C97797FCFABB1569DE1ABAB992FBF84`
+> and is launched as PID 267848 against healthy loopback Gateway PID 237188 on
+> 7210 for human movement-feel retest. Authenticated same-EXE live WSS, real
+> 100/125/150% DPI, native 30-minute soak, exhaustive player actions/classes,
+> UI/chat, skills/VFX, monsters/maps, human visual/audio/feel, semantic
+> denominators and formal publisher Authenticode remain open.
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+> Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-ANIMATION-ATLAS-STABILITY-REPORT.md`.
+
 > Windows-native VIS-01 direction/input follow-up (2026-08-29): the user's
 > latest observation records the bounded player animation regression as OK;
 > this closes the previously reported diagonal/flicker symptom only, not whole

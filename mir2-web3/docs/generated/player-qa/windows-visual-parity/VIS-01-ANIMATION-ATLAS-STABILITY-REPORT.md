@@ -1,11 +1,11 @@
-# Windows visual parity VIS-01 direction/input-repeat report
+# Windows visual parity VIS-01 direction/input/self-motion report
 
 Date: 2026-08-29
 
 ## Claim state
 
 ```text
-implementationRevision: 95b950f5e5c880f271ca87b654d6651be78fd686
+implementationRevision: a1fba63d601466e90d652015f21bd86f3eb2d5cc
 branch: codex/windows-visual-parity
 priorAtlasHandleAttemptVisuallyPassed: false
 priorDirectImageRectAttemptVisuallyPassed: false
@@ -13,6 +13,8 @@ priorPerLayerReadyHandoffVisuallyPassed: false
 priorAtomicActorAttemptVisuallyPassed: false
 priorCoherentActorAttemptVisuallyPassed: false
 directionHandoffCandidateUserAnimationObservationPassed: true
+directionInputCandidateMovementFeelPassed: false
+smoothMovementCandidateHumanRetestPending: true
 directImageRectAutomatedCheckpoint: complete
 atlasPageRetentionAutomatedCheckpoint: complete
 entityImageReadyHandoffAutomatedCheckpoint: complete
@@ -24,10 +26,15 @@ itemIconPackageClosureAutomatedCheckpoint: complete
 leftMouseHeldWalkAutomatedCheckpoint: complete
 rightMouseHeldRunAutomatedCheckpoint: complete
 heldEditableDeletionAutomatedCheckpoint: complete
+commandTimeSelfMotionAutomatedCheckpoint: complete
+exactUserLocationReconciliationAutomatedCheckpoint: complete
+snapshotAckLossFallbackAutomatedCheckpoint: complete
+movementSessionResetAutomatedCheckpoint: complete
 chatFrameAssetPathAutomatedCheckpoint: complete
 runtimeTests: 199/199
 nativeUiTests: 431/431
-windowsTests: 452/452
+runtimeLocalMotionTests: 20/20
+windowsTests: 459/459
 exactRevisionExeProduced: true
 exactRevisionCandidateProduced: true
 exactRevisionExeLaunched: true
@@ -170,6 +177,42 @@ periodic world snapshot. A live local spectator trace recorded subsequent Run
 steps approximately 261--300 ms apart. This evidence does not support a server
 throughput-overload diagnosis, and the Crystal timing constants are unchanged.
 
+The user's retest of that exact direction/input Candidate still felt jerky.
+The remaining client-side difference was not a Zone cooldown: Windows waited
+for each `UserLocation` before starting the visible movement window, while Web
+starts a bounded visual segment when the command is sent and reconciles it
+later. The same spectator stream showed ordinary ACK intervals around
+255--264 ms and intermittent 525--780 ms gaps, which exposed a standing gap in
+the ACK-only native presentation.
+
+Revision `a1fba63d601466e90d652015f21bd86f3eb2d5cc` closes that bounded
+Native/Web controller difference without moving authority into the client:
+
+- A successfully queued empty-world Walk/Run immediately starts one visual
+  self-motion window. It changes animation pixels and sub-tile offset only;
+  the authoritative entity tile remains unchanged until server evidence.
+- A matching packet-first `UserLocation` adopts the existing 600 ms visual
+  window instead of restarting it. Exact same-tile collision corrections are
+  retained as ACKs, cancel the local window, restore the authoritative
+  position/direction and block immediate resend for 400 ms.
+- Standstill Run still predicts/presents the server-compatible first one-tile
+  Walk. A confirmed/degraded first step primes the next two-tile Run for 1.2
+  seconds. Held input sends at the visual boundary, never once per render
+  frame.
+- Packet ACKs are held in a bounded ordered 32-entry buffer and cleared on
+  generation/session reset. If the exact ACK is lost but a later authoritative
+  world snapshot reaches the predicted target (or the one-tile Run-degrade
+  target), it releases the pending step instead of waiting for the 3-second
+  timeout. A temporarily absent self entity clears the controller on scene or
+  session teardown.
+- The shared runtime's existing local-motion presentation is enabled only for
+  this Windows host. Authoritative mismatch/correction events relinquish that
+  presentation immediately; the Zone, collision and movement delays are
+  unchanged.
+
+This closes an automated and packaged self-motion leaf. Human feel for the new
+exact EXE remains pending and is not inferred from unit tests.
+
 ## Automated evidence
 
 | Gate | Result |
@@ -188,11 +231,17 @@ throughput-overload diagnosis, and the Crystal timing constants are unchanged.
 | Right empty-world hold emits Run once, waits for authority, then continues | PASS |
 | Release stops held movement | PASS |
 | `UserLocation` immediately overlays stale self position | PASS |
+| Command-time self pixels start before `UserLocation` | PASS |
+| Matching ACK preserves the original visual window | PASS |
+| Same-tile correction restores the authoritative tile and blocks resend | PASS |
+| Matching authoritative snapshot releases a lost packet ACK | PASS |
+| Missing self/session transition clears pending movement | PASS |
+| Runtime local-motion command/ACK/correction regressions | PASS, 20/20 |
 | Backspace/Delete initial and repeat messages delete once per message | PASS |
 | Monster/NPC/pickup and modal/actor priority gates | PASS |
 | Shared Bevy runtime | PASS, 199/199 |
 | Client Bevy native UI | PASS, 431/431 |
-| Windows native host | PASS, 452/452 |
+| Windows native host | PASS, 459/459 |
 | Candidate package and verifier self-tests | PASS |
 | Rust formatting and diff checks | PASS |
 | Source worktree for Release | clean |
@@ -203,19 +252,20 @@ throughput-overload diagnosis, and the Crystal timing constants are unchanged.
 
 | Identity | Value |
 |---|---|
-| Candidate | `WN-CANDIDATE-VIS01-DIRECTION-INPUT-20260829` |
-| Revision | `95b950f5e5c880f271ca87b654d6651be78fd686` |
-| Release EXE bytes | 67,446,784 |
-| Release EXE SHA-256 | `BB3B83273B9CDEF19432A970D70F38F7E5BCEDFEA117FD42C0CB36FBE47E732D` |
-| Build attestation SHA-256 | `EB1FFC6DD4DC0232A92146F5D95B05F636E00E090ABE12379C97C4A95ED6F68A` |
+| Candidate | `WN-CANDIDATE-VIS01-SMOOTH-MOVEMENT-20260829` |
+| Revision | `a1fba63d601466e90d652015f21bd86f3eb2d5cc` |
+| Release EXE bytes | 67,494,400 |
+| Release EXE SHA-256 | `89AE872E29DF6187C6B62E20745D1FD84C97797FCFABB1569DE1ABAB992FBF84` |
+| Build completed UTC | `2026-08-28T20:17:59.7240459+00:00` |
+| Build attestation SHA-256 | `98D096D363C1AFCD37A18031F40837C7FEC7B8A0E298E1A6121DE57B253910AB` |
 | Package payload files | 32,951 |
 | Candidate total files | 32,955 |
-| Package payload bytes | 382,753,389 |
-| Package manifest SHA-256 | `AB698C075042357F8D089D190DC184904627E311B9735A8E79E6B315FA9B8B9B` |
-| Package aggregate SHA-256 | `4A86571C7655EDF2D58721111E1A047A7C101EA2AF066D756C70B6F17387D1C6` |
+| Package payload bytes | 382,801,773 |
+| Package manifest SHA-256 | `17C38A9FF58D2B0754608A869112B2121401463B72E698E6684BA98A8398818F` |
+| Package aggregate SHA-256 | `97B5B0248729E2A48CEC0D131346FC1C24F71CBD31F74BFC947B658C0F3202F2` |
 | Item icon closure | 361 files / 360 PNGs |
 
-The exact EXE was launched as PID 256184 with only a process-local
+The exact EXE was launched as PID 267848 with only a process-local
 `ws://127.0.0.1:7210/ws` override. Gateway PID 237188 was listening on
 127.0.0.1:7210 and `/health` returned 200 after launch. This proves package
 identity and local transport readiness only; it is not authenticated live WSS
@@ -223,21 +273,25 @@ or human visual acceptance.
 
 Packaging and a second independent verification of the final standard
 Candidate directory both passed under Windows PowerShell with
-`sourceRepoCheck=checked` and `nonvisual=True`. An initial `pwsh` packaging
-attempt failed closed because that host's `Get-Item -Stream` implementation
-misreported the same existing long-path manifest as missing; Windows
-PowerShell enumerated that exact file's unnamed data stream successfully. The
-failed staging tree was removed automatically and is not counted as evidence.
+`sourceRepoCheck=checked` and `nonvisual=True`. Earlier preflight attempts in
+the new isolated worktree failed before Candidate staging because Git-ignored
+build inputs were intentionally absent: first the locked Web dependency
+`sharp`, then the generated map-atlas manifest, then the full local Crystal
+sound tree. The dependency lock was installed, the 13-library/57-page map
+atlas was regenerated, and only the complete local `original-ui` asset tree
+was hydrated into that isolated worktree. Source/staged/final closure gates and
+hard-coded sound identities then passed; no source code or dirty overlay was
+copied. Failed preflight trees are not counted as Candidate evidence.
 
 ## Explicitly open gates
 
-- The user's latest statement that the animation is now OK records a bounded
-  visual pass for the prior exact direction-handoff Candidate's reported
-  diagonal/flicker defect. Revision `95b950f5e` changes only editable keyboard
-  handling on top of that renderer and keeps the full render regression green,
-  but the newly launched exact EXE still needs the held-deletion and movement-
-  feel spot check. Exhaustive all-eight turns, resource-page transitions and
-  every item/UI surface remain broader acceptance work.
+- The user's statement that the animation is now OK records a bounded visual
+  pass for the prior direction-handoff Candidate's diagonal/flicker defect.
+  The later direction/input Candidate was explicitly reported as still jerky.
+  The newly launched exact self-motion Candidate needs a fresh human
+  left-hold/right-hold/collision movement-feel spot check; tests and package
+  identity do not close that gate. Exhaustive all-eight turns, resource-page
+  transitions and every item/UI surface remain broader acceptance work.
 - Complete mouse combat and targeting, long-range pathfinding, chat
   interaction, remaining UI panels, skills/VFX, monsters, maps and semantic
   denominators remain open.
