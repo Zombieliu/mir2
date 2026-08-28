@@ -7717,10 +7717,8 @@ impl SharedInProcessZoneSessionRuntime {
             return Vec::new();
         };
         let now_ms = Self::zone_now_ms();
-        let packets = self.dispatch_zone_player_command(
-            ZoneCommand::CancelPendingMovement { session_id },
-            false,
-        );
+        let packets = self
+            .dispatch_zone_player_command(ZoneCommand::CancelPendingMovement { session_id }, false);
         let mut movement = self
             .movement_ingress
             .session_state
