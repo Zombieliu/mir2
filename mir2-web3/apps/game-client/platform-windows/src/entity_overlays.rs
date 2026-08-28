@@ -5,7 +5,7 @@
 
 use bevy::prelude::*;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
-use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use mir2_client_bevy::crystal_ui::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use serde_json::Value;
 
@@ -20,6 +20,11 @@ const OVERLAY_Z_INDEX: i32 = 850;
 // Crystal MapObject.DrawName and PlayerObject.DrawName use
 // `Dead ? 35 : 8`, so a corpse keeps its label and moves it down by 27px.
 const CRYSTAL_CORPSE_NAME_SHIFT_Y_PX: f32 = 27.0;
+const CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX: f32 = -17.0;
+// PlayerObject.DrawName places the guild line 12 px below the player name:
+// `-(19 - label_height / 2) + 8` versus `-(31 - label_height / 2) + 8`.
+const CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX: f32 = -5.0;
+const CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX: f32 = -18.0;
 
 #[derive(Component)]
 pub(crate) struct NativeEntityOverlayRoot;
@@ -454,10 +459,13 @@ fn overlay_entries(
                 .and_then(Value::as_array)
                 .into_iter()
                 .flatten()
-                .filter_map(|entity| {
-                    let name = entity.get("name")?.as_str()?.trim();
+                .flat_map(|entity| {
+                    let Some(name) = entity.get("name").and_then(Value::as_str).map(str::trim)
+                    else {
+                        return Vec::new();
+                    };
                     if name.is_empty() {
-                        return None;
+                        return Vec::new();
                     }
                     let kind = entity
                         .get("kind")
@@ -480,8 +488,13 @@ fn overlay_entries(
                             .is_some_and(|object_id| hovered_object_id == Some(object_id))
                     };
                     if !visibility.name_view && !hovered {
-                        return None;
+                        return Vec::new();
                     }
+                    let guild_name = matches!(kind, "selfPlayer" | "player")
+                        .then(|| entity.get("guildName").and_then(Value::as_str))
+                        .flatten()
+                        .map(str::trim)
+                        .filter(|guild_name| !guild_name.is_empty());
                     let lines = if matches!(kind, "npc" | "monster") {
                         name.split('_')
                             .filter(|part| !part.is_empty())
@@ -495,16 +508,11 @@ fn overlay_entries(
                     } else {
                         0.0
                     };
-                    let top_offset = if matches!(kind, "npc" | "monster") {
-                        -18.0
+                    let corpse_shift = if dead {
+                        CRYSTAL_CORPSE_NAME_SHIFT_Y_PX
                     } else {
-                        -17.0
-                    } + line_adjustment
-                        + if dead {
-                            CRYSTAL_CORPSE_NAME_SHIFT_Y_PX
-                        } else {
-                            0.0
-                        };
+                        0.0
+                    };
                     let color = entity
                         .get("nameColourArgb")
                         .and_then(value_i64)
@@ -516,18 +524,39 @@ fn overlay_entries(
                                 Color::WHITE
                             }
                         });
-                    Some(OverlayEntry {
+                    let left = origin_x + (x - center_x) as f32 * CELL_WIDTH;
+                    let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT;
+                    let width = if matches!(kind, "npc" | "monster") {
+                        48.0
+                    } else {
+                        50.0
+                    };
+                    let mut entity_entries = Vec::with_capacity(2);
+                    if let Some(guild_name) = guild_name {
+                        entity_entries.push(OverlayEntry {
+                            name: Some(guild_name.to_owned()),
+                            color,
+                            left,
+                            top: top + CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX + corpse_shift,
+                            width,
+                            self_health_ratio: None,
+                        });
+                    }
+                    entity_entries.push(OverlayEntry {
                         name: Some(display_name),
                         color,
-                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
-                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT + top_offset,
-                        width: if matches!(kind, "npc" | "monster") {
-                            48.0
-                        } else {
-                            50.0
-                        },
+                        left,
+                        top: top
+                            + if matches!(kind, "npc" | "monster") {
+                                CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX + line_adjustment
+                            } else {
+                                CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX
+                            }
+                            + corpse_shift,
+                        width,
                         self_health_ratio: None,
-                    })
+                    });
+                    entity_entries
                 }),
         );
     }
@@ -630,7 +659,7 @@ mod tests {
                 "playerHp": 9,
                 "playerMaxHp": 18,
                 "entities": [
-                    {"objectId": 1, "kind": "selfPlayer", "name": "Hero", "x": 10, "y": 20},
+                    {"objectId": 1, "kind": "selfPlayer", "name": "Hero", "guildName": "Guard", "x": 10, "y": 20},
                     {"objectId": 2, "kind": "npc", "name": "Weapon_Smith", "x": 11, "y": 19}
                 ]
             }),
@@ -641,16 +670,110 @@ mod tests {
             None,
             false,
         );
-        assert_eq!(entries.len(), 3);
+        assert_eq!(entries.len(), 4);
         assert_eq!(entries[0].left, 480.0);
-        assert_eq!(entries[0].top, 335.0);
+        assert_eq!(entries[0].top, 347.0);
         assert_eq!(entries[0].self_health_ratio, None);
-        assert_eq!(entries[1].name.as_deref(), Some("Weapon\nSmith"));
-        assert_eq!(entries[1].left, 528.0);
-        assert_eq!(entries[1].top, 297.0);
-        assert_eq!(entries[1].width, 48.0);
-        assert_eq!(entries[2].name, None);
-        assert_eq!(entries[2].self_health_ratio, Some(0.5));
+        assert_eq!(entries[0].name.as_deref(), Some("Guard"));
+        assert_eq!(entries[1].left, 480.0);
+        assert_eq!(entries[1].top, 335.0);
+        assert_eq!(entries[1].name.as_deref(), Some("Hero"));
+        assert_eq!(entries[2].name.as_deref(), Some("Weapon\nSmith"));
+        assert_eq!(entries[2].left, 528.0);
+        assert_eq!(entries[2].top, 297.0);
+        assert_eq!(entries[2].width, 48.0);
+        assert_eq!(entries[3].name, None);
+        assert_eq!(entries[3].self_health_ratio, Some(0.5));
+    }
+
+    #[test]
+    fn player_guild_and_name_follow_crystal_two_line_offsets_and_color() {
+        let entries = overlay_entries(
+            &json!({
+                "sceneView": {"center": {"x": 10, "y": 20}},
+                "entities": [
+                    {
+                        "objectId": 1,
+                        "kind": "player",
+                        "name": "Scout",
+                        "guildName": "BichonGuard",
+                        "nameColourArgb": 0xff12_3456u32,
+                        "x": 10,
+                        "y": 20
+                    },
+                    {
+                        "objectId": 2,
+                        "kind": "player",
+                        "name": "Fallen",
+                        "guildName": "BichonGuard",
+                        "nameColourArgb": 0xff12_3456u32,
+                        "x": 11,
+                        "y": 20,
+                        "dead": true
+                    }
+                ]
+            }),
+            OverlayVisibility {
+                name_view: true,
+                drop_view: false,
+            },
+            None,
+            false,
+        );
+        assert_eq!(
+            entry_names(&entries),
+            ["BichonGuard", "Scout", "BichonGuard", "Fallen"]
+        );
+        assert_eq!(entries[0].top - entries[1].top, 12.0);
+        assert_eq!(entries[2].top - entries[0].top, 27.0);
+        assert_eq!(entries[3].top - entries[1].top, 27.0);
+        for entry in &entries {
+            assert_eq!(entry.color, Color::srgba_u8(0x12, 0x34, 0x56, 0xff));
+            assert_eq!(entry.width, 50.0);
+        }
+    }
+
+    #[test]
+    fn player_guild_lines_follow_name_view_and_hover_without_duplicates() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "playerHp": 9,
+            "playerMaxHp": 18,
+            "entities": [
+                {"objectId": 1, "kind": "selfPlayer", "name": "Self", "guildName": "Codex", "x": 10, "y": 20},
+                {"objectId": "2", "kind": "player", "name": "Remote", "guildName": "BichonGuard", "x": 11, "y": 20},
+                {"objectId": 3, "kind": "player", "name": "Solo", "x": 12, "y": 20}
+            ]
+        });
+        let off = OverlayVisibility {
+            name_view: false,
+            drop_view: false,
+        };
+        assert!(entry_names(&overlay_entries(&payload, off, None, false)).is_empty());
+        assert_eq!(
+            entry_names(&overlay_entries(&payload, off, Some("2"), false)),
+            ["BichonGuard", "Remote"]
+        );
+        assert_eq!(
+            entry_names(&overlay_entries(&payload, off, None, true)),
+            ["Codex", "Self"]
+        );
+        assert_eq!(
+            entry_names(&overlay_entries(&payload, off, Some("2"), true)),
+            ["Codex", "Self", "BichonGuard", "Remote"]
+        );
+        assert_eq!(
+            entry_names(&overlay_entries(
+                &payload,
+                OverlayVisibility {
+                    name_view: true,
+                    drop_view: false,
+                },
+                Some("2"),
+                true,
+            )),
+            ["Codex", "Self", "BichonGuard", "Remote", "Solo"]
+        );
     }
 
     #[test]
@@ -783,7 +906,13 @@ mod tests {
         );
         assert_eq!(
             entry_names(&entries),
-            ["Living", "Fallen", "Living\nDeer", "Fallen\nDeer", "SelfCorpse"]
+            [
+                "Living",
+                "Fallen",
+                "Living\nDeer",
+                "Fallen\nDeer",
+                "SelfCorpse"
+            ]
         );
         assert_eq!(entries[1].top - entries[0].top, 27.0);
         assert_eq!(entries[3].top - entries[2].top, 27.0);
