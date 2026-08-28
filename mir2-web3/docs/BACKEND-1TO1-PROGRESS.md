@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> VIS-02 Hallucination client-boundary checkpoint (2026-08-28): revision
+> `60eae9561c5b18bc79456105e455d6964c14fafe` changes no simulation,
+> shared Zone, Gateway, protocol, damage, hit or status authority. The Windows
+> presentation layer consumes the existing typed spell/target events to run
+> Crystal's client-owned delayed missile and completion callback, including
+> terminal-`Dead` suppression and exact impact audio. Windows 421/421 and all
+> focused asset/Candidate gates pass; review is P0=0/P1=0/P2=0. No exact-head
+> EXE/live-WSS/device evidence or backend/global percentage is claimed.
+
 > VIS-01/VIS-02/VIS-04 client-boundary sync (2026-08-28): revisions
 > `2a83c0062dd60916730c46c752e044f668b243db`,
 > `473a56137c7af458d5c982c90f3d4a658a9243fd` and

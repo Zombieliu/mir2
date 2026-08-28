@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> VIS-02 Hallucination bounded visual checkpoint (2026-08-28): revision
+> `60eae9561c5b18bc79456105e455d6964c14fafe` binds the Windows native
+> client to Crystal spell 76: no cast art/audio, a 600ms delayed 16-direction
+> `Magic/1160` projectile with three 48ms source frames, terminal-`Dead`
+> completion suppression, and otherwise `Magic2/1110..1119` plus exact
+> `M76-0.wav`. Export, audio, Candidate self-tests, asset preflight and the
+> full Windows 421/421 suite pass; independent review is P0=0/P1=0/P2=0.
+> This closes one automated numerator leaf only. No exact-revision EXE,
+> same-EXE/live-WSS, DPI, soak, physical-audio, human or signing evidence was
+> produced; the 129-spell and global semantic denominators remain open, so
+> `globalParityPercent` stays null. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-02-HALLUCINATION-REPORT.md`.
+
 > VIS-01/VIS-02/VIS-04 bounded visual checkpoints (2026-08-28): revisions
 > `2a83c0062dd60916730c46c752e044f668b243db`,
 > `473a56137c7af458d5c982c90f3d4a658a9243fd` and

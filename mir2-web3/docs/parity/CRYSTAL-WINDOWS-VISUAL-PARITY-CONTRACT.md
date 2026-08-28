@@ -21,6 +21,7 @@ inventoryLockedTabCheckpointRevision: 83f081149375fb402b9c7e6711fdb4e6bed68a0e
 scarecrowDeathAudioCheckpointRevision: cf4f5b5197c492324be23beb73611c0e0162c403
 scarecrowAttackAudioCheckpointRevision: e1dd6d6379d23efeafe57aa01c170452f1261b83
 scarecrowStruckAudioCheckpointRevision: 354bb9f9648758c9f38d5ce149a273ae07cd2a7e
+hallucinationCheckpointRevision: 60eae9561c5b18bc79456105e455d6964c14fafe
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -69,6 +70,21 @@ main-HUD button matrix expansion. It is the smallest user-facing slice that
 answers the current report about button/UI fidelity. Whole-game percentages,
 same-EXE, live WSS, real DPI, native soak and human visual/feel remain
 explicitly open.
+
+## Hallucination bounded automated checkpoint
+
+Revision `60eae9561c5b18bc79456105e455d6964c14fafe` closes one VIS-02
+numerator leaf against Crystal `PlayerObject.cs`: spell 76 has no cast bitmap
+or cast sound, waits for the 600ms Spell action, then owns a 16-direction
+`Magic/1160` three-frame projectile driven by the 48ms process clock. A
+present target receives `Magic2/1110..1119` and exact `M76-0.wav` unless its
+completion-time rendered action is terminal `Dead`; a missing target never
+receives an invented impact. Windows 421/421, exporters, audio, asset
+preflight, Candidate self-tests and independent P0=0/P1=0/P2=0 review pass.
+
+This revision was not launched or captured as an EXE. It closes neither the
+129-spell denominator nor same-EXE/live-WSS, DPI, soak, human, clean-source or
+publisher-signing gates; `globalParityPercent` remains null.
 
 ## Scarecrow struck-audio bounded automated checkpoint
 

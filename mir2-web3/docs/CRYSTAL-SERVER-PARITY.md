@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> VIS-02 Hallucination server-client note (2026-08-28): revision
+> `60eae9561c5b18bc79456105e455d6964c14fafe` adds no packet shape or
+> server authority. Existing spell id, target identity and movement feed the
+> client-owned Crystal action/projectile clock; a present target gets impact
+> and `M76-0.wav` unless its rendered action is terminal `Dead` at completion.
+> Missing targets fail closed. Windows 421/421, exporters, Candidate gates and
+> P0=0/P1=0/P2=0 review pass. Live WSS, the complete spell denominator and all
+> exact-head device/human/signing gates remain open; no server or global
+> percentage is reported.
+
 > VIS-01/VIS-02/VIS-04 server-client note (2026-08-28): revisions
 > `2a83c0062dd60916730c46c752e044f668b243db`,
 > `473a56137c7af458d5c982c90f3d4a658a9243fd` and

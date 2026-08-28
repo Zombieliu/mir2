@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest VIS-02 Hallucination checkpoint (2026-08-28): revision
+> `60eae9561c5b18bc79456105e455d6964c14fafe` closes the bounded native
+> spell-76 presentation leaf. It locks Crystal's absent cast phase, 600ms
+> action delay, 16-direction `Magic/1160` missile, 48ms process clock,
+> target-aware completion, terminal-`Dead` suppression, `Magic2/1110..1119`
+> impact and sole `M76-0.wav` cue. Focused/export/audio/Candidate/preflight
+> gates, Windows 421/421 and independent P0=0/P1=0/P2=0 review pass. This is
+> not spell or whole-game completion: the full 129-spell denominator and all
+> same-EXE/live-WSS, real-DPI, soak, human and signing gates remain open, with
+> `globalParityPercent=null`.
+
 > Latest bounded visual sync (2026-08-28): player name/guild revision
 > `2a83c0062dd60916730c46c752e044f668b243db`, FrostCrunch revision
 > `473a56137c7af458d5c982c90f3d4a658a9243fd`, and Scarecrow Walking
