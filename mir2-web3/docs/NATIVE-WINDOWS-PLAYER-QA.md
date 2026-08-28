@@ -1,5 +1,26 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-28 VIS-01 player-sprite geometry/package checkpoint: native Windows
+> no longer invents a 48x64 rectangle when a player frame is absent from the
+> entity atlas. The ten packaged player families use exact per-frame Crystal
+> metadata as a verified fallback, including original offsets and transparent
+> pixel hit/highlight behavior; other atlas misses still produce no layer.
+> Source, staging and final-package closure all pass at 10 families / 34
+> libraries / 22,944 declared frames. Full Windows tests pass 441/441, both
+> Candidate self-tests pass, and exact revision
+> `ef25aec83b8023003ae648b4a2955a4e9ec76362` produced nonvisually verified
+> Candidate `WN-CANDIDATE-VIS01-PLAYER-GEOMETRY-20260828`. Its Release EXE is
+> 67,398,144 bytes, SHA-256
+> `1550B512930C54BA5356100B63976919A146E904F9A397D4EDE4CF653200FC3A`.
+> The package carries a detached CMS statement verified with the internal
+> certificate, while the EXE itself is not publisher-signed. At the
+> 2026-08-28 observation, PID 225736 was a current-source debug/loopback
+> inspection window, not exact-Release same-EXE evidence.
+> `visualAccepted=false`, `accepted=false`
+> and `globalParityPercent=null`: complete actions, UI/VFX, authenticated live
+> WSS, 100/125/150% DPI, native 30-minute soak, human visual/feel acceptance
+> and formal publisher signing remain open.
+
 > 2026-08-27 VIS-00 code gate: the independent visual-parity branch now has a
 > source-bound Phase-A ledger plus tested repairs for Arial routing,
 > 8pt chat/nameplates, outlined ordinary NameView labels, remote

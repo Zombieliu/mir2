@@ -2,6 +2,26 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-01 player-sprite geometry/package bounded
+> checkpoint: revision `7fa5369bcb6767ad5f1d1e1e0f07cac6bae8f7a6`
+> replaces the repository-only 48x64 atlas-miss placeholder with exact
+> `meta.json` geometry for canonical frames in the ten packaged player
+> families. Atlas pages remain preferred. Verified standalone player frames
+> retain transparent-pixel hit testing and atomic 30% selected/hover redraw
+> through a bounded 256-frame alpha cache; malformed identity, missing PNG or
+> metadata, half-atlas bindings and every non-player miss fail closed. This
+> narrowly supersedes the earlier selected-target note that every missing
+> atlas identity must suppress the clone: a complete verified standalone
+> player layer may now be cloned, while partial or non-player composites still
+> suppress. Package/verify close 10 families / 34 libraries / 22,944 declared
+> frames, Windows passes 441/441, and release-gate revision
+> `ef25aec83b8023003ae648b4a2955a4e9ec76362` produces a clean nonvisually
+> verified Candidate with EXE SHA-256
+> `1550B512930C54BA5356100B63976919A146E904F9A397D4EDE4CF653200FC3A`.
+> This does not close missing source-frame denominator differences, complete
+> player actions, UI/VFX, same-EXE live WSS, DPI, soak, human or publisher-
+> signing gates. `globalParityPercent=null` and `visualAccepted=false`.
+
 > 2026-08-28 Windows-native VIS-03 Character HUD additional bounded
 > checkpoint: revision `849f1f0b5120867d1358e0e7db9ba675e9866f9c`
 > verifies exact `Prguse/1900/1901/1902` at `(905,692,20,20)`, enabled

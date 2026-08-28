@@ -1,5 +1,30 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 player-sprite geometry/package checkpoint
+> (2026-08-28): implementation revision
+> `7fa5369bcb6767ad5f1d1e1e0f07cac6bae8f7a6` removes the invented 48x64
+> atlas-miss geometry that could crop, stretch or offset the native player
+> composite. Atlas frames remain preferred; only the ten packaged player
+> families may fall back to exact per-frame `meta.json` width/height/x/y,
+> with bounded PNG-alpha hit/highlight caching, while non-player misses still
+> fail closed. Package/verify now bind all 10 families, 34 libraries and
+> 22,944 declared frames. Release-gate revision
+> `ef25aec83b8023003ae648b4a2955a4e9ec76362` additionally recognizes the
+> Microsoft-signed DirectWrite system dependency introduced by Bevy system
+> font discovery without allowing arbitrary DLLs. Windows passes 441/441;
+> both Candidate self-tests, source/staging/final player closure and final
+> nonvisual verification pass. The clean exact-revision Release is
+> 67,398,144 bytes with SHA-256
+> `1550B512930C54BA5356100B63976919A146E904F9A397D4EDE4CF653200FC3A`;
+> Candidate `WN-CANDIDATE-VIS01-PLAYER-GEOMETRY-20260828` contains 32,594
+> files and remains `accepted=false`. The visible local debug client remains
+> running for human inspection, but it is not the exact packaged Release and
+> uses plaintext loopback. Complete player actions, UI, VFX and semantic
+> denominators plus same-EXE authenticated live WSS, real DPI, native
+> 30-minute soak, human visual/feel acceptance and formal publisher signing
+> remain open; `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-PLAYER-SPRITE-GEOMETRY-REPORT.md`.
+
 > Windows interaction/FireBounce/chat/Archer bounded checkpoints
 > (2026-08-28): revisions `9bccca3ae`, `90f861a9d`, `d0a30206d` and
 > `17b234911` close four automated leaves only. Native Windows now resolves
