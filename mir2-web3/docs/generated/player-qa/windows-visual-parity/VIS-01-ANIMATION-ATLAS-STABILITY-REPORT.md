@@ -1,28 +1,33 @@
-# Windows visual parity VIS-01 coherent-actor/item-icon report
+# Windows visual parity VIS-01 direction/input-repeat report
 
 Date: 2026-08-29
 
 ## Claim state
 
 ```text
-implementationRevision: 6a37a1e9b56e02a4afc4b3d88d721e50fbeb109e
+implementationRevision: 95b950f5e5c880f271ca87b654d6651be78fd686
 branch: codex/windows-visual-parity
 priorAtlasHandleAttemptVisuallyPassed: false
 priorDirectImageRectAttemptVisuallyPassed: false
 priorPerLayerReadyHandoffVisuallyPassed: false
 priorAtomicActorAttemptVisuallyPassed: false
+priorCoherentActorAttemptVisuallyPassed: false
+directionHandoffCandidateUserAnimationObservationPassed: true
 directImageRectAutomatedCheckpoint: complete
 atlasPageRetentionAutomatedCheckpoint: complete
 entityImageReadyHandoffAutomatedCheckpoint: complete
 actorCompositeAtomicHandoffAutomatedCheckpoint: complete
 actorCompositeGeometryRetentionAutomatedCheckpoint: complete
+pendingDirectionImageRetentionAutomatedCheckpoint: complete
+eightRealPlayerDirectionsAutomatedCheckpoint: complete
 itemIconPackageClosureAutomatedCheckpoint: complete
 leftMouseHeldWalkAutomatedCheckpoint: complete
 rightMouseHeldRunAutomatedCheckpoint: complete
+heldEditableDeletionAutomatedCheckpoint: complete
 chatFrameAssetPathAutomatedCheckpoint: complete
 runtimeTests: 199/199
-nativeUiTests: 430/430 (unchanged prior suite)
-windowsTests: 451/451
+nativeUiTests: 431/431
+windowsTests: 452/452
 exactRevisionExeProduced: true
 exactRevisionCandidateProduced: true
 exactRevisionExeLaunched: true
@@ -78,6 +83,24 @@ concrete: prior Windows Candidates contained zero files from
 `original-ui/Items`. This Candidate is explicitly visually failed on both
 observations.
 
+The user then tested revision
+`6a37a1e9b56e02a4afc4b3d88d721e50fbeb109e` from exact Candidate
+`WN-CANDIDATE-VIS01-COHERENT-ACTOR-ITEMS-20260829`. Their latest observation
+was more specific: the prior visible flicker was no longer observed, but the
+player remained on a diagonal pose instead of following authoritative turns.
+The supplied screenshot has UTC file time `2026-08-28T18:28:42Z`. Spectator
+records `24843..24879` show `SelfPlayer` direction `Left` continuously from
+`18:28:38.469Z` through `18:28:47.940Z`, including records `24856..24859`
+around the screenshot. The visible body instead matched the retained
+`UpRight` standing band. This Candidate is therefore an explicit direction-
+handoff visual failure even though it closed the previously reported flash.
+
+The concrete lifecycle defect was in the atomic ready barrier. Preflight
+requested each replacement PNG through `AssetServer::load`, but the temporary
+handle was dropped at the end of every deferred tick. The displayed Sprite
+owned only the old image. Bevy could therefore cancel or unload the replacement
+before it became ready, leaving the old diagonal composite stable forever.
+
 ## Current bounded implementation
 
 The renderer now treats mount, body, hair and both weapon roles as one actor
@@ -94,6 +117,16 @@ are removed. Rect-only animation on resident pages remains immediate.
 Highlight/effect decoration does not block the actor composite and retains its
 independent ready handoff. Death, real equipment changes and scene/session
 teardown retain their existing semantics.
+
+Every changed actor and non-actor replacement now also has a bounded strong
+pending-image handle while its old Sprite remains visible. The pending handle
+is removed on commit, source stability, layer removal and both scene-clear
+paths. This lets the all-layer barrier eventually become ready without
+reintroducing mixed body/hair/weapon frames. A separate presentation regression
+locks all eight real Crystal directions (`Up`, `UpRight`, `Right`,
+`DownRight`, `Down`, `DownLeft`, `Left`, `UpLeft`) and requires body, hair and
+primary weapon to select the same direction band. Crystal/Web/Windows use eight
+real directions; there is no three-direction or mirrored-cardinal fallback.
 
 Windows packaging now copies the complete `apps/web/public/original-ui/Items`
 tree. Source and staged package gates parse `Items/meta.json`, require every
@@ -119,6 +152,24 @@ shape:
 
 This is continuous direction intent, not long-range obstacle pathfinding.
 
+Native login, character-create, change-password and safe-key fields now consume
+the ordered raw Bevy keyboard messages rather than deriving deletion only from
+the collapsed `ButtonInput::just_pressed` state. Every Windows initial press
+and key-repeat message for Backspace or Delete therefore applies one deletion.
+These Crystal-shaped fields do not yet expose a caret or selection model, so
+both keys retain the existing tail-delete behavior; caret-aware forward Delete
+remains part of the wider editable-text denominator rather than being
+fabricated in this bounded fix.
+
+The held-movement path remains server authoritative. Zone Walk has a 600 ms
+step delay and Run has a 300 ms attempt delay; Run from standstill intentionally
+degrades to the first Walk and opens a 1.2 second run window. `UserLocation`
+immediately overlays a stale personal snapshot and publishes the new self tile,
+which releases the held-mouse gate for the next intent without waiting for the
+periodic world snapshot. A live local spectator trace recorded subsequent Run
+steps approximately 261--300 ms apart. This evidence does not support a server
+throughput-overload diagnosis, and the Crystal timing constants are unchanged.
+
 ## Automated evidence
 
 | Gate | Result |
@@ -127,6 +178,8 @@ This is continuous direction intent, not long-range obstacle pathfinding.
 | Atlas page-switch retention | PASS |
 | Unready replacement image retains visible entity binding | PASS |
 | Mixed-ready body/hair replacement retains the whole actor composite | PASS |
+| Deferred replacement retains a strong handle until atomic commit | PASS |
+| Eight standing directions select eight real body/hair/weapon bands | PASS |
 | Deferred body/hair/weapon keep their internal x/y/z geometry | PASS |
 | Repeated deferred snapshot does not apply root delta twice | PASS |
 | All-ready commit removes a genuinely omitted old weapon atomically | PASS |
@@ -134,54 +187,57 @@ This is continuous direction intent, not long-range obstacle pathfinding.
 | Left empty-world hold emits Walk once, waits for authority, then continues | PASS |
 | Right empty-world hold emits Run once, waits for authority, then continues | PASS |
 | Release stops held movement | PASS |
+| `UserLocation` immediately overlays stale self position | PASS |
+| Backspace/Delete initial and repeat messages delete once per message | PASS |
 | Monster/NPC/pickup and modal/actor priority gates | PASS |
 | Shared Bevy runtime | PASS, 199/199 |
-| Client Bevy native UI | PASS, unchanged prior 430/430 |
-| Windows native host | PASS, 451/451 |
+| Client Bevy native UI | PASS, 431/431 |
+| Windows native host | PASS, 452/452 |
 | Candidate package and verifier self-tests | PASS |
 | Rust formatting and diff checks | PASS |
 | Source worktree for Release | clean |
 | Candidate package verifier | PASS |
-| Final moved-directory nonvisual verifier | PASS (`sourceRepoCheck=checked`) |
+| Final standard-directory nonvisual verifier | PASS (`sourceRepoCheck=checked`) |
 
 ## Exact EXE and Candidate identity
 
 | Identity | Value |
 |---|---|
-| Candidate | `WN-CANDIDATE-VIS01-COHERENT-ACTOR-ITEMS-20260829` |
-| Revision | `6a37a1e9b56e02a4afc4b3d88d721e50fbeb109e` |
-| Release EXE bytes | 67,437,568 |
-| Release EXE SHA-256 | `47960E35DA7619E8FC73B3E300450D78C30FD501D179D16ECDD7519660FDBE5B` |
-| Build attestation SHA-256 | `F9320D942B5D0C273D443A01A9FB4BA9A3B47019B044E0AAB424D7822EAB0F7C` |
+| Candidate | `WN-CANDIDATE-VIS01-DIRECTION-INPUT-20260829` |
+| Revision | `95b950f5e5c880f271ca87b654d6651be78fd686` |
+| Release EXE bytes | 67,446,784 |
+| Release EXE SHA-256 | `BB3B83273B9CDEF19432A970D70F38F7E5BCEDFEA117FD42C0CB36FBE47E732D` |
+| Build attestation SHA-256 | `EB1FFC6DD4DC0232A92146F5D95B05F636E00E090ABE12379C97C4A95ED6F68A` |
 | Package payload files | 32,951 |
 | Candidate total files | 32,955 |
-| Package payload bytes | 382,744,941 |
-| Candidate total bytes | 391,623,693 |
-| Package manifest SHA-256 | `44743BE662A94CC7396EBD468AFC05AE325FD57941A9A319EEF9F544DFBBDD1C` |
-| Package aggregate SHA-256 | `86D6FA076F07C02DA98FFFFC7292FD14F47265D200DFEA65737749A59A61B5FD` |
-| Version SHA-256 | `33D0C2CE720C685224CF59A3EAA4966D360286A05E76450BEE457A70E2398EBC` |
+| Package payload bytes | 382,753,389 |
+| Package manifest SHA-256 | `AB698C075042357F8D089D190DC184904627E311B9735A8E79E6B315FA9B8B9B` |
+| Package aggregate SHA-256 | `4A86571C7655EDF2D58721111E1A047A7C101EA2AF066D756C70B6F17387D1C6` |
 | Item icon closure | 361 files / 360 PNGs |
 
-The exact EXE was launched as PID 255504 with only a process-local
+The exact EXE was launched as PID 256184 with only a process-local
 `ws://127.0.0.1:7210/ws` override. Gateway PID 237188 was listening on
 127.0.0.1:7210 and `/health` returned 200 after launch. This proves package
 identity and local transport readiness only; it is not authenticated live WSS
 or human visual acceptance.
 
-The final nonvisual verifier passed after the package directory was moved to a
-short alternate path inside the same clean exact-revision worktree, including
-`sourceRepoCheck=checked`. The unchanged directory was then moved back to the
-standard Candidate location. A redundant re-run from that longer location hit
-Windows PowerShell's legacy ADS enumeration limit on a 273-character generated
-manifest path; direct `\\?\` enumeration proves the file and its unnamed data
-stream exist. That path-length tooling limitation is not recorded as a package
-content pass, and the earlier strict moved-directory pass remains the evidence.
+Packaging and a second independent verification of the final standard
+Candidate directory both passed under Windows PowerShell with
+`sourceRepoCheck=checked` and `nonvisual=True`. An initial `pwsh` packaging
+attempt failed closed because that host's `Get-Item -Stream` implementation
+misreported the same existing long-path manifest as missing; Windows
+PowerShell enumerated that exact file's unnamed data stream successfully. The
+failed staging tree was removed automatically and is not counted as evidence.
 
 ## Explicitly open gates
 
-- The user must observe idle, Walk, held Run, body/hair/weapon resource-page
-  transitions and visible belt item icons in this exact EXE before the current
-  leaf can receive a visual pass.
+- The user's latest statement that the animation is now OK records a bounded
+  visual pass for the prior exact direction-handoff Candidate's reported
+  diagonal/flicker defect. Revision `95b950f5e` changes only editable keyboard
+  handling on top of that renderer and keeps the full render regression green,
+  but the newly launched exact EXE still needs the held-deletion and movement-
+  feel spot check. Exhaustive all-eight turns, resource-page transitions and
+  every item/UI surface remain broader acceptance work.
 - Complete mouse combat and targeting, long-range pathfinding, chat
   interaction, remaining UI panels, skills/VFX, monsters, maps and semantic
   denominators remain open.

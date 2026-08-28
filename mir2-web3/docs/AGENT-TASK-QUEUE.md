@@ -1,5 +1,28 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 direction/input follow-up (2026-08-29): the user's
+> latest observation records the bounded player animation regression as OK;
+> this closes the previously reported diagonal/flicker symptom only, not whole
+> VIS-01 or global Crystal parity. Clean revision
+> `95b950f5e5c880f271ca87b654d6651be78fd686` additionally makes native login,
+> character-create, change-password and safe-key fields consume every raw
+> Backspace/Delete press and Windows repeat message instead of the collapsed
+> `just_pressed` edge. Native UI 431/431 and Windows 452/452 pass. Exact
+> Candidate `WN-CANDIDATE-VIS01-DIRECTION-INPUT-20260829` passed packaging and
+> an independent final-directory verifier with `sourceRepoCheck=checked`; its
+> 67,446,784-byte EXE is SHA-256
+> `BB3B83273B9CDEF19432A970D70F38F7E5BCEDFEA117FD42C0CB36FBE47E732D`
+> and is running as PID 256184 against healthy loopback for user retest. Held
+> movement remains authoritative Crystal timing: Walk 600 ms, Run 300 ms, and
+> the first standstill Run degrades to Walk; packet-first `UserLocation`
+> releases the next held intent without periodic-snapshot delay. No cooldown
+> was weakened. Authenticated same-EXE live WSS, real 100/125/150% DPI, native
+> 30-minute soak, exhaustive player actions/classes, UI/chat, skills/VFX,
+> monsters/maps, human visual/audio/feel, semantic denominators and formal
+> publisher signing remain open. `accepted=false`, `visualAccepted=false`,
+> `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-ANIMATION-ATLAS-STABILITY-REPORT.md`.
+
 > Windows-native VIS-01 coherent-actor/item-icon follow-up (2026-08-29): the
 > user's retest of exact Candidate
 > `WN-CANDIDATE-VIS01-ATOMIC-ACTOR-HOLD-20260829` showed that the retained
