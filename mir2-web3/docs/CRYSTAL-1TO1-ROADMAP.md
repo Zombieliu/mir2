@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest bounded visual sync (2026-08-28): player name/guild revision
+> `2a83c0062dd60916730c46c752e044f668b243db`, FrostCrunch revision
+> `473a56137c7af458d5c982c90f3d4a658a9243fd`, and Scarecrow Walking
+> revision `fd3b5d552bbb9292ce49d95709477da3f6966d38` close three source-bound
+> automated leaves. They lock Crystal's player two-line nameplate geometry,
+> FrostCrunch cast/projectile/impact/audio plus fail-closed package assets, and
+> `Monster/005` Right `44..49 -> Standing/8`. Combined Windows 416/416,
+> focused Web/script/Candidate gates and independent reviews pass. This advances
+> three numerator leaves only: full player/monster/skill/UI denominators and
+> same-EXE/live-WSS, real DPI, native soak, human acceptance and publisher
+> signing remain open; no whole-game or visual percentage is authorized.
+
 > VIS-02 FireBall-family Dead-target checkpoint (2026-08-28): revision
 > `8d8c5f12f6faa4617ce87017f82738458f164bd9` closes the bounded Windows
 > completion-action leaf for FireBall, GreatFireBall and SoulFireBall. Their

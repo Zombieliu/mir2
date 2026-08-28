@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> VIS-01/VIS-02/VIS-04 server-client note (2026-08-28): revisions
+> `2a83c0062dd60916730c46c752e044f668b243db`,
+> `473a56137c7af458d5c982c90f3d4a658a9243fd` and
+> `fd3b5d552bbb9292ce49d95709477da3f6966d38` are presentation-only. They
+> consume existing player guild/name colour, typed FrostCrunch target/spell
+> events, and Scarecrow movement packets; no packet shape, damage/freeze,
+> movement, simulation or shared-Zone authority changes. Exact client frames,
+> audio identity, lifecycle and transcripts pass the combined Windows 416/416
+> and focused gates. Live WSS and the complete semantic denominators remain
+> open; no server or global percentage is reported.
+
 > VIS-02 FireBall-family server-client note (2026-08-28): revision
 > `8d8c5f12f6faa4617ce87017f82738458f164bd9` adds no server packet or
 > authority. Existing target identity, spell and projectile timing feed a

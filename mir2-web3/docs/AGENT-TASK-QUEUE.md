@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> VIS-01/VIS-02/VIS-04 bounded visual checkpoints (2026-08-28): revisions
+> `2a83c0062dd60916730c46c752e044f668b243db`,
+> `473a56137c7af458d5c982c90f3d4a658a9243fd` and
+> `fd3b5d552bbb9292ce49d95709477da3f6966d38` close three independent
+> automated leaves. Player/self-player now render Crystal's name-above-guild
+> two-line label with shared colour/outline and corpse delta; FrostCrunch now
+> owns exact `Magic2/400..413,570..577`, `M41-1/2`, delayed completion, terminal
+> `Dead` suppression and Candidate asset identity; Scarecrow Right Walking is
+> transcript-locked as `44..49 -> Standing/8` at 100ms without invented audio.
+> Focused gates, both Candidate self-tests and the combined Windows 416/416
+> suite pass; independent reviews have P0=0 and no semantic P1. Player,
+> monster, spell and UI denominators plus same-EXE/live-WSS, DPI, soak, human
+> and signing gates remain open, so `globalParityPercent` stays null. Reports:
+> `VIS-01-PLAYER-GUILD-NAME-REPORT.md`, `VIS-02-FROST-CRUNCH-REPORT.md` and
+> `VIS-04-SCARECROW-WALKING-REPORT.md` under
+> `docs/generated/player-qa/windows-visual-parity/`.
+
 > VIS-02 FireBall-family Dead-target bounded checkpoint (2026-08-28): revision
 > `8d8c5f12f6faa4617ce87017f82738458f164bd9` binds Windows native
 > FireBall, GreatFireBall and SoulFireBall completion to Crystal's exact

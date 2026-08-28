@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-01/VIS-02/VIS-04 client-boundary sync (2026-08-28): revisions
+> `2a83c0062dd60916730c46c752e044f668b243db`,
+> `473a56137c7af458d5c982c90f3d4a658a9243fd` and
+> `fd3b5d552bbb9292ce49d95709477da3f6966d38` add no simulation, Gateway,
+> protocol, persistence or Zone authority. Existing authoritative player guild
+> metadata now drives exact two-line labels; existing typed FrostCrunch events
+> drive client-owned `Magic2` phases and exact audio with terminal-Dead
+> completion semantics; existing `ObjectWalk` drives the source-signed
+> Scarecrow Right sequence. Focused gates and Windows 416/416 pass. Full
+> semantic denominators and every exact-head device/human/signing gate remain
+> open; no backend or global percentage is claimed.
+
 > VIS-02 FireBall-family client-boundary checkpoint (2026-08-28): revision
 > `8d8c5f12f6faa4617ce87017f82738458f164bd9` changes no simulation,
 > shared Zone, Gateway, packet, skill damage or hit authority. The Windows
