@@ -981,9 +981,12 @@ fn build_entity_render_state_with_index(
         })
         .unwrap_or_default();
 
-    let hovered_object_id = highlight_target
-        .then(|| hovered_object_at_cursor(payload, &entities, index, pixels))
-        .flatten();
+    // Crystal keeps MouseObject/SelfPlayer.MouseOver alive even when the
+    // optional target highlight blend is disabled. Nameplates consume these
+    // identities independently; only the duplicate sprite blend below is
+    // gated by HighlightTarget.
+    let hovered_object_id = hovered_object_at_cursor(payload, &entities, index, pixels);
+    let self_hovered = self_hovered_at_cursor(payload, &entities, index, pixels);
     if highlight_target {
         for entity in &mut entities {
             let object_id = entity
@@ -1071,6 +1074,8 @@ fn build_entity_render_state_with_index(
         "stageHeight": STAGE_HEIGHT,
         "centerX": center_x,
         "centerY": center_y,
+        "hoveredObjectId": hovered_object_id,
+        "selfHovered": self_hovered,
         "atlases": atlases,
         "entities": entities,
     });
@@ -1227,15 +1232,7 @@ fn hovered_object_at_cursor(
     index: &StarterAtlasIndex,
     pixels: Option<&StarterAtlasPixels>,
 ) -> Option<String> {
-    let cursor = payload.get("_nativeHoverCursor")?;
-    let cursor_x = cursor.get("x").and_then(Value::as_f64)? as f32;
-    let cursor_y = cursor.get("y").and_then(Value::as_f64)? as f32;
-    if !(0.0..STAGE_WIDTH).contains(&cursor_x) || !(0.0..STAGE_HEIGHT).contains(&cursor_y) {
-        return None;
-    }
-    let (center_x, center_y) = scene_center(payload);
-    let cursor_grid_x = center_x + i64::from((cursor_x / CELL_WIDTH).floor() as i32) - 10;
-    let cursor_grid_y = center_y + i64::from((cursor_y / CELL_HEIGHT).floor() as i32) - 11;
+    let (cursor_x, cursor_y, cursor_grid_x, cursor_grid_y) = cursor_hit_context(payload)?;
 
     // Crystal scans the cursor tile's 5x5 neighbourhood from bottom-right to
     // top-left and each cell's object list in reverse insertion order.
@@ -1260,6 +1257,45 @@ fn hovered_object_at_cursor(
         }
     }
     None
+}
+
+fn self_hovered_at_cursor(
+    payload: &Value,
+    entities: &[Value],
+    index: &StarterAtlasIndex,
+    pixels: Option<&StarterAtlasPixels>,
+) -> bool {
+    let Some((cursor_x, cursor_y, cursor_grid_x, cursor_grid_y)) = cursor_hit_context(payload)
+    else {
+        return false;
+    };
+    entities.iter().any(|entity| {
+        if entity.get("isSelf").and_then(Value::as_bool) != Some(true)
+            || entity.get("dead").and_then(Value::as_bool) == Some(true)
+        {
+            return false;
+        }
+        let Some(object_id) = entity.get("objectId").and_then(Value::as_str) else {
+            return false;
+        };
+        let x = entity.get("gridX").and_then(Value::as_i64);
+        let y = entity.get("gridY").and_then(Value::as_i64);
+        (x == Some(cursor_grid_x) && y == Some(cursor_grid_y))
+            || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
+    })
+}
+
+fn cursor_hit_context(payload: &Value) -> Option<(f32, f32, i64, i64)> {
+    let cursor = payload.get("_nativeHoverCursor")?;
+    let cursor_x = cursor.get("x").and_then(Value::as_f64)? as f32;
+    let cursor_y = cursor.get("y").and_then(Value::as_f64)? as f32;
+    if !(0.0..STAGE_WIDTH).contains(&cursor_x) || !(0.0..STAGE_HEIGHT).contains(&cursor_y) {
+        return None;
+    }
+    let (center_x, center_y) = scene_center(payload);
+    let cursor_grid_x = center_x + i64::from((cursor_x / CELL_WIDTH).floor() as i32) - 10;
+    let cursor_grid_y = center_y + i64::from((cursor_y / CELL_HEIGHT).floor() as i32) - 11;
+    Some((cursor_x, cursor_y, cursor_grid_x, cursor_grid_y))
 }
 
 fn body_visible_pixel(
@@ -2245,6 +2281,7 @@ mod tests {
         )
         .expect("opaque hover state");
         assert!(has_layer(&opaque, "2001:hover-highlight:body"));
+        assert_eq!(opaque["hoveredObjectId"], json!("2001"));
 
         payload["_nativeHoverCursor"] = json!({"x": 481.2, "y": 352.2});
         let transparent = build_entity_render_state_with_manifest_and_pixels_for_test(
@@ -2252,6 +2289,7 @@ mod tests {
         )
         .expect("transparent hover state");
         assert!(!has_layer(&transparent, "2001:hover-highlight:body"));
+        assert!(transparent["hoveredObjectId"].is_null());
 
         payload["_nativeHoverCursor"] = json!({"x": 482.2, "y": 353.2});
         let missing_pixels = build_entity_render_state_with_manifest_and_pixels_for_test(
@@ -2263,6 +2301,7 @@ mod tests {
         )
         .expect("missing pixel cache state");
         assert!(!has_layer(&missing_pixels, "2001:hover-highlight:body"));
+        assert!(missing_pixels["hoveredObjectId"].is_null());
 
         payload["_nativeHoverCursor"] = json!({"x": 529.0, "y": 353.0});
         let same_tile = build_entity_render_state_with_manifest_and_pixels_for_test(
@@ -2274,6 +2313,7 @@ mod tests {
         )
         .expect("same-tile shortcut state");
         assert!(has_layer(&same_tile, "2001:hover-highlight:body"));
+        assert_eq!(same_tile["hoveredObjectId"], json!("2001"));
     }
 
     #[test]
@@ -2304,6 +2344,8 @@ mod tests {
         assert!(!has_layer(&state, "3001:hover-highlight:body"));
         assert!(!has_layer(&state, "2001:hover-highlight:body"));
         assert!(!has_layer(&state, "1000:hover-highlight:body"));
+        assert_eq!(state["hoveredObjectId"], json!("3002"));
+        assert_eq!(state["selfHovered"], json!(true));
     }
 
     #[test]
@@ -2357,6 +2399,7 @@ mod tests {
         .expect("disabled highlight state");
         assert!(!has_layer(&disabled, "2001:target-highlight:body"));
         assert!(!has_layer(&disabled, "2001:hover-highlight:body"));
+        assert_eq!(disabled["hoveredObjectId"], json!("2001"));
     }
 
     #[test]

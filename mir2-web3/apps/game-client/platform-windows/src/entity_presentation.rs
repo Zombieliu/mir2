@@ -41,6 +41,8 @@ pub struct NativeEntityPresentation {
     last_effect_visible: Option<bool>,
     hover_cursor_stage: Option<(f32, f32)>,
     highlight_target: bool,
+    hovered_object_id: Option<String>,
+    self_hovered: bool,
     payload_dirty: bool,
 }
 
@@ -57,6 +59,8 @@ impl Default for NativeEntityPresentation {
             last_effect_visible: None,
             hover_cursor_stage: None,
             highlight_target: true,
+            hovered_object_id: None,
+            self_hovered: false,
             payload_dirty: false,
         }
     }
@@ -69,6 +73,14 @@ impl NativeEntityPresentation {
 
     pub fn replace_payload(&mut self, payload: Value) {
         self.pending_payload = Some(payload);
+    }
+
+    pub(crate) fn hovered_object_id(&self) -> Option<&str> {
+        self.hovered_object_id.as_deref()
+    }
+
+    pub(crate) fn self_hovered(&self) -> bool {
+        self.self_hovered
     }
 
     fn set_hover_presentation(
@@ -280,7 +292,16 @@ impl NativeEntityPresentation {
                     .is_none_or(|object_id| !self.hidden_after_hide.contains(&object_id))
             });
         }
-        let state = render(&visible_payload, &frames, effect_visible)?;
+        let Some(state) = render(&visible_payload, &frames, effect_visible) else {
+            self.hovered_object_id = None;
+            self.self_hovered = false;
+            return None;
+        };
+        self.hovered_object_id = state.get("hoveredObjectId").and_then(value_object_id);
+        self.self_hovered = state
+            .get("selfHovered")
+            .and_then(Value::as_bool)
+            .unwrap_or(false);
         self.last_frames = frames;
         self.payload_dirty = false;
         Some(state)
@@ -303,12 +324,19 @@ pub fn tick_native_entity_presentation(
         .as_deref()
         .map(|state| state.core.options.highlight_target)
         .unwrap_or(true);
-    let hover_cursor_stage = native_hover_cursor(
-        windows.iter().next(),
-        shell.as_deref(),
-        player_ui.as_deref(),
-        highlight_target,
-    );
+    let name_view = player_ui
+        .as_deref()
+        .map(|state| state.core.options.name_view)
+        .unwrap_or(true);
+    let hover_cursor_stage = (highlight_target || !name_view)
+        .then(|| {
+            native_hover_cursor(
+                windows.iter().next(),
+                shell.as_deref(),
+                player_ui.as_deref(),
+            )
+        })
+        .flatten();
     presentation.set_hover_presentation(hover_cursor_stage, highlight_target);
     let Some(state) = presentation.render_state_if_changed(now_ms, effect_visible) else {
         return;
@@ -322,12 +350,10 @@ fn native_hover_cursor(
     window: Option<&Window>,
     shell: Option<&mir2_client_bevy::native_shell::NativeShellModel>,
     player_ui: Option<&mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
-    highlight_target: bool,
 ) -> Option<(f32, f32)> {
     use mir2_client_bevy::native_shell::NativeShellScreen;
 
-    if !highlight_target
-        || shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
+    if shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
         || player_ui.is_some_and(|ui| ui.blocks_world_click())
     {
         return None;
@@ -576,7 +602,7 @@ mod tests {
     }
 
     #[test]
-    fn native_hover_cursor_uses_shared_letterbox_transform_and_runtime_gates() {
+    fn native_hover_cursor_is_independent_of_highlight_and_uses_runtime_gates() {
         use bevy::prelude::Vec2;
         use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 
@@ -586,31 +612,42 @@ mod tests {
         window.set_cursor_position(Some(Vec2::new(100.0, 360.0)));
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::InGame;
-        assert_eq!(
-            native_hover_cursor(Some(&window), Some(&shell), None, true),
-            None
-        );
+        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None), None);
 
         window.set_cursor_position(Some(Vec2::new(640.0, 360.0)));
         assert_eq!(
-            native_hover_cursor(Some(&window), Some(&shell), None, true),
+            native_hover_cursor(Some(&window), Some(&shell), None),
             Some((512.0, 384.0))
         );
-        assert_eq!(
-            native_hover_cursor(Some(&window), Some(&shell), None, false),
-            None
-        );
         shell.screen = NativeShellScreen::Login;
-        assert_eq!(
-            native_hover_cursor(Some(&window), Some(&shell), None, true),
-            None
-        );
+        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None), None);
         shell.screen = NativeShellScreen::InGame;
         window.focused = false;
-        assert_eq!(
-            native_hover_cursor(Some(&window), Some(&shell), None, true),
-            None
+        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None), None);
+    }
+
+    #[test]
+    fn rendered_hover_identity_is_published_and_cleared_fail_closed() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        let _ = presentation.render_state_if_changed_with(0, true, |_, _, _| {
+            Some(json!({"hoveredObjectId": "2001", "selfHovered": true}))
+        });
+        assert_eq!(presentation.hovered_object_id(), Some("2001"));
+        assert!(presentation.self_hovered());
+
+        presentation.set_hover_presentation(Some((512.0, 384.0)), false);
+        assert!(
+            presentation
+                .render_state_if_changed_with(0, true, |_, _, _| None)
+                .is_none()
         );
+        assert_eq!(presentation.hovered_object_id(), None);
+        assert!(!presentation.self_hovered());
+
+        presentation.reset_session();
+        assert_eq!(presentation.hovered_object_id(), None);
+        assert!(!presentation.self_hovered());
     }
 
     #[test]

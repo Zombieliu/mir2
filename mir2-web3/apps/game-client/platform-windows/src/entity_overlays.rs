@@ -9,6 +9,7 @@ use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAUL
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use serde_json::Value;
 
+use crate::entity_presentation::NativeEntityPresentation;
 use crate::gameplay_bridge::NativeDamageEvent;
 
 const STAGE_WIDTH: f32 = 1024.0;
@@ -28,6 +29,8 @@ pub struct NativeEntityOverlays {
     dirty: bool,
     last_in_game: bool,
     last_visibility: Option<OverlayVisibility>,
+    last_hovered_object_id: Option<String>,
+    last_self_hovered: bool,
 }
 
 /// Local Crystal name/drop presentation flags. They only select which labels
@@ -56,6 +59,8 @@ impl NativeEntityOverlays {
         self.last_damage_sequence = 0;
         self.dirty = true;
         self.last_in_game = false;
+        self.last_hovered_object_id = None;
+        self.last_self_hovered = false;
     }
 
     pub fn replace_payload(&mut self, payload: Value) {
@@ -155,7 +160,7 @@ struct DamageFloaterEntry {
 
 #[derive(Debug)]
 struct OverlayEntry {
-    name: String,
+    name: Option<String>,
     color: Color,
     left: f32,
     top: f32,
@@ -170,6 +175,7 @@ pub fn sync_native_entity_overlays(
     roots: Query<Entity, With<NativeEntityOverlayRoot>>,
     time: Res<Time>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    presentation: Res<NativeEntityPresentation>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let previous_floater_count = overlays.active_floaters.len();
@@ -183,14 +189,20 @@ pub fn sync_native_entity_overlays(
     }
     let in_game = shell.screen == NativeShellScreen::InGame;
     let visibility = OverlayVisibility::from_player_ui(player_ui.as_deref());
+    let hovered_object_id = presentation.hovered_object_id();
+    let self_hovered = presentation.self_hovered();
     if !overlays.dirty
         && overlays.last_in_game == in_game
         && overlays.last_visibility == Some(visibility)
+        && overlays.last_hovered_object_id.as_deref() == hovered_object_id
+        && overlays.last_self_hovered == self_hovered
     {
         return;
     }
     overlays.last_in_game = in_game;
     overlays.last_visibility = Some(visibility);
+    overlays.last_hovered_object_id = hovered_object_id.map(str::to_owned);
+    overlays.last_self_hovered = self_hovered;
     overlays.dirty = false;
     for root in &roots {
         commands.entity(root).despawn();
@@ -201,7 +213,7 @@ pub fn sync_native_entity_overlays(
     let Some(payload) = overlays.latest_payload.as_ref() else {
         return;
     };
-    let entries = overlay_entries(payload, visibility);
+    let entries = overlay_entries(payload, visibility, hovered_object_id, self_hovered);
     let floaters = damage_floater_entries(payload, &overlays.active_floaters, now_ms);
     if entries.is_empty() && floaters.is_empty() {
         return;
@@ -248,6 +260,9 @@ pub fn sync_native_entity_overlays(
                     });
                 }
 
+                let Some(name) = entry.name else {
+                    continue;
+                };
                 for offset in crystal_outline_offsets() {
                     root.spawn((
                         Node {
@@ -258,7 +273,7 @@ pub fn sync_native_entity_overlays(
                             min_width: Val::Px(entry.width),
                             ..default()
                         },
-                        Text::new(entry.name.clone()),
+                        Text::new(name.clone()),
                         crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
                         TextColor(Color::BLACK),
                         TextLayout::justify(Justify::Center),
@@ -273,7 +288,7 @@ pub fn sync_native_entity_overlays(
                         min_width: Val::Px(entry.width),
                         ..default()
                     },
-                    Text::new(entry.name),
+                    Text::new(name),
                     crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
                     TextColor(entry.color),
                     TextLayout::justify(Justify::Center),
@@ -408,7 +423,12 @@ fn damage_floater_entries(
         .collect()
 }
 
-fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<OverlayEntry> {
+fn overlay_entries(
+    payload: &Value,
+    visibility: OverlayVisibility,
+    hovered_object_id: Option<&str>,
+    self_hovered: bool,
+) -> Vec<OverlayEntry> {
     let center = payload.get("sceneView").and_then(|view| view.get("center"));
     let center_x = center
         .and_then(|center| center.get("x"))
@@ -424,7 +444,7 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
     let player_max_hp = payload.get("playerMaxHp").and_then(value_i64);
 
     let mut entries = Vec::new();
-    if visibility.name_view {
+    if visibility.name_view || hovered_object_id.is_some() || self_hovered {
         entries.extend(
             payload
                 .get("entities")
@@ -447,6 +467,21 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                         return None;
                     }
                     let is_self = kind == "selfPlayer";
+                    let object_id = entity.get("objectId").and_then(|value| match value {
+                        Value::Number(number) => Some(number.to_string()),
+                        Value::String(value) if !value.is_empty() => Some(value.clone()),
+                        _ => None,
+                    });
+                    let hovered = if is_self {
+                        self_hovered
+                    } else {
+                        object_id
+                            .as_deref()
+                            .is_some_and(|object_id| hovered_object_id == Some(object_id))
+                    };
+                    if !visibility.name_view && !hovered {
+                        return None;
+                    }
                     let lines = if matches!(kind, "npc" | "monster") {
                         name.split('_')
                             .filter(|part| !part.is_empty())
@@ -476,17 +511,8 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                                 Color::WHITE
                             }
                         });
-                    let self_health_ratio = is_self
-                        .then(|| {
-                            let hp = entity.get("hp").and_then(value_i64).or(player_hp)?;
-                            let max_hp =
-                                entity.get("maxHp").and_then(value_i64).or(player_max_hp)?;
-                            (max_hp > 0).then_some((hp as f32 / max_hp as f32).clamp(0.0, 1.0))
-                        })
-                        .flatten();
-
                     Some(OverlayEntry {
-                        name: display_name,
+                        name: Some(display_name),
                         color,
                         left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
                         top: origin_y + (y - center_y) as f32 * CELL_HEIGHT + top_offset,
@@ -495,10 +521,41 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                         } else {
                             50.0
                         },
-                        self_health_ratio,
+                        self_health_ratio: None,
                     })
                 }),
         );
+    }
+
+    // Crystal's User.DrawHealth path is independent of NameView and
+    // SelfPlayer.MouseOver. Keep one health-only entry so moving the cursor
+    // cannot make the self bar appear or disappear with the nameplate.
+    if let Some(entity) = payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .find(|entity| {
+            entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                && entity.get("dead").and_then(Value::as_bool) != Some(true)
+        })
+    {
+        let hp = entity.get("hp").and_then(value_i64).or(player_hp);
+        let max_hp = entity.get("maxHp").and_then(value_i64).or(player_max_hp);
+        if let (Some(hp), Some(max_hp)) = (hp, max_hp) {
+            if max_hp > 0 {
+                let x = entity.get("x").and_then(value_i64).unwrap_or(0);
+                let y = entity.get("y").and_then(value_i64).unwrap_or(0);
+                entries.push(OverlayEntry {
+                    name: None,
+                    color: Color::WHITE,
+                    left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
+                    top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0,
+                    width: 50.0,
+                    self_health_ratio: Some((hp as f32 / max_hp as f32).clamp(0.0, 1.0)),
+                });
+            }
+        }
     }
 
     // Crystal's DropView draws item names after map/world rendering. The
@@ -520,7 +577,7 @@ fn overlay_entries(payload: &Value, visibility: OverlayVisibility) -> Vec<Overla
                     let x = drop.get("x").and_then(value_i64)?;
                     let y = drop.get("y").and_then(value_i64)?;
                     Some(OverlayEntry {
-                        name: name.to_owned(),
+                        name: Some(name.to_owned()),
                         color: Color::srgb_u8(0xff, 0xe6, 0x58),
                         left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0,
                         top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0,
@@ -576,15 +633,19 @@ mod tests {
                 name_view: true,
                 drop_view: true,
             },
+            None,
+            false,
         );
-        assert_eq!(entries.len(), 2);
+        assert_eq!(entries.len(), 3);
         assert_eq!(entries[0].left, 480.0);
         assert_eq!(entries[0].top, 335.0);
-        assert_eq!(entries[0].self_health_ratio, Some(0.5));
-        assert_eq!(entries[1].name, "Weapon\nSmith");
+        assert_eq!(entries[0].self_health_ratio, None);
+        assert_eq!(entries[1].name.as_deref(), Some("Weapon\nSmith"));
         assert_eq!(entries[1].left, 528.0);
         assert_eq!(entries[1].top, 297.0);
         assert_eq!(entries[1].width, 48.0);
+        assert_eq!(entries[2].name, None);
+        assert_eq!(entries[2].self_health_ratio, Some(0.5));
     }
 
     #[test]
@@ -600,11 +661,13 @@ mod tests {
                 name_view: true,
                 drop_view: false,
             },
+            None,
+            false,
         );
         assert_eq!(
             names_only
                 .iter()
-                .map(|entry| entry.name.as_str())
+                .filter_map(|entry| entry.name.as_deref())
                 .collect::<Vec<_>>(),
             ["Hero"]
         );
@@ -615,23 +678,77 @@ mod tests {
                 name_view: false,
                 drop_view: true,
             },
+            None,
+            false,
         );
         assert_eq!(
             drops_only
                 .iter()
-                .map(|entry| entry.name.as_str())
+                .filter_map(|entry| entry.name.as_deref())
                 .collect::<Vec<_>>(),
             ["Potion"]
         );
 
-        assert!(overlay_entries(
+        assert!(
+            overlay_entries(
+                &payload,
+                OverlayVisibility {
+                    name_view: false,
+                    drop_view: false
+                },
+                None,
+                false,
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn living_names_follow_name_view_and_hover_identity_without_duplicates() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "playerHp": 9,
+            "playerMaxHp": 18,
+            "selectedObjectId": 4,
+            "entities": [
+                {"objectId": 1, "kind": "selfPlayer", "name": "Self", "x": 10, "y": 20},
+                {"objectId": "2", "kind": "player", "name": "Remote", "x": 11, "y": 20},
+                {"objectId": 3, "kind": "npc", "name": "Town_Guard", "x": 12, "y": 20},
+                {"objectId": 4, "kind": "monster", "name": "Deer", "x": 13, "y": 20},
+                {"objectId": 5, "kind": "monster", "name": "", "x": 14, "y": 20},
+                {"objectId": 6, "kind": "monster", "name": "Corpse", "x": 15, "y": 20, "dead": true}
+            ]
+        });
+        let off = OverlayVisibility {
+            name_view: false,
+            drop_view: false,
+        };
+        let hidden_names = overlay_entries(&payload, off, None, false);
+        assert!(entry_names(&hidden_names).is_empty());
+        assert_eq!(health_ratios(&hidden_names), [0.5]);
+
+        let self_only = overlay_entries(&payload, off, None, true);
+        assert_eq!(entry_names(&self_only), ["Self"]);
+        assert_eq!(health_ratios(&self_only), [0.5]);
+        for (object_id, expected) in [("2", "Remote"), ("3", "Town\nGuard"), ("4", "Deer")] {
+            let hovered = overlay_entries(&payload, off, Some(object_id), false);
+            assert_eq!(entry_names(&hovered), [expected]);
+            assert_eq!(health_ratios(&hovered), [0.5]);
+        }
+
+        let overlapping = overlay_entries(&payload, off, Some("2"), true);
+        assert_eq!(entry_names(&overlapping), ["Self", "Remote"]);
+
+        let on = overlay_entries(
             &payload,
             OverlayVisibility {
-                name_view: false,
-                drop_view: false
+                name_view: true,
+                drop_view: false,
             },
-        )
-        .is_empty());
+            Some("4"),
+            true,
+        );
+        assert_eq!(entry_names(&on), ["Self", "Remote", "Town\nGuard", "Deer"]);
     }
 
     #[test]
@@ -648,9 +765,11 @@ mod tests {
                 name_view: true,
                 drop_view: false,
             },
+            None,
+            false,
         );
         assert_eq!(entries.len(), 1);
-        assert_eq!(entries[0].name, "Living\nDeer");
+        assert_eq!(entries[0].name.as_deref(), Some("Living\nDeer"));
     }
 
     #[test]
@@ -674,6 +793,20 @@ mod tests {
                 Vec2::new(1.0, 2.0),
             ]
         );
+    }
+
+    fn entry_names(entries: &[OverlayEntry]) -> Vec<&str> {
+        entries
+            .iter()
+            .filter_map(|entry| entry.name.as_deref())
+            .collect()
+    }
+
+    fn health_ratios(entries: &[OverlayEntry]) -> Vec<f32> {
+        entries
+            .iter()
+            .filter_map(|entry| entry.self_health_ratio)
+            .collect()
     }
 
     #[test]
