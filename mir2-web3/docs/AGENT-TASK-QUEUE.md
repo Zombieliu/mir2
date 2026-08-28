@@ -1,5 +1,29 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 pointer/NPC/self-motion follow-up (2026-08-29): clean
+> revision `4d035489a966d827ef5aa49567d4b53bf344d2a7` removes the native-only
+> command/ACK presentation-owner handoff that could flash the player and whole
+> scene during sustained running. One self motion window now owns command-time
+> pixels through authoritative acknowledgement; Zone timing/collision remains
+> unchanged. Native hover now presents the exact converted Crystal Default,
+> Attack, Compulsion Attack and NPC cursors, and empty-world right click plays
+> the source `Magic3` 500..509 NewMove marker. A distant NPC left click uses a
+> bounded authoritative approach and emits one interaction only after
+> adjacency; this restores the Web-playable bridge but does not yet replace
+> Rust adjacency with Crystal server `DataRange` semantics. Runtime 199/199,
+> Windows 463/463, deterministic 74-spell exporter, package/verifier self-tests,
+> clean attested build, package-time verification and independent final
+> verification pass. Candidate
+> `WN-CANDIDATE-VIS01-POINTER-NPC-MOTION-20260829` has a 67,901,952-byte EXE,
+> SHA-256 `6782C69AF21BBC0DD72965154AD81CFF15CCFB8FB2F80FCEDF208B06721C6D03`,
+> and is launched as PID 263988 against healthy loopback for user retest.
+> Authenticated same-EXE live WSS, real DPI, native 30-minute soak, human
+> visual/audio/feel, formal publisher signing, complete mouse combat/UI/chat,
+> all player/skill/monster/map denominators and source-exact NPC range remain
+> open. `accepted=false`, `visualAccepted=false`,
+> `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-CRYSTAL-POINTER-NPC-MOTION-REPORT.md`.
+
 > Windows-native VIS-01 command-time self-motion follow-up (2026-08-29): the
 > user reported that exact Candidate
 > `WN-CANDIDATE-VIS01-DIRECTION-INPUT-20260829` still felt visibly jerky. A

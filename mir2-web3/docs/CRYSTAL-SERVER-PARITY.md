@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> Windows pointer/NPC/motion server-client note (2026-08-29): revision
+> `4d035489a966d827ef5aa49567d4b53bf344d2a7` adds no server packet or
+> authority. Cursor states and the right-click NewMove marker are exact
+> client-owned presentation; one native self-motion window follows existing
+> authoritative movement. The NPC compatibility bridge approaches through
+> existing Zone movement and sends one existing interaction at adjacency.
+> Crystal's direct `CallNPC [@Main]` within `Globals.DataRange` remains open
+> server-semantic work and is not declared equivalent. Runtime 199/199,
+> Windows 463/463 and Candidate verification pass; no server/global percentage
+> is reported.
+
 > FireBounce server-client checkpoint (2026-08-28): revision `90f861a9d`
 > preserves Crystal's authoritative timing boundary across shared Zone and
 > Windows presentation. ObjectMagic owns the local first leg, whose hit is due

@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows pointer/NPC/motion checkpoint (2026-08-29): revision
+> `4d035489a966d827ef5aa49567d4b53bf344d2a7` gives command-to-ACK self
+> movement one native presentation owner, maps alpha-tested Monster/NPC/
+> Shift-Player hover to four original Crystal cursors, exports the exact
+> `Magic3` 500..509 right-click NewMove marker, and makes distant NPC clicks
+> approach authoritatively before one adjacent interaction. Runtime 199/199,
+> Windows 463/463, exporter and Candidate gates pass; exact Candidate
+> `WN-CANDIDATE-VIS01-POINTER-NPC-MOTION-20260829` is running for human
+> inspection. Rust still uses adjacent NPC interaction, so its Web-compatible
+> approach bridge is not claimed equivalent to Crystal server `DataRange`.
+> Full mouse combat/pathfinding, player/skill/monster/UI/map denominators and
+> every same-EXE live-WSS, real-DPI, native-soak, human and publisher-signing
+> gate remain open. No visual or whole-game percentage is authorized;
+> `globalParityPercent=null`.
+
 > Latest Windows interaction checkpoint (2026-08-28): revisions
 > `9bccca3ae`, `90f861a9d`, `d0a30206d` and `17b234911` advance four
 > source-bound leaves: interactive actor targeting/motion/DashAttack/font

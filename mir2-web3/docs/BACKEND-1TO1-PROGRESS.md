@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> Windows pointer/NPC/motion client-boundary checkpoint (2026-08-29): revision
+> `4d035489a966d827ef5aa49567d4b53bf344d2a7` changes no simulation, Zone,
+> Gateway, packet, persistence, combat or movement authority. The self-motion
+> fix and Crystal cursor/NewMove marker are presentation-only. Distant NPC
+> clicks reuse authoritative Walk/Run ACKs and the existing `InteractNpc`
+> command, but current Rust adjacency remains a documented difference from
+> Crystal server `Globals.DataRange`. Runtime 199/199, Windows 463/463 and
+> exact Candidate gates pass. No backend or global percentage is claimed.
+
 > Shared-Zone FireBounce timing checkpoint (2026-08-28): revision
 > `90f861a9d` moves the skill's damage timing onto the authoritative Zone
 > clock. The initial target resolves at `500ms + 50ms * tile distance` without
