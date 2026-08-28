@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> VIS-02 Healing additional bounded automated checkpoint (2026-08-28):
+> revision `24d9b73a30fc18edf0649283d14495c6f4900aff` reproduces the
+> Crystal caster `Magic/200..209` ten-frame 60 ms sequence plus exact
+> `M61-0.wav`, and the immediate target-owned `Magic/370..379` ten-frame
+> 80 ms sequence plus exact `M61-1.wav`. Native replay, moving/removing target,
+> reset and missing-asset boundaries are covered; Web typed projection, string
+> and numeric spell audio, source export and Candidate fail-closed rules are
+> also automated. Focused Healing 4/4, Windows 398/398, Bevy 416/416, Web
+> event/export/runtime/type checks and both Candidate script self-tests pass.
+> Final review is P0=0/P1=0; Web retransmit deduplication remains a non-blocking
+> P2. This changes no Healing gameplay authority and produced no exact-head
+> package, EXE, live WSS or device capture. Same-EXE/DPI/soak/human/signing and
+> denominator gates remain open; no global percentage is claimed.
+
 > VIS-03 HelpDialog movable/Sort follow-on checkpoint (2026-08-28): revision
 > `4545465a2e31a6646f247c55906764952d44cd58` implements Crystal's grab-offset
 > movement through the shared logical-stage transform, four-boundary clamp

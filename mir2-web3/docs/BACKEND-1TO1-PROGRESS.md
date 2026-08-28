@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-02 Healing client-boundary checkpoint (2026-08-28): revision
+> `24d9b73a30fc18edf0649283d14495c6f4900aff` changes no simulation,
+> shared-Zone, Gateway, protocol, persistence or Healing gameplay authority.
+> Existing typed `ObjectMagic`/`ObjectEffect` projections drive local caster-
+> and target-owned visuals plus exact two-stage audio. Focused Healing 4/4,
+> Windows 398/398, Bevy 416/416, Web event/export/runtime/type gates and both
+> Candidate script self-tests pass; final review is P0=0/P1=0 with one client
+> P2 for Web retransmit deduplication. Existing server Healing behavior was not
+> live-revalidated by this leaf. No exact-head package, EXE, live WSS or device
+> evidence was produced; all same-EXE/DPI/soak/human/signing/denominator gates
+> remain open. No backend or global percentage is claimed.
+
 > VIS-03 HelpDialog movable client-only follow-on (2026-08-28): revision
 > `4545465a2e31a6646f247c55906764952d44cd58` adds renderer-owned movement,
 > clamp and z-order state only; it changes no simulation, shared-Zone, Gateway,

@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 Healing additional bounded checkpoint (2026-08-28): implementation
+> revision `24d9b73a30fc18edf0649283d14495c6f4900aff` reproduces the
+> Crystal caster `Magic/200..209`/`M61-0.wav` and immediate target-owned
+> `Magic/370..379`/`M61-1.wav` presentation paths. Native lifecycle/replay,
+> Web typed projection/audio, exact asset identities, source export and both
+> Candidate fail-closed scripts are automated. Focused 4/4, Windows 398/398,
+> Bevy 416/416 and the Web gates pass; final review is P0=0/P1=0 with one
+> retained non-blocking P2 for explicit Web retransmit deduplication. This
+> closes one additional presentation leaf, not Healing gameplay authority,
+> VIS-02 or visual acceptance. No exact-head Candidate, same-EXE/live-WSS,
+> real-DPI, soak, human or signing evidence was produced; the denominator is
+> incomplete and `globalParityPercent` remains null.
+
 > VIS-03 HelpDialog movable/Sort follow-on checkpoint (2026-08-28):
 > implementation revision `4545465a2e31a6646f247c55906764952d44cd58`
 > reproduces grab-offset movement in the shared 1024x768 stage, Crystal's

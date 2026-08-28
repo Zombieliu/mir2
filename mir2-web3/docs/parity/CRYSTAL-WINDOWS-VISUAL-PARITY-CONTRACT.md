@@ -16,6 +16,7 @@ inventoryButtonACheckpointRevision: 5b70511316b084ac677b5978f7f03e440241ca4c
 characterHudCheckpointRevision: 849f1f0b5120867d1358e0e7db9ba675e9866f9c
 helpDialogCheckpointRevision: e22f2aa4c683447b0e57805a580fd29e0a84c37c
 helpDialogMovableCheckpointRevision: 4545465a2e31a6646f247c55906764952d44cd58
+healingCheckpointRevision: 24d9b73a30fc18edf0649283d14495c6f4900aff
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -28,6 +29,59 @@ The dirty Crystal files are server files (`Server/MirEnvir/Envir.cs` and
 but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
+
+## Healing bounded automated checkpoint
+
+Revision `24d9b73a30fc18edf0649283d14495c6f4900aff` closes automated
+presentation evidence for one additional VIS-02 spell leaf. A typed
+`ObjectMagic(Healing)` starts the caster-owned `Magic/200..209` sequence:
+ten 60 ms frames, 600 ms total, light 6 and exact `M61-0.wav`. The cast sound
+is emitted only for an active resolved cast and is one-shot across native
+sequence replay.
+
+A typed raw `ObjectEffect` value 3 starts `Magic/370..379`: ten 80 ms frames,
+800 ms total, light 6 and exact `M61-1.wav`. Crystal handles this packet
+outside the generic delayed-effect branch, so Healing deliberately ignores
+the packet delay. The effect is anchored to the authoritative target object,
+follows it while alive, disappears on Hide/Remove and does not resolve or play
+audio when the target is absent. This implementation also fixes generic
+native object-effect anchoring rather than leaving the Healing target at its
+initial screen tile.
+
+Web projection now carries the Healing magic effect through its typed game
+event, resolves either `"Healing"` or numeric 61 to the exact audio IDs and
+keeps the target effect attached to the live actor. The Web event currently
+does not carry a sequence/generation identity, so explicit retransmit or
+reconnect deduplication remains a reviewed non-blocking P2 and is outside this
+bounded claim. The native sequence-replay boundary is covered.
+
+Exact source audio identities are:
+
+- `M61-0.wav`: 194,008 bytes, SHA-256
+  `AADE9DB9A46762B8C319A2FD3611FBB4CDC86D444B5C3FD14DC92AEC812F94A1`;
+- `M61-1.wav`: 308,496 bytes, SHA-256
+  `9E3942A729F886197B30D1CA0084AA020179F62BCA64C6044E36D6E080D74ED5`.
+
+Sound and magic exporters, the Web present manifest, Bevy gameplay allowlist,
+package script and copied-Candidate verifier require both sounds and all
+`Magic/200..209` plus `Magic/370..379` frames. The verifier self-tests remove
+each sound and both ends of the image ranges and prove fail-closed behavior.
+Focused Healing 4/4, Windows 398/398, Bevy native-ui 416/416, Web game-event,
+sound-export, magic-export, scene-runtime and type checks, Rust formatting and
+both Candidate script self-tests pass. Independent final review is P0=0/P1=0.
+
+This checkpoint certifies packet-to-presentation behavior only. It does not
+alter or certify server healing amount, mana/cooldown, target eligibility,
+Zone authority or live authenticated delivery. No exact-head Candidate,
+package, EXE, client launch, live WSS transcript, GPU capture or human evidence
+was produced. Same-EXE pixels/audio, real 100/125/150% DPI, native 30-minute
+soak, human visual/feel review, clean-source/complete-denominator closure,
+legal asset packaging and formal publisher signing remain required. The
+inventory counts below do not change, VIS-02 stays in progress and
+`globalParityPercent` remains null.
+
+The detailed evidence report is
+`docs/generated/player-qa/windows-visual-parity/VIS-02-HEALING-REPORT.md`.
 
 ## HelpDialog bounded default-English checkpoint
 

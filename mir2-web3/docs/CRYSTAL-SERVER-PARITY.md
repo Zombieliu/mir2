@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> VIS-02 Healing server-client note (2026-08-28): revision
+> `24d9b73a30fc18edf0649283d14495c6f4900aff` adds no server packet or
+> authority. The caster `Magic/200..209`, target-owned `Magic/370..379`, exact
+> `M61-0.wav`/`M61-1.wav` and their lifecycle are client projections over
+> existing typed `ObjectMagic`/`ObjectEffect` fields. Focused 4/4, Windows
+> 398/398, Bevy 416/416, Web gates and Candidate self-tests pass; review is
+> P0=0/P1=0 with one non-blocking Web retransmit-deduplication P2. Existing
+> Healing gameplay authority was not live-revalidated, and no exact-head EXE,
+> package, live WSS or screenshot was produced. All same-EXE/DPI/soak/human/
+> signing/denominator gates remain open; global parity remains unreported.
+
 > VIS-03 HelpDialog movable server-client note (2026-08-28): revision
 > `4545465a2e31a6646f247c55906764952d44cd58` changes no packet, simulation,
 > Zone or Gateway authority. Grab-offset movement, shared-stage clamping,
