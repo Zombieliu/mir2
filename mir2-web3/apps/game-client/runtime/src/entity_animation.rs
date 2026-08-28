@@ -65,6 +65,10 @@ impl AnimationAction {
     fn is_interruptible_idle(self, kind: EntityKind) -> bool {
         self == Self::Standing || (kind == EntityKind::Npc && self == Self::Harvest)
     }
+
+    fn is_locomotion(self) -> bool {
+        matches!(self, Self::Walking | Self::Running)
+    }
 }
 
 /// The body-frame subset of Crystal's `Frame` metadata.
@@ -643,6 +647,46 @@ impl EntityAnimationState {
         })
     }
 
+    /// Apply a movement event as the latest authoritative player segment.
+    ///
+    /// Crystal's generic action feed remains FIFO, but a native presentation
+    /// may already have started the next authoritative motion window before a
+    /// previous walk/run cycle reaches its final frame. When no other action is
+    /// waiting, restart that player locomotion immediately so the internal
+    /// action and visible movement phase share the new segment. Every other
+    /// case preserves the ordinary [`Self::apply_event`] queue behavior.
+    pub fn apply_latest_locomotion_event(
+        &mut self,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        let can_replace = self.kind == EntityKind::Player
+            && self.current_action.is_locomotion()
+            && event.action.is_locomotion()
+            && self.action_feed.is_empty();
+        if !can_replace {
+            return self.apply_event(event, now_ms);
+        }
+
+        let mut transitions = self.advance_to(now_ms)?;
+        self.catalog.validate_event(event.action)?;
+        if let Some(previous) = self.last_enqueued_event_sequence {
+            if event.sequence <= previous {
+                return Err(AnimationError::OutOfOrderEvent {
+                    previous,
+                    incoming: event.sequence,
+                });
+            }
+        }
+
+        self.last_enqueued_event_sequence = Some(event.sequence);
+        self.start_event(event, now_ms, &mut transitions)?;
+        Ok(EventUpdate {
+            disposition: QueueDisposition::Started,
+            transitions,
+        })
+    }
+
     pub fn advance_to(&mut self, now_ms: u64) -> Result<Vec<ActionTransition>, AnimationError> {
         if now_ms < self.last_update_at_ms {
             return Err(AnimationError::TimeWentBackwards {
@@ -929,6 +973,15 @@ impl AnimationWorld {
         now_ms: u64,
     ) -> Result<EventUpdate, AnimationError> {
         state_for_key_mut(&mut self.active, key)?.apply_event(event, now_ms)
+    }
+
+    pub fn apply_latest_locomotion_event(
+        &mut self,
+        key: &EntityKey,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        state_for_key_mut(&mut self.active, key)?.apply_latest_locomotion_event(event, now_ms)
     }
 
     pub fn tick(&mut self, now_ms: u64) -> Result<Vec<ActionTransition>, AnimationError> {
@@ -1382,6 +1435,80 @@ mod tests {
         assert_eq!(state.current_action, AnimationAction::Standing);
         assert_eq!(state.queue_depth(), 0);
         assert_eq!(state.last_started_event_sequence(), None);
+    }
+
+    #[test]
+    fn latest_player_locomotion_restarts_without_stale_queueing() {
+        let mut world = AnimationWorld::new(11);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Walking, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world.tick(250).unwrap();
+        assert_eq!(world.state(&key).unwrap().frame_index, 2);
+
+        let update = world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Running, Direction::DownRight),
+                250,
+            )
+            .unwrap();
+        assert_eq!(update.disposition, QueueDisposition::Started);
+        assert!(update.transitions.iter().any(|transition| {
+            transition.from == AnimationAction::Walking
+                && transition.to == AnimationAction::Running
+                && transition.reason == TransitionReason::Event(2)
+        }));
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Running);
+        assert_eq!(state.direction, Direction::DownRight);
+        assert_eq!(state.frame_index, 0);
+        assert_eq!(state.next_motion_at_ms, Some(350));
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(state.last_started_event_sequence(), Some(2));
+    }
+
+    #[test]
+    fn latest_player_locomotion_preserves_waiting_combat_fifo() {
+        let mut world = AnimationWorld::new(12);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Walking, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Attack1, Direction::Right),
+                100,
+            )
+            .unwrap();
+
+        let update = world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(3, AnimationAction::Running, Direction::Right),
+                100,
+            )
+            .unwrap();
+        assert_eq!(update.disposition, QueueDisposition::Queued);
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Walking);
+        assert_eq!(
+            state
+                .queued_actions()
+                .map(|event| event.action)
+                .collect::<Vec<_>>(),
+            vec![AnimationAction::Attack1, AnimationAction::Running]
+        );
     }
 
     #[test]

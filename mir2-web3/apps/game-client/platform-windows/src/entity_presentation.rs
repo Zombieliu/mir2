@@ -29,6 +29,9 @@ struct NativeMotionWindow {
     to_y: f32,
     started_ms: u64,
     expires_ms: u64,
+    animation_sequence: u64,
+    action: AnimationAction,
+    direction: Direction,
 }
 
 #[derive(Debug)]
@@ -317,6 +320,40 @@ impl NativeEntityPresentation {
             let Some(action) = normalize_action(entity.kind, action) else {
                 continue;
             };
+            let coalesces_active_player_motion = entity.kind == EntityKind::Player
+                && matches!(action, AnimationAction::Walking | AnimationAction::Running)
+                && self
+                    .motion_windows
+                    .get(&entity.object_id)
+                    .is_some_and(|window| motion_now_ms < window.expires_ms)
+                && self.world.state(&update.key).is_ok_and(|state| {
+                    matches!(
+                        state.pose().action,
+                        AnimationAction::Walking | AnimationAction::Running
+                    )
+                });
+            if coalesces_active_player_motion {
+                // Crystal starts the next movement tile from frame zero, while
+                // its generic ActionFeed remains FIFO for combat actions. The
+                // native bridge publishes a fresh sequence and authoritative
+                // target for every tile, so queuing another walk/run here would
+                // replay stale locomotion after the new motion window already
+                // began. The active window below owns the visible movement
+                // phase; retain FIFO semantics for every non-movement action.
+                if self
+                    .world
+                    .apply_latest_locomotion_event(
+                        &update.key,
+                        AnimationEvent::new(sequence, action, entity.direction),
+                        animation_now_ms,
+                    )
+                    .is_ok()
+                {
+                    self.last_applied_sequence
+                        .insert(entity.object_id, sequence);
+                }
+                continue;
+            }
             if self
                 .world
                 .apply_event(
@@ -343,11 +380,12 @@ impl NativeEntityPresentation {
             return;
         };
         let mut observed_ids = HashSet::new();
+        let mut self_center_correction = None;
         for entity in entities {
             let Some(object_id) = entity.get("objectId").and_then(value_object_id) else {
                 continue;
             };
-            let (Some(x), Some(y)) = (
+            let (Some(mut x), Some(mut y)) = (
                 entity
                     .get("x")
                     .and_then(Value::as_i64)
@@ -363,24 +401,85 @@ impl NativeEntityPresentation {
             let is_self = entity.get("kind").and_then(Value::as_str) == Some("selfPlayer");
             if is_self {
                 self.self_object_id = Some(object_id.clone());
+                if let Some(window) =
+                    self.motion_windows
+                        .get(&object_id)
+                        .copied()
+                        .filter(|window| {
+                            now_ms < window.expires_ms
+                                && is_stale_self_source_echo(entity, x, y, *window)
+                        })
+                {
+                    x = window.to_x as i32;
+                    y = window.to_y as i32;
+                    entity["x"] = Value::from(x);
+                    entity["y"] = Value::from(y);
+                    entity["_nativeAnimationSequence"] = Value::from(window.animation_sequence);
+                    entity["_nativeAnimationAction"] =
+                        Value::from(movement_action_name(window.action));
+                    self_center_correction = Some((x, y));
+                }
             }
 
             let previous = self.last_positions.insert(object_id.clone(), (x, y));
             if let Some((from_x, from_y)) = previous.filter(|previous| *previous != (x, y)) {
-                let distance = from_x.abs_diff(x).max(from_y.abs_diff(y));
-                let is_movement_action = entity
+                let active_previous =
+                    self.motion_windows
+                        .get(&object_id)
+                        .copied()
+                        .filter(|window| {
+                            now_ms < window.expires_ms
+                                && window.to_x == from_x as f32
+                                && window.to_y == from_y as f32
+                        });
+                let (motion_from_x, motion_from_y) =
+                    active_previous.map_or((from_x as f32, from_y as f32), |window| {
+                        (
+                            native_motion_coordinate(window.from_x, window.to_x, &window, now_ms),
+                            native_motion_coordinate(window.from_y, window.to_y, &window, now_ms),
+                        )
+                    });
+                let distance = (motion_from_x - x as f32)
+                    .abs()
+                    .max((motion_from_y - y as f32).abs());
+                let movement = entity
                     .get("_nativeAnimationAction")
                     .and_then(Value::as_str)
-                    .is_some_and(|action| matches!(action, "walking" | "running"));
-                if is_movement_action && distance <= MAX_SMOOTH_TILE_DISTANCE {
+                    .and_then(parse_action)
+                    .filter(|action| {
+                        matches!(action, AnimationAction::Walking | AnimationAction::Running)
+                    })
+                    .zip(
+                        entity
+                            .get("_nativeAnimationSequence")
+                            .and_then(Value::as_u64),
+                    )
+                    .map(|(action, sequence)| {
+                        (
+                            action,
+                            sequence,
+                            parse_direction(
+                                entity
+                                    .get("direction")
+                                    .and_then(Value::as_str)
+                                    .unwrap_or("down"),
+                            ),
+                        )
+                    });
+                if let Some((action, animation_sequence, direction)) =
+                    movement.filter(|_| distance <= MAX_SMOOTH_TILE_DISTANCE as f32)
+                {
                     let duration_ms = u64::from(CRYSTAL_MOVE_PHASE_COUNT) * CRYSTAL_MOVE_PHASE_MS;
                     let window = NativeMotionWindow {
-                        from_x: from_x as f32,
-                        from_y: from_y as f32,
+                        from_x: motion_from_x,
+                        from_y: motion_from_y,
                         to_x: x as f32,
                         to_y: y as f32,
                         started_ms: now_ms,
                         expires_ms: now_ms.saturating_add(duration_ms),
+                        animation_sequence,
+                        action,
+                        direction,
                     };
                     self.motion_windows.insert(object_id.clone(), window);
                     if is_self {
@@ -420,6 +519,17 @@ impl NativeEntityPresentation {
         self.motion_windows.retain(|object_id, window| {
             observed_ids.contains(object_id) && now_ms < window.expires_ms
         });
+        if let Some((x, y)) = self_center_correction {
+            if let Some(center) = payload
+                .get_mut("sceneView")
+                .and_then(Value::as_object_mut)
+                .and_then(|scene_view| scene_view.get_mut("center"))
+                .and_then(Value::as_object_mut)
+            {
+                center.insert("x".to_owned(), Value::from(x));
+                center.insert("y".to_owned(), Value::from(y));
+            }
+        }
         if self
             .self_object_id
             .as_ref()
@@ -494,9 +604,32 @@ impl NativeEntityPresentation {
             .active_states()
             .map(|(object_id, state)| {
                 let pose = state.pose();
+                let movement_pose = if state.kind == EntityKind::Player
+                    && matches!(
+                        pose.action,
+                        AnimationAction::Walking | AnimationAction::Running
+                    ) {
+                    self.motion_windows
+                        .get(object_id)
+                        .filter(|window| motion_now_ms < window.expires_ms)
+                        .and_then(|window| {
+                            if pose.last_started_event_sequence != Some(window.animation_sequence) {
+                                return None;
+                            }
+                            let descriptor = state.catalog().descriptor(window.action)?;
+                            let phase = native_motion_phase_index(window, motion_now_ms)
+                                .min(descriptor.frame_count.saturating_sub(1));
+                            Some((
+                                i64::from(descriptor.draw_frame(window.direction, phase)),
+                                window.action,
+                            ))
+                        })
+                } else {
+                    None
+                };
                 (
                     object_id.to_owned(),
-                    (i64::from(pose.draw_frame_index), pose.action),
+                    movement_pose.unwrap_or((i64::from(pose.draw_frame_index), pose.action)),
                 )
             })
             .collect::<HashMap<_, _>>();
@@ -703,6 +836,58 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
     }
 }
 
+fn movement_action_name(action: AnimationAction) -> &'static str {
+    match action {
+        AnimationAction::Walking => "walking",
+        AnimationAction::Running => "running",
+        _ => "standing",
+    }
+}
+
+fn is_stale_self_source_echo(entity: &Value, x: i32, y: i32, window: NativeMotionWindow) -> bool {
+    let source_distance = (x as f32 - window.from_x)
+        .abs()
+        .max((y as f32 - window.from_y).abs());
+    let target_distance = (x as f32 - window.to_x)
+        .abs()
+        .max((y as f32 - window.to_y).abs());
+    if source_distance >= 0.125 || target_distance < 0.125 {
+        return false;
+    }
+
+    entity
+        .get("direction")
+        .and_then(Value::as_str)
+        .map(parse_direction)
+        == native_motion_direction(window)
+}
+
+fn native_motion_direction(window: NativeMotionWindow) -> Option<Direction> {
+    let horizontal = motion_axis_sign(window.to_x - window.from_x);
+    let vertical = motion_axis_sign(window.to_y - window.from_y);
+    match (horizontal, vertical) {
+        (0, -1) => Some(Direction::Up),
+        (1, -1) => Some(Direction::UpRight),
+        (1, 0) => Some(Direction::Right),
+        (1, 1) => Some(Direction::DownRight),
+        (0, 1) => Some(Direction::Down),
+        (-1, 1) => Some(Direction::DownLeft),
+        (-1, 0) => Some(Direction::Left),
+        (-1, -1) => Some(Direction::UpLeft),
+        _ => None,
+    }
+}
+
+fn motion_axis_sign(value: f32) -> i8 {
+    if value > 0.001 {
+        1
+    } else if value < -0.001 {
+        -1
+    } else {
+        0
+    }
+}
+
 fn value_object_id(value: &Value) -> Option<String> {
     match value {
         Value::Number(number) => Some(number.to_string()),
@@ -712,20 +897,37 @@ fn value_object_id(value: &Value) -> Option<String> {
 }
 
 fn native_motion_offset(window: &NativeMotionWindow, now_ms: u64) -> (f32, f32) {
-    if window.expires_ms <= window.started_ms || now_ms >= window.expires_ms {
-        return (0.0, 0.0);
-    }
-    let elapsed_ms = now_ms.saturating_sub(window.started_ms);
-    let phase_index = (elapsed_ms / CRYSTAL_MOVE_PHASE_MS)
-        .min(u64::from(CRYSTAL_MOVE_PHASE_COUNT.saturating_sub(1)));
-    // Crystal applies the first displacement increment while frame zero is
-    // drawn, then advances one of six movement phases every 100 ms.
-    let progress = (phase_index + 1) as f32 / f32::from(CRYSTAL_MOVE_PHASE_COUNT);
-    let remaining = (1.0 - progress).clamp(0.0, 1.0);
+    let remaining = native_motion_remaining_ratio(window, now_ms);
     (
         crystal_even_pixel((window.from_x - window.to_x) * 48.0 * remaining),
         crystal_even_pixel((window.from_y - window.to_y) * 32.0 * remaining),
     )
+}
+
+fn native_motion_coordinate(from: f32, to: f32, window: &NativeMotionWindow, now_ms: u64) -> f32 {
+    to + (from - to) * native_motion_remaining_ratio(window, now_ms)
+}
+
+fn native_motion_phase_index(window: &NativeMotionWindow, now_ms: u64) -> u16 {
+    if window.expires_ms <= window.started_ms || now_ms >= window.expires_ms {
+        return u16::from(CRYSTAL_MOVE_PHASE_COUNT.saturating_sub(1));
+    }
+    u16::try_from(
+        (now_ms.saturating_sub(window.started_ms) / CRYSTAL_MOVE_PHASE_MS)
+            .min(u64::from(CRYSTAL_MOVE_PHASE_COUNT.saturating_sub(1))),
+    )
+    .unwrap_or(u16::MAX)
+}
+
+fn native_motion_remaining_ratio(window: &NativeMotionWindow, now_ms: u64) -> f32 {
+    if window.expires_ms <= window.started_ms || now_ms >= window.expires_ms {
+        return 0.0;
+    }
+    // Crystal applies the first displacement increment while frame zero is
+    // drawn, then advances one of six movement phases every 100 ms.
+    let progress = f32::from(native_motion_phase_index(window, now_ms) + 1)
+        / f32::from(CRYSTAL_MOVE_PHASE_COUNT);
+    (1.0 - progress).clamp(0.0, 1.0)
 }
 
 fn crystal_even_pixel(value: f32) -> f32 {
@@ -858,6 +1060,9 @@ mod tests {
             to_y: 10.0,
             started_ms: 1_000,
             expires_ms: 1_600,
+            animation_sequence: 1,
+            action: AnimationAction::Walking,
+            direction: Direction::Right,
         };
         assert_eq!(native_motion_offset(&horizontal, 1_000), (-40.0, 0.0));
         assert_eq!(native_motion_offset(&horizontal, 1_099), (-40.0, 0.0));
@@ -873,6 +1078,9 @@ mod tests {
             to_y: 9.0,
             started_ms: 2_000,
             expires_ms: 2_600,
+            animation_sequence: 2,
+            action: AnimationAction::Walking,
+            direction: Direction::Up,
         };
         assert_eq!(native_motion_offset(&vertical, 2_000), (0.0, 26.0));
         assert_eq!(native_motion_offset(&vertical, 2_100), (0.0, 22.0));
@@ -935,6 +1143,146 @@ mod tests {
             .expect("teleport payload");
         assert!(rendered["entities"][0].get("motionFromX").is_none());
         assert!(!presentation.has_active_motion(1_700_000_000_200));
+    }
+
+    #[test]
+    fn overlapping_player_moves_continue_fractional_motion_and_restart_visible_phase() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, frames, _| {
+                crate::atlas::build_entity_render_state_with_poses(payload, frames)
+            })
+            .expect("initial player payload");
+
+        let mut first_move = player_payload(2);
+        first_move["sceneView"]["center"]["x"] = json!(11);
+        first_move["entities"][0]["x"] = json!(11);
+        presentation.replace_payload(first_move);
+        let first = presentation
+            .render_state_if_changed_with_clocks(100, 1_100, true, |payload, frames, _| {
+                crate::atlas::build_entity_render_state_with_poses(payload, frames)
+            })
+            .expect("first player move");
+        assert!(
+            rendered_path(&first).ends_with("/56.png"),
+            "a new tile starts from Crystal movement frame zero"
+        );
+        assert_eq!(
+            presentation
+                .world
+                .active_state("1")
+                .expect("player animation state")
+                .queue_depth(),
+            0,
+            "a newer player movement must not enqueue stale locomotion"
+        );
+
+        let mut second_move = player_payload(3);
+        second_move["sceneView"]["center"]["x"] = json!(12);
+        second_move["entities"][0]["x"] = json!(12);
+        second_move["entities"][0]["_nativeAnimationAction"] = json!("running");
+        presentation.replace_payload(second_move);
+        let second = presentation
+            .render_state_if_changed_with_clocks(350, 1_350, true, |payload, frames, _| {
+                crate::atlas::build_entity_render_state_with_poses(payload, frames)
+            })
+            .expect("overlapping player move");
+
+        let entity = &second["entities"][0];
+        assert_eq!(
+            entity["motionFromX"],
+            json!(10.5),
+            "the second segment continues from the first segment's current fractional position"
+        );
+        assert_eq!(entity["motionToX"], json!(12.0));
+        assert_eq!(entity["motionStartedMs"], json!(1_350_u64));
+        assert!(
+            rendered_path(&second).ends_with("/104.png"),
+            "walk-to-run restarts the running sprite with the same motion window"
+        );
+        let state = presentation
+            .world
+            .active_state("1")
+            .expect("player animation state");
+        assert_eq!(state.current_action, AnimationAction::Running);
+        assert_eq!(state.last_started_event_sequence(), Some(3));
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(presentation.last_applied_sequence.get("1"), Some(&3));
+        assert_eq!(
+            presentation.entity_screen_offset("1", 1_350),
+            (0.0, 0.0),
+            "self sprite and camera must remain locked across a rebased segment"
+        );
+
+        let mut third_move = player_payload(4);
+        third_move["sceneView"]["center"]["x"] = json!(13);
+        third_move["entities"][0]["x"] = json!(13);
+        presentation.replace_payload(third_move);
+        let third = presentation
+            .render_state_if_changed_with_clocks(500, 1_500, true, |payload, frames, _| {
+                crate::atlas::build_entity_render_state_with_poses(payload, frames)
+            })
+            .expect("run-to-walk player move");
+        assert_eq!(third["entities"][0]["motionFromX"], json!(11.0));
+        assert!(
+            rendered_path(&third).ends_with("/56.png"),
+            "run-to-walk restarts the walking sprite at frame zero"
+        );
+        let state = presentation
+            .world
+            .active_state("1")
+            .expect("player animation state");
+        assert_eq!(state.current_action, AnimationAction::Walking);
+        assert_eq!(state.last_started_event_sequence(), Some(4));
+        assert_eq!(state.queue_depth(), 0);
+    }
+
+    #[test]
+    fn stale_self_source_echo_keeps_the_active_target_and_motion_window() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut initial = player_payload(10);
+        initial["entities"][0]["direction"] = json!("right");
+        presentation.replace_payload(initial);
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial self payload");
+
+        let mut moved = player_payload(11);
+        moved["sceneView"]["center"]["x"] = json!(11);
+        moved["entities"][0]["x"] = json!(11);
+        moved["entities"][0]["direction"] = json!("right");
+        presentation.replace_payload(moved);
+        let _ = presentation
+            .render_state_if_changed_with_clocks(100, 1_100, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("authoritative self move");
+
+        let mut stale_echo = player_payload(12);
+        stale_echo["entities"][0]["direction"] = json!("right");
+        presentation.replace_payload(stale_echo);
+        let rendered = presentation
+            .render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("stale self source echo");
+
+        assert_eq!(rendered["sceneView"]["center"]["x"], json!(11));
+        assert_eq!(rendered["entities"][0]["x"], json!(11));
+        assert_eq!(rendered["entities"][0]["motionFromX"], json!(10.0));
+        assert_eq!(rendered["entities"][0]["motionToX"], json!(11.0));
+        assert_eq!(rendered["entities"][0]["motionStartedMs"], json!(1_100_u64));
+        assert_eq!(presentation.last_positions.get("1"), Some(&(11, 10)));
+        assert_eq!(presentation.last_applied_sequence.get("1"), Some(&11));
+        let state = presentation
+            .world
+            .active_state("1")
+            .expect("player animation state");
+        assert_eq!(state.last_started_event_sequence(), Some(11));
+        assert_eq!(state.queue_depth(), 0);
     }
 
     #[test]
