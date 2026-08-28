@@ -44,12 +44,45 @@ impl GatewayCommands {
         self.sender.send(command).is_ok()
     }
 
-    fn send(&self, intent: PlayerIntent) {
-        self.send_command(GatewayCommand::Player(intent));
+    fn send(&self, intent: PlayerIntent) -> bool {
+        self.send_command(GatewayCommand::Player(intent))
     }
 
     fn send_town_revive(&self) {
         self.send_command(GatewayCommand::Wire(NativeOutboundCommand::TownRevive));
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum WorldPointerMovementMode {
+    Walk,
+    Run,
+}
+
+/// Retains a Crystal-style empty-world mouse hold without predicting position.
+/// A new movement intent is admitted only after the authoritative self tile
+/// advances (or the desired direction changes), so a 60 Hz render loop cannot
+/// flood the shared Zone with stale Walk/Run commands.
+#[derive(bevy::prelude::Resource, Default, Debug)]
+pub struct WorldPointerMovementState {
+    active: Option<WorldPointerMovementMode>,
+    last_sent_origin: Option<(i32, i32)>,
+    last_sent_direction: Option<&'static str>,
+}
+
+impl WorldPointerMovementState {
+    fn begin(&mut self, mode: WorldPointerMovementMode) {
+        if self.active != Some(mode) {
+            self.last_sent_origin = None;
+            self.last_sent_direction = None;
+        }
+        self.active = Some(mode);
+    }
+
+    fn clear(&mut self) {
+        self.active = None;
+        self.last_sent_origin = None;
+        self.last_sent_direction = None;
     }
 }
 
@@ -173,10 +206,18 @@ fn movement_direction_toward(
     }
 }
 
-/// Convert Crystal world mouse edges into bounded intents. Left click uses the
-/// pixel-tested hovered object for combat/NPC/pickup. Right click on empty
-/// world space expresses a run direction; the shared Zone remains authoritative
-/// and may degrade the first movement from standstill to a walk.
+fn authoritative_player_position(entities: &EntityModelSet) -> Option<(i32, i32)> {
+    entities
+        .entities
+        .iter()
+        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+        .map(|entity| (entity.x, entity.y))
+}
+
+/// Convert Crystal world mouse input into bounded intents. Left click keeps the
+/// pixel-tested combat/NPC/pickup priorities and walks while empty world stays
+/// held. Right click runs while empty world stays held. The shared Zone remains
+/// authoritative and may degrade the first movement from standstill to a walk.
 pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
     shell: Option<Res<NativeShellModel>>,
@@ -188,19 +229,23 @@ pub fn mouse_world_interaction_system(
     windows: Query<&Window>,
     queue: Option<ResMut<QuestUiIntentQueue>>,
     commands: Option<Res<GatewayCommands>>,
+    mut movement: ResMut<WorldPointerMovementState>,
 ) {
     let left_pressed = mouse.just_pressed(MouseButton::Left);
     let right_pressed = mouse.just_pressed(MouseButton::Right);
-    if !left_pressed && !right_pressed {
+    if !left_pressed && !right_pressed && movement.active.is_none() {
         return;
     }
     let (Some(shell), Some(entities), Some(presentation)) = (shell, entities, presentation) else {
+        movement.clear();
         return;
     };
     let Ok(window) = windows.single() else {
+        movement.clear();
         return;
     };
     if !window.focused || shell.screen != NativeShellScreen::InGame {
+        movement.clear();
         return;
     }
 
@@ -209,6 +254,7 @@ pub fn mouse_world_interaction_system(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
+        movement.clear();
         return;
     }
 
@@ -217,29 +263,70 @@ pub fn mouse_world_interaction_system(
         // inspect). Until those are implemented, never turn an object click
         // into movement through the actor beneath the pointer.
         if presentation.hovered_object_id().is_some() {
+            movement.clear();
             return;
         }
-        let (Some(direction), Some(commands)) = (
-            movement_direction_toward(presentation.hovered_grid_position(), &entities),
-            commands,
-        ) else {
+        movement.begin(WorldPointerMovementMode::Run);
+    } else if left_pressed {
+        if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
+            .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
+        {
+            movement.clear();
+            if let Some(mut queue) = queue {
+                queue.push_intent(intent);
+            }
             return;
-        };
-        commands.send(PlayerIntent::Run {
-            direction: direction.to_owned(),
-        });
+        }
+
+        // A player or another non-interactable actor is still solid world
+        // content. Do not reinterpret that pixel hit as movement through it.
+        if presentation.hovered_object_id().is_some() {
+            movement.clear();
+            return;
+        }
+        movement.begin(WorldPointerMovementMode::Walk);
+    }
+
+    let Some(mode) = movement.active else {
+        return;
+    };
+    let held = match mode {
+        WorldPointerMovementMode::Walk => mouse.pressed(MouseButton::Left),
+        WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right),
+    };
+    if !held {
+        movement.clear();
+        return;
+    }
+    if presentation.hovered_object_id().is_some() {
+        movement.clear();
         return;
     }
 
-    let Some(mut queue) = queue else {
+    let (Some(origin), Some(direction), Some(commands)) = (
+        authoritative_player_position(&entities),
+        movement_direction_toward(presentation.hovered_grid_position(), &entities),
+        commands,
+    ) else {
         return;
     };
-    let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
-        .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
-    else {
+    if movement.last_sent_origin == Some(origin) && movement.last_sent_direction == Some(direction)
+    {
         return;
+    }
+
+    let intent = match mode {
+        WorldPointerMovementMode::Walk => PlayerIntent::Walk {
+            direction: direction.to_owned(),
+        },
+        WorldPointerMovementMode::Run => PlayerIntent::Run {
+            direction: direction.to_owned(),
+        },
     };
-    queue.push_intent(intent);
+    if commands.send(intent) {
+        movement.last_sent_origin = Some(origin);
+        movement.last_sent_direction = Some(direction);
+    }
 }
 
 /// Reject a stale Bevy `Interaction::Pressed` unless it is paired with the
@@ -611,6 +698,7 @@ mod tests {
         let mut app = bevy::prelude::App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
         app.insert_resource(GatewayCommands::new(sender));
+        app.init_resource::<WorldPointerMovementState>();
         app.insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
             ..Default::default()
@@ -840,6 +928,7 @@ mod tests {
             presentation.set_hovered_object_id_for_test(Some(hovered_object_id));
             app.insert_resource(presentation);
             app.init_resource::<QuestUiIntentQueue>();
+            app.init_resource::<WorldPointerMovementState>();
             app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
             app.world_mut()
                 .resource_mut::<ButtonInput<MouseButton>>()
@@ -893,6 +982,7 @@ mod tests {
         presentation.set_hover_grid_context_for_test((10, 10), (512.0, 368.0));
         app.insert_resource(presentation);
         app.init_resource::<QuestUiIntentQueue>();
+        app.init_resource::<WorldPointerMovementState>();
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
@@ -918,7 +1008,7 @@ mod tests {
         app.insert_resource(UiReadModel::default());
         app.insert_resource(world_entities());
         let mut presentation = NativeEntityPresentation::default();
-        presentation.set_hover_grid_context_for_test((10, 10), (528.0, 352.0));
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
         app.init_resource::<QuestUiIntentQueue>();
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
@@ -928,6 +1018,100 @@ mod tests {
 
         app.update();
 
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+    }
+
+    #[test]
+    fn left_hold_on_empty_world_walks_only_after_authoritative_progress() {
+        let (mut app, receiver) = input_app();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "held walk flooded before ack");
+
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 11;
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "released walk kept sending");
+    }
+
+    #[test]
+    fn right_hold_repeats_run_only_after_authoritative_progress() {
+        let (mut app, receiver) = input_app();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "held run flooded before ack");
+
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 11;
+        app.update();
         assert!(matches!(
             receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
@@ -952,6 +1136,7 @@ mod tests {
             presentation.set_hovered_object_id_for_test(hovered_object_id);
             app.insert_resource(presentation);
             app.init_resource::<QuestUiIntentQueue>();
+            app.init_resource::<WorldPointerMovementState>();
             app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
             app.world_mut()
                 .resource_mut::<ButtonInput<MouseButton>>()

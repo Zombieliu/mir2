@@ -4324,6 +4324,30 @@ fn sync_entity_render_layers(
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 
+            // Keep the previously visible image bound until a replacement page
+            // or standalone PNG has actually decoded into Assets<Image>. The map
+            // renderer already performs this kind of ready-before-commit handoff;
+            // without it, an ordinary body/hair/weapon page switch can expose a
+            // one-frame empty handle and appear as a faint actor flash. Rect-only
+            // animation on the same resident image remains immediate.
+            if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
+                let image_source_changed = handle.image_key != image_binding.image_key
+                    || handle.atlas_key != image_binding.atlas_key;
+                let uploaded_image_ready = image_binding
+                    .atlas_key
+                    .as_ref()
+                    .and_then(|atlas_key| atlas_assets.images.get(atlas_key))
+                    .is_some_and(|image| image.id() == image_binding.image.id());
+                let image_ready = uploaded_image_ready
+                    || asset_server.is_loaded_with_dependencies(image_binding.image.id());
+                if image_source_changed && !image_ready {
+                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        transform.translation = position;
+                    }
+                    continue;
+                }
+            }
+
             if registry
                 .entity_render_layers
                 .get(&layer_key)
@@ -5779,6 +5803,66 @@ mod entity_atlas_tests {
             .expect("retained body sprite");
         assert!(second.texture_atlas.is_none());
         assert_eq!(second.rect, Some(Rect::new(50.0, 20.0, 82.0, 68.0)));
+    }
+
+    #[test]
+    fn unready_entity_image_switch_retains_the_visible_binding() {
+        let mut app = entity_sync_test_app();
+        let state = |path: &str| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "entities": [{
+                    "objectId": "1001",
+                    "layers": [{
+                        "key": "1001:body",
+                        "path": path,
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005
+                    }]
+                }]
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("/original-ui/CArmour/00/standing.png"));
+        app.update();
+        let entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        let original_image = app
+            .world()
+            .get::<Sprite>(entity)
+            .expect("initial body sprite")
+            .image
+            .id();
+        let original_key = app.world().resource::<SceneRegistry>().entity_render_layers
+            ["1001:body"]
+            .image_key
+            .clone();
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("/original-ui/CArmour/00/new-page.png"));
+        app.update();
+
+        let retained = &app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"];
+        assert_eq!(retained.entity, entity);
+        assert_eq!(retained.image_key, original_key);
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(entity)
+                .expect("retained body sprite")
+                .image
+                .id(),
+            original_image,
+            "an undecoded replacement image must not blank the visible actor"
+        );
     }
 
     #[test]

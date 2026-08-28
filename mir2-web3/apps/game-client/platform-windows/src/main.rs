@@ -123,6 +123,7 @@ fn main() {
     app.init_resource::<entity_presentation::NativeEntityPresentation>();
     app.init_resource::<entity_overlays::NativeEntityOverlays>();
     app.init_resource::<effects::NativeEffects>();
+    app.init_resource::<input::WorldPointerMovementState>();
     app.insert_resource(shell_bridge::NativeAutoLoginFlow::from_config(
         session.auto_login.as_ref(),
     ));
