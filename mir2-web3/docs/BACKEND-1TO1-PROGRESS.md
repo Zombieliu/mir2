@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> VIS-01 corpse-name client-boundary checkpoint (2026-08-28): revision
+> `cda55ef5a` changes no simulation, Zone, Gateway, protocol, persistence or
+> combat authority. It only projects Crystal's living/dead name offset and
+> existing dead-health gate in the Windows native presentation layer. Focused
+> regression and Windows 406/406 pass. Player libraries/actions and exact-head
+> device/human gates remain open; no backend or global percentage is claimed.
+
 > Shared-Zone monster respawn authority checkpoint (2026-08-28): revision
 > `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` removes the private
 > Session respawn timer and retains one wall-clock scheduler per Zone monster

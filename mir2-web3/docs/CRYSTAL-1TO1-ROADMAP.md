@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-01 corpse/body-name checkpoint (2026-08-28): revision `cda55ef5a`
+> completes the bounded automated player-death label leaf: dead names remain
+> visible, keep their text, move by the exact Crystal 27px delta, and do not
+> restore the dead self-health bar. Windows passes 406/406 and independent
+> exact-worktree review passes. The next player-character leaves still include
+> guild/name two-line layout and the open body/hair/weapon/action library
+> denominator; Scarecrow Revive and dead-target projectile-impact suppression
+> remain queued in their own waves. No whole-game percentage is authorized,
+> and all same-EXE/live-WSS, real-DPI, soak, human and signing gates remain
+> open.
+
 > Shared-Zone respawn and VIS-03 HUD checkpoint (2026-08-28): backend
 > revision `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` makes the
 > single-writer Zone the only monster-incarnation authority across death,

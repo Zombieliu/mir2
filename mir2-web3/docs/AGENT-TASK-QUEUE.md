@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> VIS-01 corpse/body-name bounded checkpoint (2026-08-28): revision
+> `cda55ef5a` aligns the Windows native overlay with Crystal's
+> `Dead ? 35 : 8` name placement. Dead player/base-monster names remain
+> visible without a synthetic `Dead` line, move exactly 27px below the living
+> position, and retain the existing NameView/hover gates; the independent dead
+> self-health path remains suppressed. Focused regression and the full Windows
+> suite pass (406/406), and exact-worktree review found no P0/P1 issue. This is
+> one player-character presentation leaf only: guild labels, complete player
+> libraries/actions and all exact-head device/human/signing gates remain open;
+> `globalParityPercent` stays null. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-CORPSE-NAMEPLATE-REPORT.md`.
+
 > Shared-Zone wall-clock monster respawn checkpoint (2026-08-28): revision
 > `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` moves ordinary and
 > harvest-gated monster resurrection out of each personal

@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> VIS-01 corpse-name server-client note (2026-08-28): revision `cda55ef5a`
+> adds no packet or server authority. Existing authoritative `dead` state now
+> drives the exact client-owned Crystal name placement: keep the name, shift it
+> 27px, and keep dead self health hidden. Windows 406/406 and independent
+> review pass. Guild labels, complete player presentation, live WSS and the
+> full denominator remain open; no server or global percentage is reported.
+
 > Shared-Zone wall-clock respawn server checkpoint (2026-08-28): revision
 > `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` makes `ZoneRuntime`
 > the sole authority for monster death-to-new-incarnation scheduling. It
