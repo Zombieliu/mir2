@@ -638,7 +638,14 @@ fn shell_keyboard_input(
     // Drain the complete ordered queue every frame. Rapid SendInput bursts can
     // place several characters in one Bevy update; consuming a single event or
     // relying only on `KeyboardInput::text` loses synthetic characters.
-    let typed_text = collect_typed_text(keyboard_inputs.read(), &mut modifiers);
+    // ButtonInput deliberately collapses OS key-repeat presses, so retain the
+    // raw messages for editable-field Backspace/Delete repeat semantics.
+    let keyboard_events = keyboard_inputs.read().collect::<Vec<_>>();
+    let edit_delete_count =
+        editable_key_press_count(&keyboard_events, &keys, KeyCode::Backspace).saturating_add(
+            editable_key_press_count(&keyboard_events, &keys, KeyCode::Delete),
+        );
+    let typed_text = collect_typed_text(keyboard_events.iter().copied(), &mut modifiers);
     modifiers.control = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
     modifiers.alt = keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight);
     modifiers.super_key = keys.pressed(KeyCode::SuperLeft) || keys.pressed(KeyCode::SuperRight);
@@ -674,16 +681,14 @@ fn shell_keyboard_input(
                 return;
             }
 
-            if keys.just_pressed(KeyCode::Backspace) {
-                match shell.login.focus {
-                    LoginFocus::Account => {
-                        shell.login.account.pop();
-                    }
-                    LoginFocus::Password => {
-                        shell.login.password.pop();
-                    }
-                    LoginFocus::LoginButton | LoginFocus::NewAccountButton => {}
+            match shell.login.focus {
+                LoginFocus::Account => {
+                    pop_editable_tail(&mut shell.login.account, edit_delete_count);
                 }
+                LoginFocus::Password => {
+                    pop_editable_tail(&mut shell.login.password, edit_delete_count);
+                }
+                LoginFocus::LoginButton | LoginFocus::NewAccountButton => {}
             }
 
             for c in typed_text.chars() {
@@ -711,10 +716,8 @@ fn shell_keyboard_input(
                 return;
             }
 
-            if keys.just_pressed(KeyCode::Backspace) {
-                if matches!(shell.character_create.focus, CharacterCreateFocus::Name) {
-                    shell.character_create.name.pop();
-                }
+            if matches!(shell.character_create.focus, CharacterCreateFocus::Name) {
+                pop_editable_tail(&mut shell.character_create.name, edit_delete_count);
             }
 
             if keys.just_pressed(KeyCode::Enter) {
@@ -785,22 +788,23 @@ fn shell_keyboard_input(
                 }
                 return;
             }
-            if keys.just_pressed(KeyCode::Backspace) {
-                match shell.change_password.focus {
-                    ChangePasswordFocus::AccountId => {
-                        shell.change_password.account_id.pop();
-                    }
-                    ChangePasswordFocus::OldPassword => {
-                        shell.change_password.old_password.pop();
-                    }
-                    ChangePasswordFocus::NewPassword => {
-                        shell.change_password.new_password.pop();
-                    }
-                    ChangePasswordFocus::ConfirmPassword => {
-                        shell.change_password.confirm_password.pop();
-                    }
-                    _ => {}
+            match shell.change_password.focus {
+                ChangePasswordFocus::AccountId => {
+                    pop_editable_tail(&mut shell.change_password.account_id, edit_delete_count);
                 }
+                ChangePasswordFocus::OldPassword => {
+                    pop_editable_tail(&mut shell.change_password.old_password, edit_delete_count);
+                }
+                ChangePasswordFocus::NewPassword => {
+                    pop_editable_tail(&mut shell.change_password.new_password, edit_delete_count);
+                }
+                ChangePasswordFocus::ConfirmPassword => {
+                    pop_editable_tail(
+                        &mut shell.change_password.confirm_password,
+                        edit_delete_count,
+                    );
+                }
+                _ => {}
             }
             for c in typed_text.chars() {
                 match shell.change_password.focus {
@@ -840,8 +844,10 @@ fn shell_keyboard_input(
                 };
                 return;
             }
-            if keys.just_pressed(KeyCode::Backspace) {
-                let _ = shell.apply_ui_intent(NativeUiIntent::SafeKeyDelete);
+            if edit_delete_count > 0 {
+                for _ in 0..edit_delete_count {
+                    let _ = shell.apply_ui_intent(NativeUiIntent::SafeKeyDelete);
+                }
                 return;
             }
             if keys.just_pressed(KeyCode::Enter) {
@@ -884,6 +890,31 @@ fn shell_keyboard_input(
         }
 
         _ => {}
+    }
+}
+
+fn editable_key_press_count(
+    events: &[&KeyboardInput],
+    keys: &ButtonInput<KeyCode>,
+    key_code: KeyCode,
+) -> usize {
+    let raw_press_count = events
+        .iter()
+        .filter(|event| event.key_code == key_code && event.state == ButtonState::Pressed)
+        .count();
+    if raw_press_count > 0 {
+        raw_press_count
+    } else {
+        usize::from(keys.just_pressed(key_code))
+    }
+}
+
+fn pop_editable_tail(text: &mut String, count: usize) {
+    // These Crystal fields do not yet expose a cursor or selection model.
+    // Until that denominator is implemented, both Backspace and Delete keep
+    // the existing tail-delete behavior while honoring every OS repeat event.
+    for _ in 0..count {
+        text.pop();
     }
 }
 
@@ -2107,6 +2138,56 @@ mod tests {
         assert_eq!(
             app.world().resource::<NativeShellModel>().login.account,
             "visualqa1"
+        );
+    }
+
+    #[test]
+    fn login_system_honors_backspace_and_delete_repeat_messages() {
+        let mut shell = NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..Default::default()
+        };
+        shell.login.account = "visualqa1".to_owned();
+        shell.login.password = "secret".to_owned();
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default())
+            .insert_resource(shell)
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<NativeShellAuxFocus>()
+            .init_resource::<NativeShellTextModifiers>()
+            .add_message::<KeyboardInput>()
+            .add_systems(Update, shell_keyboard_input);
+
+        for repeat in [false, true, true] {
+            let mut event = keyboard_event(
+                KeyCode::Backspace,
+                Key::Backspace,
+                ButtonState::Pressed,
+                None,
+            );
+            event.repeat = repeat;
+            app.world_mut().write_message(event);
+        }
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().login.account,
+            "visual"
+        );
+
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .login
+            .focus = LoginFocus::Password;
+        for repeat in [false, true] {
+            let mut event =
+                keyboard_event(KeyCode::Delete, Key::Delete, ButtonState::Pressed, None);
+            event.repeat = repeat;
+            app.world_mut().write_message(event);
+        }
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().login.password,
+            "secr"
         );
     }
 
