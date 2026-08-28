@@ -1,5 +1,20 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-28 VIS-01 mounted motion cadence/packet-clock checkpoint: revision
+> `eb174e94eecde4a6e24f63d16616e2dfb9a03589` drives the native motion
+> window from the current player movement descriptor instead of a global six-
+> frame constant. Mounted Walk is now 8 x 100ms with matching right-direction
+> sprite phases and camera cancellation; mounted Run stays 6 x 100ms. A live
+> authoritative packet time window is consumed at its already-elapsed phase,
+> while missing, future, expired, inverted or overflowing metadata safely
+> falls back to the descriptor duration. Explicit movement frame counts are
+> bounded to the Web-compatible 1..8 range. Focused 5/5 and full Windows
+> 446/446 pass, and independent review is P0=0/P1=0. No exact-revision EXE,
+> package, live mounted input route, screenshot or human-feel evidence exists
+> for this head. The wider player/action/UI/VFX/monster denominators and final
+> authenticated same-EXE WSS, DPI, soak, human and signing gates remain open;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-08-28 VIS-01 continuous player-locomotion checkpoint: revision
 > `532ddc6be0a0c38313fdd39fe9e0af82b883371b` makes overlapping native
 > player Walk/Run segments continue from the prior segment's current

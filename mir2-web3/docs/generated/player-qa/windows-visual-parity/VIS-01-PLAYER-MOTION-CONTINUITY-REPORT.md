@@ -29,6 +29,12 @@ unmounted player Walk/Run continuity. It does not claim that every player
 action, the Windows UI, mouse combat, skills/VFX, monsters or the whole game
 are visually or interactively 1:1.
 
+> Subsequent revision
+> `eb174e94eecde4a6e24f63d16616e2dfb9a03589` closes the automated
+> mounted-Walk eight-phase and packet-clock follow-up recorded below. See
+> `VIS-01-MOUNTED-MOTION-CADENCE-REPORT.md`. Exact-EXE, live mounted play and
+> human acceptance remain open.
+
 ## Observed native-only failure
 
 The Web presentation already carries the current fractional render coordinate
@@ -90,6 +96,10 @@ No exact-head Release EXE, Candidate package, same-scene screenshot, live WSS
 transcript, real-DPI run, soak or human play result was produced in this leaf.
 
 ## Explicitly open gates
+
+The first two bullets describe the state at implementation revision
+`532ddc6be0a0c38313fdd39fe9e0af82b883371b`; their source/test portion is
+superseded by `eb174e94eecde4a6e24f63d16616e2dfb9a03589`.
 
 - Crystal mounted Walk uses eight 100 ms phases; this Windows motion window
   remains the ordinary fixed six-phase path. Mounted Run and packet distance

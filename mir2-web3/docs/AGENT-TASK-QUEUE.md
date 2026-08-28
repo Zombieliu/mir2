@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 mounted cadence/packet-clock checkpoint
+> (2026-08-28): revision
+> `eb174e94eecde4a6e24f63d16616e2dfb9a03589` removes the remaining
+> fixed-six-phase assumption from the native player motion window. Crystal's
+> mounted Walk now uses its descriptor-owned eight 100ms phases, mounted Run
+> remains six phases, and a bounded explicit frame count is accepted only in
+> the shared Web-compatible 1..8 range. Still-active authoritative
+> `movementStartedAt`/`movementUntil` (or transformed duration) now own the
+> Windows wall-clock window; future, expired, inverted and overflowing values
+> fall back to the descriptor duration. Focused 5/5 and full Windows 446/446
+> pass; final independent reviews found no P0/P1. This closes source/test math,
+> not actual mounted play: no exact-head EXE, package, live mounted route,
+> screenshot or human-feel evidence was produced. Complete player actions,
+> UI/chat, mouse combat, skills/VFX, monsters and same-EXE live WSS/DPI/soak/
+> human/signing gates remain open. `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-MOUNTED-MOTION-CADENCE-REPORT.md`.
+
 > Windows-native VIS-01 continuous player-locomotion checkpoint
 > (2026-08-28): revision
 > `532ddc6be0a0c38313fdd39fe9e0af82b883371b` removes two native-only

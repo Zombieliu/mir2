@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-01 mounted cadence/packet-clock bounded
+> checkpoint: revision `eb174e94eecde4a6e24f63d16616e2dfb9a03589`
+> closes the source/test portion of the mounted timing gap left by the prior
+> locomotion checkpoint. Windows now derives player movement phases from the
+> active Crystal catalog: mounted Walk is 8 x 100ms and mounted Run remains
+> 6 x 100ms. The same phase count drives pixel displacement, visible frame,
+> motion duration and self-camera cancellation. Active packet-carried start/
+> end timing is preferred over receipt time; invalid metadata falls back
+> without freezing or extending the actor, and explicit counts are bounded to
+> 1..8 like Web pose input. Focused 5/5 and Windows 446/446 pass; independent
+> reviews find P0=0/P1=0. No exact-head EXE/package, actual mounted input,
+> screenshot, DPI, soak or human-feel evidence was produced. Complete actions,
+> UI/chat, mouse combat, skills/VFX, monsters and final device/human/signing
+> gates remain open; `globalParityPercent=null` and
+> `visualAccepted=false`.
+
 > 2026-08-28 Windows-native VIS-01 continuous player-locomotion bounded
 > checkpoint: revision `532ddc6be0a0c38313fdd39fe9e0af82b883371b`
 > aligns ordinary overlapping Walk/Run presentation with the already-working
