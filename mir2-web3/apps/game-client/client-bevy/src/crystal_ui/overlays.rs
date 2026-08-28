@@ -4876,12 +4876,7 @@ fn render_overlays(
         );
         let dead = ui.player.max_hp > 0 && ui.player.hp <= 0;
         fill_panel(&mut commands, &mut all.p6(), dead, render_death);
-        fill_panel(
-            &mut commands,
-            &mut all.p7(),
-            false,
-            |_| {},
-        );
+        fill_panel(&mut commands, &mut all.p7(), false, |_| {});
     }
     {
         let mut secondary = panels.p1();
