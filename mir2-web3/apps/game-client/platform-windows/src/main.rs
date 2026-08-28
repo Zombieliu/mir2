@@ -76,6 +76,10 @@ fn main() {
         height: session.window_height,
         ..RuntimeWindowSpec::native("mir2-web3 (native)")
     });
+    // Windows mirrors the Web controller's command-time self presentation.
+    // This is a guarded visual shadow only; UserLocation remains authoritative
+    // and clears/corrects the path on every acknowledgement.
+    mir2_bevy_runtime::set_mir2_local_motion_presentation_enabled(true);
     app.edit_schedule(bevy::prelude::Update, |schedule| {
         schedule.set_executor(SingleThreadedExecutor::new());
     });

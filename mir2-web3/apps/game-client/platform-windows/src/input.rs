@@ -6,7 +6,7 @@
 //! movement; the client only expresses the request.
 
 use bevy::input::ButtonInput;
-use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Window, With};
+use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Time, Window, With};
 use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
@@ -18,6 +18,7 @@ use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
 
 use crate::entity_presentation::NativeEntityPresentation;
+use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck};
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
 use crate::native_protocol::NativeOutboundCommand;
 
@@ -59,30 +60,125 @@ enum WorldPointerMovementMode {
     Run,
 }
 
-/// Retains a Crystal-style empty-world mouse hold without predicting position.
-/// A new movement intent is admitted only after the authoritative self tile
-/// advances (or the desired direction changes), so a 60 Hz render loop cannot
-/// flood the shared Zone with stale Walk/Run commands.
+const CRYSTAL_MOVE_PRESENTATION_MS: f64 = 600.0;
+const CRYSTAL_RUN_PRIME_MS: f64 = 1_200.0;
+const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
+const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
+
+#[derive(Clone, Debug, PartialEq)]
+struct PendingSelfMove {
+    from: (i32, i32),
+    to: (i32, i32),
+    direction: &'static str,
+    mode: WorldPointerMovementMode,
+    sent_at_ms: f64,
+    visual_until_ms: f64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum MovementAckOutcome {
+    Confirmed,
+    Degraded,
+    Correction,
+    Accepted,
+}
+
+/// Crystal-style native movement controller. The shared Zone remains the only
+/// gameplay authority; this resource owns one bounded pending intent plus a
+/// presentation-only prediction copied into the shared runtime. ACKs either
+/// confirm that visual path or clear it and expose the authoritative tile.
 #[derive(bevy::prelude::Resource, Default, Debug)]
 pub struct WorldPointerMovementState {
     active: Option<WorldPointerMovementMode>,
-    last_sent_origin: Option<(i32, i32)>,
-    last_sent_direction: Option<&'static str>,
+    pending: Option<PendingSelfMove>,
+    self_object_id: Option<String>,
+    authoritative_position: Option<(i32, i32)>,
+    authoritative_direction: Option<String>,
+    next_move_send_at_ms: f64,
+    run_primed_until_ms: f64,
+    input_blocked_until_ms: f64,
+    last_packet_ack_at_ms: Option<f64>,
 }
 
 impl WorldPointerMovementState {
     fn begin(&mut self, mode: WorldPointerMovementMode) {
-        if self.active != Some(mode) {
-            self.last_sent_origin = None;
-            self.last_sent_direction = None;
-        }
         self.active = Some(mode);
     }
 
-    fn clear(&mut self) {
+    fn stop_hold(&mut self) {
         self.active = None;
-        self.last_sent_origin = None;
-        self.last_sent_direction = None;
+    }
+
+    fn reset_controller(&mut self) {
+        *self = Self::default();
+    }
+
+    fn can_send(&self, now_ms: f64) -> bool {
+        self.pending.is_none()
+            && now_ms >= self.next_move_send_at_ms
+            && now_ms >= self.input_blocked_until_ms
+    }
+
+    fn effective_mode(
+        &self,
+        requested: WorldPointerMovementMode,
+        now_ms: f64,
+    ) -> WorldPointerMovementMode {
+        if requested == WorldPointerMovementMode::Run && now_ms < self.run_primed_until_ms {
+            WorldPointerMovementMode::Run
+        } else {
+            WorldPointerMovementMode::Walk
+        }
+    }
+
+    fn observe_identity(&mut self, object_id: &str, position: (i32, i32), direction: &str) -> bool {
+        if self.self_object_id.as_deref() == Some(object_id) {
+            if self.authoritative_position.is_none() {
+                self.authoritative_position = Some(position);
+            }
+            if self.authoritative_direction.is_none() {
+                self.authoritative_direction = Some(direction.to_owned());
+            }
+            return false;
+        }
+        self.pending = None;
+        self.next_move_send_at_ms = 0.0;
+        self.run_primed_until_ms = 0.0;
+        self.input_blocked_until_ms = 0.0;
+        self.self_object_id = Some(object_id.to_owned());
+        self.authoritative_position = Some(position);
+        self.authoritative_direction = Some(direction.to_owned());
+        true
+    }
+
+    fn reconcile_ack(&mut self, ack: &NativeSelfMovementAck, now_ms: f64) -> MovementAckOutcome {
+        self.authoritative_position = Some((ack.x, ack.y));
+        self.authoritative_direction = Some(ack.direction.clone());
+        self.last_packet_ack_at_ms = Some(now_ms);
+        let Some(pending) = self.pending.take() else {
+            return MovementAckOutcome::Accepted;
+        };
+        let outcome = if (ack.x, ack.y) == pending.to {
+            MovementAckOutcome::Confirmed
+        } else if pending.mode == WorldPointerMovementMode::Run
+            && (ack.x, ack.y) == movement_target(pending.from, pending.direction, 1)
+        {
+            MovementAckOutcome::Degraded
+        } else {
+            MovementAckOutcome::Correction
+        };
+        if matches!(
+            outcome,
+            MovementAckOutcome::Confirmed | MovementAckOutcome::Degraded
+        ) {
+            self.next_move_send_at_ms = self.next_move_send_at_ms.max(pending.visual_until_ms);
+            self.run_primed_until_ms = now_ms + CRYSTAL_RUN_PRIME_MS;
+        } else {
+            self.run_primed_until_ms = 0.0;
+            self.input_blocked_until_ms = now_ms + CRYSTAL_CORRECTION_BLOCK_MS;
+            self.next_move_send_at_ms = self.next_move_send_at_ms.max(self.input_blocked_until_ms);
+        }
+        outcome
     }
 }
 
@@ -183,16 +279,12 @@ fn pickup_tile_intent(
 
 fn movement_direction_toward(
     hovered_grid_position: Option<(i32, i32)>,
-    entities: &EntityModelSet,
+    origin: (i32, i32),
 ) -> Option<&'static str> {
     let (target_x, target_y) = hovered_grid_position?;
-    let player = entities
-        .entities
-        .iter()
-        .find(|entity| entity.kind == EntityKind::SelfPlayer)?;
     match (
-        (target_x - player.x).signum(),
-        (target_y - player.y).signum(),
+        (target_x - origin.0).signum(),
+        (target_y - origin.1).signum(),
     ) {
         (0, -1) => Some("up"),
         (1, -1) => Some("upright"),
@@ -206,12 +298,105 @@ fn movement_direction_toward(
     }
 }
 
-fn authoritative_player_position(entities: &EntityModelSet) -> Option<(i32, i32)> {
-    entities
+fn authoritative_player(entities: &EntityModelSet) -> Option<(String, (i32, i32), String)> {
+    let player = entities
         .entities
         .iter()
-        .find(|entity| entity.kind == EntityKind::SelfPlayer)
-        .map(|entity| (entity.x, entity.y))
+        .find(|entity| entity.kind == EntityKind::SelfPlayer)?;
+    Some((
+        player.object_id.clone(),
+        (player.x, player.y),
+        player
+            .direction
+            .clone()
+            .unwrap_or_else(|| "down".to_owned()),
+    ))
+}
+
+fn movement_target(origin: (i32, i32), direction: &str, distance: i32) -> (i32, i32) {
+    let (dx, dy) = match direction.to_ascii_lowercase().as_str() {
+        "up" => (0, -1),
+        "upright" => (1, -1),
+        "right" => (1, 0),
+        "downright" => (1, 1),
+        "down" => (0, 1),
+        "downleft" => (-1, 1),
+        "left" => (-1, 0),
+        "upleft" => (-1, -1),
+        _ => (0, 0),
+    };
+    (origin.0 + dx * distance, origin.1 + dy * distance)
+}
+
+fn crystal_direction_name(direction: &str) -> &'static str {
+    match direction.to_ascii_lowercase().as_str() {
+        "up" => "Up",
+        "upright" => "UpRight",
+        "right" => "Right",
+        "downright" => "DownRight",
+        "downleft" => "DownLeft",
+        "left" => "Left",
+        "upleft" => "UpLeft",
+        _ => "Down",
+    }
+}
+
+fn push_movement_shadow(value: serde_json::Value) {
+    mir2_bevy_runtime::push_mir2_movement_shadow_event(value.to_string());
+}
+
+fn push_movement_shadow_reset(at_ms: f64, object_id: &str, position: (i32, i32), direction: &str) {
+    push_movement_shadow(serde_json::json!({
+        "type": "reset",
+        "atMs": at_ms,
+        "objectId": object_id,
+        "x": position.0,
+        "y": position.1,
+        "direction": crystal_direction_name(direction),
+    }));
+}
+
+fn push_movement_shadow_command(at_ms: f64, pending: &PendingSelfMove) {
+    push_movement_shadow(serde_json::json!({
+        "type": "commandSent",
+        "atMs": at_ms,
+        "direction": crystal_direction_name(pending.direction),
+        "mode": match pending.mode {
+            WorldPointerMovementMode::Walk => "walk",
+            WorldPointerMovementMode::Run => "run",
+        },
+        "fromX": pending.from.0,
+        "fromY": pending.from.1,
+        "toX": pending.to.0,
+        "toY": pending.to.1,
+        "phaseCount": 6,
+    }));
+}
+
+fn push_movement_shadow_authoritative(
+    at_ms: f64,
+    ack: &NativeSelfMovementAck,
+    predicted: Option<(i32, i32)>,
+    outcome: MovementAckOutcome,
+) {
+    let disposition = match outcome {
+        MovementAckOutcome::Confirmed | MovementAckOutcome::Degraded => "confirmed",
+        MovementAckOutcome::Correction => "correction",
+        MovementAckOutcome::Accepted => "accepted",
+    };
+    push_movement_shadow(serde_json::json!({
+        "type": "authoritative",
+        "atMs": at_ms,
+        "packet": ack.packet,
+        "objectId": ack.object_id,
+        "isSelf": true,
+        "x": ack.x,
+        "y": ack.y,
+        "direction": crystal_direction_name(&ack.direction),
+        "tsPredictedX": predicted.map(|point| point.0),
+        "tsPredictedY": predicted.map(|point| point.1),
+        "tsDisposition": disposition,
+    }));
 }
 
 /// Convert Crystal world mouse input into bounded intents. Left click keeps the
@@ -225,27 +410,163 @@ pub fn mouse_world_interaction_system(
     dialog: Option<Res<NpcDialogModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
-    presentation: Option<Res<NativeEntityPresentation>>,
+    mut presentation: Option<ResMut<NativeEntityPresentation>>,
+    time: Option<Res<Time>>,
     windows: Query<&Window>,
     queue: Option<ResMut<QuestUiIntentQueue>>,
     commands: Option<Res<GatewayCommands>>,
+    gameplay_inbox: Option<Res<GameplayEventInbox>>,
     mut movement: ResMut<WorldPointerMovementState>,
 ) {
     let left_pressed = mouse.just_pressed(MouseButton::Left);
     let right_pressed = mouse.just_pressed(MouseButton::Right);
-    if !left_pressed && !right_pressed && movement.active.is_none() {
+    let ack_waiting = gameplay_inbox
+        .as_deref()
+        .is_some_and(GameplayEventInbox::has_movement_acks);
+    if !left_pressed
+        && !right_pressed
+        && movement.active.is_none()
+        && movement.pending.is_none()
+        && !ack_waiting
+    {
         return;
     }
-    let (Some(shell), Some(entities), Some(presentation)) = (shell, entities, presentation) else {
-        movement.clear();
+    let now_ms = time
+        .as_deref()
+        .map(|time| time.elapsed_secs_f64() * 1_000.0)
+        .unwrap_or(0.0);
+    let animation_now_ms = now_ms.clamp(0.0, u64::MAX as f64) as u64;
+    let (Some(shell), Some(entities), Some(presentation)) =
+        (shell, entities, presentation.as_deref_mut())
+    else {
+        push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
+        movement.reset_controller();
         return;
     };
     let Ok(window) = windows.single() else {
-        movement.clear();
+        movement.stop_hold();
         return;
     };
-    if !window.focused || shell.screen != NativeShellScreen::InGame {
-        movement.clear();
+    if shell.screen != NativeShellScreen::InGame {
+        push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
+        movement.reset_controller();
+        if let Some(inbox) = gameplay_inbox.as_deref() {
+            inbox.clear_movement_acks();
+        }
+        return;
+    }
+
+    let Some((object_id, entity_position, entity_direction)) = authoritative_player(&entities)
+    else {
+        if movement.self_object_id.is_some() || movement.pending.is_some() {
+            push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
+            movement.reset_controller();
+            if let Some(inbox) = gameplay_inbox.as_deref() {
+                inbox.clear_movement_acks();
+            }
+        } else {
+            movement.stop_hold();
+        }
+        return;
+    };
+    if movement.observe_identity(&object_id, entity_position, entity_direction.as_str()) {
+        push_movement_shadow_reset(
+            now_ms,
+            &object_id,
+            entity_position,
+            entity_direction.as_str(),
+        );
+    }
+
+    let mut packet_ack_observed = false;
+    if let Some(inbox) = gameplay_inbox.as_deref() {
+        for ack in inbox.drain_movement_acks() {
+            if ack.object_id != object_id {
+                continue;
+            }
+            let predicted = movement.pending.as_ref().map(|pending| pending.to);
+            let outcome = movement.reconcile_ack(&ack, now_ms);
+            push_movement_shadow_authoritative(now_ms, &ack, predicted, outcome);
+            if matches!(
+                outcome,
+                MovementAckOutcome::Degraded | MovementAckOutcome::Correction
+            ) {
+                presentation.cancel_local_self_prediction(
+                    &object_id,
+                    (ack.x, ack.y),
+                    &ack.direction,
+                );
+            }
+            packet_ack_observed = true;
+        }
+    }
+    let snapshot_reconciles_pending = movement.pending.as_ref().is_some_and(|pending| {
+        entity_position == pending.to
+            || (pending.mode == WorldPointerMovementMode::Run
+                && entity_position == movement_target(pending.from, pending.direction, 1))
+    });
+    if !packet_ack_observed
+        && (movement.pending.is_none() || snapshot_reconciles_pending)
+        && movement.authoritative_position != Some(entity_position)
+        && movement
+            .last_packet_ack_at_ms
+            .is_none_or(|at_ms| now_ms >= at_ms + 250.0)
+    {
+        let predicted = movement.pending.as_ref().map(|pending| pending.to);
+        let snapshot = NativeSelfMovementAck {
+            packet: "worldSnapshot".to_owned(),
+            object_id: object_id.clone(),
+            x: entity_position.0,
+            y: entity_position.1,
+            direction: entity_direction.clone(),
+        };
+        let outcome = movement.reconcile_ack(&snapshot, now_ms);
+        push_movement_shadow_authoritative(now_ms, &snapshot, predicted, outcome);
+        if matches!(
+            outcome,
+            MovementAckOutcome::Degraded | MovementAckOutcome::Correction
+        ) {
+            presentation.cancel_local_self_prediction(
+                &object_id,
+                entity_position,
+                &entity_direction,
+            );
+        }
+    }
+
+    if movement
+        .pending
+        .as_ref()
+        .is_some_and(|pending| now_ms >= pending.sent_at_ms + MOVEMENT_PENDING_MAX_AGE_MS)
+    {
+        let predicted = movement.pending.as_ref().map(|pending| pending.to);
+        movement.pending = None;
+        movement.run_primed_until_ms = 0.0;
+        movement.input_blocked_until_ms = now_ms + CRYSTAL_CORRECTION_BLOCK_MS;
+        movement.next_move_send_at_ms = movement.input_blocked_until_ms;
+        let position = movement.authoritative_position.unwrap_or(entity_position);
+        let direction = movement
+            .authoritative_direction
+            .clone()
+            .unwrap_or_else(|| entity_direction.clone());
+        presentation.cancel_local_self_prediction(&object_id, position, &direction);
+        let timeout = NativeSelfMovementAck {
+            packet: "MovementTimeout".to_owned(),
+            object_id: object_id.clone(),
+            x: position.0,
+            y: position.1,
+            direction,
+        };
+        push_movement_shadow_authoritative(
+            now_ms,
+            &timeout,
+            predicted,
+            MovementAckOutcome::Correction,
+        );
+    }
+
+    if !window.focused {
+        movement.stop_hold();
         return;
     }
 
@@ -254,7 +575,7 @@ pub fn mouse_world_interaction_system(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
-        movement.clear();
+        movement.stop_hold();
         return;
     }
 
@@ -263,7 +584,7 @@ pub fn mouse_world_interaction_system(
         // inspect). Until those are implemented, never turn an object click
         // into movement through the actor beneath the pointer.
         if presentation.hovered_object_id().is_some() {
-            movement.clear();
+            movement.stop_hold();
             return;
         }
         movement.begin(WorldPointerMovementMode::Run);
@@ -271,7 +592,7 @@ pub fn mouse_world_interaction_system(
         if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
             .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
         {
-            movement.clear();
+            movement.stop_hold();
             if let Some(mut queue) = queue {
                 queue.push_intent(intent);
             }
@@ -281,7 +602,7 @@ pub fn mouse_world_interaction_system(
         // A player or another non-interactable actor is still solid world
         // content. Do not reinterpret that pixel hit as movement through it.
         if presentation.hovered_object_id().is_some() {
-            movement.clear();
+            movement.stop_hold();
             return;
         }
         movement.begin(WorldPointerMovementMode::Walk);
@@ -295,25 +616,38 @@ pub fn mouse_world_interaction_system(
         WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right),
     };
     if !held {
-        movement.clear();
+        movement.stop_hold();
         return;
     }
     if presentation.hovered_object_id().is_some() {
-        movement.clear();
+        movement.stop_hold();
         return;
     }
 
-    let (Some(origin), Some(direction), Some(commands)) = (
-        authoritative_player_position(&entities),
-        movement_direction_toward(presentation.hovered_grid_position(), &entities),
+    if !movement.can_send(now_ms) {
+        return;
+    }
+    let origin = movement.authoritative_position.unwrap_or(entity_position);
+    let (Some(direction), Some(commands)) = (
+        movement_direction_toward(presentation.hovered_grid_position(), origin),
         commands,
     ) else {
         return;
     };
-    if movement.last_sent_origin == Some(origin) && movement.last_sent_direction == Some(direction)
-    {
-        return;
-    }
+    let effective_mode = movement.effective_mode(mode, now_ms);
+    let distance = if effective_mode == WorldPointerMovementMode::Run {
+        2
+    } else {
+        1
+    };
+    let pending = PendingSelfMove {
+        from: origin,
+        to: movement_target(origin, direction, distance),
+        direction,
+        mode: effective_mode,
+        sent_at_ms: now_ms,
+        visual_until_ms: now_ms + CRYSTAL_MOVE_PRESENTATION_MS,
+    };
 
     let intent = match mode {
         WorldPointerMovementMode::Walk => PlayerIntent::Walk {
@@ -324,8 +658,17 @@ pub fn mouse_world_interaction_system(
         },
     };
     if commands.send(intent) {
-        movement.last_sent_origin = Some(origin);
-        movement.last_sent_direction = Some(direction);
+        let _ = presentation.begin_local_self_motion(
+            &object_id,
+            pending.from,
+            pending.to,
+            direction,
+            effective_mode == WorldPointerMovementMode::Run,
+            animation_now_ms,
+            crate::entity_presentation::native_motion_clock_ms(),
+        );
+        push_movement_shadow_command(now_ms, &pending);
+        movement.pending = Some(pending);
     }
 }
 
@@ -839,6 +1182,30 @@ mod tests {
         (app, receiver)
     }
 
+    fn install_movement_clock_and_inbox(app: &mut bevy::prelude::App) {
+        app.insert_resource(bevy::prelude::Time::<()>::default());
+        let (_sender, receiver) = std::sync::mpsc::channel();
+        app.insert_resource(GameplayEventInbox::new(receiver));
+    }
+
+    fn advance_movement_clock(app: &mut bevy::prelude::App, millis: u64) {
+        app.world_mut()
+            .resource_mut::<bevy::prelude::Time>()
+            .advance_by(std::time::Duration::from_millis(millis));
+    }
+
+    fn push_test_movement_ack(app: &bevy::prelude::App, x: i32, y: i32, direction: &str) {
+        app.world()
+            .resource::<GameplayEventInbox>()
+            .push_movement_ack(NativeSelfMovementAck {
+                packet: "UserLocation".to_owned(),
+                object_id: "1000".to_owned(),
+                x,
+                y,
+                direction: direction.to_owned(),
+            });
+    }
+
     #[test]
     fn gameplay_gate_matrix_blocks_every_registered_world_action() {
         let contexts = [
@@ -1022,11 +1389,19 @@ mod tests {
             receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
         ));
+        {
+            let state = app.world().resource::<WorldPointerMovementState>();
+            let pending = state.pending.as_ref().expect("first run pending");
+            assert_eq!(pending.mode, WorldPointerMovementMode::Walk);
+            assert_eq!(pending.from, (10, 10));
+            assert_eq!(pending.to, (11, 10));
+        }
     }
 
     #[test]
     fn left_hold_on_empty_world_walks_only_after_authoritative_progress() {
         let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
@@ -1061,6 +1436,8 @@ mod tests {
             .find(|entity| entity.kind == EntityKind::SelfPlayer)
             .expect("self player")
             .x = 11;
+        push_test_movement_ack(&app, 11, 10, "right");
+        advance_movement_clock(&mut app, 600);
         app.update();
         assert!(matches!(
             receiver.try_recv(),
@@ -1077,6 +1454,7 @@ mod tests {
     #[test]
     fn right_hold_repeats_run_only_after_authoritative_progress() {
         let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
@@ -1111,11 +1489,148 @@ mod tests {
             .find(|entity| entity.kind == EntityKind::SelfPlayer)
             .expect("self player")
             .x = 11;
+        push_test_movement_ack(&app, 11, 10, "right");
+        advance_movement_clock(&mut app, 600);
         app.update();
         assert!(matches!(
             receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
         ));
+        let state = app.world().resource::<WorldPointerMovementState>();
+        let pending = state.pending.as_ref().expect("primed run pending");
+        assert_eq!(pending.mode, WorldPointerMovementMode::Run);
+        assert_eq!(pending.from, (11, 10));
+        assert_eq!(pending.to, (13, 10));
+    }
+
+    #[test]
+    fn authoritative_snapshot_progress_releases_pending_when_packet_ack_is_missing() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 11;
+        advance_movement_clock(&mut app, 600);
+
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+        let state = app.world().resource::<WorldPointerMovementState>();
+        let pending = state.pending.as_ref().expect("snapshot released next run");
+        assert_eq!(pending.mode, WorldPointerMovementMode::Run);
+        assert_eq!(pending.from, (11, 10));
+        assert_eq!(pending.to, (13, 10));
+    }
+
+    #[test]
+    fn missing_self_entity_clears_pending_movement_controller() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .retain(|entity| entity.kind != EntityKind::SelfPlayer);
+
+        app.update();
+
+        let state = app.world().resource::<WorldPointerMovementState>();
+        assert!(state.pending.is_none());
+        assert!(state.self_object_id.is_none());
+        assert!(state.active.is_none());
+    }
+
+    #[test]
+    fn unchanged_user_location_is_a_correction_and_blocks_resend() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        push_test_movement_ack(&app, 10, 10, "right");
+        advance_movement_clock(&mut app, 100);
+
+        app.update();
+
+        assert!(receiver.try_recv().is_err(), "correction resent movement");
+        let state = app.world().resource::<WorldPointerMovementState>();
+        assert!(state.pending.is_none());
+        assert_eq!(state.authoritative_position, Some((10, 10)));
+        assert_eq!(state.run_primed_until_ms, 0.0);
+        assert_eq!(state.input_blocked_until_ms, 500.0);
+        assert!(!state.can_send(499.0));
     }
 
     #[test]

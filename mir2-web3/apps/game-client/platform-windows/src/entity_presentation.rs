@@ -34,6 +34,7 @@ struct NativeMotionWindow {
     animation_sequence: u64,
     action: AnimationAction,
     direction: Direction,
+    locally_predicted: bool,
 }
 
 #[derive(Debug)]
@@ -155,6 +156,152 @@ impl NativeEntityPresentation {
             .map(|window| native_motion_offset(window, now_ms))
             .unwrap_or((0.0, 0.0));
         (entity_x + camera_x, entity_y + camera_y)
+    }
+
+    /// Start a bounded self-only presentation window as soon as Windows has
+    /// successfully queued a movement intent. This changes animation pixels
+    /// and sub-cell presentation only; the authoritative entity/read-model
+    /// tile remains untouched until `UserLocation` arrives.
+    pub(crate) fn begin_local_self_motion(
+        &mut self,
+        object_id: &str,
+        from: (i32, i32),
+        to: (i32, i32),
+        direction: &str,
+        running: bool,
+        animation_now_ms: u64,
+        motion_now_ms: u64,
+    ) -> bool {
+        if from == to {
+            return false;
+        }
+        let action = if running {
+            AnimationAction::Running
+        } else {
+            AnimationAction::Walking
+        };
+        let direction = parse_direction(direction);
+        let Some(entity) = self
+            .latest_payload
+            .as_ref()
+            .and_then(|payload| payload.get("entities"))
+            .and_then(Value::as_array)
+            .and_then(|entities| {
+                entities.iter().find(|entity| {
+                    entity.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                        && entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                })
+            })
+        else {
+            return false;
+        };
+        let phase_count = native_motion_phase_count(entity, action);
+        let Some(key) = self
+            .world
+            .active_state(object_id)
+            .map(|state| state.key.clone())
+        else {
+            return false;
+        };
+        let animation_sequence = self
+            .last_applied_sequence
+            .get(object_id)
+            .copied()
+            .unwrap_or(0)
+            .saturating_add(1);
+        if self
+            .world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(animation_sequence, action, direction),
+                animation_now_ms,
+            )
+            .is_err()
+        {
+            return false;
+        }
+        self.last_applied_sequence
+            .insert(object_id.to_owned(), animation_sequence);
+        let expires_ms =
+            motion_now_ms.saturating_add(u64::from(phase_count) * CRYSTAL_MOVE_PHASE_MS);
+        self.motion_windows.insert(
+            object_id.to_owned(),
+            NativeMotionWindow {
+                from_x: from.0 as f32,
+                from_y: from.1 as f32,
+                to_x: to.0 as f32,
+                to_y: to.1 as f32,
+                started_ms: motion_now_ms,
+                expires_ms,
+                phase_count,
+                animation_sequence,
+                action,
+                direction,
+                locally_predicted: true,
+            },
+        );
+        self.self_object_id = Some(object_id.to_owned());
+        if let Some(entity) = self
+            .latest_payload
+            .as_mut()
+            .and_then(|payload| payload.get_mut("entities"))
+            .and_then(Value::as_array_mut)
+            .and_then(|entities| {
+                entities.iter_mut().find(|entity| {
+                    entity.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                })
+            })
+        {
+            entity["direction"] = Value::from(direction_name(direction));
+        }
+        self.payload_dirty = true;
+        true
+    }
+
+    /// A correction may acknowledge the unchanged source tile. Remove only a
+    /// still-local window; an authoritative window already built from the ACK
+    /// must remain intact.
+    pub(crate) fn cancel_local_self_prediction(
+        &mut self,
+        object_id: &str,
+        authoritative_position: (i32, i32),
+        authoritative_direction: &str,
+    ) {
+        if self
+            .motion_windows
+            .get(object_id)
+            .is_some_and(|window| window.locally_predicted)
+        {
+            self.motion_windows.remove(object_id);
+            self.last_positions
+                .insert(object_id.to_owned(), authoritative_position);
+            if let Some(payload) = self.latest_payload.as_mut() {
+                if let Some(entity) = payload
+                    .get_mut("entities")
+                    .and_then(Value::as_array_mut)
+                    .and_then(|entities| {
+                        entities.iter_mut().find(|entity| {
+                            entity.get("objectId").and_then(value_object_id).as_deref()
+                                == Some(object_id)
+                        })
+                    })
+                {
+                    entity["x"] = Value::from(authoritative_position.0);
+                    entity["y"] = Value::from(authoritative_position.1);
+                    entity["direction"] = Value::from(authoritative_direction);
+                }
+                if self.self_object_id.as_deref() == Some(object_id) {
+                    if let Some(center) = payload
+                        .get_mut("sceneView")
+                        .and_then(|view| view.get_mut("center"))
+                    {
+                        center["x"] = Value::from(authoritative_position.0);
+                        center["y"] = Value::from(authoritative_position.1);
+                    }
+                }
+            }
+            self.payload_dirty = true;
+        }
     }
 
     #[cfg(test)]
@@ -401,6 +548,7 @@ impl NativeEntityPresentation {
             };
             observed_ids.insert(object_id.clone());
             let is_self = entity.get("kind").and_then(Value::as_str) == Some("selfPlayer");
+            let mut stale_self_source_echo_applied = false;
             if is_self {
                 self.self_object_id = Some(object_id.clone());
                 if let Some(window) =
@@ -420,86 +568,99 @@ impl NativeEntityPresentation {
                     entity["_nativeAnimationAction"] =
                         Value::from(movement_action_name(window.action));
                     self_center_correction = Some((x, y));
+                    stale_self_source_echo_applied = true;
                 }
             }
 
-            let previous = self.last_positions.insert(object_id.clone(), (x, y));
-            if let Some((from_x, from_y)) = previous.filter(|previous| *previous != (x, y)) {
-                let active_previous =
-                    self.motion_windows
-                        .get(&object_id)
-                        .copied()
-                        .filter(|window| {
-                            now_ms < window.expires_ms
-                                && window.to_x == from_x as f32
-                                && window.to_y == from_y as f32
-                        });
-                let (motion_from_x, motion_from_y) =
-                    active_previous.map_or((from_x as f32, from_y as f32), |window| {
-                        (
-                            native_motion_coordinate(window.from_x, window.to_x, &window, now_ms),
-                            native_motion_coordinate(window.from_y, window.to_y, &window, now_ms),
-                        )
-                    });
-                let distance = (motion_from_x - x as f32)
-                    .abs()
-                    .max((motion_from_y - y as f32).abs());
-                let movement = entity
-                    .get("_nativeAnimationAction")
-                    .and_then(Value::as_str)
-                    .and_then(parse_action)
-                    .filter(|action| {
-                        matches!(action, AnimationAction::Walking | AnimationAction::Running)
-                    })
-                    .zip(
-                        entity
-                            .get("_nativeAnimationSequence")
-                            .and_then(Value::as_u64),
-                    )
-                    .map(|(action, sequence)| {
-                        (
-                            action,
-                            sequence,
-                            parse_direction(
-                                entity
-                                    .get("direction")
-                                    .and_then(Value::as_str)
-                                    .unwrap_or("down"),
-                            ),
-                        )
-                    });
-                if let Some((action, animation_sequence, direction)) =
-                    movement.filter(|_| distance <= MAX_SMOOTH_TILE_DISTANCE as f32)
-                {
-                    let phase_count = native_motion_phase_count(entity, action);
-                    let fallback_duration_ms = u64::from(phase_count) * CRYSTAL_MOVE_PHASE_MS;
-                    let (started_ms, expires_ms) = native_packet_motion_window(entity, now_ms)
-                        .unwrap_or((now_ms, now_ms.saturating_add(fallback_duration_ms)));
-                    let window = NativeMotionWindow {
-                        from_x: motion_from_x,
-                        from_y: motion_from_y,
-                        to_x: x as f32,
-                        to_y: y as f32,
-                        started_ms,
-                        expires_ms,
-                        phase_count,
-                        animation_sequence,
-                        action,
-                        direction,
-                    };
-                    self.motion_windows.insert(object_id.clone(), window);
-                    if is_self {
-                        mir2_bevy_runtime::set_mir2_self_camera_motion(
-                            window.from_x,
-                            window.from_y,
-                            window.to_x,
-                            window.to_y,
-                            window.started_ms as f64,
-                            window.expires_ms as f64,
-                        );
+            let preserved_local_prediction = self
+                .motion_windows
+                .get_mut(&object_id)
+                .filter(|window| {
+                    now_ms < window.expires_ms
+                        && window.locally_predicted
+                        && window.to_x == x as f32
+                        && window.to_y == y as f32
+                })
+                .map(|window| {
+                    if !stale_self_source_echo_applied {
+                        if let Some((action, animation_sequence, direction)) =
+                            native_packet_movement(entity)
+                        {
+                            window.action = action;
+                            window.animation_sequence = animation_sequence;
+                            window.direction = direction;
+                        }
+                        window.locally_predicted = false;
                     }
-                } else {
-                    self.motion_windows.remove(&object_id);
+                })
+                .is_some();
+            let previous = self.last_positions.insert(object_id.clone(), (x, y));
+            if !preserved_local_prediction {
+                if let Some((from_x, from_y)) = previous.filter(|previous| *previous != (x, y)) {
+                    let active_previous =
+                        self.motion_windows
+                            .get(&object_id)
+                            .copied()
+                            .filter(|window| {
+                                now_ms < window.expires_ms
+                                    && window.to_x == from_x as f32
+                                    && window.to_y == from_y as f32
+                            });
+                    let (motion_from_x, motion_from_y) =
+                        active_previous.map_or((from_x as f32, from_y as f32), |window| {
+                            (
+                                native_motion_coordinate(
+                                    window.from_x,
+                                    window.to_x,
+                                    &window,
+                                    now_ms,
+                                ),
+                                native_motion_coordinate(
+                                    window.from_y,
+                                    window.to_y,
+                                    &window,
+                                    now_ms,
+                                ),
+                            )
+                        });
+                    let distance = (motion_from_x - x as f32)
+                        .abs()
+                        .max((motion_from_y - y as f32).abs());
+                    let movement = native_packet_movement(entity);
+                    if let Some((action, animation_sequence, direction)) =
+                        movement.filter(|_| distance <= MAX_SMOOTH_TILE_DISTANCE as f32)
+                    {
+                        let phase_count = native_motion_phase_count(entity, action);
+                        let fallback_duration_ms = u64::from(phase_count) * CRYSTAL_MOVE_PHASE_MS;
+                        let (started_ms, expires_ms) = native_packet_motion_window(entity, now_ms)
+                            .unwrap_or((now_ms, now_ms.saturating_add(fallback_duration_ms)));
+                        let window = NativeMotionWindow {
+                            from_x: motion_from_x,
+                            from_y: motion_from_y,
+                            to_x: x as f32,
+                            to_y: y as f32,
+                            started_ms,
+                            expires_ms,
+                            phase_count,
+                            animation_sequence,
+                            action,
+                            direction,
+                            locally_predicted: false,
+                        };
+                        self.motion_windows.insert(object_id.clone(), window);
+                        if is_self {
+                            mir2_bevy_runtime::set_mir2_self_camera_motion(
+                                window.from_x,
+                                window.from_y,
+                                window.to_x,
+                                window.to_y,
+                                window.started_ms as f64,
+                                window.expires_ms as f64,
+                            );
+                        }
+                    } else {
+                        self.motion_windows.remove(&object_id);
+                    }
                 }
             }
 
@@ -817,6 +978,19 @@ fn parse_direction(direction: &str) -> Direction {
     }
 }
 
+fn direction_name(direction: Direction) -> &'static str {
+    match direction {
+        Direction::Up => "up",
+        Direction::UpRight => "upright",
+        Direction::Right => "right",
+        Direction::DownRight => "downright",
+        Direction::Down => "down",
+        Direction::DownLeft => "downleft",
+        Direction::Left => "left",
+        Direction::UpLeft => "upleft",
+    }
+}
+
 fn parse_action(action: &str) -> Option<AnimationAction> {
     match action {
         "standing" => Some(AnimationAction::Standing),
@@ -848,6 +1022,24 @@ fn movement_action_name(action: AnimationAction) -> &'static str {
         AnimationAction::Running => "running",
         _ => "standing",
     }
+}
+
+fn native_packet_movement(entity: &Value) -> Option<(AnimationAction, u64, Direction)> {
+    let action = entity
+        .get("_nativeAnimationAction")
+        .and_then(Value::as_str)
+        .and_then(parse_action)
+        .filter(|action| matches!(action, AnimationAction::Walking | AnimationAction::Running))?;
+    let sequence = entity
+        .get("_nativeAnimationSequence")
+        .and_then(Value::as_u64)?;
+    let direction = parse_direction(
+        entity
+            .get("direction")
+            .and_then(Value::as_str)
+            .unwrap_or("down"),
+    );
+    Some((action, sequence, direction))
 }
 
 fn native_motion_phase_count(entity: &Value, action: AnimationAction) -> u16 {
@@ -1203,6 +1395,7 @@ mod tests {
             animation_sequence: 1,
             action: AnimationAction::Walking,
             direction: Direction::Right,
+            locally_predicted: false,
         };
         assert_eq!(native_motion_offset(&horizontal, 1_000), (-40.0, 0.0));
         assert_eq!(native_motion_offset(&horizontal, 1_099), (-40.0, 0.0));
@@ -1222,6 +1415,7 @@ mod tests {
             animation_sequence: 2,
             action: AnimationAction::Walking,
             direction: Direction::Up,
+            locally_predicted: false,
         };
         assert_eq!(native_motion_offset(&vertical, 2_000), (0.0, 26.0));
         assert_eq!(native_motion_offset(&vertical, 2_100), (0.0, 22.0));
@@ -1284,6 +1478,103 @@ mod tests {
             .expect("teleport payload");
         assert!(rendered["entities"][0].get("motionFromX").is_none());
         assert!(!presentation.has_active_motion(1_700_000_000_200));
+    }
+
+    #[test]
+    fn local_self_command_starts_pixels_immediately_and_ack_keeps_its_window() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut initial = player_payload(7);
+        initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(initial);
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial standing self");
+
+        assert!(presentation.begin_local_self_motion(
+            "1",
+            (10, 10),
+            (11, 10),
+            "right",
+            false,
+            100,
+            1_100,
+        ));
+        let predicted = presentation
+            .render_state_if_changed_with_clocks(100, 1_100, true, |payload, frames, _| {
+                assert_eq!(
+                    frames.get("1").map(|(_, action)| *action),
+                    Some(AnimationAction::Walking)
+                );
+                Some(payload.clone())
+            })
+            .expect("command-time walking pixels");
+        assert_eq!(predicted["entities"][0]["x"], json!(10));
+        assert_eq!(predicted["entities"][0]["direction"], json!("right"));
+        let predicted_window = presentation.motion_windows["1"];
+        assert!(predicted_window.locally_predicted);
+        assert_eq!(predicted_window.started_ms, 1_100);
+        assert_eq!(predicted_window.expires_ms, 1_700);
+        assert_eq!(predicted_window.animation_sequence, 8);
+
+        let mut acknowledged = player_payload(9);
+        acknowledged["sceneView"]["center"]["x"] = json!(11);
+        acknowledged["entities"][0]["x"] = json!(11);
+        acknowledged["entities"][0]["direction"] = json!("right");
+        presentation.replace_payload(acknowledged);
+        let rendered = presentation
+            .render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("authoritative confirmation");
+
+        let confirmed = presentation.motion_windows["1"];
+        assert!(!confirmed.locally_predicted);
+        assert_eq!(confirmed.started_ms, 1_100, "ACK restarted the visual path");
+        assert_eq!(confirmed.expires_ms, 1_700);
+        assert_eq!(confirmed.animation_sequence, 9);
+        assert_eq!(rendered["entities"][0]["motionFromX"], json!(10.0));
+        assert_eq!(rendered["entities"][0]["motionToX"], json!(11.0));
+        assert_eq!(rendered["entities"][0]["motionStartedMs"], json!(1_100));
+        assert_eq!(presentation.last_applied_sequence.get("1"), Some(&9));
+    }
+
+    #[test]
+    fn unchanged_correction_removes_only_the_local_prediction() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial self");
+        assert!(presentation.begin_local_self_motion(
+            "1",
+            (10, 10),
+            (11, 10),
+            "right",
+            false,
+            100,
+            1_100,
+        ));
+
+        presentation.cancel_local_self_prediction("1", (10, 10), "left");
+
+        assert!(!presentation.motion_windows.contains_key("1"));
+        assert!(presentation.payload_dirty);
+        assert_eq!(
+            presentation.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(10)
+        );
+        assert_eq!(
+            presentation.latest_payload.as_ref().unwrap()["entities"][0]["direction"],
+            json!("left")
+        );
+        assert_eq!(
+            presentation.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(10)
+        );
     }
 
     #[test]

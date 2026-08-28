@@ -383,7 +383,23 @@ pub struct NativeGameplaySnapshot {
     /// Complete authoritative Big Map read state.  It is replaced as one
     /// snapshot so map packets cannot be observed as partially-updated UI.
     pub big_map: BigMapModel,
+    /// Exact packet-first self transform carried by `UserLocation`. Keeping
+    /// this separate from the folded entity model lets the native input
+    /// controller reconcile even when the acknowledged tile equals the old
+    /// tile (for example a collision correction).
+    pub authoritative_self_movement: Option<NativeSelfMovementAck>,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NativeSelfMovementAck {
+    pub packet: String,
+    pub object_id: String,
+    pub x: i32,
+    pub y: i32,
+    pub direction: String,
+}
+
+const MAX_BUFFERED_SELF_MOVEMENT_ACKS: usize = 32;
 
 impl NativeGameplayAdapter {
     /// Fold packet-first shared-Zone state into the adapter. Returns `true`
@@ -1293,6 +1309,7 @@ impl NativeGameplayAdapter {
             effect_events: self.effect_events.iter().cloned().collect(),
             zone_entity_tiles: self.zone_entity_tiles(payload),
             big_map: self.big_map.clone(),
+            authoritative_self_movement: None,
         }
     }
 
@@ -1340,6 +1357,7 @@ impl NativeGameplayAdapter {
 pub struct GameplayEventInbox {
     receiver: Mutex<mpsc::Receiver<NativeGameplaySnapshot>>,
     generation: Mutex<Option<u64>>,
+    movement_acks: Mutex<VecDeque<NativeSelfMovementAck>>,
 }
 
 impl GameplayEventInbox {
@@ -1347,7 +1365,42 @@ impl GameplayEventInbox {
         Self {
             receiver: Mutex::new(receiver),
             generation: Mutex::new(None),
+            movement_acks: Mutex::new(VecDeque::new()),
         }
+    }
+
+    pub(crate) fn push_movement_ack(&self, ack: NativeSelfMovementAck) {
+        let mut pending = self
+            .movement_acks
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        if pending.len() >= MAX_BUFFERED_SELF_MOVEMENT_ACKS {
+            pending.pop_front();
+        }
+        pending.push_back(ack);
+    }
+
+    pub(crate) fn drain_movement_acks(&self) -> Vec<NativeSelfMovementAck> {
+        self.movement_acks
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .drain(..)
+            .collect()
+    }
+
+    pub(crate) fn has_movement_acks(&self) -> bool {
+        !self
+            .movement_acks
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .is_empty()
+    }
+
+    pub(crate) fn clear_movement_acks(&self) {
+        self.movement_acks
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clear();
     }
 
     fn drain(&self) -> (Vec<NativeGameplaySnapshot>, bool) {
@@ -1460,6 +1513,7 @@ pub fn drain_gameplay_events(
         // CharacterSelect. Otherwise observing the generation while gated could
         // strand an old pending key forever.
         pending.release_all_quest_operations();
+        inbox.clear_movement_acks();
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
         *quests = QuestTracker::default();
@@ -1473,6 +1527,7 @@ pub fn drain_gameplay_events(
         entity_presentation.reset_session();
         entity_overlays.reset_session();
         effects.reset_session();
+        inbox.clear_movement_acks();
         if let Some(mut big_map) = big_map {
             big_map.reset_for_session();
         }
@@ -1480,6 +1535,12 @@ pub fn drain_gameplay_events(
     }
     if snapshots.is_empty() {
         return;
+    }
+    for ack in snapshots
+        .iter()
+        .filter_map(|snapshot| snapshot.authoritative_self_movement.clone())
+    {
+        inbox.push_movement_ack(ack);
     }
     apply_quest_operation_acks(&mut pending, &snapshots);
     if let (Some(mut big_map), Some(latest)) = (big_map, snapshots.last()) {
@@ -3446,6 +3507,28 @@ mod tests {
         };
         assert_eq!(apply_quest_operation_ack(&mut pending, &resumed_ack), 1);
         assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn self_movement_ack_buffer_is_bounded_and_keeps_newest_order() {
+        let (_sender, receiver) = std::sync::mpsc::channel();
+        let inbox = GameplayEventInbox::new(receiver);
+        for x in 0..35 {
+            inbox.push_movement_ack(NativeSelfMovementAck {
+                packet: "UserLocation".to_owned(),
+                object_id: "self".to_owned(),
+                x,
+                y: 10,
+                direction: "right".to_owned(),
+            });
+        }
+
+        let acks = inbox.drain_movement_acks();
+
+        assert_eq!(acks.len(), MAX_BUFFERED_SELF_MOVEMENT_ACKS);
+        assert_eq!(acks.first().map(|ack| ack.x), Some(3));
+        assert_eq!(acks.last().map(|ack| ack.x), Some(34));
+        assert!(!inbox.has_movement_acks());
     }
 
     #[test]

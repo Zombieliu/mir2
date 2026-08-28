@@ -25,7 +25,9 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio_tungstenite::tungstenite::Message;
 
-use crate::gameplay_bridge::{NativeGameplayAdapter, NativeGameplaySnapshot};
+use crate::gameplay_bridge::{
+    NativeGameplayAdapter, NativeGameplaySnapshot, NativeSelfMovementAck,
+};
 use crate::map_parser::lighting::{NativeLightAssets, NativeLightingBridge, NativeLightingMotion};
 use crate::native_protocol::{
     parse_inbound_event, InboundEvent, NativeOutboundCommand, PacketEvent,
@@ -3271,6 +3273,10 @@ where
                         gameplay_adapter,
                         gameplay_events,
                         pending_mail_feedback,
+                        match &parsed {
+                            InboundEvent::Packet(packet) => Some(packet),
+                            _ => None,
+                        },
                     )?;
                 }
             }
@@ -3371,8 +3377,12 @@ fn forward_packet_first_world(
     gameplay_adapter: &NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     pending_mail_feedback: &mut VecDeque<PendingMailOperationFeedback>,
+    source_packet: Option<&PacketEvent>,
 ) -> Result<(), String> {
-    let _ = gameplay_events.send(gameplay_adapter.snapshot(payload));
+    let mut gameplay_snapshot = gameplay_adapter.snapshot(payload);
+    gameplay_snapshot.authoritative_self_movement =
+        native_self_movement_ack(source_packet, payload);
+    let _ = gameplay_events.send(gameplay_snapshot);
 
     let runtime_snapshot = transform_world_snapshot(payload);
     let runtime_json =
@@ -3420,6 +3430,48 @@ fn forward_packet_first_world(
     }
 
     Ok(())
+}
+
+fn native_self_movement_ack(
+    packet: Option<&PacketEvent>,
+    payload: &Value,
+) -> Option<NativeSelfMovementAck> {
+    let PacketEvent::UserLocation(location) = packet? else {
+        return None;
+    };
+    let self_entity = payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .and_then(|entities| {
+            entities
+                .iter()
+                .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+        });
+    let object_id = payload
+        .get("playerObjectId")
+        .and_then(object_id_string)
+        .or_else(|| {
+            self_entity
+                .and_then(|entity| entity.get("objectId"))
+                .and_then(object_id_string)
+        })?;
+    let direction = location
+        .direction
+        .clone()
+        .or_else(|| {
+            self_entity
+                .and_then(|entity| entity.get("direction"))
+                .and_then(Value::as_str)
+                .map(str::to_owned)
+        })
+        .unwrap_or_else(|| "down".to_owned());
+    Some(NativeSelfMovementAck {
+        packet: "UserLocation".to_owned(),
+        object_id,
+        x: location.location.x,
+        y: location.location.y,
+        direction,
+    })
 }
 
 fn dispatch_shell_event(
@@ -4790,6 +4842,36 @@ mod tests {
     use tokio::sync::oneshot;
     use tokio::time::{sleep, timeout};
     use tokio_tungstenite::accept_async;
+
+    #[test]
+    fn user_location_extracts_exact_self_movement_ack_even_for_same_tile() {
+        let payload = json!({
+            "playerObjectId": 1000,
+            "entities": [{
+                "objectId": 1000,
+                "kind": "selfPlayer",
+                "x": 41,
+                "y": 42,
+                "direction": "left"
+            }]
+        });
+        let packet = PacketEvent::UserLocation(crate::native_protocol::UserLocation {
+            location: mir2_client_bevy::big_map::BigMapPoint { x: 41, y: 42 },
+            direction: Some("right".to_owned()),
+        });
+
+        assert_eq!(
+            native_self_movement_ack(Some(&packet), &payload),
+            Some(NativeSelfMovementAck {
+                packet: "UserLocation".to_owned(),
+                object_id: "1000".to_owned(),
+                x: 41,
+                y: 42,
+                direction: "right".to_owned(),
+            })
+        );
+        assert!(native_self_movement_ack(None, &payload).is_none());
+    }
 
     #[test]
     fn native_lighting_publisher_retries_backpressure_and_clears_per_generation() {
