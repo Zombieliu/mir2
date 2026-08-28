@@ -1,5 +1,23 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 continuous player-locomotion checkpoint
+> (2026-08-28): revision
+> `532ddc6be0a0c38313fdd39fe9e0af82b883371b` removes two native-only
+> discontinuities that were absent from the Web motion path. Consecutive
+> authoritative player Walk/Run segments now continue from the active
+> fractional render coordinate and replace only stale locomotion when no
+> combat action is waiting; normal combat/action FIFO remains intact. A
+> bounded self-player stale-source-echo guard keeps the authoritative target,
+> camera center and active motion window instead of visibly snapping back.
+> Runtime passes 194/194 and Windows passes 443/443; independent player and
+> Web/Crystal reviews found no P0/P1. This is a source/test checkpoint only:
+> no exact-revision EXE, package, same-scene capture or human play result was
+> produced. Mounted Walk's Crystal eight-phase cadence, packet-carried motion
+> timing, the wider player-action denominator, mouse combat, UI/chat, skills/
+> VFX, monsters and final same-EXE live WSS/DPI/soak/human/signing gates remain
+> open. `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-PLAYER-MOTION-CONTINUITY-REPORT.md`.
+
 > Windows-native VIS-01 player-sprite geometry/package checkpoint
 > (2026-08-28): implementation revision
 > `7fa5369bcb6767ad5f1d1e1e0f07cac6bae8f7a6` removes the invented 48x64

@@ -1,5 +1,21 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-28 VIS-01 continuous player-locomotion checkpoint: revision
+> `532ddc6be0a0c38313fdd39fe9e0af82b883371b` makes overlapping native
+> player Walk/Run segments continue from the prior segment's current
+> fractional coordinate, restarts the visible phase with the matching
+> authoritative sequence, and rejects the bounded self stale-source echo that
+> previously could move both actor and camera back to the old tile. Only stale
+> locomotion is replaced; queued combat remains FIFO, and monster/NPC paths do
+> not use the player-only frame override. Runtime passes 194/194 and Windows
+> passes 443/443, with independent P0=0/P1=0 player and Web/Crystal reviews.
+> This head has not produced or launched an exact-revision EXE and has no new
+> screenshot or human feel evidence. Mounted Walk eight-phase cadence,
+> packet-carried timing, complete player actions, UI/chat, mouse combat,
+> skills/VFX and final authenticated same-EXE live WSS, real DPI, 30-minute
+> native soak, human acceptance and formal publisher signing remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-08-28 VIS-01 player-sprite geometry/package checkpoint: native Windows
 > no longer invents a 48x64 rectangle when a player frame is absent from the
 > entity atlas. The ten packaged player families use exact per-frame Crystal

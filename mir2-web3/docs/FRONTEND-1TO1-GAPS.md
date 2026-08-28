@@ -2,6 +2,24 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-01 continuous player-locomotion bounded
+> checkpoint: revision `532ddc6be0a0c38313fdd39fe9e0af82b883371b`
+> aligns ordinary overlapping Walk/Run presentation with the already-working
+> Web model: the next segment starts from the current fractional coordinate,
+> its animation sequence/phase starts atomically with the native motion
+> window, and a direction/source-bounded self echo cannot roll actor and
+> camera back. The opt-in runtime replacement applies only to player
+> locomotion with an empty queue, so waiting Attack/Struck/Die actions retain
+> FIFO semantics; monster/NPC presentation is excluded from the visible-frame
+> override. Runtime passes 194/194 and Windows passes 443/443; independent
+> player and Web/Crystal reviews report P0=0/P1=0. No exact-head EXE/package,
+> live screenshot, DPI, soak or human-feel evidence exists for this revision.
+> Mounted Walk still needs its Crystal eight-phase window and Windows still
+> does not consume packet-carried movement start/end timing. The complete
+> player/UI/VFX/monster semantic denominators and final device/human/signing
+> gates remain open; `globalParityPercent=null` and
+> `visualAccepted=false`.
+
 > 2026-08-28 Windows-native VIS-01 player-sprite geometry/package bounded
 > checkpoint: revision `7fa5369bcb6767ad5f1d1e1e0f07cac6bae8f7a6`
 > replaces the repository-only 48x64 atlas-miss placeholder with exact
