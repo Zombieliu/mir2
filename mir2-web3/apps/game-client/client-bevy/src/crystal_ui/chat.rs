@@ -15,7 +15,6 @@ use mir2_ui_core::action::UiAction;
 use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
 use super::spec;
-#[cfg(test)]
 use super::spec::CrystalRect;
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 
@@ -28,6 +27,9 @@ pub const CHAT_FRAME_INDEX: u16 = 2221;
 pub const CHAT_LINE_HEIGHT: f32 = 13.0;
 /// Source chat labels begin one pixel inside the panel.
 pub const CHAT_TEXT_ORIGIN: (f32, f32) = (1.0, 1.0);
+/// Crystal's in-frame `MirTextBox`: hidden until chat owns keyboard focus.
+pub const CHAT_INPUT_ORIGIN: (f32, f32) = (1.0, 54.0);
+pub const CHAT_INPUT_SIZE: (f32, f32) = (627.0, 13.0);
 /// The scroll controls occupy the rightmost twelve pixels of the panel.
 pub const CHAT_SCROLL_LEFT: f32 = 618.0;
 /// MainDialog is currently 950 and the native shell is 1000; chat sits above
@@ -129,6 +131,14 @@ impl CrystalChatWindowSize {
             Self::Small => 2012,
             Self::Medium => 2013,
             Self::Large => 2014,
+        }
+    }
+
+    pub fn vertical_offset(self) -> f32 {
+        match self {
+            Self::Small => 0.0,
+            Self::Medium => 48.0,
+            Self::Large => 96.0,
         }
     }
 
@@ -236,6 +246,11 @@ pub struct CrystalChatRoot;
 /// chat layer without depending on implementation details.
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalChatElement;
+
+/// Marker for the real Crystal-positioned chat draft field. The field is
+/// absent while chat is unfocused, matching `ChatTextBox.Visible = false`.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalChatInput;
 
 /// A typed, presentation-only result of pressing a Crystal chat control.
 ///
@@ -757,6 +772,10 @@ fn render_crystal_chat(
     let settings_draft = player_ui
         .as_deref()
         .map(|ui| ui.core.chat_settings_draft.unwrap_or(ui.core.chat_settings));
+    let chat_input_draft = player_ui
+        .as_deref()
+        .filter(|ui| ui.core.chat_focused())
+        .map(|ui| ui.chat_draft.clone());
     let filtered = filtered_lines(chat, &state);
     let line_count = state.line_count();
     let visible = visible_chat_slice(&filtered, state.scroll, line_count);
@@ -766,7 +785,7 @@ fn render_crystal_chat(
         CrystalChatWindowSize::Large => spec::hud::CHAT_ELEVEN_LINES,
     };
     commands.entity(root).with_children(|parent| {
-        spawn_chat_control_bar(parent, &asset_server);
+        spawn_chat_control_bar(parent, &asset_server, state.window_size);
         spawn_chat_frame_with_spec(
             parent,
             &asset_server,
@@ -775,7 +794,16 @@ fn render_crystal_chat(
         );
 
         for (index, line) in visible.iter().enumerate() {
-            spawn_chat_line(parent, line, index, state.applied_settings.transparent);
+            spawn_chat_line(
+                parent,
+                line,
+                index,
+                state.window_size,
+                state.applied_settings.transparent,
+            );
+        }
+        if let Some(draft) = chat_input_draft.as_deref() {
+            spawn_chat_input(parent, state.window_size, draft);
         }
 
         // These coordinates and frame triples are copied from ChatDialog's
@@ -786,7 +814,8 @@ fn render_crystal_chat(
             2018,
             2019,
             2020,
-            scroll_button_origin(CrystalChatAction::Home),
+            state.window_size,
+            scroll_button_origin(CrystalChatAction::Home, state.window_size),
             CrystalChatAction::Home,
         );
         spawn_chat_button(
@@ -795,7 +824,8 @@ fn render_crystal_chat(
             2021,
             2022,
             2023,
-            scroll_button_origin(CrystalChatAction::Up),
+            state.window_size,
+            scroll_button_origin(CrystalChatAction::Up, state.window_size),
             CrystalChatAction::Up,
         );
         spawn_chat_button(
@@ -804,7 +834,8 @@ fn render_crystal_chat(
             2024,
             2025,
             2026,
-            scroll_button_origin(CrystalChatAction::Down),
+            state.window_size,
+            scroll_button_origin(CrystalChatAction::Down, state.window_size),
             CrystalChatAction::Down,
         );
         spawn_chat_button(
@@ -813,16 +844,20 @@ fn render_crystal_chat(
             2027,
             2028,
             2029,
-            scroll_button_origin(CrystalChatAction::End),
+            state.window_size,
+            scroll_button_origin(CrystalChatAction::End, state.window_size),
             CrystalChatAction::End,
         );
+        let count_bar_index = state.window_size.count_bar_index();
+        let (count_bar_width, count_bar_height) = prguse_frame_size(count_bar_index);
         spawn_chat_frame_at(
             parent,
             &asset_server,
-            2012,
+            state.window_size,
+            count_bar_index,
             (CHAT_SCROLL_LEFT + 4.0, 16.0),
-            4.0,
-            21.0,
+            count_bar_width,
+            count_bar_height,
         );
         spawn_chat_button(
             parent,
@@ -830,7 +865,8 @@ fn render_crystal_chat(
             2015,
             2016,
             2017,
-            (CHAT_SCROLL_LEFT + 1.0, 16.0),
+            state.window_size,
+            position_bar_origin(state.window_size, state.scroll, filtered.len()),
             CrystalChatAction::PositionBar,
         );
         if settings_open {
@@ -842,25 +878,6 @@ fn render_crystal_chat(
             );
         }
     });
-}
-
-fn spawn_chat_frame(parent: &mut ChildSpawnerCommands, asset_server: &AssetServer) {
-    let frame = spec::hud::CHAT_FOUR_LINES;
-    parent.spawn((
-        CrystalChatElement,
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(frame.rect.left),
-            top: Val::Px(frame.rect.top),
-            width: Val::Px(frame.rect.width),
-            height: Val::Px(frame.rect.height),
-            ..default()
-        },
-        ImageNode {
-            image: asset_server.load(prguse_asset(CHAT_FRAME_INDEX)),
-            ..default()
-        },
-    ));
 }
 
 fn spawn_chat_frame_with_spec(
@@ -1131,16 +1148,21 @@ fn spawn_chat_settings_button(
     ));
 }
 
-fn spawn_chat_control_bar(parent: &mut ChildSpawnerCommands, asset_server: &AssetServer) {
+fn spawn_chat_control_bar(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    window_size: CrystalChatWindowSize,
+) {
     let frame = spec::hud::CHAT_CONTROL_BAR;
+    let rect = chat_control_bar_rect(window_size);
     parent.spawn((
         CrystalChatElement,
         Node {
             position_type: PositionType::Absolute,
-            left: Val::Px(frame.rect.left),
-            top: Val::Px(frame.rect.top),
-            width: Val::Px(frame.rect.width),
-            height: Val::Px(frame.rect.height),
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
             ..default()
         },
         ImageNode {
@@ -1168,6 +1190,7 @@ fn spawn_chat_control_bar(parent: &mut ChildSpawnerCommands, asset_server: &Asse
             normal,
             normal + 1,
             normal + 2,
+            window_size,
             (relative_left, -14.0),
             action,
         );
@@ -1177,12 +1200,13 @@ fn spawn_chat_control_bar(parent: &mut ChildSpawnerCommands, asset_server: &Asse
 fn spawn_chat_frame_at(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
+    window_size: CrystalChatWindowSize,
     frame_index: u16,
     relative_origin: (f32, f32),
     width: f32,
     height: f32,
 ) {
-    let (left, top) = child_screen_origin(relative_origin);
+    let (left, top) = child_screen_origin_for(window_size, relative_origin);
     parent.spawn((
         CrystalChatElement,
         Node {
@@ -1204,13 +1228,17 @@ fn spawn_chat_line(
     parent: &mut ChildSpawnerCommands,
     line: &ChatLine,
     row: usize,
+    window_size: CrystalChatWindowSize,
     transparent: bool,
 ) {
     let colors = channel_colors(&line.channel);
-    let (left, top) = child_screen_origin((
-        CHAT_TEXT_ORIGIN.0,
-        CHAT_TEXT_ORIGIN.1 + row as f32 * CHAT_LINE_HEIGHT,
-    ));
+    let (left, top) = child_screen_origin_for(
+        window_size,
+        (
+            CHAT_TEXT_ORIGIN.0,
+            CHAT_TEXT_ORIGIN.1 + row as f32 * CHAT_LINE_HEIGHT,
+        ),
+    );
 
     parent.spawn((
         CrystalChatElement,
@@ -1227,6 +1255,31 @@ fn spawn_chat_line(
         Text::new(line.text.clone()),
         crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
         TextColor(chat_color(colors.foreground, transparent)),
+    ));
+}
+
+fn spawn_chat_input(
+    parent: &mut ChildSpawnerCommands,
+    window_size: CrystalChatWindowSize,
+    draft: &str,
+) {
+    let rect = chat_input_rect(window_size);
+    parent.spawn((
+        CrystalChatElement,
+        CrystalChatInput,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(rgb8(169, 169, 169)),
+        Text::new(draft.to_owned()),
+        crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+        TextColor(Color::BLACK),
     ));
 }
 
@@ -1252,10 +1305,11 @@ fn spawn_chat_button(
     normal: u16,
     hover: u16,
     pressed: u16,
+    window_size: CrystalChatWindowSize,
     relative_origin: (f32, f32),
     action: CrystalChatAction,
 ) {
-    let (left, top) = child_screen_origin(relative_origin);
+    let (left, top) = child_screen_origin_for(window_size, relative_origin);
     let (width, height) = prguse_frame_size(normal);
     parent.spawn((
         CrystalChatElement,
@@ -1346,23 +1400,73 @@ fn chat_asset(library: CrystalChatAssetLibrary, index: u16) -> String {
     }
 }
 
-fn scroll_button_origin(action: CrystalChatAction) -> (f32, f32) {
+fn scroll_button_origin(
+    action: CrystalChatAction,
+    window_size: CrystalChatWindowSize,
+) -> (f32, f32) {
+    let offset = window_size.vertical_offset();
     match action {
         CrystalChatAction::Home => (CHAT_SCROLL_LEFT, 1.0),
         CrystalChatAction::Up => (CHAT_SCROLL_LEFT, 9.0),
-        CrystalChatAction::Down => (CHAT_SCROLL_LEFT, 39.0),
-        CrystalChatAction::End => (CHAT_SCROLL_LEFT, 45.0),
+        CrystalChatAction::Down => (CHAT_SCROLL_LEFT, 39.0 + offset),
+        CrystalChatAction::End => (CHAT_SCROLL_LEFT, 45.0 + offset),
         CrystalChatAction::PositionBar => (CHAT_SCROLL_LEFT + 1.0, 16.0),
         _ => panic!("chat control-bar action has no scroll origin"),
     }
 }
 
+fn position_bar_origin(
+    window_size: CrystalChatWindowSize,
+    scroll: usize,
+    history_len: usize,
+) -> (f32, f32) {
+    let count_bar_height = prguse_frame_size(window_size.count_bar_index()).1;
+    let position_bar_height = prguse_frame_size(2015).1;
+    let track_height = (count_bar_height - position_bar_height).max(0.0);
+    let y = if history_len > 1 {
+        let index = scroll.min(history_len - 1) as f32;
+        16.0 + (track_height / (history_len - 1) as f32 * index).trunc()
+    } else {
+        16.0
+    };
+    (CHAT_SCROLL_LEFT + 1.0, y)
+}
+
 /// Convert a coordinate relative to ChatDialog into the 1024x768 stage.
 pub fn child_screen_origin(relative_origin: (f32, f32)) -> (f32, f32) {
+    child_screen_origin_for(CrystalChatWindowSize::Small, relative_origin)
+}
+
+pub fn child_screen_origin_for(
+    window_size: CrystalChatWindowSize,
+    relative_origin: (f32, f32),
+) -> (f32, f32) {
+    let frame = window_size.spec_rect();
     (
-        CHAT_PANEL_ORIGIN.0 + relative_origin.0,
-        CHAT_PANEL_ORIGIN.1 + relative_origin.1,
+        frame.left + relative_origin.0,
+        frame.top + relative_origin.1,
     )
+}
+
+pub fn chat_control_bar_rect(window_size: CrystalChatWindowSize) -> CrystalRect {
+    let source = spec::hud::CHAT_CONTROL_BAR.rect;
+    CrystalRect::new(
+        source.left,
+        source.top - window_size.vertical_offset(),
+        source.width,
+        source.height,
+    )
+}
+
+pub fn chat_input_rect(window_size: CrystalChatWindowSize) -> CrystalRect {
+    let (left, top) = child_screen_origin_for(
+        window_size,
+        (
+            CHAT_INPUT_ORIGIN.0,
+            CHAT_INPUT_ORIGIN.1 + window_size.vertical_offset(),
+        ),
+    );
+    CrystalRect::new(left, top, CHAT_INPUT_SIZE.0, CHAT_INPUT_SIZE.1)
 }
 
 /// Return the newest `line_count` filtered entries as visible slice.
@@ -1440,6 +1544,8 @@ fn rgb8(red: u8, green: u8, blue: u8) -> Color {
 fn prguse_frame_size(index: u16) -> (f32, f32) {
     match index {
         2012 => (4.0, 21.0),
+        2013 => (4.0, 69.0),
+        2014 => (4.0, 117.0),
         2015..=2017 => (8.0, 14.0),
         2018..=2020 | 2027..=2029 => (12.0, 8.0),
         2021..=2026 => (12.0, 6.0),
@@ -1502,6 +1608,7 @@ pub fn is_z_order_correct() -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bevy::asset::{AssetApp, AssetPlugin};
 
     fn packet_fixture(packet: &str, payload: &str) -> Option<ChatLine> {
         let value: serde_json::Value = serde_json::from_str(payload).ok()?;
@@ -1749,6 +1856,117 @@ mod tests {
     }
 
     #[test]
+    fn every_chat_size_moves_its_frame_text_and_control_bar_together() {
+        for (window_size, frame_top, control_top) in [
+            (CrystalChatWindowSize::Small, 671.0, 656.0),
+            (CrystalChatWindowSize::Medium, 623.0, 608.0),
+            (CrystalChatWindowSize::Large, 575.0, 560.0),
+        ] {
+            assert_eq!(
+                child_screen_origin_for(window_size, CHAT_TEXT_ORIGIN),
+                (231.0, frame_top + 1.0)
+            );
+            assert_eq!(
+                chat_control_bar_rect(window_size),
+                CrystalRect::new(230.0, control_top, 632.0, 16.0)
+            );
+
+            let down = child_screen_origin_for(
+                window_size,
+                scroll_button_origin(CrystalChatAction::Down, window_size),
+            );
+            let end = child_screen_origin_for(
+                window_size,
+                scroll_button_origin(CrystalChatAction::End, window_size),
+            );
+            assert_eq!(down, (848.0, 710.0));
+            assert_eq!(end, (848.0, 716.0));
+        }
+    }
+
+    #[test]
+    fn focused_chat_input_stays_at_crystal_bottom_for_all_window_sizes() {
+        for window_size in [
+            CrystalChatWindowSize::Small,
+            CrystalChatWindowSize::Medium,
+            CrystalChatWindowSize::Large,
+        ] {
+            assert_eq!(
+                chat_input_rect(window_size),
+                CrystalRect::new(231.0, 725.0, 627.0, 13.0)
+            );
+        }
+        assert_eq!(prguse_frame_size(2012), (4.0, 21.0));
+        assert_eq!(prguse_frame_size(2013), (4.0, 69.0));
+        assert_eq!(prguse_frame_size(2014), (4.0, 117.0));
+    }
+
+    #[test]
+    fn chat_input_entity_exists_only_while_the_authoritative_ui_state_is_focused() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<ChatModel>()
+            .init_resource::<CrystalChatState>()
+            .init_resource::<NativePlayerUiState>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Startup, spawn_chat_root)
+            .add_systems(Update, render_crystal_chat);
+
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query::<&CrystalChatInput>()
+                .iter(app.world())
+                .count(),
+            0,
+            "Crystal hides ChatTextBox until chat owns focus"
+        );
+
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.chat_focused = true;
+            ui.chat_draft = "hello".to_owned();
+        }
+        app.update();
+        let world = app.world_mut();
+        let (_, node, text, background, color) = world
+            .query::<(
+                &CrystalChatInput,
+                &Node,
+                &Text,
+                &BackgroundColor,
+                &TextColor,
+            )>()
+            .single(world)
+            .expect("focused Crystal chat input");
+        assert_eq!(node.left, Val::Px(231.0));
+        assert_eq!(node.top, Val::Px(725.0));
+        assert_eq!(node.width, Val::Px(627.0));
+        assert_eq!(node.height, Val::Px(13.0));
+        assert_eq!(text.0, "hello");
+        assert_eq!(background.0, rgb8(169, 169, 169));
+        assert_eq!(color.0, Color::BLACK);
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .chat_focused = false;
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query::<&CrystalChatInput>()
+                .iter(app.world())
+                .count(),
+            0
+        );
+    }
+
+    #[test]
     fn recent_four_selection_preserves_newest_source_order() {
         let mut model = ChatModel::default();
         for index in 0..6 {
@@ -1796,10 +2014,22 @@ mod tests {
         assert_eq!(prguse_frame_size(2020), (12.0, 8.0));
         assert_eq!(prguse_frame_size(2024), (12.0, 6.0));
         assert_eq!(prguse_frame_size(2029), (12.0, 8.0));
-        assert_eq!(scroll_button_origin(CrystalChatAction::Home), (618.0, 1.0));
-        assert_eq!(scroll_button_origin(CrystalChatAction::Up), (618.0, 9.0));
-        assert_eq!(scroll_button_origin(CrystalChatAction::Down), (618.0, 39.0));
-        assert_eq!(scroll_button_origin(CrystalChatAction::End), (618.0, 45.0));
+        assert_eq!(
+            scroll_button_origin(CrystalChatAction::Home, CrystalChatWindowSize::Small),
+            (618.0, 1.0)
+        );
+        assert_eq!(
+            scroll_button_origin(CrystalChatAction::Up, CrystalChatWindowSize::Small),
+            (618.0, 9.0)
+        );
+        assert_eq!(
+            scroll_button_origin(CrystalChatAction::Down, CrystalChatWindowSize::Small),
+            (618.0, 39.0)
+        );
+        assert_eq!(
+            scroll_button_origin(CrystalChatAction::End, CrystalChatWindowSize::Small),
+            (618.0, 45.0)
+        );
     }
 
     // -----------------------------------------------------------------------

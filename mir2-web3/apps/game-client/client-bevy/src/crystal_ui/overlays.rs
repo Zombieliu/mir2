@@ -4879,8 +4879,8 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut all.p7(),
-            state.chat_focused(),
-            |parent| render_chat_draft(parent, &state.chat_draft),
+            false,
+            |_| {},
         );
     }
     {
