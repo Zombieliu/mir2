@@ -4312,39 +4312,76 @@ fn sync_entity_render_layers(
             (entity_interp_offset(entity, motion_table.now_ms), source)
         };
         presentation_poses.record_entity(&entity.object_id, motion_offset, pose_source);
+
+        // A player is one visual composite. Preflight every current body/hair/
+        // weapon layer before mutating any of them; otherwise one ready atlas
+        // page can advance while another layer still retains its previous page,
+        // briefly assembling one actor from different action frames.
+        let has_retained_actor_layer = entity.layers.iter().any(|layer| {
+            entity_render_layer_is_actor(entity, layer)
+                && registry
+                    .entity_render_layers
+                    .contains_key(&entity_render_layer_key(entity, layer))
+        });
+        let defer_actor_composite = has_retained_actor_layer
+            && entity.layers.iter().any(|layer| {
+                if !entity_render_layer_is_actor(entity, layer) {
+                    return false;
+                }
+                let layer_key = entity_render_layer_key(entity, layer);
+                let image_binding =
+                    entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
+                let image_source_changed =
+                    registry
+                        .entity_render_layers
+                        .get(&layer_key)
+                        .map_or(true, |handle| {
+                            handle.image_key != image_binding.image_key
+                                || handle.atlas_key != image_binding.atlas_key
+                        });
+                image_source_changed
+                    && !entity_render_image_is_ready(&image_binding, &asset_server, &atlas_assets)
+            });
+
         for layer in &entity.layers {
-            let layer_key = if layer.key.is_empty() {
-                format!("{}:{}", entity.object_id, layer.path)
-            } else {
-                layer.key.clone()
-            };
+            let layer_key = entity_render_layer_key(entity, layer);
             alive.insert(layer_key.clone());
             let position = entity_render_layer_position(snapshot, layer, motion_offset);
+            let actor_layer = entity_render_layer_is_actor(entity, layer);
+            if actor_layer && defer_actor_composite {
+                if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
+                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        transform.translation = position;
+                        if layer.additive {
+                            transform.scale =
+                                Vec3::new(layer.width.max(1.0), layer.height.max(1.0), 1.0);
+                        }
+                    }
+                }
+                continue;
+            }
             let opacity = layer.opacity.unwrap_or(1.0);
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 
-            // Keep the previously visible image bound until a replacement page
-            // or standalone PNG has actually decoded into Assets<Image>. The map
-            // renderer already performs this kind of ready-before-commit handoff;
-            // without it, an ordinary body/hair/weapon page switch can expose a
-            // one-frame empty handle and appear as a faint actor flash. Rect-only
-            // animation on the same resident image remains immediate.
-            if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
-                let image_source_changed = handle.image_key != image_binding.image_key
-                    || handle.atlas_key != image_binding.atlas_key;
-                let uploaded_image_ready = image_binding
-                    .atlas_key
-                    .as_ref()
-                    .and_then(|atlas_key| atlas_assets.images.get(atlas_key))
-                    .is_some_and(|image| image.id() == image_binding.image.id());
-                let image_ready = uploaded_image_ready
-                    || asset_server.is_loaded_with_dependencies(image_binding.image.id());
-                if image_source_changed && !image_ready {
-                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
-                        transform.translation = position;
+            // Non-actor decoration/effect layers keep their independent ready
+            // handoff; they must not stall the body/hair/weapon composite.
+            if !actor_layer {
+                if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
+                    let image_source_changed = handle.image_key != image_binding.image_key
+                        || handle.atlas_key != image_binding.atlas_key;
+                    if image_source_changed
+                        && !entity_render_image_is_ready(
+                            &image_binding,
+                            &asset_server,
+                            &atlas_assets,
+                        )
+                    {
+                        if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                            transform.translation = position;
+                        }
+                        continue;
                     }
-                    continue;
                 }
             }
 
@@ -4487,6 +4524,37 @@ struct EntityRenderImageBinding {
     atlas_rect_key: Option<String>,
     image_rect: Option<Rect>,
     uv_scale_offset: Vec4,
+}
+
+fn entity_render_layer_key(entity: &EntityRenderEntry, layer: &EntityRenderLayer) -> String {
+    if layer.key.is_empty() {
+        format!("{}:{}", entity.object_id, layer.path)
+    } else {
+        layer.key.clone()
+    }
+}
+
+fn entity_render_layer_is_actor(entity: &EntityRenderEntry, layer: &EntityRenderLayer) -> bool {
+    let prefix = format!("{}:", entity.object_id);
+    layer.key.strip_prefix(&prefix).is_some_and(|role| {
+        matches!(
+            role,
+            "mount" | "weapon-primary" | "weapon-secondary" | "body" | "hair"
+        )
+    })
+}
+
+fn entity_render_image_is_ready(
+    binding: &EntityRenderImageBinding,
+    asset_server: &AssetServer,
+    atlas_assets: &RuntimeEntityRenderAtlases,
+) -> bool {
+    let uploaded_image_ready = binding
+        .atlas_key
+        .as_ref()
+        .and_then(|atlas_key| atlas_assets.images.get(atlas_key))
+        .is_some_and(|image| image.id() == binding.image.id());
+    uploaded_image_ready || asset_server.is_loaded_with_dependencies(binding.image.id())
 }
 
 fn entity_additive_material_key(layer_key: &str) -> String {
@@ -5862,6 +5930,118 @@ mod entity_atlas_tests {
                 .id(),
             original_image,
             "an undecoded replacement image must not blank the visible actor"
+        );
+    }
+
+    #[test]
+    fn unready_actor_layer_defers_the_whole_composite() {
+        let mut app = entity_sync_test_app();
+        let initial: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true,
+            "stageWidth": 1024,
+            "stageHeight": 768,
+            "entities": [{
+                "objectId": "1001",
+                "layers": [
+                    {
+                        "key": "1001:body",
+                        "path": "/original-ui/CArmour/00/body-old.png",
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005
+                    },
+                    {
+                        "key": "1001:hair",
+                        "path": "/original-ui/CHair/00/hair-old.png",
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50006
+                    }
+                ]
+            }]
+        }))
+        .expect("initial actor composite");
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(initial);
+        app.update();
+
+        let initial_keys = {
+            let registry = app.world().resource::<SceneRegistry>();
+            [
+                registry.entity_render_layers["1001:body"].image_key.clone(),
+                registry.entity_render_layers["1001:hair"].image_key.clone(),
+            ]
+        };
+
+        let ready_body_image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("ready:p0".to_owned(), ready_body_image);
+        let mixed_ready: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true,
+            "stageWidth": 1024,
+            "stageHeight": 768,
+            "atlases": [{
+                "key": "ready:p0",
+                "width": 64,
+                "height": 64,
+                "rects": [{
+                    "key": "body-new",
+                    "x": 0,
+                    "y": 0,
+                    "width": 32,
+                    "height": 48
+                }]
+            }],
+            "entities": [{
+                "objectId": "1001",
+                "layers": [
+                    {
+                        "key": "1001:body",
+                        "path": "/original-ui/CArmour/00/body-new.png",
+                        "atlasKey": "ready:p0",
+                        "atlasRectKey": "body-new",
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005
+                    },
+                    {
+                        "key": "1001:hair",
+                        "path": "/original-ui/CHair/00/hair-unready.png",
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50006
+                    }
+                ]
+            }]
+        }))
+        .expect("mixed-ready actor composite");
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(mixed_ready);
+        app.update();
+
+        let registry = app.world().resource::<SceneRegistry>();
+        assert_eq!(
+            registry.entity_render_layers["1001:body"].image_key, initial_keys[0],
+            "ready body must wait for the unready hair layer"
+        );
+        assert_eq!(
+            registry.entity_render_layers["1001:hair"].image_key, initial_keys[1],
+            "hair retains the same prior composite frame"
         );
     }
 
