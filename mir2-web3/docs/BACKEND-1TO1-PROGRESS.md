@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> VIS-02 FireBall-family client-boundary checkpoint (2026-08-28): revision
+> `8d8c5f12f6faa4617ce87017f82738458f164bd9` changes no simulation,
+> shared Zone, Gateway, packet, skill damage or hit authority. The Windows
+> renderer now consumes its existing client-side Crystal action clock at
+> projectile completion: terminal `Dead` cancels the three audited impact
+> bitmaps and sounds, while `Die` and Revive-before-arrival do not. Windows
+> 410/410 and independent P0=0/P1=0 review pass. The Web equivalent, other
+> missile spells, complete skill denominator and device gates remain open; no
+> backend or global percentage is claimed.
+
 > VIS-04 Scarecrow Revive client-boundary checkpoint (2026-08-28): revision
 > `04121747c70d1c5487947f027d07b5209ca84f6c` changes no simulation,
 > Zone scheduler, Gateway, protocol or monster authority. The Windows adapter

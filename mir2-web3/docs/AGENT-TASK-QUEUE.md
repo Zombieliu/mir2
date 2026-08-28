@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> VIS-02 FireBall-family Dead-target bounded checkpoint (2026-08-28): revision
+> `8d8c5f12f6faa4617ce87017f82738458f164bd9` binds Windows native
+> FireBall, GreatFireBall and SoulFireBall completion to Crystal's exact
+> `Target.CurrentAction == Dead` condition. The shared presentation clock,
+> not the early `dead` boolean, gates both impact bitmap and impact sound;
+> `Die` and Revive-before-arrival are retained. Full Windows 410/410 and
+> independent P0=0/P1=0 review pass. Other missile spells, the Web equivalent,
+> the skill/effect denominator and all exact-head device/human/signing gates
+> remain open; `globalParityPercent` stays null. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-02-FIREBALL-DEAD-TARGET-REPORT.md`.
+
 > VIS-04 Scarecrow Revive bounded checkpoint (2026-08-28): revision
 > `04121747c70d1c5487947f027d07b5209ca84f6c` closes the exact
 > `Monster/005` remote Revive packet/render leaf. It fixes a native stale-0%

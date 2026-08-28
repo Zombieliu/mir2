@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 FireBall-family Dead-target checkpoint (2026-08-28): revision
+> `8d8c5f12f6faa4617ce87017f82738458f164bd9` closes the bounded Windows
+> completion-action leaf for FireBall, GreatFireBall and SoulFireBall. Their
+> shared native path now reads the same-frame Crystal presentation clock and
+> suppresses both impact bitmap and `+2` audio only for terminal `Dead`;
+> `dead=true` during `Die` and Revive-before-arrival retain the impact. Full
+> Windows 410/410 and independent P0=0/P1=0 review pass. Other missile spells,
+> the Web equivalent and the skill/effect denominator remain open; no EXE,
+> same-EXE/live-WSS, DPI, soak, human or signing gate is closed. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-02-FIREBALL-DEAD-TARGET-REPORT.md`.
+
 > VIS-04 Scarecrow Revive checkpoint (2026-08-28): revision
 > `04121747c70d1c5487947f027d07b5209ca84f6c` closes the bounded
 > `Monster/005` remote-revive presentation leaf across native/Web gates. The

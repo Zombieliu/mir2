@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> VIS-02 FireBall-family server-client note (2026-08-28): revision
+> `8d8c5f12f6faa4617ce87017f82738458f164bd9` adds no server packet or
+> authority. Existing target identity, spell and projectile timing feed a
+> client-owned Crystal completion callback: only the terminal rendered
+> `Dead` action suppresses FireBall, GreatFireBall and SoulFireBall impact
+> bitmap/audio; `Die` remains visible and audible. Windows 410/410 and review
+> pass. Other missiles, Web parity, live WSS and the complete denominator
+> remain open; no server or global percentage is reported.
+
 > VIS-04 Scarecrow Revive server-client note (2026-08-28): revision
 > `04121747c70d1c5487947f027d07b5209ca84f6c` adds no packet or
 > server authority. Existing `ObjectRevived` remains authoritative for life
