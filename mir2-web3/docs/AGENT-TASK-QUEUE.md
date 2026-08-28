@@ -1,5 +1,29 @@
 # Agent Task Queue
 
+> Shared-Zone wall-clock monster respawn checkpoint (2026-08-28): revision
+> `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` moves ordinary and
+> harvest-gated monster resurrection out of each personal
+> `SimulationSession` and into the single-writer `ZoneRuntime`. Crystal's
+> `D10/R30` delay distribution, Deer harvest gate, checkpoint/recovery due
+> time, late-join behavior and two-observer one-incarnation rule are covered.
+> A trusted NPC/dialog boundary now cancels queued movement before
+> `CallNpc`/quest adjacency checks, closing the Q4 return-to-Merchant race.
+> `shared_zone` passes 203/203; the ordinary client-packet Q1-to-Q4 Gateway
+> chain passes in 748.77 s including five real DeerMeat, turn-in, logout and
+> reload. This is a bounded shared-world authority checkpoint, not full Zone,
+> quest, economy, AI or whole-game parity; no global percentage is claimed.
+
+> VIS-03 main-HUD seven-button matrix checkpoint (2026-08-28): revision
+> `4f7efffca093cb59d0e4f468dbd08ea2c61d314f` binds Character,
+> Inventory, Skill, Quest and Option to exact `Prguse/1900..1914` geometry
+> and ButtonA (`103.wav`), plus Menu `Prguse/1960..1962` and GameShop
+> `Prguse/826..828` to ButtonC (`105.wav`). Real press edges, panel toggles,
+> exact asset paths and Candidate allowlists/identity are automated. This
+> commit deliberately excludes the still-uncommitted inventory expansion
+> draft. No exact-head EXE, screenshot, physical audio or human acceptance was
+> produced; the wider 410-leaf UI denominator and final device gates remain
+> open, so `globalParityPercent` stays null.
+
 > Visual/interation execution goal sync (2026-08-28): the Windows native
 > client is playable enough to expose the real gap, but it is not visually
 > complete. A live native Bichon window already shows terrain, actors, labels,

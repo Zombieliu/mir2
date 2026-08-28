@@ -1,5 +1,25 @@
 # Crystal Server Parity
 
+> Shared-Zone wall-clock respawn server checkpoint (2026-08-28): revision
+> `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` makes `ZoneRuntime`
+> the sole authority for monster death-to-new-incarnation scheduling. It
+> preserves the Crystal delay roll, harvestable corpse gate, recovery due time,
+> late-join suppression and one-revive/multi-observer semantics. A new trusted
+> `CancelPendingMovement` command is server-internal only; Gateway invokes it
+> before NPC/dialog and quest operations so an accepted Walk intent cannot
+> cross the interaction boundary. `shared_zone` 203/203, focused regressions,
+> dual-crate check and the ordinary Gateway Q1-to-Q4 turn-in/reload path pass.
+> This does not close all Zone persistence, cross-Gateway ownership, content or
+> AI semantics, and it adds no client-exposed debug authority. No server or
+> global percentage is reported.
+
+> VIS-03 seven-button HUD server-client note (2026-08-28): revision
+> `4f7efffca093cb59d0e4f468dbd08ea2c61d314f` is entirely local
+> presentation. It adds no packet, server state or gameplay authority; exact
+> `Prguse` button states and ButtonA/ButtonC cues are resolved from existing
+> client actions. Inventory expansion remains outside this commit. No exact-
+> head live WSS or whole-game percentage is reported.
+
 > VIS-04 Scarecrow Struck-audio server-client note (2026-08-28): revision
 > `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` adds no server packet or
 > authority. Crystal's client-owned `Monster/005` flinch-first plus optional

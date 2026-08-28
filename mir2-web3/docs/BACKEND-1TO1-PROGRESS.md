@@ -1,5 +1,27 @@
 # Backend 1:1 Progress
 
+> Shared-Zone monster respawn authority checkpoint (2026-08-28): revision
+> `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` removes the private
+> Session respawn timer and retains one wall-clock scheduler per Zone monster
+> incarnation. It preserves Crystal `D10/R30`, waits for harvest on the exact
+> audited harvestable-AI set, checkpoints absolute due times in world schema
+> v4 with v1-v3 compatibility, rejects late/stale living resyncs, and emits one
+> revive to two observers. Gateway mirrors lifecycle packets back into private
+> compatibility ECS state; NPC/dialog/AcceptQuest/FinishQuest boundaries first
+> cancel pending movement and force the Zone transform. `shared_zone` is
+> 203/203, focused Gateway/Zone regressions pass, `cargo check` passes, and the
+> ordinary Q1-to-Q4 client-packet/reload test passes in 748.77 s. Zone durable
+> persistence beyond this scheduler, cross-Gateway ownership and the complete
+> quest/economy/skill/monster-AI denominator remain open; no backend or global
+> percentage is claimed.
+
+> VIS-03 main-HUD client-boundary checkpoint (2026-08-28): revision
+> `4f7efffca093cb59d0e4f468dbd08ea2c61d314f` changes no simulation,
+> Gateway, protocol, persistence or Zone authority. It maps seven audited local
+> HUD controls to exact ButtonA/ButtonC assets and sounds, with Candidate
+> fail-closed identity checks. The still-open inventory expansion work was not
+> included. No backend percentage or whole-game parity claim is made.
+
 > VIS-04 Scarecrow Struck-audio client-boundary checkpoint (2026-08-28):
 > revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` changes no simulation,
 > shared-Zone, Gateway, protocol, persistence, combat or monster authority.

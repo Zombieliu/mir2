@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Shared-Zone respawn and VIS-03 HUD checkpoint (2026-08-28): backend
+> revision `7f991ec34fbde6ac07a5799b35d352f2785c1aa9` makes the
+> single-writer Zone the only monster-incarnation authority across death,
+> Deer harvest, wall-clock due time, checkpoint recovery and multi-session
+> observation. Its ordinary Gateway Q1-to-Q4 client-packet loop passes through
+> five real DeerMeat, NPC turn-in and reload; queued movement is canceled at
+> trusted NPC/dialog boundaries instead of weakening adjacency. Client
+> revision `4f7efffca093cb59d0e4f468dbd08ea2c61d314f` closes only the
+> seven visible main-HUD button asset/geometry/audio leaves. The next bounded
+> player-character leaf is Crystal corpse/body-name visibility and dead
+> offset; Scarecrow Revive and projectile-impact Dead-state suppression remain
+> queued for the monster and skill/effect waves. Complete Zone persistence,
+> cross-Gateway ownership, quests/economy/skills/AI and the semantic visual
+> denominator remain open. No whole-game percentage is authorized.
+
 > Visual/interaction execution goal sync (2026-08-28): the Windows native
 > client already exposes a playable Bichon baseline with terrain, actors,
 > labels, minimap, orb HUD, chat strip, quick bar and the visible right-side
