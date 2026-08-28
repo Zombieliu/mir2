@@ -3061,6 +3061,9 @@ where
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if let Some(payload) = event.payload.as_ref() {
+                        if let Some(world) = last_world_payload.as_mut() {
+                            apply_map_information_to_world_payload(world, payload);
+                        }
                         ui_cursor.observe_map_identity(payload);
                         let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
                             ui_cursor.to_read_model_json().to_string(),
@@ -3289,6 +3292,89 @@ where
         }
         _ => Ok(WorldSnapshotIngestOutcome::NotSnapshot),
     }
+}
+
+/// Fold the authoritative MapInformation identity into the retained personal
+/// snapshot before the destination UserLocation arrives.
+///
+/// The Web client applies this packet immediately. The native packet-first
+/// path used to overlay only the new coordinates onto the retained snapshot,
+/// leaving `mapFileName`, title and source-map population untouched. Entering
+/// `0141` therefore rendered map `0` at `(2, 11)` and kept the Bichon title.
+fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> bool {
+    let next_file_name = packet
+        .get("fileName")
+        .or_else(|| packet.get("mapFileName"))
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let previous_file_name = world
+        .get("mapFileName")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let map_changed = previous_file_name
+        .zip(next_file_name)
+        .is_some_and(|(previous, next)| {
+            normalize_map_file_name(previous) != normalize_map_file_name(next)
+        });
+
+    let Some(object) = world.as_object_mut() else {
+        return false;
+    };
+    for (source, destination) in [
+        ("mapIndex", "mapIndex"),
+        ("fileName", "mapFileName"),
+        ("title", "mapTitle"),
+        ("miniMapIndex", "miniMapIndex"),
+        ("bigMapIndex", "bigMapIndex"),
+        ("lights", "mapLightSetting"),
+        ("mapDarkLight", "mapDarkLight"),
+        ("weatherParticles", "weatherParticles"),
+        ("music", "mapMusic"),
+    ] {
+        if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
+            object.insert(destination.to_owned(), value.clone());
+        }
+    }
+    if !map_changed {
+        return false;
+    }
+
+    object.insert("selectedObjectId".to_owned(), Value::Null);
+    object.insert("activeNpcDialog".to_owned(), Value::Null);
+    for key in [
+        "groundDrops",
+        "mineNodes",
+        "mapTransfers",
+        "projectiles",
+        "effects",
+        "damageFloaters",
+        "terrainPatches",
+        "decorObjects",
+    ] {
+        object.insert(key.to_owned(), Value::Array(Vec::new()));
+    }
+
+    let player_object_id = object.get("playerObjectId").and_then(object_id_string);
+    if let Some(entities) = object.get_mut("entities").and_then(Value::as_array_mut) {
+        entities.retain(|entity| {
+            entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                || player_object_id.as_ref().is_some_and(|player_id| {
+                    entity.get("objectId").and_then(object_id_string).as_ref() == Some(player_id)
+                })
+        });
+    }
+    true
+}
+
+fn normalize_map_file_name(value: &str) -> String {
+    let normalized = value.trim().replace('\\', "/").to_ascii_lowercase();
+    normalized
+        .strip_suffix(".map.gz")
+        .or_else(|| normalized.strip_suffix(".map"))
+        .unwrap_or(&normalized)
+        .to_owned()
 }
 
 /// Quest operation acknowledgements correlate only the command that caused
@@ -5472,6 +5558,82 @@ mod tests {
             GatewayCommand::Wire(NativeOutboundCommand::Disconnect)
         )));
         assert!(batch.len() <= 8);
+    }
+
+    #[test]
+    fn map_information_replaces_retained_map_identity_and_source_population() {
+        let mut world = json!({
+            "mapIndex": 1,
+            "mapFileName": "0",
+            "mapTitle": "BichonProvince",
+            "miniMapIndex": 1,
+            "bigMapIndex": 1,
+            "playerObjectId": 1000,
+            "selectedObjectId": 2000,
+            "activeNpcDialog": {"npcObjectId": 2000},
+            "entities": [
+                {"objectId": 1000, "kind": "selfPlayer", "x": 302, "y": 622},
+                {"objectId": 2000, "kind": "npc", "name": "Old NPC"}
+            ],
+            "groundDrops": [{"objectId": 3000}],
+            "mineNodes": [{"x": 1, "y": 1}],
+            "mapTransfers": [{"x": 302, "y": 622}],
+            "projectiles": [{"id": 1}],
+            "effects": [{"id": 2}],
+            "damageFloaters": [{"id": 3}],
+            "terrainPatches": [{"id": 4}],
+            "decorObjects": [{"id": 5}]
+        });
+        let packet = json!({
+            "mapIndex": 141,
+            "fileName": "0141",
+            "title": "Field Wasp Trial",
+            "miniMapIndex": 0,
+            "bigMapIndex": 0,
+            "lights": 2,
+            "mapDarkLight": 1,
+            "weatherParticles": 0,
+            "music": 17
+        });
+
+        assert!(apply_map_information_to_world_payload(&mut world, &packet));
+        assert_eq!(world["mapIndex"], json!(141));
+        assert_eq!(world["mapFileName"], json!("0141"));
+        assert_eq!(world["mapTitle"], json!("Field Wasp Trial"));
+        assert_eq!(world["mapLightSetting"], json!(2));
+        assert_eq!(world["mapMusic"], json!(17));
+        assert!(world["selectedObjectId"].is_null());
+        assert!(world["activeNpcDialog"].is_null());
+        assert_eq!(world["entities"].as_array().unwrap().len(), 1);
+        assert_eq!(world["entities"][0]["objectId"], json!(1000));
+        for key in [
+            "groundDrops",
+            "mineNodes",
+            "mapTransfers",
+            "projectiles",
+            "effects",
+            "damageFloaters",
+            "terrainPatches",
+            "decorObjects",
+        ] {
+            assert!(world[key].as_array().unwrap().is_empty(), "{key}");
+        }
+    }
+
+    #[test]
+    fn equivalent_map_file_spellings_do_not_clear_the_live_scene() {
+        let mut world = json!({
+            "mapFileName": "0141.map",
+            "entities": [{"objectId": 7, "kind": "npc"}],
+            "groundDrops": [{"objectId": 8}]
+        });
+        assert!(!apply_map_information_to_world_payload(
+            &mut world,
+            &json!({"fileName": "0141.map.gz", "title": "Field Wasp Trial"})
+        ));
+        assert_eq!(world["entities"].as_array().unwrap().len(), 1);
+        assert_eq!(world["groundDrops"].as_array().unwrap().len(), 1);
+        assert_eq!(world["mapTitle"], json!("Field Wasp Trial"));
     }
 
     #[test]

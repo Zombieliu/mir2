@@ -444,9 +444,16 @@ impl NativeGameplayAdapter {
                 // NPC object ids and queued teleport requests even if no
                 // separate MapChanged packet follows.
                 match self.big_map.current_map_index {
-                    Some(current) if current != identity.map_index => self
-                        .big_map
-                        .reset_for_map(identity.map_index, identity.location),
+                    Some(current) if current != identity.map_index => {
+                        self.big_map
+                            .reset_for_map(identity.map_index, identity.location);
+                        // The shared Zone emits MapInformation followed by the
+                        // destination UserLocation. Treat the identity change
+                        // as a scene boundary even when no legacy MapChanged
+                        // packet follows, otherwise retained source-map actors
+                        // are merged into the first destination frame.
+                        self.clear_zone_state();
+                    }
                     // NewMapInfo may legitimately arrive before the first
                     // MapInformation bootstrap. With no prior map identity,
                     // adopting that identity must not discard the definition
@@ -5615,6 +5622,47 @@ mod tests {
         assert_eq!(model.current_map_index, Some(1));
         assert_eq!(model.active_map_index, Some(1));
         assert_eq!(model.player_location, Some(BigMapPoint { x: 257, y: 594 }));
+    }
+
+    #[test]
+    fn map_information_identity_change_clears_retained_source_zone_state() {
+        use crate::native_protocol::MapIdentity;
+
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(
+            !adapter.observe_packet(&PacketEvent::MapInformation(MapIdentity {
+                map_index: 1,
+                location: None,
+            }))
+        );
+        adapter.zone_entities.insert(
+            2000,
+            serde_json::Map::from_iter([
+                ("objectId".to_owned(), json!(2000)),
+                ("kind".to_owned(), json!("monster")),
+            ]),
+        );
+        adapter.zone_ground_drops.insert(
+            3000,
+            serde_json::Map::from_iter([("objectId".to_owned(), json!(3000))]),
+        );
+        adapter.effect_events.push_back(NativeEffectEvent {
+            sequence: 1,
+            generation: 1,
+            packet: "ObjectEffect".to_owned(),
+            payload: json!({"objectId": 2000}),
+        });
+
+        assert!(
+            !adapter.observe_packet(&PacketEvent::MapInformation(MapIdentity {
+                map_index: 141,
+                location: None,
+            }))
+        );
+        assert!(adapter.zone_entities.is_empty());
+        assert!(adapter.zone_ground_drops.is_empty());
+        assert!(adapter.effect_events.is_empty());
+        assert_eq!(adapter.big_map.current_map_index, Some(141));
     }
 
     #[test]

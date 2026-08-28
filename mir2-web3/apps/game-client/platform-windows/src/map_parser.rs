@@ -205,6 +205,87 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
     })
 }
 
+/// Parse Wemade's `Map 2010 Ver 1.0` format (Crystal `LoadMapType1`).
+///
+/// These maps use a 54-byte header, XOR-obfuscated dimensions/cell images and
+/// 15-byte x-major cells. Starter quest map `0141` uses this format, so
+/// retaining a type-100-only parser makes a real map transfer fall back to the
+/// previous map's pixels even though the authoritative packet names `0141`.
+pub fn parse_type1_map(bytes: &[u8]) -> Option<ParsedMap> {
+    const HEADER_BYTES: usize = 54;
+    const CELL_BYTES: usize = 15;
+    const BACK_IMAGE_XOR: i32 = 0xAA38_AA38_u32 as i32;
+
+    if bytes.len() < HEADER_BYTES
+        || bytes[0] != 0x10
+        || bytes[2] != 0x61
+        || bytes[7] != 0x31
+        || bytes[14] != 0x31
+    {
+        return None;
+    }
+
+    let raw_width = i16::from_le_bytes([bytes[21], bytes[22]]);
+    let xor = i16::from_le_bytes([bytes[23], bytes[24]]);
+    let raw_height = i16::from_le_bytes([bytes[25], bytes[26]]);
+    let decoded_width = raw_width ^ xor;
+    let decoded_height = raw_height ^ xor;
+    if decoded_width <= 0 || decoded_height <= 0 {
+        return None;
+    }
+    let width = u16::try_from(decoded_width).ok()?;
+    let height = u16::try_from(decoded_height).ok()?;
+    let cell_count = usize::from(width).checked_mul(usize::from(height))?;
+    let required = HEADER_BYTES.checked_add(cell_count.checked_mul(CELL_BYTES)?)?;
+    if bytes.len() < required {
+        return None;
+    }
+
+    let mut cells = Vec::with_capacity(cell_count);
+    let mut offset = HEADER_BYTES;
+    for _ in 0..cell_count {
+        let back_image = i32::from_le_bytes([
+            bytes[offset],
+            bytes[offset + 1],
+            bytes[offset + 2],
+            bytes[offset + 3],
+        ]) ^ BACK_IMAGE_XOR;
+        let middle_image = i16::from_le_bytes([bytes[offset + 4], bytes[offset + 5]]) ^ xor;
+        let front_image = i16::from_le_bytes([bytes[offset + 6], bytes[offset + 7]]) ^ xor;
+        let mut front_index = i16::from(bytes[offset + 12]) + 2;
+        if front_index == 102 {
+            front_index = 90;
+        }
+        if front_index >= 255 {
+            front_index = -1;
+        }
+        cells.push(MapCell {
+            back_index: 0,
+            back_image,
+            middle_index: 1,
+            middle_image,
+            front_index,
+            front_image,
+            front_animation_frame: bytes[offset + 10],
+            front_animation_tick: bytes[offset + 11],
+            middle_animation_frame: 0,
+            middle_animation_tick: 0,
+            light: bytes[offset + 13],
+        });
+        offset += CELL_BYTES;
+    }
+
+    Some(ParsedMap {
+        width,
+        height,
+        cells,
+    })
+}
+
+fn parse_crystal_map(bytes: &[u8]) -> Option<ParsedMap> {
+    parse_type100_map(bytes).or_else(|| parse_type1_map(bytes))
+}
+
 /// A map-cell light conversion hook for the later Windows gateway/main bridge.
 /// The map binary itself has no pixel offset: callers provide the resolved
 /// front-frame offset exported from the Crystal library, which is exactly what
@@ -1006,7 +1087,7 @@ pub fn load_map(map_file_name: &str) -> Option<ParsedMap> {
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
     let mut bytes = Vec::new();
     decoder.read_to_end(&mut bytes).ok()?;
-    let map = parse_type100_map(&bytes)?;
+    let map = parse_crystal_map(&bytes)?;
     if let Ok(mut cache) = parsed_map_cache().lock() {
         cache.insert(cache_key, map.clone());
     }
@@ -1174,6 +1255,63 @@ mod tests {
         assert_eq!(map.width, 2);
         assert_eq!(map.height, 2);
         assert_eq!(map.cells.len(), 4);
+    }
+
+    #[test]
+    fn type1_map_decodes_xor_dimensions_cells_and_crystal_index_rules() {
+        const XOR: i16 = 0x1234;
+        const BACK_IMAGE_XOR: i32 = 0xAA38_AA38_u32 as i32;
+        let mut bytes = vec![0_u8; 54 + 2 * 15];
+        bytes[0] = 0x10;
+        bytes[2] = 0x61;
+        bytes[7] = 0x31;
+        bytes[14] = 0x31;
+        bytes[21..23].copy_from_slice(&(2_i16 ^ XOR).to_le_bytes());
+        bytes[23..25].copy_from_slice(&XOR.to_le_bytes());
+        bytes[25..27].copy_from_slice(&(1_i16 ^ XOR).to_le_bytes());
+
+        let first = 54;
+        bytes[first..first + 4].copy_from_slice(&(0x2000_0005_i32 ^ BACK_IMAGE_XOR).to_le_bytes());
+        bytes[first + 4..first + 6].copy_from_slice(&(7_i16 ^ XOR).to_le_bytes());
+        bytes[first + 6..first + 8].copy_from_slice(&(9_i16 ^ XOR).to_le_bytes());
+        bytes[first + 10] = 0x82;
+        bytes[first + 11] = 3;
+        bytes[first + 12] = 100; // +2 == 102, which Crystal remaps to library 90.
+        bytes[first + 13] = 4;
+
+        let second = first + 15;
+        bytes[second..second + 4].copy_from_slice(&(1_i32 ^ BACK_IMAGE_XOR).to_le_bytes());
+        bytes[second + 4..second + 6].copy_from_slice(&(2_i16 ^ XOR).to_le_bytes());
+        bytes[second + 6..second + 8].copy_from_slice(&((0x8001_u16 as i16) ^ XOR).to_le_bytes());
+        bytes[second + 12] = 253; // +2 >= 255 becomes Crystal's missing library.
+
+        let map = parse_crystal_map(&bytes).expect("parse Map 2010 fixture");
+        assert_eq!((map.width, map.height, map.cells.len()), (2, 1, 2));
+        assert_eq!(map.cells[0].back_image, 0x2000_0005);
+        assert_eq!(map.cells[0].middle_image, 7);
+        assert_eq!(map.cells[0].front_image, 9);
+        assert_eq!(map.cells[0].front_index, 90);
+        assert_eq!(map.cells[0].front_animation_frame, 0x82);
+        assert_eq!(map.cells[0].front_animation_tick, 3);
+        assert_eq!(map.cells[0].light, 4);
+        assert_eq!(map.cells[1].front_image as u16, 0x8001);
+        assert_eq!(map.cells[1].front_index, -1);
+        assert!(map.cell_blocks_movement(0, 0));
+        assert!(map.cell_blocks_movement(1, 0));
+    }
+
+    #[test]
+    fn type1_map_rejects_truncated_cell_payload() {
+        const XOR: i16 = 0x1234;
+        let mut bytes = vec![0_u8; 54 + 14];
+        bytes[0] = 0x10;
+        bytes[2] = 0x61;
+        bytes[7] = 0x31;
+        bytes[14] = 0x31;
+        bytes[21..23].copy_from_slice(&(1_i16 ^ XOR).to_le_bytes());
+        bytes[23..25].copy_from_slice(&XOR.to_le_bytes());
+        bytes[25..27].copy_from_slice(&(1_i16 ^ XOR).to_le_bytes());
+        assert!(parse_type1_map(&bytes).is_none());
     }
 
     #[test]
