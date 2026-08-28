@@ -1,5 +1,30 @@
 # Agent Task Queue
 
+> Windows interaction/FireBounce/chat/Archer bounded checkpoints
+> (2026-08-28): revisions `9bccca3ae`, `90f861a9d`, `d0a30206d` and
+> `17b234911` close four automated leaves only. Native Windows now resolves
+> pixel-hit NPC/monster clicks and same-tile pickup, advances authoritative
+> movement on the wall clock while keeping the self camera locked, exposes the
+> Crystal DashAttack descriptor and discovers Arial; shared Zone plus native
+> presentation preserve FireBounce's delayed first hit and later hop travel
+> clocks; chat uses Crystal's 4/7/11-line geometry and focus-owned bottom input;
+> and the 12 unconditional Crystal Archer spells select AttackRange2 with the
+> AR body/hair/weapon libraries. Final automated regressions pass:
+> client-bevy native-ui 430/430, runtime 192/192, Windows 436/436 and shared
+> Zone 204/204. A Windows EXE containing all four revisions was built and
+> launched against local `ws://127.0.0.1:7110/ws`; it rendered map 0, but this
+> is plaintext loopback rather than authenticated live WSS. Empty-ground
+> left-click fallback, ElementalShot's conditional animation, other player
+> actions, FireBounce selector entropy, complete UI/skill/player denominators,
+> same-EXE authenticated WSS continuity, real DPI, 30-minute native soak,
+> human visual/audio/feel acceptance and publisher signing remain open.
+> `globalParityPercent=null`. Reports:
+> `VIS-01-PLAYER-MOTION-INPUT-REPORT.md`,
+> `VIS-02-FIRE-BOUNCE-REPORT.md`,
+> `VIS-03-CHAT-INPUT-REPORT.md` and
+> `VIS-01-ARCHER-ATTACK-RANGE2-REPORT.md` under
+> `docs/generated/player-qa/windows-visual-parity/`.
+
 > VIS-02 Hallucination bounded visual checkpoint (2026-08-28): revision
 > `60eae9561c5b18bc79456105e455d6964c14fafe` binds the Windows native
 > client to Crystal spell 76: no cast art/audio, a 600ms delayed 16-direction

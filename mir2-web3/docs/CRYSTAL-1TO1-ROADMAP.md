@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows interaction checkpoint (2026-08-28): revisions
+> `9bccca3ae`, `90f861a9d`, `d0a30206d` and `17b234911` advance four
+> source-bound leaves: interactive actor targeting/motion/DashAttack/font
+> support, shared-Zone and native FireBounce timing, Crystal chat sizing/input,
+> and Archer AttackRange2 frames plus AR libraries for the 12 unconditional
+> spell branches. The combined exact-code regression state is client-bevy
+> native-ui 430/430, runtime 192/192, Windows 436/436 and shared Zone 204/204.
+> The implementation bundle at `17b234911a44dd4df47d2e6d11270a5b7ca2370d`
+> also boots as a native 1024x768 EXE and connects to the local loopback
+> Gateway, proving a runnable current-source baseline—not authenticated live
+> WSS or visual acceptance. Empty-ground mouse fallback, remaining player
+> actions and ranged skills, FireBounce random-selector equivalence, all
+> complete semantic denominators and every DPI/soak/human/signing gate remain
+> open. No visual, Candidate-wide or whole-game percentage is authorized;
+> `globalParityPercent=null`.
+
 > Latest VIS-02 Hallucination checkpoint (2026-08-28): revision
 > `60eae9561c5b18bc79456105e455d6964c14fafe` closes the bounded native
 > spell-76 presentation leaf. It locks Crystal's absent cast phase, 600ms

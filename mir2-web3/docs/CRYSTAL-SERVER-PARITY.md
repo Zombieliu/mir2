@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> FireBounce server-client checkpoint (2026-08-28): revision `90f861a9d`
+> preserves Crystal's authoritative timing boundary across shared Zone and
+> Windows presentation. ObjectMagic owns the local first leg, whose hit is due
+> after `500ms + 50ms/tile`; a successful hit then selects at most one live,
+> hostile, path-clear target within radius three, emits an ObjectProjectile
+> for that hop and delays the next hit by `50ms/tile`. Pending hit, target
+> location and remaining bounces survive checkpoint replay. Native presentation
+> deduplicates only the legacy first-leg supplement and keeps later hop packets.
+> Shared Zone 204/204 and Windows 436/436 pass. The current deterministic Zone
+> selector remains an explicit difference from Crystal runtime randomness, and
+> this checkpoint does not close the complete spell, combat, persistence,
+> live-WSS, device, human or signing denominators. No server or global
+> percentage is reported.
+
 > VIS-02 Hallucination server-client note (2026-08-28): revision
 > `60eae9561c5b18bc79456105e455d6964c14fafe` adds no packet shape or
 > server authority. Existing spell id, target identity and movement feed the

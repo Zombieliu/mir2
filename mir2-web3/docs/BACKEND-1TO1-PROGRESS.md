@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> Shared-Zone FireBounce timing checkpoint (2026-08-28): revision
+> `90f861a9d` moves the skill's damage timing onto the authoritative Zone
+> clock. The initial target resolves at `500ms + 50ms * tile distance` without
+> a duplicate initial ObjectProjectile; each surviving hop is chosen only
+> after the prior hit resolves, remains within radius three with projectile
+> path clearance, emits its authoritative monster-to-monster projectile, and
+> resolves after `50ms * hop distance`. Checkpoint/replay retains pending hit
+> and remaining-hop state, while the Windows client consumes the delayed local
+> first missile and later authoritative hops without duplicate presentation.
+> Shared Zone 204/204, Windows 436/436 and focused exporter/Candidate gates
+> pass. Crystal's runtime-random candidate selection is not claimed equivalent
+> to the Zone's deterministic selector; full skill/combat denominators,
+> cross-Gateway ownership, durable Zone completion and all live/device/human/
+> signing gates remain open. No backend or global percentage is claimed.
+
 > VIS-02 Hallucination client-boundary checkpoint (2026-08-28): revision
 > `60eae9561c5b18bc79456105e455d6964c14fafe` changes no simulation,
 > shared Zone, Gateway, protocol, damage, hit or status authority. The Windows
