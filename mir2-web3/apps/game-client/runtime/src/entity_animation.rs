@@ -51,6 +51,7 @@ pub enum AnimationAction {
     Attack3,
     Attack4,
     AttackRange1,
+    DashAttack,
     Spell,
     Struck,
     Die,
@@ -184,6 +185,10 @@ impl AnimationCatalog {
             FrameDescriptor::from_crystal(96, 8, 0, 100, false),
         );
         catalog.add_default(
+            AnimationAction::DashAttack,
+            FrameDescriptor::from_crystal(80, 3, 3, 100, false),
+        );
+        catalog.add_default(
             AnimationAction::Spell,
             FrameDescriptor::from_crystal(296, 6, 0, 100, false),
         );
@@ -222,6 +227,13 @@ impl AnimationCatalog {
         );
         catalog.add_default(
             AnimationAction::Attack1,
+            FrameDescriptor::from_crystal(80, 6, 0, 100, false),
+        );
+        // Library-specific monster catalogs replace this with their generated
+        // DashAttack descriptor when Crystal defines one. Generic monsters
+        // fail visually soft to Attack1 instead of dropping the packet action.
+        catalog.add_default(
+            AnimationAction::DashAttack,
             FrameDescriptor::from_crystal(80, 6, 0, 100, false),
         );
         catalog.add_default(
@@ -1089,6 +1101,10 @@ mod tests {
         assert_eq!(
             player.descriptor(AnimationAction::Running),
             Some(&FrameDescriptor::from_crystal(80, 6, 0, 100, false))
+        );
+        assert_eq!(
+            player.descriptor(AnimationAction::DashAttack),
+            Some(&FrameDescriptor::from_crystal(80, 3, 3, 100, false))
         );
         assert_eq!(
             player.descriptor(AnimationAction::Struck),

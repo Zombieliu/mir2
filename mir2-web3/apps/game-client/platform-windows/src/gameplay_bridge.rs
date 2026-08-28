@@ -532,6 +532,32 @@ impl NativeGameplayAdapter {
                     }
                     true
                 }
+                "UserDashAttack" => {
+                    let Some(transform) = transform_from_payload(payload) else {
+                        return false;
+                    };
+                    let unchanged =
+                        self.authoritative_player_transform
+                            .as_ref()
+                            .is_some_and(|previous| {
+                                previous.x == transform.x
+                                    && previous.y == transform.y
+                                    && previous.direction == transform.direction
+                            });
+                    if unchanged {
+                        false
+                    } else {
+                        let location = BigMapPoint {
+                            x: transform.x,
+                            y: transform.y,
+                        };
+                        self.authoritative_player_transform = Some(transform);
+                        self.authoritative_player_animation =
+                            Some(self.next_animation_hint("dashAttack"));
+                        self.big_map.set_player_location(None, location);
+                        true
+                    }
+                }
                 // Compatibility for focused callers that still construct the
                 // legacy catch-all event directly. WebSocket parsing produces
                 // the typed MapChanged variant above.
@@ -592,6 +618,7 @@ impl NativeGameplayAdapter {
                 "MountUpdate" => self.patch_zone_entity_mount(payload),
                 "ObjectWalk" => self.patch_zone_entity_transform(payload, Some("walking")),
                 "ObjectRun" => self.patch_zone_entity_transform(payload, Some("running")),
+                "ObjectDashAttack" => self.patch_zone_entity_transform(payload, Some("dashAttack")),
                 "ObjectTurn" => self.patch_zone_entity_transform(payload, None),
                 "ObjectHarvest" => self.patch_zone_entity_action(payload, "harvest", true),
                 "ObjectHarvested" => {
@@ -4300,6 +4327,60 @@ mod tests {
             adapter.effect_events[1].payload["_nativeTarget"]["objectId"],
             1000
         );
+    }
+
+    #[test]
+    fn user_and_object_dash_attack_update_transform_and_native_action_once() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+            x: 288,
+            y: 616,
+            direction: Some("Down".to_owned()),
+        });
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserDashAttack".to_owned(),
+            payload: json!({
+                "location": {"x": 291, "y": 616},
+                "direction": "Right"
+            }),
+        }));
+        let mut self_payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut self_payload);
+        assert_eq!(self_payload["entities"][0]["x"], json!(291));
+        assert_eq!(self_payload["entities"][0]["direction"], json!("Right"));
+        assert_eq!(
+            self_payload["entities"][0]["_nativeAnimationAction"],
+            json!("dashAttack")
+        );
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserDashAttack".to_owned(),
+            payload: json!({
+                "location": {"x": 291, "y": 616},
+                "direction": "Right"
+            }),
+        }));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectPlayer".to_owned(),
+            payload: json!({
+                "objectId": 2002,
+                "location": {"x": 287, "y": 616},
+                "direction": "Left"
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectDashAttack".to_owned(),
+            payload: json!({
+                "objectId": 2002,
+                "location": {"x": 284, "y": 616},
+                "direction": "Left",
+                "distance": 3
+            }),
+        }));
+        let remote = adapter.zone_entities.get(&2002).expect("remote dash actor");
+        assert_eq!(remote["x"], json!(284));
+        assert_eq!(remote["direction"], json!("Left"));
+        assert_eq!(remote["_nativeAnimationAction"], json!("dashAttack"));
     }
 
     #[test]

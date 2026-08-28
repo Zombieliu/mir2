@@ -142,7 +142,8 @@ fn main() {
     );
     app.add_systems(
         bevy::app::Update,
-        input::mouse_npc_interaction_system
+        input::mouse_world_interaction_system
+            .after(entity_presentation::tick_native_entity_presentation)
             .before(gameplay_bridge::forward_quest_ui_intents)
             .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
     );

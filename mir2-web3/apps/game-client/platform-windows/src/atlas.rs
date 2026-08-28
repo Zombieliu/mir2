@@ -460,6 +460,7 @@ fn uses_assassin_alt(action: AnimationAction) -> bool {
             | AnimationAction::Attack2
             | AnimationAction::Attack3
             | AnimationAction::Attack4
+            | AnimationAction::DashAttack
             | AnimationAction::Spell
             | AnimationAction::Struck
             | AnimationAction::Die
@@ -610,6 +611,7 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         "attack3" => AnimationAction::Attack3,
         "attack4" => AnimationAction::Attack4,
         "attackRange1" => AnimationAction::AttackRange1,
+        "dashAttack" => AnimationAction::DashAttack,
         "spell" => AnimationAction::Spell,
         "struck" => AnimationAction::Struck,
         "die" => AnimationAction::Die,
@@ -962,7 +964,7 @@ fn build_entity_render_state_with_index(
                             layer["opacity"] = json!(0.5);
                         }
                     }
-                    json!({
+                    let mut rendered_entity = json!({
                         "objectId": object_id,
                         "kind": kind,
                         "isSelf": kind == "selfPlayer",
@@ -975,7 +977,20 @@ fn build_entity_render_state_with_index(
                             .is_some_and(|kind| matches!(kind, "player" | "monster" | "npc")),
                         "_nativeActorLayerCount": actor_layer_count,
                         "layers": layers,
-                    })
+                    });
+                    for field in [
+                        "motionFromX",
+                        "motionFromY",
+                        "motionToX",
+                        "motionToY",
+                        "motionStartedMs",
+                        "motionDurationMs",
+                    ] {
+                        if let Some(value) = entity.get(field).filter(|value| !value.is_null()) {
+                            rendered_entity[field] = value.clone();
+                        }
+                    }
+                    rendered_entity
                 })
                 .collect::<Vec<_>>()
         })
@@ -1626,6 +1641,40 @@ mod tests {
     }
 
     #[test]
+    fn entity_render_state_preserves_native_motion_window_for_runtime_interpolation() {
+        let payload = json!({
+            "sceneView": { "center": { "x": 9, "y": 7 } },
+            "entities": [{
+                "objectId": 2001,
+                "kind": "monster",
+                "x": 9,
+                "y": 7,
+                "direction": "down",
+                "motionFromX": 8.0,
+                "motionFromY": 7.0,
+                "motionToX": 9.0,
+                "motionToY": 7.0,
+                "motionStartedMs": 1700000000100_u64,
+                "motionDurationMs": 600,
+                "sprite": {
+                    "bodyLibrary": "Monster/003",
+                    "directionStride": 6,
+                    "frameBaseOffset": 0
+                }
+            }]
+        });
+
+        let state = build_entity_render_state(&payload).expect("starter manifest");
+        let entity = &state["entities"][0];
+        assert_eq!(entity["motionFromX"], json!(8.0));
+        assert_eq!(entity["motionFromY"], json!(7.0));
+        assert_eq!(entity["motionToX"], json!(9.0));
+        assert_eq!(entity["motionToY"], json!(7.0));
+        assert_eq!(entity["motionStartedMs"], json!(1_700_000_000_100_u64));
+        assert_eq!(entity["motionDurationMs"], json!(600));
+    }
+
+    #[test]
     fn animation_frame_override_selects_current_draw_frame() {
         let payload = json!({
             "sceneView": { "center": { "x": 9, "y": 7 } },
@@ -2079,6 +2128,10 @@ mod tests {
         let entity = &payload["entities"][0];
         assert_eq!(
             resolved_native_sprite(entity, AnimationAction::Die).body_library,
+            "/original-ui/AArmour/00"
+        );
+        assert_eq!(
+            resolved_native_sprite(entity, AnimationAction::DashAttack).body_library,
             "/original-ui/AArmour/00"
         );
         assert_eq!(

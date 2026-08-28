@@ -6,7 +6,7 @@
 //! movement; the client only expresses the request.
 
 use bevy::input::ButtonInput;
-use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Vec2, Window, With};
+use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Window, With};
 use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
@@ -17,6 +17,7 @@ use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
 
+use crate::entity_presentation::NativeEntityPresentation;
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
 use crate::native_protocol::NativeOutboundCommand;
 
@@ -25,15 +26,6 @@ const UP: &str = "up";
 const DOWN: &str = "down";
 const LEFT: &str = "left";
 const RIGHT: &str = "right";
-const STAGE_WIDTH: f32 = 1024.0;
-const STAGE_HEIGHT: f32 = 768.0;
-const ENTITY_ORIGIN_X: f32 = 480.0;
-const ENTITY_ORIGIN_Y: f32 = 352.0;
-const CELL_WIDTH: f32 = 48.0;
-const CELL_HEIGHT: f32 = 32.0;
-const NPC_HIT_HALF_WIDTH: f32 = 32.0;
-const NPC_HIT_TOP: f32 = 96.0;
-const NPC_HIT_BOTTOM: f32 = 18.0;
 
 /// Bevy resource holding the gateway command sender, injected by the host.
 #[derive(bevy::prelude::Resource)]
@@ -122,67 +114,61 @@ pub fn is_pointer_captured_for_movement(
     })
 }
 
-fn npc_at_cursor(cursor: Vec2, window_size: Vec2, entities: &EntityModelSet) -> Option<u32> {
-    if window_size.x <= 0.0 || window_size.y <= 0.0 {
-        return None;
+fn hovered_world_intent(
+    hovered_object_id: Option<&str>,
+    entities: &EntityModelSet,
+) -> Option<QuestUiIntent> {
+    let object_id = hovered_object_id?
+        .parse::<u32>()
+        .ok()
+        .filter(|id| *id != 0)?;
+    let entity = entities.entities.iter().find(|entity| {
+        entity.object_id == object_id.to_string()
+            && matches!(entity.kind, EntityKind::Monster | EntityKind::Npc)
+    })?;
+    match entity.kind {
+        EntityKind::Monster => Some(QuestUiIntent::AttackTarget { object_id }),
+        EntityKind::Npc => Some(QuestUiIntent::InteractNpc {
+            npc_object_id: object_id,
+        }),
+        EntityKind::Player | EntityKind::SelfPlayer => None,
     }
-    let cursor = Vec2::new(
-        cursor.x * STAGE_WIDTH / window_size.x,
-        cursor.y * STAGE_HEIGHT / window_size.y,
-    );
-    let player = entities
-        .entities
-        .iter()
-        .find(|entity| entity.kind == EntityKind::SelfPlayer)?;
+}
 
+fn pickup_tile_intent(
+    hovered_grid_position: Option<(i32, i32)>,
+    entities: &EntityModelSet,
+) -> Option<QuestUiIntent> {
+    let hovered_grid_position = hovered_grid_position?;
     entities
         .entities
         .iter()
-        .filter(|entity| entity.kind == EntityKind::Npc)
-        .filter_map(|npc| {
-            let object_id = npc.object_id.parse::<u32>().ok().filter(|id| *id != 0)?;
-            let foot = Vec2::new(
-                ENTITY_ORIGIN_X + (npc.x - player.x) as f32 * CELL_WIDTH,
-                ENTITY_ORIGIN_Y + (npc.y - player.y) as f32 * CELL_HEIGHT,
-            );
-            let local = cursor - foot;
-            if local.x.abs() > NPC_HIT_HALF_WIDTH
-                || local.y < -NPC_HIT_TOP
-                || local.y > NPC_HIT_BOTTOM
-            {
-                return None;
-            }
-
-            // Prefer the NPC whose body centre is closest when tall sprites
-            // overlap. Object id is a deterministic tie-breaker only.
-            let score = local.x * local.x + (local.y + 38.0) * (local.y + 38.0) * 0.35;
-            Some((score, object_id))
-        })
-        .min_by(|(left_score, left_id), (right_score, right_id)| {
-            left_score
-                .total_cmp(right_score)
-                .then_with(|| left_id.cmp(right_id))
-        })
-        .map(|(_, object_id)| object_id)
+        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+        .filter(|entity| (entity.x, entity.y) == hovered_grid_position)
+        .map(|_| QuestUiIntent::PickUpTile)
 }
 
-/// Convert a real left click on an authoritative NPC sprite into the existing
-/// bounded quest/UI intent. This never opens a dialog locally: the gateway and
-/// server must still acknowledge the interaction with NPC dialog data.
-pub fn mouse_npc_interaction_system(
+/// Convert a real left click on Crystal's pixel-tested hovered object into the
+/// existing bounded world intent. The presentation layer supplies the exact
+/// topmost opaque NPC/monster id; this edge never fabricates damage or opens a
+/// dialog locally. Gateway and shared Zone validation remain authoritative.
+pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     dialog: Option<Res<NpcDialogModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
+    presentation: Option<Res<NativeEntityPresentation>>,
     windows: Query<&Window>,
     queue: Option<ResMut<QuestUiIntentQueue>>,
 ) {
     if !mouse.just_pressed(MouseButton::Left) {
         return;
     }
-    let (Some(shell), Some(entities), Some(mut queue)) = (shell, entities, queue) else {
+    let (Some(shell), Some(entities), Some(presentation), Some(mut queue)) =
+        (shell, entities, presentation, queue)
+    else {
         return;
     };
     let Ok(window) = windows.single() else {
@@ -199,19 +185,12 @@ pub fn mouse_npc_interaction_system(
     if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
         return;
     }
-    let Some(cursor) = window.cursor_position() else {
+    let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
+        .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
+    else {
         return;
     };
-    let Some(object_id) = npc_at_cursor(
-        cursor,
-        Vec2::new(window.resolution.width(), window.resolution.height()),
-        &entities,
-    ) else {
-        return;
-    };
-    queue.push_intent(QuestUiIntent::InteractNpc {
-        npc_object_id: object_id,
-    });
+    queue.push_intent(intent);
 }
 
 /// Reject a stale Bevy `Interaction::Pressed` unless it is paired with the
@@ -601,7 +580,7 @@ mod tests {
         (app, receiver)
     }
 
-    fn npc_entities() -> EntityModelSet {
+    fn world_entities() -> EntityModelSet {
         EntityModelSet {
             entities: vec![
                 EntityModel {
@@ -621,6 +600,15 @@ mod tests {
                     y: 10,
                     level: None,
                     direction: Some("left".to_owned()),
+                },
+                EntityModel {
+                    object_id: "2001".to_owned(),
+                    kind: EntityKind::Monster,
+                    name: "Scarecrow".to_owned(),
+                    x: 10,
+                    y: 11,
+                    level: Some(3),
+                    direction: Some("up".to_owned()),
                 },
             ],
         }
@@ -762,36 +750,31 @@ mod tests {
     }
 
     #[test]
-    fn npc_hit_test_scales_window_coordinates_and_uses_authoritative_object_id() {
-        let entities = npc_entities();
-        // NPC foot is stage (528, 352); this is the centre of its body in a
-        // 2048x1536 window after the 2x stage conversion.
+    fn rendered_hover_identity_maps_only_authoritative_npcs_and_monsters() {
+        let entities = world_entities();
         assert_eq!(
-            npc_at_cursor(
-                Vec2::new(1056.0, 628.0),
-                Vec2::new(2048.0, 1536.0),
-                &entities,
-            ),
-            Some(77)
+            hovered_world_intent(Some("77"), &entities),
+            Some(QuestUiIntent::InteractNpc { npc_object_id: 77 })
         );
         assert_eq!(
-            npc_at_cursor(
-                Vec2::new(1200.0, 628.0),
-                Vec2::new(2048.0, 1536.0),
-                &entities,
-            ),
-            None
+            hovered_world_intent(Some("2001"), &entities),
+            Some(QuestUiIntent::AttackTarget { object_id: 2001 })
         );
+        assert_eq!(hovered_world_intent(Some("1000"), &entities), None);
+        assert_eq!(hovered_world_intent(Some("9999"), &entities), None);
+        assert_eq!(hovered_world_intent(Some("invalid"), &entities), None);
+        assert_eq!(
+            pickup_tile_intent(Some((10, 10)), &entities),
+            Some(QuestUiIntent::PickUpTile)
+        );
+        assert_eq!(pickup_tile_intent(Some((11, 10)), &entities), None);
     }
 
     #[test]
-    fn real_left_click_queues_npc_interact_but_modal_dialog_blocks_click_through() {
-        fn click_app(dialog_open: bool) -> bevy::prelude::App {
+    fn real_left_click_queues_hovered_npc_or_monster_but_modal_blocks_click_through() {
+        fn click_app(dialog_open: bool, hovered_object_id: &str) -> bevy::prelude::App {
             let mut app = bevy::prelude::App::new();
-            let mut window = Window::default();
-            window.resolution.set(1024.0, 768.0);
-            window.set_cursor_position(Some(Vec2::new(528.0, 314.0)));
-            app.world_mut().spawn(window);
+            app.world_mut().spawn(Window::default());
             app.insert_resource(ButtonInput::<MouseButton>::default());
             app.insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -803,31 +786,77 @@ mod tests {
                 ..Default::default()
             });
             app.insert_resource(UiReadModel::default());
-            app.insert_resource(npc_entities());
+            app.insert_resource(world_entities());
+            let mut presentation = NativeEntityPresentation::default();
+            presentation.set_hovered_object_id_for_test(Some(hovered_object_id));
+            app.insert_resource(presentation);
             app.init_resource::<QuestUiIntentQueue>();
-            app.add_systems(bevy::prelude::Update, mouse_npc_interaction_system);
+            app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
             app.world_mut()
                 .resource_mut::<ButtonInput<MouseButton>>()
                 .press(MouseButton::Left);
             app
         }
 
-        let mut app = click_app(false);
-        app.update();
+        let mut npc = click_app(false, "77");
+        npc.update();
         assert_eq!(
-            app.world_mut()
+            npc.world_mut()
                 .resource_mut::<QuestUiIntentQueue>()
                 .drain_intents(),
             vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
         );
 
-        let mut blocked = click_app(true);
+        let mut monster = click_app(false, "2001");
+        monster.update();
+        assert_eq!(
+            monster
+                .world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+
+        let mut blocked = click_app(true, "2001");
         blocked.update();
         assert!(blocked
             .world_mut()
             .resource_mut::<QuestUiIntentQueue>()
             .drain_intents()
             .is_empty());
+    }
+
+    #[test]
+    fn real_left_click_on_self_tile_queues_crystal_tile_pickup() {
+        let mut app = bevy::prelude::App::new();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hovered_object_id_for_test(None);
+        presentation.set_hover_grid_context_for_test((10, 10), (512.0, 368.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpTile]
+        );
     }
 
     #[test]

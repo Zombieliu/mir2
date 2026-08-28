@@ -3,9 +3,11 @@
 //! Web keeps these as DOM overlays. The Windows host owns an equivalent Bevy
 //! UI layer so native entity sprites do not depend on a browser surface.
 
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
-use mir2_client_bevy::crystal_ui::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use serde_json::Value;
 
@@ -186,12 +188,14 @@ pub fn sync_native_entity_overlays(
     presentation: Res<NativeEntityPresentation>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let motion_now_ms = crate::entity_presentation::native_motion_clock_ms();
     let previous_floater_count = overlays.active_floaters.len();
     overlays
         .active_floaters
         .retain(|floater| floater.expires_at_ms > now_ms);
     if overlays.active_floaters.len() != previous_floater_count
         || !overlays.active_floaters.is_empty()
+        || presentation.has_active_motion(motion_now_ms)
     {
         overlays.dirty = true;
     }
@@ -221,8 +225,34 @@ pub fn sync_native_entity_overlays(
     let Some(payload) = overlays.latest_payload.as_ref() else {
         return;
     };
-    let entries = overlay_entries(payload, visibility, hovered_object_id, self_hovered);
-    let floaters = damage_floater_entries(payload, &overlays.active_floaters, now_ms);
+    let motion_offsets = payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|entity| {
+            let object_id = entity.get("objectId").and_then(normalized_object_id)?;
+            Some((
+                object_id.clone(),
+                presentation.entity_screen_offset(&object_id, motion_now_ms),
+            ))
+        })
+        .collect::<HashMap<_, _>>();
+    let camera_offset = presentation.camera_screen_offset(motion_now_ms);
+    let entries = overlay_entries_with_motion(
+        payload,
+        visibility,
+        hovered_object_id,
+        self_hovered,
+        &motion_offsets,
+        camera_offset,
+    );
+    let floaters = damage_floater_entries_with_motion(
+        payload,
+        &overlays.active_floaters,
+        now_ms,
+        &motion_offsets,
+    );
     if entries.is_empty() && floaters.is_empty() {
         return;
     }
@@ -343,6 +373,15 @@ fn damage_floater_entries(
     floaters: &[ActiveDamageFloater],
     now_ms: u64,
 ) -> Vec<DamageFloaterEntry> {
+    damage_floater_entries_with_motion(payload, floaters, now_ms, &HashMap::new())
+}
+
+fn damage_floater_entries_with_motion(
+    payload: &Value,
+    floaters: &[ActiveDamageFloater],
+    now_ms: u64,
+    motion_offsets: &HashMap<String, (f32, f32)>,
+) -> Vec<DamageFloaterEntry> {
     let center = payload.get("sceneView").and_then(|view| view.get("center"));
     let center_x = center
         .and_then(|center| center.get("x"))
@@ -389,6 +428,14 @@ fn damage_floater_entries(
                 })?;
             let x = target.get("x").and_then(value_i64)?;
             let y = target.get("y").and_then(value_i64)?;
+            let object_id = target
+                .get("objectId")
+                .and_then(normalized_object_id)
+                .unwrap_or_default();
+            let (motion_x, motion_y) = motion_offsets
+                .get(&object_id)
+                .copied()
+                .unwrap_or((0.0, 0.0));
             let kind = target
                 .get("kind")
                 .and_then(Value::as_str)
@@ -422,8 +469,8 @@ fn damage_floater_entries(
                 key: floater.sequence,
                 text: floater.text.clone(),
                 color: Color::srgba_u8(red, green, blue, (opacity * 255.0).round() as u8),
-                left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0,
-                top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 65.0 + rise,
+                left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0 + motion_x,
+                top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 65.0 + rise + motion_y,
                 width: 80.0,
                 font_size,
             })
@@ -436,6 +483,24 @@ fn overlay_entries(
     visibility: OverlayVisibility,
     hovered_object_id: Option<&str>,
     self_hovered: bool,
+) -> Vec<OverlayEntry> {
+    overlay_entries_with_motion(
+        payload,
+        visibility,
+        hovered_object_id,
+        self_hovered,
+        &HashMap::new(),
+        (0.0, 0.0),
+    )
+}
+
+fn overlay_entries_with_motion(
+    payload: &Value,
+    visibility: OverlayVisibility,
+    hovered_object_id: Option<&str>,
+    self_hovered: bool,
+    motion_offsets: &HashMap<String, (f32, f32)>,
+    camera_offset: (f32, f32),
 ) -> Vec<OverlayEntry> {
     let center = payload.get("sceneView").and_then(|view| view.get("center"));
     let center_x = center
@@ -480,6 +545,11 @@ fn overlay_entries(
                         Value::String(value) if !value.is_empty() => Some(value.clone()),
                         _ => None,
                     });
+                    let (motion_x, motion_y) = object_id
+                        .as_deref()
+                        .and_then(|object_id| motion_offsets.get(object_id))
+                        .copied()
+                        .unwrap_or((0.0, 0.0));
                     let hovered = if is_self {
                         self_hovered
                     } else {
@@ -524,8 +594,8 @@ fn overlay_entries(
                                 Color::WHITE
                             }
                         });
-                    let left = origin_x + (x - center_x) as f32 * CELL_WIDTH;
-                    let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT;
+                    let left = origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x;
+                    let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT + motion_y;
                     let width = if matches!(kind, "npc" | "monster") {
                         48.0
                     } else {
@@ -580,11 +650,19 @@ fn overlay_entries(
             if max_hp > 0 {
                 let x = entity.get("x").and_then(value_i64).unwrap_or(0);
                 let y = entity.get("y").and_then(value_i64).unwrap_or(0);
+                let object_id = entity
+                    .get("objectId")
+                    .and_then(normalized_object_id)
+                    .unwrap_or_default();
+                let (motion_x, motion_y) = motion_offsets
+                    .get(&object_id)
+                    .copied()
+                    .unwrap_or((0.0, 0.0));
                 entries.push(OverlayEntry {
                     name: None,
                     color: Color::WHITE,
-                    left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
-                    top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0,
+                    left: origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x,
+                    top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0 + motion_y,
                     width: 50.0,
                     self_health_ratio: Some((hp as f32 / max_hp as f32).clamp(0.0, 1.0)),
                 });
@@ -613,8 +691,10 @@ fn overlay_entries(
                     Some(OverlayEntry {
                         name: Some(name.to_owned()),
                         color: Color::srgb_u8(0xff, 0xe6, 0x58),
-                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0,
-                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0,
+                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0
+                            + camera_offset.0,
+                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0
+                            + camera_offset.1,
                         width: 80.0,
                         self_health_ratio: None,
                     })
@@ -629,6 +709,14 @@ fn value_i64(value: &Value) -> Option<i64> {
         .as_i64()
         .or_else(|| value.as_u64().and_then(|value| i64::try_from(value).ok()))
         .or_else(|| value.as_str()?.parse().ok())
+}
+
+fn normalized_object_id(value: &Value) -> Option<String> {
+    match value {
+        Value::Number(number) => Some(number.to_string()),
+        Value::String(value) if !value.is_empty() => Some(value.clone()),
+        _ => None,
+    }
 }
 
 fn argb_color(value: i64) -> Option<Color> {
@@ -817,18 +905,78 @@ mod tests {
             ["Potion"]
         );
 
-        assert!(
-            overlay_entries(
-                &payload,
-                OverlayVisibility {
-                    name_view: false,
-                    drop_view: false
-                },
-                None,
-                false,
-            )
-            .is_empty()
+        assert!(overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: false
+            },
+            None,
+            false,
+        )
+        .is_empty());
+    }
+
+    #[test]
+    fn motion_offsets_keep_self_locked_and_move_remote_drop_and_damage_labels() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "playerHp": 9,
+            "playerMaxHp": 18,
+            "entities": [
+                {"objectId": 1, "kind": "selfPlayer", "name": "Self", "x": 10, "y": 20},
+                {"objectId": 2, "kind": "monster", "name": "Deer", "x": 11, "y": 20}
+            ],
+            "groundDrops": [{"objectId": 9, "name": "Potion", "x": 11, "y": 20}]
+        });
+        let offsets = HashMap::from([("1".to_owned(), (0.0, 0.0)), ("2".to_owned(), (-16.0, 8.0))]);
+        let entries = overlay_entries_with_motion(
+            &payload,
+            OverlayVisibility {
+                name_view: true,
+                drop_view: true,
+            },
+            None,
+            false,
+            &offsets,
+            (40.0, 0.0),
         );
+        let named = |name: &str| {
+            entries
+                .iter()
+                .find(|entry| entry.name.as_deref() == Some(name))
+                .expect("named overlay")
+        };
+        assert_eq!((named("Self").left, named("Self").top), (480.0, 335.0));
+        assert_eq!((named("Deer").left, named("Deer").top), (512.0, 342.0));
+        assert_eq!((named("Potion").left, named("Potion").top), (552.0, 334.0));
+        let health = entries
+            .iter()
+            .find(|entry| entry.self_health_ratio.is_some())
+            .expect("self health overlay");
+        assert_eq!((health.left, health.top), (480.0, 335.0));
+
+        let floater = ActiveDamageFloater {
+            sequence: 1,
+            object_id: 2,
+            text: "5".to_owned(),
+            variant: DamageVariant::Hit,
+            started_at_ms: 1_000,
+            expires_at_ms: 2_800,
+        };
+        let static_entry = damage_floater_entries(&payload, std::slice::from_ref(&floater), 1_100)
+            .pop()
+            .expect("static damage floater");
+        let moved_entry = damage_floater_entries_with_motion(
+            &payload,
+            std::slice::from_ref(&floater),
+            1_100,
+            &offsets,
+        )
+        .pop()
+        .expect("moving damage floater");
+        assert_eq!(moved_entry.left - static_entry.left, -16.0);
+        assert_eq!(moved_entry.top - static_entry.top, 8.0);
     }
 
     #[test]

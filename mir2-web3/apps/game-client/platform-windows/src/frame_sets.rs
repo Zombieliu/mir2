@@ -220,6 +220,7 @@ fn build_animation_catalog(source: &HashMap<String, SourceAction>) -> Option<Ani
         AnimationAction::Attack3,
         AnimationAction::Attack4,
         AnimationAction::AttackRange1,
+        AnimationAction::DashAttack,
         AnimationAction::Spell,
         AnimationAction::Struck,
         AnimationAction::Die,
@@ -265,6 +266,7 @@ fn resolve_source_action<'a>(
         AnimationAction::Attack3 => &["Attack3", "Attack1", "Standing"],
         AnimationAction::Attack4 => &["Attack4", "Attack1", "Standing"],
         AnimationAction::AttackRange1 => &["AttackRange1", "Attack1", "Standing"],
+        AnimationAction::DashAttack => &["DashAttack", "Attack1", "Walking", "Standing"],
         AnimationAction::Spell => &["Spell", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::Struck => &["Struck", "Standing"],
         AnimationAction::Die => &["Die", "Dead", "Standing"],
@@ -392,6 +394,20 @@ mod tests {
         assert_eq!(
             catalog.descriptor(AnimationAction::Revive),
             Some(&FrameDescriptor::from_crystal(144, 10, 0, 100, true))
+        );
+    }
+
+    #[test]
+    fn generated_monster_dash_attack_keeps_its_library_specific_descriptor() {
+        let source: Value = serde_json::from_str(include_str!(
+            "../../../web/public/original-ui/frame-sets.generated.json"
+        ))
+        .expect("generated Crystal frame-set catalog");
+        let parsed = NativeFrameSetCatalog::parse(&source);
+        let catalog = parsed.catalog_for(EntityKind::Monster, "Monster/284");
+        assert_eq!(
+            catalog.descriptor(AnimationAction::DashAttack),
+            Some(&FrameDescriptor::from_crystal(352, 8, 0, 100, false))
         );
     }
 

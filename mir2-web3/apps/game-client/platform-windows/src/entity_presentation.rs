@@ -6,6 +6,7 @@
 //! or authoritative payload actually changes.
 
 use std::collections::{HashMap, HashSet};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
 use bevy::window::PrimaryWindow;
@@ -16,6 +17,19 @@ use mir2_bevy_runtime::entity_animation::{
 use serde_json::Value;
 
 const NATIVE_ANIMATION_WORLD_SEED: u64 = 0x4d49_5232_5749_4e44;
+const CRYSTAL_MOVE_PHASE_COUNT: u8 = 6;
+const CRYSTAL_MOVE_PHASE_MS: u64 = 100;
+const MAX_SMOOTH_TILE_DISTANCE: u32 = 3;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct NativeMotionWindow {
+    from_x: f32,
+    from_y: f32,
+    to_x: f32,
+    to_y: f32,
+    started_ms: u64,
+    expires_ms: u64,
+}
 
 #[derive(Debug)]
 struct ObservedEntity {
@@ -43,6 +57,9 @@ pub struct NativeEntityPresentation {
     highlight_target: bool,
     hovered_object_id: Option<String>,
     self_hovered: bool,
+    self_object_id: Option<String>,
+    last_positions: HashMap<String, (i32, i32)>,
+    motion_windows: HashMap<String, NativeMotionWindow>,
     payload_dirty: bool,
 }
 
@@ -61,6 +78,9 @@ impl Default for NativeEntityPresentation {
             highlight_target: true,
             hovered_object_id: None,
             self_hovered: false,
+            self_object_id: None,
+            last_positions: HashMap::new(),
+            motion_windows: HashMap::new(),
             payload_dirty: false,
         }
     }
@@ -81,6 +101,72 @@ impl NativeEntityPresentation {
 
     pub(crate) fn self_hovered(&self) -> bool {
         self.self_hovered
+    }
+
+    pub(crate) fn hovered_grid_position(&self) -> Option<(i32, i32)> {
+        let (cursor_x, cursor_y) = self.hover_cursor_stage?;
+        if !(0.0..1024.0).contains(&cursor_x) || !(0.0..768.0).contains(&cursor_y) {
+            return None;
+        }
+        let center = self
+            .latest_payload
+            .as_ref()?
+            .get("sceneView")?
+            .get("center")?;
+        let center_x = center
+            .get("x")
+            .and_then(Value::as_i64)
+            .and_then(|value| i32::try_from(value).ok())?;
+        let center_y = center
+            .get("y")
+            .and_then(Value::as_i64)
+            .and_then(|value| i32::try_from(value).ok())?;
+        Some((
+            center_x + (cursor_x / 48.0).floor() as i32 - 10,
+            center_y + (cursor_y / 32.0).floor() as i32 - 11,
+        ))
+    }
+
+    pub(crate) fn has_active_motion(&self, now_ms: u64) -> bool {
+        self.motion_windows
+            .values()
+            .any(|window| now_ms < window.expires_ms)
+    }
+
+    pub(crate) fn camera_screen_offset(&self, now_ms: u64) -> (f32, f32) {
+        self.self_object_id
+            .as_deref()
+            .and_then(|object_id| self.motion_windows.get(object_id))
+            .map(|window| native_motion_offset(window, now_ms))
+            .map(|(x, y)| (-x, -y))
+            .unwrap_or((0.0, 0.0))
+    }
+
+    pub(crate) fn entity_screen_offset(&self, object_id: &str, now_ms: u64) -> (f32, f32) {
+        let (camera_x, camera_y) = self.camera_screen_offset(now_ms);
+        let (entity_x, entity_y) = self
+            .motion_windows
+            .get(object_id)
+            .map(|window| native_motion_offset(window, now_ms))
+            .unwrap_or((0.0, 0.0));
+        (entity_x + camera_x, entity_y + camera_y)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_hovered_object_id_for_test(&mut self, object_id: Option<&str>) {
+        self.hovered_object_id = object_id.map(ToOwned::to_owned);
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_hover_grid_context_for_test(
+        &mut self,
+        center: (i32, i32),
+        cursor_stage: (f32, f32),
+    ) {
+        self.latest_payload = Some(serde_json::json!({
+            "sceneView": {"center": {"x": center.0, "y": center.1}}
+        }));
+        self.hover_cursor_stage = Some(cursor_stage);
     }
 
     /// Object ids whose client-side Crystal action clock has reached the
@@ -112,17 +198,33 @@ impl NativeEntityPresentation {
         }
     }
 
-    fn sync_pending_payload(&mut self, now_ms: u64) {
-        self.sync_pending_payload_with(now_ms, crate::frame_sets::animation_catalog_for);
+    fn sync_pending_payload(&mut self, animation_now_ms: u64, motion_now_ms: u64) {
+        self.sync_pending_payload_with_clocks(
+            animation_now_ms,
+            motion_now_ms,
+            crate::frame_sets::animation_catalog_for,
+        );
     }
 
     fn sync_pending_payload_with<F>(&mut self, now_ms: u64, catalog_for: F)
     where
         F: Fn(EntityKind, &str, bool) -> AnimationCatalog,
     {
-        let Some(payload) = self.pending_payload.take() else {
+        self.sync_pending_payload_with_clocks(now_ms, now_ms, catalog_for);
+    }
+
+    fn sync_pending_payload_with_clocks<F>(
+        &mut self,
+        animation_now_ms: u64,
+        motion_now_ms: u64,
+        catalog_for: F,
+    ) where
+        F: Fn(EntityKind, &str, bool) -> AnimationCatalog,
+    {
+        let Some(mut payload) = self.pending_payload.take() else {
             return;
         };
+        self.attach_native_motion_windows(&mut payload, motion_now_ms);
         let observed = payload
             .get("entities")
             .and_then(Value::as_array)
@@ -189,7 +291,7 @@ impl NativeEntityPresentation {
                 entity.kind,
                 entity.direction,
                 catalog_for(entity.kind, &entity.body_library, entity.mounted),
-                now_ms,
+                animation_now_ms,
             );
             let Ok(update) = update else {
                 continue;
@@ -220,7 +322,7 @@ impl NativeEntityPresentation {
                 .apply_event(
                     &update.key,
                     AnimationEvent::new(sequence, action, entity.direction),
-                    now_ms,
+                    animation_now_ms,
                 )
                 .is_ok()
             {
@@ -233,9 +335,117 @@ impl NativeEntityPresentation {
         self.payload_dirty = true;
     }
 
+    fn attach_native_motion_windows(&mut self, payload: &mut Value, now_ms: u64) {
+        let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) else {
+            self.self_object_id = None;
+            self.last_positions.clear();
+            self.motion_windows.clear();
+            return;
+        };
+        let mut observed_ids = HashSet::new();
+        for entity in entities {
+            let Some(object_id) = entity.get("objectId").and_then(value_object_id) else {
+                continue;
+            };
+            let (Some(x), Some(y)) = (
+                entity
+                    .get("x")
+                    .and_then(Value::as_i64)
+                    .and_then(|value| i32::try_from(value).ok()),
+                entity
+                    .get("y")
+                    .and_then(Value::as_i64)
+                    .and_then(|value| i32::try_from(value).ok()),
+            ) else {
+                continue;
+            };
+            observed_ids.insert(object_id.clone());
+            let is_self = entity.get("kind").and_then(Value::as_str) == Some("selfPlayer");
+            if is_self {
+                self.self_object_id = Some(object_id.clone());
+            }
+
+            let previous = self.last_positions.insert(object_id.clone(), (x, y));
+            if let Some((from_x, from_y)) = previous.filter(|previous| *previous != (x, y)) {
+                let distance = from_x.abs_diff(x).max(from_y.abs_diff(y));
+                let is_movement_action = entity
+                    .get("_nativeAnimationAction")
+                    .and_then(Value::as_str)
+                    .is_some_and(|action| matches!(action, "walking" | "running"));
+                if is_movement_action && distance <= MAX_SMOOTH_TILE_DISTANCE {
+                    let duration_ms = u64::from(CRYSTAL_MOVE_PHASE_COUNT) * CRYSTAL_MOVE_PHASE_MS;
+                    let window = NativeMotionWindow {
+                        from_x: from_x as f32,
+                        from_y: from_y as f32,
+                        to_x: x as f32,
+                        to_y: y as f32,
+                        started_ms: now_ms,
+                        expires_ms: now_ms.saturating_add(duration_ms),
+                    };
+                    self.motion_windows.insert(object_id.clone(), window);
+                    if is_self {
+                        mir2_bevy_runtime::set_mir2_self_camera_motion(
+                            window.from_x,
+                            window.from_y,
+                            window.to_x,
+                            window.to_y,
+                            window.started_ms as f64,
+                            window.expires_ms as f64,
+                        );
+                    }
+                } else {
+                    self.motion_windows.remove(&object_id);
+                }
+            }
+
+            let active_window = self
+                .motion_windows
+                .get(&object_id)
+                .copied()
+                .filter(|window| {
+                    now_ms < window.expires_ms && window.to_x == x as f32 && window.to_y == y as f32
+                });
+            if let Some(window) = active_window {
+                entity["motionFromX"] = Value::from(window.from_x);
+                entity["motionFromY"] = Value::from(window.from_y);
+                entity["motionToX"] = Value::from(window.to_x);
+                entity["motionToY"] = Value::from(window.to_y);
+                entity["motionStartedMs"] = Value::from(window.started_ms);
+                entity["motionDurationMs"] =
+                    Value::from(window.expires_ms.saturating_sub(window.started_ms));
+            }
+        }
+        self.last_positions
+            .retain(|object_id, _| observed_ids.contains(object_id));
+        self.motion_windows.retain(|object_id, window| {
+            observed_ids.contains(object_id) && now_ms < window.expires_ms
+        });
+        if self
+            .self_object_id
+            .as_ref()
+            .is_some_and(|object_id| !observed_ids.contains(object_id))
+        {
+            self.self_object_id = None;
+        }
+    }
+
     fn render_state_if_changed(&mut self, now_ms: u64, effect_visible: bool) -> Option<Value> {
         self.render_state_if_changed_with(
             now_ms,
+            effect_visible,
+            crate::atlas::build_entity_render_state_with_poses_and_effect_visibility,
+        )
+    }
+
+    fn render_state_if_changed_at_clocks(
+        &mut self,
+        animation_now_ms: u64,
+        motion_now_ms: u64,
+        effect_visible: bool,
+    ) -> Option<Value> {
+        self.render_state_if_changed_with_clocks(
+            animation_now_ms,
+            motion_now_ms,
             effect_visible,
             crate::atlas::build_entity_render_state_with_poses_and_effect_visibility,
         )
@@ -250,11 +460,24 @@ impl NativeEntityPresentation {
     where
         F: FnOnce(&Value, &HashMap<String, (i64, AnimationAction)>, bool) -> Option<Value>,
     {
-        self.sync_pending_payload(now_ms);
+        self.render_state_if_changed_with_clocks(now_ms, now_ms, effect_visible, render)
+    }
+
+    fn render_state_if_changed_with_clocks<F>(
+        &mut self,
+        animation_now_ms: u64,
+        motion_now_ms: u64,
+        effect_visible: bool,
+        render: F,
+    ) -> Option<Value>
+    where
+        F: FnOnce(&Value, &HashMap<String, (i64, AnimationAction)>, bool) -> Option<Value>,
+    {
+        self.sync_pending_payload(animation_now_ms, motion_now_ms);
         let payload = self.latest_payload.as_ref()?;
         let effect_visibility_changed =
             self.last_effect_visible.replace(effect_visible) != Some(effect_visible);
-        let transitions = self.world.tick(now_ms).ok()?;
+        let transitions = self.world.tick(animation_now_ms).ok()?;
         for transition in transitions {
             if transition.reason == TransitionReason::HideCompleted
                 && self
@@ -330,7 +553,8 @@ pub fn tick_native_entity_presentation(
     shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let animation_now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let motion_now_ms = native_motion_clock_ms();
     let effect_visible = player_ui
         .as_deref()
         .map(|state| state.core.options.effect)
@@ -339,26 +563,33 @@ pub fn tick_native_entity_presentation(
         .as_deref()
         .map(|state| state.core.options.highlight_target)
         .unwrap_or(true);
-    let name_view = player_ui
-        .as_deref()
-        .map(|state| state.core.options.name_view)
-        .unwrap_or(true);
-    let hover_cursor_stage = (highlight_target || !name_view)
-        .then(|| {
-            native_hover_cursor(
-                windows.iter().next(),
-                shell.as_deref(),
-                player_ui.as_deref(),
-            )
-        })
-        .flatten();
+    // Hit-testing is an input contract, not a highlight preference. Always
+    // publish the cursor while world input is allowed; `highlight_target`
+    // controls only the extra redraw band; name visibility is handled by the
+    // overlay layer and must not make monsters unclickable.
+    let hover_cursor_stage = native_hover_cursor(
+        windows.iter().next(),
+        shell.as_deref(),
+        player_ui.as_deref(),
+    );
     presentation.set_hover_presentation(hover_cursor_stage, highlight_target);
-    let Some(state) = presentation.render_state_if_changed(now_ms, effect_visible) else {
+    let Some(state) = presentation.render_state_if_changed_at_clocks(
+        animation_now_ms,
+        motion_now_ms,
+        effect_visible,
+    ) else {
         return;
     };
     if let Ok(json) = serde_json::to_string(&state) {
         let _ = mir2_bevy_runtime::native_ingest::push_native_entity_render_state(json);
     }
+}
+
+pub(crate) fn native_motion_clock_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| u64::try_from(duration.as_millis()).unwrap_or(u64::MAX))
+        .unwrap_or(0)
 }
 
 fn native_hover_cursor(
@@ -460,6 +691,7 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
         "attack3" => Some(AnimationAction::Attack3),
         "attack4" => Some(AnimationAction::Attack4),
         "attackRange1" => Some(AnimationAction::AttackRange1),
+        "dashAttack" => Some(AnimationAction::DashAttack),
         "spell" => Some(AnimationAction::Spell),
         "struck" => Some(AnimationAction::Struck),
         "die" => Some(AnimationAction::Die),
@@ -476,6 +708,31 @@ fn value_object_id(value: &Value) -> Option<String> {
         Value::String(value) => Some(value.clone()),
         _ => None,
     }
+}
+
+fn native_motion_offset(window: &NativeMotionWindow, now_ms: u64) -> (f32, f32) {
+    if window.expires_ms <= window.started_ms || now_ms >= window.expires_ms {
+        return (0.0, 0.0);
+    }
+    let elapsed_ms = now_ms.saturating_sub(window.started_ms);
+    let phase_index = (elapsed_ms / CRYSTAL_MOVE_PHASE_MS)
+        .min(u64::from(CRYSTAL_MOVE_PHASE_COUNT.saturating_sub(1)));
+    // Crystal applies the first displacement increment while frame zero is
+    // drawn, then advances one of six movement phases every 100 ms.
+    let progress = (phase_index + 1) as f32 / f32::from(CRYSTAL_MOVE_PHASE_COUNT);
+    let remaining = (1.0 - progress).clamp(0.0, 1.0);
+    (
+        crystal_even_pixel((window.from_x - window.to_x) * 48.0 * remaining),
+        crystal_even_pixel((window.from_y - window.to_y) * 32.0 * remaining),
+    )
+}
+
+fn crystal_even_pixel(value: f32) -> f32 {
+    if !value.is_finite() || value.abs() < 0.001 {
+        return 0.0;
+    }
+    let pixel = value.trunc() as i32;
+    (pixel + pixel % 2) as f32
 }
 
 fn hide_removes_rendered_entity(catalog_key: &str) -> bool {
@@ -584,6 +841,94 @@ mod tests {
     }
 
     #[test]
+    fn native_motion_offset_matches_crystal_phase_boundaries_and_even_pixels() {
+        let horizontal = NativeMotionWindow {
+            from_x: 10.0,
+            from_y: 10.0,
+            to_x: 11.0,
+            to_y: 10.0,
+            started_ms: 1_000,
+            expires_ms: 1_600,
+        };
+        assert_eq!(native_motion_offset(&horizontal, 1_000), (-40.0, 0.0));
+        assert_eq!(native_motion_offset(&horizontal, 1_099), (-40.0, 0.0));
+        assert_eq!(native_motion_offset(&horizontal, 1_100), (-32.0, 0.0));
+        assert_eq!(native_motion_offset(&horizontal, 1_499), (-8.0, 0.0));
+        assert_eq!(native_motion_offset(&horizontal, 1_500), (0.0, 0.0));
+        assert_eq!(native_motion_offset(&horizontal, 1_600), (0.0, 0.0));
+
+        let vertical = NativeMotionWindow {
+            from_x: 10.0,
+            from_y: 10.0,
+            to_x: 10.0,
+            to_y: 9.0,
+            started_ms: 2_000,
+            expires_ms: 2_600,
+        };
+        assert_eq!(native_motion_offset(&vertical, 2_000), (0.0, 26.0));
+        assert_eq!(native_motion_offset(&vertical, 2_100), (0.0, 22.0));
+        assert_eq!(crystal_even_pixel(-21.9), -22.0);
+        assert_eq!(crystal_even_pixel(21.9), 22.0);
+    }
+
+    #[test]
+    fn authoritative_move_uses_wall_clock_and_keeps_self_screen_locked() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 1_700_000_000_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial authoritative payload");
+
+        let mut moved = player_payload(2);
+        moved["sceneView"]["center"]["x"] = json!(11);
+        moved["entities"][0]["x"] = json!(11);
+        presentation.replace_payload(moved);
+        let rendered = presentation
+            .render_state_if_changed_with_clocks(100, 1_700_000_000_100, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("moved authoritative payload");
+
+        let entity = &rendered["entities"][0];
+        assert_eq!(entity["motionFromX"], json!(10.0));
+        assert_eq!(entity["motionToX"], json!(11.0));
+        assert_eq!(entity["motionStartedMs"], json!(1_700_000_000_100_u64));
+        assert_eq!(entity["motionDurationMs"], json!(600));
+        assert_eq!(
+            presentation.camera_screen_offset(1_700_000_000_100),
+            (40.0, 0.0)
+        );
+        assert_eq!(
+            presentation.entity_screen_offset("1", 1_700_000_000_100),
+            (0.0, 0.0),
+            "self motion and camera motion must cancel"
+        );
+        assert_eq!(
+            presentation.entity_screen_offset("remote", 1_700_000_000_100),
+            (40.0, 0.0),
+            "static world actors follow the moving self camera"
+        );
+        assert_eq!(
+            presentation.camera_screen_offset(1_700_000_000_700),
+            (0.0, 0.0)
+        );
+
+        let mut teleported = player_payload(3);
+        teleported["sceneView"]["center"]["x"] = json!(20);
+        teleported["entities"][0]["x"] = json!(20);
+        presentation.replace_payload(teleported);
+        let rendered = presentation
+            .render_state_if_changed_with_clocks(200, 1_700_000_000_200, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("teleport payload");
+        assert!(rendered["entities"][0].get("motionFromX").is_none());
+        assert!(!presentation.has_active_motion(1_700_000_000_200));
+    }
+
+    #[test]
     fn hover_cursor_and_highlight_setting_republish_without_authoritative_packet() {
         let mut presentation = NativeEntityPresentation::default();
         presentation.replace_payload(player_payload(1));
@@ -652,11 +997,9 @@ mod tests {
         assert!(presentation.self_hovered());
 
         presentation.set_hover_presentation(Some((512.0, 384.0)), false);
-        assert!(
-            presentation
-                .render_state_if_changed_with(0, true, |_, _, _| None)
-                .is_none()
-        );
+        assert!(presentation
+            .render_state_if_changed_with(0, true, |_, _, _| None)
+            .is_none());
         assert_eq!(presentation.hovered_object_id(), None);
         assert!(!presentation.self_hovered());
 
@@ -674,6 +1017,10 @@ mod tests {
         assert_eq!(
             normalize_action(EntityKind::Npc, AnimationAction::Attack1),
             None
+        );
+        assert_eq!(
+            parse_action("dashAttack"),
+            Some(AnimationAction::DashAttack)
         );
     }
 
@@ -1674,7 +2021,7 @@ mod tests {
             };
             if event_applied {
                 presentation.replace_payload(payload.clone());
-                presentation.sync_pending_payload(at_ms);
+                presentation.sync_pending_payload(at_ms, at_ms);
             }
             let state = presentation
                 .render_state_if_changed(at_ms, true)

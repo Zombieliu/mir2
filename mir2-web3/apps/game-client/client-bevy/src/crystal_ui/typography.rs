@@ -7,6 +7,11 @@
 
 use bevy::prelude::{FontSize, FontSource, TextFont};
 
+#[cfg(all(feature = "native-ui", not(feature = "system-font-discovery")))]
+compile_error!(
+    "native Crystal UI requires Bevy system_font_discovery for FontSource::Family(\"Arial\")"
+);
+
 pub const CRYSTAL_DEFAULT_FONT_FAMILY: &str = "Arial";
 pub const CRYSTAL_DEFAULT_FONT_SIZE_PX: f32 = 8.0 * 96.0 / 72.0;
 
@@ -24,6 +29,10 @@ mod tests {
 
     #[test]
     fn crystal_default_matches_source_arial_eight_point_at_96_dpi() {
+        assert!(
+            cfg!(feature = "system-font-discovery"),
+            "native-ui must keep Bevy system font discovery enabled"
+        );
         assert_eq!(CRYSTAL_DEFAULT_FONT_FAMILY, "Arial");
         assert!((CRYSTAL_DEFAULT_FONT_SIZE_PX - 10.666_667).abs() < 0.000_01);
         assert_eq!(
