@@ -106,6 +106,10 @@ const FROST_CRUNCH_CAST_SOUND_FILE: &str = "M41-1.wav";
 const FROST_CRUNCH_IMPACT_SOUND_FILE: &str = "M41-2.wav";
 const FROST_CRUNCH_CAST_SOUND_CUE: &str = "FrostCrunch.cast";
 const FROST_CRUNCH_IMPACT_SOUND_CUE: &str = "FrostCrunch.impact";
+const HALLUCINATION_SPELL_ACTION_MS: u64 = 600;
+const HALLUCINATION_PROJECTILE_STEP_MS: u64 = 48;
+const HALLUCINATION_IMPACT_SOUND_FILE: &str = "M76-0.wav";
+const HALLUCINATION_IMPACT_SOUND_CUE: &str = "Hallucination.impact";
 const FIREWALL_SPELL_ACTION_MS: u64 = 600;
 const FIREWALL_CAST_SOUND_FILE: &str = "M39-0.wav";
 const FIREWALL_COMPLETE_SOUND_FILE: &str = "M39-1.wav";
@@ -216,11 +220,18 @@ fn max_tile_distance(source: (i32, i32), destination: (i32, i32)) -> u64 {
     )
 }
 
-fn crystal_projectile_clock(distance: u64) -> (u64, u64) {
+fn crystal_projectile_clock(distance: u64, process_interval_ms: u64) -> (u64, u64) {
     let duration_ms = distance.saturating_mul(FIREBALL_TILE_TRAVEL_MS).max(1);
-    let process_frame_count = (duration_ms / FIREBALL_PROJECTILE_STEP_MS).max(1);
+    let process_frame_count = (duration_ms / process_interval_ms.max(1)).max(1);
     let frame_interval_ms = (duration_ms / process_frame_count).max(1);
     (duration_ms, frame_interval_ms)
+}
+
+fn projectile_process_interval_ms(spell: &str) -> u64 {
+    match spell {
+        "Hallucination" => HALLUCINATION_PROJECTILE_STEP_MS,
+        _ => FIREBALL_PROJECTILE_STEP_MS,
+    }
 }
 
 fn actor_is_player(actor: &Value) -> bool {
@@ -1704,7 +1715,11 @@ impl NativeEffects {
         for instance in &mut self.active {
             if !matches!(
                 instance.provenance.spell.as_str(),
-                "FireBall" | "GreatFireBall" | "SoulFireBall" | "FrostCrunch"
+                "FireBall"
+                    | "GreatFireBall"
+                    | "SoulFireBall"
+                    | "FrostCrunch"
+                    | "Hallucination"
             ) {
                 continue;
             }
@@ -1821,6 +1836,13 @@ impl NativeEffects {
                         SOUL_FIREBALL_IMPACT_SOUND_FILE,
                     )),
                 ),
+                "Hallucination" => (
+                    "Hallucination",
+                    Some((
+                        HALLUCINATION_IMPACT_SOUND_CUE,
+                        HALLUCINATION_IMPACT_SOUND_FILE,
+                    )),
+                ),
                 "LeftGuardRangeProjectile" => ("LeftGuardRangeProjectile", None),
                 _ => continue,
             };
@@ -1836,8 +1858,6 @@ impl NativeEffects {
             };
             let source = (from_x as i32, from_y as i32);
             let direction = projectile_direction16(source, destination);
-            let (duration_ms, frame_interval_ms) =
-                crystal_projectile_clock(max_tile_distance(source, destination));
             let launch_animation = effect_catalog().as_ref().and_then(|catalog| {
                 if spell == "LeftGuardRangeProjectile" {
                     catalog.left_guard_range_projectile_animation(direction)
@@ -1850,6 +1870,10 @@ impl NativeEffects {
                 failed_launches.push(instance.key.clone());
                 continue;
             };
+            let (duration_ms, frame_interval_ms) = crystal_projectile_clock(
+                max_tile_distance(source, destination),
+                launch_animation.interval,
+            );
             launch_animation.duration_ms = duration_ms;
             launch_animation.interval = frame_interval_ms;
             *projectile = launch_animation;
@@ -1908,6 +1932,7 @@ impl NativeEffects {
                         "GreatFireBall" => (true, Some(GREAT_FIREBALL_IMPACT_SOUND_CUE)),
                         "FrostCrunch" => (true, Some(FROST_CRUNCH_IMPACT_SOUND_CUE)),
                         "SoulFireBall" => (true, Some(SOUL_FIREBALL_IMPACT_SOUND_CUE)),
+                        "Hallucination" => (true, Some(HALLUCINATION_IMPACT_SOUND_CUE)),
                         "LeftGuardRangeProjectile" => (true, None),
                         _ => (false, None),
                     };
@@ -1921,8 +1946,10 @@ impl NativeEffects {
                         {
                             let source = (from_x as i32, from_y as i32);
                             let destination = (tile_x, tile_y);
-                            let (duration_ms, frame_interval_ms) =
-                                crystal_projectile_clock(max_tile_distance(source, destination));
+                            let (duration_ms, frame_interval_ms) = crystal_projectile_clock(
+                                max_tile_distance(source, destination),
+                                projectile_process_interval_ms(&instance.provenance.spell),
+                            );
                             projectile.duration_ms = duration_ms;
                             projectile.interval = frame_interval_ms;
                             if let Some(impact_sound_cue) = impact_sound_cue {
@@ -2446,8 +2473,10 @@ impl NativeEffects {
         let Some(mut projectile) = catalog.spell_projectile_animation(spell, direction) else {
             return;
         };
-        let (duration_ms, frame_interval_ms) =
-            crystal_projectile_clock(max_tile_distance(source, destination));
+        let (duration_ms, frame_interval_ms) = crystal_projectile_clock(
+            max_tile_distance(source, destination),
+            projectile.interval,
+        );
         projectile.duration_ms = duration_ms;
         projectile.interval = frame_interval_ms;
 
@@ -2546,6 +2575,21 @@ impl NativeEffects {
                     SOUL_FIREBALL_PROJECTILE_SOUND_CUE,
                     SOUL_FIREBALL_PROJECTILE_SOUND_FILE,
                 )),
+            );
+            return;
+        }
+        if spell == "Hallucination" {
+            // Crystal has no Hallucination cast bitmap or cast sound. Cast=true
+            // creates the source-owned missile only after the six-frame Spell
+            // actor action completes; its sole sound belongs to target impact.
+            self.schedule_local_projectile_from_object_magic(
+                payload,
+                catalog,
+                provenance,
+                "Hallucination",
+                "hallucination",
+                HALLUCINATION_SPELL_ACTION_MS,
+                None,
             );
             return;
         }
@@ -2751,11 +2795,14 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
-        // Crystal's SoulFireBall and GreatFireBall player paths never consume
-        // ObjectProjectile; current Rust servers emit it only as a
-        // compatibility supplement. Ignore it regardless of order/replay and
-        // let ObjectMagic own the delayed local missile.
-        if matches!(spell, "SoulFireBall" | "GreatFireBall") {
+        // These Crystal player paths never consume ObjectProjectile; current
+        // Rust servers emit it only as a compatibility supplement. Ignore it
+        // regardless of order/replay and let ObjectMagic own the delayed local
+        // missile.
+        if matches!(
+            spell,
+            "SoulFireBall" | "GreatFireBall" | "Hallucination"
+        ) {
             return;
         }
         let open_id = |name: &str| -> Option<u32> {
@@ -3044,8 +3091,10 @@ impl NativeEffects {
         else {
             return;
         };
-        let (duration_ms, frame_interval_ms) =
-            crystal_projectile_clock(max_tile_distance(source, destination));
+        let (duration_ms, frame_interval_ms) = crystal_projectile_clock(
+            max_tile_distance(source, destination),
+            animation.interval,
+        );
         animation.duration_ms = duration_ms;
         animation.interval = frame_interval_ms;
 
@@ -6922,6 +6971,38 @@ mod tests {
         }
     }
 
+    fn hallucination_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-hallucination-v1.json"
+        ))
+        .expect("VIS-02 Hallucination fixture JSON")
+    }
+
+    fn hallucination_magic_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = hallucination_fixture();
+        let payload = if cast {
+            fixture["timeline"][0]["event"]["payload"].clone()
+        } else {
+            fixture["timeline"][2]["event"]["payload"].clone()
+        };
+        NativeEffectEvent {
+            sequence,
+            generation: 23,
+            packet: "ObjectMagic".to_owned(),
+            payload,
+        }
+    }
+
+    fn hallucination_compat_projectile_event(sequence: u64) -> NativeEffectEvent {
+        let fixture = hallucination_fixture();
+        NativeEffectEvent {
+            sequence,
+            generation: 23,
+            packet: "ObjectProjectile".to_owned(),
+            payload: fixture["timeline"][1]["compatibilityEvent"]["payload"].clone(),
+        }
+    }
+
     #[test]
     fn soul_fireball_object_magic_owns_delayed_projectile_impact_and_three_sounds() {
         let zone = HashMap::from([(1000, (288, 616)), (2014, (288, 611))]);
@@ -7424,6 +7505,264 @@ mod tests {
         assert!(reset.active.is_empty());
         assert!(reset.local_projectile_targets.is_empty());
         assert!(reset.pending_sounds.is_empty());
+    }
+
+    #[test]
+    fn hallucination_object_magic_owns_delayed_directional_projectile_and_impact_sound() {
+        let zone = HashMap::from([(1000, (288, 616)), (2076, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[
+                hallucination_magic_event(1, true),
+                hallucination_compat_projectile_event(2),
+            ],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "Hallucination has no cast bitmap and ignores the compatibility projectile"
+        );
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-hallucination-"))
+            .expect("Hallucination projectile");
+        assert_eq!(projectile.start_at, HALLUCINATION_SPELL_ACTION_MS);
+        assert_eq!(
+            projectile.current.as_ref().map(|animation| animation.duration_ms),
+            Some(250)
+        );
+        assert_eq!(
+            projectile.current.as_ref().map(|animation| animation.interval),
+            Some(50),
+            "Crystal duration/count clock turns the 48 ms process interval into five 50 ms frames"
+        );
+        assert!(projectile.current.as_ref().is_some_and(|animation| {
+            animation.frames[0].path.ends_with("/Magic/1160.png")
+        }));
+        assert!(projectile.queued.is_none(), "target binding occurs at launch");
+        assert!(fx.take_due_sound_events(0).is_empty());
+
+        let before: Value = serde_json::from_str(
+            &fx.tick_with_visibility(599, true)
+                .expect("Hallucination before projectile"),
+        )
+        .expect("Hallucination pre-projectile JSON");
+        assert_eq!(before["effects"], json!([]));
+        assert!(fx.take_due_sound_events(599).is_empty());
+
+        let launch: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("Hallucination projectile launch"),
+        )
+        .expect("Hallucination launch JSON");
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/1160.png")));
+        assert!(fx.take_due_sound_events(600).is_empty());
+        assert!(fx.active.iter().any(|instance| {
+            instance.key.starts_with("fx-hallucination-")
+                && instance.queued.as_ref().is_some_and(|animation| {
+                    animation.frames[0].path.ends_with("/Magic2/1110.png")
+                })
+        }));
+        assert!(fx.take_due_sound_events(849).is_empty());
+
+        let impact_sound = fx.take_due_sound_events(850);
+        assert_eq!(impact_sound.len(), 1);
+        assert_eq!(impact_sound[0].cue, HALLUCINATION_IMPACT_SOUND_CUE);
+        assert_eq!(impact_sound[0].file_name, HALLUCINATION_IMPACT_SOUND_FILE);
+        let impact: Value = serde_json::from_str(
+            &fx.tick_with_visibility(850, true)
+                .expect("Hallucination impact"),
+        )
+        .expect("Hallucination impact JSON");
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic2/1110.png")));
+        assert!(fx.take_due_sound_events(850).is_empty());
+    }
+
+    #[test]
+    fn hallucination_cast_false_has_no_visual_or_audio_phases() {
+        let zone = HashMap::from([(1000, (288, 616)), (2076, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[hallucination_magic_event(1, false)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.take_due_sound_events(0).is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn hallucination_completion_uses_current_terminal_dead_state() {
+        let zone = HashMap::from([(1000, (288, 616)), (2076, (288, 611))]);
+
+        let mut dying = NativeEffects::default();
+        dying.observe(0, 288, 616, &[hallucination_magic_event(1, true)], &zone);
+        dying.observe(600, 288, 616, &[], &zone);
+        dying.replace_dead_action_object_ids(HashSet::new());
+        assert_eq!(
+            dying.take_due_sound_events(850)[0].cue,
+            HALLUCINATION_IMPACT_SOUND_CUE,
+            "Die must retain Hallucination impact"
+        );
+        let dying_impact: Value = serde_json::from_str(
+            &dying
+                .tick_with_visibility(850, true)
+                .expect("Hallucination Die-phase impact"),
+        )
+        .expect("Hallucination Die-phase JSON");
+        assert!(dying_impact["effects"].as_array().is_some_and(|effects| {
+            effects.iter().any(|effect| effect["imageUrl"]
+                .as_str()
+                .is_some_and(|path| path.ends_with("/Magic2/1110.png")))
+        }));
+
+        let mut dead = NativeEffects::default();
+        dead.observe(0, 288, 616, &[hallucination_magic_event(1, true)], &zone);
+        dead.observe(600, 288, 616, &[], &zone);
+        dead.replace_dead_action_object_ids(HashSet::from([2076]));
+        assert!(dead.take_due_sound_events(850).is_empty());
+        let suppressed: Value = serde_json::from_str(
+            &dead
+                .tick_with_visibility(850, true)
+                .expect("Hallucination Dead-phase suppression"),
+        )
+        .expect("Hallucination Dead-phase JSON");
+        assert_eq!(suppressed["effects"], json!([]));
+
+        let mut revived = NativeEffects::default();
+        revived.observe(0, 288, 616, &[hallucination_magic_event(1, true)], &zone);
+        revived.observe(600, 288, 616, &[], &zone);
+        revived.replace_dead_action_object_ids(HashSet::from([2076]));
+        let _ = revived.tick_with_visibility(700, true);
+        assert!(revived.active.iter().any(|instance| {
+            instance.key.starts_with("fx-hallucination-") && instance.queued.is_some()
+        }));
+        revived.replace_dead_action_object_ids(HashSet::new());
+        assert_eq!(
+            revived.take_due_sound_events(850)[0].cue,
+            HALLUCINATION_IMPACT_SOUND_CUE
+        );
+        let restored: Value = serde_json::from_str(
+            &revived
+                .tick_with_visibility(850, true)
+                .expect("Hallucination revived-target impact"),
+        )
+        .expect("Hallucination revived-target JSON");
+        assert!(restored["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic2/1110.png")));
+    }
+
+    #[test]
+    fn hallucination_target_absence_compatibility_and_session_boundaries_fail_closed() {
+        let initial = HashMap::from([(1000, (288, 616)), (2076, (288, 611))]);
+        let source_only = HashMap::from([(1000, (288, 616))]);
+
+        let mut compatibility_only = NativeEffects::default();
+        compatibility_only.observe(
+            0,
+            288,
+            616,
+            &[hallucination_compat_projectile_event(1)],
+            &initial,
+        );
+        assert!(compatibility_only.active.is_empty());
+
+        let mut absent = NativeEffects::default();
+        absent.observe(
+            0,
+            288,
+            616,
+            &[hallucination_magic_event(1, true)],
+            &source_only,
+        );
+        absent.observe(600, 288, 616, &[], &source_only);
+        let point_flight = absent
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-hallucination-"))
+            .expect("point-flight Hallucination");
+        assert!(point_flight.queued.is_none());
+        assert!(!absent.anchor_object_ids.contains_key(&point_flight.key));
+        assert!(absent.take_due_sound_events(10_000).is_empty());
+
+        for boundary in ["MapChanged", "LogOutSuccess"] {
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 288, 616, &[hallucination_magic_event(1, true)], &initial);
+            fx.observe(
+                100,
+                288,
+                616,
+                &[NativeEffectEvent {
+                    sequence: 2,
+                    generation: 23,
+                    packet: boundary.to_owned(),
+                    payload: json!({}),
+                }],
+                &initial,
+            );
+            assert!(fx.active.is_empty(), "{boundary} clears Hallucination");
+            assert!(
+                fx.take_due_sound_events(10_000).is_empty(),
+                "{boundary} clears delayed Hallucination audio"
+            );
+        }
+
+        let mut reset = NativeEffects::default();
+        reset.observe(0, 288, 616, &[hallucination_magic_event(1, true)], &initial);
+        reset.reset_session();
+        assert!(reset.active.is_empty());
+        assert!(reset.local_projectile_targets.is_empty());
+        assert!(reset.pending_sounds.is_empty());
+    }
+
+    #[test]
+    fn hallucination_production_frames_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = hallucination_fixture();
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        assert!(catalog.spell_cast_animation("Hallucination", 0).is_none());
+        for direction in 0..16_u32 {
+            let animation = catalog
+                .spell_projectile_animation("Hallucination", direction)
+                .expect("all Hallucination directions resolve");
+            assert_eq!(animation.interval, HALLUCINATION_PROJECTILE_STEP_MS);
+            assert_eq!(animation.frames.len(), 3);
+            for (frame, source) in animation.frames.iter().zip(0..3_u32) {
+                let index = 1160 + direction * 10 + source;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        let impact = catalog
+            .spell_impact_animation("Hallucination")
+            .expect("Hallucination impact");
+        assert_eq!(impact.frames.len(), 10);
+        assert!(impact.frames[0].path.ends_with("/Magic2/1110.png"));
+        assert!(impact.frames[9].path.ends_with("/Magic2/1119.png"));
+        for frame in &impact.frames {
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        let audio = &fixture["source"]["audio"][0];
+        let file = audio["file"].as_str().expect("Hallucination audio file");
+        let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+            .expect("packaged Hallucination sound path");
+        let bytes = fs::read(path).expect("read Hallucination sound");
+        assert_eq!(bytes.len(), audio["sourceBytes"]);
+        assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
     }
 
     #[test]

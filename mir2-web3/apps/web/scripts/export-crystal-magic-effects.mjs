@@ -267,7 +267,13 @@ export const SPELL_EFFECTS = [
   withPhases(spell("BlessedArmour", "Magic", 1160, 3, 30, "projectile"), {
     impact: phase("Magic", 1340, 15, 80, "target"),
   }),
-  withPhases(spell("Hallucination", "Magic", 1160, 3, 48, "projectile"), {
+  withPhases({
+    ...spell("Hallucination", "Magic", 1160, 3, 48, "projectile"),
+    ...direction16(1160, 3, 10),
+  }, {
+    projectile: phase("Magic", 1160, 3, 48, "projectile", {
+      ...direction16(1160, 3, 10),
+    }),
     impact: phase("Magic2", 1110, 10, 100, "target"),
   }),
   withPhases(spell("Curse", "Magic", 1160, 3, 30, "projectile"), {

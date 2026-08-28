@@ -60,6 +60,7 @@ function makeWav(seed = 0) {
   assert.equal(merged.find((entry) => entry.id === 20412).fileName, "M41-2.wav");
   assert.equal(merged.find((entry) => entry.id === 20610).fileName, "M61-0.wav");
   assert.equal(merged.find((entry) => entry.id === 20611).fileName, "M61-1.wav");
+  assert.equal(merged.find((entry) => entry.id === 20760).fileName, "M76-0.wav");
   assert.equal(merged.find((entry) => entry.id === 20791).fileName, "M79-1.wav");
   assert.throws(
     () => mergeSoundEntries([{ id: 20791, fileName: "wrong.wav" }], DIRECT_CRYSTAL_SOUND_ENTRIES),
@@ -129,7 +130,8 @@ try {
     ["M41-2.wav", 13],
     ["M61-0.wav", 14],
     ["M61-1.wav", 15],
-    ["M79-1.wav", 16],
+    ["M76-0.wav", 16],
+    ["M79-1.wav", 17],
   ]) {
     writeFileSync(path.join(soundSrc, name), makeWav(seed));
   }
@@ -144,8 +146,8 @@ try {
     strict: false,
   });
 
-  assert.equal(summary.soundListEntryCount, 21);
-  assert.equal(summary.exportedSoundCount, 20, "19 exact + 1 fallback copy");
+  assert.equal(summary.soundListEntryCount, 22);
+  assert.equal(summary.exportedSoundCount, 21, "20 exact + 1 fallback copy");
   assert.equal(summary.fallbackSoundCount, 1, "22.wav must fall back to 23.wav");
   assert.equal(summary.missingSoundCount, 1, "9999.wav must be recorded missing");
   assert.equal(summary.sounds["10100"].path, "/original-ui/Sound/100.wav");
@@ -167,6 +169,7 @@ try {
   assert.equal(summary.sounds["20412"].path, "/original-ui/Sound/M41-2.wav");
   assert.equal(summary.sounds["20610"].path, "/original-ui/Sound/M61-0.wav");
   assert.equal(summary.sounds["20611"].path, "/original-ui/Sound/M61-1.wav");
+  assert.equal(summary.sounds["20760"].path, "/original-ui/Sound/M76-0.wav");
   assert.equal(summary.sounds["20791"].path, "/original-ui/Sound/M79-1.wav");
 
   // Files actually landed on disk.
@@ -190,6 +193,7 @@ try {
     "M41-2.wav",
     "M61-0.wav",
     "M61-1.wav",
+    "M76-0.wav",
     "M79-1.wav",
   ]) {
     assert.ok(copied.has(f), `exported Sound dir must contain ${f}`);
