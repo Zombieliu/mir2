@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> VIS-04 Scarecrow Revive client-boundary checkpoint (2026-08-28): revision
+> `04121747c70d1c5487947f027d07b5209ca84f6c` changes no simulation,
+> Zone scheduler, Gateway, protocol or monster authority. The Windows adapter
+> only clears a retained client-side death-percentage normalization marker on
+> authoritative `ObjectRevived`; it retains HP until `ObjectHealth`. Exact
+> source frames, lifecycle and Web closure pass, including Windows 407/407.
+> No backend or global percentage is claimed.
+
 > VIS-01 corpse-name client-boundary checkpoint (2026-08-28): revision
 > `cda55ef5a` changes no simulation, Zone, Gateway, protocol, persistence or
 > combat authority. It only projects Crystal's living/dead name offset and

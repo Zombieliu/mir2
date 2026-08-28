@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> VIS-04 Scarecrow Revive server-client note (2026-08-28): revision
+> `04121747c70d1c5487947f027d07b5209ca84f6c` adds no packet or
+> server authority. Existing `ObjectRevived` remains authoritative for life
+> state and its existing `effect` flag; the client no longer lets a stale 0%
+> derived marker reverse that decision. `Monster/005` signed frames and return
+> to Standing are source-locked, with Windows 407/407 and Web gates passing.
+> Zone policy, live WSS and the complete monster denominator remain open; no
+> server or global percentage is reported.
+
 > VIS-01 corpse-name server-client note (2026-08-28): revision `cda55ef5a`
 > adds no packet or server authority. Existing authoritative `dead` state now
 > drives the exact client-owned Crystal name placement: keep the name, shift it

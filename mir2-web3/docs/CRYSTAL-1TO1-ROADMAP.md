@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-04 Scarecrow Revive checkpoint (2026-08-28): revision
+> `04121747c70d1c5487947f027d07b5209ca84f6c` closes the bounded
+> `Monster/005` remote-revive presentation leaf across native/Web gates. The
+> native bridge now removes only the stale death-percentage marker so Revive
+> survives a lagging snapshot without inventing HP; the transcript locks the
+> source-signed `164..155` Right frames, 1000ms return to Standing, and absence
+> of the Die additive layer. Full Windows 407/407 and Web gates pass. Other
+> directions/families and the semantic denominator remain open; same-EXE,
+> live-WSS, DPI, soak, human and signing gates are not closed.
+
 > VIS-01 corpse/body-name checkpoint (2026-08-28): revision `cda55ef5a`
 > completes the bounded automated player-death label leaf: dead names remain
 > visible, keep their text, move by the exact Crystal 27px delta, and do not

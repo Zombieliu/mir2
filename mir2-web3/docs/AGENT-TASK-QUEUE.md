@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> VIS-04 Scarecrow Revive bounded checkpoint (2026-08-28): revision
+> `04121747c70d1c5487947f027d07b5209ca84f6c` closes the exact
+> `Monster/005` remote Revive packet/render leaf. It fixes a native stale-0%
+> merge that could turn `ObjectRevived` dead again without fabricating HP,
+> then locks Crystal's signed Right sequence `164..155 -> Standing`, 100ms
+> cadence, no lingering Die additive layer, Web action token and frame
+> denominator. Windows passes 407/407; Web gates and staged-diff review pass.
+> Zone respawn policy, eight-direction captures, other monsters and final
+> device/human/signing gates remain open; no global percentage is claimed.
+> Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-04-SCARECROW-REVIVE-REPORT.md`.
+
 > VIS-01 corpse/body-name bounded checkpoint (2026-08-28): revision
 > `cda55ef5a` aligns the Windows native overlay with Crystal's
 > `Dead ? 35 : 8` name placement. Dead player/base-monster names remain
