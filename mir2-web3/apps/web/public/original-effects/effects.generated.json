@@ -3616,6 +3616,25 @@
       }
     },
     {
+      "effect": "NewMoveDestination",
+      "kind": "ground",
+      "library": "Magic3",
+      "base": 500,
+      "count": 10,
+      "interval": 60,
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirScenes/GameScene.cs::MapControl.OnMouseClick/Settings.NewMove",
+        "symbol": "NewMoveDestination"
+      }
+    },
+    {
       "effect": "PlayerRevive",
       "kind": "target",
       "library": "Magic2",

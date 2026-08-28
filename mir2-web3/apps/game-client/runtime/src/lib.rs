@@ -1189,6 +1189,17 @@ pub fn set_mir2_self_camera_motion(
         .with(|cell| cell.set(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms))));
 }
 
+/// Clear the retained self-camera interpolation window immediately.
+///
+/// Native hosts call this when the server corrects a locally predicted move or
+/// the active scene is reset. Waiting for the old window to expire would keep
+/// scrolling the world after authority has already returned the player to the
+/// source tile.
+#[wasm_bindgen(js_name = clearMir2SelfCameraMotion)]
+pub fn clear_mir2_self_camera_motion() {
+    PENDING_SELF_CAMERA_MOTION.with(|cell| cell.set(None));
+}
+
 /// Window/surface configuration for a Mir2 runtime host.
 ///
 /// Platform-neutral so the same Bevy app can open a Web canvas (WASM host), a

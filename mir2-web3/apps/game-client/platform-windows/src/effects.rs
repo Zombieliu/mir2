@@ -1689,6 +1689,51 @@ impl NativeEffects {
         self.reset_for_new_connection();
     }
 
+    /// Start Crystal's client-owned `Settings.NewMove` destination marker.
+    /// This is presentation-only: the Zone still validates the movement intent
+    /// independently and no local world position is fabricated.
+    pub(crate) fn start_new_move_destination(
+        &mut self,
+        now_ms: u64,
+        tile: (i32, i32),
+        draw_offset: (f32, f32),
+    ) -> bool {
+        let Some(mut animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation("NewMoveDestination", 0))
+        else {
+            return false;
+        };
+        animation.offset_x += draw_offset.0;
+        animation.offset_y += draw_offset.1;
+        let key = self.next_key("new-move-destination");
+        self.now_ms = now_ms;
+        self.active.push(EffectInstance {
+            key,
+            kind: EffectKindTag::Ground,
+            tile_x: tile.0,
+            tile_y: tile.1,
+            from_x: None,
+            from_y: None,
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: now_ms,
+            start_at: now_ms,
+            persistent_object_id: None,
+            provenance: EffectProvenance {
+                generation: self.last_generation,
+                sequence: 0,
+                packet: "LocalPointer".to_owned(),
+                spell: "NewMoveDestination".to_owned(),
+            },
+        });
+        while self.active.len() > MAX_ACTIVE_EFFECTS {
+            self.active.remove(0);
+        }
+        true
+    }
+
     fn next_key(&mut self, tag: &str) -> String {
         self.instance_seq = self.instance_seq.saturating_add(1);
         format!("fx-{tag}-{}", self.instance_seq)
@@ -3848,6 +3893,34 @@ mod tests {
     use crate::gameplay_bridge::{NativeEffectEvent, NativeGameplayAdapter};
     use crate::native_protocol::PacketEvent;
     use serde_json::json;
+
+    #[test]
+    fn new_move_destination_uses_crystal_magic3_frames_and_expires_at_600ms() {
+        let mut effects = NativeEffects::default();
+        let base = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.map_animation("NewMoveDestination", 0))
+            .expect("Crystal new-move effect");
+        assert_eq!(base.frames.len(), 10);
+        assert_eq!(base.interval, 60);
+        assert!(base.frames[0].path.ends_with("/Magic3/500.png"));
+        assert!(base.frames[9].path.ends_with("/Magic3/509.png"));
+
+        assert!(effects.start_new_move_destination(1_000, (11, 10), (3.0, -2.0)));
+        let instance = effects.active.last().expect("destination marker");
+        assert_eq!(instance.kind, EffectKindTag::Ground);
+        let animation = instance.current.as_ref().expect("marker animation");
+        assert_eq!(animation.offset_x, base.offset_x + 3.0);
+        assert_eq!(animation.offset_y, base.offset_y - 2.0);
+
+        let first = effects.tick(1_000).expect("first marker frame");
+        assert!(first.contains("/original-effects/Magic3/500.png"));
+        let last = effects.tick(1_599).expect("last marker frame");
+        assert!(last.contains("/original-effects/Magic3/509.png"));
+        let expired = effects.tick(1_600).expect("expired marker state");
+        assert!(expired.contains("\"effects\":[]"));
+        assert!(effects.active.is_empty());
+    }
 
     #[test]
     fn native_soak_metrics_gate_is_ten_seconds_and_saturating() {

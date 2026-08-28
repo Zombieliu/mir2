@@ -152,6 +152,22 @@ async function testAssembleMode() {
     },
   });
   assert.deepEqual(manifest.client_effects[1], {
+    effect: "NewMoveDestination",
+    library: "Magic3",
+    base: 500,
+    count: 10,
+    interval: 60,
+    kind: "ground",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirScenes/GameScene.cs::MapControl.OnMouseClick/Settings.NewMove",
+      symbol: "NewMoveDestination",
+    },
+  });
+  assert.deepEqual(manifest.client_effects[2], {
     effect: "PlayerRevive",
     library: "Magic2",
     base: 1220,
@@ -167,7 +183,7 @@ async function testAssembleMode() {
       symbol: "PlayerRevive",
     },
   });
-  assert.deepEqual(manifest.client_effects[2], {
+  assert.deepEqual(manifest.client_effects[3], {
     effect: "RightGuardRangeHit",
     library: "Magic2",
     base: 10,
@@ -357,6 +373,11 @@ async function testAssembleMode() {
   assert.equal(playerRevive.frames.at(-1).path, "/original-ui/Magic2/1239.png");
   assert.equal(playerRevive.durationMs, 2_000);
   assert.equal(playerRevive.light, 6);
+  const newMoveDestination = effects.resolveMapEffect(assets, "NewMoveDestination");
+  assert.equal(newMoveDestination.frames.length, 10);
+  assert.equal(newMoveDestination.frames[0].path, "/original-ui/Magic3/500.png");
+  assert.equal(newMoveDestination.frames.at(-1).path, "/original-ui/Magic3/509.png");
+  assert.equal(newMoveDestination.durationMs, 600);
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 7).frames[0].path, "/original-ui/Magic2/2210.png");
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 8), null);
   assert.equal(effects.effectNameForNumber(assets, 12), "Mine");

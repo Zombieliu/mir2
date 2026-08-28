@@ -13,6 +13,7 @@ use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 mod assets;
 mod atlas;
 mod capture;
+mod cursor;
 mod effects;
 mod entity_overlays;
 mod entity_presentation;
@@ -59,11 +60,12 @@ fn main() {
     });
     let diag = assets::diagnose_asset_root(&asset_root);
     eprintln!(
-        "[platform-windows] asset_root={} has_entity_manifest={} has_map_manifest={} has_effect_manifest={} complete={}",
+        "[platform-windows] asset_root={} has_entity_manifest={} has_map_manifest={} has_effect_manifest={} has_crystal_cursors={} complete={}",
         asset_root.display(),
         diag.has_entity_manifest,
         diag.has_map_manifest,
         diag.has_effect_manifest,
+        diag.has_crystal_cursors,
         diag.is_complete
     );
     eprintln!(
@@ -76,10 +78,11 @@ fn main() {
         height: session.window_height,
         ..RuntimeWindowSpec::native("mir2-web3 (native)")
     });
-    // Windows mirrors the Web controller's command-time self presentation.
-    // This is a guarded visual shadow only; UserLocation remains authoritative
-    // and clears/corrects the path on every acknowledgement.
-    mir2_bevy_runtime::set_mir2_local_motion_presentation_enabled(true);
+    // Windows publishes a command-time self motion window directly from
+    // NativeEntityPresentation. Keep the diagnostic LocalCommand shadow out of
+    // the render path so a sustained run has exactly one camera owner before,
+    // during, and after each authoritative acknowledgement.
+    mir2_bevy_runtime::set_mir2_local_motion_presentation_enabled(false);
     app.edit_schedule(bevy::prelude::Update, |schedule| {
         schedule.set_executor(SingleThreadedExecutor::new());
     });
@@ -132,6 +135,7 @@ fn main() {
         session.auto_login.as_ref(),
     ));
     app.insert_resource(input::GatewayCommands::new(command_tx.clone()));
+    app.add_systems(bevy::app::Startup, cursor::load_native_crystal_cursors);
     // Apply network session transitions before UI or world input. A queued
     // disconnect/login transition must win over a same-frame D/click event.
     app.add_systems(
@@ -150,6 +154,12 @@ fn main() {
         input::mouse_world_interaction_system
             .after(entity_presentation::tick_native_entity_presentation)
             .before(gameplay_bridge::forward_quest_ui_intents)
+            .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
+    app.add_systems(
+        bevy::app::Update,
+        cursor::sync_native_crystal_cursor
+            .after(entity_presentation::tick_native_entity_presentation)
             .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
     );
     app.add_systems(

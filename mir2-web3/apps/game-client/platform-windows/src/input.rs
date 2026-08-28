@@ -17,6 +17,7 @@ use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
 
+use crate::effects::{NativeEffects, CELL_HEIGHT, CELL_WIDTH};
 use crate::entity_presentation::NativeEntityPresentation;
 use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck};
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
@@ -64,6 +65,7 @@ const CRYSTAL_MOVE_PRESENTATION_MS: f64 = 600.0;
 const CRYSTAL_RUN_PRIME_MS: f64 = 1_200.0;
 const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
 const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
+const NPC_APPROACH_MAX_AGE_MS: f64 = 15_000.0;
 
 #[derive(Clone, Debug, PartialEq)]
 struct PendingSelfMove {
@@ -73,6 +75,12 @@ struct PendingSelfMove {
     mode: WorldPointerMovementMode,
     sent_at_ms: f64,
     visual_until_ms: f64,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct PendingNpcInteraction {
+    object_id: u32,
+    started_at_ms: f64,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -98,6 +106,7 @@ pub struct WorldPointerMovementState {
     run_primed_until_ms: f64,
     input_blocked_until_ms: f64,
     last_packet_ack_at_ms: Option<f64>,
+    pending_npc_interaction: Option<PendingNpcInteraction>,
 }
 
 impl WorldPointerMovementState {
@@ -111,6 +120,10 @@ impl WorldPointerMovementState {
 
     fn reset_controller(&mut self) {
         *self = Self::default();
+    }
+
+    fn cancel_npc_approach(&mut self) {
+        self.pending_npc_interaction = None;
     }
 
     fn can_send(&self, now_ms: f64) -> bool {
@@ -145,6 +158,7 @@ impl WorldPointerMovementState {
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
         self.input_blocked_until_ms = 0.0;
+        self.pending_npc_interaction = None;
         self.self_object_id = Some(object_id.to_owned());
         self.authoritative_position = Some(position);
         self.authoritative_direction = Some(direction.to_owned());
@@ -328,6 +342,77 @@ fn movement_target(origin: (i32, i32), direction: &str, distance: i32) -> (i32, 
     (origin.0 + dx * distance, origin.1 + dy * distance)
 }
 
+fn tile_distance(left: (i32, i32), right: (i32, i32)) -> i32 {
+    (left.0 - right.0).abs().max((left.1 - right.1).abs())
+}
+
+fn npc_position(entities: &EntityModelSet, object_id: u32) -> Option<(i32, i32)> {
+    let object_id = object_id.to_string();
+    entities
+        .entities
+        .iter()
+        .find(|entity| entity.kind == EntityKind::Npc && entity.object_id == object_id)
+        .map(|entity| (entity.x, entity.y))
+}
+
+fn new_move_draw_offset(cursor_stage: (f32, f32)) -> (f32, f32) {
+    (
+        cursor_stage.0.rem_euclid(CELL_WIDTH) - 8.0,
+        cursor_stage.1.rem_euclid(CELL_HEIGHT) - 15.0,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn send_pointer_move(
+    commands: &GatewayCommands,
+    presentation: &mut NativeEntityPresentation,
+    movement: &mut WorldPointerMovementState,
+    object_id: &str,
+    origin: (i32, i32),
+    direction: &'static str,
+    requested_mode: WorldPointerMovementMode,
+    now_ms: f64,
+    animation_now_ms: u64,
+) -> bool {
+    let effective_mode = movement.effective_mode(requested_mode, now_ms);
+    let distance = if effective_mode == WorldPointerMovementMode::Run {
+        2
+    } else {
+        1
+    };
+    let pending = PendingSelfMove {
+        from: origin,
+        to: movement_target(origin, direction, distance),
+        direction,
+        mode: effective_mode,
+        sent_at_ms: now_ms,
+        visual_until_ms: now_ms + CRYSTAL_MOVE_PRESENTATION_MS,
+    };
+    let intent = match requested_mode {
+        WorldPointerMovementMode::Walk => PlayerIntent::Walk {
+            direction: direction.to_owned(),
+        },
+        WorldPointerMovementMode::Run => PlayerIntent::Run {
+            direction: direction.to_owned(),
+        },
+    };
+    if !commands.send(intent) {
+        return false;
+    }
+    let _ = presentation.begin_local_self_motion(
+        object_id,
+        pending.from,
+        pending.to,
+        direction,
+        effective_mode == WorldPointerMovementMode::Run,
+        animation_now_ms,
+        crate::entity_presentation::native_motion_clock_ms(),
+    );
+    push_movement_shadow_command(now_ms, &pending);
+    movement.pending = Some(pending);
+    true
+}
+
 fn crystal_direction_name(direction: &str) -> &'static str {
     match direction.to_ascii_lowercase().as_str() {
         "up" => "Up",
@@ -413,8 +498,9 @@ pub fn mouse_world_interaction_system(
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     time: Option<Res<Time>>,
     windows: Query<&Window>,
-    queue: Option<ResMut<QuestUiIntentQueue>>,
+    mut queue: Option<ResMut<QuestUiIntentQueue>>,
     commands: Option<Res<GatewayCommands>>,
+    mut effects: Option<ResMut<NativeEffects>>,
     gameplay_inbox: Option<Res<GameplayEventInbox>>,
     mut movement: ResMut<WorldPointerMovementState>,
 ) {
@@ -427,6 +513,7 @@ pub fn mouse_world_interaction_system(
         && !right_pressed
         && movement.active.is_none()
         && movement.pending.is_none()
+        && movement.pending_npc_interaction.is_none()
         && !ack_waiting
     {
         return;
@@ -567,6 +654,7 @@ pub fn mouse_world_interaction_system(
 
     if !window.focused {
         movement.stop_hold();
+        movement.cancel_npc_approach();
         return;
     }
 
@@ -576,10 +664,12 @@ pub fn mouse_world_interaction_system(
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
         movement.stop_hold();
+        movement.cancel_npc_approach();
         return;
     }
 
     if right_pressed {
+        movement.cancel_npc_approach();
         // Crystal reserves right-click object interactions (for example Ctrl+
         // inspect). Until those are implemented, never turn an object click
         // into movement through the actor beneath the pointer.
@@ -587,25 +677,114 @@ pub fn mouse_world_interaction_system(
             movement.stop_hold();
             return;
         }
+        let origin = movement.authoritative_position.unwrap_or(entity_position);
+        if let (Some(target), Some(cursor_stage), Some(effects)) = (
+            presentation.hovered_grid_position(),
+            presentation.hover_cursor_stage(),
+            effects.as_deref_mut(),
+        ) {
+            if target != origin {
+                let _ = effects.start_new_move_destination(
+                    animation_now_ms,
+                    target,
+                    new_move_draw_offset(cursor_stage),
+                );
+            }
+        }
         movement.begin(WorldPointerMovementMode::Run);
     } else if left_pressed {
         if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
             .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
         {
             movement.stop_hold();
-            if let Some(mut queue) = queue {
-                queue.push_intent(intent);
+            if let QuestUiIntent::InteractNpc { npc_object_id } = intent {
+                let origin = movement.authoritative_position.unwrap_or(entity_position);
+                if npc_position(&entities, npc_object_id)
+                    .is_some_and(|target| tile_distance(origin, target) > 1)
+                {
+                    movement.pending_npc_interaction = Some(PendingNpcInteraction {
+                        object_id: npc_object_id,
+                        started_at_ms: now_ms,
+                    });
+                } else {
+                    movement.cancel_npc_approach();
+                    if let Some(queue) = queue.as_deref_mut() {
+                        queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id });
+                    }
+                    return;
+                }
+            } else {
+                movement.cancel_npc_approach();
+                if let Some(queue) = queue.as_deref_mut() {
+                    queue.push_intent(intent);
+                }
+                return;
             }
-            return;
         }
 
         // A player or another non-interactable actor is still solid world
         // content. Do not reinterpret that pixel hit as movement through it.
         if presentation.hovered_object_id().is_some() {
             movement.stop_hold();
+            if movement.pending_npc_interaction.is_none() {
+                return;
+            }
+        } else {
+            movement.cancel_npc_approach();
+            movement.begin(WorldPointerMovementMode::Walk);
+        }
+    }
+
+    // Match the Web client bridge: a distant NPC click becomes a bounded
+    // authoritative approach, and the dialog request is emitted exactly once
+    // after the player reaches an adjacent tile. Crystal's server does not
+    // accept the Windows client's previous fire-and-forget request at range.
+    if let Some(pending_npc) = movement.pending_npc_interaction.clone() {
+        if dialog_open || now_ms >= pending_npc.started_at_ms + NPC_APPROACH_MAX_AGE_MS {
+            movement.cancel_npc_approach();
             return;
         }
-        movement.begin(WorldPointerMovementMode::Walk);
+        let Some(target) = npc_position(&entities, pending_npc.object_id) else {
+            movement.cancel_npc_approach();
+            return;
+        };
+        let origin = movement.authoritative_position.unwrap_or(entity_position);
+        let distance = tile_distance(origin, target);
+        if distance <= 1 {
+            movement.cancel_npc_approach();
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.push_intent(QuestUiIntent::InteractNpc {
+                    npc_object_id: pending_npc.object_id,
+                });
+            }
+            return;
+        }
+        if !movement.can_send(now_ms) {
+            return;
+        }
+        let (Some(direction), Some(commands)) = (
+            movement_direction_toward(Some(target), origin),
+            commands.as_deref(),
+        ) else {
+            return;
+        };
+        let requested_mode = if distance > 2 {
+            WorldPointerMovementMode::Run
+        } else {
+            WorldPointerMovementMode::Walk
+        };
+        let _ = send_pointer_move(
+            commands,
+            presentation,
+            &mut movement,
+            &object_id,
+            origin,
+            direction,
+            requested_mode,
+            now_ms,
+            animation_now_ms,
+        );
+        return;
     }
 
     let Some(mode) = movement.active else {
@@ -630,46 +809,21 @@ pub fn mouse_world_interaction_system(
     let origin = movement.authoritative_position.unwrap_or(entity_position);
     let (Some(direction), Some(commands)) = (
         movement_direction_toward(presentation.hovered_grid_position(), origin),
-        commands,
+        commands.as_deref(),
     ) else {
         return;
     };
-    let effective_mode = movement.effective_mode(mode, now_ms);
-    let distance = if effective_mode == WorldPointerMovementMode::Run {
-        2
-    } else {
-        1
-    };
-    let pending = PendingSelfMove {
-        from: origin,
-        to: movement_target(origin, direction, distance),
+    let _ = send_pointer_move(
+        commands,
+        presentation,
+        &mut movement,
+        &object_id,
+        origin,
         direction,
-        mode: effective_mode,
-        sent_at_ms: now_ms,
-        visual_until_ms: now_ms + CRYSTAL_MOVE_PRESENTATION_MS,
-    };
-
-    let intent = match mode {
-        WorldPointerMovementMode::Walk => PlayerIntent::Walk {
-            direction: direction.to_owned(),
-        },
-        WorldPointerMovementMode::Run => PlayerIntent::Run {
-            direction: direction.to_owned(),
-        },
-    };
-    if commands.send(intent) {
-        let _ = presentation.begin_local_self_motion(
-            &object_id,
-            pending.from,
-            pending.to,
-            direction,
-            effective_mode == WorldPointerMovementMode::Run,
-            animation_now_ms,
-            crate::entity_presentation::native_motion_clock_ms(),
-        );
-        push_movement_shadow_command(now_ms, &pending);
-        movement.pending = Some(pending);
-    }
+        mode,
+        now_ms,
+        animation_now_ms,
+    );
 }
 
 /// Reject a stale Bevy `Interaction::Pressed` unless it is paired with the
@@ -1272,6 +1426,8 @@ mod tests {
             Some(QuestUiIntent::PickUpTile)
         );
         assert_eq!(pickup_tile_intent(Some((11, 10)), &entities), None);
+        assert_eq!(new_move_draw_offset((576.0, 352.0)), (-8.0, -15.0));
+        assert_eq!(new_move_draw_offset((600.0, 368.0)), (16.0, 1.0));
     }
 
     #[test]
@@ -1332,6 +1488,141 @@ mod tests {
     }
 
     #[test]
+    fn distant_npc_click_approaches_authoritatively_then_interacts_once() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        let mut entities = world_entities();
+        entities
+            .entities
+            .iter_mut()
+            .find(|entity| entity.object_id == "77")
+            .expect("npc")
+            .x = 15;
+        app.insert_resource(entities);
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hovered_object_id_for_test(Some("77"));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending_npc_interaction
+                .as_ref()
+                .map(|pending| pending.object_id),
+            Some(77)
+        );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self")
+            .x = 14;
+        push_test_movement_ack(&app, 14, 10, "right");
+        advance_movement_clock(&mut app, 600);
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .pending_npc_interaction
+            .is_none());
+
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+    }
+
+    #[test]
+    fn npc_disappearance_cancels_pending_approach_without_fake_dialog_request() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        let mut entities = world_entities();
+        entities
+            .entities
+            .iter_mut()
+            .find(|entity| entity.object_id == "77")
+            .expect("npc")
+            .x = 15;
+        app.insert_resource(entities);
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hovered_object_id_for_test(Some("77"));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_ok(), "approach did not start");
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .retain(|entity| entity.object_id != "77");
+        app.update();
+
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .pending_npc_interaction
+            .is_none());
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+    }
+
+    #[test]
     fn real_left_click_on_self_tile_queues_crystal_tile_pickup() {
         let mut app = bevy::prelude::App::new();
         app.world_mut().spawn(Window::default());
@@ -1378,6 +1669,7 @@ mod tests {
         presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
         app.insert_resource(presentation);
         app.init_resource::<QuestUiIntentQueue>();
+        app.init_resource::<NativeEffects>();
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
@@ -1389,6 +1681,12 @@ mod tests {
             receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
         ));
+        let marker = app
+            .world_mut()
+            .resource_mut::<NativeEffects>()
+            .tick(0)
+            .expect("right-click destination marker");
+        assert!(marker.contains("/original-effects/Magic3/500.png"));
         {
             let state = app.world().resource::<WorldPointerMovementState>();
             let pending = state.pending.as_ref().expect("first run pending");

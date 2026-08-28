@@ -61,6 +61,7 @@ const MAP_EFFECT_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapEffect";
 const PLAYER_REVIVE_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived";
 const RIGHT_GUARD_RANGE_HIT_SOURCE = "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4";
 const LEFT_GUARD_RANGE_PROJECTILE_SOURCE = "Crystal/Client/MirObjects/MonsterObject.cs::LeftGuard/AttackRange1/FrameIndex4/CreateProjectile";
+const NEW_MOVE_DESTINATION_SOURCE = "Crystal/Client/MirScenes/GameScene.cs::MapControl.OnMouseClick/Settings.NewMove";
 
 const spell = (name, library, base, count, interval, kind = "cast", directionStride) => ({
   spell: name,
@@ -363,6 +364,9 @@ export const CLIENT_EFFECTS = [
   clientEffect("LeftGuardRangeProjectile", "Magic", 10, 6, 30, LEFT_GUARD_RANGE_PROJECTILE_SOURCE, {
     kind: "projectile",
     ...direction16(10, 6, 10),
+  }),
+  clientEffect("NewMoveDestination", "Magic3", 500, 10, 60, NEW_MOVE_DESTINATION_SOURCE, {
+    kind: "ground",
   }),
   clientEffect("PlayerRevive", "Magic2", 1220, 20, 100, PLAYER_REVIVE_SOURCE),
   clientEffect("RightGuardRangeHit", "Magic2", 10, 5, 60, RIGHT_GUARD_RANGE_HIT_SOURCE, { kind: "impact" }),

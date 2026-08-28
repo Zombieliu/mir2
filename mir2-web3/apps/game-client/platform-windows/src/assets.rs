@@ -83,15 +83,16 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
             let mut message = format!(
                 "no Mir2 asset bundle found. Place a complete mir2-assets directory beside the executable, or set {ASSET_ROOT_ENV}."
             );
-            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png.");
+            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, and the four original-ui/Cursors native PNGs.");
             for (candidate, diag) in diagnostics {
                 message.push_str(&format!(
-                    "\n  candidate {} -> entity={} map={} effect={} items={} complete={}",
+                    "\n  candidate {} -> entity={} map={} effect={} items={} cursors={} complete={}",
                     candidate.display(),
                     diag.has_entity_manifest,
                     diag.has_map_manifest,
                     diag.has_effect_manifest,
                     diag.has_item_icons,
+                    diag.has_crystal_cursors,
                     diag.is_complete
                 ));
             }
@@ -102,12 +103,13 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
 
 fn incomplete_asset_error(path: &Path, diagnostics: AssetRootDiagnostics) -> String {
     format!(
-        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} effect_manifest={} item_icons={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, and original-ui/Items/3792.png. The window will not open with a missing pack.",
+        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} effect_manifest={} item_icons={} crystal_cursors={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
         path.display(),
         diagnostics.has_entity_manifest,
         diagnostics.has_map_manifest,
         diagnostics.has_effect_manifest,
-        diagnostics.has_item_icons
+        diagnostics.has_item_icons,
+        diagnostics.has_crystal_cursors
     )
 }
 
@@ -144,6 +146,7 @@ pub struct AssetRootDiagnostics {
     pub has_map_manifest: bool,
     pub has_effect_manifest: bool,
     pub has_item_icons: bool,
+    pub has_crystal_cursors: bool,
 }
 
 pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
@@ -160,14 +163,27 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     let has_item_icons = item_root.join("meta.json").is_file()
         && item_root.join("0.png").is_file()
         && item_root.join("3792.png").is_file();
-    let is_complete =
-        has_entity_manifest && has_map_manifest && has_effect_manifest && has_item_icons;
+    let cursor_root = candidate.join("original-ui/Cursors");
+    let has_crystal_cursors = [
+        "Cursor_Default.png",
+        "Cursor_Normal_Atk.png",
+        "Cursor_Compulsion_Atk.png",
+        "Cursor_Npc.png",
+    ]
+    .iter()
+    .all(|name| cursor_root.join(name).is_file());
+    let is_complete = has_entity_manifest
+        && has_map_manifest
+        && has_effect_manifest
+        && has_item_icons
+        && has_crystal_cursors;
     AssetRootDiagnostics {
         is_complete,
         has_entity_manifest,
         has_map_manifest,
         has_effect_manifest,
         has_item_icons,
+        has_crystal_cursors,
     }
 }
 
@@ -198,6 +214,7 @@ mod tests {
         assert!(diagnostics.has_map_manifest);
         assert!(diagnostics.has_effect_manifest);
         assert!(diagnostics.has_item_icons);
+        assert!(diagnostics.has_crystal_cursors);
         assert!(diagnostics.is_complete);
         match resolve_asset_root() {
             AssetRootStatus::Found(path) => assert_eq!(path, root),
@@ -226,6 +243,7 @@ mod tests {
         assert!(!diagnostics.has_map_manifest);
         assert!(!diagnostics.has_effect_manifest);
         assert!(!diagnostics.has_item_icons);
+        assert!(!diagnostics.has_crystal_cursors);
         assert!(!diagnostics.is_complete);
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -256,8 +274,23 @@ mod tests {
         std::fs::write(item_root.join("meta.json"), "{}").expect("item meta");
         std::fs::write(item_root.join("0.png"), []).expect("first item icon");
         std::fs::write(item_root.join("3792.png"), []).expect("last item icon");
+        let items_only = diagnose_asset_root(&dir);
+        assert!(items_only.has_item_icons);
+        assert!(!items_only.has_crystal_cursors);
+        assert!(!items_only.is_complete);
+
+        let cursor_root = dir.join("original-ui/Cursors");
+        std::fs::create_dir_all(&cursor_root).expect("cursor root");
+        for name in [
+            "Cursor_Default.png",
+            "Cursor_Normal_Atk.png",
+            "Cursor_Compulsion_Atk.png",
+            "Cursor_Npc.png",
+        ] {
+            std::fs::write(cursor_root.join(name), []).expect("cursor image");
+        }
         let complete = diagnose_asset_root(&dir);
-        assert!(complete.has_item_icons);
+        assert!(complete.has_crystal_cursors);
         assert!(complete.is_complete);
 
         let _ = std::fs::remove_dir_all(&dir);

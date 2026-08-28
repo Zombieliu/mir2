@@ -94,6 +94,7 @@ impl Default for NativeEntityPresentation {
 
 impl NativeEntityPresentation {
     pub fn reset_session(&mut self) {
+        mir2_bevy_runtime::clear_mir2_self_camera_motion();
         *self = Self::default();
     }
 
@@ -131,6 +132,10 @@ impl NativeEntityPresentation {
             center_x + (cursor_x / 48.0).floor() as i32 - 10,
             center_y + (cursor_y / 32.0).floor() as i32 - 11,
         ))
+    }
+
+    pub(crate) fn hover_cursor_stage(&self) -> Option<(f32, f32)> {
+        self.hover_cursor_stage
     }
 
     pub(crate) fn has_active_motion(&self, now_ms: u64) -> bool {
@@ -241,6 +246,20 @@ impl NativeEntityPresentation {
             },
         );
         self.self_object_id = Some(object_id.to_owned());
+        // Publish the same command-time window to the shared runtime before
+        // the authoritative ACK arrives. Windows previously relied on the
+        // separate LocalCommand shadow for this interval, then switched to the
+        // self window on ACK; that ownership hand-off made the whole scene
+        // visibly flash during sustained running. One time window now owns
+        // both the camera and the self sprite for the complete step.
+        mir2_bevy_runtime::set_mir2_self_camera_motion(
+            from.0 as f32,
+            from.1 as f32,
+            to.0 as f32,
+            to.1 as f32,
+            motion_now_ms as f64,
+            expires_ms as f64,
+        );
         if let Some(entity) = self
             .latest_payload
             .as_mut()
@@ -272,6 +291,7 @@ impl NativeEntityPresentation {
             .get(object_id)
             .is_some_and(|window| window.locally_predicted)
         {
+            mir2_bevy_runtime::clear_mir2_self_camera_motion();
             self.motion_windows.remove(object_id);
             self.last_positions
                 .insert(object_id.to_owned(), authoritative_position);
@@ -523,6 +543,7 @@ impl NativeEntityPresentation {
 
     fn attach_native_motion_windows(&mut self, payload: &mut Value, now_ms: u64) {
         let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) else {
+            mir2_bevy_runtime::clear_mir2_self_camera_motion();
             self.self_object_id = None;
             self.last_positions.clear();
             self.motion_windows.clear();
@@ -702,6 +723,7 @@ impl NativeEntityPresentation {
             .as_ref()
             .is_some_and(|object_id| !observed_ids.contains(object_id))
         {
+            mir2_bevy_runtime::clear_mir2_self_camera_motion();
             self.self_object_id = None;
         }
     }

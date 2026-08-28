@@ -301,6 +301,106 @@
       "shadowY": 0,
       "maskPath": null
     },
+    "500": {
+      "path": "/original-effects/Magic3/500.png",
+      "width": 124,
+      "height": 84,
+      "x": -38,
+      "y": -24,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "501": {
+      "path": "/original-effects/Magic3/501.png",
+      "width": 104,
+      "height": 69,
+      "x": -26,
+      "y": -17,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "502": {
+      "path": "/original-effects/Magic3/502.png",
+      "width": 96,
+      "height": 66,
+      "x": -23,
+      "y": -16,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "503": {
+      "path": "/original-effects/Magic3/503.png",
+      "width": 96,
+      "height": 66,
+      "x": -24,
+      "y": -15,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "504": {
+      "path": "/original-effects/Magic3/504.png",
+      "width": 96,
+      "height": 63,
+      "x": -23,
+      "y": -14,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "505": {
+      "path": "/original-effects/Magic3/505.png",
+      "width": 88,
+      "height": 63,
+      "x": -19,
+      "y": -15,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "506": {
+      "path": "/original-effects/Magic3/506.png",
+      "width": 84,
+      "height": 58,
+      "x": -17,
+      "y": -13,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "507": {
+      "path": "/original-effects/Magic3/507.png",
+      "width": 76,
+      "height": 53,
+      "x": -13,
+      "y": -10,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "508": {
+      "path": "/original-effects/Magic3/508.png",
+      "width": 48,
+      "height": 33,
+      "x": 1,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "509": {
+      "path": "/original-effects/Magic3/509.png",
+      "width": 40,
+      "height": 27,
+      "x": 4,
+      "y": 3,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
     "550": {
       "path": "/original-effects/Magic3/550.png",
       "width": 448,
