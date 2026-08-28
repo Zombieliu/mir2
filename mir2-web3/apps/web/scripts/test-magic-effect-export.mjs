@@ -129,6 +129,29 @@ async function testAssembleMode() {
   assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length);
   assert.deepEqual(manifest.client_effects, CLIENT_EFFECTS);
   assert.deepEqual(manifest.client_effects[0], {
+    effect: "LeftGuardRangeProjectile",
+    library: "Magic",
+    base: 10,
+    count: 6,
+    interval: 30,
+    directionCount: 16,
+    directionStride: 10,
+    directionRanges: Array.from({ length: 16 }, (_, direction) => ({
+      direction,
+      base: 10 + direction * 10,
+      end: 15 + direction * 10,
+    })),
+    kind: "projectile",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirObjects/MonsterObject.cs::LeftGuard/AttackRange1/FrameIndex4/CreateProjectile",
+      symbol: "LeftGuardRangeProjectile",
+    },
+  });
+  assert.deepEqual(manifest.client_effects[1], {
     effect: "PlayerRevive",
     library: "Magic2",
     base: 1220,
@@ -144,7 +167,7 @@ async function testAssembleMode() {
       symbol: "PlayerRevive",
     },
   });
-  assert.deepEqual(manifest.client_effects[1], {
+  assert.deepEqual(manifest.client_effects[2], {
     effect: "RightGuardRangeHit",
     library: "Magic2",
     base: 10,

@@ -3219,6 +3219,109 @@
   ],
   "client_effects": [
     {
+      "effect": "LeftGuardRangeProjectile",
+      "kind": "projectile",
+      "library": "Magic",
+      "base": 10,
+      "count": 6,
+      "interval": 30,
+      "directionCount": 16,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 10,
+          "end": 15
+        },
+        {
+          "direction": 1,
+          "base": 20,
+          "end": 25
+        },
+        {
+          "direction": 2,
+          "base": 30,
+          "end": 35
+        },
+        {
+          "direction": 3,
+          "base": 40,
+          "end": 45
+        },
+        {
+          "direction": 4,
+          "base": 50,
+          "end": 55
+        },
+        {
+          "direction": 5,
+          "base": 60,
+          "end": 65
+        },
+        {
+          "direction": 6,
+          "base": 70,
+          "end": 75
+        },
+        {
+          "direction": 7,
+          "base": 80,
+          "end": 85
+        },
+        {
+          "direction": 8,
+          "base": 90,
+          "end": 95
+        },
+        {
+          "direction": 9,
+          "base": 100,
+          "end": 105
+        },
+        {
+          "direction": 10,
+          "base": 110,
+          "end": 115
+        },
+        {
+          "direction": 11,
+          "base": 120,
+          "end": 125
+        },
+        {
+          "direction": 12,
+          "base": 130,
+          "end": 135
+        },
+        {
+          "direction": 13,
+          "base": 140,
+          "end": 145
+        },
+        {
+          "direction": 14,
+          "base": 150,
+          "end": 155
+        },
+        {
+          "direction": 15,
+          "base": 160,
+          "end": 165
+        }
+      ],
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/MonsterObject.cs::LeftGuard/AttackRange1/FrameIndex4/CreateProjectile",
+        "symbol": "LeftGuardRangeProjectile"
+      }
+    },
+    {
       "effect": "PlayerRevive",
       "kind": "target",
       "library": "Magic2",

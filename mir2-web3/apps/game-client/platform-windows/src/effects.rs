@@ -87,6 +87,7 @@ const LIGHTNING_SOUND_CUE: &str = "Lightning.complete";
 const FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const FIREBALL_PROJECTILE_STEP_MS: u64 = 30;
 const FIREBALL_TILE_TRAVEL_MS: u64 = 50;
+const GUARD_RANGE_ACTION_FRAME_DELAY_MS: u64 = 400;
 const FIREBALL_CAST_SOUND_FILE: &str = "M31-0.wav";
 const FIREBALL_PROJECTILE_SOUND_FILE: &str = "M31-1.wav";
 const FIREBALL_IMPACT_SOUND_FILE: &str = "M31-2.wav";
@@ -864,6 +865,20 @@ impl EffectCatalog {
             .then_some(animation)
     }
 
+    fn left_guard_range_projectile_animation(&self, direction: u32) -> Option<Animation> {
+        let entry = self.map_by_name.get("LeftGuardRangeProjectile")?;
+        let animation = self.resolve_animation(entry, direction, 0)?;
+        (animation.kind == "projectile"
+            && animation.frames.len() == 6
+            && animation.interval == FIREBALL_PROJECTILE_STEP_MS
+            && animation.duration_ms == 180
+            && animation.blend
+            && (animation.opacity - 1.0).abs() < f32::EPSILON
+            && animation.light == Some(6)
+            && !animation.repeat)
+            .then_some(animation)
+    }
+
     fn effect_name_for_number(&self, effect: u32) -> Option<String> {
         self.effect_name_by_number
             .get(&effect)
@@ -1145,6 +1160,15 @@ pub(crate) fn native_effect_light_snapshots() -> Vec<NativeEffectLightSnapshot> 
 pub(crate) struct NativeEffects {
     active: Vec<EffectInstance>,
     anchor_object_ids: HashMap<String, u32>,
+    /// Effects owned by a source actor but rendered along a separate path
+    /// (for example a missile moving toward a target). Source removal clears
+    /// the effect without incorrectly snapping its destination to the owner.
+    source_object_ids: HashMap<String, u32>,
+    /// The current native presentation tombstones most ObjectHide actors
+    /// before the effect consumer sees its zone map. Crystal Hide keeps the
+    /// object instance alive, so source-owned LeftGuard missiles retain only
+    /// the last authoritative tiles they still reference.
+    hidden_left_guard_tiles: HashMap<u32, (i32, i32)>,
     /// Delayed client-owned effects may depend on their source actor only
     /// until the Crystal action-frame boundary creates the target-owned effect.
     prestart_source_object_ids: HashMap<String, u32>,
@@ -1183,6 +1207,8 @@ impl Default for NativeEffects {
         Self {
             active: Vec::new(),
             anchor_object_ids: HashMap::new(),
+            source_object_ids: HashMap::new(),
+            hidden_left_guard_tiles: HashMap::new(),
             prestart_source_object_ids: HashMap::new(),
             anchor_player_keys: HashSet::new(),
             zone_tiles: HashMap::new(),
@@ -1286,6 +1312,40 @@ impl NativeEffects {
                 }
             })));
         }
+        let previous_generation = self.last_generation;
+        let previous_effect_sequence = self.last_effect_sequence;
+        let previous_zone_tiles = self.zone_tiles.clone();
+        for event in events {
+            if event.generation != self.last_generation
+                || event.sequence <= self.last_effect_sequence
+            {
+                continue;
+            }
+            let object_id = event
+                .payload
+                .get("objectId")
+                .and_then(Value::as_u64)
+                .and_then(|value| u32::try_from(value).ok());
+            match (event.packet.as_str(), object_id) {
+                ("ObjectHide", Some(object_id)) => {
+                    if let Some(tile) = zone_tiles
+                        .get(&object_id)
+                        .or_else(|| previous_zone_tiles.get(&object_id))
+                        .or_else(|| self.hidden_left_guard_tiles.get(&object_id))
+                        .copied()
+                    {
+                        self.hidden_left_guard_tiles.insert(object_id, tile);
+                    }
+                }
+                ("ObjectRemove", Some(object_id)) => {
+                    self.hidden_left_guard_tiles.remove(&object_id);
+                }
+                ("MapChanged" | "LogOutSuccess", _) => {
+                    self.hidden_left_guard_tiles.clear();
+                }
+                _ => {}
+            }
+        }
         self.zone_tiles.clone_from(zone_tiles);
         self.refresh_anchor_tiles();
         for event in events {
@@ -1342,7 +1402,65 @@ impl NativeEffects {
                 packet: event.packet.clone(),
                 spell,
             };
-            self.apply_event(&event.packet, &event.payload, zone_tiles, &provenance);
+            let is_left_guard_range = event.packet == "ObjectRangeAttack"
+                && event
+                    .payload
+                    .get("_nativeAttacker")
+                    .and_then(|attacker| actor_sprite_library(attacker, "bodyLibrary"))
+                    .is_some_and(|library| {
+                        matches!(library, "Monster/100" | "/original-ui/Monster/100")
+                    });
+            let earlier_scene_boundary = events.iter().any(|candidate| {
+                candidate.generation == event.generation
+                    && candidate.sequence > previous_effect_sequence
+                    && candidate.sequence < event.sequence
+                    && matches!(candidate.packet.as_str(), "MapChanged" | "LogOutSuccess")
+            });
+            if is_left_guard_range
+                && event.generation == previous_generation
+                && !earlier_scene_boundary
+            {
+                // Packet-first snapshots are folded after every packet in the
+                // batch. When RangeAttack precedes Hide, the final snapshot has
+                // already tombstoned the actor even though it existed when the
+                // attack was received. Reconstruct only those earlier
+                // LeftGuard inputs from the previous raw snapshot. A Hide that
+                // precedes this attack, another monster family, or an unrelated
+                // effect never receives the retained tile.
+                let mut event_zone_tiles = zone_tiles.clone();
+                for object_id in ["objectId", "targetId"].into_iter().filter_map(|field| {
+                    event
+                        .payload
+                        .get(field)
+                        .and_then(Value::as_u64)
+                        .and_then(|value| u32::try_from(value).ok())
+                }) {
+                    let hidden_later = events.iter().any(|candidate| {
+                        candidate.generation == event.generation
+                            && candidate.sequence > event.sequence
+                            && candidate.packet == "ObjectHide"
+                            && candidate
+                                .payload
+                                .get("objectId")
+                                .and_then(Value::as_u64)
+                                .and_then(|value| u32::try_from(value).ok())
+                                == Some(object_id)
+                    });
+                    if hidden_later {
+                        if let Some(tile) = previous_zone_tiles.get(&object_id).copied() {
+                            event_zone_tiles.entry(object_id).or_insert(tile);
+                        }
+                    }
+                }
+                self.apply_event(
+                    &event.packet,
+                    &event.payload,
+                    &event_zone_tiles,
+                    &provenance,
+                );
+            } else {
+                self.apply_event(&event.packet, &event.payload, zone_tiles, &provenance);
+            }
         }
         let latest_sequence = self.last_effect_sequence;
         self.local_projectile_dedupe
@@ -1350,6 +1468,7 @@ impl NativeEffects {
         while self.active.len() > MAX_ACTIVE_EFFECTS {
             self.active.remove(0);
         }
+        self.prune_hidden_left_guard_tiles();
         self.publish_current_light_snapshots(self.now_ms, true);
     }
 
@@ -1378,6 +1497,8 @@ impl NativeEffects {
     fn clear_active_effects(&mut self) {
         self.active.clear();
         self.anchor_object_ids.clear();
+        self.source_object_ids.clear();
+        self.hidden_left_guard_tiles.clear();
         self.prestart_source_object_ids.clear();
         self.anchor_player_keys.clear();
         self.local_projectile_dedupe.clear();
@@ -1390,7 +1511,22 @@ impl NativeEffects {
 
     fn refresh_anchor_tiles(&mut self) {
         let now_ms = self.now_ms;
-        let zone_tiles = &self.zone_tiles;
+        let zone_tiles = self.zone_tiles.clone();
+        let hidden_left_guard_tiles = self.hidden_left_guard_tiles.clone();
+        let left_guard_keys = self
+            .active
+            .iter()
+            .filter(|instance| instance.provenance.spell == "LeftGuardRangeProjectile")
+            .map(|instance| instance.key.clone())
+            .collect::<HashSet<_>>();
+        let resolve_tile = |key: &str, object_id: u32| {
+            zone_tiles.get(&object_id).copied().or_else(|| {
+                left_guard_keys
+                    .contains(key)
+                    .then(|| hidden_left_guard_tiles.get(&object_id).copied())
+                    .flatten()
+            })
+        };
         let active_start_times = self
             .active
             .iter()
@@ -1401,7 +1537,17 @@ impl NativeEffects {
             .iter()
             .filter_map(|(key, source_id)| {
                 let start_at = active_start_times.get(key).copied()?;
-                (now_ms <= start_at && !zone_tiles.contains_key(source_id)).then_some(key.clone())
+                (now_ms <= start_at && resolve_tile(key, *source_id).is_none())
+                    .then_some(key.clone())
+            })
+            .collect::<Vec<_>>();
+        let missing_owned_sources = self
+            .source_object_ids
+            .iter()
+            .filter_map(|(key, source_id)| {
+                resolve_tile(key, *source_id)
+                    .is_none()
+                    .then_some(key.clone())
             })
             .collect::<Vec<_>>();
         self.prestart_source_object_ids.retain(|key, _| {
@@ -1416,6 +1562,7 @@ impl NativeEffects {
             }
         }
         let mut anchors_to_insert = Vec::new();
+        let mut failed_launches = Vec::new();
         let mut launch_impact_sounds = Vec::new();
         for instance in &mut self.active {
             let Some(target_state) = self.local_projectile_targets.get_mut(&instance.key) else {
@@ -1424,28 +1571,31 @@ impl NativeEffects {
             if target_state.resolved_at_launch || now_ms < instance.start_at {
                 continue;
             }
-            let (spell, impact_sound_cue, impact_sound_file) =
-                match instance.provenance.spell.as_str() {
-                    "FireBall" => (
-                        "FireBall",
-                        FIREBALL_IMPACT_SOUND_CUE,
-                        FIREBALL_IMPACT_SOUND_FILE,
-                    ),
-                    "GreatFireBall" => (
-                        "GreatFireBall",
+            let (spell, impact_sound) = match instance.provenance.spell.as_str() {
+                "FireBall" => (
+                    "FireBall",
+                    Some((FIREBALL_IMPACT_SOUND_CUE, FIREBALL_IMPACT_SOUND_FILE)),
+                ),
+                "GreatFireBall" => (
+                    "GreatFireBall",
+                    Some((
                         GREAT_FIREBALL_IMPACT_SOUND_CUE,
                         GREAT_FIREBALL_IMPACT_SOUND_FILE,
-                    ),
-                    "SoulFireBall" => (
-                        "SoulFireBall",
+                    )),
+                ),
+                "SoulFireBall" => (
+                    "SoulFireBall",
+                    Some((
                         SOUL_FIREBALL_IMPACT_SOUND_CUE,
                         SOUL_FIREBALL_IMPACT_SOUND_FILE,
-                    ),
-                    _ => continue,
-                };
+                    )),
+                ),
+                "LeftGuardRangeProjectile" => ("LeftGuardRangeProjectile", None),
+                _ => continue,
+            };
             let bound_target = target_state
                 .target_id
-                .and_then(|object_id| zone_tiles.get(&object_id).copied());
+                .and_then(|object_id| resolve_tile(&instance.key, object_id));
             let destination = bound_target.unwrap_or(target_state.fallback);
             let (Some(from_x), Some(from_y), Some(projectile)) =
                 (instance.from_x, instance.from_y, instance.current.as_mut())
@@ -1457,26 +1607,39 @@ impl NativeEffects {
             let direction = projectile_direction16(source, destination);
             let (duration_ms, frame_interval_ms) =
                 crystal_projectile_clock(max_tile_distance(source, destination));
-            if let Some(mut launch_animation) = effect_catalog()
-                .as_ref()
-                .and_then(|catalog| catalog.spell_projectile_animation(spell, direction))
-            {
-                launch_animation.duration_ms = duration_ms;
-                launch_animation.interval = frame_interval_ms;
-                *projectile = launch_animation;
-            }
+            let launch_animation = effect_catalog().as_ref().and_then(|catalog| {
+                if spell == "LeftGuardRangeProjectile" {
+                    catalog.left_guard_range_projectile_animation(direction)
+                } else {
+                    catalog.spell_projectile_animation(spell, direction)
+                }
+            });
+            let Some(mut launch_animation) = launch_animation else {
+                target_state.resolved_at_launch = true;
+                failed_launches.push(instance.key.clone());
+                continue;
+            };
+            launch_animation.duration_ms = duration_ms;
+            launch_animation.interval = frame_interval_ms;
+            *projectile = launch_animation;
             instance.tile_x = destination.0;
             instance.tile_y = destination.1;
-            instance.queued = bound_target.and_then(|_| {
-                effect_catalog()
-                    .as_ref()
-                    .and_then(|catalog| catalog.spell_impact_animation(spell))
-            });
+            instance.queued = if spell == "LeftGuardRangeProjectile" {
+                None
+            } else {
+                bound_target.and_then(|_| {
+                    effect_catalog()
+                        .as_ref()
+                        .and_then(|catalog| catalog.spell_impact_animation(spell))
+                })
+            };
             target_state.resolved_at_launch = true;
             if let Some(target_id) = target_state.target_id.filter(|_| bound_target.is_some()) {
                 anchors_to_insert.push((instance.key.clone(), target_id));
             }
-            if instance.queued.is_some() {
+            if let Some((impact_sound_cue, impact_sound_file)) =
+                impact_sound.filter(|_| instance.queued.is_some())
+            {
                 launch_impact_sounds.push(PendingEffectSound {
                     key: instance.key.clone(),
                     due_at_ms: instance.start_at.saturating_add(duration_ms),
@@ -1497,21 +1660,26 @@ impl NativeEffects {
 
         let anchors = &self.anchor_object_ids;
         let mut missing = missing_prestart_sources;
+        missing.extend(missing_owned_sources);
+        missing.extend(failed_launches);
+        let mut detached_left_guard_targets = Vec::new();
         let mut local_projectile_impact_due = Vec::new();
         for instance in &mut self.active {
             let Some(object_id) = anchors.get(&instance.key) else {
                 continue;
             };
-            if let Some((tile_x, tile_y)) = zone_tiles.get(object_id) {
-                instance.tile_x = *tile_x;
-                instance.tile_y = *tile_y;
-                let local_projectile = match instance.provenance.spell.as_str() {
-                    "FireBall" => Some(FIREBALL_IMPACT_SOUND_CUE),
-                    "GreatFireBall" => Some(GREAT_FIREBALL_IMPACT_SOUND_CUE),
-                    "SoulFireBall" => Some(SOUL_FIREBALL_IMPACT_SOUND_CUE),
-                    _ => None,
-                };
-                if let Some(impact_sound_cue) = local_projectile {
+            if let Some((tile_x, tile_y)) = resolve_tile(&instance.key, *object_id) {
+                instance.tile_x = tile_x;
+                instance.tile_y = tile_y;
+                let (is_local_projectile, impact_sound_cue) =
+                    match instance.provenance.spell.as_str() {
+                        "FireBall" => (true, Some(FIREBALL_IMPACT_SOUND_CUE)),
+                        "GreatFireBall" => (true, Some(GREAT_FIREBALL_IMPACT_SOUND_CUE)),
+                        "SoulFireBall" => (true, Some(SOUL_FIREBALL_IMPACT_SOUND_CUE)),
+                        "LeftGuardRangeProjectile" => (true, None),
+                        _ => (false, None),
+                    };
+                if is_local_projectile {
                     if let (Some(from_x), Some(from_y), Some(projectile)) =
                         (instance.from_x, instance.from_y, instance.current.as_mut())
                     {
@@ -1520,21 +1688,41 @@ impl NativeEffects {
                                 < instance.start_at.saturating_add(projectile.duration_ms)
                         {
                             let source = (from_x as i32, from_y as i32);
-                            let destination = (*tile_x, *tile_y);
+                            let destination = (tile_x, tile_y);
                             let (duration_ms, frame_interval_ms) =
                                 crystal_projectile_clock(max_tile_distance(source, destination));
                             projectile.duration_ms = duration_ms;
                             projectile.interval = frame_interval_ms;
-                            local_projectile_impact_due.push((
-                                instance.key.clone(),
-                                instance.start_at.saturating_add(duration_ms),
-                                impact_sound_cue,
-                            ));
+                            if let Some(impact_sound_cue) = impact_sound_cue {
+                                local_projectile_impact_due.push((
+                                    instance.key.clone(),
+                                    instance.start_at.saturating_add(duration_ms),
+                                    impact_sound_cue,
+                                ));
+                            }
                         }
                     }
-                }
+                };
+            } else if instance.provenance.spell == "LeftGuardRangeProjectile"
+                && now_ms > instance.start_at
+                && self
+                    .local_projectile_targets
+                    .get(&instance.key)
+                    .is_some_and(|target| target.resolved_at_launch)
+            {
+                // Crystal's Missile keeps a strong Target reference after the
+                // object leaves MapControl's registries. Continue from the
+                // last known destination instead of deleting the source-owned
+                // projectile.
+                detached_left_guard_targets.push(instance.key.clone());
             } else {
                 missing.push(instance.key.clone());
+            }
+        }
+        for key in detached_left_guard_targets {
+            self.anchor_object_ids.remove(&key);
+            if let Some(target) = self.local_projectile_targets.get_mut(&key) {
+                target.target_id = None;
             }
         }
         for (key, due_at_ms, impact_sound_cue) in local_projectile_impact_due {
@@ -1551,11 +1739,32 @@ impl NativeEffects {
                 .retain(|key, _| !missing.contains(key));
             self.prestart_source_object_ids
                 .retain(|key, _| !missing.contains(key));
+            self.source_object_ids
+                .retain(|key, _| !missing.contains(key));
             self.pending_sounds
                 .retain(|pending| !missing.contains(&pending.key));
             self.local_projectile_targets
                 .retain(|key, _| !missing.contains(key));
         }
+    }
+
+    fn prune_hidden_left_guard_tiles(&mut self) {
+        let left_guard_keys = self
+            .active
+            .iter()
+            .filter(|instance| instance.provenance.spell == "LeftGuardRangeProjectile")
+            .map(|instance| instance.key.as_str())
+            .collect::<HashSet<_>>();
+        let referenced_ids = self
+            .source_object_ids
+            .iter()
+            .chain(self.anchor_object_ids.iter())
+            .filter_map(|(key, object_id)| {
+                left_guard_keys.contains(key.as_str()).then_some(*object_id)
+            })
+            .collect::<HashSet<_>>();
+        self.hidden_left_guard_tiles
+            .retain(|object_id, _| referenced_ids.contains(object_id));
     }
 
     fn take_due_sound_events(
@@ -1593,9 +1802,7 @@ impl NativeEffects {
             "Struck" | "ObjectStruck" => self.apply_player_struck_sound(payload, provenance),
             "Death" | "ObjectDied" => self.apply_player_death_sound(payload, provenance),
             "ObjectAttack" => self.apply_object_attack(payload, provenance),
-            "ObjectRangeAttack" => {
-                self.apply_object_range_attack(payload, zone_tiles, provenance)
-            }
+            "ObjectRangeAttack" => self.apply_object_range_attack(payload, zone_tiles, provenance),
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
             "ObjectProjectile" => self.apply_object_projectile(payload, zone_tiles, provenance),
             "ObjectEffect" => self.apply_object_effect(payload, zone_tiles, provenance),
@@ -1603,7 +1810,8 @@ impl NativeEffects {
             "ObjectSpell" => self.apply_object_spell(payload, zone_tiles, provenance),
             "Revived" => self.apply_player_revived(payload, zone_tiles, provenance, true),
             "ObjectRevived" => self.apply_player_revived(payload, zone_tiles, provenance, false),
-            "ObjectRemove" | "ObjectHide" => self.apply_object_remove(payload),
+            "ObjectRemove" => self.apply_object_remove(payload, false),
+            "ObjectHide" => self.apply_object_remove(payload, true),
             _ => {}
         }
     }
@@ -2320,11 +2528,9 @@ impl NativeEffects {
         let Some(attacker) = payload.get("_nativeAttacker") else {
             return;
         };
-        if !actor_sprite_library(attacker, "bodyLibrary").is_some_and(|library| {
-            matches!(library, "Monster/099" | "/original-ui/Monster/099")
-        }) {
+        let Some(body_library) = actor_sprite_library(attacker, "bodyLibrary") else {
             return;
-        }
+        };
         let Some(source_id) = payload
             .get("objectId")
             .and_then(Value::as_u64)
@@ -2342,9 +2548,40 @@ impl NativeEffects {
         if !zone_tiles.contains_key(&source_id) {
             return;
         }
-        let Some((tile_x, tile_y)) = zone_tiles.get(&target_id).copied() else {
+        let Some(target_tile) = zone_tiles.get(&target_id).copied() else {
             return;
         };
+
+        match body_library {
+            "Monster/099" | "/original-ui/Monster/099" => {
+                self.apply_right_guard_range_hit(source_id, target_id, target_tile, provenance)
+            }
+            "Monster/100" | "/original-ui/Monster/100" => {
+                let (Some(source_x), Some(source_y)) = (
+                    value_f32(payload, "location", "x").map(|value| value as i32),
+                    value_f32(payload, "location", "y").map(|value| value as i32),
+                ) else {
+                    return;
+                };
+                self.apply_left_guard_range_projectile(
+                    source_id,
+                    target_id,
+                    (source_x, source_y),
+                    target_tile,
+                    provenance,
+                )
+            }
+            _ => {}
+        }
+    }
+
+    fn apply_right_guard_range_hit(
+        &mut self,
+        source_id: u32,
+        target_id: u32,
+        (tile_x, tile_y): (i32, i32),
+        provenance: &EffectProvenance,
+    ) {
         let Some(animation) = effect_catalog()
             .as_ref()
             .and_then(EffectCatalog::right_guard_range_hit_animation)
@@ -2356,12 +2593,13 @@ impl NativeEffects {
         // fourth 100 ms action-frame boundary. A new authoritative attack for
         // the same pair restarts that one semantic instance; distinct targets
         // remain independent, matching Crystal's target-owned effect list.
-        const ACTION_FRAME_DELAY_MS: u64 = 400;
         let now = self.now_ms;
         let key = format!("right-guard-range:{source_id}:{target_id}");
         self.active.retain(|instance| instance.key != key);
         self.anchor_object_ids.remove(&key);
+        self.source_object_ids.remove(&key);
         self.prestart_source_object_ids.remove(&key);
+        self.local_projectile_targets.remove(&key);
         self.active.push(EffectInstance {
             key: key.clone(),
             kind: EffectKindTag::Impact,
@@ -2373,13 +2611,75 @@ impl NativeEffects {
             queued: None,
             return_queued: None,
             started_at: now,
-            start_at: now.saturating_add(ACTION_FRAME_DELAY_MS),
+            start_at: now.saturating_add(GUARD_RANGE_ACTION_FRAME_DELAY_MS),
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
         self.anchor_object_ids.insert(key, target_id);
-        self.prestart_source_object_ids
-            .insert(format!("right-guard-range:{source_id}:{target_id}"), source_id);
+        self.prestart_source_object_ids.insert(
+            format!("right-guard-range:{source_id}:{target_id}"),
+            source_id,
+        );
+    }
+
+    fn apply_left_guard_range_projectile(
+        &mut self,
+        source_id: u32,
+        target_id: u32,
+        source: (i32, i32),
+        destination: (i32, i32),
+        provenance: &EffectProvenance,
+    ) {
+        let direction = projectile_direction16(source, destination);
+        let Some(mut animation) = effect_catalog()
+            .as_ref()
+            .and_then(|catalog| catalog.left_guard_range_projectile_animation(direction))
+        else {
+            return;
+        };
+        let (duration_ms, frame_interval_ms) =
+            crystal_projectile_clock(max_tile_distance(source, destination));
+        animation.duration_ms = duration_ms;
+        animation.interval = frame_interval_ms;
+
+        // Crystal creates this source-owned Missile on AttackRange1's fourth
+        // 100 ms frame boundary. It locks Direction16 at launch, follows the
+        // target position during flight and recomputes the 50 ms/tile clock.
+        let now = self.now_ms;
+        let key = format!("left-guard-range:{source_id}:{target_id}");
+        self.active.retain(|instance| instance.key != key);
+        self.anchor_object_ids.remove(&key);
+        self.source_object_ids.remove(&key);
+        self.prestart_source_object_ids.remove(&key);
+        self.local_projectile_targets.remove(&key);
+        self.pending_sounds.retain(|pending| pending.key != key);
+        let mut projectile_provenance = provenance.clone();
+        projectile_provenance.spell = "LeftGuardRangeProjectile".to_owned();
+        self.active.push(EffectInstance {
+            key: key.clone(),
+            kind: EffectKindTag::Projectile,
+            tile_x: destination.0,
+            tile_y: destination.1,
+            from_x: Some(source.0 as f32),
+            from_y: Some(source.1 as f32),
+            current: Some(animation),
+            queued: None,
+            return_queued: None,
+            started_at: now,
+            start_at: now.saturating_add(GUARD_RANGE_ACTION_FRAME_DELAY_MS),
+            persistent_object_id: None,
+            provenance: projectile_provenance,
+        });
+        self.anchor_object_ids.insert(key.clone(), target_id);
+        self.source_object_ids.insert(key.clone(), source_id);
+        self.local_projectile_targets.insert(
+            key,
+            LocalProjectileTarget {
+                target_id: Some(target_id),
+                fallback: destination,
+                resolved_at_launch: false,
+            },
+        );
     }
 
     fn apply_map_effect(&mut self, payload: &Value, provenance: &EffectProvenance) {
@@ -2491,7 +2791,7 @@ impl NativeEffects {
         });
     }
 
-    fn apply_object_remove(&mut self, payload: &Value) {
+    fn apply_object_remove(&mut self, payload: &Value, hidden: bool) {
         let Some(object_id) = payload
             .get("objectId")
             .and_then(Value::as_u64)
@@ -2504,36 +2804,85 @@ impl NativeEffects {
         self.dead_player_sound_keys.remove(&actor_key);
         self.revived_player_effect_keys.remove(&actor_key);
         let remove_key = format!("spell-{object_id}");
+        let left_guard_start_times = self
+            .active
+            .iter()
+            .filter_map(|instance| {
+                (instance.provenance.spell == "LeftGuardRangeProjectile")
+                    .then_some((instance.key.clone(), instance.start_at))
+            })
+            .collect::<HashMap<_, _>>();
+        let protected_hide_keys = if hidden {
+            left_guard_start_times
+                .keys()
+                .cloned()
+                .collect::<HashSet<_>>()
+        } else {
+            HashSet::new()
+        };
+        let detached_target_keys = if hidden {
+            HashSet::new()
+        } else {
+            self.anchor_object_ids
+                .iter()
+                .filter_map(|(key, anchored_id)| {
+                    (*anchored_id == object_id
+                        && left_guard_start_times
+                            .get(key)
+                            .is_some_and(|start_at| self.now_ms > *start_at))
+                    .then_some(key.clone())
+                })
+                .collect::<HashSet<_>>()
+        };
         let anchored_keys = self
             .anchor_object_ids
             .iter()
-            .filter_map(|(key, anchored_id)| (*anchored_id == object_id).then_some(key.clone()))
+            .filter_map(|(key, anchored_id)| {
+                (*anchored_id == object_id
+                    && !protected_hide_keys.contains(key)
+                    && !detached_target_keys.contains(key))
+                .then_some(key.clone())
+            })
             .collect::<Vec<_>>();
         let prestart_source_keys = self
             .prestart_source_object_ids
             .iter()
-            .filter_map(|(key, source_id)| (*source_id == object_id).then_some(key.clone()))
+            .filter_map(|(key, source_id)| {
+                (*source_id == object_id && !protected_hide_keys.contains(key))
+                    .then_some(key.clone())
+            })
             .collect::<Vec<_>>();
-        self.active.retain(|instance| {
-            instance.key != remove_key
-                && !anchored_keys.contains(&instance.key)
-                && !prestart_source_keys.contains(&instance.key)
-        });
-        self.anchor_object_ids.retain(|key, anchored_id| {
-            *anchored_id != object_id && !prestart_source_keys.contains(key)
-        });
-        self.prestart_source_object_ids.retain(|key, source_id| {
-            *source_id != object_id && !anchored_keys.contains(key)
-        });
+        let source_owned_keys = self
+            .source_object_ids
+            .iter()
+            .filter_map(|(key, source_id)| {
+                (*source_id == object_id && !protected_hide_keys.contains(key))
+                    .then_some(key.clone())
+            })
+            .collect::<Vec<_>>();
+        let removed_keys = anchored_keys
+            .iter()
+            .chain(prestart_source_keys.iter())
+            .chain(source_owned_keys.iter())
+            .cloned()
+            .collect::<HashSet<_>>();
+        self.active
+            .retain(|instance| instance.key != remove_key && !removed_keys.contains(&instance.key));
+        self.anchor_object_ids
+            .retain(|key, _| !removed_keys.contains(key) && !detached_target_keys.contains(key));
+        self.prestart_source_object_ids
+            .retain(|key, _| !removed_keys.contains(key));
+        self.source_object_ids
+            .retain(|key, _| !removed_keys.contains(key));
         self.pending_sounds
-            .retain(|pending| {
-                !anchored_keys.contains(&pending.key)
-                    && !prestart_source_keys.contains(&pending.key)
-            });
+            .retain(|pending| !removed_keys.contains(&pending.key));
         self.local_projectile_targets
-            .retain(|key, _| {
-                !anchored_keys.contains(key) && !prestart_source_keys.contains(key)
-            });
+            .retain(|key, _| !removed_keys.contains(key));
+        for key in detached_target_keys {
+            if let Some(target) = self.local_projectile_targets.get_mut(&key) {
+                target.target_id = None;
+            }
+        }
     }
 
     /// Advance the effect clock and build the EffectRenderState JSON. Returns
@@ -2672,6 +3021,8 @@ impl NativeEffects {
             .retain(|key, _| live_keys.contains(&key.as_str()));
         self.prestart_source_object_ids
             .retain(|key, _| live_keys.contains(&key.as_str()));
+        self.source_object_ids
+            .retain(|key, _| live_keys.contains(&key.as_str()));
         self.anchor_player_keys
             .retain(|key| live_keys.contains(&key.as_str()));
         self.local_projectile_targets
@@ -2679,6 +3030,7 @@ impl NativeEffects {
         self.pending_sounds.retain(|pending| {
             !pending.requires_active_effect || live_keys.contains(&pending.key.as_str())
         });
+        self.prune_hidden_left_guard_tiles();
 
         self.publish_current_light_snapshots(now_ms, visible);
 
@@ -2909,7 +3261,8 @@ pub(crate) fn tick_native_effects(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::gameplay_bridge::NativeEffectEvent;
+    use crate::gameplay_bridge::{NativeEffectEvent, NativeGameplayAdapter};
+    use crate::native_protocol::PacketEvent;
     use serde_json::json;
 
     #[test]
@@ -5932,13 +6285,659 @@ mod tests {
         }
     }
 
-    fn lifecycle_effect_event(sequence: u64, packet: &str, object_id: Option<u32>) -> NativeEffectEvent {
+    fn lifecycle_effect_event(
+        sequence: u64,
+        packet: &str,
+        object_id: Option<u32>,
+    ) -> NativeEffectEvent {
         NativeEffectEvent {
             sequence,
             generation: 17,
             packet: packet.to_owned(),
             payload: object_id.map_or_else(|| json!({}), |id| json!({"objectId": id})),
         }
+    }
+
+    #[test]
+    fn left_guard_range_projectile_catalog_is_exact_crystal_contract() {
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        for direction in 0..16_u32 {
+            let animation = catalog
+                .left_guard_range_projectile_animation(direction)
+                .expect("all LeftGuard Direction16 frames resolve");
+            assert_eq!(animation.name, "LeftGuardRangeProjectile");
+            assert_eq!(animation.kind, "projectile");
+            assert_eq!(animation.interval, 30);
+            assert_eq!(animation.duration_ms, 180);
+            assert_eq!(animation.frames.len(), 6);
+            assert!(animation.blend);
+            assert!((animation.opacity - 1.0).abs() < f32::EPSILON);
+            assert_eq!(animation.light, Some(6));
+            assert!(!animation.repeat);
+            for (frame, source_frame) in animation.frames.iter().zip(0..6_u32) {
+                let index = 10 + direction * 10 + source_frame;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        assert!(catalog.left_guard_range_projectile_animation(16).is_none());
+    }
+
+    #[test]
+    fn left_guard_range_projectile_waits_four_frames_and_uses_crystal_flight_clock() {
+        let zone = HashMap::from([(371, (287, 616)), (2001, (293, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[right_guard_range_event(1, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "left-guard-range:371:2001");
+        assert_eq!(fx.active[0].kind, EffectKindTag::Projectile);
+        assert_eq!(fx.active[0].start_at, 400);
+        assert_eq!(fx.anchor_object_ids["left-guard-range:371:2001"], 2001);
+        assert_eq!(fx.source_object_ids["left-guard-range:371:2001"], 371);
+        assert!(fx.current_light_snapshots(399).is_empty());
+        let before: Value = serde_json::from_str(
+            &fx.tick_with_visibility(399, true)
+                .expect("delayed LeftGuard state"),
+        )
+        .expect("delayed LeftGuard JSON");
+        assert_eq!(before["effects"], json!([]));
+
+        for (now_ms, index) in [
+            (400, 50),
+            (430, 51),
+            (460, 52),
+            (490, 53),
+            (520, 54),
+            (550, 55),
+            (580, 50),
+        ] {
+            let rendered: Value = serde_json::from_str(
+                &fx.tick_with_visibility(now_ms, true)
+                    .expect("LeftGuard projectile frame"),
+            )
+            .expect("LeftGuard projectile JSON");
+            assert_eq!(rendered["effects"].as_array().map(Vec::len), Some(1));
+            assert!(rendered["effects"][0]["imageUrl"]
+                .as_str()
+                .is_some_and(|path| path.ends_with(&format!("/Magic/{index}.png"))));
+            assert_eq!(rendered["effects"][0]["additive"], true);
+            assert_eq!(rendered["effects"][0]["opacity"], 1.0);
+        }
+        assert_eq!(
+            fx.active[0]
+                .current
+                .as_ref()
+                .map(|animation| animation.duration_ms),
+            Some(300),
+            "six tiles use Crystal's 50 ms/tile duration"
+        );
+        let midpoint_light = fx.current_light_snapshots(550);
+        assert_eq!(midpoint_light.len(), 1);
+        assert_eq!(midpoint_light[0].light, 6);
+        assert!((midpoint_light[0].tile_x - 290.0).abs() < f32::EPSILON);
+        assert!((midpoint_light[0].tile_y - 616.0).abs() < f32::EPSILON);
+
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(700, true)
+                .expect("expired LeftGuard state"),
+        )
+        .expect("expired LeftGuard JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.source_object_ids.is_empty());
+        assert!(fx.local_projectile_targets.is_empty());
+        assert!(fx.take_due_sound_events(10_000).is_empty());
+    }
+
+    #[test]
+    fn left_guard_range_projectile_locks_launch_direction_then_tracks_target() {
+        let mut zone = HashMap::from([(371, (287, 616)), (2001, (293, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[right_guard_range_event(1, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        zone.insert(371, (288, 616));
+        zone.insert(2001, (288, 610));
+        fx.observe(400, 288, 616, &[], &zone);
+        assert_eq!(fx.active[0].from_x, Some(287.0));
+        assert_eq!(fx.active[0].from_y, Some(616.0));
+        assert!(fx.active[0]
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")));
+        assert_eq!(
+            fx.active[0]
+                .current
+                .as_ref()
+                .map(|animation| animation.duration_ms),
+            Some(300),
+            "launch clock remains based on the packet action location"
+        );
+
+        zone.insert(2001, (296, 616));
+        fx.observe(430, 288, 616, &[], &zone);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (296, 616));
+        assert_eq!(
+            fx.active[0]
+                .current
+                .as_ref()
+                .map(|animation| animation.duration_ms),
+            Some(450)
+        );
+        assert!(
+            fx.active[0]
+                .current
+                .as_ref()
+                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")),
+            "Crystal locks Direction16 when Missile is constructed"
+        );
+    }
+
+    #[test]
+    fn left_guard_range_projectile_restarts_per_pair_and_is_source_owned() {
+        let mut zone = HashMap::from([(371, (287, 616)), (2001, (293, 616)), (2002, (287, 610))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[right_guard_range_event(1, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        fx.observe(
+            100,
+            288,
+            616,
+            &[right_guard_range_event(
+                2,
+                371,
+                2001,
+                "/original-ui/Monster/100",
+            )],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].start_at, 500);
+
+        let other_target = right_guard_range_event(3, 371, 2002, "Monster/100");
+        fx.observe(120, 288, 616, &[other_target.clone()], &zone);
+        assert_eq!(fx.active.len(), 2);
+        let replay_state = fx
+            .active
+            .iter()
+            .find(|instance| instance.key == "left-guard-range:371:2002")
+            .map(|instance| (instance.start_at, instance.provenance.sequence))
+            .expect("second LeftGuard target");
+        fx.observe(130, 288, 616, &[other_target], &zone);
+        assert_eq!(fx.active.len(), 2);
+        assert_eq!(
+            fx.active
+                .iter()
+                .find(|instance| instance.key == "left-guard-range:371:2002")
+                .map(|instance| (instance.start_at, instance.provenance.sequence)),
+            Some(replay_state)
+        );
+
+        fx.observe(520, 288, 616, &[], &zone);
+        zone.remove(&371);
+        fx.observe(
+            521,
+            288,
+            616,
+            &[lifecycle_effect_event(4, "ObjectRemove", Some(371))],
+            &zone,
+        );
+        assert!(
+            fx.active.is_empty(),
+            "source owns both missiles after launch"
+        );
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.source_object_ids.is_empty());
+        assert!(fx.local_projectile_targets.is_empty());
+
+        zone.insert(371, (287, 616));
+        fx.observe(
+            600,
+            288,
+            616,
+            &[right_guard_range_event(5, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        zone.remove(&371);
+        fx.observe(
+            610,
+            288,
+            616,
+            &[lifecycle_effect_event(6, "ObjectHide", Some(371))],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "source Hide only changes the actor action even after the bridge tombstones it"
+        );
+        assert_eq!(fx.hidden_left_guard_tiles.get(&371), Some(&(287, 616)));
+        zone.remove(&2001);
+        fx.observe(
+            620,
+            288,
+            616,
+            &[lifecycle_effect_event(7, "ObjectHide", Some(2001))],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "target Hide keeps the pending missile target after the bridge tombstones it"
+        );
+        assert_eq!(fx.hidden_left_guard_tiles.get(&2001), Some(&(293, 616)));
+        fx.observe(
+            630,
+            288,
+            616,
+            &[lifecycle_effect_event(8, "ObjectRemove", Some(2001))],
+            &zone,
+        );
+        assert!(
+            fx.active.is_empty(),
+            "target Remove before frame 4 prevents Missile construction"
+        );
+        assert!(fx.hidden_left_guard_tiles.is_empty());
+
+        zone.insert(371, (287, 616));
+        zone.insert(2001, (293, 616));
+        fx.observe(
+            700,
+            288,
+            616,
+            &[right_guard_range_event(9, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        fx.observe(1_100, 288, 616, &[], &zone);
+        zone.remove(&2001);
+        fx.observe(
+            1_101,
+            288,
+            616,
+            &[lifecycle_effect_event(10, "ObjectHide", Some(2001))],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "post-launch target Hide keeps the missile after the bridge tombstones it"
+        );
+        assert_eq!(fx.hidden_left_guard_tiles.get(&2001), Some(&(293, 616)));
+        fx.observe(
+            1_102,
+            288,
+            616,
+            &[lifecycle_effect_event(11, "ObjectRemove", Some(2001))],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "post-launch target Remove freezes its last destination"
+        );
+        assert!(fx.anchor_object_ids.is_empty());
+        assert_eq!(fx.source_object_ids.len(), 1);
+        assert!(fx
+            .local_projectile_targets
+            .values()
+            .all(|target| target.target_id.is_none()));
+        let late_flight: Value = serde_json::from_str(
+            &fx.tick_with_visibility(1_399, true)
+                .expect("detached LeftGuard late flight"),
+        )
+        .expect("detached LeftGuard JSON");
+        assert_eq!(late_flight["effects"].as_array().map(Vec::len), Some(1));
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(1_400, true)
+                .expect("detached LeftGuard expiration"),
+        )
+        .expect("detached LeftGuard expiration JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.hidden_left_guard_tiles.is_empty());
+
+        zone.insert(2001, (293, 616));
+        fx.observe(
+            1_500,
+            288,
+            616,
+            &[right_guard_range_event(12, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        fx.observe(1_900, 288, 616, &[], &zone);
+        zone.remove(&371);
+        fx.observe(
+            1_901,
+            288,
+            616,
+            &[lifecycle_effect_event(13, "ObjectHide", Some(371))],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "post-launch source Hide keeps its Effects after the bridge tombstones it"
+        );
+        assert_eq!(fx.hidden_left_guard_tiles.get(&371), Some(&(287, 616)));
+        fx.observe(
+            1_902,
+            288,
+            616,
+            &[lifecycle_effect_event(14, "ObjectRemove", Some(371))],
+            &zone,
+        );
+        assert!(
+            fx.active.is_empty(),
+            "source Remove clears its owned Missile"
+        );
+        assert!(fx.hidden_left_guard_tiles.is_empty());
+
+        zone.insert(371, (287, 616));
+        fx.observe(
+            2_000,
+            288,
+            616,
+            &[right_guard_range_event(15, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        fx.observe(
+            2_010,
+            288,
+            616,
+            &[lifecycle_effect_event(16, "MapChanged", None)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        fx.observe(
+            2_100,
+            288,
+            616,
+            &[right_guard_range_event(17, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        fx.observe(
+            2_110,
+            288,
+            616,
+            &[lifecycle_effect_event(18, "LogOutSuccess", None)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+        fx.observe(
+            2_200,
+            288,
+            616,
+            &[right_guard_range_event(19, 371, 2001, "Monster/100")],
+            &zone,
+        );
+        let mut next_generation = right_guard_range_event(1, 371, 2002, "Monster/100");
+        next_generation.generation = 18;
+        fx.observe(2_210, 288, 616, &[next_generation], &zone);
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "left-guard-range:371:2002");
+        assert_eq!(fx.source_object_ids.len(), 1);
+        fx.reset_session();
+        assert!(fx.active.is_empty());
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.source_object_ids.is_empty());
+        assert!(fx.local_projectile_targets.is_empty());
+        assert!(fx.hidden_left_guard_tiles.is_empty());
+    }
+
+    #[test]
+    fn left_guard_hide_survives_real_adapter_tombstoned_snapshots() {
+        let base_payload = json!({
+            "playerObjectId": 1000,
+            "sceneView": {"center": {"x": 288, "y": 616}, "width": 19, "height": 15},
+            "entities": [
+                {"objectId": 1000, "kind": "selfPlayer", "x": 288, "y": 616},
+                {
+                    "objectId": 371,
+                    "kind": "monster",
+                    "x": 287,
+                    "y": 616,
+                    "sprite": {"bodyLibrary": "Monster/100"}
+                },
+                {
+                    "objectId": 372,
+                    "kind": "monster",
+                    "x": 289,
+                    "y": 616,
+                    "sprite": {"bodyLibrary": "Monster/099"}
+                },
+                {"objectId": 2001, "kind": "monster", "x": 293, "y": 616}
+            ]
+        });
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&base_payload);
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRangeAttack".to_owned(),
+            payload: json!({
+                "objectId": 371,
+                "location": {"x": 287, "y": 616},
+                "direction": "Down",
+                "targetId": 2001,
+                "target": {"x": 293, "y": 616},
+                "attackType": 0,
+                "spell": 0,
+                "level": 0
+            }),
+        }));
+
+        let mut attack_payload = base_payload.clone();
+        adapter.apply_authoritative_overlay(&mut attack_payload);
+        let attack_snapshot = adapter.snapshot(&attack_payload);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &attack_snapshot.effect_events,
+            &attack_snapshot.zone_entity_tiles,
+        );
+        assert_eq!(fx.active.len(), 1);
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHide".to_owned(),
+            payload: json!({"objectId": 371}),
+        }));
+        let mut hidden_source_payload = base_payload.clone();
+        adapter.apply_authoritative_overlay(&mut hidden_source_payload);
+        let hidden_source_snapshot = adapter.snapshot(&hidden_source_payload);
+        assert!(!hidden_source_snapshot.zone_entity_tiles.contains_key(&371));
+        fx.observe(
+            10,
+            288,
+            616,
+            &hidden_source_snapshot.effect_events,
+            &hidden_source_snapshot.zone_entity_tiles,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.hidden_left_guard_tiles.get(&371), Some(&(287, 616)));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHide".to_owned(),
+            payload: json!({"objectId": 2001}),
+        }));
+        let mut hidden_both_payload = base_payload;
+        adapter.apply_authoritative_overlay(&mut hidden_both_payload);
+        let hidden_both_snapshot = adapter.snapshot(&hidden_both_payload);
+        assert!(!hidden_both_snapshot.zone_entity_tiles.contains_key(&371));
+        assert!(!hidden_both_snapshot.zone_entity_tiles.contains_key(&2001));
+
+        let mut batched_fx = NativeEffects::default();
+        batched_fx.observe(0, 288, 616, &[], &attack_snapshot.zone_entity_tiles);
+        batched_fx.observe(
+            10,
+            288,
+            616,
+            &hidden_both_snapshot.effect_events,
+            &hidden_both_snapshot.zone_entity_tiles,
+        );
+        assert_eq!(
+            batched_fx.active.len(),
+            1,
+            "RangeAttack preceding same-batch Hide must use the previous raw actor tiles"
+        );
+        let batched_launch: Value = serde_json::from_str(
+            &batched_fx
+                .tick_with_visibility(410, true)
+                .expect("same-batch LeftGuard launch"),
+        )
+        .expect("same-batch LeftGuard JSON");
+        assert_eq!(batched_launch["effects"].as_array().map(Vec::len), Some(1));
+
+        let mut reverse_attack = attack_snapshot.effect_events[0].clone();
+        reverse_attack.sequence = 3;
+        let reverse_events = vec![
+            NativeEffectEvent {
+                sequence: 1,
+                generation: 0,
+                packet: "ObjectHide".to_owned(),
+                payload: json!({"objectId": 371}),
+            },
+            NativeEffectEvent {
+                sequence: 2,
+                generation: 0,
+                packet: "ObjectHide".to_owned(),
+                payload: json!({"objectId": 2001}),
+            },
+            reverse_attack,
+        ];
+        let mut reverse_fx = NativeEffects::default();
+        reverse_fx.observe(0, 288, 616, &[], &attack_snapshot.zone_entity_tiles);
+        reverse_fx.observe(
+            10,
+            288,
+            616,
+            &reverse_events,
+            &hidden_both_snapshot.zone_entity_tiles,
+        );
+        assert!(
+            reverse_fx.active.is_empty(),
+            "Hide preceding RangeAttack must remain fail-closed"
+        );
+
+        let mut next_generation_events = hidden_both_snapshot.effect_events.clone();
+        for event in &mut next_generation_events {
+            event.generation = 10;
+        }
+        let mut generation_fx = NativeEffects::default();
+        generation_fx.last_generation = 9;
+        generation_fx.observe(0, 288, 616, &[], &attack_snapshot.zone_entity_tiles);
+        generation_fx.observe(
+            10,
+            288,
+            616,
+            &next_generation_events,
+            &hidden_both_snapshot.zone_entity_tiles,
+        );
+        assert!(
+            generation_fx.active.is_empty(),
+            "a new generation must never recover tiles from the previous connection"
+        );
+        assert!(!generation_fx.zone_tiles.contains_key(&371));
+        assert!(!generation_fx.zone_tiles.contains_key(&2001));
+
+        let mut post_map_attack = attack_snapshot.effect_events[0].clone();
+        post_map_attack.sequence = 2;
+        let post_map_events = vec![
+            NativeEffectEvent {
+                sequence: 1,
+                generation: 0,
+                packet: "MapChanged".to_owned(),
+                payload: json!({"mapIndex": 2}),
+            },
+            post_map_attack,
+            NativeEffectEvent {
+                sequence: 3,
+                generation: 0,
+                packet: "ObjectHide".to_owned(),
+                payload: json!({"objectId": 371}),
+            },
+            NativeEffectEvent {
+                sequence: 4,
+                generation: 0,
+                packet: "ObjectHide".to_owned(),
+                payload: json!({"objectId": 2001}),
+            },
+        ];
+        let mut map_boundary_fx = NativeEffects::default();
+        map_boundary_fx.observe(0, 288, 616, &[], &attack_snapshot.zone_entity_tiles);
+        map_boundary_fx.observe(
+            10,
+            288,
+            616,
+            &post_map_events,
+            &hidden_both_snapshot.zone_entity_tiles,
+        );
+        assert!(
+            map_boundary_fx.active.is_empty(),
+            "same-generation MapChanged must invalidate the previous map's raw tiles"
+        );
+        assert!(!map_boundary_fx.zone_tiles.contains_key(&371));
+        assert!(!map_boundary_fx.zone_tiles.contains_key(&2001));
+
+        fx.observe(
+            20,
+            288,
+            616,
+            &hidden_both_snapshot.effect_events,
+            &hidden_both_snapshot.zone_entity_tiles,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.hidden_left_guard_tiles.get(&2001), Some(&(293, 616)));
+
+        let launched: Value = serde_json::from_str(
+            &fx.tick_with_visibility(400, true)
+                .expect("LeftGuard survives adapter tombstones through launch"),
+        )
+        .expect("adapter-chain LeftGuard JSON");
+        assert_eq!(launched["effects"].as_array().map(Vec::len), Some(1));
+
+        let expired: Value = serde_json::from_str(
+            &fx.tick_with_visibility(700, true)
+                .expect("adapter-chain LeftGuard expiration"),
+        )
+        .expect("adapter-chain expiration JSON");
+        assert_eq!(expired["effects"], json!([]));
+        assert!(fx.active.is_empty());
+        assert!(fx.hidden_left_guard_tiles.is_empty());
+        assert!(!fx.zone_tiles.contains_key(&371));
+        assert!(!fx.zone_tiles.contains_key(&2001));
+
+        let mut replayed_events = hidden_both_snapshot.effect_events.clone();
+        let mut unrelated_right_guard = right_guard_range_event(4, 372, 2001, "Monster/099");
+        unrelated_right_guard.generation = 0;
+        replayed_events.push(unrelated_right_guard);
+        fx.observe(
+            710,
+            288,
+            616,
+            &replayed_events,
+            &hidden_both_snapshot.zone_entity_tiles,
+        );
+        assert!(fx.active.is_empty());
+        assert!(fx.hidden_left_guard_tiles.is_empty());
+        assert!(
+            !fx.zone_tiles.contains_key(&2001),
+            "replayed Hide must not resurrect a stale target for unrelated effects"
+        );
     }
 
     #[test]
@@ -6026,11 +7025,7 @@ mod tests {
 
     #[test]
     fn right_guard_range_hit_restarts_per_pair_and_obeys_target_lifecycle() {
-        let zone = HashMap::from([
-            (371, (287, 616)),
-            (2001, (289, 616)),
-            (2002, (290, 616)),
-        ]);
+        let zone = HashMap::from([(371, (287, 616)), (2001, (289, 616)), (2002, (290, 616))]);
         let mut fx = NativeEffects::default();
         fx.observe(
             0,
@@ -6081,7 +7076,10 @@ mod tests {
             &[lifecycle_effect_event(4, "ObjectRemove", Some(371))],
             &zone,
         );
-        assert!(fx.active.is_empty(), "prestart attacker removal cancels both effects");
+        assert!(
+            fx.active.is_empty(),
+            "prestart attacker removal cancels both effects"
+        );
         assert!(fx.anchor_object_ids.is_empty());
         assert!(fx.prestart_source_object_ids.is_empty());
 
@@ -6099,7 +7097,10 @@ mod tests {
             &[lifecycle_effect_event(6, "ObjectHide", Some(371))],
             &zone,
         );
-        assert!(fx.active.is_empty(), "prestart attacker hide cancels the effect");
+        assert!(
+            fx.active.is_empty(),
+            "prestart attacker hide cancels the effect"
+        );
 
         fx.observe(
             400,
@@ -6117,7 +7118,11 @@ mod tests {
             &[lifecycle_effect_event(8, "ObjectRemove", Some(371))],
             &zone,
         );
-        assert_eq!(fx.active.len(), 1, "post-start attacker removal keeps target-owned effect");
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "post-start attacker removal keeps target-owned effect"
+        );
         fx.observe(
             820,
             288,
@@ -6125,7 +7130,10 @@ mod tests {
             &[lifecycle_effect_event(9, "ObjectRemove", Some(2001))],
             &zone,
         );
-        assert!(fx.active.is_empty(), "target removal always cancels the effect");
+        assert!(
+            fx.active.is_empty(),
+            "target removal always cancels the effect"
+        );
 
         fx.observe(
             900,
@@ -6142,7 +7150,11 @@ mod tests {
             &[lifecycle_effect_event(11, "ObjectHide", Some(371))],
             &zone,
         );
-        assert_eq!(fx.active.len(), 1, "post-start attacker hide keeps target-owned effect");
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "post-start attacker hide keeps target-owned effect"
+        );
         fx.observe(
             1_320,
             288,
@@ -6150,7 +7162,10 @@ mod tests {
             &[lifecycle_effect_event(12, "ObjectHide", Some(2002))],
             &zone,
         );
-        assert!(fx.active.is_empty(), "target hide always cancels the effect");
+        assert!(
+            fx.active.is_empty(),
+            "target hide always cancels the effect"
+        );
 
         fx.observe(
             1_400,
@@ -6225,7 +7240,10 @@ mod tests {
             &[lifecycle_effect_event(2, "ObjectRemove", Some(371))],
             &zone,
         );
-        assert!(fx.active.is_empty(), "source remove at 400 ms cancels before ownership transfer");
+        assert!(
+            fx.active.is_empty(),
+            "source remove at 400 ms cancels before ownership transfer"
+        );
 
         fx.observe(
             500,
@@ -6241,7 +7259,10 @@ mod tests {
             &[lifecycle_effect_event(4, "ObjectHide", Some(371))],
             &zone,
         );
-        assert!(fx.active.is_empty(), "source hide at 400 ms cancels before ownership transfer");
+        assert!(
+            fx.active.is_empty(),
+            "source hide at 400 ms cancels before ownership transfer"
+        );
 
         fx.observe(
             1_000,
@@ -6257,7 +7278,11 @@ mod tests {
             &[lifecycle_effect_event(6, "ObjectRemove", Some(371))],
             &zone,
         );
-        assert_eq!(fx.active.len(), 1, "source remove after 400 ms keeps target ownership");
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "source remove after 400 ms keeps target ownership"
+        );
         fx.observe(
             1_410,
             288,
@@ -6281,7 +7306,11 @@ mod tests {
             &[lifecycle_effect_event(9, "ObjectHide", Some(371))],
             &zone,
         );
-        assert_eq!(fx.active.len(), 1, "source hide after 400 ms keeps target ownership");
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "source hide after 400 ms keeps target ownership"
+        );
         fx.observe(
             1_910,
             288,
@@ -6293,19 +7322,28 @@ mod tests {
     }
 
     #[test]
-    fn right_guard_range_hit_fails_closed_for_other_packets_sources_and_missing_target() {
+    fn guard_range_effects_fail_closed_for_other_packets_sources_and_missing_context() {
         let zone = HashMap::from([(371, (287, 616)), (2001, (289, 616))]);
         let mut fx = NativeEffects::default();
-        let mut ordinary = ordinary_attack_event(4);
+        let mut missing_location = right_guard_range_event(4, 371, 2001, "Monster/100");
+        missing_location
+            .payload
+            .as_object_mut()
+            .expect("range payload object")
+            .remove("location");
+        let mut ordinary = ordinary_attack_event(7);
         ordinary.generation = 17;
         fx.observe(
             0,
             288,
             616,
             &[
-                right_guard_range_event(1, 371, 2001, "Monster/100"),
+                right_guard_range_event(1, 371, 2001, "Monster/101"),
                 right_guard_range_event(2, 371, 9999, "Monster/099"),
                 right_guard_range_event(3, 9999, 2001, "Monster/099"),
+                missing_location,
+                right_guard_range_event(5, 371, 9999, "Monster/100"),
+                right_guard_range_event(6, 9999, 2001, "Monster/100"),
                 ordinary,
             ],
             &zone,
