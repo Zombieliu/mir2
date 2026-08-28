@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> VIS-01 living hover-name additional bounded automated checkpoint
+> (2026-08-28): revision `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83`
+> decouples Crystal living `NameView`, non-self MouseObject/self MouseOver
+> names, `HighlightTarget` redraws and the living self health bar. Self,
+> remote player, NPC and monster matrices; simultaneous self/non-self hover;
+> selected-only suppression; alpha/same-tile/reverse hit testing; dead/empty
+> fail-closed behavior; health stability and local reset are automated.
+> Windows 394/394 and final independent P0=0/P1=0 review pass. No server,
+> Gateway, asset, EXE/package, live WSS or device capture changed. Corpse/
+> DisplayBodyName, guild/line-color/special-offset formatting, same-EXE/DPI/
+> soak/human/signing and the incomplete denominator remain open. VIS-01 stays
+> in progress; do not emit a global percentage.
+
 > VIS-02 LeftGuard range-projectile additional bounded automated checkpoint
 > (2026-08-28): revision `d2dfff14308256c07c3b3169798afee0a051b97b`
 > routes typed `ObjectRangeAttack` through exact `Monster/100` client logic.

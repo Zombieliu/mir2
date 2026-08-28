@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> VIS-01 living hover-name client-boundary checkpoint (2026-08-28): revision
+> `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83` adds no server or Gateway
+> authority. Existing packet-authoritative object identity/name/color and HP
+> feed a local split between living `NameView`, MouseObject/self MouseOver
+> names, optional `HighlightTarget` redraws and the always-independent living
+> self health bar. Windows 394/394 and independent P0=0/P1=0 review pass.
+> Corpse/DisplayBodyName, exact line formatting and every same-EXE/live-WSS/
+> GPU/DPI/soak/human/signing/denominator gate stay open; no backend or global
+> percentage is claimed.
+
 > VIS-02 LeftGuard range-projectile client-boundary checkpoint (2026-08-28):
 > revision `d2dfff14308256c07c3b3169798afee0a051b97b` changes no simulation,
 > shared-Zone, Gateway, protocol or combat authority. The Windows client

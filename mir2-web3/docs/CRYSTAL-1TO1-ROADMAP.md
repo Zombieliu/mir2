@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-01 living hover-name additional bounded checkpoint (2026-08-28):
+> implementation revision `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83`
+> now keeps Crystal's ordinary living `NameView`, non-self MouseObject/self
+> MouseOver names, `HighlightTarget` actor redraws and the living self health
+> bar independent. Self, remote player, NPC and monster matrices plus alpha/
+> same-tile/reverse hit tests, selected-only suppression, simultaneous hover,
+> dead/empty fail-closed behavior and health stability are automated. Windows
+> 394/394 and independent final P0=0/P1=0 review pass. No executable/package,
+> live WSS, GPU capture or server authority was changed. Corpse/DisplayBodyName,
+> exact guild/line color/special offsets and every same-EXE/DPI/soak/human/
+> signing/denominator gate remain open; VIS-01 is still in progress.
+
 > VIS-02 LeftGuard range-projectile additional bounded checkpoint
 > (2026-08-28): implementation revision
 > `d2dfff14308256c07c3b3169798afee0a051b97b` reproduces exact

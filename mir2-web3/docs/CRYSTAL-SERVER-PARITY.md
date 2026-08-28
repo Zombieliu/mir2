@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> VIS-01 living hover-name server-client note (2026-08-28): revision
+> `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83` changes no server combat,
+> session or Zone authority. It consumes the existing authoritative entity
+> identity/name/color/HP projection and closes only a bounded local living
+> name/hover/health presentation leaf. Windows 394/394 and final independent
+> P0=0/P1=0 review pass. Corpse/DisplayBodyName, exact multiline formatting,
+> same-EXE/live-WSS/GPU/DPI/soak/human/signing and the incomplete denominator
+> remain open. No server or global percentage is claimed.
+
 > VIS-02 LeftGuard range-projectile server-client note (2026-08-28): revision
 > `d2dfff14308256c07c3b3169798afee0a051b97b` adds no server packet or
 > authority. Exact `Monster/100` selection, the 400 ms frame-4 delay,

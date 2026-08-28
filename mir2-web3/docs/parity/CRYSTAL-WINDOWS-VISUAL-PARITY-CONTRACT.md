@@ -296,6 +296,16 @@ continue to render their normal frame. This passes render-state, input-gate,
 asset-closure and package/verifier automation only; no same-EXE capture, GPU
 raster, real-DPI or human acceptance is implied.
 
+VIS-01 living hover-name revision
+`066f6f3b576cbdc03106c8a221ccdaf13f7dfa83` separates three Crystal paths:
+ordinary living `NameView`, non-self `MouseObject` / self MouseOver names, and
+the living self health bar. `HighlightTarget` gates only actor redraws;
+selected-only objects do not gain names; self and overlapping non-self hover
+may both draw one name; and health remains stable across name visibility.
+Windows 394/394 and independent P0=0/P1=0 review pass. Corpse TargetDead,
+DisplayBodyName, guild dual-line layout, NPC line-color split, special monster
+offsets and all same-EXE/live-WSS/GPU/DPI/soak/human/signing gates stay open.
+
 ## Delivery waves
 
 1. `VIS-00` routes native text through Arial, applies the 8pt-at-96-DPI

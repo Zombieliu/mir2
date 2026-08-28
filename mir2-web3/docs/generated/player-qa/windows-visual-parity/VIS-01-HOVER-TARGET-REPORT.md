@@ -8,9 +8,11 @@ Date: 2026-08-28
 Crystal source revision: 484983404e3d6afa584e93801f8006ae3429bea9
 implementation base: 67a55b37900ced07d66bd788cbe06ef429ede8aa
 hover-target implementation revision: 1deb930483f3eca5f26f11020f091454fc96b183
+living-hover-name implementation revision: 066f6f3b576cbdc03106c8a221ccdaf13f7dfa83
 branch: codex/windows-visual-parity
 vis01Status: in_progress
 hoverTargetAutomatedCheckpoint: complete
+livingHoverNameAutomatedCheckpoint: complete
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -41,8 +43,9 @@ was produced.
   30% before the selected object. A hovered dead object is not redrawn, and
   the same object is not redrawn twice.
 - `Client/Settings.cs:155,259,369` defines, loads and saves
-  `HighlightTarget`, defaulting to true. The setting gates both hover and
-  selected redraws; it is not one of `OptionDialog`'s seven visible rows.
+  `HighlightTarget`, defaulting to true. The setting gates both 30% hover and
+  selected actor redraws, not hover identity or hover-only names; it is not
+  one of `OptionDialog`'s seven visible rows.
 
 ## Implemented behavior
 
@@ -52,7 +55,9 @@ was produced.
   publishes a pixel cache.
 - Pointer coordinates use the shared 1024x768 Crystal letterbox transform.
   Letterbox space, a missing cursor, an unfocused window, non-InGame state,
-  blocked world UI and `HighlightTarget=false` clear the local hover input.
+  and blocked world UI clear the local hover input. `HighlightTarget=false`
+  does not suppress hover-only names; cursor tracking is skipped only when
+  `NameView=true` also leaves no local hover consumer.
 - The renderer derives the cursor map tile and performs Crystal's five-by-five
   Y-descending/X-descending/reverse-object scan. Self and dead candidates are
   excluded; explicit player, monster and NPC projections are eligible.
@@ -69,6 +74,10 @@ was produced.
   they resolve to the same object, only the selected redraw is emitted.
   Non-overlapping depth bands preserve world < hover < selected < foreground
   effect order while Persistent ObjectSpell remains in the world pass.
+- The renderer now publishes non-self hover identity separately from self
+  MouseOver. Living self, remote player, NPC and monster names obey
+  `NameView || matching hover`, selected-only objects do not gain names, and
+  the self health bar remains independent of both name paths.
 - `UiOptions.highlight_target` persists in options schema v3. Schema v1 and
   v2 remain readable and receive the source default `true`; no visible
   OptionDialog row or outbound packet was added. Cursor movement, cursor
@@ -82,7 +91,8 @@ was produced.
 | Crystal/source behavior audit | PASS |
 | Focused hover/setting/presentation tests | PASS, 5/5 |
 | Options persistence/migration tests | PASS, 9/9 |
-| Full Windows native suite | PASS, 381/381 |
+| Full Windows native suite | PASS, 394/394 |
+| Living hover-name and self-health matrix | PASS, 7/7 |
 | Bevy native-ui suite | PASS, 402/402 |
 | UI-core suite | PASS, 42/42 |
 | Shared runtime suite | PASS, 191/191 |
