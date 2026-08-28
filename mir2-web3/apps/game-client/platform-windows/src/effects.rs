@@ -130,6 +130,7 @@ const PLAYER_TIGER_STRUCK_1_FILE: &str = "tiger_struck_1.wav";
 const PLAYER_TIGER_STRUCK_2_FILE: &str = "tiger_struck_2.wav";
 const PLAYER_WOLF_STRUCK_FILE: &str = "wolf_struck1.wav";
 const PLAYER_DIE_SOUND_DELAY_MS: u64 = 100;
+const SCARECROW_DIE_SOUND_FILE: &str = "005-3.wav";
 const SOUL_FIREBALL_SPELL_ACTION_MS: u64 = 600;
 const SOUL_FIREBALL_CAST_SOUND_FILE: &str = "M64-0.wav";
 const SOUL_FIREBALL_PROJECTILE_SOUND_FILE: &str = "M64-1.wav";
@@ -219,6 +220,22 @@ fn actor_is_player(actor: &Value) -> bool {
                 "selfplayer" | "player" | "hero"
             )
         })
+}
+
+fn actor_is_scarecrow(actor: &Value) -> bool {
+    if !actor
+        .get("kind")
+        .and_then(Value::as_str)
+        .is_some_and(|kind| kind.eq_ignore_ascii_case("monster"))
+    {
+        return false;
+    }
+    actor_sprite_library(actor, "bodyLibrary").is_some_and(|library| {
+        let normalized = library.trim().replace('\\', "/");
+        let normalized = normalized.trim_start_matches('/');
+        normalized.eq_ignore_ascii_case("Monster/005")
+            || normalized.eq_ignore_ascii_case("original-ui/Monster/005")
+    })
 }
 
 fn actor_sound_key(actor: &Value) -> Option<String> {
@@ -1193,6 +1210,7 @@ pub(crate) struct NativeEffects {
     ready_sounds: Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent>,
     pending_sounds: Vec<PendingEffectSound>,
     dead_player_sound_keys: HashSet<String>,
+    dead_scarecrow_sound_keys: HashSet<String>,
     revived_player_effect_keys: HashSet<String>,
     last_effect_sequence: u64,
     last_generation: u64,
@@ -1221,6 +1239,7 @@ impl Default for NativeEffects {
             ready_sounds: Vec::new(),
             pending_sounds: Vec::new(),
             dead_player_sound_keys: HashSet::new(),
+            dead_scarecrow_sound_keys: HashSet::new(),
             revived_player_effect_keys: HashSet::new(),
             last_effect_sequence: 0,
             last_generation: 0,
@@ -1510,6 +1529,7 @@ impl NativeEffects {
         self.ready_sounds.clear();
         self.pending_sounds.clear();
         self.dead_player_sound_keys.clear();
+        self.dead_scarecrow_sound_keys.clear();
         self.revived_player_effect_keys.clear();
     }
 
@@ -1804,7 +1824,10 @@ impl NativeEffects {
         match packet {
             "MapChanged" | "LogOutSuccess" => self.clear_active_effects(),
             "Struck" | "ObjectStruck" => self.apply_player_struck_sound(payload, provenance),
-            "Death" | "ObjectDied" => self.apply_player_death_sound(payload, provenance),
+            "Death" | "ObjectDied" => {
+                self.apply_player_death_sound(payload, provenance);
+                self.apply_scarecrow_death_sound(payload, provenance);
+            }
             "ObjectAttack" => self.apply_object_attack(payload, provenance),
             "ObjectRangeAttack" => self.apply_object_range_attack(payload, zone_tiles, provenance),
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
@@ -2059,6 +2082,36 @@ impl NativeEffects {
         });
     }
 
+    fn apply_scarecrow_death_sound(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        let Some(target) = payload
+            .get("_nativeTarget")
+            .filter(|actor| actor_is_scarecrow(actor))
+        else {
+            return;
+        };
+        let Some(actor_key) = actor_sound_key(target) else {
+            return;
+        };
+        if !self.dead_scarecrow_sound_keys.insert(actor_key.clone()) {
+            return;
+        }
+        self.cancel_scarecrow_sounds(&actor_key);
+        // Crystal's MonsterObject plays BaseSound + 3 when the Die action
+        // starts. Keep this due-now entry pending until the packet batch is
+        // complete so an adjacent remove/hide lifecycle packet can cancel it.
+        self.pending_sounds.push(PendingEffectSound {
+            key: format!("scarecrow-sound-{actor_key}"),
+            due_at_ms: self.now_ms,
+            requires_active_effect: false,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: format!("Scarecrow.{actor_key}.Die"),
+                file_name: SCARECROW_DIE_SOUND_FILE.to_owned(),
+            },
+        });
+    }
+
     fn cancel_player_sounds(&mut self, actor_key: &str) {
         let cue_prefix = format!("Player.{actor_key}.");
         self.ready_sounds
@@ -2068,6 +2121,15 @@ impl NativeEffects {
 
     fn cancel_pending_player_sound(&mut self, actor_key: &str) {
         let pending_key = format!("player-sound-{actor_key}");
+        self.pending_sounds
+            .retain(|pending| pending.key != pending_key);
+    }
+
+    fn cancel_scarecrow_sounds(&mut self, actor_key: &str) {
+        let cue_prefix = format!("Scarecrow.{actor_key}.");
+        self.ready_sounds
+            .retain(|event| !event.cue.starts_with(&cue_prefix));
+        let pending_key = format!("scarecrow-sound-{actor_key}");
         self.pending_sounds
             .retain(|pending| pending.key != pending_key);
     }
@@ -2843,7 +2905,9 @@ impl NativeEffects {
         };
         let actor_key = object_id.to_string();
         self.cancel_player_sounds(&actor_key);
+        self.cancel_scarecrow_sounds(&actor_key);
         self.dead_player_sound_keys.remove(&actor_key);
+        self.dead_scarecrow_sound_keys.remove(&actor_key);
         self.revived_player_effect_keys.remove(&actor_key);
         let remove_key = format!("spell-{object_id}");
         let left_guard_start_times = self
@@ -3604,6 +3668,14 @@ mod tests {
         }
     }
 
+    fn monster_actor(object_id: u32, body: &str) -> Value {
+        json!({
+            "objectId": object_id,
+            "kind": "monster",
+            "sprite": { "bodyLibrary": body },
+        })
+    }
+
     #[test]
     fn owner_revive_alias_packets_emit_one_effect_and_one_sound() {
         let owner = player_actor(
@@ -3780,8 +3852,9 @@ mod tests {
     }
 
     #[test]
-    fn native_gameplay_audio_allowlist_contains_every_player_combat_clip() {
+    fn native_gameplay_audio_allowlist_contains_every_implemented_combat_clip() {
         for file_name in [
+            SCARECROW_DIE_SOUND_FILE,
             PLAYER_STRUCK_BODY_SWORD_FILE,
             PLAYER_STRUCK_BODY_AXE_FILE,
             PLAYER_STRUCK_BODY_LONG_STICK_FILE,
@@ -3930,6 +4003,95 @@ mod tests {
             &HashMap::new(),
         );
         assert!(fx.take_due_sound_events(2_000).is_empty());
+    }
+
+    #[test]
+    fn scarecrow_death_audio_uses_crystal_numeric_file_resolution_once() {
+        let scarecrow = monster_actor(5_001, "/original-ui/Monster/005");
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            1_000,
+            288,
+            616,
+            &[player_sound_event(
+                1,
+                "ObjectDied",
+                scarecrow.clone(),
+                None,
+            )],
+            &HashMap::new(),
+        );
+        let due = fx.take_due_sound_events(1_000);
+        assert_eq!(due.len(), 1);
+        assert_eq!(due[0].file_name, SCARECROW_DIE_SOUND_FILE);
+        assert_eq!(due[0].cue, "Scarecrow.5001.Die");
+
+        fx.observe(
+            1_100,
+            288,
+            616,
+            &[player_sound_event(2, "ObjectDied", scarecrow, None)],
+            &HashMap::new(),
+        );
+        assert!(fx.take_due_sound_events(1_100).is_empty());
+    }
+
+    #[test]
+    fn scarecrow_death_audio_is_exact_and_lifecycle_scoped() {
+        for target in [
+            monster_actor(5_010, "/original-ui/Monster/004"),
+            json!({
+                "objectId": 5011,
+                "kind": "player",
+                "sprite": { "bodyLibrary": "/original-ui/Monster/005" },
+            }),
+            json!({
+                "objectId": 5012,
+                "kind": "monster",
+                "name": "Scarecrow",
+                "sprite": { "bodyLibrary": "/original-ui/Monster/006" },
+            }),
+        ] {
+            let mut fx = NativeEffects::default();
+            fx.observe(
+                1_000,
+                288,
+                616,
+                &[player_sound_event(1, "ObjectDied", target, None)],
+                &HashMap::new(),
+            );
+            assert!(fx.take_due_sound_events(1_000).is_empty());
+        }
+
+        for lifecycle_packet in [
+            "ObjectRemove",
+            "ObjectHide",
+            "MapChanged",
+            "LogOutSuccess",
+        ] {
+            let mut fx = NativeEffects::default();
+            let mut events = vec![player_sound_event(
+                1,
+                "ObjectDied",
+                monster_actor(5_020, "Monster/005"),
+                None,
+            )];
+            events.push(NativeEffectEvent {
+                sequence: 2,
+                generation: 0,
+                packet: lifecycle_packet.to_owned(),
+                payload: if matches!(lifecycle_packet, "ObjectRemove" | "ObjectHide") {
+                    json!({"objectId": 5020})
+                } else {
+                    json!({})
+                },
+            });
+            fx.observe(1_000, 288, 616, &events, &HashMap::new());
+            assert!(
+                fx.take_due_sound_events(1_000).is_empty(),
+                "{lifecycle_packet} must cancel the same-batch Scarecrow cry"
+            );
+        }
     }
 
     #[test]

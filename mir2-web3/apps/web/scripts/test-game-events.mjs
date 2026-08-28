@@ -484,6 +484,27 @@ check("player death cue is delayed to Die frame 1 and can be cancelled", () => {
   }
 });
 
+check("Scarecrow death cue resolves BaseImage + 3 immediately", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 92;
+  };
+  try {
+    originalSoundTriggersModule.scheduleEntityDieSound(
+      { kind: "monster", sprite: { bodyLibrary: "/original-ui/Monster/005" } },
+      "scarecrow-5",
+    );
+    assert.deepEqual(triggerPlayedIds, [53]);
+    assert.deepEqual(scheduled, []);
+  } finally {
+    originalSoundTriggersModule.cancelPendingEntitySounds();
+    globalThis.setTimeout = realSetTimeout;
+  }
+});
+
 check("entityRevived -> playReviveSound", () => {
   const bus = createGameEventBus();
   const { calls, sink } = makeAudioSink();

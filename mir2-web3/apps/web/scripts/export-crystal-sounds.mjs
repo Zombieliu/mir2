@@ -39,11 +39,13 @@ const FALLBACK_SOUND_FILES = new Map([
   ],
 ]);
 
-// Crystal derives magic sound ids arithmetically (20000 + Spell*10 + variant),
-// so these clips are not necessarily listed in SoundList.lst even though the
+// Crystal derives some sound ids arithmetically (magic uses
+// 20000 + Spell*10 + variant; monsters use BaseImage*10 + action variant), so
+// these clips are not necessarily listed in SoundList.lst even though the
 // client invokes the numeric id directly. Keep the index and exported bytes
 // closed over every locally implemented effect/audio checkpoint.
 export const DIRECT_CRYSTAL_SOUND_ENTRIES = [
+  { id: 53, fileName: "005-3.wav" },
   { id: 20081, fileName: "M8-1.wav" },
   { id: 20340, fileName: "M34-0.wav" },
   { id: 20341, fileName: "M34-1.wav" },

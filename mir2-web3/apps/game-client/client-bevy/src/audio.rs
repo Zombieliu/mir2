@@ -33,6 +33,7 @@ pub const NATIVE_UI_BUTTON_A_FILE: &str = "103.wav";
 /// become file paths: the platform effect adapter can only request a cue listed
 /// here and packaging verifies the same exact files.
 pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
+    "005-3.wav",
     "70.wav",
     "71.wav",
     "72.wav",
@@ -982,6 +983,10 @@ mod tests {
             file_name: "arbitrary.wav".to_owned(),
             ..lightning.clone()
         }));
+        assert!(!queue.push(NativeGameplaySoundEvent {
+            file_name: "53.wav".to_owned(),
+            ..lightning.clone()
+        }));
         assert_eq!(queue.len(), 1);
 
         assert!(queue.push(NativeGameplaySoundEvent {
@@ -996,6 +1001,12 @@ mod tests {
             sequence: 2,
             cue: "FlamingSword.attack".to_owned(),
             file_name: "M8-1.wav".to_owned(),
+        }));
+        assert!(queue.push(NativeGameplaySoundEvent {
+            generation: 5,
+            sequence: 3,
+            cue: "Scarecrow.5.Die".to_owned(),
+            file_name: "005-3.wav".to_owned(),
         }));
 
         for (sequence, file_name) in ["M31-0.wav", "M31-1.wav", "M31-2.wav"]

@@ -7,10 +7,9 @@
 // handlers (ObjectAttack / ObjectStruck / ObjectDied / ObjectMagic / Struck …) and they compute
 // the Crystal sound id and hand it to the presence-aware resolver in original-audio.ts.
 //
-// Coverage note: generic combat sounds (player swing/struck/die, monster struck clang) use the
-// always-present SoundList.cs weapon constants, so they always sound. Per-monster roars
-// (image*10 + offset) sound only when that monster has a SoundList entry — exactly as in Crystal,
-// where monsters without a sound entry are silent. Unlisted ids resolve to null and are skipped.
+// Coverage note: generic combat sounds use SoundList constants. Audited arithmetic ids such as
+// Scarecrow death (BaseImage 5 * 10 + 3 => 005-3.wav) are exported as explicit direct entries.
+// Other per-monster ids remain silent until their exact Crystal files enter that audited set.
 
 import { ORIGINAL_SOUND_IDS } from "./original-sound-events";
 import { playOriginalSoundId, playOriginalSoundIdWithFallback } from "./original-audio";
@@ -86,7 +85,12 @@ export function monsterImageFromBodyLibrary(bodyLibrary: string | null | undefin
   if (!bodyLibrary) {
     return null;
   }
-  const match = /^Monster\/0*(\d+)/i.exec(bodyLibrary);
+  const normalized = bodyLibrary
+    .trim()
+    .replaceAll("\\", "/")
+    .replace(/^\/?original-ui\//i, "")
+    .replace(/^\/+/, "");
+  const match = /^Monster\/0*(\d+)(?:\/|$)/i.exec(normalized);
   if (!match) {
     return null;
   }
@@ -221,12 +225,16 @@ export function playEntityDieSound(entity: SoundEntityRef | null | undefined): v
   }
 }
 
-/** Crystal PlayerObject plays the death cry on Die frame 1 (100 ms). */
+/** Crystal MonsterObject plays at Die action start; PlayerObject waits for Die frame 1 (100 ms). */
 export function scheduleEntityDieSound(
   entity: SoundEntityRef | null | undefined,
   objectId?: string | null,
 ): void {
   if (!entity) return;
+  if (entity.kind === "monster") {
+    playEntityDieSound(entity);
+    return;
+  }
   const timer = globalThis.setTimeout(() => {
     pendingEntitySoundTimers.delete(timer);
     playEntityDieSound(entity);
