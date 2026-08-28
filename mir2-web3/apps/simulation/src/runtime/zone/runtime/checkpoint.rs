@@ -14,7 +14,7 @@ use super::{
 };
 use crate::runtime::zone::types::{
     GroundDropClaimTicket, SessionId, ZoneGroundDrop, ZoneGroundDropClaim, ZoneKey,
-    ZoneNativeMonster, ZoneObject, ZonePlayer, ZonePlayerBuff,
+    ZoneNativeMonster, ZoneNativeMonsterRespawn, ZoneObject, ZonePlayer, ZonePlayerBuff,
 };
 use crate::runtime::zone::ZoneCollision;
 
@@ -22,11 +22,14 @@ const LEGACY_CANONICAL_ZONE_STATE_VERSION: u32 = 1;
 const LEGACY_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v1\0";
 const LEGACY_V2_CANONICAL_ZONE_STATE_VERSION: u32 = 2;
 const LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v2\0";
-const CANONICAL_ZONE_STATE_VERSION: u32 = 3;
-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
+const LEGACY_V3_CANONICAL_ZONE_STATE_VERSION: u32 = 3;
+const LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
+const CANONICAL_ZONE_STATE_VERSION: u32 = 4;
+const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
 const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
 const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
+const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
+const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
 
 fn legacy_v2_ground_drop_claim_idempotency_key(
     key: &ZoneKey,
@@ -69,6 +72,34 @@ struct CanonicalZoneState<'a> {
     removed_object_ids: &'a BTreeSet<u32>,
     harvested_object_ids: &'a BTreeSet<u32>,
     native_monsters: &'a BTreeMap<u32, ZoneNativeMonster>,
+    pending_native_hits: &'a [PendingNativeMonsterHit],
+    pending_native_projectiles: &'a [PendingNativeProjectile],
+    pending_native_player_hits: &'a [PendingNativePlayerHit],
+    pending_native_player_heals: &'a [PendingNativePlayerHeal],
+    pending_native_summons: &'a [PendingNativeSummon],
+    pending_native_ground_spells: &'a [PendingNativeGroundSpellAction],
+    ground_drops: &'a BTreeMap<u32, ZoneGroundDrop>,
+    claimed_ground_drops: &'a BTreeMap<u32, ZoneGroundDropClaim>,
+    next_ground_drop_generation: u64,
+    next_ground_drop_claim_id: u64,
+    open_doors: &'a BTreeMap<u8, u64>,
+    hazard: &'a ZoneHazardState,
+    next_object_id: u32,
+}
+
+#[derive(Serialize)]
+struct CanonicalZoneStateV4<'a> {
+    version: u32,
+    key: &'a ZoneKey,
+    collision: &'a ZoneCollision,
+    players: &'a BTreeMap<SessionId, ZonePlayer>,
+    objects: &'a BTreeMap<u32, ZoneObject>,
+    dead_object_ids: &'a BTreeMap<u32, ZoneObjectDeadState>,
+    revived_object_ids: &'a BTreeSet<u32>,
+    removed_object_ids: &'a BTreeSet<u32>,
+    harvested_object_ids: &'a BTreeSet<u32>,
+    native_monsters: &'a BTreeMap<u32, ZoneNativeMonster>,
+    native_monster_respawns: &'a BTreeMap<u32, ZoneNativeMonsterRespawn>,
     pending_native_hits: &'a [PendingNativeMonsterHit],
     pending_native_projectiles: &'a [PendingNativeProjectile],
     pending_native_player_hits: &'a [PendingNativePlayerHit],
@@ -133,6 +164,8 @@ struct ZoneRuntimeCheckpoint {
     removed_object_ids: BTreeSet<u32>,
     harvested_object_ids: BTreeSet<u32>,
     native_monsters: BTreeMap<u32, ZoneNativeMonster>,
+    #[serde(default)]
+    native_monster_respawns: BTreeMap<u32, ZoneNativeMonsterRespawn>,
     pending_native_hits: Vec<PendingNativeMonsterHit>,
     pending_native_projectiles: Vec<PendingNativeProjectile>,
     pending_native_player_hits: Vec<PendingNativePlayerHit>,
@@ -194,7 +227,7 @@ impl ZoneRuntime {
     /// BTree collections and struct field order make the JSON byte stream
     /// deterministic for a fixed signed game-module version.
     pub fn canonical_state_root(&self) -> Result<String, String> {
-        let state = CanonicalZoneState {
+        let state = CanonicalZoneStateV4 {
             version: CANONICAL_ZONE_STATE_VERSION,
             key: &self.key,
             collision: &self.collision,
@@ -205,6 +238,7 @@ impl ZoneRuntime {
             removed_object_ids: &self.removed_object_ids,
             harvested_object_ids: &self.harvested_object_ids,
             native_monsters: &self.native_monsters,
+            native_monster_respawns: &self.native_monster_respawns,
             pending_native_hits: &self.pending_native_hits,
             pending_native_projectiles: &self.pending_native_projectiles,
             pending_native_player_hits: &self.pending_native_player_hits,
@@ -321,6 +355,41 @@ impl ZoneRuntime {
         })?;
         let mut hasher = Sha256::new();
         hasher.update(LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN);
+        hasher.update(bytes);
+        Ok(hex_lower(&hasher.finalize()))
+    }
+
+    fn legacy_v3_canonical_state_root(&self) -> Result<String, String> {
+        let state = CanonicalZoneState {
+            version: LEGACY_V3_CANONICAL_ZONE_STATE_VERSION,
+            key: &self.key,
+            collision: &self.collision,
+            players: &self.players,
+            objects: &self.objects,
+            dead_object_ids: &self.dead_object_ids,
+            revived_object_ids: &self.revived_object_ids,
+            removed_object_ids: &self.removed_object_ids,
+            harvested_object_ids: &self.harvested_object_ids,
+            native_monsters: &self.native_monsters,
+            pending_native_hits: &self.pending_native_hits,
+            pending_native_projectiles: &self.pending_native_projectiles,
+            pending_native_player_hits: &self.pending_native_player_hits,
+            pending_native_player_heals: &self.pending_native_player_heals,
+            pending_native_summons: &self.pending_native_summons,
+            pending_native_ground_spells: &self.pending_native_ground_spells,
+            ground_drops: &self.ground_drops,
+            claimed_ground_drops: &self.claimed_ground_drops,
+            next_ground_drop_generation: self.next_ground_drop_generation,
+            next_ground_drop_claim_id: self.next_ground_drop_claim_id,
+            open_doors: &self.open_doors,
+            hazard: &self.hazard,
+            next_object_id: self.next_object_id,
+        };
+        let bytes = serde_json::to_vec(&state).map_err(|error| {
+            format!("failed to serialize legacy v3 canonical zone state: {error}")
+        })?;
+        let mut hasher = Sha256::new();
+        hasher.update(LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN);
         hasher.update(bytes);
         Ok(hex_lower(&hasher.finalize()))
     }
@@ -510,6 +579,7 @@ impl ZoneRuntime {
             removed_object_ids: self.removed_object_ids.clone(),
             harvested_object_ids: self.harvested_object_ids.clone(),
             native_monsters: self.native_monsters.clone(),
+            native_monster_respawns: self.native_monster_respawns.clone(),
             pending_native_hits: self.pending_native_hits.clone(),
             pending_native_projectiles: self.pending_native_projectiles.clone(),
             pending_native_player_hits: self.pending_native_player_hits.clone(),
@@ -552,13 +622,15 @@ impl ZoneRuntime {
             .map_err(|error| format!("failed to decode zone runtime checkpoint: {error}"))?;
         if checkpoint.version != LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION
+            && checkpoint.version != LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
         {
             return Err(format!(
-                "unsupported zone runtime checkpoint version {}, expected {}, {}, or {}",
+                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, or {}",
                 checkpoint.version,
                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 ZONE_RUNTIME_CHECKPOINT_VERSION
             ));
         }
@@ -594,6 +666,13 @@ impl ZoneRuntime {
         runtime.removed_object_ids = checkpoint.removed_object_ids;
         runtime.harvested_object_ids = checkpoint.harvested_object_ids;
         runtime.native_monsters = checkpoint.native_monsters;
+        runtime.native_monster_respawns = checkpoint.native_monster_respawns;
+        if checkpoint_version != ZONE_RUNTIME_CHECKPOINT_VERSION {
+            // v1-v3 roots did not commit respawn policy/due state. Ignore any
+            // forward fields injected into legacy JSON before authenticating
+            // and re-anchoring it under the current schema.
+            runtime.native_monster_respawns.clear();
+        }
         for monster in runtime.native_monsters.values_mut() {
             // Legacy checkpoints had only the AI-derived boolean. Without the
             // explicit authoritative disposition they must remain untargetable
@@ -642,6 +721,9 @@ impl ZoneRuntime {
             LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.legacy_v2_canonical_state_root()?
             }
+            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.legacy_v3_canonical_state_root()?
+            }
             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
             _ => unreachable!("checkpoint version was validated above"),
         };
@@ -658,6 +740,9 @@ impl ZoneRuntime {
             LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_legacy_v2_ground_drop_claim_authority()?;
                 runtime.reanchor_legacy_v2_ground_drop_claim_idempotency_keys();
+                runtime.validate_ground_drop_claim_authority()?;
+            }
+            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
             ZONE_RUNTIME_CHECKPOINT_VERSION => {
@@ -684,7 +769,8 @@ mod tests {
     use super::*;
     use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
     use crate::runtime::zone::types::{
-        ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneOutbound, ZonePlayerCombatStats,
+        ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
+        ZoneMonsterSpawn, ZoneOutbound, ZonePlayerCombatStats,
     };
     use mir2_protocol::{MirClass, MirDirection, MirGender};
 
@@ -701,6 +787,37 @@ mod tests {
             owner_object_id: None,
             ownership_remaining_ticks: Some(20),
             loot: GroundDropLootSnapshot::Gold { amount: 25 },
+        }
+    }
+
+    fn checkpoint_scheduled_monster(object_id: u32) -> ZoneMonsterSpawn {
+        ZoneMonsterSpawn {
+            object_id,
+            name: "CheckpointWasp".to_string(),
+            name_colour_argb: -1,
+            image: 0,
+            ai: 0,
+            disposition: Some(crate::config::WorldEntityDisposition::Hostile),
+            level: 1,
+            max_hp: 20,
+            hp: 20,
+            experience: 0,
+            move_speed_ms: 0,
+            attack_speed_ms: 0,
+            friendly_guild: None,
+            position: Point { x: 30, y: 30 },
+            direction: MirDirection::Down,
+            defense: ZoneMonsterDefense::default(),
+            respawn: Some(ZoneMonsterRespawnPolicy {
+                minimum_delay_ms: 0,
+                base_delay_ms: 100,
+                random_delay_step_ms: 0,
+                random_delay_steps: 1,
+                random_delay_subtract_steps: 0,
+                rule_index: 0,
+                slot_index: 0,
+            }),
+            drops: Vec::new(),
         }
     }
 
@@ -1018,6 +1135,103 @@ mod tests {
         assert_eq!(reanchored.version, ZONE_RUNTIME_CHECKPOINT_VERSION);
     }
     #[test]
+    fn legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy() {
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("legacy-v3-respawn-map"));
+        let spawn = checkpoint_scheduled_monster(8_301);
+        assert!(runtime.spawn_world_event_monster(&spawn, 0).0);
+        let mut checkpoint: ZoneRuntimeCheckpoint = serde_json::from_slice(
+            &runtime
+                .checkpoint_bytes()
+                .expect("current checkpoint source bytes"),
+        )
+        .expect("current checkpoint JSON");
+        checkpoint.version = LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION;
+        checkpoint
+            .native_monster_respawns
+            .get_mut(&spawn.object_id)
+            .expect("forward-injected respawn")
+            .due_at_ms = Some(0);
+        checkpoint.state_root = runtime
+            .legacy_v3_canonical_state_root()
+            .expect("legacy v3 state root");
+
+        let mut restored = ZoneRuntime::restore_checkpoint(
+            &serde_json::to_vec(&checkpoint).expect("legacy v3 checkpoint bytes"),
+        )
+        .expect("strict legacy v3 restore");
+        assert!(restored.native_monster_respawns.is_empty());
+        assert!(
+            !restored
+                .spawn_authoritative_monster_internal(&spawn, 1_000, false, false)
+                .0
+        );
+        let hydrated = restored
+            .native_monster_respawns
+            .get(&spawn.object_id)
+            .expect("trusted live sync must rehydrate policy");
+        assert_eq!(hydrated.due_at_ms, None);
+        let reanchored: ZoneRuntimeCheckpoint = serde_json::from_slice(
+            &restored
+                .checkpoint_bytes()
+                .expect("re-anchored v4 checkpoint bytes"),
+        )
+        .expect("re-anchored v4 checkpoint JSON");
+        assert_eq!(reanchored.version, ZONE_RUNTIME_CHECKPOINT_VERSION);
+        assert!(reanchored
+            .native_monster_respawns
+            .contains_key(&spawn.object_id));
+    }
+
+    #[test]
+    fn legacy_v3_dead_monster_policy_hydration_never_revives_immediately() {
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("legacy-v3-dead-map"));
+        let spawn = checkpoint_scheduled_monster(8_302);
+        assert!(runtime.spawn_world_event_monster(&spawn, 0).0);
+        let monster = runtime
+            .native_monsters
+            .get_mut(&spawn.object_id)
+            .expect("scheduled monster");
+        monster.dead = true;
+        monster.hp = 0;
+        runtime
+            .native_monster_respawns
+            .get_mut(&spawn.object_id)
+            .expect("scheduled policy")
+            .due_at_ms = Some(1);
+        let mut checkpoint: ZoneRuntimeCheckpoint = serde_json::from_slice(
+            &runtime
+                .checkpoint_bytes()
+                .expect("current checkpoint bytes"),
+        )
+        .expect("current checkpoint JSON");
+        checkpoint.version = LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION;
+        checkpoint.state_root = runtime
+            .legacy_v3_canonical_state_root()
+            .expect("legacy v3 state root");
+
+        let mut restored = ZoneRuntime::restore_checkpoint(
+            &serde_json::to_vec(&checkpoint).expect("legacy v3 checkpoint bytes"),
+        )
+        .expect("strict legacy v3 restore");
+        assert!(restored.native_monster_respawns.is_empty());
+        let (changed, outbounds) =
+            restored.spawn_authoritative_monster_internal(&spawn, 5_000, false, false);
+        assert!(!changed);
+        assert!(outbounds.is_empty());
+        assert!(restored
+            .native_monsters
+            .get(&spawn.object_id)
+            .is_some_and(|monster| monster.dead && monster.hp == 0));
+        assert_eq!(
+            restored
+                .native_monster_respawns
+                .get(&spawn.object_id)
+                .and_then(|respawn| respawn.due_at_ms),
+            Some(5_100)
+        );
+    }
+
+    #[test]
     fn complete_zone_checkpoint_restores_authoritative_and_derived_state() {
         let session_id = SessionId::new("checkpoint-player");
         let mut runtime = ZoneRuntime::new_with_collision(
@@ -1287,6 +1501,7 @@ mod tests {
             position: Point { x: 30, y: 30 },
             direction: MirDirection::Down,
             defense: ZoneMonsterDefense::default(),
+            respawn: None,
             drops: Vec::new(),
         };
         let (spawned, outbounds) = runtime.spawn_world_event_monster(&spawn, 1_000);
@@ -1326,6 +1541,7 @@ mod tests {
             position: Point { x: 30, y: 30 },
             direction: MirDirection::Down,
             defense: ZoneMonsterDefense::default(),
+            respawn: None,
             drops: Vec::new(),
         };
         assert!(runtime.spawn_world_event_monster(&spawn, 0).0);
@@ -1391,6 +1607,7 @@ mod tests {
             position: Point { x: 31, y: 30 },
             direction: MirDirection::Down,
             defense: ZoneMonsterDefense::default(),
+            respawn: None,
             drops: Vec::new(),
         };
         let (spawned, outbounds) = runtime.spawn_world_event_monster(&spawn, 2_000);

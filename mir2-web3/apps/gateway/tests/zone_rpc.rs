@@ -142,6 +142,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
         position: Point { x: 168, y: 155 },
         direction: MirDirection::Down,
         defense: ZoneMonsterDefense::default(),
+        respawn: None,
         drops: Vec::new(),
     };
     factory

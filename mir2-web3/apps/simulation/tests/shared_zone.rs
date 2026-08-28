@@ -10,9 +10,9 @@ use mir2_protocol::{
 use mir2_simulation::{
     GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, SessionId, SimulationConfig,
     SimulationSession, WorldEntityDisposition, WorldEntityKind, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterSpawn,
-    ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats,
-    ZoneRuntime,
+    ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
+    ZoneMonsterSpawn, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
+    ZonePlayerCombatStats, ZoneRuntime,
 };
 
 fn session(value: &str) -> SessionId {
@@ -550,6 +550,53 @@ fn npc_teleport_discards_movement_intent_queued_before_commit() {
 }
 
 #[test]
+fn interaction_boundary_cancels_queued_movement_without_moving_the_player() {
+    let mut zone = zone();
+    let owner = session("interaction-movement-owner");
+    zone.handle(ZoneCommand::Join(join(
+        "interaction-movement-owner",
+        100,
+        "Owner",
+        10,
+        10,
+    )));
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: owner.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 10,
+    });
+    zone.handle(ZoneCommand::Walk {
+        session_id: owner.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 11,
+    });
+    let before_cancel = zone_player_transform(&zone, &owner);
+
+    let canceled = zone.handle(ZoneCommand::CancelPendingMovement {
+        session_id: owner.clone(),
+    });
+    assert!(has_packet(&canceled, &owner, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if Some((location.position.clone(), location.direction)) == before_cancel
+    )));
+
+    let after_cooldown = zone.tick(u64::MAX);
+    assert_eq!(zone_player_transform(&zone, &owner), before_cancel);
+    assert!(!after_cooldown.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::ToSession { packets, .. } | ZoneOutbound::ToMany { packets, .. }
+            if packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectWalk { .. } | ServerPacket::ObjectRun { .. }
+            ))
+    )));
+}
+
+#[test]
 fn npc_teleport_rejections_preserve_transform_for_missing_ineligible_low_gold_and_occupied_front() {
     for (requested_object_id, available_gold, occupy_front) in [
         (901, 10_000, false),
@@ -776,6 +823,7 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
         position: Point { x, y },
         direction: MirDirection::Down,
         defense: Default::default(),
+        respawn: None,
         drops: vec![GroundDropSnapshot {
             object_id: 9200,
             name: "Wasp Gold".to_string(),
@@ -789,6 +837,18 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
             ownership_remaining_ticks: None,
             loot: GroundDropLootSnapshot::Gold { amount: 8 },
         }],
+    }
+}
+
+fn fixed_wall_clock_respawn(delay_ms: u64) -> ZoneMonsterRespawnPolicy {
+    ZoneMonsterRespawnPolicy {
+        minimum_delay_ms: 0,
+        base_delay_ms: delay_ms,
+        random_delay_step_ms: 0,
+        random_delay_steps: 1,
+        random_delay_subtract_steps: 0,
+        rule_index: 7,
+        slot_index: 3,
     }
 }
 
@@ -4713,6 +4773,372 @@ fn zone_native_harvestable_monster_cannot_respawn_before_object_harvested() {
         .expect("harvested Deer should respawn as a new incarnation");
     assert!(!live.dead);
     assert!(live.hp > 0);
+}
+
+#[test]
+fn zone_wall_clock_respawn_is_emitted_once_for_two_observing_sessions() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Mage", 330, 271)));
+    admit_melee(&mut zone, &first);
+
+    let mut spawn = native_monster_spawn(9_103, 331, 270);
+    spawn.drops.clear();
+    spawn.respawn = Some(fixed_wall_clock_respawn(100));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn,
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_103,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    assert!(has_packet(&zone.tick(10), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_103
+    )));
+    assert!(!has_packet(&zone.tick(109), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_103
+    )));
+
+    let respawned = zone.tick(110);
+    for observer in [&first, &second] {
+        assert_eq!(
+            packets_for(&respawned, observer)
+                .iter()
+                .filter(|packet| matches!(
+                    packet,
+                    ServerPacket::ObjectRevived { info } if info.object_id == 9_103
+                ))
+                .count(),
+            1,
+            "each observer must see exactly one shared incarnation boundary"
+        );
+    }
+    assert!(!has_packet(&zone.tick(110), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_103
+    )));
+}
+
+#[test]
+fn late_join_sync_cannot_respawn_scheduled_corpse_before_zone_due() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    admit_melee(&mut zone, &first);
+
+    let mut spawn = native_monster_spawn(9_106, 331, 270);
+    spawn.drops.clear();
+    spawn.respawn = Some(fixed_wall_clock_respawn(100));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn.clone(),
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_106,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    zone.tick(10);
+
+    zone.handle(ZoneCommand::Join(join("second", 102, "Mage", 330, 271)));
+    let sync = zone.handle(ZoneCommand::SyncNativeMonsters {
+        session_id: second.clone(),
+        monsters: vec![spawn.clone()],
+        now_ms: 50,
+    });
+    assert!(!has_packet(&sync, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_106
+    )));
+    let corpse = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.object_id == 9_106)
+        .expect("late sync must retain the authoritative corpse");
+    assert!(corpse.dead);
+    assert_eq!(corpse.hp, 0);
+
+    let mut respawnless_resync = spawn;
+    respawnless_resync.respawn = None;
+    let respawnless_sync = zone.handle(ZoneCommand::SyncNativeMonsters {
+        session_id: second.clone(),
+        monsters: vec![respawnless_resync],
+        now_ms: 60,
+    });
+    assert!(!has_packet(&respawnless_sync, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_106
+    )));
+    let corpse = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|monster| monster.object_id == 9_106)
+        .expect("respawn-less resync must retain Zone-owned scheduled corpse");
+    assert!(corpse.dead);
+    assert_eq!(corpse.hp, 0);
+    assert!(!has_packet(&zone.tick(109), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_106
+    )));
+
+    let respawned = zone.tick(110);
+    for observer in [&first, &second] {
+        assert_eq!(
+            packets_for(&respawned, observer)
+                .iter()
+                .filter(|packet| matches!(
+                    packet,
+                    ServerPacket::ObjectRevived { info } if info.object_id == 9_106
+                ))
+                .count(),
+            1
+        );
+    }
+    assert!(!has_packet(&zone.tick(110), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_106
+    )));
+}
+
+#[test]
+fn zone_wall_clock_deer_respawn_waits_for_authoritative_harvest() {
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    admit_melee(&mut zone, &first);
+
+    let mut spawn = native_neutral_monster_spawn(9_104, "Deer", 2, 331, 270);
+    spawn.drops.clear();
+    spawn.respawn = Some(fixed_wall_clock_respawn(100));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn,
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_104,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    assert!(has_packet(&zone.tick(10), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_104
+    )));
+    assert!(!has_packet(&zone.tick(110), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_104
+    )));
+
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first.clone(),
+        owner_local_object_id: 101,
+        packets: vec![ServerPacket::ObjectHarvested {
+            movement: ObjectMovement {
+                object_id: 9_104,
+                position: Point { x: 331, y: 270 },
+                direction: MirDirection::Right,
+            },
+        }],
+        now_ms: 120,
+    });
+    assert!(has_packet(&zone.tick(120), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_104
+    )));
+}
+
+#[test]
+fn harvested_deer_late_join_still_waits_for_wall_clock_due() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    admit_melee(&mut zone, &first);
+
+    let mut spawn = native_neutral_monster_spawn(9_107, "Deer", 2, 331, 270);
+    spawn.drops.clear();
+    spawn.respawn = Some(fixed_wall_clock_respawn(100));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn.clone(),
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_107,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    zone.tick(10);
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first.clone(),
+        owner_local_object_id: 101,
+        packets: vec![ServerPacket::ObjectHarvested {
+            movement: ObjectMovement {
+                object_id: 9_107,
+                position: Point { x: 331, y: 270 },
+                direction: MirDirection::Right,
+            },
+        }],
+        now_ms: 20,
+    });
+
+    zone.handle(ZoneCommand::Join(join("second", 102, "Mage", 330, 271)));
+    let sync = zone.handle(ZoneCommand::SyncNativeMonsters {
+        session_id: second,
+        monsters: vec![spawn],
+        now_ms: 30,
+    });
+    assert!(!has_packet(&sync, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_107
+    )));
+    assert!(!has_packet(&zone.tick(109), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_107
+    )));
+    assert!(has_packet(&zone.tick(110), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_107
+    )));
+}
+
+#[test]
+fn zone_wall_clock_respawn_waits_for_every_crystal_harvest_ai() {
+    for (offset, ai) in [1_u8, 2, 4, 5, 7, 9, 28, 35, 153].into_iter().enumerate() {
+        let mut zone = zone();
+        let first = session("first");
+        zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+        admit_melee(&mut zone, &first);
+        let object_id = 9_200 + offset as u32;
+        let mut spawn =
+            native_neutral_monster_spawn(object_id, &format!("HarvestAI{ai}"), ai, 331, 270);
+        spawn.drops.clear();
+        spawn.respawn = Some(fixed_wall_clock_respawn(100));
+        zone.handle(ZoneCommand::SpawnMonster {
+            session_id: first.clone(),
+            monster: spawn,
+            now_ms: 0,
+        });
+        zone.handle(ZoneCommand::PlayerAttackObject {
+            session_id: first.clone(),
+            object_id,
+            direction: MirDirection::Right,
+            spell: Spell::None as u8,
+            level: 0,
+            attack_type: 0,
+            damage: 99,
+            now_ms: 10,
+        });
+        zone.tick(10);
+        assert!(
+            !has_packet(&zone.tick(110), &first, |packet| matches!(
+                packet,
+                ServerPacket::ObjectRevived { info } if info.object_id == object_id
+            )),
+            "AI {ai} must retain its corpse until harvest"
+        );
+        zone.handle(ZoneCommand::BroadcastPackets {
+            session_id: first.clone(),
+            owner_local_object_id: 101,
+            packets: vec![ServerPacket::ObjectHarvested {
+                movement: ObjectMovement {
+                    object_id,
+                    position: Point { x: 331, y: 270 },
+                    direction: MirDirection::Right,
+                },
+            }],
+            now_ms: 120,
+        });
+        assert!(has_packet(&zone.tick(120), &first, |packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == object_id
+        )));
+    }
+}
+
+#[test]
+fn zone_checkpoint_preserves_wall_clock_respawn_due_time() {
+    // Strict checkpoints reconstruct collision from the signed map module, so
+    // use the same authoritative constructor on both sides of recovery.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    admit_melee(&mut zone, &first);
+
+    let mut spawn = native_monster_spawn(9_105, 331, 270);
+    spawn.drops.clear();
+    spawn.respawn = Some(fixed_wall_clock_respawn(100));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn,
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9_105,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    assert!(has_packet(&zone.tick(10), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == 9_105
+    )));
+
+    let checkpoint = zone.checkpoint_bytes().expect("Zone checkpoint");
+    let mut recovered = ZoneRuntime::restore_checkpoint(&checkpoint).expect("Zone recovery");
+    assert!(!has_packet(
+        &recovered.tick(109),
+        &first,
+        |packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == 9_105
+        )
+    ));
+    assert!(has_packet(&recovered.tick(110), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == 9_105
+    )));
+    assert!(!has_packet(
+        &recovered.tick(110),
+        &first,
+        |packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == 9_105
+        )
+    ));
 }
 
 #[test]
@@ -10903,6 +11329,13 @@ fn session_mirrors_zone_monster_death_until_explicit_revive() {
         x: monster.x,
         y: monster.y,
     };
+    assert!(
+        session
+            .zone_monster_spawn_snapshot(monster.object_id)
+            .and_then(|spawn| spawn.respawn)
+            .is_some(),
+        "scheduled map monsters must export a server-authored wall-clock policy"
+    );
 
     session.apply_shared_monster_lifecycle_packets(&[
         ServerPacket::ObjectHealth {

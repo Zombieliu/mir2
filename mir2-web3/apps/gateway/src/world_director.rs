@@ -1940,6 +1940,7 @@ fn director_monster_spawns(
                 position: position.clone(),
                 direction: *direction,
                 defense: ZoneMonsterDefense::from_crystal_template(&template),
+                respawn: None,
                 drops: Vec::new(),
             }
         })

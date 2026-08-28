@@ -645,24 +645,12 @@ fn advance_world_tick_prelude(
 /// poisons, pending dynamic spawns, activation, and monster AI do not: the
 /// shared `ZoneRuntime` is their single writer and delivers authoritative
 /// packets and vitals through the Gateway's pending-Zone drain. The existing
-/// personal spawn table advances only its Crystal respawn schedule; Zone still
-/// owns the resulting public incarnation boundary.
+/// personal spawn table does not advance monster respawns: the shared Zone owns
+/// the wall-clock schedule, harvest gate, checkpoint and public incarnation.
 pub(super) fn advance_shared_zone_personal_world(world: &mut World) -> Vec<ServerPacket> {
-    let Some((_, mut packets)) = advance_world_tick_prelude(world, false) else {
+    let Some((_, packets)) = advance_world_tick_prelude(world, false) else {
         return Vec::new();
     };
-    // The personal spawn table currently retains Crystal's respawn schedule,
-    // while the shared Zone owns the public monster incarnation. Advancing the
-    // timer only emits an explicit revive boundary; it must not run private
-    // activation, movement, combat, drops, or monster AI.
-    for entity in tick_respawns(world) {
-        if let Some(info) = object_revived_info_for_entity(world, entity, false) {
-            packets.push(ServerPacket::ObjectRevived { info });
-        }
-        if let Some(info) = object_health_info_for_entity(world, entity, 0) {
-            packets.push(ServerPacket::ObjectHealth { info });
-        }
-    }
     packets
 }
 

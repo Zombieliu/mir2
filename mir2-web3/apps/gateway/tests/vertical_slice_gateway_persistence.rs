@@ -1939,6 +1939,31 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
             >= 5
     );
 
+    // The original Crystal server checks reward capacity before removing
+    // quest-bag proof items. Keep this full client-packet path honest by
+    // freeing the q3 weapon slot when the newcomer is still too low-level to
+    // equip it; otherwise the legitimate bag-full rejection masks q4 turn-in.
+    if let Some(dagger) = first
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.container == ItemContainer::Bag1 && item.name == "SharpDagger")
+    {
+        let dropped = first.handle_packet(ClientPacket::DropItem {
+            unique_id: dagger.unique_id,
+            count: 1,
+            hero_inventory: false,
+        });
+        assert!(dropped.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DropItem {
+                unique_id,
+                success: true,
+                ..
+            } if *unique_id == dagger.unique_id
+        )));
+    }
+
     open_quest_npc(&mut first, "Merchant_John", "@quest:finish:4");
     let q4_exp_before = newcomer_cumulative_experience(&first);
     let q4_gold_before = first.world_snapshot().gold;
@@ -1946,10 +1971,13 @@ fn gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads() {
         quest_index: 4,
         selected_item_index: -1,
     });
-    assert!(finish_q4.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&4)
-    )));
+    assert!(
+        finish_q4.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&4)
+        )),
+        "q4 turn-in must complete after freeing a Crystal reward slot: {finish_q4:?}"
+    );
     assert_eq!(newcomer_cumulative_experience(&first) - q4_exp_before, 80);
     assert_eq!(first.world_snapshot().gold, q4_gold_before + 20);
     assert_eq!(quest_stage(&first, 4), Some(QuestStage::Completed));

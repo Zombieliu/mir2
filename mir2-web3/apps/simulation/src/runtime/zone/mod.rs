@@ -22,6 +22,6 @@ pub use runtime::ZoneRuntime;
 pub use types::{
     GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile,
     ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward,
-    ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination,
-    ZoneOutbound, ZonePlayerCombatStats,
+    ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
+    ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats,
 };

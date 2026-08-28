@@ -44,10 +44,10 @@ pub use runtime::{
     SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
     ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
     ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata, ZoneMonsterDefense,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
-    ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
-    ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
-    ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
+    ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
+    ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
+    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{

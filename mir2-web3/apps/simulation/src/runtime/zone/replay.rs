@@ -245,6 +245,7 @@ impl ZoneReplayCommand {
                         min_mac,
                         max_mac,
                     },
+                    respawn: None,
                     drops: Vec::new(),
                 },
                 now_ms: logical_time_ms,

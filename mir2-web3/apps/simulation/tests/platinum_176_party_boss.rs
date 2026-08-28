@@ -235,6 +235,7 @@ fn boss_spawn() -> ZoneMonsterSpawn {
         position: Point { x: 23, y: 18 },
         direction: MirDirection::Left,
         defense: ZoneMonsterDefense::from_crystal_template(template),
+        respawn: None,
         drops: Vec::<GroundDropSnapshot>::new(),
     }
 }

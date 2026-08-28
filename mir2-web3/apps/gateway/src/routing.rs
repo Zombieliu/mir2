@@ -3027,6 +3027,7 @@ impl SharedInProcessZoneState {
             | ZoneCommand::CommitGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::CancelGroundDropClaim { session_id, .. }
             | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, .. }
+            | ZoneCommand::CancelPendingMovement { session_id }
             | ZoneCommand::TickPlayerMovement { session_id, .. }
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. } => Some(session_id),
@@ -5995,6 +5996,7 @@ fn zone_monster_spawn_from_shared_entity(
         defense: template_ref
             .map(|monster| ZoneMonsterDefense::from_crystal_template(monster))
             .unwrap_or_default(),
+        respawn: None,
         position: Point {
             x: entity.x,
             y: entity.y,
@@ -7708,6 +7710,28 @@ impl SharedInProcessZoneSessionRuntime {
             .expect("shared zone movement session mutex should not be poisoned")
             .recent_zone_player_movement_until_ms
             > now_ms
+    }
+
+    fn cancel_pending_zone_player_movement(&mut self) -> Vec<ServerPacket> {
+        let Some(session_id) = self.current_zone_session_id() else {
+            return Vec::new();
+        };
+        let now_ms = Self::zone_now_ms();
+        let packets = self.dispatch_zone_player_command(
+            ZoneCommand::CancelPendingMovement { session_id },
+            false,
+        );
+        let mut movement = self
+            .movement_ingress
+            .session_state
+            .lock()
+            .expect("shared zone movement session mutex should not be poisoned");
+        movement.pending_zone_player_movement = false;
+        if packets_include_user_location(&packets) {
+            movement.recent_zone_player_movement_until_ms =
+                now_ms.saturating_add(SHARED_ZONE_POST_MOVEMENT_INPUT_GRACE_MS);
+        }
+        packets
     }
 
     fn refresh_replica_zone_binding(&mut self) -> Result<(), String> {
@@ -11612,6 +11636,20 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                         | ClientPacket::DropItem { .. }
                         | ClientPacket::CallNpc { .. }
                         | ClientPacket::NpcConfirmInput { .. }
+                        | ClientPacket::AcceptQuest { .. }
+                        | ClientPacket::FinishQuest { .. }
+                )
+        );
+        let cancels_pending_zone_player_movement = matches!(
+            &command,
+            WorldCommand::Interact { .. }
+                | WorldCommand::SelectNpcDialog { .. }
+                | WorldCommand::SubmitNpcInput { .. }
+                | WorldCommand::ClientPacket(
+                    ClientPacket::CallNpc { .. }
+                        | ClientPacket::NpcConfirmInput { .. }
+                        | ClientPacket::AcceptQuest { .. }
+                        | ClientPacket::FinishQuest { .. }
                 )
         );
         // Shared action gates must observe the same authoritative transform as
@@ -11719,6 +11757,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             packets.extend(self.apply_pending_shared_rental_packets());
             packets
         };
+        if cancels_pending_zone_player_movement {
+            packets.extend(self.cancel_pending_zone_player_movement());
+        }
         if removes_presence {
             // Roll back an unmatched, already-debited offer before the inner
             // LogOut/Disconnect path persists and clears the active character.
@@ -14439,6 +14480,7 @@ mod tests {
             position: Point { x: 168, y: 155 },
             direction: MirDirection::Down,
             defense: ZoneMonsterDefense::default(),
+            respawn: None,
             drops: Vec::new(),
         };
 
@@ -14511,6 +14553,7 @@ mod tests {
             position: Point { x: 168, y: 155 },
             direction: MirDirection::Down,
             defense: ZoneMonsterDefense::default(),
+            respawn: None,
             drops: Vec::new(),
         };
         factory
@@ -23155,6 +23198,84 @@ mod tests {
         );
         second.select_npc_dialog_target("@AcceptQuest:1001");
         let snapshot = second.world_snapshot();
+        assert!(
+            snapshot.quest_log.iter().any(|quest| {
+                shared_guide.quest_ids.contains(&quest.quest_id)
+                    && quest.stage == QuestStage::InProgress
+            }),
+            "shared guide CallNpc should start a quest; quests: {:?}",
+            snapshot.quest_log
+        );
+    }
+
+    #[test]
+    fn shared_quest_packet_uses_authoritative_zone_transform_after_callnpc() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_new_runtime(&mut runtime, "quest-zone-transform", "Blade");
+        let shared_guide = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| {
+                entity.kind == mir2_simulation::WorldEntityKind::Npc
+                    && entity.quest_ids.contains(&1001)
+            })
+            .expect("default session should expose a shared quest NPC");
+
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: format!(
+                    "crystal:0:{}:{}",
+                    shared_guide.x.saturating_sub(1),
+                    shared_guide.y
+                ),
+            })
+            .expect("test transfer should place the Zone player beside the guide");
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::CallNpc {
+                object_id: shared_guide.object_id,
+                key: "@Main".to_string(),
+            }))
+            .expect("shared guide CallNpc should execute");
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectChat { object_id, .. } if *object_id == shared_guide.object_id
+        )));
+        let dialog_snapshot = runtime.world_snapshot();
+        assert_eq!(
+            dialog_snapshot
+                .active_npc_dialog
+                .as_ref()
+                .map(|dialog| dialog.npc_object_id),
+            Some(shared_guide.object_id)
+        );
+        // A delayed private-session transform must not invalidate the dialog
+        // after CallNpc has admitted it from the authoritative shared Zone.
+        // FinishQuest uses the same command-boundary synchronization path.
+        runtime.inner.force_authoritative_player_transform(
+            Point {
+                x: shared_guide.x.saturating_add(8),
+                y: shared_guide.y.saturating_add(8),
+            },
+            MirDirection::Down,
+        );
+        let accepted = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::AcceptQuest {
+                npc_index: shared_guide.object_id,
+                quest_index: 1001,
+            }))
+            .expect("shared guide AcceptQuest should execute");
+        assert!(accepted.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 1001,
+                taken: true,
+                ..
+            }
+        )));
+        let snapshot = runtime.world_snapshot();
         assert!(
             snapshot.quest_log.iter().any(|quest| {
                 shared_guide.quest_ids.contains(&quest.quest_id)

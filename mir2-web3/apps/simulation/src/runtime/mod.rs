@@ -57,9 +57,9 @@ pub use zone::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, GroundDropClaimTicket,
     PlayerId, SessionId, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
     ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
-    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
-    ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
-    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
+    ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };
 

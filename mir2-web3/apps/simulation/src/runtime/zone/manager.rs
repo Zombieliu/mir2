@@ -169,6 +169,7 @@ impl ZoneManager {
             | ZoneCommand::CommitGroundDropClaimWithTicket { session_id, .. }
             | ZoneCommand::CancelGroundDropClaim { session_id, .. }
             | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, .. }
+            | ZoneCommand::CancelPendingMovement { session_id }
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. } => {

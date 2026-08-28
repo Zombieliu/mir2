@@ -275,7 +275,54 @@ pub struct ZoneMovementAction {
     pub received_at_ms: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneMonsterRespawnPolicy {
+    /// Smallest wall-clock delay before this spawn may return. This is a
+    /// floor applied after the signed Crystal random window is evaluated.
+    pub minimum_delay_ms: u64,
+    /// Delay before applying the deterministic random window.
+    pub base_delay_ms: u64,
+    /// Size of one deterministic jitter step. Zero disables jitter.
+    pub random_delay_step_ms: u64,
+    /// Number of deterministic jitter outcomes, including the zero step.
+    pub random_delay_steps: u64,
+    /// Number of steps subtracted from the base before adding the roll.
+    pub random_delay_subtract_steps: u64,
+    /// Stable source coordinates keep the jitter independent of sessions.
+    pub rule_index: u32,
+    pub slot_index: u32,
+}
+
+impl ZoneMonsterRespawnPolicy {
+    pub(crate) fn due_at_ms(self, died_at_ms: u64) -> u64 {
+        let steps = self.random_delay_steps.max(1);
+        let random_step = if self.random_delay_step_ms == 0 || steps == 1 {
+            0
+        } else {
+            let salt = (died_at_ms / 1_000)
+                .wrapping_mul(1_103_515_245)
+                .wrapping_add(u64::from(self.rule_index).wrapping_mul(97_651))
+                .wrapping_add(u64::from(self.slot_index).wrapping_mul(12_347))
+                .wrapping_add(0x9E37_79B9);
+            salt % steps
+        };
+        died_at_ms.saturating_add(self.delay_ms_for_roll(random_step))
+    }
+
+    fn delay_ms_for_roll(self, random_step: u64) -> u64 {
+        let delay_ms = self
+            .base_delay_ms
+            .saturating_add(random_step.saturating_mul(self.random_delay_step_ms))
+            .saturating_sub(
+                self.random_delay_subtract_steps
+                    .saturating_mul(self.random_delay_step_ms),
+            )
+            .max(self.minimum_delay_ms);
+        delay_ms
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterSpawn {
     pub object_id: u32,
     pub name: String,
@@ -307,6 +354,10 @@ pub struct ZoneMonsterSpawn {
     /// `defense.is_zero()` the zone treats the monster as having no armour/dodge
     /// and applies trusted damage unchanged (legacy behaviour).
     pub defense: ZoneMonsterDefense,
+    /// Server-authored wall-clock respawn policy. Dynamic/event monsters leave
+    /// this unset and therefore do not silently become persistent map spawns.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub respawn: Option<ZoneMonsterRespawnPolicy>,
     pub drops: Vec<GroundDropSnapshot>,
 }
 
@@ -581,6 +632,11 @@ pub enum ZoneCommand {
         ticket: GroundDropClaimTicket,
         now_ms: u64,
     },
+    /// Trusted server-side interaction boundary. Discards movement intents
+    /// that were accepted before an NPC/dialog action became authoritative.
+    CancelPendingMovement {
+        session_id: SessionId,
+    },
     TickPlayerMovement {
         session_id: SessionId,
         now_ms: u64,
@@ -789,6 +845,12 @@ pub(crate) struct ZoneNativeMonster {
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct ZoneNativeMonsterRespawn {
+    pub spawn: ZoneMonsterSpawn,
+    pub due_at_ms: Option<u64>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ZoneNativeMonsterSnapshot {
@@ -818,7 +880,7 @@ impl ZoneMonsterSpawn {
 }
 
 pub(super) fn zone_native_monster_requires_harvest(ai: u8) -> bool {
-    matches!(ai, 1 | 2 | 7 | 9 | 28 | 35)
+    crate::runtime::monsters::monster_ai_requires_harvest(ai)
 }
 
 impl ZoneNativeMonster {
@@ -1049,5 +1111,54 @@ mod combat_state_tests {
         let restored: ZonePlayerCombatState =
             serde_json::from_value(value).expect("deserialize old combat state");
         assert!(!restored.mount_attack_allowed);
+    }
+
+    #[test]
+    fn crystal_minutes_delay_matches_private_formula_when_random_exceeds_delay() {
+        let policy = ZoneMonsterRespawnPolicy {
+            minimum_delay_ms: 60_000,
+            base_delay_ms: 10 * 60_000,
+            random_delay_step_ms: 60_000,
+            random_delay_steps: 60,
+            random_delay_subtract_steps: 30,
+            rule_index: 0,
+            slot_index: 0,
+        };
+        let delays = (0..60)
+            .map(|roll| policy.delay_ms_for_roll(roll))
+            .collect::<Vec<_>>();
+        for (roll, delay_ms) in delays.iter().copied().enumerate() {
+            let expected_minutes = (10_i64 - 30 + roll as i64).max(1) as u64;
+            assert_eq!(delay_ms, expected_minutes * 60_000);
+        }
+        assert_eq!(delays.iter().filter(|delay| **delay == 60_000).count(), 22);
+        assert_eq!(delays.last(), Some(&(39 * 60_000)));
+    }
+
+    #[test]
+    fn fixed_tick_delay_matches_private_formula_for_every_roll() {
+        let policy = ZoneMonsterRespawnPolicy {
+            minimum_delay_ms: 0,
+            base_delay_ms: 7_000,
+            random_delay_step_ms: 1_000,
+            random_delay_steps: 5,
+            random_delay_subtract_steps: 0,
+            rule_index: 0,
+            slot_index: 0,
+        };
+        for roll in 0..5 {
+            assert_eq!(policy.delay_ms_for_roll(roll), (7 + roll) * 1_000);
+        }
+    }
+
+    #[test]
+    fn crystal_harvest_ai_contract_is_shared_by_session_and_zone() {
+        for ai in 0_u8..=u8::MAX {
+            assert_eq!(
+                crate::runtime::monsters::initial_harvest_monster_state(ai).is_some(),
+                zone_native_monster_requires_harvest(ai),
+                "private and Zone harvest semantics diverged for AI {ai}"
+            );
+        }
     }
 }

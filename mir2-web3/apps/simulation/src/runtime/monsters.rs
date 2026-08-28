@@ -897,15 +897,22 @@ pub(super) fn initial_monster_ai_state_for_object(
     state
 }
 
+pub(super) const fn monster_ai_requires_harvest(ai: u8) -> bool {
+    // Crystal MonsterObject.GetMonster maps these AIs to HarvestMonster itself
+    // or a transitive subclass. SpittingSpider (4) and CannibalPlant (5) are
+    // important quest-item sources: Drop() is empty and their loot resolves
+    // only from corpse harvesting.
+    matches!(ai, 1 | 2 | 4 | 5 | 7 | 9 | 28 | 35 | 153)
+}
+
 pub(super) fn initial_harvest_monster_state(ai: u8) -> Option<HarvestMonsterState> {
-    let remaining_skin_count = match ai {
-        2 => DEER_SKIN_COUNT,
-        // Crystal MonsterObject.GetMonster maps these AIs to HarvestMonster
-        // itself or a transitive subclass. SpittingSpider (4) and
-        // CannibalPlant (5) are important quest-item sources: their Drop()
-        // method is empty and their loot only resolves from corpse harvesting.
-        1 | 4 | 5 | 7 | 9 | 28 | 35 | 153 => HARVEST_MONSTER_SKIN_COUNT,
-        _ => return None,
+    if !monster_ai_requires_harvest(ai) {
+        return None;
+    }
+    let remaining_skin_count = if ai == 2 {
+        DEER_SKIN_COUNT
+    } else {
+        HARVEST_MONSTER_SKIN_COUNT
     };
     Some(HarvestMonsterState {
         remaining_skin_count,
@@ -1353,17 +1360,15 @@ pub(super) fn reset_shared_monster_harvest_state(world: &mut World, entity: Enti
 
 /// Mirror a shared-Zone death into the personal compatibility ECS without
 /// replaying damage, drops, quest credit, or experience. The Zone is the combat
-/// authority, while the personal spawn table remains the source of Crystal's
-/// respawn schedule. Leaving this mirror alive makes the next ordinary Session
-/// snapshot immediately respawn the Zone corpse and can remove it before a
-/// player has time to harvest it.
+/// authority, including the wall-clock respawn schedule. The personal spawn
+/// table must not create a second timer or incarnation boundary.
 pub(super) fn apply_shared_monster_death_state(
     world: &mut World,
     entity: Entity,
     position: Option<&Point>,
     direction: Option<MirDirection>,
 ) -> bool {
-    let (was_alive, spawn_ref) = {
+    let was_alive = {
         let entry = world.entity(entity);
         let Some(agent) = entry.get::<MonsterAgent>() else {
             return false;
@@ -1372,7 +1377,7 @@ pub(super) fn apply_shared_monster_death_state(
             .get::<MonsterVitals>()
             .map(|vitals| vitals.hp)
             .unwrap_or(0);
-        (!agent.dead && hp > 0, entry.get::<SpawnSlotRef>().copied())
+        !agent.dead && hp > 0
     };
 
     {
@@ -1392,12 +1397,6 @@ pub(super) fn apply_shared_monster_death_state(
         }
     }
 
-    if was_alive {
-        if let Some(spawn_ref) = spawn_ref {
-            let current_tick = runtime_tick(world);
-            schedule_monster_respawn(world, spawn_ref, current_tick);
-        }
-    }
     was_alive
 }
 

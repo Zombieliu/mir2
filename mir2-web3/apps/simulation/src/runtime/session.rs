@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use super::combat::{apply_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state};
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    MonsterAgent, MonsterVitals, PlayerVitals, Position, SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -22,7 +22,8 @@ use super::items::{
 use super::map::*;
 use super::monsters::{
     apply_shared_monster_death_state, apply_shared_monster_revive_state,
-    reset_shared_monster_harvest_state, spawn_shared_monster_snapshot,
+    reset_shared_monster_harvest_state, spawn_shared_monster_snapshot, MonsterRespawnSchedule,
+    MonsterSpawnTable,
 };
 use super::npc_script::*;
 use super::packets::*;
@@ -45,7 +46,8 @@ use crate::config::{
     WorldEntitySnapshot, WorldSnapshot,
 };
 use crate::runtime::zone::{
-    SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
+    SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
+    ZoneMonsterSpawn,
 };
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
@@ -951,8 +953,9 @@ impl SimulationSession {
     }
 
     /// Apply authoritative shared-Zone monster incarnation boundaries to the
-    /// personal Crystal compatibility runtime. The Zone owns combat, while the
-    /// Session retains Crystal's respawn schedule and harvest implementation.
+    /// personal Crystal compatibility runtime. The Zone owns combat, the
+    /// wall-clock respawn schedule, and the public harvest lifecycle; Session
+    /// retains only the personal Crystal harvest/drop projection.
     /// Mirroring death prevents the still-live private entity from immediately
     /// respawning a Zone corpse; mirroring explicit revive clears the previous
     /// incarnation's harvest state.
@@ -1221,12 +1224,120 @@ impl SimulationSession {
                 .unwrap_or_default(),
             position,
             direction,
+            respawn: zone_monster_respawn_policy(world, entity),
             drops: if is_conquest_battlefield_object {
                 Vec::new()
             } else {
                 zone_ground_drop_snapshots_for_monster(world, object_id, &name)
             },
         })
+    }
+}
+
+fn zone_monster_respawn_policy(
+    world: &World,
+    entity: bevy_ecs::entity::Entity,
+) -> Option<ZoneMonsterRespawnPolicy> {
+    let spawn_ref = world.entity(entity).get::<SpawnSlotRef>()?;
+    let rule = world
+        .get_resource::<MonsterSpawnTable>()?
+        .rules
+        .get(spawn_ref.rule_index)?;
+    Some(zone_monster_respawn_policy_from_schedule(
+        &rule.respawn_schedule,
+        u32::try_from(spawn_ref.rule_index).ok()?,
+        u32::try_from(spawn_ref.slot_index).ok()?,
+    ))
+}
+
+fn zone_monster_respawn_policy_from_schedule(
+    schedule: &MonsterRespawnSchedule,
+    rule_index: u32,
+    slot_index: u32,
+) -> ZoneMonsterRespawnPolicy {
+    let (
+        minimum_delay_ms,
+        base_delay_ms,
+        random_delay_step_ms,
+        random_delay_steps,
+        random_delay_subtract_steps,
+    ) = match schedule {
+        MonsterRespawnSchedule::FixedTicks {
+            delay_ticks,
+            random_delay_ticks,
+        } => (
+            0,
+            delay_ticks.saturating_mul(1_000),
+            1_000,
+            random_delay_ticks.saturating_add(1),
+            0,
+        ),
+        MonsterRespawnSchedule::CrystalMinutes {
+            delay_minutes,
+            random_delay_minutes,
+        } => {
+            let steps = if *random_delay_minutes == 0 {
+                1
+            } else {
+                u64::from(*random_delay_minutes).saturating_mul(2)
+            };
+            (
+                60_000,
+                u64::from(*delay_minutes).saturating_mul(60_000),
+                60_000,
+                steps,
+                u64::from(*random_delay_minutes),
+            )
+        }
+    };
+    ZoneMonsterRespawnPolicy {
+        minimum_delay_ms,
+        base_delay_ms,
+        random_delay_step_ms,
+        random_delay_steps,
+        random_delay_subtract_steps,
+        rule_index,
+        slot_index,
+    }
+}
+
+#[cfg(test)]
+mod zone_respawn_policy_tests {
+    use super::*;
+    use crate::config::ContentProfileRuntime;
+    use mir2_game_data::crystal_respawn_manifest;
+
+    #[test]
+    fn platinum_evil_big_ape_uses_exact_d10_r30_crystal_wall_clock_profile() {
+        let profile = ContentProfileRuntime::platinum_176();
+        let respawn = crystal_respawn_manifest()
+            .maps
+            .into_iter()
+            .find(|map| map.map_file_name == "D1002")
+            .and_then(|map| {
+                map.respawns
+                    .into_iter()
+                    .find(|respawn| respawn.monster_name == "EvilBigApe")
+            })
+            .expect("D1002 EvilBigApe production respawn");
+        let random_delay_minutes = profile.monster_respawn_random_delay_minutes(
+            &respawn.monster_name,
+            respawn.random_delay_minutes,
+        );
+        assert_eq!(respawn.delay_minutes, 10);
+        assert_eq!(random_delay_minutes, 30);
+        let policy = zone_monster_respawn_policy_from_schedule(
+            &MonsterRespawnSchedule::CrystalMinutes {
+                delay_minutes: respawn.delay_minutes,
+                random_delay_minutes,
+            },
+            7,
+            3,
+        );
+        assert_eq!(policy.minimum_delay_ms, 60_000);
+        assert_eq!(policy.base_delay_ms, 10 * 60_000);
+        assert_eq!(policy.random_delay_steps, 60);
+        assert_eq!(policy.random_delay_subtract_steps, 30);
     }
 }
 
