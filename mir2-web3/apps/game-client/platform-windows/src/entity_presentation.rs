@@ -17,9 +17,10 @@ use mir2_bevy_runtime::entity_animation::{
 use serde_json::Value;
 
 const NATIVE_ANIMATION_WORLD_SEED: u64 = 0x4d49_5232_5749_4e44;
-const CRYSTAL_MOVE_PHASE_COUNT: u8 = 6;
+const CRYSTAL_MOVE_PHASE_COUNT: u16 = 6;
 const CRYSTAL_MOVE_PHASE_MS: u64 = 100;
 const MAX_SMOOTH_TILE_DISTANCE: u32 = 3;
+const MAX_NATIVE_MOVE_PHASE_COUNT: u16 = 8;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct NativeMotionWindow {
@@ -29,6 +30,7 @@ struct NativeMotionWindow {
     to_y: f32,
     started_ms: u64,
     expires_ms: u64,
+    phase_count: u16,
     animation_sequence: u64,
     action: AnimationAction,
     direction: Direction,
@@ -469,14 +471,18 @@ impl NativeEntityPresentation {
                 if let Some((action, animation_sequence, direction)) =
                     movement.filter(|_| distance <= MAX_SMOOTH_TILE_DISTANCE as f32)
                 {
-                    let duration_ms = u64::from(CRYSTAL_MOVE_PHASE_COUNT) * CRYSTAL_MOVE_PHASE_MS;
+                    let phase_count = native_motion_phase_count(entity, action);
+                    let fallback_duration_ms = u64::from(phase_count) * CRYSTAL_MOVE_PHASE_MS;
+                    let (started_ms, expires_ms) = native_packet_motion_window(entity, now_ms)
+                        .unwrap_or((now_ms, now_ms.saturating_add(fallback_duration_ms)));
                     let window = NativeMotionWindow {
                         from_x: motion_from_x,
                         from_y: motion_from_y,
                         to_x: x as f32,
                         to_y: y as f32,
-                        started_ms: now_ms,
-                        expires_ms: now_ms.saturating_add(duration_ms),
+                        started_ms,
+                        expires_ms,
+                        phase_count,
                         animation_sequence,
                         action,
                         direction,
@@ -844,6 +850,54 @@ fn movement_action_name(action: AnimationAction) -> &'static str {
     }
 }
 
+fn native_motion_phase_count(entity: &Value, action: AnimationAction) -> u16 {
+    if let Some(explicit) = entity
+        .get("movementFrameCount")
+        .and_then(json_millis)
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| (1..=MAX_NATIVE_MOVE_PHASE_COUNT).contains(value))
+    {
+        return explicit;
+    }
+
+    let kind = match entity.get("kind").and_then(Value::as_str) {
+        Some("selfPlayer" | "player" | "hero") => EntityKind::Player,
+        _ => return CRYSTAL_MOVE_PHASE_COUNT,
+    };
+    let sprite = crate::atlas::resolved_native_sprite(entity, action);
+    crate::frame_sets::animation_catalog_for(kind, &sprite.body_library, sprite.mounted())
+        .descriptor(action)
+        .map(|descriptor| descriptor.frame_count)
+        .filter(|value| (1..=MAX_NATIVE_MOVE_PHASE_COUNT).contains(value))
+        .unwrap_or(CRYSTAL_MOVE_PHASE_COUNT)
+}
+
+fn native_packet_motion_window(entity: &Value, now_ms: u64) -> Option<(u64, u64)> {
+    let started_ms = entity
+        .get("movementStartedAt")
+        .or_else(|| entity.get("movementStartedMs"))
+        .and_then(json_millis)?;
+    let expires_ms = entity
+        .get("movementUntil")
+        .and_then(json_millis)
+        .or_else(|| {
+            entity
+                .get("movementDurationMs")
+                .and_then(json_millis)
+                .and_then(|duration_ms| started_ms.checked_add(duration_ms))
+        })?;
+    (started_ms <= now_ms && expires_ms > now_ms && expires_ms > started_ms)
+        .then_some((started_ms, expires_ms))
+}
+
+fn json_millis(value: &Value) -> Option<u64> {
+    if let Some(value) = value.as_u64() {
+        return Some(value);
+    }
+    let value = value.as_f64()?;
+    (value.is_finite() && value >= 0.0 && value <= u64::MAX as f64).then(|| value.round() as u64)
+}
+
 fn is_stale_self_source_echo(entity: &Value, x: i32, y: i32, window: NativeMotionWindow) -> bool {
     let source_distance = (x as f32 - window.from_x)
         .abs()
@@ -909,12 +963,13 @@ fn native_motion_coordinate(from: f32, to: f32, window: &NativeMotionWindow, now
 }
 
 fn native_motion_phase_index(window: &NativeMotionWindow, now_ms: u64) -> u16 {
+    let phase_count = window.phase_count.max(1);
     if window.expires_ms <= window.started_ms || now_ms >= window.expires_ms {
-        return u16::from(CRYSTAL_MOVE_PHASE_COUNT.saturating_sub(1));
+        return phase_count.saturating_sub(1);
     }
     u16::try_from(
         (now_ms.saturating_sub(window.started_ms) / CRYSTAL_MOVE_PHASE_MS)
-            .min(u64::from(CRYSTAL_MOVE_PHASE_COUNT.saturating_sub(1))),
+            .min(u64::from(phase_count.saturating_sub(1))),
     )
     .unwrap_or(u16::MAX)
 }
@@ -924,9 +979,9 @@ fn native_motion_remaining_ratio(window: &NativeMotionWindow, now_ms: u64) -> f3
         return 0.0;
     }
     // Crystal applies the first displacement increment while frame zero is
-    // drawn, then advances one of six movement phases every 100 ms.
+    // drawn, then advances the descriptor-owned movement phases every 100 ms.
     let progress = f32::from(native_motion_phase_index(window, now_ms) + 1)
-        / f32::from(CRYSTAL_MOVE_PHASE_COUNT);
+        / f32::from(window.phase_count.max(1));
     (1.0 - progress).clamp(0.0, 1.0)
 }
 
@@ -991,6 +1046,16 @@ mod tests {
                 }
             }]
         })
+    }
+
+    fn mounted_player_payload(sequence: u64, action: &str) -> Value {
+        let mut payload = player_payload(sequence);
+        payload["entities"][0]["_nativeAnimationAction"] = json!(action);
+        payload["entities"][0]["ridingMount"] = json!(true);
+        payload["entities"][0]["mountType"] = json!(0);
+        payload["entities"][0]["sprite"]["mountLibrary"] = json!("Mount/00");
+        payload["entities"][0]["sprite"]["mountFrameOffset"] = json!(0);
+        payload
     }
 
     fn rendered_path(state: &Value) -> &str {
@@ -1060,6 +1125,7 @@ mod tests {
             to_y: 10.0,
             started_ms: 1_000,
             expires_ms: 1_600,
+            phase_count: 6,
             animation_sequence: 1,
             action: AnimationAction::Walking,
             direction: Direction::Right,
@@ -1078,6 +1144,7 @@ mod tests {
             to_y: 9.0,
             started_ms: 2_000,
             expires_ms: 2_600,
+            phase_count: 6,
             animation_sequence: 2,
             action: AnimationAction::Walking,
             direction: Direction::Up,
@@ -1143,6 +1210,125 @@ mod tests {
             .expect("teleport payload");
         assert!(rendered["entities"][0].get("motionFromX").is_none());
         assert!(!presentation.has_active_motion(1_700_000_000_200));
+    }
+
+    #[test]
+    fn mounted_walk_uses_eight_phases_and_packet_carried_wall_clock() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(mounted_player_payload(20, "walking"));
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 10_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial mounted player payload");
+
+        let mut moved = mounted_player_payload(21, "walking");
+        moved["sceneView"]["center"]["x"] = json!(11);
+        moved["entities"][0]["x"] = json!(11);
+        moved["entities"][0]["direction"] = json!("right");
+        moved["entities"][0]["movementStartedAt"] = json!(10_100.0);
+        moved["entities"][0]["movementUntil"] = json!(10_900.0);
+        presentation.replace_payload(moved);
+        let rendered = presentation
+            .render_state_if_changed_with_clocks(100, 10_350, true, |payload, frames, _| {
+                let mut payload = payload.clone();
+                payload["_testDrawFrame"] = json!(frames["1"].0);
+                Some(payload)
+            })
+            .expect("packet-timed mounted walk");
+
+        let entity = &rendered["entities"][0];
+        assert_eq!(entity["motionFromX"], json!(10.0));
+        assert_eq!(entity["motionToX"], json!(11.0));
+        assert_eq!(entity["motionStartedMs"], json!(10_100_u64));
+        assert_eq!(entity["motionDurationMs"], json!(800_u64));
+        assert_eq!(rendered["_testDrawFrame"], json!(466));
+        assert_eq!(presentation.camera_screen_offset(10_350), (30.0, 0.0));
+        assert_eq!(
+            presentation.entity_screen_offset("1", 10_350),
+            (0.0, 0.0),
+            "mounted self and camera remain locked at the packet-carried phase"
+        );
+        assert!(presentation.has_active_motion(10_899));
+        assert!(!presentation.has_active_motion(10_900));
+    }
+
+    #[test]
+    fn mounted_run_remains_six_phases() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(mounted_player_payload(30, "running"));
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 20_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial mounted runner");
+
+        let mut moved = mounted_player_payload(31, "running");
+        moved["sceneView"]["center"]["x"] = json!(13);
+        moved["entities"][0]["x"] = json!(13);
+        moved["entities"][0]["direction"] = json!("right");
+        presentation.replace_payload(moved);
+        let first = presentation
+            .render_state_if_changed_with_clocks(100, 20_100, true, |payload, frames, _| {
+                let mut payload = payload.clone();
+                payload["_testDrawFrame"] = json!(frames["1"].0);
+                Some(payload)
+            })
+            .expect("mounted run frame zero");
+        assert_eq!(first["entities"][0]["motionDurationMs"], json!(600_u64));
+        assert_eq!(first["_testDrawFrame"], json!(524));
+
+        let last = presentation
+            .render_state_if_changed_with_clocks(600, 20_600, true, |payload, frames, _| {
+                let mut payload = payload.clone();
+                payload["_testDrawFrame"] = json!(frames["1"].0);
+                Some(payload)
+            })
+            .expect("mounted run final phase");
+        assert_eq!(last["_testDrawFrame"], json!(529));
+        assert!(presentation.has_active_motion(20_699));
+        assert!(!presentation.has_active_motion(20_700));
+    }
+
+    #[test]
+    fn movement_phase_and_packet_time_metadata_are_bounded() {
+        let mut mounted = mounted_player_payload(40, "walking");
+        assert_eq!(
+            native_motion_phase_count(&mounted["entities"][0], AnimationAction::Walking),
+            8
+        );
+
+        mounted["entities"][0]["movementFrameCount"] = json!(7);
+        assert_eq!(
+            native_motion_phase_count(&mounted["entities"][0], AnimationAction::Walking),
+            7
+        );
+        mounted["entities"][0]["movementFrameCount"] = json!(9);
+        assert_eq!(
+            native_motion_phase_count(&mounted["entities"][0], AnimationAction::Walking),
+            8
+        );
+        mounted["entities"][0]["movementFrameCount"] = json!(0);
+        assert_eq!(
+            native_motion_phase_count(&mounted["entities"][0], AnimationAction::Walking),
+            8
+        );
+
+        let active = json!({"movementStartedAt": 100.0, "movementUntil": 900.0});
+        assert_eq!(native_packet_motion_window(&active, 350), Some((100, 900)));
+        assert_eq!(native_packet_motion_window(&active, 99), None);
+        assert_eq!(native_packet_motion_window(&active, 900), None);
+
+        let transformed = json!({"movementStartedMs": 100, "movementDurationMs": 800});
+        assert_eq!(
+            native_packet_motion_window(&transformed, 350),
+            Some((100, 900))
+        );
+        let overflow = json!({
+            "movementStartedMs": u64::MAX - 1,
+            "movementDurationMs": 10
+        });
+        assert_eq!(native_packet_motion_window(&overflow, u64::MAX), None);
     }
 
     #[test]
