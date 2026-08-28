@@ -12,6 +12,7 @@ use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, Interaction, JustifyContent, Node,
     PositionType, UiRect, Val,
 };
+use bevy::window::PrimaryWindow;
 
 use crate::big_map::{
     BigMapGatewayIntentQueue, BigMapModel, BigMapPoint, BigMapView, BIG_MAP_NPC_ROW_COUNT,
@@ -108,19 +109,50 @@ pub enum GuildLeftPage {
 /// Renderer-owned Crystal HelpDialog state. It is intentionally independent
 /// from `UiPanel`: the source client allows Help to coexist with other
 /// windows, and hiding/reopening the dialog preserves the current page.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HelpDialogUi {
     pub open: bool,
     pub page: u8,
+    pub left: f32,
+    pub top: f32,
+    z_index: i32,
+    dragging: bool,
+    drag_offset_x: f32,
+    drag_offset_y: f32,
+}
+
+impl Default for HelpDialogUi {
+    fn default() -> Self {
+        Self {
+            open: false,
+            page: 0,
+            left: CRYSTAL_HELP_PANEL_RECT.left,
+            top: CRYSTAL_HELP_PANEL_RECT.top,
+            z_index: OVERLAY_NPC_DIALOG_Z,
+            dragging: false,
+            drag_offset_x: 0.0,
+            drag_offset_y: 0.0,
+        }
+    }
 }
 
 impl HelpDialogUi {
     pub fn toggle(&mut self) {
-        self.open = !self.open;
+        if self.open {
+            self.hide();
+        } else {
+            self.show();
+        }
+    }
+
+    fn show(&mut self) {
+        self.open = true;
+        self.sort_to_front();
     }
 
     pub fn hide(&mut self) {
         self.open = false;
+        self.end_drag();
     }
 
     pub fn previous_page(&mut self) {
@@ -137,7 +169,44 @@ impl HelpDialogUi {
 
     pub fn display_page(&mut self, page: usize) {
         self.page = page.min(usize::from(HELP_PAGE_COUNT - 1)) as u8;
-        self.open = true;
+        self.show();
+    }
+
+    pub fn dragging(&self) -> bool {
+        self.dragging
+    }
+
+    fn begin_drag(&mut self, cursor_x: f32, cursor_y: f32) -> bool {
+        if !self.open || !help_drag_surface_contains(self, cursor_x, cursor_y) {
+            return false;
+        }
+        self.dragging = true;
+        self.drag_offset_x = cursor_x - self.left;
+        self.drag_offset_y = cursor_y - self.top;
+        self.sort_to_front();
+        true
+    }
+
+    fn drag_to(&mut self, cursor_x: f32, cursor_y: f32) {
+        if !self.dragging {
+            return;
+        }
+        self.left = (cursor_x - self.drag_offset_x).clamp(0.0, HELP_MAX_LEFT);
+        self.top = (cursor_y - self.drag_offset_y).clamp(0.0, HELP_MAX_TOP);
+    }
+
+    fn end_drag(&mut self) {
+        self.dragging = false;
+        self.drag_offset_x = 0.0;
+        self.drag_offset_y = 0.0;
+    }
+
+    fn sort_to_front(&mut self) {
+        self.z_index = OVERLAY_HELP_SORTED_Z;
+    }
+
+    fn z_index(&self) -> i32 {
+        self.z_index
     }
 }
 
@@ -152,6 +221,27 @@ pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0
 pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
 pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
 pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 536.0, 509.0);
+const CRYSTAL_HELP_DRAG_HEADER_RECT: CrystalRect = CrystalRect::new(0.0, 0.0, 509.0, 35.0);
+const CRYSTAL_HELP_TITLE_RECT: CrystalRect = CrystalRect::new(18.0, 9.0, 45.0, 14.0);
+const HELP_MAX_LEFT: f32 = 1024.0 - CRYSTAL_HELP_PANEL_RECT.width - 1.0;
+const HELP_MAX_TOP: f32 = 768.0 - CRYSTAL_HELP_PANEL_RECT.height - 1.0;
+
+fn help_drag_surface_contains(help: &HelpDialogUi, cursor_x: f32, cursor_y: f32) -> bool {
+    let local_x = cursor_x - help.left;
+    let local_y = cursor_y - help.top;
+    CRYSTAL_HELP_DRAG_HEADER_RECT.contains(local_x, local_y)
+        && !CRYSTAL_HELP_TITLE_RECT.contains(local_x, local_y)
+}
+
+fn help_cursor_logical(window: &Window) -> Option<Vec2> {
+    let cursor = window.cursor_position()?;
+    let transform = super::metrics::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    Some(Vec2::new(x, y))
+}
 
 // Re-export shop/storage constants for external consumers that import via overlays.
 pub use crate::shop::{SHOP_QUANTITY_MAX, SHOP_QUANTITY_MIN, SHOP_QUANTITY_STEP};
@@ -850,6 +940,10 @@ pub const OVERLAY_MINIMAP_Z: i32 = 905;
 pub const OVERLAY_QUEST_Z: i32 = 900;
 pub const OVERLAY_CHAT_Z: i32 = 975;
 pub const OVERLAY_NPC_DIALOG_Z: i32 = 980;
+/// Crystal HelpDialog has `Sort = true`: showing or pressing its drag surface
+/// raises it above peer NPC dialogs while preserving the dedicated death/menu
+/// modal layers.
+pub const OVERLAY_HELP_SORTED_Z: i32 = OVERLAY_DEATH_Z - 1;
 pub const OVERLAY_DEATH_Z: i32 = 985;
 pub const OVERLAY_MENU_Z: i32 = 990;
 pub const OVERLAY_SHELL_Z: i32 = 1000;
@@ -1834,6 +1928,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
+                    process_help_drag,
                     process_overlay_keyboard,
                     process_overlay_buttons,
                     crate::audio::sync_native_ui_audio,
@@ -2385,6 +2480,44 @@ fn consume_mail_operation_feedback(
     }
     compose.last_notice = Some(text);
     mail.mails.retain(|message| message.operation.is_none());
+}
+
+/// Crystal's top-level HelpDialog is movable. The source control records the
+/// cursor-to-window offset on press, follows that offset while held, clamps to
+/// the fixed logical stage, and clears movement on release or Hide.
+fn process_help_drag(
+    mut state: ResMut<NativePlayerUiState>,
+    mouse: Option<Res<ButtonInput<MouseButton>>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    if !state.help.open {
+        state.help.end_drag();
+        return;
+    }
+    let Some(mouse) = mouse else {
+        state.help.end_drag();
+        return;
+    };
+    if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+        state.help.end_drag();
+        return;
+    }
+    let Ok(window) = windows.single() else {
+        state.help.end_drag();
+        return;
+    };
+    if !window.focused {
+        state.help.end_drag();
+        return;
+    }
+    let Some(cursor) = help_cursor_logical(window) else {
+        state.help.end_drag();
+        return;
+    };
+    if mouse.just_pressed(MouseButton::Left) {
+        let _ = state.help.begin_drag(cursor.x, cursor.y);
+    }
+    state.help.drag_to(cursor.x, cursor.y);
 }
 
 pub(crate) fn process_overlay_keyboard(
@@ -4615,7 +4748,7 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayStorage>>,
             Query<(Entity, &mut Node), With<OverlayOptions>>,
             Query<(Entity, &mut Node), With<OverlaySocial>>,
-            Query<(Entity, &mut Node), With<OverlayHelp>>,
+            Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayHelp>>,
         )>,
     )>,
     mut commands: Commands,
@@ -4794,9 +4927,12 @@ fn render_overlays(
                 )
             },
         );
-        fill_panel(
+        fill_positioned_panel(
             &mut commands,
             &mut secondary.p7(),
+            state.help.left,
+            state.help.top,
+            state.help.z_index(),
             state.help_open(),
             |parent| render_help(parent, asset_server.as_deref(), state.help.page),
         );
@@ -4812,6 +4948,32 @@ fn fill_panel<C: Component>(
     let Some((entity, mut node)) = query.iter_mut().next() else {
         return;
     };
+    node.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    commands.entity(entity).despawn_children();
+    if visible {
+        commands.entity(entity).with_children(render);
+    }
+}
+
+fn fill_positioned_panel<C: Component>(
+    commands: &mut Commands,
+    query: &mut Query<(Entity, &mut Node, &mut GlobalZIndex), With<C>>,
+    left: f32,
+    top: f32,
+    z_index: i32,
+    visible: bool,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let Some((entity, mut node, mut rendered_z_index)) = query.iter_mut().next() else {
+        return;
+    };
+    node.left = Val::Px(left);
+    node.top = Val::Px(top);
+    *rendered_z_index = GlobalZIndex(z_index);
     node.display = if visible {
         Display::Flex
     } else {
@@ -12653,6 +12815,11 @@ mod tests {
     #[test]
     fn help_navigation_wraps_clamps_and_hide_preserves_page() {
         let mut help = HelpDialogUi::default();
+        assert_eq!(
+            (help.left, help.top),
+            (CRYSTAL_HELP_PANEL_RECT.left, CRYSTAL_HELP_PANEL_RECT.top)
+        );
+        assert_eq!(help.z_index(), OVERLAY_NPC_DIALOG_Z);
         help.previous_page();
         assert_eq!(help.page, 44);
         help.next_page();
@@ -12666,6 +12833,140 @@ mod tests {
         help.toggle();
         assert!(help.open);
         assert_eq!(help.page, 44);
+        assert_eq!(help.z_index(), OVERLAY_HELP_SORTED_Z);
+    }
+
+    #[test]
+    fn help_sort_true_raises_on_show_and_drag_below_modal_layers() {
+        let mut help = HelpDialogUi::default();
+        assert_eq!(help.z_index(), OVERLAY_NPC_DIALOG_Z);
+
+        help.toggle();
+        assert_eq!(help.z_index(), OVERLAY_HELP_SORTED_Z);
+        assert!(help.z_index() > OVERLAY_NPC_DIALOG_Z);
+        assert!(help.z_index() < OVERLAY_DEATH_Z);
+
+        help.z_index = OVERLAY_NPC_DIALOG_Z;
+        assert!(help.begin_drag(help.left + 100.0, help.top + 10.0));
+        assert_eq!(help.z_index(), OVERLAY_HELP_SORTED_Z);
+    }
+
+    #[test]
+    fn help_drag_preserves_grab_offset_clamps_and_stops_on_release() {
+        let mut help = HelpDialogUi::default();
+        help.open = true;
+        assert!(help.begin_drag(help.left + 100.0, help.top + 10.0));
+        assert!(help.dragging());
+
+        help.drag_to(300.0, 200.0);
+        assert_eq!((help.left, help.top), (200.0, 190.0));
+        help.drag_to(-100.0, -100.0);
+        assert_eq!((help.left, help.top), (0.0, 0.0));
+        help.drag_to(10_000.0, 10_000.0);
+        assert_eq!((help.left, help.top), (HELP_MAX_LEFT, HELP_MAX_TOP));
+
+        help.end_drag();
+        assert!(!help.dragging());
+        let stopped = (help.left, help.top);
+        help.drag_to(200.0, 200.0);
+        assert_eq!((help.left, help.top), stopped);
+    }
+
+    #[test]
+    fn help_drag_uses_only_blank_header_and_hide_clears_movement() {
+        let mut help = HelpDialogUi::default();
+        assert!(!help.begin_drag(help.left + 100.0, help.top + 10.0));
+        help.open = true;
+        assert!(!help.begin_drag(help.left + 20.0, help.top + 10.0));
+        assert!(!help.begin_drag(help.left + 100.0, help.top + 100.0));
+        assert!(!help.begin_drag(help.left + 510.0, help.top + 10.0));
+        assert!(help.begin_drag(help.left + 100.0, help.top + 10.0));
+        help.drag_to(400.0, 300.0);
+        let moved = (help.left, help.top);
+        help.hide();
+        assert!(!help.dragging());
+        assert_eq!((help.left, help.top), moved, "Hide preserves location");
+
+        help = HelpDialogUi::default();
+        assert_eq!(
+            (help.left, help.top),
+            (CRYSTAL_HELP_PANEL_RECT.left, CRYSTAL_HELP_PANEL_RECT.top),
+            "session reset reconstructs the centered source location"
+        );
+    }
+
+    #[test]
+    fn help_drag_system_uses_the_shared_stage_transform_and_release_edge() {
+        let mut app = App::new();
+        let mut window = Window::default();
+        window.resolution.set(2048.0, 1536.0);
+        window.set_cursor_position(Some(Vec2::new(
+            (CRYSTAL_HELP_PANEL_RECT.left + 100.0) * 2.0,
+            (CRYSTAL_HELP_PANEL_RECT.top + 10.0) * 2.0,
+        )));
+        app.world_mut().spawn((window, PrimaryWindow));
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<ButtonInput<MouseButton>>()
+            .add_systems(Update, process_help_drag);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .help
+            .open = true;
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .help
+            .dragging());
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .query_filtered::<&mut Window, With<PrimaryWindow>>()
+            .single_mut(app.world_mut())
+            .expect("primary window")
+            .set_cursor_position(Some(Vec2::new(600.0, 400.0)));
+        app.update();
+        assert_eq!(
+            {
+                let help = &app.world().resource::<NativePlayerUiState>().help;
+                (help.left, help.top)
+            },
+            (200.0, 190.0)
+        );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.update();
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .help
+            .dragging());
+    }
+
+    #[test]
+    fn help_drag_system_fails_closed_without_headless_input_resources() {
+        let mut state = NativePlayerUiState::default();
+        state.help.open = true;
+        let cursor = (state.help.left + 100.0, state.help.top + 10.0);
+        assert!(state.help.begin_drag(cursor.0, cursor.1));
+
+        let mut app = App::new();
+        app.insert_resource(state)
+            .add_systems(Update, process_help_drag);
+        app.update();
+
+        assert!(!app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .help
+            .dragging());
     }
 
     #[test]
@@ -12813,13 +13114,34 @@ mod tests {
     #[test]
     fn help_renderer_maps_dynamic_and_image_pages_without_fabrication() {
         let mut app = overlay_render_test_app();
-        app.world_mut()
-            .resource_mut::<NativePlayerUiState>()
-            .help
-            .display_page(0);
+        let peer_dialog = app
+            .world_mut()
+            .spawn(GlobalZIndex(OVERLAY_NPC_DIALOG_Z))
+            .id();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.help.left = 32.0;
+            state.help.top = 41.0;
+            state.help.display_page(0);
+        }
         app.update();
         {
             let world = app.world_mut();
+            let help_node = world
+                .query_filtered::<&Node, With<OverlayHelp>>()
+                .single(world)
+                .expect("Help root");
+            assert_eq!(help_node.left, Val::Px(32.0));
+            assert_eq!(help_node.top, Val::Px(41.0));
+            let help_z = *world
+                .query_filtered::<&GlobalZIndex, With<OverlayHelp>>()
+                .single(world)
+                .expect("Help z index");
+            let peer_z = *world
+                .get::<GlobalZIndex>(peer_dialog)
+                .expect("peer dialog z index");
+            assert_eq!(help_z, GlobalZIndex(OVERLAY_HELP_SORTED_Z));
+            assert!(help_z.0 > peer_z.0, "Sort=true raises Help above peers");
             assert_eq!(world.query::<&HelpPageImageEntity>().iter(world).count(), 0);
             assert!(world
                 .query::<&Text>()
