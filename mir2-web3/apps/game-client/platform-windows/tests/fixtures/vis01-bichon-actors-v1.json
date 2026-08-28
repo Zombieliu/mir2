@@ -277,64 +277,77 @@
       "checkpoint": { "objectId": 2003, "action": "walking", "sequence": 2, "visible": true, "layers": [ { "key": "2003:body", "path": "/original-ui/Monster/003/44.png" } ] }
     },
     {
+      "atMs": 1900,
+      "event": { "type": "packet", "packet": "ObjectWalk", "payload": { "objectId": 2005, "x": 292, "y": 616, "direction": "Right" } },
+      "checkpoint": { "objectId": 2005, "action": "walking", "sequence": 3, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/44.png" } ] }
+    },
+    {
+      "atMs": 2400,
+      "checkpoint": { "objectId": 2005, "action": "walking", "sequence": 3, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/49.png" } ] }
+    },
+    {
       "atMs": 2500,
-      "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1001, "location": { "x": 289, "y": 616 }, "direction": "Left", "spell": 0, "level": 0, "attackType": 0 } },
-      "checkpoint": { "objectId": 1001, "action": "attack1", "sequence": 3, "visible": true, "layers": [ { "key": "1001:body", "path": "/original-ui/CArmour/00/980.png" }, { "key": "1001:hair", "path": "/original-ui/CHair/00/980.png" }, { "key": "1001:weapon-primary", "path": "/original-ui/CWeapon/00/588.png" } ] }
+      "checkpoint": { "objectId": 2005, "action": "standing", "sequence": 3, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/8.png" } ] }
     },
     {
       "atMs": 2600,
-      "event": { "type": "packet", "packet": "ObjectStruck", "payload": { "objectId": 2005, "attackerId": 1001, "location": { "x": 291, "y": 616 }, "direction": "Down" } },
-      "checkpoint": { "objectId": 2005, "action": "struck", "sequence": 4, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/136.png" } ] }
+      "event": { "type": "packet", "packet": "ObjectAttack", "payload": { "objectId": 1001, "location": { "x": 289, "y": 616 }, "direction": "Left", "spell": 0, "level": 0, "attackType": 0 } },
+      "checkpoint": { "objectId": 1001, "action": "attack1", "sequence": 4, "visible": true, "layers": [ { "key": "1001:body", "path": "/original-ui/CArmour/00/980.png" }, { "key": "1001:hair", "path": "/original-ui/CHair/00/980.png" }, { "key": "1001:weapon-primary", "path": "/original-ui/CWeapon/00/588.png" } ] }
     },
     {
-      "atMs": 2601,
+      "atMs": 2700,
+      "event": { "type": "packet", "packet": "ObjectStruck", "payload": { "objectId": 2005, "attackerId": 1001, "location": { "x": 291, "y": 616 }, "direction": "Down" } },
+      "checkpoint": { "objectId": 2005, "action": "struck", "sequence": 5, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/136.png" } ] }
+    },
+    {
+      "atMs": 2701,
       "event": { "type": "packet", "packet": "DamageIndicator", "payload": { "damage": 7, "damageType": 0, "objectId": 2005, "typed": true } },
       "damageCheckpoint": { "sequence": 1, "objectId": 2005, "damage": 7, "damageType": 0 }
     },
     {
-      "atMs": 3000,
+      "atMs": 3100,
       "event": { "type": "packet", "packet": "ObjectDied", "payload": { "objectId": 2005, "location": { "x": 292, "y": 616 }, "direction": "Right", "kind": 2 } },
-      "checkpoint": { "objectId": 2005, "action": "die", "sequence": 5, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/164.png" }, { "key": "2005:scarecrow-die-effect", "path": "/original-ui/Monster/005/224.png", "additive": true } ] }
-    },
-    {
-      "atMs": 3900,
-      "checkpoint": { "objectId": 2005, "action": "die", "sequence": 5, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/173.png" }, { "key": "2005:scarecrow-die-effect", "path": "/original-ui/Monster/005/233.png", "additive": true } ] }
+      "checkpoint": { "objectId": 2005, "action": "die", "sequence": 6, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/164.png" }, { "key": "2005:scarecrow-die-effect", "path": "/original-ui/Monster/005/224.png", "additive": true } ] }
     },
     {
       "atMs": 4000,
-      "checkpoint": { "objectId": 2005, "action": "dead", "sequence": 5, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/173.png" } ] }
+      "checkpoint": { "objectId": 2005, "action": "die", "sequence": 6, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/173.png" }, { "key": "2005:scarecrow-die-effect", "path": "/original-ui/Monster/005/233.png", "additive": true } ] }
+    },
+    {
+      "atMs": 4100,
+      "checkpoint": { "objectId": 2005, "action": "dead", "sequence": 6, "dead": true, "x": 292, "y": 616, "direction": "Right", "deathKind": 2, "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/173.png" } ] }
     },
     {
       "atMs": 4200,
       "event": { "type": "packet", "packet": "ObjectHarvest", "payload": { "objectId": 1000, "x": 288, "y": 616, "direction": "Down" } },
-      "checkpoint": { "objectId": 1000, "action": "harvest", "sequence": 6, "visible": true, "layers": [ { "key": "1000:body", "path": "/original-ui/CArmour/00/352.png" }, { "key": "1000:hair", "path": "/original-ui/CHair/00/352.png" }, { "key": "1000:weapon-primary", "path": "/original-ui/CWeapon/01/352.png" } ] }
+      "checkpoint": { "objectId": 1000, "action": "harvest", "sequence": 7, "visible": true, "layers": [ { "key": "1000:body", "path": "/original-ui/CArmour/00/352.png" }, { "key": "1000:hair", "path": "/original-ui/CHair/00/352.png" }, { "key": "1000:weapon-primary", "path": "/original-ui/CWeapon/01/352.png" } ] }
     },
     {
       "atMs": 5000,
       "event": { "type": "packet", "packet": "ObjectDied", "payload": { "objectId": 2004, "location": { "x": 290, "y": 618 }, "direction": "Up", "kind": 1 } },
-      "checkpoint": { "objectId": 2004, "action": "die", "sequence": 7, "dead": true, "x": 290, "y": 618, "direction": "Up", "deathKind": 1, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/144.png" } ] }
+      "checkpoint": { "objectId": 2004, "action": "die", "sequence": 8, "dead": true, "x": 290, "y": 618, "direction": "Up", "deathKind": 1, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/144.png" } ] }
     },
     {
       "atMs": 6000,
-      "checkpoint": { "objectId": 2004, "action": "dead", "sequence": 7, "dead": true, "x": 290, "y": 618, "direction": "Up", "deathKind": 1, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/153.png" } ] }
+      "checkpoint": { "objectId": 2004, "action": "dead", "sequence": 8, "dead": true, "x": 290, "y": 618, "direction": "Up", "deathKind": 1, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/153.png" } ] }
     },
     {
       "atMs": 6001,
       "event": { "type": "packet", "packet": "ObjectHarvested", "payload": { "objectId": 2004, "x": 290, "y": 617, "direction": "Down" } },
-      "checkpoint": { "objectId": 2004, "action": "skeleton", "sequence": 8, "dead": true, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/228.png" } ] }
+      "checkpoint": { "objectId": 2004, "action": "skeleton", "sequence": 9, "dead": true, "visible": true, "layers": [ { "key": "2004:body", "path": "/original-ui/Monster/004/228.png" } ] }
     },
     {
       "atMs": 6500,
       "event": { "type": "packet", "packet": "ObjectHide", "payload": { "objectId": 2010 } },
-      "checkpoint": { "objectId": 2010, "action": "hide", "sequence": 9, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/12.png" } ] }
+      "checkpoint": { "objectId": 2010, "action": "hide", "sequence": 10, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/12.png" } ] }
     },
     {
       "atMs": 8099,
-      "checkpoint": { "objectId": 2010, "action": "hide", "sequence": 9, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/5.png" } ] }
+      "checkpoint": { "objectId": 2010, "action": "hide", "sequence": 10, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/5.png" } ] }
     },
     {
       "atMs": 8100,
-      "checkpoint": { "objectId": 2010, "sequence": 9, "visible": false, "layers": [] }
+      "checkpoint": { "objectId": 2010, "sequence": 10, "visible": false, "layers": [] }
     },
     {
       "atMs": 8200,
@@ -343,20 +356,20 @@
     {
       "atMs": 8201,
       "event": { "type": "packet", "packet": "ObjectShow", "payload": { "objectId": 2010 } },
-      "checkpoint": { "objectId": 2010, "action": "show", "sequence": 10, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/4.png" } ] }
+      "checkpoint": { "objectId": 2010, "action": "show", "sequence": 11, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/4.png" } ] }
     },
     {
-      "atMs": 8300,
+      "atMs": 8400,
       "event": { "type": "packet", "packet": "ObjectRevived", "payload": { "objectId": 2005, "effect": true } },
-      "checkpoint": { "objectId": 2005, "action": "revive", "sequence": 11, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/164.png" } ] }
-    },
-    {
-      "atMs": 9200,
-      "checkpoint": { "objectId": 2005, "action": "revive", "sequence": 11, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/155.png" } ] }
+      "checkpoint": { "objectId": 2005, "action": "revive", "sequence": 12, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/164.png" } ] }
     },
     {
       "atMs": 9300,
-      "checkpoint": { "objectId": 2005, "action": "standing", "sequence": 11, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/8.png" } ] }
+      "checkpoint": { "objectId": 2005, "action": "revive", "sequence": 12, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/155.png" } ] }
+    },
+    {
+      "atMs": 9400,
+      "checkpoint": { "objectId": 2005, "action": "standing", "sequence": 12, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/8.png" } ] }
     }
   ]
 }

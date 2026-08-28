@@ -144,6 +144,14 @@ assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/000"), "walking
   reverse: undefined,
   blend: undefined,
 });
+assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/005"), "walking"), {
+  frameBaseOffset: 32,
+  frameCount: 6,
+  directionStride: 6,
+  frameIntervalMs: 100,
+  reverse: undefined,
+  blend: undefined,
+});
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/003"), "reviving").reverse, true);
 assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/005"), "reviving"), {
   frameBaseOffset: 144,
