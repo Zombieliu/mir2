@@ -4958,23 +4958,76 @@ fn browser_asset_path(path: &str) -> String {
 /// scrolls the wrong way, flip the sign(s) here (this is the one spot).
 fn self_camera_screen_offset(
     motion_table: &motion::EntityMotionTable,
+    applied_map_center: Option<presentation_pose::PresentationGridCenter>,
 ) -> (Vec2, presentation_pose::CameraPoseSource) {
     let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) =
         PENDING_SELF_CAMERA_MOTION.with(|cell| cell.get())
     else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
-    let now = motion_table.now_ms;
-    if expires_ms <= started_ms || now >= expires_ms || (from_x == to_x && from_y == to_y) {
+    let window = local_motion::LocalTsMotionWindow {
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        started_ms,
+        expires_ms,
+    };
+    let Some(camera_offset) =
+        self_camera_offset_for_applied_center(window, motion_table.now_ms, applied_map_center)
+    else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
+    };
+    (
+        camera_offset,
+        presentation_pose::CameraPoseSource::SelfWindow,
+    )
+}
+
+fn self_camera_offset_for_applied_center(
+    window: local_motion::LocalTsMotionWindow,
+    now_ms: f64,
+    applied_map_center: Option<presentation_pose::PresentationGridCenter>,
+) -> Option<Vec2> {
+    if window.expires_ms <= window.started_ms
+        || now_ms >= window.expires_ms
+        || (window.from_x == window.to_x && window.from_y == window.to_y)
+    {
+        return None;
     }
     // Successive movement windows can start from the fractional pose of the
     // previous step. Preserve that value across the JS/WASM boundary; coercing
     // it to i32 makes the fallback camera disagree with the local-command pose.
-    let offset = motion::compute_motion_offset_fractional(
-        from_x, from_y, to_x, to_y, started_ms, expires_ms, now, 48.0, 32.0,
+    let mut entity_offset = motion::compute_motion_offset_fractional(
+        window.from_x,
+        window.from_y,
+        window.to_x,
+        window.to_y,
+        window.started_ms,
+        window.expires_ms,
+        now_ms,
+        48.0,
+        32.0,
     );
-    (-offset, presentation_pose::CameraPoseSource::SelfWindow)
+    if let Some(center) = applied_map_center {
+        let center_matches_window = (center.x == window.from_x.round() as i32
+            && center.y == window.from_y.round() as i32)
+            || (center.x == window.to_x.round() as i32 && center.y == window.to_y.round() as i32);
+        if !center_matches_window {
+            return None;
+        }
+        // `compute_motion_offset_fractional` is target-relative
+        // (`current - to`). Before an ACK the retained map/entity frame is
+        // still source-centred, so convert the same physical pose to
+        // `current - applied_center`. When the target-centred frame commits,
+        // the centre delta disappears and the camera changes by exactly the
+        // producer's whole-cell recentering amount. The composed pixels are
+        // therefore continuous across the ACK instead of flashing by most of
+        // a run step.
+        entity_offset.x += (window.to_x - center.x as f32) * 48.0;
+        entity_offset.y += (window.to_y - center.y as f32) * 32.0;
+    }
+    Some(-entity_offset)
 }
 
 fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTsMotionWindow> {
@@ -4998,6 +5051,81 @@ fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTs
     })
 }
 
+#[cfg(test)]
+mod self_camera_motion_tests {
+    use super::*;
+
+    fn run_window() -> local_motion::LocalTsMotionWindow {
+        local_motion::LocalTsMotionWindow {
+            from_x: 10.0,
+            from_y: 5.0,
+            to_x: 12.0,
+            to_y: 5.0,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        }
+    }
+
+    #[test]
+    fn local_camera_uses_the_current_committed_map_center() {
+        let source = self_camera_offset_for_applied_center(
+            run_window(),
+            0.0,
+            Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
+        );
+        let target = self_camera_offset_for_applied_center(
+            run_window(),
+            0.0,
+            Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+        );
+
+        // Crystal applies phase zero immediately: the physical pose is 16 px
+        // right of the source, equivalently 80 px left of the target. The
+        // inverse camera offsets differ by exactly one two-tile recenter (96
+        // px), so switching committed centres cannot change composed pixels.
+        assert_eq!(source, Some(Vec2::new(-16.0, 0.0)));
+        assert_eq!(target, Some(Vec2::new(80.0, 0.0)));
+        assert_eq!(target.unwrap().x - source.unwrap().x, 96.0);
+    }
+
+    #[test]
+    fn local_camera_preserves_later_crystal_phases_across_the_ack() {
+        let source = self_camera_offset_for_applied_center(
+            run_window(),
+            100.0,
+            Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
+        );
+        let target = self_camera_offset_for_applied_center(
+            run_window(),
+            100.0,
+            Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+        );
+        assert_eq!(source, Some(Vec2::new(-32.0, 0.0)));
+        assert_eq!(target, Some(Vec2::new(64.0, 0.0)));
+        assert_eq!(target.unwrap().x - source.unwrap().x, 96.0);
+    }
+
+    #[test]
+    fn stale_scene_center_and_expired_window_fail_closed() {
+        assert_eq!(
+            self_camera_offset_for_applied_center(
+                run_window(),
+                0.0,
+                Some(presentation_pose::PresentationGridCenter { x: 2, y: 11 }),
+            ),
+            None
+        );
+        assert_eq!(
+            self_camera_offset_for_applied_center(
+                run_window(),
+                600.0,
+                Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+            ),
+            None
+        );
+    }
+}
+
 fn begin_presentation_pose_frame(
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
@@ -5012,7 +5140,11 @@ fn begin_presentation_pose_frame(
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     presentation_poses.begin_frame(motion_table.now_ms, renderer_enabled);
-    let (ts_camera_offset, ts_source) = self_camera_screen_offset(&motion_table);
+    // `sync_map_render` runs immediately before this system. Use the centre it
+    // actually committed, not the newer requested snapshot centre, so a local
+    // movement window has the same screen pose before and after its fast ACK.
+    let (ts_camera_offset, ts_source) =
+        self_camera_screen_offset(&motion_table, presentation_poses.applied_map_center());
     let mut selected_camera_offset = ts_camera_offset;
     let mut selected_source = ts_source;
     let mut selected_motion = None;
