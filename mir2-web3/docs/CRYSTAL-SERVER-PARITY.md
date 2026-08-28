@@ -1,13 +1,22 @@
 # Crystal Server Parity
 
+> VIS-03 HelpDialog movable server-client note (2026-08-28): revision
+> `4545465a2e31a6646f247c55906764952d44cd58` changes no packet, simulation,
+> Zone or Gateway authority. Grab-offset movement, shared-stage clamping,
+> release/focus/Hide/reset cleanup and `Sort=true` z-order are local renderer
+> state and emit no intent. Focused Help 14/14, Bevy 416/416 and Windows 394/394
+> pass; review is P0=0/P1=0 for this leaf. Dynamic binding/localization and all
+> same-EXE/DPI/soak/human/signing/denominator gates remain open. No server or
+> global percentage is claimed.
+
 > VIS-03 HelpDialog server-client note (2026-08-28): revision
 > `e22f2aa4c683447b0e57805a580fd29e0a84c37c` changes no server packet,
 > simulation, Zone or Gateway authority. Help visibility/page state, Menu/H/P
 > input and ButtonA are strictly local; no UI or gameplay intent is emitted.
 > The source-bound default-English/default-binding leaf passes Help 9/9,
 > Bevy 411/411, Windows 394/394, ui-core registry 13/13 and Candidate script
-> self-tests. Dynamic rebind/localization remains one reviewed client P1;
-> dragging, exact typography and every same-EXE/DPI/soak/human/signing/
+> self-tests. Dynamic rebind/localization remains one reviewed client P1; at
+> that revision dragging, exact typography and every same-EXE/DPI/soak/human/signing/
 > denominator gate remain open. No server or global percentage is claimed.
 
 > VIS-01 living hover-name server-client note (2026-08-28): revision

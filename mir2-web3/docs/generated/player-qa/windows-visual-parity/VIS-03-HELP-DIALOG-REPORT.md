@@ -8,9 +8,11 @@ Date: 2026-08-28
 Crystal source revision: 484983404e3d6afa584e93801f8006ae3429bea9
 implementation base: e8603bfb627736436cb2ae72756d7b1f5ad03f34
 VIS-03 HelpDialog implementation revision: e22f2aa4c683447b0e57805a580fd29e0a84c37c
+VIS-03 HelpDialog movable revision: 4545465a2e31a6646f247c55906764952d44cd58
 branch: codex/windows-visual-parity
 vis03Status: in_progress
 helpDialogAutomatedCheckpoint: complete
+helpDialogMovableAutomatedCheckpoint: complete
 helpDialogScope: default-English/default-bindings
 helpDialogVisualAccepted: false
 semanticLeafInventoryComplete: false
@@ -22,7 +24,8 @@ sameExeCaptureProduced: false
 exactHeadCandidateProduced: false
 ```
 
-This report closes one bounded automated HelpDialog checkpoint. It does not
+This report closes the bounded default-English content/control checkpoint and
+its follow-on movable/Sort checkpoint. It does not
 close VIS-03, all UI/buttons, the player/monster/effect tracks or the whole-
 game denominator. No client was launched and no screen was taken over.
 
@@ -47,6 +50,16 @@ game denominator. No client was launched and no screen was taken over.
 - Remote/Candidate closure contains all 42 Help images, `Prguse/920` and
   `Title/57`. The verifier self-test proves those three required-file families
   fail closed when their boundary files are deleted.
+- The follow-on movable checkpoint preserves the cursor-to-window grab offset,
+  follows the shared 1024x768 stage transform at scaled/letterboxed window
+  sizes, and clamps to Crystal's top/left zero and right/bottom `-1` bounds.
+  Only blank header space starts a drag; the title, content and Close control
+  do not. Release, lost focus, Hide, missing headless input/window state and
+  session reset all clear movement without fabricating a new location.
+- Crystal `Sort=true` is represented by raising Help from the peer dialog layer
+  (`980`) to `984` on Show or a valid drag press. It remains below Death (`985`)
+  and Menu (`990`), and the renderer synchronizes position and z-order from one
+  Help state on every update.
 
 Source asset identities include:
 
@@ -61,14 +74,14 @@ Source asset identities include:
 
 | Gate | Result |
 |---|---|
-| Focused Help state/render/input/audio tests | PASS, 9/9 |
-| Full `mir2-client-bevy` native-ui suite | PASS, 411/411 |
+| Focused Help state/render/input/audio/movement tests | PASS, 14/14 |
+| Full `mir2-client-bevy` native-ui suite | PASS, 416/416 |
 | Full Windows native suite | PASS, 394/394 |
 | UI-core registry tests | PASS, 13/13 |
 | Candidate package script self-test | PASS; ADS and reparse probes pass |
 | Candidate verifier self-test | PASS; Help boundary files fail closed |
 | Rust 1.95 formatting and diff checks | PASS |
-| Independent read-only review | P0=0; P route resolved; one retained dynamic binding/localization P1 |
+| Independent read-only movable/Sort review | PASS, P0=0/P1=0 |
 
 Only pre-existing compiler warnings were emitted. The previous exact-head CI
 snapshot for `e8603bfb627736436cb2ae72756d7b1f5ad03f34` had zero failures while
@@ -78,8 +91,9 @@ five workflows remained in progress; it is not evidence for this new commit.
 
 Crystal builds the shortcut rows from current `KeyBinds.ini` and localized
 text. Native currently displays default English/default bindings, so custom
-rebinding and non-English Help are not accepted. Crystal also marks Help as
-movable; native is fixed-center. Exact source font/bold raster remains open.
+rebinding and non-English Help are not accepted. The automated movable and
+Sort geometry is now covered, but it has no exact-head same-EXE or real-DPI
+human interaction evidence. Exact source font/bold raster remains open.
 
 An exact-head packaged Candidate and same-EXE GPU/audio capture are still
 required, followed by 100/125/150% real-DPI interaction, a native 30-minute

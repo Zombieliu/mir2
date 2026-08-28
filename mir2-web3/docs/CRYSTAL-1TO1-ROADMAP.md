@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 HelpDialog movable/Sort follow-on checkpoint (2026-08-28):
+> implementation revision `4545465a2e31a6646f247c55906764952d44cd58`
+> reproduces grab-offset movement in the shared 1024x768 stage, Crystal's
+> four-edge clamp including right/bottom `-1`, movement cleanup and source
+> `Sort=true` peer-dialog promotion without crossing Death/Menu. Focused Help
+> 14/14, Bevy native-ui 416/416 and Windows 394/394 pass; read-only final review
+> is P0=0/P1=0 for this leaf. It supplies no exact-head Candidate, same-EXE,
+> real-DPI or human evidence. Dynamic binding/localization, exact typography,
+> soak/signing and the incomplete denominator remain open;
+> `globalParityPercent` remains null.
+
 > VIS-03 HelpDialog bounded default-English checkpoint (2026-08-28):
 > implementation revision `e22f2aa4c683447b0e57805a580fd29e0a84c37c`
 > reproduces the source 536x509 Help shell, exact source frame/title/button
@@ -11,7 +22,8 @@
 > Windows 394/394, ui-core registry 13/13 and package/verifier self-tests pass.
 > This closes only a default-English/default-binding automated Help leaf, not
 > Help visual acceptance or VIS-03. Dynamic rebind/localization remains one
-> reviewed P1; dragging, exact typography, same-EXE/DPI/soak/human/signing and
+> reviewed P1; at that revision dragging, exact typography,
+> same-EXE/DPI/soak/human/signing and
 > the incomplete denominator remain open. `globalParityPercent` remains null.
 
 > VIS-01 living hover-name additional bounded checkpoint (2026-08-28):

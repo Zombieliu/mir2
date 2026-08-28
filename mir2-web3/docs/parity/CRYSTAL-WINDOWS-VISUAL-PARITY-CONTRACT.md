@@ -15,6 +15,7 @@ selectedTargetCheckpointRevision: a58ab0aaa2202731a5c55e7a684261d6c15c2f8d
 inventoryButtonACheckpointRevision: 5b70511316b084ac677b5978f7f03e440241ca4c
 characterHudCheckpointRevision: 849f1f0b5120867d1358e0e7db9ba675e9866f9c
 helpDialogCheckpointRevision: e22f2aa4c683447b0e57805a580fd29e0a84c37c
+helpDialogMovableCheckpointRevision: 4545465a2e31a6646f247c55906764952d44cd58
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -59,9 +60,16 @@ Crystal reads current keybindings and localized strings, while native Help is
 still hard-coded to default English/default bindings.
 
 No exact-head Candidate, EXE, package, live WSS run, GPU capture or human
-evidence was produced. Crystal marks the window movable, but native is still
-fixed-center; exact bold/font raster is also unaccepted. Dynamic rebind/
-localization, dragging, 100/125/150% DPI, same-EXE pixels/audio, native
+evidence was produced at that implementation revision. Follow-on revision
+`4545465a2e31a6646f247c55906764952d44cd58` closes the automated movable/
+`Sort=true` geometry: it preserves the grab offset, uses the shared stage
+transform, clamps all four boundaries with Crystal's right/bottom `-1`, keeps
+title/content/Close outside the blank-header drag surface, clears movement on
+release/focus loss/Hide/headless absence/session reset, and raises Help above
+peer dialogs without crossing Death or Menu. Focused Help 14/14, Bevy native-
+ui 416/416 and Windows 394/394 pass; independent review is P0=0/P1=0 for this
+follow-on leaf. Exact bold/font raster is still unaccepted. Dynamic rebind/
+localization, 100/125/150% real-DPI interaction, same-EXE pixels/audio, native
 30-minute soak, human visual/interaction acceptance and publisher signing all
 remain required. This is not HelpDialog visual acceptance, VIS-03 completion
 or whole-game UI parity.

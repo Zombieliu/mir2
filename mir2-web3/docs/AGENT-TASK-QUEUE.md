@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> VIS-03 HelpDialog movable/Sort follow-on checkpoint (2026-08-28): revision
+> `4545465a2e31a6646f247c55906764952d44cd58` implements Crystal's grab-offset
+> movement through the shared logical-stage transform, four-boundary clamp
+> including the source right/bottom `-1`, release/focus/Hide/reset cleanup and
+> fail-closed headless handling. Show and valid header drag raise Help above
+> peer dialogs while preserving Death/Menu modal layers. Focused Help 14/14,
+> Bevy native-ui 416/416 and Windows 394/394 pass; independent review reports
+> P0=0/P1=0 for this leaf. Dynamic keybinding/localization, exact typography,
+> same-EXE/real-DPI/soak/human/signing and denominator gates remain open. No
+> EXE, package, screenshot or global percentage is claimed.
+
 > VIS-03 HelpDialog bounded default-English automated checkpoint
 > (2026-08-28): revision `e22f2aa4c683447b0e57805a580fd29e0a84c37c`
 > adds Crystal's independent 536x509 Help window, exact frame/title and
@@ -12,7 +23,8 @@
 > Focused Help 9/9, Bevy native-ui 411/411, Windows 394/394, ui-core registry
 > 13/13 and both script self-tests pass. Review has P0=0; one retained P1 is
 > explicit: native Help uses default English/default bindings instead of
-> Crystal's live rebind/localization model. Movable dragging, exact font/bold
+> Crystal's live rebind/localization model. At that revision movable dragging,
+> exact font/bold
 > raster, same-EXE/DPI/soak/human/signing and the incomplete denominator also
 > remain open. No EXE, package or screenshot was produced; do not emit a
 > global percentage.

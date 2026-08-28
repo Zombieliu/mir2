@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> VIS-03 HelpDialog movable client-only follow-on (2026-08-28): revision
+> `4545465a2e31a6646f247c55906764952d44cd58` adds renderer-owned movement,
+> clamp and z-order state only; it changes no simulation, shared-Zone, Gateway,
+> protocol or persistence authority and emits no intent. Focused Help 14/14,
+> Bevy 416/416 and Windows 394/394 pass; review is P0=0/P1=0 for this leaf.
+> Dynamic keybinding/localization and every same-EXE/DPI/soak/human/signing/
+> denominator gate remain open. No backend or global percentage is claimed.
+
 > VIS-03 HelpDialog client-only checkpoint (2026-08-28): revision
 > `e22f2aa4c683447b0e57805a580fd29e0a84c37c` adds no simulation, shared-Zone,
 > Gateway, protocol or persistence authority. The Help window, 45-page cursor,
