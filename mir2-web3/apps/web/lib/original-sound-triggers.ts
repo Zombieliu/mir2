@@ -19,7 +19,8 @@ import { spellNumberForName } from "./crystal-magic-effects";
 //   PlayAttackSound -> BaseSound + 1   (the monster's attack roar)
 //   PlaySwingSound  -> BaseSound + 4   (the weapon swoosh)
 //   PlayDieSound    -> BaseSound + 3   (the death cry)
-// Monster *struck* is weapon-based (SoundList.Struck*), not image-based — see below.
+// Monster struck plays both the image-owned flinch (BaseSound + 2) and the
+// attacker-weapon-owned SoundList.Struck* cue, in that exact order.
 const MONSTER_ATTACK_OFFSET = 1;
 const MONSTER_SWING_OFFSET = 4;
 const MONSTER_DIE_OFFSET = 3;
@@ -136,6 +137,21 @@ function playerStruckBodySoundId(target: SoundEntityRef, attacker: SoundEntityRe
   return null;
 }
 
+function monsterStruckWeaponSoundId(attacker: SoundEntityRef | null | undefined): number | null {
+  const weapon = playerWeaponIndex(attacker);
+  if ([0, 23, 28, 40].includes(weapon)) return ORIGINAL_SOUND_IDS.struckWooden;
+  if ([1, 6, 10, 12, 17, 22, 27, 30, 36, 39].includes(weapon)) return ORIGINAL_SOUND_IDS.struckShort;
+  if ([2, 8, 11, 15, 18, 20, 25, 31, 33, 34, 37, 41].includes(weapon)) {
+    return ORIGINAL_SOUND_IDS.struckSword;
+  }
+  if ([3, 5, 7, 9, 13, 19, 24, 26, 29, 32, 35].includes(weapon)) {
+    return ORIGINAL_SOUND_IDS.struckSword2;
+  }
+  if ([4, 14, 16, 38].includes(weapon)) return ORIGINAL_SOUND_IDS.struckAxe;
+  if (weapon === 21) return ORIGINAL_SOUND_IDS.struckClub;
+  return null;
+}
+
 /** Attack swing / roar for an object that just attacked (ObjectAttack / ObjectRangeAttack). */
 export function playEntityAttackSound(
   entity: SoundEntityRef | null | undefined,
@@ -176,8 +192,13 @@ export function playEntityStruckSound(
     return;
   }
   if (target.kind === "monster") {
-    // MonsterObject.PlayStruckSound: weapon clang (default StruckSword) — always present.
-    playOriginalSoundId(ORIGINAL_SOUND_IDS.struckSword);
+    // MonsterObject enters Struck by calling PlayFlinchSound before
+    // PlayStruckSound. Unknown/non-player attackers keep StruckWeapon=-2, so
+    // the image-owned flinch remains but there is no invented default clang.
+    const base = monsterBaseSound(target);
+    if (base !== null) playOriginalSoundId(base + 2);
+    const struck = monsterStruckWeaponSoundId(attacker);
+    if (struck !== null) playOriginalSoundId(struck);
     return;
   }
   if (isPlayer(target.kind)) {

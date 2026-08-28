@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-28T03:29:25.691Z",
+  "generatedAt": "2026-08-28T03:51:12.924Z",
   "clientRoot": "E:\\mir2\\Crystal\\Build\\Client\\Debug",
   "soundDir": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound",
   "soundListPath": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Sound\\SoundList.lst",
-  "soundListEntryCount": 461,
-  "exportedSoundCount": 461,
+  "soundListEntryCount": 462,
+  "exportedSoundCount": 462,
   "fallbackSoundCount": 3,
   "sourceWavCount": 1607,
   "missingSoundCount": 0,
@@ -37,6 +37,14 @@
       "exactSourceExists": true,
       "fallback": false,
       "sourceBytes": 90118
+    },
+    "52": {
+      "fileName": "005-2.wav",
+      "path": "/original-ui/Sound/005-2.wav",
+      "sourceExists": true,
+      "exactSourceExists": true,
+      "fallback": false,
+      "sourceBytes": 36726
     },
     "53": {
       "fileName": "005-3.wav",

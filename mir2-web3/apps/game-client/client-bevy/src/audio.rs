@@ -34,7 +34,14 @@ pub const NATIVE_UI_BUTTON_A_FILE: &str = "103.wav";
 /// here and packaging verifies the same exact files.
 pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "005-1.wav",
+    "005-2.wav",
     "005-3.wav",
+    "60.wav",
+    "61.wav",
+    "62.wav",
+    "63.wav",
+    "64.wav",
+    "65.wav",
     "70.wav",
     "71.wav",
     "72.wav",
@@ -992,6 +999,10 @@ mod tests {
             file_name: "51.wav".to_owned(),
             ..lightning.clone()
         }));
+        assert!(!queue.push(NativeGameplaySoundEvent {
+            file_name: "52.wav".to_owned(),
+            ..lightning.clone()
+        }));
         assert_eq!(queue.len(), 1);
 
         assert!(queue.push(NativeGameplaySoundEvent {
@@ -1019,6 +1030,25 @@ mod tests {
             cue: "Scarecrow.5.Attack".to_owned(),
             file_name: "005-1.wav".to_owned(),
         }));
+        for (sequence, file_name) in [
+            "005-2.wav",
+            "60.wav",
+            "61.wav",
+            "62.wav",
+            "63.wav",
+            "64.wav",
+            "65.wav",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            assert!(queue.push(NativeGameplaySoundEvent {
+                generation: 5,
+                sequence: sequence as u64 + 5,
+                cue: format!("Scarecrow.5.Struck.{sequence}"),
+                file_name: file_name.to_owned(),
+            }));
+        }
 
         for (sequence, file_name) in ["M31-0.wav", "M31-1.wav", "M31-2.wav"]
             .into_iter()

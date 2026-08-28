@@ -64,7 +64,12 @@ const originalSoundTriggersModule = loadTypeScriptModule(
     "./original-sound-events": {
       ORIGINAL_SOUND_IDS: {
         swingSword: 10052,
-        struckSword: 10110,
+        struckShort: 10060,
+        struckWooden: 10061,
+        struckSword: 10062,
+        struckSword2: 10063,
+        struckAxe: 10064,
+        struckClub: 10065,
         struckBodySword: 10120,
         struckBodyAxe: 10121,
         struckBodyLongStick: 10122,
@@ -401,6 +406,42 @@ check("Scarecrow Attack1 resolves BaseImage + 1 immediately", () => {
     "scarecrow-5",
   );
   assert.deepEqual(triggerPlayedIds, [51]);
+});
+
+check("Scarecrow Struck plays BaseImage + 2 before the exact weapon clang", () => {
+  const cases = [
+    ["warrior", "CWeapon/00", 10061],
+    ["warrior", "CWeapon/01", 10060],
+    ["warrior", "CWeapon/02", 10062],
+    ["warrior", "CWeapon/03", 10063],
+    ["warrior", "CWeapon/04", 10064],
+    ["warrior", "CWeapon/06", 10060],
+    ["warrior", "CWeapon/21", 10065],
+    ["assassin", "CWeapon/04", 10060],
+  ];
+  for (const [classKey, weaponLibrary, expected] of cases) {
+    triggerPlayedIds.length = 0;
+    originalSoundTriggersModule.playEntityStruckSound(
+      { kind: "monster", sprite: { bodyLibrary: "Monster/005" } },
+      { kind: "player", classKey, sprite: { weaponLibrary } },
+    );
+    assert.deepEqual(triggerPlayedIds, [52, expected], `${classKey}/${weaponLibrary}`);
+  }
+});
+
+check("Scarecrow Struck with unknown attacker keeps flinch and invents no clang", () => {
+  for (const attacker of [
+    null,
+    { kind: "monster", sprite: { bodyLibrary: "Monster/004" } },
+    { kind: "player", classKey: "warrior", sprite: { weaponLibrary: null } },
+  ]) {
+    triggerPlayedIds.length = 0;
+    originalSoundTriggersModule.playEntityStruckSound(
+      { kind: "monster", sprite: { bodyLibrary: "/original-ui/Monster/005" } },
+      attacker,
+    );
+    assert.deepEqual(triggerPlayedIds, [52]);
+  }
 });
 
 check("entityStruck -> playEntityStruckSound with attacker context", () => {

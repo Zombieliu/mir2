@@ -53,6 +53,7 @@ function makeWav(seed = 0) {
   );
   assert.equal(merged.filter((entry) => entry.id === 20081).length, 1);
   assert.equal(merged.find((entry) => entry.id === 51).fileName, "005-1.wav");
+  assert.equal(merged.find((entry) => entry.id === 52).fileName, "005-2.wav");
   assert.equal(merged.find((entry) => entry.id === 53).fileName, "005-3.wav");
   assert.equal(merged.find((entry) => entry.id === 20342).fileName, "M34-2.wav");
   assert.equal(merged.find((entry) => entry.id === 20610).fileName, "M61-0.wav");
@@ -109,6 +110,7 @@ try {
   writeFileSync(path.join(soundSrc, "SoundList.lst"), `${soundList}\r\n`);
   for (const [name, seed] of [
     ["005-1.wav", 15],
+    ["005-2.wav", 16],
     ["005-3.wav", 0],
     ["100.wav", 1],
     ["Login2.wav", 2],
@@ -138,8 +140,8 @@ try {
     strict: false,
   });
 
-  assert.equal(summary.soundListEntryCount, 18);
-  assert.equal(summary.exportedSoundCount, 17, "16 exact + 1 fallback copy");
+  assert.equal(summary.soundListEntryCount, 19);
+  assert.equal(summary.exportedSoundCount, 18, "17 exact + 1 fallback copy");
   assert.equal(summary.fallbackSoundCount, 1, "22.wav must fall back to 23.wav");
   assert.equal(summary.missingSoundCount, 1, "9999.wav must be recorded missing");
   assert.equal(summary.sounds["10100"].path, "/original-ui/Sound/100.wav");
@@ -149,6 +151,7 @@ try {
   assert.equal(summary.sounds["19999"].sourceExists, false);
   assert.equal(summary.sounds["19999"].path, null);
   assert.equal(summary.sounds["51"].path, "/original-ui/Sound/005-1.wav");
+  assert.equal(summary.sounds["52"].path, "/original-ui/Sound/005-2.wav");
   assert.equal(summary.sounds["53"].path, "/original-ui/Sound/005-3.wav");
   assert.equal(summary.sounds["20081"].path, "/original-ui/Sound/M8-1.wav");
   assert.equal(summary.sounds["20340"].path, "/original-ui/Sound/M34-0.wav");
@@ -164,6 +167,7 @@ try {
   const copied = new Set(readdirSync(outputDir));
   for (const f of [
     "005-1.wav",
+    "005-2.wav",
     "005-3.wav",
     "100.wav",
     "Login2.wav",

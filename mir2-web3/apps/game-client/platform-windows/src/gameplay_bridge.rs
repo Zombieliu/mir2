@@ -4068,7 +4068,12 @@ mod tests {
     #[test]
     fn movement_and_combat_packets_emit_monotonic_animation_hints() {
         let mut adapter = NativeGameplayAdapter::default();
-        adapter.observe_world_snapshot(&gameplay_payload());
+        let mut world = gameplay_payload();
+        world["entities"][0]["sprite"] = json!({
+            "bodyLibrary": "CArmour/00",
+            "weaponLibrary": "CWeapon/02"
+        });
+        adapter.observe_world_snapshot(&world);
         adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
             x: 288,
             y: 616,
@@ -4090,6 +4095,7 @@ mod tests {
             packet: "ObjectStruck".to_owned(),
             payload: json!({
                 "objectId":2001,
+                "attackerId":1000,
                 "location":{"x":289,"y":615},
                 "direction":"Down"
             }),
@@ -4117,6 +4123,14 @@ mod tests {
             "Monster/005"
         );
         assert_eq!(adapter.effect_events[1].packet, "ObjectStruck");
+        assert_eq!(
+            adapter.effect_events[1].payload["_nativeTarget"]["sprite"]["bodyLibrary"],
+            "Monster/005"
+        );
+        assert_eq!(
+            adapter.effect_events[1].payload["_nativeAttacker"]["sprite"]["weaponLibrary"],
+            "CWeapon/02"
+        );
     }
 
     #[test]
