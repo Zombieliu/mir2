@@ -312,6 +312,14 @@ async function testAssembleMode() {
   assert.equal(effects.resolveSpellProjectileEffect(assets, "GreatFireBall", 15).frames.at(-1).path, "/original-ui/Magic/565.png");
   assert.equal(effects.resolveSpellImpactEffect(assets, "GreatFireBall").frames[0].path, "/original-ui/Magic/570.png");
   assert.equal(effects.resolveSpellImpactEffect(assets, "GreatFireBall").frames.at(-1).path, "/original-ui/Magic/579.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireBounce").frames[0].path, "/original-ui/Magic/400.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireBounce").frames.at(-1).path, "/original-ui/Magic/409.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 0).frames[0].path, "/original-ui/Magic/410.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 15).frames[0].path, "/original-ui/Magic/560.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 15).frames.at(-1).path, "/original-ui/Magic/565.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 15).interval, 30);
+  assert.equal(effects.resolveSpellImpactEffect(assets, "FireBounce").frames[0].path, "/original-ui/Magic/570.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "FireBounce").frames.at(-1).path, "/original-ui/Magic/579.png");
   assert.equal(effects.resolveSpellCastEffect(assets, "SoulFireBall"), null);
   assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1160.png");
   assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall", 15).frames[0].path, "/original-ui/Magic/1310.png");

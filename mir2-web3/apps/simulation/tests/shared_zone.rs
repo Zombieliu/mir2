@@ -6608,7 +6608,8 @@ fn zone_native_player_meteor_shower_damages_primary_and_secondary_monsters() {
 
 #[test]
 fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
-    let mut zone = zone();
+    // Strict recovery reconstructs collision from the signed map module.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
     let first = session("first");
     let second = session("second");
     let target = Point { x: 334, y: 270 };
@@ -6616,9 +6617,17 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 324, 270)));
     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 326, 270)));
     for (object_id, x) in [(9100, 334), (9101, 336), (9102, 338), (9103, 344)] {
+        let mut monster = native_monster_spawn(object_id, x, 270);
+        if object_id == 9100 {
+            // Make the primary die so the second hop has one legal living
+            // candidate. Crystal may continue bouncing from a monster that
+            // the just-resolved hit killed.
+            monster.max_hp = 8;
+            monster.hp = 8;
+        }
         zone.handle(ZoneCommand::SpawnMonster {
             session_id: first.clone(),
-            monster: native_monster_spawn(object_id, x, 270),
+            monster,
             now_ms: 0,
         });
     }
@@ -6640,41 +6649,94 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
     for target_session in [&first, &second] {
         assert!(has_packet(&launch, target_session, |packet| matches!(
             packet,
+            ServerPacket::ObjectMagic {
+                spell,
+                target_id,
+                cast,
+                ..
+            } if *spell == Spell::FireBounce && *target_id == 9100 && *cast
+        )));
+        assert!(!has_packet(&launch, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectProjectile { spell, .. }
+                if *spell == Spell::FireBounce
+        )));
+        assert!(!has_packet(&launch, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info }
+                if (9100..=9103).contains(&info.object_id)
+        )));
+    }
+    let launch_checkpoint: serde_json::Value = serde_json::from_slice(
+        &zone
+            .checkpoint_bytes()
+            .expect("FireBounce checkpoint after launch"),
+    )
+    .expect("FireBounce launch checkpoint JSON");
+    let launch_hits = &launch_checkpoint["pending_native_hits"];
+    assert_eq!(launch_hits.as_array().map(Vec::len), Some(1));
+    assert_eq!(launch_hits[0]["object_id"].as_u64(), Some(9100));
+    assert_eq!(launch_hits[0]["ready_at_ms"].as_u64(), Some(1_020));
+    assert_eq!(
+        launch_hits[0]["fire_bounce"]["remaining_bounces"].as_u64(),
+        Some(4)
+    );
+
+    // Crystal's first leg lands after 500 ms plus 50 ms per tile. Only after
+    // that hit resolves does the server choose and broadcast the next hop.
+    let primary = zone.tick(1_020);
+    for target_session in [&first, &second] {
+        assert!(has_packet(&primary, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info }
+                if info.object_id == 9100 && info.percent == 0
+        )));
+        assert!(has_packet(&primary, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectDied { info } if info.object_id == 9100
+        )));
+        assert!(has_packet(&primary, target_session, |packet| matches!(
+            packet,
             ServerPacket::ObjectProjectile {
                 spell,
                 source_id,
                 destination_id
             } if *spell == Spell::FireBounce
-                && *source_id == 101
-                && *destination_id == 9100
+                && *source_id == 9100
+                && *destination_id == 9101
         )));
     }
+    let checkpoint_bytes = zone
+        .checkpoint_bytes()
+        .expect("FireBounce checkpoint after primary hit");
+    let checkpoint: serde_json::Value =
+        serde_json::from_slice(&checkpoint_bytes).expect("FireBounce checkpoint JSON");
+    let pending_hits = &checkpoint["pending_native_hits"];
+    assert_eq!(pending_hits.as_array().map(Vec::len), Some(1));
+    assert_eq!(pending_hits[0]["object_id"].as_u64(), Some(9101));
+    assert_eq!(pending_hits[0]["ready_at_ms"].as_u64(), Some(1_120));
+    assert_eq!(
+        pending_hits[0]["fire_bounce"]["remaining_bounces"].as_u64(),
+        Some(3)
+    );
+    let mut zone = ZoneRuntime::restore_checkpoint(&checkpoint_bytes)
+        .expect("restore FireBounce pending-hop checkpoint");
 
-    let primary = zone.tick(20);
+    let second_bounce = zone.tick(1_120);
     for target_session in [&first, &second] {
-        assert!(has_packet(&primary, target_session, |packet| matches!(
-            packet,
-            ServerPacket::ObjectHealth { info }
-                if info.object_id == 9100 && info.percent == 60
-        )));
-    }
-
-    let second_bounce = zone.tick(120);
-    for target_session in [&first, &second] {
-        assert!(has_packet(
-            &second_bounce,
-            target_session,
-            |packet| matches!(
+        assert!(
+            has_packet(&second_bounce, target_session, |packet| matches!(
                 packet,
                 ServerPacket::ObjectProjectile {
                     spell,
                     source_id,
                     destination_id
                 } if *spell == Spell::FireBounce
-                    && *source_id == 9100
-                    && *destination_id == 9101
-            )
-        ));
+                    && *source_id == 9101
+                    && *destination_id == 9102
+            )),
+            "second FireBounce hop: {second_bounce:#?}"
+        );
         assert!(has_packet(
             &second_bounce,
             target_session,
@@ -6686,7 +6748,7 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
         ));
     }
 
-    let third_bounce = zone.tick(220);
+    let third_bounce = zone.tick(1_220);
     for target_session in [&first, &second] {
         assert!(has_packet(
             &third_bounce,
@@ -6698,8 +6760,8 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
                     source_id,
                     destination_id
                 } if *spell == Spell::FireBounce
-                    && *source_id == 9101
-                    && *destination_id == 9102
+                    && *source_id == 9102
+                    && *destination_id == 9101
             )
         ));
         assert!(has_packet(
@@ -6719,6 +6781,82 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
                 ServerPacket::ObjectHealth { info } if info.object_id == 9103
             )
         ));
+    }
+
+    // Level 2 starts with bounce=4 in Crystal. The final --bounce=1 leg may
+    // revisit a prior legal target, then terminates without another projectile.
+    let final_bounce = zone.tick(1_320);
+    for target_session in [&first, &second] {
+        assert!(has_packet(
+            &final_bounce,
+            target_session,
+            |packet| matches!(
+                packet,
+                ServerPacket::ObjectHealth { info }
+                    if info.object_id == 9101 && info.percent == 20
+            )
+        ));
+        assert!(!has_packet(
+            &final_bounce,
+            target_session,
+            |packet| matches!(
+                packet,
+                ServerPacket::ObjectProjectile { spell, .. }
+                    if *spell == Spell::FireBounce
+            )
+        ));
+    }
+}
+
+#[test]
+fn zone_native_player_fire_bounce_cancels_when_target_moves_beyond_crystal_tolerance() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 324, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 326, 270)));
+
+    let mut target = native_monster_spawn(9100, 334, 270);
+    target.move_speed_ms = 300;
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: target,
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::FireBounce,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 8,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 0,
+    });
+
+    // Move the live target four cells before the 500 + 10*50 ms hit. Crystal
+    // accepts at most two cells of drift from the captured target location.
+    for now_ms in [1, 301, 601, 901] {
+        zone.tick(now_ms);
+    }
+    let cancelled = zone.tick(1_000);
+    for target_session in [&first, &second] {
+        assert!(!has_packet(&cancelled, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == 9100
+        )));
+        assert!(!has_packet(&cancelled, target_session, |packet| matches!(
+            packet,
+            ServerPacket::DamageIndicator { object_id, .. } if *object_id == 9100
+        )));
+        assert!(!has_packet(&cancelled, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectProjectile { spell, .. }
+                if *spell == Spell::FireBounce
+        )));
     }
 }
 

@@ -248,7 +248,12 @@ export const SPELL_EFFECTS = [
   spell("ElementalBarrier", "Magic3", 1880, 8, 75),
   spell("PoisonShot", "Magic3", 2300, 8, 125),
   spell("OneWithNature", "Magic3", 2710, 8, 150, "ground"),
-  spell("FireBounce", "Magic", 400, 10, 60),
+  withPhases(spell("FireBounce", "Magic", 400, 10, 60), {
+    projectile: phase("Magic", 410, 6, 30, "projectile", {
+      ...direction16(410, 6, 10),
+    }),
+    impact: phase("Magic", 570, 10, 60, "target"),
+  }),
   withPhases({
     ...spell("SoulFireBall", "Magic", 1160, 3, 30, "projectile"),
     ...direction16(1160, 3, 10),

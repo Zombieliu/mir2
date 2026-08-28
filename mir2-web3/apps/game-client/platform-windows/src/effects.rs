@@ -14,7 +14,7 @@ use std::sync::{Mutex, OnceLock};
 
 use bevy::prelude::Resource;
 use serde::Deserialize;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
 use crate::assets;
 use crate::gameplay_bridge::NativeEffectEvent;
@@ -101,6 +101,13 @@ const GREAT_FIREBALL_IMPACT_SOUND_FILE: &str = "M34-2.wav";
 const GREAT_FIREBALL_CAST_SOUND_CUE: &str = "GreatFireBall.cast";
 const GREAT_FIREBALL_PROJECTILE_SOUND_CUE: &str = "GreatFireBall.projectile";
 const GREAT_FIREBALL_IMPACT_SOUND_CUE: &str = "GreatFireBall.impact";
+const FIRE_BOUNCE_SPELL_ACTION_MS: u64 = 600;
+const FIRE_BOUNCE_CAST_SOUND_FILE: &str = "M34-0.wav";
+const FIRE_BOUNCE_PROJECTILE_SOUND_FILE: &str = "M34-1.wav";
+const FIRE_BOUNCE_IMPACT_SOUND_FILE: &str = "M34-2.wav";
+const FIRE_BOUNCE_CAST_SOUND_CUE: &str = "FireBounce.cast";
+const FIRE_BOUNCE_PROJECTILE_SOUND_CUE: &str = "FireBounce.projectile";
+const FIRE_BOUNCE_IMPACT_SOUND_CUE: &str = "FireBounce.impact";
 const FROST_CRUNCH_SPELL_ACTION_MS: u64 = 600;
 const FROST_CRUNCH_CAST_SOUND_FILE: &str = "M41-1.wav";
 const FROST_CRUNCH_IMPACT_SOUND_FILE: &str = "M41-2.wav";
@@ -1237,8 +1244,10 @@ pub(crate) struct NativeEffects {
     zone_tiles: HashMap<u32, (i32, i32)>,
     /// The Rust simulation currently emits a compatibility ObjectProjectile
     /// immediately after some ObjectMagic packets. Crystal creates FireBall
-    /// and SoulFireBall missiles locally after the Spell action completes, so
-    /// consume the adjacent compatibility packet instead of drawing twice.
+    /// SoulFireBall, and the first FireBounce missile locally after the Spell
+    /// action completes, so consume the adjacent compatibility packet instead
+    /// of drawing twice. Later FireBounce hops have different sources and remain
+    /// authoritative ObjectProjectile events.
     local_projectile_dedupe: HashMap<(String, u32, u32), u64>,
     /// Target presence is resolved at Crystal's Spell-completion boundary,
     /// not when ObjectMagic first arrives. This preserves point-flight when a
@@ -1717,6 +1726,7 @@ impl NativeEffects {
                 instance.provenance.spell.as_str(),
                 "FireBall"
                     | "GreatFireBall"
+                    | "FireBounce"
                     | "SoulFireBall"
                     | "FrostCrunch"
                     | "Hallucination"
@@ -1821,6 +1831,10 @@ impl NativeEffects {
                         GREAT_FIREBALL_IMPACT_SOUND_CUE,
                         GREAT_FIREBALL_IMPACT_SOUND_FILE,
                     )),
+                ),
+                "FireBounce" => (
+                    "FireBounce",
+                    Some((FIRE_BOUNCE_IMPACT_SOUND_CUE, FIRE_BOUNCE_IMPACT_SOUND_FILE)),
                 ),
                 "FrostCrunch" => (
                     "FrostCrunch",
@@ -1930,6 +1944,7 @@ impl NativeEffects {
                     match instance.provenance.spell.as_str() {
                         "FireBall" => (true, Some(FIREBALL_IMPACT_SOUND_CUE)),
                         "GreatFireBall" => (true, Some(GREAT_FIREBALL_IMPACT_SOUND_CUE)),
+                        "FireBounce" => (true, Some(FIRE_BOUNCE_IMPACT_SOUND_CUE)),
                         "FrostCrunch" => (true, Some(FROST_CRUNCH_IMPACT_SOUND_CUE)),
                         "SoulFireBall" => (true, Some(SOUL_FIREBALL_IMPACT_SOUND_CUE)),
                         "Hallucination" => (true, Some(HALLUCINATION_IMPACT_SOUND_CUE)),
@@ -2473,10 +2488,8 @@ impl NativeEffects {
         let Some(mut projectile) = catalog.spell_projectile_animation(spell, direction) else {
             return;
         };
-        let (duration_ms, frame_interval_ms) = crystal_projectile_clock(
-            max_tile_distance(source, destination),
-            projectile.interval,
-        );
+        let (duration_ms, frame_interval_ms) =
+            crystal_projectile_clock(max_tile_distance(source, destination), projectile.interval);
         projectile.duration_ms = duration_ms;
         projectile.interval = frame_interval_ms;
 
@@ -2660,6 +2673,19 @@ impl NativeEffects {
                 },
             });
         }
+        if spell == "FireBounce" {
+            self.pending_sounds.push(PendingEffectSound {
+                key: key.clone(),
+                due_at_ms: now,
+                requires_active_effect: true,
+                event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                    generation: provenance.generation,
+                    sequence: provenance.sequence,
+                    cue: FIRE_BOUNCE_CAST_SOUND_CUE.to_owned(),
+                    file_name: FIRE_BOUNCE_CAST_SOUND_FILE.to_owned(),
+                },
+            });
+        }
         if spell == "FrostCrunch" {
             self.pending_sounds.push(PendingEffectSound {
                 key: key.clone(),
@@ -2767,6 +2793,20 @@ impl NativeEffects {
                 )),
             );
         }
+        if spell == "FireBounce" {
+            self.schedule_local_projectile_from_object_magic(
+                payload,
+                catalog,
+                provenance,
+                "FireBounce",
+                "fire-bounce",
+                FIRE_BOUNCE_SPELL_ACTION_MS,
+                Some((
+                    FIRE_BOUNCE_PROJECTILE_SOUND_CUE,
+                    FIRE_BOUNCE_PROJECTILE_SOUND_FILE,
+                )),
+            );
+        }
         if spell == "FrostCrunch" {
             self.schedule_local_projectile_from_object_magic(
                 payload,
@@ -2795,14 +2835,13 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
-        // These Crystal player paths never consume ObjectProjectile; current
-        // Rust servers emit it only as a compatibility supplement. Ignore it
-        // regardless of order/replay and let ObjectMagic own the delayed local
-        // missile.
-        if matches!(
-            spell,
-            "SoulFireBall" | "GreatFireBall" | "Hallucination"
-        ) {
+        // These three Crystal player paths never consume ObjectProjectile;
+        // current Rust servers emit it only as a compatibility supplement.
+        // Ignore those packets regardless of order/replay and let ObjectMagic
+        // own their delayed local missile. FireBounce differs: dedupe only its
+        // legacy initial player-to-target supplement below, then consume later
+        // monster-to-monster packets as authoritative bounce hops.
+        if matches!(spell, "SoulFireBall" | "GreatFireBall" | "Hallucination") {
             return;
         }
         let open_id = |name: &str| -> Option<u32> {
@@ -2814,14 +2853,16 @@ impl NativeEffects {
             // Without authoritative source/destination we must not fabricate a path.
             return;
         };
-        if matches!(spell, "FireBall" | "SoulFireBall" | "FrostCrunch")
-            && self
-                .local_projectile_dedupe
-                .get(&(spell.to_owned(), source_id, destination_id))
-                .is_some_and(|cast_sequence| {
-                    provenance.sequence > *cast_sequence
-                        && provenance.sequence.saturating_sub(*cast_sequence) <= 2
-                })
+        if matches!(
+            spell,
+            "FireBall" | "SoulFireBall" | "FrostCrunch" | "FireBounce"
+        ) && self
+            .local_projectile_dedupe
+            .get(&(spell.to_owned(), source_id, destination_id))
+            .is_some_and(|cast_sequence| {
+                provenance.sequence > *cast_sequence
+                    && provenance.sequence.saturating_sub(*cast_sequence) <= 2
+            })
         {
             self.local_projectile_dedupe
                 .remove(&(spell.to_owned(), source_id, destination_id));
@@ -2832,6 +2873,17 @@ impl NativeEffects {
         else {
             return;
         };
+        if spell == "FireBounce" {
+            self.apply_fire_bounce_projectile(
+                catalog,
+                source_id,
+                destination_id,
+                (from_x, from_y),
+                (to_x, to_y),
+                provenance,
+            );
+            return;
+        }
         let direction = projectile_direction16((from_x, from_y), (to_x, to_y));
         let projectile = catalog.spell_projectile_animation(spell, direction);
         let impact = catalog.spell_impact_animation(spell);
@@ -2892,6 +2944,79 @@ impl NativeEffects {
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
+    }
+
+    fn apply_fire_bounce_projectile(
+        &mut self,
+        catalog: &EffectCatalog,
+        source_id: u32,
+        destination_id: u32,
+        source: (i32, i32),
+        destination: (i32, i32),
+        provenance: &EffectProvenance,
+    ) {
+        let direction = projectile_direction16(source, destination);
+        let Some(mut projectile) = catalog.spell_projectile_animation("FireBounce", direction)
+        else {
+            return;
+        };
+        let Some(impact) = catalog.spell_impact_animation("FireBounce") else {
+            return;
+        };
+        let (duration_ms, frame_interval_ms) =
+            crystal_projectile_clock(max_tile_distance(source, destination), projectile.interval);
+        projectile.duration_ms = duration_ms;
+        projectile.interval = frame_interval_ms;
+
+        let now = self.now_ms;
+        let key = self.next_key("fire-bounce-hop");
+        self.pending_sounds.push(PendingEffectSound {
+            key: key.clone(),
+            due_at_ms: now,
+            requires_active_effect: true,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: FIRE_BOUNCE_PROJECTILE_SOUND_CUE.to_owned(),
+                file_name: FIRE_BOUNCE_PROJECTILE_SOUND_FILE.to_owned(),
+            },
+        });
+        self.pending_sounds.push(PendingEffectSound {
+            key: key.clone(),
+            due_at_ms: now.saturating_add(duration_ms),
+            requires_active_effect: true,
+            event: mir2_client_bevy::audio::NativeGameplaySoundEvent {
+                generation: provenance.generation,
+                sequence: provenance.sequence,
+                cue: FIRE_BOUNCE_IMPACT_SOUND_CUE.to_owned(),
+                file_name: FIRE_BOUNCE_IMPACT_SOUND_FILE.to_owned(),
+            },
+        });
+        self.active.push(EffectInstance {
+            key: key.clone(),
+            kind: EffectKindTag::Projectile,
+            tile_x: destination.0,
+            tile_y: destination.1,
+            from_x: Some(source.0 as f32),
+            from_y: Some(source.1 as f32),
+            current: Some(projectile),
+            queued: Some(impact),
+            return_queued: None,
+            started_at: now,
+            start_at: now,
+            persistent_object_id: None,
+            provenance: provenance.clone(),
+        });
+        self.anchor_object_ids.insert(key.clone(), destination_id);
+        self.source_object_ids.insert(key.clone(), source_id);
+        self.local_projectile_targets.insert(
+            key,
+            LocalProjectileTarget {
+                target_id: Some(destination_id),
+                fallback: destination,
+                resolved_at_launch: true,
+            },
+        );
     }
 
     fn apply_object_effect(
@@ -3091,10 +3216,8 @@ impl NativeEffects {
         else {
             return;
         };
-        let (duration_ms, frame_interval_ms) = crystal_projectile_clock(
-            max_tile_distance(source, destination),
-            animation.interval,
-        );
+        let (duration_ms, frame_interval_ms) =
+            crystal_projectile_clock(max_tile_distance(source, destination), animation.interval);
         animation.duration_ms = duration_ms;
         animation.interval = frame_interval_ms;
 
@@ -5217,11 +5340,9 @@ mod tests {
         });
         assert_eq!(fx.current_light_snapshots(49).len(), 1);
         fx.publish_current_light_snapshots(0, true);
-        assert!(
-            native_effect_light_snapshots()
-                .iter()
-                .any(|snapshot| snapshot.key == "expiring-light")
-        );
+        assert!(native_effect_light_snapshots()
+            .iter()
+            .any(|snapshot| snapshot.key == "expiring-light"));
         assert!(fx.current_light_snapshots(100).is_empty());
         let _ = fx.tick(100);
         assert!(native_effect_light_snapshots().is_empty());
@@ -5725,16 +5846,14 @@ mod tests {
         assert_eq!(inst.kind, EffectKindTag::Projectile);
         assert_eq!(inst.from_x, Some(10.0));
         assert_eq!(inst.tile_x, 12);
-        assert!(
-            inst.current
-                .as_ref()
-                .is_some_and(|anim| anim.frames[0].path.ends_with("/Magic/50.png"))
-        );
-        assert!(
-            inst.queued
-                .as_ref()
-                .is_some_and(|anim| anim.frames[0].path.ends_with("/Magic/170.png"))
-        );
+        assert!(inst
+            .current
+            .as_ref()
+            .is_some_and(|anim| anim.frames[0].path.ends_with("/Magic/50.png")));
+        assert!(inst
+            .queued
+            .as_ref()
+            .is_some_and(|anim| anim.frames[0].path.ends_with("/Magic/170.png")));
     }
 
     #[test]
@@ -6011,11 +6130,10 @@ mod tests {
         // Trigger retain.
         fx.tick(far_future);
         // At far future, no projectile should be alive (duration 180 + 600).
-        assert!(
-            fx.active
-                .iter()
-                .all(|inst| matches!(inst.kind, EffectKindTag::Persistent))
-        );
+        assert!(fx
+            .active
+            .iter()
+            .all(|inst| matches!(inst.kind, EffectKindTag::Persistent)));
         // For projectile-only test, after far future all should be cleared.
         let mut fx2 = NativeEffects::default();
         fx2.observe(0, 10, 10, &events, &zone_tiles);
@@ -6418,11 +6536,10 @@ mod tests {
             .find(|instance| instance.key.starts_with("fx-cast-"))
             .expect("FireBall cast");
         assert_eq!(cast.start_at, 0);
-        assert!(
-            cast.current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/0.png"))
-        );
+        assert!(cast
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/0.png")));
         let projectile = fx
             .active
             .iter()
@@ -6437,12 +6554,10 @@ mod tests {
             projectile.current.as_ref().map(|anim| anim.interval),
             Some(31)
         );
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")));
         assert!(
             projectile.queued.is_none(),
             "target binding occurs at launch"
@@ -6472,11 +6587,9 @@ mod tests {
                 .expect("FireBall projectile launch"),
         )
         .expect("FireBall launch JSON");
-        assert!(
-            launch["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/10.png"))
-        );
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/10.png")));
         assert!(fx.active.iter().any(|instance| {
             instance.key.starts_with("fx-fireball-")
                 && instance
@@ -6493,11 +6606,9 @@ mod tests {
         let impact: Value =
             serde_json::from_str(&fx.tick_with_visibility(850, true).expect("FireBall impact"))
                 .expect("FireBall impact JSON");
-        assert!(
-            impact["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/170.png"))
-        );
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/170.png")));
         assert!(fx.take_due_sound_events(850).is_empty());
     }
 
@@ -6522,12 +6633,10 @@ mod tests {
             .iter()
             .find(|instance| instance.key.starts_with("fx-fireball-"))
             .expect("FireBall launch");
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/50.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/50.png")));
         assert_eq!(
             projectile
                 .current
@@ -6732,23 +6841,20 @@ mod tests {
             .iter()
             .find(|instance| instance.key.starts_with("fx-cast-"))
             .expect("GreatFireBall cast");
-        assert!(
-            cast.current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/400.png"))
-        );
+        assert!(cast
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/400.png")));
         let projectile = fx
             .active
             .iter()
             .find(|instance| instance.key.starts_with("fx-great-fireball-"))
             .expect("GreatFireBall projectile");
         assert_eq!(projectile.start_at, GREAT_FIREBALL_SPELL_ACTION_MS);
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/410.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/410.png")));
         assert_eq!(
             fx.take_due_sound_events(0)[0].cue,
             GREAT_FIREBALL_CAST_SOUND_CUE
@@ -6787,11 +6893,9 @@ mod tests {
                 .expect("GreatFireBall impact"),
         )
         .expect("GreatFireBall impact JSON");
-        assert!(
-            impact["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/570.png"))
-        );
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/570.png")));
     }
 
     #[test]
@@ -6908,6 +7012,326 @@ mod tests {
             let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
                 .expect("GreatFireBall source sound path");
             let bytes = fs::read(path).expect("read GreatFireBall sound");
+            assert_eq!(bytes.len(), audio["sourceBytes"]);
+            assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
+        }
+    }
+
+    fn fire_bounce_fixture() -> Value {
+        serde_json::from_str(include_str!(
+            "../tests/fixtures/vis02-bichon-fire-bounce-v1.json"
+        ))
+        .expect("VIS-02 FireBounce fixture JSON")
+    }
+
+    fn fire_bounce_magic_event(sequence: u64, cast: bool) -> NativeEffectEvent {
+        let fixture = fire_bounce_fixture();
+        let index = if cast { 0 } else { 2 };
+        NativeEffectEvent {
+            sequence,
+            generation: 29,
+            packet: "ObjectMagic".to_owned(),
+            payload: fixture["timeline"][index]["event"]["payload"].clone(),
+        }
+    }
+
+    fn fire_bounce_legacy_compat_projectile_event(sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 29,
+            packet: "ObjectProjectile".to_owned(),
+            payload: fire_bounce_fixture()["timeline"][0]["legacyCompatibilityEvent"]["payload"]
+                .clone(),
+        }
+    }
+
+    fn fire_bounce_hop_event(sequence: u64) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 29,
+            packet: "ObjectProjectile".to_owned(),
+            payload: fire_bounce_fixture()["timeline"][1]["event"]["payload"].clone(),
+        }
+    }
+
+    #[test]
+    fn fire_bounce_object_magic_owns_delayed_first_projectile_and_legacy_dedupe() {
+        let zone = HashMap::from([(1000, (288, 616)), (2154, (288, 611)), (2155, (290, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[
+                fire_bounce_magic_event(1, true),
+                fire_bounce_legacy_compat_projectile_event(2),
+            ],
+            &zone,
+        );
+
+        assert_eq!(
+            fx.active.len(),
+            2,
+            "legacy player-to-primary ObjectProjectile must not duplicate the local first leg"
+        );
+        let cast = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-cast-"))
+            .expect("FireBounce cast");
+        assert!(cast
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/400.png")));
+        let projectile = fx
+            .active
+            .iter()
+            .find(|instance| instance.key.starts_with("fx-fire-bounce-"))
+            .expect("FireBounce first projectile");
+        assert_eq!(projectile.start_at, FIRE_BOUNCE_SPELL_ACTION_MS);
+        assert_eq!(
+            projectile
+                .current
+                .as_ref()
+                .map(|animation| animation.duration_ms),
+            Some(250)
+        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/410.png")));
+
+        let cast_sound = fx.take_due_sound_events(0);
+        assert_eq!(cast_sound.len(), 1);
+        assert_eq!(cast_sound[0].cue, FIRE_BOUNCE_CAST_SOUND_CUE);
+        assert!(fx.take_due_sound_events(599).is_empty());
+        let projectile_sound = fx.take_due_sound_events(600);
+        assert_eq!(projectile_sound.len(), 1);
+        assert_eq!(projectile_sound[0].cue, FIRE_BOUNCE_PROJECTILE_SOUND_CUE);
+
+        let launch: Value = serde_json::from_str(
+            &fx.tick_with_visibility(600, true)
+                .expect("FireBounce first projectile launch"),
+        )
+        .expect("FireBounce first launch JSON");
+        assert!(launch["effects"].as_array().is_some_and(|effects| {
+            effects.iter().any(|effect| {
+                effect["imageUrl"]
+                    .as_str()
+                    .is_some_and(|path| path.ends_with("/Magic/410.png"))
+            })
+        }));
+        assert!(fx.active.iter().any(|instance| {
+            instance.key.starts_with("fx-fire-bounce-")
+                && instance
+                    .queued
+                    .as_ref()
+                    .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/570.png"))
+        }));
+        assert!(fx.take_due_sound_events(849).is_empty());
+        let impact_sound = fx.take_due_sound_events(850);
+        assert_eq!(impact_sound.len(), 1);
+        assert_eq!(impact_sound[0].cue, FIRE_BOUNCE_IMPACT_SOUND_CUE);
+        let impact: Value = serde_json::from_str(
+            &fx.tick_with_visibility(850, true)
+                .expect("FireBounce first impact"),
+        )
+        .expect("FireBounce first impact JSON");
+        assert!(impact["effects"].as_array().is_some_and(|effects| {
+            effects.iter().any(|effect| {
+                effect["imageUrl"]
+                    .as_str()
+                    .is_some_and(|path| path.ends_with("/Magic/570.png"))
+            })
+        }));
+    }
+
+    #[test]
+    fn fire_bounce_authoritative_hop_uses_source_direction_and_crystal_clock() {
+        let zone = HashMap::from([(2154, (288, 611)), (2155, (290, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fire_bounce_hop_event(1)], &zone);
+
+        assert_eq!(fx.active.len(), 1);
+        let hop = &fx.active[0];
+        assert!(hop.key.starts_with("fx-fire-bounce-hop-"));
+        let projectile = hop.current.as_ref().expect("FireBounce hop projectile");
+        assert_eq!(projectile.duration_ms, 100);
+        assert_eq!(projectile.interval, 33);
+        assert!(projectile.frames[0].path.ends_with("/Magic/450.png"));
+        assert!(hop
+            .queued
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/570.png")));
+
+        let launch_sound = fx.take_due_sound_events(0);
+        assert_eq!(launch_sound.len(), 1);
+        assert_eq!(launch_sound[0].cue, FIRE_BOUNCE_PROJECTILE_SOUND_CUE);
+        assert!(fx.take_due_sound_events(99).is_empty());
+        let impact_sound = fx.take_due_sound_events(100);
+        assert_eq!(impact_sound.len(), 1);
+        assert_eq!(impact_sound[0].cue, FIRE_BOUNCE_IMPACT_SOUND_CUE);
+        let impact: Value = serde_json::from_str(
+            &fx.tick_with_visibility(100, true)
+                .expect("FireBounce hop impact"),
+        )
+        .expect("FireBounce hop impact JSON");
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/570.png")));
+    }
+
+    #[test]
+    fn fire_bounce_cast_false_keeps_cast_only_and_boundaries_clear_chain() {
+        let zone = HashMap::from([(1000, (288, 616)), (2154, (288, 611)), (2155, (290, 611))]);
+        let mut cast_false = NativeEffects::default();
+        cast_false.observe(0, 288, 616, &[fire_bounce_magic_event(1, false)], &zone);
+        assert_eq!(cast_false.active.len(), 1);
+        assert!(cast_false.active[0].key.starts_with("fx-cast-"));
+        let sounds = cast_false.take_due_sound_events(0);
+        assert_eq!(sounds.len(), 1);
+        assert_eq!(sounds[0].cue, FIRE_BOUNCE_CAST_SOUND_CUE);
+        assert!(cast_false.take_due_sound_events(10_000).is_empty());
+
+        for boundary in ["MapChanged", "LogOutSuccess"] {
+            let mut fx = NativeEffects::default();
+            fx.observe(
+                0,
+                288,
+                616,
+                &[fire_bounce_magic_event(1, true), fire_bounce_hop_event(2)],
+                &zone,
+            );
+            fx.observe(
+                10,
+                288,
+                616,
+                &[NativeEffectEvent {
+                    sequence: 3,
+                    generation: 29,
+                    packet: boundary.to_owned(),
+                    payload: json!({}),
+                }],
+                &zone,
+            );
+            assert!(fx.active.is_empty(), "{boundary} clears FireBounce");
+            assert!(fx.local_projectile_targets.is_empty());
+            assert!(fx.local_projectile_dedupe.is_empty());
+            assert!(fx.take_due_sound_events(10_000).is_empty());
+        }
+
+        let mut reset = NativeEffects::default();
+        reset.observe(0, 288, 616, &[fire_bounce_magic_event(1, true)], &zone);
+        reset.reset_session();
+        assert!(reset.active.is_empty());
+        assert!(reset.local_projectile_targets.is_empty());
+        assert!(reset.local_projectile_dedupe.is_empty());
+        assert!(reset.pending_sounds.is_empty());
+    }
+
+    #[test]
+    fn fire_bounce_completion_suppresses_only_terminal_dead_target() {
+        let zone = HashMap::from([(2154, (288, 611)), (2155, (290, 611))]);
+
+        let mut dying = NativeEffects::default();
+        dying.observe(0, 288, 616, &[fire_bounce_hop_event(1)], &zone);
+        let _ = dying.take_due_sound_events(0);
+        dying.replace_dead_action_object_ids(HashSet::new());
+        assert_eq!(
+            dying.take_due_sound_events(100)[0].cue,
+            FIRE_BOUNCE_IMPACT_SOUND_CUE,
+            "Crystal's Die phase retains the FireBounce impact"
+        );
+        let dying_impact: Value = serde_json::from_str(
+            &dying
+                .tick_with_visibility(100, true)
+                .expect("FireBounce Die-phase impact"),
+        )
+        .expect("FireBounce Die-phase impact JSON");
+        assert!(dying_impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/570.png")));
+
+        let mut dead = NativeEffects::default();
+        dead.observe(0, 288, 616, &[fire_bounce_hop_event(1)], &zone);
+        let _ = dead.take_due_sound_events(0);
+        dead.replace_dead_action_object_ids(HashSet::from([2155]));
+        assert!(dead.take_due_sound_events(100).is_empty());
+        let suppressed: Value = serde_json::from_str(
+            &dead
+                .tick_with_visibility(100, true)
+                .expect("FireBounce Dead-phase suppression"),
+        )
+        .expect("FireBounce Dead-phase JSON");
+        assert_eq!(suppressed["effects"], json!([]));
+
+        let mut revived = NativeEffects::default();
+        revived.observe(0, 288, 616, &[fire_bounce_hop_event(1)], &zone);
+        let _ = revived.take_due_sound_events(0);
+        revived.replace_dead_action_object_ids(HashSet::from([2155]));
+        let _ = revived.tick_with_visibility(50, true);
+        revived.replace_dead_action_object_ids(HashSet::new());
+        assert_eq!(
+            revived.take_due_sound_events(100)[0].cue,
+            FIRE_BOUNCE_IMPACT_SOUND_CUE
+        );
+        let restored: Value = serde_json::from_str(
+            &revived
+                .tick_with_visibility(100, true)
+                .expect("FireBounce revived-target impact"),
+        )
+        .expect("FireBounce revived-target JSON");
+        assert!(restored["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/570.png")));
+    }
+
+    #[test]
+    fn fire_bounce_production_frames_and_audio_are_integrity_closed() {
+        use sha2::{Digest, Sha256};
+
+        let fixture = fire_bounce_fixture();
+        assert_eq!(fixture["source"]["actorActionDurationMs"], json!(600));
+        assert_eq!(
+            fixture["source"]["authoritativeFirstHitBaseDelayMs"],
+            json!(500)
+        );
+        let catalog = EffectCatalog::load().expect("production effect catalog");
+        let cast = catalog
+            .spell_cast_animation("FireBounce", 0)
+            .expect("FireBounce cast");
+        assert_eq!(cast.frames.len(), 10);
+        for (frame, index) in cast.frames.iter().zip(400..410) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        for direction in 0..16_u32 {
+            let projectile = catalog
+                .spell_projectile_animation("FireBounce", direction)
+                .expect("all FireBounce directions resolve");
+            assert_eq!(projectile.frames.len(), 6);
+            for (frame, source) in projectile.frames.iter().zip(0..6_u32) {
+                let index = 410 + direction * 10 + source;
+                assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+                assert!(crate::frame_png_exists(&frame.path));
+            }
+        }
+        let impact = catalog
+            .spell_impact_animation("FireBounce")
+            .expect("FireBounce impact");
+        assert_eq!(impact.frames.len(), 10);
+        for (frame, index) in impact.frames.iter().zip(570..580) {
+            assert!(frame.path.ends_with(&format!("/Magic/{index}.png")));
+            assert!(crate::frame_png_exists(&frame.path));
+        }
+        for audio in fixture["source"]["audio"]
+            .as_array()
+            .expect("FireBounce audio catalog")
+        {
+            let file = audio["file"].as_str().expect("FireBounce audio file");
+            let path = assets::asset_path(&format!("original-ui/Sound/{file}"))
+                .expect("packaged FireBounce sound path");
+            let bytes = fs::read(path).expect("read FireBounce sound");
             assert_eq!(bytes.len(), audio["sourceBytes"]);
             assert_eq!(format!("{:x}", Sha256::digest(&bytes)), audio["sha256"]);
         }
@@ -7036,12 +7460,10 @@ mod tests {
             projectile.current.as_ref().map(|anim| anim.interval),
             Some(31)
         );
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1160.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1160.png")));
         assert!(
             projectile.queued.is_none(),
             "target binding occurs at launch"
@@ -7071,11 +7493,9 @@ mod tests {
                 .expect("SoulFireBall projectile launch"),
         )
         .expect("SoulFireBall launch JSON");
-        assert!(
-            launch["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/1160.png"))
-        );
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/1160.png")));
         assert!(fx.active.iter().any(|instance| {
             instance.key.starts_with("fx-soul-fireball-")
                 && instance
@@ -7094,11 +7514,9 @@ mod tests {
                 .expect("SoulFireBall impact"),
         )
         .expect("SoulFireBall impact JSON");
-        assert!(
-            impact["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/1360.png"))
-        );
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/1360.png")));
     }
 
     #[test]
@@ -7129,12 +7547,10 @@ mod tests {
             .iter()
             .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
             .expect("SoulFireBall launch");
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1200.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1200.png")));
         assert_eq!(
             projectile.current.as_ref().map(|anim| anim.duration_ms),
             Some(350)
@@ -7147,12 +7563,10 @@ mod tests {
             .iter()
             .find(|instance| instance.key.starts_with("fx-soul-fireball-"))
             .expect("moving SoulFireBall projectile");
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1200.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/1200.png")));
         assert_eq!(
             projectile.current.as_ref().map(|anim| anim.duration_ms),
             Some(500)
@@ -7258,11 +7672,9 @@ mod tests {
                 .expect("revived target impact"),
         )
         .expect("revived target impact JSON");
-        assert!(
-            impact["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/170.png"))
-        );
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/170.png")));
     }
 
     #[test]
@@ -7290,11 +7702,10 @@ mod tests {
             .find(|instance| instance.key.starts_with("fx-cast-"))
             .expect("FrostCrunch cast");
         assert_eq!(cast.start_at, 0);
-        assert!(
-            cast.current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic2/400.png"))
-        );
+        assert!(cast
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic2/400.png")));
         let projectile = fx
             .active
             .iter()
@@ -7309,12 +7720,10 @@ mod tests {
             projectile.current.as_ref().map(|anim| anim.interval),
             Some(31)
         );
-        assert!(
-            projectile
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic2/410.png"))
-        );
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic2/410.png")));
         assert!(
             projectile.queued.is_none(),
             "target binding occurs at launch"
@@ -7338,11 +7747,9 @@ mod tests {
                 .expect("FrostCrunch projectile launch"),
         )
         .expect("FrostCrunch launch JSON");
-        assert!(
-            launch["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic2/410.png"))
-        );
+        assert!(launch["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic2/410.png")));
         assert!(fx.take_due_sound_events(600).is_empty());
         assert!(fx.active.iter().any(|instance| {
             instance.key.starts_with("fx-frost-crunch-")
@@ -7362,11 +7769,9 @@ mod tests {
                 .expect("FrostCrunch impact"),
         )
         .expect("FrostCrunch impact JSON");
-        assert!(
-            impact["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic2/570.png"))
-        );
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic2/570.png")));
         assert!(fx.take_due_sound_events(850).is_empty());
     }
 
@@ -7447,11 +7852,9 @@ mod tests {
                 .expect("FrostCrunch revived target impact"),
         )
         .expect("FrostCrunch revived target JSON");
-        assert!(
-            impact["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic2/570.png"))
-        );
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic2/570.png")));
     }
 
     #[test]
@@ -7533,18 +7936,28 @@ mod tests {
             .expect("Hallucination projectile");
         assert_eq!(projectile.start_at, HALLUCINATION_SPELL_ACTION_MS);
         assert_eq!(
-            projectile.current.as_ref().map(|animation| animation.duration_ms),
+            projectile
+                .current
+                .as_ref()
+                .map(|animation| animation.duration_ms),
             Some(250)
         );
         assert_eq!(
-            projectile.current.as_ref().map(|animation| animation.interval),
+            projectile
+                .current
+                .as_ref()
+                .map(|animation| animation.interval),
             Some(50),
             "Crystal duration/count clock turns the 48 ms process interval into five 50 ms frames"
         );
-        assert!(projectile.current.as_ref().is_some_and(|animation| {
-            animation.frames[0].path.ends_with("/Magic/1160.png")
-        }));
-        assert!(projectile.queued.is_none(), "target binding occurs at launch");
+        assert!(projectile
+            .current
+            .as_ref()
+            .is_some_and(|animation| { animation.frames[0].path.ends_with("/Magic/1160.png") }));
+        assert!(
+            projectile.queued.is_none(),
+            "target binding occurs at launch"
+        );
         assert!(fx.take_due_sound_events(0).is_empty());
 
         let before: Value = serde_json::from_str(
@@ -7566,9 +7979,10 @@ mod tests {
         assert!(fx.take_due_sound_events(600).is_empty());
         assert!(fx.active.iter().any(|instance| {
             instance.key.starts_with("fx-hallucination-")
-                && instance.queued.as_ref().is_some_and(|animation| {
-                    animation.frames[0].path.ends_with("/Magic2/1110.png")
-                })
+                && instance
+                    .queued
+                    .as_ref()
+                    .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic2/1110.png"))
         }));
         assert!(fx.take_due_sound_events(849).is_empty());
 
@@ -7591,13 +8005,7 @@ mod tests {
     fn hallucination_cast_false_has_no_visual_or_audio_phases() {
         let zone = HashMap::from([(1000, (288, 616)), (2076, (288, 611))]);
         let mut fx = NativeEffects::default();
-        fx.observe(
-            0,
-            288,
-            616,
-            &[hallucination_magic_event(1, false)],
-            &zone,
-        );
+        fx.observe(0, 288, 616, &[hallucination_magic_event(1, false)], &zone);
         assert!(fx.active.is_empty());
         assert!(fx.take_due_sound_events(0).is_empty());
         assert!(fx.take_due_sound_events(10_000).is_empty());
@@ -7623,9 +8031,11 @@ mod tests {
         )
         .expect("Hallucination Die-phase JSON");
         assert!(dying_impact["effects"].as_array().is_some_and(|effects| {
-            effects.iter().any(|effect| effect["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic2/1110.png")))
+            effects.iter().any(|effect| {
+                effect["imageUrl"]
+                    .as_str()
+                    .is_some_and(|path| path.ends_with("/Magic2/1110.png"))
+            })
         }));
 
         let mut dead = NativeEffects::default();
@@ -8105,9 +8515,9 @@ mod tests {
             sequence,
             generation: 16,
             packet: "ObjectAttack".to_owned(),
-            payload:
-                flaming_sword_fixture()["compatibilityCases"]["ordinaryAttack"]["event"]["payload"]
-                    .clone(),
+            payload: flaming_sword_fixture()["compatibilityCases"]["ordinaryAttack"]["event"]
+                ["payload"]
+                .clone(),
         }
     }
 
@@ -8218,11 +8628,9 @@ mod tests {
             )
             .expect("LeftGuard projectile JSON");
             assert_eq!(rendered["effects"].as_array().map(Vec::len), Some(1));
-            assert!(
-                rendered["effects"][0]["imageUrl"]
-                    .as_str()
-                    .is_some_and(|path| path.ends_with(&format!("/Magic/{index}.png")))
-            );
+            assert!(rendered["effects"][0]["imageUrl"]
+                .as_str()
+                .is_some_and(|path| path.ends_with(&format!("/Magic/{index}.png"))));
             assert_eq!(rendered["effects"][0]["additive"], true);
             assert_eq!(rendered["effects"][0]["opacity"], 1.0);
         }
@@ -8269,12 +8677,10 @@ mod tests {
         fx.observe(400, 288, 616, &[], &zone);
         assert_eq!(fx.active[0].from_x, Some(287.0));
         assert_eq!(fx.active[0].from_y, Some(616.0));
-        assert!(
-            fx.active[0]
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png"))
-        );
+        assert!(fx.active[0]
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/10.png")));
         assert_eq!(
             fx.active[0]
                 .current
@@ -8452,11 +8858,10 @@ mod tests {
         );
         assert!(fx.anchor_object_ids.is_empty());
         assert_eq!(fx.source_object_ids.len(), 1);
-        assert!(
-            fx.local_projectile_targets
-                .values()
-                .all(|target| target.target_id.is_none())
-        );
+        assert!(fx
+            .local_projectile_targets
+            .values()
+            .all(|target| target.target_id.is_none()));
         let late_flight: Value = serde_json::from_str(
             &fx.tick_with_visibility(1_399, true)
                 .expect("detached LeftGuard late flight"),
@@ -8862,11 +9267,9 @@ mod tests {
             )
             .expect("RightGuard frame JSON");
             assert_eq!(rendered["effects"].as_array().map(Vec::len), Some(1));
-            assert!(
-                rendered["effects"][0]["imageUrl"]
-                    .as_str()
-                    .is_some_and(|path| path.ends_with(&format!("/Magic2/{index}.png")))
-            );
+            assert!(rendered["effects"][0]["imageUrl"]
+                .as_str()
+                .is_some_and(|path| path.ends_with(&format!("/Magic2/{index}.png"))));
             assert_eq!(rendered["effects"][0]["additive"], true);
             assert_eq!(rendered["effects"][0]["opacity"], 1.0);
             let lights = fx.current_light_snapshots(now_ms);
@@ -9269,17 +9672,13 @@ mod tests {
         )
         .expect("first FlamingSword JSON");
         let entry = &first["effects"][0];
-        assert!(
-            entry["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/3480.png"))
-        );
+        assert!(entry["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3480.png")));
         assert_eq!(entry["additive"], true);
-        assert!(
-            entry["opacity"]
-                .as_f64()
-                .is_some_and(|opacity| (opacity - 0.7).abs() < 0.000_001)
-        );
+        assert!(entry["opacity"]
+            .as_f64()
+            .is_some_and(|opacity| (opacity - 0.7).abs() < 0.000_001));
         assert!(entry.get("shadowX").is_none());
         assert!(entry.get("shadowY").is_none());
 
@@ -9291,11 +9690,9 @@ mod tests {
                 .expect("moved FlamingSword frame"),
         )
         .expect("moved FlamingSword JSON");
-        assert!(
-            moved["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/3482.png"))
-        );
+        assert!(moved["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3482.png")));
 
         let hidden: Value = serde_json::from_str(
             &fx.tick_with_visibility(300, false)
@@ -9308,22 +9705,18 @@ mod tests {
                 .expect("restored FlamingSword state"),
         )
         .expect("restored FlamingSword JSON");
-        assert!(
-            restored["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/3484.png"))
-        );
+        assert!(restored["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3484.png")));
 
         let last: Value = serde_json::from_str(
             &fx.tick_with_visibility(599, true)
                 .expect("last FlamingSword frame"),
         )
         .expect("last FlamingSword JSON");
-        assert!(
-            last["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/3485.png"))
-        );
+        assert!(last["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/3485.png")));
         let expired: Value = serde_json::from_str(
             &fx.tick_with_visibility(600, true)
                 .expect("expired FlamingSword state"),
@@ -9346,28 +9739,24 @@ mod tests {
         fx.observe(210, 288, 616, &[flaming_sword_event(3, 2)], &zone);
         assert_eq!(fx.active.len(), 1, "same attacker replaces old overlay");
         assert_eq!(fx.active[0].started_at, 210);
-        assert!(
-            fx.active[0]
-                .current
-                .as_ref()
-                .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/3500.png"))
-        );
+        assert!(fx.active[0]
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.frames[0].path.ends_with("/Magic/3500.png")));
 
         let mut other = flaming_sword_event(4, 4);
         other.payload["objectId"] = json!(1001);
         other.payload["location"] = json!({"x": 289, "y": 616});
         fx.observe(220, 288, 616, &[other], &zone);
         assert_eq!(fx.active.len(), 2, "different attackers coexist");
-        assert!(
-            fx.active
-                .iter()
-                .any(|entry| entry.key == "flaming-sword-1000")
-        );
-        assert!(
-            fx.active
-                .iter()
-                .any(|entry| entry.key == "flaming-sword-1001")
-        );
+        assert!(fx
+            .active
+            .iter()
+            .any(|entry| entry.key == "flaming-sword-1000"));
+        assert!(fx
+            .active
+            .iter()
+            .any(|entry| entry.key == "flaming-sword-1001"));
     }
 
     #[test]
@@ -9666,11 +10055,9 @@ mod tests {
                 .expect("first Lightning frame"),
         )
         .expect("first frame JSON");
-        assert!(
-            first["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/970.png"))
-        );
+        assert!(first["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/970.png")));
 
         let hidden: Value = serde_json::from_str(
             &fx.tick_with_visibility(750, false)
@@ -9683,11 +10070,9 @@ mod tests {
                 .expect("restored Lightning state"),
         )
         .expect("restored JSON");
-        assert!(
-            restored["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/972.png"))
-        );
+        assert!(restored["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/972.png")));
         assert!(fx.take_due_sound_events(800).is_empty());
 
         let last: Value = serde_json::from_str(
@@ -9695,11 +10080,9 @@ mod tests {
                 .expect("last Lightning frame"),
         )
         .expect("last frame JSON");
-        assert!(
-            last["effects"][0]["imageUrl"]
-                .as_str()
-                .is_some_and(|path| path.ends_with("/Magic/975.png"))
-        );
+        assert!(last["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/975.png")));
         let expired: Value = serde_json::from_str(
             &fx.tick_with_visibility(1_200, true)
                 .expect("expired Lightning state"),

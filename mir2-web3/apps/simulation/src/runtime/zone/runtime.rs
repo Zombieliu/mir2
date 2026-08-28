@@ -113,6 +113,7 @@ const ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX: i32 = 9;
 const ZONE_NATIVE_PLAYER_MAGIC_MAX: i32 = 12;
 const ZONE_NATIVE_PLAYER_ATTACK_ACTION_MS: u64 = 600;
 const ZONE_NATIVE_PLAYER_SPELL_ACTION_MS: u64 = 300;
+const ZONE_FIRE_BOUNCE_INITIAL_DELAY_MS: u64 = 500;
 const QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV: &str = "MIR2_QA_NATURAL_KILL_DAMAGE_MULTIPLIER";
 const MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER: i32 = 1_000;
 const QA_NATURAL_MOVEMENT_DELAY_MS_ENV: &str = "MIR2_QA_NATURAL_MOVEMENT_DELAY_MS";
@@ -236,12 +237,20 @@ struct ZoneObjectDeadState {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+struct PendingNativeFireBounce {
+    remaining_bounces: u8,
+    target_location: Point,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingNativeMonsterHit {
     ready_at_ms: u64,
     session_id: SessionId,
     attacker_object_id: u32,
     object_id: u32,
     damage: i32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    fire_bounce: Option<PendingNativeFireBounce>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3000,6 +3009,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: resolved_damage,
+                fire_bounce: None,
             });
             if attack_spell == Spell::TwinDrakeBlade {
                 self.pending_native_hits.push(PendingNativeMonsterHit {
@@ -3008,6 +3018,7 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id,
                     damage: resolved_damage,
+                    fire_bounce: None,
                 });
                 if let Some(target) = self.native_monsters.get_mut(&object_id) {
                     target.control_poison |= CRYSTAL_POISON_STUN;
@@ -3076,6 +3087,7 @@ impl ZoneRuntime {
                         } else {
                             hit_damage
                         },
+                        fire_bounce: None,
                     });
                 }
             }
@@ -3407,6 +3419,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: resolved_damage,
+                fire_bounce: None,
             });
         }
         self.apply_zone_object_packets(&action_packets, now_ms);
@@ -3834,7 +3847,7 @@ impl ZoneRuntime {
                 &target_point,
                 now_ms,
             ));
-            self.apply_native_player_fire_bounce_chain(
+            self.schedule_native_player_fire_bounce(
                 session_id,
                 object_id,
                 player.object_id,
@@ -3846,6 +3859,7 @@ impl ZoneRuntime {
         }
         if cast
             && damage > 0
+            && spell != Spell::FireBounce
             && (!zone_magic_uses_ground_spell(spell)
                 || matches!(spell, Spell::FireBang | Spell::IceStorm))
             && zone_magic_deals_direct_damage(spell)
@@ -3882,6 +3896,7 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: hit_object_id,
                     damage: hit_damage,
+                    fire_bounce: None,
                 });
             }
             if spell == Spell::VampireShot {
@@ -5621,7 +5636,7 @@ impl ZoneRuntime {
         true
     }
 
-    fn apply_native_player_fire_bounce_chain(
+    fn schedule_native_player_fire_bounce(
         &mut self,
         session_id: &SessionId,
         primary_object_id: u32,
@@ -5641,93 +5656,55 @@ impl ZoneRuntime {
         else {
             return;
         };
-        let Some(primary_position) = self
+        let Some(primary_monster) = self
             .native_monsters
             .get(&primary_object_id)
-            .map(|monster| monster.position.clone())
+            .filter(|monster| !monster.dead && monster.hp > 0 && monster.hostile_to_player)
+            .cloned()
         else {
             return;
         };
+        if !self.native_projectile_path_clear(&player_position, &primary_monster.position) {
+            return;
+        }
 
-        let mut chain = vec![primary_object_id];
-        let mut previous_position = primary_position;
-        let max_bounces = usize::from(level).saturating_add(2);
-        for _ in 0..max_bounces {
-            let mut candidates = self
-                .native_monsters
-                .iter()
-                .filter_map(|(object_id, monster)| {
-                    (!chain.contains(object_id)
-                        && !monster.dead
-                        && monster.hp > 0
-                        && monster.hostile_to_player
-                        && zone_tile_distance(&previous_position, &monster.position) <= 4)
-                        .then_some((
-                            *object_id,
-                            monster.position.clone(),
-                            zone_tile_distance(&previous_position, &monster.position),
-                        ))
-                })
-                .collect::<Vec<_>>();
-            candidates.sort_by_key(|(object_id, _, distance)| (*distance, *object_id));
-            let Some((next_object_id, next_position, _)) = candidates.into_iter().next() else {
+        // Crystal's first FireBounce leg is owned by ObjectMagic. The server
+        // schedules its hit for 500 ms plus 50 ms per tile and sends no initial
+        // ObjectProjectile packet. Every later hop is selected only after the
+        // previous hit actually resolves.
+        let travel_ms = u64::try_from(zone_tile_distance(
+            &player_position,
+            &primary_monster.position,
+        ))
+        .unwrap_or_default()
+        .saturating_mul(50);
+        self.pending_native_hits.push(PendingNativeMonsterHit {
+            ready_at_ms: now_ms
+                .saturating_add(ZONE_FIRE_BOUNCE_INITIAL_DELAY_MS)
+                .saturating_add(travel_ms),
+            session_id: session_id.clone(),
+            attacker_object_id: player_object_id,
+            object_id: primary_object_id,
+            damage,
+            fire_bounce: Some(PendingNativeFireBounce {
+                remaining_bounces: level.saturating_add(2),
+                target_location: primary_monster.position,
+            }),
+        });
+    }
+
+    fn native_projectile_path_clear(&self, source: &Point, target: &Point) -> bool {
+        let mut location = source.clone();
+        while location != *target {
+            let Some(direction) = zone_direction_toward(&location, target) else {
                 break;
             };
-            chain.push(next_object_id);
-            previous_position = next_position;
-        }
-
-        let mut due_ms = now_ms;
-        let mut source_object_id = player_object_id;
-        let mut source_position = player_position;
-        for (index, target_object_id) in chain.into_iter().enumerate() {
-            let Some(target_position) = self
-                .native_monsters
-                .get(&target_object_id)
-                .map(|monster| monster.position.clone())
-            else {
-                continue;
-            };
-            if index == 0 {
-                source_object_id = target_object_id;
-                source_position = target_position;
-                continue;
+            location = offset_point(&location, direction, 1);
+            if self.collision.is_blocked(&location) {
+                return false;
             }
-
-            let distance_ms = u64::try_from(zone_tile_distance(&source_position, &target_position))
-                .unwrap_or_default()
-                .saturating_mul(50)
-                .max(1);
-            due_ms = due_ms.saturating_add(distance_ms);
-            self.pending_native_projectiles
-                .push(PendingNativeProjectile {
-                    ready_at_ms: due_ms,
-                    session_id: session_id.clone(),
-                    spell,
-                    source_id: source_object_id,
-                    destination_id: target_object_id,
-                });
-            // Each bounce target mitigates with its own magic armour, like the
-            // primary attack-magic hit.
-            let bounce_damage = match self.native_monsters.get(&target_object_id) {
-                Some(target_monster) => zone_magic_damage_after_monster_armour(
-                    target_monster,
-                    damage,
-                    player_object_id,
-                    due_ms,
-                ),
-                None => damage,
-            };
-            self.pending_native_hits.push(PendingNativeMonsterHit {
-                ready_at_ms: due_ms,
-                session_id: session_id.clone(),
-                attacker_object_id: player_object_id,
-                object_id: target_object_id,
-                damage: bounce_damage,
-            });
-            source_object_id = target_object_id;
-            source_position = target_position;
         }
+        true
     }
 
     fn apply_native_friendly_player_magic(
@@ -6424,6 +6401,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: hit_damage,
+                fire_bounce: None,
             });
         }
         Vec::new()
@@ -6525,6 +6503,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: damage.max(1),
+                fire_bounce: None,
             });
         }
         packets.push(ServerPacket::MagicCast {
@@ -7112,6 +7091,7 @@ impl ZoneRuntime {
                         attacker_object_id: caster.object_id,
                         object_id,
                         damage: hit_damage,
+                        fire_bounce: None,
                     },
                     now_ms,
                 ));
@@ -7405,6 +7385,7 @@ impl ZoneRuntime {
                     attacker_object_id: caster.object_id,
                     object_id,
                     damage: hit_damage,
+                    fire_bounce: None,
                 },
                 now_ms,
             ));
@@ -8086,6 +8067,7 @@ impl ZoneRuntime {
                                 attacker_object_id: action.caster_object_id,
                                 object_id,
                                 damage: hit_damage,
+                                fire_bounce: None,
                             },
                             now_ms,
                         ));
@@ -8179,6 +8161,10 @@ impl ZoneRuntime {
             }
             outbounds.extend(self.resolve_pending_native_monster_hit(hit, now_ms));
         }
+        // A resolved hit may schedule another authoritative hit (FireBounce is
+        // the first native chain that does so). Preserve those newly queued
+        // actions instead of replacing them with only the old not-ready set.
+        remaining_hits.append(&mut self.pending_native_hits);
         self.pending_native_hits = remaining_hits;
         outbounds
     }
@@ -8191,6 +8177,33 @@ impl ZoneRuntime {
         if !self.players.contains_key(&hit.session_id) {
             return Vec::new();
         }
+
+        if let Some(fire_bounce) = &hit.fire_bounce {
+            let Some(_target) = self.native_monsters.get(&hit.object_id).filter(|monster| {
+                !monster.dead
+                    && monster.hp > 0
+                    && monster.hostile_to_player
+                    && zone_tile_distance(&monster.position, &fire_bounce.target_location) <= 2
+            }) else {
+                return Vec::new();
+            };
+        }
+
+        let resolved_hit_damage = if hit.fire_bounce.is_some() {
+            self.native_monsters
+                .get(&hit.object_id)
+                .map(|monster| {
+                    zone_magic_damage_after_monster_armour(
+                        monster,
+                        hit.damage,
+                        hit.attacker_object_id,
+                        now_ms,
+                    )
+                })
+                .unwrap_or(hit.damage)
+        } else {
+            hit.damage
+        };
 
         let Some((
             damage,
@@ -8205,7 +8218,7 @@ impl ZoneRuntime {
             boss_audit,
         )) = self.apply_native_monster_damage(
             hit.object_id,
-            hit.damage,
+            resolved_hit_damage,
             Some(&hit.session_id),
             now_ms,
         )
@@ -8314,6 +8327,82 @@ impl ZoneRuntime {
                 },
             ));
         }
+        if let Some(fire_bounce) = hit.fire_bounce.clone() {
+            outbounds.extend(self.continue_native_fire_bounce(
+                &hit,
+                fire_bounce,
+                &position,
+                now_ms,
+            ));
+        }
+        outbounds
+    }
+
+    fn continue_native_fire_bounce(
+        &mut self,
+        hit: &PendingNativeMonsterHit,
+        fire_bounce: PendingNativeFireBounce,
+        source_position: &Point,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        if fire_bounce.remaining_bounces <= 1 {
+            return Vec::new();
+        }
+        let Some(caster_object_id) = self
+            .players
+            .get(&hit.session_id)
+            .map(|caster| caster.object_id)
+        else {
+            return Vec::new();
+        };
+
+        let mut candidates = self
+            .native_monsters
+            .iter()
+            .filter_map(|(object_id, monster)| {
+                (*object_id != hit.object_id
+                    && !monster.dead
+                    && monster.hp > 0
+                    && monster.hostile_to_player
+                    && zone_tile_distance(source_position, &monster.position) <= 3
+                    && self.native_projectile_path_clear(source_position, &monster.position))
+                .then_some((*object_id, monster.position.clone()))
+            })
+            .collect::<Vec<_>>();
+        if candidates.is_empty() {
+            return Vec::new();
+        }
+        candidates.sort_by_key(|(object_id, _)| *object_id);
+        let candidate_index = usize::try_from(zone_deterministic_roll(
+            now_ms,
+            usize::try_from(caster_object_id).unwrap_or_default(),
+            usize::try_from(hit.object_id).unwrap_or_default(),
+            u64::try_from(candidates.len()).unwrap_or_default(),
+        ))
+        .unwrap_or_default();
+        let (target_object_id, target_position) = candidates[candidate_index].clone();
+        let projectile = PendingNativeProjectile {
+            ready_at_ms: now_ms,
+            session_id: hit.session_id.clone(),
+            spell: Spell::FireBounce,
+            source_id: hit.object_id,
+            destination_id: target_object_id,
+        };
+        let outbounds = self.resolve_pending_native_projectile(projectile);
+        let travel_ms = u64::try_from(zone_tile_distance(source_position, &target_position))
+            .unwrap_or_default()
+            .saturating_mul(50);
+        self.pending_native_hits.push(PendingNativeMonsterHit {
+            ready_at_ms: now_ms.saturating_add(travel_ms),
+            session_id: hit.session_id.clone(),
+            attacker_object_id: hit.attacker_object_id,
+            object_id: target_object_id,
+            damage: hit.damage,
+            fire_bounce: Some(PendingNativeFireBounce {
+                remaining_bounces: fire_bounce.remaining_bounces.saturating_sub(1),
+                target_location: target_position,
+            }),
+        });
         outbounds
     }
 
@@ -8565,6 +8654,7 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: attacker_object_id,
                     damage,
+                    fire_bounce: None,
                 });
             }
         }
@@ -9164,6 +9254,7 @@ impl ZoneRuntime {
                     attacker_object_id: object_id,
                     object_id: target_object_id,
                     damage,
+                    fire_bounce: None,
                 },
                 now_ms,
             ));
@@ -9278,6 +9369,7 @@ impl ZoneRuntime {
                     attacker_object_id: object_id,
                     object_id: target_object_id,
                     damage,
+                    fire_bounce: None,
                 },
                 now_ms,
             ));
@@ -9849,6 +9941,7 @@ impl ZoneRuntime {
             attacker_object_id: object_id,
             object_id: target.object_id,
             damage,
+            fire_bounce: None,
         });
         let packet = ServerPacket::ObjectAttack {
             info: ObjectAttackInfo {
@@ -9914,6 +10007,7 @@ impl ZoneRuntime {
                 attacker_object_id: object_id,
                 object_id: target.object_id,
                 damage,
+                fire_bounce: None,
             });
         }
         let packet = ServerPacket::ObjectRangeAttack {
@@ -13141,7 +13235,6 @@ fn zone_magic_uses_projectile(spell: Spell) -> bool {
             | Spell::GreatFireBall
             | Spell::ThunderBolt
             | Spell::SoulFireBall
-            | Spell::FireBounce
             | Spell::CatTongue
     )
 }
