@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-04 Scarecrow Struck-audio bounded checkpoint (2026-08-28): revision
+> `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` closes the exact Crystal
+> `Monster/005` struck leaf: `005-2.wav` flinch first, then the optional
+> attacker-weapon clang from the complete audited `60..65.wav` mapping.
+> Native/Web order, lethal transition, dedupe, fail-closed unknown context and
+> actor/scene lifecycle are automated; Windows 406/406, Bevy 419/419, runtime
+> 191/191, Web/script gates and independent P0=0/P1=0/P2=0 review pass.
+> Scarecrow Attack1/Struck/Death now have bounded automated source/script
+> closure, not complete monster presentation. Other actions/families and the
+> semantic denominator remain open. Same-EXE/live-WSS, real DPI, native soak,
+> human audio/visual/feel, legal assets and signing remain final gates;
+> `globalParityPercent` stays null.
+
 > VIS-04 Scarecrow Attack1-audio bounded checkpoint (2026-08-28): revision
 > `e1dd6d6379d23efeafe57aa01c170452f1261b83` closes the exact Crystal
 > action/resolver leaf `Monster/005: BaseSound+1=51 -> 005-1.wav` in native

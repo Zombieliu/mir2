@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> VIS-04 Scarecrow Struck-audio server-client note (2026-08-28): revision
+> `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` adds no server packet or
+> authority. Crystal's client-owned `Monster/005` flinch-first plus optional
+> attacker-weapon clang now resolves exact `005-2.wav` then `60..65.wav` on
+> native and Web from existing typed events and authoritative actor context.
+> Windows 406/406, Bevy 419/419, runtime 191/191, Web/audio/export/typecheck
+> and Candidate script gates pass; review is P0=0/P1=0/P2=0. Other monster
+> actions/families, live WSS and the complete denominator remain open. No
+> server or global percentage is reported.
+
 > VIS-04 Scarecrow Attack1-audio server-client note (2026-08-28): revision
 > `e1dd6d6379d23efeafe57aa01c170452f1261b83` adds no server packet or
 > authority. Crystal's client-owned `Monster/005 BaseSound+1` projection now

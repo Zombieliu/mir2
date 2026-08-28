@@ -20,6 +20,7 @@ healingCheckpointRevision: 24d9b73a30fc18edf0649283d14495c6f4900aff
 inventoryLockedTabCheckpointRevision: 83f081149375fb402b9c7e6711fdb4e6bed68a0e
 scarecrowDeathAudioCheckpointRevision: cf4f5b5197c492324be23beb73611c0e0162c403
 scarecrowAttackAudioCheckpointRevision: e1dd6d6379d23efeafe57aa01c170452f1261b83
+scarecrowStruckAudioCheckpointRevision: 354bb9f9648758c9f38d5ce149a273ae07cd2a7e
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -32,6 +33,36 @@ The dirty Crystal files are server files (`Server/MirEnvir/Envir.cs` and
 but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
+
+## Scarecrow struck-audio bounded automated checkpoint
+
+Revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` closes one exact
+monster-audio action leaf. Crystal's `MonsterObject.Struck` calls
+`PlayFlinchSound` before `PlayStruckSound`: Scarecrow resolves the first cue
+as `BaseSound+2=52 -> 005-2.wav`, followed by the optional attacker-weapon
+clang from the complete audited `60.wav` through `65.wav` grouping.
+
+Native and Web preserve flinch-first order, including flinch-only behavior
+when attacker context or the weapon image is unknown. Assassin equipped-weapon
+handling follows Crystal's Short group. Native also covers lethal
+flinch/clang/death order, ActionFeed tail deduplication, persistent
+Remove/Hide actor termination, persistent map/logout scene termination and
+connection-generation reset. A stale struck after a boundary in the same
+batch remains fail-closed; actor reappearance or a proven scene change can
+reopen the matching gate.
+
+Focused native 3/3, Windows 406/406, Bevy native-ui 419/419, runtime 191/191,
+Web 49 groups plus audio/export/typecheck and Candidate package/verifier
+self-tests pass. Independent review is P0=0/P1=0/P2=0. Candidate scripts
+require, copy and hash-bind `005-2.wav` and `60.wav` through `65.wav`, but no
+exact-head package or EXE was built. Other Scarecrow/monster actions, other
+monster families and the complete semantic denominator remain open, as do
+same-EXE/live-WSS, device audio/GPU, real DPI, native soak, human acceptance,
+legal asset review and signing. Global and visual acceptance remain
+unreported.
+
+The detailed evidence report is
+`docs/generated/player-qa/windows-visual-parity/VIS-04-SCARECROW-STRUCK-AUDIO-REPORT.md`.
 
 ## Scarecrow Attack1-audio bounded automated checkpoint
 

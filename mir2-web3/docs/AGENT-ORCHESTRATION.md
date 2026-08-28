@@ -1,5 +1,18 @@
 # Agent Orchestration
 
+> Latest Windows visual-parity sync (2026-08-28): VIS-04 Scarecrow Struck
+> audio revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` binds Crystal's
+> exact `005-2.wav` flinch-first plus optional attacker-weapon `60..65.wav`
+> clang order across native, Web and Candidate package/verify. Full audited
+> weapon-image groups, Assassin override, unknown-attacker fail-closed,
+> lethal ordering, feed dedupe and actor/scene lifecycle gates are covered.
+> Windows 406/406, Bevy 419/419, runtime 191/191, Web 49 groups plus
+> audio/export/typecheck, Candidate self-tests and independent P0=0/P1=0/
+> P2=0 review pass. This closes one automated audio leaf only. Other monster
+> actions/families and the semantic denominator remain open, as do exact-head
+> package, same-EXE/live-WSS, real DPI, native soak, human audio/visual/feel,
+> legal assets and signing. No global percentage is claimed.
+
 > Latest Windows visual-parity sync (2026-08-28): VIS-04 Scarecrow Attack1
 > audio revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` binds exact
 > Crystal `Monster/005 BaseSound+1=51 -> 005-1.wav` across native actor

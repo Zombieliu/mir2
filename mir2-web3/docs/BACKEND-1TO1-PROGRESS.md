@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> VIS-04 Scarecrow Struck-audio client-boundary checkpoint (2026-08-28):
+> revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` changes no simulation,
+> shared-Zone, Gateway, protocol, persistence, combat or monster authority.
+> Existing typed struck/death projections and actor context drive the exact
+> local `005-2.wav` flinch-first plus optional `60..65.wav` weapon clang.
+> Full weapon grouping, fail-closed unknown attackers, lethal ordering,
+> dedupe and lifecycle gates are covered. Windows 406/406, Bevy 419/419,
+> runtime 191/191 and Web/script gates pass; review is P0=0/P1=0/P2=0.
+> Other monster actions/families and the full denominator remain open, as do
+> all exact-head device gates. No backend or global percentage is claimed.
+
 > VIS-04 Scarecrow Attack1-audio client-boundary checkpoint (2026-08-28):
 > revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` changes no simulation,
 > shared-Zone, Gateway, protocol, persistence, attack or monster authority.

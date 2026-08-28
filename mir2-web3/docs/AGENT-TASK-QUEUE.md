@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> VIS-04 Scarecrow Struck-audio bounded automated checkpoint (2026-08-28):
+> revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` binds Crystal's
+> `MonsterObject.Struck` order to exact `005-2.wav` flinch followed by the
+> optional attacker-weapon clang `60..65.wav`. Native and Web cover the full
+> audited weapon-image grouping, Assassin override, unknown-attacker
+> fail-closed, lethal flinch/clang/death order, feed dedupe and actor/scene
+> stale-event gates. Focused 3/3, Windows 406/406, Bevy 419/419, runtime
+> 191/191, Web 49 groups, audio/export/typecheck and both Candidate self-tests
+> pass; final review is P0=0/P1=0/P2=0. Scarecrow Attack1/Struck/Death now
+> have bounded automated source/script closure, but movement/swing/revive,
+> other monsters and the complete denominator remain open. No EXE, package,
+> live WSS, screenshot, physical-audio or human evidence was produced; no
+> global percentage is claimed.
+
 > VIS-04 Scarecrow Attack1-audio bounded automated checkpoint (2026-08-28):
 > revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` binds Crystal
 > `Scarecrow=5`, `BaseSound=50`, immediate `Attack1 PlayAttackSound=51` and
