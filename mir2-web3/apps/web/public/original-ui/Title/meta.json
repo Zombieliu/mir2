@@ -134,6 +134,20 @@
       "maskPath": null
     },
     {
+      "index": 57,
+      "width": 45,
+      "height": 14,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Title/57.png",
+      "maskPath": null
+    },
+    {
       "index": 90,
       "width": 40,
       "height": 25,

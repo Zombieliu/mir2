@@ -83,6 +83,7 @@ const BUTTON_DISABLED: Color = Color::srgba(0.30, 0.24, 0.16, 0.45);
 const MAX_QUEUED: usize = 24;
 const BAG_SLOTS: u32 = 46;
 const GUILD_NOTICE_MAX_CHARS_PER_LINE: usize = 32;
+pub const HELP_PAGE_COUNT: u8 = 45;
 
 /// Pages exposed by Crystal's CharacterDialog.  The page is local UI state;
 /// values shown on each page still come from the authoritative read models.
@@ -104,6 +105,42 @@ pub enum GuildLeftPage {
     Ranks,
 }
 
+/// Renderer-owned Crystal HelpDialog state. It is intentionally independent
+/// from `UiPanel`: the source client allows Help to coexist with other
+/// windows, and hiding/reopening the dialog preserves the current page.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct HelpDialogUi {
+    pub open: bool,
+    pub page: u8,
+}
+
+impl HelpDialogUi {
+    pub fn toggle(&mut self) {
+        self.open = !self.open;
+    }
+
+    pub fn hide(&mut self) {
+        self.open = false;
+    }
+
+    pub fn previous_page(&mut self) {
+        self.page = if self.page == 0 {
+            HELP_PAGE_COUNT - 1
+        } else {
+            self.page - 1
+        };
+    }
+
+    pub fn next_page(&mut self) {
+        self.page = (self.page + 1) % HELP_PAGE_COUNT;
+    }
+
+    pub fn display_page(&mut self, page: usize) {
+        self.page = page.min(usize::from(HELP_PAGE_COUNT - 1)) as u8;
+        self.open = true;
+    }
+}
+
 pub const BIGMAP_ZOOM_MIN: f32 = 0.5;
 pub const BIGMAP_ZOOM_MAX: f32 = 3.0;
 pub const BIGMAP_ZOOM_STEP: f32 = 0.25;
@@ -114,6 +151,7 @@ pub const CRYSTAL_OPTIONS_PANEL_RECT: CrystalRect = CrystalRect::new(382.0, 207.
 pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0, 760.0, 500.0);
 pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
 pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
+pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 536.0, 509.0);
 
 // Re-export shop/storage constants for external consumers that import via overlays.
 pub use crate::shop::{SHOP_QUANTITY_MAX, SHOP_QUANTITY_MIN, SHOP_QUANTITY_STEP};
@@ -313,6 +351,7 @@ pub struct NativePlayerUiState {
     pub guild_notice_editing: bool,
     pub guild_notice_draft: String,
     pub guild_notice_submission: Option<Vec<String>>,
+    pub help: HelpDialogUi,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -410,6 +449,7 @@ impl Default for NativePlayerUiState {
             guild_notice_editing: false,
             guild_notice_draft: String::new(),
             guild_notice_submission: None,
+            help: HelpDialogUi::default(),
         }
     }
 }
@@ -492,6 +532,10 @@ impl NativePlayerUiState {
         self.core.chat_focused()
     }
 
+    pub fn help_open(&self) -> bool {
+        self.help.open
+    }
+
     pub fn toggle_inventory(&mut self) {
         self.apply(mir2_ui_core::action::UiAction::OpenInventory);
     }
@@ -561,7 +605,7 @@ impl NativePlayerUiState {
         self.core.blocks_gameplay_keys()
     }
     pub fn blocks_world_click(&self) -> bool {
-        self.core.blocks_world_click() || self.inspect.is_some()
+        self.core.blocks_world_click() || self.inspect.is_some() || self.help.open
     }
     pub fn blocks_world_action(&self, dialog_open: bool, dead: bool) -> bool {
         self.blocks_world_click() || dialog_open || dead
@@ -612,6 +656,10 @@ impl NativePlayerUiState {
         self.guild_rank_name_draft.clear();
         self.guild_rank_name_focused = false;
         self.guild_left_page = GuildLeftPage::Notice;
+    }
+    pub fn close_all_windows(&mut self) {
+        self.close_windows();
+        self.help.hide();
     }
     pub fn reset_session(&mut self) {
         let options = self.core.options.clone();
@@ -839,7 +887,7 @@ pub fn modal_priority_for_state(
     if state.chat_focused() {
         return Some(OverlayModalPriority::Chat);
     }
-    if dialog_open || state.quest_open() {
+    if dialog_open || state.quest_open() || state.help_open() {
         return Some(OverlayModalPriority::NpcDialog);
     }
     if state.inventory_open()
@@ -1449,6 +1497,14 @@ struct OverlayEquipment;
 struct OverlayMenu;
 
 #[derive(Component)]
+struct OverlayHelp;
+
+#[derive(Debug, Clone, Copy, Component, PartialEq, Eq)]
+struct HelpPageImageEntity {
+    image_index: u8,
+}
+
+#[derive(Component)]
 struct OverlaySkill;
 
 #[derive(Component)]
@@ -1520,6 +1576,10 @@ struct OverlaySocial;
 enum OverlayButton {
     ExitApplication,
     CloseWindows,
+    ToggleHelp,
+    CloseHelp,
+    HelpPrevious,
+    HelpNext,
     CloseCharacter,
     CloseInspect,
     CloseMail,
@@ -2045,6 +2105,21 @@ fn spawn_overlay_root(mut commands: Commands) {
                     ..default()
                 },
                 GlobalZIndex(OVERLAY_MENU_Z),
+                BackgroundColor(Color::NONE),
+            ));
+            root.spawn((
+                OverlayHelp,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(CRYSTAL_HELP_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_HELP_PANEL_RECT.top),
+                    width: Val::Px(CRYSTAL_HELP_PANEL_RECT.width),
+                    height: Val::Px(CRYSTAL_HELP_PANEL_RECT.height),
+                    display: Display::None,
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_NPC_DIALOG_Z),
                 BackgroundColor(Color::NONE),
             ));
             root.spawn((
@@ -2749,6 +2824,18 @@ pub(crate) fn process_overlay_keyboard(
         state.set_chat_focused(true);
         return;
     }
+    // Crystal's default Help binding is H with Ctrl and Shift explicitly
+    // unpressed; Alt is a don't-care modifier. Ctrl+H remains available to
+    // the attack-mode binding and Shift+H must not toggle Help.
+    let help_shortcut = keys.just_pressed(KeyCode::KeyH)
+        && !keys.pressed(KeyCode::ControlLeft)
+        && !keys.pressed(KeyCode::ControlRight)
+        && !keys.pressed(KeyCode::ShiftLeft)
+        && !keys.pressed(KeyCode::ShiftRight);
+    if help_shortcut {
+        state.help.toggle();
+        return;
+    }
     // Quest/NPC surfaces own Escape. This system is ordered before the quest
     // input system so returning here preserves the pre-key modal state for the
     // dedicated handler and prevents the same key from opening Menu after it
@@ -2791,15 +2878,17 @@ pub(crate) fn process_overlay_keyboard(
         }
     }
     if keys.just_pressed(KeyCode::KeyP) {
-        state.toggle_storage();
-        if state.storage_open() && storage.size == 0 {
-            storage.size = STORAGE_BASE_SIZE;
-        }
+        // Crystal's default binding is P = Group. Help page one exposes this
+        // binding, so the production route must not silently open Storage.
+        state.toggle_group();
     }
     if keys.just_pressed(KeyCode::Escape) {
-        if state.core.panel != mir2_ui_core::state::UiPanel::None || state.inspect.is_some() {
+        if state.core.panel != mir2_ui_core::state::UiPanel::None
+            || state.inspect.is_some()
+            || state.help_open()
+        {
             // If shop/storage open, Escape acts as Cancel
-            state.close_windows();
+            state.close_all_windows();
             state.shop_quantity = 1;
             if let Some(skill_binding) = skill_binding.as_deref_mut() {
                 skill_binding.clear_selection();
@@ -2826,7 +2915,7 @@ pub(crate) fn process_overlay_keyboard(
     if keys.just_pressed(KeyCode::KeyL) && state.menu_open() {
         let _ = shell.apply_ui_intent(NativeUiIntent::Logout);
         shell_intents.push(NativeUiIntent::Logout);
-        state.close_windows();
+        state.close_all_windows();
     }
     // Cash GameShop quantity hotkeys use the cash model; NPC quantity stays
     // in the NPC-only state field.
@@ -2958,6 +3047,21 @@ fn process_overlay_buttons(
                     skill_binding.clear_selection();
                     skill_binding.set_assign_key(false);
                 }
+            }
+            OverlayButton::ToggleHelp => {
+                state.help.toggle();
+            }
+            OverlayButton::CloseHelp => {
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                state.help.hide();
+            }
+            OverlayButton::HelpPrevious => {
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                state.help.previous_page();
+            }
+            OverlayButton::HelpNext => {
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                state.help.next_page();
             }
             OverlayButton::CloseInspect => {
                 state.inspect = None;
@@ -3542,7 +3646,7 @@ fn process_overlay_buttons(
             OverlayButton::Logout => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::Logout);
                 shell_intents.push(NativeUiIntent::Logout);
-                state.close_windows();
+                state.close_all_windows();
             }
             OverlayButton::UseInspected => {
                 if let Some(intent) = inspected_use_intent(&state, &inventory) {
@@ -4511,6 +4615,7 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayStorage>>,
             Query<(Entity, &mut Node), With<OverlayOptions>>,
             Query<(Entity, &mut Node), With<OverlaySocial>>,
+            Query<(Entity, &mut Node), With<OverlayHelp>>,
         )>,
     )>,
     mut commands: Commands,
@@ -4688,6 +4793,12 @@ fn render_overlays(
                     combat_target.as_deref(),
                 )
             },
+        );
+        fill_panel(
+            &mut commands,
+            &mut secondary.p7(),
+            state.help_open(),
+            |parent| render_help(parent, asset_server.as_deref(), state.help.page),
         );
     }
 }
@@ -5578,6 +5689,245 @@ fn spawn_overlay_crystal_button_enabled_with_disabled(
     spawn_crystal_image_button(parent, asset_server, spec, assets, action, false, enabled);
 }
 
+const HELP_PAGE_TITLES: [&str; HELP_PAGE_COUNT as usize] = [
+    "Shortcut Information",
+    "Shortcut Information",
+    "Chat Shortcuts",
+    "Movements",
+    "Attacking",
+    "Collecting Items",
+    "Health",
+    "Skills",
+    "Skills",
+    "Mana",
+    "Chatting",
+    "Groups",
+    "Durability",
+    "Purchasing",
+    "Selling",
+    "Repairing",
+    "Trading",
+    "Inspecting",
+    "Statistics",
+    "Statistics",
+    "Statistics",
+    "Statistics",
+    "Statistics",
+    "Statistics",
+    "Quests",
+    "Quests",
+    "Quests",
+    "Quests",
+    "Mounts",
+    "Mounts",
+    "Fishing",
+    "Gems and Orbs",
+    "Heroes",
+    "Heroes",
+    "Heroes",
+    "Heroes",
+    "Heroes",
+    "Guild Buffs",
+    "Guild Buffs",
+    "Guild Buffs",
+    "Awakening",
+    "Awakening",
+    "Awakening",
+    "Awakening",
+    "Awakening",
+];
+
+const HELP_SHORTCUT_PAGE_1: [(&str, &str); 18] = [
+    ("Alt + Q", "Exit the game"),
+    ("Alt + X", "Log out"),
+    ("F1-F8", "Skill buttons"),
+    ("F9", "Inventory window (open / close)"),
+    ("F10", "Status window (open / close)"),
+    ("F11", "Skill window (open / close)"),
+    ("P", "Group window (open / close)"),
+    ("T", "Trade window (open / close)"),
+    ("F", "Friend window (open / close)"),
+    ("V", "Minimap window (open / close)"),
+    ("Ctrl + G", "Guild window (open / close)"),
+    ("Y", "Gameshop window (open / close)"),
+    ("L", "Engagement window (open / close)"),
+    ("Ctrl + Z", "Belt window (open / close)"),
+    ("F12", "Option window (open / close)"),
+    ("H", "Help window (open / close)"),
+    ("M", "Mount / Dismount ride"),
+    ("", "Lock spell onto target not cursor location"),
+];
+
+const HELP_SHORTCUT_PAGE_2: [(&str, &str); 18] = [
+    ("Ctrl + A", "Toggle pet attack pet"),
+    ("Ctrl + H", "Toggle player attack mode"),
+    ("", "Peace Mode - Attack monsters only"),
+    (
+        "",
+        "Group Mode - Attack all subjects except your group members",
+    ),
+    (
+        "",
+        "Guild Mode - Attack all subjects except your guild members",
+    ),
+    ("", "Good/Evil Mode - Attack PK players and monsters only"),
+    ("", "All Attack Mode - Attack all subjects"),
+    ("B", "Show the field map"),
+    ("R", "Show the skill bar"),
+    ("D", "Auto run on / off"),
+    ("Insert", "Show / Hide interface"),
+    ("Tab", "Highlight / Pickup Items"),
+    ("Ctrl + Right Click", "Show other players kits"),
+    ("PrintScreen", "Screen Capture"),
+    ("N", "Open / Close fishing window"),
+    ("", "Mentor window (open / close)"),
+    ("X", "Creature Pickup (Multi Mouse Target)"),
+    ("Alt + A", "Creature Pickup (Single Mouse Target)"),
+];
+
+const HELP_SHORTCUT_PAGE_3: [(&str, &str); 3] = [
+    ("/(username)", "Command to whisper to others"),
+    ("!(text)", "Command to shout to others nearby"),
+    ("!~(text)", "Command to guild chat"),
+];
+
+fn help_shortcut_rows(page: u8) -> Option<&'static [(&'static str, &'static str)]> {
+    match page {
+        0 => Some(&HELP_SHORTCUT_PAGE_1),
+        1 => Some(&HELP_SHORTCUT_PAGE_2),
+        2 => Some(&HELP_SHORTCUT_PAGE_3),
+        _ => None,
+    }
+}
+
+fn help_image_dimensions(index: u8) -> (f32, f32) {
+    match index {
+        0..=28 => (512.0, 396.0),
+        29 => (509.0, 396.0),
+        30 => (508.0, 395.0),
+        31..=33 => (509.0, 396.0),
+        34..=41 => (508.0, 395.0),
+        _ => (0.0, 0.0),
+    }
+}
+
+fn render_help(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>, page: u8) {
+    let page = page.min(HELP_PAGE_COUNT - 1);
+    let Some(asset_server) = asset_server else {
+        return;
+    };
+
+    spawn_overlay_frame(
+        parent,
+        asset_server,
+        "original-ui/Prguse/920.png",
+        CRYSTAL_HELP_PANEL_RECT.width,
+        CRYSTAL_HELP_PANEL_RECT.height,
+    );
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Title/57.png".to_owned(),
+        CrystalRect::new(18.0, 9.0, 45.0, 14.0),
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        240,
+        241,
+        242,
+        CrystalRect::new(210.0, 485.0, 16.0, 16.0),
+        OverlayButton::HelpPrevious,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        243,
+        244,
+        245,
+        CrystalRect::new(310.0, 485.0, 16.0, 16.0),
+        OverlayButton::HelpNext,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        CrystalRect::new(509.0, 3.0, 24.0, 21.0),
+        OverlayButton::CloseHelp,
+    );
+    overlay_text_at(
+        parent,
+        &format!("{} / {}", page + 1, HELP_PAGE_COUNT),
+        CrystalRect::new(230.0, 480.0, 80.0, 20.0),
+        9.0,
+        TEXT,
+    );
+    overlay_text_at(
+        parent,
+        &format!("{}. {}", page + 1, HELP_PAGE_TITLES[usize::from(page)]),
+        CrystalRect::new(147.0, 39.0, 242.0, 30.0),
+        10.0,
+        TEXT,
+    );
+
+    if let Some(rows) = help_shortcut_rows(page) {
+        overlay_text_at(
+            parent,
+            "Shortcuts",
+            CrystalRect::new(25.0, 110.0, 100.0, 30.0),
+            10.0,
+            TEXT,
+        );
+        overlay_text_at(
+            parent,
+            "Information",
+            CrystalRect::new(126.0, 110.0, 405.0, 30.0),
+            10.0,
+            TEXT,
+        );
+        for (row, (shortcut, information)) in rows.iter().enumerate() {
+            let top = 142.0 + row as f32 * 20.0;
+            overlay_text_at(
+                parent,
+                shortcut,
+                CrystalRect::new(30.0, top, 95.0, 23.0),
+                9.0,
+                GOLD,
+            );
+            overlay_text_at(
+                parent,
+                information,
+                CrystalRect::new(131.0, top, 400.0, 23.0),
+                9.0,
+                TEXT,
+            );
+        }
+    } else {
+        let image_index = page - 3;
+        let (width, height) = help_image_dimensions(image_index);
+        parent.spawn((
+            HelpPageImageEntity { image_index },
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(12.0),
+                top: Val::Px(75.0),
+                width: Val::Px(width),
+                height: Val::Px(height),
+                ..default()
+            },
+            ImageNode {
+                image: asset_server.load(format!("original-ui/Help/{image_index}.png")),
+                ..default()
+            },
+        ));
+    }
+}
+
 fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>) {
     let Some(asset_server) = asset_server else {
         return;
@@ -5614,8 +5964,18 @@ fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
         OverlayButton::Logout,
     );
 
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        1970,
+        1971,
+        1972,
+        CrystalRect::new(3.0, 50.0, 32.0, 20.0),
+        OverlayButton::ToggleHelp,
+    );
+
     for (library, normal, hover, pressed, top) in [
-        ("Prguse", 1970, 1971, 1972, 50.0),
         ("Prguse", 1973, 1974, 1975, 69.0),
         ("Prguse", 2000, 2001, 2002, 88.0),
         ("Prguse2", 431, 432, 433, 126.0),
@@ -7084,8 +7444,8 @@ fn render_mail(
             CrystalRect::new(288.0, 3.0, 24.0, 21.0),
             OverlayButton::CloseMail,
         );
-        // Help has no native/backend page yet. Rendering it disabled avoids a
-        // source-looking control with an empty click handler.
+        // This is MailDialog's context-help control, not MenuDialog's global
+        // HelpDialog button. Its source handler remains unimplemented here.
         spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
@@ -12218,5 +12578,285 @@ mod tests {
                 amount: 500,
             }
         ));
+    }
+
+    fn help_keyboard_test_app() -> App {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<MapModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<KeyboardInput>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, process_overlay_keyboard);
+        app
+    }
+
+    fn help_button_test_app() -> App {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<GameShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+        init_overlay_button_test_resources(&mut app);
+        app.add_systems(Update, process_overlay_buttons);
+        app
+    }
+
+    fn press_help_button(app: &mut App, action: OverlayButton) {
+        let button = app
+            .world_mut()
+            .spawn((Button, Interaction::Pressed, action))
+            .id();
+        app.update();
+        app.world_mut().despawn(button);
+    }
+
+    #[test]
+    fn help_catalog_matches_the_crystal_45_page_contract() {
+        assert_eq!(HELP_PAGE_TITLES.len(), 45);
+        assert_eq!(HELP_PAGE_TITLES[0], "Shortcut Information");
+        assert_eq!(HELP_PAGE_TITLES[2], "Chat Shortcuts");
+        assert_eq!(HELP_PAGE_TITLES[44], "Awakening");
+        assert_eq!(help_shortcut_rows(0).unwrap().len(), 18);
+        assert_eq!(help_shortcut_rows(1).unwrap().len(), 18);
+        assert_eq!(help_shortcut_rows(2).unwrap().len(), 3);
+        assert!(help_shortcut_rows(3).is_none());
+        assert_eq!(help_image_dimensions(0), (512.0, 396.0));
+        assert_eq!(help_image_dimensions(29), (509.0, 396.0));
+        assert_eq!(help_image_dimensions(30), (508.0, 395.0));
+        assert_eq!(help_image_dimensions(33), (509.0, 396.0));
+        assert_eq!(help_image_dimensions(41), (508.0, 395.0));
+    }
+
+    #[test]
+    fn help_navigation_wraps_clamps_and_hide_preserves_page() {
+        let mut help = HelpDialogUi::default();
+        help.previous_page();
+        assert_eq!(help.page, 44);
+        help.next_page();
+        assert_eq!(help.page, 0);
+        help.display_page(999);
+        assert!(help.open);
+        assert_eq!(help.page, 44);
+        help.hide();
+        assert!(!help.open);
+        assert_eq!(help.page, 44);
+        help.toggle();
+        assert!(help.open);
+        assert_eq!(help.page, 44);
+    }
+
+    #[test]
+    fn help_shortcut_requires_ctrl_and_shift_unpressed_but_ignores_alt() {
+        fn opens(modifiers: &[KeyCode], chat_focused: bool) -> bool {
+            let mut app = help_keyboard_test_app();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .chat_focused = chat_focused;
+            {
+                let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+                for modifier in modifiers {
+                    keys.press(*modifier);
+                }
+                keys.press(KeyCode::KeyH);
+            }
+            app.update();
+            app.world().resource::<NativePlayerUiState>().help_open()
+        }
+
+        assert!(opens(&[], false));
+        assert!(opens(&[KeyCode::AltLeft], false));
+        assert!(!opens(&[KeyCode::ControlLeft], false));
+        assert!(!opens(&[KeyCode::ShiftLeft], false));
+        assert!(!opens(&[], true), "chat input owns typed H");
+    }
+
+    #[test]
+    fn crystal_p_shortcut_opens_group_even_while_help_is_visible() {
+        let mut app = help_keyboard_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .help
+            .display_page(0);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyP);
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.help_open(), "Crystal Help coexists with core panels");
+        assert!(state.group_open(), "Help page one declares P = Group");
+        assert!(!state.storage_open(), "P must not route to Storage");
+    }
+
+    #[test]
+    fn help_escape_closes_all_without_opening_menu_and_preserves_page() {
+        let mut app = help_keyboard_test_app();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.toggle_inventory();
+            state.help.display_page(17);
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.inventory_open());
+        assert!(!state.help_open());
+        assert!(!state.menu_open());
+        assert_eq!(state.help.page, 17);
+    }
+
+    #[test]
+    fn panel_close_keeps_coexisting_help_while_session_reset_clears_it() {
+        let mut state = NativePlayerUiState::default();
+        state.toggle_inventory();
+        state.help.display_page(9);
+        state.close_windows();
+        assert!(!state.inventory_open());
+        assert!(state.help_open());
+        assert_eq!(state.help.page, 9);
+        state.reset_session();
+        assert!(!state.help_open());
+        assert_eq!(state.help.page, 0);
+    }
+
+    #[test]
+    fn help_blocks_world_click_and_has_dialog_priority_without_chat_key_capture() {
+        let mut state = NativePlayerUiState::default();
+        state.help.open = true;
+        assert!(state.blocks_world_click());
+        assert!(!state.blocks_gameplay_keys());
+        assert_eq!(
+            modal_priority_for_state(&state, false, false),
+            Some(OverlayModalPriority::NpcDialog)
+        );
+        state.toggle_menu();
+        assert_eq!(
+            modal_priority_for_state(&state, false, false),
+            Some(OverlayModalPriority::SystemMenu)
+        );
+    }
+
+    #[test]
+    fn help_internal_buttons_emit_one_button_a_while_menu_toggle_is_silent() {
+        let mut app = help_button_test_app();
+
+        press_help_button(&mut app, OverlayButton::ToggleHelp);
+        assert!(app.world().resource::<NativePlayerUiState>().help_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
+
+        press_help_button(&mut app, OverlayButton::HelpPrevious);
+        assert_eq!(app.world().resource::<NativePlayerUiState>().help.page, 44);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonA]
+        );
+
+        press_help_button(&mut app, OverlayButton::HelpNext);
+        assert_eq!(app.world().resource::<NativePlayerUiState>().help.page, 0);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonA]
+        );
+
+        press_help_button(&mut app, OverlayButton::CloseHelp);
+        assert!(!app.world().resource::<NativePlayerUiState>().help_open());
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonA]
+        );
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+        assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+    }
+
+    #[test]
+    fn help_renderer_maps_dynamic_and_image_pages_without_fabrication() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .help
+            .display_page(0);
+        app.update();
+        {
+            let world = app.world_mut();
+            assert_eq!(world.query::<&HelpPageImageEntity>().iter(world).count(), 0);
+            assert!(world
+                .query::<&Text>()
+                .iter(world)
+                .any(|text| text.0 == "1 / 45"));
+        }
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .help
+            .display_page(3);
+        app.update();
+        {
+            let world = app.world_mut();
+            let indices = world
+                .query::<&HelpPageImageEntity>()
+                .iter(world)
+                .map(|image| image.image_index)
+                .collect::<Vec<_>>();
+            assert_eq!(indices, vec![0]);
+        }
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .help
+            .display_page(44);
+        app.update();
+        let world = app.world_mut();
+        let indices = world
+            .query::<&HelpPageImageEntity>()
+            .iter(world)
+            .map(|image| image.image_index)
+            .collect::<Vec<_>>();
+        assert_eq!(indices, vec![41]);
+        assert!(world
+            .query::<&Text>()
+            .iter(world)
+            .any(|text| text.0 == "45 / 45"));
     }
 }

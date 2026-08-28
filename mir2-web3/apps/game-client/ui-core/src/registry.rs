@@ -349,6 +349,7 @@ const OVERLAY_ACTIONS: &[&str] = &[
     "BigMapSearchSubmit",
     "BigMapTeleport",
     "BigMapSelectNpc",
+    "ToggleHelp",
     "ToggleGroup",
     "ToggleGuild",
     "OpenGroup",
@@ -718,6 +719,7 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("MENU.LOGOUT", "InGame", "System Menu", "LogoutButton", "Logout", "button", None, "single", 1, "Menu open", "Logout", "Authoritative logout request", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("MENU.GROUP", "InGame", "System Menu", "GroupButton", "Group", "button", None, "single", 1, "Menu open", "ToggleGroup", "Opens the native group panel", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("MENU.GUILD", "InGame", "System Menu", "GuildButton", "Guild", "button", None, "single", 1, "Menu open", "ToggleGuild", "Opens the native guild panel", "CloseWindows", "implemented", OVERLAY, None, false),
+        c!("MENU.HELP", "InGame", "System Menu", "HelpButton", "Help", "button", rect(3.0,50.0,32.0,20.0), "single", 1, "Menu open", "ToggleHelp", "Toggles the renderer-owned Crystal 45-page HelpDialog without a gateway intent", "CloseHelp", "implemented_default_english", OVERLAY, None, false),
         c!("GROUP.PANEL", "InGame", "Group", "Panel", "Group", "panel", rect(396.0,259.0,232.0,249.0), "single", 1, "OpenGroup", "OpenGroup", "Crystal Prguse/120 group panel", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
         c!("GROUP.MEMBERS", "InGame", "Group", "MemberRows", "Group member", "dynamic_button_family", None, "up to fifteen members", 15, "authoritative member exists", "SelectGroupMember", "Selects the exact authoritative group member", "CloseSocial", "implemented_runtime_adapter", OVERLAY, None, false),
         c!("GROUP.SWITCH", "InGame", "Group", "SwitchButton", "Allow group", "button", rect(421.0,478.0,28.0,25.0), "single", 1, "Group open", "GroupSwitch", "Requests the inverse authoritative allow-group state", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
@@ -750,7 +752,7 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("GUILD.STORAGE.PAGE.PREV", "InGame", "Guild", "StoragePreviousPage", "Prev", "button", None, "single", 1, "Storage tab open after first page", "GuildStoragePreviousPage", "Moves to the previous bounded storage page", "CloseSocial", "implemented", OVERLAY, None, false),
         c!("GUILD.STORAGE.PAGE.NEXT", "InGame", "Guild", "StorageNextPage", "Next", "button", None, "single", 1, "Storage tab open before last page", "GuildStorageNextPage", "Moves to the next bounded storage page", "CloseSocial", "implemented", OVERLAY, None, false),
         c!("GUILD.CLOSE", "InGame", "Guild", "CloseButton", "Close", "button", rect(782.0,172.0,24.0,21.0), "single", 1, "Guild open", "CloseSocial", "Guild closes", "CloseSocial", "implemented", OVERLAY, None, false),
-        c!("MENU.DISABLED_SOURCE", "InGame", "System Menu", "DisabledSourceButtons", "Help/Keyboard/Ranking/Creature/Ride/Fishing/Friend/Mentor/Relationship", "disabled_button_family", None, "nine visible source controls", 9, "always disabled", "DisabledSourceControl", "Rendered from Crystal sprites but deliberately non-interactive because no native/backend surface exists", "CloseWindows", "disabled_source_control", OVERLAY, None, true),
+        c!("MENU.DISABLED_SOURCE", "InGame", "System Menu", "DisabledSourceButtons", "Keyboard/Ranking/Creature/Ride/Fishing/Friend/Mentor/Relationship", "disabled_button_family", None, "eight visible source controls", 8, "always disabled", "DisabledSourceControl", "Rendered from Crystal sprites but deliberately non-interactive because no native/backend surface exists", "CloseWindows", "disabled_source_control", OVERLAY, None, true),
         c!("MAIL.PANEL", "InGame", "Mail", "Panel", "Mail", "panel", rect(212.0,80.0,600.0,520.0), "single", 1, "OpenMail", "OpenMail", "Mail list/detail", "CloseMail", "implemented", OVERLAY, None, false),
         c!("MAIL.ACTIONS", "InGame", "Mail", "MailRows", "Read/Claim/Delete", "dynamic_button_family", None, "per message id", 0, "mail exists", "SelectMail", "Mail detail/claim/delete intents", "CloseMail", "implemented", OVERLAY, None, false),
         c!("MAIL.PAGING", "InGame", "Mail", "PageButtons", "Previous/Next", "button_pair", None, "single pair", 2, "another authoritative page exists", "MailPageNext", "Changes the bounded ten-row local page cursor", "CloseMail", "implemented", OVERLAY, None, false),
@@ -1387,7 +1389,7 @@ mod tests {
         let controls = all_controls();
         assert_eq!(
             controls.len(),
-            173,
+            174,
             "the Candidate control inventory changed; update its typed-action contract deliberately"
         );
         validate_registry(&controls).unwrap_or_else(|errors| panic!("{errors:?}"));
@@ -1412,6 +1414,7 @@ mod tests {
             "OPTIONS.PANEL",
             "OPTIONS.SOUND_VOLUME",
             "OPTIONS.MUSIC_VOLUME",
+            "MENU.HELP",
             "MENU.DISABLED_SOURCE",
             "MAIL.COMPOSE",
             "BIGMAP.SEARCH",
