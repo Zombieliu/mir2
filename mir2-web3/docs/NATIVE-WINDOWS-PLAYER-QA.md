@@ -1,5 +1,26 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-29 VIS-01 direct-frame/run/chat follow-up: the exact `02bb678747...`
+> Candidate failed the user's visual retest because whole-actor flicker still
+> occurred. Revision `a3121ce487c93ff37f2ca94d7d60d8e12bf9e5ea`
+> therefore changes ordinary animation to update `Sprite.rect` directly on a
+> retained full-page image, while retaining all observed atlas pages across
+> page switches. It also fixes the missing `.png` suffix that made the chat
+> frame appear transparent and maps right-click on empty world space to a
+> Zone-authoritative Run intent. Shift plus a newly pressed direction remains
+> the keyboard Run path. Dedicated regressions plus shared runtime 197/197,
+> native-UI 430/430 and Windows 448/448 pass. Clean Candidate
+> `WN-CANDIDATE-VIS01-DIRECT-RECT-RUN-CHAT-20260829` passes final nonvisual
+> verification; its 67,430,912-byte EXE is SHA-256
+> `4EB134ABDA3CC4981A4268CF4501E2ABB5BEDCD3E1C0F2E23F653008C7F8D57A`.
+> It is running as PID 243288 against local Gateway PID 237188 (`/health` 200)
+> for user inspection. Do not mark this visual pass until idle, walk, Run and
+> chat-frame behavior are observed. Complete player actions, mouse combat and
+> click-to-path, UI/chat, alternate classes, skills/VFX, map/monster semantic
+> denominators, authenticated same-EXE WSS, real DPI, native 30-minute soak,
+> formal publisher signing and human visual/audio/feel remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-08-28 VIS-01 exact-head motion Candidate evidence: clean revision
 > `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced attested Candidate
 > `WN-CANDIDATE-VIS01-MOTION-20260828`. The 67,435,520-byte Release EXE has

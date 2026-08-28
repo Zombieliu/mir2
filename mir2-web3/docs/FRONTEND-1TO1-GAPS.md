@@ -1,6 +1,27 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-28
+Last updated: 2026-08-29
+
+> 2026-08-29 Windows-native VIS-01 direct-frame/run/chat follow-up: the user
+> visually rejected `02bb67874791c26e556fee88382d0e7d61287012` because the
+> actor still flickered; stable `TextureAtlasLayout` identity was therefore
+> insufficient. Revision `a3121ce487c93ff37f2ca94d7d60d8e12bf9e5ea`
+> removes ordinary animated sprites from the dynamic layout/index path and
+> updates a direct source `Sprite.rect` on one retained full-page image. Atlas
+> pages remain cached across animation page changes; additive UV-material
+> rendering is unchanged. The same revision fixes the extensionless chat frame
+> lookup (`original-ui/Prguse/2221.png`) and adds right-click empty-world Run
+> intent while leaving Zone validation authoritative. Shared runtime 197/197,
+> native-UI 430/430 and Windows 448/448 pass. Exact clean Candidate
+> `WN-CANDIDATE-VIS01-DIRECT-RECT-RUN-CHAT-20260829` passes final nonvisual
+> verification; its 67,430,912-byte EXE is SHA-256
+> `4EB134ABDA3CC4981A4268CF4501E2ABB5BEDCD3E1C0F2E23F653008C7F8D57A`.
+> PID 243288 is running against healthy plaintext loopback for a new user
+> check; no visual pass is recorded yet. Full mouse combat/click-to-path,
+> complete chat/UI, alternate classes, skills/VFX, map/monster/player semantic
+> denominators and the authenticated WSS/DPI/soak/human/publisher-signing gates
+> remain open. `globalParityPercent=null`, `visualAccepted=false`,
+> `accepted=false`.
 
 > 2026-08-28 Windows-native VIS-01 exact-head motion Candidate evidence:
 > clean revision `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced Candidate

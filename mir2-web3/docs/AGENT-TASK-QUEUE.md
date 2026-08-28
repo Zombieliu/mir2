@@ -1,5 +1,26 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 direct-frame/run/chat follow-up (2026-08-29): the user
+> re-tested revision `02bb67874791c26e556fee88382d0e7d61287012` and confirmed
+> that whole-actor flicker remained, so stable atlas-handle accumulation alone
+> is explicitly recorded as a failed visual attempt. Revision
+> `a3121ce487c93ff37f2ca94d7d60d8e12bf9e5ea` now renders ordinary animated
+> layers with a direct `Sprite.rect` on the retained full-page image and keeps
+> previously observed atlas pages across page switches. It also restores the
+> chat frame's required `.png` asset suffix and adds right-click-on-empty-world
+> `Run` intent; Shift plus a newly pressed direction remains available. Shared
+> runtime 197/197, native-UI 430/430 and Windows 448/448 pass. Clean Candidate
+> `WN-CANDIDATE-VIS01-DIRECT-RECT-RUN-CHAT-20260829` passes package and final
+> nonvisual verification; its 67,430,912-byte EXE is SHA-256
+> `4EB134ABDA3CC4981A4268CF4501E2ABB5BEDCD3E1C0F2E23F653008C7F8D57A`
+> and is launched as PID 243288 against healthy local loopback for user
+> inspection. Visual success is still pending that inspection. Authenticated
+> same-EXE live WSS, real 100/125/150% DPI, native 30-minute soak, human
+> visual/audio/feel, formal publisher signing, full mouse combat/UI/chat,
+> alternate classes, skills/VFX and semantic denominators remain open.
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-ANIMATION-ATLAS-STABILITY-REPORT.md`.
+
 > Windows-native VIS-01 exact-head motion Candidate evidence (2026-08-28):
 > clean revision `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced attested
 > Candidate `WN-CANDIDATE-VIS01-MOTION-20260828`. Its 67,435,520-byte EXE is
