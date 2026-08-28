@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Visual/interaction execution goal sync (2026-08-28): the Windows native
+> client already exposes a playable Bichon baseline with terrain, actors,
+> labels, minimap, orb HUD, chat strip, quick bar and the visible right-side
+> HUD controls. That does not mean visual 100%. The current source-audited
+> denominator remains materially open: player libraries `7/477`, monster
+> libraries `8/546`, non-None spells `first bounded leaves only`, and the
+> fixed/template UI registry `partial out of 410` leaves. The active visual
+> execution goal is now explicitly staged as four bounded waves: `HUD/button
+> UI`, `player-character`, `skill/effect`, and `monster-family` expansion. The
+> first bounded write target after this roadmap sync is the `VIS-03` main-HUD
+> button matrix expansion. No whole-game percentage is authorized from this
+> note, and same-EXE/live-WSS, real-DPI, native soak, human visual/feel, clean
+> source binding, legal assets and signing remain final gates. Detailed note:
+> `docs/generated/player-qa/windows-visual-parity/VISUAL-GOAL-20260828.md`.
+
 > VIS-04 Scarecrow Struck-audio bounded checkpoint (2026-08-28): revision
 > `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` closes the exact Crystal
 > `Monster/005` struck leaf: `005-2.wav` flinch first, then the optional

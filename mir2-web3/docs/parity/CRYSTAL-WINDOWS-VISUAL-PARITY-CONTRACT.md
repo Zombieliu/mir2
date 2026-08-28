@@ -34,6 +34,42 @@ but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
 
+## 2026-08-28 execution goal and screenshot-grounded status
+
+The current native window is not a blank placeholder. It already renders a
+playable Bichon baseline with terrain, actors, labels, minimap, orb HUD, chat
+strip, quick bar and the right-side HUD cluster visible. That is still far
+from visual 100% and does not close same-EXE or human acceptance.
+
+The current source-audited denominator remains materially open:
+
+- player pixel libraries: 477 libraries / 541,010 frames, with only 7 roots /
+  7,360 frames currently closed in the native audit base;
+- monster pixel libraries: 546 libraries / 219,607 frames, with only
+  8 Monster libraries / 1,742 frames currently closed in the native audit
+  base;
+- non-None spells: 129, with only the first bounded effect/audio leaves
+  automated;
+- fixed/template UI scope: 410 leaves, with only selected shell/button/dialog
+  leaves source-bound so far.
+
+Execution continues in four bounded waves:
+
+1. HUD/button UI wave: exact visible controls, images, press/hover/disabled
+   semantics, sound, geometry and enable gates.
+2. Player-character wave: body/hair/weapon/mount/corpse/name overlays across
+   the real class/gender/equipment matrix.
+3. Skill/effect wave: cast, projectile, impact, persistence and the actor
+   struck/die/dead/revive chain for the first observable combat slice.
+4. Monster wave: finish the remaining `Monster/005` action semantics, then
+   expand to more families without generic fallback claims.
+
+The first bounded write target after this goal sync is the visible `VIS-03`
+main-HUD button matrix expansion. It is the smallest user-facing slice that
+answers the current report about button/UI fidelity. Whole-game percentages,
+same-EXE, live WSS, real DPI, native soak and human visual/feel remain
+explicitly open.
+
 ## Scarecrow struck-audio bounded automated checkpoint
 
 Revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` closes one exact
@@ -63,6 +99,9 @@ unreported.
 
 The detailed evidence report is
 `docs/generated/player-qa/windows-visual-parity/VIS-04-SCARECROW-STRUCK-AUDIO-REPORT.md`.
+
+The broader execution-goal note for the current visual branch is
+`docs/generated/player-qa/windows-visual-parity/VISUAL-GOAL-20260828.md`.
 
 ## Scarecrow Attack1-audio bounded automated checkpoint
 

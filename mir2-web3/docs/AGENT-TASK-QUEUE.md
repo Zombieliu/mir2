@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> Visual/interation execution goal sync (2026-08-28): the Windows native
+> client is playable enough to expose the real gap, but it is not visually
+> complete. A live native Bichon window already shows terrain, actors, labels,
+> minimap, orb HUD, chat strip, quick bar and the right-side HUD cluster.
+> The current source-audited denominator is still open: player libraries
+> `7/477`, monster libraries `8/546`, non-None spells `first bounded leaves
+> only`, and fixed/template UI leaves `partial out of 410`. The active visual
+> execution goal is now explicitly split into four waves: `HUD/button UI`,
+> `player-character`, `skill/effect`, and `monster-family` expansion. The
+> first bounded write target after this sync is the `VIS-03` main-HUD button
+> matrix expansion so the next user-visible work lands on exact button/panel
+> fidelity rather than another hidden backend-only slice. This queue entry does
+> not authorize whole-game percentages or close same-EXE/live-WSS, real-DPI,
+> soak, human, legal-asset or signing gates. Detailed note:
+> `docs/generated/player-qa/windows-visual-parity/VISUAL-GOAL-20260828.md`.
+
 > VIS-04 Scarecrow Struck-audio bounded automated checkpoint (2026-08-28):
 > revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` binds Crystal's
 > `MonsterObject.Struck` order to exact `005-2.wav` flinch followed by the
