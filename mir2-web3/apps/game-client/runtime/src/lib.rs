@@ -4493,22 +4493,41 @@ fn sync_entity_render_atlas_layouts(
             (None, None)
         };
 
-        // Prebuilt pages keep a stable page key while the web producer sends
-        // only rects used by the current scene. A turn or attack can therefore
-        // add rects under an existing key. Reusing the old layout made those
-        // frames miss the atlas and fall back to asynchronous per-PNG loading,
-        // which presented as disappearing monsters and skipped attacks.
-        let layout_is_current =
-            registry
-                .entity_render_atlases
-                .get(&atlas.key)
-                .is_some_and(|existing| {
-                    existing.size == size
-                        && existing.image_key == image_key
-                        && entity_render_atlas_contains_rects(&existing.rects, &atlas.rects)
-                });
-        if layout_is_current {
-            continue;
+        // Prebuilt pages keep a stable page key while the producer publishes
+        // only the rects used by the current animation frame. Rebuilding the
+        // layout from that one-frame subset discarded every previously seen
+        // rect and replaced the TextureAtlasLayout handle on every standing,
+        // walk, or run tick. The retained sprite then crossed GPU extraction
+        // with a changing layout binding, which appeared as a repeating actor
+        // flash. Grow a compatible layout in place instead: existing indices
+        // and the handle stay stable while newly observed frames become
+        // immediately addressable.
+        if let Some(existing) = registry.entity_render_atlases.get_mut(&atlas.key) {
+            let compatible = existing.size == size && existing.image_key == image_key;
+            if compatible {
+                existing.image = image.clone();
+                let missing = atlas
+                    .rects
+                    .iter()
+                    .filter(|rect| !existing.rects.contains_key(&rect.key))
+                    .collect::<Vec<_>>();
+                if missing.is_empty() {
+                    continue;
+                }
+                if let Some(mut layout) = texture_atlas_layouts.get_mut(&existing.layout) {
+                    for rect in missing {
+                        let uv_rect = URect {
+                            min: UVec2::new(rect.x, rect.y),
+                            max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+                        };
+                        let index = layout.add_texture(uv_rect);
+                        existing.rects.insert(rect.key.clone(), index);
+                        existing.uv_rects.insert(rect.key.clone(), uv_rect);
+                    }
+                    existing.image = image;
+                    continue;
+                }
+            }
         }
 
         let mut layout = TextureAtlasLayout::new_empty(size);
@@ -4542,6 +4561,7 @@ fn sync_entity_render_atlas_layouts(
         .retain(|key, _| alive.contains(key));
 }
 
+#[cfg(test)]
 fn entity_render_atlas_contains_rects(
     existing: &HashMap<String, usize>,
     incoming: &[EntityRenderAtlasRect],
@@ -5589,6 +5609,61 @@ mod entity_atlas_tests {
             &existing,
             &[rect("standing"), rect("attack")]
         ));
+    }
+
+    #[test]
+    fn animation_frames_extend_one_stable_atlas_layout() {
+        let mut app = entity_sync_test_app();
+        let state = |rect_key: &str| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "starter:p0",
+                    "width": 2048,
+                    "height": 2048,
+                    "imageUrl": "/bevy-entity-atlases/starter.png",
+                    "rects": [{
+                        "key": rect_key,
+                        "x": if rect_key == "standing-0" { 0 } else { 32 },
+                        "y": 0,
+                        "width": 32,
+                        "height": 48
+                    }]
+                }],
+                "entities": []
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-0"));
+        app.update();
+        let first_layout = {
+            let registry = app.world().resource::<SceneRegistry>();
+            let atlas = registry
+                .entity_render_atlases
+                .get("starter:p0")
+                .expect("initial atlas layout");
+            assert_eq!(atlas.rects.len(), 1);
+            atlas.layout.id()
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-1"));
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        let atlas = registry
+            .entity_render_atlases
+            .get("starter:p0")
+            .expect("extended atlas layout");
+        assert_eq!(atlas.layout.id(), first_layout);
+        assert!(atlas.rects.contains_key("standing-0"));
+        assert!(atlas.rects.contains_key("standing-1"));
+        assert_eq!(atlas.rects.len(), 2);
     }
 
     #[test]
