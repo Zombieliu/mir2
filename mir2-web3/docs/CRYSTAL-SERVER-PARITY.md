@@ -1,13 +1,24 @@
 # Crystal Server Parity
 
+> VIS-04 Scarecrow Attack1-audio server-client note (2026-08-28): revision
+> `e1dd6d6379d23efeafe57aa01c170452f1261b83` adds no server packet or
+> authority. Crystal's client-owned `Monster/005 BaseSound+1` projection now
+> resolves exact `005-1.wav` on native and Web from existing typed
+> `ObjectAttack` events plus authoritative actor context. Windows 403/403,
+> Bevy 419/419, runtime 191/191, Web/audio/export/typecheck and Candidate
+> script gates pass; review is P0=0/P1=0. Flinch/weapon-struck ordering, other
+> monsters, live WSS and the complete denominator remain open. No server or
+> global percentage is reported.
+
 > VIS-04 Scarecrow death-audio server-client note (2026-08-28): revision
 > `cf4f5b5197c492324be23beb73611c0e0162c403` adds no server packet or
 > authority. Crystal's client-owned `Monster/005 BaseSound+3` projection now
 > resolves exact `005-3.wav` on native and Web from existing typed death
 > events; identity replay and local lifecycle cleanup are bounded. Windows
 > 401/401, Bevy 419/419, runtime 191/191, Web/audio/export/typecheck and
-> Candidate script gates pass; review is P0=0/P1=0. Attack/flinch/struck,
-> other monsters, live WSS and the complete denominator remain open. No server
+> Candidate script gates pass; review is P0=0/P1=0. The later checkpoint above
+> closes Attack1; flinch/struck, other monsters, live WSS and the complete
+> denominator remain open. No server
 > or global percentage is reported.
 
 > VIS-03 Inventory locked-second-tab server-client note (2026-08-28): revision

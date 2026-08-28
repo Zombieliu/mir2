@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> VIS-04 Scarecrow Attack1-audio client-boundary checkpoint (2026-08-28):
+> revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` changes no simulation,
+> shared-Zone, Gateway, protocol, persistence, attack or monster authority.
+> Existing typed `ObjectAttack` projection now carries authoritative actor
+> context into the exact local `Monster/005 -> 005-1.wav` cue; Web and
+> Candidate resolution are source-bound to numeric ID 51. Windows 403/403,
+> Bevy 419/419, runtime 191/191 and Web/script gates pass; review is
+> P0=0/P1=0. Flinch/struck ordering, other monsters and the full audio
+> denominator remain open, as do all exact-head device gates. No backend or
+> global percentage is claimed.
+
 > VIS-04 Scarecrow death-audio client-boundary checkpoint (2026-08-28):
 > revision `cf4f5b5197c492324be23beb73611c0e0162c403` changes no simulation,
 > shared-Zone, Gateway, protocol, persistence, combat or monster-death
@@ -7,8 +18,9 @@
 > `Monster/005 -> 005-3.wav` cue once, with Remove/Hide/map/logout cleanup;
 > Web and Candidate asset resolution are source-bound to numeric ID 53.
 > Windows 401/401, Bevy 419/419, runtime 191/191 and Web/script gates pass;
-> review is P0=0/P1=0. Monster attack/flinch/struck and the full audio
-> denominator remain open, as do all exact-head device gates. No backend or
+> review is P0=0/P1=0. That revision's attack gap is closed by the later
+> checkpoint above; monster flinch/struck and the full audio denominator
+> remain open, as do all exact-head device gates. No backend or
 > global percentage is claimed.
 
 > VIS-03 Inventory locked-second-tab client-boundary checkpoint (2026-08-28):

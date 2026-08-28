@@ -19,6 +19,7 @@ helpDialogMovableCheckpointRevision: 4545465a2e31a6646f247c55906764952d44cd58
 healingCheckpointRevision: 24d9b73a30fc18edf0649283d14495c6f4900aff
 inventoryLockedTabCheckpointRevision: 83f081149375fb402b9c7e6711fdb4e6bed68a0e
 scarecrowDeathAudioCheckpointRevision: cf4f5b5197c492324be23beb73611c0e0162c403
+scarecrowAttackAudioCheckpointRevision: e1dd6d6379d23efeafe57aa01c170452f1261b83
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -31,6 +32,36 @@ The dirty Crystal files are server files (`Server/MirEnvir/Envir.cs` and
 but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
+
+## Scarecrow Attack1-audio bounded automated checkpoint
+
+Revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` closes one exact
+monster-audio action leaf. Crystal binds `Scarecrow=5`,
+`BaseSound=BaseImage*10`, enters `MirAction.Attack1` with an immediate
+`PlayAttackSound`, and resolves the default `BaseSound+1` numeric ID 51 as
+`005-1.wav`. The tracked file is 90,118 bytes with SHA-256
+`966E4163FC0000CF769B63C0F3379F1E9863645F43C1CCADEEE8066B73E6AE9A`.
+
+Native enriches typed `ObjectAttack` with authoritative actor context and
+requires exact Monster kind plus normalized `Monster/005`. Each distinct
+Attack1 can emit the cue immediately; other actors and missing context fail
+closed. Dead state suppresses attack audio, adjacent Remove/Hide cancels a
+due-now cue, and map/logout/generation boundaries clear local sound state.
+Web retains the source-derived `BaseImage*10+1` formula, and direct ID 51 is
+present in both generated indices. Candidate package/verify require, copy and
+hash-bind the exact file; the verifier removes it in self-test to prove the
+required boundary.
+
+Focused native 2/2 plus bridge 1/1, Windows 403/403, Bevy native-ui 419/419,
+runtime 191/191, Web event/audio/export/typecheck and Candidate script tests
+pass. Independent review is P0=0/P1=0. This does not implement `005-2`
+flinch, the weapon-dependent struck cue/order, other monsters or the complete
+monster-audio denominator. No exact-head package, EXE, same-EXE/live-WSS,
+physical-audio, DPI, soak or human evidence was produced. Global and visual
+acceptance remain unreported.
+
+The detailed evidence report is
+`docs/generated/player-qa/windows-visual-parity/VIS-04-SCARECROW-ATTACK-AUDIO-REPORT.md`.
 
 ## Scarecrow death-audio bounded automated checkpoint
 
@@ -52,9 +83,11 @@ required boundary.
 
 Focused 2/2, Windows 401/401, Bevy native-ui 419/419, runtime 191/191, Web
 event/audio/export/typecheck and Candidate script tests pass. Independent
-review is P0=0/P1=0. This does not implement `005-1` attack, `005-2` flinch,
-public struck clang, movement/Dead/Revive cues, other monsters or the complete
-monster-audio denominator. No exact-head package, EXE, same-EXE/live-WSS,
+review is P0=0/P1=0. That revision alone did not implement `005-1` attack;
+the later Attack1 checkpoint above closes it. `005-2` flinch, public struck
+clang, movement/Dead/Revive cues, other monsters and the complete
+monster-audio denominator remain open. No exact-head package, EXE,
+same-EXE/live-WSS,
 physical-audio, DPI, soak or human evidence was produced. Global and visual
 acceptance remain unreported.
 
@@ -494,8 +527,8 @@ offsets and all same-EXE/live-WSS/GPU/DPI/soak/human/signing gates stay open.
 4. `VIS-03` closes the first UI state slice at 1024x768: normal HUD, Inventory
    hover, Inventory pressed and BigMap Teleport explicit disabled state.
 5. `VIS-04` begins the source-derived monster-audio registry. Its first bounded
-   leaf is Scarecrow death `005-3.wav`; attack, flinch, struck, movement and
-   other monster families remain open.
+   leaves are Scarecrow death `005-3.wav` and Attack1 `005-1.wav`; flinch,
+   struck ordering, movement and other monster families remain open.
 6. Subsequent waves expand the source-derived actor, monster, spell,
    environment and UI registries. The denominator may grow; existing leaf IDs
    and failures may not be silently removed.

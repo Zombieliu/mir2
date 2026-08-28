@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> VIS-04 Scarecrow Attack1-audio bounded automated checkpoint (2026-08-28):
+> revision `e1dd6d6379d23efeafe57aa01c170452f1261b83` binds Crystal
+> `Scarecrow=5`, `BaseSound=50`, immediate `Attack1 PlayAttackSound=51` and
+> unlisted-ID filename synthesis to exact `005-1.wav`, never `51.wav`.
+> Native actor-context routing, exact kind/body checks, per-action replay and
+> Remove/Hide/map/logout cancellation, Web ID 51 resolution, direct export and
+> Candidate exact identity are automated. Focused 2/2 plus bridge 1/1,
+> Windows 403/403, Bevy native-ui 419/419, runtime 191/191, Web 47 groups,
+> audio/export/typecheck and both Candidate self-tests pass; final review is
+> P0=0/P1=0. Flinch `005-2`, weapon struck clang/order, other monsters and the
+> complete monster-audio denominator remain open. No EXE, package, live WSS,
+> screenshot, physical-audio or human evidence was produced; no global
+> percentage is claimed.
+
 > VIS-04 Scarecrow death-audio bounded automated checkpoint (2026-08-28):
 > revision `cf4f5b5197c492324be23beb73611c0e0162c403` binds Crystal
 > `Scarecrow=5`, `BaseSound=50`, `PlayDieSound=53` and the unlisted-ID
@@ -9,9 +23,10 @@
 > timing, direct sound export and Candidate exact identity are automated.
 > Focused 2/2, Windows 401/401, Bevy native-ui 419/419, runtime 191/191, Web
 > 46 groups, audio/export/typecheck and both Candidate script self-tests pass;
-> final review is P0=0/P1=0. Attack `005-1`, flinch `005-2`, struck/walk/
-> swing/Dead/Revive, other monsters and the complete monster-audio denominator
-> remain open. No EXE, package, live WSS, screenshot, physical-audio or human
+> final review is P0=0/P1=0. That revision left Attack `005-1` open; the
+> later checkpoint above closes it. Flinch `005-2`, struck/walk/swing/Dead/
+> Revive, other monsters and the complete monster-audio denominator remain
+> open. No EXE, package, live WSS, screenshot, physical-audio or human
 > evidence was produced; no global percentage is claimed.
 
 > VIS-03 Inventory locked-second-tab bounded automated checkpoint

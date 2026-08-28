@@ -1,13 +1,26 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-04 Scarecrow Attack1-audio bounded checkpoint (2026-08-28): revision
+> `e1dd6d6379d23efeafe57aa01c170452f1261b83` closes the exact Crystal
+> action/resolver leaf `Monster/005: BaseSound+1=51 -> 005-1.wav` in native
+> actor context/effects, Web export/runtime and Candidate package/verify.
+> Each authoritative Attack1 may sound once; unrelated actors fail closed and
+> scene lifecycle cancels pending local audio. Windows 403/403, Bevy 419/419,
+> runtime 191/191, Web and script gates plus independent P0=0/P1=0 review
+> pass. This is not complete monster audio: flinch/struck ordering, movement,
+> other monster families and the semantic denominator remain open. Same-EXE/
+> live-WSS, real DPI, native soak, human audio/feel, legal assets and signing
+> remain final gates; `globalParityPercent` stays null.
+
 > VIS-04 Scarecrow death-audio bounded checkpoint (2026-08-28): revision
 > `cf4f5b5197c492324be23beb73611c0e0162c403` closes the exact Crystal
 > numeric resolver leaf `Monster/005: BaseSound+3=53 -> 005-3.wav` in native,
 > Web export/runtime and Candidate package/verify. Replay and scene lifecycle
 > are fail-closed, `53.wav` is explicitly rejected by gameplay audio, and all
-> automated suites/review pass. This is one Scarecrow death cue, not complete
-> monster audio: attack/flinch/struck/movement, other monster families and the
-> semantic denominator remain open. Same-EXE/live-WSS, real DPI, native soak,
+> automated suites/review pass. This is one Scarecrow death cue; its then-open
+> Attack1 is closed by the later checkpoint above. Flinch/struck/movement,
+> other monster families and the semantic denominator remain open. Same-EXE/
+> live-WSS, real DPI, native soak,
 > human audio/feel, legal assets and signing remain final gates;
 > `globalParityPercent` stays null.
 
