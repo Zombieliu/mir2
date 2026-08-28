@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-28
 
+> 2026-08-28 Windows-native VIS-01 exact-head motion Candidate evidence:
+> clean revision `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced Candidate
+> `WN-CANDIDATE-VIS01-MOTION-20260828` from its attested 67,435,520-byte EXE
+> (SHA-256
+> `E40C5216A29DE870DA7898F0ACABE331E7310C583D249C2F66DC3210692050F4`).
+> The 32,594-file Candidate passes detached-CMS and final nonvisual
+> verification; payload aggregate SHA-256 is
+> `167EB82528CD5ADEDA5621B170233FA2B8314540F11A95E65EB812ECA8D5B726`.
+> This adds exact-head artifact evidence to the mounted-cadence and continuous-
+> locomotion leaves, but no visible acceptance: the EXE was not launched and
+> native keyed-map generation still has 2,508 missing source entries.
+> Same-EXE live WSS, mounted input, UI/chat, mouse combat, skills/VFX,
+> complete monster/map denominators, DPI, soak, human acceptance and formal
+> publisher signing remain open. `globalParityPercent=null`,
+> `visualAccepted=false`, `accepted=false`.
+
 > 2026-08-28 Windows-native VIS-01 mounted cadence/packet-clock bounded
 > checkpoint: revision `eb174e94eecde4a6e24f63d16616e2dfb9a03589`
 > closes the source/test portion of the mounted timing gap left by the prior

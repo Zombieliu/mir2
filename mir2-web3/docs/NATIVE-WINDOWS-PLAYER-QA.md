@@ -1,5 +1,21 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-28 VIS-01 exact-head motion Candidate evidence: clean revision
+> `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced attested Candidate
+> `WN-CANDIDATE-VIS01-MOTION-20260828`. The 67,435,520-byte Release EXE has
+> SHA-256 `E40C5216A29DE870DA7898F0ACABE331E7310C583D249C2F66DC3210692050F4`;
+> all 32,594 Candidate files are covered by the package identity chain and the
+> payload aggregate is
+> `167EB82528CD5ADEDA5621B170233FA2B8314540F11A95E65EB812ECA8D5B726`.
+> Detached-CMS and final nonvisual verification pass. This closes exact-head
+> build/package evidence for the two motion leaves, not visible play. The EXE
+> was not launched, the internal certificate is not publisher Authenticode,
+> and the keyed-map manifest still records 2,508 missing source entries.
+> Authenticated same-EXE WSS, live mounted input, UI/chat, mouse combat,
+> skills/VFX, complete monster/map denominators, 100/125/150% DPI, native
+> 30-minute soak and human visual/audio/feel acceptance remain open;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-08-28 VIS-01 mounted motion cadence/packet-clock checkpoint: revision
 > `eb174e94eecde4a6e24f63d16616e2dfb9a03589` drives the native motion
 > window from the current player movement descriptor instead of a global six-

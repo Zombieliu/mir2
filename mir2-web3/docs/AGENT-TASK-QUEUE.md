@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 exact-head motion Candidate evidence (2026-08-28):
+> clean revision `94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced attested
+> Candidate `WN-CANDIDATE-VIS01-MOTION-20260828`. Its 67,435,520-byte EXE is
+> SHA-256 `E40C5216A29DE870DA7898F0ACABE331E7310C583D249C2F66DC3210692050F4`;
+> the package has 32,594 total files, payload aggregate SHA-256
+> `167EB82528CD5ADEDA5621B170233FA2B8314540F11A95E65EB812ECA8D5B726`,
+> a verified internal detached-CMS statement and passing final nonvisual
+> verification. This supersedes only the earlier statement that the mounted
+> cadence/continuous-locomotion revisions lacked an exact-head EXE/package.
+> The EXE was not launched in this run. Native keyed-map generation still
+> reports 2,508 missing source entries; same-EXE live WSS, actual mounted
+> input, UI/chat, mouse combat, skills/VFX, complete monsters/maps, real DPI,
+> 30-minute soak, human visual/audio/feel and formal publisher signing remain
+> open. Candidate `accepted=false`; `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-MOUNTED-MOTION-CADENCE-REPORT.md`.
+
 > Windows-native VIS-01 mounted cadence/packet-clock checkpoint
 > (2026-08-28): revision
 > `eb174e94eecde4a6e24f63d16616e2dfb9a03589` removes the remaining

@@ -7,12 +7,17 @@ Date: 2026-08-28
 ```text
 implementationRevision: eb174e94eecde4a6e24f63d16616e2dfb9a03589
 dependsOnLocomotionRevision: 532ddc6be0a0c38313fdd39fe9e0af82b883371b
+exactEvidenceRevision: 94f8e4f032643fdb826d6ef0ae82b360b4dcc83d
 branch: codex/windows-visual-parity
 mountedWalkEightPhaseAutomatedCheckpoint: complete
 mountedRunSixPhaseRegressionCheckpoint: complete
 packetCarriedMotionTimingConsumedByWindows: true
-exactRevisionExeProduced: false
-exactRevisionCandidateProduced: false
+exactRevisionExeProduced: true
+exactRevisionCandidateProduced: true
+exactRevisionExeLaunched: false
+candidateNonvisualVerificationPassed: true
+releaseStatementDetachedCmsVerified: true
+exePublisherSigned: false
 liveMountedRouteObserved: false
 sameSceneVisualCaptureProduced: false
 authenticatedLiveWssTranscriptProduced: false
@@ -79,13 +84,42 @@ The new tests fail against the prior fixed-six-phase path: mounted Walk reports
 600ms instead of 800ms, uses the receipt-time first frame rather than the
 already-elapsed packet phase, and cannot retain its eighth phase.
 
-## Evidence not produced
+## Exact-head EXE and Candidate evidence
 
-The already-running debug client predates both this revision and the preceding
-continuous-locomotion revision. It was not restarted or treated as evidence.
-No exact-head Release EXE, Candidate package, live mount/dismount-and-move
-route, same-scene capture, real-DPI execution, soak or human play result was
-produced.
+The exact clean evidence revision
+`94f8e4f032643fdb826d6ef0ae82b360b4dcc83d` produced an attested Windows
+Release and staged Candidate
+`WN-CANDIDATE-VIS01-MOTION-20260828`. The packaging script completed its
+source preflight, staging checks, detached-CMS verification and final
+nonvisual Candidate verification.
+
+| Identity | Value |
+|---|---|
+| Release EXE bytes | 67,435,520 |
+| Release EXE SHA-256 | `E40C5216A29DE870DA7898F0ACABE331E7310C583D249C2F66DC3210692050F4` |
+| Build attestation SHA-256 | `6FB4F78C254F3B86B13F2AEEF275314911651CA0AC1149973CF0BD2832D19F19` |
+| Package payload file count | 32,590 |
+| Candidate total file count | 32,594 |
+| Package payload bytes | 382,252,058 |
+| Candidate total bytes | 391,038,981 |
+| Package manifest SHA-256 | `6546B4F91D54A19D5494A4D9D7E5C5A80911B24BF7829F8320853DF48FF8C0D1` |
+| Package aggregate SHA-256 | `167EB82528CD5ADEDA5621B170233FA2B8314540F11A95E65EB812ECA8D5B726` |
+| Source worktree | clean (`dirty=false`) |
+| Candidate verifier | PASS (`sourceRepoCheck=checked`, `nonvisual=true`) |
+
+The internal self-signed certificate binds the detached release statement;
+it is not formal publisher Authenticode signing. The generated native keyed
+map manifest reports 7,158 references, 4,650 emitted entries and 2,508
+missing source entries. Map-atlas generation also reports seven pre-existing
+uniform near-black source ground tiles. Those facts remain explicit visual
+asset gaps and are not converted into a parity percentage.
+
+## Evidence still not produced
+
+The exact Candidate was not launched during this nonvisual packaging run.
+No live mount/dismount-and-move route, authenticated same-EXE WSS transcript,
+same-scene capture, real-DPI execution, soak or human play result was
+produced. The earlier debug client was not treated as evidence.
 
 ## Explicitly open gates
 
