@@ -148,10 +148,35 @@ fn pickup_tile_intent(
         .map(|_| QuestUiIntent::PickUpTile)
 }
 
-/// Convert a real left click on Crystal's pixel-tested hovered object into the
-/// existing bounded world intent. The presentation layer supplies the exact
-/// topmost opaque NPC/monster id; this edge never fabricates damage or opens a
-/// dialog locally. Gateway and shared Zone validation remain authoritative.
+fn movement_direction_toward(
+    hovered_grid_position: Option<(i32, i32)>,
+    entities: &EntityModelSet,
+) -> Option<&'static str> {
+    let (target_x, target_y) = hovered_grid_position?;
+    let player = entities
+        .entities
+        .iter()
+        .find(|entity| entity.kind == EntityKind::SelfPlayer)?;
+    match (
+        (target_x - player.x).signum(),
+        (target_y - player.y).signum(),
+    ) {
+        (0, -1) => Some("up"),
+        (1, -1) => Some("upright"),
+        (1, 0) => Some("right"),
+        (1, 1) => Some("downright"),
+        (0, 1) => Some("down"),
+        (-1, 1) => Some("downleft"),
+        (-1, 0) => Some("left"),
+        (-1, -1) => Some("upleft"),
+        _ => None,
+    }
+}
+
+/// Convert Crystal world mouse edges into bounded intents. Left click uses the
+/// pixel-tested hovered object for combat/NPC/pickup. Right click on empty
+/// world space expresses a run direction; the shared Zone remains authoritative
+/// and may degrade the first movement from standstill to a walk.
 pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
     shell: Option<Res<NativeShellModel>>,
@@ -162,13 +187,14 @@ pub fn mouse_world_interaction_system(
     presentation: Option<Res<NativeEntityPresentation>>,
     windows: Query<&Window>,
     queue: Option<ResMut<QuestUiIntentQueue>>,
+    commands: Option<Res<GatewayCommands>>,
 ) {
-    if !mouse.just_pressed(MouseButton::Left) {
+    let left_pressed = mouse.just_pressed(MouseButton::Left);
+    let right_pressed = mouse.just_pressed(MouseButton::Right);
+    if !left_pressed && !right_pressed {
         return;
     }
-    let (Some(shell), Some(entities), Some(presentation), Some(mut queue)) =
-        (shell, entities, presentation, queue)
-    else {
+    let (Some(shell), Some(entities), Some(presentation)) = (shell, entities, presentation) else {
         return;
     };
     let Ok(window) = windows.single() else {
@@ -185,6 +211,29 @@ pub fn mouse_world_interaction_system(
     if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
         return;
     }
+
+    if right_pressed {
+        // Crystal reserves right-click object interactions (for example Ctrl+
+        // inspect). Until those are implemented, never turn an object click
+        // into movement through the actor beneath the pointer.
+        if presentation.hovered_object_id().is_some() {
+            return;
+        }
+        let (Some(direction), Some(commands)) = (
+            movement_direction_toward(presentation.hovered_grid_position(), &entities),
+            commands,
+        ) else {
+            return;
+        };
+        commands.send(PlayerIntent::Run {
+            direction: direction.to_owned(),
+        });
+        return;
+    }
+
+    let Some(mut queue) = queue else {
+        return;
+    };
     let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
         .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
     else {
@@ -857,6 +906,64 @@ mod tests {
                 .drain_intents(),
             vec![QuestUiIntent::PickUpTile]
         );
+    }
+
+    #[test]
+    fn real_right_click_on_empty_world_sends_authoritative_run_intent() {
+        let (mut app, receiver) = input_app();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (528.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+    }
+
+    #[test]
+    fn right_click_run_is_blocked_by_modal_or_hovered_actor() {
+        let right_click_app = |dialog_open: bool, hovered_object_id: Option<&str>| {
+            let (mut app, receiver) = input_app();
+            app.world_mut().spawn(Window::default());
+            app.insert_resource(ButtonInput::<MouseButton>::default());
+            app.insert_resource(NativePlayerUiState::default());
+            app.insert_resource(NpcDialogModel {
+                is_open: dialog_open,
+                ..Default::default()
+            });
+            app.insert_resource(UiReadModel::default());
+            app.insert_resource(world_entities());
+            let mut presentation = NativeEntityPresentation::default();
+            presentation.set_hover_grid_context_for_test((10, 10), (528.0, 352.0));
+            presentation.set_hovered_object_id_for_test(hovered_object_id);
+            app.insert_resource(presentation);
+            app.init_resource::<QuestUiIntentQueue>();
+            app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Right);
+            (app, receiver)
+        };
+
+        for (dialog_open, hovered_object_id) in [(true, None), (false, Some("2001"))] {
+            let (mut app, receiver) = right_click_app(dialog_open, hovered_object_id);
+            app.update();
+            assert!(receiver.try_recv().is_err());
+        }
     }
 
     #[test]

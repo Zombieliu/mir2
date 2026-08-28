@@ -897,7 +897,7 @@ fn spawn_chat_frame_with_spec(
             ..default()
         },
         ImageNode {
-            image: asset_server.load(format!("original-ui/{}/{}", frame.library, frame.index)),
+            image: asset_server.load(crystal_asset(frame.library, frame.index)),
             color: chat_tint(transparent),
             ..default()
         },
@@ -1384,8 +1384,12 @@ fn consume_chat_button_interactions(
     }
 }
 
+fn crystal_asset(library: &str, index: u16) -> String {
+    format!("original-ui/{library}/{index}.png")
+}
+
 fn prguse_asset(index: u16) -> String {
-    format!("original-ui/Prguse/{index}.png")
+    crystal_asset("Prguse", index)
 }
 
 fn title_asset(index: u16) -> String {
@@ -1835,7 +1839,10 @@ mod tests {
         );
         assert_eq!(CHAT_FRAME_INDEX, 2221);
         assert_eq!(
-            prguse_asset(CHAT_FRAME_INDEX),
+            crystal_asset(
+                spec::hud::CHAT_FOUR_LINES.library,
+                spec::hud::CHAT_FOUR_LINES.index
+            ),
             "original-ui/Prguse/2221.png"
         );
         assert_eq!(prguse_frame_size(2018), (12.0, 8.0));

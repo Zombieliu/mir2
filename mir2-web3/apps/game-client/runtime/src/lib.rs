@@ -20,7 +20,7 @@ use std::collections::{HashMap, HashSet};
 use bevy::asset::{AssetMetaCheck, AssetPlugin, LoadState, RenderAssetUsages};
 use bevy::camera::{visibility::RenderLayers, ClearColorConfig, RenderTarget};
 use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
-use bevy::math::{URect, UVec2};
+use bevy::math::{Rect, URect, UVec2};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::window::{CompositeAlphaMode, WindowResolution};
@@ -4358,8 +4358,8 @@ fn sync_entity_render_layers(
                 } else if binding_changed {
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.image = image_binding.image.clone();
-                        sprite.texture_atlas = image_binding.texture_atlas.clone();
-                        sprite.rect = None;
+                        sprite.texture_atlas = None;
+                        sprite.rect = image_binding.image_rect;
                     }
                 }
                 handle.image_key = image_binding.image_key.clone();
@@ -4370,8 +4370,8 @@ fn sync_entity_render_layers(
                         sprite.custom_size =
                             Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
                         sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
-                        sprite.texture_atlas = image_binding.texture_atlas.clone();
-                        sprite.rect = None;
+                        sprite.texture_atlas = None;
+                        sprite.rect = image_binding.image_rect;
                     }
                 }
                 if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
@@ -4411,11 +4411,12 @@ fn sync_entity_render_layers(
                         MirEntityRenderLayer,
                         Sprite {
                             image: image_binding.image.clone(),
-                            texture_atlas: image_binding.texture_atlas.clone(),
+                            texture_atlas: None,
                             custom_size: Some(Vec2::new(
                                 layer.width.max(1.0),
                                 layer.height.max(1.0),
                             )),
+                            rect: image_binding.image_rect,
                             color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
                             ..default()
                         },
@@ -4460,7 +4461,7 @@ struct EntityRenderImageBinding {
     image_key: String,
     atlas_key: Option<String>,
     atlas_rect_key: Option<String>,
-    texture_atlas: Option<TextureAtlas>,
+    image_rect: Option<Rect>,
     uv_scale_offset: Vec4,
 }
 
@@ -4475,10 +4476,7 @@ fn sync_entity_render_atlas_layouts(
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
     registry: &mut SceneRegistry,
 ) {
-    let mut alive = HashSet::new();
-
     for atlas in &snapshot.atlases {
-        alive.insert(atlas.key.clone());
         let size = UVec2::new(atlas.width, atlas.height);
         let uploaded_image = atlas_assets.images.get(&atlas.key).cloned();
         let url_image = atlas.image_url.as_ref().map(|image_url| {
@@ -4494,14 +4492,13 @@ fn sync_entity_render_atlas_layouts(
         };
 
         // Prebuilt pages keep a stable page key while the producer publishes
-        // only the rects used by the current animation frame. Rebuilding the
-        // layout from that one-frame subset discarded every previously seen
-        // rect and replaced the TextureAtlasLayout handle on every standing,
-        // walk, or run tick. The retained sprite then crossed GPU extraction
-        // with a changing layout binding, which appeared as a repeating actor
-        // flash. Grow a compatible layout in place instead: existing indices
-        // and the handle stay stable while newly observed frames become
-        // immediately addressable.
+        // only the page and rects used by the current animation frame. Keep
+        // every observed compatible page cached for the scene and grow its
+        // layout in place. Dropping a page merely because the current frame
+        // lives on another page makes a later frame rebuild the layout and its
+        // GPU-facing handle, which appears as a repeating actor flash. The
+        // cache is bounded by the packaged manifest pages and is cleared by
+        // `clear_entity_render_layers` on scene/session teardown.
         if let Some(existing) = registry.entity_render_atlases.get_mut(&atlas.key) {
             let compatible = existing.size == size && existing.image_key == image_key;
             if compatible {
@@ -4555,10 +4552,6 @@ fn sync_entity_render_atlas_layouts(
             },
         );
     }
-
-    registry
-        .entity_render_atlases
-        .retain(|key, _| alive.contains(key));
 }
 
 #[cfg(test)]
@@ -4577,7 +4570,7 @@ fn entity_render_image_binding(
 ) -> EntityRenderImageBinding {
     if let (Some(atlas_key), Some(rect_key)) = (&layer.atlas_key, &layer.atlas_rect_key) {
         if let Some(atlas) = registry.entity_render_atlases.get(atlas_key) {
-            if let Some(index) = atlas.rects.get(rect_key) {
+            if atlas.rects.contains_key(rect_key) {
                 let uv_scale_offset = atlas
                     .uv_rects
                     .get(rect_key)
@@ -4589,9 +4582,9 @@ fn entity_render_image_binding(
                         image_key: image_key.clone(),
                         atlas_key: Some(atlas_key.clone()),
                         atlas_rect_key: Some(rect_key.clone()),
-                        texture_atlas: Some(TextureAtlas {
-                            layout: atlas.layout.clone(),
-                            index: *index,
+                        image_rect: atlas.uv_rects.get(rect_key).map(|rect| Rect {
+                            min: rect.min.as_vec2(),
+                            max: rect.max.as_vec2(),
                         }),
                         uv_scale_offset,
                     };
@@ -4603,9 +4596,9 @@ fn entity_render_image_binding(
                         image_key: format!("atlas:{atlas_key}"),
                         atlas_key: Some(atlas_key.clone()),
                         atlas_rect_key: Some(rect_key.clone()),
-                        texture_atlas: Some(TextureAtlas {
-                            layout: atlas.layout.clone(),
-                            index: *index,
+                        image_rect: atlas.uv_rects.get(rect_key).map(|rect| Rect {
+                            min: rect.min.as_vec2(),
+                            max: rect.max.as_vec2(),
                         }),
                         uv_scale_offset,
                     };
@@ -4620,7 +4613,7 @@ fn entity_render_image_binding(
         image_key: asset_path,
         atlas_key: None,
         atlas_rect_key: None,
-        texture_atlas: None,
+        image_rect: None,
         uv_scale_offset: Vec4::new(1.0, 1.0, 0.0, 0.0),
     }
 }
@@ -5664,6 +5657,128 @@ mod entity_atlas_tests {
         assert!(atlas.rects.contains_key("standing-0"));
         assert!(atlas.rects.contains_key("standing-1"));
         assert_eq!(atlas.rects.len(), 2);
+    }
+
+    #[test]
+    fn animation_page_switch_retains_each_atlas_layout() {
+        let mut app = entity_sync_test_app();
+        let state = |page_key: &str, image_name: &str, rect_key: &str| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": page_key,
+                    "width": 2048,
+                    "height": 2048,
+                    "imageUrl": format!("/bevy-entity-atlases/{image_name}"),
+                    "rects": [{
+                        "key": rect_key,
+                        "x": 0,
+                        "y": 0,
+                        "width": 32,
+                        "height": 48
+                    }]
+                }],
+                "entities": []
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("starter:p0", "starter.png", "standing-0"));
+        app.update();
+        let first_page_layout = app
+            .world()
+            .resource::<SceneRegistry>()
+            .entity_render_atlases["starter:p0"]
+            .layout
+            .id();
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("starter:p1", "starter-p1.png", "standing-1"));
+        app.update();
+        {
+            let registry = app.world().resource::<SceneRegistry>();
+            assert!(registry.entity_render_atlases.contains_key("starter:p0"));
+            assert!(registry.entity_render_atlases.contains_key("starter:p1"));
+        }
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("starter:p0", "starter.png", "standing-0"));
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert_eq!(
+            registry.entity_render_atlases["starter:p0"].layout.id(),
+            first_page_layout
+        );
+    }
+
+    #[test]
+    fn regular_animation_uses_direct_image_rect_on_one_retained_sprite() {
+        let mut app = entity_sync_test_app();
+        let state = |rect_key: &str, x: u32| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "starter:p4",
+                    "width": 2048,
+                    "height": 2048,
+                    "imageUrl": "/bevy-entity-atlases/starter-p4.png",
+                    "rects": [{
+                        "key": rect_key,
+                        "x": x,
+                        "y": 20,
+                        "width": 32,
+                        "height": 48
+                    }]
+                }],
+                "entities": [{
+                    "objectId": "1001",
+                    "layers": [{
+                        "key": "1001:body",
+                        "path": format!("/original-ui/CArmour/00/{rect_key}.png"),
+                        "atlasKey": "starter:p4",
+                        "atlasRectKey": rect_key,
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005
+                    }]
+                }]
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-0", 10));
+        app.update();
+        let entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        let first = app.world().get::<Sprite>(entity).expect("body sprite");
+        assert!(first.texture_atlas.is_none());
+        assert_eq!(first.rect, Some(Rect::new(10.0, 20.0, 42.0, 68.0)));
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-1", 50));
+        app.update();
+        let retained =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        assert_eq!(retained, entity);
+        let second = app
+            .world()
+            .get::<Sprite>(retained)
+            .expect("retained body sprite");
+        assert!(second.texture_atlas.is_none());
+        assert_eq!(second.rect, Some(Rect::new(50.0, 20.0, 82.0, 68.0)));
     }
 
     #[test]
