@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> VIS-03 Inventory locked-second-tab bounded automated checkpoint
+> (2026-08-28): revision `83f081149375fb402b9c7e6711fdb4e6bed68a0e`
+> binds Crystal's unexpanded array length 46 to the exact `Title/169` locked
+> tab, one local ButtonA click cue and no page/Gateway transition. Only the
+> real Crystal capacity domain `46,54,58,...,86` is accepted; missing or
+> illegal values fail closed, and an authoritative downgrade returns to page
+> one while clearing pending local item UI state. `Title/168,169,196,197,198,
+> 737,738,739` are required by Candidate packaging/verification. Focused 5/5,
+> Bevy native-ui 419/419, Windows 399/399, runtime 191/191 and both Candidate
+> script self-tests pass; final review is P0=0/P1=0. Production capacity
+> emission, `ExtraSlots8`/`@ADDINVENTORY`, `Prguse2/307` lock bars and
+> `Title/483..485` AddButton remain P2/follow-on work. No EXE, package, live
+> WSS, screenshot or device evidence was produced; same-EXE/DPI/soak/human/
+> signing and denominator gates remain open, so no global percentage is
+> claimed.
+
 > VIS-02 Healing additional bounded automated checkpoint (2026-08-28):
 > revision `24d9b73a30fc18edf0649283d14495c6f4900aff` reproduces the
 > Crystal caster `Magic/200..209` ten-frame 60 ms sequence plus exact

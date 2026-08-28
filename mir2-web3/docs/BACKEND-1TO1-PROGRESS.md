@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> VIS-03 Inventory locked-second-tab client-boundary checkpoint (2026-08-28):
+> revision `83f081149375fb402b9c7e6711fdb4e6bed68a0e` adds a fail-closed
+> Gateway read-model transform for an optional explicit `inventoryCapacity`,
+> but no simulation, shared-Zone, protocol, persistence or purchase authority.
+> Only `46,54,58,...,86` survives normalization; missing/illegal values keep
+> the native second tab locked and emit no Gateway intent. Focused 5/5, Bevy
+> 419/419, Windows 399/399, runtime 191/191 and Candidate script self-tests
+> pass; review is P0=0/P1=0. The production snapshot does not yet emit the
+> field, and Crystal expansion purchase/lock-bar behavior remains client/server
+> follow-on work. No exact-head package, live WSS or device evidence was
+> produced; all same-EXE/DPI/soak/human/signing/denominator gates remain open.
+> No backend or global percentage is claimed.
+
 > VIS-02 Healing client-boundary checkpoint (2026-08-28): revision
 > `24d9b73a30fc18edf0649283d14495c6f4900aff` changes no simulation,
 > shared-Zone, Gateway, protocol, persistence or Healing gameplay authority.

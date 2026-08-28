@@ -17,6 +17,7 @@ characterHudCheckpointRevision: 849f1f0b5120867d1358e0e7db9ba675e9866f9c
 helpDialogCheckpointRevision: e22f2aa4c683447b0e57805a580fd29e0a84c37c
 helpDialogMovableCheckpointRevision: 4545465a2e31a6646f247c55906764952d44cd58
 healingCheckpointRevision: 24d9b73a30fc18edf0649283d14495c6f4900aff
+inventoryLockedTabCheckpointRevision: 83f081149375fb402b9c7e6711fdb4e6bed68a0e
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -29,6 +30,45 @@ The dirty Crystal files are server files (`Server/MirEnvir/Envir.cs` and
 but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
+
+## Inventory locked-second-tab bounded automated checkpoint
+
+Revision `83f081149375fb402b9c7e6711fdb4e6bed68a0e` closes one additional
+VIS-03 renderer/model/package leaf. Crystal's unexpanded `User.Inventory`
+length is 46: six belt cells plus forty first-page carried-item cells. In that
+state native renders the second tab with exact `Title/169`. Clicking it emits
+one local ButtonA cue but cannot select a phantom page or enqueue any Gateway
+or gameplay intent. The first, second and quest tabs use the exact source state
+assets `Title/197|737`, `Title/169|738|168` and `Title/198|739` over the
+`Title/196` Inventory background.
+
+The authoritative read model accepts only capacity values Crystal can create:
+`46,54,58,62,66,70,74,78,82,86`. Crystal's first expansion adds eight cells
+and each later expansion adds four. Missing and illegal values, including
+`47,50,87,100,65535`, normalize to 46 instead of fabricating expansion.
+Occupied item count/slot is not treated as purchase evidence. When authority
+downgrades while page two is selected, native returns to page one and clears
+inspect, pending inventory-operation and drop-confirmation state.
+
+Candidate package and verifier scripts now require
+`Title/168,169,196,197,198,737,738,739`; the verifier's missing-169 probe proves
+the locked state fails closed. Focused model/tab/Gateway tests pass 5/5, the
+full Bevy native-ui suite 419/419, Windows 399/399 and runtime 191/191. Package
+and verifier self-tests pass, and independent final review reports P0=0/P1=0.
+
+This is not complete Inventory parity. Production world snapshots do not yet
+emit authoritative `inventoryCapacity`, so expanded-empty accounts remain
+locked. Crystal's locked-tab `ExtraSlots8` dialog, `@ADDINVENTORY` request,
+expanded-page `Prguse2/307` lock bars, partial open-level states and
+`Title/483..485` AddButton are not implemented or claimed. No exact-head
+Candidate, package, EXE, launch, live-WSS transcript, GPU/audio capture or human
+evidence was produced. Same-EXE pixels/audio, real 100/125/150% DPI, native
+30-minute soak, human visual/feel, clean-source/complete-denominator closure,
+legal asset packaging and formal publisher signing remain required. VIS-03
+stays in progress and `globalParityPercent` remains null.
+
+The detailed evidence report is
+`docs/generated/player-qa/windows-visual-parity/VIS-03-INVENTORY-LOCKED-TAB-REPORT.md`.
 
 ## Healing bounded automated checkpoint
 

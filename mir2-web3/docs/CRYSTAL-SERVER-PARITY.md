@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> VIS-03 Inventory locked-second-tab server-client note (2026-08-28): revision
+> `83f081149375fb402b9c7e6711fdb4e6bed68a0e` changes no authoritative
+> inventory, purchase, protocol, simulation or Zone semantics. The optional
+> Gateway snapshot field is normalized at the client boundary to Crystal's
+> exact `46,54,58,...,86` domain; absence/invalidity locks page two and the
+> local click emits only ButtonA. Focused 5/5, Bevy 419/419, Windows 399/399,
+> runtime 191/191 and package/verifier self-tests pass; final review is
+> P0=0/P1=0. Production `inventoryCapacity` emission and the Crystal
+> `ExtraSlots8`/`@ADDINVENTORY` expansion chain remain open. No exact-head EXE,
+> package, live WSS or screenshot was produced. Same-EXE/DPI/soak/human/
+> signing/denominator gates remain open; global parity remains unreported.
+
 > VIS-02 Healing server-client note (2026-08-28): revision
 > `24d9b73a30fc18edf0649283d14495c6f4900aff` adds no server packet or
 > authority. The caster `Magic/200..209`, target-owned `Magic/370..379`, exact

@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 Inventory locked-second-tab bounded checkpoint (2026-08-28):
+> implementation revision `83f081149375fb402b9c7e6711fdb4e6bed68a0e`
+> reproduces the unexpanded length-46 `Title/169` state, local ButtonA cue,
+> fail-closed page selection and exact legal capacity sequence
+> `46,54,58,...,86`. Missing/illegal authority cannot fabricate page two;
+> a downgrade closes it and clears transient local item state. Candidate
+> scripts require the eight tab/background assets. Focused 5/5, Bevy 419/419,
+> Windows 399/399, runtime 191/191 and both script self-tests pass; independent
+> review is P0=0/P1=0. This closes only the locked-tab renderer/model/package
+> leaf, not the expanded page, purchase flow, production capacity source,
+> Inventory, VIS-03 or visual acceptance. Same-EXE/live-WSS, real DPI, soak,
+> human feel, signing and denominator gates remain open;
+> `globalParityPercent` remains null.
+
 > VIS-02 Healing additional bounded checkpoint (2026-08-28): implementation
 > revision `24d9b73a30fc18edf0649283d14495c6f4900aff` reproduces the
 > Crystal caster `Magic/200..209`/`M61-0.wav` and immediate target-owned
