@@ -83,14 +83,15 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
             let mut message = format!(
                 "no Mir2 asset bundle found. Place a complete mir2-assets directory beside the executable, or set {ASSET_ROOT_ENV}."
             );
-            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json.");
+            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png.");
             for (candidate, diag) in diagnostics {
                 message.push_str(&format!(
-                    "\n  candidate {} -> entity={} map={} effect={} complete={}",
+                    "\n  candidate {} -> entity={} map={} effect={} items={} complete={}",
                     candidate.display(),
                     diag.has_entity_manifest,
                     diag.has_map_manifest,
                     diag.has_effect_manifest,
+                    diag.has_item_icons,
                     diag.is_complete
                 ));
             }
@@ -101,11 +102,12 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
 
 fn incomplete_asset_error(path: &Path, diagnostics: AssetRootDiagnostics) -> String {
     format!(
-        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} effect_manifest={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, and original-effects/effects.generated.json. The window will not open with a missing pack.",
+        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} effect_manifest={} item_icons={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, and original-ui/Items/3792.png. The window will not open with a missing pack.",
         path.display(),
         diagnostics.has_entity_manifest,
         diagnostics.has_map_manifest,
-        diagnostics.has_effect_manifest
+        diagnostics.has_effect_manifest,
+        diagnostics.has_item_icons
     )
 }
 
@@ -141,6 +143,7 @@ pub struct AssetRootDiagnostics {
     pub has_entity_manifest: bool,
     pub has_map_manifest: bool,
     pub has_effect_manifest: bool,
+    pub has_item_icons: bool,
 }
 
 pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
@@ -153,12 +156,18 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     let has_effect_manifest = candidate
         .join("original-effects/effects.generated.json")
         .is_file();
-    let is_complete = has_entity_manifest && has_map_manifest && has_effect_manifest;
+    let item_root = candidate.join("original-ui/Items");
+    let has_item_icons = item_root.join("meta.json").is_file()
+        && item_root.join("0.png").is_file()
+        && item_root.join("3792.png").is_file();
+    let is_complete =
+        has_entity_manifest && has_map_manifest && has_effect_manifest && has_item_icons;
     AssetRootDiagnostics {
         is_complete,
         has_entity_manifest,
         has_map_manifest,
         has_effect_manifest,
+        has_item_icons,
     }
 }
 
@@ -188,6 +197,7 @@ mod tests {
         assert!(diagnostics.has_entity_manifest);
         assert!(diagnostics.has_map_manifest);
         assert!(diagnostics.has_effect_manifest);
+        assert!(diagnostics.has_item_icons);
         assert!(diagnostics.is_complete);
         match resolve_asset_root() {
             AssetRootStatus::Found(path) => assert_eq!(path, root),
@@ -215,7 +225,41 @@ mod tests {
         assert!(diagnostics.has_entity_manifest);
         assert!(!diagnostics.has_map_manifest);
         assert!(!diagnostics.has_effect_manifest);
+        assert!(!diagnostics.has_item_icons);
         assert!(!diagnostics.is_complete);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn complete_render_manifests_without_item_icons_fail_closed() {
+        let dir =
+            std::env::temp_dir().join(format!("mir2-asset-missing-items-{}", std::process::id()));
+        for relative in [
+            "bevy-entity-atlases/manifest.json",
+            "generated/map-atlas/manifest.json",
+            "original-effects/effects.generated.json",
+        ] {
+            let path = dir.join(relative);
+            std::fs::create_dir_all(path.parent().expect("asset parent")).expect("temp asset dir");
+            std::fs::write(path, "{}").expect("asset manifest");
+        }
+
+        let diagnostics = diagnose_asset_root(&dir);
+        assert!(diagnostics.has_entity_manifest);
+        assert!(diagnostics.has_map_manifest);
+        assert!(diagnostics.has_effect_manifest);
+        assert!(!diagnostics.has_item_icons);
+        assert!(!diagnostics.is_complete);
+
+        let item_root = dir.join("original-ui/Items");
+        std::fs::create_dir_all(&item_root).expect("item icon root");
+        std::fs::write(item_root.join("meta.json"), "{}").expect("item meta");
+        std::fs::write(item_root.join("0.png"), []).expect("first item icon");
+        std::fs::write(item_root.join("3792.png"), []).expect("last item icon");
+        let complete = diagnose_asset_root(&dir);
+        assert!(complete.has_item_icons);
+        assert!(complete.is_complete);
+
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

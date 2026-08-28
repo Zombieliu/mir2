@@ -32,6 +32,9 @@ for required in \
   "$FALLBACK_UI_SOURCE/ChrSel/375.png" \
   "$FALLBACK_UI_SOURCE/ChrSel/600.png" \
   "$FALLBACK_UI_SOURCE/ChrSel/895.png" \
+  "$FALLBACK_UI_SOURCE/Items/meta.json" \
+  "$FALLBACK_UI_SOURCE/Items/0.png" \
+  "$FALLBACK_UI_SOURCE/Items/3792.png" \
   "$FALLBACK_UI_SOURCE/MMap/101.png" \
   "$FALLBACK_UI_SOURCE/Prguse/1080.png" \
   "$FALLBACK_UI_SOURCE/Prguse/1081.png" \
@@ -79,6 +82,7 @@ mkdir -p \
   "$DESTINATION/generated/native-map-keyed" \
   "$DESTINATION/crystal-map-pack" \
   "$DESTINATION/original-ui/ChrSel" \
+  "$DESTINATION/original-ui/Items" \
   "$DESTINATION/original-ui/MMap" \
   "$DESTINATION/original-ui/Prguse" \
   "$DESTINATION/original-ui/UI_32bit" \
@@ -93,6 +97,7 @@ cp -R "$MAP_ATLAS_SOURCE/." "$DESTINATION/generated/map-atlas/"
 cp -R "$NATIVE_KEYED_MAP_SOURCE/." "$DESTINATION/generated/native-map-keyed/"
 cp -R "$MAP_PACK_SOURCE/." "$DESTINATION/crystal-map-pack/"
 cp -R "$FALLBACK_UI_SOURCE/ChrSel/." "$DESTINATION/original-ui/ChrSel/"
+cp -R "$FALLBACK_UI_SOURCE/Items/." "$DESTINATION/original-ui/Items/"
 cp -R "$FALLBACK_UI_SOURCE/MMap/." "$DESTINATION/original-ui/MMap/"
 cp -R "$FALLBACK_UI_SOURCE/Prguse/." "$DESTINATION/original-ui/Prguse/"
 cp -R "$FALLBACK_UI_SOURCE/UI_32bit/." "$DESTINATION/original-ui/UI_32bit/"
@@ -112,6 +117,9 @@ test -f "$DESTINATION/original-ui/ChrSel/20.png"
 test -f "$DESTINATION/original-ui/ChrSel/375.png"
 test -f "$DESTINATION/original-ui/ChrSel/600.png"
 test -f "$DESTINATION/original-ui/ChrSel/895.png"
+test -f "$DESTINATION/original-ui/Items/meta.json"
+test -f "$DESTINATION/original-ui/Items/0.png"
+test -f "$DESTINATION/original-ui/Items/3792.png"
 test -f "$DESTINATION/original-ui/MMap/101.png"
 test -s "$DESTINATION/original-ui/Prguse/1080.png"
 test -s "$DESTINATION/original-ui/Prguse/1081.png"
@@ -140,5 +148,12 @@ test -f "$DESTINATION/original-ui/Monster/000/0.png"
 test -f "$DESTINATION/original-ui/NPC/00/0.png"
 test -s "$DESTINATION/original-ui/Sound/Login2.wav"
 test -s "$DESTINATION/original-ui/Sound/Select2.wav"
+
+SOURCE_ITEMS_FILE_COUNT="$(find "$FALLBACK_UI_SOURCE/Items" -type f | wc -l | tr -d '[:space:]')"
+DEST_ITEMS_FILE_COUNT="$(find "$DESTINATION/original-ui/Items" -type f | wc -l | tr -d '[:space:]')"
+if [[ "$SOURCE_ITEMS_FILE_COUNT" != "$DEST_ITEMS_FILE_COUNT" ]]; then
+  echo "item icon closure mismatch: source=$SOURCE_ITEMS_FILE_COUNT dest=$DEST_ITEMS_FILE_COUNT" >&2
+  exit 1
+fi
 
 echo "[platform-windows] packaged native assets: $DESTINATION"

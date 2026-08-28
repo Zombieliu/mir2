@@ -203,6 +203,11 @@ struct RuntimeMapCameraOffset {
 struct SceneRegistry {
     entities: HashMap<String, SceneEntityHandles>,
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
+    /// Last committed world-space root for each retained actor composite.
+    /// During a deferred image handoff every old body/hair/weapon/mount layer
+    /// moves by the same root delta, preserving the old frame's internal
+    /// geometry until the complete replacement is ready.
+    entity_render_actor_roots: HashMap<String, Vec3>,
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     effect_render: HashMap<String, EffectRenderLayerHandle>,
     effect_render_masks: HashMap<String, EffectRenderLayerHandle>,
@@ -3232,6 +3237,7 @@ fn clear_scene_registry(
             additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
         }
     }
+    registry.entity_render_actor_roots.clear();
     registry.entity_render_atlases.clear();
 
     // Keep the shadow handles until cleanup_reset_effect_shadows can remove
@@ -4263,6 +4269,7 @@ fn sync_entity_render_layers(
     }
 
     let mut alive = HashSet::new();
+    let mut alive_actor_objects = HashSet::new();
     sync_entity_render_atlas_layouts(
         snapshot,
         &asset_server,
@@ -4316,32 +4323,74 @@ fn sync_entity_render_layers(
         // A player is one visual composite. Preflight every current body/hair/
         // weapon layer before mutating any of them; otherwise one ready atlas
         // page can advance while another layer still retains its previous page,
-        // briefly assembling one actor from different action frames.
-        let has_retained_actor_layer = entity.layers.iter().any(|layer| {
-            entity_render_layer_is_actor(entity, layer)
-                && registry
-                    .entity_render_layers
-                    .contains_key(&entity_render_layer_key(entity, layer))
-        });
+        // briefly assembling one actor from different action frames. The
+        // retained set comes from the registry rather than only this snapshot:
+        // an optional old weapon/mount omitted by a deferred replacement still
+        // belongs to the visible old composite and must not be cleaned up early.
+        let retained_actor_keys = registry
+            .entity_render_layers
+            .keys()
+            .filter(|key| entity_render_key_is_actor(&entity.object_id, key))
+            .cloned()
+            .collect::<Vec<_>>();
+        let has_retained_actor_layer = !retained_actor_keys.is_empty();
+        let incoming_actor_layer_count = entity
+            .layers
+            .iter()
+            .filter(|layer| entity_render_layer_is_actor(entity, layer))
+            .count();
         let defer_actor_composite = has_retained_actor_layer
-            && entity.layers.iter().any(|layer| {
-                if !entity_render_layer_is_actor(entity, layer) {
-                    return false;
-                }
-                let layer_key = entity_render_layer_key(entity, layer);
-                let image_binding =
-                    entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
-                let image_source_changed =
-                    registry
+            && (incoming_actor_layer_count == 0
+                || entity.layers.iter().any(|layer| {
+                    if !entity_render_layer_is_actor(entity, layer) {
+                        return false;
+                    }
+                    let layer_key = entity_render_layer_key(entity, layer);
+                    let image_binding =
+                        entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
+                    let image_source_changed = registry
                         .entity_render_layers
                         .get(&layer_key)
                         .map_or(true, |handle| {
                             handle.image_key != image_binding.image_key
                                 || handle.atlas_key != image_binding.atlas_key
                         });
-                image_source_changed
-                    && !entity_render_image_is_ready(&image_binding, &asset_server, &atlas_assets)
-            });
+                    image_source_changed
+                        && !entity_render_image_is_ready(
+                            &image_binding,
+                            &asset_server,
+                            &atlas_assets,
+                        )
+                }));
+
+        let actor_root = entity_render_actor_root(snapshot, entity, motion_offset);
+        if has_retained_actor_layer || incoming_actor_layer_count > 0 {
+            alive_actor_objects.insert(entity.object_id.clone());
+        }
+        if defer_actor_composite {
+            alive.extend(retained_actor_keys.iter().cloned());
+            if let (Some(previous_root), Some(current_root)) = (
+                registry
+                    .entity_render_actor_roots
+                    .get(&entity.object_id)
+                    .copied(),
+                actor_root,
+            ) {
+                let delta = current_root - previous_root;
+                for key in &retained_actor_keys {
+                    if let Some(handle) = registry.entity_render_layers.get(key) {
+                        if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                            transform.translation += delta;
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(actor_root) = actor_root {
+            registry
+                .entity_render_actor_roots
+                .insert(entity.object_id.clone(), actor_root);
+        }
 
         for layer in &entity.layers {
             let layer_key = entity_render_layer_key(entity, layer);
@@ -4349,15 +4398,6 @@ fn sync_entity_render_layers(
             let position = entity_render_layer_position(snapshot, layer, motion_offset);
             let actor_layer = entity_render_layer_is_actor(entity, layer);
             if actor_layer && defer_actor_composite {
-                if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
-                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
-                        transform.translation = position;
-                        if layer.additive {
-                            transform.scale =
-                                Vec3::new(layer.width.max(1.0), layer.height.max(1.0), 1.0);
-                        }
-                    }
-                }
                 continue;
             }
             let opacity = layer.opacity.unwrap_or(1.0);
@@ -4514,6 +4554,10 @@ fn sync_entity_render_layers(
         }
     }
 
+    registry
+        .entity_render_actor_roots
+        .retain(|object_id, _| alive_actor_objects.contains(object_id));
+
     presentation_poses.set_applied_entity_center(entity_center);
 }
 
@@ -4535,8 +4579,12 @@ fn entity_render_layer_key(entity: &EntityRenderEntry, layer: &EntityRenderLayer
 }
 
 fn entity_render_layer_is_actor(entity: &EntityRenderEntry, layer: &EntityRenderLayer) -> bool {
-    let prefix = format!("{}:", entity.object_id);
-    layer.key.strip_prefix(&prefix).is_some_and(|role| {
+    entity_render_key_is_actor(&entity.object_id, &layer.key)
+}
+
+fn entity_render_key_is_actor(object_id: &str, key: &str) -> bool {
+    let prefix = format!("{object_id}:");
+    key.strip_prefix(&prefix).is_some_and(|role| {
         matches!(
             role,
             "mount" | "weapon-primary" | "weapon-secondary" | "body" | "hair"
@@ -4736,7 +4784,42 @@ fn clear_entity_render_layers(
             additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
         }
     }
+    registry.entity_render_actor_roots.clear();
     registry.entity_render_atlases.clear();
+}
+
+/// Stable world-space root shared by every actor layer in the native producer.
+/// Frame-specific sprite offsets live in each layer's `left`/`top`; using those
+/// offsets while a replacement frame is only partially ready tears the retained
+/// body/hair/weapon composite apart. Grid/center coordinates recover the common
+/// root so a deferred old composite can move as one rigid group.
+fn entity_render_actor_root(
+    snapshot: &EntityRenderState,
+    entity: &EntityRenderEntry,
+    offset: Vec2,
+) -> Option<Vec3> {
+    const CELL_WIDTH: f32 = 48.0;
+    const CELL_HEIGHT: f32 = 32.0;
+    const ENTITY_DEPTH_GAIN: i64 = 10;
+    const WORLD_DEPTH_DIVISOR: f32 = 100_000.0;
+
+    let (center_x, center_y) = snapshot.center_x.zip(snapshot.center_y)?;
+    let (grid_x, grid_y) = entity.grid_x.zip(entity.grid_y)?;
+    let origin_x = (snapshot.stage_width * 0.5 / CELL_WIDTH).floor() * CELL_WIDTH;
+    let origin_y = ((snapshot.stage_height * 0.5 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
+    let root_left = origin_x + (i64::from(grid_x) - i64::from(center_x)) as f32 * CELL_WIDTH;
+    let root_top = origin_y + (i64::from(grid_y) - i64::from(center_y)) as f32 * CELL_HEIGHT;
+    let depth = i64::from(grid_y)
+        .saturating_mul(1_000)
+        .saturating_add(i64::from(grid_x).saturating_mul(10))
+        .saturating_mul(ENTITY_DEPTH_GAIN) as f32
+        / WORLD_DEPTH_DIVISOR;
+
+    Some(Vec3::new(
+        root_left + offset.x - snapshot.stage_width * 0.5,
+        snapshot.stage_height * 0.5 - (root_top + offset.y),
+        depth,
+    ))
 }
 
 /// Screen→world position for one entity layer.
@@ -5940,26 +6023,39 @@ mod entity_atlas_tests {
             "enabled": true,
             "stageWidth": 1024,
             "stageHeight": 768,
+            "centerX": 10,
+            "centerY": 10,
             "entities": [{
                 "objectId": "1001",
+                "gridX": 10,
+                "gridY": 10,
                 "layers": [
                     {
                         "key": "1001:body",
                         "path": "/original-ui/CArmour/00/body-old.png",
-                        "left": 480,
-                        "top": 352,
+                        "left": 478,
+                        "top": 350,
                         "width": 32,
                         "height": 48,
-                        "z": 50005
+                        "z": 101005
                     },
                     {
                         "key": "1001:hair",
                         "path": "/original-ui/CHair/00/hair-old.png",
-                        "left": 480,
-                        "top": 352,
-                        "width": 32,
-                        "height": 48,
-                        "z": 50006
+                        "left": 482,
+                        "top": 345,
+                        "width": 24,
+                        "height": 40,
+                        "z": 101006
+                    },
+                    {
+                        "key": "1001:weapon-primary",
+                        "path": "/original-ui/CWeapon/00/weapon-old.png",
+                        "left": 468,
+                        "top": 348,
+                        "width": 40,
+                        "height": 50,
+                        "z": 101004
                     }
                 ]
             }]
@@ -5970,12 +6066,28 @@ mod entity_atlas_tests {
             .snapshot = Some(initial);
         app.update();
 
-        let initial_keys = {
-            let registry = app.world().resource::<SceneRegistry>();
-            [
+        let (initial_entities, initial_keys, initial_positions) = {
+            let world = app.world();
+            let registry = world.resource::<SceneRegistry>();
+            let entities = [
+                registry.entity_render_layers["1001:body"].entity,
+                registry.entity_render_layers["1001:hair"].entity,
+                registry.entity_render_layers["1001:weapon-primary"].entity,
+            ];
+            let keys = [
                 registry.entity_render_layers["1001:body"].image_key.clone(),
                 registry.entity_render_layers["1001:hair"].image_key.clone(),
-            ]
+                registry.entity_render_layers["1001:weapon-primary"]
+                    .image_key
+                    .clone(),
+            ];
+            let positions = entities.map(|entity| {
+                world
+                    .get::<Transform>(entity)
+                    .expect("initial actor transform")
+                    .translation
+            });
+            (entities, keys, positions)
         };
 
         let ready_body_image = app
@@ -5990,40 +6102,60 @@ mod entity_atlas_tests {
             "enabled": true,
             "stageWidth": 1024,
             "stageHeight": 768,
-            "atlases": [{
-                "key": "ready:p0",
-                "width": 64,
-                "height": 64,
-                "rects": [{
-                    "key": "body-new",
-                    "x": 0,
-                    "y": 0,
-                    "width": 32,
-                    "height": 48
-                }]
-            }],
+            "centerX": 10,
+            "centerY": 10,
+            "atlases": [
+                {
+                    "key": "ready:p0",
+                    "width": 64,
+                    "height": 64,
+                    "rects": [{
+                        "key": "body-new",
+                        "x": 0,
+                        "y": 0,
+                        "width": 48,
+                        "height": 56
+                    }]
+                },
+                {
+                    "key": "waiting:p0",
+                    "width": 64,
+                    "height": 64,
+                    "rects": [{
+                        "key": "hair-new",
+                        "x": 0,
+                        "y": 0,
+                        "width": 20,
+                        "height": 30
+                    }]
+                }
+            ],
             "entities": [{
                 "objectId": "1001",
+                "gridX": 11,
+                "gridY": 11,
                 "layers": [
                     {
                         "key": "1001:body",
                         "path": "/original-ui/CArmour/00/body-new.png",
                         "atlasKey": "ready:p0",
                         "atlasRectKey": "body-new",
-                        "left": 480,
-                        "top": 352,
-                        "width": 32,
-                        "height": 48,
-                        "z": 50005
+                        "left": 600,
+                        "top": 100,
+                        "width": 48,
+                        "height": 56,
+                        "z": 111105
                     },
                     {
                         "key": "1001:hair",
                         "path": "/original-ui/CHair/00/hair-unready.png",
-                        "left": 480,
-                        "top": 352,
-                        "width": 32,
-                        "height": 48,
-                        "z": 50006
+                        "atlasKey": "waiting:p0",
+                        "atlasRectKey": "hair-new",
+                        "left": 300,
+                        "top": 500,
+                        "width": 20,
+                        "height": 30,
+                        "z": 111106
                     }
                 ]
             }]
@@ -6034,14 +6166,93 @@ mod entity_atlas_tests {
             .snapshot = Some(mixed_ready);
         app.update();
 
-        let registry = app.world().resource::<SceneRegistry>();
+        {
+            let world = app.world();
+            let registry = world.resource::<SceneRegistry>();
+            assert_eq!(
+                registry.entity_render_layers["1001:body"].image_key, initial_keys[0],
+                "ready body must wait for the unready hair layer"
+            );
+            assert_eq!(
+                registry.entity_render_layers["1001:hair"].image_key, initial_keys[1],
+                "hair retains the same prior composite frame"
+            );
+            assert_eq!(
+                registry.entity_render_layers["1001:weapon-primary"].image_key, initial_keys[2],
+                "an old optional weapon remains until the replacement composite commits"
+            );
+
+            for (index, entity) in initial_entities.iter().copied().enumerate() {
+                let deferred = world
+                    .get::<Transform>(entity)
+                    .expect("retained deferred actor transform")
+                    .translation;
+                assert_eq!(
+                    (deferred - initial_positions[index]).truncate(),
+                    Vec2::new(48.0, -32.0),
+                    "every old actor layer must move by one shared x/y root delta"
+                );
+                assert!(
+                    ((deferred - initial_positions[index]).z - 0.101).abs() < 0.000_001,
+                    "every old actor layer must move by the current tile depth delta"
+                );
+            }
+        }
+
+        app.update();
+        for (index, entity) in initial_entities.iter().copied().enumerate() {
+            let repeated = app
+                .world()
+                .get::<Transform>(entity)
+                .expect("repeated deferred actor transform")
+                .translation;
+            let delta = repeated - initial_positions[index];
+            assert_eq!(delta.truncate(), Vec2::new(48.0, -32.0));
+            assert!(
+                (delta.z - 0.101).abs() < 0.000_001,
+                "repeating one deferred snapshot must not reapply its root delta"
+            );
+        }
+
+        let ready_hair_image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("waiting:p0".to_owned(), ready_hair_image);
+        app.update();
+
+        let world = app.world();
+        let registry = world.resource::<SceneRegistry>();
         assert_eq!(
-            registry.entity_render_layers["1001:body"].image_key, initial_keys[0],
-            "ready body must wait for the unready hair layer"
+            registry.entity_render_layers["1001:body"].image_key,
+            "atlas:ready:p0"
         );
         assert_eq!(
-            registry.entity_render_layers["1001:hair"].image_key, initial_keys[1],
-            "hair retains the same prior composite frame"
+            registry.entity_render_layers["1001:hair"].image_key,
+            "atlas:waiting:p0"
+        );
+        assert!(
+            !registry
+                .entity_render_layers
+                .contains_key("1001:weapon-primary"),
+            "the omitted old weapon is removed only after the new composite is ready"
+        );
+        assert_eq!(
+            world
+                .get::<Transform>(registry.entity_render_layers["1001:body"].entity)
+                .expect("committed body transform")
+                .translation,
+            Vec3::new(112.0, 256.0, 1.11105)
+        );
+        assert_eq!(
+            world
+                .get::<Transform>(registry.entity_render_layers["1001:hair"].entity)
+                .expect("committed hair transform")
+                .translation,
+            Vec3::new(-202.0, -131.0, 1.11106)
         );
     }
 
