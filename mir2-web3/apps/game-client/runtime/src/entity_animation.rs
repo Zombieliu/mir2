@@ -51,6 +51,7 @@ pub enum AnimationAction {
     Attack3,
     Attack4,
     AttackRange1,
+    AttackRange2,
     DashAttack,
     Spell,
     Struck,
@@ -183,6 +184,10 @@ impl AnimationCatalog {
         catalog.add_default(
             AnimationAction::AttackRange1,
             FrameDescriptor::from_crystal(96, 8, 0, 100, false),
+        );
+        catalog.add_default(
+            AnimationAction::AttackRange2,
+            FrameDescriptor::from_crystal(160, 8, 0, 100, false),
         );
         catalog.add_default(
             AnimationAction::DashAttack,
@@ -1105,6 +1110,10 @@ mod tests {
         assert_eq!(
             player.descriptor(AnimationAction::DashAttack),
             Some(&FrameDescriptor::from_crystal(80, 3, 3, 100, false))
+        );
+        assert_eq!(
+            player.descriptor(AnimationAction::AttackRange2),
+            Some(&FrameDescriptor::from_crystal(160, 8, 0, 100, false))
         );
         assert_eq!(
             player.descriptor(AnimationAction::Struck),

@@ -275,6 +275,7 @@ fn parse_action(value: &str) -> Option<AnimationAction> {
         "attack3" => Some(AnimationAction::Attack3),
         "attack4" => Some(AnimationAction::Attack4),
         "attackRange1" => Some(AnimationAction::AttackRange1),
+        "attackRange2" => Some(AnimationAction::AttackRange2),
         "dashAttack" => Some(AnimationAction::DashAttack),
         "spell" => Some(AnimationAction::Spell),
         "struck" => Some(AnimationAction::Struck),
@@ -295,6 +296,7 @@ fn normalize_action(kind: EntityKind, action: AnimationAction) -> AnimationActio
             | AnimationAction::Attack3
             | AnimationAction::Attack4
             | AnimationAction::AttackRange1
+            | AnimationAction::AttackRange2
             | AnimationAction::Spell,
         ) => AnimationAction::Attack1,
         _ => action,
@@ -314,6 +316,7 @@ fn action_name(action: AnimationAction) -> &'static str {
         AnimationAction::Attack3 => "attack3",
         AnimationAction::Attack4 => "attack4",
         AnimationAction::AttackRange1 => "attackRange1",
+        AnimationAction::AttackRange2 => "attackRange2",
         AnimationAction::DashAttack => "dashAttack",
         AnimationAction::Spell => "spell",
         AnimationAction::Struck => "struck",
@@ -337,7 +340,9 @@ fn animation_state_name(action: AnimationAction) -> &'static str {
         | AnimationAction::Attack3
         | AnimationAction::Attack4
         | AnimationAction::DashAttack => "attackMelee",
-        AnimationAction::AttackRange1 | AnimationAction::Spell => "attackRange",
+        AnimationAction::AttackRange1 | AnimationAction::AttackRange2 | AnimationAction::Spell => {
+            "attackRange"
+        }
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "dying",
         AnimationAction::Dead => "dead",
@@ -389,6 +394,17 @@ mod tests {
         assert_eq!(repeated.poses[0].action, "attack1");
         assert_eq!(repeated.poses[0].logical_frame_index, 2);
         assert!(repeated.errors.is_empty());
+    }
+
+    #[test]
+    fn attack_range_two_round_trips_as_the_ranged_animation_state() {
+        let mut bridge = AnimationBridge::new("0:player".to_owned(), 7, 1_000);
+        let resolved = bridge.resolve(input(1_000, "attackRange2", Some("magic:122:1")));
+
+        assert_eq!(resolved.poses[0].action, "attackRange2");
+        assert_eq!(resolved.poses[0].animation_state, "attackRange");
+        assert_eq!(resolved.poses[0].logical_frame_index, 0);
+        assert!(resolved.errors.is_empty());
     }
 
     #[test]

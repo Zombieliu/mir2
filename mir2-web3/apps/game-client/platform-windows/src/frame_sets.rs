@@ -97,6 +97,12 @@ fn build_archer_player_catalog() -> AnimationCatalog {
         )
         .expect("Crystal archer running descriptor is valid");
     catalog
+        .insert(
+            AnimationAction::AttackRange2,
+            FrameDescriptor::from_crystal(160, 8, 0, 100, false),
+        )
+        .expect("Crystal archer range-two descriptor is valid");
+    catalog
 }
 
 fn build_mounted_player_catalog() -> AnimationCatalog {
@@ -147,6 +153,7 @@ fn build_mounted_player_catalog() -> AnimationCatalog {
         AnimationAction::Attack3,
         AnimationAction::Attack4,
         AnimationAction::AttackRange1,
+        AnimationAction::AttackRange2,
         AnimationAction::Spell,
     ] {
         catalog
@@ -220,6 +227,7 @@ fn build_animation_catalog(source: &HashMap<String, SourceAction>) -> Option<Ani
         AnimationAction::Attack3,
         AnimationAction::Attack4,
         AnimationAction::AttackRange1,
+        AnimationAction::AttackRange2,
         AnimationAction::DashAttack,
         AnimationAction::Spell,
         AnimationAction::Struck,
@@ -266,6 +274,7 @@ fn resolve_source_action<'a>(
         AnimationAction::Attack3 => &["Attack3", "Attack1", "Standing"],
         AnimationAction::Attack4 => &["Attack4", "Attack1", "Standing"],
         AnimationAction::AttackRange1 => &["AttackRange1", "Attack1", "Standing"],
+        AnimationAction::AttackRange2 => &["AttackRange2", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::DashAttack => &["DashAttack", "Attack1", "Walking", "Standing"],
         AnimationAction::Spell => &["Spell", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::Struck => &["Struck", "Standing"],
@@ -443,6 +452,10 @@ mod tests {
             Some(&FrameDescriptor::from_crystal(584, 6, 0, 100, false))
         );
         assert_eq!(
+            catalog.descriptor(AnimationAction::AttackRange2),
+            Some(&FrameDescriptor::from_crystal(584, 6, 0, 100, false))
+        );
+        assert_eq!(
             catalog.descriptor(AnimationAction::Die),
             Some(&FrameDescriptor::from_crystal(384, 4, 0, 100, false))
         );
@@ -457,7 +470,7 @@ mod tests {
     }
 
     #[test]
-    fn archer_alt_library_uses_its_compact_walk_and_run_tables() {
+    fn archer_alt_library_uses_its_compact_walk_run_and_range_two_tables() {
         let catalog = animation_catalog_for(EntityKind::Player, "ARArmour/00", false);
         assert_eq!(
             catalog.descriptor(AnimationAction::Walking),
@@ -470,6 +483,10 @@ mod tests {
         assert_eq!(
             catalog.descriptor(AnimationAction::AttackRange1),
             AnimationCatalog::crystal_player().descriptor(AnimationAction::AttackRange1)
+        );
+        assert_eq!(
+            catalog.descriptor(AnimationAction::AttackRange2),
+            Some(&FrameDescriptor::from_crystal(160, 8, 0, 100, false))
         );
     }
 }

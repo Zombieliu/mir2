@@ -446,7 +446,10 @@ fn available_sprite_library(sprite: Option<&Value>, field: &str) -> Option<Strin
 fn uses_archer_alt(action: AnimationAction) -> bool {
     matches!(
         action,
-        AnimationAction::Walking | AnimationAction::Running | AnimationAction::AttackRange1
+        AnimationAction::Walking
+            | AnimationAction::Running
+            | AnimationAction::AttackRange1
+            | AnimationAction::AttackRange2
     )
 }
 
@@ -611,6 +614,7 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         "attack3" => AnimationAction::Attack3,
         "attack4" => AnimationAction::Attack4,
         "attackRange1" => AnimationAction::AttackRange1,
+        "attackRange2" => AnimationAction::AttackRange2,
         "dashAttack" => AnimationAction::DashAttack,
         "spell" => AnimationAction::Spell,
         "struck" => AnimationAction::Struck,
@@ -1946,7 +1950,7 @@ mod tests {
     }
 
     #[test]
-    fn archer_walk_uses_alt_body_hair_and_single_weapon_then_returns_to_common_standing() {
+    fn archer_walk_and_range_two_use_alt_layers_then_standing_returns_to_common_body() {
         let payload = json!({
             "sceneView": { "center": { "x": 9, "y": 7 } },
             "entities": [{
@@ -2004,6 +2008,19 @@ mod tests {
                 .as_str()
                 .is_some_and(|path| path.ends_with("/ARWeapon/00 S/24.png"))
         }));
+
+        let archer = &payload["entities"][0];
+        let range_two = resolved_native_sprite(archer, AnimationAction::AttackRange2);
+        assert_eq!(range_two.body_library, "/original-ui/ARArmour/00");
+        assert_eq!(
+            range_two.hair_library.as_deref(),
+            Some("/original-ui/ARHair/00")
+        );
+        assert_eq!(
+            range_two.weapon_library.as_deref(),
+            Some("/original-ui/ARWeapon/00 S")
+        );
+        assert!(range_two.weapon_library_secondary.is_none());
 
         let standing = build_entity_render_state_with_poses(
             &payload,

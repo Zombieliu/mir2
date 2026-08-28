@@ -691,6 +691,7 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
         "attack3" => Some(AnimationAction::Attack3),
         "attack4" => Some(AnimationAction::Attack4),
         "attackRange1" => Some(AnimationAction::AttackRange1),
+        "attackRange2" => Some(AnimationAction::AttackRange2),
         "dashAttack" => Some(AnimationAction::DashAttack),
         "spell" => Some(AnimationAction::Spell),
         "struck" => Some(AnimationAction::Struck),
@@ -817,6 +818,14 @@ mod tests {
             .render_state_if_changed(100, true)
             .expect("next timed walking frame");
         assert!(rendered_path(&second).ends_with("/57.png"));
+    }
+
+    #[test]
+    fn attack_range_two_parser_uses_the_crystal_player_action() {
+        assert_eq!(
+            parse_action("attackRange2"),
+            Some(AnimationAction::AttackRange2)
+        );
     }
 
     #[test]

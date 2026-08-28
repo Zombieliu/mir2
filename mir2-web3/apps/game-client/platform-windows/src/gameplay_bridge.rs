@@ -659,9 +659,13 @@ impl NativeGameplayAdapter {
                     changed
                 }
                 "ObjectMagic" => {
-                    // Keep the existing entity action hint for the caster, then
-                    // hand the authoritative cast packet to the effect system.
-                    let changed = self.patch_zone_entity_action(payload, "spell", false);
+                    // Crystal's PlayerObject changes a sourced subset of
+                    // Archer spells from the generic Spell pose to
+                    // AttackRange2. The gateway projects the typed Spell enum
+                    // by name, so this is an authoritative discriminator and
+                    // does not infer from class, distance, or target state.
+                    let action = object_magic_animation_action(payload);
+                    let changed = self.patch_zone_entity_action(payload, action, false);
                     self.record_effect("ObjectMagic", payload);
                     changed
                 }
@@ -2109,6 +2113,20 @@ fn packet_object_id(payload: &Value) -> Option<u32> {
     body.get("objectId")
         .or_else(|| body.get("object_id"))
         .and_then(value_u32)
+}
+
+fn object_magic_animation_action(payload: &Value) -> &'static str {
+    match packet_body(payload).get("spell").and_then(Value::as_str) {
+        Some(
+            "StraightShot" | "DoubleShot" | "DelayedExplosion" | "Stonetrap" | "SummonVampire"
+            | "VampireShot" | "SummonToad" | "PoisonShot" | "CrippleShot" | "SummonSnakes"
+            | "NapalmShot" | "BindingShot",
+        ) => "attackRange2",
+        // Crystal gates ElementalShot's range-two pose on client-local
+        // HasElements/ElementCasted state that the current authoritative
+        // snapshot does not expose. Fail closed to the generic Spell pose.
+        _ => "spell",
+    }
 }
 
 fn movement_action(from_x: i32, from_y: i32, to_x: i32, to_y: i32) -> Option<&'static str> {
@@ -4184,6 +4202,81 @@ mod tests {
         assert_eq!(adapter.effect_events[0].payload["spell"], 8);
         assert_eq!(adapter.effect_events[0].payload["level"], 3);
         assert_eq!(adapter.effect_events[0].payload["attackType"], 0);
+    }
+
+    #[test]
+    fn crystal_archer_range_two_spell_table_is_exact_and_fails_closed() {
+        for spell in [
+            "StraightShot",
+            "DoubleShot",
+            "DelayedExplosion",
+            "Stonetrap",
+            "SummonVampire",
+            "VampireShot",
+            "SummonToad",
+            "PoisonShot",
+            "CrippleShot",
+            "SummonSnakes",
+            "NapalmShot",
+            "BindingShot",
+        ] {
+            assert_eq!(
+                object_magic_animation_action(&json!({"spell": spell})),
+                "attackRange2",
+                "{spell} uses Crystal's second Archer range pose"
+            );
+        }
+        assert_eq!(
+            object_magic_animation_action(&json!({"spell": "ElementalShot"})),
+            "spell",
+            "ElementalShot needs authoritative HasElements/ElementCasted state"
+        );
+        assert_eq!(
+            object_magic_animation_action(&json!({"spell": "FireBall"})),
+            "spell"
+        );
+        assert_eq!(
+            object_magic_animation_action(&json!({"spell": 122})),
+            "spell",
+            "the production gateway supplies typed Spell names, not guessed numeric ids"
+        );
+    }
+
+    #[test]
+    fn object_magic_projects_archer_range_two_into_the_native_player_action() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut world = gameplay_payload();
+        world["entities"][0]["classKey"] = json!("archer");
+        world["entities"][0]["sprite"] = json!({
+            "bodyLibrary": "CArmour/00",
+            "altBodyLibrary": "ARArmour/00",
+            "altHairLibrary": "ARHair/00",
+            "altWeaponLibrary": "ARWeapon/00 S"
+        });
+        adapter.observe_world_snapshot(&world);
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMagic".to_owned(),
+            payload: json!({
+                "objectId": 1000,
+                "location": {"x": 288, "y": 616},
+                "direction": "Up",
+                "spell": "StraightShot",
+                "targetId": 2001,
+                "target": {"x": 289, "y": 616},
+                "cast": true,
+                "level": 1
+            }),
+        }));
+
+        let mut overlaid = world;
+        adapter.apply_authoritative_overlay(&mut overlaid);
+        assert_eq!(
+            overlaid["entities"][0]["_nativeAnimationAction"],
+            json!("attackRange2")
+        );
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectMagic");
     }
 
     #[test]
