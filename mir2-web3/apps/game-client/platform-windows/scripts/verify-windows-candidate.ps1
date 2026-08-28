@@ -352,7 +352,7 @@ function Assert-NoBuildPathStrings {
     }
 }
 
-function Clear-NativeDevEnv { foreach ($name in @('MIR2_NATIVE_ASSET_ROOT','MIR2_ASSET_ROOT','MIR2_NATIVE_ACCOUNT','MIR2_NATIVE_PASSWORD','MIR2_GATEWAY_WS_URL','MIR2_NATIVE_CAPTURE_DIR','MIR2_NATIVE_SCREENSHOT_DIR','MIR2_NATIVE_TRACE_RENDER','MIR2_NATIVE_SOAK_METRICS')) { Remove-Item -Path ('Env:' + $name) -ErrorAction SilentlyContinue } }
+function Clear-NativeDevEnv { foreach ($name in @('MIR2_NATIVE_ASSET_ROOT','MIR2_ASSET_ROOT','MIR2_NATIVE_ACCOUNT','MIR2_NATIVE_PASSWORD','MIR2_GATEWAY_WS_URL','MIR2_NATIVE_CAPTURE_DIR','MIR2_NATIVE_SCREENSHOT_DIR','MIR2_NATIVE_TRACE_RENDER','MIR2_NATIVE_SOAK_METRICS','MIR2_NATIVE_MOVEMENT_TRACE_PATH')) { Remove-Item -Path ('Env:' + $name) -ErrorAction SilentlyContinue } }
 
 function Invoke-CandidateProcess {
     param([string]$WorkingDirectory, [string]$ExePath, [int]$TimeoutMs, [string]$LogPath)

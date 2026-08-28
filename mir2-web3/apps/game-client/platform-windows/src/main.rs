@@ -22,6 +22,7 @@ mod gameplay_bridge;
 mod gateway;
 mod input;
 mod map_parser;
+mod movement_trace;
 mod native_protocol;
 mod session_config;
 mod shell_bridge;
@@ -35,6 +36,7 @@ fn frame_png_exists(web_path: &str) -> bool {
 
 fn main() {
     console_error_panic_hook::set_once();
+    movement_trace::initialize();
 
     let session = session_config::NativeSessionConfig::load(gateway::LOCAL_GATEWAY_WS_URL)
         .unwrap_or_else(|error| {

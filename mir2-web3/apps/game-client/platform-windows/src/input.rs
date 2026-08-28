@@ -118,23 +118,70 @@ pub struct WorldPointerMovementState {
     last_packet_ack_at_ms: Option<f64>,
     pending_npc_interaction: Option<PendingNpcInteraction>,
     blocked_steps: Vec<BlockedSelfMove>,
+    last_plan_block_trace_at_ms: Option<f64>,
 }
 
 impl WorldPointerMovementState {
-    fn begin(&mut self, mode: WorldPointerMovementMode) {
+    fn begin(&mut self, mode: WorldPointerMovementMode, at_ms: f64) {
+        if self.active != Some(mode) {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "movementHoldStarted",
+                "atMs": at_ms,
+                "mode": movement_mode_name(mode),
+            }));
+        }
         self.active = Some(mode);
+        self.last_plan_block_trace_at_ms = None;
     }
 
-    fn stop_hold(&mut self) {
-        self.active = None;
+    fn stop_hold(&mut self, at_ms: f64, reason: &'static str) {
+        if let Some(mode) = self.active.take() {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "movementHoldStopped",
+                "atMs": at_ms,
+                "mode": movement_mode_name(mode),
+                "reason": reason,
+            }));
+        }
+        self.last_plan_block_trace_at_ms = None;
     }
 
-    fn reset_controller(&mut self) {
+    fn reset_controller(&mut self, at_ms: f64, reason: &'static str) {
+        self.stop_hold(at_ms, reason);
+        crate::movement_trace::record(serde_json::json!({
+            "type": "movementControllerReset",
+            "atMs": at_ms,
+            "reason": reason,
+        }));
         *self = Self::default();
     }
 
     fn cancel_npc_approach(&mut self) {
         self.pending_npc_interaction = None;
+    }
+
+    fn trace_plan_blocked(
+        &mut self,
+        at_ms: f64,
+        origin: (i32, i32),
+        direction: &'static str,
+        mode: WorldPointerMovementMode,
+    ) {
+        if self
+            .last_plan_block_trace_at_ms
+            .is_some_and(|last| at_ms < last + 250.0)
+        {
+            return;
+        }
+        self.last_plan_block_trace_at_ms = Some(at_ms);
+        crate::movement_trace::record(serde_json::json!({
+            "type": "movementPlanBlocked",
+            "atMs": at_ms,
+            "originX": origin.0,
+            "originY": origin.1,
+            "direction": crystal_direction_name(direction),
+            "mode": movement_mode_name(mode),
+        }));
     }
 
     fn can_send(&self, now_ms: f64) -> bool {
@@ -590,6 +637,7 @@ fn send_pointer_move(
     );
     push_movement_shadow_command(now_ms, &pending);
     movement.pending = Some(pending);
+    movement.last_plan_block_trace_at_ms = None;
     true
 }
 
@@ -606,8 +654,25 @@ fn crystal_direction_name(direction: &str) -> &'static str {
     }
 }
 
+fn movement_mode_name(mode: WorldPointerMovementMode) -> &'static str {
+    match mode {
+        WorldPointerMovementMode::Walk => "walk",
+        WorldPointerMovementMode::Run => "run",
+    }
+}
+
 fn push_movement_shadow(value: serde_json::Value) {
+    crate::movement_trace::record(value.clone());
     mir2_bevy_runtime::push_mir2_movement_shadow_event(value.to_string());
+}
+
+fn trace_pointer_input(at_ms: f64, button: &'static str, state: &'static str) {
+    crate::movement_trace::record(serde_json::json!({
+        "type": "pointerInput",
+        "atMs": at_ms,
+        "button": button,
+        "state": state,
+    }));
 }
 
 fn push_movement_shadow_reset(at_ms: f64, object_id: &str, position: (i32, i32), direction: &str) {
@@ -686,11 +751,31 @@ pub fn mouse_world_interaction_system(
 ) {
     let left_pressed = mouse.just_pressed(MouseButton::Left);
     let right_pressed = mouse.just_pressed(MouseButton::Right);
+    let left_released = mouse.just_released(MouseButton::Left);
+    let right_released = mouse.just_released(MouseButton::Right);
+    let now_ms = time
+        .as_deref()
+        .map(|time| time.elapsed_secs_f64() * 1_000.0)
+        .unwrap_or(0.0);
+    if left_pressed {
+        trace_pointer_input(now_ms, "left", "down");
+    }
+    if left_released {
+        trace_pointer_input(now_ms, "left", "up");
+    }
+    if right_pressed {
+        trace_pointer_input(now_ms, "right", "down");
+    }
+    if right_released {
+        trace_pointer_input(now_ms, "right", "up");
+    }
     let ack_waiting = gameplay_inbox
         .as_deref()
         .is_some_and(GameplayEventInbox::has_movement_acks);
     if !left_pressed
         && !right_pressed
+        && !left_released
+        && !right_released
         && movement.active.is_none()
         && movement.pending.is_none()
         && movement.pending_npc_interaction.is_none()
@@ -698,25 +783,21 @@ pub fn mouse_world_interaction_system(
     {
         return;
     }
-    let now_ms = time
-        .as_deref()
-        .map(|time| time.elapsed_secs_f64() * 1_000.0)
-        .unwrap_or(0.0);
     let animation_now_ms = now_ms.clamp(0.0, u64::MAX as f64) as u64;
     let (Some(shell), Some(entities), Some(presentation)) =
         (shell, entities, presentation.as_deref_mut())
     else {
         push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
-        movement.reset_controller();
+        movement.reset_controller(now_ms, "missingResources");
         return;
     };
     let Ok(window) = windows.single() else {
-        movement.stop_hold();
+        movement.stop_hold(now_ms, "missingWindow");
         return;
     };
     if shell.screen != NativeShellScreen::InGame {
         push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
-        movement.reset_controller();
+        movement.reset_controller(now_ms, "notInGame");
         if let Some(inbox) = gameplay_inbox.as_deref() {
             inbox.clear_movement_acks();
         }
@@ -727,12 +808,12 @@ pub fn mouse_world_interaction_system(
     else {
         if movement.self_object_id.is_some() || movement.pending.is_some() {
             push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
-            movement.reset_controller();
+            movement.reset_controller(now_ms, "missingPlayer");
             if let Some(inbox) = gameplay_inbox.as_deref() {
                 inbox.clear_movement_acks();
             }
         } else {
-            movement.stop_hold();
+            movement.stop_hold(now_ms, "missingPlayer");
         }
         return;
     };
@@ -833,7 +914,7 @@ pub fn mouse_world_interaction_system(
     }
 
     if !window.focused {
-        movement.stop_hold();
+        movement.stop_hold(now_ms, "windowUnfocused");
         movement.cancel_npc_approach();
         return;
     }
@@ -843,7 +924,7 @@ pub fn mouse_world_interaction_system(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
-        movement.stop_hold();
+        movement.stop_hold(now_ms, "worldInputBlocked");
         movement.cancel_npc_approach();
         return;
     }
@@ -854,7 +935,7 @@ pub fn mouse_world_interaction_system(
         // inspect). Until those are implemented, never turn an object click
         // into movement through the actor beneath the pointer.
         if presentation.hovered_object_id().is_some() {
-            movement.stop_hold();
+            movement.stop_hold(now_ms, "rightClickActor");
             return;
         }
         let origin = movement.authoritative_position.unwrap_or(entity_position);
@@ -871,12 +952,12 @@ pub fn mouse_world_interaction_system(
                 );
             }
         }
-        movement.begin(WorldPointerMovementMode::Run);
+        movement.begin(WorldPointerMovementMode::Run, now_ms);
     } else if left_pressed {
         if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
             .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
         {
-            movement.stop_hold();
+            movement.stop_hold(now_ms, "leftWorldIntent");
             if let QuestUiIntent::InteractNpc { npc_object_id } = intent {
                 let origin = movement.authoritative_position.unwrap_or(entity_position);
                 if npc_position(&entities, npc_object_id)
@@ -905,13 +986,13 @@ pub fn mouse_world_interaction_system(
         // A player or another non-interactable actor is still solid world
         // content. Do not reinterpret that pixel hit as movement through it.
         if presentation.hovered_object_id().is_some() {
-            movement.stop_hold();
+            movement.stop_hold(now_ms, "leftClickActor");
             if movement.pending_npc_interaction.is_none() {
                 return;
             }
         } else {
             movement.cancel_npc_approach();
-            movement.begin(WorldPointerMovementMode::Walk);
+            movement.begin(WorldPointerMovementMode::Walk, now_ms);
         }
     }
 
@@ -989,11 +1070,11 @@ pub fn mouse_world_interaction_system(
         WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right),
     };
     if !held {
-        movement.stop_hold();
+        movement.stop_hold(now_ms, "buttonReleased");
         return;
     }
     if presentation.hovered_object_id().is_some() {
-        movement.stop_hold();
+        movement.stop_hold(now_ms, "hoveredActor");
         return;
     }
 
@@ -1019,6 +1100,7 @@ pub fn mouse_world_interaction_system(
         mode,
         now_ms,
     ) else {
+        movement.trace_plan_blocked(now_ms, origin, direction, mode);
         return;
     };
     let _ = send_pointer_move(
