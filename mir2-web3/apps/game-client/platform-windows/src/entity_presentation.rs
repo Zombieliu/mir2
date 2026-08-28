@@ -1422,9 +1422,16 @@ mod tests {
         .expect("partially resolved player render state");
         assert_eq!(
             highlight_layer_count(&partial),
-            0,
-            "one missing actor rect suppresses the entire selected composite"
+            3,
+            "a verified standalone body keeps the complete selected composite"
         );
+        let partial_layers = rendered_layers(&partial, "1001");
+        assert!(rendered_layer(partial_layers, "1001:body")
+            .get("atlasRectKey")
+            .is_none());
+        assert!(rendered_layer(partial_layers, "1001:target-highlight:body")
+            .get("atlasRectKey")
+            .is_none());
 
         payload["entities"][0]["kind"] = json!("selfPlayer");
         let self_selected = crate::atlas::build_entity_render_state_with_manifest_for_test(
@@ -1719,9 +1726,10 @@ mod tests {
         )
         .expect("missing target rect state");
         assert_eq!(highlight_layer_count(&missing_rect), 0);
-        assert!(rendered_layers(&missing_rect, "2005")[0]
-            .get("atlasRectKey")
-            .is_none());
+        assert!(
+            rendered_layers(&missing_rect, "2005").is_empty(),
+            "a non-player body without atlas geometry fails closed instead of inventing 48x64"
+        );
     }
 
     fn assert_vis01_checkpoint(

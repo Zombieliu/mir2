@@ -1,11 +1,11 @@
 //! Native entity-atlas loading and viewport render-state construction.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
-    OnceLock,
+    Arc, Mutex, OnceLock,
 };
 
 use serde_json::{json, Value};
@@ -30,6 +30,7 @@ const ENTITY_FRONT_WEAPON_ORDER: f32 = 7.0;
 const MAP_FRONT_ORDER: f32 = crate::map_parser::MAP_FRONT_DEPTH_ORDER * ENTITY_DEPTH_GAIN;
 const POST_WORLD_BAND_GAP: f32 = 20.0;
 const TARGET_HIGHLIGHT_OPACITY: f64 = 0.3;
+const ORIGINAL_FRAME_PIXEL_CACHE_LIMIT: usize = 256;
 
 #[derive(Debug, Clone)]
 struct StarterAtlasRect {
@@ -70,7 +71,25 @@ type StarterAtlasPixels = HashMap<String, StarterAtlasPixelPage>;
 
 static STARTER_ATLAS_INDEX: OnceLock<Option<StarterAtlasIndex>> = OnceLock::new();
 static STARTER_ATLAS_PIXELS: OnceLock<Option<StarterAtlasPixels>> = OnceLock::new();
+static ORIGINAL_FRAME_GEOMETRY_CACHE: OnceLock<
+    Mutex<HashMap<String, Option<HashMap<i64, OriginalFrameGeometry>>>>,
+> = OnceLock::new();
+static ORIGINAL_FRAME_PIXEL_CACHE: OnceLock<Mutex<OriginalFramePixelCache>> = OnceLock::new();
 static RENDER_TRACE_STATE_LOGS: AtomicUsize = AtomicUsize::new(0);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct OriginalFrameGeometry {
+    width: u32,
+    height: u32,
+    offset_x: i32,
+    offset_y: i32,
+}
+
+#[derive(Default)]
+struct OriginalFramePixelCache {
+    frames: HashMap<String, Option<Arc<StarterAtlasPixelPage>>>,
+    insertion_order: VecDeque<String>,
+}
 
 #[derive(bevy::prelude::Resource, Default)]
 pub struct NativeRenderTrace {
@@ -429,6 +448,159 @@ fn normalized_library_key(library: &str) -> &str {
         .unwrap_or_else(|| library.trim().trim_matches('/'))
 }
 
+fn is_player_sprite_library(library: &str) -> bool {
+    let mut segments = normalized_library_key(library).split('/');
+    let Some(family) = segments.next() else {
+        return false;
+    };
+    let Some(name) = segments.next() else {
+        return false;
+    };
+    !name.is_empty()
+        && segments.next().is_none()
+        && matches!(
+            family,
+            "CArmour"
+                | "CHair"
+                | "CWeapon"
+                | "ARArmour"
+                | "ARHair"
+                | "ARWeapon"
+                | "AArmour"
+                | "AHair"
+                | "AWeapon"
+                | "Mount"
+        )
+}
+
+fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
+    let relative = frame_path.trim().trim_start_matches('/').replace('\\', "/");
+    let source_path = relative.strip_prefix("original-ui/")?;
+    let (library, file_name) = source_path.rsplit_once('/')?;
+    if !is_player_sprite_library(library) {
+        return None;
+    }
+    let frame = file_name.strip_suffix(".png")?.parse::<i64>().ok()?;
+    if frame < 0 || relative != format!("original-ui/{library}/{frame}.png") {
+        return None;
+    }
+    Some((library.to_owned(), frame, relative))
+}
+
+fn parse_original_frame_geometry(
+    payload: &Value,
+    library: &str,
+) -> Option<HashMap<i64, OriginalFrameGeometry>> {
+    let normalized_library = normalized_library_key(library);
+    let frames = payload.get("frames")?.as_array()?;
+    let mut geometry = HashMap::with_capacity(frames.len());
+    for frame in frames {
+        let index = frame.get("index")?.as_i64()?;
+        if index < 0 {
+            continue;
+        }
+        let width = frame
+            .get("width")?
+            .as_u64()
+            .and_then(|value| u32::try_from(value).ok())?;
+        let height = frame
+            .get("height")?
+            .as_u64()
+            .and_then(|value| u32::try_from(value).ok())?;
+        let offset_x = frame
+            .get("x")?
+            .as_i64()
+            .and_then(|value| i32::try_from(value).ok())?;
+        let offset_y = frame
+            .get("y")?
+            .as_i64()
+            .and_then(|value| i32::try_from(value).ok())?;
+        if width == 0 || height == 0 {
+            continue;
+        }
+        let Some(path) = frame.get("path").and_then(Value::as_str) else {
+            continue;
+        };
+        let expected_path = format!("/original-ui/{normalized_library}/{index}.png");
+        if path != expected_path {
+            continue;
+        }
+        geometry.insert(
+            index,
+            OriginalFrameGeometry {
+                width,
+                height,
+                offset_x,
+                offset_y,
+            },
+        );
+    }
+    (!geometry.is_empty()).then_some(geometry)
+}
+
+fn load_original_frame_geometry(library: &str) -> Option<HashMap<i64, OriginalFrameGeometry>> {
+    let meta_path = format!("original-ui/{}/meta.json", normalized_library_key(library));
+    let path = assets::asset_path(&meta_path)?;
+    let payload: Value = serde_json::from_str(&fs::read_to_string(path).ok()?).ok()?;
+    parse_original_frame_geometry(&payload, library)
+}
+
+fn original_frame_geometry(library: &str, frame: i64) -> Option<OriginalFrameGeometry> {
+    let library = normalized_library_key(library).to_owned();
+    let cache = ORIGINAL_FRAME_GEOMETRY_CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+    let mut cache = cache.lock().ok()?;
+    if !cache.contains_key(&library) {
+        let loaded = load_original_frame_geometry(&library);
+        cache.insert(library.clone(), loaded);
+    }
+    cache
+        .get(&library)
+        .and_then(Option::as_ref)
+        .and_then(|frames| frames.get(&frame))
+        .copied()
+}
+
+fn verified_player_frame_geometry(frame_path: &str) -> Option<OriginalFrameGeometry> {
+    let (library, frame, relative) = player_frame_path_parts(frame_path)?;
+    assets::asset_path(&relative).filter(|path| path.is_file())?;
+    original_frame_geometry(&library, frame)
+}
+
+fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>> {
+    let (_, _, cache_key) = player_frame_path_parts(frame_path)?;
+    let cache = ORIGINAL_FRAME_PIXEL_CACHE.get_or_init(|| Mutex::new(Default::default()));
+    if let Ok(cache) = cache.lock() {
+        if let Some(cached) = cache.frames.get(&cache_key) {
+            return cached.clone();
+        }
+    }
+
+    let loaded = assets::asset_path(&cache_key)
+        .and_then(|path| fs::read(path).ok())
+        .and_then(|bytes| decode_png_rgba(&bytes))
+        .map(|(width, height, rgba)| {
+            Arc::new(StarterAtlasPixelPage {
+                width,
+                height,
+                rgba,
+            })
+        });
+
+    let mut cache = cache.lock().ok()?;
+    if let Some(cached) = cache.frames.get(&cache_key) {
+        return cached.clone();
+    }
+    while cache.frames.len() >= ORIGINAL_FRAME_PIXEL_CACHE_LIMIT {
+        let Some(oldest) = cache.insertion_order.pop_front() else {
+            break;
+        };
+        cache.frames.remove(&oldest);
+    }
+    cache.insertion_order.push_back(cache_key.clone());
+    cache.frames.insert(cache_key, loaded.clone());
+    loaded
+}
+
 fn sprite_library_exists(library: &str) -> bool {
     let encoded_prefix = format!("{}/", library.trim_end_matches('/')).replace(' ', "%20");
     starter_atlas_index().is_some_and(|index| {
@@ -636,7 +808,6 @@ fn build_entity_layer(
     root_left: f32,
     root_top: f32,
     z: f32,
-    required: bool,
 ) -> Option<Value> {
     let frame_path = format!("{library}/{frame}.png");
     let atlas_frame_path = frame_path.replace(' ', "%20");
@@ -647,10 +818,11 @@ fn build_entity_layer(
             let page = &index.pages[*page_index];
             (page, &page.rects[*rect_index])
         });
-    if !required
-        && resolved.is_none()
-        && !assets::asset_path(&frame_path).is_some_and(|path| path.is_file())
-    {
+    let individual_geometry = resolved
+        .is_none()
+        .then(|| verified_player_frame_geometry(&frame_path));
+    let individual_geometry = individual_geometry.flatten();
+    if resolved.is_none() && individual_geometry.is_none() {
         return None;
     }
 
@@ -663,7 +835,16 @@ fn build_entity_layer(
                 rect.offset_y.map(|value| value as f32),
             )
         })
-        .unwrap_or((CELL_WIDTH, CELL_HEIGHT * 2.0, None, None));
+        .or_else(|| {
+            individual_geometry.map(|geometry| {
+                (
+                    geometry.width as f32,
+                    geometry.height as f32,
+                    Some(geometry.offset_x as f32),
+                    Some(geometry.offset_y as f32),
+                )
+            })
+        })?;
     let mut layer = json!({
         "key": key,
         "path": frame_path,
@@ -711,9 +892,10 @@ fn scene_center(payload: &Value) -> (i64, i64) {
         .unwrap_or((0, 0))
 }
 
-/// Build viewport-relative entity layers with exact rect geometry from the
-/// generated manifest. Missing atlas entries fall back to the individual PNG
-/// path rather than inventing a rect key or coordinates.
+/// Build viewport-relative entity layers with exact Crystal geometry. Atlas
+/// rects stay preferred; an unpacked individual PNG must have the same
+/// per-library `meta.json` geometry consumed by Web. Missing metadata fails
+/// closed instead of stretching the frame into an invented 48x64 rectangle.
 #[cfg(test)]
 pub fn build_entity_render_state(payload: &Value) -> Option<Value> {
     build_entity_render_state_with_frames(payload, &HashMap::new())
@@ -858,7 +1040,6 @@ fn build_entity_render_state_with_index(
                             root_left,
                             root_top,
                             z_base + ENTITY_MOUNT_ORDER,
-                            false,
                         ) {
                             layers.push(layer);
                         }
@@ -901,7 +1082,6 @@ fn build_entity_render_state_with_index(
                                     } else {
                                         ENTITY_FRONT_WEAPON_ORDER
                                     },
-                                false,
                             ) {
                                 layers.push(layer);
                             }
@@ -917,7 +1097,6 @@ fn build_entity_render_state_with_index(
                         root_left,
                         root_top,
                         z_base + ENTITY_BODY_ORDER,
-                        true,
                     ) {
                         layers.push(layer);
                     }
@@ -931,7 +1110,6 @@ fn build_entity_render_state_with_index(
                             root_left,
                             root_top,
                             z_base + ENTITY_HAIR_ORDER,
-                            false,
                         ) {
                             layers.push(layer);
                         }
@@ -957,7 +1135,6 @@ fn build_entity_render_state_with_index(
                             root_left,
                             root_top,
                             post_world_effect_z(payload, x, y),
-                            false,
                         ) {
                             layer["additive"] = json!(true);
                             layers.push(layer);
@@ -1220,11 +1397,26 @@ fn append_actor_highlight(
         .map(|layer| {
             let key = layer.get("key").and_then(Value::as_str)?;
             let role = key.strip_prefix(&prefix)?;
-            // DrawBlend is atomic exact-atlas presentation. One missing rect
-            // suppresses the whole composite instead of tinting only a body,
-            // weapon, hair, or mount fragment.
-            layer.get("atlasKey").and_then(Value::as_str)?;
-            layer.get("atlasRectKey").and_then(Value::as_str)?;
+            // DrawBlend is atomic across the complete actor composite. A layer
+            // may be atlas-backed or a verified individual PNG; only a broken
+            // half-atlas binding suppresses the full redraw.
+            match (
+                layer.get("atlasKey").and_then(Value::as_str),
+                layer.get("atlasRectKey").and_then(Value::as_str),
+            ) {
+                (Some(_), Some(_)) => {}
+                (None, None) => {
+                    let frame_path = layer.get("path").and_then(Value::as_str)?;
+                    let geometry = verified_player_frame_geometry(frame_path)?;
+                    if layer.get("width").and_then(Value::as_f64) != Some(f64::from(geometry.width))
+                        || layer.get("height").and_then(Value::as_f64)
+                            != Some(f64::from(geometry.height))
+                    {
+                        return None;
+                    }
+                }
+                _ => return None,
+            }
             let normal_z = layer.get("z").and_then(Value::as_f64)? as f32;
             let (name, z) = match band {
                 HighlightBand::Hover => ("hover-highlight", post_world_hover_z(payload, normal_z)),
@@ -1354,10 +1546,32 @@ fn body_visible_pixel(
     if cursor_x < left || cursor_y < top || cursor_x >= left + width || cursor_y >= top + height {
         return false;
     }
-    let Some(atlas_key) = body.get("atlasKey").and_then(Value::as_str) else {
-        return false;
-    };
-    let Some(rect_key) = body.get("atlasRectKey").and_then(Value::as_str) else {
+    let local_x = (cursor_x - left).floor() as u32;
+    let local_y = (cursor_y - top).floor() as u32;
+    let atlas_key = body.get("atlasKey").and_then(Value::as_str);
+    let rect_key = body.get("atlasRectKey").and_then(Value::as_str);
+    if atlas_key.is_none() && rect_key.is_none() {
+        let Some(frame_path) = body.get("path").and_then(Value::as_str) else {
+            return false;
+        };
+        let Some(frame_pixels) = original_frame_pixels(frame_path) else {
+            return false;
+        };
+        if frame_pixels.width as f32 != width || frame_pixels.height as f32 != height {
+            return false;
+        }
+        let Some(alpha_index) = local_y
+            .checked_mul(frame_pixels.width)
+            .and_then(|row| row.checked_add(local_x))
+            .and_then(|pixel| pixel.checked_mul(4))
+            .and_then(|offset| offset.checked_add(3))
+            .and_then(|offset| usize::try_from(offset).ok())
+        else {
+            return false;
+        };
+        return frame_pixels.rgba.get(alpha_index).copied().unwrap_or(0) > 0;
+    }
+    let (Some(atlas_key), Some(rect_key)) = (atlas_key, rect_key) else {
         return false;
     };
     let Some(page) = index.pages.iter().find(|page| page.key == atlas_key) else {
@@ -1372,8 +1586,6 @@ fn body_visible_pixel(
     if pixel_page.width != page.width || pixel_page.height != page.height {
         return false;
     }
-    let local_x = (cursor_x - left).floor() as u32;
-    let local_y = (cursor_y - top).floor() as u32;
     if local_x >= rect.width || local_y >= rect.height {
         return false;
     }
@@ -1604,6 +1816,225 @@ mod tests {
         assert_eq!(index.rect_by_path["/original-ui/Monster/004/0.png"], (1, 0));
         assert_eq!(index.pages[0].rects[0].offset_x, Some(3));
         assert_eq!(index.pages[0].rects[0].offset_y, Some(-4));
+    }
+
+    #[test]
+    fn original_frame_meta_maps_web_xy_to_crystal_draw_offsets() {
+        let payload = json!({
+            "frames": [
+                {
+                    "index": 0,
+                    "width": 64,
+                    "height": 76,
+                    "x": 6,
+                    "y": -48,
+                    "path": "/original-ui/CArmour/01/0.png"
+                },
+                {
+                    "index": 1,
+                    "width": 60,
+                    "height": 80,
+                    "x": 9,
+                    "y": -49,
+                    "path": "/original-ui/Other/1.png"
+                },
+                {
+                    "index": 2,
+                    "width": 60,
+                    "height": 80,
+                    "x": 9,
+                    "y": -49
+                }
+            ]
+        });
+        let frames = parse_original_frame_geometry(&payload, "CArmour/01")
+            .expect("valid Web sprite metadata");
+        assert_eq!(
+            frames.get(&0),
+            Some(&OriginalFrameGeometry {
+                width: 64,
+                height: 76,
+                offset_x: 6,
+                offset_y: -48,
+            })
+        );
+        assert!(!frames.contains_key(&1), "foreign frame paths fail closed");
+        assert!(!frames.contains_key(&2), "missing frame paths fail closed");
+    }
+
+    #[test]
+    fn packed_manifest_and_web_meta_share_geometry_semantics() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        let (page_index, rect_index) = index.rect_by_path["/original-ui/CArmour/00/0.png"];
+        let rect = &index.pages[page_index].rects[rect_index];
+        let geometry = original_frame_geometry("/original-ui/CArmour/00", 0)
+            .expect("base armour Web metadata");
+        assert_eq!(rect.width, geometry.width);
+        assert_eq!(rect.height, geometry.height);
+        assert_eq!(rect.offset_x, Some(geometry.offset_x));
+        assert_eq!(rect.offset_y, Some(geometry.offset_y));
+    }
+
+    #[test]
+    fn unpacked_player_library_uses_exact_meta_for_actions_directions_and_gender() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        assert!(!index
+            .rect_by_path
+            .contains_key("/original-ui/CArmour/01/0.png"));
+
+        let action_ranges = [
+            (0_i64, 4_i64),
+            (32, 6),
+            (80, 6),
+            (96, 8),
+            (136, 6),
+            (160, 8),
+            (184, 6),
+            (232, 8),
+            (296, 6),
+            (344, 2),
+            (360, 3),
+            (384, 4),
+            (416, 6),
+        ];
+        for gender_offset in [0_i64, 808_i64] {
+            for (start, count) in action_ranges {
+                // The kept same-origin CArmour/01 export ends at frame 1263;
+                // the final female DashAttack directions remain a remote-asset
+                // gate and must not be pretended into existence here.
+                if gender_offset == 808 && start == 416 {
+                    continue;
+                }
+                for direction in 0_i64..8 {
+                    for phase in [0_i64, count - 1] {
+                        let frame = gender_offset + start + direction * count + phase;
+                        let expected = original_frame_geometry("CArmour/01", frame)
+                            .unwrap_or_else(|| panic!("CArmour/01 frame {frame} metadata"));
+                        let mut used_rects = HashMap::new();
+                        let layer = build_entity_layer(
+                            index,
+                            &mut used_rects,
+                            format!("player:body:{frame}"),
+                            "/original-ui/CArmour/01",
+                            frame,
+                            100.0,
+                            200.0,
+                            5.0,
+                        )
+                        .unwrap_or_else(|| panic!("CArmour/01 frame {frame} layer"));
+                        assert_eq!(layer["width"], json!(expected.width as f32));
+                        assert_eq!(layer["height"], json!(expected.height as f32));
+                        assert_eq!(layer["left"], json!(100.0 + expected.offset_x as f32));
+                        assert_eq!(layer["top"], json!(200.0 + expected.offset_y as f32));
+                        assert!(layer.get("atlasKey").is_none());
+                        assert!(layer.get("atlasRectKey").is_none());
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn unpacked_player_frame_keeps_pixel_hit_and_atomic_highlight() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        let layer = build_entity_layer(
+            index,
+            &mut HashMap::new(),
+            "player:body".to_owned(),
+            "/original-ui/CArmour/01",
+            0,
+            100.0,
+            200.0,
+            5.0,
+        )
+        .expect("unpacked player body");
+        assert!(layer.get("atlasKey").is_none());
+        assert!(layer.get("atlasRectKey").is_none());
+
+        let pixels = original_frame_pixels("/original-ui/CArmour/01/0.png")
+            .expect("unpacked player frame pixels");
+        let opaque = pixels
+            .rgba
+            .chunks_exact(4)
+            .position(|pixel| pixel[3] > 0)
+            .expect("opaque player pixel");
+        let transparent = pixels
+            .rgba
+            .chunks_exact(4)
+            .position(|pixel| pixel[3] == 0)
+            .expect("transparent player pixel");
+        let left = layer["left"].as_f64().expect("layer left") as f32;
+        let top = layer["top"].as_f64().expect("layer top") as f32;
+        let cursor_for = |pixel: usize| {
+            (
+                left + (pixel as u32 % pixels.width) as f32 + 0.5,
+                top + (pixel as u32 / pixels.width) as f32 + 0.5,
+            )
+        };
+        let entity = json!({
+            "_nativeActorLayerCount": 1,
+            "layers": [layer.clone()]
+        });
+        let (opaque_x, opaque_y) = cursor_for(opaque);
+        assert!(body_visible_pixel(
+            &entity, "player", opaque_x, opaque_y, index, None
+        ));
+        let (transparent_x, transparent_y) = cursor_for(transparent);
+        assert!(!body_visible_pixel(
+            &entity,
+            "player",
+            transparent_x,
+            transparent_y,
+            index,
+            None,
+        ));
+
+        let mut broken_layer = layer.clone();
+        broken_layer["atlasKey"] = json!("half-binding");
+        let mut broken_layers = vec![broken_layer];
+        append_actor_highlight(
+            &mut broken_layers,
+            1,
+            "player",
+            HighlightBand::Selected,
+            &json!({"sceneView": {"center": {"x": 257, "y": 594}}}),
+        );
+        assert_eq!(
+            broken_layers.len(),
+            1,
+            "half-atlas bindings fail the complete highlight closed"
+        );
+
+        let mut layers = vec![layer];
+        append_actor_highlight(
+            &mut layers,
+            1,
+            "player",
+            HighlightBand::Selected,
+            &json!({"sceneView": {"center": {"x": 257, "y": 594}}}),
+        );
+        assert_eq!(layers.len(), 2, "standalone composite keeps DrawBlend pass");
+        assert_eq!(layers[1]["key"], json!("player:target-highlight:body"));
+        assert_eq!(layers[1]["path"], json!("/original-ui/CArmour/01/0.png"));
+        assert_eq!(layers[1]["opacity"], json!(TARGET_HIGHLIGHT_OPACITY));
+        assert!(layers[1].get("atlasKey").is_none());
+        assert!(layers[1].get("atlasRectKey").is_none());
+    }
+
+    #[test]
+    fn missing_atlas_png_or_meta_never_invents_player_geometry() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        assert!(build_entity_layer(
+            index,
+            &mut HashMap::new(),
+            "player:body".to_owned(),
+            "/original-ui/CArmour/not-exported",
+            0,
+            0.0,
+            0.0,
+            0.0,
+        )
+        .is_none());
     }
 
     #[test]
