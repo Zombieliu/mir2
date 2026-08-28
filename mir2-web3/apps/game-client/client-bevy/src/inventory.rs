@@ -19,6 +19,13 @@ use serde::{Deserialize, Serialize};
 pub const SLOT_SIZE: f32 = 40.0;
 /// Slots per row in the bag grid.
 pub const SLOTS_PER_ROW: u32 = 8;
+/// Crystal's unexpanded `User.Inventory` array includes six belt cells plus
+/// forty first-bag cells. The second bag exists only above this exact length.
+pub const CRYSTAL_BASE_INVENTORY_CAPACITY: u16 = 46;
+/// Six belt cells plus both forty-cell bag pages.
+pub const CRYSTAL_MAX_INVENTORY_CAPACITY: u16 = 86;
+/// Visible carried-item cells on Crystal's first inventory page.
+pub const CRYSTAL_FIRST_BAG_PAGE_SLOTS: u16 = 40;
 
 /// A single carried item in renderer-neutral form.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -83,13 +90,63 @@ pub fn item_durability_label(item: &ItemModel) -> Option<String> {
 }
 
 /// The renderer-neutral inventory read model.
-#[derive(Debug, Clone, Default, Resource, Serialize, Deserialize)]
+#[derive(Debug, Clone, Resource, Serialize, Deserialize)]
 pub struct InventoryModel {
+    /// Authoritative Crystal `User.Inventory.Length`, including the six belt
+    /// cells. Legacy snapshots fail closed to the unexpanded length instead
+    /// of inferring expansion from the number of occupied items.
+    #[serde(default = "default_inventory_capacity")]
+    pub capacity: u16,
     pub gold: u32,
     pub items: Vec<ItemModel>,
 }
 
+const fn default_inventory_capacity() -> u16 {
+    CRYSTAL_BASE_INVENTORY_CAPACITY
+}
+
+impl Default for InventoryModel {
+    fn default() -> Self {
+        Self {
+            capacity: default_inventory_capacity(),
+            gold: 0,
+            items: Vec::new(),
+        }
+    }
+}
+
 impl InventoryModel {
+    /// Fail-closed normalization for Crystal's actual inventory-array lengths:
+    /// the first expansion is +8, then each later expansion is +4.
+    pub fn canonical_capacity(value: u16) -> u16 {
+        if value == CRYSTAL_BASE_INVENTORY_CAPACITY
+            || ((54..=CRYSTAL_MAX_INVENTORY_CAPACITY).contains(&value) && (value - 54) % 4 == 0)
+        {
+            value
+        } else {
+            CRYSTAL_BASE_INVENTORY_CAPACITY
+        }
+    }
+
+    /// Explicit authoritative capacity. Occupied item count and slot values do
+    /// not prove that a character purchased Crystal inventory expansion.
+    pub fn effective_capacity(&self) -> u16 {
+        Self::canonical_capacity(self.capacity)
+    }
+
+    /// Whether Crystal exposes its second carried-item page.
+    pub fn second_bag_unlocked(&self) -> bool {
+        self.effective_capacity() > CRYSTAL_BASE_INVENTORY_CAPACITY
+    }
+
+    /// Number of bag cells exposed by the authoritative Crystal array.
+    pub fn bag_slot_capacity(&self) -> u16 {
+        CRYSTAL_FIRST_BAG_PAGE_SLOTS
+            + self
+                .effective_capacity()
+                .saturating_sub(CRYSTAL_BASE_INVENTORY_CAPACITY)
+    }
+
     /// Items in a given container, ordered by slot.
     pub fn items_in(&self, container: u8) -> Vec<&ItemModel> {
         let mut items: Vec<&ItemModel> = self
@@ -273,6 +330,7 @@ mod tests {
                 item("belt1", 1, 1),
                 item("eq", 2, 0),
             ],
+            ..Default::default()
         };
         let bag = model.items_in(0);
         assert_eq!(bag.len(), 1);
@@ -288,6 +346,7 @@ mod tests {
         let model = InventoryModel {
             gold: 500,
             items: vec![item("a", 0, 0), item("b", 1, 0), item("c", 2, 0)],
+            ..Default::default()
         };
         assert_eq!(
             inventory_summary(&model),
@@ -325,6 +384,7 @@ mod tests {
                 container: 0,
                 ..ItemModel::default()
             }],
+            ..Default::default()
         };
         app.update();
 
@@ -358,5 +418,46 @@ mod tests {
         assert_eq!(item_durability_label(&full).as_deref(), Some("35/40"));
         assert_eq!(full.added_attack, 3);
         assert_eq!(full.socket_slots, 2);
+    }
+
+    #[test]
+    fn inventory_capacity_is_authoritative_and_legacy_json_fails_closed() {
+        let legacy: InventoryModel =
+            serde_json::from_str(r#"{"gold":0,"items":[]}"#).expect("legacy inventory model");
+        assert_eq!(legacy.capacity, CRYSTAL_BASE_INVENTORY_CAPACITY);
+        assert!(!legacy.second_bag_unlocked());
+        assert_eq!(legacy.bag_slot_capacity(), 40);
+
+        let first_expansion: InventoryModel =
+            serde_json::from_str(r#"{"capacity":54,"gold":0,"items":[]}"#)
+                .expect("expanded inventory model");
+        assert!(first_expansion.second_bag_unlocked());
+        assert_eq!(first_expansion.bag_slot_capacity(), 48);
+
+        let full = InventoryModel {
+            capacity: 86,
+            ..Default::default()
+        };
+        assert_eq!(full.bag_slot_capacity(), 80);
+
+        let occupied_slot_without_capacity = InventoryModel {
+            items: vec![item("bag2", 0, 40)],
+            ..Default::default()
+        };
+        assert_eq!(occupied_slot_without_capacity.effective_capacity(), 46);
+        assert!(!occupied_slot_without_capacity.second_bag_unlocked());
+
+        for illegal in [0, 45, 47, 50, 87, 100, u16::MAX] {
+            let model = InventoryModel {
+                capacity: illegal,
+                ..Default::default()
+            };
+            assert_eq!(model.effective_capacity(), 46, "illegal value {illegal}");
+            assert!(!model.second_bag_unlocked(), "illegal value {illegal}");
+        }
+
+        for legal in [46, 54, 58, 62, 66, 70, 74, 78, 82, 86] {
+            assert_eq!(InventoryModel::canonical_capacity(legal), legal);
+        }
     }
 }

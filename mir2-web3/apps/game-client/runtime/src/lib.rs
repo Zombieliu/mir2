@@ -7594,6 +7594,7 @@ mod native_data_path_tests {
                     container: 0,
                     ..mir2_client_bevy::inventory::ItemModel::default()
                 }],
+                ..Default::default()
             };
         let key = mir2_client_bevy::pending_operations::PendingOperationKey::Split {
             grid: "inventory".into(),

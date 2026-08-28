@@ -1983,6 +1983,7 @@ fn sync_big_map_ui(
 
 fn sync_local_panel_models(
     shell: Res<NativeShellModel>,
+    mut state: ResMut<NativePlayerUiState>,
     mut mail: ResMut<MailModel>,
     mut mail_ui: ResMut<MailUiState>,
     inventory: Res<InventoryModel>,
@@ -1993,6 +1994,7 @@ fn sync_local_panel_models(
     mut skill_binding: ResMut<SkillBindingUi>,
     mut skills: ResMut<SkillModel>,
 ) {
+    reconcile_inventory_capacity(&mut state, &inventory);
     mail.clamp_after_refresh(&mut mail_ui.cursor);
     storage.clamp_after_refresh(&mut storage_ui.cursor);
     storage_ui.bag_selection = storage_ui.bag_selection.filter(|selection| {
@@ -2018,6 +2020,20 @@ fn sync_local_panel_models(
         skill_binding.clear_selection();
         skill_binding.set_assign_key(false);
     }
+}
+
+fn reconcile_inventory_capacity(
+    state: &mut NativePlayerUiState,
+    inventory: &InventoryModel,
+) -> bool {
+    if state.inventory_page != 1 || inventory.second_bag_unlocked() {
+        return false;
+    }
+    state.inventory_page = 0;
+    state.inspect = None;
+    state.inventory_operation = None;
+    state.drop_confirmation = None;
+    true
 }
 
 /// Keep the native overlay's shared UiState correlation shadow aligned with
@@ -3991,10 +4007,17 @@ fn process_overlay_buttons(
             }
             OverlayButton::SelectInventoryPage(page) => {
                 if page <= 2 {
-                    state.inventory_page = page;
-                    state.inspect = None;
-                    state.inventory_operation = None;
-                    state.drop_confirmation = None;
+                    // All three source tabs are MirButtons with ButtonA. The
+                    // locked second tab still clicks (Crystal opens an
+                    // expansion prompt), but it must never expose a phantom
+                    // empty page while expansion authority is unavailable.
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    if page != 1 || inventory.second_bag_unlocked() {
+                        state.inventory_page = page;
+                        state.inspect = None;
+                        state.inventory_operation = None;
+                        state.drop_confirmation = None;
+                    }
                 }
             }
             OverlayButton::SkillPagePrev => {
@@ -5010,13 +5033,14 @@ fn render_inventory(
             state.inventory_page == 0,
             OverlayButton::SelectInventoryPage(0),
         );
+        let second_tab_index = inventory_second_tab_index(inventory, state.inventory_page == 1);
         spawn_inventory_tab(
             parent,
             asset_server,
             76.0,
             7.0,
-            168,
-            738,
+            second_tab_index,
+            second_tab_index,
             state.inventory_page == 1,
             OverlayButton::SelectInventoryPage(1),
         );
@@ -5084,6 +5108,9 @@ fn render_inventory(
                     let bag_items = inventory.items_in(0);
                     for local_slot in 0..INVENTORY_PAGE_SIZE {
                         let slot = (page_offset + local_slot) as u32;
+                        if slot >= u32::from(inventory.bag_slot_capacity()) {
+                            continue;
+                        }
                         let item = bag_items.iter().copied().find(|item| item.slot == slot);
                         let enabled = match &state.inventory_operation {
                             Some(InventoryOperationDraft::Move { source_slot, .. }) => {
@@ -5492,6 +5519,16 @@ fn spawn_inventory_tab(
         CrystalRect::new(left, top, 72.0, 23.0),
         action,
     );
+}
+
+fn inventory_second_tab_index(inventory: &InventoryModel, active: bool) -> u16 {
+    if !inventory.second_bag_unlocked() {
+        169
+    } else if active {
+        168
+    } else {
+        738
+    }
 }
 
 fn overlay_text_at(
@@ -11284,6 +11321,7 @@ mod tests {
         let mut inventory = InventoryModel {
             gold: 50,
             items: vec![],
+            ..Default::default()
         };
         // Not enough gold
         assert!(!shop_buy_enabled(&shop, &inventory, 1));
@@ -11305,6 +11343,7 @@ mod tests {
         let mut full_inventory = InventoryModel {
             gold: 10000,
             items: vec![],
+            ..Default::default()
         };
         for slot in 0..BAG_SLOTS {
             full_inventory
@@ -11386,6 +11425,7 @@ mod tests {
         let inventory = InventoryModel {
             gold: 500000,
             items: vec![item("1", "Potion", 0, 0)],
+            ..Default::default()
         };
         let mut storage2 = StorageModel {
             size: 10,
@@ -11413,6 +11453,7 @@ mod tests {
         let mut full_inv = InventoryModel {
             gold: 0,
             items: vec![],
+            ..Default::default()
         };
         for slot in 0..BAG_SLOTS {
             full_inv.items.push(item(&slot.to_string(), "X", 0, slot));
@@ -11630,6 +11671,7 @@ mod tests {
                 container: 0,
                 ..ItemModel::default()
             }],
+            ..Default::default()
         };
         assert!(!drop_confirmation_is_current(&confirmation, &replacement));
     }
@@ -11945,7 +11987,28 @@ mod tests {
         press(&mut app, OverlayButton::SelectInventoryPage(1));
         assert_eq!(
             app.world().resource::<NativePlayerUiState>().inventory_page,
-            1
+            0,
+            "the source length 46 keeps the second bag locked"
+        );
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonA],
+            "Crystal's locked MirButton still emits its click cue"
+        );
+        app.world_mut().resource_mut::<InventoryModel>().capacity = 54;
+        press(&mut app, OverlayButton::SelectInventoryPage(1));
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().inventory_page,
+            1,
+            "an explicit expanded Crystal array unlocks page two"
+        );
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .drain_bounded(8),
+            vec![crate::audio::NativeUiSound::ButtonA]
         );
         press(&mut app, OverlayButton::SkillPageNext);
         assert_eq!(
@@ -11955,6 +12018,41 @@ mod tests {
         );
         press(&mut app, OverlayButton::SkillPagePrev);
         assert_eq!(app.world().resource::<NativePlayerUiState>().skill_page, 0);
+    }
+
+    #[test]
+    fn inventory_capacity_downgrade_closes_the_second_page_fail_closed() {
+        let mut state = NativePlayerUiState {
+            inventory_page: 1,
+            ..Default::default()
+        };
+        let expanded = InventoryModel {
+            capacity: 54,
+            ..Default::default()
+        };
+        assert!(!reconcile_inventory_capacity(&mut state, &expanded));
+        assert_eq!(state.inventory_page, 1);
+
+        let locked = InventoryModel::default();
+        assert!(reconcile_inventory_capacity(&mut state, &locked));
+        assert_eq!(state.inventory_page, 0);
+        assert!(state.inspect.is_none());
+        assert!(state.inventory_operation.is_none());
+        assert!(state.drop_confirmation.is_none());
+    }
+
+    #[test]
+    fn inventory_second_tab_uses_exact_crystal_locked_and_page_assets() {
+        let locked = InventoryModel::default();
+        assert_eq!(inventory_second_tab_index(&locked, false), 169);
+        assert_eq!(inventory_second_tab_index(&locked, true), 169);
+
+        let expanded = InventoryModel {
+            capacity: 54,
+            ..Default::default()
+        };
+        assert_eq!(inventory_second_tab_index(&expanded, false), 738);
+        assert_eq!(inventory_second_tab_index(&expanded, true), 168);
     }
 
     #[test]

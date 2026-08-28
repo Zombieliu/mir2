@@ -1469,6 +1469,7 @@ mod tests {
         let old = crate::inventory::InventoryModel {
             gold: 0,
             items: vec![item(10, 5, 0, 0)],
+            ..Default::default()
         };
         let mut pending = PendingOperations::default();
         let move_key = PendingOperationKey::Move {
@@ -1585,6 +1586,7 @@ mod tests {
                 item(30, 4, 4, 0),
                 item(40, 2, 5, 0),
             ],
+            ..Default::default()
         };
         let new = crate::inventory::InventoryModel {
             gold: 100,
@@ -1595,6 +1597,7 @@ mod tests {
                 item(30, 3, 4, 0),
                 item(40, 2, 8, 0),
             ],
+            ..Default::default()
         };
         let mut pending = PendingOperations::default();
         for key in [
@@ -1998,6 +2001,7 @@ mod tests {
         let inventory = crate::inventory::InventoryModel {
             gold: 0,
             items: vec![item(60, 1, 7, 0)],
+            ..Default::default()
         };
         let old = crate::storage::StorageModel {
             size: 30,

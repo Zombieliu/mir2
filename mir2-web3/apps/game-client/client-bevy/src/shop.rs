@@ -258,6 +258,7 @@ mod tests {
         let mut inv = InventoryModel {
             gold: 50,
             items: vec![],
+            ..Default::default()
         };
         assert!(!shop_buy_enabled(&shop, &inv, 1));
         inv.gold = 500;
@@ -272,6 +273,7 @@ mod tests {
         let inv = InventoryModel {
             gold: 0,
             items: vec![item(3)],
+            ..Default::default()
         };
         assert!(shop_sell_enabled(&inv, Some(3)));
         assert!(!shop_sell_enabled(&inv, Some(4)));

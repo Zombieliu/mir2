@@ -4494,6 +4494,13 @@ fn transform_chat_line(packet: &str, payload: &Value) -> Option<mir2_client_bevy
 /// Container mapping: inventory items → 0 (bag), belt items → 1, equipment → 2.
 fn transform_inventory_model(payload: &Value) -> Value {
     let gold = value_u32_or(payload.get("gold"), 0);
+    // Only an explicit Crystal-array length can unlock page two. Occupied
+    // item count and the runtime's broader maxBagSlots value are not evidence
+    // that this character purchased inventory expansion.
+    let capacity = value_u32(payload.get("inventoryCapacity"))
+        .and_then(|value| u16::try_from(value).ok())
+        .map(mir2_client_bevy::inventory::InventoryModel::canonical_capacity)
+        .unwrap_or(mir2_client_bevy::inventory::CRYSTAL_BASE_INVENTORY_CAPACITY);
 
     let map_items = |items: Option<&Value>, container: u8| -> Vec<Value> {
         items
@@ -4533,7 +4540,7 @@ fn transform_inventory_model(payload: &Value) -> Value {
     items.extend(map_items(payload.get("beltItems"), 1));
     items.extend(map_items(payload.get("equipmentItems"), 2));
 
-    json!({ "gold": gold, "items": items })
+    json!({ "capacity": capacity, "gold": gold, "items": items })
 }
 
 /// Copy the item fields that the simulation already exposes into the shared
@@ -6518,6 +6525,7 @@ mod tests {
         ]);
 
         let inventory = transform_inventory_model(&payload);
+        assert_eq!(inventory["capacity"], json!(46));
         assert_eq!(inventory["gold"], json!(1234));
         let items = inventory["items"].as_array().expect("items");
         assert_eq!(items.len(), 3);
@@ -6545,6 +6553,53 @@ mod tests {
         assert_eq!(model.items[0].added_defence, 4);
         assert_eq!(model.items[0].shape, Some(9));
         assert_eq!(model.items[0].socket_slots, 3);
+    }
+
+    #[test]
+    fn inventory_transform_uses_only_explicit_crystal_array_capacity() {
+        let default_payload = json!({
+            "gold": 0,
+            "maxBagSlots": 80,
+            "inventoryItems": [],
+            "beltItems": [],
+            "equipmentItems": []
+        });
+        let default_model = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(
+            transform_inventory_model(&default_payload),
+        )
+        .expect("default inventory");
+        assert_eq!(default_model.capacity, 46);
+        assert!(!default_model.second_bag_unlocked());
+
+        let expanded_payload = json!({
+            "gold": 0,
+            "inventoryCapacity": 54,
+            "inventoryItems": [],
+            "beltItems": [],
+            "equipmentItems": []
+        });
+        let expanded_model = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(
+            transform_inventory_model(&expanded_payload),
+        )
+        .expect("expanded inventory");
+        assert_eq!(expanded_model.capacity, 54);
+        assert!(expanded_model.second_bag_unlocked());
+
+        for illegal in [47_u64, 50, 87, 100, u16::MAX as u64] {
+            let payload = json!({
+                "gold": 0,
+                "inventoryCapacity": illegal,
+                "inventoryItems": [],
+                "beltItems": [],
+                "equipmentItems": []
+            });
+            let model = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(
+                transform_inventory_model(&payload),
+            )
+            .expect("illegal capacity fails closed");
+            assert_eq!(model.capacity, 46, "illegal value {illegal}");
+            assert!(!model.second_bag_unlocked(), "illegal value {illegal}");
+        }
     }
 
     #[test]

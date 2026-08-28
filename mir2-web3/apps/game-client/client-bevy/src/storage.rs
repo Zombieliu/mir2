@@ -360,6 +360,7 @@ mod tests {
         let inv = InventoryModel {
             gold: 0,
             items: vec![item(0, 0)],
+            ..Default::default()
         };
         assert!(!storage_deposit_enabled(&storage, &inv));
         let mut unlocked = storage;

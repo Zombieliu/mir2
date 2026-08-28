@@ -1491,6 +1491,7 @@ mod tests {
                 container: 1,
                 ..mir2_client_bevy::inventory::ItemModel::default()
             }],
+            ..Default::default()
         });
         app.add_systems(bevy::prelude::Update, keyboard_skill_system);
         app.world_mut()

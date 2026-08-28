@@ -1335,6 +1335,7 @@ mod tests {
                 item("slot0", "First", 1, 0, 1),
                 item("equipment", "Equip", 2, 0, 1),
             ],
+            ..Default::default()
         };
         assert_eq!(
             belt_slot_item(&model, 0).map(|item| item.key.as_str()),
@@ -1385,6 +1386,7 @@ mod tests {
                 item("belt", "Belt", 1, 0, 1),
                 item("equip", "Equipment", 2, 0, 1),
             ],
+            ..Default::default()
         };
         assert_eq!(free_inventory_slots(&model), 44);
     }
