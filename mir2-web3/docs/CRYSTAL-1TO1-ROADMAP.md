@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-04 Scarecrow death-audio bounded checkpoint (2026-08-28): revision
+> `cf4f5b5197c492324be23beb73611c0e0162c403` closes the exact Crystal
+> numeric resolver leaf `Monster/005: BaseSound+3=53 -> 005-3.wav` in native,
+> Web export/runtime and Candidate package/verify. Replay and scene lifecycle
+> are fail-closed, `53.wav` is explicitly rejected by gameplay audio, and all
+> automated suites/review pass. This is one Scarecrow death cue, not complete
+> monster audio: attack/flinch/struck/movement, other monster families and the
+> semantic denominator remain open. Same-EXE/live-WSS, real DPI, native soak,
+> human audio/feel, legal assets and signing remain final gates;
+> `globalParityPercent` stays null.
+
 > VIS-03 Inventory locked-second-tab bounded checkpoint (2026-08-28):
 > implementation revision `83f081149375fb402b9c7e6711fdb4e6bed68a0e`
 > reproduces the unexpanded length-46 `Title/169` state, local ButtonA cue,

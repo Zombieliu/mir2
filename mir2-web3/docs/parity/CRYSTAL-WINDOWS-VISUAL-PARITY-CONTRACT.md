@@ -18,6 +18,7 @@ helpDialogCheckpointRevision: e22f2aa4c683447b0e57805a580fd29e0a84c37c
 helpDialogMovableCheckpointRevision: 4545465a2e31a6646f247c55906764952d44cd58
 healingCheckpointRevision: 24d9b73a30fc18edf0649283d14495c6f4900aff
 inventoryLockedTabCheckpointRevision: 83f081149375fb402b9c7e6711fdb4e6bed68a0e
+scarecrowDeathAudioCheckpointRevision: cf4f5b5197c492324be23beb73611c0e0162c403
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -30,6 +31,35 @@ The dirty Crystal files are server files (`Server/MirEnvir/Envir.cs` and
 but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
+
+## Scarecrow death-audio bounded automated checkpoint
+
+Revision `cf4f5b5197c492324be23beb73611c0e0162c403` closes one exact
+monster-audio leaf. Crystal binds `Scarecrow=5`, `BaseSound=BaseImage*10` and
+`PlayDieSound=BaseSound+3`; `SoundManager` synthesizes unlisted numeric ID 53
+as `005-3.wav`. The unrelated SoundList `10053 -> 53.wav` is not accepted as a
+substitute. The tracked file is 198,168 bytes with SHA-256
+`CF1FAF157B49D1E014E9B3A56367234FDCFD54088F93F04BB653CB27A67B9FF7`.
+
+Native requires exact Monster kind plus normalized `Monster/005`, keys the
+cue by authoritative object identity, suppresses replay and lets adjacent
+Remove/Hide cancel before the due-now queue drains. Map change, logout and
+generation reset clear it. Web emits Monster death at action start while
+retaining PlayerObject's 100 ms frame-one delay, and direct sound ID 53 is
+present in both generated indices. Candidate package/verify require, copy and
+hash-bind the exact file; the verifier removes it in self-test to prove the
+required boundary.
+
+Focused 2/2, Windows 401/401, Bevy native-ui 419/419, runtime 191/191, Web
+event/audio/export/typecheck and Candidate script tests pass. Independent
+review is P0=0/P1=0. This does not implement `005-1` attack, `005-2` flinch,
+public struck clang, movement/Dead/Revive cues, other monsters or the complete
+monster-audio denominator. No exact-head package, EXE, same-EXE/live-WSS,
+physical-audio, DPI, soak or human evidence was produced. Global and visual
+acceptance remain unreported.
+
+The detailed evidence report is
+`docs/generated/player-qa/windows-visual-parity/VIS-04-SCARECROW-DEATH-AUDIO-REPORT.md`.
 
 ## Inventory locked-second-tab bounded automated checkpoint
 
@@ -463,7 +493,10 @@ offsets and all same-EXE/live-WSS/GPU/DPI/soak/human/signing gates stay open.
    clock, packet fixtures, effect/audio traces and same-EXE capture.
 4. `VIS-03` closes the first UI state slice at 1024x768: normal HUD, Inventory
    hover, Inventory pressed and BigMap Teleport explicit disabled state.
-5. Subsequent waves expand the source-derived actor, monster, spell,
+5. `VIS-04` begins the source-derived monster-audio registry. Its first bounded
+   leaf is Scarecrow death `005-3.wav`; attack, flinch, struck, movement and
+   other monster families remain open.
+6. Subsequent waves expand the source-derived actor, monster, spell,
    environment and UI registries. The denominator may grow; existing leaf IDs
    and failures may not be silently removed.
 

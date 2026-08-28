@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> VIS-04 Scarecrow death-audio server-client note (2026-08-28): revision
+> `cf4f5b5197c492324be23beb73611c0e0162c403` adds no server packet or
+> authority. Crystal's client-owned `Monster/005 BaseSound+3` projection now
+> resolves exact `005-3.wav` on native and Web from existing typed death
+> events; identity replay and local lifecycle cleanup are bounded. Windows
+> 401/401, Bevy 419/419, runtime 191/191, Web/audio/export/typecheck and
+> Candidate script gates pass; review is P0=0/P1=0. Attack/flinch/struck,
+> other monsters, live WSS and the complete denominator remain open. No server
+> or global percentage is reported.
+
 > VIS-03 Inventory locked-second-tab server-client note (2026-08-28): revision
 > `83f081149375fb402b9c7e6711fdb4e6bed68a0e` changes no authoritative
 > inventory, purchase, protocol, simulation or Zone semantics. The optional

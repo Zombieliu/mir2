@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> VIS-04 Scarecrow death-audio bounded automated checkpoint (2026-08-28):
+> revision `cf4f5b5197c492324be23beb73611c0e0162c403` binds Crystal
+> `Scarecrow=5`, `BaseSound=50`, `PlayDieSound=53` and the unlisted-ID
+> filename synthesis to exact `005-3.wav`, never the unrelated `53.wav`.
+> Native exact-body routing, one-shot identity, same-batch Remove/Hide and
+> map/logout reset cancellation, Web immediate Monster versus 100 ms Player
+> timing, direct sound export and Candidate exact identity are automated.
+> Focused 2/2, Windows 401/401, Bevy native-ui 419/419, runtime 191/191, Web
+> 46 groups, audio/export/typecheck and both Candidate script self-tests pass;
+> final review is P0=0/P1=0. Attack `005-1`, flinch `005-2`, struck/walk/
+> swing/Dead/Revive, other monsters and the complete monster-audio denominator
+> remain open. No EXE, package, live WSS, screenshot, physical-audio or human
+> evidence was produced; no global percentage is claimed.
+
 > VIS-03 Inventory locked-second-tab bounded automated checkpoint
 > (2026-08-28): revision `83f081149375fb402b9c7e6711fdb4e6bed68a0e`
 > binds Crystal's unexpanded array length 46 to the exact `Title/169` locked
