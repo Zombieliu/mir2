@@ -1,5 +1,32 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 coherent-actor/item-icon follow-up (2026-08-29): the
+> user's retest of exact Candidate
+> `WN-CANDIDATE-VIS01-ATOMIC-ACTOR-HOLD-20260829` showed that the retained
+> body/hair/weapon composite could still tear while moving and that belt slots
+> had quantities without item images. That Candidate is therefore an explicit
+> visual failure, not an accepted or silently superseded build. Clean revision
+> `6a37a1e9b56e02a4afc4b3d88d721e50fbeb109e` now moves every deferred actor
+> layer by one shared x/y/z root delta, retains omitted optional weapon/mount
+> layers until the replacement composite is ready, prevents repeat-tick drift,
+> and commits/removes layers only at the all-ready boundary. The Windows
+> Candidate now also packages the complete `original-ui/Items` closure (361
+> files / 360 PNGs); packaging, verification and runtime asset-root checks fail
+> closed on missing or unreferenced item art. Runtime 199/199, Windows 451/451,
+> both Candidate self-tests, item/player/entity closure checks and final
+> moved-directory nonvisual verification pass with `sourceRepoCheck=checked`.
+> Exact Candidate `WN-CANDIDATE-VIS01-COHERENT-ACTOR-ITEMS-20260829` has a
+> 67,437,568-byte EXE with SHA-256
+> `47960E35DA7619E8FC73B3E300450D78C30FD501D179D16ECDD7519660FDBE5B` and is
+> launched as PID 255504 against healthy loopback for user inspection. The
+> current Candidate remains human-visual pending; no new same-scene screenshot
+> or acceptance has been recorded. Authenticated same-EXE live WSS, real
+> 100/125/150% DPI, native 30-minute soak, human visual/audio/feel, formal
+> publisher signing, complete mouse combat/pathfinding/UI/chat, alternate
+> classes, skills/VFX and semantic denominators remain open. `accepted=false`,
+> `visualAccepted=false`, `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-ANIMATION-ATLAS-STABILITY-REPORT.md`.
+
 > Windows-native VIS-01 atomic-actor follow-up (2026-08-29): the user re-tested
 > exact Candidate `WN-CANDIDATE-VIS01-READY-HOLD-20260829` and supplied a
 > screenshot showing one player assembled from mismatched body/hair/weapon
