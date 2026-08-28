@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> VIS-02 LeftGuard range-projectile client-boundary checkpoint (2026-08-28):
+> revision `d2dfff14308256c07c3b3169798afee0a051b97b` changes no simulation,
+> shared-Zone, Gateway, protocol or combat authority. The Windows client
+> consumes existing typed `ObjectRangeAttack` projection and, only for exact
+> `Monster/100`, reproduces the delayed source-owned `Magic` missile with its
+> 400 ms action boundary, Direction16 stride, moving target and 50 ms/tile
+> clock. LeftGuard 5/5, guard-range 10/10, Windows 392/392, the 74-spell
+> exporter/validator, diff checks and final P0=0/P1=0 review pass. No new
+> asset, audio, live WSS, EXE/package or visual device evidence was produced.
+> Monster ActionFeed and every same-EXE/DPI/soak/human/signing/denominator
+> gate remain open. No backend, visual or global percentage is claimed.
+
 > VIS-02 RightGuard range-hit client-boundary checkpoint (2026-08-28):
 > revision `7d08b53f8d78161655254bb83ebd519ecbd62fed` changes no simulation,
 > shared-Zone, Gateway, protocol or combat authority. The Windows client

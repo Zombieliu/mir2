@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> VIS-02 LeftGuard range-projectile server-client note (2026-08-28): revision
+> `d2dfff14308256c07c3b3169798afee0a051b97b` adds no server packet or
+> authority. Exact `Monster/100` selection, the 400 ms frame-4 delay,
+> Direction16 `Magic` missile, target following and source-owned lifecycle are
+> native-client projection concerns over existing `ObjectRangeAttack` fields.
+> LeftGuard 5/5, guard-range 10/10, Windows 392/392, the 74-spell exporter/
+> validator and final P0=0/P1=0 review pass. No asset, audio, EXE, live WSS or
+> screenshot was created. Monster ActionFeed and all final same-EXE/DPI/soak/
+> human/signing/denominator gates remain open; global parity remains
+> unreported.
+
 > VIS-02 RightGuard range-hit server-client note (2026-08-28): revision
 > `7d08b53f8d78161655254bb83ebd519ecbd62fed` adds no server packet or
 > authority. Exact `Monster/099` selection, the 400 ms frame-4 delay,

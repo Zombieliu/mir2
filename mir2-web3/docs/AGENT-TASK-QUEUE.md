@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> VIS-02 LeftGuard range-projectile additional bounded automated checkpoint
+> (2026-08-28): revision `d2dfff14308256c07c3b3169798afee0a051b97b`
+> routes typed `ObjectRangeAttack` through exact `Monster/100` client logic.
+> After the frame-4 400 ms delay it launches the source-owned, target-tracking
+> `Magic/10 + Direction16*10 .. +5` missile: six 30 ms additive frames,
+> opacity 1, light 6 and a Crystal 50 ms/tile flight clock. Packet location,
+> locked launch direction, moving-target retiming, Hide/Remove ordering,
+> adapter tombstones, replay, map/generation/session boundaries and fail-closed
+> assets are automated. LeftGuard 5/5, guard-range 10/10, Windows 392/392,
+> the 74-spell exporter/validator, diff checks and final P0=0/P1=0 review pass.
+> This adds no server/Gateway authority, new asset, audio, EXE/package, live
+> WSS or device capture. Monster ActionFeed, same-EXE/DPI/soak/human/signing
+> gates and the incomplete semantic denominator remain open. VIS-02 stays in
+> progress; do not emit a global percentage.
+
 > VIS-02 RightGuard range-hit additional bounded automated checkpoint
 > (2026-08-28): revision `7d08b53f8d78161655254bb83ebd519ecbd62fed`
 > routes typed `ObjectRangeAttack` through the exact `Monster/099`

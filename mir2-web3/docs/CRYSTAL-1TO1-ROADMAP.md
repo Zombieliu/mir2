@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-02 LeftGuard range-projectile additional bounded checkpoint
+> (2026-08-28): implementation revision
+> `d2dfff14308256c07c3b3169798afee0a051b97b` reproduces exact
+> `Monster/100` frame-4 `CreateProjectile(10, Magic, true, 6, 30, 4)` client
+> behavior: 400 ms action delay, 16 locked launch directions with ten-frame
+> stride and six visible frames, target tracking, light 6 and 50 ms/tile
+> travel. Adapter tombstones, ordered Hide/Remove, replay, map/generation/
+> session resets and missing assets are fail-closed. LeftGuard 5/5,
+> guard-range 10/10, Windows 392/392, the 74-spell exporter/validator and final
+> P0=0/P1=0 review pass. This closes one automated VFX leaf, not monster
+> ActionFeed, VIS-02, monster presentation or visual acceptance. Same-EXE/
+> live-WSS/DPI/soak/human/signing and the incomplete denominator remain open;
+> `globalParityPercent` remains null.
+
 > VIS-02 RightGuard range-hit additional bounded checkpoint (2026-08-28):
 > implementation revision `7d08b53f8d78161655254bb83ebd519ecbd62fed`
 > reproduces the exact `Monster/099` frame-4 target hit as delayed
