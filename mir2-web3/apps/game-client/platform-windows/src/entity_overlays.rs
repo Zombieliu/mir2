@@ -17,6 +17,9 @@ const STAGE_HEIGHT: f32 = 768.0;
 const CELL_WIDTH: f32 = 48.0;
 const CELL_HEIGHT: f32 = 32.0;
 const OVERLAY_Z_INDEX: i32 = 850;
+// Crystal MapObject.DrawName and PlayerObject.DrawName use
+// `Dead ? 35 : 8`, so a corpse keeps its label and moves it down by 27px.
+const CRYSTAL_CORPSE_NAME_SHIFT_Y_PX: f32 = 27.0;
 
 #[derive(Component)]
 pub(crate) struct NativeEntityOverlayRoot;
@@ -463,9 +466,6 @@ fn overlay_entries(
                     let x = entity.get("x").and_then(value_i64).unwrap_or(0);
                     let y = entity.get("y").and_then(value_i64).unwrap_or(0);
                     let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
-                    if dead {
-                        return None;
-                    }
                     let is_self = kind == "selfPlayer";
                     let object_id = entity.get("objectId").and_then(|value| match value {
                         Value::Number(number) => Some(number.to_string()),
@@ -499,7 +499,12 @@ fn overlay_entries(
                         -18.0
                     } else {
                         -17.0
-                    } + line_adjustment;
+                    } + line_adjustment
+                        + if dead {
+                            CRYSTAL_CORPSE_NAME_SHIFT_Y_PX
+                        } else {
+                            0.0
+                        };
                     let color = entity
                         .get("nameColourArgb")
                         .and_then(value_i64)
@@ -748,17 +753,25 @@ mod tests {
             Some("4"),
             true,
         );
-        assert_eq!(entry_names(&on), ["Self", "Remote", "Town\nGuard", "Deer"]);
+        assert_eq!(
+            entry_names(&on),
+            ["Self", "Remote", "Town\nGuard", "Deer", "Corpse"]
+        );
     }
 
     #[test]
-    fn dead_entities_do_not_emit_crystal_nameplates() {
+    fn dead_entities_keep_crystal_nameplates_shifted_down_without_self_health() {
         let entries = overlay_entries(
             &json!({
                 "sceneView": {"center": {"x": 10, "y": 20}},
+                "playerHp": 0,
+                "playerMaxHp": 18,
                 "entities": [
-                    {"objectId": 1, "kind": "selfPlayer", "name": "Fallen", "x": 10, "y": 20, "dead": true},
-                    {"objectId": 2, "kind": "monster", "name": "Living_Deer", "x": 11, "y": 20, "dead": false}
+                    {"objectId": 1, "kind": "player", "name": "Living", "x": 10, "y": 20, "dead": false},
+                    {"objectId": 2, "kind": "player", "name": "Fallen", "x": 10, "y": 20, "dead": true},
+                    {"objectId": 3, "kind": "monster", "name": "Living_Deer", "x": 11, "y": 20, "dead": false},
+                    {"objectId": 4, "kind": "monster", "name": "Fallen_Deer", "x": 11, "y": 20, "dead": true},
+                    {"objectId": 5, "kind": "selfPlayer", "name": "SelfCorpse", "x": 12, "y": 20, "dead": true}
                 ]
             }),
             OverlayVisibility {
@@ -768,8 +781,13 @@ mod tests {
             None,
             false,
         );
-        assert_eq!(entries.len(), 1);
-        assert_eq!(entries[0].name.as_deref(), Some("Living\nDeer"));
+        assert_eq!(
+            entry_names(&entries),
+            ["Living", "Fallen", "Living\nDeer", "Fallen\nDeer", "SelfCorpse"]
+        );
+        assert_eq!(entries[1].top - entries[0].top, 27.0);
+        assert_eq!(entries[3].top - entries[2].top, 27.0);
+        assert!(health_ratios(&entries).is_empty());
     }
 
     #[test]
