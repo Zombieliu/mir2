@@ -20,6 +20,12 @@ use crate::options_effects::OptionsRuntime;
 const MUSIC_FILE: &str = "Main.wav";
 const PACKAGED_MUSIC_FALLBACK_FILE: &str = "Login2.wav";
 const SOUND_FILE: &str = "Select2.wav";
+/// Temporary development policy requested while Windows parity work is in
+/// progress. Keep loading the legal source so packaging/diagnostics stay
+/// truthful, but never create or resume a looping music player. Typed UI,
+/// gameplay and skill-effect queues remain governed solely by `sound_enabled`.
+/// Flip this to `true` only when the game is ready for final audio acceptance.
+const DEVELOPMENT_BACKGROUND_MUSIC_ENABLED: bool = false;
 const MAX_PENDING_SOUND_ENTITIES: usize = 8;
 const MAX_PENDING_GAMEPLAY_SOUND_EVENTS: usize = 32;
 const MAX_PENDING_UI_SOUND_EVENTS: usize = 8;
@@ -260,7 +266,10 @@ pub(crate) fn initialize_native_audio(
         || !runtime.ui_sources.is_empty();
     options.audio.audible_backend = runtime.source_available;
 
-    if let (Some(source), true) = (runtime.music_source.clone(), options.audio.music_enabled) {
+    if let (Some(source), true) = (
+        runtime.music_source.clone(),
+        background_music_enabled(&options),
+    ) {
         let mut entities = music_entities.iter();
         if entities.next().is_none() {
             spawn_music(&mut commands, source, options.audio.music_volume);
@@ -268,6 +277,12 @@ pub(crate) fn initialize_native_audio(
         for entity in entities {
             commands.entity(entity).despawn();
         }
+    }
+
+    if !DEVELOPMENT_BACKGROUND_MUSIC_ENABLED && runtime.music_source.is_some() {
+        eprintln!(
+            "[client-bevy/audio] background music muted by development policy; sound effects remain enabled"
+        );
     }
 
     if !runtime.source_available {
@@ -289,9 +304,10 @@ pub(crate) fn sync_native_audio(
     music_entities: Query<Entity, bevy::ecs::query::With<NativeMusicTrack>>,
     sound_entities: Query<Entity, bevy::ecs::query::With<NativeSoundEffectTrack>>,
 ) {
+    let music_enabled = background_music_enabled(&options);
     for mut sink in &mut music_sinks {
         sink.set_volume(music_volume(options.audio.music_volume));
-        if !options.audio.music_enabled {
+        if !music_enabled {
             sink.pause();
         } else {
             sink.play();
@@ -445,9 +461,10 @@ fn reconcile_music(
     options: &OptionsRuntime,
     music_entities: Query<Entity, bevy::ecs::query::With<NativeMusicTrack>>,
 ) {
+    let music_enabled = background_music_enabled(options);
     let mut entities = music_entities.iter();
     let Some(keep) = entities.next() else {
-        if options.audio.music_enabled {
+        if music_enabled {
             if let Some(source) = runtime.music_source.clone() {
                 spawn_music(commands, source, options.audio.music_volume);
             }
@@ -455,7 +472,7 @@ fn reconcile_music(
         return;
     };
 
-    if !options.audio.music_enabled {
+    if !music_enabled {
         commands.entity(keep).despawn();
     }
     // Keep exactly one looping player even if a previous frame or an external
@@ -463,6 +480,10 @@ fn reconcile_music(
     for entity in entities {
         commands.entity(entity).despawn();
     }
+}
+
+fn background_music_enabled(options: &OptionsRuntime) -> bool {
+    DEVELOPMENT_BACKGROUND_MUSIC_ENABLED && options.audio.music_enabled
 }
 
 fn music_volume(value: u8) -> Volume {
@@ -809,7 +830,7 @@ mod tests {
     }
 
     #[test]
-    fn startup_queues_real_music_when_the_crystal_source_is_available() {
+    fn startup_loads_real_music_but_development_policy_does_not_play_it() {
         if discover_audio_file(MUSIC_FILE).is_none() {
             return;
         }
@@ -825,7 +846,7 @@ mod tests {
                 .query::<&NativeMusicTrack>()
                 .iter(app.world())
                 .count(),
-            1
+            0
         );
         assert!(
             app.world()
@@ -854,9 +875,9 @@ mod tests {
             .add_systems(Update, initialize_native_audio);
 
         app.update();
-        assert_eq!(count_music_entities(&mut app), 1);
+        assert_eq!(count_music_entities(&mut app), 0);
         app.update();
-        assert_eq!(count_music_entities(&mut app), 1);
+        assert_eq!(count_music_entities(&mut app), 0);
 
         if let Some(previous_root) = previous_root {
             std::env::set_var("MIR2_NATIVE_AUDIO_ROOT", previous_root);
@@ -900,7 +921,7 @@ mod tests {
     }
 
     #[test]
-    fn music_toggle_and_duplicate_reconciliation_keep_one_looping_entity() {
+    fn development_music_policy_removes_looping_entities_even_if_option_is_enabled() {
         let mut app = app();
         let source = bevy::asset::Handle::<AudioSource>::default();
         app.world_mut()
@@ -921,7 +942,7 @@ mod tests {
             .resource_mut::<OptionsRuntime>()
             .audio_revision = 1;
         app.update();
-        assert_eq!(count_music_entities(&mut app), 1);
+        assert_eq!(count_music_entities(&mut app), 0);
 
         {
             let mut options = app.world_mut().resource_mut::<OptionsRuntime>();
@@ -937,7 +958,11 @@ mod tests {
             options.audio_revision = 3;
         }
         app.update();
-        assert_eq!(count_music_entities(&mut app), 1);
+        assert_eq!(count_music_entities(&mut app), 0);
+        assert!(
+            app.world().resource::<OptionsRuntime>().audio.sound_enabled,
+            "development music policy must not disable sound effects"
+        );
     }
 
     #[test]
