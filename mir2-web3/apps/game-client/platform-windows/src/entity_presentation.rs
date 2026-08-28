@@ -83,6 +83,21 @@ impl NativeEntityPresentation {
         self.self_hovered
     }
 
+    /// Object ids whose client-side Crystal action clock has reached the
+    /// terminal corpse pose. `dead=true` and the `Die` action are deliberately
+    /// excluded: Crystal projectile completion callbacks suppress their impact
+    /// only when `CurrentAction == MirAction.Dead`.
+    pub(crate) fn dead_action_object_ids(&self) -> HashSet<u32> {
+        self.world
+            .active_states()
+            .filter_map(|(object_id, state)| {
+                (state.pose().action == AnimationAction::Dead)
+                    .then(|| object_id.parse::<u32>().ok())
+                    .flatten()
+            })
+            .collect()
+    }
+
     fn set_hover_presentation(
         &mut self,
         hover_cursor_stage: Option<(f32, f32)>,
@@ -659,6 +674,45 @@ mod tests {
         assert_eq!(
             normalize_action(EntityKind::Npc, AnimationAction::Attack1),
             None
+        );
+    }
+
+    #[test]
+    fn projectile_completion_gate_uses_dead_action_not_dead_flag() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "entities": [{
+                "objectId": 2005,
+                "kind": "monster",
+                "x": 10,
+                "y": 10,
+                "direction": "down",
+                "dead": true,
+                "_nativeAnimationAction": "die",
+                "_nativeAnimationSequence": 1,
+                "sprite": {
+                    "bodyLibrary": "Monster/005",
+                    "directionStride": 10,
+                    "frameBaseOffset": 0
+                }
+            }]
+        }));
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_monster());
+        assert!(
+            presentation.dead_action_object_ids().is_empty(),
+            "dead=true during Die must not suppress a Crystal projectile impact"
+        );
+        presentation.world.tick(999).expect("advance Die action");
+        assert!(presentation.dead_action_object_ids().is_empty());
+        presentation
+            .world
+            .tick(1_000)
+            .expect("complete Die into terminal Dead action");
+        assert_eq!(
+            presentation.dead_action_object_ids(),
+            HashSet::from([2005]),
+            "the shared action clock closes the impact callback only at Dead"
         );
     }
 

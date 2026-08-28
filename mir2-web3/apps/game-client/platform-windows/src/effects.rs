@@ -1229,6 +1229,10 @@ pub(crate) struct NativeEffects {
     /// target disappears during wind-up and binds a target that appears before
     /// launch.
     local_projectile_targets: HashMap<String, LocalProjectileTarget>,
+    /// Targets whose shared presentation clock is currently in Crystal's
+    /// terminal `Dead` action. A plain `dead` packet flag is insufficient:
+    /// FireBall-family impacts remain visible throughout the `Die` action.
+    dead_action_object_ids: HashSet<u32>,
     /// Audio-only cast branches (SoulFireBall has no cast bitmap) still need a
     /// one-shot queue that does not depend on an active render instance.
     ready_sounds: Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent>,
@@ -1271,6 +1275,7 @@ impl Default for NativeEffects {
             zone_tiles: HashMap::new(),
             local_projectile_dedupe: HashMap::new(),
             local_projectile_targets: HashMap::new(),
+            dead_action_object_ids: HashSet::new(),
             ready_sounds: Vec::new(),
             pending_sounds: Vec::new(),
             dead_player_sound_keys: HashSet::new(),
@@ -1646,6 +1651,7 @@ impl NativeEffects {
         self.render_scene_identity = None;
         self.render_scene_changed = false;
         self.zone_tiles.clear();
+        self.dead_action_object_ids.clear();
         self.post_world_depth_bounds = None;
         publish_effect_lights(Vec::new());
         crate::map_parser::lighting::publish_effect_lighting_frame(
@@ -1677,6 +1683,49 @@ impl NativeEffects {
         self.dead_player_sound_keys.clear();
         self.dead_scarecrow_sound_keys.clear();
         self.revived_player_effect_keys.clear();
+    }
+
+    fn replace_dead_action_object_ids(&mut self, object_ids: HashSet<u32>) {
+        self.dead_action_object_ids = object_ids;
+    }
+
+    /// Crystal checks the target's current action in the missile completion
+    /// callback. Keep the projectile and its tracking intact during flight so
+    /// a target revived before arrival can still receive the visual impact;
+    /// suppress only at the exact completion boundary, and cancel its paired
+    /// impact sound in the same operation.
+    fn suppress_dead_target_impacts_at_completion(&mut self, now_ms: u64) {
+        let mut suppressed = HashSet::new();
+        for instance in &mut self.active {
+            if !matches!(
+                instance.provenance.spell.as_str(),
+                "FireBall" | "GreatFireBall" | "SoulFireBall"
+            ) {
+                continue;
+            }
+            let Some(target) = self.local_projectile_targets.get(&instance.key) else {
+                continue;
+            };
+            let Some(target_id) = target.target_id else {
+                continue;
+            };
+            let Some(projectile) = instance.current.as_ref() else {
+                continue;
+            };
+            if projectile.kind != "projectile"
+                || now_ms < instance.start_at.saturating_add(projectile.duration_ms)
+                || !self.dead_action_object_ids.contains(&target_id)
+            {
+                continue;
+            }
+            if instance.queued.take().is_some() {
+                suppressed.insert(instance.key.clone());
+            }
+        }
+        if !suppressed.is_empty() {
+            self.pending_sounds
+                .retain(|pending| !suppressed.contains(&pending.key));
+        }
     }
 
     fn refresh_anchor_tiles(&mut self) {
@@ -1941,6 +1990,7 @@ impl NativeEffects {
         &mut self,
         now_ms: u64,
     ) -> Vec<mir2_client_bevy::audio::NativeGameplaySoundEvent> {
+        self.suppress_dead_target_impacts_at_completion(now_ms);
         let active_keys = self
             .active
             .iter()
@@ -3218,6 +3268,7 @@ impl NativeEffects {
         let post_world_depth_bounds = self.post_world_depth_bounds;
         let _ = effect_catalog();
         self.refresh_anchor_tiles();
+        self.suppress_dead_target_impacts_at_completion(now_ms);
 
         let rendered = self
             .active
@@ -3537,6 +3588,7 @@ fn spell_number_u32(value: &Value) -> u32 {
 pub(crate) fn tick_native_effects(
     time: bevy::prelude::Res<bevy::prelude::Time>,
     mut effects: bevy::prelude::ResMut<NativeEffects>,
+    presentation: bevy::prelude::Res<crate::entity_presentation::NativeEntityPresentation>,
     mut gameplay_audio: Option<
         bevy::prelude::ResMut<mir2_client_bevy::audio::NativeGameplayAudioQueue>,
     >,
@@ -3545,6 +3597,7 @@ pub(crate) fn tick_native_effects(
     >,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    effects.replace_dead_action_object_ids(presentation.dead_action_object_ids());
     if let Some(queue) = gameplay_audio.as_deref_mut() {
         for event in effects.take_due_sound_events(now_ms) {
             queue.push(event);
@@ -6921,6 +6974,109 @@ mod tests {
             Some(500)
         );
         assert_eq!((projectile.tile_x, projectile.tile_y), (298, 616));
+    }
+
+    #[test]
+    fn fireball_family_suppresses_impact_and_sound_only_for_dead_action_at_completion() {
+        for (event, target_id, impact_cue, impact_frame) in [
+            (
+                fireball_magic_event(1, true),
+                2005,
+                FIREBALL_IMPACT_SOUND_CUE,
+                "/Magic/170.png",
+            ),
+            (
+                great_fireball_magic_event(1, true),
+                2034,
+                GREAT_FIREBALL_IMPACT_SOUND_CUE,
+                "/Magic/570.png",
+            ),
+            (
+                soul_fireball_magic_event(1, true),
+                2014,
+                SOUL_FIREBALL_IMPACT_SOUND_CUE,
+                "/Magic/1360.png",
+            ),
+        ] {
+            let zone = HashMap::from([(1000, (288, 616)), (target_id, (288, 611))]);
+
+            let mut dying = NativeEffects::default();
+            dying.observe(0, 288, 616, &[event.clone()], &zone);
+            let _ = dying.take_due_sound_events(0);
+            dying.observe(600, 288, 616, &[], &zone);
+            let _ = dying.take_due_sound_events(600);
+            dying.replace_dead_action_object_ids(HashSet::new());
+            let impact_sound = dying.take_due_sound_events(850);
+            assert_eq!(
+                impact_sound
+                    .iter()
+                    .map(|sound| sound.cue.as_str())
+                    .collect::<Vec<_>>(),
+                vec![impact_cue],
+                "Die must retain the {impact_cue} completion sound"
+            );
+            let impact: Value = serde_json::from_str(
+                &dying
+                    .tick_with_visibility(850, true)
+                    .expect("Die-phase impact render state"),
+            )
+            .expect("Die-phase impact JSON");
+            assert!(impact["effects"].as_array().is_some_and(|effects| {
+                effects.iter().any(|effect| {
+                    effect["imageUrl"]
+                        .as_str()
+                        .is_some_and(|path| path.ends_with(impact_frame))
+                })
+            }));
+
+            let mut dead = NativeEffects::default();
+            dead.observe(0, 288, 616, &[event], &zone);
+            let _ = dead.take_due_sound_events(0);
+            dead.observe(600, 288, 616, &[], &zone);
+            let _ = dead.take_due_sound_events(600);
+            dead.replace_dead_action_object_ids(HashSet::from([target_id]));
+            assert!(
+                dead.take_due_sound_events(850).is_empty(),
+                "Dead must suppress the {impact_cue} completion sound"
+            );
+            let suppressed: Value = serde_json::from_str(
+                &dead
+                    .tick_with_visibility(850, true)
+                    .expect("Dead-phase suppression render state"),
+            )
+            .expect("Dead-phase suppression JSON");
+            assert_eq!(suppressed["effects"], json!([]));
+        }
+    }
+
+    #[test]
+    fn fireball_target_revived_before_completion_restores_impact() {
+        let zone = HashMap::from([(1000, (288, 616)), (2005, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[fireball_magic_event(1, true)], &zone);
+        let _ = fx.take_due_sound_events(0);
+        fx.observe(600, 288, 616, &[], &zone);
+        let _ = fx.take_due_sound_events(600);
+
+        fx.replace_dead_action_object_ids(HashSet::from([2005]));
+        let _ = fx.tick_with_visibility(700, true);
+        assert!(fx.active.iter().any(|instance| {
+            instance.key.starts_with("fx-fireball-") && instance.queued.is_some()
+        }));
+
+        fx.replace_dead_action_object_ids(HashSet::new());
+        assert_eq!(
+            fx.take_due_sound_events(850)[0].cue,
+            FIREBALL_IMPACT_SOUND_CUE
+        );
+        let impact: Value = serde_json::from_str(
+            &fx.tick_with_visibility(850, true)
+                .expect("revived target impact"),
+        )
+        .expect("revived target impact JSON");
+        assert!(impact["effects"][0]["imageUrl"]
+            .as_str()
+            .is_some_and(|path| path.ends_with("/Magic/170.png")));
     }
 
     #[test]
