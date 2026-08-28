@@ -203,6 +203,14 @@ struct RuntimeMapCameraOffset {
 struct SceneRegistry {
     entities: HashMap<String, SceneEntityHandles>,
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
+    /// Strong references for replacement images that are still loading.
+    ///
+    /// The currently rendered Sprite owns only the old image while an atomic
+    /// actor/non-actor handoff is deferred. Without this bounded per-layer
+    /// cache, the temporary `AssetServer::load` handle is dropped at the end of
+    /// every preflight tick, so Bevy may cancel/unload the replacement before
+    /// it can ever become ready. That permanently freezes the old direction.
+    entity_render_pending_images: HashMap<String, Handle<Image>>,
     /// Last committed world-space root for each retained actor composite.
     /// During a deferred image handoff every old body/hair/weapon/mount layer
     /// moves by the same root delta, preserving the old frame's internal
@@ -3238,6 +3246,7 @@ fn clear_scene_registry(
         }
     }
     registry.entity_render_actor_roots.clear();
+    registry.entity_render_pending_images.clear();
     registry.entity_render_atlases.clear();
 
     // Keep the shadow handles until cleanup_reset_effect_shadows can remove
@@ -4339,29 +4348,40 @@ fn sync_entity_render_layers(
             .iter()
             .filter(|layer| entity_render_layer_is_actor(entity, layer))
             .count();
-        let defer_actor_composite = has_retained_actor_layer
-            && (incoming_actor_layer_count == 0
-                || entity.layers.iter().any(|layer| {
-                    if !entity_render_layer_is_actor(entity, layer) {
-                        return false;
-                    }
-                    let layer_key = entity_render_layer_key(entity, layer);
-                    let image_binding =
-                        entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
-                    let image_source_changed = registry
-                        .entity_render_layers
-                        .get(&layer_key)
-                        .map_or(true, |handle| {
-                            handle.image_key != image_binding.image_key
-                                || handle.atlas_key != image_binding.atlas_key
-                        });
-                    image_source_changed
-                        && !entity_render_image_is_ready(
-                            &image_binding,
-                            &asset_server,
-                            &atlas_assets,
-                        )
-                }));
+        let mut defer_actor_composite = has_retained_actor_layer && incoming_actor_layer_count == 0;
+        if has_retained_actor_layer && incoming_actor_layer_count > 0 {
+            for layer in entity
+                .layers
+                .iter()
+                .filter(|layer| entity_render_layer_is_actor(entity, layer))
+            {
+                let layer_key = entity_render_layer_key(entity, layer);
+                let image_binding =
+                    entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
+                let image_source_changed = registry
+                    .entity_render_layers
+                    .get(&layer_key)
+                    .is_none_or(|handle| {
+                        handle.image_key != image_binding.image_key
+                            || handle.atlas_key != image_binding.atlas_key
+                    });
+                if image_source_changed {
+                    // Keep the requested replacement alive across deferred
+                    // ticks. The old Sprite still owns only its old image.
+                    registry
+                        .entity_render_pending_images
+                        .insert(layer_key, image_binding.image.clone());
+                    defer_actor_composite |=
+                        !entity_render_image_is_ready(&image_binding, &asset_server, &atlas_assets);
+                } else {
+                    registry.entity_render_pending_images.remove(&layer_key);
+                }
+            }
+        } else if incoming_actor_layer_count == 0 {
+            for key in &retained_actor_keys {
+                registry.entity_render_pending_images.remove(key);
+            }
+        }
 
         let actor_root = entity_render_actor_root(snapshot, entity, motion_offset);
         if has_retained_actor_layer || incoming_actor_layer_count > 0 {
@@ -4407,9 +4427,15 @@ fn sync_entity_render_layers(
             // Non-actor decoration/effect layers keep their independent ready
             // handoff; they must not stall the body/hair/weapon composite.
             if !actor_layer {
-                if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
-                    let image_source_changed = handle.image_key != image_binding.image_key
-                        || handle.atlas_key != image_binding.atlas_key;
+                if let Some((layer_entity, image_source_changed)) =
+                    registry.entity_render_layers.get(&layer_key).map(|handle| {
+                        (
+                            handle.entity,
+                            handle.image_key != image_binding.image_key
+                                || handle.atlas_key != image_binding.atlas_key,
+                        )
+                    })
+                {
                     if image_source_changed
                         && !entity_render_image_is_ready(
                             &image_binding,
@@ -4417,7 +4443,10 @@ fn sync_entity_render_layers(
                             &atlas_assets,
                         )
                     {
-                        if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        registry
+                            .entity_render_pending_images
+                            .insert(layer_key.clone(), image_binding.image.clone());
+                        if let Ok(mut transform) = transform_query.get_mut(layer_entity) {
                             transform.translation = position;
                         }
                         continue;
@@ -4482,6 +4511,7 @@ fn sync_entity_render_layers(
                             Vec3::new(layer.width.max(1.0), layer.height.max(1.0), 1.0);
                     }
                 }
+                registry.entity_render_pending_images.remove(&layer_key);
                 continue;
             }
 
@@ -4526,7 +4556,7 @@ fn sync_entity_render_layers(
                     .id()
             };
             registry.entity_render_layers.insert(
-                layer_key,
+                layer_key.clone(),
                 EntityRenderLayerHandle {
                     entity: sprite_entity,
                     image_key: image_binding.image_key,
@@ -4535,6 +4565,7 @@ fn sync_entity_render_layers(
                     additive: layer.additive,
                 },
             );
+            registry.entity_render_pending_images.remove(&layer_key);
         }
     }
 
@@ -4552,7 +4583,12 @@ fn sync_entity_render_layers(
                 additive_cache.evict(&entity_additive_material_key(&key), &mut additive_materials);
             }
         }
+        registry.entity_render_pending_images.remove(&key);
     }
+
+    registry
+        .entity_render_pending_images
+        .retain(|key, _| alive.contains(key));
 
     registry
         .entity_render_actor_roots
@@ -4784,6 +4820,7 @@ fn clear_entity_render_layers(
             additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
         }
     }
+    registry.entity_render_pending_images.clear();
     registry.entity_render_actor_roots.clear();
     registry.entity_render_atlases.clear();
 }
@@ -6181,6 +6218,13 @@ mod entity_atlas_tests {
                 registry.entity_render_layers["1001:weapon-primary"].image_key, initial_keys[2],
                 "an old optional weapon remains until the replacement composite commits"
             );
+            assert!(
+                registry
+                    .entity_render_pending_images
+                    .get("1001:hair")
+                    .is_some_and(Handle::is_strong),
+                "the unready replacement must keep a strong handle across deferred ticks"
+            );
 
             for (index, entity) in initial_entities.iter().copied().enumerate() {
                 let deferred = world
@@ -6226,6 +6270,10 @@ mod entity_atlas_tests {
 
         let world = app.world();
         let registry = world.resource::<SceneRegistry>();
+        assert!(
+            registry.entity_render_pending_images.is_empty(),
+            "committed replacement images are owned by their Sprites and leave no pending handles"
+        );
         assert_eq!(
             registry.entity_render_layers["1001:body"].image_key,
             "atlas:ready:p0"

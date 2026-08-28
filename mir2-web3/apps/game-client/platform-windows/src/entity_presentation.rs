@@ -1088,6 +1088,80 @@ mod tests {
     }
 
     #[test]
+    fn authoritative_turn_selects_all_eight_real_player_directions_for_every_actor_layer() {
+        let payload = |direction: &str| {
+            json!({
+                "sceneView": {"center": {"x": 10, "y": 10}},
+                "entities": [{
+                    "objectId": 1,
+                    "kind": "selfPlayer",
+                    "classKey": "warrior",
+                    "genderKey": "male",
+                    "x": 10,
+                    "y": 10,
+                    "direction": direction,
+                    "dead": false,
+                    "sprite": {
+                        "bodyLibrary": "CArmour/01",
+                        "hairLibrary": "CHair/00",
+                        "weaponLibrary": "CWeapon/00",
+                        "frameBaseOffset": 0,
+                        "weaponFrameOffset": 0,
+                        "directionStride": 4
+                    }
+                }]
+            })
+        };
+        let mut presentation = NativeEntityPresentation::default();
+        let mut body_paths = HashSet::new();
+
+        for (direction, direction_index) in [
+            ("Up", 0_i64),
+            ("UpRight", 1),
+            ("Right", 2),
+            ("DownRight", 3),
+            ("Down", 4),
+            ("DownLeft", 5),
+            ("Left", 6),
+            ("UpLeft", 7),
+        ] {
+            presentation.replace_payload(payload(direction));
+            let state = presentation
+                .render_state_if_changed(0, true)
+                .unwrap_or_else(|| panic!("{direction} must republish a changed standing pose"));
+            let layers = state["entities"][0]["layers"]
+                .as_array()
+                .expect("player actor layers");
+            let expected_frame = direction_index * 4;
+            for (role, library) in [
+                ("body", "CArmour/01"),
+                ("hair", "CHair/00"),
+                ("weapon-primary", "CWeapon/00"),
+            ] {
+                let key = format!("1:{role}");
+                let layer = layers
+                    .iter()
+                    .find(|layer| layer["key"].as_str() == Some(key.as_str()))
+                    .unwrap_or_else(|| panic!("{direction} missing {role}"));
+                assert_eq!(
+                    layer["path"],
+                    json!(format!("/original-ui/{library}/{expected_frame}.png")),
+                    "{direction} must select the same real direction band for {role}"
+                );
+                if role == "body" {
+                    body_paths.insert(layer["path"].as_str().unwrap().to_owned());
+                }
+            }
+        }
+
+        assert_eq!(
+            body_paths.len(),
+            8,
+            "Crystal player standing uses eight real direction bands, not one diagonal or mirrored fallback"
+        );
+    }
+
+    #[test]
     fn attack_range_two_parser_uses_the_crystal_player_action() {
         assert_eq!(
             parse_action("attackRange2"),
