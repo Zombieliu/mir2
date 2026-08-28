@@ -1,5 +1,28 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 atomic-actor follow-up (2026-08-29): the user re-tested
+> exact Candidate `WN-CANDIDATE-VIS01-READY-HOLD-20260829` and supplied a
+> screenshot showing one player assembled from mismatched body/hair/weapon
+> animation pages. Revision
+> `266e89b07ab69fe6f8fd697cbeaebc24b098a977` preflights every retained actor
+> layer before changing any actor image binding. If one replacement page/PNG
+> is not ready, the whole actor composite retains its prior bindings while
+> transforms continue to update; non-actor effects keep independent handoff
+> and real removal/death/equipment semantics are unchanged. The mixed-ready
+> regression plus Runtime 199/199 and Windows 450/450 pass. Clean Candidate
+> `WN-CANDIDATE-VIS01-ATOMIC-ACTOR-HOLD-20260829` passes staging and final
+> moved-directory nonvisual verification; its 67,451,904-byte EXE is SHA-256
+> `D5B1D7AB446C09BA2E5ACCF49221AE45973614D5D3E4EAB63E4BFDB021ACEEA7`
+> and is launched as PID 242852 against healthy loopback for user inspection.
+> Both the prior direct-rect and ready-image/per-layer Candidates are explicitly
+> failed visual attempts; the atomic-actor Candidate remains human-visual
+> pending. Authenticated same-EXE live WSS, real 100/125/150% DPI, native
+> 30-minute soak, human visual/audio/feel, formal publisher signing, complete
+> mouse combat/pathfinding/UI/chat, alternate classes, skills/VFX and semantic
+> denominators remain open. `accepted=false`, `visualAccepted=false`,
+> `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-ANIMATION-ATLAS-STABILITY-REPORT.md`.
+
 > Windows-native VIS-01 direct-frame/run/chat follow-up (2026-08-29): the user
 > re-tested revision `02bb67874791c26e556fee88382d0e7d61287012` and confirmed
 > that whole-actor flicker remained, so stable atlas-handle accumulation alone
