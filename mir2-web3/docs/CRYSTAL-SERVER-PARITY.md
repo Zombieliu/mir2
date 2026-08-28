@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> VIS-03 HelpDialog server-client note (2026-08-28): revision
+> `e22f2aa4c683447b0e57805a580fd29e0a84c37c` changes no server packet,
+> simulation, Zone or Gateway authority. Help visibility/page state, Menu/H/P
+> input and ButtonA are strictly local; no UI or gameplay intent is emitted.
+> The source-bound default-English/default-binding leaf passes Help 9/9,
+> Bevy 411/411, Windows 394/394, ui-core registry 13/13 and Candidate script
+> self-tests. Dynamic rebind/localization remains one reviewed client P1;
+> dragging, exact typography and every same-EXE/DPI/soak/human/signing/
+> denominator gate remain open. No server or global percentage is claimed.
+
 > VIS-01 living hover-name server-client note (2026-08-28): revision
 > `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83` changes no server combat,
 > session or Zone authority. It consumes the existing authoritative entity

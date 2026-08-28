@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> VIS-03 HelpDialog bounded default-English checkpoint (2026-08-28):
+> implementation revision `e22f2aa4c683447b0e57805a580fd29e0a84c37c`
+> reproduces the source 536x509 Help shell, exact source frame/title/button
+> assets and coordinates, three shortcut pages, 42 image pages, 45-page
+> titles and circular navigation. Help is independent of the core panel,
+> opens from Menu or source-compatible H, preserves its page on Hide, resets
+> on session change and routes displayed P to Group. Internal navigation and
+> Close each emit one ButtonA without Gateway work. Focused 9/9, Bevy 411/411,
+> Windows 394/394, ui-core registry 13/13 and package/verifier self-tests pass.
+> This closes only a default-English/default-binding automated Help leaf, not
+> Help visual acceptance or VIS-03. Dynamic rebind/localization remains one
+> reviewed P1; dragging, exact typography, same-EXE/DPI/soak/human/signing and
+> the incomplete denominator remain open. `globalParityPercent` remains null.
+
 > VIS-01 living hover-name additional bounded checkpoint (2026-08-28):
 > implementation revision `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83`
 > now keeps Crystal's ordinary living `NameView`, non-self MouseObject/self

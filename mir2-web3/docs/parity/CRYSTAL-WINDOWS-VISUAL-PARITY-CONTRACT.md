@@ -14,6 +14,7 @@ visual branch: codex/windows-visual-parity
 selectedTargetCheckpointRevision: a58ab0aaa2202731a5c55e7a684261d6c15c2f8d
 inventoryButtonACheckpointRevision: 5b70511316b084ac677b5978f7f03e440241ca4c
 characterHudCheckpointRevision: 849f1f0b5120867d1358e0e7db9ba675e9866f9c
+helpDialogCheckpointRevision: e22f2aa4c683447b0e57805a580fd29e0a84c37c
 semanticLeafInventoryComplete: false
 inventoryComplete: false
 globalParityPercent: null
@@ -26,6 +27,44 @@ The dirty Crystal files are server files (`Server/MirEnvir/Envir.cs` and
 but the source root is still not clean; final source binding therefore remains
 fail-closed and must be regenerated against a clean source checkout before
 acceptance.
+
+## HelpDialog bounded default-English checkpoint
+
+Revision `e22f2aa4c683447b0e57805a580fd29e0a84c37c` closes automated evidence
+for one VIS-03 window leaf. It uses Crystal's 536x509 `Prguse/920` frame,
+`Title/57`, `Prguse2/240..245` Previous/Next triples and
+`Prguse2/360..362` Close triple at their source coordinates. Pages zero
+through two render the source English shortcut catalog; pages three through
+44 map exactly to `Help/0..41`, with the source 45 titles and circular
+Previous/Next behavior.
+
+Help has renderer-owned visibility and page state separate from the core panel
+reducer. Menu Help and the default H shortcut toggle it without sound or
+Gateway work. H requires Ctrl and Shift unpressed while Alt is irrelevant;
+focused text input owns H. Hide preserves the current page, session reset
+returns to page zero, and Escape closes Help together with other windows.
+Previous, Next and Close each enqueue one typed ButtonA. The displayed Crystal
+default P shortcut now opens Group and never Storage, including while Help is
+visible. `MENU.HELP` is a typed Overlay action in the 174-entry control
+registry; the deliberately disabled source-menu family has been reduced from
+nine entries to eight.
+
+All 42 Help page PNGs plus the frame and title are source-exported and present
+in the remote/Candidate closure. Candidate scripts allowlist, require and copy
+the Help tree and fail closed when `Help/41.png`, `Prguse/920.png` or
+`Title/57.png` is missing. Focused Help 9/9, Bevy native-ui 411/411, Windows
+394/394, ui-core registry 13/13, rustfmt/diff and both script self-tests pass.
+Independent review reports P0=0 and retains one P1 outside this bounded claim:
+Crystal reads current keybindings and localized strings, while native Help is
+still hard-coded to default English/default bindings.
+
+No exact-head Candidate, EXE, package, live WSS run, GPU capture or human
+evidence was produced. Crystal marks the window movable, but native is still
+fixed-center; exact bold/font raster is also unaccepted. Dynamic rebind/
+localization, dragging, 100/125/150% DPI, same-EXE pixels/audio, native
+30-minute soak, human visual/interaction acceptance and publisher signing all
+remain required. This is not HelpDialog visual acceptance, VIS-03 completion
+or whole-game UI parity.
 
 The machine-readable companion is
 `docs/generated/player-qa/windows-visual-parity/phase-a-denominator.json`.

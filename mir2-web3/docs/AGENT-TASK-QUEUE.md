@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> VIS-03 HelpDialog bounded default-English automated checkpoint
+> (2026-08-28): revision `e22f2aa4c683447b0e57805a580fd29e0a84c37c`
+> adds Crystal's independent 536x509 Help window, exact frame/title and
+> previous/next/close triples, three shortcut pages plus `Help/0..41`, all
+> 45 titles and wraparound navigation. Menu Help and default H are local and
+> silent; the internal controls emit one ButtonA; Escape/session reset and
+> core-panel coexistence are covered. P now follows the displayed Crystal
+> default and opens Group rather than Storage. The typed control inventory is
+> 174 entries and Candidate scripts fail closed for missing Help assets.
+> Focused Help 9/9, Bevy native-ui 411/411, Windows 394/394, ui-core registry
+> 13/13 and both script self-tests pass. Review has P0=0; one retained P1 is
+> explicit: native Help uses default English/default bindings instead of
+> Crystal's live rebind/localization model. Movable dragging, exact font/bold
+> raster, same-EXE/DPI/soak/human/signing and the incomplete denominator also
+> remain open. No EXE, package or screenshot was produced; do not emit a
+> global percentage.
+
 > VIS-01 living hover-name additional bounded automated checkpoint
 > (2026-08-28): revision `066f6f3b576cbdc03106c8a221ccdaf13f7dfa83`
 > decouples Crystal living `NameView`, non-self MouseObject/self MouseOver
