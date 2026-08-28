@@ -1123,6 +1123,11 @@ impl NativeGameplayAdapter {
         if dead {
             overlay.insert("hp".to_owned(), Value::from(0));
             overlay.insert("_packetHealthPercent".to_owned(), Value::from(0));
+        } else {
+            // ObjectRevived carries no HP, but it is authoritative for life
+            // state. Do not let the retained death-time 0% normalization turn
+            // this actor dead again before the later ObjectHealth packet.
+            overlay.remove("_packetHealthPercent");
         }
         apply_animation_hint_to_map(overlay, &hint);
         true
@@ -4871,6 +4876,10 @@ mod tests {
         let revived = adapter.zone_entities.get(&2001).expect("revived entity");
         assert_eq!(revived.get("dead"), Some(&json!(false)));
         assert_eq!(revived.get("skeleton"), Some(&json!(false)));
+        assert_eq!(
+            revived.get("_nativeAnimationAction"),
+            Some(&json!("revive"))
+        );
     }
 
     #[test]

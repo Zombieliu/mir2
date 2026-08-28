@@ -382,6 +382,20 @@ mod tests {
     }
 
     #[test]
+    fn scarecrow_revive_uses_the_exact_generated_crystal_descriptor() {
+        let source: Value = serde_json::from_str(include_str!(
+            "../../../web/public/original-ui/frame-sets.generated.json"
+        ))
+        .expect("generated Crystal frame-set catalog");
+        let parsed = NativeFrameSetCatalog::parse(&source);
+        let catalog = parsed.catalog_for(EntityKind::Monster, "Monster/005");
+        assert_eq!(
+            catalog.descriptor(AnimationAction::Revive),
+            Some(&FrameDescriptor::from_crystal(144, 10, 0, 100, true))
+        );
+    }
+
+    #[test]
     fn malformed_or_unknown_library_uses_kind_default() {
         let parsed = NativeFrameSetCatalog::parse(&json!({
             "libraries": {

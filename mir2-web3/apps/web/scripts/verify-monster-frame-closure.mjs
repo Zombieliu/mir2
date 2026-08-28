@@ -21,7 +21,7 @@ const requiredActionsByLibrary = Object.freeze({
   "Monster/000": ["Standing", "Walking", "Attack1"],
   "Monster/003": ["Standing", "Walking", "Attack1", "Struck", "Die", "Dead"],
   "Monster/004": ["Standing", "Walking", "Attack1", "Struck", "Die", "Dead"],
-  "Monster/005": ["Standing", "Walking", "Attack1", "Struck", "Die", "Dead"],
+  "Monster/005": ["Standing", "Walking", "Attack1", "Struck", "Die", "Dead", "Revive"],
   "Monster/007": ["Standing", "Walking", "Attack1", "Struck", "Die", "Dead"],
   "Monster/010": ["Standing", "Attack1", "Struck", "Die", "Dead"],
   "Monster/012": ["Standing", "Walking", "Attack1", "Struck", "Die", "Dead"],

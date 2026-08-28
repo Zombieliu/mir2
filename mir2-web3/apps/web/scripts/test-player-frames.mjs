@@ -145,6 +145,14 @@ assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/000"), "walking
   blend: undefined,
 });
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/003"), "reviving").reverse, true);
+assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("Monster/005"), "reviving"), {
+  frameBaseOffset: 144,
+  frameCount: 10,
+  directionStride: 10,
+  frameIntervalMs: 100,
+  reverse: true,
+  blend: undefined,
+});
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Dragon"), "standing").directionStride, 0);
 assert.equal(crystalEntityAnimationMeta(frameSetFor("Monster/182"), "standing").blend, true);
 assert.deepEqual(crystalEntityAnimationMeta(frameSetFor("NPC/155"), "standing").effect, {

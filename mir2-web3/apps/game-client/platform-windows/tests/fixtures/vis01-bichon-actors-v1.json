@@ -344,6 +344,19 @@
       "atMs": 8201,
       "event": { "type": "packet", "packet": "ObjectShow", "payload": { "objectId": 2010 } },
       "checkpoint": { "objectId": 2010, "action": "show", "sequence": 10, "visible": true, "layers": [ { "key": "2010:body", "path": "/original-ui/Monster/010/4.png" } ] }
+    },
+    {
+      "atMs": 8300,
+      "event": { "type": "packet", "packet": "ObjectRevived", "payload": { "objectId": 2005, "effect": true } },
+      "checkpoint": { "objectId": 2005, "action": "revive", "sequence": 11, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/164.png" } ] }
+    },
+    {
+      "atMs": 9200,
+      "checkpoint": { "objectId": 2005, "action": "revive", "sequence": 11, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/155.png" } ] }
+    },
+    {
+      "atMs": 9300,
+      "checkpoint": { "objectId": 2005, "action": "standing", "sequence": 11, "dead": false, "x": 292, "y": 616, "direction": "Right", "visible": true, "layers": [ { "key": "2005:body", "path": "/original-ui/Monster/005/8.png" } ] }
     }
   ]
 }
