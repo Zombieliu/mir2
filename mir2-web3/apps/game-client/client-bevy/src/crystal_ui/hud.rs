@@ -1150,11 +1150,7 @@ mod tests {
                 1912,
                 CrystalRect::new(997.0, 692.0, 20.0, 20.0),
             ),
-            (
-                spec::MENU,
-                1960,
-                CrystalRect::new(969.0, 651.0, 40.0, 40.0),
-            ),
+            (spec::MENU, 1960, CrystalRect::new(969.0, 651.0, 40.0, 40.0)),
             (
                 spec::GAME_SHOP,
                 826,
