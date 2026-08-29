@@ -11,8 +11,11 @@
 > frames fail closed instead of retaining old terrain, and map boundaries
 > preserve the self actor while clearing source-map population. Native map-pack
 > tests, a real 4,957-entry combined build and Windows 474/474 pass. This is a
-> source/automation checkpoint only; a new exact EXE/package and the user's
-> GroceryStore visual retest remain pending. No other map, global visual or
+> bounded Candidate checkpoint only. Clean revision
+> `be6eed8d3767e4381f064f957413564e4cb78df0` produced independently verified
+> Candidate `WN-CANDIDATE-VIS01-TYPE1-MAP-TRANSFER-20260829`, and its exact EXE
+> is running against healthy loopback for the user's GroceryStore visual
+> retest. That human retest remains pending. No other map, global visual or
 > whole-game percentage is closed, and all live-WSS/DPI/soak/human/signing
 > gates remain open; `globalParityPercent=null`.
 

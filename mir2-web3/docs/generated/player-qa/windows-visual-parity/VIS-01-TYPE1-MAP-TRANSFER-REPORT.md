@@ -6,6 +6,8 @@ Date: 2026-08-29
 
 ```text
 branch: codex/windows-visual-parity
+implementationRevision: be6eed8d3767e4381f064f957413564e4cb78df0
+candidate: WN-CANDIDATE-VIS01-TYPE1-MAP-TRANSFER-20260829
 reportedOldMapRetained: true
 reportedActorBodiesMissing: true
 type1ParserAutomatedCheckpoint: complete
@@ -14,9 +16,12 @@ mapIdentityHandoffAutomatedCheckpoint: complete
 mapBoundarySelfPreservationAutomatedCheckpoint: complete
 nativeMapPackTests: pass
 windowsTests: 474/474
-exactRevisionExeProduced: false
-exactRevisionCandidateProduced: false
-exactRevisionExeLaunched: false
+exactRevisionExeProduced: true
+exactRevisionCandidateProduced: true
+exactRevisionExeLaunched: true
+candidateNonvisualVerificationPassed: true
+releaseStatementDetachedCmsVerified: true
+exePublisherSigned: false
 groceryStoreHumanRetestPassed: false
 authenticatedLiveWssTranscriptProduced: false
 realDpiEvidenceProduced: false
@@ -75,15 +80,33 @@ Two independent failures produced that image:
 | Combined references / emitted entries | 7,465 / 4,957 |
 | Exact map-0141 Full Pack extractions | 307 |
 | Remaining missing sources | 2,508, unchanged known map-0 baseline |
-| Combined image bytes | 51,666,052 |
-| Combined manifest SHA-256 | `3f9ad98baa32b17c7c3aae05e25129dc20d994dc7ad100f9d149ddf2486ab3e4` |
+| Combined image bytes | 51,665,994 |
+| Formal Candidate native-map manifest SHA-256 | `e309477533b3e91bba7c85f97fa569f7f04f1b2f65778a9185fcdc93db1c5129` |
 | Windows native host tests | PASS, 474/474 |
 | Scoped diff check | PASS |
 
+## Exact EXE and Candidate identity
+
+| Identity | Value |
+|---|---|
+| Candidate | `WN-CANDIDATE-VIS01-TYPE1-MAP-TRANSFER-20260829` |
+| Revision | `be6eed8d3767e4381f064f957413564e4cb78df0` |
+| Release EXE bytes | 67,961,856 |
+| Release EXE SHA-256 | `693A26B9AAE131B1DF584768C3B0D719964FF26A833B2DADDC045FDC1D7C53AD` |
+| Build attestation SHA-256 | `C0C6541384F859601F56D5F967B049D3D03C66C798221E05351C8542D7AD2DB4` |
+| Package payload files | 33,272 |
+| Candidate total files | 33,276 |
+| Candidate bytes | 393,539,979 |
+| Package manifest SHA-256 | `16BF00909C002B6525647C5A0A593A09E3950F59CDD90C8170BB5E3992F41666` |
+| Package aggregate SHA-256 | `1C96F49B95CE277F655DBBEA22371327B50C775F891433CBBADEE6FD65A13329` |
+| Package-time verifier | PASS, `sourceRepoCheck=checked`, `nonvisual=True` |
+| Independent final-directory verifier | PASS, `sourceRepoCheck=checked`, `nonvisual=True` |
+| Launched client | PID 290000 against healthy `ws://127.0.0.1:7210/ws` |
+
 ## Explicitly open
 
-The repair has not yet been built into a new exact-revision Candidate or
-visually accepted in GroceryStore. The user's next test must confirm that map
+The exact-revision Candidate is built, independently verified and launched,
+but it is not yet visually accepted in GroceryStore. The user's next test must confirm that map
 0141 terrain, player body and destination NPCs are present after a real map
 transition and that returning to map 0 does not retain GroceryStore pixels.
 

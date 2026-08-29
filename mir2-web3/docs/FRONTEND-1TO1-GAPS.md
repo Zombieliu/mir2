@@ -16,8 +16,12 @@ Last updated: 2026-08-29
 > preserves only the authoritative self actor while dropping old remote
 > population/transients. Native keyed-map tests pass, a real combined build
 > reports 4,957 emitted / 307 Full-Pack-derived / 2,508 known map-0 baseline
-> missing, and Windows passes 474/474. No exact new EXE has yet been visually
-> accepted. Other maps, complete map/UI/VFX/actor denominators, live WSS, DPI,
+> missing, and Windows passes 474/474. Exact clean Candidate
+> `WN-CANDIDATE-VIS01-TYPE1-MAP-TRANSFER-20260829` binds revision
+> `be6eed8d3767e4381f064f957413564e4cb78df0`, passes packaging and independent
+> final-directory verification, and is running as PID 290000 for the user's
+> GroceryStore retest. It has not yet been visually accepted. Other maps,
+> complete map/UI/VFX/actor denominators, live WSS, DPI,
 > soak, human acceptance and formal publisher signing remain open;
 > `globalParityPercent=null`, `visualAccepted=false`, `accepted=false`.
 

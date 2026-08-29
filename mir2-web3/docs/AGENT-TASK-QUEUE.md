@@ -13,8 +13,13 @@
 > clears remote population/transients while preserving the local actor. The
 > real combined build emits 4,957 entries with `fullPackEntryCount=307` and
 > leaves the known map-0 baseline `missingSourceCount=2508`; native keyed-map
-> tests and Windows 474/474 pass. An exact EXE/package and human GroceryStore
-> retest are still pending. Other maps and the complete map denominator,
+> tests and Windows 474/474 pass. Clean revision
+> `be6eed8d3767e4381f064f957413564e4cb78df0` produced and independently
+> verified Candidate `WN-CANDIDATE-VIS01-TYPE1-MAP-TRANSFER-20260829`; its
+> 67,961,856-byte EXE has SHA-256
+> `693A26B9AAE131B1DF584768C3B0D719964FF26A833B2DADDC045FDC1D7C53AD`
+> and is launched as PID 290000 against healthy loopback for the human
+> GroceryStore retest. That retest remains pending. Other maps and the complete map denominator,
 > authenticated same-EXE live WSS, real DPI, native 30-minute soak, complete
 > UI/VFX/actor coverage, human visual/feel and formal publisher signing remain
 > open. `accepted=false`, `visualAccepted=false`,
