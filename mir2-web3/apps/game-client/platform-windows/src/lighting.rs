@@ -628,6 +628,9 @@ mod tests {
             front_animation_tick: 0,
             middle_animation_frame: 0,
             middle_animation_tick: 0,
+            tile_animation_image: 0,
+            tile_animation_offset: 0,
+            tile_animation_frames: 0,
             light,
         }
     }

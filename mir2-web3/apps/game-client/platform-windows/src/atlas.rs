@@ -2215,6 +2215,9 @@ mod tests {
             front_animation_tick: 0,
             middle_animation_frame: 0,
             middle_animation_tick: 0,
+            tile_animation_image: 0,
+            tile_animation_offset: 0,
+            tile_animation_frames: 0,
             light: 0,
         };
         let map_width = u16::try_from(deepest_x + 1).expect("test map width");

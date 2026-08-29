@@ -400,6 +400,16 @@ struct MapRenderTileHandle {
     last_seen_generation: u64,
 }
 
+/// One preloaded phase of a Crystal map animation family. Every family frame
+/// is resident before the scene handoff; this component lets a lightweight
+/// clock toggle visibility without rebinding textures or exposing empty frames.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+struct MapAnimationFrame {
+    phase: u32,
+    frame_count: u32,
+    animation_tick: u32,
+}
+
 #[derive(Clone, Copy)]
 struct AppliedMapRenderState {
     producer_revision: Option<u64>,
@@ -783,6 +793,12 @@ struct MapTile {
     z: f32,
     #[serde(default)]
     opacity: Option<f32>,
+    #[serde(default)]
+    animation_phase: u32,
+    #[serde(default = "default_map_animation_frame_count")]
+    animation_frame_count: u32,
+    #[serde(default)]
+    animation_tick: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -801,6 +817,16 @@ struct MapStandaloneTile {
     opacity: Option<f32>,
     #[serde(default)]
     additive: bool,
+    #[serde(default)]
+    animation_phase: u32,
+    #[serde(default = "default_map_animation_frame_count")]
+    animation_frame_count: u32,
+    #[serde(default)]
+    animation_tick: u32,
+}
+
+const fn default_map_animation_frame_count() -> u32 {
+    1
 }
 
 fn map_render_active_image_keys(snapshot: &MapRenderState) -> HashSet<String> {
@@ -1408,6 +1434,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             Update,
             (
                 sync_map_render,
+                animate_map_tiles,
                 sync_map_scene,
                 sync_effect_render,
                 sync_lighting_render,
@@ -3347,6 +3374,130 @@ fn ingest_pending_map_render_images(
 /// objects interleave with actors by cell row) — Crystal's single y-sorted band.
 const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
 const MAP_TILE_Z_DENOM: f32 = 100_000.0;
+const CRYSTAL_MAP_ANIMATION_INTERVAL_MS: u128 = 100;
+
+fn crystal_map_animation_count(elapsed: std::time::Duration) -> u64 {
+    (elapsed.as_millis() / CRYSTAL_MAP_ANIMATION_INTERVAL_MS).min(u128::from(u64::MAX)) as u64
+}
+
+/// Crystal middle/front animation formula:
+/// `(count % (frames + frames*tick)) / (1 + tick)`.
+/// Tile animations use the same phase selection with tick zero; their source
+/// frame step is already resolved by the Windows map producer.
+fn crystal_map_animation_phase(count: u64, frame_count: u32, animation_tick: u32) -> u32 {
+    let frame_count = u64::from(frame_count.max(1));
+    let dwell = u64::from(animation_tick).saturating_add(1);
+    let cycle = frame_count.saturating_mul(dwell).max(1);
+    ((count % cycle) / dwell) as u32
+}
+
+fn map_animation_frame_visible(count: u64, frame: &MapAnimationFrame) -> bool {
+    crystal_map_animation_phase(count, frame.frame_count, frame.animation_tick) == frame.phase
+}
+
+fn animate_map_tiles(time: Res<Time>, mut frames: Query<(&MapAnimationFrame, &mut Visibility)>) {
+    let count = crystal_map_animation_count(time.elapsed());
+    for (frame, mut visibility) in &mut frames {
+        let active = map_animation_frame_visible(count, frame);
+        *visibility = if active {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
+    }
+}
+
+fn sync_map_animation_component(
+    commands: &mut Commands,
+    entity: Entity,
+    phase: u32,
+    frame_count: u32,
+    animation_tick: u32,
+) {
+    if frame_count > 1 {
+        commands.entity(entity).insert((
+            MapAnimationFrame {
+                phase,
+                frame_count,
+                animation_tick,
+            },
+            if phase == 0 {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            },
+        ));
+    } else {
+        commands
+            .entity(entity)
+            .remove::<MapAnimationFrame>()
+            .insert(Visibility::Visible);
+    }
+}
+
+#[cfg(test)]
+mod map_animation_tests {
+    use super::*;
+
+    #[test]
+    fn crystal_animation_clock_advances_once_per_hundred_milliseconds() {
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(0)),
+            0
+        );
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(99)),
+            0
+        );
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(100)),
+            1
+        );
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(999)),
+            9
+        );
+    }
+
+    #[test]
+    fn crystal_animation_phase_matches_frame_and_tick_dwell_formula() {
+        assert_eq!(
+            (0..=3)
+                .map(|count| crystal_map_animation_phase(count, 3, 0))
+                .collect::<Vec<_>>(),
+            [0, 1, 2, 0]
+        );
+        assert_eq!(
+            (0..=9)
+                .map(|count| crystal_map_animation_phase(count, 3, 2))
+                .collect::<Vec<_>>(),
+            [0, 0, 0, 1, 1, 1, 2, 2, 2, 0]
+        );
+        assert_eq!(crystal_map_animation_phase(u64::MAX, 0, u32::MAX), 0);
+    }
+
+    #[test]
+    fn animation_family_exposes_exactly_one_phase() {
+        let frames = (0..3)
+            .map(|phase| MapAnimationFrame {
+                phase,
+                frame_count: 3,
+                animation_tick: 1,
+            })
+            .collect::<Vec<_>>();
+        for count in 0..12 {
+            let visible = frames
+                .iter()
+                .enumerate()
+                .filter_map(|(index, frame)| {
+                    map_animation_frame_visible(count, frame).then_some(index)
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(visible.len(), 1, "count {count} must expose one phase");
+            assert_eq!(visible[0] as u32, crystal_map_animation_phase(count, 3, 1));
+        }
+    }
+}
 
 /// Bevy-native map-tile renderer. Builds/refreshes atlas-page layouts, then skips
 /// an already-applied producer/image revision. The producer folds the camera
@@ -3594,6 +3745,13 @@ fn sync_map_render(
             if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
                 transform.translation = Vec3::new(world_x, world_y, world_z);
             }
+            sync_map_animation_component(
+                &mut commands,
+                handle.entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
         } else {
             let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
                 continue;
@@ -3612,6 +3770,13 @@ fn sync_map_render(
                     Transform::from_xyz(world_x, world_y, world_z),
                 ))
                 .id();
+            sync_map_animation_component(
+                &mut commands,
+                entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
             registry.map_render.tiles.insert(
                 tile.key.clone(),
                 MapRenderTileHandle {
@@ -3655,6 +3820,13 @@ fn sync_map_render(
                     transform.scale = Vec3::new(tile.width, tile.height, 1.0);
                 }
             }
+            sync_map_animation_component(
+                &mut commands,
+                handle.entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
         } else {
             let image = atlas_assets
                 .images
@@ -3695,6 +3867,13 @@ fn sync_map_render(
                     ))
                     .id()
             };
+            sync_map_animation_component(
+                &mut commands,
+                entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
             registry.map_render.tiles.insert(
                 tile.key.clone(),
                 MapRenderTileHandle {

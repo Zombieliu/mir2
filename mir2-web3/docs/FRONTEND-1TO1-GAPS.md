@@ -26,6 +26,19 @@ Last updated: 2026-08-29
 > The numbered denominator is recorded in
 > `docs/generated/player-qa/windows-visual-parity/VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md`.
 
+> 2026-08-29 Windows-native P0 environment/quest-marker implementation
+> checkpoint: Type100 tile-animation bytes now survive parsing; tile, middle,
+> and front animation families are expanded only when every source frame is
+> packaged, then advanced by a local 100 ms clock using Crystal's frame/tick
+> dwell formula. Incomplete families fail closed to their stable base frame
+> instead of flashing transparent. Runtime tests pass 205/205 and focused map
+> parser tests pass 31/31. Separately, authoritative NPC `questIds` plus the
+> native `QuestTracker` now drive a bounded `!` / `?` world-overlay baseline,
+> with focused overlay tests passing 11/11. Neither item is visually accepted:
+> source `Prguse` two-frame quest icons, complete quest state transitions,
+> timed same-EXE fire/lamp captures, additive/blend fidelity, full animation
+> asset coverage, soak and human acceptance remain open.
+
 > 2026-08-29 Windows-native VIS-01 Type1 transfer regression checkpoint: the
 > user-provided GroceryStore screenshot is an explicit failure. Map identity
 > reached `0141` / `(5,12)`, but old Bichon pixels remained and player/NPC

@@ -9,6 +9,7 @@ use bevy::prelude::*;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+use mir2_client_bevy::quest_model::{QuestStatus, QuestTracker};
 use serde_json::Value;
 
 use crate::entity_presentation::NativeEntityPresentation;
@@ -175,7 +176,32 @@ struct OverlayEntry {
     left: f32,
     top: f32,
     width: f32,
+    font_size: f32,
     self_health_ratio: Option<f32>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum QuestMarkerKind {
+    Available,
+    InProgress,
+    ReadyToTurnIn,
+}
+
+impl QuestMarkerKind {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Available => "!",
+            Self::InProgress | Self::ReadyToTurnIn => "?",
+        }
+    }
+
+    fn color(self) -> Color {
+        match self {
+            Self::Available => Color::srgb_u8(0xff, 0xd8, 0x3a),
+            Self::InProgress => Color::srgb_u8(0xc4, 0xc4, 0xc4),
+            Self::ReadyToTurnIn => Color::srgb_u8(0xff, 0xd8, 0x3a),
+        }
+    }
 }
 
 pub fn sync_native_entity_overlays(
@@ -186,6 +212,7 @@ pub fn sync_native_entity_overlays(
     time: Res<Time>,
     player_ui: Option<Res<NativePlayerUiState>>,
     presentation: Res<NativeEntityPresentation>,
+    quest_tracker: Option<Res<QuestTracker>>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let motion_now_ms = crate::entity_presentation::native_motion_clock_ms();
@@ -244,6 +271,7 @@ pub fn sync_native_entity_overlays(
         visibility,
         hovered_object_id,
         self_hovered,
+        quest_tracker.as_deref(),
         &motion_offsets,
         camera_offset,
     );
@@ -312,7 +340,7 @@ pub fn sync_native_entity_overlays(
                             ..default()
                         },
                         Text::new(name.clone()),
-                        crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+                        crystal_text_font(entry.font_size),
                         TextColor(Color::BLACK),
                         TextLayout::justify(Justify::Center),
                     ));
@@ -327,7 +355,7 @@ pub fn sync_native_entity_overlays(
                         ..default()
                     },
                     Text::new(name),
-                    crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+                    crystal_text_font(entry.font_size),
                     TextColor(entry.color),
                     TextLayout::justify(Justify::Center),
                 ));
@@ -483,12 +511,14 @@ fn overlay_entries(
     visibility: OverlayVisibility,
     hovered_object_id: Option<&str>,
     self_hovered: bool,
+    quest_tracker: Option<&QuestTracker>,
 ) -> Vec<OverlayEntry> {
     overlay_entries_with_motion(
         payload,
         visibility,
         hovered_object_id,
         self_hovered,
+        quest_tracker,
         &HashMap::new(),
         (0.0, 0.0),
     )
@@ -499,6 +529,7 @@ fn overlay_entries_with_motion(
     visibility: OverlayVisibility,
     hovered_object_id: Option<&str>,
     self_hovered: bool,
+    quest_tracker: Option<&QuestTracker>,
     motion_offsets: &HashMap<String, (f32, f32)>,
     camera_offset: (f32, f32),
 ) -> Vec<OverlayEntry> {
@@ -602,6 +633,19 @@ fn overlay_entries_with_motion(
                         50.0
                     };
                     let mut entity_entries = Vec::with_capacity(2);
+                    if kind == "npc" {
+                        if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
+                            entity_entries.push(OverlayEntry {
+                                name: Some(marker.label().to_owned()),
+                                color: marker.color(),
+                                left,
+                                top: top + CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX - 15.0,
+                                width,
+                                font_size: 16.0,
+                                self_health_ratio: None,
+                            });
+                        }
+                    }
                     if let Some(guild_name) = guild_name {
                         entity_entries.push(OverlayEntry {
                             name: Some(guild_name.to_owned()),
@@ -609,6 +653,7 @@ fn overlay_entries_with_motion(
                             left,
                             top: top + CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX + corpse_shift,
                             width,
+                            font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                             self_health_ratio: None,
                         });
                     }
@@ -624,6 +669,7 @@ fn overlay_entries_with_motion(
                             }
                             + corpse_shift,
                         width,
+                        font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
                     });
                     entity_entries
@@ -664,6 +710,7 @@ fn overlay_entries_with_motion(
                     left: origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x,
                     top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0 + motion_y,
                     width: 50.0,
+                    font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                     self_health_ratio: Some((hp as f32 / max_hp as f32).clamp(0.0, 1.0)),
                 });
             }
@@ -696,12 +743,42 @@ fn overlay_entries_with_motion(
                         top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0
                             + camera_offset.1,
                         width: 80.0,
+                        font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
                     })
                 }),
         );
     }
     entries
+}
+
+fn quest_marker_for_entity(
+    entity: &Value,
+    quest_tracker: Option<&QuestTracker>,
+) -> Option<QuestMarkerKind> {
+    let quest_indexes = entity.get("questIds")?.as_array()?;
+    let tracker = quest_tracker?;
+    let mut saw_in_progress = false;
+    for quest_index in quest_indexes.iter().filter_map(value_i64) {
+        let quest_index = i32::try_from(quest_index).ok()?;
+        let Some(quest) = tracker
+            .active_quests
+            .iter()
+            .find(|quest| quest.quest_index == quest_index)
+        else {
+            continue;
+        };
+        match quest.status {
+            QuestStatus::ReadyToTurnIn => return Some(QuestMarkerKind::ReadyToTurnIn),
+            QuestStatus::NotStarted => return Some(QuestMarkerKind::Available),
+            QuestStatus::InProgress => saw_in_progress = true,
+            QuestStatus::Completed
+            | QuestStatus::Failed
+            | QuestStatus::Aborted
+            | QuestStatus::Unknown(_) => {}
+        }
+    }
+    saw_in_progress.then_some(QuestMarkerKind::InProgress)
 }
 
 fn value_i64(value: &Value) -> Option<i64> {
@@ -757,6 +834,7 @@ mod tests {
             },
             None,
             false,
+            None,
         );
         assert_eq!(entries.len(), 4);
         assert_eq!(entries[0].left, 480.0);
@@ -807,6 +885,7 @@ mod tests {
             },
             None,
             false,
+            None,
         );
         assert_eq!(
             entry_names(&entries),
@@ -837,17 +916,17 @@ mod tests {
             name_view: false,
             drop_view: false,
         };
-        assert!(entry_names(&overlay_entries(&payload, off, None, false)).is_empty());
+        assert!(entry_names(&overlay_entries(&payload, off, None, false, None)).is_empty());
         assert_eq!(
-            entry_names(&overlay_entries(&payload, off, Some("2"), false)),
+            entry_names(&overlay_entries(&payload, off, Some("2"), false, None)),
             ["BichonGuard", "Remote"]
         );
         assert_eq!(
-            entry_names(&overlay_entries(&payload, off, None, true)),
+            entry_names(&overlay_entries(&payload, off, None, true, None)),
             ["Codex", "Self"]
         );
         assert_eq!(
-            entry_names(&overlay_entries(&payload, off, Some("2"), true)),
+            entry_names(&overlay_entries(&payload, off, Some("2"), true, None)),
             ["Codex", "Self", "BichonGuard", "Remote"]
         );
         assert_eq!(
@@ -859,6 +938,7 @@ mod tests {
                 },
                 Some("2"),
                 true,
+                None,
             )),
             ["Codex", "Self", "BichonGuard", "Remote", "Solo"]
         );
@@ -879,6 +959,7 @@ mod tests {
             },
             None,
             false,
+            None,
         );
         assert_eq!(
             names_only
@@ -896,6 +977,7 @@ mod tests {
             },
             None,
             false,
+            None,
         );
         assert_eq!(
             drops_only
@@ -913,6 +995,7 @@ mod tests {
             },
             None,
             false,
+            None,
         )
         .is_empty());
     }
@@ -938,6 +1021,7 @@ mod tests {
             },
             None,
             false,
+            None,
             &offsets,
             (40.0, 0.0),
         );
@@ -999,20 +1083,20 @@ mod tests {
             name_view: false,
             drop_view: false,
         };
-        let hidden_names = overlay_entries(&payload, off, None, false);
+        let hidden_names = overlay_entries(&payload, off, None, false, None);
         assert!(entry_names(&hidden_names).is_empty());
         assert_eq!(health_ratios(&hidden_names), [0.5]);
 
-        let self_only = overlay_entries(&payload, off, None, true);
+        let self_only = overlay_entries(&payload, off, None, true, None);
         assert_eq!(entry_names(&self_only), ["Self"]);
         assert_eq!(health_ratios(&self_only), [0.5]);
         for (object_id, expected) in [("2", "Remote"), ("3", "Town\nGuard"), ("4", "Deer")] {
-            let hovered = overlay_entries(&payload, off, Some(object_id), false);
+            let hovered = overlay_entries(&payload, off, Some(object_id), false, None);
             assert_eq!(entry_names(&hovered), [expected]);
             assert_eq!(health_ratios(&hovered), [0.5]);
         }
 
-        let overlapping = overlay_entries(&payload, off, Some("2"), true);
+        let overlapping = overlay_entries(&payload, off, Some("2"), true, None);
         assert_eq!(entry_names(&overlapping), ["Self", "Remote"]);
 
         let on = overlay_entries(
@@ -1023,6 +1107,7 @@ mod tests {
             },
             Some("4"),
             true,
+            None,
         );
         assert_eq!(
             entry_names(&on),
@@ -1051,6 +1136,7 @@ mod tests {
             },
             None,
             false,
+            None,
         );
         assert_eq!(
             entry_names(&entries),
@@ -1065,6 +1151,80 @@ mod tests {
         assert_eq!(entries[1].top - entries[0].top, 27.0);
         assert_eq!(entries[3].top - entries[2].top, 27.0);
         assert!(health_ratios(&entries).is_empty());
+    }
+
+    #[test]
+    fn npc_quest_markers_follow_authoritative_quest_status() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [
+                {"objectId": 3, "kind": "npc", "name": "Assistant_Jane", "x": 12, "y": 20, "questIds": [1]},
+                {"objectId": 4, "kind": "npc", "name": "CraftsLady_Jude", "x": 13, "y": 20, "questIds": [2]},
+                {"objectId": 5, "kind": "npc", "name": "Merchant_Ruben", "x": 14, "y": 20, "questIds": [3]}
+            ]
+        });
+        let tracker = QuestTracker {
+            active_quests: vec![
+                mir2_client_bevy::quest_model::Quest {
+                    quest_index: 1,
+                    accept_npc_index: Some(3),
+                    finish_npc_index: Some(3),
+                    title: "Available".to_owned(),
+                    npc_name: Some("Assistant Jane".to_owned()),
+                    status: QuestStatus::NotStarted,
+                    objectives: vec![],
+                    rewards: vec![],
+                    unknown_text: None,
+                },
+                mir2_client_bevy::quest_model::Quest {
+                    quest_index: 2,
+                    accept_npc_index: Some(4),
+                    finish_npc_index: Some(4),
+                    title: "Progress".to_owned(),
+                    npc_name: Some("CraftsLady Jude".to_owned()),
+                    status: QuestStatus::InProgress,
+                    objectives: vec![],
+                    rewards: vec![],
+                    unknown_text: None,
+                },
+                mir2_client_bevy::quest_model::Quest {
+                    quest_index: 3,
+                    accept_npc_index: Some(5),
+                    finish_npc_index: Some(5),
+                    title: "Turn In".to_owned(),
+                    npc_name: Some("Merchant Ruben".to_owned()),
+                    status: QuestStatus::ReadyToTurnIn,
+                    objectives: vec![],
+                    rewards: vec![],
+                    unknown_text: None,
+                },
+            ],
+        };
+        let entries = overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: true,
+                drop_view: false,
+            },
+            None,
+            false,
+            Some(&tracker),
+        );
+        assert_eq!(
+            entry_names(&entries),
+            [
+                "!",
+                "Assistant\nJane",
+                "?",
+                "CraftsLady\nJude",
+                "?",
+                "Merchant\nRuben"
+            ]
+        );
+        assert_eq!(entries[0].color, QuestMarkerKind::Available.color());
+        assert_eq!(entries[2].color, QuestMarkerKind::InProgress.color());
+        assert_eq!(entries[4].color, QuestMarkerKind::ReadyToTurnIn.color());
+        assert_eq!(entries[0].font_size, 16.0);
     }
 
     #[test]

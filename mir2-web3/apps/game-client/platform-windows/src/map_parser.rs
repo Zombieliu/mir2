@@ -30,6 +30,7 @@ const CELL_WIDTH: f32 = 48.0;
 const CELL_HEIGHT: f32 = 32.0;
 pub(crate) const MAP_RENDER_GUARD_CELLS: i32 = 6;
 pub(crate) const MAP_FRONT_DEPTH_ORDER: f32 = 1.0;
+const MAP_TILE_ANIMATION_DEPTH_ORDER: f32 = -0.5;
 
 /// A parsed type-100 map cell.
 #[derive(Debug, Clone)]
@@ -47,8 +48,12 @@ pub struct MapCell {
     pub front_animation_tick: u8,
     /// `middleAnimationFrame`: high bit = additive, low 7 bits = frame count.
     pub middle_animation_frame: u8,
-    #[allow(dead_code)]
     pub middle_animation_tick: u8,
+    /// Shanda tile-animation source frame. Zero means absent.
+    pub tile_animation_image: i16,
+    /// Crystal advances tile animations by `(offset ^ 0x2000)` per phase.
+    pub tile_animation_offset: i16,
+    pub tile_animation_frames: u8,
     /// Crystal type-100 `CellInfo.Light` at byte 25. Values 1..9 are map
     /// light emitters; values >=10 carry other legacy flags/colour buckets and
     /// are intentionally skipped by Crystal DrawLights.
@@ -65,14 +70,19 @@ pub struct MapTileDraw {
     pub frame_index: i32,
     pub additive: bool,
     /// Number of animation frames this tile cycles through (>= 1).
-    #[allow(dead_code)]
     pub frame_count: u32,
+    /// Number of global 100 ms animation counts each phase remains visible.
+    pub animation_tick: u32,
+    /// Source-frame delta between animation phases. Middle/front use one;
+    /// Shanda tile animations use `TileAnimationOffset ^ 0x2000`.
+    pub frame_step: i32,
     pub z: f32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TileLayer {
     Back,
+    TileAnimation,
     Middle,
     Front,
 }
@@ -194,6 +204,9 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
             front_animation_tick: bytes[offset + 17],
             middle_animation_frame: bytes[offset + 18],
             middle_animation_tick: bytes[offset + 19],
+            tile_animation_image: i16::from_le_bytes([bytes[offset + 20], bytes[offset + 21]]),
+            tile_animation_offset: i16::from_le_bytes([bytes[offset + 22], bytes[offset + 23]]),
+            tile_animation_frames: bytes[offset + 24],
             light: bytes[offset + 25],
         });
         offset += 26;
@@ -270,6 +283,9 @@ pub fn parse_type1_map(bytes: &[u8]) -> Option<ParsedMap> {
             front_animation_tick: bytes[offset + 11],
             middle_animation_frame: 0,
             middle_animation_tick: 0,
+            tile_animation_image: 0,
+            tile_animation_offset: 0,
+            tile_animation_frames: 0,
             light: bytes[offset + 13],
         });
         offset += CELL_BYTES;
@@ -517,7 +533,29 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
                     frame_index: back_frame,
                     additive: false,
                     frame_count: 1,
+                    animation_tick: 0,
+                    frame_step: 0,
                     z: -2.0,
+                });
+            }
+
+            // Shanda's dedicated tile-animation layer is drawn after the
+            // floor and before middle/front objects. Crystal always resolves
+            // it from MapLibs[190] and advances by the XOR-decoded offset.
+            let tile_animation_frame = i32::from(cell.tile_animation_image) - 1;
+            let tile_animation_count = u32::from(cell.tile_animation_frames);
+            if tile_animation_frame >= 0 && tile_animation_count > 0 {
+                draws.push(MapTileDraw {
+                    x: x as i32,
+                    y: y as i32,
+                    layer: TileLayer::TileAnimation,
+                    library: library_key_for_index(190),
+                    frame_index: tile_animation_frame,
+                    additive: false,
+                    frame_count: tile_animation_count,
+                    animation_tick: 0,
+                    frame_step: i32::from(cell.tile_animation_offset) ^ 0x2000,
+                    z: MAP_TILE_ANIMATION_DEPTH_ORDER,
                 });
             }
 
@@ -533,6 +571,8 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
                     additive: middle_is_additive(cell.middle_animation_frame),
                     frame_count: u32::from(middle_animation_count(cell.middle_animation_frame))
                         .max(1),
+                    animation_tick: u32::from(cell.middle_animation_tick),
+                    frame_step: 1,
                     z: 0.0,
                 });
             }
@@ -549,6 +589,8 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
                     additive: front_is_additive(cell.front_animation_frame),
                     frame_count: u32::from(front_animation_count(cell.front_animation_frame))
                         .max(1),
+                    animation_tick: u32::from(cell.front_animation_tick),
+                    frame_step: 1,
                     z: MAP_FRONT_DEPTH_ORDER,
                 });
             }
@@ -629,6 +671,18 @@ struct StandaloneAsset {
 enum StandalonePlacementMode {
     BottomLeft,
     SourceOffset,
+}
+
+#[derive(Clone)]
+enum ResolvedMapFrame {
+    Atlas {
+        atlas_key: String,
+        rect: AtlasRect,
+    },
+    Standalone {
+        rect_key: String,
+        asset: StandaloneAsset,
+    },
 }
 
 fn build_original_map_frame_path(library: &str, frame_index: i32) -> String {
@@ -982,6 +1036,7 @@ fn build_map_render_state_with_indexes(
     let mut tiles: Vec<Value> = Vec::new();
     let mut standalone_tiles: Vec<Value> = Vec::new();
     let mut missing_standalone = HashSet::new();
+    let mut incomplete_animation_families = HashSet::new();
     let tile_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH
         - (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor();
     let tile_origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
@@ -990,76 +1045,173 @@ fn build_map_render_state_with_indexes(
         if !viewport.retains_cell(draw.x, draw.y) {
             continue;
         }
-        let rect_key = atlas_rect_key(&draw.library, draw.frame_index);
-        let image_path = build_original_map_frame_path(&draw.library, draw.frame_index);
-        let requires_standalone = draw.additive || map_path_requires_alpha_key(&image_path);
+
+        let requested_frame_count = draw.frame_count.max(1);
+        let mut resolved_frames = Vec::with_capacity(requested_frame_count as usize);
+        let mut family_complete = true;
+        for phase in 0..requested_frame_count {
+            let Ok(phase_i32) = i32::try_from(phase) else {
+                family_complete = false;
+                break;
+            };
+            let Some(frame_index) = draw
+                .frame_step
+                .checked_mul(phase_i32)
+                .and_then(|offset| draw.frame_index.checked_add(offset))
+            else {
+                family_complete = false;
+                break;
+            };
+            if frame_index < 0 {
+                family_complete = false;
+                break;
+            }
+            let rect_key = atlas_rect_key(&draw.library, frame_index);
+            let image_path = build_original_map_frame_path(&draw.library, frame_index);
+            let requires_standalone = draw.additive || map_path_requires_alpha_key(&image_path);
+            let resolved = if requires_standalone {
+                standalone_index
+                    .and_then(|index| index.entries.get(&rect_key))
+                    .cloned()
+                    .map(|asset| ResolvedMapFrame::Standalone {
+                        rect_key: rect_key.clone(),
+                        asset,
+                    })
+            } else {
+                atlas_index
+                    .rect_to_atlas
+                    .get(&rect_key)
+                    .cloned()
+                    .zip(atlas_index.rects.get(&rect_key).cloned())
+                    .map(|(atlas_key, rect)| ResolvedMapFrame::Atlas { atlas_key, rect })
+            };
+            let Some(resolved) = resolved else {
+                if requires_standalone {
+                    missing_standalone.insert(rect_key);
+                }
+                family_complete = false;
+                break;
+            };
+            resolved_frames.push((phase, resolved));
+        }
+
+        // A partial family would flash transparent whenever the clock selects
+        // a missing phase. Fall back to the source base frame as a static draw
+        // until the complete family is packaged, preserving an atomic scene.
+        if !family_complete || resolved_frames.len() != requested_frame_count as usize {
+            incomplete_animation_families.insert(format!(
+                "{}:{}:{}:{}",
+                draw.library, draw.frame_index, draw.x, draw.y
+            ));
+            resolved_frames.clear();
+            let rect_key = atlas_rect_key(&draw.library, draw.frame_index);
+            let image_path = build_original_map_frame_path(&draw.library, draw.frame_index);
+            let requires_standalone = draw.additive || map_path_requires_alpha_key(&image_path);
+            let resolved = if requires_standalone {
+                standalone_index
+                    .and_then(|index| index.entries.get(&rect_key))
+                    .cloned()
+                    .map(|asset| ResolvedMapFrame::Standalone {
+                        rect_key: rect_key.clone(),
+                        asset,
+                    })
+            } else {
+                atlas_index
+                    .rect_to_atlas
+                    .get(&rect_key)
+                    .cloned()
+                    .zip(atlas_index.rects.get(&rect_key).cloned())
+                    .map(|(atlas_key, rect)| ResolvedMapFrame::Atlas { atlas_key, rect })
+            };
+            if let Some(resolved) = resolved {
+                resolved_frames.push((0, resolved));
+            } else {
+                if requires_standalone {
+                    missing_standalone.insert(rect_key);
+                }
+                continue;
+            }
+        }
+
+        let effective_frame_count = if family_complete {
+            requested_frame_count
+        } else {
+            1
+        };
+        let animated = effective_frame_count > 1;
         let cell_left = tile_origin_x + (draw.x - viewport.center_x) as f32 * CELL_WIDTH;
         let cell_top = tile_origin_y + (draw.y - viewport.center_y) as f32 * CELL_HEIGHT;
         let depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
-        if requires_standalone {
-            if let Some(asset) = standalone_index.and_then(|index| index.entries.get(&rect_key)) {
-                let (left, top) = match asset.placement_mode {
-                    StandalonePlacementMode::BottomLeft => {
-                        (cell_left, cell_top + CELL_HEIGHT - asset.height as f32)
-                    }
-                    StandalonePlacementMode::SourceOffset => (
-                        cell_left + asset.offset_x as f32,
-                        cell_top + CELL_HEIGHT - asset.height as f32 + asset.offset_y as f32,
-                    ),
-                };
-                standalone_tiles.push(json!({
-                    "key": standalone_tile_key(draw, &rect_key),
-                    "imageKey": standalone_image_key(&rect_key, draw.additive),
-                    "imageUrl": asset.image_url,
-                    "left": left,
-                    "top": top,
-                    "width": asset.width,
-                    "height": asset.height,
-                    "z": depth,
-                    "additive": draw.additive,
-                }));
-            } else {
-                missing_standalone.insert(rect_key.clone());
-            }
-            continue;
-        }
-        let Some(atlas_key) = atlas_index.rect_to_atlas.get(&rect_key).cloned() else {
-            continue;
-        };
-        let Some(rect) = atlas_index.rects.get(&rect_key) else {
-            continue;
-        };
-        used_rects
-            .entry(atlas_key.clone())
-            .or_default()
-            .insert(rect_key.clone());
-        let floor_sized = (rect.width == CELL_WIDTH as u32 && rect.height == CELL_HEIGHT as u32)
-            || (rect.width == (CELL_WIDTH * 2.0) as u32
-                && rect.height == (CELL_HEIGHT * 2.0) as u32);
-        let draw_as_floor = draw.layer == TileLayer::Back || (draw.frame_count == 1 && floor_sized);
-        let (left, top) = if draw_as_floor {
-            (cell_left, cell_top)
-        } else {
-            (
-                cell_left + (CELL_WIDTH - rect.width as f32) / 2.0,
-                cell_top + CELL_HEIGHT - rect.height as f32,
-            )
-        };
         let layer_key = match draw.layer {
             TileLayer::Back => "back",
+            TileLayer::TileAnimation => "tile-animation",
             TileLayer::Middle => "mid",
             TileLayer::Front => "front",
         };
-        tiles.push(json!({
-            "key": format!("{}:{}:{}", layer_key, draw.x, draw.y),
-            "atlasKey": atlas_key,
-            "rectKey": rect_key,
-            "left": left,
-            "top": top,
-            "width": rect.width,
-            "height": rect.height,
-            "z": depth,
-        }));
+
+        for (phase, resolved) in resolved_frames {
+            match resolved {
+                ResolvedMapFrame::Standalone { rect_key, asset } => {
+                    let (left, top) = match asset.placement_mode {
+                        StandalonePlacementMode::BottomLeft => {
+                            (cell_left, cell_top + CELL_HEIGHT - asset.height as f32)
+                        }
+                        StandalonePlacementMode::SourceOffset => (
+                            cell_left + asset.offset_x as f32,
+                            cell_top + CELL_HEIGHT - asset.height as f32 + asset.offset_y as f32,
+                        ),
+                    };
+                    let base_key = standalone_tile_key(draw, &rect_key);
+                    standalone_tiles.push(json!({
+                        "key": if animated { format!("{base_key}:anim:{phase}") } else { base_key },
+                        "imageKey": standalone_image_key(&rect_key, draw.additive),
+                        "imageUrl": asset.image_url,
+                        "left": left,
+                        "top": top,
+                        "width": asset.width,
+                        "height": asset.height,
+                        "z": depth,
+                        "additive": draw.additive,
+                        "animationPhase": phase,
+                        "animationFrameCount": effective_frame_count,
+                        "animationTick": draw.animation_tick,
+                    }));
+                }
+                ResolvedMapFrame::Atlas { atlas_key, rect } => {
+                    used_rects
+                        .entry(atlas_key.clone())
+                        .or_default()
+                        .insert(rect.key.clone());
+                    let floor_sized = (rect.width == CELL_WIDTH as u32
+                        && rect.height == CELL_HEIGHT as u32)
+                        || (rect.width == (CELL_WIDTH * 2.0) as u32
+                            && rect.height == (CELL_HEIGHT * 2.0) as u32);
+                    let draw_as_floor = draw.layer == TileLayer::Back || (!animated && floor_sized);
+                    let (left, top) = if draw_as_floor {
+                        (cell_left, cell_top)
+                    } else {
+                        (
+                            cell_left + (CELL_WIDTH - rect.width as f32) / 2.0,
+                            cell_top + CELL_HEIGHT - rect.height as f32,
+                        )
+                    };
+                    let base_key = format!("{}:{}:{}", layer_key, draw.x, draw.y);
+                    tiles.push(json!({
+                        "key": if animated { format!("{base_key}:anim:{phase}") } else { base_key },
+                        "atlasKey": atlas_key,
+                        "rectKey": rect.key,
+                        "left": left,
+                        "top": top,
+                        "width": rect.width,
+                        "height": rect.height,
+                        "z": depth,
+                        "animationPhase": phase,
+                        "animationFrameCount": effective_frame_count,
+                        "animationTick": draw.animation_tick,
+                    }));
+                }
+            }
+        }
     }
 
     let atlases: Vec<Value> = used_rects
@@ -1093,6 +1245,12 @@ fn build_map_render_state_with_indexes(
         eprintln!(
             "[native-map] skipped {} standalone tiles with missing native keyed/additive assets",
             missing_standalone.len()
+        );
+    }
+    if !incomplete_animation_families.is_empty() {
+        eprintln!(
+            "[native-map] held {} incomplete animation families on their source base frame",
+            incomplete_animation_families.len()
         );
     }
 
@@ -1222,6 +1380,9 @@ mod tests {
             front_animation_tick: 0,
             middle_animation_frame: 0,
             middle_animation_tick: 0,
+            tile_animation_image: 0,
+            tile_animation_offset: 0,
+            tile_animation_frames: 0,
             light: 0,
         }
     }
@@ -1310,13 +1471,22 @@ mod tests {
         let mut bytes = vec![0x01, 0x00, 0x43, 0x23];
         bytes.extend_from_slice(&2u16.to_le_bytes());
         bytes.extend_from_slice(&2u16.to_le_bytes());
-        for _ in 0..4 {
-            bytes.extend_from_slice(&[0u8; 26]);
+        for index in 0..4 {
+            let mut cell = [0u8; 26];
+            if index == 0 {
+                cell[20..22].copy_from_slice(&501i16.to_le_bytes());
+                cell[22..24].copy_from_slice(&0x2002i16.to_le_bytes());
+                cell[24] = 4;
+            }
+            bytes.extend_from_slice(&cell);
         }
         let map = parse_type100_map(&bytes).expect("parse");
         assert_eq!(map.width, 2);
         assert_eq!(map.height, 2);
         assert_eq!(map.cells.len(), 4);
+        assert_eq!(map.cells[0].tile_animation_image, 501);
+        assert_eq!(map.cells[0].tile_animation_offset, 0x2002);
+        assert_eq!(map.cells[0].tile_animation_frames, 4);
     }
 
     #[test]
@@ -1655,6 +1825,9 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    tile_animation_image: 0,
+                    tile_animation_offset: 0,
+                    tile_animation_frames: 0,
                     light: 0,
                 },
                 MapCell {
@@ -1668,6 +1841,9 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    tile_animation_image: 0,
+                    tile_animation_offset: 0,
+                    tile_animation_frames: 0,
                     light: 0,
                 },
                 MapCell {
@@ -1681,6 +1857,9 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    tile_animation_image: 0,
+                    tile_animation_offset: 0,
+                    tile_animation_frames: 0,
                     light: 0,
                 },
                 MapCell {
@@ -1694,6 +1873,9 @@ mod tests {
                     front_animation_tick: 0,
                     middle_animation_frame: 0,
                     middle_animation_tick: 0,
+                    tile_animation_image: 0,
+                    tile_animation_offset: 0,
+                    tile_animation_frames: 0,
                     light: 0,
                 },
             ],
@@ -1733,6 +1915,142 @@ mod tests {
         let map = parse_type100_map(&bytes).expect("type-100 map");
         let draw = resolve_map_tile_draws(&map).remove(0);
         assert_eq!(draw.frame_count, 3);
+    }
+
+    #[test]
+    fn resolve_map_draws_preserves_crystal_animation_family_parameters() {
+        let mut cell = middle_cell(0, 100);
+        cell.middle_animation_frame = 3;
+        cell.middle_animation_tick = 2;
+        cell.front_index = 2;
+        cell.front_image = 201;
+        cell.front_animation_frame = 0x82;
+        cell.front_animation_tick = 1;
+        cell.tile_animation_image = 501;
+        cell.tile_animation_offset = 0x2002;
+        cell.tile_animation_frames = 4;
+        let draws = resolve_map_tile_draws(&ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell],
+        });
+
+        let tile = draws
+            .iter()
+            .find(|draw| draw.layer == TileLayer::TileAnimation)
+            .expect("tile animation draw");
+        assert_eq!(tile.library, library_key_for_index(190));
+        assert_eq!(tile.frame_index, 500);
+        assert_eq!(tile.frame_count, 4);
+        assert_eq!(tile.animation_tick, 0);
+        assert_eq!(tile.frame_step, 2);
+
+        let middle = draws
+            .iter()
+            .find(|draw| draw.layer == TileLayer::Middle)
+            .expect("middle animation draw");
+        assert_eq!(middle.frame_index, 100);
+        assert_eq!(middle.frame_count, 3);
+        assert_eq!(middle.animation_tick, 2);
+        assert_eq!(middle.frame_step, 1);
+
+        let front = draws
+            .iter()
+            .find(|draw| draw.layer == TileLayer::Front)
+            .expect("front animation draw");
+        assert_eq!(front.frame_index, 200);
+        assert_eq!(front.frame_count, 2);
+        assert_eq!(front.animation_tick, 1);
+        assert_eq!(front.frame_step, 1);
+        assert!(front.additive);
+    }
+
+    fn atlas_index_for_animation_family(library: &str, frame_indexes: &[i32]) -> AtlasIndex {
+        let atlas_key = "map:animation#p0".to_owned();
+        let mut rect_to_atlas = HashMap::new();
+        let mut rects = HashMap::new();
+        for (slot, frame_index) in frame_indexes.iter().copied().enumerate() {
+            let rect_key = atlas_rect_key(library, frame_index);
+            rect_to_atlas.insert(rect_key.clone(), atlas_key.clone());
+            rects.insert(
+                rect_key.clone(),
+                AtlasRect {
+                    key: rect_key,
+                    x: u32::try_from(slot).unwrap() * 48,
+                    y: 0,
+                    width: 48,
+                    height: 32,
+                },
+            );
+        }
+        AtlasIndex {
+            pages: HashMap::from([(
+                atlas_key,
+                AtlasPage {
+                    image_url: "/generated/map-atlas/animation/p0.png".to_owned(),
+                    width: 512,
+                    height: 512,
+                },
+            )]),
+            rect_to_atlas,
+            rects,
+        }
+    }
+
+    #[test]
+    fn render_state_emits_complete_animation_family_with_phase_metadata() {
+        let mut cell = middle_cell(0, 100);
+        cell.middle_animation_frame = 3;
+        cell.middle_animation_tick = 2;
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell],
+        };
+        let atlas = atlas_index_for_animation_family("WemadeMir2/Tiles", &[100, 101, 102]);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None)
+            .expect("complete animation family state");
+        let tiles = state["tiles"].as_array().expect("tiles");
+        assert_eq!(tiles.len(), 3);
+        assert_eq!(
+            tiles
+                .iter()
+                .map(|tile| tile["rectKey"].as_str().unwrap())
+                .collect::<Vec<_>>(),
+            [
+                "WemadeMir2/Tiles#100",
+                "WemadeMir2/Tiles#101",
+                "WemadeMir2/Tiles#102",
+            ]
+        );
+        for (phase, tile) in tiles.iter().enumerate() {
+            assert_eq!(tile["animationPhase"], json!(phase));
+            assert_eq!(tile["animationFrameCount"], json!(3));
+            assert_eq!(tile["animationTick"], json!(2));
+            assert_eq!(tile["key"], json!(format!("mid:0:0:anim:{phase}")));
+        }
+        assert_eq!(state["atlases"][0]["rects"].as_array().unwrap().len(), 3);
+    }
+
+    #[test]
+    fn incomplete_animation_family_holds_stable_base_frame() {
+        let mut cell = middle_cell(0, 100);
+        cell.middle_animation_frame = 3;
+        cell.middle_animation_tick = 2;
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell],
+        };
+        let atlas = atlas_index_for_animation_family("WemadeMir2/Tiles", &[100, 101]);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None)
+            .expect("base frame fallback state");
+        let tiles = state["tiles"].as_array().expect("tiles");
+        assert_eq!(tiles.len(), 1);
+        assert_eq!(tiles[0]["rectKey"], json!("WemadeMir2/Tiles#100"));
+        assert_eq!(tiles[0]["key"], json!("mid:0:0"));
+        assert_eq!(tiles[0]["animationPhase"], json!(0));
+        assert_eq!(tiles[0]["animationFrameCount"], json!(1));
     }
 
     #[test]
@@ -1841,6 +2159,9 @@ mod tests {
                 front_animation_tick: 0,
                 middle_animation_frame: 0,
                 middle_animation_tick: 0,
+                tile_animation_image: 0,
+                tile_animation_offset: 0,
+                tile_animation_frames: 0,
                 light: 0,
             }],
         };
@@ -1919,6 +2240,8 @@ mod tests {
             frame_index: 1,
             additive: false,
             frame_count: 1,
+            animation_tick: 0,
+            frame_step: 1,
             z: 1.0,
         };
         let additive = MapTileDraw {
