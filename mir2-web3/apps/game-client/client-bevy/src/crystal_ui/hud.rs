@@ -6,16 +6,17 @@
 //! that is not present in the read models.
 
 use bevy::prelude::*;
+use bevy::text::LineBreak;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
 
-use crate::inventory::{item_durability_label, item_icon_path, InventoryModel, ItemModel};
+use crate::inventory::{item_icon_path, InventoryModel, ItemModel};
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
-use super::typography::crystal_text_font;
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
@@ -25,6 +26,7 @@ pub(crate) const HUD_Z_INDEX: i32 = 950;
 pub const ORB_WIDTH: f32 = 104.0;
 pub const ORB_HEIGHT: f32 = 80.0;
 pub const ORB_HALF_WIDTH: f32 = 50.0;
+pub const ORB_HP_ONLY_WIDTH: f32 = 100.0;
 pub const ORB_HP_SOURCE_LEFT: f32 = 0.0;
 pub const ORB_MP_SOURCE_LEFT: f32 = 51.0;
 pub const ORB_TOP: f32 = 646.0;
@@ -85,6 +87,21 @@ pub fn orb_clip_geometry(ratio: f32, side: OrbSide) -> OrbClipGeometry {
     OrbClipGeometry {
         source: orb_source_rect(side, height),
         destination: CrystalRect::new(left, ORB_TOP + ORB_HEIGHT - height, ORB_HALF_WIDTH, height),
+    }
+}
+
+/// Crystal uses `Prguse/6` as one full-width red orb for Warriors below level
+/// 26. It is clipped from the bottom exactly like the split HP/MP texture.
+pub fn hp_only_orb_clip_geometry(ratio: f32) -> OrbClipGeometry {
+    let height = (ORB_HEIGHT * ratio.clamp(0.0, 1.0)).floor();
+    OrbClipGeometry {
+        source: HudSourceRect::new(0.0, ORB_HEIGHT - height, ORB_HP_ONLY_WIDTH, height),
+        destination: CrystalRect::new(
+            0.0,
+            ORB_TOP + ORB_HEIGHT - height,
+            ORB_HP_ONLY_WIDTH,
+            height,
+        ),
     }
 }
 
@@ -195,15 +212,16 @@ pub const BELT_SLOT_STEP: f32 = 35.0;
 pub const BELT_SLOT_COUNT: u8 = 6;
 
 /// Exact source-relative positions from Crystal's `MainDialog`.
-pub const HP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 673.0, 102.0, 14.0);
-pub const MP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 688.0, 102.0, 14.0);
+pub const HP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 673.0, 100.0, 14.0);
+pub const MP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 688.0, 100.0, 14.0);
 pub const LEVEL_RECT: CrystalRect = CrystalRect::new(5.0, 724.0, 30.0, 14.0);
 pub const NAME_RECT: CrystalRect = CrystalRect::new(6.0, 736.0, 90.0, 16.0);
 pub const GOLD_RECT: CrystalRect = CrystalRect::new(919.0, 735.0, 99.0, 13.0);
 pub const EXPERIENCE_TEXT_RECT: CrystalRect = CrystalRect::new(491.0, 749.0, 40.0, 12.0);
 pub const MAP_TITLE_RECT: CrystalRect = CrystalRect::new(900.0, 2.0, 120.0, 18.0);
 pub const MAP_COORDINATE_RECT: CrystalRect = CrystalRect::new(944.0, 131.0, 56.0, 18.0);
-pub const CRYSTAL_INVENTORY_SLOTS: u32 = 46;
+pub const ALTERNATE_TOP_RECT: CrystalRect = CrystalRect::new(9.0, 666.0, 85.0, 30.0);
+pub const ALTERNATE_BOTTOM_RECT: CrystalRect = CrystalRect::new(9.0, 696.0, 85.0, 30.0);
 
 pub struct Mir2CrystalHudPlugin;
 
@@ -257,6 +275,7 @@ fn spawn_crystal_hud(
     } else {
         Display::None
     };
+    let hp_only = crystal_hp_only(&ui_model);
 
     commands
         .spawn((
@@ -280,12 +299,14 @@ fn spawn_crystal_hud(
                 &asset_server,
                 OrbSide::Hp,
                 ui_model.player.normalized_hp(),
+                hp_only,
             );
             spawn_orb_half(
                 root,
                 &asset_server,
                 OrbSide::Mp,
                 ui_model.player.normalized_mp(),
+                hp_only,
             );
             spawn_horizontal_bar(
                 root,
@@ -315,16 +336,16 @@ fn spawn_crystal_hud(
                 CrystalHudHpText,
                 &format!("HP {}", ui_model.player.hp_label().replacen(" / ", "/", 1)),
                 HP_TEXT_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
             spawn_text(
                 root,
                 CrystalHudMpText,
-                &format!("MP {}", ui_model.player.mp_label().replacen(" / ", "/", 1)),
+                &compact_mp_label(&ui_model),
                 MP_TEXT_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
@@ -332,8 +353,8 @@ fn spawn_crystal_hud(
                 root,
                 CrystalHudHpAlternateTopText,
                 &hp_view_alternate_top(&ui_model),
-                HP_TEXT_RECT,
-                8.0,
+                ALTERNATE_TOP_RECT,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
@@ -341,8 +362,8 @@ fn spawn_crystal_hud(
                 root,
                 CrystalHudHpAlternateBottomText,
                 &hp_view_alternate_bottom(&ui_model),
-                MP_TEXT_RECT,
-                8.0,
+                ALTERNATE_BOTTOM_RECT,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
@@ -351,25 +372,25 @@ fn spawn_crystal_hud(
                 CrystalHudLevel,
                 &ui_model.player.level.to_string(),
                 LEVEL_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Left,
             );
-            spawn_text(
+            spawn_vertical_centered_text(
                 root,
                 CrystalHudName,
                 ui_model.player.name.as_deref().unwrap_or(""),
                 NAME_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
-            spawn_text(
+            spawn_vertical_centered_text(
                 root,
                 CrystalHudGold,
                 &format_gold(ui_model.player.gold),
                 GOLD_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Left,
             );
@@ -378,16 +399,16 @@ fn spawn_crystal_hud(
                 CrystalHudExperienceText,
                 &ui_model.player.experience_percent_label(),
                 EXPERIENCE_TEXT_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
-                Justify::Center,
+                Justify::Left,
             );
             spawn_text(
                 root,
                 CrystalHudWeightText,
                 &ui_model.player.available_weight().to_string(),
                 spec::WEIGHT_LABEL,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Left,
             );
@@ -396,9 +417,9 @@ fn spawn_crystal_hud(
                 CrystalHudSpaceText,
                 &free_inventory_slots(&inventory).to_string(),
                 spec::SPACE_LABEL,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
-                Justify::Center,
+                Justify::Left,
             );
 
             spawn_frame_at(root, &asset_server, "Prguse", 1932, BELT_FRAME);
@@ -415,21 +436,21 @@ fn spawn_crystal_hud(
             }
 
             spawn_minimap_frame(root, &asset_server);
-            spawn_text(
+            spawn_vertical_centered_text(
                 root,
                 CrystalHudMapTitle,
                 ui_model.player.map_name.as_deref().unwrap_or(""),
                 MAP_TITLE_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
-            spawn_text(
+            spawn_vertical_centered_text(
                 root,
                 CrystalHudMapCoordinate,
                 &format!("{}, {}", map_model.center_x, map_model.center_y),
                 MAP_COORDINATE_RECT,
-                8.0,
+                CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
                 Justify::Center,
             );
@@ -500,15 +521,24 @@ fn spawn_orb_half(
     asset_server: &AssetServer,
     side: OrbSide,
     ratio: f32,
+    hp_only: bool,
 ) {
-    let geometry = orb_clip_geometry(ratio, side);
+    let geometry = if side == OrbSide::Hp && hp_only {
+        hp_only_orb_clip_geometry(ratio)
+    } else {
+        orb_clip_geometry(ratio, side)
+    };
     match side {
         OrbSide::Hp => {
             parent.spawn((
                 CrystalHudHpOrb,
                 absolute_node(geometry.destination),
                 ImageNode {
-                    image: asset_server.load("original-ui/Prguse/4.png"),
+                    image: asset_server.load(if hp_only {
+                        "original-ui/Prguse/6.png"
+                    } else {
+                        "original-ui/Prguse/4.png"
+                    }),
                     rect: Some(to_bevy_rect(geometry.source)),
                     image_mode: NodeImageMode::Stretch,
                     ..default()
@@ -516,9 +546,15 @@ fn spawn_orb_half(
             ));
         }
         OrbSide::Mp => {
+            let mut node = absolute_node(geometry.destination);
+            node.display = if hp_only {
+                Display::None
+            } else {
+                Display::Flex
+            };
             parent.spawn((
                 CrystalHudMpOrb,
-                absolute_node(geometry.destination),
+                node,
                 ImageNode {
                     image: asset_server.load("original-ui/Prguse/4.png"),
                     rect: Some(to_bevy_rect(geometry.source)),
@@ -652,7 +688,13 @@ fn spawn_belt_slot(
     // A stale or legacy stack without its server instance id may be displayed,
     // but cannot issue an ambiguous use command.
     let mut hit_target = parent.spawn((
-        absolute_node(CrystalRect::new(slot_rect.left, slot_rect.top, 32.0, 32.0)),
+        {
+            let mut node =
+                absolute_node(CrystalRect::new(slot_rect.left, slot_rect.top, 32.0, 32.0));
+            node.align_items = AlignItems::Center;
+            node.justify_content = JustifyContent::Center;
+            node
+        },
         CrystalHudBeltHitTarget { slot },
         CrystalHudAction::BeltUse(slot),
     ));
@@ -661,8 +703,6 @@ fn spawn_belt_slot(
         button.spawn((
             CrystalHudBeltIcon { slot },
             Node {
-                width: Val::Px(32.0),
-                height: Val::Px(32.0),
                 display: if path.is_some() {
                     Display::Flex
                 } else {
@@ -672,7 +712,7 @@ fn spawn_belt_slot(
             },
             ImageNode {
                 image: path.map(|path| asset_server.load(path)).unwrap_or_default(),
-                image_mode: NodeImageMode::Stretch,
+                image_mode: NodeImageMode::Auto,
                 ..default()
             },
         ));
@@ -681,19 +721,19 @@ fn spawn_belt_slot(
         parent,
         CrystalHudBeltKey { slot },
         &(slot + 1).to_string(),
-        CrystalRect::new(238.0 + BELT_SLOT_STEP * slot as f32, 620.0, 12.0, 11.0),
-        8.0,
+        belt_key_rect(slot),
+        CRYSTAL_DEFAULT_FONT_SIZE_PX,
         WHITE,
         Justify::Left,
     );
-    spawn_text(
+    spawn_unoutlined_text(
         parent,
         CrystalHudBeltItem { slot },
         &belt_item_label(inventory, slot),
-        CrystalRect::new(slot_rect.left, slot_rect.top + 19.0, slot_rect.width, 12.0),
-        7.0,
-        WHITE,
-        Justify::Center,
+        belt_count_rect(slot),
+        CRYSTAL_DEFAULT_FONT_SIZE_PX,
+        Color::srgb_u8(255, 255, 0),
+        Justify::Right,
     );
 }
 
@@ -706,18 +746,92 @@ fn spawn_text<T: Component>(
     color: Color,
     justify: Justify,
 ) {
-    parent.spawn((
+    spawn_text_entity(
+        parent,
         marker,
-        absolute_node(rect),
+        value,
+        text_absolute_node(rect),
+        font_size,
+        color,
+        justify,
+        true,
+    );
+}
+
+fn spawn_vertical_centered_text<T: Component>(
+    parent: &mut ChildSpawnerCommands,
+    marker: T,
+    value: &str,
+    rect: CrystalRect,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+) {
+    let mut container = text_absolute_node(rect);
+    container.align_items = AlignItems::Center;
+    parent.spawn(container).with_children(|text_root| {
+        spawn_text_entity(
+            text_root,
+            marker,
+            value,
+            Node {
+                width: Val::Percent(100.0),
+                ..default()
+            },
+            font_size,
+            color,
+            justify,
+            true,
+        );
+    });
+}
+
+fn spawn_unoutlined_text<T: Component>(
+    parent: &mut ChildSpawnerCommands,
+    marker: T,
+    value: &str,
+    rect: CrystalRect,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+) {
+    spawn_text_entity(
+        parent,
+        marker,
+        value,
+        text_absolute_node(rect),
+        font_size,
+        color,
+        justify,
+        false,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_text_entity<T: Component>(
+    parent: &mut ChildSpawnerCommands,
+    marker: T,
+    value: &str,
+    node: Node,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+    outlined: bool,
+) {
+    let mut entity = parent.spawn((
+        marker,
+        node,
         Text::new(value.to_owned()),
         crystal_text_font(font_size),
         TextColor(color),
-        TextLayout::justify(justify),
-        TextShadow {
+        TextLayout::new(justify, LineBreak::NoWrap),
+    ));
+    if outlined {
+        entity.insert(TextShadow {
             offset: Vec2::splat(1.0),
             color: Color::BLACK,
-        },
-    ));
+        });
+    }
 }
 
 fn absolute_node(rect: CrystalRect) -> Node {
@@ -729,6 +843,12 @@ fn absolute_node(rect: CrystalRect) -> Node {
         height: Val::Px(rect.height),
         ..default()
     }
+}
+
+fn text_absolute_node(rect: CrystalRect) -> Node {
+    let mut node = absolute_node(rect);
+    node.overflow = Overflow::clip();
+    node
 }
 
 fn to_bevy_rect(rect: HudSourceRect) -> bevy::math::Rect {
@@ -772,15 +892,20 @@ fn update_hud_read_model(
         Query<&mut Text, With<CrystalHudWeightText>>,
     )>,
 ) {
+    let hp_only = crystal_hp_only(&model);
     sync_orb_half(
         &mut image_queries.p0(),
+        &asset_server,
         OrbSide::Hp,
         model.player.normalized_hp(),
+        hp_only,
     );
     sync_orb_half(
         &mut image_queries.p1(),
+        &asset_server,
         OrbSide::Mp,
         model.player.normalized_mp(),
+        hp_only,
     );
     sync_horizontal_bar(
         &mut image_queries.p2(),
@@ -795,7 +920,7 @@ fn update_hud_read_model(
     );
 
     let hp = format!("HP {}", model.player.hp_label().replacen(" / ", "/", 1));
-    let mp = format!("MP {}", model.player.mp_label().replacen(" / ", "/", 1));
+    let mp = compact_mp_label(&model);
     set_text(&mut text_queries.p0(), hp);
     set_text(&mut text_queries.p1(), mp);
     set_text(
@@ -836,11 +961,39 @@ fn update_hud_hp_alternate_text(
 /// `Settings.HPView` is off. Keeping this pure makes the alternate rendering
 /// independently testable from the Bevy node wiring.
 pub fn hp_view_alternate_top(model: &UiReadModel) -> String {
-    format!("{}    {}", model.player.hp, model.player.mp)
+    if crystal_hp_only(model) {
+        format!("{}\n--", model.player.hp)
+    } else {
+        format!(
+            " {}    {} \n---------------",
+            model.player.hp, model.player.mp
+        )
+    }
 }
 
 pub fn hp_view_alternate_bottom(model: &UiReadModel) -> String {
-    format!("{}    {}", model.player.max_hp, model.player.max_mp)
+    if crystal_hp_only(model) {
+        model.player.max_hp.to_string()
+    } else {
+        format!(" {}    {} ", model.player.max_hp, model.player.max_mp)
+    }
+}
+
+pub fn crystal_hp_only(model: &UiReadModel) -> bool {
+    model.player.level < 26
+        && model
+            .player
+            .class_name
+            .as_deref()
+            .is_some_and(|class_name| class_name.eq_ignore_ascii_case("Warrior"))
+}
+
+pub fn compact_mp_label(model: &UiReadModel) -> String {
+    if crystal_hp_only(model) {
+        String::new()
+    } else {
+        format!("MP {} ", model.player.mp_label().replacen(" / ", "/", 1))
+    }
 }
 
 /// Apply the presentation choices this HUD owns. The state is read directly
@@ -849,6 +1002,7 @@ pub fn hp_view_alternate_bottom(model: &UiReadModel) -> String {
 /// Re-enabling a mode exposes the latest render nodes again.
 fn update_hud_option_presentation(
     shell: Res<NativeShellModel>,
+    model: Res<UiReadModel>,
     state: Option<Res<crate::crystal_ui::overlays::NativePlayerUiState>>,
     mut nodes: ParamSet<(
         Query<&mut Node, With<CrystalHudHpText>>,
@@ -862,7 +1016,12 @@ fn update_hud_option_presentation(
         .as_deref()
         .map(|state| state.core.options.hp_view)
         .unwrap_or(true);
-    let compact_display = if in_game && hp_view {
+    let compact_hp_display = if in_game && hp_view {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    let compact_mp_display = if in_game && hp_view && !crystal_hp_only(&model) {
         Display::Flex
     } else {
         Display::None
@@ -873,10 +1032,10 @@ fn update_hud_option_presentation(
         Display::None
     };
     for mut node in nodes.p0().iter_mut() {
-        node.display = compact_display;
+        node.display = compact_hp_display;
     }
     for mut node in nodes.p1().iter_mut() {
-        node.display = compact_display;
+        node.display = compact_mp_display;
     }
     for mut node in nodes.p2().iter_mut() {
         node.display = alternate_display;
@@ -888,17 +1047,33 @@ fn update_hud_option_presentation(
 
 fn sync_orb_half<T>(
     query: &mut Query<(&mut Node, &mut ImageNode), With<T>>,
+    asset_server: &AssetServer,
     side: OrbSide,
     ratio: f32,
+    hp_only: bool,
 ) where
     T: Component,
 {
-    let geometry = orb_clip_geometry(ratio, side);
+    let geometry = if side == OrbSide::Hp && hp_only {
+        hp_only_orb_clip_geometry(ratio)
+    } else {
+        orb_clip_geometry(ratio, side)
+    };
     for (mut node, mut image) in query.iter_mut() {
+        node.display = if side == OrbSide::Mp && hp_only {
+            Display::None
+        } else {
+            Display::Flex
+        };
         node.left = Val::Px(geometry.destination.left);
         node.top = Val::Px(geometry.destination.top);
         node.width = Val::Px(geometry.destination.width);
         node.height = Val::Px(geometry.destination.height);
+        image.image = asset_server.load(if side == OrbSide::Hp && hp_only {
+            "original-ui/Prguse/6.png"
+        } else {
+            "original-ui/Prguse/4.png"
+        });
         image.rect = Some(to_bevy_rect(geometry.source));
     }
 }
@@ -1070,9 +1245,9 @@ pub fn free_inventory_slots(model: &InventoryModel) -> u32 {
     let occupied = model
         .items
         .iter()
-        .filter(|item| item.container == 0)
+        .filter(|item| matches!(item.container, 0 | 1))
         .count() as u32;
-    CRYSTAL_INVENTORY_SLOTS.saturating_sub(occupied)
+    u32::from(model.effective_capacity()).saturating_sub(occupied)
 }
 
 /// Produce a bounded label suitable for one 40-pixel belt slot.
@@ -1081,10 +1256,24 @@ pub fn belt_item_label(model: &InventoryModel, slot: u8) -> String {
         return String::new();
     };
     if item.quantity > 1 {
-        format!("x{}", item.quantity)
+        item.quantity.to_string()
     } else {
-        item_durability_label(item).unwrap_or_default()
+        String::new()
     }
+}
+
+/// Crystal `BeltDialog.Key` uses a fixed 26x14 label at `(8 + slot*35, 2)`
+/// relative to the 230,618 belt frame.
+pub const fn belt_key_rect(slot: u8) -> CrystalRect {
+    CrystalRect::new(238.0 + BELT_SLOT_STEP * slot as f32, 620.0, 26.0, 14.0)
+}
+
+/// `MirItemCell.CountLabel` is auto-sized and bottom-right anchored. Arial 8pt
+/// measures to a 14px row on the 96-DPI logical stage, so this right-justified
+/// row reproduces its source anchor without the native-only `x` prefix.
+pub const fn belt_count_rect(slot: u8) -> CrystalRect {
+    let item = spec::belt_slot(slot as usize);
+    CrystalRect::new(item.left, item.top + 18.0, item.width, 14.0)
 }
 
 pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
@@ -1271,6 +1460,16 @@ mod tests {
     }
 
     #[test]
+    fn low_level_warrior_uses_crystal_full_width_hp_orb() {
+        let geometry = hp_only_orb_clip_geometry(0.5);
+        assert_eq!(geometry.source, HudSourceRect::new(0.0, 40.0, 100.0, 40.0));
+        assert_eq!(
+            geometry.destination,
+            CrystalRect::new(0.0, 686.0, 100.0, 40.0)
+        );
+    }
+
+    #[test]
     fn hp_view_alternate_labels_keep_authoritative_current_and_max_values() {
         let model = UiReadModel {
             player: crate::read_model::PlayerStats {
@@ -1281,8 +1480,31 @@ mod tests {
                 ..default()
             },
         };
-        assert_eq!(hp_view_alternate_top(&model), "12    4");
-        assert_eq!(hp_view_alternate_bottom(&model), "15    11");
+        assert_eq!(hp_view_alternate_top(&model), " 12    4 \n---------------");
+        assert_eq!(hp_view_alternate_bottom(&model), " 15    11 ");
+    }
+
+    #[test]
+    fn low_level_warrior_hides_mp_and_uses_hp_only_labels() {
+        let mut model = UiReadModel {
+            player: crate::read_model::PlayerStats {
+                hp: 12,
+                max_hp: 15,
+                mp: 4,
+                max_mp: 11,
+                level: 25,
+                class_name: Some("Warrior".to_owned()),
+                ..default()
+            },
+        };
+        assert!(crystal_hp_only(&model));
+        assert_eq!(compact_mp_label(&model), "");
+        assert_eq!(hp_view_alternate_top(&model), "12\n--");
+        assert_eq!(hp_view_alternate_bottom(&model), "15");
+
+        model.player.level = 26;
+        assert!(!crystal_hp_only(&model));
+        assert_eq!(compact_mp_label(&model), "MP 4/11 ");
     }
 
     #[test]
@@ -1293,6 +1515,7 @@ mod tests {
         player_ui.core.options.hp_view = false;
         let mut app = App::new();
         app.insert_resource(shell)
+            .insert_resource(UiReadModel::default())
             .insert_resource(player_ui)
             .add_systems(Update, update_hud_option_presentation);
         let hp = app
@@ -1392,6 +1615,44 @@ mod tests {
     }
 
     #[test]
+    fn main_hud_text_uses_crystal_point_size_and_source_anchors() {
+        assert!((CRYSTAL_DEFAULT_FONT_SIZE_PX - 10.666_667).abs() < 0.000_01);
+        assert_eq!(HP_TEXT_RECT, CrystalRect::new(0.0, 673.0, 100.0, 14.0));
+        assert_eq!(MP_TEXT_RECT, CrystalRect::new(0.0, 688.0, 100.0, 14.0));
+        assert_eq!(
+            EXPERIENCE_TEXT_RECT,
+            CrystalRect::new(491.0, 749.0, 40.0, 12.0)
+        );
+        assert_eq!(belt_key_rect(0), CrystalRect::new(238.0, 620.0, 26.0, 14.0));
+        assert_eq!(belt_key_rect(5), CrystalRect::new(413.0, 620.0, 26.0, 14.0));
+        assert_eq!(
+            belt_count_rect(0),
+            CrystalRect::new(242.0, 639.0, 32.0, 14.0)
+        );
+    }
+
+    #[test]
+    fn belt_count_matches_crystal_without_native_prefix_or_durability_text() {
+        let mut stacked = item("stacked", "Potion", 1, 0, 12);
+        stacked.durability_current = Some(7);
+        stacked.durability_max = Some(10);
+        let model = InventoryModel {
+            items: vec![stacked],
+            ..Default::default()
+        };
+        assert_eq!(belt_item_label(&model, 0), "12");
+
+        let mut single = item("single", "Sword", 1, 1, 1);
+        single.durability_current = Some(7);
+        single.durability_max = Some(10);
+        let model = InventoryModel {
+            items: vec![single],
+            ..Default::default()
+        };
+        assert_eq!(belt_item_label(&model, 1), "");
+    }
+
+    #[test]
     fn belt_labels_are_bounded_without_splitting_unicode() {
         assert_eq!(bounded_belt_label("Potion", 5), "Poti…");
         assert_eq!(bounded_belt_label("红蓝药水", 5), "红蓝药水");
@@ -1422,7 +1683,7 @@ mod tests {
     }
 
     #[test]
-    fn free_inventory_slots_count_only_crystal_bag_cells() {
+    fn free_inventory_slots_follow_crystal_inventory_array_capacity() {
         let model = InventoryModel {
             gold: 0,
             items: vec![
@@ -1433,7 +1694,13 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_eq!(free_inventory_slots(&model), 44);
+        assert_eq!(free_inventory_slots(&model), 43);
+
+        let expanded = InventoryModel {
+            capacity: 54,
+            ..model
+        };
+        assert_eq!(free_inventory_slots(&expanded), 51);
     }
 
     #[test]
