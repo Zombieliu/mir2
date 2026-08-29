@@ -1,5 +1,26 @@
 # Agent Task Queue
 
+> Windows-native VIS-03/VIS-01 user-observed UI and render backlog
+> (2026-08-29): recent direct Crystal-vs-native user checks must be treated as
+> active open scope, not polish. The current native Candidate still lacks or
+> has not yet human-accepted: the post-login notice popup, safe-zone visual
+> indicator, several Crystal hover/tooltips for the right-side menu, bottom-right
+> buttons, chat control mini-buttons, and inventory/item details; Crystal-sized
+> inventory and belt slot presentation; complete item detail tooltips; and
+> comparable world sharpness/solidity on some buildings plus scene animations
+> such as lamp flame/fire. User feedback also keeps movement/interact feel
+> open where bounded automation exists but human acceptance does not: sustained
+> run responsiveness, click-to-move pacing, and some cursor/NPC interaction
+> semantics. The quest lane is also explicitly open: the user reports an
+> incomplete end-to-end quest system and no NPC-head available/in-progress/
+> turn-in guidance marker. The complete right-side system-menu function matrix,
+> main-HUD function matrix, and chat-control row must be tested as functions,
+> not counted closed because their sprites are visible. These items should be
+> scheduled as bounded Windows visual-parity
+> leaves with exact same-EXE evidence and must stay outside any "100%"
+> statement until closed. The tracked denominator and priority order are in
+> `docs/generated/player-qa/windows-visual-parity/VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md`.
+
 > Windows-native VIS-01 Type1 map-transfer recovery (2026-08-29): the user's
 > GroceryStore screenshot is retained as a failed Candidate observation, not a
 > visual pass. The destination title/coordinates had advanced to map `0141`

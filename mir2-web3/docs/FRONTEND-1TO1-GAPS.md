@@ -2,6 +2,30 @@
 
 Last updated: 2026-08-29
 
+> 2026-08-29 Windows-native user-observed visual/UI backlog: the current
+> native Candidate is explicitly not visually accepted. Recent side-by-side
+> user checks against Crystal confirm several still-open gaps that must remain
+> tracked as unfinished work instead of being implied complete by narrower
+> automated leaves. Open items now include: no login-to-game notice popup;
+> missing safe-zone indicator; substantial HUD/chat/button/layout drift versus
+> Crystal; missing or incomplete hover tooltips on the right-side function
+> strip, bottom-right action buttons, chat mini-buttons and inventory/item UI;
+> inventory/belt slot sizing differences; item tooltip/detail gaps; missing
+> Crystal-style monster/NPC cursor semantics in some remaining paths; native
+> world rendering that still reads softer or blurrier than Crystal on some
+> buildings; missing or unaccepted scene animations such as lamp flame/fire;
+> an incomplete quest/quest-diary flow; missing NPC-head available,
+> in-progress and turn-in guidance markers; and unresolved human-feel concerns
+> around movement cadence, click-to-move, run responsiveness and interaction
+> pacing. The right-side system menu, main-HUD buttons, and chat mini-button row
+> remain a functional denominator, not merely an asset-presence check. These
+> observations are retained as
+> open Windows visual-parity backlog, not as evidence of completion, and they
+> must be closed with exact same-EXE screenshots, bounded automation where
+> possible, and final human acceptance before any 1:1 completion claim.
+> The numbered denominator is recorded in
+> `docs/generated/player-qa/windows-visual-parity/VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md`.
+
 > 2026-08-29 Windows-native VIS-01 Type1 transfer regression checkpoint: the
 > user-provided GroceryStore screenshot is an explicit failure. Map identity
 > reached `0141` / `(5,12)`, but old Bichon pixels remained and player/NPC
