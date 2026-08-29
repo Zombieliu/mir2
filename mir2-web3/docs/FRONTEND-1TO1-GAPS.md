@@ -33,9 +33,11 @@ Last updated: 2026-08-29
 > dwell formula. Incomplete families fail closed to their stable base frame
 > instead of flashing transparent. Runtime tests pass 205/205 and focused map
 > parser tests pass 31/31. Separately, authoritative NPC `questIds` plus the
-> native `QuestTracker` now drive a bounded `!` / `?` world-overlay baseline,
-> with focused overlay tests passing 11/11. Neither item is visually accepted:
-> source `Prguse` two-frame quest icons, complete quest state transitions,
+> native `QuestTracker` now select Crystal's real `Prguse` `983..988`
+> question/exclamation pairs, advance them on the original 500 ms cadence, and
+> honor ready > available > in-progress priority, with focused overlay tests
+> passing 11/11. Neither item is visually accepted: exact NPC body-frame
+> anchoring, complete quest state transitions,
 > timed same-EXE fire/lamp captures, additive/blend fidelity, full animation
 > asset coverage, soak and human acceptance remain open.
 

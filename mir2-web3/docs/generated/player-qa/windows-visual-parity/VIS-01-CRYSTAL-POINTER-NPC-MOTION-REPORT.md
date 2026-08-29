@@ -2,7 +2,7 @@
 
 Date: 2026-08-29
 
-Status: automated Candidate pass; fresh human visual/feel acceptance pending.
+Status: bounded automated interaction pass on the branch; fresh human visual/feel acceptance pending.
 
 ## Closed bounded leaf
 
@@ -27,6 +27,12 @@ Status: automated Candidate pass; fresh human visual/feel acceptance pending.
   authoritative ACK/snapshot, and emits exactly one existing `InteractNpc`
   intent after reaching an adjacent tile. Dialog open, focus/session loss,
   timeout or NPC disappearance cancels the pending action.
+- Current implementation revision `71ff4311941467f34554fe1ab6401948d122eb7a`
+  also narrows one live
+  failure mode behind “NPC 点不开”: when an NPC body is visibly under the
+  cursor but the transient body-alpha pixel source is unavailable, native
+  hover now falls back to the NPC body bounds only for NPCs. Monster targeting
+  remains fail-closed, so this does not loosen combat hover semantics.
 
 ## Source boundary and known semantic difference
 
@@ -49,9 +55,11 @@ Status: automated Candidate pass; fresh human visual/feel acceptance pending.
 | Gate | Result |
 |---|---|
 | Windows native host suite, Rust 1.95 | PASS, 463/463 |
+| Current implementation Windows host suite, Rust 1.95 | PASS, 479/479 |
 | Shared Bevy runtime suite, Rust 1.95 | PASS, 199/199 |
 | Distant NPC approach then single interaction | PASS |
 | NPC disappearance cancels without a fake dialog request | PASS |
+| NPC hover keeps clickability when NPC body pixels are temporarily unavailable | PASS |
 | Hover cursor Monster/NPC/Shift-Player/default matrix | PASS |
 | NewMove Magic3 500..509 frame and 600 ms lifetime | PASS |
 | Magic exporter deterministic end-to-end suite | PASS, 74 spells |
@@ -84,6 +92,20 @@ The exact EXE was launched as PID 263988 with a process-local
 127.0.0.1:7210 and `/health` returned 200 after launch. This proves package
 identity and local transport readiness only; it is not authenticated live WSS
 or human visual acceptance.
+
+## Current branch-head addendum
+
+After the exact Candidate above, branch head
+`71ff4311941467f34554fe1ab6401948d122eb7a` added one more bounded hover
+reliability fix without claiming a new packaged Candidate:
+
+- `atlas::tests::npc_hover_falls_back_to_body_bounds_when_pixels_are_unavailable` → PASS
+- `atlas::tests::hover_scan_allows_npc_excludes_self_and_dead_and_uses_reverse_cell_order` → PASS
+- `atlas::tests::hover_uses_body_alpha_and_same_tile_shortcut_but_fails_closed_without_pixels` → PASS
+
+This addendum strengthens the Windows-native NPC hover/open path on the live
+branch head, but it does not replace the exact-Candidate identity table above
+and does not by itself close the remaining human dialog-open gate.
 
 ## Explicitly open gates
 
