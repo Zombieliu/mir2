@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows safe-zone regression repair checkpoint (2026-08-29):
+> revision `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` restores this project's
+> imported Crystal `SafeZoneBorder=True` behavior. Simulation no longer
+> hard-codes the optional border off; it derives the default from generated
+> `TrapHexagon` boundary objects while keeping an explicit opt-out. Windows
+> already renders persistent `Magic 1390..1399` at the source 100 ms cadence
+> until authoritative removal, and authoritative `inSafeZone` now reaches the
+> shared UI read model. Full Simulation 1482/1482 plus focused native effect,
+> read-model and producer tests pass. Exact-head Candidate capture and human
+> comparison remain open; no map-wide, visual or global percentage is claimed.
+
 > Latest Windows Type1 transfer checkpoint (2026-08-29): the user's
 > GroceryStore screenshot records a failed old Candidate: destination map
 > metadata changed to `0141`, but Bichon terrain remained and scene clearing

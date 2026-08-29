@@ -2,6 +2,17 @@
 
 Last updated: 2026-08-29
 
+> 2026-08-29 Windows safe-zone regression repair checkpoint: revision
+> `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` restores the imported Crystal
+> server's `SafeZoneBorder=True` presentation path. The Simulation default now
+> derives from generated `TrapHexagon` boundary objects instead of suppressing
+> them, while an explicit opt-out remains. The existing Windows persistent
+> effect renderer is source-bound to `Magic 1390..1399`, 100 ms frames and
+> authoritative removal; `inSafeZone` is also retained in the shared read
+> model. Full Simulation 1482/1482 and focused Windows/read-model tests pass.
+> Exact-head packaging, timed capture and human comparison are still required,
+> so this does not close global visual parity or authorize a percentage.
+
 > 2026-08-29 Windows-native user-observed visual/UI backlog: the current
 > native Candidate is explicitly not visually accepted. Recent side-by-side
 > user checks against Crystal confirm several still-open gaps that must remain

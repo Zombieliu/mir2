@@ -17,7 +17,7 @@ route, and human-visible result must all be accounted for.
 
 ```text
 branch: codex/windows-visual-parity
-recordedHead: 71ff4311941467f34554fe1ab6401948d122eb7a
+recordedHead: aae9c2c7e06dbceb6f6539c7b29eba63ece293c4
 globalParityPercent: null
 visualAccepted: false
 accepted: false
@@ -46,12 +46,12 @@ SHA-256 rather than assuming every image represents one build.
 
 | ID | Priority | Area | Crystal expectation | Current native status | Required closure evidence |
 | --- | --- | --- | --- | --- | --- |
-| WN-BOOT-001 | P1 | Login announcement | After entering the game, show the Crystal-style notice window with the configured body, frame, scrolling/link rules, and close flow. | User reports no popup after entering native. A separate unreviewed draft exists in another dirty worktree and is not accepted or part of this branch. | Source-bound trigger test, close/re-login test, exact same-EXE screenshot, and no duplicate popup in one session. |
+| WN-BOOT-001 | P1 | Login announcement | After entering the game, show the Crystal-style notice window with the configured body, frame, scrolling/link rules, and close flow. | User reports no popup after entering native. Current head still lacks a reviewed native in-game announcement presentation/trigger chain on this branch: login/shell notices exist, and chat can color `announcement`, but that is not the Crystal post-login notice window. A separate unreviewed draft exists in another dirty worktree and is not accepted or part of this branch. | Source-bound trigger test, close/re-login test, exact same-EXE screenshot, and no duplicate popup in one session. |
 | WN-BOOT-002 | P2 | Build identity | Candidate/test screens show sourced version, short Git commit, platform, and TEST/CANDIDATE marker; production uses the concise product version and no test marker. | Policy requested but not closed on this branch. | Build-metadata provenance test plus Candidate and production-shaped screenshots. |
 | WN-WORLD-001 | P0 | Map transfer | A destination map renders its own terrain/objects atomically and retains the self actor. | Type1 fixes are automated, but the user's earlier GroceryStore failure remains a failed observation until exact-Candidate retest. | Exact EXE identity, source/destination route, no stale pixels, correct local actor, and map-wide denominator expansion. |
 | WN-WORLD-002 | P1 | Raster sharpness and building solidity | Original pixels stay crisp at integer geometry; roofs/front cells have Crystal opacity, depth, and occlusion. | Global Bevy sampling is already nearest, so this is not closed by changing one sampler. User still sees softer buildings and weaker foreground volume. | Same viewport and DPI pair, integer-transform audit, front/middle layer count/depth assertions, and pixel-diff review. |
 | WN-WORLD-003 | P0 | Environmental animation | Tile, middle, and front animations advance with Crystal frame counts/ticks; lamp flames and fires visibly animate. | Current head includes a bounded implementation that parses Type100 tile-animation fields, expands complete tile/middle/front animation families, advances a 100 ms Crystal-compatible clock with per-family tick dwell, and holds the base frame when a packaged family is incomplete. Focused map-parser and runtime animation tests are green on this head; exact Candidate timed capture, additive/blend fidelity, full asset-family audit, soak, and human acceptance remain open. | Timed capture proving at least two source-correct frames, phase/tick unit tests, full visible animation-family residency, and soak stability. |
-| WN-WORLD-004 | P1 | Safe-zone presentation | Server-authoritative safe-zone state produces the Crystal visual indicator/effect at the correct tiles and clears on exit. | User reports it is absent. Data includes safe-zone state, but the native presentation/acceptance path is not closed. | Enter/leave boundary automation, false-positive test outside the zone, and same-EXE screenshot/video. |
+| WN-WORLD-004 | P1 | Safe-zone presentation | When the imported server enables `SafeZoneBorder`, Crystal keeps `TrapHexagon` world objects visible at boundary tiles while they remain in AOI; local `inSafeZone` changes independently on entry/exit. | Revision `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` removes the hard-coded false default and derives the switch from imported `TrapHexagon` manifest evidence, while preserving explicit opt-out. The Windows effect path already renders exact `Magic 1390..1399` frames at 100 ms and retains them until authoritative remove; `inSafeZone` now also reaches the shared read model. Simulation 1482/1482 and focused Windows/read-model tests pass. Exact-Candidate capture and human acceptance remain open. | Enter/leave state automation, AOI add/remove and scene-clear tests, exact same-EXE timed capture, and human comparison. |
 | WN-WORLD-005 | P1 | Lighting and foreground effects | Lamps, spell/world lights, roof darkness, additive pixels, and foreground ordering match Crystal without flattening the scene. | Static lighting exists, but the user comparison shows visible depth/effect drift and fire is static. | Source-bound light inventory, same-scene night/day captures, order assertions, and human review. |
 | WN-ACTOR-001 | P0 | Player animation integrity | Idle/walk/run/direction/composite layers remain coherent, do not flicker, and use Crystal cadence. | Several bounded fixes passed tests and the user later reported direction animation improved, but sustained-run flash/cadence and full action/class denominator remain open. | Long movement trace, frame-sequence assertions for every in-scope direction/action, same-EXE video, and human feel acceptance. |
 | WN-INPUT-001 | P0 | Ground movement | Left-click walk and held right-click run follow Crystal intent, marker, cadence, path, collision, and cancellation semantics. | User reported missing left-click walk, held-run behavior, and continued stutter across earlier Candidates; only bounded paths are automated. | Pointer event matrix, packet/ACK timing trace, collision/release cases, and five-minute live loop. |
@@ -105,3 +105,19 @@ their listed evidence exists.
 When a bounded item above is implemented, update this backlog together with the
 more specific VIS report for that leaf and keep unresolved items listed until
 they have both automated evidence and human acceptance where required.
+
+## Current branch-head architecture notes
+
+- `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` still carries an unrelated dirty
+  `apps/game-client/client-bevy/src/crystal_ui/overlays.rs` inventory-expansion
+  draft. It is not closure evidence for any backlog item above and should be
+  preserved while adjacent parity work proceeds.
+- Safe-zone status and source settings are no longer speculative: the world
+  snapshot carries `in_safe_zone`, the imported manifest contains the boundary
+  `TrapHexagon` objects produced by this project's `SafeZoneBorder=True`, and
+  the Windows renderer already owns the exact persistent effect loop. The
+  remaining `WN-WORLD-004` gates are exact-Candidate/live/human evidence, not a
+  claim that all safe-zone semantics or visuals are globally accepted.
+- Login announcement closure is also no longer speculative on this branch:
+  native login/shell notices and chat announcement coloring exist, but they are
+  not yet the Crystal in-game announcement dialog that `WN-BOOT-001` requires.

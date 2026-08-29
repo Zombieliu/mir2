@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> Windows safe-zone server-client note (2026-08-29): revision
+> `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` preserves existing safe-zone
+> authority and packet shapes, but removes a configuration mismatch: the
+> imported Crystal server has `SafeZoneBorder=True`, its generated map data
+> contains persistent `TrapHexagon` boundary objects, and Simulation now emits
+> them by default instead of hard-coding the option off. Explicit disable is
+> still supported. Windows consumes the existing `ObjectSpell` lifecycle and
+> exact `Magic 1390..1399` animation; `inSafeZone` reaches the shared read
+> model. Full Simulation 1482/1482 and focused client tests pass. Same-EXE and
+> human visual acceptance remain open, with no server/global percentage claim.
+
 > Windows pointer/NPC/motion server-client note (2026-08-29): revision
 > `4d035489a966d827ef5aa49567d4b53bf344d2a7` adds no server packet or
 > authority. Cursor states and the right-click NewMove marker are exact

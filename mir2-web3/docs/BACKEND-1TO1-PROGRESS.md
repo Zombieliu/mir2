@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> Windows safe-zone source-setting checkpoint (2026-08-29): revision
+> `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` changes no safe-zone geometry,
+> combat authority or packet shape. It fixes the configuration boundary that
+> suppressed generated `TrapHexagon` objects even though this project's
+> imported Crystal setup enables `SafeZoneBorder`. The default now follows
+> imported manifest evidence, explicit opt-out remains, and authoritative
+> `inSafeZone` is retained by the shared client read model. Full Simulation
+> 1482/1482 and focused Windows/read-model tests pass. Exact Candidate and
+> human visual acceptance remain frontend gates; no backend/global percentage
+> is claimed.
+
 > Windows pointer/NPC/motion client-boundary checkpoint (2026-08-29): revision
 > `4d035489a966d827ef5aa49567d4b53bf344d2a7` changes no simulation, Zone,
 > Gateway, packet, persistence, combat or movement authority. The self-motion
