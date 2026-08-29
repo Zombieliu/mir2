@@ -17,7 +17,7 @@ route, and human-visible result must all be accounted for.
 
 ```text
 branch: codex/windows-visual-parity
-recordedHead: 182485d24a0645a9034a5eaefdcccaa180b9d4b2
+recordedHead: dd3179559c74756d15c4cbf2c712cb659437d1cb
 globalParityPercent: null
 visualAccepted: false
 accepted: false
@@ -27,6 +27,23 @@ nativeThirtyMinuteSoakClosed: false
 humanVisualAudioFeelClosed: false
 formalPublisherSigningClosed: false
 ```
+
+## Latest implemented checkpoint
+
+Revision `dd3179559` closes the bounded automated part of `WN-INPUT-003` that
+was known to contradict Crystal source. Native NPC left click now sends an
+immediate interaction without auto-walking; Simulation owns the visible-NPC
+square DataRange 16 decision for initial/follow-up/quest operations, rejects 17,
+does not force a turn, and accepts `[@MAIN]`. The client also applies Crystal's
+same-object five-second guard. Simulation 1485/1485, Gateway 664 active plus one
+ignored, Windows 484/484 and ordinary Candidate loop 2/2 pass.
+
+This is not visual or playable acceptance. The currently running Candidate is
+still based on `4fc98ecc4`, so no screenshot or user observation is attributed
+to `dd3179559`. Exact response-reset timing, blocked/removed NPC lifecycle,
+same-EXE dialog capture and human feel remain in the denominator. The absent
+daily-blue `Prguse 991..994` PNGs were not replaced with placeholders and were
+not falsely added to the package-required gate.
 
 ## User evidence captured in this round
 
@@ -56,7 +73,7 @@ SHA-256 rather than assuming every image represents one build.
 | WN-ACTOR-001 | P0 | Player animation integrity | Idle/walk/run/direction/composite layers remain coherent, do not flicker, and use Crystal cadence. | Several bounded fixes passed tests and the user later reported direction animation improved, but sustained-run flash/cadence and full action/class denominator remain open. | Long movement trace, frame-sequence assertions for every in-scope direction/action, same-EXE video, and human feel acceptance. |
 | WN-INPUT-001 | P0 | Ground movement | Left-click walk and held right-click run follow Crystal intent, marker, cadence, path, collision, and cancellation semantics. | User reported missing left-click walk, held-run behavior, and continued stutter across earlier Candidates; only bounded paths are automated. | Pointer event matrix, packet/ACK timing trace, collision/release cases, and five-minute live loop. |
 | WN-INPUT-002 | P0 | Monster targeting/combat cursor | Monster hover changes to the correct cursor/highlight; click approaches and attacks with authoritative range rules. | Some cursor leaves exist, but the user reports live mouse combat is not complete. | Empty/NPC/monster/dead-target cursor matrix and real attack/approach outcome assertions. |
-| WN-INPUT-003 | P0 | NPC hover/interact | NPC cursor, approach, range, single-open behavior, dialog, and cancellation mirror Crystal. | Current code already has a bounded left-click NPC flow: a distant click enters `pending_npc_interaction`, sends one authoritative Walk/Run intent at a time, waits for ACK/snapshot progress, and emits exactly one existing `InteractNpc` intent after the player reaches an adjacent tile; dialog open, notice open, focus loss, timeout, or NPC disappearance cancel the pending action. Native hover also preserves NPC clickability when transient body-alpha pixels are unavailable by falling back to NPC body bounds only; monster targeting stays fail-closed. The simulation still distinguishes NPC visibility/service range (`CRYSTAL_DATA_RANGE`) from the Rust dialog-open adjacency gate (`<= 1` tile), so exact Crystal `DataRange` open semantics, live dialog capture, and human retest remain open. | Near/far/blocked/double-click tests plus exact dialog screenshot and no duplicate request. |
+| WN-INPUT-003 | P0 | NPC hover/interact | NPC cursor, request timing, range, single-open behavior, dialog, and cancellation mirror Crystal. | Revision `dd3179559` removes the invented auto-approach/adjacency path. A visible NPC click immediately queues `CallNPC [@Main]` without Walk/Run; Simulation applies one visibility-aware square DataRange 16 gate to open/follow-up/quest operations, does not force a turn, and Windows applies the same-object five-second guard. Boundary, shared-authority and full crate tests pass. Exact response-reset timing, blocked/removed NPC lifecycle, same-EXE dialog capture and human retest remain open. | Near/far/blocked/removed/double-click tests, exact response-reset transcript, same-EXE dialog screenshot and no duplicate request. |
 | WN-QUEST-001 | P0 | Quest availability/turn-in markers | NPCs show source-correct `!`, `?`, or equivalent Crystal marker states for available, active/incomplete, and ready-to-turn-in quests; markers update without relog. | Simulation now emits a per-character authoritative Crystal `questIcon`, keeps it out of shared Zone state, and Gateway reapplies it per requesting session. Selection follows Crystal's current-quest-first insertion order and exact start/finish NPC, level, class and prerequisite gates; the former invented status priority is removed. Windows maps all seven Crystal discriminants and 500 ms frame formula, retains the marker across partial NPC packets, and passes a fresh q1 Jane `!` -> Jude `?` -> next-q2 `!` transition plus 483/483 native tests. Marker placement now consumes each NPC standing-body frame-zero width and source offsets with Crystal's exact `/2 - 28, -40` formula, and remains visible when `NameView` is off. Candidate gates require the resident yellow/white/green frames. Same-EXE anchor/transitions, daily-blue source frames `991..994`, complete live transitions, occlusion/z-order, and human acceptance remain open. | State-transition matrix, NPC/object binding test, same-EXE body-anchor and occlusion/z-order acceptance, source closure for daily blue frames, focused Windows overlay tests, and same-EXE captures for every state. |
 | WN-QUEST-002 | P0 | Quest end-to-end flow | Discover -> NPC dialog -> accept -> objective progress -> tracker -> completion -> turn-in -> reward/persistence works for the audited quest set. | The backend denominator is materially stronger than the current native feel suggests: simulation already carries explicit NPC dialog links plus deterministic `@quest:accept:*` / `@quest:finish:*` coverage across starter and broader quest loops, and native already has `QuestTracker`, `NpcDialogModel`, typed `AcceptQuest` / `FinishQuest` forwarding, and pending-operation de-duplication. What remains open is the Windows-native closure of that chain under the same exact EXE the user plays: dialog entry reliability, live marker/state transitions, tracker/diary visibility, reward selection, reconnect/save recovery, and human play validation across an explicitly bounded quest set. | Source-derived quest inventory, deterministic end-to-end tests, reconnect/save recovery, multi-session correctness where applicable, and human play pass. |
 | WN-QUEST-003 | P1 | Quest diary/tracker/map guidance | Quest button, diary tabs, objective text, navigation hints, target/map markers, abandon/share rules, and empty/error states match Crystal. | Partial panels/models exist and many local/typed leaves are implemented, but the visible quest diary/tracker/navigation experience is not accepted. Current branch evidence shows the backlog must distinguish real missing behavior from unrelated dirty work: the present unstaged `crystal_ui/overlays.rs` draft is inventory-expansion UI, not quest guidance closure evidence. | Per-control behavior matrix, known quest snapshots, map/NPC link tests, and same-EXE screenshots. |
@@ -124,7 +141,8 @@ they have both automated evidence and human acceptance where required.
   span fidelity, persistent `LastUpdate > LastLogoutDate` semantics, and human
   acceptance remain open, so `WN-BOOT-001` is implemented but not accepted.
 - NPC/quest interaction implementation is also no longer speculative on this
-  branch: Windows already owns an authoritative approach-then-interact bridge,
-  while simulation exports `questIds`, typed quest dialog targets, and
-  deterministic accept/finish flows. Remaining Windows quest items are closure
-  and parity gates, not proof that no quest chain exists.
+  branch: Windows now emits the source-shaped immediate request and Simulation
+  owns the common visible-NPC DataRange gate, while `questIds`, typed quest
+  dialog targets, and deterministic accept/finish flows remain available.
+  Remaining Windows quest items are closure and parity gates, not proof that no
+  quest chain exists.

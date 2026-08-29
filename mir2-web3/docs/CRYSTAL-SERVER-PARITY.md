@@ -1,5 +1,20 @@
 # Crystal Server Parity
 
+> Windows NPC click/DataRange server-client note (2026-08-29): revision
+> `dd3179559` is source-bound to Crystal `GameScene.OnMouseClick` and
+> `PlayerObject.CallNPC`. Windows sends `CallNPC [@Main]` immediately for a
+> visible NPC, does not auto-walk, and suppresses repeated clicks on the same
+> object for five seconds. Server interaction, active dialog actions and quest
+> accept/finish all use the same NPC existence, character visibility and square
+> `Globals.DataRange=16` gate; 16 is accepted, 17 is rejected, `[@MAIN]` parses,
+> and no interaction-only turn packet is generated. Gateway still synchronizes
+> the authoritative shared-Zone transform before executing these personal
+> session operations. Simulation 1485/1485, Gateway 664 active plus one ignored,
+> Windows 484/484 and ordinary Candidate loop 2/2 pass. Exact response-reset
+> timing, full NPC/quest side-effect ownership, distributed persistence,
+> same-EXE/live-WSS, DPI/soak/human and signing denominators remain open; no
+> server/global percentage is reported.
+
 > Windows NPC quest-marker server/client note (2026-08-29; follow-on over
 > revision `630dd957e0f5dcbee6e03e366efe6f82c20b8484`): server-owned personal quest
 > state now selects Crystal's exact `QuestIcon` discriminant and exposes it in

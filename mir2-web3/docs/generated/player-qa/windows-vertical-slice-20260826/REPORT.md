@@ -12,6 +12,20 @@ exact attested Release EXE and one exact nonvisual Candidate package. It does
 not certify global Crystal parity, strict Windows Candidate 100%, or a
 human-accepted release.
 
+## Post-Candidate follow-on (not part of this artifact binding)
+
+The later Windows visual-parity revision `dd3179559` aligns NPC click and
+dialog/quest range semantics with Crystal source: immediate `CallNPC [@Main]`,
+no invented approach movement or forced turn, a visibility-aware square
+DataRange 16 server gate, bracketed-main compatibility and a same-object
+five-second client guard. Simulation 1485/1485, Gateway 664 active tests plus
+one ignored, Windows 484/484 and `ordinary_candidate_loop` 2/2 pass.
+
+This follow-on does not modify or re-attest `WN-CANDIDATE-03-20260826`; a new
+exact-head EXE/package and same-EXE human test are required before attributing
+the behavior to a Candidate. Full NPC/quest semantics and all global device,
+soak, human, legal-asset and publisher-signing gates remain open.
+
 ## Passed functional evidence
 
 | Gate | Result | Meaning |

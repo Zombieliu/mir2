@@ -1,5 +1,25 @@
 # Agent Task Queue
 
+> Windows-native NPC click/DataRange follow-up (2026-08-29): revision
+> `dd3179559` replaces the native adjacent-auto-approach compatibility bridge
+> with the behavior verified directly from Crystal `GameScene.OnMouseClick`
+> and `PlayerObject.CallNPC`. A visible NPC left click now sends one immediate
+> `CallNPC [@Main]`, never invents movement and applies Crystal's same-object
+> five-second click guard. Simulation uses one visibility-aware square
+> `Globals.DataRange=16` gate for dialog open, dialog links/inputs and quest
+> accept/finish; distance 16 succeeds, 17 rejects, and interaction no longer
+> forces an `ObjectTurn`. Shared Gateway command-boundary transform sync remains
+> authoritative, and bracketed `[@MAIN]` is accepted. Simulation 1485/1485,
+> Gateway 664 active tests plus one ignored, Windows 484/484 and ordinary
+> Candidate loop 2/2 pass. The existing VIS-01 actor transcript also had two
+> previously added fixture events (Scarecrow Walk/Revived) missing from its
+> Gateway typed-packet vector; that stale test mirror is synchronized here.
+> This is not yet a new exact-head Candidate or human dialog acceptance: the
+> currently running `4fc98ecc4` EXE predates this revision. Crystal's exact
+> response-time guard reset, authenticated same-EXE live WSS, DPI, soak, human
+> visual/feel, full quest/NPC denominator and signing gates remain open;
+> `globalParityPercent=null`.
+
 > Windows-native VIS-03/VIS-01 user-observed UI and render backlog
 > (2026-08-29): recent direct Crystal-vs-native user checks must be treated as
 > active open scope, not polish. The current native Candidate still lacks or

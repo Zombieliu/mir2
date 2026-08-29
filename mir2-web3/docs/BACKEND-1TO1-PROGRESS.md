@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> Windows NPC DataRange backend checkpoint (2026-08-29): revision
+> `dd3179559` removes the Rust-only one-tile dialog gate. Initial interaction,
+> active-dialog links/inputs and quest accept/finish now share the existing
+> Crystal-visible NPC check and square `Globals.DataRange=16` boundary. The
+> server no longer turns the player as an interaction side effect and accepts
+> the wire-compatible bracketed `[@MAIN]` key. Gateway continues to project the
+> shared Zone authoritative transform into the personal session before NPC or
+> quest execution, with stale-private-position tests moved beyond DataRange.
+> Simulation 1485/1485, Gateway 664 active plus one ignored and ordinary
+> Candidate loop 2/2 pass; Windows 484/484 verifies immediate client request,
+> no invented movement and same-object click suppression. This does not make
+> NPC/quest state Zone-native or distributed, and it does not close full quest
+> semantics, persistence/failure/repeatability, live-WSS or human/device gates.
+> No backend/global percentage is claimed.
+
 > Windows NPC quest-marker server/client checkpoint (2026-08-29; follow-on
 > over revision `630dd957e0f5dcbee6e03e366efe6f82c20b8484`): the personal Simulation
 > snapshot now carries an optional exact Crystal `questIcon`. Selection follows

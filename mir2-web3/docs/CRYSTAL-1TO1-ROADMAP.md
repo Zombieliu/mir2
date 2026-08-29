@@ -1,5 +1,22 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows NPC click/DataRange checkpoint (2026-08-29): revision
+> `dd3179559` follows the Crystal client/server source boundary instead of the
+> former native auto-approach shim. Windows emits immediate `CallNPC [@Main]`
+> without Walk/Run, preserves Crystal's same-NPC five-second click guard, and
+> leaves rejection to server authority. Simulation centralizes NPC existence,
+> per-character/global visibility and Chebyshev `DataRange=16` in one gate used
+> by initial dialog, follow-up links/inputs and quest accept/finish. Boundary
+> tests prove 16 accepted/17 rejected, no forced player turn and bracketed
+> `[@MAIN]` compatibility; shared Gateway tests retain Zone-authoritative
+> command-boundary transforms. Simulation 1485/1485, Gateway 664 active plus
+> one ignored, Windows 484/484 and ordinary Candidate loop 2/2 pass. No exact
+> `dd3179559` EXE has yet been packaged or human-tested. Complete NPC/quest
+> flows, exact response-reset timing, daily-blue marker source frames
+> `Prguse 991..994`, same-EXE/live-WSS, DPI, soak, human acceptance, legal asset
+> closure and signing remain open. No visual, whole-game or global percentage
+> is claimed; `globalParityPercent=null`.
+
 > Latest Windows NPC quest-marker authority/anchor checkpoint (2026-08-29;
 > follow-on over revision `630dd957e0f5dcbee6e03e366efe6f82c20b8484`): Simulation now
 > computes the exact Crystal `QuestIcon` per character using current-quest-first
