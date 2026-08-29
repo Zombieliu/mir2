@@ -396,12 +396,7 @@ fn position_crystal_hint_overlay(
         return;
     }
     let logical_size = computed.size() * computed.inverse_scale_factor;
-    let position = crystal_hint_position_for_bounds(
-        style.0,
-        cursor,
-        logical_size,
-        bounds,
-    );
+    let position = crystal_hint_position_for_bounds(style.0, cursor, logical_size, bounds);
     let desired_left = Val::Px(position.x);
     let desired_top = Val::Px(position.y);
     if node.left != desired_left {

@@ -22,11 +22,9 @@ use super::notice::NoticeDialogState;
 use super::overlays::{NativePlayerUiSet, NativePlayerUiState};
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
-use super::widget::{
-    spawn_crystal_image_button, CrystalHint, Mir2CrystalHintPlugin,
-};
 #[cfg(test)]
 use super::widget::CrystalHintStyle;
+use super::widget::{spawn_crystal_image_button, CrystalHint, Mir2CrystalHintPlugin};
 
 const WHITE: Color = Color::WHITE;
 pub(crate) const HUD_Z_INDEX: i32 = 950;
@@ -1759,10 +1757,7 @@ fn update_hud_minimap_visibility(
         .as_deref()
         .map(|s| s.minimap_visible())
         .unwrap_or(true);
-    let expanded = minimap_is_expanded(
-        preferred_expanded,
-        ui_model.player.map_name.as_deref(),
-    );
+    let expanded = minimap_is_expanded(preferred_expanded, ui_model.player.map_name.as_deref());
     let expanded_display = if in_game && expanded {
         Display::Flex
     } else {
@@ -2218,8 +2213,13 @@ mod tests {
             .init_resource::<NoticeDialogState>()
             .init_resource::<ButtonInput<KeyCode>>()
             .add_systems(Update, toggle_belt_from_keyboard);
-        app.world_mut()
-            .spawn((Window { focused: true, ..default() }, PrimaryWindow));
+        app.world_mut().spawn((
+            Window {
+                focused: true,
+                ..default()
+            },
+            PrimaryWindow,
+        ));
         {
             let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
             keys.press(KeyCode::KeyZ);

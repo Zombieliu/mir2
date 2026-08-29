@@ -43,11 +43,10 @@ pub struct Mir2CrystalMiniMapPlugin;
 
 impl Plugin for Mir2CrystalMiniMapPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_crystal_minimap)
-            .add_systems(
-                Update,
-                render_crystal_minimap.after(NativePlayerUiSet::Mutate),
-            );
+        app.add_systems(Startup, spawn_crystal_minimap).add_systems(
+            Update,
+            render_crystal_minimap.after(NativePlayerUiSet::Mutate),
+        );
     }
 }
 
