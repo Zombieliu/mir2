@@ -5215,7 +5215,10 @@ export default function HomePage() {
 
   function crystalBootstrapLineMessage() {
     const params = new URLSearchParams(window.location.search);
-    return params.get("crystalLineMessage")?.trim() || "www.LOMCN.net";
+    return (
+      params.get("crystalLineMessage")?.trim() ||
+      "Welcome to the Legend of Mir 2 Server."
+    );
   }
 
   function crystalBootstrapVisibleChatLines(

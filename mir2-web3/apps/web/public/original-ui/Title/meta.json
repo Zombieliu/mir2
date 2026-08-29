@@ -596,6 +596,48 @@
       "maskPath": null
     },
     {
+      "index": 193,
+      "width": 68,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Title/193.png",
+      "maskPath": null
+    },
+    {
+      "index": 194,
+      "width": 68,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Title/194.png",
+      "maskPath": null
+    },
+    {
+      "index": 195,
+      "width": 68,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Title/195.png",
+      "maskPath": null
+    },
+    {
       "index": 196,
       "width": 316,
       "height": 236,

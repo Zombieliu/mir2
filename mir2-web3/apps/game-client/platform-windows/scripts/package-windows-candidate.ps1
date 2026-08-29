@@ -743,13 +743,14 @@ try {
  foreach ($cursorName in @('Cursor_Default.png','Cursor_Normal_Atk.png','Cursor_Compulsion_Atk.png','Cursor_Npc.png')) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Cursors\' + $cursorName)) }
  foreach ($index in @(1900..1914) + @(1960..1962)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
  foreach ($index in 826..828) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
+ foreach ($index in @(961)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
  foreach ($soundName in $playerCombatSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }
  foreach ($soundName in $monsterCombatSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }
  foreach ($soundName in $frostCrunchSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }
  foreach ($soundName in $hallucinationSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }
- foreach ($index in @(197,205,207,360,431,1340,1350) + @(450..468)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse2\$index.png") }
+ foreach ($index in @(197,205,206,207,360,361,362,431,1340,1350) + @(450..468) + @(470..475)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse2\$index.png") }
  foreach ($index in @(0..41)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Help\$index.png") }
- foreach ($index in @(57,168,169,196,197,198,411,567,633,634,635,636,637,638,737,738,739,820,821,822,823,824,827,848,850,851,853)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Title\$index.png") }
+ foreach ($index in @(57,168,169,193,194,195,196,197,198,411,567,633,634,635,636,637,638,737,738,739,820,821,822,823,824,827,848,850,851,853)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Title\$index.png") }
  foreach ($index in @(1,920,1903,1904,1905,1970,1973,1976,1979,1982,1985,1988,1991,1992,1993,1994,1995,1996,2000,2090,2096,2097,2098)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
  foreach ($index in @(0..9) + @(170..179)) { $requiredSources += (Join-Path $PublicRoot "original-effects\Magic\$index.png") }
  foreach ($index in @(200..209) + @(370..379)) { $requiredSources += (Join-Path $PublicRoot "original-effects\Magic\$index.png") }

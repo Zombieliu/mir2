@@ -3364,6 +3364,15 @@ impl SimulationSession {
                 chat_type: ChatType::Hint,
             },
         ];
+        if let Some(notice) = config
+            .login_notice
+            .as_ref()
+            .filter(|notice| !notice.message.trim().is_empty())
+        {
+            packets.push(ServerPacket::UpdateNotice {
+                notice: notice.clone(),
+            });
+        }
         packets.extend(start_game_item_info_packets(
             resources,
             &mut sent_item_info_indices,

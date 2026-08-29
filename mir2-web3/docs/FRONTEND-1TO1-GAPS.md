@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-29
 
+> 2026-08-29 Windows native login-notice implementation checkpoint: Crystal
+> runtime `StartGame` now emits a project-owned `UpdateNotice` only after a
+> successful gameplay entry; Gateway preserves the typed `{notice}` envelope;
+> the Windows adapter retains a monotonic connection-scoped update; and native
+> Bevy renders the source-sized `Prguse/961` panel with original close, scroll,
+> position-bar, and OK assets. Focused Simulation, Gateway, protocol, adapter,
+> and UI-state tests pass. Default startup chat fallbacks no longer inject the
+> unrelated LOMCN/Suprcode/JevLomcn/Net.8 copy previously seen by the user.
+> This is implementation evidence, not visual acceptance: exact same-EXE
+> capture, clickable/color span fidelity, persistent Crystal
+> `LastUpdate > LastLogoutDate` behavior, DPI, soak, and human acceptance remain
+> open.
+
 > 2026-08-29 Windows safe-zone regression repair checkpoint: revision
 > `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` restores the imported Crystal
 > server's `SafeZoneBorder=True` presentation path. The Simulation default now
@@ -17,7 +30,8 @@ Last updated: 2026-08-29
 > native Candidate is explicitly not visually accepted. Recent side-by-side
 > user checks against Crystal confirm several still-open gaps that must remain
 > tracked as unfinished work instead of being implied complete by narrower
-> automated leaves. Open items now include: no login-to-game notice popup;
+> automated leaves. Open items now include: an implemented but not yet
+> exact-Candidate-accepted login-to-game notice popup;
 > missing safe-zone indicator; substantial HUD/chat/button/layout drift versus
 > Crystal; missing or incomplete hover tooltips on the right-side function
 > strip, bottom-right action buttons, chat mini-buttons and inventory/item UI;

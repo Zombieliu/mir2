@@ -21,8 +21,8 @@ use mir2_game_data::{
     SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
-    ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, ObjectPlayerInfo,
-    Point, SelectInfo, Spell, UserItem, UserItemStat,
+    ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Notice,
+    ObjectPlayerInfo, Point, SelectInfo, Spell, UserItem, UserItemStat,
 };
 use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
 use rand_core::{OsRng, RngCore};
@@ -3344,6 +3344,20 @@ pub fn account_is_env_gm(account_id: &str) -> bool {
         .unwrap_or(false)
 }
 
+fn default_crystal_login_notice() -> Notice {
+    Notice {
+        title: "Welcome to Legend of Mir 2".to_owned(),
+        message: [
+            "Welcome to the Legend of Mir 2 Server.",
+            "",
+            "This is a development Candidate build.",
+            "Gameplay, data, and presentation may change during development.",
+            "Please include the build identifier when reporting a problem.",
+        ]
+        .join("\r\n"),
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
     pub map: MapInformation,
@@ -3375,6 +3389,12 @@ pub struct SimulationConfig {
     /// runtime switch so deployments can disable the decoration without
     /// confusing it with player-cast TrapHexagon `ObjectSpell` packets.
     pub safe_zone_border_effects: bool,
+    /// Login-time Crystal notice delivered only after a successful StartGame.
+    ///
+    /// This is deliberately project-owned configuration. The imported Crystal
+    /// sample `Notice.txt` contains third-party release-site advertising and
+    /// must never become our default player-facing content by accident.
+    pub login_notice: Option<Notice>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub mine_zones: Vec<MineZoneRecord>,
     /// On-chain mine veins (M4) — render-only mappings, disjoint from `mine_zones`.
@@ -3420,6 +3440,20 @@ impl Default for SimulationConfig {
 }
 
 impl SimulationConfig {
+    /// Replace the project-owned login notice with deployment-specific text.
+    /// Empty messages are retained in configuration but fail closed at the
+    /// StartGame packet boundary and are not sent to clients.
+    pub fn with_login_notice(mut self, notice: Notice) -> Self {
+        self.login_notice = Some(notice);
+        self
+    }
+
+    /// Explicitly disable the login notice after applying a runtime profile.
+    pub fn without_login_notice(mut self) -> Self {
+        self.login_notice = None;
+        self
+    }
+
     /// Clone the runtime configuration while giving it an independent account
     /// store and persistence lock. Zone checkpoint replay uses this to ensure
     /// every full-journal replay starts from the same baseline instead of a
@@ -3542,6 +3576,7 @@ impl SimulationConfig {
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             safe_zone_border_effects: imported_safe_zone_border_enabled(&scene.map.file_name),
+            login_notice: None,
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
             onchain_mine_nodes: Vec::new(),
@@ -3789,6 +3824,9 @@ impl SimulationConfig {
         self.visible_monsters.clear();
         self.visible_npcs.clear();
         self.map_hazards = crystal_map_hazard_records();
+        if self.login_notice.is_none() {
+            self.login_notice = Some(default_crystal_login_notice());
+        }
         apply_crystal_map_metadata(&mut self.map);
         if let Some(start_point) = crystal_map_respawns_by_file_name(&self.map.file_name)
             .and_then(|map| map.safe_zones.into_iter().find(|zone| zone.start_point))

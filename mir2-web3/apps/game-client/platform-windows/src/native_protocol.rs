@@ -708,6 +708,12 @@ pub struct AllowObserve {
     pub allow: bool,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UpdateNotice {
+    pub title: String,
+    pub message: String,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum PacketEvent {
     NewAccountResult(NewAccountResult),
@@ -730,6 +736,7 @@ pub enum PacketEvent {
     MapChanged(MapIdentity),
     UserLocation(UserLocation),
     AllowObserve(AllowObserve),
+    UpdateNotice(UpdateNotice),
     Disconnect(Disconnect),
     Other { packet: String, payload: Value },
     WorldSnapshot(WorldSnapshot),
@@ -993,6 +1000,7 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
                 AllowObserve { allow },
             )))
         }
+        "UpdateNotice" => parse_update_notice(payload),
         "Disconnect" => Ok(InboundEvent::Packet(PacketEvent::Disconnect(Disconnect {
             reason: payload
                 .get("reason")
@@ -1005,6 +1013,31 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
             payload,
         })),
     }
+}
+
+fn parse_update_notice(payload: Value) -> Result<InboundEvent, ParseInboundError> {
+    let notice = payload
+        .get("notice")
+        .ok_or_else(|| ParseInboundError::MissingEnvelopeField {
+            field: "UpdateNotice.notice",
+            detail: "notice object is required".to_owned(),
+        })?;
+    let title = notice
+        .get("title")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_owned();
+    let message = notice
+        .get("message")
+        .and_then(Value::as_str)
+        .ok_or_else(|| ParseInboundError::MissingEnvelopeField {
+            field: "UpdateNotice.notice.message",
+            detail: "message must be a string".to_owned(),
+        })?
+        .to_owned();
+    Ok(InboundEvent::Packet(PacketEvent::UpdateNotice(
+        UpdateNotice { title, message },
+    )))
 }
 
 fn parse_new_map_info(payload: Value) -> Result<InboundEvent, ParseInboundError> {
@@ -2108,6 +2141,40 @@ mod tests {
             }
             _ => panic!("expected complete quest"),
         }
+    }
+
+    #[test]
+    fn inbound_update_notice_preserves_authoritative_text_and_rejects_bad_shape() {
+        let parsed = parse_inbound_event(
+            r#"{
+            "type":"packet",
+            "packet":"UpdateNotice",
+            "payload":{"notice":{"title":"Welcome","message":"Line 1\r\nLine 2"}}
+        }"#,
+        )
+        .expect("parse update notice");
+        assert_eq!(
+            parsed,
+            InboundEvent::Packet(PacketEvent::UpdateNotice(UpdateNotice {
+                title: "Welcome".to_owned(),
+                message: "Line 1\r\nLine 2".to_owned(),
+            }))
+        );
+
+        let missing_message = parse_inbound_event(
+            r#"{
+            "type":"packet",
+            "packet":"UpdateNotice",
+            "payload":{"notice":{"title":"Welcome"}}
+        }"#,
+        );
+        assert!(matches!(
+            missing_message,
+            Err(ParseInboundError::MissingEnvelopeField {
+                field: "UpdateNotice.notice.message",
+                ..
+            })
+        ));
     }
 
     #[test]

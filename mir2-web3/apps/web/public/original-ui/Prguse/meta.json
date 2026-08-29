@@ -988,6 +988,20 @@
       "maskPath": null
     },
     {
+      "index": 961,
+      "width": 316,
+      "height": 466,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse/961.png",
+      "maskPath": null
+    },
+    {
       "index": 983,
       "width": 28,
       "height": 29,

@@ -9,6 +9,7 @@ use bevy::prelude::{
     Resource, Window, With,
 };
 use bevy::window::{CursorIcon, CustomCursor, CustomCursorImage, PrimaryWindow};
+use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
@@ -78,6 +79,7 @@ pub(crate) fn sync_native_crystal_cursor(
     keys: Res<ButtonInput<KeyCode>>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
@@ -100,6 +102,7 @@ pub(crate) fn sync_native_crystal_cursor(
         && shell
             .as_deref()
             .is_some_and(|shell| shell.screen == NativeShellScreen::InGame)
+        && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
         && !is_world_click_blocked(player_ui.as_deref(), dialog_open, dead);
 
     let hovered_kind = world_cursor_enabled

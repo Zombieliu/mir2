@@ -1,6 +1,6 @@
 {
   "sourceKind": "external-crystal-client-data",
-  "exportedAt": "2026-08-28T00:58:37.755Z",
+  "exportedAt": "2026-08-29T04:23:22.199Z",
   "libraries": {
     "CArmour/00": {
       "version": 2,
@@ -337174,6 +337174,20 @@
           "maskPath": null
         },
         {
+          "index": 961,
+          "width": 316,
+          "height": 466,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse/961.png",
+          "maskPath": null
+        },
+        {
           "index": 983,
           "width": 28,
           "height": 29,
@@ -340517,6 +340531,90 @@
           "maskPath": null
         },
         {
+          "index": 470,
+          "width": 12,
+          "height": 12,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse2/470.png",
+          "maskPath": null
+        },
+        {
+          "index": 471,
+          "width": 12,
+          "height": 12,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse2/471.png",
+          "maskPath": null
+        },
+        {
+          "index": 472,
+          "width": 12,
+          "height": 12,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse2/472.png",
+          "maskPath": null
+        },
+        {
+          "index": 473,
+          "width": 12,
+          "height": 12,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse2/473.png",
+          "maskPath": null
+        },
+        {
+          "index": 474,
+          "width": 12,
+          "height": 12,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse2/474.png",
+          "maskPath": null
+        },
+        {
+          "index": 475,
+          "width": 12,
+          "height": 12,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse2/475.png",
+          "maskPath": null
+        },
+        {
           "index": 1340,
           "width": 32,
           "height": 30,
@@ -341211,6 +341309,48 @@
           "maskWidth": null,
           "maskHeight": null,
           "path": "/original-ui/Title/169.png",
+          "maskPath": null
+        },
+        {
+          "index": 193,
+          "width": 68,
+          "height": 25,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Title/193.png",
+          "maskPath": null
+        },
+        {
+          "index": 194,
+          "width": 68,
+          "height": 25,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Title/194.png",
+          "maskPath": null
+        },
+        {
+          "index": 195,
+          "width": 68,
+          "height": 25,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Title/195.png",
           "maskPath": null
         },
         {

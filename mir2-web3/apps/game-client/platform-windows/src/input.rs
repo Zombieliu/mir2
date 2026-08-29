@@ -8,6 +8,7 @@
 use bevy::input::ButtonInput;
 use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Time, Window, With};
 use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
+use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::inventory::InventoryModel;
@@ -307,12 +308,16 @@ fn window_is_focused(windows: &Query<&Window>) -> bool {
 fn gameplay_input_enabled(
     shell: Option<&NativeShellModel>,
     player_ui: Option<&NativePlayerUiState>,
+    notice: Option<&NoticeDialogState>,
     windows: &Query<&Window>,
 ) -> bool {
     if !window_is_focused(windows) {
         return false;
     }
     if !shell.is_some_and(|shell| shell.screen == NativeShellScreen::InGame) {
+        return false;
+    }
+    if notice.is_some_and(NoticeDialogState::is_open) {
         return false;
     }
     if is_world_click_blocked(player_ui, false, false) {
@@ -737,6 +742,7 @@ pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
@@ -923,7 +929,9 @@ pub fn mouse_world_interaction_system(
     let dead = ui_read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
-    if is_world_click_blocked(player_ui.as_deref(), dialog_open, dead) {
+    if notice.as_deref().is_some_and(NoticeDialogState::is_open)
+        || is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
+    {
         movement.stop_hold(now_ms, "worldInputBlocked");
         movement.cancel_npc_approach();
         return;
@@ -1145,6 +1153,7 @@ pub fn keyboard_walk_system(
     commands: Res<GatewayCommands>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     windows: Query<&Window>,
 ) {
     if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
@@ -1159,7 +1168,12 @@ pub fn keyboard_walk_system(
             );
         }
     }
-    if !gameplay_input_enabled(shell.as_deref(), player_ui.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        player_ui.as_deref(),
+        notice.as_deref(),
+        &windows,
+    ) {
         return;
     }
     if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
@@ -1180,9 +1194,15 @@ pub fn keyboard_run_system(
     commands: Res<GatewayCommands>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     windows: Query<&Window>,
 ) {
-    if !gameplay_input_enabled(shell.as_deref(), player_ui.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        player_ui.as_deref(),
+        notice.as_deref(),
+        &windows,
+    ) {
         return;
     }
     if !keys.pressed(KeyCode::ShiftLeft) && !keys.pressed(KeyCode::ShiftRight) {
@@ -1207,9 +1227,15 @@ pub fn keyboard_turn_system(
     entities: Res<EntityModelSet>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     windows: Query<&Window>,
 ) {
-    if !gameplay_input_enabled(shell.as_deref(), player_ui.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        player_ui.as_deref(),
+        notice.as_deref(),
+        &windows,
+    ) {
         return;
     }
     let Some(current) = entities
@@ -1242,9 +1268,15 @@ pub fn keyboard_town_revive_system(
     shell: Option<Res<NativeShellModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     windows: Query<&Window>,
 ) {
-    if !gameplay_input_enabled(shell.as_deref(), player_ui.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        player_ui.as_deref(),
+        notice.as_deref(),
+        &windows,
+    ) {
         return;
     }
     if !keys.just_pressed(KeyCode::KeyV) {
@@ -1272,9 +1304,15 @@ pub fn keyboard_skill_system(
     skills: Option<Res<SkillModel>>,
     inventory: Option<Res<InventoryModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     windows: Query<&Window>,
 ) {
-    if !gameplay_input_enabled(shell.as_deref(), player_ui.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        player_ui.as_deref(),
+        notice.as_deref(),
+        &windows,
+    ) {
         return;
     }
 

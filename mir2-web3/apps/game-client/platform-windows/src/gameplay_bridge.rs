@@ -9,6 +9,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{mpsc, Mutex};
 
+use bevy::ecs::system::SystemParam;
 use bevy::input::ButtonInput;
 use bevy::prelude::{Commands, KeyCode, Res, ResMut, Resource};
 use mir2_client_bevy::big_map::{
@@ -36,6 +37,7 @@ use serde_json::Value;
 use crate::gateway::GatewayCommand;
 use crate::input::GatewayCommands;
 use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
+use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate};
 use mir2_client_bevy::crystal_ui::overlays::{
     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
 };
@@ -67,6 +69,8 @@ pub struct NativeGameplayAdapter {
     damage_events: VecDeque<NativeDamageEvent>,
     effect_sequence: u64,
     effect_events: VecDeque<NativeEffectEvent>,
+    notice_sequence: u64,
+    notice_update: Option<NoticePacketUpdate>,
     /// Latest authoritative actor payloads used only to resolve Crystal's
     /// client-owned player sound family when a later packet contains ids but
     /// not class/gender/equipment/mount presentation fields.
@@ -388,6 +392,10 @@ pub struct NativeGameplaySnapshot {
     /// controller reconcile even when the acknowledged tile equals the old
     /// tile (for example a collision correction).
     pub authoritative_self_movement: Option<NativeSelfMovementAck>,
+    /// Latest authoritative login-notice delivery. The UI reducer de-duplicates
+    /// this `(generation, sequence)` identity so periodic snapshots cannot
+    /// reopen a notice the player already closed.
+    pub notice_update: Option<NoticePacketUpdate>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -531,9 +539,20 @@ impl NativeGameplayAdapter {
                 self.authoritative_observe_allowed = Some(update.allow);
                 true
             }
+            PacketEvent::UpdateNotice(update) => {
+                self.notice_sequence = self.notice_sequence.saturating_add(1);
+                self.notice_update = Some(NoticePacketUpdate {
+                    generation: self.generation,
+                    sequence: self.notice_sequence,
+                    title: update.title.clone(),
+                    message: update.message.clone(),
+                });
+                true
+            }
             PacketEvent::Disconnect(_) => {
                 self.authoritative_player_transform = None;
                 self.authoritative_observe_allowed = None;
+                self.notice_update = None;
                 self.clear_zone_state();
                 self.big_map.reset_for_session();
                 false
@@ -605,6 +624,7 @@ impl NativeGameplayAdapter {
                 "LogOutSuccess" => {
                     self.authoritative_player_transform = None;
                     self.authoritative_observe_allowed = None;
+                    self.notice_update = None;
                     self.big_map.reset_for_session();
                     self.clear_zone_state();
                     self.record_effect("LogOutSuccess", payload);
@@ -613,6 +633,7 @@ impl NativeGameplayAdapter {
                 "ReturnToLogin" => {
                     self.authoritative_player_transform = None;
                     self.authoritative_observe_allowed = None;
+                    self.notice_update = None;
                     self.clear_zone_state();
                     self.big_map.reset_for_session();
                     false
@@ -950,6 +971,8 @@ impl NativeGameplayAdapter {
             self.effect_sequence = 0;
             self.animation_sequence = 0;
             self.damage_sequence = 0;
+            self.notice_sequence = 0;
+            self.notice_update = None;
             self.clear_zone_state();
             self.big_map.reset_for_session();
             self.authoritative_observe_allowed = None;
@@ -1336,6 +1359,7 @@ impl NativeGameplayAdapter {
             zone_entity_tiles: self.zone_entity_tiles(payload),
             big_map: self.big_map.clone(),
             authoritative_self_movement: None,
+            notice_update: self.notice_update.clone(),
         }
     }
 
@@ -1514,21 +1538,27 @@ fn apply_authoritative_observe_state(
     debug_assert!(transition.effects.is_empty());
 }
 
+#[derive(SystemParam)]
+pub(crate) struct GameplayDrainModels<'w> {
+    quests: ResMut<'w, QuestTracker>,
+    dialog: ResMut<'w, NpcDialogModel>,
+    nearby_npcs: ResMut<'w, NearbyNpcModel>,
+    combat_target: ResMut<'w, CombatTargetModel>,
+    ground_pickups: ResMut<'w, GroundPickupModel>,
+    notice: ResMut<'w, NoticeDialogState>,
+    entity_presentation: ResMut<'w, crate::entity_presentation::NativeEntityPresentation>,
+    entity_overlays: ResMut<'w, crate::entity_overlays::NativeEntityOverlays>,
+    effects: ResMut<'w, crate::effects::NativeEffects>,
+    big_map: Option<ResMut<'w, BigMapModel>>,
+    revisions: ResMut<'w, AuthoritativeModelRevisions>,
+    pending: ResMut<'w, PendingOperations>,
+    click_state: Option<ResMut<'w, NativeWorldClickState>>,
+}
+
 pub fn drain_gameplay_events(
     shell: Res<NativeShellModel>,
     inbox: Res<GameplayEventInbox>,
-    mut quests: ResMut<QuestTracker>,
-    mut dialog: ResMut<NpcDialogModel>,
-    mut nearby_npcs: ResMut<NearbyNpcModel>,
-    mut combat_target: ResMut<CombatTargetModel>,
-    mut ground_pickups: ResMut<GroundPickupModel>,
-    mut entity_presentation: ResMut<crate::entity_presentation::NativeEntityPresentation>,
-    mut entity_overlays: ResMut<crate::entity_overlays::NativeEntityOverlays>,
-    mut effects: ResMut<crate::effects::NativeEffects>,
-    big_map: Option<ResMut<BigMapModel>>,
-    mut revisions: ResMut<AuthoritativeModelRevisions>,
-    mut pending: ResMut<PendingOperations>,
-    click_state: Option<ResMut<NativeWorldClickState>>,
+    mut models: GameplayDrainModels,
     mut ecs_commands: Commands,
     time: Res<bevy::prelude::Time>,
 ) {
@@ -1538,29 +1568,39 @@ pub fn drain_gameplay_events(
         // UI mutation, even when presentation is currently gated by Login or
         // CharacterSelect. Otherwise observing the generation while gated could
         // strand an old pending key forever.
-        pending.release_all_quest_operations();
+        models.pending.release_all_quest_operations();
         inbox.clear_movement_acks();
+        models.notice.reset_session();
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
-        *quests = QuestTracker::default();
-        *dialog = NpcDialogModel::default();
-        *nearby_npcs = NearbyNpcModel::default();
-        *combat_target = CombatTargetModel::default();
-        *ground_pickups = GroundPickupModel::default();
-        if let Some(mut click_state) = click_state {
+        *models.quests = QuestTracker::default();
+        *models.dialog = NpcDialogModel::default();
+        *models.nearby_npcs = NearbyNpcModel::default();
+        *models.combat_target = CombatTargetModel::default();
+        *models.ground_pickups = GroundPickupModel::default();
+        if let Some(click_state) = models.click_state.as_deref_mut() {
             *click_state = NativeWorldClickState::default();
         }
-        entity_presentation.reset_session();
-        entity_overlays.reset_session();
-        effects.reset_session();
+        models.entity_presentation.reset_session();
+        models.entity_overlays.reset_session();
+        models.effects.reset_session();
         inbox.clear_movement_acks();
-        if let Some(mut big_map) = big_map {
+        if let Some(big_map) = models.big_map.as_deref_mut() {
             big_map.reset_for_session();
         }
+        models.notice.reset_session();
         return;
     }
     if snapshots.is_empty() {
         return;
+    }
+    for update in snapshots
+        .iter()
+        .filter_map(|snapshot| snapshot.notice_update.as_ref())
+    {
+        if models.notice.would_accept(update) {
+            models.notice.observe(update.clone());
+        }
     }
     for ack in snapshots
         .iter()
@@ -1568,8 +1608,8 @@ pub fn drain_gameplay_events(
     {
         inbox.push_movement_ack(ack);
     }
-    apply_quest_operation_acks(&mut pending, &snapshots);
-    if let (Some(mut big_map), Some(latest)) = (big_map, snapshots.last()) {
+    apply_quest_operation_acks(&mut models.pending, &snapshots);
+    if let (Some(big_map), Some(latest)) = (models.big_map.as_deref_mut(), snapshots.last()) {
         *big_map = latest.big_map.clone();
     }
     let Some(snapshot) = snapshots
@@ -1579,32 +1619,34 @@ pub fn drain_gameplay_events(
     else {
         return;
     };
-    reconcile_quest_refresh(&mut pending, &quests, &snapshot.quests);
-    mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Quest);
-    *quests = snapshot.quests;
-    *dialog = snapshot.dialog;
-    *nearby_npcs = snapshot.nearby_npcs;
-    *combat_target = snapshot.combat_target;
-    *ground_pickups = snapshot.ground_pickups;
-    if let Some(mut click_state) = click_state {
+    reconcile_quest_refresh(&mut models.pending, &models.quests, &snapshot.quests);
+    mark_authoritative_refresh(&mut models.revisions, AuthoritativeModelDomain::Quest);
+    *models.quests = snapshot.quests;
+    *models.dialog = snapshot.dialog;
+    *models.nearby_npcs = snapshot.nearby_npcs;
+    *models.combat_target = snapshot.combat_target;
+    *models.ground_pickups = snapshot.ground_pickups;
+    if let Some(click_state) = models.click_state.as_deref_mut() {
         *click_state = snapshot.world_click_state;
     } else {
         ecs_commands.insert_resource(snapshot.world_click_state);
     }
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
-    entity_overlays.observe_damage_events(&snapshot.damage_events, now_ms);
+    models
+        .entity_overlays
+        .observe_damage_events(&snapshot.damage_events, now_ms);
     if let Some(payload) = snapshot.entity_render_payload {
         let (player_x, player_y) = authoritative_player_position(&payload).unwrap_or((0, 0));
-        effects.observe_render_payload(&payload);
-        effects.observe(
+        models.effects.observe_render_payload(&payload);
+        models.effects.observe(
             now_ms,
             player_x,
             player_y,
             &snapshot.effect_events,
             &snapshot.zone_entity_tiles,
         );
-        entity_presentation.replace_payload(payload.clone());
-        entity_overlays.replace_payload(payload);
+        models.entity_presentation.replace_payload(payload.clone());
+        models.entity_overlays.replace_payload(payload);
     }
 }
 
@@ -1682,6 +1724,7 @@ pub fn forward_quest_ui_intents(
     entities: Option<Res<EntityModelSet>>,
     click_state: Option<Res<NativeWorldClickState>>,
     mut player_ui_state: Option<ResMut<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
     mut game_shop: Option<ResMut<GameShopModel>>,
     mut operation_pending: Option<ResMut<PendingOperations>>,
     dialog: Option<Res<NpcDialogModel>>,
@@ -1715,10 +1758,11 @@ pub fn forward_quest_ui_intents(
     let dead = read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
-    let world_actions_blocked = player_ui_state
-        .as_deref()
-        .map(|state| state.blocks_world_action(dialog_open, dead))
-        .unwrap_or(dialog_open || dead);
+    let world_actions_blocked = notice.as_deref().is_some_and(NoticeDialogState::is_open)
+        || player_ui_state
+            .as_deref()
+            .map(|state| state.blocks_world_action(dialog_open, dead))
+            .unwrap_or(dialog_open || dead);
 
     let mut retry_intents = Vec::new();
     for intent in pending {
@@ -3984,6 +4028,47 @@ mod tests {
                 .observe_allowed,
             None
         );
+    }
+
+    #[test]
+    fn update_notice_is_connection_scoped_and_monotonic() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.set_generation(7);
+        assert!(adapter.observe_packet(&PacketEvent::UpdateNotice(
+            crate::native_protocol::UpdateNotice {
+                title: "Welcome".to_owned(),
+                message: "Candidate notice".to_owned(),
+            },
+        )));
+
+        let first = adapter
+            .snapshot(&gameplay_payload())
+            .notice_update
+            .expect("first notice update");
+        assert_eq!(first.generation, 7);
+        assert_eq!(first.sequence, 1);
+        assert_eq!(first.title, "Welcome");
+        assert_eq!(first.message, "Candidate notice");
+
+        assert!(adapter.observe_packet(&PacketEvent::UpdateNotice(
+            crate::native_protocol::UpdateNotice {
+                title: "Changed".to_owned(),
+                message: "Second".to_owned(),
+            },
+        )));
+        let second = adapter
+            .snapshot(&gameplay_payload())
+            .notice_update
+            .expect("second notice update");
+        assert_eq!(second.generation, 7);
+        assert_eq!(second.sequence, 2);
+
+        adapter.set_generation(8);
+        assert!(adapter
+            .snapshot(&gameplay_payload())
+            .notice_update
+            .is_none());
+        assert_eq!(adapter.notice_sequence, 0);
     }
 
     #[test]

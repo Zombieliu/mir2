@@ -11834,7 +11834,7 @@ mod tests {
         decode_server_packet, encode_frame, ClientAuction, ClientBuff, ClientFriend,
         ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientMapInfo, ClientPacket,
         ClientQuestInfo, GroupMember, IntelligentCreatureItemFilter, IntelligentCreatureRules,
-        MapInformation, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo,
+        MapInformation, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, Notice,
         ObjectAttackInfo, ObjectDiedInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo,
         ObjectSpellInfo, ObjectStruckInfo, Point, RankCharacterInfo, SelectInfo, ServerPacket,
         ServerPacketId, Spell, UserItem, UserItemStat, UserLocation,
@@ -15093,6 +15093,16 @@ mod tests {
         let npc_update = super::server_packet_to_event(&ServerPacket::NPCUpdate { npc_id: 1_002 });
         assert_eq!(npc_update["packet"], "NPCUpdate");
         assert_eq!(npc_update["payload"]["npcId"], 1_002);
+
+        let notice = super::server_packet_to_event(&ServerPacket::UpdateNotice {
+            notice: Notice {
+                title: "Welcome".to_owned(),
+                message: "Candidate notice".to_owned(),
+            },
+        });
+        assert_eq!(notice["packet"], "UpdateNotice");
+        assert_eq!(notice["payload"]["notice"]["title"], "Welcome");
+        assert_eq!(notice["payload"]["notice"]["message"], "Candidate notice");
 
         let lover = super::server_packet_to_event(&ServerPacket::LoverUpdate {
             name: "Partner".to_string(),

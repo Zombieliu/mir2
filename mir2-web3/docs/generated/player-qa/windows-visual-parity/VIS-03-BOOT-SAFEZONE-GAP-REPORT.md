@@ -7,7 +7,7 @@ Date: 2026-08-29
 This report records two high-visibility user-reported Windows gaps on
 `codex/windows-visual-parity`. The safe-zone code leaf is now bounded at
 implementation revision `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4`; the
-login announcement remains open:
+login announcement implementation now exists but remains unaccepted:
 
 - Crystal-style post-login announcement popup
 - Crystal safe-zone presentation
@@ -18,17 +18,24 @@ It is a scoping and evidence note, not a closure claim.
 
 ### 1. Login announcement popup
 
-Current branch evidence shows three adjacent pieces, but not the required
-Crystal in-game notice dialog:
+Current branch evidence now shows the required bounded in-game notice chain:
 
-- native shell/login notices exist for login and error flows;
-- chat already understands the `announcement` channel color family;
-- no reviewed in-game Windows presentation/trigger path was found on this
-  branch for the Crystal notice window that appears after entering the world.
+- simulation `StartGame` already emits one authoritative `UpdateNotice` per
+  gameplay session and tests that it never contains third-party `LOMCN` /
+  `Supercode` copy;
+- the Windows native protocol parses `UpdateNotice`, the gameplay bridge
+  retains one monotonic `(generation, sequence)` notice update, and resets it
+  on logout/return/disconnect/session-generation changes;
+- native Bevy now mounts the Crystal notice plugin and renders the in-game
+  panel using the original `Prguse/961`, `Prguse2 470..475`, and
+  `Title 193..195` assets with bounded scrolling and close behavior;
+- focused simulation and native notice tests cover source-bound trigger,
+  close/re-login, empty-notice fail-closed behavior, and session reset.
 
-Conclusion: this gap is not a hidden toggle on the current branch head. It
-still needs a bounded in-game trigger + presentation implementation and exact
-same-EXE verification.
+Conclusion: the code leaf now exists on this branch. Exact same-EXE visual
+verification, clickable/color span and scrollbar fidelity review, persistent
+Crystal `LastUpdate > LastLogoutDate` delivery semantics, and human acceptance
+remain open, so the item stays open in the denominator.
 
 ### 2. Safe-zone presentation
 
@@ -68,7 +75,7 @@ exist:
 
 1. Package the exact safe-zone implementation revision and capture the
    persistent boundary animation plus entry/exit state transitions.
-2. Add the Crystal-style post-login announcement presentation on the native
-   in-game path rather than treating chat or shell notices as equivalent.
+2. Capture the native post-login announcement against the exact Candidate and
+   verify no duplicate popup within one gameplay session.
 3. Only after both are evidenced, bind them into the backlog denominator with
    exact-Candidate captures.

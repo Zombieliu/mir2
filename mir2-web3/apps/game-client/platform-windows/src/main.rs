@@ -110,6 +110,7 @@ fn main() {
     app.add_plugins(mir2_client_bevy::crystal_ui::minimap::Mir2CrystalMiniMapPlugin);
     app.add_plugins(mir2_client_bevy::crystal_ui::hud::Mir2CrystalHudPlugin);
     app.add_plugins(mir2_client_bevy::crystal_ui::chat::Mir2CrystalChatPlugin);
+    app.add_plugins(mir2_client_bevy::crystal_ui::notice::Mir2CrystalNoticePlugin);
     // Quest/NPC/target/drop intent handling remains in the established plugin;
     // its former player/control/bag placeholder panels are suppressed once the
     // Crystal MainDialog owns those regions.

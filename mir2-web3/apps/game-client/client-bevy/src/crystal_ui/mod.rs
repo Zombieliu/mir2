@@ -9,6 +9,7 @@ pub mod hud;
 pub mod login;
 pub mod metrics;
 pub mod minimap;
+pub mod notice;
 pub mod overlays;
 pub mod panel_layouts;
 pub mod preview_data;
