@@ -78,11 +78,11 @@ static ORIGINAL_FRAME_PIXEL_CACHE: OnceLock<Mutex<OriginalFramePixelCache>> = On
 static RENDER_TRACE_STATE_LOGS: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct OriginalFrameGeometry {
-    width: u32,
-    height: u32,
-    offset_x: i32,
-    offset_y: i32,
+pub(crate) struct OriginalFrameGeometry {
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) offset_x: i32,
+    pub(crate) offset_y: i32,
 }
 
 #[derive(Default)]
@@ -558,6 +558,31 @@ fn original_frame_geometry(library: &str, frame: i64) -> Option<OriginalFrameGeo
         .and_then(Option::as_ref)
         .and_then(|frames| frames.get(&frame))
         .copied()
+}
+
+/// Resolve the same source-frame size and draw offset used by the native body
+/// renderer. Crystal's NPC quest marker anchors to `BodyLibrary` frame zero,
+/// so UI overlays must consume this geometry instead of a fixed tile offset.
+pub(crate) fn native_frame_geometry(library: &str, frame: i64) -> Option<OriginalFrameGeometry> {
+    let normalized_library = normalized_library_key(library);
+    let frame_path = format!("/original-ui/{normalized_library}/{frame}.png");
+    let atlas_frame_path = frame_path.replace(' ', "%20");
+    if let Some(rect) = starter_atlas_index().and_then(|index| {
+        index
+            .rect_by_path
+            .get(&atlas_frame_path)
+            .map(|(page_index, rect_index)| &index.pages[*page_index].rects[*rect_index])
+    }) {
+        if let (Some(offset_x), Some(offset_y)) = (rect.offset_x, rect.offset_y) {
+            return Some(OriginalFrameGeometry {
+                width: rect.width,
+                height: rect.height,
+                offset_x,
+                offset_y,
+            });
+        }
+    }
+    original_frame_geometry(normalized_library, frame)
 }
 
 fn verified_player_frame_geometry(frame_path: &str) -> Option<OriginalFrameGeometry> {
@@ -1924,6 +1949,19 @@ mod tests {
         assert_eq!(rect.height, geometry.height);
         assert_eq!(rect.offset_x, Some(geometry.offset_x));
         assert_eq!(rect.offset_y, Some(geometry.offset_y));
+    }
+
+    #[test]
+    fn native_frame_geometry_exposes_crystal_npc_frame_zero_anchor_data() {
+        assert_eq!(
+            native_frame_geometry("/original-ui/NPC/05", 0),
+            Some(OriginalFrameGeometry {
+                width: 56,
+                height: 72,
+                offset_x: 13,
+                offset_y: -52,
+            })
+        );
     }
 
     #[test]

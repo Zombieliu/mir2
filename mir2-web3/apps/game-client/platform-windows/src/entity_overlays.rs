@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
@@ -31,6 +32,8 @@ const CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX: f32 = -18.0;
 const CRYSTAL_QUEST_MARKER_WIDTH_PX: f32 = 28.0;
 const CRYSTAL_QUEST_MARKER_HEIGHT_PX: f32 = 29.0;
 const CRYSTAL_QUEST_MARKER_FRAME_INTERVAL_MS: u64 = 500;
+const CRYSTAL_QUEST_MARKER_BODY_CENTER_SHIFT_PX: f32 = 28.0;
+const CRYSTAL_QUEST_MARKER_BODY_TOP_SHIFT_PX: f32 = 40.0;
 const CRYSTAL_QUEST_MARKER_FALLBACK_LEFT_PX: f32 = 12.0;
 const CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX: f32 = -58.0;
 
@@ -227,6 +230,23 @@ impl QuestMarkerKind {
 
 fn quest_marker_animation_phase(now_ms: u64) -> u8 {
     ((now_ms / CRYSTAL_QUEST_MARKER_FRAME_INTERVAL_MS) % 2) as u8
+}
+
+fn crystal_npc_quest_marker_anchor(entity: &Value, left: f32, top: f32) -> (f32, f32) {
+    let body_library =
+        crate::atlas::resolved_native_sprite(entity, AnimationAction::Standing).body_library;
+    crate::atlas::native_frame_geometry(&body_library, 0)
+        .map(|geometry| {
+            (
+                left + geometry.offset_x as f32 + geometry.width as f32 / 2.0
+                    - CRYSTAL_QUEST_MARKER_BODY_CENTER_SHIFT_PX,
+                top + geometry.offset_y as f32 - CRYSTAL_QUEST_MARKER_BODY_TOP_SHIFT_PX,
+            )
+        })
+        .unwrap_or((
+            left + CRYSTAL_QUEST_MARKER_FALLBACK_LEFT_PX,
+            top + CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX,
+        ))
 }
 
 pub fn sync_native_entity_overlays(
@@ -601,137 +621,137 @@ fn overlay_entries_with_motion(
     let player_max_hp = payload.get("playerMaxHp").and_then(value_i64);
 
     let mut entries = Vec::new();
-    if visibility.name_view || hovered_object_id.is_some() || self_hovered {
-        entries.extend(
-            payload
-                .get("entities")
-                .and_then(Value::as_array)
-                .into_iter()
-                .flatten()
-                .flat_map(|entity| {
-                    let Some(name) = entity.get("name").and_then(Value::as_str).map(str::trim)
-                    else {
-                        return Vec::new();
-                    };
-                    if name.is_empty() {
-                        return Vec::new();
-                    }
-                    let kind = entity
-                        .get("kind")
-                        .and_then(Value::as_str)
-                        .unwrap_or("monster");
-                    let x = entity.get("x").and_then(value_i64).unwrap_or(0);
-                    let y = entity.get("y").and_then(value_i64).unwrap_or(0);
-                    let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
-                    let is_self = kind == "selfPlayer";
-                    let object_id = entity.get("objectId").and_then(|value| match value {
-                        Value::Number(number) => Some(number.to_string()),
-                        Value::String(value) if !value.is_empty() => Some(value.clone()),
-                        _ => None,
-                    });
-                    let (motion_x, motion_y) = object_id
+    entries.extend(
+        payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .flat_map(|entity| {
+                let Some(name) = entity.get("name").and_then(Value::as_str).map(str::trim) else {
+                    return Vec::new();
+                };
+                if name.is_empty() {
+                    return Vec::new();
+                }
+                let kind = entity
+                    .get("kind")
+                    .and_then(Value::as_str)
+                    .unwrap_or("monster");
+                let x = entity.get("x").and_then(value_i64).unwrap_or(0);
+                let y = entity.get("y").and_then(value_i64).unwrap_or(0);
+                let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
+                let is_self = kind == "selfPlayer";
+                let object_id = entity.get("objectId").and_then(|value| match value {
+                    Value::Number(number) => Some(number.to_string()),
+                    Value::String(value) if !value.is_empty() => Some(value.clone()),
+                    _ => None,
+                });
+                let (motion_x, motion_y) = object_id
+                    .as_deref()
+                    .and_then(|object_id| motion_offsets.get(object_id))
+                    .copied()
+                    .unwrap_or((0.0, 0.0));
+                let hovered = if is_self {
+                    self_hovered
+                } else {
+                    object_id
                         .as_deref()
-                        .and_then(|object_id| motion_offsets.get(object_id))
-                        .copied()
-                        .unwrap_or((0.0, 0.0));
-                    let hovered = if is_self {
-                        self_hovered
-                    } else {
-                        object_id
-                            .as_deref()
-                            .is_some_and(|object_id| hovered_object_id == Some(object_id))
-                    };
-                    if !visibility.name_view && !hovered {
-                        return Vec::new();
-                    }
-                    let guild_name = matches!(kind, "selfPlayer" | "player")
-                        .then(|| entity.get("guildName").and_then(Value::as_str))
-                        .flatten()
-                        .map(str::trim)
-                        .filter(|guild_name| !guild_name.is_empty());
-                    let lines = if matches!(kind, "npc" | "monster") {
-                        name.split('_')
-                            .filter(|part| !part.is_empty())
-                            .collect::<Vec<_>>()
-                    } else {
-                        vec![name]
-                    };
-                    let display_name = lines.join("\n");
-                    let line_adjustment = if matches!(kind, "npc" | "monster") {
-                        -((lines.len().saturating_sub(1) as f32) * 10.0) / 2.0
-                    } else {
-                        0.0
-                    };
-                    let corpse_shift = if dead {
-                        CRYSTAL_CORPSE_NAME_SHIFT_Y_PX
-                    } else {
-                        0.0
-                    };
-                    let color = entity
-                        .get("nameColourArgb")
-                        .and_then(value_i64)
-                        .and_then(argb_color)
-                        .unwrap_or_else(|| {
-                            if kind == "npc" {
-                                Color::srgb_u8(0x00, 0xff, 0x00)
-                            } else {
-                                Color::WHITE
-                            }
-                        });
-                    let left = origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x;
-                    let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT + motion_y;
-                    let width = if matches!(kind, "npc" | "monster") {
-                        48.0
-                    } else {
-                        50.0
-                    };
-                    let mut entity_entries = Vec::with_capacity(2);
-                    if kind == "npc" {
-                        if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
-                            entity_entries.push(OverlayEntry {
-                                name: None,
-                                quest_marker: Some(marker),
-                                color: Color::WHITE,
-                                left: left + CRYSTAL_QUEST_MARKER_FALLBACK_LEFT_PX,
-                                top: top + CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX,
-                                width: CRYSTAL_QUEST_MARKER_WIDTH_PX,
-                                font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
-                                self_health_ratio: None,
-                            });
+                        .is_some_and(|object_id| hovered_object_id == Some(object_id))
+                };
+                let show_name = visibility.name_view || hovered;
+                let guild_name = matches!(kind, "selfPlayer" | "player")
+                    .then(|| entity.get("guildName").and_then(Value::as_str))
+                    .flatten()
+                    .map(str::trim)
+                    .filter(|guild_name| !guild_name.is_empty());
+                let lines = if matches!(kind, "npc" | "monster") {
+                    name.split('_')
+                        .filter(|part| !part.is_empty())
+                        .collect::<Vec<_>>()
+                } else {
+                    vec![name]
+                };
+                let display_name = lines.join("\n");
+                let line_adjustment = if matches!(kind, "npc" | "monster") {
+                    -((lines.len().saturating_sub(1) as f32) * 10.0) / 2.0
+                } else {
+                    0.0
+                };
+                let corpse_shift = if dead {
+                    CRYSTAL_CORPSE_NAME_SHIFT_Y_PX
+                } else {
+                    0.0
+                };
+                let color = entity
+                    .get("nameColourArgb")
+                    .and_then(value_i64)
+                    .and_then(argb_color)
+                    .unwrap_or_else(|| {
+                        if kind == "npc" {
+                            Color::srgb_u8(0x00, 0xff, 0x00)
+                        } else {
+                            Color::WHITE
                         }
-                    }
-                    if let Some(guild_name) = guild_name {
+                    });
+                let left = origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x;
+                let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT + motion_y;
+                let width = if matches!(kind, "npc" | "monster") {
+                    48.0
+                } else {
+                    50.0
+                };
+                let mut entity_entries = Vec::with_capacity(2);
+                if kind == "npc" {
+                    if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
+                        let (marker_left, marker_top) =
+                            crystal_npc_quest_marker_anchor(entity, left, top);
                         entity_entries.push(OverlayEntry {
-                            name: Some(guild_name.to_owned()),
-                            quest_marker: None,
-                            color,
-                            left,
-                            top: top + CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX + corpse_shift,
-                            width,
+                            name: None,
+                            quest_marker: Some(marker),
+                            color: Color::WHITE,
+                            left: marker_left,
+                            top: marker_top,
+                            width: CRYSTAL_QUEST_MARKER_WIDTH_PX,
                             font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                             self_health_ratio: None,
                         });
                     }
+                }
+                if !show_name {
+                    return entity_entries;
+                }
+                if let Some(guild_name) = guild_name {
                     entity_entries.push(OverlayEntry {
-                        name: Some(display_name),
+                        name: Some(guild_name.to_owned()),
                         quest_marker: None,
                         color,
                         left,
-                        top: top
-                            + if matches!(kind, "npc" | "monster") {
-                                CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX + line_adjustment
-                            } else {
-                                CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX
-                            }
-                            + corpse_shift,
+                        top: top + CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX + corpse_shift,
                         width,
                         font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
                     });
-                    entity_entries
-                }),
-        );
-    }
+                }
+                entity_entries.push(OverlayEntry {
+                    name: Some(display_name),
+                    quest_marker: None,
+                    color,
+                    left,
+                    top: top
+                        + if matches!(kind, "npc" | "monster") {
+                            CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX + line_adjustment
+                        } else {
+                            CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX
+                        }
+                        + corpse_shift,
+                    width,
+                    font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    self_health_ratio: None,
+                });
+                entity_entries
+            }),
+    );
 
     // Crystal's User.DrawHealth path is independent of NameView and
     // SelfPlayer.MouseOver. Keep one health-only entry so moving the cursor
@@ -1254,9 +1274,9 @@ mod tests {
         let payload = json!({
             "sceneView": {"center": {"x": 10, "y": 20}},
             "entities": [
-                {"objectId": 3, "kind": "npc", "name": "Assistant_Jane", "x": 12, "y": 20, "questIds": [1], "questIcon": 2},
-                {"objectId": 4, "kind": "npc", "name": "CraftsLady_Jude", "x": 13, "y": 20, "questIds": [2], "questIcon": 1},
-                {"objectId": 5, "kind": "npc", "name": "Merchant_Ruben", "x": 14, "y": 20, "questIds": [3], "questIcon": 3}
+                {"objectId": 3, "kind": "npc", "name": "Assistant_Jane", "x": 12, "y": 20, "sprite": {"bodyLibrary": "NPC/05"}, "questIds": [1], "questIcon": 2},
+                {"objectId": 4, "kind": "npc", "name": "CraftsLady_Jude", "x": 13, "y": 20, "sprite": {"bodyLibrary": "NPC/07"}, "questIds": [2], "questIcon": 1},
+                {"objectId": 5, "kind": "npc", "name": "Merchant_Ruben", "x": 14, "y": 20, "sprite": {"bodyLibrary": "NPC/01"}, "questIds": [3], "questIcon": 3}
             ]
         });
         let tracker = QuestTracker {
@@ -1318,8 +1338,20 @@ mod tests {
                 QuestMarkerKind::QuestionYellow
             ]
         );
-        assert_eq!(entries[0].left, 588.0);
-        assert_eq!(entries[0].top, 294.0);
+        assert_eq!(entries[0].left, 589.0);
+        assert_eq!(entries[0].top, 260.0);
+        let markers_only = overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: false,
+            },
+            None,
+            false,
+            Some(&tracker),
+        );
+        assert!(entry_names(&markers_only).is_empty());
+        assert_eq!(quest_markers(&markers_only), quest_markers(&entries));
         assert_eq!(
             QuestMarkerKind::QuestionWhite.asset_path(0),
             "original-ui/Prguse/983.png"

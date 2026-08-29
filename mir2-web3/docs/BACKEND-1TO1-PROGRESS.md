@@ -1,7 +1,7 @@
 # Backend 1:1 Progress
 
-> Windows NPC quest-marker server/client checkpoint (2026-08-29; working tree
-> base `182485d24a0645a9034a5eaefdcccaa180b9d4b2`): the personal Simulation
+> Windows NPC quest-marker server/client checkpoint (2026-08-29; follow-on
+> over revision `630dd957e0f5dcbee6e03e366efe6f82c20b8484`): the personal Simulation
 > snapshot now carries an optional exact Crystal `questIcon`. Selection follows
 > `NPCObject.GetAvailableQuests(true)` ordering and authoritative acceptance
 > gates instead of the native client's former invented status priority. The
@@ -9,7 +9,9 @@
 > overlays each session's personal value after shared map composition, so one
 > player's quest progress cannot choose another player's NPC marker. Focused
 > q1 accept/finish transitions and the focused two-session Gateway isolation
-> regression pass, dual-crate checks pass, Windows is 482/482, and Candidate
+> regression pass and dual-crate checks pass. The client follow-on binds exact
+> NPC standing-frame-zero geometry to Crystal's marker-anchor formula and keeps
+> marker drawing independent of `NameView`; Windows is 483/483 and Candidate
 > verification self-test passes.
 > This is a presentation-data projection, not completion of the quest system;
 > full quest persistence/failure/repeatable semantics, cross-Gateway authority,

@@ -9,7 +9,7 @@ same-EXE capture and human acceptance remain open.
 
 ```text
 branch: codex/windows-visual-parity
-workingTreeBase: 182485d24a0645a9034a5eaefdcccaa180b9d4b2
+workingTreeBase: 630dd957e0f5dcbee6e03e366efe6f82c20b8484
 authoritativeQuestIconBound: true
 crystalQuestSelectionOrderBound: true
 questTypeColourDiscriminantsBound: true
@@ -18,6 +18,7 @@ q1AcceptFinishTransitionPassed: true
 incrementalNpcPacketRetentionPassed: true
 candidateResidentMarkerAssetsBound: true
 dailyBlueDrawableSourceFramesPresent: false
+exactBodyFrameAnchorBound: true
 exactBodyFrameAnchorAccepted: false
 sameExeCaptureProduced: false
 fullLiveStateTransitionCoverage: false
@@ -50,6 +51,12 @@ accepted: false
 - Native animation keeps Crystal's two-frame 500 ms cadence. Legacy snapshots
   can recover general/repeatable markers from tracker accept/finish NPC ids,
   but never guess daily/story colour.
+- Native placement now uses the standing NPC body library's real frame-zero
+  width and source offsets, matching Crystal's
+  `GetOffSet(BaseIndex) + GetSize(BaseIndex)/2 - 28, -40` formula. The marker
+  is generated independently of `NameView`, as in Crystal's NPC draw order;
+  fixed tile offsets remain only as a fail-closed fallback when source geometry
+  is genuinely unavailable.
 - Candidate packaging and verification now fail closed if any resident
   `983..988` or `1085..1088` marker frame is missing.
 
@@ -63,9 +70,11 @@ accepted: false
 | authoritative marker works without client `QuestTracker` | PASS |
 | missing `questIds` fallback uses accept/finish NPC roles | PASS |
 | wrong-role NPC does not receive a marker | PASS |
+| frame-zero native geometry exposes exact `NPC/05` width/height/offset data | PASS |
+| source-formula marker anchor and marker-with-`NameView=false` | PASS |
 | `incremental_npc_packet_preserves_authoritative_quest_marker_fields` | PASS |
 | `routing::tests::shared_in_process_registry_keeps_npc_quest_icons_personal_per_session` | PASS |
-| full Windows native tests | PASS, 482/482 |
+| full Windows native tests | PASS, 483/483 |
 | Candidate verification self-test, including missing story-frame rejection | PASS |
 | Rust formatting and `git diff --check` | PASS |
 
@@ -82,9 +91,9 @@ to contain drawable data or a legally valid source provides those frames.
 
 - Same-EXE timed captures for available, in-progress, ready, cleared, relog,
   reconnect, and map-transfer transitions.
-- Exact `BodyLibrary.GetOffSet(BaseIndex) + GetSize(BaseIndex)/2 - 28, -40`
-  placement instead of the current bounded tile-anchor fallback.
-- Occlusion and z-order review against roofs, trees, foreground, and labels.
+- Same-EXE visual acceptance of the source-derived body anchor, including the
+  fallback-free resident NPC set and marker persistence with names hidden.
+- Occlusion and z-order acceptance against roofs, trees, foreground, and labels.
 - Daily blue drawable-source closure, broader quest-chain denominator, quest
   diary/map guidance, failure/abandon/repeatable rules, and persistence audit.
 - Human visual acceptance, authenticated live WSS, real DPI, native soak,

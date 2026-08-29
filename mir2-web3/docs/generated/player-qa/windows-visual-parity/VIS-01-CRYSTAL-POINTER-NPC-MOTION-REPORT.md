@@ -103,9 +103,17 @@ reliability fix without claiming a new packaged Candidate:
 - `atlas::tests::hover_scan_allows_npc_excludes_self_and_dead_and_uses_reverse_cell_order` → PASS
 - `atlas::tests::hover_uses_body_alpha_and_same_tile_shortcut_but_fails_closed_without_pixels` → PASS
 
+Additional authoritative recheck on `2026-08-29` against the current dirty
+branch head, without changing the unrelated inventory-expansion draft in
+`apps/game-client/client-bevy/src/crystal_ui/overlays.rs`:
+
+- `cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml distant_npc_click_approaches_authoritatively_then_interacts_once -- --nocapture`
+  → PASS
+
 This addendum strengthens the Windows-native NPC hover/open path on the live
 branch head, but it does not replace the exact-Candidate identity table above
-and does not by itself close the remaining human dialog-open gate.
+and does not by itself close the remaining human dialog-open gate or full
+`DataRange` parity.
 
 ## Explicitly open gates
 

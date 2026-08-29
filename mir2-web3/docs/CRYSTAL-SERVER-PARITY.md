@@ -1,15 +1,17 @@
 # Crystal Server Parity
 
-> Windows NPC quest-marker server/client note (2026-08-29; working tree base
-> `182485d24a0645a9034a5eaefdcccaa180b9d4b2`): server-owned personal quest
+> Windows NPC quest-marker server/client note (2026-08-29; follow-on over
+> revision `630dd957e0f5dcbee6e03e366efe6f82c20b8484`): server-owned personal quest
 > state now selects Crystal's exact `QuestIcon` discriminant and exposes it in
 > the NPC world snapshot. Active finish-NPC quests win in insertion order;
 > only then do level/class/prerequisite-valid start-NPC quests participate.
 > Shared Zone state never owns the per-character icon, and Gateway reapplies it
 > from the requesting personal snapshot after world composition. The q1
 > Jane/Jude transition, native partial-packet retention, focused two-session
-> Gateway isolation, Windows 482/482 and Candidate self-test pass. The client still needs
-> same-EXE body-anchor/live-transition acceptance, and the supplied `Prguse`
+> Gateway isolation, Windows 483/483 and Candidate self-test pass. The client
+> now uses exact NPC standing-frame-zero geometry with Crystal's marker formula
+> and renders it independently of `NameView`; same-EXE body-anchor/live-transition
+> acceptance still remains, and the supplied `Prguse`
 > export has no drawable daily-blue `991..994` frames. Broader quest/server,
 > persistence, distributed ownership, device and signing denominators remain
 > open; no server/global percentage is reported.
