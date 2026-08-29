@@ -218,6 +218,11 @@ pub(super) fn strip_crystal_npc_links(line: &str) -> String {
 
 pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
     let trimmed = label.trim();
+    let trimmed = trimmed
+        .strip_prefix('[')
+        .and_then(|value| value.strip_suffix(']'))
+        .map(str::trim)
+        .unwrap_or(trimmed);
     if trimmed.starts_with('@') {
         trimmed.to_string()
     } else {
@@ -245,6 +250,23 @@ pub(super) fn parse_crystal_label_target(target: &str) -> (String, Vec<String>) 
         .map(str::to_string)
         .collect();
     (label, args)
+}
+
+#[cfg(test)]
+mod crystal_label_compat_tests {
+    use super::parse_crystal_label_target;
+
+    #[test]
+    fn bracketed_crystal_callnpc_labels_preserve_labels_and_arguments() {
+        assert_eq!(
+            parse_crystal_label_target("[@MAIN]"),
+            ("@MAIN".to_string(), Vec::new())
+        );
+        assert_eq!(
+            parse_crystal_label_target("[@Buy](1, two)"),
+            ("@Buy".to_string(), vec!["1".to_string(), "two".to_string()])
+        );
+    }
 }
 
 pub(super) fn replace_ignore_ascii_case(input: &str, needle: &str, replacement: &str) -> String {
@@ -3259,6 +3281,10 @@ impl SimulationSession {
             return Vec::new();
         }
 
+        if !crystal_npc_object_in_data_range(self.app.world(), object_id) {
+            return Vec::new();
+        }
+
         let Some(npc_entity) = entity_by_object_id(self.app.world(), object_id) else {
             return Vec::new();
         };
@@ -3267,6 +3293,11 @@ impl SimulationSession {
         let player_position =
             entity_position(self.app.world(), player_entity).expect("player position");
         let npc_position = entity_position(self.app.world(), npc_entity).expect("npc position");
+        // Occupancy makes this impossible in a valid Crystal world. Reject a
+        // corrupted overlap instead of opening a dialog from the NPC's tile.
+        if player_position == npc_position {
+            return Vec::new();
+        }
         let npc_name =
             entity_name(self.app.world(), npc_entity).unwrap_or_else(|| "NPC".to_string());
         let npc_quest_ids = self
@@ -3283,26 +3314,6 @@ impl SimulationSession {
             .get::<NpcAgent>()
             .and_then(|agent| agent.script_key.clone());
 
-        let Some(direction) = direction_toward(&player_position, &npc_position) else {
-            return Vec::new();
-        };
-
-        let mut packets = Vec::new();
-        {
-            let mut player = self.app.world_mut().entity_mut(player_entity);
-            let mut facing = player.get_mut::<Facing>().expect("player facing");
-            if facing.0 != direction {
-                facing.0 = direction;
-                packets.push(ServerPacket::ObjectTurn {
-                    movement: current_movement(self.app.world()),
-                });
-            }
-        }
-
-        if tile_distance(&player_position, &npc_position) > 1 {
-            return packets;
-        }
-
         let context = NpcInteractionContext {
             object_id,
             name: npc_name,
@@ -3313,7 +3324,7 @@ impl SimulationSession {
             args: Vec::new(),
             input: None,
         };
-        handle_npc_interaction(self.app.world_mut(), context, packets)
+        handle_npc_interaction(self.app.world_mut(), context, Vec::new())
     }
 
     pub(super) fn interact_shared_npc_snapshot_impl(
@@ -3381,8 +3392,9 @@ impl SimulationSession {
     }
 
     pub(super) fn call_npc_impl(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
-        let normalized_key = key.trim();
-        let main_call = normalized_key.is_empty() || normalized_key.eq_ignore_ascii_case("@Main");
+        let requested_key = key.trim();
+        let (normalized_label, _) = parse_crystal_label_target(requested_key);
+        let main_call = requested_key.is_empty() || normalized_label.eq_ignore_ascii_case("@Main");
         if main_call {
             return self.interact_impl(object_id);
         }
@@ -3395,7 +3407,7 @@ impl SimulationSession {
             .as_ref()
             .map(|dialog| dialog.npc_object_id);
         if active_npc_object_id == Some(object_id) {
-            return self.select_npc_dialog_target_impl(normalized_key);
+            return self.select_npc_dialog_target_impl(requested_key);
         }
 
         let mut packets = self.interact_impl(object_id);
@@ -3407,7 +3419,7 @@ impl SimulationSession {
             .as_ref()
             .map(|dialog| dialog.npc_object_id);
         if active_npc_object_id == Some(object_id) {
-            packets.extend(self.select_npc_dialog_target_impl(normalized_key));
+            packets.extend(self.select_npc_dialog_target_impl(requested_key));
         }
         packets
     }
@@ -3441,12 +3453,12 @@ impl SimulationSession {
             return Vec::new();
         }
 
-        if !npc_dialog_actor_is_adjacent(self.app.world(), active_dialog.npc_object_id) {
+        if !crystal_npc_object_in_data_range(self.app.world(), active_dialog.npc_object_id) {
             dismiss_dialog(self.app.world_mut());
             return Vec::new();
         }
 
-        let input_link = target.trim_start().starts_with("@@");
+        let input_link = normalized_target.starts_with("@@");
         if input_link && input_value.is_none() {
             let prompt = crystal_npc_input_prompt(&active_dialog, target);
             set_dialog(
@@ -3666,25 +3678,6 @@ fn parse_explicit_npc_quest_command(target: &str) -> Option<ExplicitNpcQuestComm
     } else {
         None
     }
-}
-
-fn npc_dialog_actor_is_adjacent(world: &World, npc_object_id: u32) -> bool {
-    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
-        return false;
-    };
-    if !world.entity(npc_entity).contains::<Npc>() {
-        return false;
-    }
-    let Some(player) = player_entity(world) else {
-        return false;
-    };
-    let (Some(player_position), Some(npc_position)) = (
-        entity_position(world, player),
-        entity_position(world, npc_entity),
-    ) else {
-        return false;
-    };
-    tile_distance(&player_position, &npc_position) <= 1
 }
 
 #[cfg(test)]

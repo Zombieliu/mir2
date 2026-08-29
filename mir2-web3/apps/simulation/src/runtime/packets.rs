@@ -42,12 +42,12 @@ use super::combat::{
     crystal_player_slowed_by_status, melee_target_is_authoritatively_attackable_in_direction,
 };
 use super::components::{
-    current_hero_object_id, current_player_is_dead, current_player_object_id, entity_by_object_id,
-    entity_facing, entity_object_id, entity_player_vitals, entity_position, hero_entity,
-    player_entity, CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState,
-    GroundDrop, HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState,
-    MonsterPoisonState, MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position,
-    RemotePlayer, SelfPlayer, SummonedMonster,
+    current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
+    entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
+    CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState, GroundDrop,
+    HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState, MonsterPoisonState,
+    MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
+    SummonedMonster,
 };
 use super::crystal_compat::{
     BASE_STORAGE_SLOTS, BUFF_GENERAL_MEOW_MEOW_SHIELD, CRYSTAL_BIND_DONT_STORE,
@@ -94,10 +94,11 @@ use super::monsters::{
     crystal_respawn_object_monster_packet, crystal_world_respawn_spawns, point_in_data_range,
     start_game_visible_respawn_spawns,
 };
-use super::movement::{current_location, tile_distance, town_revive_packets};
+use super::movement::{current_location, town_revive_packets};
 use super::npc::{
-    buy_item_impl, crystal_npc_object_visible_in_world, crystal_npc_visible_to_character,
-    crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl, CrystalNpcLocalTime, NpcFlagState,
+    buy_item_impl, crystal_npc_object_in_data_range, crystal_npc_object_visible_in_world,
+    crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl,
+    CrystalNpcLocalTime, NpcFlagState,
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
@@ -3377,7 +3378,7 @@ fn active_npc_allows_quest_request(
         return false;
     }
 
-    npc_is_adjacent_to_player(world, npc_object_id)
+    crystal_npc_object_in_data_range(world, npc_object_id)
 }
 
 fn quest_npc_matches_request(
@@ -3402,25 +3403,6 @@ fn quest_npc_matches_request(
     } else {
         false
     }
-}
-
-fn npc_is_adjacent_to_player(world: &World, npc_object_id: u32) -> bool {
-    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
-        return false;
-    };
-    if !world.entity(npc_entity).contains::<Npc>() {
-        return false;
-    }
-    let Some(player) = player_entity(world) else {
-        return false;
-    };
-    let (Some(player_position), Some(npc_position)) = (
-        entity_position(world, player),
-        entity_position(world, npc_entity),
-    ) else {
-        return false;
-    };
-    tile_distance(&player_position, &npc_position) <= 1
 }
 
 fn quest_dialog_link_allows_operation(
@@ -3455,7 +3437,7 @@ mod quest_dialog_operation_link_tests {
 
     use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
     use super::super::npc::{ActiveNpcDialogState, NpcDialogLinkState};
-    use super::super::resources::NpcStateResource;
+    use super::super::resources::{NpcStateResource, SessionResource};
     use super::{
         active_npc_allows_quest_request, quest_dialog_link_allows_operation, GUIDE_NPC_ID,
         GUIDE_QUEST_ID,
@@ -3508,9 +3490,13 @@ mod quest_dialog_operation_link_tests {
     }
 
     #[test]
-    fn quest_packets_require_the_exact_active_dialog_even_beside_the_correct_npc() {
+    fn quest_packets_require_the_exact_active_dialog_inside_crystal_data_range() {
         let mut world = World::new();
         world.insert_resource(NpcStateResource::new());
+        let config = crate::config::SimulationConfig::default();
+        let mut session = SessionResource::new(&config);
+        session.selected_character = Some(config.default_character.clone());
+        world.insert_resource(session);
         let player = world
             .spawn((SelfPlayer, ObjectId(1), Position(Point { x: 10, y: 10 })))
             .id();
@@ -3591,7 +3577,20 @@ mod quest_dialog_operation_link_tests {
             .entity_mut(player)
             .get_mut::<Position>()
             .expect("player position")
-            .0 = Point { x: 20, y: 20 };
+            .0 = Point { x: 27, y: 10 };
+        assert!(active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+
+        world
+            .entity_mut(player)
+            .get_mut::<Position>()
+            .expect("player position")
+            .0 = Point { x: 28, y: 10 };
         assert!(!active_npc_allows_quest_request(
             &world,
             GUIDE_QUEST_ID,

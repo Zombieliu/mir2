@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
     GroundDropLootSnapshot, ItemContainer, QuestStage, SimulationConfig, SimulationSession,
-    VisibleNpcRecord, WorldEntityKind, WorldEntitySnapshot,
+    VisibleNpcRecord, WorldEntityKind, WorldEntitySnapshot, CRYSTAL_OBJECT_DATA_RANGE,
 };
 
 struct SaveFileGuard(PathBuf);
@@ -709,7 +709,7 @@ fn ordinary_candidate_loop_persists_new_warrior_progress_across_logout() {
 }
 
 #[test]
-fn stale_npc_dialog_action_is_rejected_after_ordinary_walks_out_of_range() {
+fn stale_npc_dialog_action_is_rejected_after_authoritative_transform_leaves_data_range() {
     let mut config = SimulationConfig::default();
     config.visible_npcs.push(VisibleNpcRecord {
         object_id: 4_991,
@@ -748,6 +748,13 @@ fn stale_npc_dialog_action_is_rejected_after_ordinary_walks_out_of_range() {
         });
         tick_after_ordinary_action(&mut session);
     }
+    session.force_authoritative_player_transform(
+        Point {
+            x: 331 - CRYSTAL_OBJECT_DATA_RANGE - 1,
+            y: 270,
+        },
+        MirDirection::Left,
+    );
     let current = player(&session);
     assert!(
         tile_distance(
@@ -756,13 +763,16 @@ fn stale_npc_dialog_action_is_rejected_after_ordinary_walks_out_of_range() {
                 y: current.y,
             },
             &Point { x: 331, y: 270 }
-        ) > 1,
-        "ordinary movement must leave the active NPC's interaction range"
+        ) > CRYSTAL_OBJECT_DATA_RANGE,
+        "authoritative transform must leave the active NPC's interaction range"
     );
 
     let replay = session.select_npc_dialog_target("@Storage");
     assert!(
-        replay.is_empty(),
+        replay.iter().all(|packet| !matches!(
+            packet,
+            ServerPacket::NPCStorage | ServerPacket::UserStorage { .. }
+        )),
         "a stale remote NPC action must not execute: {replay:?}"
     );
     assert!(session.world_snapshot().active_npc_dialog.is_none());

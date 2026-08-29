@@ -390,7 +390,7 @@ pub(super) fn crystal_class_name(class: MirClass) -> &'static str {
     }
 }
 
-pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: u32) -> bool {
+pub(super) fn crystal_npc_object_in_data_range(world: &World, npc_object_id: u32) -> bool {
     let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
         return false;
     };
@@ -412,6 +412,10 @@ pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: 
     };
 
     tile_distance(&player_position, &npc_position) <= CRYSTAL_DATA_RANGE
+}
+
+pub(super) fn crystal_npc_service_object_in_range(world: &World, npc_object_id: u32) -> bool {
+    crystal_npc_object_in_data_range(world, npc_object_id)
 }
 
 pub(super) fn current_crystal_npc_service_in_range(world: &World) -> Option<ActiveNpcServiceState> {

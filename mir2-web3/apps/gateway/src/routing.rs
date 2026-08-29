@@ -23194,8 +23194,12 @@ mod tests {
         // position at the command boundary just like Harvest and pickup do.
         runtime.inner.force_authoritative_player_transform(
             Point {
-                x: shared_npc.x.saturating_add(8),
-                y: shared_npc.y.saturating_add(8),
+                x: shared_npc
+                    .x
+                    .saturating_add(mir2_simulation::CRYSTAL_OBJECT_DATA_RANGE + 1),
+                y: shared_npc
+                    .y
+                    .saturating_add(mir2_simulation::CRYSTAL_OBJECT_DATA_RANGE + 1),
             },
             MirDirection::Down,
         );
@@ -23320,8 +23324,12 @@ mod tests {
         // FinishQuest uses the same command-boundary synchronization path.
         runtime.inner.force_authoritative_player_transform(
             Point {
-                x: shared_guide.x.saturating_add(8),
-                y: shared_guide.y.saturating_add(8),
+                x: shared_guide
+                    .x
+                    .saturating_add(mir2_simulation::CRYSTAL_OBJECT_DATA_RANGE + 1),
+                y: shared_guide
+                    .y
+                    .saturating_add(mir2_simulation::CRYSTAL_OBJECT_DATA_RANGE + 1),
             },
             MirDirection::Down,
         );

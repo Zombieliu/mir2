@@ -18757,6 +18757,13 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             },
+            ServerPacket::ObjectWalk {
+                movement: ObjectMovement {
+                    object_id: 2005,
+                    position: Point { x: 292, y: 616 },
+                    direction: MirDirection::Right,
+                },
+            },
             ServerPacket::ObjectAttack {
                 info: ObjectAttackInfo {
                     object_id: 1001,
@@ -18813,6 +18820,12 @@ mod tests {
             ServerPacket::ObjectHide { object_id: 2010 },
             ServerPacket::ObjectMonster { info: cannibal },
             ServerPacket::ObjectShow { object_id: 2010 },
+            ServerPacket::ObjectRevived {
+                info: mir2_protocol::ObjectRevivedInfo {
+                    object_id: 2005,
+                    effect: true,
+                },
+            },
         ];
         let fixture_events = fixture["timeline"]
             .as_array()

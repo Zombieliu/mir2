@@ -3897,22 +3897,93 @@ fn direct_interact_same_tile_rejects_without_runtime_chat_or_dialog() {
 }
 
 #[test]
-fn direct_interact_out_of_range_rejects_without_runtime_chat_or_dialog() {
+fn direct_interact_at_crystal_data_range_opens_without_forcing_a_turn() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    set_player_position(&mut session, Point { x: 330, y: 270 });
+    let npc_entity =
+        super::entity_by_object_id(session.app.world(), 4001).expect("starter NPC should exist");
+    let npc_position =
+        super::entity_position(session.app.world(), npc_entity).expect("NPC position");
+    set_player_position(
+        &mut session,
+        Point {
+            x: npc_position.x + crate::CRYSTAL_OBJECT_DATA_RANGE,
+            y: npc_position.y + crate::CRYSTAL_OBJECT_DATA_RANGE,
+        },
+    );
+    let player = super::player_entity(session.app.world()).expect("player");
+    let facing_before = super::entity_facing(session.app.world(), player).expect("facing");
 
     let packets = session.interact(4001);
     let snapshot = session.world_snapshot();
 
-    assert!(!packets
+    assert!(snapshot.active_npc_dialog.is_some());
+    assert!(packets
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert!(!packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
-    assert!(snapshot.active_npc_dialog.is_none());
+        .all(|packet| !matches!(packet, ServerPacket::ObjectTurn { .. })));
+    assert_eq!(
+        super::entity_facing(session.app.world(), player),
+        Some(facing_before)
+    );
+}
+
+#[test]
+fn direct_interact_beyond_crystal_data_range_rejects_without_dialog() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let npc_entity =
+        super::entity_by_object_id(session.app.world(), 4001).expect("starter NPC should exist");
+    let npc_position =
+        super::entity_position(session.app.world(), npc_entity).expect("NPC position");
+    set_player_position(
+        &mut session,
+        Point {
+            x: npc_position.x + crate::CRYSTAL_OBJECT_DATA_RANGE + 1,
+            y: npc_position.y + crate::CRYSTAL_OBJECT_DATA_RANGE + 1,
+        },
+    );
+
+    let packets = session.interact(4001);
+
+    assert!(packets.iter().all(|packet| !matches!(
+        packet,
+        ServerPacket::ObjectChat {
+            object_id: 4001,
+            ..
+        }
+    )));
+    assert!(session.world_snapshot().active_npc_dialog.is_none());
+}
+
+#[test]
+fn call_npc_accepts_crystal_bracketed_main_key() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let npc_entity =
+        super::entity_by_object_id(session.app.world(), 4001).expect("starter NPC should exist");
+    let npc_position =
+        super::entity_position(session.app.world(), npc_entity).expect("NPC position");
+    set_player_position(
+        &mut session,
+        Point {
+            x: npc_position.x + 2,
+            y: npc_position.y,
+        },
+    );
+
+    let packets = session.call_npc(4001, "[@MAIN]");
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat {
+            object_id: 4001,
+            ..
+        }
+    )));
+    assert!(session.world_snapshot().active_npc_dialog.is_some());
 }
 
 #[test]

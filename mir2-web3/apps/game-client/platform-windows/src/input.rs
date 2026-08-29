@@ -68,7 +68,7 @@ const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
 const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_LIMIT: usize = 16;
-const NPC_APPROACH_MAX_AGE_MS: f64 = 15_000.0;
+const CRYSTAL_NPC_CLICK_GUARD_MS: f64 = 5_000.0;
 
 #[derive(Clone, Debug, PartialEq)]
 struct PendingSelfMove {
@@ -78,12 +78,6 @@ struct PendingSelfMove {
     mode: WorldPointerMovementMode,
     sent_at_ms: f64,
     visual_until_ms: f64,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-struct PendingNpcInteraction {
-    object_id: u32,
-    started_at_ms: f64,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -117,7 +111,8 @@ pub struct WorldPointerMovementState {
     run_primed_until_ms: f64,
     input_blocked_until_ms: f64,
     last_packet_ack_at_ms: Option<f64>,
-    pending_npc_interaction: Option<PendingNpcInteraction>,
+    last_npc_object_id: Option<u32>,
+    npc_click_blocked_until_ms: f64,
     blocked_steps: Vec<BlockedSelfMove>,
     last_plan_block_trace_at_ms: Option<f64>,
 }
@@ -155,10 +150,6 @@ impl WorldPointerMovementState {
             "reason": reason,
         }));
         *self = Self::default();
-    }
-
-    fn cancel_npc_approach(&mut self) {
-        self.pending_npc_interaction = None;
     }
 
     fn trace_plan_blocked(
@@ -258,7 +249,8 @@ impl WorldPointerMovementState {
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
         self.input_blocked_until_ms = 0.0;
-        self.pending_npc_interaction = None;
+        self.last_npc_object_id = None;
+        self.npc_click_blocked_until_ms = 0.0;
         self.self_object_id = Some(object_id.to_owned());
         self.authoritative_position = Some(position);
         self.authoritative_direction = Some(direction.to_owned());
@@ -574,19 +566,6 @@ fn plan_crystal_pointer_move(
     None
 }
 
-fn tile_distance(left: (i32, i32), right: (i32, i32)) -> i32 {
-    (left.0 - right.0).abs().max((left.1 - right.1).abs())
-}
-
-fn npc_position(entities: &EntityModelSet, object_id: u32) -> Option<(i32, i32)> {
-    let object_id = object_id.to_string();
-    entities
-        .entities
-        .iter()
-        .find(|entity| entity.kind == EntityKind::Npc && entity.object_id == object_id)
-        .map(|entity| (entity.x, entity.y))
-}
-
 fn new_move_draw_offset(cursor_stage: (f32, f32)) -> (f32, f32) {
     (
         cursor_stage.0.rem_euclid(CELL_WIDTH) - 8.0,
@@ -784,7 +763,6 @@ pub fn mouse_world_interaction_system(
         && !right_released
         && movement.active.is_none()
         && movement.pending.is_none()
-        && movement.pending_npc_interaction.is_none()
         && !ack_waiting
     {
         return;
@@ -921,7 +899,6 @@ pub fn mouse_world_interaction_system(
 
     if !window.focused {
         movement.stop_hold(now_ms, "windowUnfocused");
-        movement.cancel_npc_approach();
         return;
     }
 
@@ -933,12 +910,10 @@ pub fn mouse_world_interaction_system(
         || is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
     {
         movement.stop_hold(now_ms, "worldInputBlocked");
-        movement.cancel_npc_approach();
         return;
     }
 
     if right_pressed {
-        movement.cancel_npc_approach();
         // Crystal reserves right-click object interactions (for example Ctrl+
         // inspect). Until those are implemented, never turn an object click
         // into movement through the actor beneath the pointer.
@@ -966,108 +941,36 @@ pub fn mouse_world_interaction_system(
             .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
         {
             movement.stop_hold(now_ms, "leftWorldIntent");
-            if let QuestUiIntent::InteractNpc { npc_object_id } = intent {
-                let origin = movement.authoritative_position.unwrap_or(entity_position);
-                if npc_position(&entities, npc_object_id)
-                    .is_some_and(|target| tile_distance(origin, target) > 1)
+            // Crystal sends CallNPC immediately and lets the server enforce
+            // its square DataRange=16 gate. It does not auto-walk adjacent.
+            if let QuestUiIntent::InteractNpc { npc_object_id } = &intent {
+                let npc_object_id = *npc_object_id;
+                if movement.last_npc_object_id == Some(npc_object_id)
+                    && now_ms <= movement.npc_click_blocked_until_ms
                 {
-                    movement.pending_npc_interaction = Some(PendingNpcInteraction {
-                        object_id: npc_object_id,
-                        started_at_ms: now_ms,
-                    });
-                } else {
-                    movement.cancel_npc_approach();
-                    if let Some(queue) = queue.as_deref_mut() {
-                        queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id });
-                    }
                     return;
                 }
-            } else {
-                movement.cancel_npc_approach();
+                movement.last_npc_object_id = Some(npc_object_id);
+                movement.npc_click_blocked_until_ms = now_ms + CRYSTAL_NPC_CLICK_GUARD_MS;
                 if let Some(queue) = queue.as_deref_mut() {
-                    queue.push_intent(intent);
+                    queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id });
                 }
                 return;
             }
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.push_intent(intent);
+            }
+            return;
         }
 
         // A player or another non-interactable actor is still solid world
         // content. Do not reinterpret that pixel hit as movement through it.
         if presentation.hovered_object_id().is_some() {
             movement.stop_hold(now_ms, "leftClickActor");
-            if movement.pending_npc_interaction.is_none() {
-                return;
-            }
+            return;
         } else {
-            movement.cancel_npc_approach();
             movement.begin(WorldPointerMovementMode::Walk, now_ms);
         }
-    }
-
-    // Match the Web client bridge: a distant NPC click becomes a bounded
-    // authoritative approach, and the dialog request is emitted exactly once
-    // after the player reaches an adjacent tile. Crystal's server does not
-    // accept the Windows client's previous fire-and-forget request at range.
-    if let Some(pending_npc) = movement.pending_npc_interaction.clone() {
-        if dialog_open || now_ms >= pending_npc.started_at_ms + NPC_APPROACH_MAX_AGE_MS {
-            movement.cancel_npc_approach();
-            return;
-        }
-        let Some(target) = npc_position(&entities, pending_npc.object_id) else {
-            movement.cancel_npc_approach();
-            return;
-        };
-        let origin = movement.authoritative_position.unwrap_or(entity_position);
-        let distance = tile_distance(origin, target);
-        if distance <= 1 {
-            movement.cancel_npc_approach();
-            if let Some(queue) = queue.as_deref_mut() {
-                queue.push_intent(QuestUiIntent::InteractNpc {
-                    npc_object_id: pending_npc.object_id,
-                });
-            }
-            return;
-        }
-        if !movement.can_send(now_ms) {
-            return;
-        }
-        let (Some(direction), Some(commands)) = (
-            movement_direction_toward(Some(target), origin),
-            commands.as_deref(),
-        ) else {
-            return;
-        };
-        let requested_mode = if distance > 2 {
-            WorldPointerMovementMode::Run
-        } else {
-            WorldPointerMovementMode::Walk
-        };
-        let map_file_name = presentation.current_map_file_name().map(ToOwned::to_owned);
-        let Some(planned) = plan_crystal_pointer_move(
-            &mut movement,
-            &entities,
-            Some(presentation),
-            &object_id,
-            map_file_name.as_deref(),
-            origin,
-            direction,
-            requested_mode,
-            now_ms,
-        ) else {
-            return;
-        };
-        let _ = send_pointer_move(
-            commands,
-            presentation,
-            &mut movement,
-            &object_id,
-            origin,
-            planned.direction,
-            planned.mode,
-            now_ms,
-            animation_now_ms,
-        );
-        return;
     }
 
     let Some(mode) = movement.active else {
@@ -1887,7 +1790,7 @@ mod tests {
     }
 
     #[test]
-    fn distant_npc_click_approaches_authoritatively_then_interacts_once() {
+    fn distant_npc_click_queues_interaction_immediately_without_movement() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -1901,7 +1804,7 @@ mod tests {
             .iter_mut()
             .find(|entity| entity.object_id == "77")
             .expect("npc")
-            .x = 15;
+            .x = 26;
         app.insert_resource(entities);
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hovered_object_id_for_test(Some("77"));
@@ -1912,41 +1815,6 @@ mod tests {
             .resource_mut::<ButtonInput<MouseButton>>()
             .press(MouseButton::Left);
 
-        app.update();
-
-        assert!(matches!(
-            receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
-        ));
-        assert!(app
-            .world_mut()
-            .resource_mut::<QuestUiIntentQueue>()
-            .drain_intents()
-            .is_empty());
-        assert_eq!(
-            app.world()
-                .resource::<WorldPointerMovementState>()
-                .pending_npc_interaction
-                .as_ref()
-                .map(|pending| pending.object_id),
-            Some(77)
-        );
-
-        app.world_mut()
-            .resource_mut::<ButtonInput<MouseButton>>()
-            .release(MouseButton::Left);
-        app.world_mut()
-            .resource_mut::<ButtonInput<MouseButton>>()
-            .clear_just_pressed(MouseButton::Left);
-        app.world_mut()
-            .resource_mut::<EntityModelSet>()
-            .entities
-            .iter_mut()
-            .find(|entity| entity.kind == EntityKind::SelfPlayer)
-            .expect("self")
-            .x = 14;
-        push_test_movement_ack(&app, 14, 10, "right");
-        advance_movement_clock(&mut app, 600);
         app.update();
 
         assert_eq!(
@@ -1955,22 +1823,11 @@ mod tests {
                 .drain_intents(),
             vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
         );
-        assert!(app
-            .world()
-            .resource::<WorldPointerMovementState>()
-            .pending_npc_interaction
-            .is_none());
-
-        app.update();
-        assert!(app
-            .world_mut()
-            .resource_mut::<QuestUiIntentQueue>()
-            .drain_intents()
-            .is_empty());
+        assert!(receiver.try_recv().is_err(), "NPC click must not auto-walk");
     }
 
     #[test]
-    fn npc_disappearance_cancels_pending_approach_without_fake_dialog_request() {
+    fn npc_click_beyond_data_range_still_defers_rejection_to_the_server() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -1984,7 +1841,7 @@ mod tests {
             .iter_mut()
             .find(|entity| entity.object_id == "77")
             .expect("npc")
-            .x = 15;
+            .x = 27;
         app.insert_resource(entities);
         let mut presentation = NativeEntityPresentation::default();
         presentation.set_hovered_object_id_for_test(Some("77"));
@@ -1994,31 +1851,78 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
             .press(MouseButton::Left);
+
         app.update();
-        assert!(receiver.try_recv().is_ok(), "approach did not start");
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "only the server may reject an out-of-range NPC click"
+        );
+    }
+
+    #[test]
+    fn repeated_npc_click_uses_crystal_five_second_same_object_guard() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hovered_object_id_for_test(Some("77"));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
 
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
-            .release(MouseButton::Left);
-        app.world_mut()
-            .resource_mut::<ButtonInput<MouseButton>>()
-            .clear_just_pressed(MouseButton::Left);
-        app.world_mut()
-            .resource_mut::<EntityModelSet>()
-            .entities
-            .retain(|entity| entity.object_id != "77");
+            .press(MouseButton::Left);
         app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
 
-        assert!(app
-            .world()
-            .resource::<WorldPointerMovementState>()
-            .pending_npc_interaction
-            .is_none());
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.release(MouseButton::Left);
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.press(MouseButton::Left);
+        }
+        app.update();
         assert!(app
             .world_mut()
             .resource_mut::<QuestUiIntentQueue>()
             .drain_intents()
             .is_empty());
+
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.release(MouseButton::Left);
+            mouse.clear_just_pressed(MouseButton::Left);
+        }
+        advance_movement_clock(&mut app, 5_001);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
+        assert!(receiver.try_recv().is_err(), "NPC clicks must not move");
     }
 
     #[test]
