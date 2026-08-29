@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows Type1 transfer checkpoint (2026-08-29): the user's
+> GroceryStore screenshot records a failed old Candidate: destination map
+> metadata changed to `0141`, but Bichon terrain remained and scene clearing
+> removed visible actor bodies. The bounded repair adds Type1 map parsing to
+> native keyed-map packaging, unions maps `0` and `0141`, and fills all 307
+> GroceryStore `WemadeMir2/Objects2` references by SHA-256-verified extraction
+> from the immutable Full Crystal release while preserving exact offsets. Map
+> identity is now part of the render handoff key, unavailable destination
+> frames fail closed instead of retaining old terrain, and map boundaries
+> preserve the self actor while clearing source-map population. Native map-pack
+> tests, a real 4,957-entry combined build and Windows 474/474 pass. This is a
+> source/automation checkpoint only; a new exact EXE/package and the user's
+> GroceryStore visual retest remain pending. No other map, global visual or
+> whole-game percentage is closed, and all live-WSS/DPI/soak/human/signing
+> gates remain open; `globalParityPercent=null`.
+
 > Latest Windows pointer/NPC/motion checkpoint (2026-08-29): revision
 > `4d035489a966d827ef5aa49567d4b53bf344d2a7` gives command-to-ACK self
 > movement one native presentation owner, maps alpha-tested Monster/NPC/

@@ -1,5 +1,26 @@
 # Agent Task Queue
 
+> Windows-native VIS-01 Type1 map-transfer recovery (2026-08-29): the user's
+> GroceryStore screenshot is retained as a failed Candidate observation, not a
+> visual pass. The destination title/coordinates had advanced to map `0141`
+> while the renderer retained Bichon terrain, and the scene reset discarded
+> the self actor presentation. The native keyed-map build had covered only map
+> `0`; map `0141` needs 307 unique `WemadeMir2/Objects2` frames. The builder
+> now parses Crystal Type1 maps, unions `0,0141`, verifies the immutable Full
+> Crystal index/library/page SHA-256 chain, and extracts all 307 exact frames
+> with source offsets. Map render handoff keys now include map identity and
+> failed destination renders explicitly clear stale terrain; a map boundary
+> clears remote population/transients while preserving the local actor. The
+> real combined build emits 4,957 entries with `fullPackEntryCount=307` and
+> leaves the known map-0 baseline `missingSourceCount=2508`; native keyed-map
+> tests and Windows 474/474 pass. An exact EXE/package and human GroceryStore
+> retest are still pending. Other maps and the complete map denominator,
+> authenticated same-EXE live WSS, real DPI, native 30-minute soak, complete
+> UI/VFX/actor coverage, human visual/feel and formal publisher signing remain
+> open. `accepted=false`, `visualAccepted=false`,
+> `globalParityPercent=null`. Report:
+> `docs/generated/player-qa/windows-visual-parity/VIS-01-TYPE1-MAP-TRANSFER-REPORT.md`.
+
 > Windows-native VIS-01 pointer/NPC/self-motion follow-up (2026-08-29): clean
 > revision `4d035489a966d827ef5aa49567d4b53bf344d2a7` removes the native-only
 > command/ACK presentation-owner handoff that could flash the player and whole

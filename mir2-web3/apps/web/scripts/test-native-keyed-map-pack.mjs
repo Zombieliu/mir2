@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
@@ -20,6 +21,7 @@ import {
   mapAtlasPathRequiresAlphaKey,
   mapLibraryKeyForIndex,
   NATIVE_KEYED_MAX_MISSING_SOURCES,
+  parseType1Map,
   parseType100Map,
   resolveCrystalMapPlacement,
 } from "./build-native-keyed-map-pack.mjs";
@@ -68,6 +70,26 @@ function makeType100MapBytes(cells) {
   return bytes;
 }
 
+function makeType1MapBytes(cells, width = cells.length, height = 1) {
+  const xor = 0x1357;
+  const bytes = Buffer.alloc(54 + cells.length * 15);
+  bytes[0] = 0x10;
+  bytes[2] = 0x61;
+  bytes[7] = 0x31;
+  bytes[14] = 0x31;
+  bytes.writeInt16LE(width ^ xor, 21);
+  bytes.writeInt16LE(xor, 23);
+  bytes.writeInt16LE(height ^ xor, 25);
+  for (let index = 0; index < cells.length; index += 1) {
+    cells[index](bytes, 54 + index * 15, xor);
+  }
+  return bytes;
+}
+
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
 {
   const mir3Names = [
     "Tilesc",
@@ -91,9 +113,16 @@ function makeType100MapBytes(cells) {
     for (let slot = 0; slot < mir3Names.length; slot += 1) {
       const name = mir3Names[slot];
       const wemadeFolder =
-        name === "Object1c" || name === "Object2c" ? "" : wemadeMir3Folders[state];
-      const wemadePrefix = wemadeFolder ? `WemadeMir3/${wemadeFolder}/` : "WemadeMir3/";
-      assert.equal(mapLibraryKeyForIndex(200 + state * 15 + slot), `${wemadePrefix}${name}`);
+        name === "Object1c" || name === "Object2c"
+          ? ""
+          : wemadeMir3Folders[state];
+      const wemadePrefix = wemadeFolder
+        ? `WemadeMir3/${wemadeFolder}/`
+        : "WemadeMir3/";
+      assert.equal(
+        mapLibraryKeyForIndex(200 + state * 15 + slot),
+        `${wemadePrefix}${name}`,
+      );
       assert.equal(
         mapLibraryKeyForIndex(300 + state * 15 + slot),
         `ShandaMir3/${name}${shandaMir3Suffixes[state]}`,
@@ -113,9 +142,20 @@ function makeType100MapBytes(cells) {
 }
 
 {
-  assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir2/Tiles/1.png"), false);
-  assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir2/Objects/1.png"), true);
-  assert.equal(mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir3/Sand/Dungeonsc/99.png"), true);
+  assert.equal(
+    mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir2/Tiles/1.png"),
+    false,
+  );
+  assert.equal(
+    mapAtlasPathRequiresAlphaKey("/original-map/WemadeMir2/Objects/1.png"),
+    true,
+  );
+  assert.equal(
+    mapAtlasPathRequiresAlphaKey(
+      "/original-map/WemadeMir3/Sand/Dungeonsc/99.png",
+    ),
+    true,
+  );
 }
 
 {
@@ -133,7 +173,9 @@ function makeType100MapBytes(cells) {
 
 {
   const pixels = makePixels(5, 5, (x, y) =>
-    x === 0 || y === 0 || x === 4 || y === 4 ? [0, 0, 0, 255] : [200, 200, 200, 255],
+    x === 0 || y === 0 || x === 4 || y === 4
+      ? [0, 0, 0, 255]
+      : [200, 200, 200, 255],
   );
   const changed = alphaKeyMapObjectPixels(pixels, 5, 5);
   assert.ok(changed > 0);
@@ -158,7 +200,32 @@ function makeType100MapBytes(cells) {
   const refs = collectStandaloneMapReferences(parsed);
   assert.equal(refs.length, 1, "same frame should dedupe");
   assert.equal(refs[0].key, "WemadeMir2/Objects#1");
-  assert.equal(refs[0].additive, true, "additive reference must win during dedupe");
+  assert.equal(
+    refs[0].additive,
+    true,
+    "additive reference must win during dedupe",
+  );
+}
+
+{
+  const bytes = makeType1MapBytes([
+    (target, base, xor) => {
+      target.writeInt32LE(0xaa38aa38 | 0, base);
+      target.writeInt16LE(xor, base + 4);
+      target.writeInt16LE(2 ^ xor, base + 6);
+      target[base + 12] = 1; // library index 3 -> WemadeMir2/Objects2
+    },
+  ]);
+  const parsed = parseType1Map(bytes);
+  assert.ok(parsed);
+  assert.equal(parsed.width, 1);
+  assert.equal(parsed.height, 1);
+  assert.equal(parsed.cells[0].frontIndex, 3);
+  assert.equal(parsed.cells[0].frontImage, 2);
+  assert.equal(
+    collectStandaloneMapReferences(parsed)[0].key,
+    "WemadeMir2/Objects2#1",
+  );
 }
 
 {
@@ -246,7 +313,9 @@ function makeType100MapBytes(cells) {
 {
   let unsafeError = null;
   try {
-    assertSafeNativeKeyedOutputRoot(path.join(os.tmpdir(), "plain-temp-output"));
+    assertSafeNativeKeyedOutputRoot(
+      path.join(os.tmpdir(), "plain-temp-output"),
+    );
   } catch (error) {
     unsafeError = error;
   }
@@ -254,14 +323,23 @@ function makeType100MapBytes(cells) {
 }
 
 {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "native-keyed-map-"));
+  const tempRoot = await fs.mkdtemp(
+    path.join(os.tmpdir(), "native-keyed-map-"),
+  );
   const packagedMapRoot = path.join(tempRoot, "packaged");
   const originalMapRoot = path.join(tempRoot, "original-map");
   const outputRoot = path.join(tempRoot, "native-keyed-map-output");
-  const starterMapRegionPath = path.join(tempRoot, "crystal_starter_map_region.json");
+  const starterMapRegionPath = path.join(
+    tempRoot,
+    "crystal_starter_map_region.json",
+  );
   await fs.mkdir(packagedMapRoot, { recursive: true });
-  await fs.mkdir(path.join(originalMapRoot, "WemadeMir2", "Objects"), { recursive: true });
-  await fs.mkdir(path.join(originalMapRoot, "WemadeMir2", "Objects27"), { recursive: true });
+  await fs.mkdir(path.join(originalMapRoot, "WemadeMir2", "Objects"), {
+    recursive: true,
+  });
+  await fs.mkdir(path.join(originalMapRoot, "WemadeMir2", "Objects27"), {
+    recursive: true,
+  });
   const mapBytes = makeType100MapBytes([
     (target, base) => {
       target.writeInt16LE(2, base + 6);
@@ -273,7 +351,10 @@ function makeType100MapBytes(cells) {
       target[base + 16] = 0x81;
     },
   ]);
-  await fs.writeFile(path.join(packagedMapRoot, "0.map.gz"), gzipSync(mapBytes));
+  await fs.writeFile(
+    path.join(packagedMapRoot, "0.map.gz"),
+    gzipSync(mapBytes),
+  );
   const keyedSource = await sharp({
     create: {
       width: 2,
@@ -294,8 +375,14 @@ function makeType100MapBytes(cells) {
   })
     .png()
     .toBuffer();
-  await fs.writeFile(path.join(originalMapRoot, "WemadeMir2", "Objects", "1.png"), keyedSource);
-  await fs.writeFile(path.join(originalMapRoot, "WemadeMir2", "Objects", "2723.png"), additiveSource);
+  await fs.writeFile(
+    path.join(originalMapRoot, "WemadeMir2", "Objects", "1.png"),
+    keyedSource,
+  );
+  await fs.writeFile(
+    path.join(originalMapRoot, "WemadeMir2", "Objects", "2723.png"),
+    additiveSource,
+  );
   await fs.writeFile(
     starterMapRegionPath,
     JSON.stringify({
@@ -328,7 +415,9 @@ function makeType100MapBytes(cells) {
   const manifest = JSON.parse(
     await fs.readFile(path.join(outputRoot, "manifest.json"), "utf8"),
   );
-  const keyedEntry = manifest.entries.find((entry) => entry.key === "WemadeMir2/Objects#1");
+  const keyedEntry = manifest.entries.find(
+    (entry) => entry.key === "WemadeMir2/Objects#1",
+  );
   const additiveEntry = manifest.entries.find(
     (entry) => entry.key === "WemadeMir2/Objects#2723",
   );
@@ -337,10 +426,24 @@ function makeType100MapBytes(cells) {
   assert.equal(additiveEntry.placementMode, "source-offset");
   assert.equal(additiveEntry.offsetX, -51);
   assert.equal(additiveEntry.offsetY, -113);
-  const keyedPagePath = path.join(outputRoot, "pages", path.basename(keyedEntry.imageUrl));
-  const additivePagePath = path.join(outputRoot, "pages", path.basename(additiveEntry.imageUrl));
-  assert.ok(existsSync(keyedPagePath), "keyed page must be emitted in custom output root");
-  assert.ok(existsSync(additivePagePath), "additive page must be emitted in custom output root");
+  const keyedPagePath = path.join(
+    outputRoot,
+    "pages",
+    path.basename(keyedEntry.imageUrl),
+  );
+  const additivePagePath = path.join(
+    outputRoot,
+    "pages",
+    path.basename(additiveEntry.imageUrl),
+  );
+  assert.ok(
+    existsSync(keyedPagePath),
+    "keyed page must be emitted in custom output root",
+  );
+  assert.ok(
+    existsSync(additivePagePath),
+    "additive page must be emitted in custom output root",
+  );
   assert.equal(
     existsSync(
       path.resolve(
@@ -362,15 +465,179 @@ function makeType100MapBytes(cells) {
     "additive staged PNG must stay byte-identical to source",
   );
   const stagedMeta = await sharp(readFileSync(additivePagePath)).metadata();
-  assert.equal(stagedMeta.hasAlpha, true, "additive staged PNG must preserve source alpha");
+  assert.equal(
+    stagedMeta.hasAlpha,
+    true,
+    "additive staged PNG must preserve source alpha",
+  );
 }
 
 {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "native-keyed-map-"));
+  const tempRoot = await fs.mkdtemp(
+    path.join(os.tmpdir(), "native-keyed-map-"),
+  );
+  const packagedMapRoot = path.join(tempRoot, "packaged");
+  const originalMapRoot = path.join(tempRoot, "original-map");
+  const fullPackRoot = path.join(tempRoot, "full");
+  const outputRoot = path.join(tempRoot, "native-keyed-map-full-pack-output");
+  const productionAssetConfigPath = path.join(
+    tempRoot,
+    "production-web-assets.json",
+  );
+  const starterMapRegionPath = path.join(
+    tempRoot,
+    "crystal_starter_map_region.json",
+  );
+  await fs.mkdir(packagedMapRoot, { recursive: true });
+  await fs.mkdir(originalMapRoot, { recursive: true });
+  const mapBytes = makeType1MapBytes([
+    (target, base, xor) => {
+      target.writeInt32LE(0xaa38aa38 | 0, base);
+      target.writeInt16LE(xor, base + 4);
+      target.writeInt16LE(2 ^ xor, base + 6);
+      target[base + 12] = 1;
+    },
+  ]);
+  await fs.writeFile(
+    path.join(packagedMapRoot, "0141.map.gz"),
+    gzipSync(mapBytes),
+  );
+  await fs.writeFile(starterMapRegionPath, JSON.stringify({ sprites: {} }));
+
+  const pageBytes = await sharp({
+    create: {
+      width: 4,
+      height: 4,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([
+      {
+        input: await sharp({
+          create: {
+            width: 2,
+            height: 2,
+            channels: 4,
+            background: { r: 25, g: 120, b: 240, alpha: 1 },
+          },
+        })
+          .png()
+          .toBuffer(),
+        left: 1,
+        top: 1,
+      },
+    ])
+    .png()
+    .toBuffer();
+  const pageHash = sha256(pageBytes);
+  const pageUrl = `/generated/crystal-packs/full/pages/${pageHash.slice(0, 2)}/${pageHash}.png`;
+  const libraryManifest = {
+    libraryKey: "Map/WemadeMir2/Objects2",
+    frames: [
+      { index: 0, noDraw: true, status: "no-draw" },
+      {
+        index: 1,
+        status: "packed",
+        noDraw: false,
+        x: 7,
+        y: -44,
+        image: {
+          imageUrl: pageUrl,
+          pageKey: `sha256:${pageHash}`,
+          x: 1,
+          y: 1,
+          width: 2,
+          height: 2,
+        },
+      },
+    ],
+  };
+  const libraryBytes = Buffer.from(`${JSON.stringify(libraryManifest)}\n`);
+  const libraryHash = sha256(libraryBytes);
+  const libraryUrl =
+    "/generated/crystal-packs/full/libraries/maps/objects2.json";
+  const contentHash = "a".repeat(64);
+  const indexBytes = Buffer.from(
+    `${JSON.stringify({
+      contentHash,
+      libraries: [
+        {
+          libraryKey: "Map/WemadeMir2/Objects2",
+          manifestUrl: libraryUrl,
+          manifestSha256: libraryHash,
+        },
+      ],
+    })}\n`,
+  );
+  await fs.mkdir(path.join(fullPackRoot, "libraries", "maps"), {
+    recursive: true,
+  });
+  await fs.mkdir(path.join(fullPackRoot, "pages", pageHash.slice(0, 2)), {
+    recursive: true,
+  });
+  await fs.writeFile(path.join(fullPackRoot, "index.json"), indexBytes);
+  await fs.writeFile(
+    path.join(fullPackRoot, "libraries", "maps", "objects2.json"),
+    libraryBytes,
+  );
+  await fs.writeFile(
+    path.join(fullPackRoot, "pages", pageHash.slice(0, 2), `${pageHash}.png`),
+    pageBytes,
+  );
+  await fs.writeFile(
+    productionAssetConfigPath,
+    JSON.stringify({
+      assetBaseUrl: "https://assets.invalid/release",
+      fullCrystalPack: {
+        path: "/generated/crystal-packs/full/index.json",
+        contentHash,
+      },
+    }),
+  );
+
+  const result = await buildNativeKeyedMapPack({
+    mapFileNames: ["0141"],
+    packagedMapRoot,
+    originalMapRoot,
+    fullPackRoot,
+    outputRoot,
+    starterMapRegionPath,
+    productionAssetConfigPath,
+    fullPackFallbackMapFileNames: ["0141"],
+    maxMissingSources: 0,
+  });
+  assert.equal(result.fullPackEntryCount, 1);
+  assert.equal(result.missingSourceCount, 0);
+  const manifest = JSON.parse(
+    await fs.readFile(path.join(outputRoot, "manifest.json"), "utf8"),
+  );
+  assert.deepEqual(manifest.mapFileNames, ["0141"]);
+  assert.equal(manifest.entries[0].key, "WemadeMir2/Objects2#1");
+  assert.equal(manifest.entries[0].placementMode, "source-offset");
+  assert.equal(manifest.entries[0].offsetX, 7);
+  assert.equal(manifest.entries[0].offsetY, -44);
+  const extracted = await sharp(
+    path.join(outputRoot, "pages", path.basename(manifest.entries[0].imageUrl)),
+  )
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assert.equal(extracted.info.width, 2);
+  assert.equal(extracted.info.height, 2);
+  assert.deepEqual([...extracted.data.subarray(0, 4)], [25, 120, 240, 255]);
+}
+
+{
+  const tempRoot = await fs.mkdtemp(
+    path.join(os.tmpdir(), "native-keyed-map-"),
+  );
   const packagedMapRoot = path.join(tempRoot, "packaged");
   const originalMapRoot = path.join(tempRoot, "original-map");
   const outputRoot = path.join(tempRoot, "native-keyed-map-budget-output");
-  const starterMapRegionPath = path.join(tempRoot, "crystal_starter_map_region.json");
+  const starterMapRegionPath = path.join(
+    tempRoot,
+    "crystal_starter_map_region.json",
+  );
   await fs.mkdir(packagedMapRoot, { recursive: true });
   await fs.mkdir(outputRoot, { recursive: true });
   const mapBytes = makeType100MapBytes([
@@ -379,7 +646,10 @@ function makeType100MapBytes(cells) {
       target.writeInt16LE(2, base + 8);
     },
   ]);
-  await fs.writeFile(path.join(packagedMapRoot, "0.map.gz"), gzipSync(mapBytes));
+  await fs.writeFile(
+    path.join(packagedMapRoot, "0.map.gz"),
+    gzipSync(mapBytes),
+  );
   await fs.writeFile(starterMapRegionPath, JSON.stringify({ sprites: {} }));
   const sentinelManifest = '{"sentinel":true}\n';
   await fs.writeFile(path.join(outputRoot, "manifest.json"), sentinelManifest);

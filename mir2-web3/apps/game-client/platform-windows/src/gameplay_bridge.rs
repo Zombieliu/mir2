@@ -452,7 +452,7 @@ impl NativeGameplayAdapter {
                         // as a scene boundary even when no legacy MapChanged
                         // packet follows, otherwise retained source-map actors
                         // are merged into the first destination frame.
-                        self.clear_zone_state();
+                        self.clear_zone_state_for_map_change();
                     }
                     // NewMapInfo may legitimately arrive before the first
                     // MapInformation bootstrap. With no prior map identity,
@@ -473,7 +473,7 @@ impl NativeGameplayAdapter {
                 // Preserve only the connection-scoped WorldMapSetup metadata.
                 self.big_map
                     .reset_for_map(identity.map_index, identity.location);
-                self.clear_zone_state();
+                self.clear_zone_state_for_map_change();
                 self.record_effect(
                     "MapChanged",
                     &serde_json::json!({
@@ -595,7 +595,7 @@ impl NativeGameplayAdapter {
                     } else {
                         self.big_map.reset_for_session();
                     }
-                    self.clear_zone_state();
+                    self.clear_zone_state_for_map_change();
                     self.record_effect("MapChanged", payload);
                     if let Some(transform) = transform_from_payload(payload) {
                         self.authoritative_player_transform = Some(transform);
@@ -923,6 +923,25 @@ impl NativeGameplayAdapter {
         self.effect_events.clear();
         self.actor_sound_contexts.clear();
         self.latest_player_object_id = None;
+    }
+
+    /// Drop source-map population without discarding the local player's
+    /// presentation identity. MapInformation is a scene boundary, not a session
+    /// boundary: clearing the self object id/animation here leaves a valid name
+    /// and HP bar with no body until a later full personal snapshot arrives.
+    fn clear_zone_state_for_map_change(&mut self) {
+        let player_object_id = self.latest_player_object_id;
+        self.zone_entities.retain(|object_id, overlay| {
+            player_object_id == Some(*object_id)
+                || overlay.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+        });
+        self.zone_snapshot_dispositions.clear();
+        self.zone_ground_drops.clear();
+        self.zone_tombstones.clear();
+        self.damage_events.clear();
+        self.effect_events.clear();
+        self.actor_sound_contexts
+            .retain(|object_id, _| player_object_id == Some(*object_id));
     }
 
     pub(crate) fn set_generation(&mut self, generation: u64) {
@@ -5625,7 +5644,7 @@ mod tests {
     }
 
     #[test]
-    fn map_information_identity_change_clears_retained_source_zone_state() {
+    fn map_information_identity_change_clears_source_population_but_preserves_self() {
         use crate::native_protocol::MapIdentity;
 
         let mut adapter = NativeGameplayAdapter::default();
@@ -5635,6 +5654,22 @@ mod tests {
                 location: None,
             }))
         );
+        adapter.latest_player_object_id = Some(1000);
+        adapter.authoritative_player_dead = Some(false);
+        adapter.authoritative_player_animation = Some(NativeAnimationHint {
+            sequence: 7,
+            action: "stand",
+        });
+        adapter.zone_entities.insert(
+            1000,
+            serde_json::Map::from_iter([
+                ("objectId".to_owned(), json!(1000)),
+                ("kind".to_owned(), json!("selfPlayer")),
+            ]),
+        );
+        adapter
+            .actor_sound_contexts
+            .insert(1000, json!({"objectId": 1000, "kind": "selfPlayer"}));
         adapter.zone_entities.insert(
             2000,
             serde_json::Map::from_iter([
@@ -5659,7 +5694,18 @@ mod tests {
                 location: None,
             }))
         );
-        assert!(adapter.zone_entities.is_empty());
+        assert_eq!(adapter.zone_entities.len(), 1);
+        assert!(adapter.zone_entities.contains_key(&1000));
+        assert_eq!(adapter.latest_player_object_id, Some(1000));
+        assert_eq!(adapter.authoritative_player_dead, Some(false));
+        assert_eq!(
+            adapter
+                .authoritative_player_animation
+                .as_ref()
+                .map(|hint| (hint.sequence, hint.action)),
+            Some((7, "stand"))
+        );
+        assert!(adapter.actor_sound_contexts.contains_key(&1000));
         assert!(adapter.zone_ground_drops.is_empty());
         assert!(adapter.effect_events.is_empty());
         assert_eq!(adapter.big_map.current_map_index, Some(141));

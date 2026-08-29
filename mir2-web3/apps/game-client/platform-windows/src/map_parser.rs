@@ -931,6 +931,46 @@ pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<
     build_map_render_state_with_indexes(map, viewport, &atlas_index, standalone_index.as_ref())
 }
 
+/// Build a map frame whose acknowledgement identity includes the authoritative
+/// map file. Coordinates alone are not unique across a transfer (for example
+/// `(5, 12)` exists in both Bichon and GroceryStore), so a coordinate-only key
+/// can let the previous map satisfy the destination frame handoff.
+pub fn build_map_render_state_for_file(
+    map: &ParsedMap,
+    viewport: MapViewport,
+    map_file_name: &str,
+) -> Option<Value> {
+    let mut state = build_map_render_state(map, viewport)?;
+    state["ackKey"] = json!(map_render_ack_key(map_file_name, viewport));
+    Some(state)
+}
+
+/// Explicit fail-closed state for a destination map whose local assets cannot
+/// produce a complete render frame. This removes the previous map instead of
+/// displaying old terrain under the new title and coordinates.
+pub fn disabled_map_render_state(map_file_name: &str, viewport: MapViewport) -> Value {
+    json!({
+        "enabled": false,
+        "stageWidth": STAGE_WIDTH,
+        "stageHeight": STAGE_HEIGHT,
+        "centerX": viewport.center_x,
+        "centerY": viewport.center_y,
+        "ackKey": map_render_ack_key(map_file_name, viewport),
+        "tiles": [],
+        "atlases": [],
+        "standaloneTiles": [],
+        "retainedImageKeys": [],
+    })
+}
+
+fn map_render_ack_key(map_file_name: &str, viewport: MapViewport) -> String {
+    let identity = map_cache_key(map_file_name).unwrap_or_else(|| "unknown".to_owned());
+    format!(
+        "native-map:{identity}:{}:{}",
+        viewport.center_x, viewport.center_y
+    )
+}
+
 fn build_map_render_state_with_indexes(
     map: &ParsedMap,
     viewport: MapViewport,
@@ -1131,6 +1171,28 @@ pub fn has_local_map_atlas() -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn destination_map_identity_is_part_of_the_render_handoff_key() {
+        let viewport = MapViewport {
+            center_x: 5,
+            center_y: 12,
+            width: 22,
+            height: 18,
+        };
+        assert_eq!(
+            map_render_ack_key("0141.map.gz", viewport),
+            "native-map:0141:5:12"
+        );
+        assert_eq!(
+            disabled_map_render_state("0141", viewport)["ackKey"],
+            json!("native-map:0141:5:12")
+        );
+        assert_eq!(
+            disabled_map_render_state("0141", viewport)["enabled"],
+            json!(false)
+        );
+    }
 
     #[test]
     fn parsed_map_cache_is_bounded_and_refreshes_the_current_map() {

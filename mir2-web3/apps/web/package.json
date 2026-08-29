@@ -83,7 +83,7 @@
     "assets:full-pack:prune": "node ./scripts/asset-pipeline/compile-full-asset-packs.mjs --mode prune --apply true",
     "assets:map-atlas:build": "node ./scripts/build-map-atlas-pack.mjs",
     "assets:map-atlas:ensure": "node ./scripts/build-map-atlas-pack.mjs --skipIfPresent",
-    "assets:native-map-keyed:build": "node ./scripts/build-native-keyed-map-pack.mjs --map 0",
+    "assets:native-map-keyed:build": "node ./scripts/build-native-keyed-map-pack.mjs --maps 0,0141 --fullPackFallbackMaps 0141",
     "test:native-map-keyed": "node --test ./scripts/test-native-keyed-map-pack.mjs",
     "assets:map-atlas:release": "node ./scripts/build-map-atlas-release.mjs",
     "verify:map-atlas-release": "node ./scripts/verify-map-atlas-release.mjs",

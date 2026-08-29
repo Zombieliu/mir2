@@ -2,6 +2,25 @@
 
 Last updated: 2026-08-29
 
+> 2026-08-29 Windows-native VIS-01 Type1 transfer regression checkpoint: the
+> user-provided GroceryStore screenshot is an explicit failure. Map identity
+> reached `0141` / `(5,12)`, but old Bichon pixels remained and player/NPC
+> bodies disappeared. Two independent causes are now covered: the Candidate's
+> native keyed-map assets were generated only from map `0`, omitting 307
+> `WemadeMir2/Objects2` frames referenced by Type1 map `0141`; and the map
+> boundary cleared the local actor presentation along with source-map actors.
+> The asset builder now parses Type1, builds `0,0141`, verifies immutable Full
+> Crystal content/library/page hashes and crops all 307 required frames with
+> exact source offsets. Windows render handoff identity includes the map file,
+> unavailable destination rendering clears stale terrain, and scene reset
+> preserves only the authoritative self actor while dropping old remote
+> population/transients. Native keyed-map tests pass, a real combined build
+> reports 4,957 emitted / 307 Full-Pack-derived / 2,508 known map-0 baseline
+> missing, and Windows passes 474/474. No exact new EXE has yet been visually
+> accepted. Other maps, complete map/UI/VFX/actor denominators, live WSS, DPI,
+> soak, human acceptance and formal publisher signing remain open;
+> `globalParityPercent=null`, `visualAccepted=false`, `accepted=false`.
+
 > 2026-08-29 Windows-native VIS-01 direct-frame/run/chat follow-up: the user
 > visually rejected `02bb67874791c26e556fee88382d0e7d61287012` because the
 > actor still flickered; stable `TextureAtlasLayout` identity was therefore

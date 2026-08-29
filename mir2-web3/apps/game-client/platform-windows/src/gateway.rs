@@ -2995,27 +2995,7 @@ where
             // When a local map pack + atlas are available, render the real map
             // textures via MapRenderState instead of the colored terrain. The
             // gateway payload carries the authoritative map file name.
-            let map_file_name = payload
-                .get("mapFileName")
-                .and_then(Value::as_str)
-                .unwrap_or("0");
-            if crate::map_parser::has_local_map_atlas() {
-                if let Some(map) = crate::map_parser::load_map(map_file_name) {
-                    let viewport = crate::map_parser::MapViewport::from_gateway_payload(&payload);
-                    if let Some(render_state) =
-                        crate::map_parser::build_map_render_state(&map, viewport)
-                    {
-                        let render_json =
-                            serde_json::to_string(&render_state).map_err(|e| e.to_string())?;
-                        let _ = mir2_bevy_runtime::native_ingest::push_native_map_render_state(
-                            render_json,
-                        );
-                        eprintln!(
-                            "[gateway-client] pushed real map render state for {map_file_name}"
-                        );
-                    }
-                }
-            }
+            push_local_map_render_state(&payload)?;
 
             // Feed the shared entity model set so client-bevy renders entities.
             let entity_model = transform_entity_model_set(&payload);
@@ -3483,20 +3463,7 @@ fn forward_packet_first_world(
     let map_json = serde_json::to_string(&map_model).map_err(|error| error.to_string())?;
     let _ = mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
 
-    let map_file_name = payload
-        .get("mapFileName")
-        .and_then(Value::as_str)
-        .unwrap_or("0");
-    if crate::map_parser::has_local_map_atlas() {
-        if let Some(map) = crate::map_parser::load_map(map_file_name) {
-            let viewport = crate::map_parser::MapViewport::from_gateway_payload(payload);
-            if let Some(render_state) = crate::map_parser::build_map_render_state(&map, viewport) {
-                let render_json =
-                    serde_json::to_string(&render_state).map_err(|error| error.to_string())?;
-                let _ = mir2_bevy_runtime::native_ingest::push_native_map_render_state(render_json);
-            }
-        }
-    }
+    push_local_map_render_state(payload)?;
 
     let entity_model = transform_entity_model_set(payload);
     let entity_json = serde_json::to_string(&entity_model).map_err(|error| error.to_string())?;
@@ -3516,6 +3483,34 @@ fn forward_packet_first_world(
     }
 
     Ok(())
+}
+
+fn push_local_map_render_state(payload: &Value) -> Result<bool, String> {
+    if !crate::map_parser::has_local_map_atlas() {
+        return Ok(false);
+    }
+
+    let map_file_name = payload
+        .get("mapFileName")
+        .and_then(Value::as_str)
+        .unwrap_or("0");
+    let viewport = crate::map_parser::MapViewport::from_gateway_payload(payload);
+    let render_state = crate::map_parser::load_map(map_file_name).and_then(|map| {
+        crate::map_parser::build_map_render_state_for_file(&map, viewport, map_file_name)
+    });
+    let rendered = render_state.is_some();
+    let render_state = render_state
+        .unwrap_or_else(|| crate::map_parser::disabled_map_render_state(map_file_name, viewport));
+    let render_json = serde_json::to_string(&render_state).map_err(|error| error.to_string())?;
+    let _ = mir2_bevy_runtime::native_ingest::push_native_map_render_state(render_json);
+    if rendered {
+        eprintln!("[gateway-client] pushed real map render state for {map_file_name}");
+    } else {
+        eprintln!(
+            "[gateway-client] cleared stale map: destination render unavailable for {map_file_name}"
+        );
+    }
+    Ok(rendered)
 }
 
 fn native_self_movement_ack(
