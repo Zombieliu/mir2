@@ -3369,11 +3369,11 @@ pub struct SimulationConfig {
     pub safe_zones: Vec<SafeZoneRecord>,
     /// Crystal's optional `Settings.SafeZoneBorder` presentation switch.
     ///
-    /// The imported map manifest retains the decorative TrapHexagon objects so
-    /// deployments that explicitly enable the option can reproduce Crystal,
-    /// but Crystal defaults this setting to false. Keeping the switch in the
-    /// runtime config prevents those map decorations from being confused with
-    /// real player-cast TrapHexagon `ObjectSpell` packets.
+    /// The generated map manifest materializes the decorative TrapHexagon
+    /// objects only when the imported server enables this setting. The default
+    /// therefore follows that imported evidence while retaining an explicit
+    /// runtime switch so deployments can disable the decoration without
+    /// confusing it with player-cast TrapHexagon `ObjectSpell` packets.
     pub safe_zone_border_effects: bool,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub mine_zones: Vec<MineZoneRecord>,
@@ -3541,7 +3541,7 @@ impl SimulationConfig {
             conquest_owners: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
-            safe_zone_border_effects: false,
+            safe_zone_border_effects: imported_safe_zone_border_enabled(&scene.map.file_name),
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
             onchain_mine_nodes: Vec::new(),
@@ -5403,6 +5403,14 @@ fn starter_safe_zones() -> Vec<SafeZoneRecord> {
             max_y: 273,
         },
     }]
+}
+
+fn imported_safe_zone_border_enabled(map_file_name: &str) -> bool {
+    crystal_map_respawns_by_file_name(map_file_name).is_some_and(|map| {
+        map.safe_zone_spells
+            .iter()
+            .any(|spell| spell.spell.eq_ignore_ascii_case("TrapHexagon"))
+    })
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

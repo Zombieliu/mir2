@@ -768,6 +768,7 @@ struct NativeUiPlayerCursor {
     name: Option<String>,
     class_name: Option<String>,
     map_name: Option<String>,
+    in_safe_zone: Option<bool>,
 }
 
 impl NativeUiPlayerCursor {
@@ -812,6 +813,9 @@ impl NativeUiPlayerCursor {
         }
         if let Some(value) = value_string(payload.get("mapTitle")) {
             self.map_name = Some(value);
+        }
+        if let Some(value) = payload.get("inSafeZone").and_then(Value::as_bool) {
+            self.in_safe_zone = Some(value);
         }
 
         let player_object_id = value_u32(payload.get("playerObjectId"));
@@ -894,6 +898,13 @@ impl NativeUiPlayerCursor {
         {
             self.class_name = Some(value);
         }
+        if let Some(value) = payload
+            .get("inSafeZone")
+            .or_else(|| payload.get("in_safe_zone"))
+            .and_then(Value::as_bool)
+        {
+            self.in_safe_zone = Some(value);
+        }
         self.observe_map_identity(payload);
     }
 
@@ -925,6 +936,7 @@ impl NativeUiPlayerCursor {
                 "name": self.name,
                 "className": self.class_name,
                 "mapName": self.map_name,
+                "inSafeZone": self.in_safe_zone.unwrap_or(false),
             }
         })
     }
@@ -4810,6 +4822,7 @@ fn transform_ui_read_model(payload: &Value) -> Value {
                     .or_else(|| self_player.and_then(|entity| entity.get("className"))),
             ),
             "mapName": value_string(payload.get("mapTitle")),
+            "inSafeZone": payload.get("inSafeZone").and_then(Value::as_bool).unwrap_or(false),
         }
     })
 }
@@ -4911,7 +4924,12 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
             "maxWeight": value_u32(payload.get("maxWeight")).unwrap_or_default(),
             "name": value_string(payload.get("name")),
             "className": value_string(payload.get("class").or_else(|| payload.get("className"))),
-            "mapName": value_string(payload.get("mapTitle").or_else(|| payload.get("mapName")))
+            "mapName": value_string(payload.get("mapTitle").or_else(|| payload.get("mapName"))),
+            "inSafeZone": payload
+                .get("inSafeZone")
+                .or_else(|| payload.get("in_safe_zone"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
         }
     })
 }
@@ -6611,6 +6629,7 @@ mod tests {
         assert_eq!(model.player.current_weight, 0);
         assert_eq!(model.player.max_weight, 0);
         assert_eq!(model.player.map_name, None);
+        assert!(!model.player.in_safe_zone);
     }
 
     #[test]
@@ -6630,7 +6649,8 @@ mod tests {
             "maxExperience": 10,
             "currentWeight": 3,
             "maxWeight": 50,
-            "mapTitle": "BichonProvince"
+            "mapTitle": "BichonProvince",
+            "inSafeZone": true
         }));
 
         cursor.observe_world_snapshot(&json!({
@@ -6652,6 +6672,7 @@ mod tests {
         assert_eq!((model.player.hp, model.player.max_hp), (80, 100));
         assert_eq!((model.player.mp, model.player.max_mp), (20, 40));
         assert_eq!(model.player.map_name.as_deref(), Some("BichonProvince"));
+        assert!(model.player.in_safe_zone);
     }
 
     #[test]
@@ -6667,6 +6688,7 @@ mod tests {
         cursor.observe_world_snapshot(&json!({
             "playerObjectId": 99,
             "playerHp": 0,
+            "inSafeZone": false,
             "entities": [{
                 "objectId": 99,
                 "kind": "player",
@@ -6691,6 +6713,7 @@ mod tests {
         assert_eq!(model.player.name.as_deref(), Some("Alice Renamed"));
         assert_eq!(model.player.level, 8);
         assert_eq!(model.player.map_name.as_deref(), Some("BorderVillage"));
+        assert!(!model.player.in_safe_zone);
 
         cursor.reset();
         let reset = serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(
@@ -6700,6 +6723,7 @@ mod tests {
         assert_eq!(reset.player.name, None);
         assert_eq!(reset.player.hp, 0);
         assert_eq!(reset.player.map_name, None);
+        assert!(!reset.player.in_safe_zone);
     }
 
     #[test]

@@ -2370,7 +2370,7 @@ fn start_game_emits_visible_object_packets() {
 }
 
 #[test]
-fn optional_safe_zone_border_is_off_by_default_but_can_be_enabled() {
+fn imported_safe_zone_border_is_on_by_default_but_can_be_disabled() {
     let manifest = crystal_respawn_manifest();
     let map = manifest
         .maps
@@ -2397,35 +2397,35 @@ fn optional_safe_zone_border_is_off_by_default_but_can_be_enabled() {
         super::CrystalNpcLocalTime::new(0, 0, 0),
     );
     assert!(
-        !default_packets.iter().any(|packet| matches!(
+        default_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectSpell { info }
                 if info.object_id == 46
                     && info.spell == Spell::TrapHexagon
                     && info.location == border.location
         )),
-        "Crystal defaults Settings.SafeZoneBorder to false"
+        "the imported Crystal Setup.ini enables SafeZoneBorder, so its generated border objects must be visible by default"
     );
 
-    let mut enabled_config = SimulationConfig::default();
-    enabled_config.safe_zone_border_effects = true;
-    let enabled_packets = super::super::packets::start_game_static_visible_object_packets(
+    let mut disabled_config = SimulationConfig::default();
+    disabled_config.safe_zone_border_effects = false;
+    let disabled_packets = super::super::packets::start_game_static_visible_object_packets(
         &map.map_file_name,
         &border.location,
         &character,
-        &enabled_config,
+        &disabled_config,
         &[],
         super::CrystalNpcLocalTime::new(0, 0, 0),
     );
     assert!(
-        enabled_packets.iter().any(|packet| matches!(
+        !disabled_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectSpell { info }
                 if info.object_id == 46
                     && info.spell == Spell::TrapHexagon
                     && info.location == border.location
         )),
-        "an explicit SafeZoneBorder opt-in must retain the imported decoration"
+        "an explicit SafeZoneBorder opt-out must suppress the imported decoration"
     );
 }
 

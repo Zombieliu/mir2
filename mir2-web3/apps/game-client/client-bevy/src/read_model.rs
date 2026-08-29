@@ -34,6 +34,8 @@ pub struct PlayerStats {
     /// server remains the final authority for a purchase.
     pub class_name: Option<String>,
     pub map_name: Option<String>,
+    /// Server-authoritative safe-zone membership for the local player.
+    pub in_safe_zone: bool,
 }
 
 impl PlayerStats {
@@ -143,6 +145,7 @@ mod tests {
                 name: Some("Demo".to_owned()),
                 class_name: Some("Warrior".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
+                in_safe_zone: true,
             },
         }
     }
@@ -159,6 +162,7 @@ mod tests {
         assert_eq!(model.player.experience_percent_label(), "48.33%");
         assert!((model.player.normalized_weight() - 0.02).abs() < 1e-6);
         assert_eq!(model.player.available_weight(), 49);
+        assert!(model.player.in_safe_zone);
     }
 
     #[test]
