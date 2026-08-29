@@ -30,6 +30,18 @@ fn crystal_start_game_delivers_one_project_owned_notice_per_gameplay_session() {
         .expect("Crystal runtime should configure a login notice");
     assert!(!expected.message.contains("LOMCN"));
     assert!(!expected.message.contains("Supercode"));
+    assert_eq!(
+        expected.message.split("\r\n").collect::<Vec<_>>(),
+        vec![
+            "Welcome to the Legend of Mir 2 Server.",
+            "",
+            "This is a development Candidate build.",
+            "Gameplay, data, and presentation may",
+            "change during development.",
+            "Please include the build identifier",
+            "when reporting a problem.",
+        ]
+    );
 
     let mut session = SimulationSession::new(config);
     login_demo(&mut session);

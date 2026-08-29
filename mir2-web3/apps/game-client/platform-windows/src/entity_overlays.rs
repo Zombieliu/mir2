@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use bevy::text::LineBreak;
 use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
@@ -29,6 +30,7 @@ const CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX: f32 = -17.0;
 // `-(19 - label_height / 2) + 8` versus `-(31 - label_height / 2) + 8`.
 const CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX: f32 = -5.0;
 const CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX: f32 = -18.0;
+const CRYSTAL_SPLIT_NAME_LINE_STEP_PX: f32 = 12.0;
 const CRYSTAL_QUEST_MARKER_WIDTH_PX: f32 = 28.0;
 const CRYSTAL_QUEST_MARKER_HEIGHT_PX: f32 = 29.0;
 const CRYSTAL_QUEST_MARKER_FRAME_INTERVAL_MS: u64 = 500;
@@ -415,7 +417,7 @@ pub fn sync_native_entity_overlays(
                         Text::new(name.clone()),
                         crystal_text_font(entry.font_size),
                         TextColor(Color::BLACK),
-                        TextLayout::justify(Justify::Center),
+                        TextLayout::new(Justify::Center, LineBreak::NoWrap),
                     ));
                 }
                 root.spawn((
@@ -430,7 +432,7 @@ pub fn sync_native_entity_overlays(
                     Text::new(name),
                     crystal_text_font(entry.font_size),
                     TextColor(entry.color),
-                    TextLayout::justify(Justify::Center),
+                    TextLayout::new(Justify::Center, LineBreak::NoWrap),
                 ));
             }
             for floater in floaters {
@@ -672,7 +674,6 @@ fn overlay_entries_with_motion(
                 } else {
                     vec![name]
                 };
-                let display_name = lines.join("\n");
                 let line_adjustment = if matches!(kind, "npc" | "monster") {
                     -((lines.len().saturating_sub(1) as f32) * 10.0) / 2.0
                 } else {
@@ -701,7 +702,7 @@ fn overlay_entries_with_motion(
                 } else {
                     50.0
                 };
-                let mut entity_entries = Vec::with_capacity(2);
+                let mut entity_entries = Vec::with_capacity(lines.len().saturating_add(2));
                 if kind == "npc" {
                     if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
                         let (marker_left, marker_top) =
@@ -733,22 +734,43 @@ fn overlay_entries_with_motion(
                         self_health_ratio: None,
                     });
                 }
-                entity_entries.push(OverlayEntry {
-                    name: Some(display_name),
-                    quest_marker: None,
-                    color,
-                    left,
-                    top: top
-                        + if matches!(kind, "npc" | "monster") {
-                            CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX + line_adjustment
-                        } else {
-                            CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX
-                        }
-                        + corpse_shift,
-                    width,
-                    font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
-                    self_health_ratio: None,
-                });
+                if matches!(kind, "npc" | "monster") {
+                    // Crystal creates one MirLabel per underscore-separated
+                    // row and advances it by exactly 12 pixels. A single Bevy
+                    // multiline node instead inherits the font engine's line
+                    // height and makes the rows visibly drift.
+                    for (line_index, line) in lines.into_iter().enumerate() {
+                        entity_entries.push(OverlayEntry {
+                            name: Some(line.to_owned()),
+                            quest_marker: None,
+                            color: if kind == "npc" && line_index > 0 {
+                                Color::WHITE
+                            } else {
+                                color
+                            },
+                            left,
+                            top: top
+                                + CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX
+                                + line_adjustment
+                                + line_index as f32 * CRYSTAL_SPLIT_NAME_LINE_STEP_PX
+                                + corpse_shift,
+                            width,
+                            font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                            self_health_ratio: None,
+                        });
+                    }
+                } else {
+                    entity_entries.push(OverlayEntry {
+                        name: Some(name.to_owned()),
+                        quest_marker: None,
+                        color,
+                        left,
+                        top: top + CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX + corpse_shift,
+                        width,
+                        font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                        self_health_ratio: None,
+                    });
+                }
                 entity_entries
             }),
     );
@@ -952,7 +974,7 @@ mod tests {
             false,
             None,
         );
-        assert_eq!(entries.len(), 4);
+        assert_eq!(entries.len(), 5);
         assert_eq!(entries[0].left, 480.0);
         assert_eq!(entries[0].top, 347.0);
         assert_eq!(entries[0].self_health_ratio, None);
@@ -960,12 +982,16 @@ mod tests {
         assert_eq!(entries[1].left, 480.0);
         assert_eq!(entries[1].top, 335.0);
         assert_eq!(entries[1].name.as_deref(), Some("Hero"));
-        assert_eq!(entries[2].name.as_deref(), Some("Weapon\nSmith"));
+        assert_eq!(entries[2].name.as_deref(), Some("Weapon"));
         assert_eq!(entries[2].left, 528.0);
         assert_eq!(entries[2].top, 297.0);
         assert_eq!(entries[2].width, 48.0);
-        assert_eq!(entries[3].name, None);
-        assert_eq!(entries[3].self_health_ratio, Some(0.5));
+        assert_eq!(entries[2].color, Color::srgb_u8(0x00, 0xff, 0x00));
+        assert_eq!(entries[3].name.as_deref(), Some("Smith"));
+        assert_eq!(entries[3].top, 309.0);
+        assert_eq!(entries[3].color, Color::WHITE);
+        assert_eq!(entries[4].name, None);
+        assert_eq!(entries[4].self_health_ratio, Some(0.5));
     }
 
     #[test]
@@ -1206,9 +1232,13 @@ mod tests {
         let self_only = overlay_entries(&payload, off, None, true, None);
         assert_eq!(entry_names(&self_only), ["Self"]);
         assert_eq!(health_ratios(&self_only), [0.5]);
-        for (object_id, expected) in [("2", "Remote"), ("3", "Town\nGuard"), ("4", "Deer")] {
+        for (object_id, expected) in [
+            ("2", vec!["Remote"]),
+            ("3", vec!["Town", "Guard"]),
+            ("4", vec!["Deer"]),
+        ] {
             let hovered = overlay_entries(&payload, off, Some(object_id), false, None);
-            assert_eq!(entry_names(&hovered), [expected]);
+            assert_eq!(entry_names(&hovered), expected);
             assert_eq!(health_ratios(&hovered), [0.5]);
         }
 
@@ -1227,7 +1257,7 @@ mod tests {
         );
         assert_eq!(
             entry_names(&on),
-            ["Self", "Remote", "Town\nGuard", "Deer", "Corpse"]
+            ["Self", "Remote", "Town", "Guard", "Deer", "Corpse"]
         );
     }
 
@@ -1259,13 +1289,16 @@ mod tests {
             [
                 "Living",
                 "Fallen",
-                "Living\nDeer",
-                "Fallen\nDeer",
+                "Living",
+                "Deer",
+                "Fallen",
+                "Deer",
                 "SelfCorpse"
             ]
         );
         assert_eq!(entries[1].top - entries[0].top, 27.0);
-        assert_eq!(entries[3].top - entries[2].top, 27.0);
+        assert_eq!(entries[4].top - entries[2].top, 27.0);
+        assert_eq!(entries[5].top - entries[3].top, 27.0);
         assert!(health_ratios(&entries).is_empty());
     }
 
@@ -1328,7 +1361,14 @@ mod tests {
         );
         assert_eq!(
             entry_names(&entries),
-            ["Assistant\nJane", "CraftsLady\nJude", "Merchant\nRuben"]
+            [
+                "Assistant",
+                "Jane",
+                "CraftsLady",
+                "Jude",
+                "Merchant",
+                "Ruben"
+            ]
         );
         assert_eq!(
             quest_markers(&entries),

@@ -6,7 +6,9 @@
 
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
-use bevy::ui::{Display, Node, PositionType, Val};
+use bevy::text::{Justify, LineBreak, TextLayout};
+use bevy::ui::{Display, Node, Overflow, PositionType, Val};
+use unicode_width::UnicodeWidthStr;
 
 use super::typography::crystal_text_font;
 
@@ -19,8 +21,12 @@ pub const NOTICE_Z_INDEX: i32 = 995;
 
 const NOTICE_TITLE_FONT_PX: f32 = 10.0 * 96.0 / 72.0;
 const NOTICE_BODY_FONT_PX: f32 = 10.0 * 96.0 / 72.0;
+const NOTICE_BODY_LEFT: f32 = 25.0;
+const NOTICE_BODY_WIDTH: f32 = 264.0;
+const NOTICE_SCROLL_GUTTER_LEFT: f32 = 293.0;
 const NOTICE_SCROLL_TOP: f32 = 46.0;
 const NOTICE_SCROLL_BOTTOM: f32 = 399.0;
+const NOTICE_BODY_WRAP_COLUMNS: usize = 38;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NoticePacketUpdate {
@@ -160,8 +166,76 @@ fn normalize_notice_lines(message: &str) -> Vec<String> {
         .replace("\r\n", "\n")
         .replace('\r', "\n")
         .split('\n')
-        .map(strip_notice_markup)
+        .flat_map(|line| wrap_notice_line(&strip_notice_markup(line)))
         .collect()
+}
+
+fn wrap_notice_line(line: &str) -> Vec<String> {
+    if line.trim().is_empty() {
+        return vec![String::new()];
+    }
+
+    let mut wrapped = Vec::new();
+    let mut current = String::new();
+    let mut current_width = 0usize;
+
+    for word in line.split_whitespace() {
+        let word_width = UnicodeWidthStr::width(word);
+        if current.is_empty() {
+            if word_width <= NOTICE_BODY_WRAP_COLUMNS {
+                current.push_str(word);
+                current_width = word_width;
+            } else {
+                push_split_word(word, &mut wrapped);
+            }
+            continue;
+        }
+
+        let next_width = current_width + 1 + word_width;
+        if next_width <= NOTICE_BODY_WRAP_COLUMNS {
+            current.push(' ');
+            current.push_str(word);
+            current_width = next_width;
+            continue;
+        }
+
+        wrapped.push(std::mem::take(&mut current));
+        current_width = 0;
+        if word_width <= NOTICE_BODY_WRAP_COLUMNS {
+            current.push_str(word);
+            current_width = word_width;
+        } else {
+            push_split_word(word, &mut wrapped);
+        }
+    }
+
+    if !current.is_empty() {
+        wrapped.push(current);
+    }
+
+    if wrapped.is_empty() {
+        vec![String::new()]
+    } else {
+        wrapped
+    }
+}
+
+fn push_split_word(word: &str, wrapped: &mut Vec<String>) {
+    let mut chunk = String::new();
+    let mut chunk_width = 0usize;
+    for ch in word.chars() {
+        let ch_str = ch.to_string();
+        let ch_width = UnicodeWidthStr::width(ch_str.as_str()).max(1);
+        if !chunk.is_empty() && chunk_width + ch_width > NOTICE_BODY_WRAP_COLUMNS {
+            wrapped.push(std::mem::take(&mut chunk));
+            chunk_width = 0;
+        }
+        chunk.push(ch);
+        chunk_width += ch_width;
+    }
+    if !chunk.is_empty() {
+        wrapped.push(chunk);
+    }
 }
 
 /// Crystal renders link `(text/http://...)` and colour `{text/Color}` runs as
@@ -293,6 +367,11 @@ fn render_notice_dialog(
                     top: Val::Px(NOTICE_TOP),
                     width: Val::Px(NOTICE_WIDTH),
                     height: Val::Px(NOTICE_HEIGHT),
+                    // Crystal child controls are clipped by the parent image
+                    // control. Bevy does not inherit that behavior unless the
+                    // panel declares it explicitly, so an authored long line
+                    // must never paint over the world outside this frame.
+                    overflow: Overflow::clip(),
                     ..default()
                 },
                 ImageNode {
@@ -319,15 +398,21 @@ fn render_notice_dialog(
                     panel.spawn((
                         Node {
                             position_type: PositionType::Absolute,
-                            left: Val::Px(25.0),
+                            left: Val::Px(NOTICE_BODY_LEFT),
                             top: Val::Px(50.0 + line as f32 * 20.0),
-                            width: Val::Px(420.0),
+                            // Keep text before Crystal's scrollbar gutter.
+                            // The upstream label is wider than its parent and
+                            // relies on parent clipping; bounding each Bevy row
+                            // as well makes that invariant explicit.
+                            width: Val::Px(NOTICE_BODY_WIDTH),
                             height: Val::Px(20.0),
+                            overflow: Overflow::clip(),
                             ..default()
                         },
                         Text::new(text.to_owned()),
                         crystal_text_font(NOTICE_BODY_FONT_PX),
                         TextColor(Color::WHITE),
+                        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                     ));
                 }
 
@@ -367,7 +452,7 @@ fn render_notice_dialog(
                             hover: 471,
                             pressed: 472,
                         },
-                        (293.0, 33.0, 16.0, 14.0),
+                        (NOTICE_SCROLL_GUTTER_LEFT, 33.0, 16.0, 14.0),
                     );
                     spawn_notice_button(
                         panel,
@@ -379,12 +464,12 @@ fn render_notice_dialog(
                             hover: 474,
                             pressed: 475,
                         },
-                        (293.0, 418.0, 16.0, 14.0),
+                        (NOTICE_SCROLL_GUTTER_LEFT, 418.0, 16.0, 14.0),
                     );
                     panel.spawn((
                         Node {
                             position_type: PositionType::Absolute,
-                            left: Val::Px(293.0),
+                            left: Val::Px(NOTICE_SCROLL_GUTTER_LEFT),
                             top: Val::Px(state.position_bar_top()),
                             width: Val::Px(12.0),
                             height: Val::Px(18.0),
@@ -508,6 +593,13 @@ mod tests {
     }
 
     #[test]
+    fn notice_body_is_clipped_before_crystal_scrollbar_gutter() {
+        assert!(NOTICE_BODY_LEFT >= 0.0);
+        assert!(NOTICE_BODY_LEFT + NOTICE_BODY_WIDTH <= NOTICE_SCROLL_GUTTER_LEFT);
+        assert!(NOTICE_SCROLL_GUTTER_LEFT < NOTICE_WIDTH);
+    }
+
+    #[test]
     fn newer_notice_opens_once_and_close_does_not_reopen_from_same_snapshot() {
         let mut state = NoticeDialogState::default();
         let first = update(4, 1, "one\r\ntwo");
@@ -565,5 +657,26 @@ mod tests {
             strip_notice_markup("(Unsafe/https://example.test)"),
             "(Unsafe/https://example.test)"
         );
+    }
+
+    #[test]
+    fn notice_long_lines_wrap_before_the_scrollbar_gutter() {
+        let lines = normalize_notice_lines(
+            "By clicking close and continuing to play the game you are agreeing to the terms of service above.",
+        );
+        assert!(lines.len() > 1, "expected notice body to wrap");
+        assert!(lines
+            .iter()
+            .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
+    }
+
+    #[test]
+    fn notice_wrap_preserves_blank_lines_and_breaks_oversized_tokens() {
+        let lines = normalize_notice_lines("Line one\r\n\r\nSUPERCODESUPERCODESUPERCODESUPERCODE");
+        assert_eq!(lines[0], "Line one");
+        assert_eq!(lines[1], "");
+        assert!(lines[2..]
+            .iter()
+            .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
     }
 }

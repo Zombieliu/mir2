@@ -13,7 +13,7 @@ use bevy::{
     render::view::screenshot::{Screenshot, ScreenshotCaptured},
     window::PrimaryWindow,
 };
-use mir2_client_bevy::crystal_ui::NativePlayerUiState;
+use mir2_client_bevy::crystal_ui::{notice::NoticeDialogState, NativePlayerUiState};
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{CombatTargetModel, QuestStatus, QuestTracker};
@@ -53,6 +53,7 @@ pub struct NativeCaptureConfig {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeCaptureTarget {
     Screen(NativeShellScreen),
+    NoticeOpen,
     QuestAccepted,
     Combat,
     QuestComplete,
@@ -320,6 +321,7 @@ fn auto_capture_system(
     shell: Option<Res<NativeShellModel>>,
     tracker: Option<Res<QuestTracker>>,
     combat: Option<Res<CombatTargetModel>>,
+    notice: Option<Res<NoticeDialogState>>,
     ui: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
     player_ui: Option<Res<NativePlayerUiState>>,
@@ -340,6 +342,7 @@ fn auto_capture_system(
             shell,
             tracker.as_deref(),
             combat.as_deref(),
+            notice.as_deref(),
             config.quest_index,
         );
         if env::var_os("MIR2_NATIVE_TRACE_CAPTURE").is_some()
@@ -743,10 +746,15 @@ fn capture_target_matches(
     shell: &NativeShellModel,
     tracker: Option<&QuestTracker>,
     combat: Option<&CombatTargetModel>,
+    notice: Option<&NoticeDialogState>,
     quest_index: Option<i32>,
 ) -> bool {
     match target {
         NativeCaptureTarget::Screen(screen) => shell.screen == screen,
+        NativeCaptureTarget::NoticeOpen => {
+            shell.screen == NativeShellScreen::InGame
+                && notice.is_some_and(NoticeDialogState::is_open)
+        }
         NativeCaptureTarget::QuestAccepted => {
             shell.screen == NativeShellScreen::InGame
                 && tracker.is_some_and(|tracker| {
@@ -779,6 +787,7 @@ fn capture_target_matches(
 fn capture_target_slug(target: NativeCaptureTarget) -> &'static str {
     match target {
         NativeCaptureTarget::Screen(screen) => native_shell_screen_slug(screen),
+        NativeCaptureTarget::NoticeOpen => "notice-open",
         NativeCaptureTarget::QuestAccepted => "quest-accepted",
         NativeCaptureTarget::Combat => "combat",
         NativeCaptureTarget::QuestComplete => "quest-complete",
@@ -824,6 +833,7 @@ fn parse_shell_screen_slug(raw: &str) -> Option<NativeShellScreen> {
 fn parse_capture_target_slug(raw: &str) -> Option<NativeCaptureTarget> {
     let normalized = sanitize_capture_label(&raw.to_ascii_lowercase().replace('_', "-"));
     match normalized.as_str() {
+        "notice" | "notice-open" | "login-notice" => Some(NativeCaptureTarget::NoticeOpen),
         "quest-accepted" | "questaccepted" => Some(NativeCaptureTarget::QuestAccepted),
         "combat" | "combat-damaged" => Some(NativeCaptureTarget::Combat),
         "quest-complete" | "questcomplete" | "quest-completed" => {
@@ -1069,6 +1079,10 @@ mod tests {
             parse_capture_target_slug("quest_complete"),
             Some(NativeCaptureTarget::QuestComplete)
         );
+        assert_eq!(
+            parse_capture_target_slug("login-notice"),
+            Some(NativeCaptureTarget::NoticeOpen)
+        );
     }
 
     #[test]
@@ -1172,6 +1186,7 @@ mod tests {
             &shell,
             Some(&tracker),
             Some(&combat),
+            None,
             Some(2)
         ));
         assert!(capture_target_matches(
@@ -1179,6 +1194,7 @@ mod tests {
             &shell,
             Some(&tracker),
             Some(&combat),
+            None,
             Some(2)
         ));
         tracker.active_quests[0].status = QuestStatus::Completed;
@@ -1187,6 +1203,7 @@ mod tests {
             &shell,
             Some(&tracker),
             Some(&combat),
+            None,
             Some(2)
         ));
         assert!(!capture_target_matches(
@@ -1194,7 +1211,42 @@ mod tests {
             &shell,
             Some(&tracker),
             Some(&combat),
+            None,
             Some(2)
+        ));
+    }
+
+    #[test]
+    fn notice_capture_waits_for_the_authoritative_dialog_to_open() {
+        let shell = NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        };
+        let mut notice = NoticeDialogState::default();
+        assert!(!capture_target_matches(
+            NativeCaptureTarget::NoticeOpen,
+            &shell,
+            None,
+            None,
+            Some(&notice),
+            None
+        ));
+
+        assert!(
+            notice.observe(mir2_client_bevy::crystal_ui::notice::NoticePacketUpdate {
+                generation: 1,
+                sequence: 1,
+                title: "Welcome".to_owned(),
+                message: "Candidate notice".to_owned(),
+            })
+        );
+        assert!(capture_target_matches(
+            NativeCaptureTarget::NoticeOpen,
+            &shell,
+            None,
+            None,
+            Some(&notice),
+            None
         ));
     }
 

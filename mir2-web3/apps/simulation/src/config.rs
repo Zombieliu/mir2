@@ -3351,8 +3351,10 @@ fn default_crystal_login_notice() -> Notice {
             "Welcome to the Legend of Mir 2 Server.",
             "",
             "This is a development Candidate build.",
-            "Gameplay, data, and presentation may change during development.",
-            "Please include the build identifier when reporting a problem.",
+            "Gameplay, data, and presentation may",
+            "change during development.",
+            "Please include the build identifier",
+            "when reporting a problem.",
         ]
         .join("\r\n"),
     }
