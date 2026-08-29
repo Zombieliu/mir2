@@ -5716,6 +5716,11 @@ pub struct WorldEntitySnapshot {
     pub disposition: WorldEntityDisposition,
     pub sprite: Option<WorldEntitySpriteSnapshot>,
     pub quest_ids: Vec<i32>,
+    /// Exact Crystal `QuestIcon` discriminant selected for this NPC. Keeping
+    /// this authoritative prevents clients from guessing quest type, ordering,
+    /// prerequisite gates, or loaded-object-id aliases.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quest_icon: Option<u8>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

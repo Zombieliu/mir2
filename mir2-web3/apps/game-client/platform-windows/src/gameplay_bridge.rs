@@ -1097,6 +1097,7 @@ impl NativeGameplayAdapter {
                 "hp",
                 "maxHp",
                 "questIds",
+                "questIcon",
             ],
         );
         patch_location_fields(body, overlay);
@@ -5326,6 +5327,38 @@ mod tests {
         let snapshot2 = adapter.snapshot(&payload);
         assert_eq!(snapshot2.zone_entity_tiles.get(&2001), Some(&(20, 20)));
         assert_eq!(snapshot2.zone_entity_tiles.get(&1000), Some(&(10, 10)));
+    }
+
+    #[test]
+    fn incremental_npc_packet_preserves_authoritative_quest_marker_fields() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectNpc".to_owned(),
+            payload: json!({
+                "objectId": 3,
+                "name": "Assistant_Jane",
+                "location": {"x": 284, "y": 606},
+                "questIds": [1],
+                "questIcon": 2
+            }),
+        }));
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectNpc".to_owned(),
+            payload: json!({
+                "objectId": 3,
+                "location": {"x": 285, "y": 606}
+            }),
+        }));
+
+        let mut payload = json!({
+            "entities": [
+                {"objectId": 3, "kind": "npc", "name": "Assistant_Jane", "x": 284, "y": 606}
+            ]
+        });
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"][0]["x"], json!(285));
+        assert_eq!(payload["entities"][0]["questIds"], json!([1]));
+        assert_eq!(payload["entities"][0]["questIcon"], json!(2));
     }
 
     #[test]

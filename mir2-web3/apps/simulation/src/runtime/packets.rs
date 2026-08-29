@@ -101,10 +101,10 @@ use super::npc::{
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
-    completed_quest_ids, crystal_quest_finish_npc_matches, crystal_quest_info_by_id,
-    crystal_quest_reward_selection_missing, crystal_quest_start_npc_matches,
-    crystal_quest_task_list, ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
-    quest_template_by_id,
+    completed_quest_ids, crystal_npc_quest_icon, crystal_quest_finish_npc_matches,
+    crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
+    crystal_quest_start_npc_matches, crystal_quest_task_list, ensure_runtime_quest,
+    quest_definition_exists, quest_log_snapshots, quest_template_by_id,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -7148,6 +7148,8 @@ pub(super) fn collect_world_entities(
         let quest_ids = npc_agent
             .map(|agent| agent.quest_ids.clone())
             .unwrap_or_default();
+        let quest_icon =
+            npc_agent.and_then(|_| crystal_npc_quest_icon(world, object_id.0, &quest_ids));
         let name_colour_argb = match kind {
             WorldEntityKind::Npc => CRYSTAL_NPC_NAME_COLOUR_ARGB,
             _ => -1,
@@ -7198,6 +7200,7 @@ pub(super) fn collect_world_entities(
             disposition,
             sprite,
             quest_ids,
+            quest_icon,
         });
     }
 
@@ -7213,6 +7216,12 @@ pub(super) fn collect_current_map_shared_entity_snapshots(
         .into_iter()
         .filter(|entity| matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Npc))
         .collect::<Vec<_>>();
+    // Quest icons are character-specific presentation state. Shared Zone map
+    // entities must remain player-agnostic; Gateway overlays each session's
+    // personal authoritative icon after composing the shared map snapshot.
+    for entity in &mut entities {
+        entity.quest_icon = None;
+    }
     entities.sort_by_key(|entity| entity.object_id);
     entities
 }

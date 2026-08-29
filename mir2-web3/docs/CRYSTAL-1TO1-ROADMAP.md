@@ -1,5 +1,22 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows NPC quest-marker authority checkpoint (2026-08-29; working
+> tree base `182485d24a0645a9034a5eaefdcccaa180b9d4b2`): Simulation now
+> computes the exact Crystal `QuestIcon` per character using current-quest-first
+> insertion order, start/finish NPC identity (including loaded-object aliases),
+> quest type, stage, level, class and prerequisite gates. Character-specific
+> icons are stripped from shared Zone state and reapplied by Gateway only to
+> the requesting session. Windows consumes all seven discriminants with the
+> original `981 + icon*2 + phase` formula and 500 ms cadence, retains fields
+> across partial NPC packets, and Candidate gates require the resident
+> white/yellow/green frames. The fresh q1 Jane `!` -> Jude `?` -> q2 `!`
+> transition passes, a two-session shared-Zone regression proves markers do not
+> leak across characters, Windows is 482/482, and Candidate self-test passes.
+> Exact body-frame anchoring, same-EXE live transitions, the
+> absent drawable daily-blue `Prguse 991..994` source frames, broader quest
+> semantics, and all device/human/signing gates remain open. No whole-game or
+> global percentage is claimed.
+
 > Latest Windows safe-zone regression repair checkpoint (2026-08-29):
 > revision `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` restores this project's
 > imported Crystal `SafeZoneBorder=True` behavior. Simulation no longer

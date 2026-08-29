@@ -744,6 +744,7 @@ try {
  foreach ($index in @(1900..1914) + @(1960..1962)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
  foreach ($index in 826..828) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
  foreach ($index in @(961)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
+ foreach ($index in @(983..988) + @(1085..1088)) { $requiredSources += (Join-Path $PublicRoot "original-ui\Prguse\$index.png") }
  foreach ($soundName in $playerCombatSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }
  foreach ($soundName in $monsterCombatSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }
  foreach ($soundName in $frostCrunchSoundNames) { $requiredSources += (Join-Path $PublicRoot ('original-ui\Sound\' + $soundName)) }

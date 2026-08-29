@@ -1,5 +1,21 @@
 # Backend 1:1 Progress
 
+> Windows NPC quest-marker server/client checkpoint (2026-08-29; working tree
+> base `182485d24a0645a9034a5eaefdcccaa180b9d4b2`): the personal Simulation
+> snapshot now carries an optional exact Crystal `questIcon`. Selection follows
+> `NPCObject.GetAvailableQuests(true)` ordering and authoritative acceptance
+> gates instead of the native client's former invented status priority. The
+> shared Zone snapshot explicitly removes this per-character field; Gateway
+> overlays each session's personal value after shared map composition, so one
+> player's quest progress cannot choose another player's NPC marker. Focused
+> q1 accept/finish transitions and the focused two-session Gateway isolation
+> regression pass, dual-crate checks pass, Windows is 482/482, and Candidate
+> verification self-test passes.
+> This is a presentation-data projection, not completion of the quest system;
+> full quest persistence/failure/repeatable semantics, cross-Gateway authority,
+> same-EXE/live-WSS and human/device gates remain open. No backend/global
+> percentage is claimed.
+
 > Windows safe-zone source-setting checkpoint (2026-08-29): revision
 > `aae9c2c7e06dbceb6f6539c7b29eba63ece293c4` changes no safe-zone geometry,
 > combat authority or packet shape. It fixes the configuration boundary that

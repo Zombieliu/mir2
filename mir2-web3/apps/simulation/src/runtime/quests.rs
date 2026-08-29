@@ -34,6 +34,19 @@ use super::resources::{
 const CRYSTAL_NORMAL_QUEST_MIN_LEVEL: i32 = 1;
 const CRYSTAL_NORMAL_QUEST_MAX_LEVEL: i32 = 45;
 
+const CRYSTAL_QUEST_TYPE_GENERAL: u8 = 0;
+const CRYSTAL_QUEST_TYPE_DAILY: u8 = 1;
+const CRYSTAL_QUEST_TYPE_REPEATABLE: u8 = 2;
+const CRYSTAL_QUEST_TYPE_STORY: u8 = 3;
+
+const CRYSTAL_QUEST_ICON_QUESTION_WHITE: u8 = 1;
+const CRYSTAL_QUEST_ICON_EXCLAMATION_YELLOW: u8 = 2;
+const CRYSTAL_QUEST_ICON_QUESTION_YELLOW: u8 = 3;
+const CRYSTAL_QUEST_ICON_EXCLAMATION_BLUE: u8 = 5;
+const CRYSTAL_QUEST_ICON_QUESTION_BLUE: u8 = 6;
+const CRYSTAL_QUEST_ICON_EXCLAMATION_GREEN: u8 = 52;
+const CRYSTAL_QUEST_ICON_QUESTION_GREEN: u8 = 53;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct QuestState {
     pub(super) quest_id: i32,
@@ -1665,6 +1678,77 @@ pub(super) fn crystal_quest_finish_npc_matches(info: &ClientQuestInfo, npc_objec
         return crystal_quest_start_npc_matches(info, npc_object_id);
     }
     crystal_quest_npc_index_matches(info.finish_npc_index, npc_object_id)
+}
+
+/// Reproduce Crystal's `NPCObject.GetAvailableQuests(true).FirstOrDefault()`
+/// selection and `ClientQuestInfo.GetQuestIcon` result. The returned byte is
+/// the original `QuestIcon` discriminant consumed by the native renderer.
+pub(super) fn crystal_npc_quest_icon(
+    world: &World,
+    npc_object_id: u32,
+    quest_ids: &[i32],
+) -> Option<u8> {
+    // Crystal considers the player's current quests before the NPC's available
+    // list. Preserve that insertion order instead of inventing a status
+    // priority (for example, Ready > Available > InProgress).
+    for quest in &world.resource::<QuestResource>().quests {
+        if !matches!(
+            quest.stage,
+            QuestStage::InProgress | QuestStage::ReadyToTurnIn
+        ) {
+            continue;
+        }
+        let Some(info) = effective_crystal_quest_info_by_id(world, quest.quest_id) else {
+            continue;
+        };
+        if !crystal_quest_finish_npc_matches(&info, npc_object_id) {
+            continue;
+        }
+        return match quest.stage {
+            QuestStage::InProgress => Some(CRYSTAL_QUEST_ICON_QUESTION_WHITE),
+            QuestStage::ReadyToTurnIn => crystal_completed_quest_icon(info.quest_type),
+            QuestStage::Available | QuestStage::Completed => None,
+        };
+    }
+
+    // Only when no current quest targets this NPC does Crystal inspect the
+    // NPC's quest list, including the authoritative level/class/prerequisite
+    // acceptance gates.
+    for &quest_id in quest_ids {
+        let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
+            continue;
+        };
+        if !crystal_quest_start_npc_matches(&info, npc_object_id)
+            || !can_accept_crystal_quest(world, &info)
+        {
+            continue;
+        }
+        return crystal_available_quest_icon(info.quest_type);
+    }
+
+    None
+}
+
+fn crystal_available_quest_icon(quest_type: u8) -> Option<u8> {
+    match quest_type {
+        CRYSTAL_QUEST_TYPE_GENERAL | CRYSTAL_QUEST_TYPE_REPEATABLE => {
+            Some(CRYSTAL_QUEST_ICON_EXCLAMATION_YELLOW)
+        }
+        CRYSTAL_QUEST_TYPE_DAILY => Some(CRYSTAL_QUEST_ICON_EXCLAMATION_BLUE),
+        CRYSTAL_QUEST_TYPE_STORY => Some(CRYSTAL_QUEST_ICON_EXCLAMATION_GREEN),
+        _ => None,
+    }
+}
+
+fn crystal_completed_quest_icon(quest_type: u8) -> Option<u8> {
+    match quest_type {
+        CRYSTAL_QUEST_TYPE_GENERAL | CRYSTAL_QUEST_TYPE_REPEATABLE => {
+            Some(CRYSTAL_QUEST_ICON_QUESTION_YELLOW)
+        }
+        CRYSTAL_QUEST_TYPE_DAILY => Some(CRYSTAL_QUEST_ICON_QUESTION_BLUE),
+        CRYSTAL_QUEST_TYPE_STORY => Some(CRYSTAL_QUEST_ICON_QUESTION_GREEN),
+        _ => None,
+    }
 }
 
 fn crystal_quest_npc_index_matches(npc_index: u32, npc_object_id: u32) -> bool {

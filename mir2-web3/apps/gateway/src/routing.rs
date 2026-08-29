@@ -5885,6 +5885,7 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
             "Monster", info.image, 3,
         )),
         quest_ids: Vec::new(),
+        quest_icon: None,
     }
 }
 
@@ -5923,6 +5924,7 @@ fn world_entity_from_zone_monster_spawn(
             3,
         )),
         quest_ids: Vec::new(),
+        quest_icon: None,
     }
 }
 
@@ -6041,6 +6043,7 @@ fn world_entity_from_object_player_info(
         disposition: WorldEntityDisposition::Friendly,
         sprite: Some(world_entity_sprite_from_object_player(info)),
         quest_ids: Vec::new(),
+        quest_icon: None,
     }
 }
 
@@ -6070,6 +6073,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         disposition: WorldEntityDisposition::Neutral,
         sprite: Some(simple_world_entity_sprite_snapshot("NPC", info.image, 2)),
         quest_ids: info.quest_ids.clone(),
+        quest_icon: None,
     }
 }
 
@@ -12099,6 +12103,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn world_snapshot(&self) -> WorldSnapshot {
         let mut snapshot = self.inner.world_snapshot();
+        let personal_quest_icons = snapshot
+            .entities
+            .iter()
+            .filter_map(|entity| entity.quest_icon.map(|icon| (entity.object_id, icon)))
+            .collect::<BTreeMap<_, _>>();
         let current_key = self.current_presence_key();
         let zone_state = self
             .zone_state
@@ -12112,6 +12121,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 )
             });
             snapshot.entities.extend(shared_map.entities.into_values());
+            for entity in &mut snapshot.entities {
+                entity.quest_icon = personal_quest_icons.get(&entity.object_id).copied();
+            }
             snapshot.ground_drops = shared_map.ground_drops.into_values().collect();
         }
         if let (Some(key), Some(map_file_name)) =
@@ -23101,6 +23113,60 @@ mod tests {
     }
 
     #[test]
+    fn shared_in_process_registry_keeps_npc_quest_icons_personal_per_session() {
+        let registry = ZoneRegistry::in_process();
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut second = GatewaySession::new_with_zone_registry(config, &registry);
+        start_new_character(&mut first, "quest-icon-first", "IconBladeA");
+        start_new_character(&mut second, "quest-icon-second", "IconBladeB");
+
+        first.transfer_map("crystal:0:283:606");
+        let opened = first.handle_packet(ClientPacket::CallNpc {
+            object_id: 3,
+            key: "@Main".to_owned(),
+        });
+        assert!(opened
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectChat { object_id: 3, .. })));
+        let accepted = first.select_npc_dialog_target("@quest:accept:1");
+        assert!(accepted.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 1,
+                taken: true,
+                completed: true,
+                ..
+            }
+        )));
+        first.transfer_map("crystal:0:288:616");
+        second.transfer_map("crystal:0:288:616");
+
+        let first_snapshot = first.world_snapshot();
+        let second_snapshot = second.world_snapshot();
+        let icon = |snapshot: &mir2_simulation::WorldSnapshot, object_id: u32| {
+            snapshot
+                .entities
+                .iter()
+                .find(|entity| entity.kind == WorldEntityKind::Npc && entity.object_id == object_id)
+                .and_then(|entity| entity.quest_icon)
+        };
+
+        assert_eq!(icon(&first_snapshot, 3), None);
+        assert_eq!(icon(&first_snapshot, 4), Some(3));
+        assert_eq!(
+            icon(&second_snapshot, 3),
+            Some(2),
+            "the second player's available q1 marker must survive the first player's progress"
+        );
+        assert_eq!(
+            icon(&second_snapshot, 4),
+            None,
+            "the first player's ready marker must not leak through shared Zone state"
+        );
+    }
+
+    #[test]
     fn shared_npc_interact_uses_authoritative_zone_transform_after_long_movement() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state);
@@ -25357,6 +25423,7 @@ mod tests {
             disposition: WorldEntityDisposition::Neutral,
             sprite: None,
             quest_ids: Vec::new(),
+            quest_icon: None,
         }
     }
 
@@ -25446,6 +25513,7 @@ mod tests {
             disposition: WorldEntityDisposition::Friendly,
             sprite: None,
             quest_ids: Vec::new(),
+            quest_icon: None,
         }
     }
 

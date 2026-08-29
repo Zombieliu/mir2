@@ -188,19 +188,33 @@ struct OverlayEntry {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
 enum QuestMarkerKind {
-    Available,
-    InProgress,
-    ReadyToTurnIn,
+    QuestionWhite = 1,
+    ExclamationYellow = 2,
+    QuestionYellow = 3,
+    ExclamationBlue = 5,
+    QuestionBlue = 6,
+    ExclamationGreen = 52,
+    QuestionGreen = 53,
 }
 
 impl QuestMarkerKind {
-    fn first_frame_index(self) -> u16 {
-        match self {
-            Self::InProgress => 983,
-            Self::Available => 985,
-            Self::ReadyToTurnIn => 987,
+    fn from_crystal_discriminant(value: i64) -> Option<Self> {
+        match value {
+            1 => Some(Self::QuestionWhite),
+            2 => Some(Self::ExclamationYellow),
+            3 => Some(Self::QuestionYellow),
+            5 => Some(Self::ExclamationBlue),
+            6 => Some(Self::QuestionBlue),
+            52 => Some(Self::ExclamationGreen),
+            53 => Some(Self::QuestionGreen),
+            _ => None,
         }
+    }
+
+    fn first_frame_index(self) -> u16 {
+        981 + u16::from(self as u8) * 2
     }
 
     fn asset_path(self, phase: u8) -> String {
@@ -208,14 +222,6 @@ impl QuestMarkerKind {
             "original-ui/Prguse/{}.png",
             self.first_frame_index() + u16::from(phase % 2)
         )
-    }
-
-    fn priority(self) -> u8 {
-        match self {
-            Self::ReadyToTurnIn => 0,
-            Self::Available => 1,
-            Self::InProgress => 2,
-        }
     }
 }
 
@@ -808,34 +814,67 @@ fn quest_marker_for_entity(
     entity: &Value,
     quest_tracker: Option<&QuestTracker>,
 ) -> Option<QuestMarkerKind> {
-    let quest_indexes = entity.get("questIds")?.as_array()?;
+    if let Some(marker) = entity
+        .get("questIcon")
+        .and_then(value_i64)
+        .and_then(QuestMarkerKind::from_crystal_discriminant)
+    {
+        return Some(marker);
+    }
+
     let tracker = quest_tracker?;
-    let mut best = None;
-    for quest_index in quest_indexes.iter().filter_map(value_i64) {
-        let quest_index = i32::try_from(quest_index).ok()?;
-        let Some(quest) = tracker
-            .active_quests
-            .iter()
-            .find(|quest| quest.quest_index == quest_index)
-        else {
+    let object_id = entity.get("objectId").and_then(value_i64)?;
+    let object_id = u32::try_from(object_id).ok()?;
+    let quest_indexes = entity.get("questIds").and_then(Value::as_array).map(|ids| {
+        ids.iter()
+            .filter_map(value_i64)
+            .filter_map(|value| i32::try_from(value).ok())
+            .collect::<Vec<_>>()
+    });
+    let listed_for_npc = |quest_index: i32| {
+        quest_indexes
+            .as_ref()
+            .is_none_or(|indexes| indexes.contains(&quest_index))
+    };
+
+    // Crystal first walks CurrentQuests in insertion order and chooses the
+    // first quest whose finish NPC is this object. Any current quest therefore
+    // wins over an available quest without inventing a status priority.
+    for quest in &tracker.active_quests {
+        if !matches!(
+            quest.status,
+            QuestStatus::InProgress | QuestStatus::ReadyToTurnIn
+        ) {
             continue;
-        };
-        let candidate = match quest.status {
-            QuestStatus::ReadyToTurnIn => Some(QuestMarkerKind::ReadyToTurnIn),
-            QuestStatus::NotStarted => Some(QuestMarkerKind::Available),
-            QuestStatus::InProgress => Some(QuestMarkerKind::InProgress),
-            QuestStatus::Completed
-            | QuestStatus::Failed
-            | QuestStatus::Aborted
-            | QuestStatus::Unknown(_) => None,
-        };
-        if candidate.is_some_and(|candidate| {
-            best.is_none_or(|current: QuestMarkerKind| candidate.priority() < current.priority())
-        }) {
-            best = candidate;
+        }
+        let finish_npc = quest
+            .finish_npc_index
+            .filter(|finish| *finish != 0)
+            .or(quest.accept_npc_index);
+        if finish_npc != Some(object_id) {
+            continue;
+        }
+        return Some(match quest.status {
+            QuestStatus::InProgress => QuestMarkerKind::QuestionWhite,
+            QuestStatus::ReadyToTurnIn => QuestMarkerKind::QuestionYellow,
+            _ => unreachable!("current quest status was filtered above"),
+        });
+    }
+
+    for quest in &tracker.active_quests {
+        if listed_for_npc(quest.quest_index)
+            && quest.status == QuestStatus::NotStarted
+            && quest.accept_npc_index == Some(object_id)
+        {
+            // The legacy tracker model does not carry QuestType. This path is
+            // only a compatibility fallback for snapshots predating
+            // authoritative questIcon, so use Crystal's general/repeatable
+            // presentation instead of guessing blue/green.
+            return Some(QuestMarkerKind::ExclamationYellow);
         }
     }
-    best
+
+    None
 }
 
 fn value_i64(value: &Value) -> Option<i64> {
@@ -1215,9 +1254,9 @@ mod tests {
         let payload = json!({
             "sceneView": {"center": {"x": 10, "y": 20}},
             "entities": [
-                {"objectId": 3, "kind": "npc", "name": "Assistant_Jane", "x": 12, "y": 20, "questIds": [1]},
-                {"objectId": 4, "kind": "npc", "name": "CraftsLady_Jude", "x": 13, "y": 20, "questIds": [2]},
-                {"objectId": 5, "kind": "npc", "name": "Merchant_Ruben", "x": 14, "y": 20, "questIds": [3]}
+                {"objectId": 3, "kind": "npc", "name": "Assistant_Jane", "x": 12, "y": 20, "questIds": [1], "questIcon": 2},
+                {"objectId": 4, "kind": "npc", "name": "CraftsLady_Jude", "x": 13, "y": 20, "questIds": [2], "questIcon": 1},
+                {"objectId": 5, "kind": "npc", "name": "Merchant_Ruben", "x": 14, "y": 20, "questIds": [3], "questIcon": 3}
             ]
         });
         let tracker = QuestTracker {
@@ -1274,47 +1313,83 @@ mod tests {
         assert_eq!(
             quest_markers(&entries),
             [
-                QuestMarkerKind::Available,
-                QuestMarkerKind::InProgress,
-                QuestMarkerKind::ReadyToTurnIn
+                QuestMarkerKind::ExclamationYellow,
+                QuestMarkerKind::QuestionWhite,
+                QuestMarkerKind::QuestionYellow
             ]
         );
         assert_eq!(entries[0].left, 588.0);
         assert_eq!(entries[0].top, 294.0);
         assert_eq!(
-            QuestMarkerKind::InProgress.asset_path(0),
+            QuestMarkerKind::QuestionWhite.asset_path(0),
             "original-ui/Prguse/983.png"
         );
         assert_eq!(
-            QuestMarkerKind::InProgress.asset_path(1),
+            QuestMarkerKind::QuestionWhite.asset_path(1),
             "original-ui/Prguse/984.png"
         );
         assert_eq!(
-            QuestMarkerKind::Available.asset_path(0),
+            QuestMarkerKind::ExclamationYellow.asset_path(0),
             "original-ui/Prguse/985.png"
         );
         assert_eq!(
-            QuestMarkerKind::Available.asset_path(1),
+            QuestMarkerKind::ExclamationYellow.asset_path(1),
             "original-ui/Prguse/986.png"
         );
         assert_eq!(
-            QuestMarkerKind::ReadyToTurnIn.asset_path(0),
+            QuestMarkerKind::QuestionYellow.asset_path(0),
             "original-ui/Prguse/987.png"
         );
         assert_eq!(
-            QuestMarkerKind::ReadyToTurnIn.asset_path(1),
+            QuestMarkerKind::QuestionYellow.asset_path(1),
             "original-ui/Prguse/988.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::ExclamationBlue.asset_path(0),
+            "original-ui/Prguse/991.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::QuestionBlue.asset_path(1),
+            "original-ui/Prguse/994.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::ExclamationGreen.asset_path(0),
+            "original-ui/Prguse/1085.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::QuestionGreen.asset_path(1),
+            "original-ui/Prguse/1088.png"
         );
         assert_eq!(quest_marker_animation_phase(0), 0);
         assert_eq!(quest_marker_animation_phase(499), 0);
         assert_eq!(quest_marker_animation_phase(500), 1);
         assert_eq!(quest_marker_animation_phase(1_000), 0);
 
-        let mixed = json!({"questIds": [1, 2, 3]});
+        let mixed = json!({"objectId": 4, "questIds": [1, 2, 3]});
         assert_eq!(
             quest_marker_for_entity(&mixed, Some(&tracker)),
-            Some(QuestMarkerKind::ReadyToTurnIn),
-            "ready-to-turn-in must win even when an available quest is listed first"
+            Some(QuestMarkerKind::QuestionWhite),
+            "the current quest targeting this NPC must win over unrelated statuses"
+        );
+        assert_eq!(
+            quest_marker_for_entity(&json!({"objectId": 4}), Some(&tracker)),
+            Some(QuestMarkerKind::QuestionWhite),
+            "legacy snapshots missing questIds must recover from tracker NPC indexes"
+        );
+        assert_eq!(
+            quest_marker_for_entity(&json!({"objectId": 4, "questIds": []}), Some(&tracker)),
+            Some(QuestMarkerKind::QuestionWhite),
+            "Crystal current-quest matching must not depend on the NPC available list"
+        );
+        assert_eq!(
+            quest_marker_for_entity(&json!({"objectId": 99}), Some(&tracker)),
+            None,
+            "a quest marker must not appear on an NPC with the wrong role"
+        );
+        assert_eq!(
+            quest_marker_for_entity(&json!({"questIcon": 53}), None),
+            Some(QuestMarkerKind::QuestionGreen),
+            "authoritative questIcon must not depend on a client tracker"
         );
     }
 

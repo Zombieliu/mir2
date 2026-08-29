@@ -77,6 +77,7 @@ fn monster_snapshot(
         disposition,
         sprite: None,
         quest_ids: Vec::new(),
+        quest_icon: None,
     }
 }
 
