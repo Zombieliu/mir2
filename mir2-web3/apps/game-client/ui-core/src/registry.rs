@@ -308,6 +308,9 @@ const CORE_ACTIONS: &[&str] = &[
     "ToggleEquipment",
     "ToggleShop",
     "ToggleStorage",
+    "RotateBelt",
+    "CloseBelt",
+    "ToggleBelt",
     "SetMusicEnabled",
     "SetMusicVolume",
     "SetSoundEnabled",
@@ -439,7 +442,7 @@ const CHAT_ACTIONS: &[&str] = &[
     "FilterMentor",
     "FilterGroup",
     "FilterGuild",
-    "FilterTrade",
+    "TradeRequest",
     "Resize",
     "Settings",
     "OpenChatSettings",
@@ -680,9 +683,11 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("HUD.GAME_SHOP", "InGame", "HUD", "GameShopButton", "Game Shop", "button", rect(919.0,651.0,40.0,38.0), "single", 1, "InGame", "OpenGameShop", "Cash-shop panel", "CloseGameShop", "implemented", HUD, None, false),
         c!("HUD.MAIL", "InGame", "HUD", "MailButton", "Mail", "button", rect(902.0,131.0,20.0,20.0), "single", 1, "InGame", "OpenMail", "Mail panel", "CloseMail", "implemented", HUD, None, false),
         c!("HUD.BIG_MAP", "InGame", "HUD", "BigMapButton", "Big Map", "button", rect(923.0,131.0,20.0,20.0), "single", 1, "InGame", "OpenBigMap", "Big map panel", "CloseBigMap", "implemented", HUD, None, false),
-        c!("HUD.MINIMAP_TOGGLE", "InGame", "HUD", "MinimapToggle", "Minimap", "button", rect(1007.0,3.0,16.0,15.0), "single", 1, "InGame", "ToggleMinimap", "Minimap visibility toggles", "ToggleMinimap", "implemented", HUD, None, false),
+        c!("HUD.MINIMAP_TOGGLE", "InGame", "HUD", "MinimapToggle", "Minimap", "button", rect(1007.0,3.0,16.0,15.0), "single", 1, "InGame", "ToggleMinimap", "Switches between source frames 2090 (128x154) and 2091 (128x45), moving the footer from y=131 to y=22", "ToggleMinimap", "implemented", HUD, None, false),
         c!("HUD.LIGHT_SETTING", "InGame", "HUD", "LightSettingFrame", "Light", "visual", rect(1000.0,131.0,20.0,20.0), "single", 1, "InGame", "ShowLightSetting", "Frame only; no Button component", "none", "visual_only", HUD, None, true),
-        c!("HUD.BELT", "InGame", "HUD Belt", "BeltSlots", "Belt 1-6", "keyboard_shortcut_family", rect(242.0,621.0,32.0,32.0), "belt slots 1..6", 6, "occupied belt item", "UseBeltItem1", "Digit 1..6 uses corresponding belt item; no native mouse handler", "none", "implemented_keyboard_only", INPUT, None, false),
+        c!("HUD.BELT", "InGame", "HUD Belt", "BeltSlots", "Belt 1-6", "button_and_keyboard_family", rect(242.0,621.0,32.0,32.0), "belt slots 1..6", 6, "occupied belt item with authoritative unique id", "UseBeltItem1", "Digit 1..6 and current native pointer route use the corresponding authoritative item; Crystal right-click/double-click selection semantics remain open", "none", "implemented_with_pointer_semantic_gap", INPUT, None, false),
+        c!("HUD.BELT_ROTATE", "InGame", "HUD Belt", "RotateButton", "Rotate", "button", rect(452.0,621.0,16.0,16.0), "single", 1, "belt visible", "RotateBelt", "Switches source 1932/1933 horizontal geometry to 1944/1945 vertical geometry without changing slot identities; Ctrl+Z uses the same local rotation", "RotateBelt", "implemented_local", HUD, None, false),
+        c!("HUD.BELT_CLOSE", "InGame", "HUD Belt", "CloseButton", "Close", "button", rect(452.0,637.0,16.0,14.0), "single", 1, "belt visible", "CloseBelt", "Hides the belt; Z toggles visibility without losing orientation or slot identities", "ToggleBelt", "implemented_local", HUD, None, false),
         c!("INVENTORY.PANEL", "InGame", "Inventory", "Panel", "Bag", "panel", rect(16.0,170.0,360.0,520.0), "single", 1, "OpenInventory", "OpenInventory", "Bag contents", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("INVENTORY.SLOTS", "InGame", "Inventory", "BagSlots", "Bag slot", "dynamic_button_family", None, "slots 0..45", 46, "always rendered; item may be empty", "InspectBag", "Item inspection", "CloseWindows", "implemented", OVERLAY, None, false),
         c!("INVENTORY.ACTIONS", "InGame", "Item Inspect", "ItemActions", "Use/Equip/Unequip/Drop/Split/Move/Merge", "button_family", None, "context-sensitive actions", 9, "item inspected; mutations require explicit uniqueId", "UseInspected", "Server-authoritative item intents with exact pending keys", "CloseWindows", "implemented", OVERLAY, None, false),
@@ -780,7 +785,8 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("CHAT.SEND", "InGame", "Chat", "SendShortcut", "Send", "keyboard_shortcut", None, "single", 1, "chat focused + Enter", "SendChat", "Chat intent", "CancelChatDraft", "implemented_keyboard_only", CHAT, None, false),
         c!("CHAT.CANCEL", "InGame", "Chat", "CancelShortcut", "Cancel", "keyboard_shortcut", None, "single", 1, "chat focused + Escape", "CancelChatDraft", "Draft discarded", "CancelChatDraft", "implemented_keyboard_only", CHAT, None, false),
         c!("CHAT.SCROLL", "InGame", "Chat", "ScrollControls", "Home/Up/Down/End/Position", "button_family", None, "five controls", 5, "chat rendered", "Home", "Crystal chat action queue", "none", "implemented_ui_only", CHAT, None, false),
-        c!("CHAT.FILTERS", "InGame", "Chat", "ChannelFilters", "All/Shout/Whisper/Lover/Mentor/Group/Guild/Trade", "button_family", None, "eight controls", 8, "chat rendered", "FilterAll", "Crystal chat action queue", "none", "implemented_ui_only", CHAT, None, false),
+        c!("CHAT.FILTERS", "InGame", "Chat", "ChannelFilters", "All/Shout/Whisper/Lover/Mentor/Group/Guild", "button_family", None, "seven controls", 7, "chat rendered", "FilterAll", "Crystal chat action queue", "none", "implemented_ui_only", CHAT, None, false),
+        c!("CHAT.TRADE_REQUEST", "InGame", "Chat", "TradeButton", "Trade", "button", None, "single", 1, "chat rendered", "TradeRequest", "Queues one authoritative trade request without changing the chat filter", "none", "implemented_authoritative_request", CHAT, None, false),
         c!("CHAT.RESIZE", "InGame", "Chat", "ResizeButton", "Resize", "button", None, "single", 1, "chat rendered", "Resize", "Chat size changes", "none", "implemented_ui_only", CHAT, None, false),
         c!("CHAT.SETTINGS", "InGame", "Chat", "SettingsButton", "Settings", "button", None, "single", 1, "chat rendered", "OpenChatSettings", "Opens the shared Chat Settings staged state", "CloseChatSettings", "implemented", CHAT, None, false),
         c!("CHAT.SETTINGS_PANEL", "InGame", "Chat Settings", "Panel", "Chat Settings", "panel", rect(430.0,571.0,224.0,180.0), "single", 1, "Settings pressed", "OpenChatSettings", "Staged channel filters and transparency apply through the shared reducer and persist through the renderer adapter", "CloseChatSettings", "implemented_persisted_adapter", CHAT, None, false),
@@ -1389,7 +1395,7 @@ mod tests {
         let controls = all_controls();
         assert_eq!(
             controls.len(),
-            174,
+            177,
             "the Candidate control inventory changed; update its typed-action contract deliberately"
         );
         validate_registry(&controls).unwrap_or_else(|errors| panic!("{errors:?}"));

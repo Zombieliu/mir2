@@ -8,7 +8,7 @@
 use bevy::prelude::*;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
 
-use crate::crystal_ui::overlays::NativePlayerUiState;
+use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState};
 use crate::entities::{EntityKind, EntityModel, EntityModelSet};
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
@@ -44,7 +44,10 @@ pub struct Mir2CrystalMiniMapPlugin;
 impl Plugin for Mir2CrystalMiniMapPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_crystal_minimap)
-            .add_systems(Update, render_crystal_minimap);
+            .add_systems(
+                Update,
+                render_crystal_minimap.after(NativePlayerUiSet::Mutate),
+            );
     }
 }
 
@@ -135,7 +138,8 @@ fn render_crystal_minimap(
         .as_deref()
         .map(|s| s.minimap_visible())
         .unwrap_or(true);
-    let visible = in_game && minimap_visible;
+    let profile = mini_map_profile(ui_model.player.map_name.as_deref());
+    let visible = in_game && minimap_visible && profile.is_some();
     root_node.display = if visible {
         Display::Flex
     } else {
@@ -158,7 +162,7 @@ fn render_crystal_minimap(
     }
 
     commands.entity(root_entity).despawn_children();
-    let Some(profile) = mini_map_profile(ui_model.player.map_name.as_deref()) else {
+    let Some(profile) = profile else {
         return;
     };
     let crop = source_crop(profile, map_model.center_x, map_model.center_y);

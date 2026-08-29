@@ -7,17 +7,26 @@
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
+use bevy::ui::{widget::NodeImageMode, Display, FocusPolicy, Node, PositionType, Val};
+use bevy::window::PrimaryWindow;
 
 use crate::inventory::{item_icon_path, InventoryModel, ItemModel};
+use crate::mail::MailModel;
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
+use crate::pending_operations::{PendingLifecycleSet, SessionResetRevision};
 use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
+use super::notice::NoticeDialogState;
+use super::overlays::{NativePlayerUiSet, NativePlayerUiState};
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
-use super::widget::spawn_crystal_image_button;
+use super::widget::{
+    spawn_crystal_image_button, CrystalHint, Mir2CrystalHintPlugin,
+};
+#[cfg(test)]
+use super::widget::CrystalHintStyle;
 
 const WHITE: Color = Color::WHITE;
 pub(crate) const HUD_Z_INDEX: i32 = 950;
@@ -184,6 +193,12 @@ pub struct CrystalHudMapCoordinate;
 #[derive(Component, Debug)]
 pub struct CrystalHudMinimap;
 
+#[derive(Component, Debug)]
+pub struct CrystalHudMinimapCollapsed;
+
+#[derive(Component, Debug)]
+pub struct CrystalHudLightSetting;
+
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalHudBeltKey {
     pub slot: u8,
@@ -206,10 +221,102 @@ pub struct CrystalHudBeltHitTarget {
     pub slot: u8,
 }
 
+#[derive(Component, Debug)]
+pub struct CrystalHudBeltFrame;
+
+#[derive(Component, Debug)]
+pub struct CrystalHudBeltTint;
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CrystalBeltControlAction {
+    Rotate,
+    Close,
+}
+
+#[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalBeltPresentation {
+    pub visible: bool,
+    pub vertical: bool,
+}
+
+impl Default for CrystalBeltPresentation {
+    fn default() -> Self {
+        Self {
+            visible: true,
+            vertical: false,
+        }
+    }
+}
+
+#[derive(Resource, Debug, Default, Clone, Copy, PartialEq, Eq)]
+struct CrystalHudResetTracker(u64);
+
 /// Belt geometry follows `Prguse/1932` and keeps six fixed 40-pixel slots.
 pub const BELT_FRAME: CrystalRect = CrystalRect::new(230.0, 618.0, 240.0, 38.0);
+pub const BELT_VERTICAL_FRAME: CrystalRect = CrystalRect::new(0.0, 200.0, 40.0, 241.0);
 pub const BELT_SLOT_STEP: f32 = 35.0;
 pub const BELT_SLOT_COUNT: u8 = 6;
+const NEW_MAIL_BLINK_SECONDS: f32 = 0.5;
+const NEW_MAIL_HIDDEN_EDGE_LIMIT: u8 = 10;
+const NEW_MAIL_RECT: CrystalRect = CrystalRect::new(903.0, 132.0, 20.0, 18.0);
+const MINIMAP_COLLAPSED_FRAME: CrystalRect = CrystalRect::new(898.0, 0.0, 128.0, 45.0);
+const MINIMAP_EXPANDED_FOOTER_TOP: f32 = 131.0;
+const MINIMAP_COLLAPSED_FOOTER_TOP: f32 = 22.0;
+
+#[derive(Component, Debug)]
+pub struct CrystalHudNewMail;
+
+/// Crystal resets its new-mail pulse whenever the authoritative mail snapshot
+/// changes. The icon alternates every 500 ms; after ten hidden edges it stays
+/// visible until no unread mail remains.
+#[derive(Resource, Debug)]
+struct CrystalNewMailBlink {
+    unread_ids: Vec<u64>,
+    timer: Timer,
+    hidden_edges: u8,
+    visible: bool,
+}
+
+impl Default for CrystalNewMailBlink {
+    fn default() -> Self {
+        Self {
+            unread_ids: Vec::new(),
+            timer: Timer::from_seconds(NEW_MAIL_BLINK_SECONDS, TimerMode::Repeating),
+            hidden_edges: 0,
+            visible: false,
+        }
+    }
+}
+
+impl CrystalNewMailBlink {
+    fn reset_unread_ids(&mut self, mut unread_ids: Vec<u64>) {
+        unread_ids.sort_unstable();
+        unread_ids.dedup();
+        self.unread_ids = unread_ids;
+        self.timer.reset();
+        self.hidden_edges = 0;
+        self.visible = !self.unread_ids.is_empty();
+    }
+
+    fn tick(&mut self, delta: std::time::Duration) {
+        if self.unread_ids.is_empty() || self.hidden_edges >= NEW_MAIL_HIDDEN_EDGE_LIMIT {
+            self.visible = !self.unread_ids.is_empty();
+            return;
+        }
+
+        self.timer.tick(delta);
+        for _ in 0..self.timer.times_finished_this_tick() {
+            self.visible = !self.visible;
+            if !self.visible {
+                self.hidden_edges = self.hidden_edges.saturating_add(1);
+                if self.hidden_edges >= NEW_MAIL_HIDDEN_EDGE_LIMIT {
+                    self.visible = true;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 /// Exact source-relative positions from Crystal's `MainDialog`.
 pub const HP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 673.0, 100.0, 14.0);
@@ -229,6 +336,11 @@ impl Plugin for Mir2CrystalHudPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiReadModel>()
             .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<CrystalNewMailBlink>()
+            .init_resource::<CrystalBeltPresentation>()
+            .init_resource::<CrystalHudResetTracker>()
+            .init_resource::<SessionResetRevision>()
             .init_resource::<MapModel>()
             .init_resource::<NativeShellModel>()
             .add_systems(Startup, spawn_crystal_hud)
@@ -257,7 +369,29 @@ impl Plugin for Mir2CrystalHudPlugin {
                 Update,
                 update_hud_map_model.run_if(resource_changed::<MapModel>),
             )
-            .add_systems(Update, update_hud_minimap_visibility)
+            .add_systems(
+                Update,
+                apply_hud_session_reset
+                    .in_set(PendingLifecycleSet::UiReset)
+                    .before(update_new_mail_indicator)
+                    .before(toggle_belt_from_keyboard),
+            )
+            .add_systems(Update, update_new_mail_indicator)
+            .add_systems(
+                Update,
+                update_hud_minimap_visibility.after(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
+                (
+                    consume_belt_control_actions,
+                    toggle_belt_from_keyboard,
+                    sync_belt_presentation,
+                )
+                    .chain()
+                    .in_set(NativePlayerUiSet::Mutate),
+            )
+            .add_plugins(Mir2CrystalHintPlugin)
             .add_plugins(super::overlays::Mir2CrystalOverlayPlugin);
     }
 }
@@ -422,18 +556,29 @@ fn spawn_crystal_hud(
                 Justify::Left,
             );
 
-            spawn_frame_at(root, &asset_server, "Prguse", 1932, BELT_FRAME);
-            spawn_frame_tinted(
-                root,
-                &asset_server,
-                "Prguse",
-                1933,
-                BELT_FRAME,
-                Color::srgba(1.0, 1.0, 1.0, 0.5),
-            );
+            root.spawn((
+                CrystalHudBeltFrame,
+                absolute_node(BELT_FRAME),
+                ImageNode {
+                    image: asset_server.load("original-ui/Prguse/1932.png"),
+                    image_mode: NodeImageMode::Stretch,
+                    ..default()
+                },
+            ));
+            root.spawn((
+                CrystalHudBeltTint,
+                absolute_node(BELT_FRAME),
+                ImageNode {
+                    image: asset_server.load("original-ui/Prguse/1933.png"),
+                    color: Color::srgba(1.0, 1.0, 1.0, 0.5),
+                    image_mode: NodeImageMode::Stretch,
+                    ..default()
+                },
+            ));
             for slot in 0..BELT_SLOT_COUNT {
                 spawn_belt_slot(root, &asset_server, &inventory, slot);
             }
+            spawn_belt_controls(root, &asset_server);
 
             spawn_minimap_frame(root, &asset_server);
             spawn_vertical_centered_text(
@@ -456,6 +601,16 @@ fn spawn_crystal_hud(
             );
 
             spawn_hud_buttons(root, &asset_server);
+            root.spawn((
+                CrystalHudNewMail,
+                absolute_node(NEW_MAIL_RECT),
+                FocusPolicy::Pass,
+                ImageNode {
+                    image: asset_server.load("original-ui/Prguse/544.png"),
+                    image_mode: NodeImageMode::Stretch,
+                    ..default()
+                },
+            ));
         });
 }
 
@@ -478,6 +633,17 @@ fn spawn_minimap_frame(parent: &mut ChildSpawnerCommands, asset_server: &AssetSe
             ..default()
         },
     ));
+    let mut collapsed = absolute_node(MINIMAP_COLLAPSED_FRAME);
+    collapsed.display = Display::None;
+    parent.spawn((
+        CrystalHudMinimapCollapsed,
+        collapsed,
+        ImageNode {
+            image: asset_server.load("original-ui/Prguse/2091.png"),
+            image_mode: NodeImageMode::Stretch,
+            ..default()
+        },
+    ));
 }
 
 fn spawn_frame_at(
@@ -491,25 +657,6 @@ fn spawn_frame_at(
         absolute_node(rect),
         ImageNode {
             image: asset_server.load(format!("original-ui/{library}/{index}.png")),
-            image_mode: NodeImageMode::Stretch,
-            ..default()
-        },
-    ));
-}
-
-fn spawn_frame_tinted(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    library: &str,
-    index: u16,
-    rect: CrystalRect,
-    color: Color,
-) {
-    parent.spawn((
-        absolute_node(rect),
-        ImageNode {
-            image: asset_server.load(format!("original-ui/{library}/{index}.png")),
-            color,
             image_mode: NodeImageMode::Stretch,
             ..default()
         },
@@ -657,7 +804,29 @@ fn spawn_hud_buttons(parent: &mut ChildSpawnerCommands, asset_server: &AssetServ
         spec::MINIMAP_TOGGLE,
         CrystalHudAction::MinimapToggle,
     );
-    spawn_frame(parent, asset_server, spec::LIGHT_SETTING);
+    spawn_marked_frame(
+        parent,
+        asset_server,
+        spec::LIGHT_SETTING,
+        CrystalHudLightSetting,
+    );
+}
+
+fn spawn_marked_frame<T: Component>(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    frame: CrystalFrameSpec,
+    marker: T,
+) {
+    parent.spawn((
+        marker,
+        absolute_node(frame.rect),
+        ImageNode {
+            image: asset_server.load(frame.asset_path()),
+            image_mode: NodeImageMode::Stretch,
+            ..default()
+        },
+    ));
 }
 
 fn spawn_hud_button(
@@ -666,15 +835,34 @@ fn spawn_hud_button(
     button: super::spec::CrystalButtonSpec,
     action: CrystalHudAction,
 ) {
+    let hint = CrystalHint::new(
+        hud_hint(action).expect("every source HUD image button has a Crystal hint"),
+    );
     spawn_crystal_image_button(
         parent,
         asset_server,
         button,
         CrystalButtonAssetSet::from_spec(button),
-        action,
+        (action, hint),
         false,
         true,
     );
+}
+
+pub const fn hud_hint(action: CrystalHudAction) -> Option<&'static str> {
+    match action {
+        CrystalHudAction::Character => Some("Character"),
+        CrystalHudAction::Inventory => Some("Inventory"),
+        CrystalHudAction::Skill => Some("Skills"),
+        CrystalHudAction::Quest => Some("Quests"),
+        CrystalHudAction::Option => Some("Options"),
+        CrystalHudAction::Menu => Some("Menu"),
+        CrystalHudAction::GameShop => Some("Game Shop"),
+        CrystalHudAction::Mail => Some("Mail"),
+        CrystalHudAction::BigMap => Some("Big Map"),
+        CrystalHudAction::MinimapToggle => Some("Mini Map"),
+        CrystalHudAction::BeltUse(_) => None,
+    }
 }
 
 fn spawn_belt_slot(
@@ -734,6 +922,49 @@ fn spawn_belt_slot(
         CRYSTAL_DEFAULT_FONT_SIZE_PX,
         Color::srgb_u8(255, 255, 0),
         Justify::Right,
+    );
+}
+
+fn spawn_belt_controls(parent: &mut ChildSpawnerCommands, asset_server: &AssetServer) {
+    let rotate = super::spec::CrystalButtonSpec::new(
+        "Prguse",
+        1926,
+        1927,
+        1928,
+        CrystalRect::new(452.0, 621.0, 16.0, 16.0),
+        16.0,
+        16.0,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        rotate,
+        CrystalButtonAssetSet::from_spec(rotate),
+        (CrystalBeltControlAction::Rotate, CrystalHint::new("Rotate")),
+        false,
+        true,
+    );
+
+    let close = super::spec::CrystalButtonSpec::new(
+        "Prguse",
+        1923,
+        1924,
+        1925,
+        CrystalRect::new(452.0, 637.0, 16.0, 14.0),
+        16.0,
+        14.0,
+    );
+    spawn_crystal_image_button(
+        parent,
+        asset_server,
+        close,
+        CrystalButtonAssetSet::from_spec(close),
+        (
+            CrystalBeltControlAction::Close,
+            CrystalHint::new("Close (Z)"),
+        ),
+        false,
+        true,
     );
 }
 
@@ -870,6 +1101,47 @@ fn update_hud_visibility(
     } else {
         Display::None
     };
+}
+
+fn update_new_mail_indicator(
+    time: Res<Time>,
+    mail: Res<MailModel>,
+    mut blink: ResMut<CrystalNewMailBlink>,
+    mut indicators: Query<&mut Node, With<CrystalHudNewMail>>,
+) {
+    if mail.is_changed() {
+        blink.reset_unread_ids(
+            mail.mails
+                .iter()
+                .filter(|message| !message.read)
+                .map(|message| message.id)
+                .collect(),
+        );
+    }
+    blink.tick(time.delta());
+
+    let display = if blink.visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    for mut node in &mut indicators {
+        node.display = display;
+    }
+}
+
+fn apply_hud_session_reset(
+    reset: Res<SessionResetRevision>,
+    mut tracker: ResMut<CrystalHudResetTracker>,
+    mut belt: ResMut<CrystalBeltPresentation>,
+    mut mail_blink: ResMut<CrystalNewMailBlink>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+    *belt = CrystalBeltPresentation::default();
+    *mail_blink = CrystalNewMailBlink::default();
 }
 
 fn update_hud_read_model(
@@ -1156,8 +1428,17 @@ fn sync_belt_hit_targets(
     targets: Query<(Entity, &CrystalHudBeltHitTarget, Option<&Button>)>,
 ) {
     for (entity, marker, button) in &targets {
-        let enabled =
-            belt_slot_item(&inventory, marker.slot).is_some_and(|item| item.unique_id.is_some());
+        let item = belt_slot_item(&inventory, marker.slot).filter(|item| item.unique_id.is_some());
+        let enabled = item.is_some();
+        if let Some(item) = item {
+            let broken = item.durability_current == Some(0)
+                && item.durability_max.is_some_and(|maximum| maximum != 0);
+            commands
+                .entity(entity)
+                .insert(CrystalHint::item(basic_item_hint(item), broken));
+        } else {
+            commands.entity(entity).remove::<CrystalHint>();
+        }
         match (enabled, button.is_some()) {
             (true, false) => {
                 commands.entity(entity).insert((Button, Interaction::None));
@@ -1168,6 +1449,284 @@ fn sync_belt_hit_targets(
             }
             _ => {}
         }
+    }
+}
+
+fn consume_belt_control_actions(
+    interactions: Query<
+        (&Interaction, &CrystalBeltControlAction),
+        (Changed<Interaction>, With<Button>),
+    >,
+    shell: Res<NativeShellModel>,
+    mut presentation: ResMut<CrystalBeltPresentation>,
+) {
+    if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+    for (interaction, action) in &interactions {
+        if *interaction != Interaction::Pressed {
+            continue;
+        }
+        match action {
+            CrystalBeltControlAction::Rotate => {
+                presentation.vertical = !presentation.vertical;
+                presentation.visible = true;
+            }
+            CrystalBeltControlAction::Close => presentation.visible = false,
+        }
+    }
+}
+
+fn toggle_belt_from_keyboard(
+    keys: Option<Res<ButtonInput<KeyCode>>>,
+    shell: Res<NativeShellModel>,
+    player_ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut presentation: ResMut<CrystalBeltPresentation>,
+) {
+    let Some(keys) = keys else {
+        return;
+    };
+    if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+    if player_ui
+        .as_deref()
+        .is_some_and(NativePlayerUiState::blocks_gameplay_keys)
+        || notice.as_deref().is_some_and(NoticeDialogState::is_open)
+        || !windows.single().is_ok_and(|window| window.focused)
+    {
+        return;
+    }
+    let control = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
+    if !keys.just_pressed(KeyCode::KeyZ) {
+        return;
+    }
+    if control {
+        presentation.vertical = !presentation.vertical;
+    } else {
+        presentation.visible = !presentation.visible;
+    }
+}
+
+#[allow(clippy::type_complexity)]
+fn sync_belt_presentation(
+    presentation: Res<CrystalBeltPresentation>,
+    asset_server: Res<AssetServer>,
+    mut node_queries: ParamSet<(
+        Query<(&mut Node, &mut ImageNode), With<CrystalHudBeltFrame>>,
+        Query<(&mut Node, &mut ImageNode), With<CrystalHudBeltTint>>,
+        Query<(&CrystalHudBeltHitTarget, &mut Node)>,
+        Query<(&CrystalHudBeltKey, &mut Node)>,
+        Query<(&CrystalHudBeltItem, &mut Node)>,
+        Query<(
+            &CrystalBeltControlAction,
+            &mut Node,
+            &mut super::widget::CrystalImageButton,
+            &Children,
+        )>,
+        Query<&mut Node, With<super::widget::CrystalImageButtonSprite>>,
+    )>,
+) {
+    let visible = if presentation.visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    let frame_rect = belt_frame_rect(presentation.vertical);
+    let (frame_index, tint_index) = if presentation.vertical {
+        (1944, 1945)
+    } else {
+        (1932, 1933)
+    };
+    for (mut node, mut image) in node_queries.p0().iter_mut() {
+        set_node_rect(&mut node, frame_rect);
+        node.display = visible;
+        image.image = asset_server.load(format!("original-ui/Prguse/{frame_index}.png"));
+    }
+    for (mut node, mut image) in node_queries.p1().iter_mut() {
+        set_node_rect(&mut node, frame_rect);
+        node.display = visible;
+        image.image = asset_server.load(format!("original-ui/Prguse/{tint_index}.png"));
+    }
+    for (marker, mut node) in node_queries.p2().iter_mut() {
+        set_node_rect(
+            &mut node,
+            belt_slot_rect(marker.slot, presentation.vertical),
+        );
+        node.display = visible;
+    }
+    for (marker, mut node) in node_queries.p3().iter_mut() {
+        set_node_rect(
+            &mut node,
+            belt_key_rect_for_orientation(marker.slot, presentation.vertical),
+        );
+        node.display = visible;
+    }
+    for (marker, mut node) in node_queries.p4().iter_mut() {
+        set_node_rect(
+            &mut node,
+            belt_count_rect_for_orientation(marker.slot, presentation.vertical),
+        );
+        node.display = visible;
+    }
+
+    let mut sprite_sizes = Vec::new();
+    for (action, mut node, mut button, children) in node_queries.p5().iter_mut() {
+        let spec = belt_control_spec(*action, presentation.vertical);
+        set_node_rect(&mut node, spec.rect);
+        node.display = visible;
+        let assets = CrystalButtonAssetSet::from_spec(spec);
+        if button.assets != assets {
+            button.assets = assets;
+        }
+        sprite_sizes.push((
+            children.iter().collect::<Vec<_>>(),
+            spec.image_width,
+            spec.image_height,
+        ));
+    }
+    for (children, width, height) in sprite_sizes {
+        for child in children {
+            if let Ok(mut node) = node_queries.p6().get_mut(child) {
+                node.width = Val::Px(width);
+                node.height = Val::Px(height);
+            }
+        }
+    }
+}
+
+fn set_node_rect(node: &mut Node, rect: CrystalRect) {
+    node.left = Val::Px(rect.left);
+    node.top = Val::Px(rect.top);
+    node.width = Val::Px(rect.width);
+    node.height = Val::Px(rect.height);
+}
+
+pub const fn belt_frame_rect(vertical: bool) -> CrystalRect {
+    if vertical {
+        BELT_VERTICAL_FRAME
+    } else {
+        BELT_FRAME
+    }
+}
+
+pub const fn belt_slot_rect(slot: u8, vertical: bool) -> CrystalRect {
+    if vertical {
+        CrystalRect::new(3.0, 212.0 + BELT_SLOT_STEP * slot as f32, 32.0, 32.0)
+    } else {
+        spec::belt_slot(slot as usize)
+    }
+}
+
+pub const fn belt_key_rect_for_orientation(slot: u8, vertical: bool) -> CrystalRect {
+    if vertical {
+        CrystalRect::new(-1.0, 211.0 + BELT_SLOT_STEP * slot as f32, 26.0, 14.0)
+    } else {
+        belt_key_rect(slot)
+    }
+}
+
+pub const fn belt_count_rect_for_orientation(slot: u8, vertical: bool) -> CrystalRect {
+    let item = belt_slot_rect(slot, vertical);
+    CrystalRect::new(item.left, item.top + 18.0, item.width, 14.0)
+}
+
+pub const fn belt_control_spec(
+    action: CrystalBeltControlAction,
+    vertical: bool,
+) -> super::spec::CrystalButtonSpec {
+    match (action, vertical) {
+        (CrystalBeltControlAction::Rotate, false) => super::spec::CrystalButtonSpec::new(
+            "Prguse",
+            1926,
+            1927,
+            1928,
+            CrystalRect::new(452.0, 621.0, 16.0, 16.0),
+            16.0,
+            16.0,
+        ),
+        (CrystalBeltControlAction::Close, false) => super::spec::CrystalButtonSpec::new(
+            "Prguse",
+            1923,
+            1924,
+            1925,
+            CrystalRect::new(452.0, 637.0, 16.0, 14.0),
+            16.0,
+            14.0,
+        ),
+        (CrystalBeltControlAction::Rotate, true) => super::spec::CrystalButtonSpec::new(
+            "Prguse",
+            1938,
+            1939,
+            1940,
+            CrystalRect::new(19.0, 422.0, 16.0, 16.0),
+            16.0,
+            16.0,
+        ),
+        (CrystalBeltControlAction::Close, true) => super::spec::CrystalButtonSpec::new(
+            "Prguse",
+            1935,
+            1936,
+            1937,
+            CrystalRect::new(3.0, 422.0, 16.0, 16.0),
+            16.0,
+            16.0,
+        ),
+    }
+}
+
+/// Build only the portion of Crystal's item tooltip supported by the current
+/// authoritative native item snapshot. Missing requirement/bind/awake/rental
+/// fields stay absent instead of being guessed in the presentation layer.
+pub fn basic_item_hint(item: &ItemModel) -> String {
+    let mut lines = vec![bounded_belt_label(&item.name, 64)];
+    if let Some(grade) = item.grade.as_deref().filter(|grade| !grade.is_empty()) {
+        lines.push(format!("Grade: {}", bounded_belt_label(grade, 32)));
+    }
+    if item.quantity > 1 {
+        lines.push(format!("Quantity: {}", item.quantity));
+    }
+    if !item.description.is_empty() {
+        lines.extend(
+            item.description
+                .lines()
+                .take(3)
+                .map(|line| bounded_belt_label(line, 80)),
+        );
+    }
+    if let (Some(current), Some(maximum)) = (item.durability_current, item.durability_max) {
+        lines.push(format!("Durability: {current}/{maximum}"));
+    }
+    if item.attack != 0 || item.added_attack != 0 {
+        lines.push(format!(
+            "Attack: {}{}",
+            item.attack,
+            signed_item_bonus(item.added_attack)
+        ));
+    }
+    if item.defence != 0 || item.added_defence != 0 {
+        lines.push(format!(
+            "Defence: {}{}",
+            item.defence,
+            signed_item_bonus(item.added_defence)
+        ));
+    }
+    if item.added_luck != 0 {
+        lines.push(format!("Luck: {:+}", item.added_luck));
+    }
+    if item.socket_slots != 0 {
+        lines.push(format!("Sockets: {}", item.socket_slots));
+    }
+    lines.join("\n")
+}
+
+fn signed_item_bonus(value: i32) -> String {
+    if value == 0 {
+        String::new()
+    } else {
+        format!(" ({value:+})")
     }
 }
 
@@ -1183,33 +1742,79 @@ fn update_hud_map_model(
 
 fn update_hud_minimap_visibility(
     shell: Res<NativeShellModel>,
-    state: Option<Res<crate::crystal_ui::overlays::NativePlayerUiState>>,
+    state: Option<Res<NativePlayerUiState>>,
+    ui_model: Res<UiReadModel>,
     mut node_queries: ParamSet<(
         Query<&mut Node, With<CrystalHudMinimap>>,
+        Query<&mut Node, With<CrystalHudMinimapCollapsed>>,
         Query<&mut Node, With<CrystalHudMapTitle>>,
         Query<&mut Node, With<CrystalHudMapCoordinate>>,
+        Query<(&CrystalHudAction, &mut Node)>,
+        Query<&mut Node, With<CrystalHudLightSetting>>,
+        Query<&mut Node, With<CrystalHudNewMail>>,
     )>,
 ) {
     let in_game = shell.screen == NativeShellScreen::InGame;
-    let visible = in_game
-        && state
-            .as_deref()
-            .map(|s| s.minimap_visible())
-            .unwrap_or(true);
-    let display = if visible {
+    let preferred_expanded = state
+        .as_deref()
+        .map(|s| s.minimap_visible())
+        .unwrap_or(true);
+    let expanded = minimap_is_expanded(
+        preferred_expanded,
+        ui_model.player.map_name.as_deref(),
+    );
+    let expanded_display = if in_game && expanded {
         Display::Flex
     } else {
         Display::None
     };
     for mut node in node_queries.p0().iter_mut() {
-        node.display = display;
+        node.display = expanded_display;
     }
+    let collapsed_display = if in_game && !expanded {
+        Display::Flex
+    } else {
+        Display::None
+    };
     for mut node in node_queries.p1().iter_mut() {
-        node.display = display;
+        node.display = collapsed_display;
     }
+    let common_display = if in_game {
+        Display::Flex
+    } else {
+        Display::None
+    };
     for mut node in node_queries.p2().iter_mut() {
-        node.display = display;
+        node.display = common_display;
     }
+    let footer_top = minimap_footer_top(expanded);
+    for mut node in node_queries.p3().iter_mut() {
+        node.display = common_display;
+        node.top = Val::Px(footer_top);
+    }
+    for (action, mut node) in node_queries.p4().iter_mut() {
+        if matches!(action, CrystalHudAction::Mail | CrystalHudAction::BigMap) {
+            node.top = Val::Px(footer_top);
+        }
+    }
+    for mut node in node_queries.p5().iter_mut() {
+        node.top = Val::Px(footer_top);
+    }
+    for mut node in node_queries.p6().iter_mut() {
+        node.top = Val::Px(footer_top + 1.0);
+    }
+}
+
+pub const fn minimap_footer_top(expanded: bool) -> f32 {
+    if expanded {
+        MINIMAP_EXPANDED_FOOTER_TOP
+    } else {
+        MINIMAP_COLLAPSED_FOOTER_TOP
+    }
+}
+
+pub fn minimap_is_expanded(preferred_expanded: bool, map_name: Option<&str>) -> bool {
+    preferred_expanded && super::minimap::mini_map_profile(map_name).is_some()
 }
 
 fn set_text<T>(texts: &mut Query<&mut Text, With<T>>, value: String)
@@ -1367,9 +1972,63 @@ mod tests {
     }
 
     #[test]
+    fn main_hud_hint_matrix_covers_only_source_hint_controls() {
+        let cases = [
+            (CrystalHudAction::Character, "Character"),
+            (CrystalHudAction::Inventory, "Inventory"),
+            (CrystalHudAction::Skill, "Skills"),
+            (CrystalHudAction::Quest, "Quests"),
+            (CrystalHudAction::Option, "Options"),
+            (CrystalHudAction::Menu, "Menu"),
+            (CrystalHudAction::GameShop, "Game Shop"),
+            (CrystalHudAction::Mail, "Mail"),
+            (CrystalHudAction::BigMap, "Big Map"),
+            (CrystalHudAction::MinimapToggle, "Mini Map"),
+        ];
+        for (action, expected) in cases {
+            assert_eq!(hud_hint(action), Some(expected));
+        }
+        assert_eq!(hud_hint(CrystalHudAction::BeltUse(0)), None);
+    }
+
+    #[test]
+    fn new_mail_indicator_uses_source_geometry_and_blink_contract() {
+        assert_eq!(NEW_MAIL_RECT, CrystalRect::new(903.0, 132.0, 20.0, 18.0));
+
+        let mut blink = CrystalNewMailBlink::default();
+        blink.reset_unread_ids(vec![9, 3, 9]);
+        assert_eq!(blink.unread_ids, vec![3, 9]);
+        assert!(blink.visible);
+
+        blink.tick(std::time::Duration::from_millis(500));
+        assert!(!blink.visible);
+        assert_eq!(blink.hidden_edges, 1);
+        blink.reset_unread_ids(vec![3, 9]);
+        assert!(blink.visible);
+        assert_eq!(blink.hidden_edges, 0);
+        blink.tick(std::time::Duration::from_millis(500));
+        assert!(!blink.visible);
+        assert_eq!(blink.hidden_edges, 1);
+        blink.tick(std::time::Duration::from_millis(500));
+        assert!(blink.visible);
+
+        for _ in 1..NEW_MAIL_HIDDEN_EDGE_LIMIT {
+            blink.tick(std::time::Duration::from_millis(500));
+            blink.tick(std::time::Duration::from_millis(500));
+        }
+        assert_eq!(blink.hidden_edges, NEW_MAIL_HIDDEN_EDGE_LIMIT);
+        assert!(blink.visible);
+
+        blink.reset_unread_ids(Vec::new());
+        assert!(!blink.visible);
+        assert_eq!(blink.hidden_edges, 0);
+    }
+
+    #[test]
     fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
         let mut app = App::new();
-        app.insert_resource(NativeShellModel::default());
+        app.insert_resource(NativeShellModel::default())
+            .init_resource::<UiReadModel>();
         app.add_systems(Update, update_hud_minimap_visibility);
         app.world_mut()
             .spawn((Node::default(), CrystalHudMinimap, CrystalHudMapTitle));
@@ -1377,6 +2036,17 @@ mod tests {
             .spawn((Node::default(), CrystalHudMapCoordinate));
 
         app.update();
+    }
+
+    #[test]
+    fn minimap_toggle_uses_crystal_collapsed_frame_and_footer_positions() {
+        assert_eq!(spec::MINIMAP.index, 2090);
+        assert_eq!(
+            MINIMAP_COLLAPSED_FRAME,
+            CrystalRect::new(898.0, 0.0, 128.0, 45.0)
+        );
+        assert_eq!(minimap_footer_top(true), 131.0);
+        assert_eq!(minimap_footer_top(false), 22.0);
     }
 
     fn item(key: &str, name: &str, container: u8, slot: u32, quantity: u32) -> ItemModel {
@@ -1419,6 +2089,34 @@ mod tests {
         }];
         app.update();
         assert!(app.world().entity(target).contains::<Button>());
+        assert_eq!(
+            app.world()
+                .entity(target)
+                .get::<CrystalHint>()
+                .map(|hint| hint.0.as_str()),
+            Some("Potion\nQuantity: 2")
+        );
+        assert_eq!(
+            app.world()
+                .entity(target)
+                .get::<CrystalHint>()
+                .map(|hint| hint.1),
+            Some(CrystalHintStyle::Item { broken: false })
+        );
+
+        {
+            let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
+            inventory.items[0].durability_current = Some(0);
+            inventory.items[0].durability_max = Some(10);
+        }
+        app.update();
+        assert_eq!(
+            app.world()
+                .entity(target)
+                .get::<CrystalHint>()
+                .map(|hint| hint.1),
+            Some(CrystalHintStyle::Item { broken: true })
+        );
 
         app.world_mut()
             .resource_mut::<InventoryModel>()
@@ -1426,6 +2124,251 @@ mod tests {
             .clear();
         app.update();
         assert!(!app.world().entity(target).contains::<Button>());
+        assert!(!app.world().entity(target).contains::<CrystalHint>());
+    }
+
+    #[test]
+    fn belt_rotate_and_close_controls_follow_source_frames_and_geometry() {
+        assert_eq!(belt_frame_rect(false), BELT_FRAME);
+        assert_eq!(belt_frame_rect(true), BELT_VERTICAL_FRAME);
+        assert_eq!(
+            belt_slot_rect(5, true),
+            CrystalRect::new(3.0, 387.0, 32.0, 32.0)
+        );
+        assert_eq!(
+            belt_key_rect_for_orientation(0, true),
+            CrystalRect::new(-1.0, 211.0, 26.0, 14.0)
+        );
+        assert_eq!(
+            belt_count_rect_for_orientation(0, true),
+            CrystalRect::new(3.0, 230.0, 32.0, 14.0)
+        );
+
+        let horizontal_rotate = belt_control_spec(CrystalBeltControlAction::Rotate, false);
+        assert_eq!(
+            (
+                horizontal_rotate.normal,
+                horizontal_rotate.hover,
+                horizontal_rotate.pressed
+            ),
+            (1926, 1927, 1928)
+        );
+        assert_eq!(
+            horizontal_rotate.rect,
+            CrystalRect::new(452.0, 621.0, 16.0, 16.0)
+        );
+        let vertical_close = belt_control_spec(CrystalBeltControlAction::Close, true);
+        assert_eq!(
+            (
+                vertical_close.normal,
+                vertical_close.hover,
+                vertical_close.pressed
+            ),
+            (1935, 1936, 1937)
+        );
+        assert_eq!(
+            vertical_close.rect,
+            CrystalRect::new(3.0, 422.0, 16.0, 16.0)
+        );
+    }
+
+    #[test]
+    fn belt_controls_mutate_only_local_presentation_state() {
+        let mut app = App::new();
+        app.init_resource::<CrystalBeltPresentation>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Update, consume_belt_control_actions);
+        app.world_mut().spawn((
+            Button,
+            Interaction::Pressed,
+            CrystalBeltControlAction::Rotate,
+        ));
+        app.update();
+        assert_eq!(
+            *app.world().resource::<CrystalBeltPresentation>(),
+            CrystalBeltPresentation {
+                visible: true,
+                vertical: true,
+            }
+        );
+
+        app.world_mut().spawn((
+            Button,
+            Interaction::Pressed,
+            CrystalBeltControlAction::Close,
+        ));
+        app.update();
+        assert!(!app.world().resource::<CrystalBeltPresentation>().visible);
+    }
+
+    #[test]
+    fn crystal_z_toggles_belt_and_ctrl_z_rotates_without_reopening() {
+        let mut app = App::new();
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::InGame;
+        app.insert_resource(shell)
+            .insert_resource(CrystalBeltPresentation {
+                visible: false,
+                vertical: false,
+            })
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<NoticeDialogState>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_systems(Update, toggle_belt_from_keyboard);
+        app.world_mut()
+            .spawn((Window { focused: true, ..default() }, PrimaryWindow));
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.press(KeyCode::KeyZ);
+        }
+
+        app.update();
+
+        assert_eq!(
+            *app.world().resource::<CrystalBeltPresentation>(),
+            CrystalBeltPresentation {
+                visible: true,
+                vertical: false,
+            }
+        );
+
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.release(KeyCode::KeyZ);
+            keys.clear();
+            keys.press(KeyCode::ControlLeft);
+            keys.press(KeyCode::KeyZ);
+        }
+        app.update();
+        assert_eq!(
+            *app.world().resource::<CrystalBeltPresentation>(),
+            CrystalBeltPresentation {
+                visible: true,
+                vertical: true,
+            }
+        );
+
+        app.world_mut()
+            .resource_mut::<CrystalBeltPresentation>()
+            .visible = false;
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.release(KeyCode::ControlLeft);
+            keys.release(KeyCode::KeyZ);
+            keys.clear();
+            keys.press(KeyCode::ControlLeft);
+            keys.press(KeyCode::KeyZ);
+        }
+        app.update();
+        assert_eq!(
+            *app.world().resource::<CrystalBeltPresentation>(),
+            CrystalBeltPresentation {
+                visible: false,
+                vertical: false,
+            }
+        );
+    }
+
+    #[test]
+    fn hud_session_reset_restores_new_scene_belt_and_mail_defaults() {
+        let mut app = App::new();
+        app.init_resource::<SessionResetRevision>()
+            .init_resource::<CrystalHudResetTracker>()
+            .insert_resource(CrystalBeltPresentation {
+                visible: false,
+                vertical: true,
+            })
+            .init_resource::<CrystalNewMailBlink>()
+            .add_systems(Update, apply_hud_session_reset);
+        app.world_mut()
+            .resource_mut::<CrystalNewMailBlink>()
+            .reset_unread_ids(vec![7]);
+        app.world_mut()
+            .resource_mut::<SessionResetRevision>()
+            .request();
+
+        app.update();
+
+        assert_eq!(
+            *app.world().resource::<CrystalBeltPresentation>(),
+            CrystalBeltPresentation::default()
+        );
+        let blink = app.world().resource::<CrystalNewMailBlink>();
+        assert!(blink.unread_ids.is_empty());
+        assert!(!blink.visible);
+    }
+
+    #[test]
+    fn hud_session_reset_wins_over_stale_belt_press_outside_gameplay() {
+        let mut app = App::new();
+        app.init_resource::<SessionResetRevision>()
+            .init_resource::<CrystalHudResetTracker>()
+            .init_resource::<NativeShellModel>()
+            .insert_resource(CrystalBeltPresentation {
+                visible: false,
+                vertical: true,
+            })
+            .init_resource::<CrystalNewMailBlink>()
+            .configure_sets(
+                Update,
+                PendingLifecycleSet::UiReset.before(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
+                apply_hud_session_reset.in_set(PendingLifecycleSet::UiReset),
+            )
+            .add_systems(
+                Update,
+                consume_belt_control_actions.in_set(NativePlayerUiSet::Mutate),
+            );
+        app.world_mut().spawn((
+            Button,
+            Interaction::Pressed,
+            CrystalBeltControlAction::Close,
+        ));
+        app.world_mut()
+            .resource_mut::<SessionResetRevision>()
+            .request();
+
+        app.update();
+
+        assert_eq!(
+            *app.world().resource::<CrystalBeltPresentation>(),
+            CrystalBeltPresentation::default()
+        );
+    }
+
+    #[test]
+    fn missing_minimap_profile_forces_small_frame_without_losing_preference() {
+        assert!(minimap_is_expanded(true, Some("BichonProvince")));
+        assert!(!minimap_is_expanded(true, Some("UnknownMap")));
+        assert!(!minimap_is_expanded(false, Some("BichonProvince")));
+    }
+
+    #[test]
+    fn basic_item_hint_uses_only_supported_authoritative_fields() {
+        let item = ItemModel {
+            name: "Bronze Sword".to_owned(),
+            quantity: 1,
+            description: "A reliable blade.".to_owned(),
+            durability_current: Some(7),
+            durability_max: Some(10),
+            grade: Some("Rare".to_owned()),
+            attack: 3,
+            added_attack: 2,
+            defence: 1,
+            added_defence: -1,
+            added_luck: 1,
+            socket_slots: 2,
+            ..ItemModel::default()
+        };
+        assert_eq!(
+            basic_item_hint(&item),
+            "Bronze Sword\nGrade: Rare\nA reliable blade.\nDurability: 7/10\nAttack: 3 (+2)\nDefence: 1 (-1)\nLuck: +1\nSockets: 2"
+        );
     }
 
     #[test]

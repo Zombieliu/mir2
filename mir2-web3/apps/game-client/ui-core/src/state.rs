@@ -244,9 +244,10 @@ impl UiOptions {
 
 /// Chat channels supported by the shared native chat filter state.
 ///
-/// Crystal's ChatOptionDialog renders the first eight entries. Trade is kept
-/// in the shared state because the native ChatControlBar already exposes it;
-/// renderers do not have to show a Trade checkbox in the options dialog.
+/// Crystal's ChatOptionDialog renders the first eight entries. `Trade` remains
+/// in this serialized shared-state enum for backward compatibility only: the
+/// source ChatControlBar's eighth adjacent button sends a trade request and is
+/// not a channel filter.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum UiChatChannel {
     Normal,
@@ -273,8 +274,8 @@ impl UiChatChannel {
         Self::Trade,
     ];
 
-    /// Channels rendered by Crystal's `ChatOptionDialog`. Trade remains a
-    /// control-bar filter, but the source dialog has no ninth Trade checkbox.
+    /// Channels rendered by Crystal's `ChatOptionDialog`. The source dialog
+    /// has no ninth Trade checkbox.
     pub const SETTINGS: [Self; 8] = [
         Self::Normal,
         Self::Whisper,

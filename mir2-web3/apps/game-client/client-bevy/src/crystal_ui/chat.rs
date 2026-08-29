@@ -9,7 +9,10 @@ use bevy::prelude::*;
 use bevy::ui::{BackgroundColor, Node, PositionType, Val};
 
 use crate::chat::{ChatChannel, ChatLine, ChatModel};
-use crate::crystal_ui::overlays::{dispatch_ui_action, NativePlayerUiState, UiEffectQueue};
+use crate::crystal_ui::overlays::{
+    dispatch_ui_action, NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
+    UiEffectQueue,
+};
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_ui_core::action::UiAction;
 use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
@@ -17,6 +20,7 @@ use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 use super::spec;
 use super::spec::CrystalRect;
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use super::widget::CrystalHint;
 
 /// The Crystal 1024x768 chat panel's screen-space origin.
 pub const CHAT_PANEL_ORIGIN: (f32, f32) = (230.0, 671.0);
@@ -42,8 +46,9 @@ pub const CHAT_Z_INDEX: i32 = 975;
 
 /// Outbound/display filter selected via the ChatControlBar buttons.
 ///
-/// Maps directly to the 8 control-bar actions:
-/// All / Shout / Whisper / Lover / Mentor / Group / Guild / Trade
+/// Maps directly to Crystal's seven channel-prefix control-bar actions:
+/// All / Shout / Whisper / Lover / Mentor / Group / Guild. The visually
+/// adjacent eighth button sends `TradeRequest`; it is not a chat filter.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum CrystalChatFilter {
     #[default]
@@ -54,7 +59,6 @@ pub enum CrystalChatFilter {
     Mentor,
     Group,
     Guild,
-    Trade,
 }
 
 impl CrystalChatFilter {
@@ -68,7 +72,6 @@ impl CrystalChatFilter {
             Self::Mentor,
             Self::Group,
             Self::Guild,
-            Self::Trade,
         ]
     }
 
@@ -81,7 +84,6 @@ impl CrystalChatFilter {
             CrystalChatAction::FilterMentor => Some(Self::Mentor),
             CrystalChatAction::FilterGroup => Some(Self::Group),
             CrystalChatAction::FilterGuild => Some(Self::Guild),
-            CrystalChatAction::FilterTrade => Some(Self::Trade),
             _ => None,
         }
     }
@@ -95,7 +97,6 @@ impl CrystalChatFilter {
             Self::Mentor => "!#",
             Self::Group => "!!",
             Self::Guild => "!~",
-            Self::Trade => "@",
         }
     }
 }
@@ -254,9 +255,9 @@ pub struct CrystalChatInput;
 
 /// A typed, presentation-only result of pressing a Crystal chat control.
 ///
-/// The plugin places these in [`CrystalChatActionQueue`]. No action changes
-/// the gameplay model or emits a Gateway command; a later host may consume the
-/// queue to implement scrolling or chat options.
+/// The plugin places these in [`CrystalChatActionQueue`]. Presentation actions
+/// remain local; the source-authored Trade button is separately converted into
+/// one authoritative trade intent by the queue consumer.
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CrystalChatAction {
     Home,
@@ -271,7 +272,7 @@ pub enum CrystalChatAction {
     FilterMentor,
     FilterGroup,
     FilterGuild,
-    FilterTrade,
+    TradeRequest,
     Resize,
     Settings,
     SettingsTab(CrystalChatSettingsTab),
@@ -345,6 +346,8 @@ impl Plugin for Mir2CrystalChatPlugin {
             .init_resource::<CrystalChatState>()
             .init_resource::<NativePlayerUiState>()
             .init_resource::<UiEffectQueue>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::social::SocialModel>()
             .init_resource::<crate::chat_settings_effects::ChatSettingsRuntime>()
             .add_systems(Startup, spawn_chat_root)
             .add_systems(
@@ -400,7 +403,6 @@ pub fn channel_matches_filter(channel: &str, filter: CrystalChatFilter) -> bool 
         CrystalChatFilter::Mentor => channel == ChatChannel::Mentor,
         CrystalChatFilter::Group => channel == ChatChannel::Group,
         CrystalChatFilter::Guild => channel == ChatChannel::Guild,
-        CrystalChatFilter::Trade => channel == ChatChannel::Trade,
     }
 }
 
@@ -489,10 +491,7 @@ pub fn apply_chat_action(
             let len = filtered_len;
             state.set_filter(CrystalChatFilter::Guild, len);
         }
-        CrystalChatAction::FilterTrade => {
-            let len = filtered_len;
-            state.set_filter(CrystalChatFilter::Trade, len);
-        }
+        CrystalChatAction::TradeRequest => {}
         CrystalChatAction::Resize => state.resize(filtered_len),
         CrystalChatAction::SettingsTab(tab) => state.settings_tab = tab,
         CrystalChatAction::Settings
@@ -516,6 +515,7 @@ fn consume_chat_actions(
     mut state: ResMut<CrystalChatState>,
     mut player_ui: ResMut<NativePlayerUiState>,
     mut effects: ResMut<UiEffectQueue>,
+    mut intents: ResMut<NativePlayerUiIntentQueue>,
     chat: Option<Res<ChatModel>>,
 ) {
     if queue.is_empty() {
@@ -525,6 +525,13 @@ fn consume_chat_actions(
     // Need filtered length for scroll bounds. We compute based on current state before applying?
     // For correctness we recompute after each filter change.
     for action in actions {
+        if action == CrystalChatAction::TradeRequest {
+            // Crystal can reject a request (no target, invalid target, or refusal)
+            // with only a System chat line. There is no authoritative state
+            // transition that can clear a persistent TradeRequest pending key,
+            // so deduplicate only while the outbound intent is still queued.
+            intents.push_transient_unique(NativePlayerUiIntent::TradeRequest);
+        }
         let settings_open = player_ui.core.chat_settings_open();
         let shared_action = match action {
             CrystalChatAction::Settings => Some(if settings_open {
@@ -999,7 +1006,7 @@ fn spawn_chat_filter_settings(
     asset_server: &AssetServer,
     settings: UiChatSettings,
 ) {
-    let all_frame = if settings.any_filter_hidden() {
+    let all_frame = if settings.any_dialog_filter_hidden() {
         2086
     } else {
         2087
@@ -1179,7 +1186,7 @@ fn spawn_chat_control_bar(
         (2048, 100.0, CrystalChatAction::FilterMentor),
         (2051, 122.0, CrystalChatAction::FilterGroup),
         (2054, 144.0, CrystalChatAction::FilterGuild),
-        (2004, 166.0, CrystalChatAction::FilterTrade),
+        (2004, 166.0, CrystalChatAction::TradeRequest),
         (2057, 574.0, CrystalChatAction::Resize),
         (2060, 596.0, CrystalChatAction::Settings),
     ];
@@ -1311,7 +1318,7 @@ fn spawn_chat_button(
 ) {
     let (left, top) = child_screen_origin_for(window_size, relative_origin);
     let (width, height) = prguse_frame_size(normal);
-    parent.spawn((
+    let mut entity = parent.spawn((
         CrystalChatElement,
         Button,
         action,
@@ -1333,6 +1340,37 @@ fn spawn_chat_button(
             ..default()
         },
     ));
+    if let Some(hint) = chat_hint(action) {
+        entity.insert(CrystalHint::new(hint));
+    }
+}
+
+pub const fn chat_hint(action: CrystalChatAction) -> Option<&'static str> {
+    match action {
+        CrystalChatAction::FilterAll => Some("All"),
+        CrystalChatAction::FilterShout => Some("Shout"),
+        CrystalChatAction::FilterWhisper => Some("Whisper"),
+        CrystalChatAction::FilterLover => Some("Lover"),
+        CrystalChatAction::FilterMentor => Some("Mentor"),
+        CrystalChatAction::FilterGroup => Some("Group"),
+        CrystalChatAction::FilterGuild => Some("Guild"),
+        CrystalChatAction::TradeRequest => Some("Trade"),
+        CrystalChatAction::Resize => Some("Size"),
+        CrystalChatAction::Settings => Some("Chat Settings"),
+        CrystalChatAction::Home
+        | CrystalChatAction::Up
+        | CrystalChatAction::Down
+        | CrystalChatAction::End
+        | CrystalChatAction::PositionBar
+        | CrystalChatAction::SettingsTab(_)
+        | CrystalChatAction::SettingsFilterAll
+        | CrystalChatAction::SettingsFilter(_)
+        | CrystalChatAction::SettingsTransparency(_)
+        | CrystalChatAction::SettingsApply
+        | CrystalChatAction::SettingsCancel
+        | CrystalChatAction::SettingsDefaults
+        | CrystalChatAction::SettingsClose => None,
+    }
 }
 
 fn sync_chat_button_visuals(
@@ -1704,7 +1742,6 @@ mod tests {
             (ChatChannel::Mentor, CrystalChatFilter::Mentor),
             (ChatChannel::Group, CrystalChatFilter::Group),
             (ChatChannel::Guild, CrystalChatFilter::Guild),
-            (ChatChannel::Trade, CrystalChatFilter::Trade),
         ];
 
         for (channel, control_filter) in cases {
@@ -1727,8 +1764,7 @@ mod tests {
             "lineMessage",
             CrystalChatFilter::All
         ));
-        assert!(!channel_matches_filter("system", CrystalChatFilter::Trade));
-        assert!(!channel_matches_filter("hint", CrystalChatFilter::Trade));
+        assert!(channel_matches_filter("trade", CrystalChatFilter::All));
         assert!(!is_line_hidden_by_settings(
             &ChatLine {
                 text: "trade".to_owned(),
@@ -2170,11 +2206,6 @@ mod tests {
             filter_lines_by_filter(&lines, CrystalChatFilter::Guild).len(),
             1
         );
-        // Trade
-        assert_eq!(
-            filter_lines_by_filter(&lines, CrystalChatFilter::Trade).len(),
-            1
-        );
     }
 
     #[test]
@@ -2241,6 +2272,8 @@ mod tests {
             .init_resource::<CrystalChatState>()
             .init_resource::<NativePlayerUiState>()
             .init_resource::<UiEffectQueue>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::social::SocialModel>()
             .init_resource::<ChatModel>()
             .add_systems(Update, consume_chat_actions);
         app.world_mut()
@@ -2329,13 +2362,89 @@ mod tests {
         app.insert_resource(state);
         app.insert_resource(ChatModel::default());
         app.init_resource::<NativePlayerUiState>()
-            .init_resource::<UiEffectQueue>();
+            .init_resource::<UiEffectQueue>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::social::SocialModel>();
         app.add_systems(Update, consume_chat_actions);
         app.update();
         let state = app.world().resource::<CrystalChatState>();
         assert_eq!(state.filter, CrystalChatFilter::All);
         let queue = app.world().resource::<CrystalChatActionQueue>();
         assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn source_trade_button_queues_trade_request_without_changing_chat_filter() {
+        let mut app = App::new();
+        app.init_resource::<CrystalChatActionQueue>()
+            .init_resource::<CrystalChatState>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<UiEffectQueue>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::social::SocialModel>()
+            .init_resource::<ChatModel>()
+            .add_systems(Update, consume_chat_actions);
+        app.world_mut().resource_mut::<CrystalChatState>().filter = CrystalChatFilter::Guild;
+        app.world_mut()
+            .resource_mut::<CrystalChatActionQueue>()
+            .push(CrystalChatAction::TradeRequest);
+
+        app.update();
+
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().filter,
+            CrystalChatFilter::Guild
+        );
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::TradeRequest]
+        );
+        assert!(app
+            .world()
+            .resource::<crate::social::SocialModel>()
+            .pending
+            .is_empty());
+
+        app.world_mut()
+            .resource_mut::<CrystalChatActionQueue>()
+            .push(CrystalChatAction::TradeRequest);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::TradeRequest]
+        );
+    }
+
+    #[test]
+    fn source_chat_hint_matrix_excludes_scroll_and_settings_panel_controls() {
+        let cases = [
+            (CrystalChatAction::FilterAll, "All"),
+            (CrystalChatAction::FilterShout, "Shout"),
+            (CrystalChatAction::FilterWhisper, "Whisper"),
+            (CrystalChatAction::FilterLover, "Lover"),
+            (CrystalChatAction::FilterMentor, "Mentor"),
+            (CrystalChatAction::FilterGroup, "Group"),
+            (CrystalChatAction::FilterGuild, "Guild"),
+            (CrystalChatAction::TradeRequest, "Trade"),
+            (CrystalChatAction::Resize, "Size"),
+            (CrystalChatAction::Settings, "Chat Settings"),
+        ];
+        for (action, expected) in cases {
+            assert_eq!(chat_hint(action), Some(expected));
+        }
+        for action in [
+            CrystalChatAction::Home,
+            CrystalChatAction::Up,
+            CrystalChatAction::Down,
+            CrystalChatAction::End,
+            CrystalChatAction::PositionBar,
+        ] {
+            assert_eq!(chat_hint(action), None);
+        }
     }
 
     #[test]
@@ -2403,10 +2512,6 @@ mod tests {
         assert_eq!(
             format_chat_for_filter(CrystalChatFilter::Guild, "hi"),
             Some("!~hi".to_owned())
-        );
-        assert_eq!(
-            format_chat_for_filter(CrystalChatFilter::Trade, "sell"),
-            Some("@sell".to_owned())
         );
         assert_eq!(
             format_chat_for_filter(CrystalChatFilter::Shout, "   "),
