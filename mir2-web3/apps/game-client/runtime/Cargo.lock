@@ -2949,6 +2949,7 @@ dependencies = [
  "mir2-ui-core",
  "serde",
  "serde_json",
+ "unicode-width",
 ]
 
 [[package]]
