@@ -28,6 +28,11 @@ const CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX: f32 = -17.0;
 // `-(19 - label_height / 2) + 8` versus `-(31 - label_height / 2) + 8`.
 const CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX: f32 = -5.0;
 const CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX: f32 = -18.0;
+const CRYSTAL_QUEST_MARKER_WIDTH_PX: f32 = 28.0;
+const CRYSTAL_QUEST_MARKER_HEIGHT_PX: f32 = 29.0;
+const CRYSTAL_QUEST_MARKER_FRAME_INTERVAL_MS: u64 = 500;
+const CRYSTAL_QUEST_MARKER_FALLBACK_LEFT_PX: f32 = 12.0;
+const CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX: f32 = -58.0;
 
 #[derive(Component)]
 pub(crate) struct NativeEntityOverlayRoot;
@@ -42,6 +47,7 @@ pub struct NativeEntityOverlays {
     last_visibility: Option<OverlayVisibility>,
     last_hovered_object_id: Option<String>,
     last_self_hovered: bool,
+    last_quest_marker_phase: u8,
 }
 
 /// Local Crystal name/drop presentation flags. They only select which labels
@@ -172,6 +178,7 @@ struct DamageFloaterEntry {
 #[derive(Debug)]
 struct OverlayEntry {
     name: Option<String>,
+    quest_marker: Option<QuestMarkerKind>,
     color: Color,
     left: f32,
     top: f32,
@@ -188,20 +195,32 @@ enum QuestMarkerKind {
 }
 
 impl QuestMarkerKind {
-    fn label(self) -> &'static str {
+    fn first_frame_index(self) -> u16 {
         match self {
-            Self::Available => "!",
-            Self::InProgress | Self::ReadyToTurnIn => "?",
+            Self::InProgress => 983,
+            Self::Available => 985,
+            Self::ReadyToTurnIn => 987,
         }
     }
 
-    fn color(self) -> Color {
+    fn asset_path(self, phase: u8) -> String {
+        format!(
+            "original-ui/Prguse/{}.png",
+            self.first_frame_index() + u16::from(phase % 2)
+        )
+    }
+
+    fn priority(self) -> u8 {
         match self {
-            Self::Available => Color::srgb_u8(0xff, 0xd8, 0x3a),
-            Self::InProgress => Color::srgb_u8(0xc4, 0xc4, 0xc4),
-            Self::ReadyToTurnIn => Color::srgb_u8(0xff, 0xd8, 0x3a),
+            Self::ReadyToTurnIn => 0,
+            Self::Available => 1,
+            Self::InProgress => 2,
         }
     }
+}
+
+fn quest_marker_animation_phase(now_ms: u64) -> u8 {
+    ((now_ms / CRYSTAL_QUEST_MARKER_FRAME_INTERVAL_MS) % 2) as u8
 }
 
 pub fn sync_native_entity_overlays(
@@ -210,6 +229,7 @@ pub fn sync_native_entity_overlays(
     mut overlays: ResMut<NativeEntityOverlays>,
     roots: Query<Entity, With<NativeEntityOverlayRoot>>,
     time: Res<Time>,
+    asset_server: Res<AssetServer>,
     player_ui: Option<Res<NativePlayerUiState>>,
     presentation: Res<NativeEntityPresentation>,
     quest_tracker: Option<Res<QuestTracker>>,
@@ -230,6 +250,15 @@ pub fn sync_native_entity_overlays(
     let visibility = OverlayVisibility::from_player_ui(player_ui.as_deref());
     let hovered_object_id = presentation.hovered_object_id();
     let self_hovered = presentation.self_hovered();
+    let quest_marker_phase = quest_marker_animation_phase(now_ms);
+    if overlays.last_quest_marker_phase != quest_marker_phase
+        || quest_tracker
+            .as_ref()
+            .is_some_and(|tracker| tracker.is_changed())
+    {
+        overlays.dirty = true;
+        overlays.last_quest_marker_phase = quest_marker_phase;
+    }
     if !overlays.dirty
         && overlays.last_in_game == in_game
         && overlays.last_visibility == Some(visibility)
@@ -324,6 +353,24 @@ pub fn sync_native_entity_overlays(
                             BackgroundColor(Color::srgb_u8(0x00, 0xc0, 0x00)),
                         ));
                     });
+                }
+
+                if let Some(marker) = entry.quest_marker {
+                    root.spawn((
+                        Name::new(format!("NativeQuestMarker:{marker:?}")),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(entry.left),
+                            top: Val::Px(entry.top),
+                            width: Val::Px(CRYSTAL_QUEST_MARKER_WIDTH_PX),
+                            height: Val::Px(CRYSTAL_QUEST_MARKER_HEIGHT_PX),
+                            ..default()
+                        },
+                        ImageNode {
+                            image: asset_server.load(marker.asset_path(quest_marker_phase)),
+                            ..default()
+                        },
+                    ));
                 }
 
                 let Some(name) = entry.name else {
@@ -636,12 +683,13 @@ fn overlay_entries_with_motion(
                     if kind == "npc" {
                         if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
                             entity_entries.push(OverlayEntry {
-                                name: Some(marker.label().to_owned()),
-                                color: marker.color(),
-                                left,
-                                top: top + CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX - 15.0,
-                                width,
-                                font_size: 16.0,
+                                name: None,
+                                quest_marker: Some(marker),
+                                color: Color::WHITE,
+                                left: left + CRYSTAL_QUEST_MARKER_FALLBACK_LEFT_PX,
+                                top: top + CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX,
+                                width: CRYSTAL_QUEST_MARKER_WIDTH_PX,
+                                font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                                 self_health_ratio: None,
                             });
                         }
@@ -649,6 +697,7 @@ fn overlay_entries_with_motion(
                     if let Some(guild_name) = guild_name {
                         entity_entries.push(OverlayEntry {
                             name: Some(guild_name.to_owned()),
+                            quest_marker: None,
                             color,
                             left,
                             top: top + CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX + corpse_shift,
@@ -659,6 +708,7 @@ fn overlay_entries_with_motion(
                     }
                     entity_entries.push(OverlayEntry {
                         name: Some(display_name),
+                        quest_marker: None,
                         color,
                         left,
                         top: top
@@ -706,6 +756,7 @@ fn overlay_entries_with_motion(
                     .unwrap_or((0.0, 0.0));
                 entries.push(OverlayEntry {
                     name: None,
+                    quest_marker: None,
                     color: Color::WHITE,
                     left: origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x,
                     top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0 + motion_y,
@@ -737,6 +788,7 @@ fn overlay_entries_with_motion(
                     let y = drop.get("y").and_then(value_i64)?;
                     Some(OverlayEntry {
                         name: Some(name.to_owned()),
+                        quest_marker: None,
                         color: Color::srgb_u8(0xff, 0xe6, 0x58),
                         left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0
                             + camera_offset.0,
@@ -758,7 +810,7 @@ fn quest_marker_for_entity(
 ) -> Option<QuestMarkerKind> {
     let quest_indexes = entity.get("questIds")?.as_array()?;
     let tracker = quest_tracker?;
-    let mut saw_in_progress = false;
+    let mut best = None;
     for quest_index in quest_indexes.iter().filter_map(value_i64) {
         let quest_index = i32::try_from(quest_index).ok()?;
         let Some(quest) = tracker
@@ -768,17 +820,22 @@ fn quest_marker_for_entity(
         else {
             continue;
         };
-        match quest.status {
-            QuestStatus::ReadyToTurnIn => return Some(QuestMarkerKind::ReadyToTurnIn),
-            QuestStatus::NotStarted => return Some(QuestMarkerKind::Available),
-            QuestStatus::InProgress => saw_in_progress = true,
+        let candidate = match quest.status {
+            QuestStatus::ReadyToTurnIn => Some(QuestMarkerKind::ReadyToTurnIn),
+            QuestStatus::NotStarted => Some(QuestMarkerKind::Available),
+            QuestStatus::InProgress => Some(QuestMarkerKind::InProgress),
             QuestStatus::Completed
             | QuestStatus::Failed
             | QuestStatus::Aborted
-            | QuestStatus::Unknown(_) => {}
+            | QuestStatus::Unknown(_) => None,
+        };
+        if candidate.is_some_and(|candidate| {
+            best.is_none_or(|current: QuestMarkerKind| candidate.priority() < current.priority())
+        }) {
+            best = candidate;
         }
     }
-    saw_in_progress.then_some(QuestMarkerKind::InProgress)
+    best
 }
 
 fn value_i64(value: &Value) -> Option<i64> {
@@ -1212,19 +1269,53 @@ mod tests {
         );
         assert_eq!(
             entry_names(&entries),
+            ["Assistant\nJane", "CraftsLady\nJude", "Merchant\nRuben"]
+        );
+        assert_eq!(
+            quest_markers(&entries),
             [
-                "!",
-                "Assistant\nJane",
-                "?",
-                "CraftsLady\nJude",
-                "?",
-                "Merchant\nRuben"
+                QuestMarkerKind::Available,
+                QuestMarkerKind::InProgress,
+                QuestMarkerKind::ReadyToTurnIn
             ]
         );
-        assert_eq!(entries[0].color, QuestMarkerKind::Available.color());
-        assert_eq!(entries[2].color, QuestMarkerKind::InProgress.color());
-        assert_eq!(entries[4].color, QuestMarkerKind::ReadyToTurnIn.color());
-        assert_eq!(entries[0].font_size, 16.0);
+        assert_eq!(entries[0].left, 588.0);
+        assert_eq!(entries[0].top, 294.0);
+        assert_eq!(
+            QuestMarkerKind::InProgress.asset_path(0),
+            "original-ui/Prguse/983.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::InProgress.asset_path(1),
+            "original-ui/Prguse/984.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::Available.asset_path(0),
+            "original-ui/Prguse/985.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::Available.asset_path(1),
+            "original-ui/Prguse/986.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::ReadyToTurnIn.asset_path(0),
+            "original-ui/Prguse/987.png"
+        );
+        assert_eq!(
+            QuestMarkerKind::ReadyToTurnIn.asset_path(1),
+            "original-ui/Prguse/988.png"
+        );
+        assert_eq!(quest_marker_animation_phase(0), 0);
+        assert_eq!(quest_marker_animation_phase(499), 0);
+        assert_eq!(quest_marker_animation_phase(500), 1);
+        assert_eq!(quest_marker_animation_phase(1_000), 0);
+
+        let mixed = json!({"questIds": [1, 2, 3]});
+        assert_eq!(
+            quest_marker_for_entity(&mixed, Some(&tracker)),
+            Some(QuestMarkerKind::ReadyToTurnIn),
+            "ready-to-turn-in must win even when an available quest is listed first"
+        );
     }
 
     #[test]
@@ -1261,6 +1352,13 @@ mod tests {
         entries
             .iter()
             .filter_map(|entry| entry.self_health_ratio)
+            .collect()
+    }
+
+    fn quest_markers(entries: &[OverlayEntry]) -> Vec<QuestMarkerKind> {
+        entries
+            .iter()
+            .filter_map(|entry| entry.quest_marker)
             .collect()
     }
 

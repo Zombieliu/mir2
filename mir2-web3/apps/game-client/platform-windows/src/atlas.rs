@@ -1461,6 +1461,7 @@ fn hovered_object_at_cursor(
                 let object_id = entity.get("objectId").and_then(Value::as_str)?;
                 if (x == cursor_grid_x && y == cursor_grid_y)
                     || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
+                    || npc_body_bounds_fallback_hit(entity, cursor_x, cursor_y, index, pixels)
                 {
                     return Some(object_id.to_owned());
                 }
@@ -1468,6 +1469,143 @@ fn hovered_object_at_cursor(
         }
     }
     None
+}
+
+fn npc_body_bounds_fallback_hit(
+    entity: &Value,
+    cursor_x: f32,
+    cursor_y: f32,
+    index: &StarterAtlasIndex,
+    pixels: Option<&StarterAtlasPixels>,
+) -> bool {
+    if entity.get("kind").and_then(Value::as_str) != Some("npc") {
+        return false;
+    }
+    let Some(object_id) = entity.get("objectId").and_then(Value::as_str) else {
+        return false;
+    };
+    match body_hit_availability(entity, object_id, cursor_x, cursor_y, index, pixels) {
+        BodyHitAvailability::Hit => true,
+        BodyHitAvailability::Miss => false,
+        BodyHitAvailability::UnavailableWithinBounds => true,
+        BodyHitAvailability::OutOfBounds => false,
+    }
+}
+
+enum BodyHitAvailability {
+    Hit,
+    Miss,
+    UnavailableWithinBounds,
+    OutOfBounds,
+}
+
+fn body_hit_availability(
+    entity: &Value,
+    object_id: &str,
+    cursor_x: f32,
+    cursor_y: f32,
+    index: &StarterAtlasIndex,
+    pixels: Option<&StarterAtlasPixels>,
+) -> BodyHitAvailability {
+    let actor_layer_count = entity
+        .get("_nativeActorLayerCount")
+        .and_then(Value::as_u64)
+        .and_then(|count| usize::try_from(count).ok())
+        .unwrap_or(0);
+    let body_key = format!("{object_id}:body");
+    let Some(body) = entity
+        .get("layers")
+        .and_then(Value::as_array)
+        .and_then(|layers| layers.get(..actor_layer_count))
+        .and_then(|layers| layers.iter().find(|layer| layer["key"] == body_key))
+    else {
+        return BodyHitAvailability::OutOfBounds;
+    };
+    let Some(left) = body.get("left").and_then(Value::as_f64).map(|v| v as f32) else {
+        return BodyHitAvailability::OutOfBounds;
+    };
+    let Some(top) = body.get("top").and_then(Value::as_f64).map(|v| v as f32) else {
+        return BodyHitAvailability::OutOfBounds;
+    };
+    let Some(width) = body.get("width").and_then(Value::as_f64).map(|v| v as f32) else {
+        return BodyHitAvailability::OutOfBounds;
+    };
+    let Some(height) = body.get("height").and_then(Value::as_f64).map(|v| v as f32) else {
+        return BodyHitAvailability::OutOfBounds;
+    };
+    if cursor_x < left || cursor_y < top || cursor_x >= left + width || cursor_y >= top + height {
+        return BodyHitAvailability::OutOfBounds;
+    }
+    let local_x = (cursor_x - left).floor() as u32;
+    let local_y = (cursor_y - top).floor() as u32;
+    let atlas_key = body.get("atlasKey").and_then(Value::as_str);
+    let rect_key = body.get("atlasRectKey").and_then(Value::as_str);
+    if atlas_key.is_none() && rect_key.is_none() {
+        let Some(frame_path) = body.get("path").and_then(Value::as_str) else {
+            return BodyHitAvailability::UnavailableWithinBounds;
+        };
+        let Some(frame_pixels) = original_frame_pixels(frame_path) else {
+            return BodyHitAvailability::UnavailableWithinBounds;
+        };
+        if frame_pixels.width as f32 != width || frame_pixels.height as f32 != height {
+            return BodyHitAvailability::UnavailableWithinBounds;
+        }
+        let Some(alpha_index) = local_y
+            .checked_mul(frame_pixels.width)
+            .and_then(|row| row.checked_add(local_x))
+            .and_then(|pixel| pixel.checked_mul(4))
+            .and_then(|offset| offset.checked_add(3))
+            .and_then(|offset| usize::try_from(offset).ok())
+        else {
+            return BodyHitAvailability::UnavailableWithinBounds;
+        };
+        return if frame_pixels.rgba.get(alpha_index).copied().unwrap_or(0) > 0 {
+            BodyHitAvailability::Hit
+        } else {
+            BodyHitAvailability::Miss
+        };
+    }
+    let (Some(atlas_key), Some(rect_key)) = (atlas_key, rect_key) else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    let Some(page) = index.pages.iter().find(|page| page.key == atlas_key) else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    let Some(rect) = page.rects.iter().find(|rect| rect.key == rect_key) else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    let Some(pixel_page) = pixels.and_then(|pages| pages.get(atlas_key)) else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    if pixel_page.width != page.width || pixel_page.height != page.height {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    }
+    if local_x >= rect.width || local_y >= rect.height {
+        return BodyHitAvailability::Miss;
+    }
+    let Some(pixel_x) = rect.x.checked_add(local_x) else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    let Some(pixel_y) = rect.y.checked_add(local_y) else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    if pixel_x >= pixel_page.width || pixel_y >= pixel_page.height {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    }
+    let Some(alpha_index) = pixel_y
+        .checked_mul(pixel_page.width)
+        .and_then(|row| row.checked_add(pixel_x))
+        .and_then(|pixel| pixel.checked_mul(4))
+        .and_then(|offset| offset.checked_add(3))
+        .and_then(|offset| usize::try_from(offset).ok())
+    else {
+        return BodyHitAvailability::UnavailableWithinBounds;
+    };
+    if pixel_page.rgba.get(alpha_index).copied().unwrap_or(0) > 0 {
+        BodyHitAvailability::Hit
+    } else {
+        BodyHitAvailability::Miss
+    }
 }
 
 fn self_hovered_at_cursor(
@@ -1517,97 +1655,10 @@ fn body_visible_pixel(
     index: &StarterAtlasIndex,
     pixels: Option<&StarterAtlasPixels>,
 ) -> bool {
-    let actor_layer_count = entity
-        .get("_nativeActorLayerCount")
-        .and_then(Value::as_u64)
-        .and_then(|count| usize::try_from(count).ok())
-        .unwrap_or(0);
-    let body_key = format!("{object_id}:body");
-    let Some(body) = entity
-        .get("layers")
-        .and_then(Value::as_array)
-        .and_then(|layers| layers.get(..actor_layer_count))
-        .and_then(|layers| layers.iter().find(|layer| layer["key"] == body_key))
-    else {
-        return false;
-    };
-    let Some(left) = body.get("left").and_then(Value::as_f64).map(|v| v as f32) else {
-        return false;
-    };
-    let Some(top) = body.get("top").and_then(Value::as_f64).map(|v| v as f32) else {
-        return false;
-    };
-    let Some(width) = body.get("width").and_then(Value::as_f64).map(|v| v as f32) else {
-        return false;
-    };
-    let Some(height) = body.get("height").and_then(Value::as_f64).map(|v| v as f32) else {
-        return false;
-    };
-    if cursor_x < left || cursor_y < top || cursor_x >= left + width || cursor_y >= top + height {
-        return false;
-    }
-    let local_x = (cursor_x - left).floor() as u32;
-    let local_y = (cursor_y - top).floor() as u32;
-    let atlas_key = body.get("atlasKey").and_then(Value::as_str);
-    let rect_key = body.get("atlasRectKey").and_then(Value::as_str);
-    if atlas_key.is_none() && rect_key.is_none() {
-        let Some(frame_path) = body.get("path").and_then(Value::as_str) else {
-            return false;
-        };
-        let Some(frame_pixels) = original_frame_pixels(frame_path) else {
-            return false;
-        };
-        if frame_pixels.width as f32 != width || frame_pixels.height as f32 != height {
-            return false;
-        }
-        let Some(alpha_index) = local_y
-            .checked_mul(frame_pixels.width)
-            .and_then(|row| row.checked_add(local_x))
-            .and_then(|pixel| pixel.checked_mul(4))
-            .and_then(|offset| offset.checked_add(3))
-            .and_then(|offset| usize::try_from(offset).ok())
-        else {
-            return false;
-        };
-        return frame_pixels.rgba.get(alpha_index).copied().unwrap_or(0) > 0;
-    }
-    let (Some(atlas_key), Some(rect_key)) = (atlas_key, rect_key) else {
-        return false;
-    };
-    let Some(page) = index.pages.iter().find(|page| page.key == atlas_key) else {
-        return false;
-    };
-    let Some(rect) = page.rects.iter().find(|rect| rect.key == rect_key) else {
-        return false;
-    };
-    let Some(pixel_page) = pixels.and_then(|pages| pages.get(atlas_key)) else {
-        return false;
-    };
-    if pixel_page.width != page.width || pixel_page.height != page.height {
-        return false;
-    }
-    if local_x >= rect.width || local_y >= rect.height {
-        return false;
-    }
-    let Some(pixel_x) = rect.x.checked_add(local_x) else {
-        return false;
-    };
-    let Some(pixel_y) = rect.y.checked_add(local_y) else {
-        return false;
-    };
-    if pixel_x >= pixel_page.width || pixel_y >= pixel_page.height {
-        return false;
-    }
-    let Some(alpha_index) = pixel_y
-        .checked_mul(pixel_page.width)
-        .and_then(|row| row.checked_add(pixel_x))
-        .and_then(|pixel| pixel.checked_mul(4))
-        .and_then(|offset| offset.checked_add(3))
-        .and_then(|offset| usize::try_from(offset).ok())
-    else {
-        return false;
-    };
-    pixel_page.rgba.get(alpha_index).copied().unwrap_or(0) > 0
+    matches!(
+        body_hit_availability(entity, object_id, cursor_x, cursor_y, index, pixels),
+        BodyHitAvailability::Hit
+    )
 }
 
 #[cfg(test)]
@@ -2850,6 +2901,49 @@ mod tests {
         assert!(!has_layer(&state, "1000:hover-highlight:body"));
         assert_eq!(state["hoveredObjectId"], json!("3002"));
         assert_eq!(state["selfHovered"], json!(true));
+    }
+
+    #[test]
+    fn npc_hover_falls_back_to_body_bounds_when_pixels_are_unavailable() {
+        let manifest = hover_fixture_manifest();
+        let poses = HashMap::from([
+            ("3001".to_owned(), (0, AnimationAction::Standing)),
+            ("2001".to_owned(), (0, AnimationAction::Standing)),
+        ]);
+
+        let npc_payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
+            "_nativeHighlightTarget": true,
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [hover_fixture_entity(3001, "npc", 11, false)]
+        });
+        let npc_state = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &npc_payload,
+            &poses,
+            true,
+            &manifest,
+            &HashMap::new(),
+        )
+        .expect("npc bounds fallback state");
+        assert_eq!(npc_state["hoveredObjectId"], json!("3001"));
+        assert!(has_layer(&npc_state, "3001:hover-highlight:body"));
+
+        let monster_payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
+            "_nativeHighlightTarget": true,
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [hover_fixture_entity(2001, "monster", 11, false)]
+        });
+        let monster_state = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &monster_payload,
+            &poses,
+            true,
+            &manifest,
+            &HashMap::new(),
+        )
+        .expect("monster fail-closed state");
+        assert!(monster_state["hoveredObjectId"].is_null());
+        assert!(!has_layer(&monster_state, "2001:hover-highlight:body"));
     }
 
     #[test]
