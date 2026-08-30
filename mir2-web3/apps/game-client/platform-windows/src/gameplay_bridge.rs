@@ -76,6 +76,11 @@ pub struct NativeGameplayAdapter {
     /// not class/gender/equipment/mount presentation fields.
     actor_sound_contexts: HashMap<u32, Value>,
     latest_player_object_id: Option<u32>,
+    /// Compatibility runtimes may echo a source-complete `ObjectMagic`
+    /// immediately after the owner's compact `Magic` acknowledgement. Keep
+    /// the just-rehydrated event until that exact echo is consumed so the
+    /// caster does not render or play the same spell twice.
+    pending_local_magic_echo: Option<Value>,
     zone_entities: HashMap<u32, serde_json::Map<String, Value>>,
     /// Relationship comes from the retained authoritative world snapshot.
     /// Incremental ObjectMonster packets do not carry it, so packet-only
@@ -702,7 +707,19 @@ impl NativeGameplayAdapter {
                     );
                     changed
                 }
+                "Magic" => {
+                    if std::env::var_os("MIR2_NATIVE_FX_TRACE").is_some() {
+                        eprintln!("[native-magic-bridge] packet=Magic payload={payload}");
+                    }
+                    self.record_local_magic(payload)
+                }
                 "ObjectMagic" => {
+                    if std::env::var_os("MIR2_NATIVE_FX_TRACE").is_some() {
+                        eprintln!("[native-magic-bridge] packet=ObjectMagic payload={payload}");
+                    }
+                    if self.consume_local_magic_echo(payload) {
+                        return false;
+                    }
                     // Crystal's PlayerObject changes a sourced subset of
                     // Archer spells from the generic Spell pose to
                     // AttackRange2. The gateway projects the typed Spell enum
@@ -944,6 +961,7 @@ impl NativeGameplayAdapter {
         self.effect_events.clear();
         self.actor_sound_contexts.clear();
         self.latest_player_object_id = None;
+        self.pending_local_magic_echo = None;
     }
 
     /// Drop source-map population without discarding the local player's
@@ -961,6 +979,7 @@ impl NativeGameplayAdapter {
         self.zone_tombstones.clear();
         self.damage_events.clear();
         self.effect_events.clear();
+        self.pending_local_magic_echo = None;
         self.actor_sound_contexts
             .retain(|object_id, _| player_object_id == Some(*object_id));
     }
@@ -992,6 +1011,93 @@ impl NativeGameplayAdapter {
         while self.effect_events.len() > MAX_BUFFERED_EFFECT_EVENTS {
             self.effect_events.pop_front();
         }
+    }
+
+    /// Crystal sends the caster a compact `Magic` acknowledgement while AOI
+    /// observers receive the source-complete `ObjectMagic` packet. Rehydrate
+    /// only from the latest authoritative self identity/transform so the
+    /// native effect consumer can share the observer path without guessing a
+    /// source tile or facing direction.
+    fn record_local_magic(&mut self, payload: &Value) -> bool {
+        let Some(object_id) = self.latest_player_object_id else {
+            return false;
+        };
+        let Some(transform) = self.authoritative_player_transform.clone() else {
+            return false;
+        };
+        let Some(direction) = transform.direction else {
+            return false;
+        };
+        let mut enriched = packet_body(payload).clone();
+        let Some(body) = enriched.as_object_mut() else {
+            return false;
+        };
+        body.insert("objectId".to_owned(), Value::from(object_id));
+        body.insert(
+            "location".to_owned(),
+            serde_json::json!({"x": transform.x, "y": transform.y}),
+        );
+        body.insert("direction".to_owned(), Value::from(direction));
+
+        let action = object_magic_animation_action(&enriched);
+        self.authoritative_player_animation = Some(self.next_animation_hint(action));
+        self.pending_local_magic_echo = Some(enriched.clone());
+        self.record_effect("ObjectMagic", &enriched);
+        true
+    }
+
+    fn consume_local_magic_echo(&mut self, payload: &Value) -> bool {
+        let Some(expected_payload) = self.pending_local_magic_echo.take() else {
+            return false;
+        };
+        let Some(expected_object_id) = packet_object_id(&expected_payload) else {
+            return false;
+        };
+        let expected = packet_body(&expected_payload);
+        let actual = packet_body(payload);
+        let owner_nonbroadcast_echo = actual
+            .get("selfBroadcast")
+            .or_else(|| actual.get("self_broadcast"))
+            .and_then(Value::as_bool)
+            == Some(false)
+            && expected.get("spell") == actual.get("spell")
+            && expected.get("targetId") == actual.get("targetId")
+            && expected.get("cast") == actual.get("cast")
+            && expected.get("level") == actual.get("level")
+            && expected.get("location") == actual.get("location");
+        if owner_nonbroadcast_echo {
+            // Shared-zone compatibility deliberately sends the caster both a
+            // compact `Magic` acknowledgement and the source-complete
+            // `ObjectMagic { selfBroadcast: false }`. The target location can
+            // legitimately move between those projections, and the Zone may
+            // remap the personal-session object id. The immutable source tile
+            // plus cast identity and explicit owner non-broadcast marker are
+            // therefore the authoritative echo identity.
+            return true;
+        }
+
+        if packet_object_id(payload) != Some(expected_object_id) {
+            self.pending_local_magic_echo = Some(expected_payload.clone());
+            return false;
+        }
+
+        // The compact owner `Magic` acknowledgement has no source facing.
+        // Rehydration therefore uses the latest authoritative transform, while
+        // the source-complete compatibility echo may already carry the cast
+        // facing calculated toward the target. Direction is presentation
+        // context, not cast identity, so requiring it here duplicates one cast
+        // whenever those two authoritative observations straddle a turn.
+        const ECHO_FIELDS: [&str; 6] = [
+            "spell",
+            "targetId",
+            "target",
+            "cast",
+            "level",
+            "secondaryTargetIds",
+        ];
+        ECHO_FIELDS
+            .into_iter()
+            .all(|field| expected.get(field) == actual.get(field))
     }
 
     fn record_actor_effect(
@@ -4384,7 +4490,8 @@ mod tests {
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "ObjectAttack".to_owned(),
             payload: json!({
-                "objectId": 1000,
+                // The shared Zone may remap the personal-session object id.
+                "objectId": 50000,
                 "location": {"x": 288, "y": 616},
                 "direction": "UpLeft",
                 "spell": 8,
@@ -4472,6 +4579,104 @@ mod tests {
         );
         assert_eq!(adapter.effect_events.len(), 1);
         assert_eq!(adapter.effect_events[0].packet, "ObjectMagic");
+    }
+
+    #[test]
+    fn owner_magic_rehydrates_authoritative_source_for_native_cast_effects() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let world = gameplay_payload();
+        adapter.observe_world_snapshot(&world);
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserLocation".to_owned(),
+            payload: json!({"x": 288, "y": 616, "direction": "UpRight"}),
+        }));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "Magic".to_owned(),
+            payload: json!({
+                "spell": "FireBall",
+                "targetId": 2001,
+                "target": {"x": 292, "y": 612},
+                "cast": true,
+                "level": 3,
+                "secondaryTargetIds": []
+            }),
+        }));
+
+        let mut overlaid = world;
+        adapter.apply_authoritative_overlay(&mut overlaid);
+        assert_eq!(
+            overlaid["entities"][0]["_nativeAnimationAction"],
+            json!("spell")
+        );
+        assert_eq!(adapter.effect_events.len(), 1);
+        let event = &adapter.effect_events[0];
+        assert_eq!(event.packet, "ObjectMagic");
+        assert_eq!(event.payload["objectId"], json!(1000));
+        assert_eq!(event.payload["location"], json!({"x": 288, "y": 616}));
+        assert_eq!(event.payload["direction"], json!("UpRight"));
+        assert_eq!(event.payload["spell"], json!("FireBall"));
+        assert_eq!(event.payload["targetId"], json!(2001));
+        assert_eq!(event.payload["target"], json!({"x": 292, "y": 612}));
+        assert_eq!(event.payload["cast"], json!(true));
+        assert_eq!(event.payload["level"], json!(3));
+
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectMagic".to_owned(),
+            payload: json!({
+                "objectId": 1000,
+                "location": {"x": 288, "y": 616},
+                // The full echo may contain the cast-facing direction even
+                // when the compact acknowledgement was rehydrated from the
+                // preceding authoritative player direction.
+                "direction": "UpLeft",
+                "spell": "FireBall",
+                "targetId": 2001,
+                // A moving target may be projected at a newer authoritative
+                // tile than the compact owner acknowledgement.
+                "target": {"x": 293, "y": 612},
+                "cast": true,
+                "level": 3,
+                "selfBroadcast": false,
+                "secondaryTargetIds": []
+            }),
+        }));
+        assert_eq!(
+            adapter.effect_events.len(),
+            1,
+            "the compatibility ObjectMagic echo must not duplicate cast VFX/audio"
+        );
+    }
+
+    #[test]
+    fn owner_magic_fails_closed_without_authoritative_source_context() {
+        let packet = PacketEvent::Other {
+            packet: "Magic".to_owned(),
+            payload: json!({
+                "spell": "FireBall",
+                "targetId": 2001,
+                "target": {"x": 292, "y": 612},
+                "cast": true,
+                "level": 3
+            }),
+        };
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+            x: 288,
+            y: 616,
+            direction: Some("UpRight".to_owned()),
+        });
+        assert!(!adapter.observe_packet(&packet));
+        assert!(adapter.effect_events.is_empty());
+
+        adapter.latest_player_object_id = Some(1000);
+        adapter.authoritative_player_transform = Some(AuthoritativePlayerTransform {
+            x: 288,
+            y: 616,
+            direction: None,
+        });
+        assert!(!adapter.observe_packet(&packet));
+        assert!(adapter.effect_events.is_empty());
     }
 
     #[test]

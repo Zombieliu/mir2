@@ -3023,6 +3023,12 @@ where
             let inventory_json = serde_json::to_string(&inventory).map_err(|e| e.to_string())?;
             let _ = mir2_bevy_runtime::native_ingest::push_native_inventory_model(inventory_json);
 
+            // Skills are a separate Bevy resource, not part of UiReadModel.
+            // Keep it synchronized with every accepted authoritative snapshot;
+            // otherwise NewMagic can be acknowledged in chat while the native
+            // SPELLS page and F1-F8 resolver remain permanently empty.
+            let _ = push_native_skill_model_from_world(&payload)?;
+
             // These models are deliberately independent. NPCGoods populates
             // ShopModel, while the cash catalogue uses GameShopInfo/Stock.
             if let Some(mut mail) = try_transform_mail_model_from_snapshot(&payload) {
@@ -3480,6 +3486,8 @@ fn forward_packet_first_world(
     let entity_model = transform_entity_model_set(payload);
     let entity_json = serde_json::to_string(&entity_model).map_err(|error| error.to_string())?;
     let _ = mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
+
+    let _ = push_native_skill_model_from_world(payload)?;
 
     if let Some(mut mail) = try_transform_mail_model_from_snapshot(payload) {
         let _ = push_mail_model_with_feedback(&mut mail, pending_mail_feedback)?;
@@ -4571,6 +4579,22 @@ fn transform_skill_model(payload: &Value) -> Value {
         })
         .unwrap_or_default();
     json!({ "skills": skills })
+}
+
+fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
+    push_native_skill_model_with(
+        payload,
+        mir2_bevy_runtime::native_ingest::push_native_skill_model,
+    )
+}
+
+fn push_native_skill_model_with(
+    payload: &Value,
+    push: impl FnOnce(String) -> bool,
+) -> Result<bool, String> {
+    let model = transform_skill_model(payload);
+    let json = serde_json::to_string(&model).map_err(|error| error.to_string())?;
+    Ok(push(json))
 }
 
 fn value_string(value: Option<&Value>) -> Option<String> {
@@ -7101,6 +7125,55 @@ mod tests {
             .expect("F3 selected display-only skill");
         assert_eq!(display_only.spell, None);
         assert_eq!(display_only.mp_cost, None);
+    }
+
+    #[test]
+    fn authoritative_world_skills_are_forwarded_to_the_native_skill_resource() {
+        let payload = json!({
+            "knownSkills": [
+                {
+                    "key": "fireball",
+                    "name": "FireBall",
+                    "spell": "FireBall",
+                    "castKind": "target",
+                    "hotkey": 1,
+                    "level": 3
+                },
+                {
+                    "key": "lightning",
+                    "name": "Lightning",
+                    "spell": "Lightning",
+                    "castKind": "target",
+                    "hotkey": 2,
+                    "level": 3
+                }
+            ]
+        });
+        let mut forwarded = None;
+
+        assert!(push_native_skill_model_with(&payload, |json| {
+            forwarded = Some(json);
+            true
+        })
+        .expect("skill model forwarding"));
+
+        let model = serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(
+            forwarded.as_deref().expect("forwarded skill model"),
+        )
+        .expect("native skill model");
+        assert_eq!(model.skills.len(), 2);
+        assert_eq!(
+            model
+                .selection_for_shortcut(1)
+                .and_then(|skill| skill.spell),
+            Some("FireBall".to_owned())
+        );
+        assert_eq!(
+            model
+                .selection_for_shortcut(2)
+                .and_then(|skill| skill.spell),
+            Some("Lightning".to_owned())
+        );
     }
 
     #[test]

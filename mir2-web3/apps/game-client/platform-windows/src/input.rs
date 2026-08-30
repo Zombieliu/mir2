@@ -1245,8 +1245,7 @@ pub fn keyboard_skill_system(
         }
         return;
     }
-    let skill_mode = player_ui.as_deref().map(|ui| ui.core.options.skill_mode);
-    let Some(skill_slot) = skill_shortcut_slot(&keys, skill_mode) else {
+    let Some(skill_slot) = skill_shortcut_slot(&keys) else {
         return;
     };
     let Some(skills) = skills.as_deref() else {
@@ -1338,16 +1337,17 @@ pub fn keyboard_skill_system(
     }));
 }
 
-fn skill_shortcut_slot(keys: &ButtonInput<KeyCode>, skill_mode: Option<bool>) -> Option<u8> {
-    // Crystal rewrites skill bindings when SkillMode changes: false is Ctrl,
-    // true is tilde. Hosts that do not yet provide shared UI state keep the
-    // legacy direct-F-key bridge instead of becoming unusable.
-    let modifier_active = match skill_mode {
-        Some(false) => keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight),
-        Some(true) => keys.pressed(KeyCode::Backquote),
-        None => true,
-    };
-    if !modifier_active {
+fn skill_shortcut_slot(keys: &ButtonInput<KeyCode>) -> Option<u8> {
+    // Crystal's primary skill bar is the unmodified F1-F8 bank. Ctrl+F1-F8
+    // belongs to the second skill bar and Shift+F1-F8 belongs to the hero bar;
+    // neither bank is modeled by this single-bar bridge yet. SkillMode changes
+    // presentation, not the primary bank's modifier requirements.
+    if keys.pressed(KeyCode::ControlLeft)
+        || keys.pressed(KeyCode::ControlRight)
+        || keys.pressed(KeyCode::ShiftLeft)
+        || keys.pressed(KeyCode::ShiftRight)
+        || keys.pressed(KeyCode::Backquote)
+    {
         return None;
     }
     [
@@ -2419,21 +2419,21 @@ mod tests {
     }
 
     #[test]
-    fn crystal_skill_mode_selects_ctrl_or_tilde_modifier() {
+    fn crystal_primary_skill_bar_uses_unmodified_function_keys() {
         let mut keys = ButtonInput::<KeyCode>::default();
         keys.press(KeyCode::F1);
-        assert_eq!(skill_shortcut_slot(&keys, Some(false)), None);
-        assert_eq!(skill_shortcut_slot(&keys, Some(true)), None);
-        assert_eq!(skill_shortcut_slot(&keys, None), Some(1));
+        assert_eq!(skill_shortcut_slot(&keys), Some(1));
 
         keys.press(KeyCode::ControlLeft);
-        assert_eq!(skill_shortcut_slot(&keys, Some(false)), Some(1));
-        assert_eq!(skill_shortcut_slot(&keys, Some(true)), None);
+        assert_eq!(skill_shortcut_slot(&keys), None);
 
         keys.release(KeyCode::ControlLeft);
+        keys.press(KeyCode::ShiftLeft);
+        assert_eq!(skill_shortcut_slot(&keys), None);
+
+        keys.release(KeyCode::ShiftLeft);
         keys.press(KeyCode::Backquote);
-        assert_eq!(skill_shortcut_slot(&keys, Some(false)), None);
-        assert_eq!(skill_shortcut_slot(&keys, Some(true)), Some(1));
+        assert_eq!(skill_shortcut_slot(&keys), None);
     }
 
     #[test]
@@ -2553,6 +2553,9 @@ mod tests {
     #[test]
     fn f1_selects_a_server_learned_skill_with_target_and_direction() {
         let (mut app, receiver) = input_app();
+        // A live client always owns this UI resource. Its SkillMode option must
+        // not suppress Crystal's unmodified primary F-key bank.
+        app.insert_resource(NativePlayerUiState::default());
         // Insert combat target and UI so skill is allowed.
         app.insert_resource(mir2_client_bevy::quest_model::CombatTargetModel {
             target: Some(mir2_client_bevy::quest_model::CombatTarget {

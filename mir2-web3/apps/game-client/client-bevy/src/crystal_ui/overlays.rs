@@ -3024,6 +3024,9 @@ pub(crate) fn process_overlay_keyboard(
         // intentionally silent.
         state.activate_character_hud_button();
     }
+    if keys.just_pressed(KeyCode::F11) {
+        state.toggle_skill();
+    }
     if keys.just_pressed(KeyCode::KeyM) {
         state.toggle_mail();
     }
@@ -10850,6 +10853,43 @@ mod tests {
             .world()
             .resource::<NativePlayerUiState>()
             .inventory_open());
+    }
+
+    #[test]
+    fn overlay_keyboard_toggles_skills_with_f11() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<MapModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<KeyboardInput>()
+            .add_systems(Update, process_overlay_keyboard);
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F11);
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().skill_open());
+
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.release(KeyCode::F11);
+            keys.clear();
+            keys.press(KeyCode::F11);
+        }
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().skill_open());
     }
 
     #[test]
