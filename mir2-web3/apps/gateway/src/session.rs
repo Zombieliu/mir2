@@ -1339,9 +1339,8 @@ fn next_gateway_session_id() -> String {
 }
 
 fn append_start_game_announcements(packets: &mut Vec<ServerPacket>) {
-    let lines = load_line_messages_from_env().unwrap_or_else(|_| {
-        crate::tcp::chat_broadcast::default_line_messages()
-    });
+    let lines = load_line_messages_from_env()
+        .unwrap_or_else(|_| crate::tcp::chat_broadcast::default_line_messages());
     for line in lines {
         packets.push(ServerPacket::Chat {
             message: line,
@@ -2134,7 +2133,23 @@ mod tests {
         assert_eq!(events[0].account_id.as_deref(), Some("demo"));
         assert_eq!(events[0].character_index, Some(0));
         assert_eq!(events[0].character_name.as_deref(), Some("Scout"));
-        assert_eq!(events[0].packet_count, packets.len());
+        let announcement_count = packets
+            .iter()
+            .filter(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::Chat {
+                        chat_type: ChatType::LineMessage,
+                        ..
+                    }
+                )
+            })
+            .count();
+        assert_eq!(
+            announcement_count,
+            crate::tcp::chat_broadcast::default_line_messages().len()
+        );
+        assert_eq!(events[0].packet_count + announcement_count, packets.len());
         assert_eq!(events[0].snapshot_tick, session.world_snapshot().tick);
     }
 
