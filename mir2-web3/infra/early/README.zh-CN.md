@@ -15,11 +15,12 @@ PostgreSQL 经济账本、Redis Session 缓存和热点地图分线，但把它�
 
 ## 启动
 
-先设置两个秘密，不能使用 Compose 中的开发默认值：
+先设置三个秘密；recovery key 必须来自密钥管理系统，不能使用开发默认值：
 
 ```bash
 export MIR2_EARLY_POSTGRES_PASSWORD='<random-password>'
 export MIR2_EARLY_ZONE_TOKEN='<at-least-32-random-bytes>'
+export MIR2_GATEWAY_SAVE_RECOVERY_MAC_KEY='<64-hex-secret-from-secret-manager>'
 ./infra/early/preflight.sh
 docker compose -f infra/early/docker-compose.yml up -d --build
 docker compose -f infra/early/docker-compose.yml ps
@@ -46,3 +47,27 @@ HA 形态，最终 Regional 使用 4 active + 4 standby Zone Host。
 
 机房必须靠近玩家。香港节点适合东亚和东南亚；如果首发用户主要在巴西，应把
 同一套 Compose 部署到圣保罗区域，不能用增加 CPU 掩盖跨洲网络延迟。
+
+## Gateway save-recovery
+
+实际运行 Gateway 的 service 必须显式声明
+`com.obelisk.mir2.role=gateway`。该标签是验证器的权威 Gateway 清单，不依赖 service
+名称、镜像名称或监听地址。build target、Gateway image token 和 TCP/Web 环境变量
+只作为兼容守卫，用来拒绝疑似 Gateway 缺少或错写角色标签的配置。
+
+Compose 使用 MIR2_GATEWAY_SAVE_RECOVERY_MAC_KEY 的必填插值，只证明变量存在且
+非空；它不会判断 malformed、placeholder 或重复弱值。Gateway 进程负责校验恰好
+64 个十六进制字符和最低多样性。本静态检查不执行 Rust 强度门，独立命令是：
+
+    cargo +1.95.0 test --manifest-path apps/gateway/Cargo.toml --bin mir2-gateway       --jobs 1 tests::empty_malformed_and_weak_recovery_keys_are_rejected       -- --exact --test-threads=1
+
+逻辑卷 gateway-save-recovery 的固定物理名是
+mir2-early-gateway-save-recovery-v1，挂载到实例 early-gateway-1 的绝对 recovery
+目录。普通重启及修改 COMPOSE_PROJECT_NAME/-p 都会复用同一 sidecar。现有
+backup.sh 只备份 PostgreSQL；发布备份必须在同一恢复点联合保存 recovery key 与
+该 physical volume。
+
+固定物理名也意味着同一 Docker daemon 只能运行一套 Early 拓扑；不同 -p 启动
+第二套会有意连接同一 sidecar。独立集群必须使用不同主机/daemon，或经过重新审计
+后显式改名。不要把展开后的 docker compose config 输出到日志；静态检查器捕获
+渲染结果且只报告 wiring 结论。

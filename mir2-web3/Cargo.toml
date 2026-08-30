@@ -4,6 +4,7 @@ members = [
     "apps/dubhe-node-desktop/src-tauri",
     "apps/gateway",
     "apps/simulation",
+    "apps/game-client/ui-core",
     "packages/game-data",
     "packages/protocol",
     "vendor/dubhe-network-core",

@@ -222,3 +222,33 @@ docker compose \
 
 正常空 Zone 只打印首次/恢复同步，不再每 250ms 刷屏；有玩家的 Zone 每 2 秒输出
 一次可观察进度。base snapshot、promotion、降级和回滚仍保留独立事件。
+
+## Gateway save-recovery 运维边界
+
+合并后的 gateway-1/2/3 必须显式声明
+`com.obelisk.mir2.role=gateway`。该标签是权威 Gateway 清单；build target、
+Gateway image token 和 TCP/Web 环境变量只是守卫，用于拒绝疑似 Gateway 缺标或
+错标，不承担任意 generic runtime 的身份推断。
+
+Gate 21 是 Gate 19 的 Compose override，沿用三个外部必填 key 变量，但把三个
+Gateway 的最终 physical volume source 固定为：
+
+- mir2-gate21-gateway-1-save-recovery-v1
+- mir2-gate21-gateway-2-save-recovery-v1
+- mir2-gate21-gateway-3-save-recovery-v1
+
+容器内 target 仍按 gateway-1/2/3 分开；合并后的每个 Gateway 只能存在一个对应
+target mount，且不得使用任何 Gate 19 physical source。固定名称不受
+COMPOSE_PROJECT_NAME/-p 影响。代价是同一 Docker daemon 只能部署一套 Gate 21；
+不同 -p 会有意复用同一组 sidecar，独立集群必须使用不同主机/daemon 或审计后改名。
+
+Compose 只证明 key 缺失/空值会失败以及 recovery wiring 正确。它会接受任何非空
+malformed、placeholder 或重复弱值；Gateway Rust 强度门必须单独执行：
+
+    cargo +1.95.0 test --manifest-path apps/gateway/Cargo.toml --bin mir2-gateway       --jobs 1 tests::empty_malformed_and_weak_recovery_keys_are_rejected       -- --exact --test-threads=1
+
+运行 python3 infra/gate21/verify-save-recovery-compose.py 可验证权威角色标签清单、
+疑似 Gateway 缺标/错标守卫、仅靠标签发现的改名未保护回归、逐 key
+missing/empty、绝对 root、稳定实例 ID、固定 physical volume、Gate19/Gate21
+source 隔离和 project-name 不变性。它不启动容器、不打印渲染 key，并把未执行的
+Rust 强度门单独报告。

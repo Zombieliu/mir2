@@ -4,6 +4,8 @@ ARG NODE_IMAGE=node:22.18.0-bookworm-slim@sha256:752ea8a2f758c34002a0461bd9f1cee
 FROM ${NODE_IMAGE}
 
 ARG RUST_VERSION=1.89.0
+ARG BEVY_RUNTIME_RUST_VERSION=1.95.0
+ARG WASM_BINDGEN_VERSION=0.2.118
 ARG NPM_VERSION=11.13.0
 ARG GH_VERSION=2.96.0
 ARG MIR2_DEVELOPER_IMAGE_REVISION=unknown
@@ -12,6 +14,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/home/node/.cargo \
     RUSTUP_TOOLCHAIN=${RUST_VERSION} \
+    MIR2_BEVY_RUNTIME_RUST_TOOLCHAIN=${BEVY_RUNTIME_RUST_VERSION} \
     PATH=/usr/local/cargo/bin:/home/node/.cargo/bin:${PATH}
 
 RUN apt-get update \
@@ -38,6 +41,17 @@ RUN mkdir -p /usr/local/cargo /usr/local/rustup /home/node/.cargo \
            --profile minimal \
     && CARGO_HOME=/usr/local/cargo rustup component add rustfmt \
     && CARGO_HOME=/usr/local/cargo rustup target add wasm32-unknown-unknown \
+    && CARGO_HOME=/usr/local/cargo rustup toolchain install \
+         "${BEVY_RUNTIME_RUST_VERSION}" \
+         --profile minimal \
+         --component rustfmt \
+         --target wasm32-unknown-unknown \
+    && CARGO_HOME=/usr/local/cargo \
+       RUSTUP_TOOLCHAIN="${BEVY_RUNTIME_RUST_VERSION}" \
+       cargo install \
+         wasm-bindgen-cli \
+         --version "${WASM_BINDGEN_VERSION}" \
+         --locked \
     && npm install --global "npm@${NPM_VERSION}" \
     && printf '%s\n' \
          'export PATH="/usr/local/cargo/bin:/home/node/.cargo/bin:${PATH}"' \

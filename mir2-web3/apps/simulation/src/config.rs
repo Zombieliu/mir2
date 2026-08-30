@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
@@ -22,9 +22,10 @@ use mir2_game_data::{
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
-    SelectInfo, Spell, UserItemStat,
+    SelectInfo, Spell, UserItem, UserItemStat,
 };
 use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
+use rand_core::{OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -85,11 +86,20 @@ pub struct AccountStore {
     pub schema_version: u16,
     #[serde(rename = "nextCharacterIndex", default)]
     pub next_character_index: i32,
+    /// Crystal `Envir.GameshopLog`: cumulative purchases for finite products
+    /// whose stock is shared by every account. Unlimited (`stock == 0`) rows
+    /// never enter this map.
+    #[serde(rename = "gameShopGlobalPurchases", default)]
+    pub game_shop_global_purchases: BTreeMap<i32, u64>,
     pub accounts: BTreeMap<String, AccountRecord>,
     #[serde(skip)]
     source_account_versions: BTreeMap<String, i64>,
     #[serde(skip)]
     source_save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
+    #[serde(skip)]
+    source_game_shop_global_version: Option<i64>,
+    #[serde(skip)]
+    source_game_shop_global_purchases: BTreeMap<i32, u64>,
 }
 
 impl AccountStore {
@@ -99,9 +109,12 @@ impl AccountStore {
         Self {
             schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
             next_character_index: 1,
+            game_shop_global_purchases: BTreeMap::new(),
             accounts,
             source_account_versions: BTreeMap::new(),
             source_save_versions: BTreeMap::new(),
+            source_game_shop_global_version: None,
+            source_game_shop_global_purchases: BTreeMap::new(),
         }
     }
 
@@ -116,22 +129,38 @@ impl AccountStore {
     }
 
     pub fn save_to_path(&self, path: &Path) -> Result<(), String> {
+        self.save_to_path_with_fault(path, None)
+            .map_err(|error| error.to_string())
+    }
+
+    fn save_to_path_with_fault(
+        &self,
+        path: &Path,
+        fault: Option<AccountStoreFileCommitFault>,
+    ) -> Result<(), AccountStoreFileCommitError> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).map_err(|error| {
-                format!(
-                    "failed to create account store directory {}: {error}",
-                    parent.display()
-                )
+                AccountStoreFileCommitError::not_committed(io::Error::new(
+                    error.kind(),
+                    format!(
+                        "failed to create account store directory {}: {error}",
+                        parent.display()
+                    ),
+                ))
             })?;
         }
 
-        let data = serde_json::to_string_pretty(self)
-            .map_err(|error| format!("failed to encode account store: {error}"))?;
-        write_file_atomically(path, data.as_bytes()).map_err(|error| {
-            format!(
-                "failed to atomically write account store {}: {error}",
+        let data = serde_json::to_string_pretty(self).map_err(|error| {
+            AccountStoreFileCommitError::not_committed(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("failed to encode account store: {error}"),
+            ))
+        })?;
+        write_file_atomically(path, data.as_bytes(), fault).map_err(|error| {
+            error.with_context(format!(
+                "failed to atomically write account store {}",
                 path.display()
-            )
+            ))
         })
     }
 
@@ -173,6 +202,8 @@ impl AccountStore {
     fn with_source_versions(mut self, versions: AccountStoreSourceVersions) -> Self {
         self.source_account_versions = versions.accounts;
         self.source_save_versions = versions.saves;
+        self.source_game_shop_global_version = versions.game_shop_global_version;
+        self.source_game_shop_global_purchases = self.game_shop_global_purchases.clone();
         self
     }
 
@@ -188,27 +219,40 @@ impl AccountStore {
     }
 
     fn scoped_to_account(&self, account_id: &str) -> Self {
+        self.scoped_to_accounts(std::slice::from_ref(&account_id))
+    }
+
+    fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
         let mut accounts = BTreeMap::new();
-        if let Some(account) = self.accounts.get(account_id) {
-            accounts.insert(account_id.to_string(), account.clone());
+        for account_id in account_ids {
+            if let Some(account) = self.accounts.get(*account_id) {
+                accounts.insert((*account_id).to_string(), account.clone());
+            }
         }
 
         let mut source_account_versions = BTreeMap::new();
-        if let Some(version) = self.source_account_versions.get(account_id) {
-            source_account_versions.insert(account_id.to_string(), *version);
+        for account_id in account_ids {
+            if let Some(version) = self.source_account_versions.get(*account_id) {
+                source_account_versions.insert((*account_id).to_string(), *version);
+            }
         }
 
         let mut source_save_versions = BTreeMap::new();
-        if let Some(versions) = self.source_save_versions.get(account_id) {
-            source_save_versions.insert(account_id.to_string(), versions.clone());
+        for account_id in account_ids {
+            if let Some(versions) = self.source_save_versions.get(*account_id) {
+                source_save_versions.insert((*account_id).to_string(), versions.clone());
+            }
         }
 
         Self {
             schema_version: self.schema_version,
             next_character_index: self.next_character_index,
+            game_shop_global_purchases: self.game_shop_global_purchases.clone(),
             accounts,
             source_account_versions,
             source_save_versions,
+            source_game_shop_global_version: self.source_game_shop_global_version,
+            source_game_shop_global_purchases: self.source_game_shop_global_purchases.clone(),
         }
     }
 
@@ -222,13 +266,362 @@ impl AccountStore {
                 .or_default()
                 .extend(saves);
         }
+        if let Some(version) = versions.game_shop_global_version {
+            self.source_game_shop_global_version = Some(version);
+            self.source_game_shop_global_purchases = self.game_shop_global_purchases.clone();
+        }
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct AccountStoreSourceVersions {
     accounts: BTreeMap<String, i64>,
     saves: BTreeMap<String, BTreeMap<i32, i64>>,
+    game_shop_global_version: Option<i64>,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum AccountStoreMutationScope<'a> {
+    Accounts(&'a [String]),
+    AccountsWithGlobal(&'a [String]),
+    FullRestore,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum AccountStoreTransactionScopeError {
+    OutOfScopeAccountChanged { account_id: String },
+    SourceMetadataChanged { field: &'static str },
+    UnauthorizedGlobalStockChanged,
+    AccountFingerprintFailed { account_id: String, reason: String },
+}
+
+impl fmt::Display for AccountStoreTransactionScopeError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::OutOfScopeAccountChanged { account_id } => write!(
+                formatter,
+                "account-store transaction scope violation: account {account_id} changed outside the authorized scope"
+            ),
+            Self::SourceMetadataChanged { field } => write!(
+                formatter,
+                "account-store transaction scope violation: closure changed protected source metadata {field}"
+            ),
+            Self::UnauthorizedGlobalStockChanged => write!(
+                formatter,
+                "account-store transaction scope violation: account-only closure changed global stock"
+            ),
+            Self::AccountFingerprintFailed { account_id, reason } => write!(
+                formatter,
+                "account-store transaction scope validation could not fingerprint account {account_id}: {reason}"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for AccountStoreTransactionScopeError {}
+
+fn validate_account_store_transaction_scope(
+    original: &AccountStore,
+    staged: &AccountStore,
+    scope: AccountStoreMutationScope<'_>,
+) -> Result<(), AccountStoreTransactionScopeError> {
+    let (account_ids, include_global) = match scope {
+        AccountStoreMutationScope::Accounts(account_ids) => (account_ids, false),
+        AccountStoreMutationScope::AccountsWithGlobal(account_ids) => (account_ids, true),
+        AccountStoreMutationScope::FullRestore => return Ok(()),
+    };
+    let authorized = account_ids.iter().cloned().collect::<BTreeSet<_>>();
+    let mut all_account_ids = BTreeSet::new();
+    all_account_ids.extend(original.accounts.keys().cloned());
+    all_account_ids.extend(staged.accounts.keys().cloned());
+    for account_id in all_account_ids {
+        if authorized.contains(&account_id) {
+            continue;
+        }
+        let fingerprint = |account: Option<&AccountRecord>| {
+            account
+                .map(serde_json::to_vec)
+                .transpose()
+                .map_err(
+                    |error| AccountStoreTransactionScopeError::AccountFingerprintFailed {
+                        account_id: account_id.clone(),
+                        reason: error.to_string(),
+                    },
+                )
+        };
+        if fingerprint(original.accounts.get(&account_id))?
+            != fingerprint(staged.accounts.get(&account_id))?
+        {
+            return Err(AccountStoreTransactionScopeError::OutOfScopeAccountChanged { account_id });
+        }
+    }
+
+    for (changed, field) in [
+        (
+            original.source_account_versions != staged.source_account_versions,
+            "source_account_versions",
+        ),
+        (
+            original.source_save_versions != staged.source_save_versions,
+            "source_save_versions",
+        ),
+        (
+            original.source_game_shop_global_version != staged.source_game_shop_global_version,
+            "source_game_shop_global_version",
+        ),
+        (
+            original.source_game_shop_global_purchases != staged.source_game_shop_global_purchases,
+            "source_game_shop_global_purchases",
+        ),
+    ] {
+        if changed {
+            return Err(AccountStoreTransactionScopeError::SourceMetadataChanged { field });
+        }
+    }
+    if !include_global && original.game_shop_global_purchases != staged.game_shop_global_purchases {
+        return Err(AccountStoreTransactionScopeError::UnauthorizedGlobalStockChanged);
+    }
+    Ok(())
+}
+
+#[derive(Debug, Clone)]
+struct AccountStoreMutationPlan {
+    accounts: BTreeMap<String, AccountStoreAccountMutation>,
+    global_stock: Option<AccountStoreGlobalStockMutation>,
+}
+
+#[derive(Debug, Clone)]
+struct AccountStoreAccountMutation {
+    expected_version: Option<i64>,
+    desired_account: Option<AccountRecord>,
+    saves: BTreeMap<i32, AccountStoreSaveMutation>,
+}
+
+#[derive(Debug, Clone)]
+struct AccountStoreSaveMutation {
+    expected_version: Option<i64>,
+    desired_save: Option<CharacterSaveRecord>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct AccountStoreGlobalStockMutation {
+    expected_version: Option<i64>,
+    expected_purchases: BTreeMap<i32, u64>,
+    desired_purchases: BTreeMap<i32, u64>,
+}
+
+enum AccountStoreMutationOperation<'a> {
+    GlobalStock(&'a AccountStoreGlobalStockMutation),
+    Account {
+        account_id: &'a str,
+        mutation: &'a AccountStoreAccountMutation,
+    },
+}
+
+enum AccountStoreMutationOperationResult {
+    GlobalStock(Option<i64>),
+    Account {
+        account_version: Option<i64>,
+        save_versions: BTreeMap<i32, i64>,
+    },
+}
+
+fn build_account_store_mutation_plan(
+    original: &AccountStore,
+    desired: &AccountStore,
+    scope: AccountStoreMutationScope<'_>,
+    force_global_stock: bool,
+) -> AccountStoreMutationPlan {
+    let mut account_ids = BTreeSet::new();
+    match scope {
+        AccountStoreMutationScope::Accounts(scoped_ids)
+        | AccountStoreMutationScope::AccountsWithGlobal(scoped_ids) => {
+            account_ids.extend(scoped_ids.iter().cloned());
+        }
+        AccountStoreMutationScope::FullRestore => {
+            account_ids.extend(original.accounts.keys().cloned());
+            account_ids.extend(original.source_account_versions.keys().cloned());
+            account_ids.extend(original.source_save_versions.keys().cloned());
+            account_ids.extend(desired.accounts.keys().cloned());
+        }
+    }
+
+    let mut accounts = BTreeMap::new();
+    for account_id in account_ids {
+        let original_account = original.accounts.get(&account_id);
+        let desired_account = desired.accounts.get(&account_id);
+        let mut save_indices = BTreeSet::new();
+        if let Some(account) = original_account {
+            save_indices.extend(account.saves.keys().copied());
+        }
+        if let Some(account) = desired_account {
+            save_indices.extend(account.saves.keys().copied());
+        }
+        if let Some(versions) = original.source_save_versions.get(&account_id) {
+            save_indices.extend(versions.keys().copied());
+        }
+
+        let saves = save_indices
+            .into_iter()
+            .map(|character_index| {
+                (
+                    character_index,
+                    AccountStoreSaveMutation {
+                        expected_version: original
+                            .source_save_version(&account_id, character_index),
+                        desired_save: desired_account
+                            .and_then(|account| account.saves.get(&character_index))
+                            .cloned(),
+                    },
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        let expected_version = original.source_account_version(&account_id);
+        if original_account.is_none()
+            && desired_account.is_none()
+            && expected_version.is_none()
+            && saves.is_empty()
+        {
+            continue;
+        }
+        accounts.insert(
+            account_id,
+            AccountStoreAccountMutation {
+                expected_version,
+                desired_account: desired_account.cloned(),
+                saves,
+            },
+        );
+    }
+
+    let include_global = matches!(
+        scope,
+        AccountStoreMutationScope::AccountsWithGlobal(_) | AccountStoreMutationScope::FullRestore
+    );
+    let global_stock = if force_global_stock
+    // The migrated game_shop_global_stock row is a singleton.  Full restore
+    // therefore emits an explicit replace/reset (including an empty map).
+    // Account-bounded work only includes it through explicit global scope.
+        || matches!(scope, AccountStoreMutationScope::FullRestore)
+        || (include_global
+            && desired.game_shop_global_purchases
+                != original.source_game_shop_global_purchases)
+    {
+        Some(AccountStoreGlobalStockMutation {
+            expected_version: original.source_game_shop_global_version,
+            expected_purchases: original.source_game_shop_global_purchases.clone(),
+            desired_purchases: desired.game_shop_global_purchases.clone(),
+        })
+    } else {
+        None
+    };
+
+    AccountStoreMutationPlan {
+        accounts,
+        global_stock,
+    }
+}
+
+fn execute_account_store_mutation_plan<F>(
+    plan: &AccountStoreMutationPlan,
+    mut apply: F,
+) -> Result<AccountStoreSourceVersions, String>
+where
+    F: for<'a> FnMut(
+        AccountStoreMutationOperation<'a>,
+    ) -> Result<AccountStoreMutationOperationResult, String>,
+{
+    let mut versions = AccountStoreSourceVersions::default();
+    if let Some(global_stock) = plan.global_stock.as_ref() {
+        match apply(AccountStoreMutationOperation::GlobalStock(global_stock))? {
+            AccountStoreMutationOperationResult::GlobalStock(version) => {
+                versions.game_shop_global_version = version;
+            }
+            AccountStoreMutationOperationResult::Account { .. } => {
+                return Err(
+                    "account-store mutation repository returned an account result for global stock"
+                        .to_string(),
+                );
+            }
+        }
+    }
+
+    for (account_id, mutation) in &plan.accounts {
+        let (account_version, save_versions) =
+            match apply(AccountStoreMutationOperation::Account {
+                account_id,
+                mutation,
+            })? {
+                AccountStoreMutationOperationResult::Account {
+                    account_version,
+                    save_versions,
+                } => (account_version, save_versions),
+                AccountStoreMutationOperationResult::GlobalStock(_) => {
+                    return Err(
+                        "account-store mutation repository returned a global result for an account"
+                            .to_string(),
+                    );
+                }
+            };
+        if mutation.desired_account.is_some() {
+            let account_version = account_version.ok_or_else(|| {
+                format!("account-store mutation repository omitted version for {account_id}")
+            })?;
+            versions
+                .accounts
+                .insert(account_id.clone(), account_version);
+            for (character_index, save_mutation) in &mutation.saves {
+                if save_mutation.desired_save.is_some() {
+                    let save_version = save_versions.get(character_index).copied().ok_or_else(|| {
+                        format!(
+                            "account-store mutation repository omitted save version for {account_id}/{character_index}"
+                        )
+                    })?;
+                    versions
+                        .saves
+                        .entry(account_id.clone())
+                        .or_default()
+                        .insert(*character_index, save_version);
+                }
+            }
+        } else if account_version.is_some() || !save_versions.is_empty() {
+            return Err(format!(
+                "account-store mutation repository returned versions for deleted account {account_id}"
+            ));
+        }
+    }
+    Ok(versions)
+}
+
+fn apply_account_store_mutation_source_versions(
+    store: &mut AccountStore,
+    plan: &AccountStoreMutationPlan,
+    versions: AccountStoreSourceVersions,
+) {
+    for (account_id, mutation) in &plan.accounts {
+        if mutation.desired_account.is_none() {
+            store.source_account_versions.remove(account_id);
+            store.source_save_versions.remove(account_id);
+            continue;
+        }
+        if let Some(version) = versions.accounts.get(account_id) {
+            store
+                .source_account_versions
+                .insert(account_id.clone(), *version);
+        }
+        let save_versions = versions.saves.get(account_id).cloned().unwrap_or_default();
+        if save_versions.is_empty() {
+            store.source_save_versions.remove(account_id);
+        } else {
+            store
+                .source_save_versions
+                .insert(account_id.clone(), save_versions);
+        }
+    }
+    if let Some(global_stock) = plan.global_stock.as_ref() {
+        store.source_game_shop_global_version = versions.game_shop_global_version;
+        store.source_game_shop_global_purchases = global_stock.desired_purchases.clone();
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -244,6 +637,7 @@ pub struct AccountStoreRepositoryStatus {
 pub struct AccountStoreRepositorySave {
     pub account_versions: BTreeMap<String, i64>,
     pub save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
+    pub game_shop_global_version: Option<i64>,
 }
 
 impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
@@ -251,6 +645,7 @@ impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
         Self {
             account_versions: value.accounts,
             save_versions: value.saves,
+            game_shop_global_version: value.game_shop_global_version,
         }
     }
 }
@@ -260,8 +655,65 @@ impl AccountStoreRepositorySave {
         AccountStoreSourceVersions {
             accounts: self.account_versions,
             saves: self.save_versions,
+            game_shop_global_version: self.game_shop_global_version,
         }
     }
+}
+
+#[derive(Debug)]
+enum AccountStoreFileCommitError {
+    NotCommitted(io::Error),
+    CommitOutcomeUnknown(io::Error),
+}
+
+impl AccountStoreFileCommitError {
+    fn not_committed(error: io::Error) -> Self {
+        Self::NotCommitted(error)
+    }
+
+    fn commit_outcome_unknown(error: io::Error) -> Self {
+        Self::CommitOutcomeUnknown(error)
+    }
+
+    fn with_context(self, context: String) -> Self {
+        match self {
+            Self::NotCommitted(error) => {
+                Self::NotCommitted(io::Error::new(error.kind(), format!("{context}: {error}")))
+            }
+            Self::CommitOutcomeUnknown(error) => Self::CommitOutcomeUnknown(io::Error::new(
+                error.kind(),
+                format!("{context}: {error}"),
+            )),
+        }
+    }
+
+    fn is_commit_outcome_unknown(&self) -> bool {
+        matches!(self, Self::CommitOutcomeUnknown(_))
+    }
+
+    fn is_retryable_not_committed(&self) -> bool {
+        matches!(
+            self,
+            Self::NotCommitted(error) if is_retryable_atomic_replace_error(error)
+        )
+    }
+}
+
+impl fmt::Display for AccountStoreFileCommitError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NotCommitted(error) => write!(formatter, "not committed: {error}"),
+            Self::CommitOutcomeUnknown(error) => {
+                write!(formatter, "commit outcome unknown: {error}")
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AccountStoreFileCommitFault {
+    BeforeRename,
+    AfterRenameBeforeDirectorySync,
 }
 
 pub trait AccountStoreRepository: Send + Sync {
@@ -279,6 +731,15 @@ impl FileAccountStoreRepository {
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self { path: path.into() }
     }
+
+    fn save_with_commit_outcome(
+        &self,
+        store: &AccountStore,
+        fault: Option<AccountStoreFileCommitFault>,
+    ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
+        save_account_store_snapshot_to_path(store, &self.path, fault)?;
+        Ok(AccountStoreRepositorySave::default())
+    }
 }
 
 impl AccountStoreRepository for FileAccountStoreRepository {
@@ -287,8 +748,8 @@ impl AccountStoreRepository for FileAccountStoreRepository {
     }
 
     fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String> {
-        save_account_store_snapshot_to_path(store, &self.path)?;
-        Ok(AccountStoreRepositorySave::default())
+        self.save_with_commit_outcome(store, None)
+            .map_err(|error| error.to_string())
     }
 
     fn status(&self) -> AccountStoreRepositoryStatus {
@@ -313,6 +774,18 @@ impl PostgresAccountStoreRepository {
             database_url: database_url.into(),
             mode,
         }
+    }
+
+    fn save_mutation_plan(
+        &self,
+        plan: &AccountStoreMutationPlan,
+    ) -> Result<AccountStoreRepositorySave, String> {
+        save_account_store_mutation_plan_to_postgres(
+            self.database_url.clone(),
+            plan.clone(),
+            self.mode,
+        )
+        .map(AccountStoreRepositorySave::from)
     }
 }
 
@@ -526,6 +999,19 @@ impl PostgresAccountStoreConnectionPool {
         }
         crate::db_projection::apply_migrations(client)
             .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
+        client
+            .batch_execute(
+                "CREATE TABLE IF NOT EXISTS game_shop_global_stock (\
+                    state_key SMALLINT PRIMARY KEY CHECK (state_key = 1), \
+                    purchases_json JSONB NOT NULL DEFAULT '{}'::jsonb, \
+                    store_version BIGINT NOT NULL DEFAULT 1, \
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()); \
+                 INSERT INTO game_shop_global_stock (state_key) VALUES (1) \
+                    ON CONFLICT (state_key) DO NOTHING",
+            )
+            .map_err(|error| {
+                format!("postgres game-shop global-stock migration failed: {error}")
+            })?;
         *migrated = true;
         Ok(())
     }
@@ -590,6 +1076,32 @@ impl Drop for PostgresAccountStoreConnection {
     }
 }
 
+fn validate_postgres_account_store_database_url(database_url: &str) -> Result<(), String> {
+    let trimmed = database_url.trim();
+    if trimmed.is_empty() {
+        return Err("postgres account-store URL is empty".to_string());
+    }
+    if trimmed != database_url {
+        return Err(
+            "postgres account-store URL must not contain leading or trailing whitespace"
+                .to_string(),
+        );
+    }
+    if database_url.chars().any(char::is_control) {
+        return Err("postgres account-store URL must not contain control characters".to_string());
+    }
+    if !database_url.starts_with("postgres://") && !database_url.starts_with("postgresql://") {
+        return Err(
+            "postgres account-store URL must use the postgres:// or postgresql:// scheme"
+                .to_string(),
+        );
+    }
+    trimmed
+        .parse::<PostgresClientConfig>()
+        .map(|_| ())
+        .map_err(|error| format!("invalid postgres account-store URL: {error}"))
+}
+
 fn connect_postgres_account_store_client(
     database_url: &str,
     connect_timeout: Duration,
@@ -630,34 +1142,56 @@ fn redact_database_url(database_url: &str) -> String {
     format!("{scheme}://<redacted>@{}", &rest[at_index + 1..])
 }
 
-fn write_file_atomically(path: &Path, data: &[u8]) -> io::Result<()> {
+fn write_file_atomically(
+    path: &Path,
+    data: &[u8],
+    fault: Option<AccountStoreFileCommitFault>,
+) -> Result<(), AccountStoreFileCommitError> {
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
-    fs::create_dir_all(parent)?;
+    fs::create_dir_all(parent).map_err(AccountStoreFileCommitError::not_committed)?;
 
     let temp_path = atomic_temp_path(path);
-    {
+    let prepare_result = (|| -> io::Result<()> {
         let mut file = File::create(&temp_path)?;
         file.write_all(data)?;
         file.write_all(b"\n")?;
-        file.sync_all()?;
+        file.sync_all()
+    })();
+    if let Err(error) = prepare_result {
+        let _ = fs::remove_file(&temp_path);
+        return Err(AccountStoreFileCommitError::not_committed(error));
     }
 
-    match replace_file_atomically_with_retry(&temp_path, path) {
+    if fault == Some(AccountStoreFileCommitFault::BeforeRename) {
+        let _ = fs::remove_file(&temp_path);
+        return Err(AccountStoreFileCommitError::not_committed(io::Error::new(
+            io::ErrorKind::Other,
+            "injected failure before account-store rename",
+        )));
+    }
+
+    match replace_file_atomically_with_retry(&temp_path, path, fault) {
         Ok(()) => Ok(()),
         Err(error) => {
-            let _ = fs::remove_file(&temp_path);
+            if !error.is_commit_outcome_unknown() {
+                let _ = fs::remove_file(&temp_path);
+            }
             Err(error)
         }
     }
 }
 
-fn replace_file_atomically_with_retry(from: &Path, to: &Path) -> io::Result<()> {
+fn replace_file_atomically_with_retry(
+    from: &Path,
+    to: &Path,
+    fault: Option<AccountStoreFileCommitFault>,
+) -> Result<(), AccountStoreFileCommitError> {
     let mut delay = Duration::from_millis(5);
     let mut last_error = None;
     for attempt in 0..8 {
-        match replace_file_atomically(from, to) {
+        match replace_file_atomically(from, to, fault) {
             Ok(()) => return Ok(()),
-            Err(error) if attempt < 7 && is_retryable_atomic_replace_error(&error) => {
+            Err(error) if attempt < 7 && error.is_retryable_not_committed() => {
                 last_error = Some(error);
                 std::thread::sleep(delay);
                 delay = delay.saturating_mul(2);
@@ -665,7 +1199,8 @@ fn replace_file_atomically_with_retry(from: &Path, to: &Path) -> io::Result<()> 
             Err(error) => return Err(error),
         }
     }
-    Err(last_error.unwrap_or_else(|| io::Error::last_os_error()))
+    Err(last_error
+        .unwrap_or_else(|| AccountStoreFileCommitError::not_committed(io::Error::last_os_error())))
 }
 
 fn is_retryable_atomic_replace_error(error: &io::Error) -> bool {
@@ -688,7 +1223,11 @@ fn atomic_temp_path(path: &Path) -> PathBuf {
 }
 
 #[cfg(windows)]
-fn replace_file_atomically(from: &Path, to: &Path) -> io::Result<()> {
+fn replace_file_atomically(
+    from: &Path,
+    to: &Path,
+    fault: Option<AccountStoreFileCommitFault>,
+) -> Result<(), AccountStoreFileCommitError> {
     const MOVEFILE_REPLACE_EXISTING: u32 = 0x1;
     const MOVEFILE_WRITE_THROUGH: u32 = 0x8;
 
@@ -707,10 +1246,19 @@ fn replace_file_atomically(from: &Path, to: &Path) -> io::Result<()> {
         )
     };
     if ok == 0 {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok(())
+        return Err(AccountStoreFileCommitError::not_committed(
+            io::Error::last_os_error(),
+        ));
     }
+    if fault == Some(AccountStoreFileCommitFault::AfterRenameBeforeDirectorySync) {
+        return Err(AccountStoreFileCommitError::commit_outcome_unknown(
+            io::Error::new(
+                io::ErrorKind::Other,
+                "injected failure after account-store publication",
+            ),
+        ));
+    }
+    Ok(())
 }
 
 #[cfg(windows)]
@@ -719,8 +1267,43 @@ fn wide_null_terminated(value: &OsStr) -> Vec<u16> {
 }
 
 #[cfg(not(windows))]
-fn replace_file_atomically(from: &Path, to: &Path) -> io::Result<()> {
-    fs::rename(from, to)
+fn replace_file_atomically(
+    from: &Path,
+    to: &Path,
+    fault: Option<AccountStoreFileCommitFault>,
+) -> Result<(), AccountStoreFileCommitError> {
+    fs::rename(from, to).map_err(AccountStoreFileCommitError::not_committed)?;
+    if fault == Some(AccountStoreFileCommitFault::AfterRenameBeforeDirectorySync) {
+        return Err(AccountStoreFileCommitError::commit_outcome_unknown(
+            io::Error::new(
+                io::ErrorKind::Other,
+                "injected failure after account-store rename before parent directory sync",
+            ),
+        ));
+    }
+
+    // rename only publishes the new directory entry. The snapshot is not
+    // considered durable until the containing directory is synced as well.
+    // Any failure after rename is therefore outcome-unknown, never retryable.
+    let parent = to.parent().unwrap_or_else(|| Path::new("."));
+    let directory = File::open(parent).map_err(|error| {
+        AccountStoreFileCommitError::commit_outcome_unknown(io::Error::new(
+            error.kind(),
+            format!(
+                "account-store rename succeeded but parent directory {} could not be opened: {error}",
+                parent.display()
+            ),
+        ))
+    })?;
+    directory.sync_all().map_err(|error| {
+        AccountStoreFileCommitError::commit_outcome_unknown(io::Error::new(
+            error.kind(),
+            format!(
+                "account-store rename succeeded but parent directory {} could not be synced: {error}",
+                parent.display()
+            ),
+        ))
+    })
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -895,6 +1478,13 @@ impl CurrencyKind {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterSaveRecord {
+    /// Optimistic revision for the complete private character snapshot.
+    ///
+    /// Legacy saves deserialize at revision zero. Every durable character
+    /// mutation advances this value so a second session cannot overwrite a
+    /// newer transaction with an older full-World snapshot.
+    #[serde(default)]
+    pub revision: u64,
     pub character: CharacterRecord,
     pub map_file_name: String,
     pub map_title: String,
@@ -971,6 +1561,7 @@ impl CharacterSaveRecord {
     pub fn new(character: CharacterRecord) -> Self {
         let (max_hp, mp) = crystal_base_vitals(character.class, character.level);
         Self {
+            revision: 0,
             character,
             map_file_name: String::new(),
             map_title: String::new(),
@@ -1098,9 +1689,12 @@ mod tests {
             AccountStore {
                 schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
                 next_character_index: 1,
+                game_shop_global_purchases: BTreeMap::new(),
                 accounts,
                 source_account_versions: BTreeMap::new(),
                 source_save_versions: BTreeMap::new(),
+                source_game_shop_global_version: None,
+                source_game_shop_global_purchases: BTreeMap::new(),
             },
         )
     }
@@ -1276,6 +1870,26 @@ mod tests {
     fn account_store_new_records_current_schema_version() {
         let store = AccountStore::new(default_character());
         assert_eq!(store.schema_version, ACCOUNT_STORE_SCHEMA_VERSION);
+    }
+
+    #[test]
+    fn account_store_scoping_and_source_merge_preserve_shared_game_shop_state() {
+        let mut store = AccountStore::new(default_character());
+        store.game_shop_global_purchases.insert(17, 4);
+        store.source_game_shop_global_version = Some(8);
+        store.source_game_shop_global_purchases.insert(17, 3);
+
+        let scoped = store.scoped_to_account("demo");
+        assert_eq!(scoped.game_shop_global_purchases.get(&17), Some(&4));
+        assert_eq!(scoped.source_game_shop_global_version, Some(8));
+        assert_eq!(scoped.source_game_shop_global_purchases.get(&17), Some(&3));
+
+        store.merge_source_versions(AccountStoreSourceVersions {
+            game_shop_global_version: Some(9),
+            ..AccountStoreSourceVersions::default()
+        });
+        assert_eq!(store.source_game_shop_global_version, Some(9));
+        assert_eq!(store.source_game_shop_global_purchases.get(&17), Some(&4));
     }
 
     #[test]
@@ -1736,6 +2350,7 @@ mod tests {
         systems.guild.name = "Crimson".to_string();
         systems.mail.push(Stage5MailMessage {
             id: 9,
+            delivery_nonce: "fixture-mail-9".to_string(),
             from: "GM".to_string(),
             to: owner_name.to_string(),
             subject: "Reward".to_string(),
@@ -2174,6 +2789,90 @@ mod tests {
         cleanup_postgres_account(&database_url, &first_account_id);
         cleanup_postgres_account(&database_url, &second_account_id);
     }
+
+    #[test]
+    fn postgres_multi_account_persist_failure_rolls_back_every_account() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!(
+                "skipping postgres multi-account rollback test because Postgres is unavailable"
+            );
+            return;
+        };
+        let (sender_account_id, mut store) = unique_account_store("mail-atomic-a-sender");
+        let (recipient_account_id, recipient_store) =
+            unique_account_store("mail-atomic-z-recipient");
+        cleanup_postgres_account(&database_url, &sender_account_id);
+        cleanup_postgres_account(&database_url, &recipient_account_id);
+        store.accounts.extend(recipient_store.accounts);
+
+        let initial_versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial multi-account source write should succeed");
+        let initial_sender_gold = store
+            .accounts
+            .get(&sender_account_id)
+            .and_then(|account| account.saves.get(&0))
+            .expect("sender save should exist")
+            .gold;
+        let mut staged = store.with_source_versions(initial_versions);
+        staged
+            .accounts
+            .get_mut(&sender_account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("sender save should exist")
+            .gold = 17;
+        staged
+            .accounts
+            .get_mut(&recipient_account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("recipient save should exist")
+            .stage5_systems_json = Some("{malformed-mail-state".to_string());
+
+        let error = save_account_store_to_postgres(
+            database_url.clone(),
+            staged,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect_err("the malformed recipient save must abort the whole transaction");
+        assert!(error.contains("stage5 systems json decode failed"));
+
+        let confirmed = load_account_store_from_postgres(database_url.clone(), default_character())
+            .expect("postgres account store should reload after rollback");
+        assert_eq!(
+            confirmed
+                .accounts
+                .get(&sender_account_id)
+                .and_then(|account| account.saves.get(&0))
+                .map(|save| save.gold),
+            Some(initial_sender_gold)
+        );
+        assert_eq!(
+            confirmed
+                .accounts
+                .get(&recipient_account_id)
+                .and_then(|account| account.saves.get(&0))
+                .and_then(|save| save.stage5_systems_json.as_deref()),
+            None
+        );
+
+        let mut client = Client::connect(&database_url, NoTls).expect("postgres should connect");
+        for account_id in [&sender_account_id, &recipient_account_id] {
+            let version: i64 = client
+                .query_one(
+                    "SELECT store_version FROM accounts WHERE account_id = $1",
+                    &[account_id],
+                )
+                .expect("account version should load")
+                .get("store_version");
+            assert_eq!(version, 1);
+        }
+
+        cleanup_postgres_account(&database_url, &sender_account_id);
+        cleanup_postgres_account(&database_url, &recipient_account_id);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2356,6 +3055,46 @@ pub enum AccountStoreDatabaseMode {
 pub enum AccountStoreRuntimeBackend {
     File,
     Postgres,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AccountSourceRefreshOutcome {
+    NotRequired,
+    Refreshed,
+    Missing,
+}
+
+#[cfg(any(test, feature = "test-support"))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AccountStoreTransactionFault {
+    BeforePersist,
+    Persist,
+    BeforeFileRename,
+    AfterFileRenameBeforeDirectorySync,
+}
+
+#[cfg(test)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AccountStoreTransactionScopeObservation {
+    AccountOnly,
+    WithGlobal,
+    FullRestore,
+}
+
+#[cfg(test)]
+#[derive(Debug, Clone)]
+struct AccountStoreRepositoryWriterProbe {
+    invocations: usize,
+    last_plan_includes_global: Option<bool>,
+    outcome: Result<AccountStoreRepositorySave, String>,
+}
+
+const ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN: &str = "ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN";
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum AccountStoreWriteState {
+    Writable,
+    Frozen { reason: String },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -2628,6 +3367,14 @@ pub struct SimulationConfig {
     pub conquest_owners: BTreeMap<i32, String>,
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
+    /// Crystal's optional `Settings.SafeZoneBorder` presentation switch.
+    ///
+    /// The imported map manifest retains the decorative TrapHexagon objects so
+    /// deployments that explicitly enable the option can reproduce Crystal,
+    /// but Crystal defaults this setting to false. Keeping the switch in the
+    /// runtime config prevents those map decorations from being confused with
+    /// real player-cast TrapHexagon `ObjectSpell` packets.
+    pub safe_zone_border_effects: bool,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub mine_zones: Vec<MineZoneRecord>,
     /// On-chain mine veins (M4) — render-only mappings, disjoint from `mine_zones`.
@@ -2637,8 +3384,33 @@ pub struct SimulationConfig {
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
     pub account_store_database_mode: AccountStoreDatabaseMode,
+    /// Explicit durable directory for Gateway character-save recovery journals.
+    /// PostgreSQL deployments must configure this independently because a DB
+    /// URL is not a filesystem location.
+    pub save_recovery_dir: Option<PathBuf>,
+    save_recovery_mac_key: Option<SaveRecoveryMacKey>,
     pub content_profile: Option<ContentProfileRuntime>,
     account_store_persist_lock: Arc<Mutex<()>>,
+    /// Shared by every clone/rebind that can reach the same durable store.
+    /// Once publication has an unknown outcome, only process restart plus a
+    /// fresh durable reload may create a writable state again.
+    account_store_write_state: Arc<Mutex<AccountStoreWriteState>>,
+    #[cfg(any(test, feature = "test-support"))]
+    account_store_transaction_fault: Arc<Mutex<Option<AccountStoreTransactionFault>>>,
+    #[cfg(test)]
+    account_store_repository_writer_probe: Arc<Mutex<Option<AccountStoreRepositoryWriterProbe>>>,
+    #[cfg(test)]
+    account_store_transaction_scope_observations:
+        Arc<Mutex<Vec<AccountStoreTransactionScopeObservation>>>,
+}
+
+#[derive(Clone)]
+struct SaveRecoveryMacKey(Arc<[u8; 32]>);
+
+impl fmt::Debug for SaveRecoveryMacKey {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("SaveRecoveryMacKey([REDACTED])")
+    }
 }
 
 impl Default for SimulationConfig {
@@ -2661,6 +3433,12 @@ impl SimulationConfig {
         let mut fork = self.clone();
         fork.account_store = Arc::new(Mutex::new(account_store));
         fork.account_store_persist_lock = Arc::new(Mutex::new(()));
+        #[cfg(test)]
+        {
+            fork.account_store_transaction_fault = Arc::new(Mutex::new(None));
+            fork.account_store_repository_writer_probe = Arc::new(Mutex::new(None));
+            fork.account_store_transaction_scope_observations = Arc::new(Mutex::new(Vec::new()));
+        }
         Ok(fork)
     }
 
@@ -2671,6 +3449,8 @@ impl SimulationConfig {
         let mut fork = self.fork_with_isolated_account_store()?;
         fork.account_store_path = None;
         fork.account_store_database_url = None;
+        fork.save_recovery_dir = None;
+        fork.save_recovery_mac_key = None;
         Ok(fork)
     }
 
@@ -2682,7 +3462,10 @@ impl SimulationConfig {
         self.account_store_path = authoritative.account_store_path.clone();
         self.account_store_database_url = authoritative.account_store_database_url.clone();
         self.account_store_database_mode = authoritative.account_store_database_mode;
+        self.save_recovery_dir = authoritative.save_recovery_dir.clone();
+        self.save_recovery_mac_key = authoritative.save_recovery_mac_key.clone();
         self.account_store_persist_lock = Arc::clone(&authoritative.account_store_persist_lock);
+        self.account_store_write_state = Arc::clone(&authoritative.account_store_write_state);
     }
 
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
@@ -2758,6 +3541,7 @@ impl SimulationConfig {
             conquest_owners: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
+            safe_zone_border_effects: false,
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
             onchain_mine_nodes: Vec::new(),
@@ -2766,8 +3550,17 @@ impl SimulationConfig {
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
+            save_recovery_dir: None,
+            save_recovery_mac_key: None,
             content_profile: None,
             account_store_persist_lock: Arc::new(Mutex::new(())),
+            account_store_write_state: Arc::new(Mutex::new(AccountStoreWriteState::Writable)),
+            #[cfg(any(test, feature = "test-support"))]
+            account_store_transaction_fault: Arc::new(Mutex::new(None)),
+            #[cfg(test)]
+            account_store_repository_writer_probe: Arc::new(Mutex::new(None)),
+            #[cfg(test)]
+            account_store_transaction_scope_observations: Arc::new(Mutex::new(Vec::new())),
         }
     }
 
@@ -2905,9 +3698,46 @@ impl SimulationConfig {
         self
     }
 
+    pub fn with_save_recovery_dir(mut self, path: impl Into<PathBuf>) -> Self {
+        let path = path.into();
+        if !path.as_os_str().is_empty() {
+            self.save_recovery_dir = Some(path);
+        }
+        self
+    }
+
+    pub fn with_save_recovery_mac_key(mut self, key: impl AsRef<[u8]>) -> Result<Self, String> {
+        let key = key.as_ref();
+        let key: [u8; 32] = key
+            .try_into()
+            .map_err(|_| "save recovery MAC key must decode to exactly 32 bytes".to_string())?;
+        let mut distinct = [false; 256];
+        for byte in key {
+            distinct[usize::from(byte)] = true;
+        }
+        if distinct.into_iter().filter(|present| *present).count() < 8 {
+            return Err("save recovery MAC key does not meet minimum diversity".to_string());
+        }
+        self.save_recovery_mac_key = Some(SaveRecoveryMacKey(Arc::new(key)));
+        Ok(self)
+    }
+
+    pub fn save_recovery_mac_key(&self) -> Option<&[u8; 32]> {
+        self.save_recovery_mac_key
+            .as_ref()
+            .map(|key| key.0.as_ref())
+    }
+
+    pub fn recovery_journal_enabled(&self) -> bool {
+        self.save_recovery_dir.is_some()
+            || self.account_store_path.is_some()
+            || self.account_store_database_url.is_some()
+    }
+
     pub fn with_crystal_map_runtime(mut self) -> Self {
         self.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
         self.map_transfers.clear();
+        self.map_hazards = crystal_map_hazard_records();
         apply_crystal_map_metadata(&mut self.map);
         // Starter mining zone: a small ore vein just east of the Bichon spawn
         // (330, 270) so players can try mining without leaving the starter map.
@@ -2941,7 +3771,8 @@ impl SimulationConfig {
     /// Activate the full Crystal world (every map live when occupied, dormant
     /// when empty). Unlike [`with_crystal_map_runtime`], this does not fence the
     /// player into the starter slice: it keeps every manifest movement so all
-    /// ~463 maps are reachable, and entering any map spawns that map's entire
+    /// All 463 named maps (464 source records including one empty DB placeholder)
+    /// are reachable, and entering any named map spawns that map's entire
     /// Crystal respawn set. The starter map keeps its real manifest NPCs
     /// (spawned per-map from the manifest), so no hand-authored starter
     /// blacksmith/mine overlays are injected here — NOTE that `mine_zones`
@@ -2957,6 +3788,7 @@ impl SimulationConfig {
         self.visible_players.clear();
         self.visible_monsters.clear();
         self.visible_npcs.clear();
+        self.map_hazards = crystal_map_hazard_records();
         apply_crystal_map_metadata(&mut self.map);
         if let Some(start_point) = crystal_map_respawns_by_file_name(&self.map.file_name)
             .and_then(|map| map.safe_zones.into_iter().find(|zone| zone.start_point))
@@ -2978,48 +3810,79 @@ impl SimulationConfig {
         self
     }
 
-    pub fn with_postgres_account_store(mut self, database_url: impl Into<String>) -> Self {
+    pub fn with_postgres_account_store(
+        self,
+        database_url: impl Into<String>,
+    ) -> Result<Self, String> {
         let database_url = database_url.into();
-        if !database_url.trim().is_empty() {
+        self.with_postgres_account_store_with_loader(database_url, |database_url, default| {
             let repository = PostgresAccountStoreRepository::new(
-                database_url.clone(),
+                database_url,
                 AccountStoreDatabaseMode::SourceOfTruth,
             );
-            let store = repository
-                .load(self.default_character.clone())
-                .unwrap_or_else(|error| {
-                    eprintln!("failed to load postgres account store, using default: {error}");
-                    AccountStore::new(self.default_character.clone())
-                });
-            self.account_store = Arc::new(Mutex::new(store));
-            self.account_store_path = None;
-            self.account_store_database_url = Some(database_url);
-            self.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
-        }
-        self
+            repository.load(default)
+        })
+    }
+
+    fn with_postgres_account_store_with_loader<F>(
+        mut self,
+        database_url: String,
+        loader: F,
+    ) -> Result<Self, String>
+    where
+        F: FnOnce(String, CharacterRecord) -> Result<AccountStore, String>,
+    {
+        validate_postgres_account_store_database_url(&database_url)?;
+        let store = loader(database_url.clone(), self.default_character.clone())
+            .map_err(|error| format!("failed to load postgres account store: {error}"))?;
+        self.account_store = Arc::new(Mutex::new(store));
+        self.account_store_path = None;
+        self.account_store_database_url = Some(database_url);
+        self.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
+        Ok(self)
     }
 
     pub fn with_account_store_environment(
         self,
         account_store_path: impl Into<PathBuf>,
     ) -> Result<Self, String> {
-        match account_store_runtime_backend_from_env()? {
+        let backend = account_store_runtime_backend_from_env()?;
+        let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL").ok();
+        self.with_account_store_environment_with_loader(
+            account_store_path.into(),
+            backend,
+            database_url,
+            |database_url, default| {
+                PostgresAccountStoreRepository::new(
+                    database_url,
+                    AccountStoreDatabaseMode::SourceOfTruth,
+                )
+                .load(default)
+            },
+        )
+    }
+
+    fn with_account_store_environment_with_loader<F>(
+        self,
+        account_store_path: PathBuf,
+        backend: AccountStoreRuntimeBackend,
+        database_url: Option<String>,
+        postgres_loader: F,
+    ) -> Result<Self, String>
+    where
+        F: FnOnce(String, CharacterRecord) -> Result<AccountStore, String>,
+    {
+        match backend {
             AccountStoreRuntimeBackend::Postgres => {
-                let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL").map_err(|_| {
+                let database_url = database_url.ok_or_else(|| {
                     "MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store"
                         .to_string()
                 })?;
-                if database_url.trim().is_empty() {
-                    return Err(
-                        "MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store"
-                            .to_string(),
-                    );
-                }
-                Ok(self.with_postgres_account_store(database_url))
+                self.with_postgres_account_store_with_loader(database_url, postgres_loader)
             }
             AccountStoreRuntimeBackend::File => {
                 let mut config = self.with_account_store_path(account_store_path);
-                if let Ok(database_url) = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL") {
+                if let Some(database_url) = database_url {
                     config = config.with_account_store_database_url(database_url);
                 }
                 Ok(config)
@@ -3027,11 +3890,130 @@ impl SimulationConfig {
         }
     }
 
+    fn ensure_account_store_writable(&self) -> Result<(), String> {
+        let state = self.account_store_write_state.lock().map_err(|_| {
+            "account-store write-state mutex poisoned; writes are blocked".to_string()
+        })?;
+        match &*state {
+            AccountStoreWriteState::Writable => Ok(()),
+            AccountStoreWriteState::Frozen { reason } => Err(format!(
+                "account-store writes are frozen until restart and durable reload: {reason}"
+            )),
+        }
+    }
+
+    fn freeze_account_store_writes(&self, reason: String) -> String {
+        let reason = format!("{reason}; live AccountStore was not published");
+        match self.account_store_write_state.lock() {
+            Ok(mut state) => {
+                if matches!(*state, AccountStoreWriteState::Writable) {
+                    *state = AccountStoreWriteState::Frozen {
+                        reason: reason.clone(),
+                    };
+                }
+                match &*state {
+                    AccountStoreWriteState::Writable => unreachable!(),
+                    AccountStoreWriteState::Frozen { reason } => reason.clone(),
+                }
+            }
+            Err(_) => format!(
+                "{reason}; account-store write-state mutex poisoned, so subsequent writes remain fail-closed"
+            ),
+        }
+    }
+
+    fn map_file_commit_error(&self, error: AccountStoreFileCommitError) -> String {
+        if error.is_commit_outcome_unknown() {
+            self.freeze_account_store_writes(format!(
+                "{ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN}: {error}"
+            ))
+        } else {
+            error.to_string()
+        }
+    }
+
+    fn save_file_account_store(
+        &self,
+        path: &Path,
+        store: &AccountStore,
+    ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
+        let fault = self.take_account_store_file_commit_fault();
+        FileAccountStoreRepository::new(path).save_with_commit_outcome(store, fault)
+    }
+
+    fn save_account_store_mutation_plan_to_repository(
+        &self,
+        database_url: &str,
+        mode: AccountStoreDatabaseMode,
+        mutation_plan: &AccountStoreMutationPlan,
+    ) -> Result<AccountStoreRepositorySave, String> {
+        #[cfg(test)]
+        {
+            let mut probe = self
+                .account_store_repository_writer_probe
+                .lock()
+                .expect("account-store repository writer probe mutex should not be poisoned");
+            if let Some(probe) = probe.as_mut() {
+                probe.invocations = probe.invocations.saturating_add(1);
+                probe.last_plan_includes_global = Some(mutation_plan.global_stock.is_some());
+                return probe.outcome.clone();
+            }
+        }
+        PostgresAccountStoreRepository::new(database_url, mode).save_mutation_plan(mutation_plan)
+    }
+
+    fn take_account_store_file_commit_fault(&self) -> Option<AccountStoreFileCommitFault> {
+        #[cfg(any(test, feature = "test-support"))]
+        {
+            let mut fault = self
+                .account_store_transaction_fault
+                .lock()
+                .expect("account-store transaction fault mutex should not be poisoned");
+            let mapped = match *fault {
+                Some(AccountStoreTransactionFault::BeforeFileRename) => {
+                    Some(AccountStoreFileCommitFault::BeforeRename)
+                }
+                Some(AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync) => {
+                    Some(AccountStoreFileCommitFault::AfterRenameBeforeDirectorySync)
+                }
+                _ => None,
+            };
+            if mapped.is_some() {
+                *fault = None;
+            }
+            mapped
+        }
+        #[cfg(not(any(test, feature = "test-support")))]
+        {
+            None
+        }
+    }
+
     pub fn save_account_store(&self) -> Result<(), String> {
+        self.save_account_store_with_plan_writer(None, |database_url, mode, mutation_plan| {
+            PostgresAccountStoreRepository::new(database_url, mode)
+                .save_mutation_plan(mutation_plan)
+                .map(AccountStoreRepositorySave::into_source_versions)
+        })
+    }
+
+    fn save_account_store_with_plan_writer<F>(
+        &self,
+        scoped_account_id: Option<&str>,
+        write_repository: F,
+    ) -> Result<(), String>
+    where
+        F: FnOnce(
+            &str,
+            AccountStoreDatabaseMode,
+            &AccountStoreMutationPlan,
+        ) -> Result<AccountStoreSourceVersions, String>,
+    {
         let _persist_guard = self
             .account_store_persist_lock
             .lock()
-            .expect("account store persist mutex should not be poisoned");
+            .map_err(|_| "account store persist mutex poisoned".to_string())?;
+        self.ensure_account_store_writable()?;
         let store = {
             let store = self
                 .account_store
@@ -3039,24 +4021,328 @@ impl SimulationConfig {
                 .expect("account store mutex should not be poisoned");
             store.clone()
         };
+        let account_ids = if let Some(account_id) = scoped_account_id {
+            vec![account_id.to_string()]
+        } else {
+            let mut account_ids = BTreeSet::new();
+            account_ids.extend(store.accounts.keys().cloned());
+            account_ids.extend(store.source_account_versions.keys().cloned());
+            account_ids.extend(store.source_save_versions.keys().cloned());
+            account_ids.into_iter().collect::<Vec<_>>()
+        };
+        let scope = if scoped_account_id.is_some() {
+            AccountStoreMutationScope::Accounts(&account_ids)
+        } else {
+            AccountStoreMutationScope::AccountsWithGlobal(&account_ids)
+        };
+        let mutation_plan = build_account_store_mutation_plan(
+            &store,
+            &store,
+            scope,
+            self.account_store_database_mode == AccountStoreDatabaseMode::Mirror
+                && scoped_account_id.is_none(),
+        );
+
         if let Some(path) = self.account_store_path.as_deref() {
-            FileAccountStoreRepository::new(path).save(&store)?;
+            self.save_file_account_store(path, &store)
+                .map_err(|error| self.map_file_commit_error(error))?;
         }
         if let Some(database_url) = self.account_store_database_url.as_deref() {
-            let source_versions =
-                PostgresAccountStoreRepository::new(database_url, self.account_store_database_mode)
-                    .save(&store)?
-                    .into_source_versions();
+            let source_versions = write_repository(
+                database_url,
+                self.account_store_database_mode,
+                &mutation_plan,
+            )?;
             if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
-                let mut store = self
+                let mut live_store = self
                     .account_store
                     .lock()
                     .expect("account store mutex should not be poisoned");
-                store.source_account_versions = source_versions.accounts;
-                store.source_save_versions = source_versions.saves;
+                apply_account_store_mutation_source_versions(
+                    &mut live_store,
+                    &mutation_plan,
+                    source_versions,
+                );
             }
         }
         Ok(())
+    }
+
+    /// Commit a bounded multi-account mutation as one persistence operation.
+    ///
+    /// The shared account image is kept unchanged while `transaction` mutates
+    /// an isolated snapshot.  File persistence replaces the complete snapshot
+    /// atomically; PostgreSQL persists only `account_ids`, but does so inside
+    /// the repository's single transaction with the existing optimistic
+    /// version checks.  The in-memory image is replaced only after every
+    /// authoritative write succeeds.
+    ///
+    /// The account-store mutex deliberately remains held while the repositories
+    /// are called.  This prevents an in-process writer from being overwritten
+    /// between durable commit and the shared-image swap.  The implementation
+    /// calls repositories directly and must never recurse through
+    /// `save_account_store*` while holding this mutex.
+    pub(crate) fn commit_account_store_transaction<T, F>(
+        &self,
+        account_ids: &[String],
+        transaction: F,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+    {
+        if account_ids.is_empty() {
+            return Err("account-store transaction requires at least one account".to_string());
+        }
+        self.commit_account_store_transaction_inner(
+            AccountStoreMutationScope::Accounts(account_ids),
+            transaction,
+        )
+    }
+
+    pub(crate) fn commit_account_store_transaction_with_global<T, F>(
+        &self,
+        account_ids: &[String],
+        transaction: F,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+    {
+        if account_ids.is_empty() {
+            return Err("account-store transaction requires at least one account".to_string());
+        }
+        self.commit_account_store_transaction_inner(
+            AccountStoreMutationScope::AccountsWithGlobal(account_ids),
+            transaction,
+        )
+    }
+
+    fn commit_account_store_transaction_inner<T, F>(
+        &self,
+        scope: AccountStoreMutationScope<'_>,
+        transaction: F,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+    {
+        let empty_account_scope = match scope {
+            AccountStoreMutationScope::Accounts(account_ids)
+            | AccountStoreMutationScope::AccountsWithGlobal(account_ids) => account_ids.is_empty(),
+            AccountStoreMutationScope::FullRestore => false,
+        };
+        if empty_account_scope {
+            return Err("account-store transaction requires at least one account".to_string());
+        }
+
+        #[cfg(test)]
+        self.record_account_store_transaction_scope(scope);
+
+        let _persist_guard = self
+            .account_store_persist_lock
+            .lock()
+            .map_err(|_| "account store persist mutex poisoned".to_string())?;
+        self.ensure_account_store_writable()?;
+        let mut live_store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?;
+        let original_store = live_store.clone();
+        let mut staged_store = original_store.clone();
+        let result = transaction(&mut staged_store)?;
+        validate_account_store_transaction_scope(&original_store, &staged_store, scope)
+            .map_err(|error| error.to_string())?;
+        let mutation_plan =
+            build_account_store_mutation_plan(&original_store, &staged_store, scope, false);
+
+        #[cfg(any(test, feature = "test-support"))]
+        if self.take_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist) {
+            return Err("injected account-store failure before persist".to_string());
+        }
+
+        // Fail serialization before touching either repository.  The file
+        // backend repeats this encoding for its pretty snapshot, while this
+        // preflight also protects PostgreSQL mirror-first ordering.
+        serde_json::to_vec(&staged_store)
+            .map_err(|error| format!("failed to encode account-store transaction: {error}"))?;
+
+        #[cfg(any(test, feature = "test-support"))]
+        if self.take_account_store_transaction_fault(AccountStoreTransactionFault::Persist) {
+            return Err("injected account-store persistence failure".to_string());
+        }
+
+        if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth
+            && self.account_store_path.is_some()
+        {
+            return Err(
+                "postgres source-of-truth account store cannot also commit a file primary"
+                    .to_string(),
+            );
+        }
+
+        let rollback_plan = build_account_store_mutation_plan(
+            &staged_store,
+            &original_store,
+            scope,
+            mutation_plan.global_stock.is_some(),
+        );
+        let mut postgres_versions = None;
+
+        match (
+            self.account_store_path.as_deref(),
+            self.account_store_database_url.as_deref(),
+        ) {
+            (Some(path), Some(database_url)) => {
+                // File mode with a configured database uses the file as the
+                // source and PostgreSQL as a synchronous mirror.  Write the
+                // mirror first so a mirror failure cannot advance the source.
+                // A known pre-publication file failure is compensated with the
+                // original mirror snapshot. An outcome-unknown file publish is
+                // never compensated or retried: both writes may already hold
+                // the staged value, so the process freezes until durable
+                // reconciliation after restart. This ordering is fail-closed;
+                // it does not claim cross-database atomicity.
+                self.save_account_store_mutation_plan_to_repository(
+                    database_url,
+                    AccountStoreDatabaseMode::Mirror,
+                    &mutation_plan,
+                )?;
+                if let Err(file_error) = self.save_file_account_store(path, &staged_store) {
+                    if file_error.is_commit_outcome_unknown() {
+                        return Err(self.map_file_commit_error(file_error));
+                    }
+                    return match self.save_account_store_mutation_plan_to_repository(
+                        database_url,
+                        AccountStoreDatabaseMode::Mirror,
+                        &rollback_plan,
+                    ) {
+                        Ok(_) => Err(file_error.to_string()),
+                        Err(rollback_error) => Err(self.freeze_account_store_writes(format!(
+                            "file account-store write was not committed ({file_error}), but postgres mirror compensation failed: {rollback_error}"
+                        ))),
+                    };
+                }
+            }
+            (Some(path), None) => {
+                self.save_file_account_store(path, &staged_store)
+                    .map_err(|error| self.map_file_commit_error(error))?;
+            }
+            (None, Some(database_url)) => {
+                postgres_versions = Some(
+                    self.save_account_store_mutation_plan_to_repository(
+                        database_url,
+                        self.account_store_database_mode,
+                        &mutation_plan,
+                    )?
+                    .into_source_versions(),
+                );
+            }
+            (None, None) => {}
+        }
+
+        if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+            if let Some(versions) = postgres_versions {
+                apply_account_store_mutation_source_versions(
+                    &mut staged_store,
+                    &mutation_plan,
+                    versions,
+                );
+            }
+        }
+        *live_store = staged_store;
+        Ok(result)
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn inject_account_store_transaction_fault(&self, fault: AccountStoreTransactionFault) {
+        *self
+            .account_store_transaction_fault
+            .lock()
+            .expect("account-store transaction fault mutex should not be poisoned") = Some(fault);
+    }
+
+    #[cfg(test)]
+    fn record_account_store_transaction_scope(&self, scope: AccountStoreMutationScope<'_>) {
+        let observation = match scope {
+            AccountStoreMutationScope::Accounts(_) => {
+                AccountStoreTransactionScopeObservation::AccountOnly
+            }
+            AccountStoreMutationScope::AccountsWithGlobal(_) => {
+                AccountStoreTransactionScopeObservation::WithGlobal
+            }
+            AccountStoreMutationScope::FullRestore => {
+                AccountStoreTransactionScopeObservation::FullRestore
+            }
+        };
+        self.account_store_transaction_scope_observations
+            .lock()
+            .expect("account-store transaction scope probe mutex should not be poisoned")
+            .push(observation);
+    }
+
+    #[cfg(test)]
+    pub(crate) fn clear_account_store_transaction_scope_observations(&self) {
+        self.account_store_transaction_scope_observations
+            .lock()
+            .expect("account-store transaction scope probe mutex should not be poisoned")
+            .clear();
+    }
+
+    #[cfg(test)]
+    pub(crate) fn account_store_transaction_scope_observations(
+        &self,
+    ) -> Vec<AccountStoreTransactionScopeObservation> {
+        self.account_store_transaction_scope_observations
+            .lock()
+            .expect("account-store transaction scope probe mutex should not be poisoned")
+            .clone()
+    }
+
+    #[cfg(test)]
+    fn inject_account_store_repository_writer_probe(
+        &self,
+        outcome: Result<AccountStoreRepositorySave, String>,
+    ) {
+        *self
+            .account_store_repository_writer_probe
+            .lock()
+            .expect("account-store repository writer probe mutex should not be poisoned") =
+            Some(AccountStoreRepositoryWriterProbe {
+                invocations: 0,
+                last_plan_includes_global: None,
+                outcome,
+            });
+    }
+
+    #[cfg(test)]
+    fn account_store_repository_writer_probe_invocations(&self) -> usize {
+        self.account_store_repository_writer_probe
+            .lock()
+            .expect("account-store repository writer probe mutex should not be poisoned")
+            .as_ref()
+            .map(|probe| probe.invocations)
+            .unwrap_or_default()
+    }
+
+    #[cfg(test)]
+    fn account_store_repository_writer_probe_last_plan_includes_global(&self) -> Option<bool> {
+        self.account_store_repository_writer_probe
+            .lock()
+            .expect("account-store repository writer probe mutex should not be poisoned")
+            .as_ref()
+            .and_then(|probe| probe.last_plan_includes_global)
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    fn take_account_store_transaction_fault(&self, expected: AccountStoreTransactionFault) -> bool {
+        let mut fault = self
+            .account_store_transaction_fault
+            .lock()
+            .expect("account-store transaction fault mutex should not be poisoned");
+        if *fault == Some(expected) {
+            *fault = None;
+            true
+        } else {
+            false
+        }
     }
 
     /// Refresh one account from the authoritative PostgreSQL repository.
@@ -3065,63 +4351,93 @@ impl SimulationConfig {
     /// image predates the latest character save. Loading only the requested
     /// account keeps that boundary safe without re-reading every account on
     /// every login.
-    pub(crate) fn refresh_account_store_account(&self, account_id: &str) -> Result<bool, String> {
+    pub(crate) fn refresh_account_store_account(
+        &self,
+        account_id: &str,
+    ) -> Result<AccountSourceRefreshOutcome, String> {
+        if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth {
+            return Ok(AccountSourceRefreshOutcome::NotRequired);
+        }
+        let Some(database_url) = self.account_store_database_url.as_deref() else {
+            return Err("postgres account source is unavailable".to_string());
+        };
+        self.refresh_account_store_account_with_loader(account_id, || {
+            load_account_from_postgres(database_url.to_string(), account_id.to_string())
+        })
+    }
+
+    fn refresh_account_store_account_with_loader<F>(
+        &self,
+        account_id: &str,
+        loader: F,
+    ) -> Result<AccountSourceRefreshOutcome, String>
+    where
+        F: FnOnce() -> Result<Option<(AccountRecord, AccountStoreSourceVersions)>, String>,
+    {
+        if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth {
+            return Ok(AccountSourceRefreshOutcome::NotRequired);
+        }
+        let _persist_guard = self.account_store_persist_lock.lock().map_err(|_| {
+            "account store persist mutex poisoned during source refresh".to_string()
+        })?;
+        self.ensure_account_store_writable()?;
+        let loaded = loader()?;
+        let mut store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?;
+        let Some((account, versions)) = loaded else {
+            store.accounts.remove(account_id);
+            store.source_account_versions.remove(account_id);
+            store.source_save_versions.remove(account_id);
+            return Ok(AccountSourceRefreshOutcome::Missing);
+        };
+        store.source_account_versions.remove(account_id);
+        store.source_save_versions.remove(account_id);
+        store.accounts.insert(account_id.to_string(), account);
+        store.merge_source_versions(versions);
+        store.normalize_next_character_index();
+        Ok(AccountSourceRefreshOutcome::Refreshed)
+    }
+
+    /// Refresh only the shared finite GameShop counters from PostgreSQL.
+    ///
+    /// Account refresh intentionally does not replace this process-wide state:
+    /// a finite global purchase retries through this explicit path after the
+    /// global CAS reports a stale source version.
+    pub(crate) fn refresh_game_shop_global_stock(&self) -> Result<bool, String> {
         if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth {
             return Ok(false);
         }
         let Some(database_url) = self.account_store_database_url.as_deref() else {
             return Ok(false);
         };
-        let Some((account, versions)) =
-            load_account_from_postgres(database_url.to_string(), account_id.to_string())?
-        else {
-            return Ok(false);
-        };
+        let _persist_guard = self
+            .account_store_persist_lock
+            .lock()
+            .map_err(|_| "account store persist mutex poisoned".to_string())?;
+        self.ensure_account_store_writable()?;
+        let (purchases, version) =
+            load_game_shop_global_stock_from_postgres(database_url.to_string())?;
         let mut store = self
             .account_store
             .lock()
             .map_err(|_| "account store mutex poisoned".to_string())?;
-        store.accounts.insert(account_id.to_string(), account);
-        store.merge_source_versions(versions);
-        store.normalize_next_character_index();
+        store.game_shop_global_purchases = purchases;
+        store.source_game_shop_global_version = version;
+        store.source_game_shop_global_purchases = store.game_shop_global_purchases.clone();
         Ok(true)
     }
 
     pub fn save_account_store_account(&self, account_id: &str) -> Result<(), String> {
-        let _persist_guard = self
-            .account_store_persist_lock
-            .lock()
-            .expect("account store persist mutex should not be poisoned");
-        let store = {
-            let store = self
-                .account_store
-                .lock()
-                .expect("account store mutex should not be poisoned");
-            store.clone()
-        };
-        if let Some(path) = self.account_store_path.as_deref() {
-            FileAccountStoreRepository::new(path).save(&store)?;
-        }
-        if let Some(database_url) = self.account_store_database_url.as_deref() {
-            let postgres_store =
-                if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
-                    store.scoped_to_account(account_id)
-                } else {
-                    store
-                };
-            let source_versions =
-                PostgresAccountStoreRepository::new(database_url, self.account_store_database_mode)
-                    .save(&postgres_store)?
-                    .into_source_versions();
-            if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
-                let mut store = self
-                    .account_store
-                    .lock()
-                    .expect("account store mutex should not be poisoned");
-                store.merge_source_versions(source_versions);
-            }
-        }
-        Ok(())
+        self.save_account_store_with_plan_writer(
+            Some(account_id),
+            |database_url, mode, mutation_plan| {
+                PostgresAccountStoreRepository::new(database_url, mode)
+                    .save_mutation_plan(mutation_plan)
+                    .map(AccountStoreRepositorySave::into_source_versions)
+            },
+        )
     }
 
     pub fn account_store_repository_statuses(&self) -> Vec<AccountStoreRepositoryStatus> {
@@ -3157,6 +4473,11 @@ impl SimulationConfig {
         store.save_to_path(backup_path.as_ref())
     }
 
+    fn allows_default_account_fixture(&self) -> bool {
+        self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth
+            && (self.account_store_path.is_some() || self.account_store_database_url.is_none())
+    }
+
     pub fn restore_account_store_from_backup(
         &self,
         backup_path: impl AsRef<Path>,
@@ -3168,25 +4489,31 @@ impl SimulationConfig {
                 backup_path.display()
             )
         })?;
-        let restored = serde_json::from_str::<AccountStore>(&data)
-            .map_err(|error| {
-                format!(
-                    "failed to decode account store backup {}: {error}",
-                    backup_path.display()
-                )
-            })?
-            .with_default_account(self.default_character.clone())
-            .migrate_to_current_schema();
-
-        {
-            let mut store = self
-                .account_store
-                .lock()
-                .expect("account store mutex should not be poisoned");
-            *store = restored;
+        let decoded = serde_json::from_str::<AccountStore>(&data).map_err(|error| {
+            format!(
+                "failed to decode account store backup {}: {error}",
+                backup_path.display()
+            )
+        })?;
+        let mut restored = if self.allows_default_account_fixture() {
+            decoded.with_default_account(self.default_character.clone())
+        } else {
+            decoded
         }
-
-        self.save_account_store()
+        .migrate_to_current_schema();
+        // Backup JSON deliberately excludes optimistic source metadata.  Full
+        // restore builds every expected version from the locked live image.
+        restored.source_account_versions.clear();
+        restored.source_save_versions.clear();
+        restored.source_game_shop_global_version = None;
+        restored.source_game_shop_global_purchases.clear();
+        self.commit_account_store_transaction_inner(
+            AccountStoreMutationScope::FullRestore,
+            move |staged_store| {
+                *staged_store = restored;
+                Ok(())
+            },
+        )
     }
 }
 
@@ -3224,19 +4551,45 @@ pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {
     map.mini_map = crystal_map.mini_map;
     map.big_map = crystal_map.big_map;
     map.lights = crystal_map.light;
+    map.flags = u8::from(crystal_map.lightning) | (u8::from(crystal_map.fire) << 1);
     map.map_dark_light = crystal_map.map_dark_light;
+    map.music = crystal_map.music;
     map.weather_particles = crystal_map.weather_particles;
     true
 }
 
+fn crystal_map_hazard_records() -> Vec<MapHazardRecord> {
+    crystal_respawn_manifest()
+        .maps
+        .into_iter()
+        .filter(|map| map.lightning || map.fire)
+        .map(|map| MapHazardRecord {
+            map_file_name: map.map_file_name,
+            lightning: map.lightning,
+            fire: map.fire,
+            lightning_damage: map.lightning_damage,
+            fire_damage: map.fire_damage,
+        })
+        .collect()
+}
+
 static ACCOUNT_STORE_FILE_WRITE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
-fn save_account_store_snapshot_to_path(store: &AccountStore, path: &Path) -> Result<(), String> {
+fn save_account_store_snapshot_to_path(
+    store: &AccountStore,
+    path: &Path,
+    fault: Option<AccountStoreFileCommitFault>,
+) -> Result<(), AccountStoreFileCommitError> {
     let _guard = ACCOUNT_STORE_FILE_WRITE_LOCK
         .get_or_init(|| Mutex::new(()))
         .lock()
-        .expect("account store file write mutex should not be poisoned");
-    store.save_to_path(path)
+        .map_err(|_| {
+            AccountStoreFileCommitError::not_committed(io::Error::new(
+                io::ErrorKind::Other,
+                "account store file write mutex poisoned",
+            ))
+        })?;
+    store.save_to_path_with_fault(path, fault)
 }
 
 fn load_account_store_from_postgres(
@@ -3300,71 +4653,126 @@ fn load_account_from_postgres(
     .map_err(|_| "postgres account refresh thread panicked".to_string())?
 }
 
+fn load_game_shop_global_stock_from_postgres(
+    database_url: String,
+) -> Result<(BTreeMap<i32, u64>, Option<i64>), String> {
+    let pool = postgres_account_store_pool(&database_url);
+    std::thread::spawn(move || {
+        let mut client = pool.connection()?;
+        pool.ensure_migrated(&mut client)?;
+        load_game_shop_global_stock(&mut client)
+    })
+    .join()
+    .map_err(|_| "postgres game-shop global-stock refresh thread panicked".to_string())?
+}
+
 fn load_account_store_from_postgres_with_pool(
     pool: Arc<PostgresAccountStoreConnectionPool>,
-    default_character: CharacterRecord,
+    _default_character: CharacterRecord,
 ) -> Result<AccountStore, String> {
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
         pool.ensure_migrated(&mut client)?;
-        let rows = client
+        let (game_shop_global_purchases, game_shop_global_version) =
+            load_game_shop_global_stock(&mut client)?;
+        let account_rows = client
             .query(
                 "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
                 &[],
             )
-            .map_err(|error| format!("postgres account-store load failed: {error}"))?;
-        if rows.is_empty() {
-            let store = AccountStore::new(default_character);
-            let versions = upsert_account_store_to_postgres(
-                &mut client,
-                &store,
-                AccountStoreDatabaseMode::SourceOfTruth,
-            )?;
-            return Ok(store.with_source_versions(versions));
-        }
-        let mut accounts = BTreeMap::new();
-        let mut versions = AccountStoreSourceVersions::default();
-        for row in rows {
-            let account_id: String = row.get("account_id");
-            let raw_json: Value = row.get("raw_json");
-            let store_version: i64 = row.get("store_version");
-            let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
-                format!("postgres account raw_json decode failed for {account_id}: {error}")
-            })?;
-            versions
-                .accounts
-                .insert(account_id.clone(), store_version);
-            accounts.insert(account_id, account);
-        }
+            .map_err(|error| format!("postgres account-store load failed: {error}"))?
+            .into_iter()
+            .map(|row| {
+                (
+                    row.get::<_, String>("account_id"),
+                    row.get::<_, Value>("raw_json"),
+                    row.get::<_, i64>("store_version"),
+                )
+            })
+            .collect();
         let save_rows = client
             .query(
                 "SELECT account_id, character_index, save_version FROM character_saves ORDER BY account_id, character_index",
                 &[],
             )
-            .map_err(|error| format!("postgres character-save version load failed: {error}"))?;
-        for row in save_rows {
-            let account_id: String = row.get("account_id");
-            let character_index: i32 = row.get("character_index");
-            let save_version: i64 = row.get("save_version");
-            versions
-                .saves
-                .entry(account_id)
-                .or_default()
-                .insert(character_index, save_version);
-        }
-        Ok(AccountStore {
-            schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
-            next_character_index: 0,
-            accounts,
-            source_account_versions: BTreeMap::new(),
-            source_save_versions: BTreeMap::new(),
-        }
-        .with_default_account(default_character)
-        .migrate_to_current_schema()
-        .with_source_versions(versions))
+            .map_err(|error| format!("postgres character-save version load failed: {error}"))?
+            .into_iter()
+            .map(|row| {
+                (
+                    row.get::<_, String>("account_id"),
+                    row.get::<_, i32>("character_index"),
+                    row.get::<_, i64>("save_version"),
+                )
+            })
+            .collect();
+        assemble_account_store_from_postgres_rows(
+            account_rows,
+            save_rows,
+            game_shop_global_purchases,
+            game_shop_global_version,
+        )
     })
     .join()
     .map_err(|_| "postgres account-store load thread panicked".to_string())?
+}
+
+fn assemble_account_store_from_postgres_rows(
+    account_rows: Vec<(String, Value, i64)>,
+    save_rows: Vec<(String, i32, i64)>,
+    game_shop_global_purchases: BTreeMap<i32, u64>,
+    game_shop_global_version: Option<i64>,
+) -> Result<AccountStore, String> {
+    let mut accounts = BTreeMap::new();
+    let mut versions = AccountStoreSourceVersions::default();
+    for (account_id, raw_json, store_version) in account_rows {
+        let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
+            format!("postgres account raw_json decode failed for {account_id}: {error}")
+        })?;
+        versions.accounts.insert(account_id.clone(), store_version);
+        accounts.insert(account_id, account);
+    }
+    for (account_id, character_index, save_version) in save_rows {
+        versions
+            .saves
+            .entry(account_id)
+            .or_default()
+            .insert(character_index, save_version);
+    }
+    versions.game_shop_global_version = game_shop_global_version;
+    Ok(AccountStore {
+        schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
+        next_character_index: 0,
+        game_shop_global_purchases,
+        accounts,
+        source_account_versions: BTreeMap::new(),
+        source_save_versions: BTreeMap::new(),
+        source_game_shop_global_version: None,
+        source_game_shop_global_purchases: BTreeMap::new(),
+    }
+    .migrate_to_current_schema()
+    .with_source_versions(versions))
+}
+
+fn load_game_shop_global_stock(
+    client: &mut Client,
+) -> Result<(BTreeMap<i32, u64>, Option<i64>), String> {
+    client
+        .query_opt(
+            "SELECT purchases_json, store_version \
+             FROM game_shop_global_stock WHERE state_key = 1",
+            &[],
+        )
+        .map_err(|error| format!("postgres game-shop global-stock load failed: {error}"))?
+        .map(|row| {
+            let purchases_json: Value = row.get("purchases_json");
+            let purchases =
+                serde_json::from_value::<BTreeMap<i32, u64>>(purchases_json).map_err(|error| {
+                    format!("postgres game-shop global-stock decode failed: {error}")
+                })?;
+            Ok::<_, String>((purchases, Some(row.get("store_version"))))
+        })
+        .transpose()
+        .map(|value| value.unwrap_or_default())
 }
 
 fn save_account_store_to_postgres(
@@ -3398,86 +4806,346 @@ fn upsert_account_store_to_postgres(
     store: &AccountStore,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    let mut account_ids = BTreeSet::new();
+    account_ids.extend(store.accounts.keys().cloned());
+    account_ids.extend(store.source_account_versions.keys().cloned());
+    account_ids.extend(store.source_save_versions.keys().cloned());
+    let account_ids = account_ids.into_iter().collect::<Vec<_>>();
+    let plan = build_account_store_mutation_plan(
+        store,
+        store,
+        AccountStoreMutationScope::AccountsWithGlobal(&account_ids),
+        mode == AccountStoreDatabaseMode::Mirror,
+    );
+    write_account_store_mutation_plan_to_postgres(client, &plan, mode)
+}
+
+fn save_account_store_mutation_plan_to_postgres(
+    database_url: String,
+    plan: AccountStoreMutationPlan,
+    mode: AccountStoreDatabaseMode,
+) -> Result<AccountStoreSourceVersions, String> {
+    save_account_store_mutation_plan_to_postgres_with_pool(
+        postgres_account_store_pool(&database_url),
+        plan,
+        mode,
+    )
+}
+
+fn save_account_store_mutation_plan_to_postgres_with_pool(
+    pool: Arc<PostgresAccountStoreConnectionPool>,
+    plan: AccountStoreMutationPlan,
+    mode: AccountStoreDatabaseMode,
+) -> Result<AccountStoreSourceVersions, String> {
+    std::thread::spawn(move || {
+        let mut client = pool.connection()?;
+        pool.ensure_migrated(&mut client)?;
+        write_account_store_mutation_plan_to_postgres(&mut client, &plan, mode)
+    })
+    .join()
+    .map_err(|_| "postgres account-store mutation thread panicked".to_string())?
+}
+
+fn write_account_store_mutation_plan_to_postgres(
+    client: &mut Client,
+    plan: &AccountStoreMutationPlan,
+    mode: AccountStoreDatabaseMode,
+) -> Result<AccountStoreSourceVersions, String> {
     let mut transaction = client
         .transaction()
         .map_err(|error| format!("postgres account-store transaction failed: {error}"))?;
-    let mut source_versions = AccountStoreSourceVersions::default();
-    for (account_id, account) in &store.accounts {
-        let locked = transaction
-            .query_opt(
-                "SELECT store_version FROM accounts WHERE account_id = $1 FOR UPDATE",
-                &[&account_id],
-            )
-            .map_err(|error| format!("postgres account lock failed for {account_id}: {error}"))?;
-        if let Some(row) = locked.as_ref() {
-            let current_version: i64 = row.get("store_version");
-            if mode == AccountStoreDatabaseMode::SourceOfTruth {
-                if let Some(expected_version) = store.source_account_version(account_id) {
-                    if current_version != expected_version {
-                        return Err(format!(
-                            "stale postgres account-store write for {account_id}: expected store_version {expected_version}, found {current_version}"
-                        ));
-                    }
-                }
-            }
+    let source_versions = execute_account_store_mutation_plan(plan, |operation| match operation {
+        AccountStoreMutationOperation::GlobalStock(mutation) => {
+            write_game_shop_global_stock_mutation(&mut transaction, mutation, mode)
+                .map(AccountStoreMutationOperationResult::GlobalStock)
         }
-        let store_version = upsert_account_record(&mut transaction, account_id, account, mode)?;
-        source_versions
-            .accounts
-            .insert(account_id.clone(), store_version);
-        let mut characters = account.characters.clone();
-        for save in account.saves.values() {
-            if !characters
-                .iter()
-                .any(|character| character.index == save.character.index)
-            {
-                characters.push(save.character.clone());
-            }
-        }
-        characters.sort_by_key(|character| character.index);
-        characters.dedup_by_key(|character| character.index);
-        for character in &characters {
-            upsert_character_record(&mut transaction, account_id, character)?;
-        }
-        for (character_index, save) in &account.saves {
-            let save_version = upsert_character_save_record(
-                &mut transaction,
-                store,
-                account_id,
-                *character_index,
-                save,
-                mode,
-            )?;
-            source_versions
-                .saves
-                .entry(account_id.clone())
-                .or_default()
-                .insert(*character_index, save_version);
-        }
-        // Reconcile deleted characters: the authoritative reload is driven by
-        // accounts.raw_json, so any character_saves / projection rows for indices
-        // no longer present are ghosts that would otherwise inflate aggregates.
-        let present_indices: Vec<i32> = account.saves.keys().copied().collect();
-        transaction
-            .execute(
-                "DELETE FROM character_saves WHERE account_id = $1 AND character_index <> ALL($2)",
-                &[&account_id, &present_indices],
-            )
-            .map_err(|error| {
-                format!("postgres orphan character_saves cleanup failed for {account_id}: {error}")
-            })?;
-        crate::db_projection::retain_character_projections(
-            &mut transaction,
+        AccountStoreMutationOperation::Account {
             account_id,
-            &present_indices,
-        )?;
-    }
+            mutation,
+        } => write_account_store_account_mutation(&mut transaction, account_id, mutation, mode),
+    })?;
     transaction
         .commit()
         .map_err(|error| format!("postgres account-store commit failed: {error}"))?;
     Ok(source_versions)
 }
 
+fn write_account_store_account_mutation(
+    transaction: &mut Transaction<'_>,
+    account_id: &str,
+    mutation: &AccountStoreAccountMutation,
+    mode: AccountStoreDatabaseMode,
+) -> Result<AccountStoreMutationOperationResult, String> {
+    let current_account_version = transaction
+        .query_opt(
+            "SELECT store_version FROM accounts WHERE account_id = $1 FOR UPDATE",
+            &[&account_id],
+        )
+        .map_err(|error| format!("postgres account lock failed for {account_id}: {error}"))?
+        .map(|row| row.get::<_, i64>("store_version"));
+    let current_save_versions = transaction
+        .query(
+            "SELECT character_index, save_version FROM character_saves \
+             WHERE account_id = $1 ORDER BY character_index FOR UPDATE",
+            &[&account_id],
+        )
+        .map_err(|error| format!("postgres character-save locks failed for {account_id}: {error}"))?
+        .into_iter()
+        .map(|row| {
+            (
+                row.get::<_, i32>("character_index"),
+                row.get::<_, i64>("save_version"),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    validate_account_store_account_mutation(
+        account_id,
+        mutation,
+        current_account_version,
+        &current_save_versions,
+        mode,
+    )?;
+
+    let Some(account) = mutation.desired_account.as_ref() else {
+        // infra/postgres/migrations/0001_core.sql defines both account and
+        // character foreign keys with ON DELETE CASCADE.  Delete saves first
+        // explicitly after their CAS validation, then delete the account; the
+        // account delete cascades characters and remaining dependent rows.
+        transaction
+            .execute(
+                "DELETE FROM character_saves WHERE account_id = $1",
+                &[&account_id],
+            )
+            .map_err(|error| {
+                format!("postgres character-save tombstone failed for {account_id}: {error}")
+            })?;
+        crate::db_projection::retain_character_projections(transaction, account_id, &[])?;
+        let deleted = transaction
+            .execute("DELETE FROM accounts WHERE account_id = $1", &[&account_id])
+            .map_err(|error| {
+                format!("postgres account tombstone failed for {account_id}: {error}")
+            })?;
+        if mode == AccountStoreDatabaseMode::SourceOfTruth
+            && mutation.expected_version.is_some()
+            && deleted != 1
+        {
+            return Err(format!(
+                "stale postgres account-store delete for {account_id}: locked row disappeared"
+            ));
+        }
+        return Ok(AccountStoreMutationOperationResult::Account {
+            account_version: None,
+            save_versions: BTreeMap::new(),
+        });
+    };
+
+    let account_version = upsert_account_record(transaction, account_id, account, mode)?;
+    let present_save_indices = account.saves.keys().copied().collect::<Vec<_>>();
+    transaction
+        .execute(
+            "DELETE FROM character_saves WHERE account_id = $1 AND character_index <> ALL($2)",
+            &[&account_id, &present_save_indices],
+        )
+        .map_err(|error| {
+            format!("postgres character-save tombstone failed for {account_id}: {error}")
+        })?;
+    crate::db_projection::retain_character_projections(
+        transaction,
+        account_id,
+        &present_save_indices,
+    )?;
+
+    let mut characters = account.characters.clone();
+    for save in account.saves.values() {
+        if !characters
+            .iter()
+            .any(|character| character.index == save.character.index)
+        {
+            characters.push(save.character.clone());
+        }
+    }
+    characters.sort_by_key(|character| character.index);
+    characters.dedup_by_key(|character| character.index);
+    let present_character_indices = characters
+        .iter()
+        .map(|character| character.index)
+        .collect::<Vec<_>>();
+    transaction
+        .execute(
+            "DELETE FROM characters WHERE account_id = $1 AND character_index <> ALL($2)",
+            &[&account_id, &present_character_indices],
+        )
+        .map_err(|error| {
+            format!("postgres character tombstone failed for {account_id}: {error}")
+        })?;
+    for character in &characters {
+        upsert_character_record(transaction, account_id, character)?;
+    }
+
+    let mut save_versions = BTreeMap::new();
+    for (character_index, save) in &account.saves {
+        let save_version =
+            upsert_character_save_record(transaction, account_id, *character_index, save, mode)?;
+        save_versions.insert(*character_index, save_version);
+    }
+    Ok(AccountStoreMutationOperationResult::Account {
+        account_version: Some(account_version),
+        save_versions,
+    })
+}
+
+fn validate_account_store_account_mutation(
+    account_id: &str,
+    mutation: &AccountStoreAccountMutation,
+    current_account_version: Option<i64>,
+    current_save_versions: &BTreeMap<i32, i64>,
+    mode: AccountStoreDatabaseMode,
+) -> Result<(), String> {
+    validate_source_account_write(mode, mutation.expected_version, current_account_version)
+        .map_err(|reason| {
+            format!("stale postgres account-store write for {account_id}: {reason}")
+        })?;
+    if mode != AccountStoreDatabaseMode::SourceOfTruth {
+        return Ok(());
+    }
+
+    let mut save_indices = BTreeSet::new();
+    save_indices.extend(mutation.saves.keys().copied());
+    save_indices.extend(current_save_versions.keys().copied());
+    for character_index in save_indices {
+        let expected_version = mutation
+            .saves
+            .get(&character_index)
+            .and_then(|save| save.expected_version);
+        let current_version = current_save_versions.get(&character_index).copied();
+        validate_source_save_write(expected_version, current_version).map_err(|reason| {
+            format!(
+                "stale postgres character-save write for {account_id}/{character_index}: {reason}"
+            )
+        })?;
+    }
+    Ok(())
+}
+
+fn validate_source_account_write(
+    mode: AccountStoreDatabaseMode,
+    expected_version: Option<i64>,
+    current_version: Option<i64>,
+) -> Result<(), String> {
+    if mode != AccountStoreDatabaseMode::SourceOfTruth {
+        return Ok(());
+    }
+    match (expected_version, current_version) {
+        (Some(expected), Some(current)) if expected == current => Ok(()),
+        (Some(expected), Some(current)) => Err(format!(
+            "expected store_version {expected}, found {current}"
+        )),
+        (Some(expected), None) => Err(format!(
+            "expected store_version {expected}, found no row (account deleted)"
+        )),
+        (None, Some(current)) => Err(format!(
+            "expected no row for new account, found store_version {current}"
+        )),
+        (None, None) => Ok(()),
+    }
+}
+
+fn validate_source_save_write(
+    expected_version: Option<i64>,
+    current_version: Option<i64>,
+) -> Result<(), String> {
+    match (expected_version, current_version) {
+        (Some(expected), Some(current)) if expected == current => Ok(()),
+        (Some(expected), Some(current)) => {
+            Err(format!("expected save_version {expected}, found {current}"))
+        }
+        (Some(expected), None) => Err(format!("expected save_version {expected}, found no row")),
+        (None, Some(current)) => Err(format!(
+            "expected no row for new save, found save_version {current}"
+        )),
+        (None, None) => Ok(()),
+    }
+}
+
+fn validate_source_game_shop_global_write(
+    expected_version: Option<i64>,
+    current_version: Option<i64>,
+    expected_purchases: &BTreeMap<i32, u64>,
+    current_purchases: Option<&BTreeMap<i32, u64>>,
+) -> Result<(), String> {
+    match (expected_version, current_version) {
+        (Some(expected), Some(current)) if expected == current => {
+            if current_purchases != Some(expected_purchases) {
+                return Err(
+                    "expected global-stock contents do not match the locked row".to_string()
+                );
+            }
+            Ok(())
+        }
+        (Some(expected), Some(current)) => Err(format!(
+            "expected store_version {expected}, found {current}"
+        )),
+        (Some(expected), None) => Err(format!("expected store_version {expected}, found no row")),
+        (None, Some(current)) => Err(format!(
+            "expected no row for new global stock, found store_version {current}"
+        )),
+        (None, None) if expected_purchases.is_empty() && current_purchases.is_none() => Ok(()),
+        (None, None) => {
+            Err("global-stock baseline has contents without an expected source row".to_string())
+        }
+    }
+}
+
+fn write_game_shop_global_stock_mutation(
+    transaction: &mut Transaction<'_>,
+    mutation: &AccountStoreGlobalStockMutation,
+    mode: AccountStoreDatabaseMode,
+) -> Result<Option<i64>, String> {
+    let locked = transaction
+        .query_opt(
+            "SELECT purchases_json, store_version FROM game_shop_global_stock \
+             WHERE state_key = 1 FOR UPDATE",
+            &[],
+        )
+        .map_err(|error| format!("postgres game-shop global-stock lock failed: {error}"))?;
+    if mode == AccountStoreDatabaseMode::SourceOfTruth {
+        let current_version = locked
+            .as_ref()
+            .map(|row| row.get::<_, i64>("store_version"));
+        let current_purchases = locked
+            .as_ref()
+            .map(|row| row.get::<_, Value>("purchases_json"))
+            .map(serde_json::from_value::<BTreeMap<i32, u64>>)
+            .transpose()
+            .map_err(|error| format!("postgres game-shop global-stock decode failed: {error}"))?;
+        validate_source_game_shop_global_write(
+            mutation.expected_version,
+            current_version,
+            &mutation.expected_purchases,
+            current_purchases.as_ref(),
+        )
+        .map_err(|reason| format!("stale postgres game-shop global-stock write: {reason}"))?;
+    }
+
+    let purchases_json = serde_json::to_value(&mutation.desired_purchases)
+        .map_err(|error| format!("game-shop global-stock encode failed: {error}"))?;
+    let increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
+    let row = transaction
+        .query_one(
+            "INSERT INTO game_shop_global_stock (state_key, purchases_json, store_version, updated_at) \
+             VALUES (1, $1, 1, now()) \
+             ON CONFLICT (state_key) DO UPDATE SET \
+                purchases_json = EXCLUDED.purchases_json, \
+                store_version = CASE WHEN $2 \
+                    THEN game_shop_global_stock.store_version + 1 \
+                    ELSE game_shop_global_stock.store_version END, \
+                updated_at = now() \
+             RETURNING store_version",
+            &[&purchases_json, &increment_version],
+        )
+        .map_err(|error| format!("postgres game-shop global-stock upsert failed: {error}"))?;
+    Ok(Some(row.get("store_version")))
+}
 fn upsert_account_record(
     client: &mut Transaction<'_>,
     account_id: &str,
@@ -3586,32 +5254,11 @@ fn upsert_character_record(
 
 fn upsert_character_save_record(
     client: &mut Transaction<'_>,
-    store: &AccountStore,
     account_id: &str,
     character_index: i32,
     save: &CharacterSaveRecord,
     mode: AccountStoreDatabaseMode,
 ) -> Result<i64, String> {
-    let locked = client
-        .query_opt(
-            "SELECT save_version FROM character_saves WHERE account_id = $1 AND character_index = $2 FOR UPDATE",
-            &[&account_id, &character_index],
-        )
-        .map_err(|error| {
-            format!("postgres character save lock failed for {account_id}/{character_index}: {error}")
-        })?;
-    if let Some(row) = locked.as_ref() {
-        let current_version: i64 = row.get("save_version");
-        if mode == AccountStoreDatabaseMode::SourceOfTruth {
-            if let Some(expected_version) = store.source_save_version(account_id, character_index) {
-                if current_version != expected_version {
-                    return Err(format!(
-                        "stale postgres character-save write for {account_id}/{character_index}: expected save_version {expected_version}, found {current_version}"
-                    ));
-                }
-            }
-        }
-    }
     let snapshot_json = to_json(save)?;
     let should_increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
     let stage5_systems_json = save
@@ -3861,6 +5508,25 @@ pub struct WorldEntitySnapshot {
     pub light: u8,
     pub name_colour_argb: i32,
     pub dead: bool,
+    /// Authoritative local-player mount state. Remote/session-external players
+    /// remain `None` until their shared-zone state carries the same predicate.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub riding_mount: Option<bool>,
+    /// Crystal `CanRideAttack`, derived from authoritative mount type, riding
+    /// state and Bells equipment. Self-only; missing means deny.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_mount_attack: Option<bool>,
+    /// Crystal `HasClassWeapon`, derived from the active ECS equipment and
+    /// class. Never populated from a client declaration.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_class_weapon: Option<bool>,
+    /// Whether Crystal Dazed poison is active in the authoritative buff set.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dazed: Option<bool>,
+    /// Whether the authoritative local player is currently fishing. This is
+    /// self-only because remote fishing admission is owned by shared Zone state.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fishing: Option<bool>,
     pub disposition: WorldEntityDisposition,
     pub sprite: Option<WorldEntitySpriteSnapshot>,
     pub quest_ids: Vec<i32>,
@@ -3933,6 +5599,16 @@ pub struct GroundDropSnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GroundDropItemPayload {
+    /// Complete Crystal item identity frozen when the ground object is created.
+    pub item: UserItem,
+    /// False means the payload still needs an authoritative UID before commit.
+    #[serde(default)]
+    pub uid_assigned: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum GroundDropLootSnapshot {
     Gold {
@@ -3951,6 +5627,15 @@ pub enum GroundDropLootSnapshot {
         cursed: bool,
         socket_slots: u8,
         show_group_pickup: bool,
+        /// Added after the legacy display/template projection. Old checkpoints
+        /// decode as `None`; newly produced drops must carry `Some`.
+        #[serde(
+            default,
+            rename = "exactItem",
+            alias = "exact_item",
+            skip_serializing_if = "Option::is_none"
+        )]
+        exact_item: Option<GroundDropItemPayload>,
     },
 }
 
@@ -4015,6 +5700,8 @@ pub struct SkillSnapshot {
     pub spell: Option<String>,
     pub cast_kind: String,
     pub offensive: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mp_cost: Option<u32>,
     pub level: u8,
     pub experience: u16,
     pub hotkey: u8,
@@ -4079,6 +5766,16 @@ pub struct Stage5SystemsState {
     #[serde(default)]
     pub mentor: Stage5MentorState,
     pub mail: Vec<Stage5MailMessage>,
+    /// Crystal `CharacterInfo.GSpurchases`: cumulative purchase quantities for
+    /// finite products with individual (`iStock`) limits. This is character
+    /// save state, not an item-stack counter.
+    #[serde(default)]
+    pub game_shop_individual_purchases: BTreeMap<i32, u64>,
+    /// Durable proof that the matching external ledger event has already been
+    /// materialized into this private character snapshot. The exact event ID is
+    /// recorded in the same save as the resulting gold/item mutation.
+    #[serde(default)]
+    pub economy_projection_event_ids: BTreeSet<String>,
     pub trade: Option<Stage5TradeState>,
     pub auction: Vec<Stage5AuctionListing>,
     #[serde(default)]
@@ -4123,6 +5820,8 @@ impl Default for Stage5SystemsState {
             relationship: Stage5RelationshipState::default(),
             mentor: Stage5MentorState::default(),
             mail: Vec::new(),
+            game_shop_individual_purchases: BTreeMap::new(),
+            economy_projection_event_ids: BTreeSet::new(),
             trade: None,
             auction: Vec::new(),
             refine: Stage5RefineState::default(),
@@ -4311,6 +6010,8 @@ impl Default for Stage5MentorState {
 #[serde(rename_all = "camelCase")]
 pub struct Stage5MailMessage {
     pub id: u32,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub delivery_nonce: String,
     pub from: String,
     pub to: String,
     pub subject: String,
@@ -4326,6 +6027,22 @@ pub struct Stage5MailMessage {
     pub locked: bool,
     pub claimed: bool,
     pub deleted: bool,
+}
+
+/// Generate an opaque, persistent identity for one logical mail delivery.
+/// Mailbox IDs remain the client-facing address and may be re-keyed while an
+/// incoming delivery is merged. Clients address mail only by `id` and must not
+/// depend on this nonce.
+pub fn new_stage5_mail_delivery_nonce() -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut bytes = [0u8; 16];
+    OsRng.fill_bytes(&mut bytes);
+    let mut nonce = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        nonce.push(HEX[usize::from(byte >> 4)] as char);
+        nonce.push(HEX[usize::from(byte & 0x0f)] as char);
+    }
+    nonce
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -4359,76 +6076,91 @@ pub fn deliver_stage5_system_mail(
     config: &SimulationConfig,
     delivery: Stage5MailDelivery,
 ) -> Result<Stage5MailDeliveryReceipt, String> {
-    let mut store = config
-        .account_store
-        .lock()
-        .map_err(|_| "account store mutex poisoned".to_string())?;
-
-    if store.accounts.is_empty() {
-        store.accounts.insert(
-            "demo".to_string(),
-            AccountRecord::new(config.default_character.clone()),
-        );
-    }
-
-    let targets = resolve_stage5_mail_targets(&store, &delivery, &config.default_character)?;
-    let mut mail_ids = Vec::new();
-
-    for (account_id, character_index) in targets {
-        let account = store
-            .accounts
-            .entry(account_id.clone())
-            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-        let character = account
-            .characters
-            .iter()
-            .find(|character| character.index == character_index)
-            .cloned()
-            .unwrap_or_else(|| config.default_character.clone());
-        let save = account
-            .saves
-            .entry(character_index)
-            .or_insert_with(|| CharacterSaveRecord::new(character.clone()));
-        let mut systems = save
-            .stage5_systems_json
-            .as_deref()
-            .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
-            .unwrap_or_default();
-        let id = systems
-            .mail
-            .iter()
-            .map(|mail| mail.id)
-            .max()
-            .unwrap_or(0)
-            .saturating_add(1);
-        systems.mail.push(Stage5MailMessage {
-            id,
-            from: delivery.from.clone(),
-            to: character.name,
-            subject: delivery.subject.clone(),
-            body: delivery.body.clone(),
-            gold: delivery.gold,
-            items: delivery.items.clone(),
-            item_states_json: Vec::new(),
-            opened: false,
-            locked: false,
-            claimed: false,
-            deleted: false,
+    let expected_targets = {
+        let store = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?;
+        resolve_stage5_mail_targets(&store, &delivery)?
+    };
+    if expected_targets.is_empty() {
+        return Ok(Stage5MailDeliveryReceipt {
+            delivered_count: 0,
+            mail_ids: Vec::new(),
         });
-        save.stage5_systems_json = Some(
-            serde_json::to_string(&systems)
-                .map_err(|error| format!("failed to encode stage5 systems: {error}"))?,
-        );
-        mail_ids.push(id);
     }
 
-    let delivered_count = mail_ids.len();
-    drop(store);
-    config.save_account_store()?;
+    let account_ids = expected_targets
+        .iter()
+        .map(|(account_id, _)| account_id.clone())
+        .collect::<Vec<_>>();
+    config.commit_account_store_transaction(&account_ids, move |store| {
+        let current_targets = resolve_stage5_mail_targets(store, &delivery)?;
+        if current_targets != expected_targets {
+            return Err("stage5 mail targets changed before durable commit".to_string());
+        }
 
-    Ok(Stage5MailDeliveryReceipt {
-        delivered_count,
-        mail_ids,
+        let mut mail_ids = Vec::with_capacity(current_targets.len());
+        for (account_id, character_index) in current_targets {
+            let account = store
+                .accounts
+                .get_mut(&account_id)
+                .ok_or_else(|| format!("account not found: {account_id}"))?;
+            let character = account
+                .characters
+                .iter()
+                .find(|character| character.index == character_index)
+                .cloned()
+                .ok_or_else(|| {
+                    format!("character not found: {account_id}:{character_index}")
+                })?;
+            // A character record is the authority for initializing its own save;
+            // this never creates an account or a synthetic default character.
+            let save = account
+                .saves
+                .entry(character_index)
+                .or_insert_with(|| CharacterSaveRecord::new(character.clone()));
+            let mut systems = match save.stage5_systems_json.as_deref() {
+                Some(state) => serde_json::from_str::<Stage5SystemsState>(state).map_err(|error| {
+                    format!(
+                        "failed to decode stage5 systems for {account_id}/{character_index}: {error}"
+                    )
+                })?,
+                None => Stage5SystemsState::default(),
+            };
+            let id = systems
+                .mail
+                .iter()
+                .map(|mail| mail.id)
+                .max()
+                .unwrap_or(0)
+                .saturating_add(1);
+            systems.mail.push(Stage5MailMessage {
+                id,
+                delivery_nonce: new_stage5_mail_delivery_nonce(),
+                from: delivery.from.clone(),
+                to: character.name,
+                subject: delivery.subject.clone(),
+                body: delivery.body.clone(),
+                gold: delivery.gold,
+                items: delivery.items.clone(),
+                item_states_json: Vec::new(),
+                opened: false,
+                locked: false,
+                claimed: false,
+                deleted: false,
+            });
+            save.stage5_systems_json = Some(
+                serde_json::to_string(&systems)
+                    .map_err(|error| format!("failed to encode stage5 systems: {error}"))?,
+            );
+            mail_ids.push(id);
+        }
+
+        Ok(Stage5MailDeliveryReceipt {
+            delivered_count: mail_ids.len(),
+            mail_ids,
+        })
     })
 }
 
@@ -4447,10 +6179,14 @@ pub fn ban_account_in_store(
     duration_seconds: Option<u64>,
     reason: &str,
 ) -> Result<AccountBanReceipt, String> {
-    let account_id = account_id.trim();
-    if account_id.is_empty() {
+    let canonical_account_id = account_id.trim();
+    if canonical_account_id.is_empty() {
         return Err("account_id is required".to_string());
     }
+    if canonical_account_id != account_id {
+        return Err("account_id must not contain leading or trailing whitespace".to_string());
+    }
+
     let banned_at_ms = unix_now_ms();
     let ban_until_ms =
         duration_seconds.map(|seconds| banned_at_ms.saturating_add(seconds.saturating_mul(1000)));
@@ -4459,26 +6195,23 @@ pub fn ban_account_in_store(
     } else {
         reason.trim().to_string()
     };
+    let account_id = account_id.to_string();
+    let touched_accounts = vec![account_id.clone()];
 
-    {
-        let mut store = config
-            .account_store
-            .lock()
-            .map_err(|_| "account store mutex poisoned".to_string())?;
+    config.commit_account_store_transaction(&touched_accounts, |store| {
         let account = store
             .accounts
-            .entry(account_id.to_string())
-            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+            .get_mut(&account_id)
+            .ok_or_else(|| format!("account not found: {account_id}"))?;
         account.is_banned = true;
         account.ban_reason = reason.clone();
         account.ban_until_ms = ban_until_ms;
         account.banned_at_ms = Some(banned_at_ms);
-    }
-
-    config.save_account_store_account(account_id)?;
+        Ok(())
+    })?;
 
     Ok(AccountBanReceipt {
-        account_id: account_id.to_string(),
+        account_id,
         reason,
         ban_until_ms,
         banned_at_ms,
@@ -4495,7 +6228,6 @@ fn unix_now_ms() -> u64 {
 fn resolve_stage5_mail_targets(
     store: &AccountStore,
     delivery: &Stage5MailDelivery,
-    default_character: &CharacterRecord,
 ) -> Result<Vec<(String, i32)>, String> {
     match delivery.target_kind {
         Stage5MailTargetKind::Account => {
@@ -4517,14 +6249,6 @@ fn resolve_stage5_mail_targets(
                         targets.push((account_id.clone(), character.index));
                     }
                 }
-            }
-            if targets.is_empty()
-                && delivery
-                    .target_id
-                    .eq_ignore_ascii_case(&default_character.name)
-                && store.accounts.contains_key("demo")
-            {
-                targets.push(("demo".to_string(), default_character.index));
             }
             if targets.is_empty() {
                 Err(format!("character not found: {}", delivery.target_id))
@@ -4559,6 +6283,11 @@ fn stage5_mail_character_matches(
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5TradeState {
+    /// Opaque identity for this one participant's confirmation attempt. The
+    /// pair of participant nonces forms the durable settlement identity, so two
+    /// otherwise identical legal trades remain distinct.
+    #[serde(default)]
+    pub settlement_nonce: String,
     pub partner: String,
     pub offered_items: Vec<String>,
     #[serde(default)]
@@ -4792,3 +6521,42 @@ pub struct WorldSnapshot {
     pub map_transfers: Vec<MapTransferSnapshot>,
     pub interaction_hints: Vec<String>,
 }
+
+/// Lossless server snapshots retain exact ground-item identity. Serialize this
+/// explicit view only at untrusted client boundaries.
+#[derive(Debug, Clone, Copy)]
+pub struct WorldSnapshotClientView<'a> {
+    snapshot: &'a WorldSnapshot,
+}
+
+impl WorldSnapshot {
+    pub fn client_view(&self) -> WorldSnapshotClientView<'_> {
+        WorldSnapshotClientView { snapshot: self }
+    }
+}
+
+impl Serialize for WorldSnapshotClientView<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut value = serde_json::to_value(self.snapshot).map_err(serde::ser::Error::custom)?;
+        if let Some(drops) = value.get_mut("groundDrops").and_then(Value::as_array_mut) {
+            for drop in drops {
+                if let Some(loot) = drop.get_mut("loot").and_then(Value::as_object_mut) {
+                    loot.remove("exactItem");
+                    loot.remove("exact_item");
+                }
+            }
+        }
+        value.serialize(serializer)
+    }
+}
+
+#[cfg(test)]
+#[path = "config_refresh_fail_closed_tests.rs"]
+mod config_refresh_fail_closed_tests;
+
+#[cfg(test)]
+#[path = "config_account_store_durability_tests.rs"]
+mod config_account_store_durability_tests;

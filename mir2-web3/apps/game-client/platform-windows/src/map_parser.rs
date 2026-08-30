@@ -10,14 +10,19 @@
 //! - `mapLibraryKeyForIndex` (index -> "WemadeMir2/Tiles" etc.)
 //! - `mapAtlasRectKeyForPath` ("/original-map/<lib>/<frame>.png" -> "<lib>#<frame>")
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 
+use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::assets;
+
+#[path = "lighting.rs"]
+pub mod lighting;
 
 const STAGE_WIDTH: f32 = 1024.0;
 const STAGE_HEIGHT: f32 = 768.0;
@@ -27,7 +32,7 @@ const CELL_HEIGHT: f32 = 32.0;
 /// A parsed type-100 map cell.
 #[derive(Debug, Clone)]
 pub struct MapCell {
-    #[allow(dead_code)]
+    pub back_index: i16,
     pub back_image: i32,
     pub middle_index: i16,
     pub middle_image: i16,
@@ -42,9 +47,13 @@ pub struct MapCell {
     pub middle_animation_frame: u8,
     #[allow(dead_code)]
     pub middle_animation_tick: u8,
+    /// Crystal type-100 `CellInfo.Light` at byte 25. Values 1..9 are map
+    /// light emitters; values >=10 carry other legacy flags/colour buckets and
+    /// are intentionally skipped by Crystal DrawLights.
+    pub light: u8,
 }
 
-/// A single map tile draw (middle or front layer) resolved to an atlas rect.
+/// A single map tile draw (back, middle, or front layer) resolved to an atlas rect.
 #[derive(Debug, Clone)]
 pub struct MapTileDraw {
     pub x: i32,
@@ -52,6 +61,7 @@ pub struct MapTileDraw {
     pub layer: TileLayer,
     pub library: String,
     pub frame_index: i32,
+    pub additive: bool,
     /// Number of animation frames this tile cycles through (>= 1).
     #[allow(dead_code)]
     pub frame_count: u32,
@@ -60,6 +70,7 @@ pub struct MapTileDraw {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TileLayer {
+    Back,
     Middle,
     Front,
 }
@@ -70,6 +81,47 @@ pub struct ParsedMap {
     pub width: u16,
     pub height: u16,
     pub cells: Vec<MapCell>,
+}
+
+/// Parsed maps are immutable and can be shared by the map renderer and native
+/// lighting producer. Keep this deliberately small: a long play session may
+/// cross many maps, but the gateway must never re-read/decompress the current
+/// map for every periodic world snapshot.
+const PARSED_MAP_CACHE_CAPACITY: usize = 8;
+
+#[derive(Default)]
+struct ParsedMapCache {
+    entries: HashMap<String, ParsedMap>,
+    least_recent: VecDeque<String>,
+}
+
+impl ParsedMapCache {
+    fn get(&mut self, key: &str) -> Option<ParsedMap> {
+        let value = self.entries.get(key)?.clone();
+        self.touch(key);
+        Some(value)
+    }
+
+    fn insert(&mut self, key: String, map: ParsedMap) {
+        self.entries.insert(key.clone(), map);
+        self.touch(&key);
+        while self.entries.len() > PARSED_MAP_CACHE_CAPACITY {
+            let Some(oldest) = self.least_recent.pop_front() else {
+                break;
+            };
+            self.entries.remove(&oldest);
+        }
+    }
+
+    fn touch(&mut self, key: &str) {
+        self.least_recent.retain(|entry| entry != key);
+        self.least_recent.push_back(key.to_owned());
+    }
+}
+
+fn parsed_map_cache() -> &'static Mutex<ParsedMapCache> {
+    static CACHE: OnceLock<Mutex<ParsedMapCache>> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(ParsedMapCache::default()))
 }
 
 /// Parse a Crystal type-100 `.map` byte buffer.
@@ -91,6 +143,7 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
     let mut offset = 8usize;
     for _ in 0..(width as usize * height as usize) {
         cells.push(MapCell {
+            back_index: i16::from_le_bytes([bytes[offset], bytes[offset + 1]]),
             back_image: i32::from_le_bytes([
                 bytes[offset + 2],
                 bytes[offset + 3],
@@ -105,6 +158,7 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
             front_animation_tick: bytes[offset + 17],
             middle_animation_frame: bytes[offset + 18],
             middle_animation_tick: bytes[offset + 19],
+            light: bytes[offset + 25],
         });
         offset += 26;
     }
@@ -115,8 +169,114 @@ pub fn parse_type100_map(bytes: &[u8]) -> Option<ParsedMap> {
     })
 }
 
+/// A map-cell light conversion hook for the later Windows gateway/main bridge.
+/// The map binary itself has no pixel offset: callers provide the resolved
+/// front-frame offset exported from the Crystal library, which is exactly what
+/// Web's `lightOffsetX/Y` supplies before `DrawLights` placement.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NativeMapLightCell {
+    pub key: String,
+    pub x: i32,
+    pub y: i32,
+    pub light: u8,
+    pub offset_x: i32,
+    pub offset_y: i32,
+}
+
+/// Extract Crystal-renderable map lights in the parser's native x-major cell
+/// order. `frame_offsets` is keyed by map coordinate and can be empty while the
+/// map-frame metadata bridge is not yet attached.
+pub fn native_map_light_cells(
+    map: &ParsedMap,
+    frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
+) -> Vec<NativeMapLightCell> {
+    if map.width == 0 || map.height == 0 {
+        return Vec::new();
+    }
+    let height = i32::from(map.height);
+    map.cells
+        .iter()
+        .take(usize::from(map.width) * usize::from(map.height))
+        .enumerate()
+        .filter_map(|(index, cell)| {
+            let front_image_index = (cell.front_image & 0x7fff) - 1;
+            if !(1..10).contains(&cell.light) || cell.front_index == -1 || front_image_index == -1 {
+                return None;
+            }
+            let index = i32::try_from(index).ok()?;
+            let x = index / height;
+            let y = index % height;
+            let (offset_x, offset_y) = if cell.front_animation_frame > 0 {
+                frame_offsets.get(&(x, y)).copied().unwrap_or((0, 0))
+            } else {
+                (0, 0)
+            };
+            Some(NativeMapLightCell {
+                key: format!("{x}:{y}:{}", cell.light),
+                x,
+                y,
+                light: cell.light,
+                offset_x,
+                offset_y,
+            })
+        })
+        .collect()
+}
+
+/// Resolve the intrinsic X/Y offset of every animated front-frame that can
+/// emit a Crystal map light. This is source metadata from the native keyed
+/// asset manifest, not time-based presentation interpolation. If the export
+/// has no keyed entry, callers intentionally receive an empty map and retain
+/// Crystal's explicit `(0, 0)` default.
+pub fn native_map_light_frame_offsets(map: &ParsedMap) -> HashMap<(i32, i32), (i32, i32)> {
+    let Some(index) = load_native_keyed_index() else {
+        return HashMap::new();
+    };
+    native_map_light_frame_offsets_from_index(map, &index)
+}
+
+fn native_map_light_frame_offsets_from_index(
+    map: &ParsedMap,
+    index: &StandaloneIndex,
+) -> HashMap<(i32, i32), (i32, i32)> {
+    let mut offsets = HashMap::new();
+    let height = i32::from(map.height);
+    if height == 0 {
+        return offsets;
+    }
+    for (index_in_map, cell) in map.cells.iter().enumerate() {
+        if !(1..10).contains(&cell.light) || cell.front_animation_frame == 0 {
+            continue;
+        }
+        let front_frame = (i32::from(cell.front_image) & 0x7fff) - 1;
+        if cell.front_index == -1 || front_frame < 0 {
+            continue;
+        }
+        let Ok(index_in_map) = i32::try_from(index_in_map) else {
+            continue;
+        };
+        let key = atlas_rect_key(&library_key_for_index(cell.front_index), front_frame);
+        let Some(asset) = index.entries.get(&key) else {
+            continue;
+        };
+        offsets.insert(
+            (index_in_map / height, index_in_map % height),
+            (asset.offset_x, asset.offset_y),
+        );
+    }
+    offsets
+}
+
 /// Map a cell library index to a library key (mirrors `mapLibraryKeyForIndex`).
 pub fn library_key_for_index(index: i16) -> String {
+    if let Some(key) = mir3_library_key(index, 200, "WemadeMir3") {
+        return key;
+    }
+    if let Some(key) = mir3_library_key(index, 300, "ShandaMir3") {
+        return key;
+    }
+
     match index {
         0 => "WemadeMir2/Tiles".to_owned(),
         1 => "WemadeMir2/SmTiles".to_owned(),
@@ -134,6 +294,48 @@ pub fn library_key_for_index(index: i16) -> String {
     }
 }
 
+fn mir3_library_key(index: i16, base_index: i16, root: &str) -> Option<String> {
+    let offset = i32::from(index) - i32::from(base_index);
+    if !(0..75).contains(&offset) {
+        return None;
+    }
+
+    let state_index = usize::try_from(offset / 15).ok()?;
+    let slot = usize::try_from(offset % 15).ok()?;
+    let name = [
+        "Tilesc",
+        "Tiles30c",
+        "Tiles5c",
+        "SmTilesc",
+        "Housesc",
+        "Cliffsc",
+        "Dungeonsc",
+        "Innersc",
+        "Furnituresc",
+        "Wallsc",
+        "SmObjectsc",
+        "Animationsc",
+        "Object1c",
+        "Object2c",
+    ]
+    .get(slot)?;
+
+    if root == "WemadeMir3" {
+        if matches!(*name, "Object1c" | "Object2c") {
+            return Some(format!("{root}/{name}"));
+        }
+        let folder = ["", "Wood", "Sand", "Snow", "Forest"].get(state_index)?;
+        return Some(if folder.is_empty() {
+            format!("{root}/{name}")
+        } else {
+            format!("{root}/{folder}/{name}")
+        });
+    }
+
+    let suffix = ["", "wood", "sand", "snow", "forest"].get(state_index)?;
+    Some(format!("{root}/{name}{suffix}"))
+}
+
 /// Build the atlas-rect key for a library + frame index (mirrors
 /// `mapAtlasRectKeyForPath`: "<library>#<frame>").
 pub fn atlas_rect_key(library: &str, frame_index: i32) -> String {
@@ -143,10 +345,10 @@ pub fn atlas_rect_key(library: &str, frame_index: i32) -> String {
 /// Decode the middle-layer animation frame count (mirrors
 /// `decodeCrystalMiddleAnimationCount`).
 pub fn middle_animation_count(animation_frame: u8) -> u8 {
-    if animation_frame == 0 {
+    if animation_frame == 0 || animation_frame >= 0xff {
         0
     } else {
-        animation_frame & 0x7f
+        animation_frame & 0x0f
     }
 }
 
@@ -166,7 +368,13 @@ pub fn front_is_additive(animation_frame: u8) -> bool {
     (animation_frame & 0x80) != 0
 }
 
-/// Resolve a cell's middle + front layers into atlas-resolved tile draws.
+/// Crystal/Web additive routing for middle-layer map cells.
+pub fn middle_is_additive(animation_frame: u8) -> bool {
+    let count = middle_animation_count(animation_frame);
+    count == 8 || count == 10 || (animation_frame & 0x80) != 0
+}
+
+/// Resolve a cell's back + middle + front layers into atlas-resolved tile draws.
 ///
 /// Each layer becomes one `MapTileDraw` (single frame render for the current
 /// slice; `frame_count` carries the animation width so a future frame-cycling
@@ -179,6 +387,23 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
         for y in 0..map.height {
             let cell = &map.cells[x as usize * map.height as usize + y as usize];
 
+            // Back layer: Crystal's primary floor. Omitting this layer leaves
+            // most walkable cells transparent/black even when middle/front
+            // object overlays are present.
+            let back_frame = (cell.back_image & 0x1fff_ffff) - 1;
+            if cell.back_index >= 0 && back_frame >= 0 && x % 2 == 0 && y % 2 == 0 {
+                draws.push(MapTileDraw {
+                    x: x as i32,
+                    y: y as i32,
+                    layer: TileLayer::Back,
+                    library: library_key_for_index(cell.back_index),
+                    frame_index: back_frame,
+                    additive: false,
+                    frame_count: 1,
+                    z: -2.0,
+                });
+            }
+
             // Middle layer: primary ground tile (index 0/1/2 => Tiles/SmTiles/Objects).
             let middle_frame = i32::from(cell.middle_image) - 1;
             if middle_frame >= 0 {
@@ -188,6 +413,7 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
                     layer: TileLayer::Middle,
                     library: library_key_for_index(cell.middle_index),
                     frame_index: middle_frame,
+                    additive: middle_is_additive(cell.middle_animation_frame),
                     frame_count: u32::from(middle_animation_count(cell.middle_animation_frame))
                         .max(1),
                     z: 0.0,
@@ -203,6 +429,7 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
                     layer: TileLayer::Front,
                     library: library_key_for_index(cell.front_index),
                     frame_index: front_frame,
+                    additive: front_is_additive(cell.front_animation_frame),
                     frame_count: u32::from(front_animation_count(cell.front_animation_frame))
                         .max(1),
                     z: 1.0,
@@ -239,6 +466,10 @@ fn find_map_atlas_manifest() -> Option<PathBuf> {
     assets::asset_path("generated/map-atlas/manifest.json").filter(|path| path.is_file())
 }
 
+fn find_native_keyed_manifest() -> Option<PathBuf> {
+    assets::asset_path("generated/native-map-keyed/manifest.json").filter(|path| path.is_file())
+}
+
 /// Atlas page index: `atlasKey -> (imageUrl, rectKey -> (x,y,w,h))`.
 struct AtlasIndex {
     pages: HashMap<String, AtlasPage>,
@@ -260,6 +491,89 @@ struct AtlasRect {
     y: u32,
     width: u32,
     height: u32,
+}
+
+#[derive(Clone)]
+struct StandaloneIndex {
+    entries: HashMap<String, StandaloneAsset>,
+}
+
+#[derive(Clone)]
+struct StandaloneAsset {
+    image_url: String,
+    width: u32,
+    height: u32,
+    placement_mode: StandalonePlacementMode,
+    offset_x: i32,
+    offset_y: i32,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StandalonePlacementMode {
+    BottomLeft,
+    SourceOffset,
+}
+
+fn build_original_map_frame_path(library: &str, frame_index: i32) -> String {
+    format!("/original-map/{library}/{frame_index}.png")
+}
+
+fn map_path_requires_alpha_key(path: &str) -> bool {
+    let normalized = path.split('?').next().unwrap_or(path).to_ascii_lowercase();
+    if !normalized.starts_with("/original-map/") {
+        return false;
+    }
+    let Some(segment) = normalized.rsplit('/').nth(1) else {
+        return false;
+    };
+    map_library_segment_requires_alpha_key(segment)
+}
+
+fn map_library_segment_requires_alpha_key(segment: &str) -> bool {
+    if segment == "object1c" || segment == "object2c" {
+        return true;
+    }
+    if let Some(rest) = segment.strip_prefix("objects") {
+        return rest.is_empty()
+            || rest == "_32bit"
+            || rest.chars().all(|character| character.is_ascii_digit());
+    }
+    if let Some(rest) = segment.strip_prefix("smobjects") {
+        return rest.is_empty() || rest.chars().all(|character| character.is_ascii_digit());
+    }
+
+    fn matches_optional_plural_c(segment: &str, stem: &str) -> bool {
+        segment == stem
+            || segment == format!("{stem}s")
+            || segment == format!("{stem}c")
+            || segment == format!("{stem}sc")
+    }
+
+    matches_optional_plural_c(segment, "furniture")
+        || matches_optional_plural_c(segment, "wall")
+        || matches_optional_plural_c(segment, "animation")
+        || matches_optional_plural_c(segment, "house")
+        || matches_optional_plural_c(segment, "cliff")
+        || matches_optional_plural_c(segment, "dungeon")
+        || matches_optional_plural_c(segment, "inner")
+}
+
+fn standalone_image_key(rect_key: &str, additive: bool) -> String {
+    if additive {
+        format!("standalone-additive:{rect_key}")
+    } else {
+        format!("standalone:{rect_key}")
+    }
+}
+
+fn standalone_tile_key(draw: &MapTileDraw, rect_key: &str) -> String {
+    format!(
+        "standalone:{}:{}:{}:{}",
+        if draw.additive { "additive" } else { "normal" },
+        draw.x,
+        draw.y,
+        rect_key
+    )
 }
 
 /// Load + index the map-atlas manifest (compact schema v2 or legacy `atlases`).
@@ -387,6 +701,62 @@ fn load_atlas_index() -> Option<AtlasIndex> {
     })
 }
 
+static NATIVE_KEYED_INDEX_CACHE: OnceLock<Mutex<Option<(PathBuf, StandaloneIndex)>>> =
+    OnceLock::new();
+
+fn load_native_keyed_index() -> Option<StandaloneIndex> {
+    let path = find_native_keyed_manifest()?;
+    let cache = NATIVE_KEYED_INDEX_CACHE.get_or_init(|| Mutex::new(None));
+    {
+        let cached = cache.lock().ok()?;
+        if let Some((cached_path, index)) = cached.as_ref() {
+            if cached_path == &path {
+                return Some(index.clone());
+            }
+        }
+    }
+    let text = fs::read_to_string(&path).ok()?;
+    let manifest: Value = serde_json::from_str(&text).ok()?;
+    let mut entries = HashMap::new();
+    for entry in manifest
+        .get("entries")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+    {
+        let (Some(key), Some(image_url), Some(width), Some(height)) = (
+            entry.get("key").and_then(Value::as_str),
+            entry.get("imageUrl").and_then(Value::as_str),
+            entry.get("width").and_then(Value::as_u64),
+            entry.get("height").and_then(Value::as_u64),
+        ) else {
+            continue;
+        };
+        let placement_mode = match entry.get("placementMode").and_then(Value::as_str) {
+            Some("source-offset") => StandalonePlacementMode::SourceOffset,
+            _ => StandalonePlacementMode::BottomLeft,
+        };
+        let offset_x = entry.get("offsetX").and_then(Value::as_i64).unwrap_or(0) as i32;
+        let offset_y = entry.get("offsetY").and_then(Value::as_i64).unwrap_or(0) as i32;
+        entries.insert(
+            key.to_owned(),
+            StandaloneAsset {
+                image_url: image_url.to_owned(),
+                width: width as u32,
+                height: height as u32,
+                placement_mode,
+                offset_x,
+                offset_y,
+            },
+        );
+    }
+    let index = StandaloneIndex { entries };
+    if let Ok(mut cached) = cache.lock() {
+        *cached = Some((path, index.clone()));
+    }
+    Some(index)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapViewport {
     pub center_x: i32,
@@ -426,10 +796,22 @@ impl MapViewport {
 /// runtime requires for texture-atlas lookup.
 pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<Value> {
     let atlas_index = load_atlas_index()?;
+    let standalone_index = load_native_keyed_index();
 
+    build_map_render_state_with_indexes(map, viewport, &atlas_index, standalone_index.as_ref())
+}
+
+fn build_map_render_state_with_indexes(
+    map: &ParsedMap,
+    viewport: MapViewport,
+    atlas_index: &AtlasIndex,
+    standalone_index: Option<&StandaloneIndex>,
+) -> Option<Value> {
     let draws = resolve_map_tile_draws(map);
     let mut used_rects: HashMap<String, HashSet<String>> = HashMap::new();
     let mut tiles: Vec<Value> = Vec::new();
+    let mut standalone_tiles: Vec<Value> = Vec::new();
+    let mut missing_standalone = HashSet::new();
     let margin_x = viewport.width / 2 + 6;
     let margin_y = viewport.height / 2 + 6;
     let tile_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH
@@ -443,6 +825,38 @@ pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<
             continue;
         }
         let rect_key = atlas_rect_key(&draw.library, draw.frame_index);
+        let image_path = build_original_map_frame_path(&draw.library, draw.frame_index);
+        let requires_standalone = draw.additive || map_path_requires_alpha_key(&image_path);
+        let cell_left = tile_origin_x + (draw.x - viewport.center_x) as f32 * CELL_WIDTH;
+        let cell_top = tile_origin_y + (draw.y - viewport.center_y) as f32 * CELL_HEIGHT;
+        let depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
+        if requires_standalone {
+            if let Some(asset) = standalone_index.and_then(|index| index.entries.get(&rect_key)) {
+                let (left, top) = match asset.placement_mode {
+                    StandalonePlacementMode::BottomLeft => {
+                        (cell_left, cell_top + CELL_HEIGHT - asset.height as f32)
+                    }
+                    StandalonePlacementMode::SourceOffset => (
+                        cell_left + asset.offset_x as f32,
+                        cell_top + CELL_HEIGHT - asset.height as f32 + asset.offset_y as f32,
+                    ),
+                };
+                standalone_tiles.push(json!({
+                    "key": standalone_tile_key(draw, &rect_key),
+                    "imageKey": standalone_image_key(&rect_key, draw.additive),
+                    "imageUrl": asset.image_url,
+                    "left": left,
+                    "top": top,
+                    "width": asset.width,
+                    "height": asset.height,
+                    "z": depth,
+                    "additive": draw.additive,
+                }));
+            } else {
+                missing_standalone.insert(rect_key.clone());
+            }
+            continue;
+        }
         let Some(atlas_key) = atlas_index.rect_to_atlas.get(&rect_key).cloned() else {
             continue;
         };
@@ -453,19 +867,25 @@ pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<
             .entry(atlas_key.clone())
             .or_default()
             .insert(rect_key.clone());
-        let left = tile_origin_x
-            + (draw.x - viewport.center_x) as f32 * CELL_WIDTH
-            + (CELL_WIDTH - rect.width as f32) / 2.0;
-        let top = tile_origin_y + (draw.y - viewport.center_y) as f32 * CELL_HEIGHT + CELL_HEIGHT
-            - rect.height as f32;
-        let depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
+        let floor_sized = (rect.width == CELL_WIDTH as u32 && rect.height == CELL_HEIGHT as u32)
+            || (rect.width == (CELL_WIDTH * 2.0) as u32
+                && rect.height == (CELL_HEIGHT * 2.0) as u32);
+        let draw_as_floor = draw.layer == TileLayer::Back || (draw.frame_count == 1 && floor_sized);
+        let (left, top) = if draw_as_floor {
+            (cell_left, cell_top)
+        } else {
+            (
+                cell_left + (CELL_WIDTH - rect.width as f32) / 2.0,
+                cell_top + CELL_HEIGHT - rect.height as f32,
+            )
+        };
+        let layer_key = match draw.layer {
+            TileLayer::Back => "back",
+            TileLayer::Middle => "mid",
+            TileLayer::Front => "front",
+        };
         tiles.push(json!({
-            "key": format!(
-                "{}:{}:{}",
-                if draw.layer == TileLayer::Front { "front" } else { "mid" },
-                draw.x,
-                draw.y
-            ),
+            "key": format!("{}:{}:{}", layer_key, draw.x, draw.y),
             "atlasKey": atlas_key,
             "rectKey": rect_key,
             "left": left,
@@ -503,7 +923,14 @@ pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<
         })
         .collect();
 
-    if atlases.is_empty() || tiles.is_empty() {
+    if !missing_standalone.is_empty() {
+        eprintln!(
+            "[native-map] skipped {} standalone tiles with missing native keyed/additive assets",
+            missing_standalone.len()
+        );
+    }
+
+    if atlases.is_empty() && tiles.is_empty() && standalone_tiles.is_empty() {
         return None;
     }
 
@@ -516,19 +943,44 @@ pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<
         "ackKey": format!("native-map:{}:{}", viewport.center_x, viewport.center_y),
         "tiles": tiles,
         "atlases": atlases,
-        "standaloneTiles": [],
+        "standaloneTiles": standalone_tiles,
         "retainedImageKeys": [],
     }))
 }
 
 /// Locate + parse a local `.map.gz` for the given map file name.
 pub fn load_map(map_file_name: &str) -> Option<ParsedMap> {
+    let cache_key = map_cache_key(map_file_name)?;
+    if let Ok(mut cache) = parsed_map_cache().lock() {
+        if let Some(map) = cache.get(&cache_key) {
+            return Some(map);
+        }
+    }
     let path = find_map_file(map_file_name)?;
     let compressed = fs::read(&path).ok()?;
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
     let mut bytes = Vec::new();
     decoder.read_to_end(&mut bytes).ok()?;
-    parse_type100_map(&bytes)
+    let map = parse_type100_map(&bytes)?;
+    if let Ok(mut cache) = parsed_map_cache().lock() {
+        cache.insert(cache_key, map.clone());
+    }
+    Some(map)
+}
+
+/// Validate and normalize the map cache key before touching the filesystem.
+/// This mirrors `find_map_file`'s path policy, but turns equivalent `0`,
+/// `0.map`, and `0.map.gz` payload spellings into one retained parse.
+fn map_cache_key(map_file_name: &str) -> Option<String> {
+    let file_name = Path::new(map_file_name).file_name()?.to_str()?;
+    if file_name != map_file_name || file_name.contains("..") {
+        return None;
+    }
+    let stem = file_name
+        .strip_suffix(".map.gz")
+        .or_else(|| file_name.strip_suffix(".map"))
+        .unwrap_or(file_name);
+    (!stem.is_empty()).then(|| stem.to_ascii_lowercase())
 }
 
 /// Whether a local map pack + atlas are available for real map rendering.
@@ -540,8 +992,25 @@ pub fn has_local_map_atlas() -> bool {
 mod tests {
     use super::*;
 
+    #[test]
+    fn parsed_map_cache_is_bounded_and_refreshes_the_current_map() {
+        let mut cache = ParsedMapCache::default();
+        let map = || ParsedMap {
+            width: 0,
+            height: 0,
+            cells: Vec::new(),
+        };
+        for index in 0..=PARSED_MAP_CACHE_CAPACITY {
+            cache.insert(index.to_string(), map());
+        }
+        assert_eq!(cache.entries.len(), PARSED_MAP_CACHE_CAPACITY);
+        assert!(cache.get("0").is_none());
+        assert!(cache.get("8").is_some());
+    }
+
     fn middle_cell(library: i16, frame: i16) -> MapCell {
         MapCell {
+            back_index: -1,
             back_image: 0,
             middle_index: library,
             middle_image: frame + 1,
@@ -551,6 +1020,85 @@ mod tests {
             front_animation_tick: 0,
             middle_animation_frame: 0,
             middle_animation_tick: 0,
+            light: 0,
+        }
+    }
+
+    fn viewport() -> MapViewport {
+        MapViewport {
+            center_x: 0,
+            center_y: 0,
+            width: 19,
+            height: 15,
+        }
+    }
+
+    fn atlas_index_for(rect_key: &str, width: u32, height: u32) -> AtlasIndex {
+        let atlas_key = "map:test#p0".to_owned();
+        AtlasIndex {
+            pages: HashMap::from([(
+                atlas_key.clone(),
+                AtlasPage {
+                    image_url: "/generated/map-atlas/test/p0.png".to_owned(),
+                    width: 512,
+                    height: 512,
+                },
+            )]),
+            rect_to_atlas: HashMap::from([(rect_key.to_owned(), atlas_key.clone())]),
+            rects: HashMap::from([(
+                rect_key.to_owned(),
+                AtlasRect {
+                    key: rect_key.to_owned(),
+                    x: 1,
+                    y: 1,
+                    width,
+                    height,
+                },
+            )]),
+        }
+    }
+
+    fn standalone_index_for(
+        rect_key: &str,
+        image_url: &str,
+        width: u32,
+        height: u32,
+    ) -> StandaloneIndex {
+        StandaloneIndex {
+            entries: HashMap::from([(
+                rect_key.to_owned(),
+                StandaloneAsset {
+                    image_url: image_url.to_owned(),
+                    width,
+                    height,
+                    placement_mode: StandalonePlacementMode::BottomLeft,
+                    offset_x: 0,
+                    offset_y: 0,
+                },
+            )]),
+        }
+    }
+
+    fn standalone_index_for_source_offset(
+        rect_key: &str,
+        image_url: &str,
+        width: u32,
+        height: u32,
+        offset_x: i32,
+        offset_y: i32,
+    ) -> StandaloneIndex {
+        StandaloneIndex {
+            entries: HashMap::from([(
+                rect_key.to_owned(),
+                StandaloneAsset {
+                    image_url: image_url.to_owned(),
+                    width,
+                    height,
+                    placement_mode: StandalonePlacementMode::SourceOffset,
+                    offset_x,
+                    offset_y,
+                },
+            )]),
         }
     }
 
@@ -570,6 +1118,111 @@ mod tests {
     }
 
     #[test]
+    fn type100_light_byte_and_native_conversion_preserve_frame_offsets() {
+        let mut bytes = vec![0x01, 0x00, 0x43, 0x23];
+        bytes.extend_from_slice(&2u16.to_le_bytes());
+        bytes.extend_from_slice(&2u16.to_le_bytes());
+        for index in 0..4 {
+            let mut cell = [0u8; 26];
+            if index == 2 {
+                cell[10..12].copy_from_slice(&0i16.to_le_bytes());
+                cell[12..14].copy_from_slice(&1i16.to_le_bytes());
+                cell[16] = 1;
+                cell[25] = 3;
+            } else {
+                cell[25] = 10;
+            }
+            bytes.extend_from_slice(&cell);
+        }
+        let map = parse_type100_map(&bytes).expect("type-100 map");
+        assert_eq!(map.cells[2].light, 3);
+        let lights = native_map_light_cells(&map, &HashMap::from([((1, 0), (-50, -100))]));
+        assert_eq!(lights.len(), 1, "legacy colour bucket 10 is not a light");
+        assert_eq!(
+            lights[0],
+            NativeMapLightCell {
+                key: "1:0:3".to_owned(),
+                x: 1,
+                y: 0,
+                light: 3,
+                offset_x: -50,
+                offset_y: -100,
+            }
+        );
+    }
+
+    #[test]
+    fn map_light_requires_front_image_and_ignores_static_frame_offsets() {
+        let mut static_cell = middle_cell(0, 0);
+        static_cell.front_index = 0;
+        static_cell.front_image = 1;
+        static_cell.light = 1;
+        let missing_front = MapCell {
+            front_index: -1,
+            front_image: 0,
+            light: 1,
+            ..static_cell.clone()
+        };
+        let map = ParsedMap {
+            width: 2,
+            height: 1,
+            cells: vec![static_cell, missing_front],
+        };
+        let lights = native_map_light_cells(&map, &HashMap::from([((0, 0), (99, -88))]));
+        assert_eq!(lights.len(), 1);
+        assert_eq!((lights[0].offset_x, lights[0].offset_y), (0, 0));
+    }
+
+    #[test]
+    fn animated_map_light_uses_exported_native_frame_offset_without_motion_guessing() {
+        let mut cell = middle_cell(0, 0);
+        cell.front_index = 0;
+        cell.front_image = 1;
+        cell.front_animation_frame = 1;
+        cell.light = 1;
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell],
+        };
+        let index = standalone_index_for_source_offset(
+            "WemadeMir2/Tiles#0",
+            "/original-map/WemadeMir2/Tiles/0.png",
+            48,
+            32,
+            -7,
+            11,
+        );
+        assert_eq!(
+            native_map_light_frame_offsets_from_index(&map, &index),
+            HashMap::from([((0, 0), (-7, 11))])
+        );
+    }
+
+    #[test]
+    fn map_light_uses_offset_for_additive_flag_and_rejects_malformed_dimensions() {
+        let mut additive_cell = middle_cell(0, 0);
+        additive_cell.front_index = 0;
+        additive_cell.front_image = 1;
+        additive_cell.front_animation_frame = 0x80;
+        additive_cell.light = 2;
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![additive_cell],
+        };
+        let lights = native_map_light_cells(&map, &HashMap::from([((0, 0), (7, -9))]));
+        assert_eq!((lights[0].offset_x, lights[0].offset_y), (7, -9));
+
+        let malformed = ParsedMap {
+            width: 1,
+            height: 0,
+            cells: map.cells,
+        };
+        assert!(native_map_light_cells(&malformed, &HashMap::new()).is_empty());
+    }
+
+    #[test]
     fn library_key_mapping_matches_web() {
         assert_eq!(library_key_for_index(0), "WemadeMir2/Tiles");
         assert_eq!(library_key_for_index(1), "WemadeMir2/SmTiles");
@@ -577,6 +1230,15 @@ mod tests {
         assert_eq!(library_key_for_index(5), "WemadeMir2/Objects4");
         assert_eq!(library_key_for_index(100), "ShandaMir2/Tiles");
         assert_eq!(library_key_for_index(120), "ShandaMir2/Objects");
+        assert_eq!(library_key_for_index(200), "WemadeMir3/Tilesc");
+        assert_eq!(library_key_for_index(215), "WemadeMir3/Wood/Tilesc");
+        assert_eq!(library_key_for_index(251), "WemadeMir3/Snow/Dungeonsc");
+        assert_eq!(library_key_for_index(257), "WemadeMir3/Object1c");
+        assert_eq!(library_key_for_index(272), "WemadeMir3/Object1c");
+        assert_eq!(library_key_for_index(300), "ShandaMir3/Tilesc");
+        assert_eq!(library_key_for_index(346), "ShandaMir3/Tiles30csnow");
+        assert_eq!(library_key_for_index(374), "WemadeMir2/Tiles");
+        assert_eq!(library_key_for_index(i16::MIN), "WemadeMir2/Tiles");
     }
 
     #[test]
@@ -601,6 +1263,11 @@ mod tests {
         assert!(!front_is_additive(0x0A));
         assert_eq!(middle_animation_count(0), 0);
         assert_eq!(middle_animation_count(8), 8);
+        assert_eq!(middle_animation_count(0x88), 8);
+        assert_eq!(middle_animation_count(0xff), 0);
+        assert!(middle_is_additive(8));
+        assert!(middle_is_additive(10));
+        assert!(middle_is_additive(0x88));
     }
 
     #[test]
@@ -635,6 +1302,37 @@ mod tests {
     }
 
     #[test]
+    fn type100_back_layer_is_the_primary_floor_at_the_cell_origin() {
+        let mut bytes = vec![0x01, 0x00, 0x43, 0x23];
+        bytes.extend_from_slice(&1u16.to_le_bytes());
+        bytes.extend_from_slice(&1u16.to_le_bytes());
+        let mut cell = [0u8; 26];
+        cell[0..2].copy_from_slice(&0i16.to_le_bytes());
+        cell[2..6].copy_from_slice(&902i32.to_le_bytes());
+        bytes.extend_from_slice(&cell);
+
+        let map = parse_type100_map(&bytes).expect("type-100 map");
+        let draw = resolve_map_tile_draws(&map).remove(0);
+        assert_eq!(draw.layer, TileLayer::Back);
+        assert_eq!(draw.library, "WemadeMir2/Tiles");
+        assert_eq!(draw.frame_index, 901);
+
+        let state = build_map_render_state(
+            &map,
+            MapViewport {
+                center_x: 0,
+                center_y: 0,
+                width: 19,
+                height: 15,
+            },
+        )
+        .expect("back-layer atlas state");
+        assert_eq!(state["tiles"][0]["key"], json!("back:0:0"));
+        assert_eq!(state["tiles"][0]["left"], json!(470.0));
+        assert_eq!(state["tiles"][0]["top"], json!(352.0));
+    }
+
+    #[test]
     fn front_layer_draws_on_top() {
         // Single cell with a front overlay (Objects library).
         let mut bytes = vec![0x01, 0x00, 0x43, 0x23];
@@ -659,6 +1357,75 @@ mod tests {
         let front = draws.iter().find(|d| d.layer == TileLayer::Front).unwrap();
         assert_eq!(front.library, "WemadeMir2/Objects");
         assert_eq!(front.z, 1.0);
+    }
+
+    #[test]
+    fn odd_cells_do_not_emit_back_layer_draws() {
+        let map = ParsedMap {
+            width: 2,
+            height: 2,
+            cells: vec![
+                MapCell {
+                    back_index: 0,
+                    back_image: 2,
+                    middle_index: -1,
+                    middle_image: 0,
+                    front_index: -1,
+                    front_image: 0,
+                    front_animation_frame: 0,
+                    front_animation_tick: 0,
+                    middle_animation_frame: 0,
+                    middle_animation_tick: 0,
+                    light: 0,
+                },
+                MapCell {
+                    back_index: 0,
+                    back_image: 2,
+                    middle_index: -1,
+                    middle_image: 0,
+                    front_index: -1,
+                    front_image: 0,
+                    front_animation_frame: 0,
+                    front_animation_tick: 0,
+                    middle_animation_frame: 0,
+                    middle_animation_tick: 0,
+                    light: 0,
+                },
+                MapCell {
+                    back_index: 0,
+                    back_image: 2,
+                    middle_index: -1,
+                    middle_image: 0,
+                    front_index: -1,
+                    front_image: 0,
+                    front_animation_frame: 0,
+                    front_animation_tick: 0,
+                    middle_animation_frame: 0,
+                    middle_animation_tick: 0,
+                    light: 0,
+                },
+                MapCell {
+                    back_index: 0,
+                    back_image: 2,
+                    middle_index: -1,
+                    middle_image: 0,
+                    front_index: -1,
+                    front_image: 0,
+                    front_animation_frame: 0,
+                    front_animation_tick: 0,
+                    middle_animation_frame: 0,
+                    middle_animation_tick: 0,
+                    light: 0,
+                },
+            ],
+        };
+        let draws = resolve_map_tile_draws(&map);
+        let back_positions: Vec<(i32, i32)> = draws
+            .iter()
+            .filter(|draw| draw.layer == TileLayer::Back)
+            .map(|draw| (draw.x, draw.y))
+            .collect();
+        assert_eq!(back_positions, vec![(0, 0)]);
     }
 
     #[test]
@@ -719,7 +1486,169 @@ mod tests {
     }
 
     #[test]
+    fn alpha_key_object_routes_to_standalone_without_atlas_fallback() {
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![middle_cell(2, 7112)],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 7112);
+        let atlas = atlas_index_for(&rect_key, 48, 32);
+        let standalone = standalone_index_for(
+            &rect_key,
+            "/generated/native-map-keyed/pages/hash.png",
+            64,
+            96,
+        );
+        let state =
+            build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone))
+                .expect("standalone state");
+        assert_eq!(state["tiles"].as_array().unwrap().len(), 0);
+        assert_eq!(state["standaloneTiles"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            state["standaloneTiles"][0]["imageUrl"],
+            json!("/generated/native-map-keyed/pages/hash.png")
+        );
+        assert_eq!(
+            state["standaloneTiles"][0]["imageKey"],
+            json!("standalone:WemadeMir2/Objects#7112")
+        );
+        assert_eq!(
+            state["standaloneTiles"][0]["key"],
+            json!("standalone:normal:0:0:WemadeMir2/Objects#7112")
+        );
+        assert_eq!(state["standaloneTiles"][0]["left"], json!(470.0));
+        assert_eq!(state["standaloneTiles"][0]["top"], json!(288.0));
+    }
+
+    #[test]
+    fn non_offset_standalone_uses_bottom_left_not_centered_anchor() {
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![middle_cell(2, 9000)],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 9000);
+        let atlas = atlas_index_for(&rect_key, 48, 32);
+        let standalone = standalone_index_for(
+            &rect_key,
+            "/generated/native-map-keyed/pages/wide.png",
+            96,
+            64,
+        );
+        let state =
+            build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone))
+                .expect("wide standalone state");
+        assert_eq!(
+            state["standaloneTiles"][0]["left"],
+            json!(470.0),
+            "ordinary object placement must stay at cellLeft even when width != 48"
+        );
+    }
+
+    #[test]
+    fn additive_front_routes_to_standalone_even_when_atlas_has_rect() {
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![MapCell {
+                back_index: -1,
+                back_image: 0,
+                middle_index: -1,
+                middle_image: 0,
+                front_index: 2,
+                front_image: 2,
+                front_animation_frame: 0x81,
+                front_animation_tick: 0,
+                middle_animation_frame: 0,
+                middle_animation_tick: 0,
+                light: 0,
+            }],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 1);
+        let atlas = atlas_index_for(&rect_key, 48, 32);
+        let standalone =
+            standalone_index_for(&rect_key, "/original-map/WemadeMir2/Objects/1.png", 48, 64);
+        let state =
+            build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone))
+                .expect("additive standalone state");
+        assert_eq!(state["tiles"].as_array().unwrap().len(), 0);
+        assert_eq!(state["standaloneTiles"][0]["additive"], json!(true));
+        assert_eq!(
+            state["standaloneTiles"][0]["imageKey"],
+            json!("standalone-additive:WemadeMir2/Objects#1")
+        );
+        assert_eq!(
+            state["standaloneTiles"][0]["key"],
+            json!("standalone:additive:0:0:WemadeMir2/Objects#1")
+        );
+    }
+
+    #[test]
+    fn missing_standalone_entry_skips_black_key_objects_instead_of_using_raw_atlas() {
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![middle_cell(2, 7112)],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 7112);
+        let atlas = atlas_index_for(&rect_key, 48, 32);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None);
+        assert!(
+            state.is_none(),
+            "missing keyed object must not fall back to raw atlas"
+        );
+    }
+
+    #[test]
     fn missing_authoritative_map_does_not_fall_back_to_bichon() {
         assert!(load_map("definitely-missing-map").is_none());
+    }
+
+    #[test]
+    fn source_offset_standalone_preserves_crystal_object_placement() {
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![middle_cell(2, 2723)],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 2723);
+        let atlas = atlas_index_for(&rect_key, 48, 32);
+        let standalone = standalone_index_for_source_offset(
+            &rect_key,
+            "/generated/native-map-keyed/pages/raw.png",
+            100,
+            145,
+            -51,
+            -113,
+        );
+        let state =
+            build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone))
+                .expect("source-offset standalone state");
+        assert_eq!(state["standaloneTiles"][0]["left"], json!(419.0));
+        assert_eq!(state["standaloneTiles"][0]["top"], json!(126.0));
+    }
+
+    #[test]
+    fn standalone_keys_change_when_representation_changes() {
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 1);
+        let normal = MapTileDraw {
+            x: 3,
+            y: 4,
+            layer: TileLayer::Front,
+            library: "WemadeMir2/Objects".to_owned(),
+            frame_index: 1,
+            additive: false,
+            frame_count: 1,
+            z: 1.0,
+        };
+        let additive = MapTileDraw {
+            additive: true,
+            ..normal.clone()
+        };
+        assert_ne!(
+            standalone_tile_key(&normal, &rect_key),
+            standalone_tile_key(&additive, &rect_key)
+        );
     }
 }

@@ -12,6 +12,12 @@ use mir2_protocol::{
     ObjectStruckInfo, Point, ServerPacket, Spell, UserItem, UserItemStat,
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+
+use crate::runtime::big_map::authoritative_zone_npc_teleport_config;
+use crate::runtime::map_events::{
+    crystal_map_coordinate_decision, map_coordinate_hint_packets, CrystalMapCoordinateDecision,
+};
 
 mod checkpoint;
 
@@ -26,25 +32,82 @@ use super::movement::{
 use super::packets::{
     apply_observer_action_state, apply_retained_zone_object_packet, chat_packet,
     object_chat_packet, object_chat_packet_with_text, object_player_packets, object_run_packet,
-    object_turn_packet, object_walk_packet, observer_action_packet, owner_action_transform,
-    retained_zone_object_from_packet, retained_zone_object_is_drop, retained_zone_object_owned_by,
-    retained_zone_object_remove_id, retained_zone_object_update_id, shared_object_action_packet,
-    user_location_packet,
+    object_turn_packet, object_walk_packet, observer_action_packet, owner_action_actor_id,
+    owner_action_transform, retained_zone_object_from_packet, retained_zone_object_is_drop,
+    retained_zone_object_owned_by, retained_zone_object_remove_id, retained_zone_object_update_id,
+    shared_object_action_packet, user_location_packet,
 };
 use super::types::{
-    zone_native_monster_targets_players, PlayerId, SessionId, ZoneBossRewardAudit, ZoneCommand,
-    ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey, ZoneMonsterKillAward, ZoneMonsterSpawn,
-    ZoneMovementAction, ZoneMovementActionKind, ZoneNativeMonster, ZoneNativeMonsterSnapshot,
-    ZoneObject, ZoneOutbound, ZonePlayer, ZoneReincarnationOffer,
+    zone_native_monster_requires_harvest, GroundDropClaimTicket, PlayerId, SessionId,
+    ZoneBossRewardAudit, ZoneCommand, ZoneGroundDrop, ZoneGroundDropClaim, ZoneJoin, ZoneKey,
+    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction, ZoneMovementActionKind,
+    ZoneNativeMonster, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneObject, ZoneOutbound,
+    ZonePlayer, ZonePlayerCombatState, ZoneReincarnationOffer,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
 const ZONE_MOVEMENT_ACTION_QUEUE_LIMIT: usize = 8;
 const ZONE_MOVEMENT_INPUT_BUFFER_MS: u64 = 300;
 const ZONE_DROP_EXPIRE_MS: u64 = 30 * 60 * 300;
+const GROUND_DROP_PAYLOAD_DIGEST_DOMAIN: &[u8] = b"obelisk.mir2.ground-drop.v1\0";
 const ZONE_NATIVE_MONSTER_THINK_MS: u64 = 600;
+
+fn canonical_ground_drop_payload_digest(drop: &GroundDropSnapshot) -> String {
+    let mut canonical = drop.clone();
+    // Ownership countdown is a local projection of an absolute expiry and can
+    // legitimately change while the authoritative item identity does not.
+    canonical.ownership_remaining_ticks = None;
+    let bytes = serde_json::to_vec(&canonical)
+        .expect("GroundDropSnapshot serialization should be infallible");
+    let mut hasher = Sha256::new();
+    hasher.update(GROUND_DROP_PAYLOAD_DIGEST_DOMAIN);
+    hasher.update(bytes);
+    zone_hex_lower(&hasher.finalize())
+}
+
+fn canonical_ground_drop_claim_idempotency_key(
+    key: &ZoneKey,
+    object_id: u32,
+    drop_generation: u64,
+    payload_digest: &str,
+) -> String {
+    // Economic settlement is stable for the lifetime of one authoritative drop
+    // generation. A canceled/retried Zone claim receives a new claim_id for ABA
+    // protection, but it must not create a second ledger credit after a crash.
+    format!(
+        "ground-drop:{}:{}:{}:{}:{}:{}:{}",
+        key.shard_id,
+        key.map_file_name,
+        key.channel_id,
+        key.instance_id,
+        object_id,
+        drop_generation,
+        payload_digest
+    )
+}
+
+fn zone_hex_lower(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut output = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
+}
 const ZONE_NATIVE_MONSTER_AGGRO_X: i32 = 8;
 const ZONE_NATIVE_MONSTER_AGGRO_Y: i32 = 6;
+
+fn zone_native_monster_is_authoritatively_hostile(monster: &ZoneNativeMonster) -> bool {
+    monster.hostile_to_player
+        && monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile)
+}
+
+fn zone_native_monster_is_authoritatively_melee_attackable(monster: &ZoneNativeMonster) -> bool {
+    zone_native_monster_is_authoritatively_hostile(monster)
+        || (monster.disposition == Some(crate::config::WorldEntityDisposition::Neutral)
+            && zone_native_monster_requires_harvest(monster.ai))
+}
 const ZONE_NATIVE_MONSTER_RANGED_MAX: i32 = 8;
 const ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX: i32 = 9;
 const ZONE_NATIVE_PLAYER_MAGIC_MAX: i32 = 12;
@@ -126,7 +189,10 @@ pub struct ZoneRuntime {
     pending_native_ground_spells: Vec<PendingNativeGroundSpellAction>,
     ground_drops: BTreeMap<u32, ZoneGroundDrop>,
     claimed_ground_drops: BTreeMap<u32, ZoneGroundDropClaim>,
+    next_ground_drop_generation: u64,
+    next_ground_drop_claim_id: u64,
     occupancy: BTreeMap<(i32, i32), SessionId>,
+    npc_teleport_config: ZoneNpcTeleportConfig,
     /// Open doors → the tick (ms) at which they auto-close. Shared across all
     /// players on the map (Crystal `Map.Doors`).
     open_doors: BTreeMap<u8, u64>,
@@ -318,6 +384,18 @@ impl ZoneRuntime {
     }
 
     pub fn new_with_collision(key: ZoneKey, collision: ZoneCollision) -> Self {
+        Self::new_with_collision_and_npc_teleport_config(
+            key,
+            collision,
+            authoritative_zone_npc_teleport_config(),
+        )
+    }
+
+    pub fn new_with_collision_and_npc_teleport_config(
+        key: ZoneKey,
+        collision: ZoneCollision,
+        npc_teleport_config: ZoneNpcTeleportConfig,
+    ) -> Self {
         Self {
             key,
             collision,
@@ -336,7 +414,10 @@ impl ZoneRuntime {
             pending_native_ground_spells: Vec::new(),
             ground_drops: BTreeMap::new(),
             claimed_ground_drops: BTreeMap::new(),
+            next_ground_drop_generation: 1,
+            next_ground_drop_claim_id: 1,
             occupancy: BTreeMap::new(),
+            npc_teleport_config,
             open_doors: BTreeMap::new(),
             hazard: ZoneHazardState::default(),
             // Cells are sized to the AOI range so the 3x3 neighborhood of any
@@ -346,6 +427,48 @@ impl ZoneRuntime {
             ecs: ZoneEcs::new(),
             next_object_id: 1_000_000,
         }
+    }
+
+    /// Fork the complete Zone state for an all-or-nothing command. The ECS and
+    /// AOI grids are derived mirrors, so they are rebuilt from the cloned
+    /// authoritative maps instead of requiring `bevy_ecs::World: Clone`.
+    fn transaction_fork(&self) -> Self {
+        let mut fork = Self::new_with_collision_and_npc_teleport_config(
+            self.key.clone(),
+            self.collision.clone(),
+            self.npc_teleport_config.clone(),
+        );
+        fork.players = self.players.clone();
+        fork.objects = self.objects.clone();
+        fork.dead_object_ids = self.dead_object_ids.clone();
+        fork.revived_object_ids = self.revived_object_ids.clone();
+        fork.removed_object_ids = self.removed_object_ids.clone();
+        fork.harvested_object_ids = self.harvested_object_ids.clone();
+        fork.native_monsters = self.native_monsters.clone();
+        fork.pending_native_hits = self.pending_native_hits.clone();
+        fork.pending_native_projectiles = self.pending_native_projectiles.clone();
+        fork.pending_native_player_hits = self.pending_native_player_hits.clone();
+        fork.pending_native_player_heals = self.pending_native_player_heals.clone();
+        fork.pending_native_summons = self.pending_native_summons.clone();
+        fork.pending_native_ground_spells = self.pending_native_ground_spells.clone();
+        fork.ground_drops = self.ground_drops.clone();
+        fork.claimed_ground_drops = self.claimed_ground_drops.clone();
+        fork.next_ground_drop_generation = self.next_ground_drop_generation;
+        fork.next_ground_drop_claim_id = self.next_ground_drop_claim_id;
+        fork.occupancy = self.occupancy.clone();
+        fork.open_doors = self.open_doors.clone();
+        fork.hazard = self.hazard.clone();
+        fork.next_object_id = self.next_object_id;
+        for (session_id, player) in &fork.players {
+            fork.player_grid
+                .insert(session_id.clone(), &player.position);
+            fork.ecs
+                .upsert_player(session_id, player.object_id, &player.position);
+        }
+        for (object_id, object) in &fork.objects {
+            fork.object_grid.insert(*object_id, &object.position);
+        }
+        fork
     }
 
     pub fn key(&self) -> &ZoneKey {
@@ -358,6 +481,138 @@ impl ZoneRuntime {
 
     pub fn ground_drop_count(&self) -> usize {
         self.ground_drops.len()
+    }
+
+    pub fn has_pending_ground_drop_claim_ticket(
+        &self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.claimed_ground_drops
+            .get(&ticket.object_id)
+            .is_some_and(|claim| self.ground_drop_claim_ticket_matches(claim, session_id, ticket))
+    }
+
+    /// Return the exact, authoritative tickets that are waiting for Gateway
+    /// settlement. The `BTreeMap` backing claims makes this ordering stable for
+    /// checkpoint recovery and tests.
+    pub fn pending_ground_drop_claim_tickets(&self) -> Vec<(SessionId, GroundDropClaimTicket)> {
+        self.claimed_ground_drops
+            .values()
+            .filter_map(|claim| {
+                claim
+                    .ticket
+                    .as_ref()
+                    .map(|ticket| (claim.session_id.clone(), ticket.clone()))
+            })
+            .collect()
+    }
+
+    pub fn detached_ground_drop_claim_ticket_is_canonical(
+        &self,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        ticket.object_id == ticket.drop.object_id
+            && ticket.owner_object_id == ticket.drop.owner_object_id
+            && ticket.drop_generation > 0
+            && !ticket.payload_digest.is_empty()
+            && canonical_ground_drop_payload_digest(&ticket.drop) == ticket.payload_digest
+            && ticket.idempotency_key
+                == canonical_ground_drop_claim_idempotency_key(
+                    &self.key,
+                    ticket.object_id,
+                    ticket.drop_generation,
+                    &ticket.payload_digest,
+                )
+    }
+
+    pub fn has_detached_ground_drop_claim_ticket(&self, ticket: &GroundDropClaimTicket) -> bool {
+        self.detached_ground_drop_claim_ticket_is_canonical(ticket)
+            && self.removed_object_ids.contains(&ticket.object_id)
+            && !self.ground_drops.contains_key(&ticket.object_id)
+            && !self.claimed_ground_drops.contains_key(&ticket.object_id)
+    }
+
+    /// Move an unresolved claim out of session-owned state while retaining the
+    /// removed-object tombstone. The Gateway recovery ledger becomes the sole
+    /// authority until PostgreSQL confirms committed or definitively absent.
+    pub fn detach_ground_drop_claim(
+        &mut self,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        if !self.has_pending_ground_drop_claim_ticket(session_id, ticket) {
+            return false;
+        }
+        self.claimed_ground_drops.remove(&ticket.object_id);
+        self.removed_object_ids.insert(ticket.object_id);
+        true
+    }
+
+    pub fn detach_all_ground_drop_claims(&mut self) -> Vec<(SessionId, GroundDropClaimTicket)> {
+        let tickets = self.pending_ground_drop_claim_tickets();
+        for (session_id, ticket) in &tickets {
+            let detached = self.detach_ground_drop_claim(session_id, ticket);
+            debug_assert!(detached, "enumerated ground-drop claim must detach");
+        }
+        tickets
+    }
+
+    /// Restore a definitively rejected detached claim without requiring the
+    /// historical Gateway session to exist. Canonical ticket binding and the
+    /// retained tombstone prevent cross-Zone or duplicate restoration.
+    pub fn restore_detached_ground_drop_claim(
+        &mut self,
+        ticket: &GroundDropClaimTicket,
+        now_ms: u64,
+    ) -> Option<Vec<ZoneOutbound>> {
+        if !self.has_detached_ground_drop_claim_ticket(ticket) {
+            return None;
+        }
+        self.removed_object_ids.remove(&ticket.object_id);
+        self.ground_drops.insert(
+            ticket.object_id,
+            ZoneGroundDrop {
+                owner_expires_at_ms: ticket
+                    .drop
+                    .ownership_remaining_ticks
+                    .filter(|ticks| *ticks > 0)
+                    .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300))),
+                drop: ticket.drop.clone(),
+                drop_generation: ticket.drop_generation,
+                payload_digest: ticket.payload_digest.clone(),
+            },
+        );
+        self.apply_zone_object_packets(&[ground_drop_spawn_packet(&ticket.drop)], now_ms);
+        Some(self.diff_all_zone_object_visibility())
+    }
+
+    fn allocate_ground_drop_generation(&mut self) -> Option<u64> {
+        let generation = self.next_ground_drop_generation.max(1);
+        let next = generation.checked_add(1)?;
+        self.next_ground_drop_generation = next;
+        Some(generation)
+    }
+
+    fn allocate_ground_drop_claim_id(&mut self) -> Option<u64> {
+        let claim_id = self.next_ground_drop_claim_id.max(1);
+        let next = claim_id.checked_add(1)?;
+        self.next_ground_drop_claim_id = next;
+        Some(claim_id)
+    }
+
+    fn new_zone_ground_drop(
+        &mut self,
+        drop: GroundDropSnapshot,
+        owner_expires_at_ms: Option<u64>,
+    ) -> Option<ZoneGroundDrop> {
+        let drop_generation = self.allocate_ground_drop_generation()?;
+        Some(ZoneGroundDrop {
+            payload_digest: canonical_ground_drop_payload_digest(&drop),
+            drop_generation,
+            drop,
+            owner_expires_at_ms,
+        })
     }
 
     pub fn native_monster_count(&self) -> usize {
@@ -378,6 +633,8 @@ impl ZoneRuntime {
                 hp: monster.hp,
                 max_hp: monster.max_hp,
                 dead: monster.dead,
+                disposition: monster.disposition,
+                hostile_to_player: monster.hostile_to_player,
             })
             .collect()
     }
@@ -428,6 +685,13 @@ impl ZoneRuntime {
             .map(|player| (player.hp, player.max_hp, player.mp))
     }
 
+    /// Server-internal Harvest admission. Missing trusted state is denied.
+    pub fn player_harvest_admitted(&self, session_id: &SessionId, now_ms: u64) -> bool {
+        self.players
+            .get(session_id)
+            .is_some_and(|player| zone_player_harvest_admitted(player, now_ms))
+    }
+
     pub fn player_identity(&self, session_id: &SessionId) -> Option<(SessionId, String, i32)> {
         self.players.get(session_id).map(|player| {
             (
@@ -452,6 +716,18 @@ impl ZoneRuntime {
         player.hp = hp.clamp(0, player.max_hp);
         player.mp = mp.max(0);
         player.dead = player.hp == 0;
+        Vec::new()
+    }
+
+    fn sync_player_combat_state(
+        &mut self,
+        session_id: &SessionId,
+        state: ZonePlayerCombatState,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        player.combat_state = Some(state);
         Vec::new()
     }
 
@@ -500,12 +776,20 @@ impl ZoneRuntime {
                     received_at_ms: now_ms,
                 },
             ),
+            ZoneCommand::TeleportToNpc {
+                session_id,
+                object_id,
+                available_gold,
+            } => self.teleport_to_npc(&session_id, object_id, available_gold),
             ZoneCommand::UpdateChatProfile {
                 session_id,
                 profile,
             } => self.update_chat_profile(&session_id, profile),
             ZoneCommand::UpdatePlayerCombatStats { session_id, stats } => {
                 self.update_player_combat_stats(&session_id, stats)
+            }
+            ZoneCommand::SyncPlayerCombatState { session_id, state } => {
+                self.sync_player_combat_state(&session_id, state)
             }
             ZoneCommand::SyncPlayerTransform {
                 session_id,
@@ -588,6 +872,27 @@ impl ZoneRuntime {
                 damage,
                 now_ms,
             ),
+            ZoneCommand::PlayerAttackMaterializedObject {
+                session_id,
+                object_id,
+                monster,
+                direction,
+                spell,
+                level,
+                attack_type,
+                damage,
+                now_ms,
+            } => self.player_attack_materialized_native_object(
+                &session_id,
+                object_id,
+                monster.as_ref(),
+                direction,
+                spell,
+                level,
+                attack_type,
+                damage,
+                now_ms,
+            ),
             ZoneCommand::PlayerRangeAttackObject {
                 session_id,
                 object_id,
@@ -601,6 +906,29 @@ impl ZoneRuntime {
             } => self.player_range_attack_native_object(
                 &session_id,
                 object_id,
+                direction,
+                target,
+                spell,
+                level,
+                attack_type,
+                damage,
+                now_ms,
+            ),
+            ZoneCommand::PlayerRangeAttackMaterializedObject {
+                session_id,
+                object_id,
+                monster,
+                direction,
+                target,
+                spell,
+                level,
+                attack_type,
+                damage,
+                now_ms,
+            } => self.player_range_attack_materialized_native_object(
+                &session_id,
+                object_id,
+                monster.as_ref(),
                 direction,
                 target,
                 spell,
@@ -688,15 +1016,16 @@ impl ZoneRuntime {
                 &group_members,
                 now_ms,
             ),
-            ZoneCommand::CommitGroundDropClaim {
+            ZoneCommand::CommitGroundDropClaim { .. }
+            | ZoneCommand::CancelGroundDropClaim { .. } => Vec::new(),
+            ZoneCommand::CommitGroundDropClaimWithTicket { session_id, ticket } => {
+                self.commit_ground_drop_claim(&session_id, &ticket)
+            }
+            ZoneCommand::CancelGroundDropClaimWithTicket {
                 session_id,
-                object_id,
-            } => self.commit_ground_drop_claim(&session_id, object_id),
-            ZoneCommand::CancelGroundDropClaim {
-                session_id,
-                object_id,
+                ticket,
                 now_ms,
-            } => self.cancel_ground_drop_claim(&session_id, object_id, now_ms),
+            } => self.cancel_ground_drop_claim(&session_id, &ticket, now_ms),
             ZoneCommand::TickPlayerMovement { session_id, now_ms } => {
                 self.tick_player_movement(&session_id, now_ms)
             }
@@ -1483,6 +1812,19 @@ impl ZoneRuntime {
         let path = (1..=steps)
             .map(|amount| offset_point(&origin, action.direction, amount))
             .collect::<Vec<_>>();
+        let map_coordinate_packets = {
+            let player = self
+                .players
+                .get(session_id)
+                .expect("action owner should still exist");
+            map_coordinate_hint_packets(
+                &self.key.map_file_name,
+                &path,
+                player.level,
+                player.chat_profile.pk_points,
+                action.direction,
+            )
+        };
 
         let blocked = path
             .iter()
@@ -1532,9 +1874,11 @@ impl ZoneRuntime {
             .players
             .get(session_id)
             .expect("action owner should still exist");
+        let mut owner_packets = vec![user_location_packet(player)];
+        owner_packets.extend(map_coordinate_packets);
         outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
-            packets: vec![user_location_packet(player)],
+            packets: owner_packets,
         });
 
         let observers = self
@@ -1582,6 +1926,33 @@ impl ZoneRuntime {
         player.direction = action.direction;
         player.movement_ready_at_ms = now_ms.saturating_add(ZONE_TURN_DELAY_MS);
         player.run_step_until_ms = 0;
+        let (position, level, pk_points) = {
+            let player = self
+                .players
+                .get(session_id)
+                .expect("turning player should still exist");
+            (
+                player.position.clone(),
+                player.level,
+                player.chat_profile.pk_points,
+            )
+        };
+        // Crystal CheckMovement runs at the current coordinate after the new
+        // Direction has been applied. The shared zone owns the admission
+        // decision and exact Hint, while the session/gateway remains the
+        // authority that commits a cross-map transfer.
+        let map_coordinate_packets = match crystal_map_coordinate_decision(
+            &self.key.map_file_name,
+            &position,
+            level,
+            pk_points,
+            action.direction,
+        ) {
+            Some(CrystalMapCoordinateDecision::Denied { message, chat_type }) => {
+                vec![ServerPacket::Chat { message, chat_type }]
+            }
+            _ => Vec::new(),
+        };
         let player = self
             .players
             .get(session_id)
@@ -1597,7 +1968,11 @@ impl ZoneRuntime {
             .collect::<Vec<_>>();
         let mut outbounds = vec![ZoneOutbound::ToSession {
             session_id: session_id.clone(),
-            packets: vec![user_location_packet(player)],
+            packets: {
+                let mut packets = vec![user_location_packet(player)];
+                packets.extend(map_coordinate_packets);
+                packets
+            },
         }];
         if !observers.is_empty() {
             outbounds.push(ZoneOutbound::ToMany {
@@ -1622,6 +1997,18 @@ impl ZoneRuntime {
             return Vec::new();
         };
         player.movement_ready_at_ms = now_ms;
+        vec![ZoneOutbound::ToSession {
+            session_id: session_id.clone(),
+            packets: vec![user_location_packet(player)],
+        }]
+    }
+
+    /// Emit the authoritative owner correction without changing movement or
+    /// action timing. Atomic command rejection must be observationally pure.
+    fn owner_location_correction(&self, session_id: &SessionId) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get(session_id) else {
+            return Vec::new();
+        };
         vec![ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: vec![user_location_packet(player)],
@@ -1711,6 +2098,109 @@ impl ZoneRuntime {
             session_id: session_id.clone(),
             packets: vec![user_location_packet(player)],
         });
+        outbounds.push(ZoneOutbound::SaveTransform {
+            session_id: session_id.clone(),
+            position: player.position.clone(),
+            direction: player.direction,
+        });
+        outbounds
+    }
+
+    fn teleport_to_npc(
+        &mut self,
+        session_id: &SessionId,
+        object_id: u32,
+        available_gold: u32,
+    ) -> Vec<ZoneOutbound> {
+        if object_id == 0
+            || !self
+                .npc_teleport_config
+                .destination_enabled(&self.key.map_file_name, object_id)
+            || available_gold < self.npc_teleport_config.cost
+        {
+            return Vec::new();
+        }
+        let Some(map) = self
+            .npc_teleport_config
+            .map(&self.key.map_file_name)
+            .cloned()
+        else {
+            return Vec::new();
+        };
+        let Some(ServerPacket::ObjectNpc { info }) =
+            self.objects.get(&object_id).map(|object| &object.packet)
+        else {
+            return Vec::new();
+        };
+        let destination = offset_point(&info.location, info.direction, 1);
+        if !self.players.contains_key(session_id)
+            || !self.can_occupy(&destination, Some(session_id))
+        {
+            return Vec::new();
+        }
+
+        let (player_object_id, old_position) = {
+            let player = self
+                .players
+                .get(session_id)
+                .expect("validated teleport player should exist");
+            (player.object_id, player.position.clone())
+        };
+        // A duplicated WebSocket packet arrives after the first request has
+        // already moved the player synchronously.  Treat that exact replay as
+        // an idempotent no-op so it cannot charge the same destination twice.
+        // Moving away first is a new player action and permits a later visit.
+        if old_position == destination {
+            return Vec::new();
+        }
+        let old_observers = self
+            .players
+            .iter_mut()
+            .filter_map(|(other_session_id, other)| {
+                (other_session_id != session_id
+                    && other.visible_object_ids.remove(&player_object_id))
+                .then(|| other_session_id.clone())
+            })
+            .collect::<Vec<_>>();
+        if let Some(player) = self.players.get_mut(session_id) {
+            player.visible_object_ids.clear();
+        }
+
+        self.occupancy.remove(&tile_key(&old_position));
+        {
+            let player = self
+                .players
+                .get_mut(session_id)
+                .expect("validated teleport player should still exist");
+            player.position = destination;
+            player.movement_actions.clear();
+            player.movement_ready_at_ms = 0;
+            player.run_step_until_ms = 0;
+            self.occupancy
+                .insert(tile_key(&player.position), session_id.clone());
+            self.player_grid.moved(session_id, &player.position);
+            self.ecs.move_player(session_id, &player.position);
+        }
+
+        let mut outbounds = vec![ZoneOutbound::NpcTeleportCommit {
+            session_id: session_id.clone(),
+            gold_cost: self.npc_teleport_config.cost,
+            map,
+        }];
+        if !old_observers.is_empty() {
+            outbounds.push(ZoneOutbound::ToMany {
+                session_ids: old_observers,
+                packets: vec![ServerPacket::ObjectRemove {
+                    object_id: player_object_id,
+                }],
+            });
+        }
+        outbounds.extend(self.diff_visibility_for(session_id));
+        outbounds.extend(self.diff_zone_object_visibility_for(session_id));
+        let player = self
+            .players
+            .get(session_id)
+            .expect("teleported player should still exist");
         outbounds.push(ZoneOutbound::SaveTransform {
             session_id: session_id.clone(),
             position: player.position.clone(),
@@ -1821,11 +2311,19 @@ impl ZoneRuntime {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
-        for packet in packets {
+        let bound_packets = packets
+            .iter()
+            .filter(|packet| {
+                owner_action_actor_id(packet)
+                    .is_none_or(|actor_id| actor_id == owner_local_object_id)
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        for packet in &bound_packets {
             apply_observer_action_state(player, owner_local_object_id, packet, now_ms);
         }
         let (mut outbounds, rejected_action_transform) =
-            self.apply_owner_action_transform(session_id, owner_local_object_id, packets);
+            self.apply_owner_action_transform(session_id, owner_local_object_id, &bound_packets);
         if rejected_action_transform {
             return outbounds;
         }
@@ -1836,7 +2334,7 @@ impl ZoneRuntime {
             .clone();
         let visible_objects_before = self.visible_zone_objects_by_session();
         let object_positions_before = self.zone_object_positions();
-        let observer_packets = packets
+        let observer_packets = bound_packets
             .iter()
             .filter_map(|packet| observer_action_packet(&player, owner_local_object_id, packet))
             .filter_map(|packet| self.canonical_observer_zone_object_packet(packet))
@@ -1912,16 +2410,29 @@ impl ZoneRuntime {
                 .ownership_remaining_ticks
                 .filter(|ticks| *ticks > 0)
                 .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300)));
-            self.ground_drops
-                .entry(drop.object_id)
-                .and_modify(|stored| {
-                    stored.drop = drop.clone();
-                    stored.owner_expires_at_ms = owner_expires_at_ms;
-                })
-                .or_insert_with(|| ZoneGroundDrop {
+            let payload_digest = canonical_ground_drop_payload_digest(drop);
+            let drop_generation = match self
+                .ground_drops
+                .get(&drop.object_id)
+                .filter(|stored| stored.payload_digest == payload_digest)
+            {
+                Some(stored) => stored.drop_generation,
+                None => {
+                    let Some(generation) = self.allocate_ground_drop_generation() else {
+                        continue;
+                    };
+                    generation
+                }
+            };
+            self.ground_drops.insert(
+                drop.object_id,
+                ZoneGroundDrop {
                     drop: drop.clone(),
                     owner_expires_at_ms,
-                });
+                    drop_generation,
+                    payload_digest,
+                },
+            );
             if !self.objects.contains_key(&drop.object_id) {
                 spawn_packets.push(ground_drop_spawn_packet(drop));
             }
@@ -2061,7 +2572,8 @@ impl ZoneRuntime {
         }
         if let Some(monster) = self.native_monsters.get_mut(&requested_object_id) {
             monster.ai = spawn.ai;
-            monster.hostile_to_player = zone_native_monster_targets_players(spawn.ai);
+            monster.disposition = spawn.disposition;
+            monster.hostile_to_player = spawn.is_authoritatively_hostile_to_player();
             monster.friendly_guild = spawn.friendly_guild.clone();
             return (false, Vec::new());
         }
@@ -2111,6 +2623,137 @@ impl ZoneRuntime {
         }]
     }
 
+    #[allow(clippy::too_many_arguments)]
+    fn player_attack_materialized_native_object(
+        &mut self,
+        session_id: &SessionId,
+        object_id: u32,
+        monster: Option<&ZoneMonsterSpawn>,
+        direction: MirDirection,
+        spell: u8,
+        level: u8,
+        attack_type: u8,
+        damage: i32,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get(session_id) else {
+            return Vec::new();
+        };
+        if !self.native_monsters.contains_key(&object_id)
+            && monster
+                .is_some_and(|monster| !monster.is_authoritatively_melee_attackable_by_player())
+        {
+            return self.owner_location_correction(session_id);
+        }
+        // Admission happens against the live trusted state before even the
+        // transaction fork can materialize a target.
+        if !zone_player_melee_attack_admitted(player, now_ms)
+            || now_ms < player.next_attack_ready_at_ms
+        {
+            return self.owner_location_correction(session_id);
+        }
+        if !self.native_monsters.contains_key(&object_id)
+            && !monster.is_some_and(|monster| monster.object_id == object_id)
+        {
+            return self.owner_location_correction(session_id);
+        }
+
+        let before_ready_at = player.next_attack_ready_at_ms;
+        let mut transaction = self.transaction_fork();
+        let mut outbounds = Vec::new();
+        if !transaction.object_id_in_use(object_id) {
+            let Some(monster) = monster else {
+                return self.owner_location_correction(session_id);
+            };
+            outbounds.extend(transaction.spawn_native_monster(session_id, monster, now_ms));
+        }
+        let mut attack_outbounds = transaction.player_attack_native_object(
+            session_id,
+            object_id,
+            direction,
+            spell,
+            level,
+            attack_type,
+            damage,
+            now_ms,
+        );
+        let committed = transaction
+            .players
+            .get(session_id)
+            .is_some_and(|player| player.next_attack_ready_at_ms > before_ready_at);
+        if !committed {
+            return self.owner_location_correction(session_id);
+        }
+        outbounds.append(&mut attack_outbounds);
+        *self = transaction;
+        outbounds
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn player_range_attack_materialized_native_object(
+        &mut self,
+        session_id: &SessionId,
+        object_id: u32,
+        monster: Option<&ZoneMonsterSpawn>,
+        direction: MirDirection,
+        target: Point,
+        spell: Spell,
+        level: u8,
+        attack_type: u8,
+        damage: i32,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get(session_id) else {
+            return Vec::new();
+        };
+        if !self.object_id_in_use(object_id)
+            && monster.is_some_and(|monster| !monster.is_authoritatively_hostile_to_player())
+        {
+            return self.owner_location_correction(session_id);
+        }
+        if !zone_player_range_attack_admitted(player, now_ms)
+            || now_ms < player.next_attack_ready_at_ms
+        {
+            return self.owner_location_correction(session_id);
+        }
+        if !self.object_id_in_use(object_id)
+            && !monster.is_some_and(|monster| monster.object_id == object_id)
+        {
+            return self.owner_location_correction(session_id);
+        }
+
+        let before_ready_at = player.next_attack_ready_at_ms;
+        let mut transaction = self.transaction_fork();
+        let mut outbounds = Vec::new();
+        if !transaction.object_id_in_use(object_id) {
+            let Some(monster) = monster else {
+                return self.owner_location_correction(session_id);
+            };
+            outbounds.extend(transaction.spawn_native_monster(session_id, monster, now_ms));
+        }
+        let mut attack_outbounds = transaction.player_range_attack_native_object(
+            session_id,
+            object_id,
+            direction,
+            target,
+            spell,
+            level,
+            attack_type,
+            damage,
+            now_ms,
+        );
+        let committed = transaction
+            .players
+            .get(session_id)
+            .is_some_and(|player| player.next_attack_ready_at_ms > before_ready_at);
+        if !committed {
+            return self.owner_location_correction(session_id);
+        }
+        outbounds.append(&mut attack_outbounds);
+        *self = transaction;
+        outbounds
+    }
+
     fn player_attack_native_object(
         &mut self,
         session_id: &SessionId,
@@ -2125,6 +2768,20 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
+        let is_player_target = self
+            .players
+            .values()
+            .any(|target| target.object_id == object_id);
+        if !is_player_target
+            && self.native_monsters.get(&object_id).is_some_and(|monster| {
+                !zone_native_monster_is_authoritatively_melee_attackable(monster)
+            })
+        {
+            return self.owner_location_correction(session_id);
+        }
+        if !zone_player_melee_attack_admitted(player, now_ms) {
+            return self.correct_player_location(session_id, now_ms);
+        }
         if now_ms < player.next_attack_ready_at_ms {
             return self.correct_player_location(session_id, now_ms);
         }
@@ -2152,8 +2809,11 @@ impl ZoneRuntime {
             .filter(|monster| !monster.dead && monster.hp > 0)
             .cloned()
         else {
-            return Vec::new();
+            return self.correct_player_location(session_id, now_ms);
         };
+        if !zone_native_monster_is_authoritatively_melee_attackable(&monster) {
+            return self.owner_location_correction(session_id);
+        }
         let attack_spell = Spell::try_from(spell).unwrap_or(Spell::None);
         let max_range = if attack_spell == Spell::Thrusting {
             2
@@ -2326,7 +2986,7 @@ impl ZoneRuntime {
         if !zone_player_can_attack_player(&attacker, &target)
             || !points_within_action_range(&attacker.position, &target.position, max_range)
         {
-            return Vec::new();
+            return self.correct_player_location(session_id, now_ms);
         }
 
         let resolved_damage =
@@ -2500,6 +3160,21 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
+        let is_player_target = self
+            .players
+            .values()
+            .any(|target| target.object_id == object_id);
+        if !is_player_target
+            && self
+                .native_monsters
+                .get(&object_id)
+                .is_some_and(|monster| !zone_native_monster_is_authoritatively_hostile(monster))
+        {
+            return self.owner_location_correction(session_id);
+        }
+        if !zone_player_range_attack_admitted(player, now_ms) {
+            return self.correct_player_location(session_id, now_ms);
+        }
         if now_ms < player.next_attack_ready_at_ms {
             return self.correct_player_location(session_id, now_ms);
         }
@@ -2527,10 +3202,14 @@ impl ZoneRuntime {
         let Some(monster) = self
             .native_monsters
             .get(&object_id)
-            .filter(|monster| !monster.dead && monster.hp > 0)
+            .filter(|monster| {
+                zone_native_monster_is_authoritatively_hostile(monster)
+                    && !monster.dead
+                    && monster.hp > 0
+            })
             .cloned()
         else {
-            return Vec::new();
+            return self.correct_player_location(session_id, now_ms);
         };
         if target != monster.position
             || !points_within_action_range(
@@ -2633,7 +3312,7 @@ impl ZoneRuntime {
             return Vec::new();
         };
         if spell == Spell::Hallucination {
-            return Vec::new();
+            return self.correct_player_location(session_id, now_ms);
         }
         if !zone_player_can_attack_player(&attacker, &target)
             || target_point != target.position
@@ -2643,7 +3322,7 @@ impl ZoneRuntime {
                 ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX,
             )
         {
-            return Vec::new();
+            return self.correct_player_location(session_id, now_ms);
         }
 
         let resolved_damage =
@@ -7977,6 +8656,7 @@ impl ZoneRuntime {
             name_colour_argb: -1,
             image: template.image,
             ai: template.ai,
+            disposition: Some(crate::config::WorldEntityDisposition::Friendly),
             level: template.level,
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
@@ -8739,6 +9419,7 @@ impl ZoneRuntime {
             name_colour_argb: -1,
             image: template.image,
             ai: template.ai,
+            disposition: Some(crate::config::WorldEntityDisposition::Friendly),
             level: template.level,
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
@@ -9500,13 +10181,10 @@ impl ZoneRuntime {
                 .ownership_remaining_ticks
                 .filter(|ticks| *ticks > 0)
                 .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300)));
-            self.ground_drops.insert(
-                drop.object_id,
-                ZoneGroundDrop {
-                    drop: drop.clone(),
-                    owner_expires_at_ms,
-                },
-            );
+            let Some(stored) = self.new_zone_ground_drop(drop.clone(), owner_expires_at_ms) else {
+                break;
+            };
+            self.ground_drops.insert(drop.object_id, stored);
             packets.push(ground_drop_spawn_packet(&drop));
             spawned.push(drop);
         }
@@ -9561,20 +10239,39 @@ impl ZoneRuntime {
                 }],
             }];
         }
+        let Some(claim_id) = self.allocate_ground_drop_claim_id() else {
+            return Vec::new();
+        };
         let Some(stored) = self.ground_drops.remove(&object_id) else {
             return Vec::new();
+        };
+        let ticket = GroundDropClaimTicket {
+            claim_id,
+            object_id,
+            drop_generation: stored.drop_generation,
+            payload_digest: stored.payload_digest.clone(),
+            idempotency_key: canonical_ground_drop_claim_idempotency_key(
+                &self.key,
+                object_id,
+                stored.drop_generation,
+                &stored.payload_digest,
+            ),
+            session_id: session_id.clone(),
+            owner_object_id: stored.drop.owner_object_id,
+            drop: stored.drop.clone(),
         };
         self.claimed_ground_drops.insert(
             object_id,
             ZoneGroundDropClaim {
                 session_id: session_id.clone(),
-                drop: stored.drop.clone(),
+                drop: stored.drop,
+                ticket: Some(ticket.clone()),
             },
         );
         let mut outbounds = self.remove_ground_drop_object_for_claim(object_id);
-        outbounds.push(ZoneOutbound::GroundDropClaimed {
+        outbounds.push(ZoneOutbound::GroundDropClaimedWithTicket {
             session_id: session_id.clone(),
-            drop: stored.drop,
+            ticket,
         });
         outbounds
     }
@@ -9631,38 +10328,65 @@ impl ZoneRuntime {
         self.claim_ground_drop(session_id, Some(object_id), &target, group_members, now_ms)
     }
 
+    fn ground_drop_claim_ticket_matches(
+        &self,
+        claim: &ZoneGroundDropClaim,
+        session_id: &SessionId,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        &claim.session_id == session_id
+            && &ticket.session_id == session_id
+            && claim.drop == ticket.drop
+            && claim.ticket.as_ref() == Some(ticket)
+            && ticket.object_id == ticket.drop.object_id
+            && ticket.owner_object_id == ticket.drop.owner_object_id
+            && ticket.drop_generation > 0
+            && !ticket.payload_digest.is_empty()
+            && canonical_ground_drop_payload_digest(&ticket.drop) == ticket.payload_digest
+            && ticket.idempotency_key
+                == canonical_ground_drop_claim_idempotency_key(
+                    &self.key,
+                    ticket.object_id,
+                    ticket.drop_generation,
+                    &ticket.payload_digest,
+                )
+    }
+
     fn commit_ground_drop_claim(
         &mut self,
         session_id: &SessionId,
-        object_id: u32,
+        ticket: &GroundDropClaimTicket,
     ) -> Vec<ZoneOutbound> {
-        if self
-            .claimed_ground_drops
-            .get(&object_id)
-            .is_some_and(|claim| &claim.session_id == session_id)
-        {
-            self.claimed_ground_drops.remove(&object_id);
-            self.removed_object_ids.insert(object_id);
+        let Some(claim) = self.claimed_ground_drops.get(&ticket.object_id) else {
+            return Vec::new();
+        };
+        if !self.ground_drop_claim_ticket_matches(claim, session_id, ticket) {
+            return Vec::new();
         }
+        self.claimed_ground_drops.remove(&ticket.object_id);
+        self.removed_object_ids.insert(ticket.object_id);
         Vec::new()
     }
 
     fn cancel_ground_drop_claim(
         &mut self,
         session_id: &SessionId,
-        object_id: u32,
+        ticket: &GroundDropClaimTicket,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some(claim) = self.claimed_ground_drops.remove(&object_id) else {
+        let Some(claim) = self.claimed_ground_drops.get(&ticket.object_id) else {
             return Vec::new();
         };
-        if &claim.session_id != session_id {
-            self.claimed_ground_drops.insert(object_id, claim);
+        if !self.ground_drop_claim_ticket_matches(claim, session_id, ticket) {
             return Vec::new();
         }
-        self.removed_object_ids.remove(&object_id);
+        let claim = self
+            .claimed_ground_drops
+            .remove(&ticket.object_id)
+            .expect("validated ground-drop claim should still exist");
+        self.removed_object_ids.remove(&ticket.object_id);
         self.ground_drops.insert(
-            object_id,
+            ticket.object_id,
             ZoneGroundDrop {
                 owner_expires_at_ms: claim
                     .drop
@@ -9670,6 +10394,8 @@ impl ZoneRuntime {
                     .filter(|ticks| *ticks > 0)
                     .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300))),
                 drop: claim.drop.clone(),
+                drop_generation: ticket.drop_generation,
+                payload_digest: ticket.payload_digest.clone(),
             },
         );
         self.apply_zone_object_packets(&[ground_drop_spawn_packet(&claim.drop)], now_ms);
@@ -11074,9 +11800,9 @@ impl ZoneRuntime {
         picker_object_id: u32,
         group_members: &[String],
     ) -> bool {
-        if !drop
+        if drop
             .ownership_remaining_ticks
-            .is_some_and(|remaining_ticks| remaining_ticks > 0)
+            .is_none_or(|remaining_ticks| remaining_ticks == 0)
         {
             return true;
         }
@@ -11095,10 +11821,6 @@ impl ZoneRuntime {
                     .any(|member| member.eq_ignore_ascii_case(&owner.name))
             })
     }
-}
-
-fn zone_native_monster_requires_harvest(ai: u8) -> bool {
-    matches!(ai, 1 | 2 | 7 | 9 | 28 | 35)
 }
 
 fn tile_key(point: &Point) -> (i32, i32) {
@@ -11420,10 +12142,10 @@ fn zone_resolve_player_physical_attack(
 
     let agility = monster.defense.agility.max(0);
     if agility > 0 {
-        let roll = zone_deterministic_roll(
+        let roll = crate::runtime::combat::crystal_accuracy_roll(
             now_ms,
-            usize::try_from(player.object_id).unwrap_or_default(),
-            usize::try_from(monster_object_id).unwrap_or_default(),
+            player.object_id,
+            monster_object_id,
             u64::try_from(agility.saturating_add(1)).unwrap_or(1),
         );
         if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
@@ -11681,10 +12403,10 @@ fn zone_resolve_player_pvp_physical_attack(
 ) -> Option<i32> {
     let stats = attacker.combat_stats;
     if stats.has_authoritative_damage() && target.combat_stats.agility > 0 {
-        let roll = zone_deterministic_roll(
+        let roll = crate::runtime::combat::crystal_accuracy_roll(
             now_ms,
-            usize::try_from(attacker.object_id).unwrap_or_default(),
-            usize::try_from(target.object_id).unwrap_or_default(),
+            attacker.object_id,
+            target.object_id,
             u64::try_from(target.combat_stats.agility.saturating_add(1)).unwrap_or(1),
         );
         if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
@@ -12137,6 +12859,49 @@ fn zone_player_status_blocks_movement(player: &ZonePlayer, now_ms: u64) -> bool 
         && player
             .native_status_poison_expires_at_ms
             .is_some_and(|expires_at_ms| now_ms < expires_at_ms)
+}
+
+fn zone_player_melee_attack_admitted(player: &ZonePlayer, now_ms: u64) -> bool {
+    let Some(state) = player.combat_state else {
+        return false;
+    };
+    state.class == player.class
+        && !state.dead
+        && !state.attack_blocked
+        && !state.fishing
+        && (!state.riding_mount || state.mount_attack_allowed)
+        && !player.dead
+        && player.hp > 0
+        && !player.fishing
+        && (!player.riding_mount || state.mount_attack_allowed)
+        && !zone_player_status_blocks_movement(player, now_ms)
+}
+
+fn zone_player_range_attack_admitted(player: &ZonePlayer, now_ms: u64) -> bool {
+    let Some(state) = player.combat_state else {
+        return false;
+    };
+    zone_player_melee_attack_admitted(player, now_ms)
+        && state.class == MirClass::Archer
+        && player.class == MirClass::Archer
+        && state.has_class_weapon
+        && !state.riding_mount
+        && !state.fishing
+        // Keep the Zone's packet-derived state as defense in depth, but never
+        // use it to authorize an otherwise unknown trusted admission state.
+        && !player.riding_mount
+        && !player.fishing
+}
+
+fn zone_player_harvest_admitted(player: &ZonePlayer, now_ms: u64) -> bool {
+    let Some(state) = player.combat_state else {
+        return false;
+    };
+    zone_player_melee_attack_admitted(player, now_ms)
+        && !state.riding_mount
+        && !state.fishing
+        && !player.riding_mount
+        && !player.fishing
 }
 
 fn zone_player_slowed(player: &ZonePlayer, now_ms: u64) -> bool {
@@ -13276,6 +14041,7 @@ mod group_experience_tests {
                 name_colour_argb: -1,
                 image: template.image,
                 ai: template.ai,
+                disposition: Some(crate::config::WorldEntityDisposition::Hostile),
                 level: template.level,
                 max_hp: 100,
                 hp: 100,
@@ -13363,6 +14129,29 @@ mod pvp_tests {
         combat_stats: ZonePlayerCombatStats,
         hp: i32,
     ) -> SessionId {
+        join_player_with_class(
+            zone,
+            id,
+            object_id,
+            x,
+            MirClass::Warrior,
+            chat_profile,
+            combat_stats,
+            hp,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn join_player_with_class(
+        zone: &mut ZoneRuntime,
+        id: &str,
+        object_id: u32,
+        x: i32,
+        class: MirClass,
+        chat_profile: ZoneChatProfile,
+        combat_stats: ZonePlayerCombatStats,
+        hp: i32,
+    ) -> SessionId {
         let session_id = SessionId::new(id);
         zone.handle(ZoneCommand::Join(ZoneJoin {
             session_id: session_id.clone(),
@@ -13370,7 +14159,7 @@ mod pvp_tests {
             character_index: object_id as i32,
             object_id,
             name: id.to_string(),
-            class: MirClass::Warrior,
+            class,
             gender: MirGender::Male,
             level: 30,
             hp,
@@ -13382,7 +14171,100 @@ mod pvp_tests {
             chat_profile,
             combat_stats,
         }));
+        zone.handle(ZoneCommand::sync_player_combat_state(
+            session_id.clone(),
+            class,
+            class == MirClass::Archer,
+            false,
+            true,
+            false,
+            false,
+            false,
+        ));
         session_id
+    }
+
+    #[test]
+    fn materialized_range_internal_distance_failure_rolls_back_every_zone_surface() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let attacker = join_player_with_class(
+            &mut zone,
+            "Archer",
+            101,
+            10,
+            MirClass::Archer,
+            ZoneChatProfile::default(),
+            ZonePlayerCombatStats::default(),
+            100,
+        );
+        let before_root = zone.canonical_state_root().expect("state root");
+        let before_occupancy = zone.occupancy.clone();
+        let before_player_grid = format!("{:?}", zone.player_grid);
+        let before_object_grid = format!("{:?}", zone.object_grid);
+        let before_player = zone.players.get(&attacker).expect("attacker").clone();
+        let target_id = 9_001;
+
+        // Admission is valid, so the transaction fork materializes this target
+        // before the authoritative 9-tile range check fails inside the fork.
+        let outbounds = zone.handle(ZoneCommand::PlayerRangeAttackMaterializedObject {
+            session_id: attacker.clone(),
+            object_id: target_id,
+            monster: Some(ZoneMonsterSpawn {
+                object_id: target_id,
+                name: "RollbackTarget".to_string(),
+                name_colour_argb: -1,
+                image: 0,
+                ai: 0,
+                disposition: Some(crate::config::WorldEntityDisposition::Hostile),
+                level: 1,
+                max_hp: 100,
+                hp: 100,
+                experience: 0,
+                move_speed_ms: 0,
+                attack_speed_ms: 0,
+                friendly_guild: None,
+                position: Point { x: 20, y: 10 },
+                direction: MirDirection::Left,
+                defense: Default::default(),
+                drops: Vec::new(),
+            }),
+            direction: MirDirection::Right,
+            target: Point { x: 20, y: 10 },
+            spell: Spell::None,
+            level: 0,
+            attack_type: 0,
+            damage: 999,
+            now_ms: 10,
+        });
+
+        assert_eq!(outbounds.len(), 1);
+        assert!(matches!(
+            &outbounds[0],
+            ZoneOutbound::ToSession { session_id, packets }
+                if session_id == &attacker
+                    && packets.len() == 1
+                    && matches!(packets[0], ServerPacket::UserLocation { .. })
+        ));
+        assert_eq!(
+            zone.canonical_state_root().expect("state root"),
+            before_root
+        );
+        assert_eq!(zone.occupancy, before_occupancy);
+        assert_eq!(format!("{:?}", zone.player_grid), before_player_grid);
+        assert_eq!(format!("{:?}", zone.object_grid), before_object_grid);
+        assert!(!zone.objects.contains_key(&target_id));
+        assert!(!zone.native_monsters.contains_key(&target_id));
+        let after_player = zone.players.get(&attacker).expect("attacker");
+        assert_eq!(after_player.hp, before_player.hp);
+        assert_eq!(
+            after_player.next_attack_ready_at_ms,
+            before_player.next_attack_ready_at_ms
+        );
+        assert_eq!(
+            after_player.visible_object_ids,
+            before_player.visible_object_ids
+        );
     }
 
     #[test]
@@ -13410,7 +14292,14 @@ mod pvp_tests {
 
         assert!(zone
             .player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 50, 1,)
-            .is_empty());
+            .iter()
+            .any(|outbound| matches!(outbound,
+            ZoneOutbound::ToSession { session_id, packets }
+                if session_id == &attacker
+                    && packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::UserLocation { .. }
+                    )))));
         assert_eq!(zone.players[&target].hp, 100);
 
         zone.handle(ZoneCommand::UpdateChatProfile {
@@ -13423,7 +14312,14 @@ mod pvp_tests {
         });
         assert!(zone
             .player_attack_native_object(&attacker, 102, MirDirection::Right, 0, 0, 0, 50, 2,)
-            .is_empty());
+            .iter()
+            .any(|outbound| matches!(outbound,
+            ZoneOutbound::ToSession { session_id, packets }
+                if session_id == &attacker
+                    && packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::UserLocation { .. }
+                    )))));
         assert_eq!(zone.players[&target].hp, 100);
     }
 
@@ -13482,11 +14378,12 @@ mod pvp_tests {
     fn all_mode_shared_range_attack_damages_remote_player() {
         let mut zone =
             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
-        let attacker = join_player(
+        let attacker = join_player_with_class(
             &mut zone,
             "Archer",
             101,
             10,
+            MirClass::Archer,
             ZoneChatProfile {
                 attack_mode: 5,
                 ..ZoneChatProfile::default()

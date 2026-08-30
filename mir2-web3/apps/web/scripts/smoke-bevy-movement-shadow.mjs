@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import net from "node:net";
@@ -321,6 +321,9 @@ async function main(args) {
 
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), TEMP_DIR_PREFIX));
     const accountStorePath = path.join(tempDir, "accounts.json");
+    const saveRecoveryDir = path.join(tempDir, "save-recovery");
+    const saveRecoveryMacKey = randomBytes(32).toString("hex");
+    runtimeSecrets.add(saveRecoveryMacKey);
     const gatewayLogPath = path.join(tempDir, "gateway.log");
 
     gateway = await launchGateway({
@@ -328,6 +331,8 @@ async function main(args) {
       webPort: ports.gatewayWeb,
       tcpPort: ports.gatewayTcp,
       accountStorePath,
+      saveRecoveryDir,
+      saveRecoveryMacKey,
       qaControlToken,
       logPath: gatewayLogPath,
       executableSha256: gatewayExecutableSha256,
@@ -682,6 +687,8 @@ async function launchGateway({
   webPort,
   tcpPort,
   accountStorePath,
+  saveRecoveryDir,
+  saveRecoveryMacKey,
   qaControlToken,
   logPath,
 }) {
@@ -689,7 +696,7 @@ async function launchGateway({
   const child = spawn(executable, [], {
     cwd: REPO_ROOT,
     env: {
-      ...process.env,
+      ...isolatedChildEnvironment(),
       MIR2_RUNTIME_ENV: "development",
       MIR2_DEPLOYMENT_ENV: "development",
       MIR2_ENV: "development",
@@ -700,6 +707,8 @@ async function launchGateway({
       MIR2_GATEWAY_TCP_ADDR: `${LOOPBACK_HOST}:${tcpPort}`,
       MIR2_ACCOUNT_STORE_PATH: accountStorePath,
       MIR2_ACCOUNT_STORE_BACKEND: "file",
+      MIR2_SAVE_RECOVERY_MAC_KEY: saveRecoveryMacKey,
+      MIR2_SAVE_RECOVERY_DIR: saveRecoveryDir,
       MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY: "1",
       MIR2_GATEWAY_QA_CONTROL_TOKEN: qaControlToken,
     },
@@ -891,7 +900,7 @@ async function runCapture({
   }
   const startedAt = Date.now();
   const result = await runChild(process.execPath, captureArgs, config.captureTimeoutMs, {
-    ...process.env,
+    ...isolatedChildEnvironment(),
     MIR2_BEVY_BACKEND: "webgpu",
     MIR2_QA_CONTROL_TOKEN: qaControlToken,
   });
@@ -952,6 +961,13 @@ function runChild(command, commandArgs, timeoutMs, env) {
       });
     });
   });
+}
+
+function isolatedChildEnvironment() {
+  const env = { ...process.env };
+  delete env.MIR2_SAVE_RECOVERY_MAC_KEY;
+  delete env.MIR2_SAVE_RECOVERY_DIR;
+  return env;
 }
 
 function captureFailureMessage(result) {

@@ -611,7 +611,7 @@ mod tests {
     use super::super::super::session::SimulationSession;
     use super::*;
     use crate::{SimulationConfig, WorldEntityDisposition};
-    use mir2_protocol::ClientPacket;
+    use mir2_protocol::{ClientPacket, ServerPacket};
 
     /// Spawn a real "TreeQueen" template (manifest AI == 142) the same way
     /// `spawn_crystal_monster_for_test` does, so the agent that reaches the AI
@@ -624,7 +624,14 @@ mod tests {
     #[test]
     fn tree_queen_is_immobile_faces_up_and_arms_timers() {
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player = player_entity(session.app.world()).expect("player entity");
         let player_origin = Point { x: 900, y: 900 };

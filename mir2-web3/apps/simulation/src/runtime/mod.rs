@@ -1,3 +1,4 @@
+mod big_map;
 mod buffs;
 mod combat;
 mod components;
@@ -13,6 +14,7 @@ mod inventory;
 mod items;
 mod leveling;
 mod map;
+mod map_events;
 mod mining;
 mod monster_ai;
 mod monsters;
@@ -46,17 +48,19 @@ pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
-    ActiveSessionIdentity, SharedItemRentalAgreement, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedSkillItemConsumptionComponent,
-    SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
+    ActiveSessionIdentity, PasskeyRecoveryPreflight, SharedItemRentalAgreement,
+    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
 };
+pub use stage5::{GameShopPurchaseExecution, GameShopPurchaseFailure, GameShopPurchaseOutcome};
 pub use zone::{
-    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, PlayerId, SessionId,
-    ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward,
-    ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
-    ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
-    ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, GroundDropClaimTicket,
+    PlayerId, SessionId, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
+    ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
+    ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
+    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
+    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

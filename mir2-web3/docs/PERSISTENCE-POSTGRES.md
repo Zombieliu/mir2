@@ -53,17 +53,63 @@ Two implementations exist:
 selected destinations (`account_store_path: Option<PathBuf>`,
 `account_store_database_url: Option<String>`,
 `account_store_database_mode: AccountStoreDatabaseMode`) plus the in-memory
-`AccountStore`, and constructs the relevant repository per save. The two runtime
+`AccountStore`, and constructs the relevant repository per save. The runtime
 writers are:
 
 - `SimulationConfig::save_account_store()` — persist the whole store.
 - `SimulationConfig::save_account_store_account(account_id)` — persist a single
   account (in `SourceOfTruth` mode the store is first narrowed with
   `AccountStore::scoped_to_account` so other accounts are not rewritten).
+- `SimulationConfig::commit_account_store_transaction(account_ids, mutate)` —
+  stage a bounded multi-account mutation on an isolated snapshot, persist the
+  touched accounts as one unit, and replace the shared in-memory image only
+  after persistence succeeds. Player SendMail uses this path so sender debit
+  and recipient delivery cannot expose a recipient-first state.
+
+The same transaction primitive now protects ordinary GameShop mailbox
+creation and `ClientPacket::CollectParcel`. A parcel claim is preflighted into
+an isolated `CharacterSaveRecord`; durable gold, exact item state and consumed
+mail payload are committed before the live World is updated or success packets
+are returned. Missing authenticated account identity fails closed. In
+particular, `persist_active_character_save` no longer maps a missing identity
+to the reserved local `demo` account.
+
+Each newly created `Stage5MailMessage` has a persisted 128-bit
+`deliveryNonce`. This identity is separate from the client-facing mailbox ID:
+an incoming external collision can be re-keyed without changing an ID already
+shown to the active client, and two legitimate deliveries with identical
+content are never deduplicated. Legacy entries are upgraded to deterministic
+compatibility identities derived from mailbox ID plus immutable sender,
+recipient, subject and body headers. Mutable opened/locked/claimed/deleted
+status and claim-cleared gold/item payload are deliberately excluded. Two
+pre-identity rows with the same ID and immutable header cannot be proven
+distinct and are therefore safely merged as one delivery, preferring durable
+claimed/consumed state to prevent duplicate collection; different legacy IDs
+remain distinct.
 
 Both writers **dual-write**: if a file path is configured they write the file,
 and if a database URL is configured they write Postgres. They are serialized by
 an internal `account_store_persist_lock` so concurrent saves cannot interleave.
+
+`commit_account_store_transaction` also holds the shared account-store mutex
+across the direct repository calls. It intentionally does **not** recurse into
+`save_account_store*`; this prevents an in-process mutation from being lost
+between durable commit and the shared-image swap without introducing a
+recursive-lock deadlock.
+
+### File + PostgreSQL mirror failure semantics
+
+When File mode also configures a PostgreSQL mirror, the multi-account
+transaction writes the non-authoritative mirror first and performs the atomic
+File replace second. A mirror failure leaves File/shared/live state unchanged.
+If the File replace fails after the mirror write, the code synchronously writes
+the original touched-account snapshot back to the mirror before returning
+failure. This is compensating dual-write, **not distributed two-phase commit**:
+a process or machine crash between the two backend commits can temporarily
+leave the mirror ahead of the File source. Restart must treat File as
+authoritative and allow the next source save/resync to heal the mirror. Strict
+cross-backend crash atomicity would require a durable journal/outbox or a 2PC
+coordinator and is deliberately outside this bounded change.
 
 ---
 

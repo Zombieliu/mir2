@@ -12,8 +12,8 @@ use super::{
     mark_crystal_packet_action, offset_point, player_entity, point_in_data_range,
     respawn_tick_for_schedule, runtime_tick, set_crystal_npc_flag, spawn_positions_for_rule,
     spawn_runtime_monster, start_game_visible_respawn_spawns, tile_distance, BuffResource,
-    BuffState, CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing,
-    FishingResource, HarvestMonsterState, InventoryResource, ItemState, MapRuntimeResource,
+    BuffState, CharacterBody, CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName,
+    Facing, FishingResource, HarvestMonsterState, InventoryResource, ItemState, MapRuntimeResource,
     Monster, MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterPoisonState,
     MonsterRespawnSchedule, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals,
     MountResource, NpcInteractionContext, NpcStateResource, ObjectId, PlayerActionKind,
@@ -22,13 +22,15 @@ use super::{
     SpawnSlotRef, Stage5SystemsResource, SummonedMonster, WoomaTaurusState, WorldObject,
     YimoogiState, BASE_STORAGE_SLOTS, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
 };
-use crate::config::{CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
+use crate::config::{
+    AccountStoreTransactionFault, CurrencyKind, ItemGrade, MapDropRuleRecord, MonsterSpawnSource,
+};
 use crate::{
     deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage,
     SharedAccountInventoryTransactionKind, SimulationConfig, Stage5AuctionListing,
-    Stage5MailDelivery, Stage5MailTargetKind, VisibleNpcRecord, WorldEntityDisposition,
-    WorldEntityKind,
+    Stage5MailDelivery, Stage5MailMessage, Stage5MailTargetKind, VisibleNpcRecord,
+    WorldEntityDisposition, WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -45,6 +47,15 @@ fn default_npc_condition_context() -> super::CrystalNpcContextState {
     super::CrystalNpcContextState {
         npc_position: Point { x: 0, y: 0 },
     }
+}
+
+#[test]
+fn stale_monster_entity_handle_is_not_damageable() {
+    let mut world = bevy_ecs::prelude::World::new();
+    let stale = world.spawn_empty().id();
+    assert!(world.despawn(stale));
+
+    assert!(!super::monster_is_damageable(&world, stale));
 }
 
 fn evaluate_crystal_npc_condition(world: &mut bevy_ecs::prelude::World, condition: &str) -> bool {
@@ -172,44 +183,6 @@ fn kill_field_wasp(session: &mut SimulationSession) {
     let _ = attack_until_monster_dies(session, 3002, 5);
 }
 
-fn add_repair_powder(session: &mut SimulationSession, quantity: u32) {
-    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-    resources.inventory_items.push(ItemState {
-        key: "repair-powder".to_string(),
-        name: "Repair Powder".to_string(),
-        icon: super::item_icon_for_key("repair-powder"),
-        slot: 11,
-        unique_id: 11,
-        container: ItemContainer::Bag1,
-        quantity,
-        description: "Starter maintenance powder issued by Village Guide.".to_string(),
-        durability_current: None,
-        durability_max: None,
-        weight: 1,
-        equip_slot: None,
-        grade: ItemGrade::None,
-        added_attack: 0,
-        added_defence: 0,
-        added_stats: Vec::new(),
-        socketed: Vec::new(),
-        cursed: false,
-        socket_slots: 0,
-        gem_count: 0,
-        identified: None,
-        soul_bound_id: None,
-        sealed_expiry_time_binary_datetime: 0,
-        sealed_next_time_binary_datetime: 0,
-        rental_binding_flags: 0,
-        rental_owner_name: String::new(),
-        rental_expiry_binary_datetime: 0,
-        rental_locked: false,
-        attack: 0,
-        defence: 0,
-        heal_hp: 0,
-        heal_mp: 0,
-    });
-}
-
 fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8) {
     let key = format!("credit-token-{token_number}");
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -231,6 +204,7 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -269,6 +243,7 @@ fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -307,6 +282,7 @@ fn add_weapon_oil(session: &mut SimulationSession, key: &str, name: &str, slot: 
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -352,6 +328,7 @@ fn add_repairable_inventory_item(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -396,6 +373,7 @@ fn add_inventory_test_item(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -428,6 +406,23 @@ fn set_active_character_class_gender_level(
     character.class = class;
     character.gender = gender;
     character.level = level;
+}
+
+fn set_active_character_and_body_class_gender_level(
+    session: &mut SimulationSession,
+    class: MirClass,
+    gender: MirGender,
+    level: u16,
+) {
+    set_active_character_class_gender_level(session, class, gender, level);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let mut entity = session.app.world_mut().entity_mut(player);
+    let mut body = entity
+        .get_mut::<CharacterBody>()
+        .expect("player character body");
+    body.class = class;
+    body.gender = gender;
+    body.level = level;
 }
 
 fn activate_storage_service(session: &mut SimulationSession) {
@@ -494,6 +489,7 @@ fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -532,6 +528,7 @@ fn add_socket_source_test_item(session: &mut SimulationSession, slot: u8, quanti
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -556,6 +553,197 @@ fn add_inventory_crystal_item(session: &mut SimulationSession, template_name: &s
 
 fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot: EquipmentSlot) {
     equip_crystal_item_with_quantity(session, template_name, slot, 1);
+}
+
+fn grant_real_crystal_item(
+    session: &mut SimulationSession,
+    template_name: &str,
+    preferred_slot: u8,
+) -> u64 {
+    let template = mir2_game_data::crystal_item_by_name(template_name)
+        .expect("Crystal item template should exist");
+    let key = super::crystal_item_key_for_template(&template);
+    let item = super::add_or_increment_item(
+        session.app.world_mut(),
+        ItemContainer::Bag1,
+        &key,
+        &template.name,
+        template.tooltip.as_deref().unwrap_or_default(),
+        preferred_slot,
+        1,
+        u16::from(template.weight),
+    );
+    item.unique_id
+}
+
+fn assert_start_game_success(session: &mut SimulationSession, character_index: i32) {
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index });
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })),
+        "StartGame should enter the character: {packets:?}"
+    );
+}
+
+fn create_and_start_test_character(session: &mut SimulationSession, name: &str) -> i32 {
+    login_demo_account_for_persistence_test(session);
+    let character_index =
+        new_character_success_index(&session.handle_packet(ClientPacket::NewCharacter {
+            name: name.to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        }));
+    assert_start_game_success(session, character_index);
+    character_index
+}
+
+fn take_real_crystal_item_state(
+    session: &mut SimulationSession,
+    template_name: &str,
+    preferred_slot: u8,
+) -> ItemState {
+    let unique_id = grant_real_crystal_item(session, template_name, preferred_slot);
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    let index = resources
+        .inventory_items
+        .iter()
+        .position(|item| item.unique_id == unique_id)
+        .expect("newly granted Crystal item should be in inventory");
+    resources.inventory_items.remove(index)
+}
+
+fn attach_real_bronze_bell_fixture(session: &mut SimulationSession, unique_id: u64) -> u64 {
+    let mut bells = take_real_crystal_item_state(session, "BronzeBell", 31);
+    bells.unique_id = unique_id;
+    bells.slot = 1;
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    let mount = resources
+        .equipment_items
+        .iter_mut()
+        .find(|item| item.slot == EquipmentSlot::Mount)
+        .expect("equipped RedTiger");
+    assert!(
+        mount.socket_slots > 1,
+        "RedTiger must expose MountSlot.Bells"
+    );
+    assert!(
+        mount.socketed.is_empty(),
+        "fixture mount must start without Bells"
+    );
+    mount.socketed.push(bells);
+    unique_id
+}
+
+fn equip_crystal_bells_to_mount(session: &mut SimulationSession, bells_id: u64) -> u64 {
+    let bells_id = grant_real_crystal_item(session, "BronzeBell", bells_id as u8);
+    let equip_bells = session.handle_packet(ClientPacket::EquipSlotItem {
+        grid: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 1,
+        grid_to: MirGridType::Mount,
+        to_unique_id: 13,
+    });
+    assert!(
+        equip_bells.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipSlotItem {
+                grid_to: MirGridType::Mount,
+                to: 1,
+                success: true,
+                ..
+            }
+        )),
+        "real Bells equip failed: {equip_bells:?}"
+    );
+    bells_id
+}
+
+fn equip_crystal_mount_with_optional_bells_and_ride(
+    session: &mut SimulationSession,
+    with_bells: bool,
+) -> Option<u64> {
+    let mount_id = grant_real_crystal_item(session, "RedTiger", 30);
+    let equip_mount = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: mount_id,
+        to: 13,
+    });
+    assert!(equip_mount.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipItem {
+            to: 13,
+            success: true,
+            ..
+        }
+    )));
+
+    let bells_id = with_bells.then(|| equip_crystal_bells_to_mount(session, 31));
+
+    let ride = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 13,
+        grid: MirGridType::Equipment,
+    });
+    assert!(ride.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate {
+            riding_mount: true,
+            ..
+        }
+    )));
+    bells_id
+}
+
+fn collect_item_tree_unique_ids(items: &[ItemState], ids: &mut Vec<u64>) {
+    for item in items {
+        ids.push(super::item_unique_id(item));
+        collect_item_tree_unique_ids(&item.socketed, ids);
+    }
+}
+
+fn equipment_embedded_unique_ids(session: &SimulationSession) -> Vec<u64> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut ids = Vec::new();
+    for equipment in &resources.equipment_items {
+        collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
+    }
+    ids
+}
+
+fn collect_item_tree_key_ids(items: &[ItemState], values: &mut Vec<(String, u64)>) {
+    for item in items {
+        values.push((item.key.clone(), super::item_unique_id(item)));
+        collect_item_tree_key_ids(&item.socketed, values);
+    }
+}
+
+fn equipment_embedded_key_ids(session: &SimulationSession) -> Vec<(String, u64)> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut values = Vec::new();
+    for equipment in &resources.equipment_items {
+        collect_item_tree_key_ids(&equipment.socketed, &mut values);
+    }
+    values.sort();
+    values
+}
+
+fn top_level_and_equipment_parent_unique_ids(
+    session: &SimulationSession,
+) -> std::collections::BTreeSet<u64> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut ids = resources
+        .belt_items
+        .iter()
+        .chain(resources.inventory_items.iter())
+        .chain(resources.storage_items.iter())
+        .map(super::item_unique_id)
+        .collect::<std::collections::BTreeSet<_>>();
+    ids.extend(resources.equipment_items.iter().filter_map(|equipment| {
+        equipment
+            .user_item_unique_id
+            .or_else(|| super::equipment_slot_unique_id(equipment.slot))
+    }));
+    ids
 }
 
 fn equip_crystal_item_with_quantity(
@@ -588,6 +776,8 @@ fn equip_crystal_item_with_quantity(
         added_luck: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
+        user_item_unique_id: None,
         cursed: false,
         socket_slots: template.slots,
         gem_count: 0,
@@ -628,6 +818,8 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
             added_luck: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
+            user_item_unique_id: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -694,6 +886,7 @@ fn add_inventory_crystal_item_with_metadata(
         added_defence,
         added_stats,
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots,
         gem_count,
@@ -741,6 +934,7 @@ fn fishing_slot_item_state(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: template.slots,
         gem_count: 0,
@@ -794,6 +988,7 @@ fn run_successful_combine_upgrade(
     target_template_name: &str,
 ) -> (SimulationSession, Vec<ServerPacket>) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, source_template_name, 31);
     add_inventory_crystal_item(&mut session, target_template_name, 32);
@@ -856,6 +1051,7 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -876,9 +1072,9 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
 
 fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
     ItemState {
-        key: "quest-wasp-stinger".to_string(),
-        name: "Wasp Stinger".to_string(),
-        icon: super::item_icon_for_key("quest-wasp-stinger"),
+        key: "crystal-item-876".to_string(),
+        name: "SkyStingerEgg".to_string(),
+        icon: super::item_icon_for_key("crystal-item-876"),
         slot,
         unique_id,
         container: ItemContainer::Quest,
@@ -893,6 +1089,7 @@ fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -912,6 +1109,10 @@ fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
 }
 
 fn fill_all_bag_slots(session: &mut SimulationSession) {
+    let template = mir2_game_data::crystal_item_by_name("BronzeHelmet")
+        .expect("real non-stackable Crystal fixture");
+    let key = super::crystal_item_key_for_template(&template);
+    let icon = u16::try_from(template.image).unwrap_or_default();
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.clear();
     for index in 0_u8..80 {
@@ -921,25 +1122,26 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
             ItemContainer::Bag2
         };
         resources.inventory_items.push(ItemState {
-            key: format!("full-slot-{index}"),
-            name: format!("Full Slot {index}"),
-            icon: super::item_icon_for_key("training-manual"),
+            key: key.clone(),
+            name: template.name.clone(),
+            icon,
             slot: index % 40,
             unique_id: super::default_item_unique_id(container, index % 40),
             container,
             quantity: 1,
             description: "Fills bag capacity for transaction rollback tests.".to_string(),
-            durability_current: None,
-            durability_max: None,
-            weight: 1,
-            equip_slot: None,
+            durability_current: Some(template.durability),
+            durability_max: Some(template.durability),
+            weight: u16::from(template.weight),
+            equip_slot: Some(EquipmentSlot::Helmet),
             grade: ItemGrade::None,
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
-            socket_slots: 0,
+            socket_slots: template.slots,
             gem_count: 0,
             identified: None,
             soul_bound_id: None,
@@ -956,7 +1158,6 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
         });
     }
 }
-
 fn add_equippable_test_item(
     session: &mut SimulationSession,
     key: &str,
@@ -985,6 +1186,7 @@ fn add_equippable_test_item(
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -1186,6 +1388,166 @@ fn register_test_account(session: &SimulationSession, account_id: &str) {
     let _ = config.save_account_store_account(account_id);
 }
 
+fn unique_test_account_id(label: &str) -> String {
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("system clock should be after epoch")
+        .as_nanos();
+    format!("test-{label}-{}-{unique}", std::process::id())
+}
+
+fn register_empty_test_account(session: &SimulationSession, account_id: &str) {
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    assert!(
+        store
+            .accounts
+            .insert(
+                account_id.to_string(),
+                crate::config::AccountRecord::empty()
+            )
+            .is_none(),
+        "test account id must be unique"
+    );
+    drop(store);
+    config
+        .save_account_store_account(account_id)
+        .expect("empty test account should persist");
+}
+
+fn login_demo_account_for_persistence_test(session: &mut SimulationSession) {
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
+/// Starts an ordinary authenticated demo character and places it three tiles
+/// behind a real fishable map cell. Fishing now reads the active map's parsed
+/// `fishing_cells`, so tests must not rely on the synthetic resource default.
+fn authenticated_demo_fishing_session() -> SimulationSession {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let login_packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    let character_index = login_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::LoginSuccess { characters } => {
+                characters.first().map(|character| character.index)
+            }
+            _ => None,
+        })
+        .expect("demo login should expose a character");
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+    assert!(
+        super::is_in_world(session.app.world()),
+        "authenticated fishing fixture must enter the world"
+    );
+    place_player_at_real_fishing_cell(&mut session);
+    session
+}
+
+fn fishing_origin_for_target(target: Point, direction: MirDirection) -> Point {
+    match direction {
+        MirDirection::Up => Point {
+            x: target.x,
+            y: target.y + 3,
+        },
+        MirDirection::Right => Point {
+            x: target.x - 3,
+            y: target.y,
+        },
+        MirDirection::Down => Point {
+            x: target.x,
+            y: target.y - 3,
+        },
+        MirDirection::Left => Point {
+            x: target.x + 3,
+            y: target.y,
+        },
+        _ => panic!("fishing fixture only uses cardinal directions"),
+    }
+}
+
+fn position_player_for_fishing_target(
+    session: &mut SimulationSession,
+    target_is_valid: bool,
+) -> Point {
+    let player = player_entity(session.app.world()).expect("player entity");
+    let (bounds, fishing_cells) = {
+        let map = session.app.world().resource::<MapRuntimeResource>();
+        (map.map_region_bounds, map.fishing_cells.clone())
+    };
+    let directions = [
+        MirDirection::Up,
+        MirDirection::Right,
+        MirDirection::Down,
+        MirDirection::Left,
+    ];
+    let candidate = (bounds.min_x..=bounds.max_x)
+        .flat_map(|x| (bounds.min_y..=bounds.max_y).map(move |y| Point { x, y }))
+        .flat_map(|target| {
+            directions
+                .into_iter()
+                .map(move |direction| (target.clone(), direction))
+        })
+        .find(|(target, direction)| {
+            fishing_cells.contains_key(&(target.x, target.y)) == target_is_valid
+                && can_occupy(
+                    session.app.world(),
+                    fishing_origin_for_target(target.clone(), *direction),
+                    Some(player),
+                )
+        })
+        .expect("map should contain a usable fishing fixture target");
+    let (target, direction) = candidate;
+    session.force_authoritative_player_transform(
+        fishing_origin_for_target(target.clone(), direction),
+        direction,
+    );
+    target
+}
+
+fn place_player_at_real_fishing_cell(session: &mut SimulationSession) -> Point {
+    position_player_for_fishing_target(session, true)
+}
+
+fn place_player_at_non_fishing_cell(session: &mut SimulationSession) -> Point {
+    position_player_for_fishing_target(session, false)
+}
+
+fn install_isolated_map_fixture(
+    session: &mut SimulationSession,
+    bounds: mir2_game_data::MapBounds,
+) {
+    {
+        let mut map = session.app.world_mut().resource_mut::<MapRuntimeResource>();
+        map.map_region_bounds = bounds;
+        map.blocked_cells.clear();
+        map.closed_door_cells.clear();
+        map.doors = super::super::resources::DoorRegistry::default();
+        map.fishing_cells.clear();
+    }
+    let mut config = session
+        .app
+        .world_mut()
+        .resource_mut::<RuntimeConfigResource>();
+    config.config.terrain_patches.clear();
+    config.config.decor_objects.clear();
+}
 fn add_rental_mail_target(config: &SimulationConfig, name: &str, index: i32) {
     let character = CharacterRecord {
         index,
@@ -1225,6 +1587,89 @@ fn stage5_systems_for_character(
         .as_deref()
         .and_then(|state| serde_json::from_str(state).ok())
         .unwrap_or_default()
+}
+
+fn stage5_systems_for_account_character(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+) -> crate::config::Stage5SystemsState {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let save = store
+        .accounts
+        .get(account_id)
+        .and_then(|account| account.saves.get(&character_index))
+        .expect("character save should exist");
+    save.stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str(state).ok())
+        .unwrap_or_default()
+}
+
+fn unique_mail_transaction_store(label: &str) -> (std::path::PathBuf, SimulationConfig) {
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("system clock should be after epoch")
+        .as_nanos();
+    let dir = std::env::temp_dir().join(format!(
+        "mir2-mail-transaction-{label}-{}-{unique}",
+        std::process::id()
+    ));
+    let path = dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(path);
+    let target = CharacterRecord {
+        index: 0,
+        name: "AtomicTarget".to_string(),
+        level: 7,
+        class: MirClass::Wizard,
+        gender: MirGender::Female,
+    };
+    config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .insert(
+            "atomic-target-account".to_string(),
+            crate::config::AccountRecord::new(target),
+        );
+    config
+        .save_account_store()
+        .expect("mail transaction fixture should persist");
+    (dir, config)
+}
+
+fn prepare_atomic_mail_sender(config: &SimulationConfig) -> (SimulationSession, u64) {
+    let mut sender = SimulationSession::new(config.clone());
+    assert!(sender
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    sender.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    sender
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 3_000;
+    let dagger_unique_id = {
+        let mut inventory = sender.app.world_mut().resource_mut::<InventoryResource>();
+        let dagger = inventory
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.key == "dagger")
+            .expect("seed dagger should exist");
+        dagger.durability_current = Some(13);
+        dagger.added_attack = 7;
+        super::item_unique_id(dagger)
+    };
+    sender.save_active_character();
+    (sender, dagger_unique_id)
 }
 
 fn set_entity_position(session: &mut SimulationSession, entity: Entity, position: Point) {
@@ -1414,7 +1859,7 @@ fn banned_account_is_rejected_on_login_and_start_game() {
     crate::config::ban_account_in_store(&config, "demo", Some(60), "test ban")
         .expect("account ban should persist");
 
-    let mut session = SimulationSession::new(config);
+    let mut session = SimulationSession::new(config.clone());
     let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "demo".to_string(),
         password: "demo".to_string(),
@@ -1427,6 +1872,31 @@ fn banned_account_is_rejected_on_login_and_start_game() {
     let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert!(matches!(
         &start_packets[0],
+        ServerPacket::StartGame {
+            result: 1,
+            resolution: 0
+        }
+    ));
+
+    // A session that authenticated before the ban must receive Crystal's
+    // ban-specific StartGame response. The unauthenticated path above must not
+    // disclose that the account exists or is banned.
+    let authenticated_account = "banned-after-auth";
+    let mut authenticated = SimulationSession::new(config.clone());
+    register_test_account(&authenticated, authenticated_account);
+    let login_packets = authenticated.handle_packet(ClientPacket::Login {
+        account_id: authenticated_account.to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(matches!(
+        login_packets.first(),
+        Some(ServerPacket::LoginSuccess { .. })
+    ));
+    crate::config::ban_account_in_store(&config, authenticated_account, Some(60), "test ban")
+        .expect("authenticated account ban should persist");
+    let start_packets = authenticated.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(matches!(
+        &start_packets[0],
         ServerPacket::StartGameBanned { reason, .. } if reason == "test ban"
     ));
 }
@@ -1434,6 +1904,7 @@ fn banned_account_is_rejected_on_login_and_start_game() {
 #[test]
 fn start_game_emits_bootstrap_sequence() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(matches!(
@@ -1521,6 +1992,7 @@ fn fixed_crystal_light_setting_accepts_only_crystal_runtime_values() {
 #[test]
 fn start_game_uses_crystal_default_warrior_vitals() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let user_info = packets
         .iter()
@@ -1561,6 +2033,7 @@ fn start_game_migrates_legacy_default_vitals() {
     }
 
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let user_info = packets
         .iter()
@@ -1605,6 +2078,7 @@ fn start_game_migrates_legacy_level_one_warrior_vitals() {
     }
 
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame {
         character_index: character.index,
     });
@@ -1711,6 +2185,7 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
     }
 
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame {
         character_index: character.index,
     });
@@ -1788,6 +2263,7 @@ fn start_game_restores_legacy_level_one_empty_starter_equipment() {
     }
 
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame {
         character_index: character.index,
     });
@@ -1818,6 +2294,7 @@ fn start_game_restores_legacy_level_one_empty_starter_equipment() {
 #[test]
 fn default_demo_character_keeps_stage5_seed_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = session.world_snapshot();
 
@@ -1833,6 +2310,7 @@ fn default_demo_character_keeps_stage5_seed_state() {
 #[test]
 fn start_game_packet_trace_matches_bootstrap_order() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let trace = trace_server_packets(&packets);
     let names = trace
@@ -1877,6 +2355,7 @@ fn start_game_packet_trace_matches_bootstrap_order() {
 #[test]
 fn start_game_emits_visible_object_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(packets
@@ -1888,6 +2367,66 @@ fn start_game_emits_visible_object_packets() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectNpc { .. })));
+}
+
+#[test]
+fn optional_safe_zone_border_is_off_by_default_but_can_be_enabled() {
+    let manifest = crystal_respawn_manifest();
+    let map = manifest
+        .maps
+        .iter()
+        .find(|map| {
+            map.safe_zone_spells
+                .iter()
+                .any(|spell| spell.object_id == 46)
+        })
+        .expect("generated Crystal map data should retain the optional Bichon border");
+    let border = map
+        .safe_zone_spells
+        .iter()
+        .find(|spell| spell.object_id == 46)
+        .expect("Bichon border object 46");
+    let default_config = SimulationConfig::default();
+    let character = default_config.default_character.clone();
+    let default_packets = super::super::packets::start_game_static_visible_object_packets(
+        &map.map_file_name,
+        &border.location,
+        &character,
+        &default_config,
+        &[],
+        super::CrystalNpcLocalTime::new(0, 0, 0),
+    );
+    assert!(
+        !default_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectSpell { info }
+                if info.object_id == 46
+                    && info.spell == Spell::TrapHexagon
+                    && info.location == border.location
+        )),
+        "Crystal defaults Settings.SafeZoneBorder to false"
+    );
+
+    let mut enabled_config = SimulationConfig::default();
+    enabled_config.safe_zone_border_effects = true;
+    let enabled_packets = super::super::packets::start_game_static_visible_object_packets(
+        &map.map_file_name,
+        &border.location,
+        &character,
+        &enabled_config,
+        &[],
+        super::CrystalNpcLocalTime::new(0, 0, 0),
+    );
+    assert!(
+        enabled_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectSpell { info }
+                if info.object_id == 46
+                    && info.spell == Spell::TrapHexagon
+                    && info.location == border.location
+        )),
+        "an explicit SafeZoneBorder opt-in must retain the imported decoration"
+    );
 }
 
 #[test]
@@ -1939,6 +2478,7 @@ fn world_snapshot_uses_crystal_symmetric_sixteen_tile_object_range() {
     ];
 
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = session.world_snapshot();
 
@@ -2076,8 +2616,11 @@ fn missing_password_login_does_not_seed_default_character() {
 
 #[test]
 fn passkey_first_login_starts_with_empty_crystal_character_list() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
     let account_id = "sui:0xpasskeyempty";
+    SimulationSession::provision_passkey_account(&config, account_id)
+        .expect("trusted test provisioning should create the passkey account");
 
     let login = session.passkey_login(account_id);
     match &login[0] {
@@ -2136,8 +2679,11 @@ fn passkey_account_cannot_be_taken_over_via_password_path() {
     // give it a character, then prove no classic password — the legacy default,
     // empty, or the internal locked sentinel — can log into it, while the real
     // owner's passkey login keeps working and still sees the character.
-    let mut session = SimulationSession::new(SimulationConfig::default());
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
     let account_id = "sui:0xvictimwallet";
+    SimulationSession::provision_passkey_account(&config, account_id)
+        .expect("trusted test provisioning should create the passkey account");
 
     let login = session.passkey_login(account_id);
     assert!(matches!(login[0], ServerPacket::LoginSuccess { .. }));
@@ -2388,8 +2934,78 @@ fn disconnect_persists_character_state_for_reconnect() {
 }
 
 #[test]
+fn unauthenticated_active_character_save_does_not_pollute_demo_account() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    let _ = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SessionResource>()
+        .account_id = None;
+    let before = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should serialize");
+
+    set_player_position(&mut session, Point { x: 401, y: 402 });
+    session.save_active_character();
+
+    let after = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should serialize");
+    assert_eq!(after, before);
+}
+
+#[test]
+fn authenticated_active_character_save_still_persists_to_its_account() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    let _ = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_position(&mut session, Point { x: 403, y: 404 });
+
+    session.save_active_character();
+
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .expect("authenticated character save should exist");
+    assert_eq!(save.position, Point { x: 403, y: 404 });
+}
+
+#[test]
 fn new_character_is_added_and_returned() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    let account_id = unique_test_account_id("new-character");
+    register_empty_test_account(&session, &account_id);
+    let login = session.handle_packet(ClientPacket::Login {
+        account_id,
+        password: "demo".to_string(),
+    });
+    assert!(matches!(
+        login.first(),
+        Some(ServerPacket::LoginSuccess { characters }) if characters.is_empty()
+    ));
     let packets = session.handle_packet(ClientPacket::NewCharacter {
         name: "Blade".to_string(),
         gender: MirGender::Female,
@@ -2723,6 +3339,7 @@ fn multi_client_shared_store_smoke_keeps_accounts_isolated() {
 #[test]
 fn long_running_tick_soak_preserves_player_state_without_panic() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     for tick in 0..1_200 {
@@ -2851,6 +3468,7 @@ fn save_reload_under_load_restores_multiple_clients() {
 #[test]
 fn long_running_tick_soak_keeps_entity_count_bounded() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let baseline = runtime_entity_count(&session);
     let mut peak = baseline;
@@ -2893,6 +3511,7 @@ fn movement_before_start_game_rejects_without_runtime_chat() {
 #[test]
 fn crystal_packet_walk_timing_queues_repeat_without_user_location_correction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
     let start = (305..360)
@@ -2975,6 +3594,7 @@ fn attack_before_start_game_rejects_without_runtime_chat() {
 #[test]
 fn crystal_packet_attack_timing_rejects_repeat_until_world_tick_advances() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     spawn_crystal_monster_for_test(
@@ -3021,6 +3641,7 @@ fn click_to_move_onto_occupied_tile_approaches_adjacent() {
     // to it and stop adjacent, rather than stalling in place because the exact
     // destination tile is unreachable. This exercises the A* adjacency fallback.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
 
@@ -3080,6 +3701,7 @@ fn click_to_move_onto_occupied_tile_approaches_adjacent() {
 #[test]
 fn direct_attack_missing_target_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.attack(98_999);
@@ -3090,6 +3712,7 @@ fn direct_attack_missing_target_rejects_without_runtime_chat() {
 #[test]
 fn direct_attack_non_monster_target_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.attack(4001);
@@ -3100,6 +3723,7 @@ fn direct_attack_non_monster_target_rejects_without_runtime_chat() {
 #[test]
 fn direct_attack_out_of_range_rejects_without_runtime_chat_or_attack_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -3116,6 +3740,7 @@ fn direct_attack_out_of_range_rejects_without_runtime_chat_or_attack_packet() {
 #[test]
 fn direct_attack_dead_monster_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
     let _ = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 5);
@@ -3123,6 +3748,99 @@ fn direct_attack_dead_monster_rejects_without_runtime_chat() {
     let packets = session.attack(super::FIELD_WASP_ID);
 
     assert!(packets.is_empty());
+}
+
+#[test]
+fn personal_melee_rejects_neutral_monster_without_consuming_attack_cooldown() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 330, y: 270 };
+    set_player_position(&mut session, origin.clone());
+    let neutral_id = 98_772;
+    let neutral = spawn_crystal_monster_for_test(
+        &mut session,
+        neutral_id,
+        "Royal_Guard",
+        Point { x: 331, y: 270 },
+        MirDirection::Left,
+        false,
+    );
+    sync_visible_objects(&mut session);
+    let neutral_hp_before = session
+        .app
+        .world()
+        .entity(neutral)
+        .get::<MonsterVitals>()
+        .expect("neutral vitals")
+        .hp;
+
+    let rejected = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+    assert!(matches!(
+        rejected.as_slice(),
+        [ServerPacket::UserLocation { .. }]
+    ));
+    assert!(!rejected
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+
+    set_entity_position(&mut session, neutral, Point { x: 340, y: 270 });
+    let hostile_id = 98_773;
+    spawn_crystal_monster_for_test(
+        &mut session,
+        hostile_id,
+        "Yob",
+        Point { x: 331, y: 270 },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+    let accepted = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+    assert!(accepted
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(neutral)
+            .get::<MonsterVitals>()
+            .expect("neutral vitals")
+            .hp,
+        neutral_hp_before
+    );
+}
+
+#[test]
+fn personal_melee_allows_passive_crystal_hunt_monster() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_position(&mut session, Point { x: 330, y: 270 });
+    spawn_crystal_monster_for_test(
+        &mut session,
+        98_774,
+        "Deer",
+        Point { x: 331, y: 270 },
+        MirDirection::Left,
+        false,
+    );
+    sync_visible_objects(&mut session);
+
+    let packets = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
 }
 
 #[test]
@@ -3152,6 +3870,7 @@ fn interact_before_start_game_rejects_without_runtime_chat() {
 #[test]
 fn direct_interact_missing_target_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.interact(98_999);
@@ -3162,6 +3881,7 @@ fn direct_interact_missing_target_rejects_without_runtime_chat() {
 #[test]
 fn direct_interact_same_tile_rejects_without_runtime_chat_or_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let npc_entity =
         super::entity_by_object_id(session.app.world(), 4001).expect("starter NPC should exist");
@@ -3179,6 +3899,7 @@ fn direct_interact_same_tile_rejects_without_runtime_chat_or_dialog() {
 #[test]
 fn direct_interact_out_of_range_rejects_without_runtime_chat_or_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -3197,6 +3918,7 @@ fn direct_interact_out_of_range_rejects_without_runtime_chat_or_dialog() {
 #[test]
 fn npc_dialog_target_without_active_dialog_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.select_npc_dialog_target("@Main");
@@ -3207,6 +3929,7 @@ fn npc_dialog_target_without_active_dialog_rejects_without_runtime_chat() {
 #[test]
 fn npc_dialog_invalid_target_rejects_without_runtime_chat_and_preserves_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
@@ -3221,6 +3944,7 @@ fn npc_dialog_invalid_target_rejects_without_runtime_chat_and_preserves_dialog()
 #[test]
 fn npc_input_submit_without_input_rejects_without_runtime_chat_and_preserves_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
@@ -3238,6 +3962,7 @@ fn npc_input_submit_without_input_rejects_without_runtime_chat_and_preserves_dia
 #[test]
 fn npc_dialog_target_missing_npc_rejects_without_runtime_chat_and_dismisses_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -3281,6 +4006,7 @@ fn npc_dialog_target_npc_without_script_rejects_without_runtime_chat_and_dismiss
         script_key: None,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -3322,6 +4048,7 @@ fn cast_skill_before_start_game_rejects_without_runtime_chat() {
 #[test]
 fn walk_updates_self_location() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let packets = session.handle_packet(ClientPacket::Walk {
         direction: MirDirection::Right,
@@ -3340,6 +4067,7 @@ fn walk_updates_self_location() {
 #[test]
 fn crystal_run_from_standstill_echoes_location_without_moving() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
     let start = (305..360)
@@ -3369,6 +4097,7 @@ fn crystal_run_from_standstill_echoes_location_without_moving() {
 #[test]
 fn crystal_walk_primes_next_run_like_crystal_step_counter() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
     let start = (305..360)
@@ -3428,6 +4157,7 @@ fn crystal_walk_primes_next_run_like_crystal_step_counter() {
 #[test]
 fn combat_packet_trace_orders_attack_before_delayed_health() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
     sync_visible_objects(&mut session);
@@ -3459,6 +4189,7 @@ fn combat_packet_trace_orders_attack_before_delayed_health() {
 #[test]
 fn walk_into_map_wall_keeps_player_in_place() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 334, y: 273 });
 
@@ -3473,6 +4204,7 @@ fn walk_into_map_wall_keeps_player_in_place() {
 #[test]
 fn run_does_not_skip_blocked_intermediate_tile() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 266 });
 
@@ -3487,6 +4219,7 @@ fn run_does_not_skip_blocked_intermediate_tile() {
 #[test]
 fn run_does_not_partially_advance_when_destination_tile_is_blocked() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
     let directions = [
@@ -3534,14 +4267,25 @@ fn crystal_walk_and_run_share_six_hundred_ms_move_delay() {
 #[test]
 fn walk_outside_map_region_keeps_player_in_place() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    set_player_position(&mut session, Point { x: 302, y: 270 });
+    install_isolated_map_fixture(
+        &mut session,
+        mir2_game_data::MapBounds {
+            min_x: 50,
+            max_x: 52,
+            min_y: 50,
+            max_y: 52,
+        },
+    );
+    let start = Point { x: 50, y: 51 };
+    session.force_authoritative_player_transform(start.clone(), MirDirection::Left);
 
     let _ = session.handle_packet(ClientPacket::Walk {
         direction: MirDirection::Left,
     });
 
-    assert_eq!(player_position(&session), Point { x: 302, y: 270 });
+    assert_eq!(player_position(&session), start);
 }
 
 #[test]
@@ -3570,6 +4314,7 @@ fn transfer_map_requires_player_on_transfer_bounds() {
     )));
 
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let unknown_packets = session.transfer_map("missing-transfer");
@@ -3601,6 +4346,7 @@ fn transfer_map_requires_player_on_transfer_bounds() {
 #[test]
 fn map_transfer_packet_trace_orders_map_information_before_location() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 340, y: 270 });
     sync_visible_objects(&mut session);
@@ -3624,6 +4370,7 @@ fn map_transfer_packet_trace_orders_map_information_before_location() {
 #[test]
 fn transfer_map_updates_map_information_location_and_safe_zone() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 340, y: 269 });
 
@@ -3657,6 +4404,7 @@ fn transfer_map_updates_map_information_location_and_safe_zone() {
 fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
     let mut session =
         SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.transfer_map("crystal:0:284:607");
@@ -3737,6 +4485,7 @@ fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
 fn platinum_profile_visible_sailor_dialogs_complete_the_paid_prajna_round_trip() {
     let mut session =
         SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.transfer_map("crystal:0:251:676");
     session
@@ -3803,6 +4552,7 @@ fn platinum_profile_visible_sailor_dialogs_complete_the_paid_prajna_round_trip()
 #[test]
 fn crystal_current_map_transfer_spawns_visible_respawns_into_world() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.transfer_map("crystal:0:284:607");
@@ -3830,6 +4580,7 @@ fn crystal_current_map_transfer_spawns_visible_respawns_into_world() {
 #[test]
 fn crystal_current_map_transfer_spawns_visible_archer_guard_into_world() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.transfer_map("crystal:0:287:618");
@@ -3862,6 +4613,7 @@ fn crystal_current_map_transfer_spawns_visible_archer_guard_into_world() {
 #[test]
 fn debug_crystal_transfer_key_updates_map_information_and_location() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.transfer_map("crystal:HF1:200:200");
@@ -3897,6 +4649,7 @@ fn debug_crystal_transfer_key_updates_map_information_and_location() {
 #[test]
 fn crystal_manifest_map_information_includes_minimap_bigmap_and_light() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.transfer_map("crystal:D1801:100:100");
@@ -3915,6 +4668,7 @@ fn crystal_manifest_map_information_includes_minimap_bigmap_and_light() {
 #[test]
 fn crystal_manifest_safe_zones_mark_imported_maps() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.transfer_map("crystal:1:315:82");
@@ -3928,6 +4682,7 @@ fn crystal_manifest_safe_zones_mark_imported_maps() {
 #[test]
 fn crystal_manifest_movements_surface_as_runtime_transfers() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let transfer = session
@@ -3963,6 +4718,7 @@ fn crystal_manifest_movements_surface_as_runtime_transfers() {
 #[test]
 fn walk_onto_crystal_manifest_movement_transfers_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.transfer_map("crystal:0:307:264");
 
@@ -3988,6 +4744,7 @@ fn walk_onto_crystal_manifest_movement_transfers_map() {
 #[test]
 fn movement_input_reactivates_crystal_transfer_when_player_is_already_on_source() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let transfer = session
         .world_snapshot()
@@ -4032,6 +4789,7 @@ fn walk_onto_blocked_crystal_manifest_movement_source_transfers_map() {
     }
 
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.transfer_map("crystal:0:322:248");
 
@@ -4057,6 +4815,7 @@ fn walk_onto_blocked_crystal_manifest_movement_source_transfers_map() {
 #[test]
 fn crystal_manifest_movements_skip_crystal_invalid_direct_transfers() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let invalid_archer_hideout_key = super::crystal_movement_transfer_key("0", 322, 473, 387, 0, 0);
@@ -4227,6 +4986,7 @@ fn crystal_world_full_spawn_table_is_empty_for_unpopulated_map() {
 fn crystal_world_start_game_activates_bichon_only() {
     let config = SimulationConfig::default().with_crystal_world_runtime();
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = session.world_snapshot();
 
@@ -4269,6 +5029,7 @@ fn crystal_full_world_zone_collision_expands_bichon_to_full_map() {
 fn crystal_world_pools_monsters_and_materializes_only_nearby() {
     let config = SimulationConfig::default().with_crystal_world_runtime();
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // The whole Bichon roster stays pooled (dormant slots retained)...
@@ -4305,6 +5066,7 @@ fn crystal_world_pools_monsters_and_materializes_only_nearby() {
 fn crystal_world_activation_respects_pending_respawn_timer() {
     let config = SimulationConfig::default().with_crystal_world_runtime();
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_pos = session
@@ -4350,6 +5112,7 @@ fn crystal_world_activation_respects_pending_respawn_timer() {
 fn crystal_map_runtime_start_game_excludes_starter_fixture_monsters() {
     let config = SimulationConfig::default().with_crystal_map_runtime();
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
 
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = session.world_snapshot();
@@ -4391,6 +5154,7 @@ fn crystal_map_runtime_start_game_uses_saved_crystal_map_roster() {
         save.position = Point { x: 302, y: 164 };
     }
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
 
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = session.world_snapshot();
@@ -4447,6 +5211,7 @@ fn crystal_neutral_town_guards_do_not_follow_respawn_routes() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let tracked_guards = session
@@ -4503,6 +5268,7 @@ fn crystal_guards_are_neutral_in_snapshot() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let guard = session
@@ -4520,6 +5286,7 @@ fn crystal_guards_do_not_auto_attack_player() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
 
@@ -4536,6 +5303,7 @@ fn crystal_imported_monster_packets_preserve_ai() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
 
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
@@ -4597,6 +5365,7 @@ fn crystal_guards_attack_hostile_monsters_with_attack_packets() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let guard_entity = find_monster_entity_by(&session, |name, agent, position| {
@@ -4681,6 +5450,7 @@ fn crystal_guard_attack_uses_target_back_packet_shape() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let guard_entity = find_monster_entity_by(&session, |name, agent, position| {
@@ -4792,6 +5562,7 @@ fn crystal_guard_attack_uses_target_back_packet_shape() {
 #[test]
 fn crystal_archer_guards_do_not_follow_routes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let current_tick = runtime_tick(session.app.world());
@@ -4848,6 +5619,7 @@ fn crystal_guards_ignore_hens_even_when_adjacent() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let guard_entity = find_monster_entity_by(&session, |name, agent, position| {
@@ -4902,6 +5674,7 @@ fn crystal_guards_ignore_hens_even_when_adjacent() {
 #[test]
 fn player_attack_locks_monster_target_and_uses_runtime_counterattack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -4987,6 +5760,7 @@ fn player_attack_locks_monster_target_and_uses_runtime_counterattack() {
 #[test]
 fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -5055,7 +5829,15 @@ fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
 #[test]
 fn crystal_range_attack_packet_uses_target_id_bridge() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Archer,
+        MirGender::Male,
+        7,
+    );
+    equip_crystal_item(&mut session, "WoodenBow", EquipmentSlot::Weapon);
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
@@ -5125,9 +5907,993 @@ fn crystal_range_attack_packet_uses_target_id_bridge() {
     )));
 }
 
+fn native_range_attack_case(
+    class: MirClass,
+    weapon_name: &str,
+    riding_mount: bool,
+    fishing: bool,
+    target_distance: i32,
+    supplied_target_location: Point,
+) -> (SimulationSession, Entity, Vec<ServerPacket>) {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(&mut session, class, MirGender::Male, 20);
+    equip_crystal_item(&mut session, weapon_name, EquipmentSlot::Weapon);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MountResource>()
+        .riding_mount = riding_mount;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .fishing = fishing;
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let target = spawn_crystal_monster_for_test(
+        &mut session,
+        98_868,
+        "Yob",
+        Point {
+            x: origin.x + target_distance,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+    let packets = session.handle_packet(ClientPacket::RangeAttack {
+        direction: MirDirection::Right,
+        location: origin,
+        target_id: 98_868,
+        target_location: supplied_target_location,
+    });
+    (session, target, packets)
+}
+
+#[test]
+fn native_range_attack_authority_rejects_wrong_class_weapon_and_mount() {
+    for (class, weapon, riding_mount) in [
+        (MirClass::Warrior, "WoodenSword", false),
+        (MirClass::Archer, "WoodenSword", false),
+        (MirClass::Archer, "WoodenBow", true),
+    ] {
+        let (mut session, target, packets) = native_range_attack_case(
+            class,
+            weapon,
+            riding_mount,
+            false,
+            1,
+            Point { x: 334, y: 267 },
+        );
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+            )),
+            "unauthorized range attack escaped: class={class:?} weapon={weapon} mounted={riding_mount}: {packets:?}"
+        );
+        let hp_before = session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp;
+        for _ in 0..8 {
+            let _ = session.tick();
+        }
+        assert_eq!(
+            session
+                .app
+                .world()
+                .entity(target)
+                .get::<MonsterVitals>()
+                .expect("target vitals")
+                .hp,
+            hp_before,
+            "rejected intent must not schedule damage"
+        );
+    }
+
+    let (mut session, target, packets) = native_range_attack_case(
+        MirClass::Archer,
+        "WoodenBow",
+        false,
+        true,
+        1,
+        Point { x: 334, y: 267 },
+    );
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+    )));
+    let hp_before = session
+        .app
+        .world()
+        .entity(target)
+        .get::<MonsterVitals>()
+        .expect("target vitals")
+        .hp;
+    for _ in 0..8 {
+        let _ = session.tick();
+    }
+
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp,
+        hp_before,
+        "forged RangeAttack while fishing must not schedule damage"
+    );
+}
+
+#[test]
+fn native_range_attack_uses_actual_target_position_and_crystal_nine_tile_limit() {
+    let (_session, _target, packets) = native_range_attack_case(
+        MirClass::Archer,
+        "WoodenBow",
+        false,
+        false,
+        10,
+        Point { x: 334, y: 267 },
+    );
+    assert!(
+        !packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+        )),
+        "a forged near targetLocation must not authorize an actual ten-tile target"
+    );
+
+    let (_session, _target, packets) = native_range_attack_case(
+        MirClass::Archer,
+        "WoodenBow",
+        false,
+        false,
+        9,
+        Point { x: 334, y: 267 },
+    );
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { target, .. } if *target == Point { x: 342, y: 267 }
+        )),
+        "nine-tile ranged intent should succeed with authoritative target: {packets:?}"
+    );
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info } if info.target == Point { x: 342, y: 267 }
+    )));
+}
+
+#[test]
+fn personal_melee_enforces_fishing_and_crystal_can_ride_attack() {
+    for (label, riding_mount, mount_type, has_bells, fishing, accepted) in [
+        ("fishing", false, -1, false, true, false),
+        ("mounted without bells", true, 5, false, false, false),
+        ("dismounted without bells", false, -1, false, false, true),
+    ] {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_and_body_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            20,
+        );
+        let origin = Point { x: 333, y: 267 };
+        set_player_position(&mut session, origin.clone());
+        let object_id = 98_900;
+        let target = spawn_crystal_monster_for_test(
+            &mut session,
+            object_id,
+            "Yob",
+            Point {
+                x: origin.x + 1,
+                y: origin.y,
+            },
+            MirDirection::Left,
+            true,
+        );
+        {
+            let mut mount = session.app.world_mut().resource_mut::<MountResource>();
+            mount.riding_mount = riding_mount;
+            mount.mount_type = mount_type;
+            mount.has_bells = has_bells;
+        }
+        session
+            .app
+            .world_mut()
+            .resource_mut::<FishingResource>()
+            .fishing = fishing;
+        sync_visible_objects(&mut session);
+        let hp_before = session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp;
+
+        let packets = session.attack(object_id);
+        assert_eq!(
+            packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })),
+            accepted,
+            "{label}: {packets:?}"
+        );
+        if !accepted {
+            assert!(packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+            for _ in 0..8 {
+                let _ = session.tick();
+            }
+            assert_eq!(
+                session
+                    .app
+                    .world()
+                    .entity(target)
+                    .get::<MonsterVitals>()
+                    .expect("target vitals")
+                    .hp,
+                hp_before,
+                "{label} must schedule zero damage"
+            );
+        }
+    }
+}
+
+#[test]
+fn mounted_melee_uses_real_bells_equipment_and_unequip_revokes_next_attack() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    assert!(session.app.world().resource::<MountResource>().has_bells);
+
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let object_id = 98_901;
+    let _first_target = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Yob",
+        Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+    let allowed = session.attack(object_id);
+    assert!(allowed
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    for _ in 0..8 {
+        let _ = session.tick();
+    }
+
+    let second_object_id = 98_902;
+    let target = spawn_crystal_monster_for_test(
+        &mut session,
+        second_object_id,
+        "Yob",
+        Point {
+            x: origin.x,
+            y: origin.y + 1,
+        },
+        MirDirection::Up,
+        true,
+    );
+
+    let removed = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(removed.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            success: true,
+            ..
+        }
+    )));
+    assert!(!session.app.world().resource::<MountResource>().has_bells);
+    let hp_before = session
+        .app
+        .world()
+        .entity(target)
+        .get::<MonsterVitals>()
+        .expect("target vitals")
+        .hp;
+    sync_visible_objects(&mut session);
+    let rejected = session.attack(second_object_id);
+    assert!(!rejected
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    assert!(rejected
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    for _ in 0..8 {
+        let _ = session.tick();
+    }
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp,
+        hp_before
+    );
+}
+
+#[test]
+fn mount_bells_curse_requires_unlock_and_consumes_it_only_after_success() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+            .expect("equipped mount")
+            .socketed
+            .iter_mut()
+            .find(|item| item.unique_id == bells_id)
+            .expect("embedded Bells")
+            .cursed = true;
+    }
+
+    let blocked = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert_eq!(
+        blocked,
+        vec![ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            grid_to: MirGridType::Inventory,
+            unique_id: bells_id,
+            to: 32,
+            success: false,
+        }]
+    );
+    assert!(
+        !session
+            .app
+            .world()
+            .resource::<PlayerPermissionResource>()
+            .unlock_curse
+    );
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerPermissionResource>()
+        .unlock_curse = true;
+    let occupied_failure = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 0,
+        from_unique_id: 13,
+    });
+    assert!(occupied_failure
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RemoveSlotItem { success: false, .. })));
+    assert!(
+        session
+            .app
+            .world()
+            .resource::<PlayerPermissionResource>()
+            .unlock_curse
+    );
+
+    let removed = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(removed
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RemoveSlotItem { success: true, .. })));
+    assert!(
+        !session
+            .app
+            .world()
+            .resource::<PlayerPermissionResource>()
+            .unlock_curse
+    );
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == bells_id && item.slot == 32 && item.cursed));
+}
+
+#[test]
+fn mount_bells_dont_store_rejects_storage_but_allows_inventory() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+            .expect("equipped mount")
+            .socketed
+            .iter_mut()
+            .find(|item| item.unique_id == bells_id)
+            .expect("embedded Bells")
+            .rental_binding_flags = super::CRYSTAL_BIND_DONT_STORE;
+    }
+    activate_storage_service(&mut session);
+
+    let storage_reject = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Storage,
+        unique_id: bells_id,
+        to: 5,
+        from_unique_id: 13,
+    });
+    assert_eq!(
+        storage_reject,
+        vec![ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            grid_to: MirGridType::Storage,
+            unique_id: bells_id,
+            to: 5,
+            success: false,
+        }]
+    );
+    assert!(session.app.world().resource::<MountResource>().has_bells);
+    assert!(!session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .storage_items
+        .iter()
+        .any(|item| item.unique_id == bells_id));
+
+    let inventory_success = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(inventory_success
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RemoveSlotItem { success: true, .. })));
+    assert!(!session.app.world().resource::<MountResource>().has_bells);
+    assert!(session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| {
+            item.unique_id == bells_id
+                && item.slot == 32
+                && item.rental_binding_flags == super::CRYSTAL_BIND_DONT_STORE
+        }));
+}
+
+#[test]
+fn world_snapshot_serializes_authoritative_native_combat_predicates() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Archer,
+        MirGender::Female,
+        30,
+    );
+    equip_crystal_item(&mut session, "WoodenBow", EquipmentSlot::Weapon);
+
+    let snapshot = session.world_snapshot();
+    let player = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(player.riding_mount, Some(false));
+    assert_eq!(player.can_mount_attack, Some(true));
+    assert_eq!(player.has_class_weapon, Some(true));
+    assert_eq!(player.dazed, Some(false));
+    assert_eq!(player.fishing, Some(false));
+
+    let gateway_frame = serde_json::json!({
+        "type": "worldSnapshot",
+        "payload": snapshot,
+    });
+    let player_json = gateway_frame["payload"]["entities"]
+        .as_array()
+        .expect("entities array")
+        .iter()
+        .find(|entity| entity["kind"] == "selfPlayer")
+        .expect("serialized self player");
+    assert_eq!(player_json["ridingMount"], false);
+    assert_eq!(player_json["canMountAttack"], true);
+    assert_eq!(player_json["hasClassWeapon"], true);
+    assert_eq!(player_json["dazed"], false);
+    assert_eq!(player_json["fishing"], false);
+
+    assert!(!session.app.world().resource::<MountResource>().has_bells);
+    assert_eq!(
+        equip_crystal_mount_with_optional_bells_and_ride(&mut session, false),
+        None
+    );
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .fishing = true;
+    let dazed_expiry = runtime_tick(session.app.world()).saturating_add(10);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: super::HELL_KEEPER_DAZED_BUFF_KEY.to_string(),
+            name: "Dazed".to_string(),
+            description: String::new(),
+            expires_at_tick: dazed_expiry,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        });
+    let changed = session.world_snapshot();
+    let changed_player = changed
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(changed_player.riding_mount, Some(true));
+    assert_eq!(changed_player.can_mount_attack, Some(false));
+    assert_eq!(changed_player.dazed, Some(true));
+    assert_eq!(changed_player.fishing, Some(true));
+
+    let _ = equip_crystal_bells_to_mount(&mut session, 31);
+    let with_bells = session.world_snapshot();
+    let with_bells_player = with_bells
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(with_bells_player.can_mount_attack, Some(true));
+    assert!(with_bells
+        .entities
+        .iter()
+        .filter(|entity| entity.kind != WorldEntityKind::SelfPlayer)
+        .all(|entity| entity.can_mount_attack.is_none()));
+
+    let mut old_host_json = serde_json::to_value(with_bells_player).expect("serialize player");
+    old_host_json
+        .as_object_mut()
+        .expect("player object")
+        .remove("canMountAttack");
+    let old_host: crate::WorldEntitySnapshot =
+        serde_json::from_value(old_host_json).expect("deserialize old host snapshot");
+    assert_eq!(old_host.can_mount_attack, None);
+}
+
+#[test]
+fn real_mount_bells_survive_save_reload_and_start_equipment_snapshot() {
+    let temp_dir = unique_runtime_temp_dir("mount-bells-persistence");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    register_test_account(&session, "mount-bells-persistence");
+    session.handle_packet(ClientPacket::Login {
+        account_id: "mount-bells-persistence".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    equip_crystal_mount_with_optional_bells_and_ride(&mut session, true);
+    assert!(session.app.world().resource::<MountResource>().has_bells);
+    session.save_active_character();
+    drop(session);
+
+    let mut reloaded =
+        SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "mount-bells-persistence".to_string(),
+        password: "demo".to_string(),
+    });
+    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(reloaded.app.world().resource::<MountResource>().has_bells);
+    let equipment = reloaded
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .clone();
+    let start_slots = super::user_equipment_slots(&equipment);
+    let mount = start_slots[13]
+        .as_ref()
+        .expect("reloaded StartGame equipment must contain the mount");
+    assert_eq!(
+        mount
+            .slots
+            .get(1)
+            .and_then(Option::as_ref)
+            .map(|item| item.item_index),
+        Some(778),
+        "Crystal MountSlot.Bells must be present in the StartGame equipment payload"
+    );
+
+    let ride = reloaded.handle_packet(ClientPacket::UseItem {
+        unique_id: 13,
+        grid: MirGridType::Equipment,
+    });
+    assert!(ride.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MountUpdate {
+            riding_mount: true,
+            ..
+        }
+    )));
+    let self_player = reloaded
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("self player snapshot");
+    assert_eq!(self_player.can_mount_attack, Some(true));
+}
+
+#[test]
+fn equipment_embedded_unique_ids_are_preserved_across_save_load() {
+    let temp_dir = unique_runtime_temp_dir("embedded-id-preserve");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    let character_index = create_and_start_test_character(&mut session, "UidBell");
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, false);
+    let bells_id = attach_real_bronze_bell_fixture(&mut session, 88_001);
+
+    // Crystal's RedTiger carries BronzeBell (item index 778) only at the
+    // legal MountSlot.Bells protocol position 1. A fabricated socket item is
+    // intentionally not used as a persistence fixture.
+    assert!(session.save_active_character().is_ok());
+    drop(session);
+
+    let mut reloaded = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path.clone()),
+    );
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, character_index);
+    let first_ids = equipment_embedded_key_ids(&reloaded);
+    assert_eq!(
+        first_ids
+            .iter()
+            .filter(|(key, _)| key == "crystal-item-778")
+            .map(|(_, id)| *id)
+            .collect::<Vec<_>>(),
+        vec![bells_id],
+        "the real MountSlot.Bells child must retain its exact non-zero UID"
+    );
+
+    assert!(reloaded.save_active_character().is_ok());
+    drop(reloaded);
+    let mut second_reload =
+        SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
+    login_demo_account_for_persistence_test(&mut second_reload);
+    assert_start_game_success(&mut second_reload, character_index);
+    assert_eq!(equipment_embedded_key_ids(&second_reload), first_ids);
+}
+#[test]
+fn legacy_zero_and_duplicate_embedded_unique_ids_normalize_deterministically() {
+    let temp_dir = unique_runtime_temp_dir("embedded-id-normalize");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    let character_index = create_and_start_test_character(&mut session, "UidLegacy");
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, false);
+    let _ = attach_real_bronze_bell_fixture(&mut session, 88_002);
+    let _ = grant_real_crystal_item(&mut session, "BronzeHelmet", 31);
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        // Legacy saves can contain zero UIDs. Make the top-level item and the
+        // *real* BronzeBell child both zero so load normalization must resolve
+        // both the zero marker and an embedded collision without inventing an
+        // unknown ItemInfo or an illegal socket position.
+        resources
+            .inventory_items
+            .first_mut()
+            .expect("starter inventory item")
+            .unique_id = 0;
+        let mount = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Mount)
+            .expect("equipped RedTiger");
+        assert!(
+            mount.socket_slots > 1,
+            "RedTiger must expose MountSlot.Bells"
+        );
+        assert_eq!(mount.socketed.len(), 1, "one legal Bells occupant expected");
+        assert_eq!(mount.socketed[0].key, "crystal-item-778");
+        mount.socketed[0].slot = 1;
+        mount.socketed[0].unique_id = 0;
+    }
+    assert!(session.save_active_character().is_ok());
+    drop(session);
+
+    let mut reloaded = SimulationSession::new(
+        SimulationConfig::default().with_account_store_path(store_path.clone()),
+    );
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, character_index);
+    let first_mapping = equipment_embedded_key_ids(&reloaded);
+    let embedded_ids = equipment_embedded_unique_ids(&reloaded);
+    let embedded_set = embedded_ids
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(embedded_set.len(), embedded_ids.len());
+    assert!(embedded_ids.iter().all(|id| *id != 0));
+    let reserved = top_level_and_equipment_parent_unique_ids(&reloaded);
+    assert!(embedded_ids.iter().all(|id| !reserved.contains(id)));
+    assert_eq!(
+        first_mapping
+            .iter()
+            .filter(|(key, _)| key == "crystal-item-778")
+            .count(),
+        1,
+        "one legal nested Bells UID must survive normalization"
+    );
+
+    assert!(reloaded.save_active_character().is_ok());
+    drop(reloaded);
+    let mut second_reload =
+        SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
+    login_demo_account_for_persistence_test(&mut second_reload);
+    assert_start_game_success(&mut second_reload, character_index);
+    assert_eq!(equipment_embedded_key_ids(&second_reload), first_mapping);
+}
+#[test]
+fn exact_root_uid_survives_protocol_equip_save_reload_and_remove() {
+    let temp_dir = unique_runtime_temp_dir("exact-root-uid-equip");
+    let store_path = temp_dir.join("accounts.json");
+    let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    let mut session = SimulationSession::new(config);
+    let character_index = create_and_start_test_character(&mut session, "UidEquip");
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+
+    let exact_uid = 91_001;
+    let granted_uid = grant_real_crystal_item(&mut session, "BronzeHelmet", 31);
+    let expected_key = {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let helmet = resources
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.unique_id == granted_uid)
+            .expect("granted real BronzeHelmet");
+        helmet.unique_id = exact_uid;
+        helmet.key.clone()
+    };
+    let equip = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: exact_uid,
+        to: 2,
+    });
+    assert!(equip.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipItem { grid: MirGridType::Inventory, unique_id, to: 2, success: true }
+            if *unique_id == exact_uid
+    )));
+    let save_result = session.save_active_character();
+    assert!(
+        save_result.is_ok(),
+        "equipped exact UID carrier must save: {save_result:?}"
+    );
+    drop(session);
+
+    let mut reloaded =
+        SimulationSession::new(SimulationConfig::default().with_account_store_path(store_path));
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, character_index);
+    assert_eq!(
+        reloaded
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet)
+            .and_then(|item| item.user_item_unique_id),
+        Some(exact_uid),
+        "real protocol equip must retain the original UserItem UID in equipment"
+    );
+
+    let remove = reloaded.handle_packet(ClientPacket::RemoveItem {
+        grid: MirGridType::Inventory,
+        unique_id: exact_uid,
+        to: 31,
+    });
+    assert!(remove.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id,
+            to: 31,
+            success: true
+        } if *unique_id == exact_uid
+    )));
+    assert!(reloaded
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.key == expected_key && item.unique_id == exact_uid && item.slot == 31));
+}
+
+#[test]
+fn qa_apply_native_state_rejects_invalid_carrier_without_mutating_world_or_session() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _character_index = create_and_start_test_character(&mut session, "UidQa");
+    let before_world = format!("{:?}", session.world_snapshot());
+    let before_session = session.app.world().resource::<SessionResource>().clone();
+
+    let invalid_item = socket_test_item_state("unknown-qa-carrier", 91_101);
+    let payload = serde_json::json!({
+        "character": {
+            "name": "MustNotApply",
+            "level": 99,
+            "class": MirClass::Wizard,
+            "gender": MirGender::Female,
+        },
+        "mapFileName": "invalid-map",
+        "mapTitle": "Must not apply",
+        "position": Point { x: 1, y: 1 },
+        "direction": MirDirection::Up,
+        "hp": 1,
+        "mp": 0,
+        "inventoryItemsJson": [serde_json::to_string(&vec![invalid_item]).expect("invalid carrier JSON")],
+        "beltItemsJson": [],
+        "storageItemsJson": [],
+        "equipmentItemsJson": [],
+    });
+    let packets = session.stage5_command("qa.applyNativeState", vec![payload.to_string()]);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    assert_eq!(format!("{:?}", session.world_snapshot()), before_world);
+    assert_eq!(
+        format!("{:?}", session.app.world().resource::<SessionResource>()),
+        format!("{:?}", before_session),
+        "a rejected carrier must not update SessionResource"
+    );
+}
+
+#[test]
+fn bells_unload_preserves_unique_id_without_creating_a_duplicate() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let bells_id = equip_crystal_mount_with_optional_bells_and_ride(&mut session, true)
+        .expect("real BronzeBell should be equipped");
+    let other_id = grant_real_crystal_item(&mut session, "MysteryWater", 31);
+    assert_ne!(other_id, bells_id, "allocator must scan embedded Bells IDs");
+
+    let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Mount,
+        grid_to: MirGridType::Inventory,
+        unique_id: bells_id,
+        to: 32,
+        from_unique_id: 13,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Mount,
+            success: true,
+            ..
+        }
+    )));
+
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut all_item_ids = Vec::new();
+    collect_item_tree_unique_ids(&resources.belt_items, &mut all_item_ids);
+    collect_item_tree_unique_ids(&resources.inventory_items, &mut all_item_ids);
+    collect_item_tree_unique_ids(&resources.storage_items, &mut all_item_ids);
+    for equipment in &resources.equipment_items {
+        collect_item_tree_unique_ids(&equipment.socketed, &mut all_item_ids);
+    }
+    assert_eq!(all_item_ids.iter().filter(|id| **id == bells_id).count(), 1);
+    assert!(resources.inventory_items.iter().any(|item| {
+        item.key == "crystal-item-778" && item.unique_id == bells_id && item.slot == 32
+    }));
+}
+
 #[test]
 fn player_attack_delays_object_struck_for_target_until_followup_tick() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -5192,6 +6958,7 @@ fn player_attack_delays_object_struck_for_target_until_followup_tick() {
 #[test]
 fn player_attack_delays_health_change_until_followup_tick() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
     let before = session
@@ -5236,6 +7003,7 @@ fn player_attack_delays_health_change_until_followup_tick() {
 #[test]
 fn player_attack_hit_resolution_has_no_runtime_damage_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -5299,6 +7067,7 @@ fn player_attack_hit_resolution_has_no_runtime_damage_chat() {
 #[test]
 fn monster_attack_delays_struck_for_player_until_next_tick() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 322, y: 277 };
@@ -5373,6 +7142,7 @@ fn monster_attack_delays_struck_for_player_until_next_tick() {
 #[test]
 fn ai0_default_monsterobject_uses_imported_melee_baseline() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 322, y: 277 };
@@ -5460,6 +7230,7 @@ fn ai0_default_monsterobject_uses_imported_melee_baseline() {
 #[test]
 fn spitting_spider_ai_attacks_from_two_tiles_with_line_timing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 322, y: 277 };
@@ -5543,6 +7314,7 @@ fn crystal_ai4_spitting_spider_attack_range_matches_crystal() {
     // full 2x2 box because its `dx<=max && dy<=max` clause is always true after
     // the cap check). This locks in the exact predicate for AI 4.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let spider_position = Point { x: 340, y: 270 };
@@ -5582,6 +7354,7 @@ fn crystal_ai4_spitting_spider_attack_range_matches_crystal() {
 #[test]
 fn sand_worm_uses_crystal_line_attack_shape_and_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 340, y: 270 };
@@ -5666,6 +7439,7 @@ fn sand_worm_uses_crystal_line_attack_shape_and_dc_damage() {
 #[test]
 fn sand_worm_line_attack_fans_out_to_forward_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -5750,6 +7524,7 @@ fn sand_worm_line_attack_fans_out_to_forward_targets() {
 #[test]
 fn sand_snail_uses_crystal_primary_dc_melee_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -5804,6 +7579,7 @@ fn sand_snail_uses_crystal_primary_dc_melee_damage() {
 #[test]
 fn sand_snail_type_one_branch_uses_halfmoon_fanout_without_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -5904,6 +7680,7 @@ fn sand_snail_type_one_branch_uses_halfmoon_fanout_without_poison() {
 #[test]
 fn sand_snail_type_two_branch_uses_mc_area_green_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -6007,6 +7784,7 @@ fn sand_snail_type_two_branch_uses_mc_area_green_poison() {
 #[test]
 fn cannibal_plant_hidden_state_blocks_attack_until_revealed() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -6100,6 +7878,7 @@ fn cannibal_plant_hidden_state_blocks_attack_until_revealed() {
 #[test]
 fn dig_out_zombie_starts_hidden_and_reveals_near_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -6172,6 +7951,7 @@ fn dig_out_zombie_starts_hidden_and_reveals_near_player() {
 #[test]
 fn reviving_zombie_revives_twice_with_reduced_health() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -6266,6 +8046,7 @@ fn reviving_zombie_revives_twice_with_reduced_health() {
 #[test]
 fn axe_skeleton_ai_uses_ranged_packet_at_six_tiles() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -6334,6 +8115,7 @@ fn axe_skeleton_ai_uses_ranged_packet_at_six_tiles() {
 #[test]
 fn axe_skeleton_moves_closer_before_fear_window_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -6426,6 +8208,7 @@ fn axe_skeleton_moves_closer_before_fear_window_attack() {
 #[test]
 fn axe_skeleton_kites_before_fear_window_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -6504,6 +8287,7 @@ fn axe_skeleton_kites_before_fear_window_attack() {
 #[test]
 fn cave_maggot_can_apply_paralysis_poison_and_block_player_walk() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -6567,6 +8351,7 @@ fn cave_maggot_can_apply_paralysis_poison_and_block_player_walk() {
 #[test]
 fn pending_monster_damage_can_kill_player_and_snapshot_dead_state_syncs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let origin = Point { x: 322, y: 277 };
@@ -6634,6 +8419,7 @@ fn pending_monster_damage_can_kill_player_and_snapshot_dead_state_syncs() {
 #[test]
 fn dead_player_cannot_move_attack_magic_or_use_normal_potion_until_revived() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 20);
     let origin = Point { x: 333, y: 300 };
@@ -6740,6 +8526,7 @@ fn dead_player_cannot_move_attack_magic_or_use_normal_potion_until_revived() {
 #[test]
 fn player_status_effects_have_gameplay_effects() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let origin = Point { x: 910, y: 910 };
     set_player_position(&mut session, origin.clone());
@@ -6828,6 +8615,7 @@ fn player_status_effects_have_gameplay_effects() {
 #[test]
 fn red_poison_increases_player_incoming_damage_and_syncs_runtime_vitals() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // Move out of the town safe zone so scheduled monster damage applies
     // (safe-zone players are immune to combat damage).
@@ -6862,6 +8650,7 @@ fn red_poison_increases_player_incoming_damage_and_syncs_runtime_vitals() {
 #[test]
 fn magic_mp_spend_syncs_entity_runtime_resource_and_snapshot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -6911,6 +8700,7 @@ fn magic_mp_spend_syncs_entity_runtime_resource_and_snapshot() {
 #[test]
 fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let training_dummy_object_id = 3001_u32;
@@ -6921,7 +8711,9 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
         agent.ai = 9;
         agent.can_wander = false;
-        agent.hostile_to_player = false;
+        // Keep the corpse source attackable. `tracking_player = false` below is
+        // sufficient to keep this harvest fixture passive.
+        agent.hostile_to_player = true;
         agent.tracking_player = false;
         drop(agent);
         entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
@@ -6943,7 +8735,7 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         .world_snapshot()
         .ground_drops
         .iter()
-        .any(|drop| drop.name == "Training Splinter"));
+        .any(|drop| drop.name == "Timber"));
 
     let first_harvest = session.handle_packet(ClientPacket::Harvest {
         direction: MirDirection::Right,
@@ -6973,7 +8765,7 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
 
     let third_harvest = session.handle_packet(ClientPacket::Harvest {
         direction: MirDirection::Right,
@@ -6985,9 +8777,16 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
                 if movement.object_id == training_dummy_object_id
         )
     }));
-    assert!(third_harvest
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::GainedItem { item } if item.item_index == 6)));
+    let timber_item_index = super::crystal_item_template_for_item_key("crystal-item-865")
+        .expect("Timber must resolve to a real Crystal template")
+        .item_index;
+    assert!(third_harvest.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::GainedItem { item }
+                if item.item_index == timber_item_index
+        )
+    }));
     assert!(!third_harvest
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -6995,7 +8794,7 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
     assert!(
         session
             .app
@@ -7004,6 +8803,67 @@ fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
             .get::<super::HarvestMonsterState>()
             .expect("harvest state")
             .harvested
+    );
+}
+
+#[test]
+fn forged_harvest_packet_is_rejected_while_riding_mount() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let object_id = 3001_u32;
+    let target =
+        entity_by_object_id(session.app.world(), object_id).expect("training dummy entity");
+    {
+        let mut entry = session.app.world_mut().entity_mut(target);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
+        agent.ai = 9;
+        agent.can_wander = false;
+        // The forged-harvest assertion is about the mounted player. The
+        // precondition still needs an authoritative hostile corpse source.
+        agent.hostile_to_player = true;
+        agent.tracking_player = false;
+        drop(agent);
+        entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
+    }
+    set_player_position(&mut session, Point { x: 337, y: 273 });
+    let death_packets = attack_until_monster_dies(&mut session, object_id, 10);
+    assert!(packet_has_object_died(&death_packets, object_id));
+    let before = session
+        .app
+        .world()
+        .entity(target)
+        .get::<super::HarvestMonsterState>()
+        .expect("harvest state")
+        .remaining_skin_count;
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MountResource>()
+        .riding_mount = true;
+    let packets = session.handle_packet(ClientPacket::Harvest {
+        direction: MirDirection::Right,
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectHarvest { .. } | ServerPacket::ObjectHarvested { .. }
+    )));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(target)
+            .get::<super::HarvestMonsterState>()
+            .expect("harvest state")
+            .remaining_skin_count,
+        before,
+        "forged Harvest while mounted must not mutate the corpse"
     );
 }
 
@@ -7025,6 +8885,7 @@ fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let training_dummy_object_id = 3001_u32;
@@ -7035,7 +8896,9 @@ fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
         let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
         agent.ai = 9;
         agent.can_wander = false;
-        agent.hostile_to_player = false;
+        // Keep the harvest fixture passive via `tracking_player`, while still
+        // allowing the player to create the corpse through normal combat.
+        agent.hostile_to_player = true;
         agent.tracking_player = false;
         drop(agent);
         entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
@@ -7087,12 +8950,13 @@ fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .all(|item| item.key != "training-splinter"));
+        .all(|item| item.key != "crystal-item-865"));
 }
 
 #[test]
 fn deer_is_passive_and_requires_five_harvest_passes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let (player_origin, deer_position) = (240..460)
@@ -7240,6 +9104,7 @@ fn deer_is_passive_and_requires_five_harvest_passes() {
 #[test]
 fn runaway_deer_flees_from_player_without_attacking() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -7304,6 +9169,7 @@ fn runaway_deer_flees_from_player_without_attacking() {
 #[test]
 fn hen_is_passive_and_requires_two_skin_passes_then_transfer() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let (player_origin, hen_position) = (240..460)
@@ -7437,8 +9303,76 @@ fn hen_is_passive_and_requires_two_skin_passes_then_transfer() {
 }
 
 #[test]
+fn due_harvestable_respawn_waits_for_final_harvest_boundary() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_world_runtime());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let deer = find_monster_entity_by(&session, |name, _, _| name == "Deer");
+    let spawn_ref = session
+        .app
+        .world()
+        .entity(deer)
+        .get::<SpawnSlotRef>()
+        .copied()
+        .expect("Crystal-world Deer must retain its respawn slot");
+    {
+        let mut entry = session.app.world_mut().entity_mut(deer);
+        entry.get_mut::<MonsterAgent>().expect("Deer agent").dead = true;
+        entry.get_mut::<MonsterVitals>().expect("Deer vitals").hp = 0;
+        entry.insert(super::initial_harvest_monster_state(2).expect("Deer harvest state"));
+    }
+    let current_tick = runtime_tick(session.app.world());
+    session
+        .app
+        .world_mut()
+        .resource_mut::<MonsterSpawnTable>()
+        .rules[spawn_ref.rule_index]
+        .slots[spawn_ref.slot_index]
+        .next_respawn_tick = Some(current_tick);
+
+    assert!(super::tick_respawns(session.app.world_mut()).is_empty());
+    assert!(
+        session
+            .app
+            .world()
+            .entity(deer)
+            .get::<MonsterAgent>()
+            .expect("Deer agent")
+            .dead
+    );
+    assert_eq!(
+        session.app.world().resource::<MonsterSpawnTable>().rules[spawn_ref.rule_index].slots
+            [spawn_ref.slot_index]
+            .next_respawn_tick,
+        Some(current_tick),
+        "due schedule must stay pending while the corpse is harvestable"
+    );
+
+    session
+        .app
+        .world_mut()
+        .entity_mut(deer)
+        .get_mut::<HarvestMonsterState>()
+        .expect("Deer harvest state")
+        .harvested = true;
+    assert_eq!(super::tick_respawns(session.app.world_mut()), vec![deer]);
+    assert!(
+        !session
+            .app
+            .world()
+            .entity(deer)
+            .get::<MonsterAgent>()
+            .expect("Deer agent")
+            .dead
+    );
+}
+
+#[test]
 fn harvest_keeps_pending_drops_when_bag_is_full_and_transfers_later() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let (player_origin, hen_position) = (240..460)
@@ -7552,6 +9486,7 @@ fn harvest_keeps_pending_drops_when_bag_is_full_and_transfers_later() {
 #[test]
 fn harvest_skips_owner_blocked_corpse_and_harvests_next_candidate() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_origin = Point { x: 330, y: 270 };
     set_player_position(&mut session, player_origin.clone());
@@ -7617,6 +9552,7 @@ fn harvest_skips_owner_blocked_corpse_and_harvests_next_candidate() {
 #[test]
 fn harvest_owner_blocked_only_emits_no_nearby_owned_carcasses() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -7665,6 +9601,7 @@ fn harvest_allows_owner_group_member_corpse() {
     let mut config = SimulationConfig::default();
     config.group_member_object_ids = vec![9001];
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -7733,6 +9670,7 @@ fn crystal_harvest_monster_subclasses_use_corpse_passes() {
         (98_916_u32, "ToxicGhoul", 28_u8),
     ] {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let (player_origin, monster_position) = (240..460)
@@ -7825,13 +9763,16 @@ fn crystal_harvest_monster_subclasses_use_corpse_passes() {
             let transfer_packets = session.handle_packet(ClientPacket::Harvest {
                 direction: MirDirection::Right,
             });
-            assert!(transfer_packets.iter().any(|packet| {
-                matches!(
-                    packet,
-                    ServerPacket::ObjectHarvested { movement }
-                        if movement.object_id == object_id
-                )
-            }));
+            assert!(
+                transfer_packets.iter().any(|packet| {
+                    matches!(
+                        packet,
+                        ServerPacket::ObjectHarvested { movement }
+                            if movement.object_id == object_id
+                    )
+                }),
+                "{template_name} ({object_id}) transfer packets: {transfer_packets:?}"
+            );
         }
         let state = session
             .app
@@ -7847,6 +9788,7 @@ fn crystal_harvest_monster_subclasses_use_corpse_passes() {
 #[test]
 fn tucson_egg_is_immobile_and_loses_one_hp_per_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -7961,6 +9903,7 @@ fn tucson_egg_is_immobile_and_loses_one_hp_per_hit() {
 #[test]
 fn tree_is_static_passive_and_loses_one_hp_per_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(
@@ -8062,6 +10005,7 @@ fn tree_is_static_passive_and_loses_one_hp_per_hit() {
 #[test]
 fn trainer_is_static_passive_and_does_not_die_from_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(
@@ -8192,6 +10136,7 @@ fn trainer_is_static_passive_and_does_not_die_from_damage() {
 #[test]
 fn toxic_ghoul_applies_green_poison_status_from_crystal_melee() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8258,6 +10203,7 @@ fn toxic_ghoul_applies_green_poison_status_from_crystal_melee() {
 #[test]
 fn thunder_element_delays_area_attack_packet_and_ignores_normal_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8338,6 +10284,7 @@ fn thunder_element_delays_area_attack_packet_and_ignores_normal_damage() {
 #[test]
 fn thunder_element_can_reposition_before_area_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 340, y: 270 };
@@ -8448,6 +10395,7 @@ fn thunder_element_can_reposition_before_area_attack() {
 #[test]
 fn dark_beast_uses_crystal_dc_damage_for_primary_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8509,6 +10457,7 @@ fn dark_beast_uses_crystal_dc_damage_for_primary_attack() {
 #[test]
 fn dark_beast_secondary_branch_is_data_gated_by_zero_mc_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8570,6 +10519,7 @@ fn dark_beast_secondary_branch_is_data_gated_by_zero_mc_effect() {
 #[test]
 fn flaming_wooma_uses_crystal_dc_damage_for_magic_melee() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8640,6 +10590,7 @@ fn flaming_wooma_uses_crystal_dc_damage_for_magic_melee() {
 #[test]
 fn hedge_kek_tal_switches_to_crystal_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8705,6 +10656,7 @@ fn hedge_kek_tal_switches_to_crystal_range_attack() {
 #[test]
 fn cannibal_tentacles_uses_crystal_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8772,6 +10724,7 @@ fn cannibal_tentacles_uses_crystal_range_attack() {
 #[test]
 fn cannibal_tentacles_adjacent_halfmoon_branch_poisons_and_fans_out() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -8902,6 +10855,7 @@ fn cannibal_tentacles_adjacent_halfmoon_branch_poisons_and_fans_out() {
 #[test]
 fn jar2_uses_crystal_range_packet_without_zero_mc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -8971,6 +10925,7 @@ fn jar2_uses_crystal_range_packet_without_zero_mc_damage() {
 #[test]
 fn jar2_adjacent_melee_branch_uses_crystal_random_dc_path() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -9041,6 +10996,7 @@ fn jar2_adjacent_melee_branch_uses_crystal_random_dc_path() {
 #[test]
 fn jar2_adjacent_non_melee_branch_uses_zero_mc_range_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -9112,6 +11068,7 @@ fn jar2_adjacent_non_melee_branch_uses_zero_mc_range_packet() {
 #[test]
 fn jar1_is_static_and_spawns_regular_slave_on_death() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let (player_origin, jar_position) = (240..460)
@@ -9226,6 +11183,7 @@ fn jar1_is_static_and_spawns_regular_slave_on_death() {
 #[test]
 fn wooma_taurus_uses_crystal_damage_and_mad_speed_phase() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9301,6 +11259,7 @@ fn wooma_taurus_uses_crystal_damage_and_mad_speed_phase() {
 #[test]
 fn wooma_taurus_teleports_when_surrounded() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 330, y: 270 };
@@ -9433,6 +11392,7 @@ fn wooma_taurus_teleports_when_surrounded() {
 #[test]
 fn zuma_monster_requires_wake_before_it_can_be_attacked() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9508,6 +11468,7 @@ fn zuma_monster_requires_wake_before_it_can_be_attacked() {
 #[test]
 fn zuma_monster_wake_spreads_to_nearby_stoned_zuma() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9569,6 +11530,7 @@ fn zuma_monster_wake_spreads_to_nearby_stoned_zuma() {
 #[test]
 fn red_thunder_zuma_wakes_and_uses_crystal_ranged_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9671,6 +11633,7 @@ fn red_thunder_zuma_wakes_and_uses_crystal_ranged_attack() {
 #[test]
 fn zuma_taurus_wakes_and_uses_crystal_melee_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9755,6 +11718,7 @@ fn zuma_taurus_wakes_and_uses_crystal_melee_attack() {
 #[test]
 fn zuma_taurus_hp_stage_spawns_crystal_slave_wave_without_skipping_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9848,6 +11812,7 @@ fn zuma_taurus_hp_stage_spawns_crystal_slave_wave_without_skipping_attack() {
 #[test]
 fn incarnated_zt_is_active_and_uses_crystal_paralysis_melee() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -9941,6 +11906,7 @@ fn incarnated_zt_is_active_and_uses_crystal_paralysis_melee() {
 #[test]
 fn dark_devil_uses_crystal_three_tile_area_range_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -10033,6 +11999,7 @@ fn dark_devil_uses_crystal_three_tile_area_range_branch() {
 #[test]
 fn dark_devil_range_branch_uses_forward_fanout_and_cooldown() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -10142,6 +12109,7 @@ fn dark_devil_range_branch_uses_forward_fanout_and_cooldown() {
 #[test]
 fn oma_king_uses_type_one_magic_attack_at_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -10231,6 +12199,7 @@ fn oma_king_uses_type_one_magic_attack_at_range() {
 #[test]
 fn oma_king_close_line_branch_pushes_and_can_paralyze_before_line_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -10330,6 +12299,7 @@ fn oma_king_close_line_branch_pushes_and_can_paralyze_before_line_damage() {
 #[test]
 fn oma_king_close_line_branch_hits_forward_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -10427,6 +12397,7 @@ fn oma_king_close_line_branch_hits_forward_targets() {
 #[test]
 fn great_fox_spirit_is_static_and_uses_seven_tile_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -10528,6 +12499,7 @@ fn great_fox_spirit_is_static_and_uses_seven_tile_range_attack() {
 #[test]
 fn great_fox_spirit_fans_out_and_applies_slow_paralysis() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_object_id = current_player_object_id(session.app.world()).expect("player object id");
@@ -10649,6 +12621,7 @@ fn great_fox_spirit_fans_out_and_applies_slow_paralysis() {
 #[test]
 fn great_fox_spirit_hp_stage_broadcasts_extra_byte_update() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -10696,6 +12669,7 @@ fn great_fox_spirit_hp_stage_broadcasts_extra_byte_update() {
 #[test]
 fn great_fox_spirit_toggles_nearby_guardian_rock_active_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -10773,6 +12747,7 @@ fn great_fox_spirit_toggles_nearby_guardian_rock_active_state() {
 #[test]
 fn great_fox_spirit_recalls_far_player_to_nearby_tile() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -10842,8 +12817,85 @@ fn great_fox_spirit_recalls_far_player_to_nearby_tile() {
 }
 
 #[test]
+fn great_fox_spirit_recall_respects_magic_resist_and_starts_cooldown() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert!(super::player_stats(session.app.world()).magic_resist() > 0);
+    let player_origin = Point { x: 900, y: 900 };
+    let fox_position = Point {
+        x: player_origin.x + 10,
+        y: player_origin.y,
+    };
+    let current_tick = runtime_tick(session.app.world());
+    let mut recall_case = None;
+    for recall_tick in current_tick.saturating_add(1)..current_tick.saturating_add(500) {
+        super::set_runtime_tick(session.app.world_mut(), recall_tick);
+        if super::crystal_player_magic_mitigated(session.app.world(), 1) != 0 {
+            continue;
+        }
+        if let Some(fox_object_id) = (100_500_u32..102_000_u32).find(|object_id| {
+            super::deterministic_chance_roll(recall_tick, *object_id, 502, 10)
+                && !super::deterministic_chance_roll(recall_tick, *object_id, 503, 4)
+        }) {
+            recall_case = Some((recall_tick, fox_object_id));
+            break;
+        }
+    }
+    let (recall_tick, fox_object_id) =
+        recall_case.expect("bounded search should find a resisted recall attempt");
+    let player_object_id = current_player_object_id(session.app.world()).expect("player object id");
+    set_player_position(&mut session, player_origin.clone());
+    let fox = spawn_crystal_monster_for_test(
+        &mut session,
+        fox_object_id,
+        "GreatFoxSpirit",
+        fox_position,
+        MirDirection::Left,
+        true,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(fox);
+        let mut agent = entry
+            .get_mut::<MonsterAgent>()
+            .expect("great fox spirit agent");
+        agent.tracking_player = true;
+        agent.can_wander = false;
+    }
+    super::set_runtime_tick(session.app.world_mut(), recall_tick.saturating_sub(1));
+    sync_visible_objects(&mut session);
+
+    let packets = session.tick();
+    assert_eq!(player_position(&session), player_origin);
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == player_object_id
+    )));
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectTeleportOut { object_id, .. }
+            | ServerPacket::ObjectTeleportIn { object_id, .. }
+            if *object_id == player_object_id
+    )));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(fox)
+            .get::<MonsterAiState>()
+            .expect("great fox spirit ai state")
+            .next_state_tick,
+        recall_tick + super::GREAT_FOX_SPIRIT_RECALL_COOLDOWN_TICKS,
+        "Crystal starts RecallTime before evaluating candidate MagicResist",
+    );
+}
+
+#[test]
 fn bone_lord_uses_crystal_seven_tile_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -10928,6 +12980,7 @@ fn bone_lord_uses_crystal_seven_tile_range_attack() {
 #[test]
 fn bone_lord_hp_stage_spawns_crystal_slave_wave() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11019,6 +13072,7 @@ fn bone_lord_hp_stage_spawns_crystal_slave_wave() {
 #[test]
 fn king_scorpion_uses_crystal_two_tile_range_line_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11114,6 +13168,7 @@ fn king_scorpion_uses_crystal_two_tile_range_line_branch() {
 #[test]
 fn king_scorpion_adjacent_branch_uses_crystal_dc_object_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11179,6 +13234,7 @@ fn king_scorpion_adjacent_branch_uses_crystal_dc_object_attack() {
 #[test]
 fn king_scorpion_line_attack_fans_out_to_forward_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11265,6 +13321,7 @@ fn king_scorpion_line_attack_fans_out_to_forward_targets() {
 #[test]
 fn king_scorpion_adjacent_random_range_override_uses_mc_line() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11328,6 +13385,7 @@ fn king_scorpion_adjacent_random_range_override_uses_mc_line() {
 #[test]
 fn mir_statue_is_static_and_broadcasts_delayed_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11417,6 +13475,7 @@ fn mir_statue_is_static_and_broadcasts_delayed_range_attack() {
 #[test]
 fn mir_statue_delayed_range_attack_fans_out_around_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11520,6 +13579,7 @@ fn mir_statue_delayed_range_attack_fans_out_around_target() {
 #[test]
 fn mir_statue_lethal_damage_sleeps_then_wakes_full_health() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11636,6 +13696,7 @@ fn mir_statue_lethal_damage_sleeps_then_wakes_full_health() {
 #[test]
 fn guardian_rock_is_static_immune_and_emits_range_pull_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11739,9 +13800,11 @@ fn guardian_rock_is_static_immune_and_emits_range_pull_packet() {
 #[test]
 fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
+    let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
         .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
@@ -11816,11 +13879,59 @@ fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
         session.world_snapshot().player_hp.expect("player hp"),
         before_hp
     );
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert!(super::player_stats(session.app.world()).magic_resist() > 0);
+    let resisted_tick = (current_tick.saturating_add(3)..current_tick.saturating_add(500))
+        .find(|candidate| {
+            super::set_runtime_tick(session.app.world_mut(), *candidate);
+            super::crystal_player_magic_mitigated(session.app.world(), 1) == 0
+        })
+        .expect("bounded deterministic window should contain a MagicResist success");
+
+    set_player_position(&mut session, player_origin.clone());
+    {
+        let mut entry = session.app.world_mut().entity_mut(rock);
+        let mut agent = entry
+            .get_mut::<MonsterAgent>()
+            .expect("guardian rock agent");
+        agent.tracking_player = true;
+        agent.next_attack_tick = resisted_tick;
+        agent.next_move_tick = resisted_tick;
+    }
+    super::set_runtime_tick(session.app.world_mut(), resisted_tick.saturating_sub(1));
+    sync_visible_objects(&mut session);
+
+    let resisted_windup_packets = session.tick();
+    assert!(!resisted_windup_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info } if info.object_id == rock_object_id
+    )));
+    let resisted_pull_packets = session.tick();
+    assert!(resisted_pull_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info }
+            if info.object_id == rock_object_id && info.direction == MirDirection::Left
+    )));
+    assert!(!resisted_pull_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == player_object_id
+    )));
+    assert_eq!(
+        entity_position(session.app.world(), player).expect("player position after resisted pull"),
+        player_origin,
+    );
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("player hp"),
+        before_hp,
+        "GuardianRock's pull remains non-damaging when resisted",
+    );
 }
 
 #[test]
 fn red_moon_evil_is_static_and_hits_from_view_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -11910,6 +14021,7 @@ fn red_moon_evil_is_static_and_hits_from_view_range() {
 #[test]
 fn red_moon_evil_view_attack_fans_out_to_all_targets_in_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_object_id = current_player_object_id(session.app.world()).expect("player object id");
@@ -12015,6 +14127,7 @@ fn red_moon_evil_view_attack_fans_out_to_all_targets_in_range() {
 #[test]
 fn evil_centipede_reveals_near_player_and_attacks_from_view_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12129,6 +14242,7 @@ fn evil_centipede_reveals_near_player_and_attacks_from_view_range() {
 #[test]
 fn evil_centipede_attack_fans_out_and_applies_crystal_poisons() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12244,6 +14358,7 @@ fn evil_centipede_attack_fans_out_and_applies_crystal_poisons() {
 #[test]
 fn yimoogi_uses_crystal_seven_tile_range_attack_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12328,6 +14443,7 @@ fn yimoogi_uses_crystal_seven_tile_range_attack_branch() {
 #[test]
 fn yimoogi_four_tile_poison_branch_uses_type_one_red_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12406,6 +14522,7 @@ fn yimoogi_four_tile_poison_branch_uses_type_one_red_poison() {
 #[test]
 fn yimoogi_spawns_sister_child_after_crystal_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12486,6 +14603,7 @@ fn yimoogi_spawns_sister_child_after_crystal_delay() {
 #[test]
 fn yimoogi_final_teleport_spawns_white_serpents_at_old_location() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12558,6 +14676,7 @@ fn yimoogi_final_teleport_spawns_white_serpents_at_old_location() {
 #[test]
 fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let yimoogi_object_id = 3001_u32;
@@ -12588,8 +14707,10 @@ fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
         agent.image = template.monster_image;
         agent.ai = 36;
         agent.dead = false;
-        agent.disposition = WorldEntityDisposition::Neutral;
-        agent.hostile_to_player = false;
+        // Keep the boss player-attackable while making the fixture passive.
+        // The drop assertion is independent of target tracking.
+        agent.disposition = WorldEntityDisposition::Hostile;
+        agent.hostile_to_player = true;
         agent.tracking_player = false;
         agent.can_wander = false;
         agent.next_attack_tick = 100;
@@ -12638,12 +14759,13 @@ fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
         .world_snapshot()
         .ground_drops
         .iter()
-        .any(|drop| drop.name == "Training Splinter"));
+        .any(|drop| drop.name == "Timber"));
 }
 
 #[test]
 fn lamia_kirin_uses_crystal_two_tile_attack_shape() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12735,6 +14857,7 @@ fn lamia_kirin_uses_crystal_two_tile_attack_shape() {
 #[test]
 fn lamia_kirin_type_one_branch_uses_crystal_packet_and_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12802,6 +14925,7 @@ fn lamia_kirin_type_one_branch_uses_crystal_packet_and_delay() {
 #[test]
 fn lamia_kirin_nonzero_mc_ice_thrust_uses_type_two_cone_and_slow() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -12914,6 +15038,7 @@ fn lamia_kirin_nonzero_mc_ice_thrust_uses_type_two_cone_and_slow() {
 #[test]
 fn khazard_uses_crystal_four_tile_pull_packet_without_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13027,11 +15152,57 @@ fn khazard_uses_crystal_four_tile_pull_packet_without_damage() {
             .next_state_tick
             > current_tick
     );
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert!(super::player_stats(session.app.world()).magic_resist() > 0);
+    let resisted_tick = (current_tick.saturating_add(2)..current_tick.saturating_add(500))
+        .find(|candidate| {
+            super::set_runtime_tick(session.app.world_mut(), *candidate);
+            super::crystal_player_magic_mitigated(session.app.world(), 1) == 0
+        })
+        .expect("bounded deterministic window should contain a MagicResist success");
+
+    set_player_position(&mut session, player_origin.clone());
+    {
+        let mut entry = session.app.world_mut().entity_mut(khazard);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("khazard agent");
+        agent.tracking_player = true;
+        agent.next_attack_tick = resisted_tick;
+        agent.next_move_tick = resisted_tick;
+        drop(agent);
+        entry
+            .get_mut::<MonsterAiState>()
+            .expect("khazard ai state")
+            .next_state_tick = 0;
+    }
+    super::set_runtime_tick(session.app.world_mut(), resisted_tick.saturating_sub(1));
+    sync_visible_objects(&mut session);
+
+    let resisted_packets = session.tick();
+    assert!(resisted_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info }
+            if info.object_id == khazard_object_id && info.direction == MirDirection::Left
+    )));
+    assert!(!resisted_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement } if movement.object_id == player_object_id
+    )));
+    assert_eq!(
+        entity_position(session.app.world(), player).expect("player position after resisted pull"),
+        player_origin,
+    );
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("player hp"),
+        before_hp,
+        "Khazard's pull remains non-damaging when resisted",
+    );
 }
 
 #[test]
 fn minotaur_king_uses_six_tile_right_guard_range_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13133,6 +15304,7 @@ fn minotaur_king_uses_six_tile_right_guard_range_branch() {
 #[test]
 fn minotaur_king_range_hit_fans_out_around_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13234,6 +15406,7 @@ fn minotaur_king_range_hit_fans_out_around_target() {
 #[test]
 fn manectric_claw_ai_uses_three_tile_range_thrust_baseline() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -13323,6 +15496,7 @@ fn manectric_claw_ai_uses_three_tile_range_thrust_baseline() {
 #[test]
 fn manectric_claw_range_thrust_applies_slow_and_frozen_rolls() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -13392,6 +15566,7 @@ fn manectric_claw_range_thrust_applies_slow_and_frozen_rolls() {
 #[test]
 fn manectric_claw_range_thrust_fans_out_to_cone_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -13493,6 +15668,7 @@ fn manectric_claw_range_thrust_fans_out_to_cone_targets() {
 #[test]
 fn manectric_claw_range_thrust_can_step_toward_target_instead_of_attacking() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13567,6 +15743,7 @@ fn manectric_claw_range_thrust_can_step_toward_target_instead_of_attacking() {
 #[test]
 fn manectric_king_uses_three_tile_line_magic_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -13662,6 +15839,7 @@ fn manectric_king_uses_three_tile_line_magic_attack() {
 #[test]
 fn manectric_king_close_push_line_uses_type_one_dc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13763,6 +15941,7 @@ fn manectric_king_close_push_line_uses_type_one_dc() {
 #[test]
 fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13893,6 +16072,7 @@ fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
 #[test]
 fn seedings_general_uses_two_tile_range_magic_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -13982,6 +16162,7 @@ fn seedings_general_uses_two_tile_range_magic_branch() {
 #[test]
 fn seedings_general_echo_branch_applies_slow_roll() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -14054,6 +16235,7 @@ fn seedings_general_echo_branch_applies_slow_roll() {
 #[test]
 fn seedings_general_stomp_branch_uses_type_one_frozen_and_area_fanout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -14181,6 +16363,7 @@ fn seedings_general_stomp_branch_uses_type_one_frozen_and_area_fanout() {
 #[test]
 fn seedings_general_close_splash_branch_uses_type_one_mc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -14272,6 +16455,7 @@ fn seedings_general_close_splash_branch_uses_type_one_mc() {
 #[test]
 fn hell_keeper_is_static_and_attacks_from_view_range_without_turning() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -14374,6 +16558,7 @@ fn hell_keeper_is_static_and_attacks_from_view_range_without_turning() {
 #[test]
 fn hell_keeper_type_one_branch_emits_packet_and_gates_zero_mc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -14429,6 +16614,7 @@ fn hell_keeper_type_one_branch_emits_packet_and_gates_zero_mc_damage() {
 #[test]
 fn hell_keeper_type_one_nonzero_mc_dazes_and_fans_out() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -14551,6 +16737,7 @@ fn hell_keeper_type_one_nonzero_mc_dazes_and_fans_out() {
 #[test]
 fn general_meow_meow_uses_twelve_tile_range_magic_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -14658,6 +16845,7 @@ fn general_meow_meow_uses_twelve_tile_range_magic_branch() {
 #[test]
 fn general_meow_meow_range_branch_fans_out_around_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -14747,6 +16935,7 @@ fn general_meow_meow_range_branch_fans_out_around_target() {
 #[test]
 fn general_meow_meow_close_slam_branch_uses_triple_dc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -14821,6 +17010,7 @@ fn general_meow_meow_close_slam_branch_uses_triple_dc() {
 #[test]
 fn general_meow_meow_shield_phase_reduces_incoming_damage_and_broadcasts_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -14934,6 +17124,7 @@ fn general_meow_meow_shield_phase_reduces_incoming_damage_and_broadcasts_buff() 
 #[test]
 fn horned_commander_ignores_damage_while_immune() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let object_id = 99_171_u32;
@@ -15010,6 +17201,7 @@ fn horned_commander_ignores_damage_while_immune() {
 #[test]
 fn horned_sorceror_ignores_damage_during_charged_stomp_immune_window() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let object_id = 99_169_u32;
@@ -15078,6 +17270,7 @@ fn horned_sorceror_ignores_damage_during_charged_stomp_immune_window() {
 #[test]
 fn horned_warrior_shield_window_subtracts_500_ac_from_incoming_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let object_id = 99_165_u32;
@@ -15200,6 +17393,7 @@ fn horned_warrior_shield_window_subtracts_500_ac_from_incoming_damage() {
 #[test]
 fn horned_sorceror_dust_tornado_field_damages_player_every_tick_until_expiry() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Player on a guaranteed non-safe-zone tile (else the safe-zone shield blocks
@@ -15345,6 +17539,7 @@ fn horned_sorceror_dust_tornado_field_damages_player_every_tick_until_expiry() {
 #[test]
 fn general_meow_meow_shield_phase_casts_mass_thunder_spell_objects() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -15475,6 +17670,7 @@ fn general_meow_meow_shield_phase_casts_mass_thunder_spell_objects() {
 #[test]
 fn general_meow_meow_periodic_slave_spawn_uses_crystal_cat_mobs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -15550,6 +17746,7 @@ fn general_meow_meow_periodic_slave_spawn_uses_crystal_cat_mobs() {
 #[test]
 fn tucson_general_opens_with_rage_packet_without_direct_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -15637,6 +17834,7 @@ fn tucson_general_opens_with_rage_packet_without_direct_damage() {
 #[test]
 fn tucson_general_uses_sc_range_branch_while_rage_cools_down() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -15733,6 +17931,7 @@ fn tucson_general_uses_sc_range_branch_while_rage_cools_down() {
 #[test]
 fn tucson_general_type_two_range_branch_uses_double_sc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -15819,6 +18018,7 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
 #[test]
 fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -15953,6 +18153,7 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
 #[test]
 fn tucson_general_rage_spawns_rock_spell_objects_and_targeted_impacts() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -16057,6 +18258,7 @@ fn tucson_general_rage_spawns_rock_spell_objects_and_targeted_impacts() {
 #[test]
 fn trap_rock_reveals_adjacent_and_emits_no_damage_range_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -16162,6 +18364,7 @@ fn trap_rock_reveals_adjacent_and_emits_no_damage_range_packet() {
 #[test]
 fn trap_rock_dies_when_target_moves_after_reveal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -16234,6 +18437,7 @@ fn trap_rock_dies_when_target_moves_after_reveal() {
 #[test]
 fn trap_rock_show_spawns_child_rocks_and_paralyzes_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = player_position(&session);
@@ -16358,6 +18562,7 @@ fn trap_rock_show_spawns_child_rocks_and_paralyzes_target() {
 #[test]
 fn trap_rock_parent_attack_can_reapply_paralysis() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = player_position(&session);
@@ -16441,6 +18646,7 @@ fn trap_rock_parent_attack_can_reapply_paralysis() {
 #[test]
 fn trap_rock_first_player_hit_collapses_visible_parent() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -16504,6 +18710,7 @@ fn trap_rock_first_player_hit_collapses_visible_parent() {
 #[test]
 fn armadillo_reveals_and_uses_primary_dc_melee() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -16599,6 +18806,7 @@ fn armadillo_reveals_and_uses_primary_dc_melee() {
 #[test]
 fn armadillo_type_one_branch_uses_three_half_dc_hits() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -16665,6 +18873,7 @@ fn armadillo_type_one_branch_uses_three_half_dc_hits() {
 #[test]
 fn armadillo_elder_reveals_and_uses_double_dc_melee() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -16750,6 +18959,7 @@ fn armadillo_elder_reveals_and_uses_double_dc_melee() {
 #[test]
 fn armadillo_elder_type_one_branch_emits_push_packet_without_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -16817,6 +19027,7 @@ fn armadillo_elder_type_one_branch_emits_push_packet_without_damage() {
 #[test]
 fn armadillo_retreat_branch_backsteps_and_ranges_nearby_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -16940,6 +19151,7 @@ fn armadillo_retreat_branch_backsteps_and_ranges_nearby_target() {
 #[test]
 fn armadillo_enters_run_away_after_failed_retreat_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -17067,6 +19279,7 @@ fn armadillo_enters_run_away_after_failed_retreat_damage() {
 #[test]
 fn armadillo_elder_retreat_backsteps_and_enters_run_away() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -17156,6 +19369,7 @@ fn armadillo_elder_retreat_backsteps_and_enters_run_away() {
 #[test]
 fn restless_jar_is_static_and_emits_zero_mc_range_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -17272,6 +19486,7 @@ fn restless_jar_is_static_and_emits_zero_mc_range_packet() {
 #[test]
 fn restless_jar_adjacent_spin_branch_fans_out() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -17364,6 +19579,7 @@ fn restless_jar_adjacent_spin_branch_fans_out() {
 #[test]
 fn restless_jar_adjacent_tornado_branch_applies_blindness() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -17432,6 +19648,7 @@ fn restless_jar_adjacent_tornado_branch_applies_blindness() {
 #[test]
 fn restless_jar_low_hp_stomp_branch_pushes_and_hits_area() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -17573,6 +19790,7 @@ fn restless_jar_low_hp_stomp_branch_pushes_and_hits_area() {
 #[test]
 fn frost_tiger_is_passive_until_targeted_and_uses_six_tile_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -17685,6 +19903,7 @@ fn frost_tiger_is_passive_until_targeted_and_uses_six_tile_range() {
 #[test]
 fn frost_tiger_sits_after_timer_and_stands_when_targeted() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -17777,6 +19996,7 @@ fn frost_tiger_sits_after_timer_and_stands_when_targeted() {
 #[test]
 fn frost_tiger_range_branch_applies_bleeding_roll_for_effect_zero() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -17843,6 +20063,7 @@ fn frost_tiger_range_branch_applies_bleeding_roll_for_effect_zero() {
 #[test]
 fn ice_guard_uses_crystal_eight_tile_ranged_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -17933,6 +20154,7 @@ fn ice_guard_uses_crystal_eight_tile_ranged_attack() {
 #[test]
 fn ice_guard_ice_range_branch_applies_slow_and_frozen_rolls() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18008,6 +20230,7 @@ fn ice_guard_ice_range_branch_applies_slow_and_frozen_rolls() {
 #[test]
 fn ice_guard_fire_range_branch_uses_type_one_without_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18078,6 +20301,7 @@ fn ice_guard_fire_range_branch_uses_type_one_without_poison() {
 #[test]
 fn frozen_miner_uses_crystal_primary_attack_timing_and_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18148,6 +20372,7 @@ fn frozen_miner_uses_crystal_primary_attack_timing_and_dc_damage() {
 #[test]
 fn frozen_miner_type_one_branch_uses_eighty_percent_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18203,6 +20428,7 @@ fn frozen_miner_type_one_branch_uses_eighty_percent_dc_damage() {
 #[test]
 fn frozen_miner_type_one_branch_fans_out_to_adjacent_opposing_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18295,6 +20521,7 @@ fn frozen_miner_type_one_branch_fans_out_to_adjacent_opposing_monsters() {
 #[test]
 fn frozen_axeman_uses_crystal_two_tile_type_one_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18382,6 +20609,7 @@ fn frozen_axeman_uses_crystal_two_tile_type_one_branch() {
 #[test]
 fn frozen_axeman_adjacent_pull_branch_uses_type_two_and_pushes_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -18492,6 +20720,7 @@ fn frozen_axeman_adjacent_pull_branch_uses_type_two_and_pushes_player() {
 #[test]
 fn frozen_magician_uses_crystal_nine_tile_ranged_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18581,6 +20810,7 @@ fn frozen_magician_uses_crystal_nine_tile_ranged_branch() {
 #[test]
 fn frozen_magician_type_one_range_branch_uses_boosted_mc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -18649,6 +20879,7 @@ fn frozen_magician_type_one_range_branch_uses_boosted_mc_damage() {
 #[test]
 fn snow_wolf_uses_crystal_primary_dc_attack_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18718,6 +20949,7 @@ fn snow_wolf_uses_crystal_primary_dc_attack_branch() {
 #[test]
 fn snow_wolf_type_one_branch_emits_packet_and_gates_zero_mc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18771,6 +21003,7 @@ fn snow_wolf_type_one_branch_emits_packet_and_gates_zero_mc_damage() {
 #[test]
 fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -18912,6 +21145,7 @@ fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
 #[test]
 fn frozen_warewolf_uses_snow_wolf_king_primary_attack_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -18982,6 +21216,7 @@ fn frozen_warewolf_uses_snow_wolf_king_primary_attack_branch() {
 #[test]
 fn frozen_warewolf_hp_branch_spawns_snow_wolf_slaves() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -19086,6 +21321,7 @@ fn frozen_warewolf_hp_branch_spawns_snow_wolf_slaves() {
 #[test]
 fn frozen_warewolf_death_explosion_hits_adjacent_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 322, y: 277 };
@@ -19151,6 +21387,7 @@ fn frozen_warewolf_death_explosion_hits_adjacent_player() {
 #[test]
 fn tucson_mage_uses_crystal_type_one_packet_without_zero_mc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19232,6 +21469,7 @@ fn tucson_mage_uses_crystal_type_one_packet_without_zero_mc_damage() {
 #[test]
 fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -19356,6 +21594,7 @@ fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
 #[test]
 fn tucson_warrior_uses_crystal_two_tile_smash_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19452,6 +21691,7 @@ fn tucson_warrior_uses_crystal_two_tile_smash_branch() {
 #[test]
 fn tucson_warrior_adjacent_halfmoon_branch_fans_out() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19546,6 +21786,7 @@ fn tucson_warrior_adjacent_halfmoon_branch_fans_out() {
 #[test]
 fn tucson_warrior_adjacent_smash_branch_hits_target_area() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19645,6 +21886,7 @@ fn tucson_warrior_adjacent_smash_branch_hits_target_area() {
 #[test]
 fn snow_yeti_uses_crystal_nine_tile_dc_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19731,6 +21973,7 @@ fn snow_yeti_uses_crystal_nine_tile_dc_range_attack() {
 #[test]
 fn snow_yeti_range_branch_applies_frozen_roll() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19798,6 +22041,7 @@ fn snow_yeti_range_branch_applies_frozen_roll() {
 #[test]
 fn snow_yeti_adjacent_branch_uses_crystal_double_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19884,6 +22128,7 @@ fn snow_yeti_adjacent_branch_uses_crystal_double_hit() {
 #[test]
 fn dark_wraith_uses_crystal_four_tile_line_attack_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -19969,6 +22214,7 @@ fn dark_wraith_uses_crystal_four_tile_line_attack_branch() {
 #[test]
 fn dark_wraith_line_branch_fans_out_and_sets_cooldown() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20067,6 +22313,7 @@ fn dark_wraith_line_branch_fans_out_and_sets_cooldown() {
 #[test]
 fn dark_wraith_adjacent_area_branch_fans_out_to_nearby_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20159,6 +22406,7 @@ fn dark_wraith_adjacent_area_branch_fans_out_to_nearby_targets() {
 #[test]
 fn crystal_spider_uses_three_tile_line_attack_and_green_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20262,6 +22510,7 @@ fn crystal_spider_uses_three_tile_line_attack_and_green_poison() {
 #[test]
 fn crystal_spider_line_attack_fans_out_to_forward_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20349,6 +22598,7 @@ fn crystal_spider_line_attack_fans_out_to_forward_targets() {
 #[test]
 fn turtle_grass_wakes_and_attacks_from_crystal_two_tile_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20440,6 +22690,7 @@ fn turtle_grass_wakes_and_attacks_from_crystal_two_tile_range() {
 #[test]
 fn turtle_grass_type_one_branch_pushes_player_before_delayed_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -20547,6 +22798,7 @@ fn turtle_grass_type_one_branch_pushes_player_before_delayed_damage() {
 #[test]
 fn man_tree_wakes_and_uses_zero_dc_attack_packet_without_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20622,6 +22874,7 @@ fn man_tree_wakes_and_uses_zero_dc_attack_packet_without_damage() {
 #[test]
 fn man_tree_type_one_halfmoon_packet_is_data_gated_by_zero_dc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20686,6 +22939,7 @@ fn man_tree_type_one_halfmoon_packet_is_data_gated_by_zero_dc() {
 #[test]
 fn man_tree_type_two_boulder_packet_is_data_gated_by_zero_mc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20752,6 +23006,7 @@ fn man_tree_type_two_boulder_packet_is_data_gated_by_zero_mc() {
 #[test]
 fn bone_spearman_ai_hits_from_two_tiles_like_line_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20824,6 +23079,7 @@ fn bone_spearman_ai_hits_from_two_tiles_like_line_attack() {
 #[test]
 fn right_guard_uses_ranged_attack_when_not_adjacent() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -20892,6 +23148,7 @@ fn right_guard_uses_ranged_attack_when_not_adjacent() {
 #[test]
 fn right_guard_uses_melee_attack_when_adjacent() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -20949,6 +23206,7 @@ fn right_guard_uses_melee_attack_when_adjacent() {
 #[test]
 fn shaman_zombie_uses_six_tile_line_range_attack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21000,6 +23258,7 @@ fn shaman_zombie_uses_six_tile_line_range_attack() {
 #[test]
 fn black_foxman_uses_type_one_line_attack_at_two_tiles() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -21053,6 +23312,7 @@ fn black_foxman_uses_type_one_line_attack_at_two_tiles() {
 #[test]
 fn red_and_white_foxmen_use_six_tile_range_attacks() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21108,6 +23368,7 @@ fn red_and_white_foxmen_use_six_tile_range_attacks() {
 #[test]
 fn red_foxman_type_one_range_branch_uses_imported_dc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21179,6 +23440,7 @@ fn red_foxman_type_one_range_branch_uses_imported_dc() {
 #[test]
 fn white_foxman_slow_branch_applies_status_without_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21251,6 +23513,7 @@ fn white_foxman_slow_branch_applies_status_without_damage() {
 #[test]
 fn white_foxman_kites_before_fear_window_then_attacks() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21317,6 +23580,7 @@ fn white_foxman_kites_before_fear_window_then_attacks() {
 #[test]
 fn red_foxman_adjacent_fear_window_teleports_with_effect_two() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -21385,6 +23649,7 @@ fn red_foxman_adjacent_fear_window_teleports_with_effect_two() {
 #[test]
 fn water_dragon_and_black_tortoise_use_range_attacks_when_not_adjacent() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21425,6 +23690,7 @@ fn water_dragon_and_black_tortoise_use_range_attacks_when_not_adjacent() {
 #[test]
 fn water_dragon_range_hit_uses_mac_and_applies_green_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // A ranged WaterDragon strike is MACAgility in Crystal. Make physical AC
@@ -21521,6 +23787,7 @@ fn water_dragon_range_hit_uses_mac_and_applies_green_poison() {
 #[test]
 fn black_tortoise_range_poison_is_zero_mc_gated() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21578,6 +23845,7 @@ fn black_tortoise_range_poison_is_zero_mc_gated() {
 #[test]
 fn black_tortoise_close_halfmoon_branch_hits_arc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -21676,6 +23944,7 @@ fn black_tortoise_close_halfmoon_branch_hits_arc() {
 #[test]
 fn cat_family_uses_crystal_range_and_line_attack_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21723,6 +23992,7 @@ fn cat_family_uses_crystal_range_and_line_attack_packets() {
 #[test]
 fn cat_shaman_red_poison_branch_is_zero_mc_gated() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21789,6 +24059,7 @@ fn cat_shaman_red_poison_branch_is_zero_mc_gated() {
 #[test]
 fn stray_cat_push_branch_moves_player_and_is_zero_mc_gated() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -21883,6 +24154,7 @@ fn stray_cat_push_branch_moves_player_and_is_zero_mc_gated() {
 #[test]
 fn yin_devil_node_is_immobile_and_does_not_attack_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -21942,6 +24214,7 @@ fn bug_bat_template_uses_crystal_monster_manifest_values() {
 #[test]
 fn bug_bag_maggot_spawns_bug_bat_after_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -22026,6 +24299,7 @@ fn bug_bag_maggot_spawns_bug_bat_after_delay() {
 #[test]
 fn root_spider_spawns_bomb_spider_from_crystal_template_offset() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -22099,6 +24373,7 @@ fn root_spider_spawns_bomb_spider_from_crystal_template_offset() {
 #[test]
 fn bug_bag_maggot_spawn_cap_counts_active_summons_only() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 930, y: 930 };
@@ -22250,6 +24525,7 @@ fn bug_bag_maggot_spawn_cap_counts_active_summons_only() {
 #[test]
 fn bomb_spider_explodes_when_adjacent_and_damages_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 315, y: 248 };
@@ -22321,6 +24597,7 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
 #[test]
 fn hell_knight_spawn_packet_sets_summoned_extra() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let hell_knight = spawn_crystal_monster_for_test(
@@ -22352,6 +24629,7 @@ fn hell_knight_spawn_packet_sets_summoned_extra() {
 #[test]
 fn hell_bomb_ignores_damage_and_explodes_after_timeout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 322, y: 277 };
@@ -22419,6 +24697,7 @@ fn hell_bomb_explosion_applies_poison_variant() {
         (2, "HellBomb3", super::FROST_TIGER_BLEEDING_BUFF_KEY),
     ] {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let player_origin = Point { x: 322, y: 277 };
@@ -22467,6 +24746,7 @@ fn hell_bomb_explosion_applies_poison_variant() {
 #[test]
 fn hell_lord_spawns_minions_and_advances_stage_when_knight_dies() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -22575,6 +24855,7 @@ fn summoned_bug_bat_spawn_packet_keeps_master_object_id() {
     assert_eq!(template.monster_name, "BugBat");
 
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let summoned = session
@@ -22639,6 +24920,7 @@ fn summoned_bug_bat_death_emits_packets_before_cleanup() {
     let template = bug_bat_template().expect("bug bat template");
 
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let object_id = 98_894_u32;
@@ -22705,6 +24987,7 @@ fn summoned_charmed_snake_spawn_packet_sets_extra_and_master() {
     let template =
         crystal_dynamic_monster_template("CharmedSnake").expect("charmed snake template");
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let summoned = session
@@ -22768,6 +25051,7 @@ fn summoned_charmed_snake_spawn_packet_sets_extra_and_master() {
 #[test]
 fn snake_totem_spawns_charmed_snake_with_extra_flag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 333, y: 267 };
@@ -22861,6 +25145,7 @@ fn summoned_charmed_snake_dies_when_totem_out_of_range() {
     let template =
         crystal_dynamic_monster_template("CharmedSnake").expect("charmed snake template");
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 349, y: 267 });
 
@@ -22967,6 +25252,7 @@ fn summoned_charmed_snake_dies_when_totem_out_of_range() {
 #[test]
 fn dead_summoned_totem_despawns_after_delay_tick() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let current_tick = runtime_tick(session.app.world());
 
@@ -23019,6 +25305,7 @@ fn dead_summoned_totem_despawns_after_delay_tick() {
 #[test]
 fn respawn_restores_special_monster_initial_ai_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let current_tick = runtime_tick(session.app.world());
@@ -23193,6 +25480,7 @@ fn respawn_restores_special_monster_initial_ai_state() {
 #[test]
 fn ranged_monster_ai_emits_object_range_attack_for_player_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -23250,6 +25538,7 @@ fn ranged_monster_ai_emits_object_range_attack_for_player_target() {
 #[test]
 fn holy_deva_uses_crystal_six_tile_range_attack_and_extra_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -23327,6 +25616,7 @@ fn holy_deva_uses_crystal_six_tile_range_attack_and_extra_state() {
 #[test]
 fn holy_deva_kites_before_fear_window_then_attacks() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = player_entity(session.app.world()).expect("player entity");
@@ -23393,6 +25683,7 @@ fn holy_deva_kites_before_fear_window_then_attacks() {
 #[test]
 fn ranged_monster_damage_uses_distance_scaled_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -23472,6 +25763,7 @@ fn ranged_monster_damage_uses_distance_scaled_delay() {
 #[test]
 fn newly_visible_attacker_spawns_before_attack_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let attacker_object_id = 98_769_u32;
@@ -23539,6 +25831,7 @@ fn newly_visible_attacker_spawns_before_attack_packet() {
 #[test]
 fn moving_out_of_aoi_emits_object_remove_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     set_player_position(&mut session, Point { x: 351, y: 273 });
@@ -23565,6 +25858,7 @@ fn chat_before_start_game_rejects_without_runtime_chat() {
 #[test]
 fn chat_normal_message_emits_crystal_object_chat_only() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::Chat {
@@ -23587,6 +25881,33 @@ fn chat_normal_message_emits_crystal_object_chat_only() {
 }
 
 fn grant_gm(session: &mut SimulationSession) {
+    let account_id = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .account_id
+        .clone()
+        .expect("GM test must have an authenticated account");
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        store
+            .accounts
+            .get_mut(&account_id)
+            .expect("authenticated GM test account should exist")
+            .gm_level = 1;
+    }
+    config
+        .save_account_store_account(&account_id)
+        .expect("durable GM test account should persist");
     session
         .app
         .world_mut()
@@ -23597,6 +25918,7 @@ fn grant_gm(session: &mut SimulationSession) {
 #[test]
 fn non_gm_gm_gated_at_command_is_consumed_silently() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // Crystal consumes every "@" line as a command attempt and never echoes it to
     // normal chat. A GM-gated command from a non-GM hits Crystal's silent
@@ -23621,6 +25943,7 @@ fn non_gm_gm_gated_at_command_is_consumed_silently() {
 #[test]
 fn non_gm_ungated_at_command_runs_for_any_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // `@TIME` carries no IsGM gate in Crystal — any player may run it.
     let packets = session.handle_packet(ClientPacket::Chat {
@@ -23637,6 +25960,7 @@ fn non_gm_ungated_at_command_runs_for_any_player() {
 #[test]
 fn gm_level_command_sets_level_and_emits_level_changed() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -23673,6 +25997,7 @@ fn player_character_level(session: &SimulationSession) -> u16 {
 #[test]
 fn experience_gain_auto_levels_through_the_crystal_curve() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // The starter scene spawns a level-7 demo character; normalise to a clean
     // level 1 first. `@LEVEL 1` runs the shared `apply_level_change`, which points
@@ -23734,6 +26059,7 @@ fn experience_gain_auto_levels_through_the_crystal_curve() {
 #[test]
 fn large_experience_grant_cascades_multiple_levels() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // Normalise the level-7 starter character to a clean level 1 (see above).
     grant_gm(&mut session);
@@ -23763,6 +26089,7 @@ fn large_experience_grant_cascades_multiple_levels() {
 #[test]
 fn gm_gold_and_move_commands_mutate_runtime() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -23809,6 +26136,7 @@ fn gm_chat(session: &mut SimulationSession, message: &str) -> Vec<ServerPacket> 
 #[test]
 fn gm_login_handshake_grants_gm_on_correct_password() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -23839,6 +26167,7 @@ fn gm_login_handshake_grants_gm_on_correct_password() {
 #[test]
 fn gm_login_handshake_rejects_wrong_password() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -23862,6 +26191,7 @@ fn gm_login_handshake_rejects_wrong_password() {
 #[test]
 fn gm_superman_toggles_invincibility() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -23887,6 +26217,7 @@ fn gm_superman_toggles_invincibility() {
 #[test]
 fn gm_allow_trade_and_allow_observe_toggle() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // Ungated commands — usable without GM rank.
     let trade = gm_chat(&mut session, "@ALLOWTRADE");
@@ -23903,6 +26234,7 @@ fn gm_allow_trade_and_allow_observe_toggle() {
 #[test]
 fn gm_map_and_roll_report_for_any_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let map = gm_chat(&mut session, "@MAP");
     assert!(map.iter().any(|packet| matches!(
@@ -23921,6 +26253,7 @@ fn gm_map_and_roll_report_for_any_player() {
 #[test]
 fn gm_make_creates_item_and_clearbag_empties_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -23955,6 +26288,7 @@ fn gm_make_creates_item_and_clearbag_empties_inventory() {
 #[test]
 fn gm_clearbuffs_removes_all_buffs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -23986,6 +26320,7 @@ fn gm_clearbuffs_removes_all_buffs() {
 #[test]
 fn gm_give_credit_and_adjust_pkpoint() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24014,6 +26349,7 @@ fn gm_give_credit_and_adjust_pkpoint() {
 #[test]
 fn gm_cross_player_givegold_reports_not_found() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
     // `@GIVEGOLD <player> <amount>` resolves to Crystal's "player not found" with
@@ -24028,6 +26364,7 @@ fn gm_cross_player_givegold_reports_not_found() {
 #[test]
 fn gm_set_flag_list_and_clear() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24048,6 +26385,7 @@ fn gm_set_flag_list_and_clear() {
 #[test]
 fn gm_setquest_marks_completed_and_clearquests_empties() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24072,6 +26410,7 @@ fn gm_setquest_marks_completed_and_clearquests_empties() {
 #[test]
 fn gm_change_class_and_gender_mutate_character() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24108,6 +26447,7 @@ fn gm_change_class_and_gender_mutate_character() {
 #[test]
 fn gm_revive_restores_player_vitals() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24139,6 +26479,7 @@ fn gm_die_emits_self_death_and_object_died() {
     // broadcasting `S.ObjectDied` (PlayerObject.cs:649-650). @DIE is ungated, so this
     // is also the death path the combat/survival QA loop exercises.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_id = current_player_object_id(session.app.world()).expect("player object id");
 
@@ -24158,6 +26499,7 @@ fn town_revive_respawns_dead_player_at_bind_point() {
     // at the bind/town point with restored vitals, replying `S.Revived` + broadcast
     // `S.ObjectRevived`. The single-map world binds to the configured spawn.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_id = current_player_object_id(session.app.world()).expect("player object id");
     let spawn = session
@@ -24208,6 +26550,7 @@ fn town_revive_respawns_dead_player_at_bind_point() {
 fn town_revive_is_noop_for_living_player() {
     // Crystal `if (!Dead) return;` — a living player's TownRevive does nothing.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let packets = session.handle_packet(ClientPacket::TownRevive);
     assert!(packets.is_empty());
@@ -24216,6 +26559,7 @@ fn town_revive_is_noop_for_living_player() {
 #[test]
 fn gm_setlight_emits_personal_light_player_update() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24239,6 +26583,7 @@ fn gm_setlight_emits_personal_light_player_update() {
 #[test]
 fn gm_deco_spawns_decoration() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24251,6 +26596,7 @@ fn gm_deco_spawns_decoration() {
 #[test]
 fn gm_mob_spawns_and_clearmob_kills_them() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
 
@@ -24275,6 +26621,7 @@ fn gm_mob_spawns_and_clearmob_kills_them() {
 #[test]
 fn gm_recall_lover_reports_not_married() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let result = gm_chat(&mut session, "@RECALLLOVER");
     assert!(result.iter().any(|packet| matches!(
@@ -24286,6 +26633,7 @@ fn gm_recall_lover_reports_not_married() {
 #[test]
 fn gm_awakening_fixes_awake_type_on_equipped_weapon() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
     equip_crystal_item(&mut session, "WoodenSword", EquipmentSlot::Weapon);
@@ -24311,6 +26659,7 @@ fn gm_awakening_fixes_awake_type_on_equipped_weapon() {
 #[test]
 fn gm_remove_awakening_pops_a_level_and_refreshes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
     equip_crystal_item(&mut session, "WoodenSword", EquipmentSlot::Weapon);
@@ -24343,6 +26692,7 @@ fn gm_remove_awakening_pops_a_level_and_refreshes() {
 #[test]
 fn gm_set_timer_emits_client_timer() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // `@SETTIMER` is ungated in Crystal.
     let packets = gm_chat(&mut session, "@SETTIMER boss 60 1");
@@ -24355,6 +26705,7 @@ fn gm_set_timer_emits_client_timer() {
 #[test]
 fn gm_superman_makes_player_invincible() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -24385,6 +26736,7 @@ fn gm_superman_makes_player_invincible() {
 #[test]
 fn gm_ride_toggles_equipped_mount() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_test_mount(&mut session, 12);
 
@@ -24409,6 +26761,7 @@ fn gm_ride_toggles_equipped_mount() {
 #[test]
 fn gm_hair_sets_character_appearance() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     grant_gm(&mut session);
     let _ = gm_chat(&mut session, "@HAIR 7");
@@ -24427,6 +26780,7 @@ fn gm_hair_sets_character_appearance() {
 #[test]
 fn gm_toggle_transform_pauses_and_unpauses_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -24489,10 +26843,24 @@ impl Drop for EnvGuard {
 
 #[test]
 fn env_gm_accounts_grants_session_gm_for_listed_account() {
-    let _guard = EnvGuard::set("MIR2_GM_ACCOUNTS", "demo");
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    let _ = session.passkey_login("demo");
-    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let config = SimulationConfig::default();
+    let account_id = unique_test_account_id("env-gm");
+    let _guard = EnvGuard::set("MIR2_GM_ACCOUNTS", &account_id);
+    SimulationSession::provision_passkey_account(&config, &account_id)
+        .expect("trusted test provisioning should create the env-GM account");
+    let mut session = SimulationSession::new(config);
+    let login = session.passkey_login(&account_id);
+    assert!(matches!(
+        login.first(),
+        Some(ServerPacket::LoginSuccess { characters }) if characters.is_empty()
+    ));
+    let created = session.handle_packet(ClientPacket::NewCharacter {
+        name: "EnvGmHero".to_string(),
+        gender: MirGender::Male,
+        class: MirClass::Warrior,
+    });
+    let character_index = new_character_success_index(&created);
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index });
     assert!(session
         .app
         .world()
@@ -24504,6 +26872,7 @@ fn env_gm_accounts_grants_session_gm_for_listed_account() {
 fn env_gm_password_enables_login_handshake() {
     let _guard = EnvGuard::set("MIR2_GM_PASSWORD", "sesame");
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = gm_chat(&mut session, "@LOGIN");
     let _ = gm_chat(&mut session, "sesame");
@@ -24544,6 +26913,7 @@ fn world_snapshot_includes_scene_and_state_data() {
 #[test]
 fn world_snapshot_marks_safe_zone_after_start_game() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = session.world_snapshot();
 
@@ -24558,6 +26928,7 @@ fn world_snapshot_marks_safe_zone_after_start_game() {
 #[test]
 fn world_snapshot_filters_outside_player_aoi() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 326, y: 270 });
     let _ = session.interact(4001);
@@ -24601,6 +26972,7 @@ fn world_snapshot_filters_outside_player_aoi() {
 #[test]
 fn attack_reduces_monster_hp() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
     let before = session
@@ -24627,6 +26999,7 @@ fn attack_reduces_monster_hp() {
 #[test]
 fn defeating_visible_monster_emits_death_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
 
@@ -24646,6 +27019,7 @@ fn defeating_visible_monster_emits_death_packets() {
 #[test]
 fn dead_monster_does_not_block_attack_or_die_twice() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
     let monster = entity_by_object_id(session.app.world(), 3002).expect("monster entity");
@@ -24669,9 +27043,30 @@ fn dead_monster_does_not_block_attack_or_die_twice() {
 #[test]
 fn npc_interaction_assigns_quest_and_dialog() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let packets = session.interact(4001);
+    let dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("Village Guide dialog should be active before accepting the quest");
+    assert_eq!(dialog.npc_name, "Village Guide");
+    assert!(dialog
+        .links
+        .iter()
+        .any(|link| { link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID) }));
+    let accept_packets =
+        session.select_npc_dialog_target(&format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID));
+    assert!(accept_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken: true,
+            completed: false,
+            ..
+        } if *quest_id == super::GUIDE_QUEST_ID
+    )));
 
     assert!(packets.iter().any(|packet| matches!(
         packet,
@@ -24686,21 +27081,25 @@ fn npc_interaction_assigns_quest_and_dialog() {
 
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.quest_log[0].stage, QuestStage::InProgress);
-    assert_eq!(
-        snapshot
-            .active_npc_dialog
-            .as_ref()
-            .map(|dialog| dialog.npc_name.as_str()),
-        Some("Village Guide")
-    );
+    assert!(snapshot.active_npc_dialog.is_none());
 }
 
 #[test]
 fn npc_interaction_uses_script_template_lookup() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID))));
+    let _ = session.select_npc_dialog_target(&format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID));
     session.set_language(mir2_game_data::LanguageCode::ChineseSimplified);
     let _ = session.interact(4001);
     let snapshot = session.world_snapshot();
@@ -24728,6 +27127,7 @@ fn npc_without_script_rejects_without_runtime_idle_dialog() {
         script_key: None,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let packets = session.interact(4999);
     let snapshot = session.world_snapshot();
@@ -24757,6 +27157,7 @@ fn crystal_npc_script_key_renders_main_say_and_links() {
         script_key: Some("BichonProvince/ArcherCaptain".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let packets = session.interact(4998);
     let snapshot = session.world_snapshot();
@@ -24799,6 +27200,7 @@ fn crystal_manifest_gtmerchant_interact_opens_dialog_when_adjacent() {
         script_key: Some("BichonProvince/BichonWall/GTMerchant".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.interact(32);
@@ -24826,6 +27228,7 @@ fn crystal_manifest_gtmerchant_interact_opens_dialog_when_adjacent() {
 #[test]
 fn crystal_npc_unknown_action_records_script_diagnostic() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     let mut execution_state = CrystalNpcExecutionState {
@@ -24862,6 +27265,7 @@ fn crystal_npc_unknown_action_records_script_diagnostic() {
 #[test]
 fn crystal_npc_unknown_condition_records_script_diagnostic() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let section = CrystalNpcSection {
         label: "@Main".to_string(),
@@ -24902,6 +27306,7 @@ fn crystal_npc_unknown_condition_records_script_diagnostic() {
 #[test]
 fn crystal_npc_goto_loop_stops_at_section_hop_limit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let script = CrystalNpcScript {
         script_key: "Test/Loop".to_string(),
@@ -24957,6 +27362,7 @@ fn crystal_npc_say_section_strips_comment_lines() {
     // `{text/colour}` directive, by contrast, is rendered client-side (MirScrollingLabel)
     // so the sim passes it through unchanged.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let script = CrystalNpcScript {
         script_key: "Test/Comment".to_string(),
@@ -25023,8 +27429,9 @@ fn crystal_npc_say_section_strips_comment_lines() {
 }
 
 #[test]
-fn crystal_npc_dynamic_visibility_flags_remain_hidden_until_runtime_hooks_exist() {
+fn crystal_npc_dynamic_visibility_matches_character_flags_and_crystal_schedule() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let character = session
         .app
@@ -25034,20 +27441,134 @@ fn crystal_npc_dynamic_visibility_flags_remain_hidden_until_runtime_hooks_exist(
         .as_ref()
         .expect("started character");
     let manifest = crystal_npc_info_manifest();
-    let flagged = manifest
+    let mut flagged = manifest
         .npcs
         .iter()
         .find(|npc| npc.flag_needed != 0)
-        .expect("Crystal manifest should include flag-gated NPCs");
-    let timed = manifest
+        .expect("Crystal manifest should include flag-gated NPCs")
+        .clone();
+    flagged.min_level = 0;
+    flagged.max_level = 0;
+    flagged.class_required.clear();
+    flagged.day_of_week.clear();
+    flagged.time_visible = false;
+    let mut timed = manifest
         .npcs
         .iter()
         .find(|npc| npc.time_visible)
-        .expect("Crystal manifest should include time-gated NPCs");
+        .expect("Crystal manifest should include time-gated NPCs")
+        .clone();
+    timed.flag_needed = 0;
+    timed.min_level = 0;
+    timed.max_level = 0;
+    timed.class_required.clear();
+    timed.day_of_week = "Monday".to_string();
+    timed.hour_start = 10;
+    timed.minute_start = 15;
+    timed.hour_end = 11;
+    timed.minute_end = 30;
 
-    assert!(!super::crystal_npc_visible_to_character(flagged, character));
-    assert!(!super::crystal_npc_visible_to_character(timed, character));
-    // TODO: wire dynamic flag_needed/time_visible evaluation against live NPC flags and Crystal local time.
+    let monday_open = super::CrystalNpcLocalTime::new(1, 10, 15);
+    assert!(!super::crystal_npc_visible_to_character(
+        &flagged,
+        character,
+        &[],
+        monday_open,
+    ));
+    assert!(super::crystal_npc_visible_to_character(
+        &flagged,
+        character,
+        &[super::NpcFlagState {
+            index: u32::try_from(flagged.flag_needed).expect("positive Crystal flag index"),
+            value: true,
+        }],
+        monday_open,
+    ));
+    assert!(super::crystal_npc_visible_to_character(
+        &timed,
+        character,
+        &[],
+        monday_open,
+    ));
+    assert!(!super::crystal_npc_visible_to_character(
+        &timed,
+        character,
+        &[],
+        super::CrystalNpcLocalTime::new(1, 11, 30),
+    ));
+    assert!(!super::crystal_npc_visible_to_character(
+        &timed,
+        character,
+        &[],
+        super::CrystalNpcLocalTime::new(2, 10, 15),
+    ));
+}
+
+#[test]
+fn crystal_npc_flag_changes_reconcile_live_aoi_and_block_hidden_interaction() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let flagged = crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .find(|npc| {
+            npc.map_file_name.as_deref() == Some("0")
+                && npc.flag_needed > 0
+                && npc.loaded_object_id.is_some()
+        })
+        .expect("Bichon should contain a flag-gated Crystal NPC");
+    let object_id = flagged.loaded_object_id.expect("loaded NPC object id");
+    let flag_index = u32::try_from(flagged.flag_needed).expect("positive Crystal flag index");
+
+    super::spawn_crystal_current_map_npcs(session.app.world_mut());
+    session.force_authoritative_player_transform(flagged.location.clone(), MirDirection::Down);
+    let hidden_packets = session.finalize_packets(Vec::new());
+    assert!(!session
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    assert!(!hidden_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectNpc { info } if info.object_id == object_id
+    )));
+    assert!(!super::crystal_npc_service_object_in_range(
+        session.app.world(),
+        object_id,
+    ));
+
+    set_crystal_npc_flag(session.app.world_mut(), flag_index, true);
+    let shown_packets = session.finalize_packets(Vec::new());
+    assert!(session
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    assert!(shown_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectNpc { info } if info.object_id == object_id
+    )));
+    assert!(super::crystal_npc_service_object_in_range(
+        session.app.world(),
+        object_id,
+    ));
+
+    set_crystal_npc_flag(session.app.world_mut(), flag_index, false);
+    let removed_packets = session.finalize_packets(Vec::new());
+    assert!(!session
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    assert!(removed_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRemove { object_id: removed } if *removed == object_id
+    )));
+    assert!(!super::crystal_npc_service_object_in_range(
+        session.app.world(),
+        object_id,
+    ));
 }
 
 #[test]
@@ -25162,6 +27683,7 @@ fn npc_confirm_input_packet_runs_input_label_with_submitted_value() {
         script_key: Some("GuildTerritory/GA0/GTAdmin-GA10".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4987);
@@ -25203,6 +27725,7 @@ fn npc_confirm_input_packet_rejects_wrong_active_npc() {
         script_key: Some("GuildTerritory/GA0/GTAdmin-GA10".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4987);
@@ -25252,6 +27775,7 @@ fn crystal_npc_service_links_emit_packets_and_close_dialog() {
         script_key: Some("BichonProvince/BichonWall/CraftsLady".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4991);
@@ -25337,6 +27861,7 @@ fn crystal_npc_storage_service_context_allows_store_and_take_back_without_helper
         script_key: Some("BichonProvince/Warehouse-D002".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let bag_item = session
@@ -25410,6 +27935,7 @@ fn crystal_npc_storage_reopen_without_state_change_only_emits_npc_storage_after_
         script_key: Some("BichonProvince/Warehouse-D002".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4991);
@@ -25435,10 +27961,14 @@ fn crystal_npc_storage_service_reopen_resets_session_unlock() {
         script_key: Some("BichonProvince/Warehouse-D002".to_string()),
     });
     let mut session = SimulationSession::new(config);
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "storage-reopen-reset");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-reopen-reset".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     activate_storage_service(&mut session);
@@ -25487,6 +28017,7 @@ fn crystal_npc_storage_service_context_rejects_storage_actions_when_player_leave
         script_key: Some("BichonProvince/Warehouse-D002".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -25607,6 +28138,7 @@ fn crystal_npc_storage_service_context_rejects_storage_actions_when_player_leave
 #[test]
 fn storage_service_context_requires_live_npc_object() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -25677,6 +28209,7 @@ fn blacksmith_config() -> SimulationConfig {
 #[test]
 fn crystal_npc_sell_updates_buy_back_goods_for_active_service() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -25752,6 +28285,7 @@ fn crystal_npc_sell_updates_buy_back_goods_for_active_service() {
 #[test]
 fn crystal_npc_buy_back_persists_across_save_and_reload() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -25775,6 +28309,7 @@ fn crystal_npc_buy_back_persists_across_save_and_reload() {
         .account_store
         .clone();
     let mut reloaded = SimulationSession::new(reloaded_config);
+    login_demo_account_for_persistence_test(&mut reloaded);
     reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let context = NpcInteractionContext {
@@ -25805,6 +28340,7 @@ fn crystal_npc_buy_back_persists_across_save_and_reload() {
 #[test]
 fn crystal_npc_buy_back_expiry_moves_items_to_used_goods() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -25893,6 +28429,7 @@ fn crystal_npc_buy_back_expiry_moves_items_to_used_goods() {
 #[test]
 fn crystal_npc_buy_item_packet_purchases_trade_goods() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -25923,6 +28460,7 @@ fn crystal_npc_buy_item_packet_purchases_trade_goods() {
 #[test]
 fn crystal_npc_buy_item_dead_player_is_silent_and_preserves_state() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -25974,6 +28512,7 @@ fn crystal_npc_buy_item_dead_player_is_silent_and_preserves_state() {
 #[test]
 fn crystal_npc_buy_item_invalid_contexts_are_silent_and_preserve_state() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -26045,6 +28584,7 @@ fn crystal_npc_buy_item_invalid_contexts_are_silent_and_preserve_state() {
 #[test]
 fn crystal_npc_buy_item_service_context_rejects_when_player_leaves_data_range() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4990);
@@ -26098,6 +28638,7 @@ fn crystal_npc_buy_item_service_context_rejects_when_player_leaves_data_range() 
 #[test]
 fn crystal_npc_sell_and_repair_contexts_reject_when_player_leaves_data_range() {
     let mut sell_session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut sell_session);
     sell_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let state_before_sell = {
         let inventory = sell_session.app.world().resource::<InventoryResource>();
@@ -26148,6 +28689,7 @@ fn crystal_npc_sell_and_repair_contexts_reject_when_player_leaves_data_range() {
     );
 
     let mut repair_session = SimulationSession::new(blacksmith_config());
+    login_demo_account_for_persistence_test(&mut repair_session);
     repair_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -26204,6 +28746,7 @@ fn crystal_npc_dialog_target_runs_followup_section_and_can_return_main() {
         script_key: Some("BichonProvince/BichonWall/Board".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4997);
@@ -26285,6 +28828,7 @@ fn crystal_npc_else_say_branch_renders_when_if_conditions_fail() {
         script_key: Some("AncientCaves/AncientNatural-D003".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4996);
@@ -26317,6 +28861,7 @@ fn crystal_npc_move_without_coordinates_returns_no_transfer_packets_yet() {
         script_key: Some("MongchonProvince/Swamp/Bones".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4995);
@@ -26346,6 +28891,7 @@ fn crystal_npc_move_with_gold_condition_charges_and_transfers_player() {
         script_key: Some("BichonProvince/BichonWall/Bichon_Teleport1".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session
@@ -26401,6 +28947,7 @@ fn crystal_npc_checkitem_takeitem_and_move_with_coordinates_execute_together() {
         script_key: Some("PrajnaIsland/Timestone".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut session_resource = session.app.world_mut().resource_mut::<SessionResource>();
@@ -26430,6 +28977,7 @@ fn crystal_npc_checkitem_takeitem_and_move_with_coordinates_execute_together() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -26484,6 +29032,7 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
         script_key: Some("BichonProvince/BichonWall/14Wr-0".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -26505,6 +29054,7 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -26552,6 +29102,7 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
 #[test]
 fn crystal_npc_giveitem_full_bag_preserves_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     let before = session.world_snapshot();
@@ -26591,6 +29142,7 @@ fn crystal_npc_local_message_break_and_close_emit_message_and_dismiss_dialog() {
         script_key: Some("MongchonProvince/Swamp/Bones".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4991);
@@ -26618,6 +29170,7 @@ fn crystal_npc_check_and_set_flag_drive_followup_dialog_branch() {
         script_key: Some("BichonProvince/BichonWall/Board".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<SessionResource>();
@@ -26683,6 +29236,7 @@ fn crystal_npc_check_and_set_flag_drive_followup_dialog_branch() {
 #[test]
 fn crystal_npc_givegold_checkclass_and_gender_execute_expected_branch() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<SessionResource>();
@@ -26729,11 +29283,13 @@ fn crystal_npc_givegold_checkclass_and_gender_execute_expected_branch() {
 fn crystal_npc_flags_persist_across_save_and_reload() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_crystal_npc_flag(first.app.world_mut(), 993, true);
     first.save_active_character();
 
     let mut second = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(evaluate_crystal_npc_condition(
@@ -26745,6 +29301,7 @@ fn crystal_npc_flags_persist_across_save_and_reload() {
 #[test]
 fn crystal_npc_checkquest_supports_active_and_complete_keywords() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(evaluate_crystal_npc_condition(
@@ -26779,6 +29336,7 @@ fn crystal_npc_checkquest_supports_active_and_complete_keywords() {
 #[test]
 fn crystal_npc_givepet_pet_checks_and_clearpets_follow_crystal_pet_flow() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -26827,6 +29385,7 @@ fn crystal_npc_givepet_pet_checks_and_clearpets_follow_crystal_pet_flow() {
 #[test]
 fn crystal_npc_param_and_mongen_spawn_runtime_monsters_on_current_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     let mut execution_state = CrystalNpcExecutionState::default();
@@ -26888,6 +29447,7 @@ fn crystal_npc_param_and_mongen_spawn_runtime_monsters_on_current_map() {
 #[test]
 fn crystal_npc_random_condition_uses_runtime_rng_progression() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(evaluate_crystal_npc_condition(
@@ -26915,6 +29475,7 @@ fn crystal_npc_random_condition_uses_runtime_rng_progression() {
 #[test]
 fn crystal_npc_checkmon_counts_runtime_monsters_on_current_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(evaluate_crystal_npc_condition(
@@ -26938,6 +29499,7 @@ fn crystal_npc_checkmon_counts_runtime_monsters_on_current_map() {
 #[test]
 fn crystal_npc_checkmon_becomes_true_after_param_and_mongen() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     let mut execution_state = CrystalNpcExecutionState::default();
@@ -27007,6 +29569,7 @@ fn crystal_npc_checkmon_becomes_true_after_param_and_mongen() {
 #[test]
 fn crystal_npc_checkexactmon_counts_named_runtime_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     let mut execution_state = CrystalNpcExecutionState::default();
@@ -27065,6 +29628,7 @@ fn crystal_npc_checkexactmon_counts_named_runtime_monsters() {
 #[test]
 fn crystal_npc_removepet_only_despawns_matching_pet_name() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27131,6 +29695,7 @@ fn crystal_npc_mov_and_checkcalc_drive_lottery_guess_flow() {
         script_key: Some("BichonProvince/BichonWall/Lottery".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4989);
@@ -27173,6 +29738,7 @@ fn crystal_npc_mov_and_checkcalc_drive_lottery_guess_flow() {
 #[test]
 fn crystal_npc_calc_updates_numeric_variable_and_checkcalc_observes_result() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27208,6 +29774,7 @@ fn crystal_npc_calc_updates_numeric_variable_and_checkcalc_observes_result() {
 #[test]
 fn crystal_npc_calc_concatenates_non_numeric_values_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27243,6 +29810,7 @@ fn crystal_npc_calc_concatenates_non_numeric_values_like_crystal() {
 #[test]
 fn crystal_npc_runtime_token_resolution_replaces_embedded_variables_and_output_placeholders() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<NpcStateResource>();
@@ -27280,6 +29848,7 @@ fn crystal_npc_input_label_waits_for_input_and_replaces_inputstr_on_submit() {
         script_key: Some("GuildTerritory/GA0/GTAdmin-GA10".to_string()),
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let _ = session.interact(4991);
@@ -27325,6 +29894,7 @@ fn crystal_npc_input_label_waits_for_input_and_replaces_inputstr_on_submit() {
 #[test]
 fn crystal_npc_world_event_conditions_check_current_map_range_and_humans() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
@@ -27357,6 +29927,7 @@ fn crystal_npc_world_event_conditions_check_current_map_range_and_humans() {
 #[test]
 fn crystal_npc_time_and_bag_conditions_follow_runtime_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let now = crystal_local_time_snapshot().expect("local time snapshot should be available");
@@ -27395,6 +29966,7 @@ fn crystal_npc_time_and_bag_conditions_follow_runtime_state() {
 #[test]
 fn crystal_npc_admin_light_and_group_nearby_conditions_use_current_baseline() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -27472,6 +30044,7 @@ fn crystal_npc_group_and_conquest_runtime_use_configured_members_and_state() {
     config.group_member_object_ids = vec![9001, 9002];
     config.conquest_wars.insert(7, false);
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     let mut packets = Vec::new();
@@ -27536,6 +30109,7 @@ fn crystal_npc_group_and_conquest_runtime_use_configured_members_and_state() {
 #[test]
 fn crystal_npc_stage5_conquest_and_guild_territory_commands_have_stateful_baselines() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     {
@@ -27613,16 +30187,17 @@ fn crystal_npc_stage5_conquest_and_guild_territory_commands_have_stateful_baseli
     ));
 
     let resolved = super::resolve_crystal_npc_runtime_tokens(
-            session.app.world(),
-            "<$CONQUESTRATE(1)> <$CONQUESTGUARD(1,2)> <$CONQUESTWALL(1,3)> <$CONQUESTGATE(1,1)> <$GUILDGTRENTALDAYSLEFT>",
-            &CrystalNpcExecutionState::default(),
-        );
+        session.app.world(),
+        "<$CONQUESTRATE(1)> <$CONQUESTGUARD(1,2)> <$CONQUESTWALL(1,3)> <$CONQUESTGATE(1,1)> <$GUILDGTRENTALDAYSLEFT>",
+        &CrystalNpcExecutionState::default(),
+    );
     assert_eq!(resolved, "15 Alive Repaired Open 14");
 }
 
 #[test]
 fn crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execute() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27678,21 +30253,20 @@ fn crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execut
         .iter()
         .any(|item| item.key == "sealed-hero"));
 
-    let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let info = start_packets
-        .into_iter()
-        .find_map(|packet| match packet {
-            ServerPacket::UserInformation { info } => Some(info),
-            _ => None,
-        })
-        .expect("user information should be emitted");
-    assert_eq!(info.level, 22);
-    assert_eq!(info.hair, 4);
+    assert_eq!(
+        snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .and_then(|entity| entity.level),
+        Some(22)
+    );
 }
 
 #[test]
 fn crystal_npc_giveexp_updates_runtime_and_user_information() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27710,16 +30284,10 @@ fn crystal_npc_giveexp_updates_runtime_and_user_information() {
     assert_eq!(snapshot.player_experience, 42);
     assert_eq!(snapshot.player_max_experience, 100);
 
-    let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let info = start_packets
-        .into_iter()
-        .find_map(|packet| match packet {
-            ServerPacket::UserInformation { info } => Some(info),
-            _ => None,
-        })
-        .expect("user information should be emitted");
-    assert_eq!(info.experience, 42);
-    assert_eq!(info.max_experience, 100);
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.kind == WorldEntityKind::SelfPlayer));
     assert!(packets.is_empty());
 }
 
@@ -27733,6 +30301,7 @@ fn crystal_npc_savevalue_and_loadvalue_persist_across_reload() {
 
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut first = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27749,6 +30318,7 @@ fn crystal_npc_savevalue_and_loadvalue_persist_across_reload() {
 
     let reloaded_config = SimulationConfig::default().with_account_store_path(store_path);
     let mut second = SimulationSession::new(reloaded_config);
+    login_demo_account_for_persistence_test(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(
@@ -27772,6 +30342,7 @@ fn crystal_npc_savevalue_and_loadvalue_persist_across_reload() {
 #[test]
 fn crystal_npc_monclear_marks_current_map_monsters_dead() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -27806,6 +30377,7 @@ fn crystal_npc_monclear_marks_current_map_monsters_dead() {
 #[test]
 fn crystal_npc_giveskill_maps_runtime_and_crystal_manifest_entries() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<SkillResource>();
@@ -27875,19 +30447,39 @@ fn crystal_npc_giveskill_maps_runtime_and_crystal_manifest_entries() {
 #[test]
 fn defeating_field_wasp_advances_and_turns_in_quest() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID))));
+    let _ = session.select_npc_dialog_target(&format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID));
 
     kill_field_wasp(&mut session);
     let after_kill = session.world_snapshot();
     assert_eq!(after_kill.quest_log[0].stage, QuestStage::ReadyToTurnIn);
-    assert!(after_kill.inventory_items.iter().any(|item| {
-        item.container == ItemContainer::Quest && item.key == "quest-wasp-stinger"
-    }));
+    assert!(after_kill
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Quest && item.key == "crystal-item-876" }));
 
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == format!("@FinishQuest:{}", super::GUIDE_QUEST_ID))));
+    let _ = session.select_npc_dialog_target(&format!("@FinishQuest:{}", super::GUIDE_QUEST_ID));
     let after_turn_in = session.world_snapshot();
 
     assert_eq!(after_turn_in.quest_log[0].stage, QuestStage::Completed);
@@ -27895,19 +30487,23 @@ fn defeating_field_wasp_advances_and_turns_in_quest() {
     assert!(after_turn_in
         .equipment_items
         .iter()
-        .any(|item| { item.slot == EquipmentSlot::RingRight && item.name == "Guide Ring" }));
+        .any(|item| { item.slot == EquipmentSlot::RingRight && item.name == "CopperRing" }));
     assert!(after_turn_in.inventory_items.iter().any(|item| {
-        item.container == ItemContainer::Bag1 && item.key == "repair-powder" && item.quantity == 2
+        item.container == ItemContainer::Bag1
+            && item.key == "crystal-item-1135"
+            && item.name == "RareCopperOre"
+            && item.quantity == 2
     }));
     assert!(!after_turn_in
         .inventory_items
         .iter()
-        .any(|item| item.key == "quest-wasp-stinger"));
+        .any(|item| item.key == "crystal-item-876"));
 }
 
 #[test]
 fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     {
@@ -27919,9 +30515,9 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
-            key: "quest-wasp-stinger".to_string(),
-            name: "Wasp Stinger".to_string(),
-            icon: super::item_icon_for_key("quest-wasp-stinger"),
+            key: "crystal-item-876".to_string(),
+            name: "SkyStingerEgg".to_string(),
+            icon: super::item_icon_for_key("crystal-item-876"),
             slot: 0,
             unique_id: 0,
             container: ItemContainer::Quest,
@@ -27936,6 +30532,7 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -27965,20 +30562,21 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     assert!(after
         .inventory_items
         .iter()
-        .any(|item| item.key == "quest-wasp-stinger"));
+        .any(|item| item.key == "crystal-item-876"));
     assert!(!after
         .inventory_items
         .iter()
-        .any(|item| item.key == "repair-powder"));
+        .any(|item| item.key == "crystal-item-1135"));
     assert!(!after
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "Guide Ring"));
+        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "CopperRing"));
 }
 
 #[test]
 fn occupied_tile_blocks_player_walk() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 325, y: 271 });
     let _ = session.handle_packet(ClientPacket::Walk {
@@ -27999,6 +30597,7 @@ fn occupied_tile_blocks_player_walk() {
 #[test]
 fn dropped_gold_can_be_picked_up() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 326, y: 270 });
     sync_visible_objects(&mut session);
@@ -28053,6 +30652,7 @@ fn dropped_gold_can_be_picked_up() {
 #[test]
 fn pickup_preserves_gold_drop_when_gold_cap_is_full() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     session
@@ -28103,6 +30703,7 @@ fn crystal_ground_gold_chunks_follow_max_drop_gold_formula() {
 #[test]
 fn crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let monster_position = Point { x: 342, y: 270 };
     let monster_object_id = 98_917_u32;
@@ -28175,6 +30776,7 @@ fn crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death() {
 #[test]
 fn starter_monster_item_drop_has_no_runtime_success_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -28192,7 +30794,7 @@ fn starter_monster_item_drop_has_no_runtime_success_chat() {
         .world_snapshot()
         .ground_drops
         .iter()
-        .any(|drop| drop.name == "Training Splinter"));
+        .any(|drop| drop.name == "Timber"));
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -28201,6 +30803,7 @@ fn starter_monster_item_drop_has_no_runtime_success_chat() {
 #[test]
 fn missing_defeated_monster_entity_is_silent() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let mut packets = Vec::new();
@@ -28448,8 +31051,12 @@ fn crystal_resolved_drop_applies_random_attack_defence_and_durability() {
 #[test]
 fn pickup_preserves_random_added_stats_in_gained_item_payload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
+    let spiritblade = mir2_game_data::crystal_item_by_name("SpiritBlade")
+        .expect("SpiritBlade should exist in Crystal ItemInfo");
+    let spiritblade_key = super::crystal_item_key_for_template(&spiritblade);
 
     super::spawn_ground_drop(
         session.app.world_mut(),
@@ -28457,7 +31064,7 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
         "",
         None,
         super::DropLoot::InventoryItem {
-            key: "spiritblade".to_string(),
+            key: spiritblade_key.clone(),
             name: "SpiritBlade".to_string(),
             description: "Random stat pickup test item.".to_string(),
             weight: 10,
@@ -28472,6 +31079,7 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
             cursed: true,
             socket_slots: 2,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "SpiritBlade".to_string(),
@@ -28495,13 +31103,13 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
                 })
     )));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "spiritblade" && item.added_attack == 2 && item.added_defence == 1
+        item.key == spiritblade_key && item.added_attack == 2 && item.added_defence == 1
     }));
     let resources = session.app.world().resource::<InventoryResource>();
     let item = resources
         .inventory_items
         .iter()
-        .find(|item| item.key == "spiritblade")
+        .find(|item| item.key == spiritblade_key)
         .expect("picked random stat item should be in inventory state");
     assert!(item.cursed);
     assert_eq!(item.socket_slots, 2);
@@ -28514,6 +31122,7 @@ fn pickup_preserves_random_added_stats_in_gained_item_payload() {
 #[test]
 fn crystal_quest_required_drop_routes_to_active_quest_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::set_quest_stage(
         session.app.world_mut(),
@@ -28543,7 +31152,7 @@ fn crystal_quest_required_drop_routes_to_active_quest_inventory() {
         .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
     assert!(packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::Chat { message, .. } if message == "You found Wasp Stinger."
+        ServerPacket::Chat { message, .. } if message == "You found SkyStingerEgg."
     )));
     assert!(packets.iter().all(|packet| !matches!(
         packet,
@@ -28555,6 +31164,7 @@ fn crystal_quest_required_drop_routes_to_active_quest_inventory() {
 #[test]
 fn crystal_quest_required_drop_is_suppressed_without_active_matching_quest() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let quest = super::guide_quest_template();
     let mut packets = Vec::new();
@@ -28585,6 +31195,7 @@ fn shared_zone_kill_award_routes_original_q_drop_to_active_quest_inventory() {
         "quest-only Q items should not need to be normal usable-item whitelist entries"
     );
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(
         super::begin_quest(session.app.world_mut(), 2),
@@ -28636,6 +31247,7 @@ fn shared_zone_kill_award_routes_original_q_drop_to_active_quest_inventory() {
 fn shared_zone_kill_award_routes_q47_repair_only_for_active_oma_cave_quest() {
     let config = SimulationConfig::default().with_platinum_176_profile();
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 14);
     session
@@ -28697,6 +31309,7 @@ fn shared_zone_kill_award_routes_q47_repair_only_for_active_oma_cave_quest() {
 
     let mut inactive =
         SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    login_demo_account_for_persistence_test(&mut inactive);
     inactive.handle_packet(ClientPacket::StartGame { character_index: 0 });
     inactive
         .app
@@ -28722,6 +31335,7 @@ fn shared_zone_kill_award_routes_q47_repair_only_for_active_oma_cave_quest() {
 fn platinum_176_q58_ignores_only_the_disabled_q57_template_prerequisite() {
     let mut profiled =
         SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    login_demo_account_for_persistence_test(&mut profiled);
     profiled.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut profiled, MirClass::Warrior, MirGender::Male, 18);
 
@@ -28733,6 +31347,7 @@ fn platinum_176_q58_ignores_only_the_disabled_q57_template_prerequisite() {
     );
 
     let mut imported = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut imported);
     imported.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut imported, MirClass::Warrior, MirGender::Male, 18);
     assert!(!super::can_accept_quest(imported.app.world(), 58));
@@ -28742,6 +31357,7 @@ fn platinum_176_q58_ignores_only_the_disabled_q57_template_prerequisite() {
 fn shared_zone_kill_award_keeps_deer_q_drop_on_corpse_harvest_path() {
     let mut session =
         SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(
         super::begin_quest(session.app.world_mut(), 4),
@@ -28784,6 +31400,7 @@ fn shared_zone_kill_award_keeps_deer_q_drop_on_corpse_harvest_path() {
 #[test]
 fn crystal_quest_required_drop_does_not_fall_back_when_quest_inventory_is_full() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::set_quest_stage(
         session.app.world_mut(),
@@ -28829,12 +31446,54 @@ fn crystal_quest_required_drop_does_not_fall_back_when_quest_inventory_is_full()
 #[test]
 fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let accept_packets = session.handle_packet(ClientPacket::AcceptQuest {
+    let rejected_remote_accept = session.handle_packet(ClientPacket::AcceptQuest {
         npc_index: 0,
         quest_index: super::GUIDE_QUEST_ID,
     });
+    assert!(rejected_remote_accept.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::Available
+    );
+
+    let guide = session
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.object_id == super::GUIDE_NPC_ID)
+        .expect("guide NPC should be present");
+    session.force_authoritative_player_transform(
+        Point {
+            x: guide.x.saturating_sub(1),
+            y: guide.y,
+        },
+        MirDirection::Right,
+    );
+    let offer_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(!offer_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken: true,
+            ..
+        } if *quest_id == super::GUIDE_QUEST_ID
+    )));
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| { link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID) })));
+    let accept_packets =
+        session.select_npc_dialog_target(&format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID));
     assert_eq!(
         session.world_snapshot().quest_log[0].stage,
         QuestStage::InProgress
@@ -28855,6 +31514,31 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
             && *track_quest
     )));
 
+    let current_dialog_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(current_dialog_packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ChangeQuest { .. })));
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| !dialog
+            .links
+            .iter()
+            .any(|link| { link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID) })));
+    let stale_accept = session.handle_packet(ClientPacket::AcceptQuest {
+        npc_index: super::GUIDE_NPC_ID,
+        quest_index: super::GUIDE_QUEST_ID,
+    });
+    assert!(stale_accept.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::InProgress
+    );
+
     let abandon_packets = session.handle_packet(ClientPacket::AbandonQuest {
         quest_index: super::GUIDE_QUEST_ID,
     });
@@ -28874,8 +31558,12 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
             && !*completed
     )));
 
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
     session.handle_packet(ClientPacket::AcceptQuest {
-        npc_index: 0,
+        npc_index: super::GUIDE_NPC_ID,
         quest_index: super::GUIDE_QUEST_ID,
     });
     super::set_quest_stage(
@@ -28883,12 +31571,77 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
         super::GUIDE_QUEST_ID,
         QuestStage::ReadyToTurnIn,
     );
-    let gold_before = session.world_snapshot().gold;
-
-    let finish_packets = session.handle_packet(ClientPacket::FinishQuest {
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    let gold_before_missing_proof = session.world_snapshot().gold;
+    let missing_proof_finish = session.handle_packet(ClientPacket::FinishQuest {
         quest_index: super::GUIDE_QUEST_ID,
         selected_item_index: -1,
     });
+    assert!(missing_proof_finish.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::ReadyToTurnIn
+    );
+    assert_eq!(session.world_snapshot().gold, gold_before_missing_proof);
+    session.select_npc_dialog_target("@Exit");
+    super::set_quest_stage(
+        session.app.world_mut(),
+        super::GUIDE_QUEST_ID,
+        QuestStage::InProgress,
+    );
+    let in_progress_dialog = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(in_progress_dialog
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::CompleteQuest { .. })));
+    let quest = super::guide_quest_template();
+    let mut drop_packets = Vec::new();
+    assert!(super::try_gain_crystal_quest_drop(
+        session.app.world_mut(),
+        &quest.quest_item.key,
+        &quest.quest_item.name,
+        quest.quest_item.quantity,
+        None,
+        None,
+        &mut drop_packets,
+    ));
+    let gold_before = session.world_snapshot().gold;
+
+    let stale_finish = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: super::GUIDE_QUEST_ID,
+        selected_item_index: -1,
+    });
+    assert!(stale_finish.is_empty());
+    assert_eq!(
+        session.world_snapshot().quest_log[0].stage,
+        QuestStage::ReadyToTurnIn
+    );
+
+    let turn_in_dialog_packets = session.handle_packet(ClientPacket::CallNpc {
+        object_id: super::GUIDE_NPC_ID,
+        key: "@Main".to_string(),
+    });
+    assert!(!turn_in_dialog_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests }
+            if completed_quests.contains(&super::GUIDE_QUEST_ID)
+    )));
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| { link.target == format!("@FinishQuest:{}", super::GUIDE_QUEST_ID) })));
+
+    let finish_packets =
+        session.select_npc_dialog_target(&format!("@FinishQuest:{}", super::GUIDE_QUEST_ID));
     let after_finish = session.world_snapshot();
 
     assert_eq!(after_finish.quest_log[0].stage, QuestStage::Completed);
@@ -28935,6 +31688,298 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
 }
 
 #[test]
+fn abandon_quest_packet_rejects_every_non_in_progress_state_without_side_effects() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::ensure_runtime_quest(session.app.world_mut(), super::GUIDE_QUEST_ID);
+
+    for stage in [
+        QuestStage::Available,
+        QuestStage::ReadyToTurnIn,
+        QuestStage::Completed,
+    ] {
+        {
+            let mut quests = session.app.world_mut().resource_mut::<QuestResource>();
+            let quest = quests
+                .quests
+                .iter_mut()
+                .find(|quest| quest.quest_id == super::GUIDE_QUEST_ID)
+                .expect("guide quest state");
+            quest.stage = stage;
+            quest.current = 3;
+            quest.task_progress.clear();
+            quest.task_progress.insert("guard:unchanged".to_string(), 3);
+        }
+        let before_quest = {
+            let quests = session.app.world().resource::<QuestResource>();
+            let quest = quests
+                .quests
+                .iter()
+                .find(|quest| quest.quest_id == super::GUIDE_QUEST_ID)
+                .expect("guide quest state");
+            (quest.stage, quest.current, quest.task_progress.clone())
+        };
+        let before_items = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .map(|item| {
+                (
+                    item.key.clone(),
+                    item.container,
+                    item.slot,
+                    item.quantity,
+                    item.unique_id,
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let packets = session.handle_packet(ClientPacket::AbandonQuest {
+            quest_index: super::GUIDE_QUEST_ID,
+        });
+
+        assert!(packets.is_empty(), "{stage:?} must be rejected");
+        let after_quest = {
+            let quests = session.app.world().resource::<QuestResource>();
+            let quest = quests
+                .quests
+                .iter()
+                .find(|quest| quest.quest_id == super::GUIDE_QUEST_ID)
+                .expect("guide quest state");
+            (quest.stage, quest.current, quest.task_progress.clone())
+        };
+        let after_items = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .map(|item| {
+                (
+                    item.key.clone(),
+                    item.container,
+                    item.slot,
+                    item.quantity,
+                    item.unique_id,
+                )
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(after_quest, before_quest, "{stage:?} mutated quest state");
+        assert_eq!(after_items, before_items, "{stage:?} mutated inventory");
+    }
+
+    let quest_count = session.app.world().resource::<QuestResource>().quests.len();
+    let item_count = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .len();
+    assert!(session
+        .handle_packet(ClientPacket::AbandonQuest {
+            quest_index: i32::MAX,
+        })
+        .is_empty());
+    assert_eq!(
+        session.app.world().resource::<QuestResource>().quests.len(),
+        quest_count
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .len(),
+        item_count
+    );
+}
+
+#[test]
+fn abandon_crystal_quest_clears_progress_and_carry_items_before_reaccept() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let template = mir2_game_data::crystal_quest_packet_manifest()
+        .quests
+        .into_iter()
+        .find(|quest| quest.index == 151)
+        .expect("Crystal q151 carry-item quest");
+    assert!(!template.carry_items.is_empty());
+    assert!(!template.kill_tasks.is_empty());
+
+    super::ensure_runtime_quest(session.app.world_mut(), template.index);
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), template.index),
+        QuestStage::InProgress
+    );
+    let carry = template
+        .carry_items
+        .iter()
+        .map(|task| {
+            let item = mir2_game_data::crystal_item_by_index(task.item_index)
+                .expect("carry item template");
+            (
+                super::crystal_item_key_for_template(&item),
+                u32::from(task.count.max(1)),
+            )
+        })
+        .collect::<Vec<_>>();
+    for (key, expected) in &carry {
+        let quantity = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.container == ItemContainer::Quest && item.key == *key)
+            .map(|item| item.quantity)
+            .sum::<u32>();
+        assert_eq!(quantity, *expected, "initial carry grant for {key}");
+    }
+    {
+        let mut quests = session.app.world_mut().resource_mut::<QuestResource>();
+        let quest = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == template.index)
+            .expect("q151 runtime state");
+        quest.current = 1;
+        quest
+            .task_progress
+            .insert(format!("kill:{}", template.kill_tasks[0].monster_index), 1);
+    }
+
+    let packets = session.handle_packet(ClientPacket::AbandonQuest {
+        quest_index: template.index,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            quest_state: 2,
+            taken: false,
+            completed: false,
+            ..
+        } if *quest_id == template.index
+    )));
+    {
+        let quests = session.app.world().resource::<QuestResource>();
+        let quest = quests
+            .quests
+            .iter()
+            .find(|quest| quest.quest_id == template.index)
+            .expect("q151 runtime state");
+        assert_eq!(quest.stage, QuestStage::Available);
+        assert_eq!(quest.current, 0);
+        assert!(quest.task_progress.is_empty());
+    }
+    for (key, _) in &carry {
+        assert!(!session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .any(|item| item.container == ItemContainer::Quest && item.key == *key));
+    }
+
+    assert_eq!(
+        super::begin_quest(session.app.world_mut(), template.index),
+        QuestStage::InProgress
+    );
+    for (key, expected) in &carry {
+        let quantity = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.container == ItemContainer::Quest && item.key == *key)
+            .map(|item| item.quantity)
+            .sum::<u32>();
+        assert_eq!(quantity, *expected, "reaccept carry grant for {key}");
+    }
+    let quests = session.app.world().resource::<QuestResource>();
+    let quest = quests
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == template.index)
+        .expect("q151 runtime state");
+    assert_eq!(quest.current, 0);
+    assert!(quest.task_progress.is_empty());
+}
+
+#[test]
+fn abandon_crystal_quest_removes_item_task_inventory() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let template = mir2_game_data::crystal_quest_packet_manifest()
+        .quests
+        .into_iter()
+        .find(|quest| !quest.item_tasks.is_empty())
+        .expect("Crystal item-task quest");
+    let task = template.item_tasks.first().expect("item task");
+    let item = mir2_game_data::crystal_item_by_index(task.item_index).expect("task item template");
+    let key = super::crystal_item_key_for_template(&item);
+
+    super::ensure_runtime_quest(session.app.world_mut(), template.index);
+    super::set_quest_stage(
+        session.app.world_mut(),
+        template.index,
+        QuestStage::InProgress,
+    );
+    super::add_or_increment_item(
+        session.app.world_mut(),
+        ItemContainer::Quest,
+        &key,
+        &item.name,
+        "task item",
+        0,
+        1,
+        u16::from(item.weight.max(1)),
+    );
+    {
+        let mut quests = session.app.world_mut().resource_mut::<QuestResource>();
+        let quest = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == template.index)
+            .expect("item quest runtime state");
+        quest.current = 1;
+        quest
+            .task_progress
+            .insert(format!("item:{}", task.item_index), 1);
+    }
+
+    let packets = session.handle_packet(ClientPacket::AbandonQuest {
+        quest_index: template.index,
+    });
+
+    assert!(!packets.is_empty());
+    assert!(!session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| item.container == ItemContainer::Quest && item.key == key));
+    let quests = session.app.world().resource::<QuestResource>();
+    let quest = quests
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == template.index)
+        .expect("item quest runtime state");
+    assert_eq!(quest.stage, QuestStage::Available);
+    assert_eq!(quest.current, 0);
+    assert!(quest.task_progress.is_empty());
+}
+
+#[test]
 fn original_crystal_normal_quest_manifest_covers_level_1_to_45_range() {
     let infos = super::crystal_normal_quest_infos_1_to_45();
     let manifest = mir2_game_data::crystal_quest_packet_manifest();
@@ -28961,18 +32006,22 @@ fn original_crystal_normal_quest_manifest_covers_level_1_to_45_range() {
 #[test]
 fn original_crystal_quest_packets_enforce_prerequisites_and_rewards() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:283:606");
     let quest_one = super::crystal_quest_info_by_id(1).expect("quest 1");
     let quest_two = super::crystal_quest_info_by_id(2).expect("quest 2");
 
-    let rejected_packets = session.handle_packet(ClientPacket::AcceptQuest {
-        npc_index: quest_two.npc_index,
-        quest_index: quest_two.index,
-    });
-    assert!(rejected_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Chat { message, .. } if message.contains("accept")
-    )));
+    set_player_position(&mut session, Point { x: 293, y: 619 });
+    let _ = session.interact(quest_two.npc_index);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .all(|link| link.target != "@quest:accept:2" && link.target != "@AcceptQuest:2")));
     assert!(!session
         .app
         .world()
@@ -28981,18 +32030,24 @@ fn original_crystal_quest_packets_enforce_prerequisites_and_rewards() {
         .iter()
         .any(|quest| quest.quest_id == quest_two.index));
 
-    let accept_packets = session.handle_packet(ClientPacket::AcceptQuest {
-        npc_index: quest_one.npc_index,
-        quest_index: quest_one.index,
-    });
+    set_player_position(&mut session, Point { x: 283, y: 606 });
+    let _ = session.interact(quest_one.npc_index);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == "@quest:accept:1")));
+    let accept_packets = session.select_npc_dialog_target("@quest:accept:1");
     assert!(accept_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ChangeQuest {
             quest_id,
-            taken,
-            completed,
+            completed: true,
             ..
-        } if *quest_id == quest_one.index && *taken && *completed
+        } if *quest_id == quest_one.index
     )));
 
     super::set_quest_stage(
@@ -29000,11 +32055,18 @@ fn original_crystal_quest_packets_enforce_prerequisites_and_rewards() {
         quest_one.index,
         QuestStage::ReadyToTurnIn,
     );
+    set_player_position(&mut session, Point { x: 293, y: 619 });
+    let _ = session.interact(quest_two.npc_index);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == "@quest:finish:1")));
     let before = session.world_snapshot();
-    let finish_packets = session.handle_packet(ClientPacket::FinishQuest {
-        quest_index: quest_one.index,
-        selected_item_index: -1,
-    });
+    let finish_packets = session.select_npc_dialog_target("@quest:finish:1");
     let after = session.world_snapshot();
 
     assert!(finish_packets.iter().any(|packet| matches!(
@@ -29031,23 +32093,29 @@ fn original_crystal_quest_packets_enforce_prerequisites_and_rewards() {
         .iter()
         .any(|quest| quest.quest_id == quest_one.index && quest.stage == QuestStage::Completed));
 
-    let accept_two_packets = session.handle_packet(ClientPacket::AcceptQuest {
-        npc_index: quest_two.npc_index,
-        quest_index: quest_two.index,
-    });
+    let _ = session.interact(quest_two.npc_index);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == "@quest:accept:2")));
+    let accept_two_packets = session.select_npc_dialog_target("@quest:accept:2");
     assert!(accept_two_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ChangeQuest {
             quest_id,
-            taken,
+            taken: true,
             ..
-        } if *quest_id == quest_two.index && *taken
+        } if *quest_id == quest_two.index
     )));
 }
-
 #[test]
 fn original_crystal_quest_structured_kill_and_item_tasks_progress() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let manifest = mir2_game_data::crystal_quest_packet_manifest();
     let kill_quest = manifest
@@ -29127,6 +32195,7 @@ fn original_crystal_quest_structured_kill_and_item_tasks_progress() {
 fn world_snapshot_restores_structured_multi_task_quest_progress() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::ensure_runtime_quest(first.app.world_mut(), 5);
     super::set_quest_stage(first.app.world_mut(), 5, QuestStage::InProgress);
@@ -29140,6 +32209,7 @@ fn world_snapshot_restores_structured_multi_task_quest_progress() {
     first.save_active_character();
 
     let mut restored = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut restored);
     restored.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let snapshot = restored.world_snapshot();
     let quest = snapshot
@@ -29174,6 +32244,7 @@ fn world_snapshot_restores_structured_multi_task_quest_progress() {
 #[test]
 fn original_crystal_loaded_npc_links_accept_and_finish_quest() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.transfer_map("crystal:0:283:606");
 
@@ -29225,8 +32296,6 @@ fn original_crystal_loaded_npc_links_accept_and_finish_quest() {
 
 #[test]
 fn original_crystal_selected_reward_is_granted_on_finish() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let info = super::crystal_normal_quest_infos_1_to_45()
         .into_iter()
         .find(|info| !info.rewards_select_item.is_empty())
@@ -29237,17 +32306,60 @@ fn original_crystal_selected_reward_is_granted_on_finish() {
         .get(selected_reward_index)
         .expect("selected reward")
         .clone();
+    let npc_object_id = if info.finish_npc_index == 0 {
+        info.npc_index
+    } else {
+        info.finish_npc_index
+    };
 
+    let mut config = SimulationConfig::default();
+    config.visible_npcs.push(VisibleNpcRecord {
+        object_id: npc_object_id,
+        name: "Quest Reward NPC".to_string(),
+        image: 5,
+        colour_argb: -1,
+        position: Point { x: 331, y: 270 },
+        direction: MirDirection::Left,
+        quest_ids: vec![info.index],
+        script_key: None,
+    });
+    let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::ensure_runtime_quest(session.app.world_mut(), info.index);
     super::set_quest_stage(
         session.app.world_mut(),
         info.index,
         QuestStage::ReadyToTurnIn,
     );
-    let packets = session.handle_packet(ClientPacket::FinishQuest {
-        quest_index: info.index,
-        selected_item_index: i32::try_from(selected_reward_index).unwrap(),
-    });
+    set_player_position(&mut session, Point { x: 330, y: 270 });
+
+    let _ = session.interact(npc_object_id);
+    let finish_target = format!("@quest:finish:{}", info.index);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog.links.iter().any(|link| link.target == finish_target)));
+    let open_finish_detail_packets = session.select_npc_dialog_target(&finish_target);
+    assert!(open_finish_detail_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { object_id, .. }
+            if *object_id == npc_object_id
+    )));
+    assert_eq!(
+        super::quest_stage(session.app.world(), info.index),
+        Some(QuestStage::ReadyToTurnIn),
+        "opening the selectable-reward detail must not finish the quest"
+    );
+
+    let reward_target = format!("@quest:finish:{}:{selected_reward_index}", info.index);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog.links.iter().any(|link| link.target == reward_target)));
+    let packets = session.select_npc_dialog_target(&reward_target);
     let snapshot = session.world_snapshot();
 
     assert!(packets.iter().any(|packet| matches!(
@@ -29258,7 +32370,6 @@ fn original_crystal_selected_reward_is_granted_on_finish() {
         item.name == selected_reward.item.name && item.quantity >= u32::from(selected_reward.count)
     }));
 }
-
 #[test]
 fn original_crystal_q23_preserves_all_selectable_reward_metadata() {
     let info = super::crystal_quest_info_by_id(23).expect("Crystal q23 is loaded");
@@ -29279,15 +32390,11 @@ fn original_crystal_q23_preserves_all_selectable_reward_metadata() {
 
 #[test]
 fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
-    // Crystal quest #1 "Assistant's Request" grants a single FIXED item reward,
-    // (HP)DrugSmall, on hand-in (BichonProvince/BorderVillage/1.txt [@FixedRewards]),
-    // plus 10 EXP and NO gold. (HP)DrugSmall is ItemType.Potion (13), so Crystal's
-    // GainItem -> AddItem auto-routes it into the belt region of the inventory
-    // (Crystal/Server/MirObjects/HumanObject.cs:1596). The web port models the belt
-    // as a separate `belt_items` container, so the reward must land in the player's
-    // carried possession (belt OR bag) — never silently vanish.
+    // Crystal quest #1 grants a fixed potion reward through its real NPC hand-in.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:283:606");
 
     let info = super::crystal_quest_info_by_id(1).expect("crystal quest #1 loaded");
     let fixed = info
@@ -29298,29 +32405,49 @@ fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
     let reward_name = fixed.item.name.clone();
     assert_eq!(reward_name, "(HP)DrugSmall");
     assert_eq!(info.reward_gold, 0, "quest #1 grants no gold");
-
-    // Start from an empty bag + belt so the reward is unambiguous (no stacking with
-    // the seeded starter potions / no pre-existing items masking the grant).
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.clear();
         resources.belt_items.clear();
     }
 
-    super::ensure_runtime_quest(session.app.world_mut(), 1);
+    set_player_position(&mut session, Point { x: 283, y: 606 });
+    let _ = session.interact(3);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == "@quest:accept:1")));
+    let accept_packets = session.select_npc_dialog_target("@quest:accept:1");
+    assert!(accept_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken: true,
+            completed: true,
+            ..
+        } if *quest_id == info.index
+    )));
     super::set_quest_stage(session.app.world_mut(), 1, QuestStage::ReadyToTurnIn);
 
-    let packets = session.handle_packet(ClientPacket::FinishQuest {
-        quest_index: 1,
-        selected_item_index: -1,
-    });
-    assert!(
-        packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
-        )),
-        "FinishQuest must complete quest #1",
-    );
+    set_player_position(&mut session, Point { x: 293, y: 619 });
+    let _ = session.interact(4);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == "@quest:finish:1")));
+    let packets = session.select_npc_dialog_target("@quest:finish:1");
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
+    )));
 
     let snapshot = session.world_snapshot();
     let in_belt = snapshot
@@ -29338,7 +32465,6 @@ fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
         snapshot.belt_items,
         snapshot.inventory_items,
     );
-    // Faithful to Crystal AddItem: a Potion auto-routes into the (empty) belt.
     assert!(
         in_belt,
         "potion reward {reward_name} should auto-route into the belt (Crystal AddItem); \
@@ -29346,7 +32472,6 @@ fn original_crystal_fixed_item_reward_lands_in_player_possession_on_finish() {
         snapshot.belt_items, snapshot.inventory_items,
     );
 }
-
 #[test]
 fn original_bichon_newcomer_quest_rewards_match_scripts() {
     let expected = [
@@ -29371,6 +32496,7 @@ fn original_bichon_newcomer_quest_rewards_match_scripts() {
 #[test]
 fn ambient_monster_death_does_not_credit_player_newcomer_quest() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(
         super::begin_quest(session.app.world_mut(), 5),
@@ -29417,6 +32543,7 @@ fn ambient_monster_death_does_not_credit_player_newcomer_quest() {
 #[test]
 fn player_owned_direct_and_poison_damage_credit_newcomer_quest() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(
         super::begin_quest(session.app.world_mut(), 5),
@@ -29505,6 +32632,7 @@ fn drop_gold_packet_silently_rejects_before_start_game() {
 #[test]
 fn drop_gold_packet_emits_lose_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_position = player_position(&session);
 
@@ -29529,6 +32657,7 @@ fn drop_gold_packet_emits_lose_gold() {
 #[test]
 fn shared_asset_drop_transactions_preflight_and_apply_exact_debits() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(session.can_commit_shared_gold_drop(25));
@@ -29585,6 +32714,7 @@ fn shared_asset_drop_transactions_preflight_and_apply_exact_debits() {
 #[test]
 fn drop_gold_packet_allows_zero_gold_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DropGold { amount: 0 });
@@ -29609,6 +32739,7 @@ fn drop_gold_packet_allows_zero_gold_like_crystal() {
 #[test]
 fn drop_gold_packet_ignores_insufficient_gold_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DropGold { amount: 1281 });
@@ -29622,6 +32753,7 @@ fn drop_gold_packet_ignores_insufficient_gold_like_crystal() {
 #[test]
 fn shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let drop = GroundDropSnapshot {
         object_id: 88_001,
@@ -29661,6 +32793,7 @@ fn shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject() {
 #[test]
 fn shared_ground_drop_pickup_advances_matching_crystal_item_task() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::ensure_runtime_quest(session.app.world_mut(), 25);
     super::set_quest_stage(session.app.world_mut(), 25, QuestStage::InProgress);
@@ -29688,6 +32821,7 @@ fn shared_ground_drop_pickup_advances_matching_crystal_item_task() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
     };
 
@@ -29719,6 +32853,7 @@ fn shared_ground_drop_pickup_advances_matching_crystal_item_task() {
 #[test]
 fn crystal_drop_search_respects_drop_stack_size_limit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 340, y: 270 });
     let origin = Point { x: 330, y: 270 };
@@ -29768,6 +32903,7 @@ fn crystal_drop_search_respects_drop_stack_size_limit() {
 #[test]
 fn crystal_drop_search_skips_map_transfer_source_tiles() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let movement_source = Point { x: 340, y: 270 };
     assert!(super::super::drops::is_current_map_transfer_source(
@@ -29802,6 +32938,7 @@ fn dropped_inventory_item_can_be_removed_from_bag_and_spawned_on_ground() {
     let before_start_packets = session.drop_item("red-potion");
     assert!(before_start_packets.is_empty());
 
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let before = session.world_snapshot();
@@ -29882,6 +33019,7 @@ fn drop_item_packet_rejects_before_start_game_without_panic() {
 #[test]
 fn drop_item_packet_splits_stack_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DropItem {
@@ -29943,6 +33081,7 @@ fn inventory_unique_ids_distinguish_bag_pages_for_same_slot() {
 #[test]
 fn world_snapshot_exposes_inventory_unique_ids_for_client_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -29969,6 +33108,7 @@ fn world_snapshot_exposes_inventory_unique_ids_for_client_packets() {
 #[test]
 fn drop_item_packet_uses_unique_id_when_it_differs_from_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30009,6 +33149,7 @@ fn drop_item_packet_uses_unique_id_when_it_differs_from_slot() {
 #[test]
 fn drop_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DropItem {
@@ -30051,6 +33192,7 @@ fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DropItem {
@@ -30111,6 +33253,7 @@ fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 0);
 
@@ -30159,6 +33302,7 @@ fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::set_quest_stage(
         session.app.world_mut(),
@@ -30185,6 +33329,7 @@ fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
 #[test]
 fn drop_item_packet_hero_inventory_flag_does_not_mutate_matching_player_inventory_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30229,6 +33374,7 @@ fn drop_item_packet_hero_inventory_flag_does_not_mutate_matching_player_inventor
 #[test]
 fn use_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30275,6 +33421,7 @@ fn use_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist() {
 #[test]
 fn equip_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30330,6 +33477,7 @@ fn equip_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist() {
 #[test]
 fn merge_item_packet_uses_inventory_unique_ids_instead_of_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30456,6 +33604,7 @@ fn add_duplicate_inventory_and_belt_merge_test_stacks(
 fn merge_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack()
 {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30516,6 +33665,7 @@ fn merge_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matc
 fn merge_item_packet_inventory_to_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30576,6 +33726,7 @@ fn merge_item_packet_inventory_to_hero_inventory_grid_does_not_emit_extra_chat_o
 fn merge_item_packet_inventory_to_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30635,6 +33786,7 @@ fn merge_item_packet_inventory_to_equipment_grid_does_not_emit_extra_chat_or_mut
 #[test]
 fn merge_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
 
@@ -30662,6 +33814,7 @@ fn merge_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_play
 fn merge_item_packet_inventory_to_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
 
@@ -30688,6 +33841,7 @@ fn merge_item_packet_inventory_to_trade_grid_does_not_emit_extra_chat_or_mutate_
 #[test]
 fn merge_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
 
@@ -30715,6 +33869,7 @@ fn merge_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_pla
 fn merge_item_packet_inventory_to_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
 
@@ -30741,6 +33896,7 @@ fn merge_item_packet_inventory_to_refine_grid_does_not_emit_extra_chat_or_mutate
 #[test]
 fn merge_item_packet_missing_source_is_ack_only_and_preserves_matching_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
 
@@ -30767,6 +33923,7 @@ fn merge_item_packet_missing_source_is_ack_only_and_preserves_matching_stack() {
 #[test]
 fn merge_item_packet_mismatched_stack_is_ack_only_and_preserves_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30822,6 +33979,7 @@ fn merge_item_packet_mismatched_stack_is_ack_only_and_preserves_inventory() {
 #[test]
 fn merge_item_packet_full_target_stack_is_ack_only_and_preserves_matching_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
     {
@@ -30874,6 +34032,7 @@ fn merge_item_packet_full_target_stack_is_ack_only_and_preserves_matching_stack(
 fn merge_item_packet_inventory_to_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -30933,6 +34092,7 @@ fn merge_item_packet_inventory_to_fishing_grid_does_not_emit_extra_chat_or_mutat
 #[test]
 fn merge_item_packet_inventory_to_belt_grid_combines_quantities_for_crystal_belt_stackables() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_and_belt_merge_test_stacks(&mut session, 9_001, 25_003);
 
@@ -30973,6 +34133,7 @@ fn merge_item_packet_inventory_to_belt_grid_combines_quantities_for_crystal_belt
 #[test]
 fn merge_item_packet_belt_to_inventory_grid_combines_quantities_for_crystal_belt_stackables() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_duplicate_inventory_and_belt_merge_test_stacks(&mut session, 9_001, 25_003);
 
@@ -31013,6 +34174,7 @@ fn merge_item_packet_belt_to_inventory_grid_combines_quantities_for_crystal_belt
 #[test]
 fn merge_item_packet_inventory_to_belt_grid_rejects_non_beltable_stack_ack_only() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "FishBait", 31);
     {
@@ -31075,6 +34237,7 @@ fn merge_item_packet_inventory_to_belt_grid_rejects_non_beltable_stack_ack_only(
 #[test]
 fn merge_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_quest_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -31103,13 +34266,13 @@ fn merge_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_mat
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
+        item.key == "crystal-item-876"
             && item.container == ItemContainer::Quest
             && item.slot == 12
             && item.quantity == 2
     }));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
+        item.key == "crystal-item-876"
             && item.container == ItemContainer::Quest
             && item.slot == 13
             && item.quantity == 1
@@ -31122,6 +34285,7 @@ fn merge_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_mat
 #[test]
 fn merge_item_packet_inventory_to_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -31150,7 +34314,7 @@ fn merge_item_packet_inventory_to_quest_inventory_grid_does_not_emit_extra_chat_
         item.key == "red-potion" && item.container == ItemContainer::Bag1 && item.quantity == 5
     }));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
+        item.key == "crystal-item-876"
             && item.container == ItemContainer::Quest
             && item.slot == 12
             && item.quantity == 1
@@ -31163,6 +34327,7 @@ fn merge_item_packet_inventory_to_quest_inventory_grid_does_not_emit_extra_chat_
 #[test]
 fn merge_item_packet_storage_to_belt_grid_does_not_emit_extra_chat_or_mutate_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -31204,6 +34369,7 @@ fn merge_item_packet_storage_to_belt_grid_does_not_emit_extra_chat_or_mutate_ite
 #[test]
 fn merge_item_packet_belt_to_storage_grid_does_not_emit_extra_chat_or_mutate_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -31245,6 +34411,7 @@ fn merge_item_packet_belt_to_storage_grid_does_not_emit_extra_chat_or_mutate_ite
 #[test]
 fn drop_item_packet_rejects_crystal_dont_drop_bind() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_test_item(&mut session, "crystal-item-451", "CraftRing1", 10, 1);
 
@@ -31277,6 +34444,7 @@ fn drop_item_packet_rejects_crystal_dont_drop_bind() {
 #[test]
 fn drop_item_packet_rejects_rental_dont_drop_bind() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "Dagger", 10);
     {
@@ -31321,6 +34489,7 @@ fn drop_item_packet_rejects_rental_dont_drop_bind() {
 #[test]
 fn drop_item_packet_destroys_crystal_destroy_on_drop_bind() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_test_item(&mut session, "crystal-item-716", "GTTeleport", 10, 3);
 
@@ -31360,6 +34529,7 @@ fn drop_item_packet_destroys_crystal_destroy_on_drop_bind() {
 #[test]
 fn delete_item_packet_reduces_or_removes_inventory_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DeleteItem {
@@ -31408,6 +34578,7 @@ fn delete_item_packet_reduces_or_removes_inventory_stack() {
 #[test]
 fn delete_item_packet_hero_inventory_flag_still_deletes_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DeleteItem {
@@ -31437,6 +34608,7 @@ fn delete_item_packet_hero_inventory_flag_still_deletes_matching_player_item() {
 #[test]
 fn delete_item_packet_hero_inventory_flag_acknowledges_missing_item_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DeleteItem {
@@ -31466,6 +34638,7 @@ fn delete_item_packet_hero_inventory_flag_acknowledges_missing_item_without_muta
 #[test]
 fn delete_item_packet_dead_player_acknowledges_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 0);
 
@@ -31496,6 +34669,7 @@ fn delete_item_packet_dead_player_acknowledges_without_mutation() {
 #[test]
 fn sell_item_packet_removes_item_and_adds_gold_without_duplication() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31568,6 +34742,7 @@ fn sell_item_packet_removes_item_and_adds_gold_without_duplication() {
 #[test]
 fn sell_item_packet_uses_unique_id_when_it_differs_from_slot() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31614,6 +34789,7 @@ fn sell_item_packet_uses_unique_id_when_it_differs_from_slot() {
 #[test]
 fn sell_item_invalid_slot_preserves_inventory_and_gold() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31676,6 +34852,7 @@ fn sell_item_invalid_slot_preserves_inventory_and_gold() {
 #[test]
 fn sell_item_without_active_sell_service_preserves_inventory_and_gold() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let (gold_before, items_before) = {
         let resources = session.app.world().resource::<InventoryResource>();
@@ -31720,6 +34897,7 @@ fn sell_item_without_active_sell_service_preserves_inventory_and_gold() {
 #[test]
 fn sell_item_service_context_requires_live_npc_object() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31778,6 +34956,7 @@ fn sell_item_service_context_requires_live_npc_object() {
 #[test]
 fn sell_item_rejects_script_type_mismatch_with_crystal_message() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31829,6 +35008,7 @@ fn sell_item_rejects_script_type_mismatch_with_crystal_message() {
 #[test]
 fn sell_item_rejects_crystal_dont_sell_bind_without_message() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let dont_sell_template =
         super::crystal_item_by_index(837).expect("PickAxe0 template should exist");
@@ -31872,6 +35052,7 @@ fn sell_item_rejects_crystal_dont_sell_bind_without_message() {
 #[test]
 fn sell_item_zero_count_only_acks_and_preserves_state() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31915,6 +35096,7 @@ fn sell_item_zero_count_only_acks_and_preserves_state() {
 #[test]
 fn sell_item_dead_player_only_acks_and_preserves_inventory_and_gold() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -31959,6 +35141,7 @@ fn sell_item_dead_player_only_acks_and_preserves_inventory_and_gold() {
 #[test]
 fn sell_item_partial_stack_rejects_when_gold_cap_would_overflow() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         session
@@ -32014,6 +35197,7 @@ fn sell_item_partial_stack_rejects_when_gold_cap_would_overflow() {
 #[test]
 fn sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.interact(4990);
     let _ = session.select_npc_dialog_target("@BuySell");
@@ -32051,16 +35235,25 @@ fn sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain() {
 
 #[test]
 fn stage3_playable_pve_loop_persists_after_reconnect() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    register_test_account(&session, "stage3-loop");
-    let login_packets = session.handle_packet(ClientPacket::Login {
-        account_id: "demo".to_string(),
-        password: "demo".to_string(),
-    });
+    let config = SimulationConfig::default();
+    let account_id = format!("sui:{}", unique_test_account_id("stage3-loop"));
+    SimulationSession::provision_passkey_account(&config, &account_id)
+        .expect("trusted test provisioning should create the stage3 passkey account");
+    let mut session = SimulationSession::new(config);
+    let login_packets = session.passkey_login(&account_id);
     assert!(login_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
-    let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let created_packets = session.handle_packet(ClientPacket::NewCharacter {
+        name: "Stage3Hero".to_string(),
+        gender: MirGender::Male,
+        class: MirClass::Warrior,
+    });
+    assert!(created_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::NewCharacterSuccess { .. })));
+    let character_index = new_character_success_index(&created_packets);
+    let start_packets = session.handle_packet(ClientPacket::StartGame { character_index });
     assert!(start_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
@@ -32078,6 +35271,21 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
     set_player_position(&mut session, Point { x: 326, y: 270 });
     sync_visible_objects(&mut session);
     let _ = session.interact(4001);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID))));
+    let accept_packets =
+        session.select_npc_dialog_target(&format!("@AcceptQuest:{}", super::GUIDE_QUEST_ID));
+    assert!(accept_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest { quest_id, taken: true, .. }
+            if *quest_id == super::GUIDE_QUEST_ID
+    )));
     let field_wasp = session
         .world_snapshot()
         .entities
@@ -32095,9 +35303,10 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
     let _ = attack_until_monster_dies(&mut session, field_wasp.object_id, 20);
     let after_kill = session.world_snapshot();
     assert_eq!(after_kill.quest_log[0].stage, QuestStage::ReadyToTurnIn);
-    assert!(after_kill.inventory_items.iter().any(|item| {
-        item.container == ItemContainer::Quest && item.key == "quest-wasp-stinger"
-    }));
+    assert!(after_kill
+        .inventory_items
+        .iter()
+        .any(|item| { item.container == ItemContainer::Quest && item.key == "crystal-item-876" }));
 
     if let Some(drop) = after_kill.ground_drops.first() {
         let drop_object_id = drop.object_id;
@@ -32121,12 +35330,27 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
 
     set_player_position(&mut session, Point { x: 326, y: 270 });
     let _ = session.interact(4001);
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .as_ref()
+        .is_some_and(|dialog| dialog
+            .links
+            .iter()
+            .any(|link| link.target == format!("@FinishQuest:{}", super::GUIDE_QUEST_ID))));
+    let finish_packets =
+        session.select_npc_dialog_target(&format!("@FinishQuest:{}", super::GUIDE_QUEST_ID));
+    assert!(finish_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests }
+            if completed_quests.contains(&super::GUIDE_QUEST_ID)
+    )));
     let after_turn_in = session.world_snapshot();
     assert_eq!(after_turn_in.quest_log[0].stage, QuestStage::Completed);
     assert!(after_turn_in
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "Guide Ring"));
+        .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "CopperRing"));
 
     let transfer_packets = session.transfer_map("crystal:HF1:200:200");
     assert!(transfer_packets.iter().any(|packet| matches!(
@@ -32145,14 +35369,11 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
         .account_store
         .clone();
     let mut reloaded = SimulationSession::new(reloaded_config);
-    let relogin_packets = reloaded.handle_packet(ClientPacket::Login {
-        account_id: "demo".to_string(),
-        password: "demo".to_string(),
-    });
+    let relogin_packets = reloaded.passkey_login(&account_id);
     assert!(relogin_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
-    let restart_packets = reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let restart_packets = reloaded.handle_packet(ClientPacket::StartGame { character_index });
 
     assert!(restart_packets.iter().any(|packet| matches!(
         packet,
@@ -32168,10 +35389,10 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
         .iter()
         .any(|quest| quest.stage == QuestStage::Completed));
 }
-
 #[test]
 fn crystal_drop_item_packet_reduces_stack_and_spawns_ground_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::DropItem {
@@ -32237,6 +35458,7 @@ fn delete_character_removes_saved_entry_from_account() {
 #[test]
 fn dropped_item_can_be_picked_up_into_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 337, y: 272 });
     let _ = attack_until_monster_dies(&mut session, 3001, 6);
@@ -32245,8 +35467,8 @@ fn dropped_item_can_be_picked_up_into_inventory() {
     let drop = after_kill
         .ground_drops
         .iter()
-        .find(|drop| drop.name == "Training Splinter")
-        .expect("training splinter drop");
+        .find(|drop| drop.name == "Timber")
+        .expect("Timber drop");
 
     set_player_position(
         &mut session,
@@ -32261,7 +35483,7 @@ fn dropped_item_can_be_picked_up_into_inventory() {
     assert!(after_pickup
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
 }
 
 #[test]
@@ -32278,6 +35500,7 @@ fn pickup_before_start_game_rejects_without_runtime_chat() {
 #[test]
 fn direct_pickup_missing_drop_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.pick_up(98_999);
@@ -32288,6 +35511,7 @@ fn direct_pickup_missing_drop_rejects_without_runtime_chat() {
 #[test]
 fn direct_pickup_non_ground_target_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.pick_up(super::FIELD_WASP_ID);
@@ -32298,6 +35522,7 @@ fn direct_pickup_non_ground_target_rejects_without_runtime_chat() {
 #[test]
 fn direct_pickup_out_of_cell_rejects_without_runtime_chat_or_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -32319,6 +35544,7 @@ fn direct_pickup_out_of_cell_rejects_without_runtime_chat_or_mutation() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Out Of Cell Pickup Test Item".to_string(),
@@ -32348,6 +35574,7 @@ fn direct_pickup_out_of_cell_rejects_without_runtime_chat_or_mutation() {
 #[test]
 fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 337, y: 272 });
     let _ = attack_until_monster_dies(&mut session, 3001, 6);
@@ -32356,8 +35583,8 @@ fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
     let drop = after_kill
         .ground_drops
         .iter()
-        .find(|drop| drop.name == "Training Splinter")
-        .expect("training splinter drop");
+        .find(|drop| drop.name == "Timber")
+        .expect("Timber drop");
     let drop_object_id = drop.object_id;
     set_player_position(
         &mut session,
@@ -32373,7 +35600,7 @@ fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
     assert!(after_pickup
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
     assert!(!after_pickup
         .ground_drops
         .iter()
@@ -32394,6 +35621,7 @@ fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
 #[test]
 fn crystal_pickup_packet_ignores_adjacent_ground_drop() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -32415,6 +35643,7 @@ fn crystal_pickup_packet_ignores_adjacent_ground_drop() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32441,6 +35670,7 @@ fn crystal_pickup_packet_ignores_adjacent_ground_drop() {
 #[test]
 fn ground_drop_expires_after_crystal_item_timeout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     let current_tick = runtime_tick(session.app.world());
@@ -32463,6 +35693,7 @@ fn ground_drop_expires_after_crystal_item_timeout() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32512,6 +35743,7 @@ fn ground_drop_expires_after_crystal_item_timeout() {
 #[test]
 fn pickup_preserves_ground_drop_when_inventory_is_full() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     set_player_position(&mut session, Point { x: 330, y: 270 });
@@ -32534,6 +35766,7 @@ fn pickup_preserves_ground_drop_when_inventory_is_full() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32582,6 +35815,7 @@ fn pickup_preserves_ground_drop_when_inventory_is_full() {
 #[test]
 fn pickup_allows_overweight_item_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -32604,6 +35838,7 @@ fn pickup_allows_overweight_item_like_crystal() {
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -32641,6 +35876,7 @@ fn pickup_allows_overweight_item_like_crystal() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32672,6 +35908,7 @@ fn pickup_allows_overweight_item_like_crystal() {
 #[test]
 fn pickup_respects_crystal_drop_owner_window() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     let current_tick = runtime_tick(session.app.world());
@@ -32694,6 +35931,7 @@ fn pickup_respects_crystal_drop_owner_window() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32751,6 +35989,7 @@ fn pickup_respects_crystal_drop_owner_window() {
 #[test]
 fn pickup_packet_skips_owner_blocked_drop_and_collects_next_current_cell_drop() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     let current_tick = runtime_tick(session.app.world());
@@ -32773,6 +36012,7 @@ fn pickup_packet_skips_owner_blocked_drop_and_collects_next_current_cell_drop() 
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32827,6 +36067,7 @@ fn pickup_packet_skips_owner_blocked_drop_and_collects_next_current_cell_drop() 
 #[test]
 fn pickup_packet_skips_full_bag_item_and_collects_later_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     set_player_position(&mut session, Point { x: 330, y: 270 });
@@ -32849,6 +36090,7 @@ fn pickup_packet_skips_full_bag_item_and_collects_later_gold() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32900,6 +36142,7 @@ fn pickup_allows_crystal_drop_owner_group_member() {
     let mut config = SimulationConfig::default();
     config.group_member_object_ids = vec![9001];
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
     let current_tick = runtime_tick(session.app.world());
@@ -32922,6 +36165,7 @@ fn pickup_allows_crystal_drop_owner_group_member() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Bronze Helmet".to_string(),
@@ -32942,6 +36186,7 @@ fn pickup_emits_crystal_group_pickup_notice_for_marked_items() {
     let mut config = SimulationConfig::default();
     config.group_member_object_ids = vec![9001];
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -32965,6 +36210,7 @@ fn pickup_emits_crystal_group_pickup_notice_for_marked_items() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: template.show_group_pickup,
+            exact_item: None,
         },
         1,
         template.name.clone(),
@@ -32991,6 +36237,7 @@ fn pickup_emits_crystal_group_pickup_notice_for_marked_items() {
 #[test]
 fn ground_item_object_uses_crystal_grade_and_name_colour() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -33014,6 +36261,7 @@ fn ground_item_object_uses_crystal_grade_and_name_colour() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: template.show_group_pickup,
+            exact_item: None,
         },
         1,
         template.name.clone(),
@@ -33039,6 +36287,7 @@ fn ground_item_object_uses_crystal_grade_and_name_colour() {
 #[test]
 fn ground_item_object_uses_cyan_name_colour_for_added_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -33061,6 +36310,7 @@ fn ground_item_object_uses_cyan_name_colour_for_added_stats() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: template.show_group_pickup,
+            exact_item: None,
         },
         1,
         template.name.clone(),
@@ -33093,20 +36343,31 @@ fn ground_item_object_uses_cyan_name_colour_for_added_stats() {
 #[test]
 fn pickup_can_stack_into_full_inventory_when_stack_has_room() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     {
+        let template = super::super::items::crystal_item_template_for_item_key("red-potion")
+            .expect("real stackable Crystal potion fixture");
+        let mut potion = super::super::items::embedded_item_state_from_template(
+            &template,
+            ItemContainer::Bag1,
+            0,
+        );
+        potion.unique_id = super::default_item_unique_id(ItemContainer::Bag1, 0);
+        potion.key = "red-potion".to_string();
+        potion.name = "Red Potion".to_string();
+        potion.quantity = 19;
+        potion.description = "Stackable full bag pickup test item.".to_string();
+        potion.weight = 1;
+
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let item = resources
+        let slot_index = resources
             .inventory_items
-            .iter_mut()
-            .find(|item| item.container == ItemContainer::Bag1 && item.slot == 0)
+            .iter()
+            .position(|item| item.container == ItemContainer::Bag1 && item.slot == 0)
             .expect("slot 0 item should exist");
-        item.key = "red-potion".to_string();
-        item.name = "Red Potion".to_string();
-        item.quantity = 19;
-        item.description = "Nearly full Crystal potion stack.".to_string();
-        item.weight = 1;
+        resources.inventory_items[slot_index] = potion;
     }
     set_player_position(&mut session, Point { x: 330, y: 270 });
 
@@ -33128,6 +36389,7 @@ fn pickup_can_stack_into_full_inventory_when_stack_has_room() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Red Potion".to_string(),
@@ -33160,6 +36422,7 @@ fn pickup_can_stack_into_full_inventory_when_stack_has_room() {
 #[test]
 fn pickup_places_crystal_potion_in_belt_when_bag_is_full() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     fill_all_bag_slots(&mut session);
     session
@@ -33188,6 +36451,7 @@ fn pickup_places_crystal_potion_in_belt_when_bag_is_full() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "Red Potion".to_string(),
@@ -33218,6 +36482,7 @@ fn pickup_places_crystal_potion_in_belt_when_bag_is_full() {
 #[test]
 fn request_item_info_packet_returns_crystal_item_info() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::RequestItemInfo { item_index: 658 });
@@ -33249,6 +36514,7 @@ fn request_item_info_packet_returns_crystal_item_info() {
 #[test]
 fn user_item_identified_flag_follows_crystal_need_identify() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33284,6 +36550,7 @@ fn user_item_identified_flag_follows_crystal_need_identify() {
 #[test]
 fn crystal_add_item_places_potions_in_potion_belt_first() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33318,6 +36585,7 @@ fn crystal_add_item_places_potions_in_potion_belt_first() {
 #[test]
 fn crystal_add_item_places_amulets_in_amulet_belt_first() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33348,6 +36616,7 @@ fn crystal_add_item_places_amulets_in_amulet_belt_first() {
 #[test]
 fn crystal_add_item_falls_back_to_bag_when_priority_belt_is_full() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33385,6 +36654,7 @@ fn crystal_add_item_falls_back_to_bag_when_priority_belt_is_full() {
 #[test]
 fn crystal_add_item_keeps_non_belt_items_in_bag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33419,6 +36689,7 @@ fn crystal_add_item_keeps_non_belt_items_in_bag() {
 #[test]
 fn add_or_increment_item_respects_crystal_stack_size() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33474,6 +36745,7 @@ fn add_or_increment_item_respects_crystal_stack_size() {
 #[test]
 fn add_or_increment_item_keeps_crystal_non_stackables_single_count() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -33511,6 +36783,7 @@ fn consumable_item_restores_hp() {
     let before_start_packets = session.use_item("red-potion");
     assert!(before_start_packets.is_empty());
 
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 10);
     let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -33538,6 +36811,7 @@ fn consumable_item_restores_hp() {
 #[test]
 fn crystal_credit_token_use_adds_credit_and_emits_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_credit_token(&mut session, 3, 12);
 
@@ -33557,6 +36831,7 @@ fn crystal_credit_token_use_adds_credit_and_emits_packet() {
 #[test]
 fn crystal_credit_persists_and_updates_user_information() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "credit-token-save");
     let _ = session.handle_packet(ClientPacket::Login {
         account_id: "credit-token-save".to_string(),
         password: "demo".to_string(),
@@ -33578,6 +36853,7 @@ fn crystal_credit_persists_and_updates_user_information() {
 #[test]
 fn benediction_oil_refreshes_weapon_after_luck_gain() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_benediction_oil(&mut session, 12);
 
@@ -33605,6 +36881,7 @@ fn benediction_oil_refreshes_weapon_after_luck_gain() {
 #[test]
 fn benediction_oil_can_have_no_effect_but_is_consumed() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_benediction_oil(&mut session, 12);
     {
@@ -33647,6 +36924,7 @@ fn benediction_oil_can_have_no_effect_but_is_consumed() {
 #[test]
 fn benediction_oil_can_curse_weapon_and_refresh_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_benediction_oil(&mut session, 12);
     super::set_runtime_tick(session.app.world_mut(), 3);
@@ -33682,6 +36960,7 @@ fn benediction_oil_can_curse_weapon_and_refresh_item() {
 #[test]
 fn benediction_oil_no_weapon_failure_has_no_runtime_chat_or_consume() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_benediction_oil(&mut session, 12);
     session
@@ -33710,6 +36989,7 @@ fn benediction_oil_no_weapon_failure_has_no_runtime_chat_or_consume() {
 #[test]
 fn repair_and_war_god_oil_emit_item_repaired_for_weapon() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33803,6 +37083,7 @@ fn repair_and_war_god_oil_emit_item_repaired_for_weapon() {
 #[test]
 fn repair_oil_failure_has_no_runtime_chat_or_consume() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -33830,6 +37111,7 @@ fn repair_oil_failure_has_no_runtime_chat_or_consume() {
 #[test]
 fn crystal_use_item_packet_consumes_inventory_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 10);
     let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -33876,6 +37158,7 @@ fn crystal_use_item_packet_consumes_inventory_slot() {
 #[test]
 fn crystal_use_item_packet_consumes_belt_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 10);
     let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -33937,6 +37220,7 @@ fn use_item_packet_static_potion_rejects_on_no_drug_map() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 10);
 
@@ -33982,6 +37266,7 @@ fn use_item_packet_static_potion_rejects_on_no_drug_map() {
 #[test]
 fn use_item_packet_belt_equipment_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_belt_test_item(&mut session, "belt-test-helmet", "Belt Test Helmet", 3);
     {
@@ -34024,6 +37309,7 @@ fn use_item_packet_belt_equipment_rejects_without_runtime_chat() {
 #[test]
 fn use_item_packet_unusable_inventory_item_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_test_item(
         &mut session,
@@ -34059,6 +37345,7 @@ fn use_item_packet_unusable_inventory_item_rejects_without_runtime_chat() {
 #[test]
 fn use_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::UseItem {
@@ -34079,6 +37366,7 @@ fn use_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
 #[test]
 fn use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "SunPotion", 31);
     let potion_test_vitals = PlayerVitals {
@@ -34124,6 +37412,7 @@ fn use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp() {
 #[test]
 fn use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "(HP)DrugSmall", 31);
     set_current_player_hp(&mut session, 10);
@@ -34181,6 +37470,7 @@ fn use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "(HP)DrugSmall", 31);
     set_current_player_hp(&mut session, 10);
@@ -34227,6 +37517,7 @@ fn use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map() {
 #[test]
 fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "ImpactDrug(S)", 31);
 
@@ -34279,6 +37570,7 @@ fn active_buff_snapshot_carries_browser_buff_contract_fields() {
     // S.AddBuff-equivalent contract fields: numeric `buffType`, `remainingMs`
     // (= remaining_ticks * 1000), `infinite`, and `{stat, label, value}` stats.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "ImpactDrug(S)", 31);
     session.handle_packet(ClientPacket::UseItem {
@@ -34312,6 +37604,7 @@ fn active_buff_snapshot_carries_browser_buff_contract_fields() {
 #[test]
 fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "Apple", 31);
 
@@ -34354,6 +37647,7 @@ fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
 #[test]
 fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "TownTeleport", 31);
     let spawn = session
@@ -34397,6 +37691,7 @@ fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll(
 #[test]
 fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "DungeonEscape", 31);
     set_player_position(&mut session, Point { x: 330, y: 270 });
@@ -34448,6 +37743,7 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "DungeonEscape", 31);
     set_player_position(&mut session, Point { x: 330, y: 270 });
@@ -34488,6 +37784,7 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map() {
 #[test]
 fn use_item_packet_dynamic_crystal_random_teleport_teleports_same_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "RandomTeleport", 31);
     set_player_position(&mut session, Point { x: 330, y: 270 });
@@ -34539,6 +37836,7 @@ fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "RandomTeleport", 31);
     set_player_position(&mut session, Point { x: 330, y: 270 });
@@ -34579,6 +37877,7 @@ fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
 #[test]
 fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 11);
     add_inventory_crystal_item(&mut session, "GtInvite", 31);
@@ -34612,6 +37911,7 @@ fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
 #[test]
 fn use_item_packet_dynamic_crystal_gt_teleport_consumes_without_teleporting() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 11);
     add_inventory_crystal_item(&mut session, "GTTeleport", 31);
@@ -34655,6 +37955,7 @@ fn use_item_packet_dynamic_crystal_gt_teleport_consumes_without_teleporting() {
 #[test]
 fn use_item_packet_dynamic_crystal_repair_oils_use_template_scroll_shapes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -34734,6 +38035,7 @@ fn use_item_packet_dynamic_crystal_repair_oils_use_template_scroll_shapes() {
 #[test]
 fn use_item_packet_dynamic_crystal_repair_oils_respect_weapon_repair_binds() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -34815,6 +38117,7 @@ fn use_item_packet_dynamic_crystal_repair_oils_respect_weapon_repair_binds() {
 #[test]
 fn use_item_packet_dynamic_crystal_food_requires_equipped_mount() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "RawMeat", 31);
 
@@ -34841,6 +38144,7 @@ fn use_item_packet_dynamic_crystal_food_requires_equipped_mount() {
 #[test]
 fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "RawMeat", 31);
     {
@@ -34867,6 +38171,8 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
                 added_luck: 0,
                 added_stats: Vec::new(),
                 socketed: Vec::new(),
+                user_item_metadata: None,
+                user_item_unique_id: None,
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
@@ -34928,6 +38234,7 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
 #[test]
 fn use_item_packet_equipped_mount_toggles_riding_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -34952,6 +38259,8 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
             added_luck: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
+            user_item_unique_id: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -35024,6 +38333,7 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_test_mount(&mut session, 12);
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
@@ -35063,6 +38373,7 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
         need_bridle: true,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_test_mount(&mut session, 12);
     assert!(session
@@ -35148,6 +38459,7 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Mount up on the (mount-allowed) starting map.
@@ -35180,6 +38492,7 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
 fn transfer_onto_mount_allowed_map_keeps_player_mounted() {
     // Sanity counterpart: transferring onto an ordinary map must NOT dismount.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut mount = session.app.world_mut().resource_mut::<MountResource>();
@@ -35255,6 +38568,7 @@ fn entity_sprite_snapshot_riding_renders_mount_and_hides_weapon() {
 #[test]
 fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryWater", 31);
     {
@@ -35340,6 +38654,7 @@ fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
 #[test]
 fn use_item_packet_mystery_water_when_already_unlocked_ack_fails_and_keeps_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryWater", 31);
     session
@@ -35389,6 +38704,7 @@ fn use_item_packet_mystery_water_when_already_unlocked_ack_fails_and_keeps_item(
 #[test]
 fn mystery_water_unlock_does_not_survive_logout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryWater", 31);
     {
@@ -35450,6 +38766,7 @@ fn mystery_water_unlock_does_not_survive_logout() {
 #[test]
 fn use_item_packet_dead_player_ack_fails_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 0);
 
@@ -35481,6 +38798,7 @@ fn use_item_packet_dead_player_ack_fails_without_mutation() {
 #[test]
 fn use_item_packet_resurrection_scroll_while_alive_hint_chats_and_preserves_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "ResurrectionScroll", 31);
     let alive_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -35516,6 +38834,7 @@ fn use_item_packet_resurrection_scroll_while_alive_hint_chats_and_preserves_item
 #[test]
 fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "ResurrectionScroll", 31);
     set_current_player_hp(&mut session, 0);
@@ -35582,6 +38901,7 @@ fn use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_m
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "ResurrectionScroll", 31);
     set_current_player_hp(&mut session, 0);
@@ -35625,6 +38945,7 @@ fn use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_m
 #[test]
 fn use_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_hp = session.world_snapshot().player_hp;
     {
@@ -35665,6 +38986,7 @@ fn use_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item() {
 #[test]
 fn equippable_item_moves_into_equipment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 10);
 
@@ -35692,6 +39014,7 @@ fn equippable_item_moves_into_equipment() {
 #[test]
 fn use_item_packet_equipping_need_identify_item_emits_refresh_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
     {
@@ -35739,6 +39062,7 @@ fn use_item_packet_equipping_need_identify_item_emits_refresh_item() {
 #[test]
 fn split_item_packet_hero_inventory_grid_does_not_mutate_matching_player_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -35798,7 +39122,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
         resources.inventory_items.push(ItemState {
             key: format!("split-fill-{slot}"),
             name: format!("Split Fill {slot}"),
-            icon: super::item_icon_for_key("training-manual"),
+            icon: super::item_icon_for_key("crystal-item-990"),
             slot,
             unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
@@ -35813,6 +39137,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
             added_defence: 0,
             added_stats: Vec::new(),
             socketed: Vec::new(),
+            user_item_metadata: None,
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -35835,6 +39160,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
 #[test]
 fn split_item_packet_inventory_uses_crystal_inventory_slots_across_bag_pages() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let bait_key = super::crystal_item_key_for_template(
         &mir2_game_data::crystal_item_by_name("FishBait").expect("FishBait template should exist"),
@@ -35888,6 +39214,7 @@ fn split_item_packet_inventory_uses_crystal_inventory_slots_across_bag_pages() {
 #[test]
 fn split_item_packet_inventory_can_place_bag2_split_into_earlier_bag1_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let bait_key = super::crystal_item_key_for_template(
         &mir2_game_data::crystal_item_by_name("FishBait").expect("FishBait template should exist"),
@@ -35939,6 +39266,7 @@ fn split_item_packet_inventory_can_place_bag2_split_into_earlier_bag1_slot() {
 #[test]
 fn split_item_packet_inventory_prefers_crystal_belt_slots_for_beltable_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::SplitItem {
@@ -35964,9 +39292,15 @@ fn split_item_packet_inventory_prefers_crystal_belt_slots_for_beltable_items() {
             && item.quantity == 3
     }));
     assert!(resources.belt_items.iter().any(|item| {
-        item.key == "red-potion"
+        item.key == "crystal-item-706"
+            && item.name == "RepairOil"
             && item.container == ItemContainer::Belt
             && item.slot == 2
+    }));
+    assert!(resources.belt_items.iter().any(|item| {
+        item.key == "red-potion"
+            && item.container == ItemContainer::Belt
+            && item.slot == 3
             && item.quantity == 2
     }));
     assert!(!packets
@@ -35977,6 +39311,7 @@ fn split_item_packet_inventory_prefers_crystal_belt_slots_for_beltable_items() {
 #[test]
 fn split_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_matching_belt_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::SplitItem {
@@ -36006,6 +39341,7 @@ fn split_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_matching_belt_
 #[test]
 fn split_item_packet_zero_count_is_ack_only_and_preserves_matching_stack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::SplitItem {
@@ -36035,6 +39371,7 @@ fn split_item_packet_zero_count_is_ack_only_and_preserves_matching_stack() {
 #[test]
 fn split_item_packet_storage_requires_active_storage_service_and_preserves_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::SplitItem {
@@ -36067,6 +39404,7 @@ fn split_item_packet_storage_requires_active_storage_service_and_preserves_items
 #[test]
 fn equip_and_remove_item_packets_emit_crystal_acks() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let helmet_slot = session
@@ -36094,7 +39432,7 @@ fn equip_and_remove_item_packets_emit_crystal_acks() {
 
     let remove_packets = session.handle_packet(ClientPacket::RemoveItem {
         grid: MirGridType::Inventory,
-        unique_id: 2,
+        unique_id: u64::from(helmet_slot),
         to: 9,
     });
 
@@ -36102,7 +39440,7 @@ fn equip_and_remove_item_packets_emit_crystal_acks() {
         remove_packets,
         vec![ServerPacket::RemoveItem {
             grid: MirGridType::Inventory,
-            unique_id: 2,
+            unique_id: u64::from(helmet_slot),
             to: 9,
             success: true,
         }]
@@ -36112,6 +39450,7 @@ fn equip_and_remove_item_packets_emit_crystal_acks() {
 #[test]
 fn equip_item_packet_manifest_ring_and_bracelet_can_target_right_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryCircle", 31);
     add_inventory_crystal_item(&mut session, "MysteryWheel", 32);
@@ -36159,6 +39498,7 @@ fn equip_item_packet_manifest_ring_and_bracelet_can_target_right_slots() {
 #[test]
 fn equip_item_packet_manifest_amulet_can_target_right_bracelet_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 50);
     add_inventory_crystal_item(&mut session, "GreenPoison", 31);
@@ -36188,6 +39528,7 @@ fn equip_item_packet_manifest_amulet_can_target_right_bracelet_slot() {
 #[test]
 fn equip_item_packet_manifest_equipment_rejects_unmet_requirements_silently() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "SpiritRing", 31);
 
@@ -36220,6 +39561,7 @@ fn equip_item_packet_manifest_equipment_rejects_unmet_requirements_silently() {
 #[test]
 fn equip_item_packet_manifest_equipment_allows_when_requirements_are_met() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 15);
     add_inventory_crystal_item(&mut session, "SpiritRing", 31);
@@ -36253,6 +39595,7 @@ fn equip_item_packet_manifest_equipment_allows_when_requirements_are_met() {
 #[test]
 fn equip_item_packet_storage_manifest_equipment_rejects_unmet_requirements_silently() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     add_inventory_crystal_item(&mut session, "SpiritRing", 31);
@@ -36299,6 +39642,7 @@ fn equip_item_packet_storage_manifest_equipment_rejects_unmet_requirements_silen
 #[test]
 fn equip_item_packet_identifies_need_identify_item_and_emits_refresh_before_ack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
 
@@ -36336,6 +39680,7 @@ fn equip_item_packet_identifies_need_identify_item_and_emits_refresh_before_ack(
 #[test]
 fn equip_item_packet_storage_identifies_need_identify_item_and_emits_refresh_before_ack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
@@ -36387,6 +39732,7 @@ fn equip_item_packet_storage_identifies_need_identify_item_and_emits_refresh_bef
 #[test]
 fn equip_item_packet_rejects_item_soul_bound_to_other_character() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
     {
@@ -36426,6 +39772,7 @@ fn equip_item_packet_rejects_item_soul_bound_to_other_character() {
 #[test]
 fn equip_item_packet_storage_grid_equips_item_when_storage_service_is_active() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -36458,6 +39805,7 @@ fn equip_item_packet_storage_grid_equips_item_when_storage_service_is_active() {
 #[test]
 fn remove_item_packet_storage_grid_moves_equipment_into_requested_storage_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -36491,6 +39839,7 @@ fn remove_item_packet_storage_grid_moves_equipment_into_requested_storage_slot()
 #[test]
 fn remove_item_packet_inventory_requires_requested_slot_to_be_empty() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.handle_packet(ClientPacket::EquipItem {
         grid: MirGridType::Inventory,
@@ -36529,6 +39878,7 @@ fn remove_item_packet_inventory_requires_requested_slot_to_be_empty() {
 #[test]
 fn remove_item_packet_cursed_equipment_consumes_unlock_after_success() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let helmet_slot = session
         .world_snapshot()
@@ -36612,6 +39962,7 @@ fn remove_item_packet_cursed_equipment_consumes_unlock_after_success() {
 #[test]
 fn equip_item_packet_storage_replacing_cursed_equipment_requires_unlock() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let helmet_slot = session
         .world_snapshot()
@@ -36694,6 +40045,7 @@ fn equip_item_packet_storage_replacing_cursed_equipment_requires_unlock() {
 #[test]
 fn equip_item_packet_storage_rejects_replaced_equipment_with_dont_store_binding() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let helmet_slot = session
         .world_snapshot()
@@ -36747,6 +40099,7 @@ fn equip_item_packet_storage_rejects_replaced_equipment_with_dont_store_binding(
 #[test]
 fn equip_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -36787,6 +40140,7 @@ fn equip_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item() 
 #[test]
 fn remove_item_packet_hero_inventory_grid_does_not_mutate_matching_player_equipment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let weapon_unique_id =
         super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
@@ -36816,6 +40170,7 @@ fn remove_item_packet_hero_inventory_grid_does_not_mutate_matching_player_equipm
 #[test]
 fn remove_slot_item_packet_hero_equipment_grid_does_not_mutate_matching_player_equipment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let weapon_unique_id =
         super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
@@ -36848,6 +40203,7 @@ fn remove_slot_item_packet_hero_equipment_grid_does_not_mutate_matching_player_e
 #[test]
 fn remove_slot_item_packet_equipment_grid_does_not_mutate_matching_player_equipment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let weapon_unique_id =
         super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
@@ -36884,6 +40240,7 @@ fn remove_slot_item_packet_equipment_grid_does_not_mutate_matching_player_equipm
 #[test]
 fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let weapon_unique_id =
         super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
@@ -36924,7 +40281,7 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
     ItemState {
         key: key.to_string(),
         name: key.to_string(),
-        icon: super::item_icon_for_key("repair-powder"),
+        icon: super::item_icon_for_key("crystal-item-1135"),
         slot: 0,
         unique_id,
         container: ItemContainer::Bag1,
@@ -36939,6 +40296,7 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -36957,11 +40315,1036 @@ fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
     }
 }
 
+fn real_crystal_socket_host_with_bell(
+    session: &mut SimulationSession,
+    host_slot: u8,
+    bell_slot: u8,
+    bell_cursed: bool,
+) -> (ItemState, u64, u64) {
+    let mut host = take_real_crystal_item_state(session, "RedTiger", host_slot);
+    let mut bell = take_real_crystal_item_state(session, "BronzeBell", bell_slot);
+    bell.cursed = bell_cursed;
+    let bell_unique_id = super::item_unique_id(&bell);
+    let bell_user = super::super::items::try_user_item_from_item_state(&bell)
+        .expect("real BronzeBell should serialize to UserItem");
+    let host_unique_id = super::item_unique_id(&host);
+    let mut host_user = super::super::items::try_user_item_from_item_state(&host)
+        .expect("real RedTiger should serialize to UserItem");
+    assert!(host_user.slots.len() > 1, "RedTiger exposes the Bells slot");
+    host_user.slots[1] = Some(bell_user);
+    host = super::super::items::try_item_state_from_user_item(host, &host_user)
+        .expect("real RedTiger + BronzeBell carrier should hydrate");
+    host.slot = host_slot;
+    (host, host_unique_id, bell_unique_id)
+}
+
+#[derive(Debug, Clone, Copy)]
+enum IncomingItemTreePath {
+    SharedTrade,
+    RentalRetrieve,
+    RentalCancel,
+    HeroTakeBack,
+    GuildStorageRetrieve,
+}
+
+impl IncomingItemTreePath {
+    fn label(self) -> &'static str {
+        match self {
+            Self::SharedTrade => "shared-trade",
+            Self::RentalRetrieve => "rental-retrieve",
+            Self::RentalCancel => "rental-cancel",
+            Self::HeroTakeBack => "hero-takeback",
+            Self::GuildStorageRetrieve => "guild-storage",
+        }
+    }
+}
+
+fn malformed_incoming_item_tree(session: &mut SimulationSession) -> ItemState {
+    // A real Crystal RedTiger is a legal parent for the real BronzeBell ItemInfo
+    // at MountSlot.Bells (protocol slot 1). Deliberately collide the incoming
+    // child with a separately equipped BronzeBell; all other carrier fields
+    // originate from the Crystal manifest rather than a synthetic socket key.
+    let mut root = take_real_crystal_item_state(session, "RedTiger", 30);
+    let mut bell = take_real_crystal_item_state(session, "BronzeBell", 31);
+    assert!(
+        root.socket_slots > 1,
+        "RedTiger must expose MountSlot.Bells"
+    );
+    root.unique_id = 0;
+    root.user_item_metadata = None;
+    root.slot = 30;
+    bell.unique_id = 88_000;
+    bell.slot = 1;
+    root.socketed = vec![bell];
+    root
+}
+
+fn incoming_tree_key_ids(session: &SimulationSession, root_key: &str) -> Vec<(String, u64)> {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let root = resources
+        .inventory_items
+        .iter()
+        .find(|item| item.key == root_key)
+        .expect("returned incoming item tree should be in player inventory");
+    let mut values = Vec::new();
+    collect_item_tree_key_ids(std::slice::from_ref(root), &mut values);
+    values.sort();
+    values
+}
+
+fn inventory_global_item_id_occurrences(session: &SimulationSession, unique_id: u64) -> usize {
+    let resources = session.app.world().resource::<InventoryResource>();
+    let mut ids = Vec::new();
+    collect_item_tree_unique_ids(&resources.belt_items, &mut ids);
+    collect_item_tree_unique_ids(&resources.inventory_items, &mut ids);
+    collect_item_tree_unique_ids(&resources.storage_items, &mut ids);
+    for equipment in &resources.equipment_items {
+        if let Some(parent_id) = equipment
+            .user_item_unique_id
+            .or_else(|| super::equipment_slot_unique_id(equipment.slot))
+        {
+            ids.push(parent_id);
+        }
+        collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
+    }
+    ids.into_iter()
+        .filter(|candidate| *candidate == unique_id)
+        .count()
+}
+
+fn return_incoming_item_tree_through_path(
+    session: &mut SimulationSession,
+    path: IncomingItemTreePath,
+    item: ItemState,
+) {
+    match path {
+        IncomingItemTreePath::SharedTrade => {
+            let offer = super::SharedTradeOffer {
+                settlement_nonce: "00000000000000000000000000000001".to_string(),
+                account_id: "sender-account".to_string(),
+                character_index: 0,
+                character_name: "Sender".to_string(),
+                partner_name: "Scout".to_string(),
+                gold: 0,
+                items: vec![super::SharedTradeOfferItem {
+                    item_state_json: serde_json::to_string(&item).expect("incoming trade item"),
+                    key: item.key.clone(),
+                    unique_id: super::item_unique_id(&item),
+                }],
+            };
+            let packets = session.apply_shared_trade_delivery(&offer);
+            assert!(packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+        }
+        IncomingItemTreePath::RentalRetrieve | IncomingItemTreePath::RentalCancel => {
+            let deposited_from = matches!(path, IncomingItemTreePath::RentalCancel).then_some(30);
+            session
+                .app
+                .world_mut()
+                .resource_mut::<super::ItemRentalResource>()
+                .active = Some(super::super::resources::ActiveItemRentalState {
+                transaction_nonce: "test-rental-transaction".to_string(),
+                partner_name: "Rental Partner".to_string(),
+                fee: 0,
+                days: 1,
+                deposited_item: Some(item),
+                deposited_from,
+                gold_locked: false,
+                item_locked: false,
+            });
+            let packets = if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                session.handle_packet(ClientPacket::RetrieveRentalItem { from: 0, to: 30 })
+            } else {
+                session.handle_packet(ClientPacket::CancelItemRental)
+            };
+            assert!(packets.iter().any(|packet| match (path, packet) {
+                (
+                    IncomingItemTreePath::RentalRetrieve,
+                    ServerPacket::RetrieveRentalItem { success: true, .. },
+                )
+                | (IncomingItemTreePath::RentalCancel, ServerPacket::CancelItemRental) => true,
+                _ => false,
+            }));
+        }
+        IncomingItemTreePath::HeroTakeBack => {
+            session.handle_packet(ClientPacket::NewHero {
+                name: "TreeCarrier".to_string(),
+                gender: MirGender::Female,
+                class: MirClass::Warrior,
+            });
+            let mut hero_item = item;
+            hero_item.slot = 3;
+            session
+                .app
+                .world_mut()
+                .resource_mut::<super::HeroInventoryResource>()
+                .items
+                .push(hero_item);
+            assert!(matches!(
+                session
+                    .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                    .as_slice(),
+                [ServerPacket::TakeBackHeroItem { success: true, .. }]
+            ));
+        }
+        IncomingItemTreePath::GuildStorageRetrieve => {
+            session.stage5_command("guild.create", vec!["TreeGuild".to_string()]);
+            let encoded = serde_json::to_string(&item).expect("guild storage item");
+            {
+                let mut stage5 = session
+                    .app
+                    .world_mut()
+                    .resource_mut::<Stage5SystemsResource>();
+                stage5
+                    .stage5_systems
+                    .guild
+                    .storage_items
+                    .insert(0, item.key.clone());
+                stage5
+                    .stage5_systems
+                    .guild
+                    .storage_item_states
+                    .insert(0, encoded);
+                stage5.stage5_systems.guild.storage_item_users.insert(0, 0);
+            }
+            let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                change_type: 1,
+                from: 0,
+                to: 30,
+            });
+            assert!(packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::GuildStorageItemChange {
+                    change_type: 1,
+                    item: None,
+                    ..
+                }
+            )));
+        }
+    }
+}
+
+#[test]
+fn incoming_item_tree_paths_normalize_nested_ids_and_remain_save_load_stable() {
+    for path in [
+        IncomingItemTreePath::SharedTrade,
+        IncomingItemTreePath::RentalRetrieve,
+        IncomingItemTreePath::RentalCancel,
+        IncomingItemTreePath::HeroTakeBack,
+        IncomingItemTreePath::GuildStorageRetrieve,
+    ] {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        let character_index = create_and_start_test_character(&mut session, "UidIngress");
+        set_active_character_and_body_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            30,
+        );
+
+        // Reserve a real mounted BronzeBell UID so the incoming tree's real
+        // BronzeBell child has to be rekeyed by every ingress path.
+        let _ = equip_crystal_mount_with_optional_bells_and_ride(&mut session, false);
+        let reserved_bells_id = attach_real_bronze_bell_fixture(&mut session, 88_000);
+        {
+            let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+            let mount = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Mount)
+                .expect("equipped RedTiger");
+            assert!(
+                mount.socket_slots > 1,
+                "RedTiger must expose MountSlot.Bells"
+            );
+            assert_eq!(mount.socketed.len(), 1, "one legal Bells occupant expected");
+            mount.socketed[0].slot = 1;
+            mount.socketed[0].unique_id = 88_000;
+        }
+        assert_eq!(
+            reserved_bells_id, 88_000,
+            "fixture must reserve the exact UID that the incoming child collides with"
+        );
+
+        let label = path.label();
+        let root_key = super::crystal_item_key_for_template(
+            &mir2_game_data::crystal_item_by_name("RedTiger").expect("RedTiger template"),
+        );
+        let incoming = malformed_incoming_item_tree(&mut session);
+        return_incoming_item_tree_through_path(&mut session, path, incoming);
+
+        let before_reload = incoming_tree_key_ids(&session, &root_key);
+        let ids = before_reload
+            .iter()
+            .map(|(_, unique_id)| *unique_id)
+            .collect::<Vec<_>>();
+        assert_eq!(ids.len(), 2, "{path:?} must carry RedTiger plus BronzeBell");
+        assert!(ids.iter().all(|unique_id| *unique_id != 0), "{path:?}");
+        assert_eq!(
+            ids.iter()
+                .copied()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            ids.len(),
+            "{path:?} incoming tree must be internally unique"
+        );
+        assert!(
+            ids.iter().all(|unique_id| {
+                inventory_global_item_id_occurrences(&session, *unique_id) == 1
+            }),
+            "{path:?} incoming IDs must be globally unique after insertion"
+        );
+        assert_ne!(
+            before_reload
+                .iter()
+                .find(|(key, _)| key == "crystal-item-778")
+                .map(|(_, unique_id)| *unique_id),
+            Some(88_000),
+            "{path:?} must rekey the colliding real BronzeBell child"
+        );
+        assert!(
+            before_reload
+                .iter()
+                .any(|(key, unique_id)| key == &root_key && *unique_id != 0),
+            "{path:?} must normalize the zero-root UID"
+        );
+
+        assert!(session.save_active_character().is_ok());
+        let mut reloaded = SimulationSession::new(config);
+        login_demo_account_for_persistence_test(&mut reloaded);
+        assert_start_game_success(&mut reloaded, character_index);
+        assert_eq!(
+            incoming_tree_key_ids(&reloaded, &root_key),
+            before_reload,
+            "{path:?} IDs must remain stable across save/load"
+        );
+        assert!(!label.is_empty());
+    }
+}
+fn invalid_recursive_incoming_item_tree(session: &mut SimulationSession) -> ItemState {
+    let mut item = malformed_incoming_item_tree(session);
+    item.socketed
+        .first_mut()
+        .expect("real RedTiger fixture should contain BronzeBell")
+        .key = "not-a-crystal-item".to_string();
+    assert!(
+        super::validate_item_state_carrier(&item).is_err(),
+        "fixture must be a syntactically valid JSON tree with an invalid nested Crystal carrier"
+    );
+    item
+}
+
+#[test]
+fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() {
+    for path in [
+        IncomingItemTreePath::SharedTrade,
+        IncomingItemTreePath::RentalRetrieve,
+        IncomingItemTreePath::RentalCancel,
+        IncomingItemTreePath::HeroTakeBack,
+        IncomingItemTreePath::GuildStorageRetrieve,
+    ] {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        create_and_start_test_character(&mut session, "BadIngress");
+        set_active_character_and_body_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            30,
+        );
+        let item = invalid_recursive_incoming_item_tree(&mut session);
+        let before_inventory = serde_json::to_string(
+            &session
+                .app
+                .world()
+                .resource::<InventoryResource>()
+                .inventory_items,
+        )
+        .expect("inventory snapshot");
+        let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+
+        match path {
+            IncomingItemTreePath::SharedTrade => {
+                let offer = super::SharedTradeOffer {
+                    settlement_nonce: "00000000000000000000000000000001".to_string(),
+                    account_id: "sender-account".to_string(),
+                    character_index: 0,
+                    character_name: "Sender".to_string(),
+                    partner_name: "Scout".to_string(),
+                    gold: 77,
+                    items: vec![super::SharedTradeOfferItem {
+                        item_state_json: serde_json::to_string(&item)
+                            .expect("invalid nested trade item should still be JSON"),
+                        key: item.key.clone(),
+                        unique_id: super::item_unique_id(&item),
+                    }],
+                };
+                let packets = session.apply_shared_trade_delivery(&offer);
+                assert!(
+                    packets
+                        .iter()
+                        .any(|packet| matches!(packet, ServerPacket::TradeCancel { .. })),
+                    "{path:?} must reject the invalid recursive carrier"
+                );
+            }
+            IncomingItemTreePath::RentalRetrieve | IncomingItemTreePath::RentalCancel => {
+                let deposited_from =
+                    matches!(path, IncomingItemTreePath::RentalCancel).then_some(30);
+                let expected_item_json =
+                    serde_json::to_string(&item).expect("rental source snapshot");
+                session
+                    .app
+                    .world_mut()
+                    .resource_mut::<super::ItemRentalResource>()
+                    .active = Some(super::super::resources::ActiveItemRentalState {
+                    transaction_nonce: "test-rental-transaction".to_string(),
+                    partner_name: "Rental Partner".to_string(),
+                    fee: 25,
+                    days: 1,
+                    deposited_item: Some(item),
+                    deposited_from,
+                    gold_locked: false,
+                    item_locked: false,
+                });
+
+                let packets = if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                    session.handle_packet(ClientPacket::RetrieveRentalItem { from: 0, to: 30 })
+                } else {
+                    session.handle_packet(ClientPacket::CancelItemRental)
+                };
+                if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                    assert!(matches!(
+                        packets.as_slice(),
+                        [ServerPacket::RetrieveRentalItem { success: false, .. }]
+                    ));
+                } else {
+                    assert!(
+                        !packets
+                            .iter()
+                            .any(|packet| matches!(packet, ServerPacket::CancelItemRental)),
+                        "cancel must not report completion for an invalid retained item"
+                    );
+                }
+                let active = session
+                    .app
+                    .world()
+                    .resource::<super::ItemRentalResource>()
+                    .active
+                    .as_ref()
+                    .expect("failed rental ingress must retain the active transaction");
+                assert_eq!(
+                    serde_json::to_string(
+                        active
+                            .deposited_item
+                            .as_ref()
+                            .expect("failed rental ingress must retain source item")
+                    )
+                    .expect("retained rental item snapshot"),
+                    expected_item_json,
+                    "{path:?} source item must remain byte-for-byte stable"
+                );
+            }
+            IncomingItemTreePath::HeroTakeBack => {
+                session.handle_packet(ClientPacket::NewHero {
+                    name: "BadCarrierHero".to_string(),
+                    gender: MirGender::Female,
+                    class: MirClass::Warrior,
+                });
+                let mut hero_item = item;
+                hero_item.slot = 3;
+                session
+                    .app
+                    .world_mut()
+                    .resource_mut::<super::HeroInventoryResource>()
+                    .items
+                    .push(hero_item);
+                let before_hero = serde_json::to_string(
+                    &session
+                        .app
+                        .world()
+                        .resource::<super::HeroInventoryResource>()
+                        .items,
+                )
+                .expect("hero source snapshot");
+                assert!(matches!(
+                    session
+                        .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                        .as_slice(),
+                    [ServerPacket::TakeBackHeroItem { success: false, .. }]
+                ));
+                assert_eq!(
+                    serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<super::HeroInventoryResource>()
+                            .items
+                    )
+                    .expect("hero retained snapshot"),
+                    before_hero,
+                    "hero source must remain unchanged on validation failure"
+                );
+            }
+            IncomingItemTreePath::GuildStorageRetrieve => {
+                session.stage5_command("guild.create", vec!["BadTreeGuild".to_string()]);
+                let encoded = serde_json::to_string(&item).expect("invalid nested guild item JSON");
+                {
+                    let mut stage5 = session
+                        .app
+                        .world_mut()
+                        .resource_mut::<Stage5SystemsResource>();
+                    let guild = &mut stage5.stage5_systems.guild;
+                    guild.storage_items.insert(0, item.key.clone());
+                    guild.storage_item_states.insert(0, encoded.clone());
+                    guild.storage_item_users.insert(0, 0);
+                }
+                let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                    change_type: 1,
+                    from: 0,
+                    to: 30,
+                });
+                assert!(
+                    !packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GuildStorageItemChange {
+                            change_type: 1,
+                            item: None,
+                            ..
+                        }
+                    )),
+                    "guild retrieve must not report success for an invalid carrier"
+                );
+
+                let move_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                    change_type: 2,
+                    from: 0,
+                    to: 1,
+                });
+                assert!(
+                    !move_packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GuildStorageItemChange {
+                            change_type: 2,
+                            item: Some(_),
+                            ..
+                        }
+                    )),
+                    "guild move must fail before swapping an invalid carrier"
+                );
+                let list_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                    change_type: 3,
+                    from: 0,
+                    to: 0,
+                });
+                assert!(!list_packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::GuildStorageList { .. })));
+                assert!(list_packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::GuildStorageItemChange {
+                        change_type: 6,
+                        item: None,
+                        ..
+                    }
+                )));
+
+                let stage5 = session.app.world().resource::<Stage5SystemsResource>();
+                let guild = &stage5.stage5_systems.guild;
+                assert_eq!(guild.storage_items.get(&0), Some(&item.key));
+                assert!(!guild.storage_items.contains_key(&1));
+                assert_eq!(guild.storage_item_states.get(&0), Some(&encoded));
+                assert!(!guild.storage_item_states.contains_key(&1));
+            }
+        }
+
+        assert_eq!(
+            serde_json::to_string(
+                &session
+                    .app
+                    .world()
+                    .resource::<InventoryResource>()
+                    .inventory_items
+            )
+            .expect("post-failure inventory snapshot"),
+            before_inventory,
+            "{path:?} must not mutate player inventory on recursive validation failure"
+        );
+        assert_eq!(
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
+            before_gold,
+            "{path:?} must not mutate gold on recursive validation failure"
+        );
+    }
+}
+
+#[test]
+fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() {
+    for zero_child in [false, true] {
+        for path in [
+            IncomingItemTreePath::SharedTrade,
+            IncomingItemTreePath::RentalRetrieve,
+            IncomingItemTreePath::RentalCancel,
+            IncomingItemTreePath::HeroTakeBack,
+            IncomingItemTreePath::GuildStorageRetrieve,
+        ] {
+            let mut session = SimulationSession::new(SimulationConfig::default());
+            create_and_start_test_character(&mut session, "ZeroIngress");
+            set_active_character_and_body_class_gender_level(
+                &mut session,
+                MirClass::Warrior,
+                MirGender::Male,
+                30,
+            );
+            let mut item = malformed_incoming_item_tree(&mut session);
+            if zero_child {
+                item.socketed
+                    .first_mut()
+                    .expect("real BronzeBell child")
+                    .quantity = 0;
+            } else {
+                item.quantity = 0;
+            }
+            super::validate_item_state_carrier(&item)
+                .expect("generic carrier must permit transient quantity zero");
+            assert!(
+                super::validate_committed_item_state_carrier(&item).is_err(),
+                "{path:?} fixture must fail only the committed invariant"
+            );
+
+            match path {
+                IncomingItemTreePath::SharedTrade => {
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+                    let offer = super::SharedTradeOffer {
+                        settlement_nonce: "00000000000000000000000000000001".to_string(),
+                        account_id: "sender-account".to_string(),
+                        character_index: 0,
+                        character_name: "Sender".to_string(),
+                        partner_name: "Scout".to_string(),
+                        gold: 77,
+                        items: vec![super::SharedTradeOfferItem {
+                            item_state_json: serde_json::to_string(&item).unwrap(),
+                            key: item.key.clone(),
+                            unique_id: super::item_unique_id(&item),
+                        }],
+                    };
+                    let packets = session.apply_shared_trade_delivery(&offer);
+                    assert!(packets
+                        .iter()
+                        .any(|packet| matches!(packet, ServerPacket::TradeCancel { .. })));
+                    assert!(!packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GainedItem { .. } | ServerPacket::GainedGold { .. }
+                    )));
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                    assert_eq!(
+                        session.app.world().resource::<PlayerRuntimeResource>().gold,
+                        before_gold
+                    );
+                }
+                IncomingItemTreePath::RentalRetrieve | IncomingItemTreePath::RentalCancel => {
+                    let deposited_from =
+                        matches!(path, IncomingItemTreePath::RentalCancel).then_some(30);
+                    let expected_item_json = serde_json::to_string(&item).unwrap();
+                    session
+                        .app
+                        .world_mut()
+                        .resource_mut::<super::ItemRentalResource>()
+                        .active = Some(super::super::resources::ActiveItemRentalState {
+                        transaction_nonce: "test-rental-transaction".to_string(),
+                        partner_name: "Rental Partner".to_string(),
+                        fee: 25,
+                        days: 1,
+                        deposited_item: Some(item),
+                        deposited_from,
+                        gold_locked: false,
+                        item_locked: false,
+                    });
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    let before_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+                    let packets = if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                        session.handle_packet(ClientPacket::RetrieveRentalItem { from: 0, to: 30 })
+                    } else {
+                        session.handle_packet(ClientPacket::CancelItemRental)
+                    };
+                    if matches!(path, IncomingItemTreePath::RentalRetrieve) {
+                        assert!(matches!(
+                            packets.as_slice(),
+                            [ServerPacket::RetrieveRentalItem { success: false, .. }]
+                        ));
+                    } else {
+                        assert!(packets.is_empty());
+                    }
+                    let active = session
+                        .app
+                        .world()
+                        .resource::<super::ItemRentalResource>()
+                        .active
+                        .as_ref()
+                        .expect("failed rental commit must retain active state");
+                    assert_eq!(
+                        serde_json::to_string(
+                            active
+                                .deposited_item
+                                .as_ref()
+                                .expect("retained rental item")
+                        )
+                        .unwrap(),
+                        expected_item_json
+                    );
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                    assert_eq!(
+                        session.app.world().resource::<PlayerRuntimeResource>().gold,
+                        before_gold
+                    );
+                }
+                IncomingItemTreePath::HeroTakeBack => {
+                    session.handle_packet(ClientPacket::NewHero {
+                        name: "ZeroCarrierHero".to_string(),
+                        gender: MirGender::Female,
+                        class: MirClass::Warrior,
+                    });
+                    let mut hero_item = item;
+                    hero_item.slot = 3;
+                    session
+                        .app
+                        .world_mut()
+                        .resource_mut::<super::HeroInventoryResource>()
+                        .items
+                        .push(hero_item);
+                    let before_hero = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<super::HeroInventoryResource>()
+                            .items,
+                    )
+                    .unwrap();
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    assert!(matches!(
+                        session
+                            .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                            .as_slice(),
+                        [ServerPacket::TakeBackHeroItem { success: false, .. }]
+                    ));
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<super::HeroInventoryResource>()
+                                .items
+                        )
+                        .unwrap(),
+                        before_hero
+                    );
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                }
+                IncomingItemTreePath::GuildStorageRetrieve => {
+                    session.stage5_command("guild.create", vec!["ZeroTreeGuild".to_string()]);
+                    let encoded = serde_json::to_string(&item).unwrap();
+                    {
+                        let mut stage5 = session
+                            .app
+                            .world_mut()
+                            .resource_mut::<Stage5SystemsResource>();
+                        let guild = &mut stage5.stage5_systems.guild;
+                        guild.storage_items.insert(0, item.key.clone());
+                        guild.storage_item_states.insert(0, encoded);
+                        guild.storage_item_users.insert(0, 0);
+                    }
+                    let before_guild = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<Stage5SystemsResource>()
+                            .stage5_systems
+                            .guild,
+                    )
+                    .unwrap();
+                    let before_inventory = serde_json::to_string(
+                        &session
+                            .app
+                            .world()
+                            .resource::<InventoryResource>()
+                            .inventory_items,
+                    )
+                    .unwrap();
+                    let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+                        change_type: 1,
+                        from: 0,
+                        to: 30,
+                    });
+                    assert!(!packets.iter().any(|packet| matches!(
+                        packet,
+                        ServerPacket::GuildStorageItemChange {
+                            change_type: 1,
+                            item: None,
+                            ..
+                        }
+                    )));
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<Stage5SystemsResource>()
+                                .stage5_systems
+                                .guild
+                        )
+                        .unwrap(),
+                        before_guild
+                    );
+                    assert_eq!(
+                        serde_json::to_string(
+                            &session
+                                .app
+                                .world()
+                                .resource::<InventoryResource>()
+                                .inventory_items
+                        )
+                        .unwrap(),
+                        before_inventory
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn inventory_use_item_equips_metadata_backed_exact_zero_from_nonzero_slot() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    create_and_start_test_character(&mut session, "ExactZeroUse");
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Warrior,
+        MirGender::Male,
+        30,
+    );
+    let helmet = take_real_crystal_item_state(&mut session, "BronzeHelmet", 30);
+    let wire = super::super::items::try_user_item_from_item_state(&helmet)
+        .expect("real Crystal helmet should serialize to UserItem");
+    let mut helmet = super::super::items::try_item_state_from_user_item(helmet, &wire)
+        .expect("protocol round-trip should hydrate exact metadata");
+    assert!(helmet.user_item_metadata.is_some());
+    helmet.unique_id = 0;
+    helmet.container = ItemContainer::Bag1;
+    helmet.slot = 30;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(helmet);
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 0,
+        grid: MirGridType::Inventory,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id: 0,
+            success: true,
+            grid: MirGridType::Inventory
+        }
+    )));
+    let resources = session.app.world().resource::<InventoryResource>();
+    assert!(
+        resources
+            .inventory_items
+            .iter()
+            .all(|item| !(item.container == ItemContainer::Bag1 && item.slot == 30)),
+        "double-click equip must remove the exact-zero item from its nonzero bag slot"
+    );
+    assert_eq!(
+        resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet)
+            .and_then(|item| item.user_item_unique_id),
+        Some(0),
+        "equipment root must retain the exact protocol UID"
+    );
+}
+
+#[test]
+fn rental_deposit_and_confirm_reject_invalid_recursive_carrier_atomically() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    create_and_start_test_character(&mut session, "BadRentalIngress");
+    let mut item = invalid_recursive_incoming_item_tree(&mut session);
+    item.container = ItemContainer::Bag1;
+    item.slot = 30;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(item);
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::ItemRentalResource>()
+        .active = Some(super::super::resources::ActiveItemRentalState {
+        transaction_nonce: "test-rental-transaction".to_string(),
+        partner_name: "Rental Partner".to_string(),
+        fee: 0,
+        days: 1,
+        deposited_item: None,
+        deposited_from: None,
+        gold_locked: false,
+        item_locked: false,
+    });
+    let before_deposit_inventory = serde_json::to_string(
+        &session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items,
+    )
+    .expect("pre-deposit inventory snapshot");
+    assert!(matches!(
+        session
+            .handle_packet(ClientPacket::DepositRentalItem { from: 30, to: 0 })
+            .as_slice(),
+        [ServerPacket::DepositRentalItem { success: false, .. }]
+    ));
+    assert_eq!(
+        serde_json::to_string(
+            &session
+                .app
+                .world()
+                .resource::<InventoryResource>()
+                .inventory_items
+        )
+        .expect("post-deposit inventory snapshot"),
+        before_deposit_inventory
+    );
+    assert!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .active
+            .as_ref()
+            .expect("failed deposit must retain rental")
+            .deposited_item
+            .is_none(),
+        "invalid deposit must not move the item into rental state"
+    );
+
+    let item = session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .pop()
+        .expect("invalid rental fixture should remain in inventory");
+    let expected_item_json = serde_json::to_string(&item).expect("confirm source snapshot");
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::ItemRentalResource>()
+        .active = Some(super::super::resources::ActiveItemRentalState {
+        transaction_nonce: "test-rental-transaction".to_string(),
+        partner_name: "Rental Partner".to_string(),
+        fee: 25,
+        days: 1,
+        deposited_item: Some(item),
+        deposited_from: Some(30),
+        gold_locked: true,
+        item_locked: true,
+    });
+    let before_confirm_gold = session.app.world().resource::<PlayerRuntimeResource>().gold;
+    assert!(
+        session
+            .handle_packet(ClientPacket::ConfirmItemRental)
+            .is_empty(),
+        "invalid confirmation must fail closed without reporting completion"
+    );
+    let rental = session.app.world().resource::<super::ItemRentalResource>();
+    let active = rental
+        .active
+        .as_ref()
+        .expect("failed confirmation must retain the active rental");
+    assert_eq!(
+        serde_json::to_string(
+            active
+                .deposited_item
+                .as_ref()
+                .expect("failed confirmation must retain the item")
+        )
+        .expect("retained confirm item snapshot"),
+        expected_item_json
+    );
+    assert!(rental.rented_items.is_empty());
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        before_confirm_gold,
+        "failed confirmation must not credit the lender"
+    );
+}
+
 #[test]
 fn socketed_gems_fold_into_equipment_totals() {
     // Crystal `RefreshSocketStats` folds each socketed gem's stats into the
     // wearer's totals; mirror that via `EquipmentState::total_attack/defence`.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let mut gem_power = socket_test_item_state("socket-gem-power", 9101);
@@ -37048,6 +41431,7 @@ fn equip_slot_item_packet_rejects_non_socket_gem() {
     // *success* path is data-gated; this exercises the validation gate that
     // rejects a non-socket item offered as a gem (PlayerObject.EquipSlotItem).
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BronzeHelmet", 40);
     add_inventory_crystal_item_with_socket_slots(&mut session, "BronzeHelmet", 41, 2);
@@ -37083,35 +41467,34 @@ fn equip_slot_item_packet_rejects_non_socket_gem() {
 
 #[test]
 fn remove_slot_item_packet_returns_socketed_gem_to_inventory() {
-    // Crystal `PlayerObject.RemoveSlotItem` pops a socketed gem back into the
-    // bag; the socket grid + inventory destination is the supported path.
+    // Crystal `PlayerObject.RemoveSlotItem` pops a real BronzeBell back into the
+    // bag from the real RedTiger mount socket carrier.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let mut gem = socket_test_item_state("socket-gem-loose", 9301);
-    gem.attack = 3;
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let mut host = socket_test_item_state("crystal-host", 9300);
-        host.slot = 50;
-        host.socket_slots = 1;
-        host.socketed = vec![gem];
-        resources.inventory_items.push(host);
-    }
+    let (host, host_unique_id, bell_unique_id) =
+        real_crystal_socket_host_with_bell(&mut session, 50, 51, false);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(host);
 
     let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
         grid: MirGridType::Socket,
         grid_to: MirGridType::Inventory,
-        unique_id: 9301,
+        unique_id: bell_unique_id,
         to: 7,
-        from_unique_id: 9300,
+        from_unique_id: host_unique_id,
     });
     assert_eq!(
         packets,
         vec![ServerPacket::RemoveSlotItem {
             grid: MirGridType::Socket,
             grid_to: MirGridType::Inventory,
-            unique_id: 9301,
+            unique_id: bell_unique_id,
             to: 7,
             success: true,
         }]
@@ -37120,45 +41503,44 @@ fn remove_slot_item_packet_returns_socketed_gem_to_inventory() {
     let host = resources
         .inventory_items
         .iter()
-        .find(|item| item.unique_id == 9300)
+        .find(|item| super::item_unique_id(item) == host_unique_id)
         .expect("host remains in the bag");
     assert!(host.socketed.is_empty());
     assert!(resources
         .inventory_items
         .iter()
-        .any(|item| item.unique_id == 9301));
+        .any(|item| super::item_unique_id(item) == bell_unique_id));
 }
 
 #[test]
 fn remove_slot_item_packet_rejects_cursed_socketed_gem() {
-    // Crystal refuses to remove cursed socketed gems; the gem stays put.
+    // Crystal refuses to remove a cursed real BronzeBell; the gem stays put.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        let mut gem = socket_test_item_state("socket-gem-cursed", 9401);
-        gem.cursed = true;
-        let mut host = socket_test_item_state("crystal-host", 9400);
-        host.slot = 51;
-        host.socket_slots = 1;
-        host.socketed = vec![gem];
-        resources.inventory_items.push(host);
-    }
+    let (host, host_unique_id, bell_unique_id) =
+        real_crystal_socket_host_with_bell(&mut session, 51, 52, true);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(host);
 
     let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
         grid: MirGridType::Socket,
         grid_to: MirGridType::Inventory,
-        unique_id: 9401,
+        unique_id: bell_unique_id,
         to: 8,
-        from_unique_id: 9400,
+        from_unique_id: host_unique_id,
     });
     assert_eq!(
         packets,
         vec![ServerPacket::RemoveSlotItem {
             grid: MirGridType::Socket,
             grid_to: MirGridType::Inventory,
-            unique_id: 9401,
+            unique_id: bell_unique_id,
             to: 8,
             success: false,
         }]
@@ -37167,14 +41549,11 @@ fn remove_slot_item_packet_rejects_cursed_socketed_gem() {
     let host = resources
         .inventory_items
         .iter()
-        .find(|item| item.unique_id == 9400)
+        .find(|item| super::item_unique_id(item) == host_unique_id)
         .expect("host remains in the bag");
     assert_eq!(host.socketed.len(), 1);
     assert!(host.socketed[0].cursed);
-    assert!(!resources
-        .inventory_items
-        .iter()
-        .any(|item| item.unique_id == 9401));
+    assert_eq!(super::item_unique_id(&host.socketed[0]), bell_unique_id);
 }
 
 /// Pushes a Crystal item (by manifest index) into the bag at a known slot and
@@ -37203,6 +41582,7 @@ fn add_recipe_item(session: &mut SimulationSession, item_index: i32, slot: u8, q
         added_defence: 0,
         added_stats: Vec::new(),
         socketed: Vec::new(),
+        user_item_metadata: None,
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -37258,6 +41638,7 @@ fn craft_item_packet_produces_output_and_consumes_ingredients() {
     // GreenPoison: chance 100, gold 100, produces a stack of 4 while consuming
     // EbonyFruit x1, SpiderTeeth x2, CannibalLeaf x4 (recipe output unique id 32).
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_gold(&mut session, 500);
     add_recipe_item(&mut session, 864, 60, 1); // EbonyFruit, exact amount
@@ -37297,6 +41678,7 @@ fn craft_item_packet_produces_output_and_consumes_ingredients() {
 #[test]
 fn craft_item_packet_rejects_insufficient_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_gold(&mut session, 50); // GreenPoison costs 100
     add_recipe_item(&mut session, 864, 60, 1);
@@ -37319,6 +41701,7 @@ fn craft_item_packet_rejects_insufficient_gold() {
 #[test]
 fn craft_item_packet_rejects_insufficient_ingredient_quantity() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_gold(&mut session, 500);
     add_recipe_item(&mut session, 864, 60, 1);
@@ -37339,6 +41722,7 @@ fn craft_item_packet_rejects_insufficient_ingredient_quantity() {
 #[test]
 fn craft_item_packet_rejects_unknown_recipe() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::CraftItem {
@@ -37353,6 +41737,7 @@ fn craft_item_packet_rejects_unknown_recipe() {
 #[test]
 fn craft_item_packet_rejects_when_an_ingredient_slot_is_not_offered() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_gold(&mut session, 500);
     add_recipe_item(&mut session, 864, 60, 1);
@@ -37375,6 +41760,7 @@ fn craft_item_packet_rejects_when_an_ingredient_slot_is_not_offered() {
 fn craft_item_packet_enforces_tool_durability() {
     // BraveryOrb requires a CraftingBook tool with floor(CurrentDura / 1000) >= count.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_gold(&mut session, 50_000);
     add_recipe_item(&mut session, 1348, 70, 1); // CraftingBook (tool)
@@ -37401,6 +41787,7 @@ fn craft_item_packet_with_tool_consumes_ingredients_even_on_a_missed_roll() {
     // tool durability and returns success for any valid attempt; only the produced
     // item is gated on the roll.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_gold(&mut session, 50_000);
     add_recipe_item(&mut session, 1348, 70, 1);
@@ -37432,53 +41819,31 @@ fn craft_item_packet_with_tool_consumes_ingredients_even_on_a_missed_roll() {
 #[test]
 fn equipping_same_slot_returns_previous_gear_to_bag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        resources.inventory_items.push(ItemState {
-            key: "iron-helmet".to_string(),
-            name: "Iron Helmet".to_string(),
-            icon: super::item_icon_for_key("iron-helmet"),
-            slot: 9,
-            unique_id: 9,
-            container: ItemContainer::Bag1,
-            quantity: 1,
-            description: "Heavier helmet used to validate equipment swapping.".to_string(),
-            durability_current: Some(20),
-            durability_max: Some(20),
-            weight: 2,
-            equip_slot: Some(EquipmentSlot::Helmet),
-            grade: ItemGrade::Rare,
-            added_attack: 0,
-            added_defence: 2,
-            added_stats: Vec::new(),
-            socketed: Vec::new(),
-            cursed: false,
-            socket_slots: 0,
-            gem_count: 0,
-            identified: None,
-            soul_bound_id: None,
-            sealed_expiry_time_binary_datetime: 0,
-            sealed_next_time_binary_datetime: 0,
-            rental_binding_flags: 0,
-            rental_owner_name: String::new(),
-            rental_expiry_binary_datetime: 0,
-            rental_locked: false,
-            attack: 0,
-            defence: 4,
-            heal_hp: 0,
-            heal_mp: 0,
-        });
-    }
+    add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
 
     let _ = session.use_item("bronze-helmet");
-    let _ = session.use_item("iron-helmet");
+    let packets = session.handle_packet(ClientPacket::EquipItem {
+        grid: MirGridType::Inventory,
+        unique_id: 31,
+        to: 2,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 2,
+            success: true,
+        }
+    )));
     let snapshot = session.world_snapshot();
 
     assert!(snapshot
         .equipment_items
         .iter()
-        .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "Iron Helmet"));
+        .any(|item| { item.slot == EquipmentSlot::Helmet && item.name == "MysteryHelmet" }));
     assert!(snapshot.inventory_items.iter().any(|item| {
         item.name == "Bronze Helmet" && item.grade == ItemGrade::Common && item.added_defence == 1
     }));
@@ -37487,6 +41852,7 @@ fn equipping_same_slot_returns_previous_gear_to_bag() {
 #[test]
 fn added_equipment_stats_affect_snapshot_and_combat_totals() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let snapshot = session.world_snapshot();
@@ -37516,10 +41882,11 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
 #[test]
 fn standard_shape_equipment_updates_self_player_sprite_libraries() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_equippable_test_item(
         &mut session,
-        "shape-dagger",
+        "dagger",
         "Dagger",
         12,
         EquipmentSlot::Weapon,
@@ -37528,7 +41895,7 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
     );
     add_equippable_test_item(
         &mut session,
-        "shape-armour",
+        "leather-armour",
         "Leather Armour",
         13,
         EquipmentSlot::Armour,
@@ -37536,8 +41903,8 @@ fn standard_shape_equipment_updates_self_player_sprite_libraries() {
         2,
     );
 
-    let _ = session.use_item("shape-dagger");
-    let _ = session.use_item("shape-armour");
+    let _ = session.use_item("dagger");
+    let _ = session.use_item("leather-armour");
     let snapshot = session.world_snapshot();
     let player = snapshot
         .entities
@@ -37566,10 +41933,14 @@ fn equipping_real_crystal_gear_updates_self_player_sprite_libraries() {
     let mut config = SimulationConfig::default();
     config.visible_players.clear();
     let mut session = SimulationSession::new(config);
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "equip-shape");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "equip-shape".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     let _ = session.handle_packet(ClientPacket::NewCharacter {
         name: "Looks".to_string(),
         gender: MirGender::Male,
@@ -37624,10 +41995,14 @@ fn assassin_class_weapon_uses_assassin_sprite_libraries() {
     let mut config = SimulationConfig::default();
     config.visible_players.clear();
     let mut session = SimulationSession::new(config);
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "assassin-shape");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "assassin-shape".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     let _ = session.handle_packet(ClientPacket::NewCharacter {
         name: "Shade".to_string(),
         gender: MirGender::Male,
@@ -37672,10 +42047,14 @@ fn archer_class_weapon_uses_archer_sprite_libraries() {
     let mut config = SimulationConfig::default();
     config.visible_players.clear();
     let mut session = SimulationSession::new(config);
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "archer-shape");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "archer-shape".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     let _ = session.handle_packet(ClientPacket::NewCharacter {
         name: "Arrow".to_string(),
         gender: MirGender::Female,
@@ -37728,6 +42107,7 @@ fn visible_player_config_shapes_feed_world_sprite_snapshot() {
         direction: MirDirection::Left,
     }];
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let snapshot = session.world_snapshot();
@@ -37876,6 +42256,7 @@ fn item_roll_fields_persist_through_save_and_reload() {
 #[test]
 fn storing_item_moves_bag_item_into_storage_snapshot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -37918,6 +42299,7 @@ fn storing_item_moves_bag_item_into_storage_snapshot() {
 #[test]
 fn storing_item_uses_crystal_inventory_index_for_bag2_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -37943,6 +42325,7 @@ fn storing_item_uses_crystal_inventory_index_for_bag2_slots() {
 #[test]
 fn taking_back_item_moves_storage_item_into_inventory_snapshot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -37982,6 +42365,7 @@ fn taking_back_item_moves_storage_item_into_inventory_snapshot() {
 #[test]
 fn taking_back_item_rekeys_dirty_duplicate_inventory_unique_id() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -38032,6 +42416,7 @@ fn taking_back_item_rekeys_dirty_duplicate_inventory_unique_id() {
 #[test]
 fn stage5_craft_allocates_unique_id_when_preferred_slot_collides_with_storage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -38065,6 +42450,7 @@ fn stage5_craft_allocates_unique_id_when_preferred_slot_collides_with_storage() 
 #[test]
 fn taking_back_item_uses_crystal_inventory_index_for_bag2_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     {
@@ -38154,6 +42540,7 @@ fn storage_items_persist_through_save_and_reload() {
 #[test]
 fn store_and_take_back_reject_occupied_targets_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -38219,6 +42606,7 @@ fn store_and_take_back_reject_occupied_targets_like_crystal() {
 #[test]
 fn storage_move_item_reorders_storage_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -38248,6 +42636,7 @@ fn storage_move_item_reorders_storage_slots() {
 #[test]
 fn move_item_packet_inventory_success_is_ack_only_and_reorders_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38277,6 +42666,7 @@ fn move_item_packet_inventory_success_is_ack_only_and_reorders_slot() {
 #[test]
 fn move_item_packet_inventory_uses_crystal_inventory_index_for_bag2_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38307,6 +42697,7 @@ fn move_item_packet_inventory_uses_crystal_inventory_index_for_bag2_slots() {
 fn move_item_packet_inventory_invalid_target_slot_does_not_emit_extra_chat_or_mutate_matching_player_item(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38340,6 +42731,7 @@ fn move_item_packet_inventory_invalid_target_slot_does_not_emit_extra_chat_or_mu
 fn move_item_packet_inventory_invalid_source_slot_does_not_emit_extra_chat_or_mutate_matching_player_item(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38372,6 +42764,7 @@ fn move_item_packet_inventory_invalid_source_slot_does_not_emit_extra_chat_or_mu
 #[test]
 fn move_item_packet_inventory_ignores_matching_quest_inventory_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -38400,13 +42793,14 @@ fn move_item_packet_inventory_ignores_matching_quest_inventory_slot() {
         item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
     }));
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger" && item.slot == 3 && item.container == ItemContainer::Quest
+        item.key == "crystal-item-876" && item.slot == 3 && item.container == ItemContainer::Quest
     }));
 }
 
 #[test]
 fn move_item_packet_inventory_missing_source_uses_crystal_move_error_report() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38447,6 +42841,7 @@ fn move_item_packet_inventory_missing_source_uses_crystal_move_error_report() {
 #[test]
 fn move_item_packet_storage_missing_source_uses_crystal_move_error_report() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -38492,6 +42887,7 @@ fn move_item_packet_storage_missing_source_uses_crystal_move_error_report() {
 #[test]
 fn move_item_packet_storage_requires_active_storage_service_and_preserves_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38528,6 +42924,7 @@ fn move_item_packet_storage_requires_active_storage_service_and_preserves_items(
 #[test]
 fn move_item_packet_negative_target_slot_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38560,6 +42957,7 @@ fn move_item_packet_negative_target_slot_does_not_emit_extra_chat_or_mutate_matc
 #[test]
 fn move_item_packet_negative_source_slot_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38592,6 +42990,7 @@ fn move_item_packet_negative_source_slot_does_not_emit_extra_chat_or_mutate_matc
 #[test]
 fn move_item_packet_storage_invalid_target_slot_does_not_emit_extra_chat_or_mutate_storage_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38628,6 +43027,7 @@ fn move_item_packet_storage_invalid_target_slot_does_not_emit_extra_chat_or_muta
 #[test]
 fn move_item_packet_storage_invalid_source_slot_does_not_emit_extra_chat_or_mutate_storage_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38664,6 +43064,7 @@ fn move_item_packet_storage_invalid_source_slot_does_not_emit_extra_chat_or_muta
 #[test]
 fn move_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_belt_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38698,6 +43099,7 @@ fn move_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_belt_item() {
 #[test]
 fn move_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_quest_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -38723,12 +43125,10 @@ fn move_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matc
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger"
-            && item.slot == 12
-            && item.container == ItemContainer::Quest
+        item.key == "crystal-item-876" && item.slot == 12 && item.container == ItemContainer::Quest
     }));
     assert!(!snapshot.inventory_items.iter().any(|item| {
-        item.key == "quest-wasp-stinger" && item.slot == 2 && item.container == ItemContainer::Quest
+        item.key == "crystal-item-876" && item.slot == 2 && item.container == ItemContainer::Quest
     }));
     assert!(!packets
         .iter()
@@ -38738,6 +43138,7 @@ fn move_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matc
 #[test]
 fn move_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38767,6 +43168,7 @@ fn move_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_match
 #[test]
 fn move_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38796,6 +43198,7 @@ fn move_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_playe
 #[test]
 fn move_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38825,6 +43228,7 @@ fn move_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_play
 #[test]
 fn move_item_packet_hero_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38855,6 +43259,7 @@ fn move_item_packet_hero_equipment_grid_does_not_emit_extra_chat_or_mutate_match
 #[test]
 fn move_item_packet_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38885,6 +43290,7 @@ fn move_item_packet_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_p
 #[test]
 fn move_item_packet_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::MoveItem {
@@ -38915,6 +43321,7 @@ fn move_item_packet_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_pla
 #[test]
 fn storage_split_item_stack_creates_new_storage_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -38961,6 +43368,7 @@ fn storage_split_item_stack_creates_new_storage_slot() {
 #[test]
 fn storage_merge_item_stack_combines_quantities() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     {
@@ -39012,6 +43420,7 @@ fn storage_merge_item_stack_combines_quantities() {
 #[test]
 fn storage_merge_item_stack_caps_at_crystal_stack_size() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     {
@@ -39070,6 +43479,7 @@ fn storage_merge_item_stack_caps_at_crystal_stack_size() {
 #[test]
 fn merge_item_packet_inventory_to_storage_combines_quantities_when_storage_service_is_active() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     {
@@ -39127,6 +43537,7 @@ fn merge_item_packet_inventory_to_storage_combines_quantities_when_storage_servi
 #[test]
 fn merge_item_packet_storage_to_inventory_combines_quantities_when_storage_service_is_active() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
     {
@@ -39184,6 +43595,7 @@ fn merge_item_packet_storage_to_inventory_combines_quantities_when_storage_servi
 #[test]
 fn merge_item_packet_inventory_to_storage_requires_active_storage_service_and_preserves_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -39243,10 +43655,14 @@ fn merge_item_packet_inventory_to_storage_requires_active_storage_service_and_pr
 #[test]
 fn locked_storage_blocks_store_and_take_back_until_unlock() {
     let mut session = SimulationSession::new(SimulationConfig::default());
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "storage-lock");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-lock".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let snapshot = session.world_snapshot();
@@ -39340,6 +43756,7 @@ fn locked_storage_blocks_store_and_take_back_until_unlock() {
 #[test]
 fn locked_storage_blocks_storage_reorder_split_and_merge() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "storage-lock-grid");
     let _ = session.handle_packet(ClientPacket::Login {
         account_id: "storage-lock-grid".to_string(),
         password: "demo".to_string(),
@@ -39433,10 +43850,14 @@ fn storage_password_can_exist_without_forcing_lock_when_config_disabled() {
     let mut config = SimulationConfig::default();
     config.require_storage_password = false;
     let mut session = SimulationSession::new(config);
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "storage-setting-off");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-setting-off".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     activate_storage_service(&mut session);
@@ -39608,10 +44029,14 @@ fn storage_password_set_unlock_remove_updates_crystal_state() {
 #[test]
 fn storage_password_actions_require_active_storage_service_and_data_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "storage-password-service");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-password-service".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let blocked_set = session.handle_packet(ClientPacket::SetStoragePassword {
@@ -39712,10 +44137,14 @@ fn storage_password_actions_require_active_storage_service_and_data_range() {
 #[test]
 fn storage_password_set_enforces_crystal_password_format() {
     let mut session = SimulationSession::new(SimulationConfig::default());
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "storage-password-format-set");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-password-format-set".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -39798,10 +44227,14 @@ fn storage_password_set_enforces_crystal_password_format() {
 #[test]
 fn storage_password_unlock_and_remove_enforce_crystal_password_format() {
     let mut session = SimulationSession::new(SimulationConfig::default());
-    let _ = session.handle_packet(ClientPacket::Login {
+    register_test_account(&session, "storage-password-format-unlock");
+    let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-password-format-unlock".to_string(),
         password: "demo".to_string(),
     });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     activate_storage_service(&mut session);
 
@@ -39918,6 +44351,7 @@ fn expanded_storage_state_flows_through_user_information_resize_packet_and_snaps
     }
 
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(packets.iter().any(|packet| matches!(
@@ -39950,6 +44384,7 @@ fn expanded_storage_state_flows_through_user_information_resize_packet_and_snaps
 #[test]
 fn addstorage_chat_command_expands_storage_and_updates_snapshot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::Chat {
@@ -39980,6 +44415,7 @@ fn addstorage_chat_command_expands_storage_and_updates_snapshot() {
 #[test]
 fn addstorage_chat_command_extends_existing_expiry() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let first_packets = session.handle_packet(ClientPacket::Chat {
@@ -40018,6 +44454,7 @@ fn addstorage_chat_command_extends_existing_expiry() {
 #[test]
 fn chat_packet_respects_persisted_chat_ban() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut player = session
@@ -40048,6 +44485,7 @@ fn chat_packet_respects_persisted_chat_ban() {
 #[test]
 fn expired_chat_ban_clears_and_allows_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut player = session
@@ -40086,6 +44524,7 @@ fn expired_expanded_storage_is_inactive_on_start_game_but_keeps_backing_size() {
     }
 
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(packets.iter().any(|packet| matches!(
@@ -40126,6 +44565,7 @@ fn expired_expanded_storage_tick_emits_resize_notice_once_and_persists_flag() {
     }
 
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let first_tick_packets = session.tick();
@@ -40184,6 +44624,7 @@ fn expired_expanded_storage_tick_emits_resize_notice_once_and_persists_flag() {
 #[test]
 fn storage_rejects_slots_outside_accessible_capacity() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let bag_item = session
@@ -40219,6 +44660,7 @@ fn storage_rejects_slots_outside_accessible_capacity() {
         account.expanded_storage_expiry_time_binary_datetime = super::future_binary_datetime(30);
     }
     let mut expanded_session = SimulationSession::new(expanded_config);
+    login_demo_account_for_persistence_test(&mut expanded_session);
     expanded_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let expanded_bag_item = expanded_session
         .world_snapshot()
@@ -40275,6 +44717,7 @@ fn crystal_npc_storage_open_sends_full_backing_storage_even_when_expansion_inact
     }
 
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -40327,6 +44770,7 @@ fn crystal_npc_storage_open_sends_full_backing_storage_even_when_expansion_inact
 #[test]
 fn storage_rejects_rental_dont_store_binding_flags() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -40371,6 +44815,7 @@ fn equipment_slot_indices_match_crystal() {
 #[test]
 fn player_attack_damages_weapon_durability() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
@@ -40404,6 +44849,7 @@ fn player_attack_damages_weapon_durability() {
 #[test]
 fn monster_hit_damages_non_weapon_equipment_durability() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -40491,6 +44937,7 @@ fn monster_hit_damages_non_weapon_equipment_durability() {
 #[test]
 fn broken_equipment_no_longer_contributes_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut resources = session.app.world_mut().resource_mut::<BuffResource>();
@@ -40529,98 +44976,9 @@ fn broken_equipment_no_longer_contributes_stats() {
 }
 
 #[test]
-fn repair_powder_restores_equipped_durability_and_consumes_item() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    add_repair_powder(&mut session, 2);
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        for item in resources.equipment_items.iter_mut() {
-            if item.slot == EquipmentSlot::Weapon || item.slot == EquipmentSlot::Armour {
-                item.durability_current = 1;
-            }
-        }
-    }
-
-    let packets = session.use_item("repair-powder");
-    let snapshot = session.world_snapshot();
-
-    assert!(!packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ItemRepaired {
-            unique_id: 0,
-            max_dura: 4000,
-            current_dura: 4000
-        }
-    )));
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ItemRepaired {
-            unique_id: 1,
-            max_dura: 5000,
-            current_dura: 5000
-        }
-    )));
-    assert_eq!(
-        snapshot
-            .equipment_items
-            .iter()
-            .find(|item| item.slot == EquipmentSlot::Weapon)
-            .map(|item| (item.durability_current, item.durability_max)),
-        Some((4000, 4000))
-    );
-    assert_eq!(
-        snapshot
-            .equipment_items
-            .iter()
-            .find(|item| item.slot == EquipmentSlot::Armour)
-            .map(|item| (item.durability_current, item.durability_max)),
-        Some((5000, 5000))
-    );
-    assert_eq!(
-        snapshot
-            .inventory_items
-            .iter()
-            .find(|item| item.key == "repair-powder")
-            .map(|item| item.quantity),
-        Some(1)
-    );
-}
-
-#[test]
-fn repair_powder_not_consumed_when_nothing_needs_repair() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    add_repair_powder(&mut session, 1);
-    {
-        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
-        for item in resources.equipment_items.iter_mut() {
-            item.durability_current = item.durability_max;
-        }
-    }
-
-    let packets = session.use_item("repair-powder");
-    let snapshot = session.world_snapshot();
-
-    assert!(!packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert_eq!(
-        snapshot
-            .inventory_items
-            .iter()
-            .find(|item| item.key == "repair-powder")
-            .map(|item| item.quantity),
-        Some(1)
-    );
-}
-
-#[test]
 fn repair_item_without_active_repair_service_only_acks_and_preserves_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -40669,6 +45027,7 @@ fn repair_item_without_active_repair_service_only_acks_and_preserves_item() {
 #[test]
 fn repair_item_service_context_requires_live_npc_object() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -40716,6 +45075,7 @@ fn repair_item_service_context_requires_live_npc_object() {
 #[test]
 fn repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -40759,6 +45119,7 @@ fn repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold() {
 #[test]
 fn repair_item_packet_repairs_inventory_unique_id_with_cost_and_max_dura_loss() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -40825,6 +45186,7 @@ fn repair_item_packet_repairs_inventory_unique_id_with_cost_and_max_dura_loss() 
 #[test]
 fn repair_item_packet_uses_unique_id_when_it_differs_from_slot() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -40887,6 +45249,7 @@ fn repair_item_packet_uses_unique_id_when_it_differs_from_slot() {
 #[test]
 fn repair_item_packet_repairs_equipped_slot_id_with_cost_and_max_dura_loss() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "Dagger", EquipmentSlot::Weapon);
     set_player_gold(&mut session, 50_000);
@@ -40953,6 +45316,7 @@ fn repair_item_packet_repairs_equipped_slot_id_with_cost_and_max_dura_loss() {
 #[test]
 fn repair_item_rejection_edges_follow_crystal_order() {
     let mut session = SimulationSession::new(wicked_trader_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let weapon_template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -41059,6 +45423,7 @@ fn repair_item_rejection_edges_follow_crystal_order() {
 #[test]
 fn srepair_item_packet_uses_triple_cost_without_max_dura_loss() {
     let mut session = SimulationSession::new(blacksmith_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -41127,6 +45492,7 @@ fn srepair_item_packet_uses_triple_cost_without_max_dura_loss() {
 #[test]
 fn srepair_item_packet_repairs_equipped_slot_id_without_max_dura_loss() {
     let mut session = SimulationSession::new(blacksmith_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "Dagger", EquipmentSlot::Weapon);
     set_player_gold(&mut session, 50_000);
@@ -41192,6 +45558,7 @@ fn srepair_item_packet_repairs_equipped_slot_id_without_max_dura_loss() {
 #[test]
 fn srepair_item_service_context_rejects_when_player_leaves_data_range() {
     let mut session = SimulationSession::new(blacksmith_config());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let template =
         super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
@@ -41238,6 +45605,7 @@ fn srepair_item_service_context_rejects_when_player_leaves_data_range() {
 #[test]
 fn town_teleport_returns_player_to_spawn() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 338, y: 276 });
 
@@ -41275,6 +45643,7 @@ fn town_teleport_packet_rejects_when_current_map_disallows_town_teleport() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 338, y: 276 });
 
@@ -41324,6 +45693,7 @@ fn town_teleport_packet_rejects_when_current_map_disallows_town_teleport() {
 #[test]
 fn use_item_packet_rejects_gender_locked_equipment_with_crystal_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BaseDress(F)", 31);
     {
@@ -41371,6 +45741,7 @@ fn use_item_packet_rejects_gender_locked_equipment_with_crystal_chat() {
 #[test]
 fn use_item_packet_crystal_book_learns_skill_when_eligible() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
     add_inventory_crystal_item(&mut session, "FireBall", 31);
@@ -41419,6 +45790,7 @@ fn platinum_profile_learns_all_three_class_source_books_through_level_50() {
     ] {
         let mut session =
             SimulationSession::new(SimulationConfig::default().with_platinum_176_profile());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_active_character_class_gender_level(&mut session, class, MirGender::Male, 50);
         session
@@ -41489,6 +45861,7 @@ fn platinum_profile_learns_all_three_class_source_books_through_level_50() {
 #[test]
 fn use_item_packet_crystal_book_rejects_wrong_class_with_localized_message() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "FireBall", 31);
 
@@ -41535,6 +45908,7 @@ fn use_item_packet_crystal_book_rejects_wrong_class_with_localized_message() {
 #[test]
 fn use_item_packet_crystal_book_rejects_low_level_with_localized_message() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 6);
     add_inventory_crystal_item(&mut session, "FireBall", 31);
@@ -41574,6 +45948,7 @@ fn use_item_packet_crystal_book_rejects_low_level_with_localized_message() {
 #[test]
 fn use_item_packet_crystal_equipment_rejects_low_max_dc_requirement() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 60);
     add_inventory_crystal_item(&mut session, "DragonSword", 31);
@@ -41613,6 +45988,7 @@ fn use_item_packet_crystal_equipment_rejects_low_max_dc_requirement() {
 #[test]
 fn use_item_packet_crystal_equipment_allows_modeled_max_mc_requirement() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 60);
     add_inventory_crystal_item(&mut session, "BloodStealerSword", 31);
@@ -41659,6 +46035,7 @@ fn use_item_packet_crystal_equipment_allows_modeled_max_mc_requirement() {
 #[test]
 fn use_item_packet_crystal_book_rejects_duplicate_known_skill() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
     add_inventory_crystal_item(&mut session, "FireBall", 31);
@@ -41703,6 +46080,7 @@ fn use_item_packet_crystal_book_rejects_duplicate_known_skill() {
 #[test]
 fn use_item_packet_credit_token_emits_localized_hint_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_credit_token(&mut session, 3, 12);
 
@@ -41739,6 +46117,7 @@ fn use_item_packet_credit_token_emits_localized_hint_chat() {
 #[test]
 fn use_item_packet_dynamic_crystal_credit_token_emits_localized_hint_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "CreditToken3", 31);
 
@@ -41781,6 +46160,7 @@ fn use_item_packet_dynamic_crystal_credit_token_emits_localized_hint_chat() {
 #[test]
 fn use_item_packet_ancient_banga_green_grants_free_map_shout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "AncientBanga[Green]", 31);
 
@@ -41822,6 +46202,7 @@ fn use_item_packet_ancient_banga_green_grants_free_map_shout() {
 #[test]
 fn use_item_packet_ancient_banga_purple_grants_free_server_shout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "AncientBanga[Purple]", 31);
 
@@ -41863,6 +46244,7 @@ fn use_item_packet_ancient_banga_purple_grants_free_server_shout() {
 #[test]
 fn casting_skill_applies_buff_and_cooldown() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.cast_skill("battle-focus");
@@ -41898,6 +46280,7 @@ fn casting_skill_applies_buff_and_cooldown() {
 #[test]
 fn buff_expiry_emits_crystal_remove_buff_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.cast_skill("battle-focus");
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
@@ -41927,6 +46310,7 @@ fn buff_expiry_emits_crystal_remove_buff_packet() {
 #[test]
 fn casting_unknown_skill_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.cast_skill("unknown-skill");
@@ -41937,6 +46321,7 @@ fn casting_unknown_skill_rejects_without_runtime_chat() {
 #[test]
 fn casting_skill_cooldown_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.cast_skill("battle-focus");
 
@@ -41948,6 +46333,7 @@ fn casting_skill_cooldown_rejects_without_runtime_chat() {
 #[test]
 fn casting_unwired_skill_rejects_without_runtime_chat_or_cooldown() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -41984,6 +46370,7 @@ fn casting_unwired_skill_rejects_without_runtime_chat_or_cooldown() {
 #[test]
 fn casting_skill_requires_mp() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let player = super::player_entity(session.app.world()).expect("player");
@@ -42016,6 +46403,7 @@ fn casting_skill_requires_mp() {
 #[test]
 fn magic_packet_casts_crystal_skill_and_emits_magic_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
@@ -42070,6 +46458,7 @@ fn magic_packet_casts_crystal_skill_and_emits_magic_packets() {
 #[test]
 fn casting_magic_booster_applies_crystal_buff_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 38);
     {
@@ -42126,6 +46515,7 @@ fn casting_magic_booster_applies_crystal_buff_stats() {
 #[test]
 fn casting_crystal_haste_and_swift_feet_apply_crystal_buff_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Assassin, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
@@ -42169,6 +46559,7 @@ fn casting_crystal_haste_and_swift_feet_apply_crystal_buff_packets() {
 #[test]
 fn casting_crystal_protection_field_and_rage_scale_from_current_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 44);
     set_current_player_mp(&mut session, 500);
@@ -42235,6 +46626,7 @@ fn casting_crystal_protection_field_and_rage_scale_from_current_stats() {
 #[test]
 fn casting_crystal_soul_shield_and_blessed_armour_consume_amulet_and_apply_target_level_buffs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 35);
     set_current_player_mp(&mut session, 500);
@@ -42359,6 +46751,7 @@ fn casting_crystal_soul_shield_and_blessed_armour_consume_amulet_and_apply_targe
 #[test]
 fn magic_packet_crystal_ultimate_enhancer_consumes_amulet_and_scales_target_class_stat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 43);
     set_current_player_mp(&mut session, 500);
@@ -42428,6 +46821,7 @@ fn magic_packet_crystal_ultimate_enhancer_consumes_amulet_and_scales_target_clas
 #[test]
 fn magic_packet_crystal_concentration_emits_buff_and_visual_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 35);
     set_current_player_mp(&mut session, 500);
@@ -42490,6 +46884,7 @@ fn magic_packet_crystal_concentration_emits_buff_and_visual_state() {
 #[test]
 fn magic_packet_crystal_elemental_shot_gathers_then_spends_orb() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 60);
     set_current_player_mp(&mut session, 500);
@@ -42605,6 +47000,7 @@ fn magic_packet_crystal_elemental_shot_gathers_then_spends_orb() {
 #[test]
 fn magic_packet_crystal_elemental_barrier_gathers_then_applies_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
@@ -42681,6 +47077,7 @@ fn magic_packet_crystal_straight_and_double_shot_queue_delayed_damage() {
         ("DoubleShot", Spell::DoubleShot, 2_usize),
     ] {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_active_character_class_gender_level(
             &mut session,
@@ -42759,6 +47156,7 @@ fn magic_packet_crystal_straight_and_double_shot_queue_delayed_damage() {
 #[test]
 fn magic_packet_crystal_back_step_moves_opposite_facing_and_reports_blocked_distance() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
@@ -42816,6 +47214,7 @@ fn magic_packet_crystal_back_step_moves_opposite_facing_and_reports_blocked_dist
     assert_eq!(entity_position(session.app.world(), player), Some(expected));
 
     let mut blocked = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut blocked);
     blocked.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut blocked, MirClass::Archer, MirGender::Female, 60);
     set_current_player_mp(&mut blocked, 500);
@@ -42880,6 +47279,7 @@ fn magic_packet_crystal_back_step_moves_opposite_facing_and_reports_blocked_dist
 #[test]
 fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 60);
     set_current_player_mp(&mut session, 500);
@@ -42954,6 +47354,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
     );
 
     let mut pushed = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut pushed);
     pushed.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut pushed, MirClass::Warrior, MirGender::Male, 60);
     set_current_player_mp(&mut pushed, 500);
@@ -43017,6 +47418,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
     );
 
     let mut blocked = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut blocked);
     blocked.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut blocked, MirClass::Warrior, MirGender::Male, 1);
     set_current_player_mp(&mut blocked, 500);
@@ -43074,6 +47476,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
 #[test]
 fn magic_packet_crystal_flash_dash_dashes_hits_and_stuns_front_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut session,
@@ -43184,6 +47587,7 @@ fn magic_packet_crystal_flash_dash_dashes_hits_and_stuns_front_target() {
 #[test]
 fn magic_packet_crystal_slashing_burst_leaps_two_tiles_and_delays_front_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Female, 60);
     set_current_player_mp(&mut session, 500);
@@ -43275,6 +47679,7 @@ fn magic_packet_crystal_slashing_burst_leaps_two_tiles_and_delays_front_damage()
 #[test]
 fn magic_packet_crystal_fire_wall_spawns_cross_spell_objects_and_ticks_ground_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 60);
     set_current_player_mp(&mut session, 500);
@@ -43388,6 +47793,7 @@ fn magic_packet_crystal_fire_wall_spawns_cross_spell_objects_and_ticks_ground_da
 #[test]
 fn magic_packet_crystal_lightning_scans_six_tiles_in_facing_line() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 60);
     set_current_player_mp(&mut session, 500);
@@ -43482,6 +47888,7 @@ fn magic_packet_crystal_lightning_scans_six_tiles_in_facing_line() {
 #[test]
 fn magic_packet_crystal_thunder_storm_hits_current_location_square_and_reduces_living_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 60);
     set_current_player_mp(&mut session, 500);
@@ -43604,6 +48011,7 @@ fn magic_packet_crystal_thunder_storm_hits_current_location_square_and_reduces_l
 #[test]
 fn magic_packet_crystal_flame_field_hits_current_location_square_without_living_reduction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 50);
     set_current_player_mp(&mut session, 500);
@@ -43726,6 +48134,7 @@ fn magic_packet_crystal_flame_field_hits_current_location_square_without_living_
 #[test]
 fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_thunder_element() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 60);
     set_current_player_mp(&mut session, 500);
@@ -43826,6 +48235,7 @@ fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_t
 #[test]
 fn magic_packet_crystal_energy_repulsor_allows_level_50_taoist_browser_target_context() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 50);
     set_current_player_mp(&mut session, 500);
@@ -43895,6 +48305,7 @@ fn magic_packet_crystal_energy_repulsor_allows_level_50_taoist_browser_target_co
 #[test]
 fn magic_packet_crystal_storm_escape_teleports_buffs_and_damages_nearby_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 65);
     set_current_player_mp(&mut session, 500);
@@ -43994,6 +48405,7 @@ fn magic_packet_crystal_storm_escape_teleports_buffs_and_damages_nearby_monsters
 #[test]
 fn magic_packet_crystal_binding_shot_queues_center_visual_and_roots_nearby_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
@@ -44090,6 +48502,7 @@ fn magic_packet_crystal_special_arrow_shots_queue_damage_and_apply_visible_buffs
         ("PoisonShot", Spell::PoisonShot, 17, "poison-shot"),
     ] {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_active_character_class_gender_level(
             &mut session,
@@ -44179,6 +48592,7 @@ fn magic_packet_crystal_special_arrow_shots_queue_damage_and_apply_visible_buffs
 #[test]
 fn magic_packet_crystal_poison_shot_applies_green_poison_to_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
@@ -44258,6 +48672,7 @@ fn magic_packet_crystal_poison_shot_applies_green_poison_to_target() {
 #[test]
 fn magic_packet_crystal_cripple_shot_consumes_poison_buff_and_spreads_green_poison() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
@@ -44390,6 +48805,7 @@ fn magic_packet_crystal_cripple_shot_consumes_poison_buff_and_spreads_green_pois
 #[test]
 fn magic_packet_crystal_mass_healing_queues_delayed_area_heal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -44453,6 +48869,7 @@ fn magic_packet_crystal_mass_healing_queues_delayed_area_heal() {
 #[test]
 fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -44601,6 +49018,7 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
 #[test]
 fn magic_packet_crystal_curse_consumes_amulet_and_debuffs_hostile_area() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -44687,6 +49105,7 @@ fn magic_packet_crystal_curse_consumes_amulet_and_debuffs_hostile_area() {
 #[test]
 fn magic_packet_crystal_trap_hexagon_consumes_amulet_roots_area_and_spawns_spell_objects() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -44778,6 +49197,7 @@ fn magic_packet_crystal_trap_hexagon_consumes_amulet_roots_area_and_spawns_spell
 #[test]
 fn magic_packet_crystal_poisoning_consumes_green_poison_and_ticks_monster_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -44886,6 +49306,7 @@ fn magic_packet_crystal_poisoning_consumes_green_poison_and_ticks_monster_damage
 #[test]
 fn magic_packet_crystal_poisoning_red_poison_marks_monster_without_green_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -44978,6 +49399,7 @@ fn magic_packet_crystal_poisoning_red_poison_marks_monster_without_green_damage(
 #[test]
 fn magic_packet_crystal_poison_cloud_consumes_amulet_and_green_poison_ground_ticks() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 48);
     set_current_player_mp(&mut session, 500);
@@ -45092,6 +49514,7 @@ fn magic_packet_crystal_poison_cloud_consumes_amulet_and_green_poison_ground_tic
 #[test]
 fn magic_packet_crystal_plague_consumes_amulet_optional_poison_and_debuffs_area() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 48);
     set_current_player_mp(&mut session, 500);
@@ -45209,6 +49632,7 @@ fn magic_packet_crystal_plague_consumes_amulet_optional_poison_and_debuffs_area(
 #[test]
 fn magic_packet_crystal_light_body_applies_agility_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -45243,6 +49667,7 @@ fn magic_packet_crystal_light_body_applies_agility_buff() {
 #[test]
 fn magic_packet_crystal_moon_light_hides_until_buff_expires() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut session,
@@ -45304,6 +49729,7 @@ fn magic_packet_crystal_moon_light_hides_until_buff_expires() {
 #[test]
 fn magic_packet_crystal_dark_body_applies_visible_hidden_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Assassin, MirGender::Male, 46);
     set_current_player_mp(&mut session, 500);
@@ -45359,6 +49785,7 @@ fn magic_packet_crystal_dark_body_applies_visible_hidden_buff() {
 #[test]
 fn magic_packet_crystal_hiding_hides_until_buff_expires() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -45444,6 +49871,7 @@ fn magic_packet_crystal_hiding_hides_until_buff_expires() {
 #[test]
 fn magic_packet_crystal_mass_hiding_delays_three_by_three_friendly_area_without_consuming_amulet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 50);
     set_current_player_mp(&mut session, 500);
@@ -45576,6 +50004,7 @@ fn magic_packet_crystal_mass_hiding_delays_three_by_three_friendly_area_without_
 #[test]
 fn magic_packet_crystal_energy_shield_applies_visible_hp_gain_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 48);
     set_current_player_mp(&mut session, 500);
@@ -45628,6 +50057,7 @@ fn magic_packet_crystal_energy_shield_applies_visible_hp_gain_buff() {
 #[test]
 fn magic_packet_crystal_immortal_skin_applies_visible_defence_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 50);
     set_current_player_mp(&mut session, 500);
@@ -45662,6 +50092,7 @@ fn magic_packet_crystal_immortal_skin_applies_visible_defence_buff() {
 #[test]
 fn magic_packet_crystal_pet_enhancer_buffs_friendly_monster() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 48);
     set_current_player_mp(&mut session, 500);
@@ -45717,6 +50148,7 @@ fn magic_packet_crystal_pet_enhancer_buffs_friendly_monster() {
 #[test]
 fn magic_packet_crystal_lion_roar_paralyses_nearby_lower_level_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -45781,6 +50213,7 @@ fn magic_packet_crystal_lion_roar_paralyses_nearby_lower_level_monsters() {
 #[test]
 fn magic_packet_crystal_battle_cry_reacquires_nearby_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -45838,6 +50271,7 @@ fn magic_packet_crystal_battle_cry_reacquires_nearby_monsters() {
 #[test]
 fn magic_packet_crystal_frost_crunch_damages_and_freezes_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -45927,6 +50361,7 @@ fn magic_packet_crystal_frost_crunch_damages_and_freezes_target() {
 #[test]
 fn magic_packet_crystal_vampirism_damages_target_and_heals_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -45998,6 +50433,7 @@ fn magic_packet_crystal_vampirism_damages_target_and_heals_player() {
 #[test]
 fn magic_packet_crystal_turn_undead_only_damages_undead_targets() {
     let mut living_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut living_session);
     living_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut living_session,
@@ -46053,6 +50489,7 @@ fn magic_packet_crystal_turn_undead_only_damages_undead_targets() {
     );
 
     let mut undead_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut undead_session);
     undead_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut undead_session,
@@ -46111,6 +50548,7 @@ fn magic_packet_crystal_turn_undead_only_damages_undead_targets() {
 #[test]
 fn magic_packet_crystal_purification_removes_player_curse_debuff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -46183,6 +50621,7 @@ fn magic_packet_crystal_purification_removes_player_curse_debuff() {
 #[test]
 fn magic_packet_crystal_revelation_queues_target_health_reveal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -46249,6 +50688,7 @@ fn magic_packet_crystal_revelation_queues_target_health_reveal() {
 #[test]
 fn magic_packet_casts_manifest_skill_and_schedules_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
     let player_origin = find_combat_origin_box(&session, player, 2, 2, 2, 2);
@@ -46346,6 +50786,7 @@ fn magic_packet_casts_manifest_skill_and_schedules_damage() {
 #[test]
 fn magic_preflight_fireball_without_target_does_not_commit_mp_cooldown_or_action() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
     set_current_player_mp(&mut session, 500);
@@ -46420,6 +50861,7 @@ fn magic_preflight_fireball_without_target_does_not_commit_mp_cooldown_or_action
 #[test]
 fn magic_preflight_out_of_range_thunderbolt_preserves_mp() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 20);
     set_current_player_mp(&mut session, 500);
@@ -46480,6 +50922,7 @@ fn magic_preflight_out_of_range_thunderbolt_preserves_mp() {
 #[test]
 fn magic_preflight_self_buff_consumes_mp_and_applies_buff() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -46517,6 +50960,7 @@ fn magic_preflight_self_buff_consumes_mp_and_applies_buff() {
 #[test]
 fn magic_preflight_passive_fencing_cannot_be_cast() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 10);
     set_current_player_mp(&mut session, 500);
@@ -46556,6 +51000,7 @@ fn magic_preflight_passive_fencing_cannot_be_cast() {
 #[test]
 fn magic_preflight_healing_self_target_and_action_lock_behave_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 25);
     set_current_player_mp(&mut session, 500);
@@ -46662,6 +51107,7 @@ fn magic_preflight_healing_self_target_and_action_lock_behave_like_crystal() {
 #[test]
 fn zone_melee_attack_profile_rejects_non_melee_requested_spell() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let plain_swing = session.zone_melee_attack_profile(Spell::None);
     session
@@ -46681,6 +51127,7 @@ fn zone_melee_attack_profile_rejects_non_melee_requested_spell() {
 #[test]
 fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
@@ -46710,6 +51157,20 @@ fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
         .expect("FireBall snapshot");
     assert_eq!(fireball.cast_kind, "target");
     assert!(fireball.offensive);
+    let fireball_magic = mir2_game_data::crystal_magic_by_spell("FireBall")
+        .expect("authoritative FireBall metadata");
+    assert_eq!(
+        fireball.mp_cost,
+        Some(
+            u32::from(fireball_magic.base_cost)
+                + u32::from(fireball_magic.level_cost) * u32::from(fireball.level)
+        )
+    );
+    let fireball_json = serde_json::to_value(fireball).expect("serialize FireBall snapshot");
+    assert_eq!(
+        fireball_json["mpCost"].as_u64(),
+        fireball.mp_cost.map(u64::from)
+    );
     let shield = snapshot
         .known_skills
         .iter()
@@ -46720,8 +51181,32 @@ fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
 }
 
 #[test]
+fn skill_snapshot_mp_cost_uses_the_same_starter_override_as_casting() {
+    let healing = super::crystal_skill_state("Healing", 2).expect("Healing skill");
+    let definition = super::skill_definition(&healing.key).expect("starter skill definition");
+    let crystal_magic = super::crystal_magic_for_skill_key(&healing.key)
+        .expect("underlying Crystal magic metadata");
+    let crystal_formula = i32::from(crystal_magic.base_cost)
+        + i32::from(crystal_magic.level_cost) * i32::from(healing.level);
+    let snapshot = healing.snapshot(0, mir2_game_data::LanguageCode::English);
+
+    assert_eq!(snapshot.mp_cost, u32::try_from(definition.mana_cost).ok());
+    assert_ne!(
+        definition.mana_cost, crystal_formula,
+        "fixture must prove starter metadata takes precedence over the Crystal fallback"
+    );
+    let json = serde_json::to_value(&snapshot).expect("serialize authoritative skill snapshot");
+    assert_eq!(
+        json["mpCost"].as_i64(),
+        Some(i64::from(definition.mana_cost))
+    );
+    assert!(json.get("mp_cost").is_none());
+}
+
+#[test]
 fn magic_packet_progresses_user_magic_and_emits_level_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
     set_current_player_mp(&mut session, 500);
@@ -46792,6 +51277,7 @@ fn magic_packet_progresses_user_magic_and_emits_level_packets() {
 #[test]
 fn magic_packet_crystal_skill_gain_multiplier_scales_practice_experience() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
     let skill_gain_expires_at = runtime_tick(session.app.world()).saturating_add(60);
@@ -46872,6 +51358,7 @@ fn magic_packet_crystal_skill_gain_multiplier_scales_practice_experience() {
 #[test]
 fn magic_key_assigns_crystal_hotkey_and_clears_duplicate() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     session.handle_packet(ClientPacket::MagicKey {
@@ -46907,6 +51394,7 @@ fn magic_key_assigns_crystal_hotkey_and_clears_duplicate() {
 #[test]
 fn spell_toggle_packet_emits_crystal_ack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -46934,6 +51422,7 @@ fn spell_toggle_packet_emits_crystal_ack() {
 #[test]
 fn spell_toggle_packet_rejects_unlearned_crystal_spell() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::SpellToggle {
@@ -46954,6 +51443,7 @@ fn spell_toggle_packet_rejects_unlearned_crystal_spell() {
 #[test]
 fn flaming_sword_spell_toggle_consumes_mp_and_latches_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -47012,6 +51502,7 @@ fn flaming_sword_spell_toggle_consumes_mp_and_latches_state() {
 #[test]
 fn counter_attack_spell_toggle_applies_crystal_buff_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -47069,6 +51560,7 @@ fn counter_attack_spell_toggle_applies_crystal_buff_stats() {
 #[test]
 fn magic_packet_crystal_counter_attack_procs_on_adjacent_incoming_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
@@ -47150,6 +51642,7 @@ fn magic_packet_crystal_counter_attack_procs_on_adjacent_incoming_hit() {
 #[test]
 fn mental_state_spell_toggle_cycles_crystal_buff_values() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -47190,6 +51683,7 @@ fn mental_state_spell_toggle_cycles_crystal_buff_values() {
 fn mental_state_trickshot_reduces_crystal_archer_shot_damage() {
     fn straight_shot_damage(with_trickshot: bool) -> i32 {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_active_character_class_gender_level(
             &mut session,
@@ -47274,6 +51768,7 @@ fn mental_state_trickshot_reduces_crystal_archer_shot_damage() {
 #[test]
 fn magic_packet_crystal_thrusting_hits_second_tile_from_attack_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 40);
     let origin = Point { x: 333, y: 300 };
@@ -47335,6 +51830,7 @@ fn magic_packet_crystal_thrusting_hits_second_tile_from_attack_packet() {
 #[test]
 fn magic_packet_crystal_melee_passive_procs_emit_effects_and_gather_element() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut session,
@@ -47441,6 +51937,7 @@ fn magic_packet_crystal_melee_passive_procs_emit_effects_and_gather_element() {
 fn magic_packet_crystal_imported_agility_drives_melee_hit_roll() {
     fn attack_high_agility_target(with_accuracy_passives: bool) -> (i32, Vec<ServerPacket>, u32) {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_active_character_class_gender_level(
             &mut session,
@@ -47551,6 +52048,7 @@ fn magic_packet_crystal_imported_agility_drives_melee_hit_roll() {
 #[test]
 fn magic_packet_crystal_flaming_sword_and_slaying_attach_attack_spells() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
@@ -47629,8 +52127,15 @@ fn magic_packet_crystal_flaming_sword_and_slaying_attach_attack_spells() {
 #[test]
 fn magic_packet_crystal_focus_marks_range_attack_and_delays_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
+    set_active_character_and_body_class_gender_level(
+        &mut session,
+        MirClass::Archer,
+        MirGender::Female,
+        40,
+    );
+    equip_crystal_item(&mut session, "WoodenBow", EquipmentSlot::Weapon);
     let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target_location = Point {
@@ -47698,6 +52203,7 @@ fn magic_packet_crystal_focus_marks_range_attack_and_delays_damage() {
 #[test]
 fn magic_packet_crystal_napalm_shot_hits_target_center_square_not_caster_square() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
@@ -47791,6 +52297,7 @@ fn magic_packet_crystal_napalm_shot_hits_target_center_square_not_caster_square(
 #[test]
 fn magic_packet_crystal_delayed_explosion_marks_explodes_and_removes_marker() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
@@ -47913,6 +52420,7 @@ fn magic_packet_crystal_delayed_explosion_marks_explodes_and_removes_marker() {
 #[test]
 fn magic_packet_crystal_trap_roots_lower_level_monster_and_spawns_trap_object() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
@@ -47981,6 +52489,7 @@ fn magic_packet_crystal_trap_roots_lower_level_monster_and_spawns_trap_object() 
 #[test]
 fn magic_packet_crystal_hell_fire_hits_forward_and_level_three_side_lanes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -48066,6 +52575,7 @@ fn magic_packet_crystal_hell_fire_hits_forward_and_level_three_side_lanes() {
 fn magic_packet_crystal_fire_bang_and_ice_storm_hit_target_three_by_three() {
     for (spell_name, spell) in [("FireBang", Spell::FireBang), ("IceStorm", Spell::IceStorm)] {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_current_player_mp(&mut session, 500);
         let player = player_entity(session.app.world()).expect("player entity");
@@ -48171,6 +52681,7 @@ fn magic_packet_crystal_blizzard_and_meteor_strike_spawn_five_by_five_ground_dam
         ("MeteorStrike", Spell::MeteorStrike),
     ] {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_current_player_mp(&mut session, 500);
         let player = player_entity(session.app.world()).expect("player entity");
@@ -48273,6 +52784,7 @@ fn magic_packet_crystal_blizzard_and_meteor_strike_spawn_five_by_five_ground_dam
 #[test]
 fn magic_packet_crystal_meteor_shower_damages_primary_and_secondary_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -48384,6 +52896,7 @@ fn magic_packet_crystal_meteor_shower_damages_primary_and_secondary_targets() {
 #[test]
 fn magic_packet_crystal_fire_bounce_chains_projectiles_and_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -48511,6 +53024,7 @@ fn magic_packet_crystal_fire_bounce_chains_projectiles_and_damage() {
 #[test]
 fn magic_packet_crystal_explosive_trap_spawns_front_row_and_detonates_on_contact() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
@@ -48606,6 +53120,7 @@ fn magic_packet_crystal_explosive_trap_spawns_front_row_and_detonates_on_contact
 #[test]
 fn magic_packet_crystal_thunder_bolt_boosts_undead_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -48705,6 +53220,7 @@ fn magic_packet_crystal_thunder_bolt_boosts_undead_damage() {
 #[test]
 fn magic_packet_crystal_electric_shock_roots_lower_level_monster_without_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -48773,6 +53289,7 @@ fn magic_packet_crystal_electric_shock_roots_lower_level_monster_without_damage(
 #[test]
 fn magic_packet_crystal_poison_sword_consumes_poison_and_marks_front_arc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut session,
@@ -48901,6 +53418,7 @@ fn magic_packet_crystal_poison_sword_consumes_poison_and_marks_front_arc() {
 #[test]
 fn magic_packet_crystal_magic_shield_and_teleport_emit_crystal_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -48987,6 +53505,7 @@ fn magic_packet_crystal_magic_shield_and_teleport_emit_crystal_state() {
 #[test]
 fn magic_packet_crystal_mirroring_spawns_and_recasts_existing_clone() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -49058,6 +53577,7 @@ fn magic_packet_crystal_mirroring_spawns_and_recasts_existing_clone() {
 #[test]
 fn magic_packet_crystal_moon_mist_hides_and_hits_nearby_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut session,
@@ -49185,6 +53705,7 @@ fn magic_packet_crystal_moon_mist_hides_and_hits_nearby_targets() {
 #[test]
 fn magic_packet_crystal_cat_tongue_damages_and_controls_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut session,
@@ -49266,6 +53787,7 @@ fn magic_packet_crystal_cat_tongue_damages_and_controls_target() {
 #[test]
 fn magic_packet_crystal_hallucination_consumes_amulet_and_breaks_tracking() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -49322,6 +53844,7 @@ fn magic_packet_crystal_hallucination_consumes_amulet_and_breaks_tracking() {
 #[test]
 fn magic_packet_crystal_one_with_nature_spends_arrow_buffs_and_applies_area_effects() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
@@ -49446,6 +53969,7 @@ fn magic_packet_crystal_one_with_nature_spends_arrow_buffs_and_applies_area_effe
 #[test]
 fn magic_packet_crystal_portal_and_reincarnation_spawn_spell_surfaces() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -49530,6 +54054,7 @@ fn magic_packet_crystal_portal_and_reincarnation_spawn_spell_surfaces() {
 #[test]
 fn magic_packet_crystal_projectile_family_uses_distance_delay_and_amulets() {
     let mut wizard_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut wizard_session);
     wizard_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut wizard_session,
@@ -49602,6 +54127,7 @@ fn magic_packet_crystal_projectile_family_uses_distance_delay_and_amulets() {
     );
 
     let mut taoist_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut taoist_session);
     taoist_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut taoist_session,
@@ -49684,6 +54210,7 @@ fn magic_packet_crystal_projectile_family_uses_distance_delay_and_amulets() {
 #[test]
 fn magic_packet_crystal_healing_and_blink_emit_effects() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
@@ -49795,6 +54322,7 @@ fn magic_packet_crystal_healing_and_blink_emit_effects() {
 #[test]
 fn magic_packet_crystal_summon_skeleton_and_holy_deva_consume_amulets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
@@ -49874,6 +54402,7 @@ fn magic_packet_crystal_summon_skeleton_and_holy_deva_consume_amulets() {
 #[test]
 fn magic_packet_crystal_blade_avalanche_and_crescent_slash_hit_crystal_arcs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
@@ -49955,6 +54484,7 @@ fn magic_packet_crystal_blade_avalanche_and_crescent_slash_hit_crystal_arcs() {
     assert_eq!(hp(&session, outside), 500);
 
     let mut crescent_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut crescent_session);
     crescent_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut crescent_session,
@@ -50048,6 +54578,7 @@ fn magic_packet_crystal_halfmoon_crosshalfmoon_and_heavenly_sword_hit_shapes() {
     };
 
     let mut half_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut half_session);
     half_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut half_session,
@@ -50111,6 +54642,7 @@ fn magic_packet_crystal_halfmoon_crosshalfmoon_and_heavenly_sword_hit_shapes() {
     assert_eq!(hp(&half_session, front), 500);
 
     let mut cross_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut cross_session);
     cross_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut cross_session,
@@ -50174,6 +54706,7 @@ fn magic_packet_crystal_halfmoon_crosshalfmoon_and_heavenly_sword_hit_shapes() {
     assert_eq!(hp(&cross_session, front), 500);
 
     let mut heavenly_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut heavenly_session);
     heavenly_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut heavenly_session,
@@ -50257,6 +54790,7 @@ fn magic_packet_crystal_double_slash_twin_drake_and_entrapment_control_target() 
     let origin = Point { x: 310, y: 275 };
 
     let mut double_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut double_session);
     double_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut double_session,
@@ -50318,6 +54852,7 @@ fn magic_packet_crystal_double_slash_twin_drake_and_entrapment_control_target() 
     );
 
     let mut twin_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut twin_session);
     twin_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut twin_session,
@@ -50386,6 +54921,7 @@ fn magic_packet_crystal_double_slash_twin_drake_and_entrapment_control_target() 
     assert!(saw_stun_poison);
 
     let mut entrapment_session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut entrapment_session);
     entrapment_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(
         &mut entrapment_session,
@@ -50463,6 +54999,7 @@ fn magic_packet_crystal_double_slash_twin_drake_and_entrapment_control_target() 
 #[test]
 fn magic_packet_crystal_flame_disruptor_boosts_living_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -50551,6 +55088,7 @@ fn magic_packet_crystal_flame_disruptor_boosts_living_targets() {
 #[test]
 fn magic_packet_crystal_ice_thrust_hits_three_column_path_and_freezes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
@@ -50645,6 +55183,7 @@ fn magic_packet_crystal_ice_thrust_hits_three_column_path_and_freezes() {
 #[test]
 fn hero_spell_toggle_routes_crystal_default_toggle_to_spawned_hero() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -50670,6 +55209,7 @@ fn hero_spell_toggle_routes_crystal_default_toggle_to_spawned_hero() {
 #[test]
 fn casting_summon_shinsu_spawns_friendly_player_pet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
@@ -50711,6 +55251,7 @@ fn casting_summon_shinsu_spawns_friendly_player_pet() {
 #[test]
 fn casting_summon_shinsu_recalls_existing_pet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
@@ -50763,6 +55304,7 @@ fn casting_summon_shinsu_recalls_existing_pet() {
 #[test]
 fn casting_stonetrap_spawns_friendly_trap_with_extra() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
     let player = player_entity(session.app.world()).expect("player entity");
@@ -50789,6 +55331,7 @@ fn casting_stonetrap_spawns_friendly_trap_with_extra() {
 #[test]
 fn hostile_monster_prefers_stone_trap_over_other_friendly_summon_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let origin = Point { x: 930, y: 930 };
     set_player_position(&mut session, origin.clone());
@@ -50980,6 +55523,7 @@ fn hostile_monster_prefers_stone_trap_over_other_friendly_summon_targets() {
 #[test]
 fn stonetrap_ignores_incoming_damage_and_keeps_full_health() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
@@ -51050,6 +55594,7 @@ fn stonetrap_ignores_incoming_damage_and_keeps_full_health() {
 #[test]
 fn casting_summon_snakes_spawns_friendly_totem_with_skill_level_cap() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
@@ -51082,6 +55627,7 @@ fn casting_summon_snakes_spawns_friendly_totem_with_skill_level_cap() {
 #[test]
 fn friendly_snake_totem_spawns_friendly_charmed_snake_against_hostile_monster() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, player_origin.clone());
@@ -51115,6 +55661,7 @@ fn friendly_snake_totem_spawns_friendly_charmed_snake_against_hostile_monster() 
 fn friendly_vampire_spider_death_explosion_has_no_runtime_defeat_chat_and_hits_nearby_hostile_monster(
 ) {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, player_origin.clone());
@@ -51166,6 +55713,7 @@ fn friendly_vampire_spider_death_explosion_has_no_runtime_defeat_chat_and_hits_n
 #[test]
 fn friendly_spitting_toad_uses_range_attack_against_hostile_monster() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, player_origin.clone());
@@ -51192,6 +55740,7 @@ fn friendly_spitting_toad_uses_range_attack_against_hostile_monster() {
 #[test]
 fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
@@ -51271,6 +55820,7 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
 #[test]
 fn friendly_shinsu_stays_hidden_without_real_target_even_near_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let origin = Point { x: 930, y: 930 };
     set_player_position(&mut session, origin.clone());
@@ -51362,6 +55912,7 @@ fn friendly_shinsu_stays_hidden_without_real_target_even_near_player() {
 #[test]
 fn friendly_shinsu_hides_after_target_is_gone_and_timeout_expires() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let origin = Point { x: 930, y: 930 };
     set_player_position(&mut session, origin.clone());
@@ -51533,6 +56084,7 @@ fn friendly_shinsu_hides_after_target_is_gone_and_timeout_expires() {
 #[test]
 fn monster_respawns_after_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
     let _ = attack_until_monster_dies(&mut session, 3002, 5);
@@ -51555,6 +56107,7 @@ fn monster_respawns_after_delay() {
 #[test]
 fn visible_monster_respawn_emits_revive_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
     let _ = attack_until_monster_dies(&mut session, 3002, 5);
@@ -51586,6 +56139,7 @@ fn visible_monster_respawn_emits_revive_packets() {
 #[test]
 fn tick_moves_wandering_monster() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let before = session
         .world_snapshot()
@@ -51611,6 +56165,7 @@ fn stage5_social_group_guild_mail_persist_across_reload() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
+    register_test_account(&session, "stage5-social");
     session.handle_packet(ClientPacket::Login {
         account_id: "stage5-social".to_string(),
         password: "demo".to_string(),
@@ -51693,7 +56248,7 @@ fn stage5_social_group_guild_mail_persist_across_reload() {
         .any(|message| message.contains("ready")));
     assert_eq!(snapshot.stage5_systems.social.friends, vec!["Miner"]);
     assert_eq!(snapshot.stage5_systems.social.blocked, vec!["Spammer"]);
-    assert_eq!(snapshot.stage5_systems.mail[0].gold, 33);
+    assert_eq!(snapshot.stage5_systems.mail[0].gold, 0);
     assert!(snapshot.stage5_systems.mail[0].claimed);
     assert_eq!(snapshot.gold, 1313);
 }
@@ -51701,6 +56256,7 @@ fn stage5_social_group_guild_mail_persist_across_reload() {
 #[test]
 fn guild_packets_update_notice_members_and_storage_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
 
@@ -51762,6 +56318,25 @@ fn guild_packets_update_notice_members_and_storage_like_crystal() {
     assert_eq!(
         session.world_snapshot().stage5_systems.guild.storage_gold,
         25
+    );
+
+    let before_failed_withdraw = session.world_snapshot();
+    let failed_withdraw = session.handle_packet(ClientPacket::GuildStorageGoldChange {
+        change_type: 1,
+        amount: 26,
+    });
+    assert!(failed_withdraw.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageGoldChange {
+            amount: 26,
+            change_type: 4,
+            name,
+        } if name == "Scout"
+    )));
+    assert_eq!(session.world_snapshot().gold, before_failed_withdraw.gold);
+    assert_eq!(
+        session.world_snapshot().stage5_systems.guild.storage_gold,
+        before_failed_withdraw.stage5_systems.guild.storage_gold
     );
 
     let store_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
@@ -51859,8 +56434,157 @@ fn guild_packets_update_notice_members_and_storage_like_crystal() {
 }
 
 #[test]
+fn guild_storage_packet_boundaries_reject_orphan_and_malformed_maps_atomically() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.stage5_command("guild.create", vec!["BoundaryGuard".to_string()]);
+
+    let snapshot = |session: &SimulationSession| {
+        let inventory = session.app.world().resource::<InventoryResource>();
+        let stage5 = session.app.world().resource::<Stage5SystemsResource>();
+        (
+            serde_json::to_string(&inventory.inventory_items).unwrap(),
+            serde_json::to_string(&stage5.stage5_systems.guild).unwrap(),
+        )
+    };
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .storage_item_users
+        .insert(1, 77);
+    let orphan_owner_before = snapshot(&session);
+    let list_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 3,
+        from: 0,
+        to: 0,
+    });
+    assert!(!list_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GuildStorageList { .. })));
+    assert!(list_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange { change_type: 6, .. }
+    )));
+    assert_eq!(snapshot(&session), orphan_owner_before);
+
+    let store_packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 0,
+        from: 4,
+        to: 1,
+    });
+    assert!(store_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange {
+            change_type: 3,
+            from: 4,
+            to: 1,
+            item: None,
+            ..
+        }
+    )));
+    assert_eq!(snapshot(&session), orphan_owner_before);
+
+    {
+        let source = session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 4)
+            .expect("starter dagger")
+            .clone();
+        let encoded = serde_json::to_string(&source).unwrap();
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let guild = &mut stage5.stage5_systems.guild;
+        guild.storage_item_users.clear();
+        guild.storage_item_states.insert(2, encoded);
+    }
+    let orphan_state_before = snapshot(&session);
+    let orphan_state_store = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 0,
+        from: 4,
+        to: 2,
+    });
+    assert!(orphan_state_store.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange { change_type: 3, .. }
+    )));
+    assert_eq!(snapshot(&session), orphan_state_before);
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .storage_item_states
+        .clear();
+    let legal_store = session.handle_packet(ClientPacket::GuildStorageItemChange {
+        change_type: 0,
+        from: 4,
+        to: 0,
+    });
+    assert!(legal_store.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GuildStorageItemChange {
+            change_type: 0,
+            item: Some(_),
+            ..
+        }
+    )));
+
+    {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let guild = &mut stage5.stage5_systems.guild;
+        guild.storage_items.insert(1, "dagger".to_string());
+        guild
+            .storage_item_states
+            .insert(1, "{malformed destination JSON".to_string());
+        guild.storage_item_users.insert(1, 88);
+    }
+    let malformed_destination_before = snapshot(&session);
+    for (change_type, from, to, failure_type) in [(2, 0, 1, 5), (1, 0, 4, 4), (3, 0, 0, 6)] {
+        let packets = session.handle_packet(ClientPacket::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        });
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GuildStorageList { .. }
+                | ServerPacket::GuildStorageItemChange {
+                    change_type: 0..=2,
+                    ..
+                }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GuildStorageItemChange {
+                change_type,
+                item: None,
+                ..
+            } if *change_type == failure_type
+        )));
+        assert_eq!(snapshot(&session), malformed_destination_before);
+    }
+}
+
+#[test]
 fn guild_storage_preserves_item_state_and_rejects_rank_permission_edges() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
 
@@ -52002,6 +56726,7 @@ fn guild_storage_preserves_item_state_and_rejects_rank_permission_edges() {
 #[test]
 fn guild_storage_rejects_crystal_dont_store_binding_flags() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
 
@@ -52041,6 +56766,7 @@ fn guild_storage_rejects_crystal_dont_store_binding_flags() {
 #[test]
 fn guild_request_war_requires_leader_and_emits_crystal_prompt_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let no_guild_message = mir2_game_data::localized_text_or_fallback(
@@ -52089,6 +56815,7 @@ fn guild_request_war_requires_leader_and_emits_crystal_prompt_packet() {
 #[test]
 fn guild_war_return_rejects_missing_self_and_non_leader_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert!(session
         .handle_packet(ClientPacket::GuildWarReturn {
@@ -52169,6 +56896,7 @@ fn guild_war_return_rejects_missing_self_and_non_leader_without_mutation() {
 #[test]
 fn guild_war_return_starts_two_guild_war_after_cost_and_blocks_duplicate_rollback() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52269,6 +56997,7 @@ fn guild_war_return_starts_two_guild_war_after_cost_and_blocks_duplicate_rollbac
 #[test]
 fn guild_war_return_insufficient_bank_funds_rolls_back_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52312,6 +57041,7 @@ fn guild_war_return_insufficient_bank_funds_rolls_back_state() {
 #[test]
 fn guild_war_return_rejects_newbie_guild_before_cost_without_registry_entry() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52356,6 +57086,7 @@ fn guild_war_return_rejects_newbie_guild_before_cost_without_registry_entry() {
 #[test]
 fn guild_war_lifecycle_expires_war_and_emits_end_chat_and_colour_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52426,6 +57157,7 @@ fn guild_war_lifecycle_expires_war_and_emits_end_chat_and_colour_state() {
 #[test]
 fn guild_alliance_commands_use_can_alter_alliance_and_update_ally_count() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52496,6 +57228,7 @@ fn guild_alliance_commands_use_can_alter_alliance_and_update_ally_count() {
 #[test]
 fn guild_alliance_request_info_exposes_count_list_and_recent_broadcasts() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52567,6 +57300,7 @@ fn guild_alliance_runtime_state_does_not_rehydrate_from_save_like_crystal() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
+    register_test_account(&session, "guild-alliance-runtime");
     session.handle_packet(ClientPacket::Login {
         account_id: "guild-alliance-runtime".to_string(),
         password: "demo".to_string(),
@@ -52626,6 +57360,7 @@ fn guild_alliance_runtime_state_does_not_rehydrate_from_save_like_crystal() {
 #[test]
 fn guild_alliance_rejects_missing_self_permission_and_active_war_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52740,6 +57475,7 @@ fn guild_alliance_rejects_missing_self_permission_and_active_war_without_mutatio
 #[test]
 fn guild_territory_packets_page_and_purchase_use_bank_gold_with_rollback() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
     {
@@ -52820,6 +57556,7 @@ fn guild_territory_packets_page_and_purchase_use_bank_gold_with_rollback() {
 #[test]
 fn group_packets_update_stage5_group_and_emit_crystal_surfaces() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let switch_packets = session.handle_packet(ClientPacket::SwitchGroup { allow_group: true });
@@ -52920,6 +57657,7 @@ fn group_member_info_roster_refreshes_when_a_member_leaves_a_larger_group() {
     // With 3+ members, removing one keeps the group alive (DeleteMember, not
     // DeleteGroup) and must re-emit the enriched roster so the web window updates.
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::SwitchGroup { allow_group: true });
     session.handle_packet(ClientPacket::AddMember {
@@ -52970,6 +57708,7 @@ fn group_member_info_roster_refreshes_when_a_member_leaves_a_larger_group() {
 #[test]
 fn stage5_trade_shop_and_auction_are_transactional() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let trade_successful_message = mir2_game_data::localized_text_or_fallback(
         mir2_game_data::LanguageCode::English,
@@ -53040,7 +57779,7 @@ fn stage5_trade_shop_and_auction_are_transactional() {
 
     session.stage5_command(
         "auction.list",
-        vec!["training-splinter".to_string(), "50".to_string()],
+        vec!["crystal-item-865".to_string(), "50".to_string()],
     );
     session.stage5_command("auction.buy", vec!["1".to_string()]);
     let after_auction = session.world_snapshot();
@@ -53052,7 +57791,7 @@ fn stage5_trade_shop_and_auction_are_transactional() {
     assert!(after_auction
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-splinter"));
+        .any(|item| item.key == "crystal-item-865"));
     // The buyer is also the seller here, so the 50-gold price is debited from the
     // buyer and settled back to the seller (net zero); only the earlier 35-gold
     // shop spend remains.
@@ -53062,6 +57801,7 @@ fn stage5_trade_shop_and_auction_are_transactional() {
 #[test]
 fn stage5_expired_auction_cannot_be_bought() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let not_found_message = mir2_game_data::localized_text_or_fallback(
         mir2_game_data::LanguageCode::English,
@@ -53102,6 +57842,7 @@ fn stage5_expired_auction_cannot_be_bought() {
 #[test]
 fn stage5_credit_shop_mails_purchase_and_claim_transfers_attachment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let bought_for_credit_message = super::format_localized_text(
         mir2_game_data::LanguageCode::English,
@@ -53154,6 +57895,10 @@ fn stage5_credit_shop_mails_purchase_and_claim_transfers_attachment() {
 #[test]
 fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -53168,6 +57913,16 @@ fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 220 })));
+    let purchases_sent_message = mir2_game_data::localized_text_or_fallback(
+        mir2_game_data::LanguageCode::English,
+        "server.PurchasesSentMailbox",
+        "server.PurchasesSentMailbox",
+    );
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat { message, chat_type: ChatType::Hint }
+            if message == &purchases_sent_message
+    )));
     assert_eq!(snapshot.credit, 280);
     assert!(snapshot.stage5_systems.mail.iter().any(|mail| {
         mail.from == "Gameshop"
@@ -53180,9 +57935,587 @@ fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
         .any(|item| item.key == "crystal-item-1268"));
 }
 
+fn started_game_shop_session(gold: u32, credit: u32) -> SimulationSession {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut player = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        player.gold = gold;
+        player.credit = credit;
+    }
+    session
+}
+
+fn game_shop_mail_states(mail: &Stage5MailMessage) -> Vec<ItemState> {
+    mail.item_states_json
+        .iter()
+        .map(|state| serde_json::from_str::<ItemState>(state).expect("valid game-shop item state"))
+        .collect()
+}
+
+fn assert_game_shop_economy_unchanged(before: &crate::WorldSnapshot, after: &crate::WorldSnapshot) {
+    assert_eq!(after.gold, before.gold);
+    assert_eq!(after.credit, before.credit);
+    assert_eq!(after.inventory_items, before.inventory_items);
+    assert_eq!(after.stage5_systems.mail, before.stage5_systems.mail);
+}
+
+#[test]
+fn game_shop_packet_credit_and_gold_mail_product_count_times_quantity() {
+    // Manifest gIndex 31: product.count=5, stack_size=20, credit=110, gold=165000.
+    let mut credit_session = started_game_shop_session(0, 500);
+    let credit_packets = credit_session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 0,
+    });
+    let credit_snapshot = credit_session.world_snapshot();
+    assert!(credit_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 220 })));
+    assert_eq!(credit_snapshot.credit, 280);
+    assert!(!credit_snapshot
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "crystal-item-1288"));
+    let credit_mail = credit_snapshot
+        .stage5_systems
+        .mail
+        .first()
+        .expect("credit purchase mail");
+    let credit_states = game_shop_mail_states(credit_mail);
+    assert_eq!(credit_mail.items.len(), credit_mail.item_states_json.len());
+    assert_eq!(credit_states.len(), 1);
+    assert_eq!(credit_states[0].quantity, 10);
+
+    credit_session.stage5_command("mail.claim", vec![credit_mail.id.to_string()]);
+    assert_eq!(
+        credit_session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "crystal-item-1288")
+            .map(|item| item.quantity)
+            .sum::<u32>(),
+        10
+    );
+
+    let mut gold_session = started_game_shop_session(500_000, 0);
+    fill_all_bag_slots(&mut gold_session);
+    let bag_before = gold_session.world_snapshot().inventory_items;
+    let gold_packets = gold_session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 1,
+    });
+    let gold_snapshot = gold_session.world_snapshot();
+    assert!(gold_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 330_000 })));
+    assert_eq!(gold_snapshot.gold, 170_000);
+    assert_eq!(gold_snapshot.inventory_items, bag_before);
+    let gold_mail = gold_snapshot
+        .stage5_systems
+        .mail
+        .first()
+        .expect("gold purchase mail even with a full bag");
+    let gold_states = game_shop_mail_states(gold_mail);
+    assert_eq!(gold_mail.items.len(), gold_mail.item_states_json.len());
+    assert_eq!(gold_states.len(), 1);
+    assert_eq!(gold_states[0].quantity, 10);
+}
+
+#[test]
+fn game_shop_five_stack_boundary_claims_exact_total_and_sixth_stack_rejects() {
+    let mut session = started_game_shop_session(0, 5_000);
+    let packets = session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 20,
+        price_type: 0,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 2_200 })));
+    let mail_id = {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let mail = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("five-stack purchase mail");
+        let mut states = game_shop_mail_states(mail);
+        assert_eq!(mail.items.len(), 5);
+        assert_eq!(mail.item_states_json.len(), 5);
+        assert!(states.iter().all(|state| state.quantity == 20));
+        assert_eq!(states.iter().map(|state| state.quantity).sum::<u32>(), 100);
+        for state in &mut states {
+            state.slot = 39;
+            state.unique_id = 9_999;
+        }
+        states[0].added_attack = 17;
+        states[0].added_stats = vec![UserItemStat { stat: 5, value: 42 }];
+        states[0].rental_binding_flags = 3;
+        states[0].rental_owner_name = "MailOwner".to_string();
+        states[0].rental_expiry_binary_datetime = 638_000_000_000_000_000;
+        states[0].rental_locked = true;
+        mail.item_states_json = states
+            .iter()
+            .map(|state| serde_json::to_string(state).expect("exact item state should encode"))
+            .collect();
+        mail.id
+    };
+
+    let claim_packets = session.handle_packet(ClientPacket::CollectParcel {
+        mail_id: u64::from(mail_id),
+    });
+    assert_eq!(
+        claim_packets
+            .iter()
+            .filter(|packet| matches!(packet, ServerPacket::GainedItem { .. }))
+            .count(),
+        5
+    );
+    assert!(claim_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    let claimed_snapshot = session.world_snapshot();
+    assert_eq!(
+        claimed_snapshot
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "crystal-item-1288")
+            .map(|item| item.quantity)
+            .sum::<u32>(),
+        100
+    );
+    let inventory = session.app.world().resource::<InventoryResource>();
+    let claimed_items = inventory
+        .inventory_items
+        .iter()
+        .filter(|item| item.key == "crystal-item-1288")
+        .collect::<Vec<_>>();
+    assert_eq!(claimed_items.len(), 5);
+    assert!(claimed_items.iter().all(|item| item.unique_id != 9_999));
+    let mut assigned_ids = claimed_items
+        .iter()
+        .map(|item| item.unique_id)
+        .collect::<Vec<_>>();
+    assigned_ids.sort_unstable();
+    assigned_ids.dedup();
+    assert_eq!(
+        assigned_ids.len(),
+        5,
+        "server-assigned unique IDs must be unique"
+    );
+    let preserved = claimed_items
+        .iter()
+        .find(|item| item.rental_owner_name == "MailOwner")
+        .expect("exact rental item metadata should be preserved");
+    assert_eq!(preserved.added_attack, 17);
+    assert_eq!(
+        preserved.added_stats,
+        vec![UserItemStat { stat: 5, value: 42 }]
+    );
+    assert_eq!(preserved.rental_binding_flags, 3);
+    assert_eq!(
+        preserved.rental_expiry_binary_datetime,
+        638_000_000_000_000_000
+    );
+    assert!(preserved.rental_locked);
+    let claimed_mail = claimed_snapshot
+        .stage5_systems
+        .mail
+        .iter()
+        .find(|candidate| candidate.id == mail_id)
+        .expect("claimed game-shop mail should remain in mailbox history");
+    assert!(claimed_mail.claimed);
+    assert_eq!(claimed_mail.gold, 0);
+    assert!(claimed_mail.items.is_empty());
+    assert!(claimed_mail.item_states_json.is_empty());
+
+    let before_duplicate = session.world_snapshot();
+    assert_eq!(
+        session.handle_packet(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }),
+        Vec::new(),
+        "a duplicate direct CollectParcel must be silent"
+    );
+    assert_eq!(session.world_snapshot(), before_duplicate);
+
+    let before = session.world_snapshot();
+    let packets = session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 21,
+        price_type: 0,
+    });
+    assert!(
+        packets.is_empty(),
+        "six attachment stacks are silently rejected"
+    );
+    let after = session.world_snapshot();
+    assert_game_shop_economy_unchanged(&before, &after);
+}
+
+#[test]
+fn collect_parcel_silently_rejects_partially_corrupt_exact_payload_with_only_four_slots_atomically()
+{
+    let mut session = started_game_shop_session(0, 5_000);
+    session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 20,
+        price_type: 0,
+    });
+    let mail_id = {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let mail = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("five-stack game-shop mail");
+        assert_eq!(mail.item_states_json.len(), 5);
+        mail.gold = 777;
+        mail.item_states_json[2] = "{partially-corrupt-json".to_string();
+        mail.id
+    };
+    fill_all_bag_slots(&mut session);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .truncate(76);
+    let before = session.world_snapshot();
+
+    let rejected = session.handle_packet(ClientPacket::CollectParcel {
+        mail_id: u64::from(mail_id),
+    });
+    assert!(rejected.is_empty());
+    let after_rejection = session.world_snapshot();
+    assert_eq!(after_rejection.gold, before.gold);
+    assert_eq!(after_rejection.inventory_items, before.inventory_items);
+    assert_eq!(
+        after_rejection.stage5_systems.mail,
+        before.stage5_systems.mail
+    );
+}
+
+#[test]
+fn collect_parcel_silently_rejects_fully_corrupt_exact_payload_without_key_fallback() {
+    let mut session = started_game_shop_session(0, 500);
+    session.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 0,
+    });
+    let mail_id = {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let mail = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("single-stack game-shop mail");
+        assert_eq!(mail.item_states_json.len(), 1);
+        mail.gold = 333;
+        mail.item_states_json[0] = "not-json".to_string();
+        mail.id
+    };
+    let before = session.world_snapshot();
+
+    for _ in 0..2 {
+        let rejected = session.handle_packet(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        });
+        assert!(rejected.is_empty());
+        let after = session.world_snapshot();
+        assert_eq!(after.gold, before.gold);
+        assert_eq!(after.inventory_items, before.inventory_items);
+        assert_eq!(after.stage5_systems.mail, before.stage5_systems.mail);
+        assert!(!after.stage5_systems.mail[0].claimed);
+        assert_eq!(after.stage5_systems.mail[0].gold, 333);
+        assert_eq!(
+            after.stage5_systems.mail[0].items,
+            before.stage5_systems.mail[0].items
+        );
+        assert_eq!(
+            after.stage5_systems.mail[0].item_states_json,
+            before.stage5_systems.mail[0].item_states_json
+        );
+    }
+}
+
+#[test]
+fn collect_parcel_silently_rejects_unknown_zero_and_overstack_exact_items_atomically() {
+    for invalid_case in ["unknown", "zero", "overstack"] {
+        let mut session = started_game_shop_session(0, 500);
+        session.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 2,
+            price_type: 0,
+        });
+        let mail_id = {
+            let mut stage5 = session
+                .app
+                .world_mut()
+                .resource_mut::<Stage5SystemsResource>();
+            let mail = stage5
+                .stage5_systems
+                .mail
+                .first_mut()
+                .expect("single-stack game-shop mail");
+            let mut state = game_shop_mail_states(mail)
+                .into_iter()
+                .next()
+                .expect("exact item state");
+            match invalid_case {
+                "unknown" => state.key = "not-a-crystal-item".to_string(),
+                "zero" => state.quantity = 0,
+                "overstack" => state.quantity = 21,
+                _ => unreachable!(),
+            }
+            mail.gold = 444;
+            mail.item_states_json =
+                vec![serde_json::to_string(&state)
+                    .expect("invalid semantic state remains valid JSON")];
+            mail.id
+        };
+        let before = session.world_snapshot();
+
+        assert_eq!(
+            session.handle_packet(ClientPacket::CollectParcel {
+                mail_id: u64::from(mail_id),
+            }),
+            Vec::new(),
+            "{invalid_case} exact state must be silently rejected"
+        );
+        assert_eq!(
+            session.world_snapshot(),
+            before,
+            "{invalid_case} rejection must be a zero-change transaction"
+        );
+    }
+}
+
+#[test]
+fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
+    let mut packet_credit = started_game_shop_session(0, 500);
+    let mut stage5_credit = started_game_shop_session(0, 500);
+    let packet_credit_packets = packet_credit.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 0,
+    });
+    let stage5_credit_packets = stage5_credit.stage5_command(
+        "gameShop.buyCredit",
+        vec!["31".to_string(), "2".to_string()],
+    );
+    assert_eq!(packet_credit_packets, stage5_credit_packets);
+    let mut packet_credit_snapshot = packet_credit.world_snapshot();
+    let mut stage5_credit_snapshot = stage5_credit.world_snapshot();
+    for mail in &mut packet_credit_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    for mail in &mut stage5_credit_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    assert_eq!(packet_credit_snapshot, stage5_credit_snapshot);
+
+    let mut packet_gold = started_game_shop_session(500_000, 0);
+    let mut stage5_gold = started_game_shop_session(500_000, 0);
+    let packet_gold_packets = packet_gold.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 2,
+        price_type: 1,
+    });
+    let stage5_gold_packets =
+        stage5_gold.stage5_command("gameShop.buyGold", vec!["31".to_string(), "2".to_string()]);
+    assert_eq!(packet_gold_packets, stage5_gold_packets);
+    let mut packet_gold_snapshot = packet_gold.world_snapshot();
+    let mut stage5_gold_snapshot = stage5_gold.world_snapshot();
+    for mail in &mut packet_gold_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    for mail in &mut stage5_gold_snapshot.stage5_systems.mail {
+        mail.delivery_nonce.clear();
+    }
+    assert_eq!(packet_gold_snapshot, stage5_gold_snapshot);
+}
+
+#[test]
+fn game_shop_invalid_packet_and_stage5_quantities_have_zero_side_effects() {
+    let mut session = started_game_shop_session(1_000_000, 10_000);
+    let before = session.world_snapshot();
+    for packet in [
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 0,
+            price_type: 0,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 100,
+            price_type: 0,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 0,
+            price_type: 1,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 100,
+            price_type: 1,
+        },
+    ] {
+        assert!(
+            session.handle_packet(packet).is_empty(),
+            "invalid Crystal quantity must be rejected silently"
+        );
+    }
+    for action in ["gameShop.buyCredit", "gameShop.buyGold"] {
+        for quantity in ["0", "100"] {
+            assert!(
+                session
+                    .stage5_command(action, vec!["31".to_string(), quantity.to_string()])
+                    .is_empty(),
+                "legacy game-shop invalid quantity must also be silent"
+            );
+        }
+    }
+    for packet in [
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: -1,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: 2,
+        },
+        ClientPacket::GameShopBuy {
+            g_index: i32::MAX,
+            quantity: 1,
+            price_type: 0,
+        },
+    ] {
+        assert!(!session.handle_packet(packet).is_empty());
+    }
+    assert_game_shop_economy_unchanged(&before, &session.world_snapshot());
+}
+
+#[test]
+fn game_shop_disabled_authoritative_payment_flags_have_zero_side_effects() {
+    // The authoritative GameShopInfo payload for gIndex 42 disables both
+    // CanBuyCredit and CanBuyGold even though it carries display prices.
+    let mut session = started_game_shop_session(1_000_000, 10_000);
+    let before = session.world_snapshot();
+    for price_type in [0, 1] {
+        session.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 42,
+            quantity: 1,
+            price_type,
+        });
+    }
+    session.stage5_command(
+        "gameShop.buyCredit",
+        vec!["42".to_string(), "1".to_string()],
+    );
+    session.stage5_command("gameShop.buyGold", vec!["42".to_string(), "1".to_string()]);
+    assert_game_shop_economy_unchanged(&before, &session.world_snapshot());
+}
+
+#[test]
+fn game_shop_balance_mail_capacity_and_world_phase_rejections_are_atomic() {
+    for price_type in [0, 1] {
+        let mut low_balance = started_game_shop_session(0, 0);
+        let before = low_balance.world_snapshot();
+        low_balance.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type,
+        });
+        assert_game_shop_economy_unchanged(&before, &low_balance.world_snapshot());
+    }
+
+    let mut full_mail = started_game_shop_session(1_000_000, 10_000);
+    full_mail
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .mail = (1..=100)
+        .map(|id| Stage5MailMessage {
+            id,
+            delivery_nonce: format!("mail-capacity-{id}"),
+            from: "System".to_string(),
+            to: "Scout".to_string(),
+            subject: format!("mail-{id}"),
+            body: String::new(),
+            gold: 0,
+            items: Vec::new(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked: false,
+            claimed: false,
+            deleted: false,
+        })
+        .collect();
+    let before_full_mail = full_mail.world_snapshot();
+    for price_type in [0, 1] {
+        full_mail.handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type,
+        });
+    }
+    assert_game_shop_economy_unchanged(&before_full_mail, &full_mail.world_snapshot());
+
+    let mut character_select = SimulationSession::new(SimulationConfig::default());
+    character_select
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 10_000;
+    let before_select = character_select.world_snapshot();
+    character_select.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    assert_game_shop_economy_unchanged(&before_select, &character_select.world_snapshot());
+
+    let mut logged_out = started_game_shop_session(0, 10_000);
+    logged_out.handle_packet(ClientPacket::LogOut);
+    let before_logout_buy = logged_out.world_snapshot();
+    logged_out.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    assert_game_shop_economy_unchanged(&before_logout_buy, &logged_out.world_snapshot());
+}
+
 #[test]
 fn stage5_trade_shop_and_auction_cancel_error_paths_preserve_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let low_gold_message = mir2_game_data::localized_text_or_fallback(
         mir2_game_data::LanguageCode::English,
@@ -53340,7 +58673,7 @@ fn stage5_trade_shop_and_auction_cancel_error_paths_preserve_gold() {
 
     session.stage5_command(
         "auction.list",
-        vec!["training-splinter".to_string(), "50".to_string()],
+        vec!["crystal-item-865".to_string(), "50".to_string()],
     );
     let missing_auction_cancel_packets = session.stage5_command("auction.cancel", Vec::new());
     assert!(missing_auction_cancel_packets.iter().any(|packet| matches!(
@@ -53361,6 +58694,7 @@ fn stage5_trade_shop_and_auction_cancel_error_paths_preserve_gold() {
 #[test]
 fn stage5_missing_mail_trade_item_and_auction_use_not_found() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let not_found_message = mir2_game_data::localized_text_or_fallback(
         mir2_game_data::LanguageCode::English,
@@ -53402,6 +58736,7 @@ fn stage5_missing_mail_trade_item_and_auction_use_not_found() {
 #[test]
 fn stage5_shop_and_auction_full_bag_preserve_gold_and_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let full_bag_message = mir2_game_data::localized_text_or_fallback(
         mir2_game_data::LanguageCode::English,
@@ -53517,6 +58852,7 @@ fn stage5_trade_disconnect_before_accept_preserves_gold() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut session = SimulationSession::new(config);
+    register_test_account(&session, "stage5-trade-disconnect");
     session.handle_packet(ClientPacket::Login {
         account_id: "stage5-trade-disconnect".to_string(),
         password: "demo".to_string(),
@@ -53551,6 +58887,7 @@ fn stage5_trade_disconnect_before_accept_preserves_gold() {
 #[test]
 fn stage5_item_add_socket_emits_item_slot_size_changed() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_bengal_tiger_with_socket_slots(&mut session, 4);
 
@@ -53584,6 +58921,7 @@ fn stage5_item_add_socket_emits_item_slot_size_changed() {
 #[test]
 fn stage5_qa_damage_equipment_emits_dura_changed_for_smoke_setup() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "Dagger", EquipmentSlot::Weapon);
     let before = session
@@ -53619,6 +58957,7 @@ fn stage5_qa_damage_equipment_emits_dura_changed_for_smoke_setup() {
 #[test]
 fn stage5_qa_damage_player_emits_health_for_smoke_setup() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let before = session.world_snapshot().player_hp.expect("player hp");
 
@@ -53634,6 +58973,7 @@ fn stage5_qa_damage_player_emits_health_for_smoke_setup() {
 #[test]
 fn stage5_qa_give_item_seeds_usable_healing_metadata() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_hp(&mut session, 10);
     let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -53691,6 +59031,7 @@ fn stage5_qa_give_item_seeds_usable_healing_metadata() {
 #[test]
 fn stage5_qa_open_npc_dialog_opens_dialog_for_smoke_setup() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.stage5_command("qa.openNpcDialog", Vec::new());
@@ -53715,6 +59056,7 @@ fn stage5_qa_open_npc_dialog_opens_dialog_for_smoke_setup() {
 #[test]
 fn stage5_item_add_socket_rejects_without_source_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_bengal_tiger_with_socket_slots(&mut session, 4);
 
@@ -53744,6 +59086,7 @@ fn stage5_item_add_socket_rejects_without_source_item() {
 #[test]
 fn stage5_item_add_socket_rejects_without_equipped_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -53776,6 +59119,7 @@ fn stage5_item_add_socket_rejects_without_equipped_item() {
 #[test]
 fn stage5_item_add_socket_rejects_wrong_source_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_bengal_tiger_with_socket_slots(&mut session, 4);
     add_inventory_test_item(&mut session, "crystal-item-739", "DurabilityGem", 31, 1);
@@ -53809,6 +59153,7 @@ fn stage5_item_add_socket_rejects_wrong_source_item() {
 #[test]
 fn stage5_item_add_socket_consumes_source_item_on_success() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_bengal_tiger_with_socket_slots(&mut session, 4);
     add_socket_source_test_item(&mut session, 31, 2);
@@ -53838,6 +59183,7 @@ fn stage5_item_add_socket_consumes_source_item_on_success() {
 #[test]
 fn stage5_item_add_socket_rejects_items_at_socket_capacity() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.stage5_command("item.addSocket", vec!["weapon".to_string()]);
@@ -53866,6 +59212,7 @@ fn stage5_item_add_socket_rejects_items_at_socket_capacity() {
 #[test]
 fn stage5_item_add_socket_rejects_unknown_socket_metadata() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -53900,6 +59247,7 @@ fn stage5_item_add_socket_rejects_unknown_socket_metadata() {
 #[test]
 fn combine_item_packet_repair_branch_emits_item_repaired_and_ack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -53958,6 +59306,7 @@ fn combine_item_packet_repair_branch_emits_item_repaired_and_ack() {
 #[test]
 fn combine_item_packet_uses_inventory_unique_ids_instead_of_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54022,6 +59371,7 @@ fn combine_item_packet_uses_inventory_unique_ids_instead_of_slots() {
 #[test]
 fn combine_item_packet_rejects_slot_numbers_when_unique_ids_differ() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54075,6 +59425,7 @@ fn combine_item_packet_rejects_slot_numbers_when_unique_ids_differ() {
 #[test]
 fn combine_item_packet_hero_inventory_grid_does_not_mutate_matching_player_items() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54129,6 +59480,7 @@ fn combine_item_packet_hero_inventory_grid_does_not_mutate_matching_player_items
 #[test]
 fn combine_item_packet_dead_player_ack_fails_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54175,6 +59527,7 @@ fn combine_item_packet_dead_player_ack_fails_without_mutation() {
 #[test]
 fn combine_item_packet_repair_branch_rejects_fully_repaired_target_with_hint() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54215,6 +59568,7 @@ fn combine_item_packet_repair_branch_rejects_fully_repaired_target_with_hint() {
 #[test]
 fn combine_item_packet_repair_branch_rejects_wrong_target_family_with_ack_only_failure() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BoneHammer", 31);
     add_inventory_crystal_item(&mut session, "MirArmour(M)", 32);
@@ -54256,6 +59610,7 @@ fn combine_item_packet_repair_branch_rejects_wrong_target_family_with_ack_only_f
 #[test]
 fn combine_item_packet_socket_branch_rejects_targets_outside_crystal_item_type_window() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item_with_socket_slots(&mut session, "BengalTiger", 32, 4);
     add_socket_source_test_item(&mut session, 31, 2);
@@ -54297,6 +59652,7 @@ fn combine_item_packet_socket_branch_rejects_targets_outside_crystal_item_type_w
 #[test]
 fn combine_item_packet_socket_branch_rejects_maxed_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item_with_socket_slots(&mut session, "BengalTiger", 32, 5);
     add_socket_source_test_item(&mut session, 31, 1);
@@ -54335,6 +59691,7 @@ fn combine_item_packet_socket_branch_rejects_maxed_target() {
 #[test]
 fn combine_item_packet_socket_branch_rejects_rental_dont_upgrade_ack_only() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "Dagger", 32);
     add_socket_source_test_item(&mut session, 31, 1);
@@ -54384,6 +59741,7 @@ fn combine_item_packet_socket_branch_rejects_rental_dont_upgrade_ack_only() {
 #[test]
 fn combine_item_packet_seal_branch_emits_crystal_ack_and_seal_change() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_seal_source_test_item(&mut session, 31, 2);
 
@@ -54441,6 +59799,7 @@ fn combine_item_packet_seal_branch_emits_crystal_ack_and_seal_change() {
 #[test]
 fn combine_item_packet_seal_branch_rejects_non_equipment_targets_with_ack_only_failure() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_seal_source_test_item(&mut session, 31, 1);
 
@@ -54481,6 +59840,7 @@ fn combine_item_packet_seal_branch_rejects_non_equipment_targets_with_ack_only_f
 #[test]
 fn combine_item_packet_upgrade_branch_emits_item_upgraded_and_ack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BraveryOrb", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54537,6 +59897,7 @@ fn combine_item_packet_upgrade_branch_emits_item_upgraded_and_ack() {
 #[test]
 fn combine_item_packet_upgrade_branch_applies_player_gem_rate_percent_bonus() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BraveryOrb", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54630,6 +59991,7 @@ fn combine_item_packet_upgrade_branch_applies_player_gem_rate_percent_bonus() {
 #[test]
 fn combine_item_packet_upgrade_branch_applies_durability_orb_max_dura_bonus() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "DurabilityOrb", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54684,6 +60046,7 @@ fn combine_item_packet_upgrade_branch_applies_durability_orb_max_dura_bonus() {
 #[test]
 fn combine_item_packet_upgrade_branch_rejects_durability_orb_at_max_added_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "DurabilityOrb", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54737,6 +60100,7 @@ fn combine_item_packet_upgrade_branch_rejects_durability_orb_at_max_added_stats(
 #[test]
 fn combine_item_packet_upgrade_branch_applies_attack_speed_bonus() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "StormOrb", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -54798,6 +60162,7 @@ fn combine_item_packet_upgrade_branch_applies_attack_speed_bonus() {
 #[test]
 fn combine_item_packet_upgrade_branch_applies_magic_resist_bonus_for_armour() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "DisillusionGem", 31);
     add_inventory_crystal_item(&mut session, "MirArmour(M)", 32);
@@ -55049,6 +60414,7 @@ fn combine_item_packet_upgrade_branch_applies_poison_resist_bonus_for_armour() {
 #[test]
 fn combine_item_packet_shape_zero_gem_source_ack_fails_without_mutation() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "Hyeoncheon Maseok", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -55084,6 +60450,7 @@ fn combine_item_packet_shape_zero_gem_source_ack_fails_without_mutation() {
 #[test]
 fn combine_item_packet_upgrade_branch_rejects_max_added_stats() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BraveryGem", 31);
     add_inventory_crystal_item_with_metadata(&mut session, "Dagger", 32, 0, 0, 0, Vec::new(), 5);
@@ -55126,6 +60493,7 @@ fn combine_item_packet_upgrade_branch_rejects_max_added_stats() {
 #[test]
 fn combine_item_packet_upgrade_branch_rejects_invalid_combination() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "ProtectionGem", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -55162,6 +60530,7 @@ fn combine_item_packet_upgrade_branch_rejects_invalid_combination() {
 #[test]
 fn combine_item_packet_upgrade_branch_rejects_rental_dont_upgrade_ack_only() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BraveryOrb", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -55205,6 +60574,7 @@ fn combine_item_packet_upgrade_branch_rejects_rental_dont_upgrade_ack_only() {
 #[test]
 fn combine_item_packet_upgrade_failure_can_destroy_target_and_still_ack_success() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "BraveryGem", 31);
     add_inventory_crystal_item(&mut session, "Dagger", 32);
@@ -55255,6 +60625,7 @@ fn combine_item_packet_upgrade_failure_can_destroy_target_and_still_ack_success(
 #[test]
 fn stage5_item_seal_emits_item_seal_changed() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.stage5_command("item.seal", vec!["weapon".to_string(), "30".to_string()]);
@@ -55282,6 +60653,7 @@ fn stage5_item_seal_emits_item_seal_changed() {
 #[test]
 fn stage5_item_seal_sets_next_seal_delay_metadata() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.stage5_command("item.seal", vec!["weapon".to_string(), "30".to_string()]);
@@ -55314,6 +60686,7 @@ fn stage5_item_seal_sets_next_seal_delay_metadata() {
 #[test]
 fn stage5_item_seal_rejects_already_sealed_equipment() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let first = session.stage5_command("item.seal", vec!["weapon".to_string(), "30".to_string()]);
@@ -55357,6 +60730,7 @@ fn stage5_item_seal_rejects_already_sealed_equipment() {
 #[test]
 fn stage5_item_seal_rejects_before_next_seal_date_after_expiry() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let next_seal = super::future_binary_datetime_minutes(30);
     {
@@ -55458,6 +60832,7 @@ fn equipment_state_legacy_seal_metadata_defaults_next_seal_date() {
 #[test]
 fn stage5_item_seal_rejects_without_source_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.stage5_command(
@@ -55492,6 +60867,7 @@ fn stage5_item_seal_rejects_without_source_item() {
 #[test]
 fn stage5_item_seal_rejects_without_equipped_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -55524,6 +60900,7 @@ fn stage5_item_seal_rejects_without_equipped_item() {
 #[test]
 fn stage5_item_seal_rejects_wrong_source_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_test_item(&mut session, "crystal-item-739", "DurabilityGem", 31, 1);
 
@@ -55562,6 +60939,7 @@ fn stage5_item_seal_rejects_wrong_source_item() {
 #[test]
 fn stage5_item_seal_consumes_source_item_on_success() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_seal_source_test_item(&mut session, 31, 2);
 
@@ -55622,6 +61000,7 @@ fn stage5_conquest_event_hero_mining_and_crafting_flow() {
     )));
 
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let crafting_failed_message = mir2_game_data::localized_text_or_fallback(
         mir2_game_data::LanguageCode::English,
@@ -55710,6 +61089,7 @@ fn stage5_conquest_event_hero_mining_and_crafting_flow() {
 #[allow(deprecated)]
 fn stage5_event_spawn_uses_nearby_spawnable_tile_on_crystal_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.transfer_map("crystal:0:330:270");
     let before_count = session
@@ -55754,14 +61134,27 @@ fn stage5_event_spawn_uses_nearby_spawnable_tile_on_crystal_map() {
 #[test]
 fn fishing_packets_toggle_crystal_update_surface() {
     let mut session = SimulationSession::new(SimulationConfig::default());
-    assert!(session
-        .handle_packet(ClientPacket::FishingCast { cast_out: true })
-        .is_empty());
-
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    assert!(session
-        .handle_packet(ClientPacket::FishingCast { cast_out: true })
-        .is_empty());
+    let no_rod_packets = session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    assert!(
+        !no_rod_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::FishingUpdate { fishing: true, .. })),
+        "fishing must not begin without an equipped fishing rod: {no_rod_packets:?}"
+    );
+    let mut session = authenticated_demo_fishing_session();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .equipment_items
+        .retain(|item| item.slot != EquipmentSlot::Weapon);
+    let no_rod_packets = session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    assert!(
+        !no_rod_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::FishingUpdate { fishing: true, .. })),
+        "fishing must not begin without an equipped fishing rod: {no_rod_packets:?}"
+    );
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
@@ -55854,8 +61247,7 @@ fn successful_swordfish_reel_tick(session: &mut SimulationSession, minimum_tick:
 
 #[test]
 fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_fishing_session();
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
     add_inventory_crystal_item(&mut session, "FishBait", 32);
@@ -55924,12 +61316,21 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
 
 #[test]
 fn fishing_cast_requires_crystal_rod_bait_hook_and_fishing_cell() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_fishing_session();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .equipment_items
+        .retain(|item| item.slot != EquipmentSlot::Weapon);
 
-    assert!(session
-        .handle_packet(ClientPacket::FishingCast { cast_out: true })
-        .is_empty());
+    let no_rod_packets = session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    assert!(
+        !no_rod_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::FishingUpdate { fishing: true, .. })),
+        "fishing must not begin without an equipped fishing rod: {no_rod_packets:?}"
+    );
 
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     assert!(session
@@ -55964,13 +61365,26 @@ fn fishing_cast_requires_crystal_rod_bait_hook_and_fishing_cell() {
         .any(|item| item.name == "FishBait"));
 
     {
-        let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
-        fishing.rod_has_hook = true;
-        fishing.fishing_attribute = -1;
+        session
+            .app
+            .world_mut()
+            .resource_mut::<FishingResource>()
+            .rod_has_hook = true;
     }
-    assert!(session
-        .handle_packet(ClientPacket::FishingCast { cast_out: true })
-        .is_empty());
+    let non_fishing_point = place_player_at_non_fishing_cell(&mut session);
+    assert!(!session
+        .app
+        .world()
+        .resource::<MapRuntimeResource>()
+        .fishing_cells
+        .contains_key(&(non_fishing_point.x, non_fishing_point.y)));
+    let no_rod_packets = session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    assert!(
+        !no_rod_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::FishingUpdate { fishing: true, .. })),
+        "fishing must not begin without an equipped fishing rod: {no_rod_packets:?}"
+    );
     assert!(session
         .world_snapshot()
         .inventory_items
@@ -55981,6 +61395,7 @@ fn fishing_cast_requires_crystal_rod_bait_hook_and_fishing_cell() {
 #[test]
 fn fishing_autocast_requires_crystal_reel_flag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     session
@@ -55997,8 +61412,7 @@ fn fishing_autocast_requires_crystal_reel_flag() {
 
 #[test]
 fn fishing_cast_consumes_slot_backed_bait_and_damages_hook() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_fishing_session();
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     {
         let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
@@ -56051,6 +61465,7 @@ fn fishing_cast_consumes_slot_backed_bait_and_damages_hook() {
 #[test]
 fn fishing_autocast_prefers_slot_backed_reel_over_resource_flag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     {
@@ -56086,8 +61501,7 @@ fn fishing_autocast_prefers_slot_backed_reel_over_resource_flag() {
 
 #[test]
 fn fishing_autocast_reel_durability_cancels_slot_backed_recast() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_fishing_session();
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     let fish_index = mir2_game_data::crystal_item_by_name("SwordFish")
         .expect("SwordFish template should exist")
@@ -56143,8 +61557,7 @@ fn fishing_autocast_reel_durability_cancels_slot_backed_recast() {
 
 #[test]
 fn fishing_retry_cast_uses_slot_backed_finder_stats_and_durability() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_fishing_session();
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     {
         let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
@@ -56196,32 +61609,66 @@ fn fishing_reel_uses_crystal_miss_and_monster_event_paths() {
             .count()
     }
 
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_fishing_session();
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
-    let before_event_monsters = giant_keratoid_count(&mut session);
+    assert!(
+        session
+            .handle_packet(ClientPacket::FishingCast { cast_out: true })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::FishingUpdate { fishing: true, .. })),
+        "the authenticated fixture must cast against the parsed map fishing cell"
+    );
 
-    super::set_runtime_tick(session.app.world_mut(), 31);
-    session.handle_packet(ClientPacket::FishingCast { cast_out: true });
-    for _ in 0..4 {
-        session.tick();
+    let mut miss_observed = false;
+    for tick in 0..1_000 {
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        {
+            let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
+            fishing.fishing = true;
+            fishing.found_fish = true;
+            fishing.progress_percent = 100;
+            fishing.chance_percent = 0;
+        }
+        let packets = session.handle_packet(ClientPacket::FishingCast { cast_out: false });
+        if packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::Chat {
+                    message,
+                    chat_type: ChatType::System,
+                } if message.contains("fish got away")
+            )
+        }) {
+            miss_observed = true;
+            break;
+        }
     }
+    assert!(
+        miss_observed,
+        "a deterministic reel miss should be observable"
+    );
 
-    let reel_packets = session.handle_packet(ClientPacket::FishingCast { cast_out: false });
-    assert!(reel_packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::Chat {
-            message,
-            chat_type: ChatType::System,
-        } if message.contains("fish got away")
-    )));
-    assert!(reel_packets
-        .iter()
-        .all(|packet| !matches!(packet, ServerPacket::GainedItem { .. })));
-    assert_eq!(
-        giant_keratoid_count(&mut session),
-        before_event_monsters + 1
+    let before_event_monsters = giant_keratoid_count(&mut session);
+    let mut spawned_event = false;
+    for tick in 0..1_000 {
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        {
+            let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
+            fishing.fishing = true;
+            fishing.found_fish = true;
+            fishing.progress_percent = 100;
+            fishing.chance_percent = 100;
+        }
+        let _ = session.handle_packet(ClientPacket::FishingCast { cast_out: false });
+        if giant_keratoid_count(&mut session) > before_event_monsters {
+            spawned_event = true;
+            break;
+        }
+    }
+    assert!(
+        spawned_event,
+        "a successful real-map reel should reach Crystal's deterministic monster event path"
     );
 }
 
@@ -56230,6 +61677,7 @@ fn trade_packets_without_partner_preserve_crystal_noop_and_ack_shape() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     assert!(session.handle_packet(ClientPacket::TradeRequest).is_empty());
 
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(
         session.handle_packet(ClientPacket::DepositTradeItem { from: 4, to: 0 }),
@@ -56259,6 +61707,7 @@ fn trade_packets_without_partner_preserve_crystal_noop_and_ack_shape() {
 #[test]
 fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_gold = session.world_snapshot().gold;
     let red_potion_slot = session
@@ -56344,6 +61793,331 @@ fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
 }
 
 #[test]
+fn repeated_trade_request_cannot_replace_an_already_debited_offer() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeGold { amount: 25 });
+    let (_, offer) = session.shared_trade_confirm();
+    let offer = offer.expect("completed offer");
+    let completed = session
+        .world_snapshot()
+        .stage5_systems
+        .trade
+        .expect("completed trade state");
+    assert_eq!(session.world_snapshot().gold, starting_gold - 25);
+
+    assert!(session.trade_request("Replacement").is_empty());
+    let preserved = session
+        .world_snapshot()
+        .stage5_systems
+        .trade
+        .expect("original trade state remains");
+    assert_eq!(preserved.settlement_nonce, completed.settlement_nonce);
+    assert_eq!(preserved.partner, "Trader");
+    assert_eq!(preserved.offered_gold, 25);
+    assert!(preserved.completed);
+    assert_eq!(session.world_snapshot().gold, starting_gold - 25);
+
+    session.rollback_shared_trade_offer(&offer);
+    assert_eq!(session.world_snapshot().gold, starting_gold);
+}
+
+#[test]
+fn shared_ground_drop_projection_persists_marker_and_replays_once() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+    let event_id = "b".repeat(64);
+    let drop = GroundDropSnapshot {
+        object_id: 90_501,
+        name: "Durable projection gold".to_string(),
+        name_colour_argb: -1,
+        icon: 0,
+        x: 330,
+        y: 270,
+        quantity: 1,
+        source_monster: "projection-test".to_string(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::Gold { amount: 25 },
+    };
+
+    let packets = session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("first projection");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+    assert_eq!(session.world_snapshot().gold, starting_gold + 25);
+    assert!(session.has_shared_economy_projection_event(&event_id));
+
+    let durable = session
+        .active_character_checkpoint()
+        .expect("durable character projection");
+    session
+        .restore_active_character_checkpoint(&durable)
+        .expect("restore durable projection");
+    assert!(session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("idempotent projection retry")
+        .is_empty());
+    assert_eq!(session.world_snapshot().gold, starting_gold + 25);
+}
+
+#[test]
+fn shared_ground_drop_projection_save_failure_rolls_back_and_retries_once() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let event_id = "c".repeat(64);
+    let drop = GroundDropSnapshot {
+        object_id: 90_502,
+        name: "Atomic durable projection gold".to_string(),
+        name_colour_argb: -1,
+        icon: 0,
+        x: 330,
+        y: 270,
+        quantity: 1,
+        source_monster: "projection-save-failure-test".to_string(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::Gold { amount: 25 },
+    };
+    let before_world = session.world_snapshot();
+    let before_checkpoint = session
+        .active_character_checkpoint()
+        .expect("pre-projection checkpoint");
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert!(session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect_err("injected save failure must reject the projection")
+        .contains("injected account-store persistence failure"));
+    assert_eq!(session.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &session
+                .active_character_checkpoint()
+                .expect("rolled-back live checkpoint"),
+        )
+        .expect("rolled-back checkpoint should serialize"),
+        serde_json::to_string(&before_checkpoint).expect("baseline checkpoint should serialize"),
+        "the live character checkpoint must roll back with the world"
+    );
+    assert!(!session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+
+    let retry = session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("fault is one-shot and the durable projection must retry");
+    assert!(retry
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+    assert_eq!(session.world_snapshot().gold, before_world.gold + 25);
+    assert!(session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+    assert!(session
+        .apply_shared_ground_drop_projection(&event_id, &drop)
+        .expect("durable second retry")
+        .is_empty());
+}
+#[test]
+fn durable_trade_projection_replays_pretrade_checkpoint_once() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+    let active = session.active_identity().expect("active identity");
+    let offered_item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion")
+        .expect("demo inventory should include red potion");
+
+    let before_trade = session
+        .active_character_checkpoint()
+        .expect("pre-trade checkpoint");
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeReply {
+        accept_invite: true,
+    });
+    let deposit = session.handle_packet(ClientPacket::DepositTradeItem {
+        from: i32::from(offered_item.slot),
+        to: 0,
+    });
+    assert!(deposit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    assert_eq!(
+        session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
+        vec![ServerPacket::TradeGold { amount: 25 }]
+    );
+    let (_, own_offer) = session.shared_trade_confirm();
+    let own_offer = own_offer.expect("validated own offer");
+    assert_eq!(session.world_snapshot().gold, starting_gold - 25);
+
+    session
+        .restore_active_character_checkpoint(&before_trade)
+        .expect("restore pre-trade crash checkpoint");
+    assert_eq!(session.world_snapshot().gold, starting_gold);
+    assert!(session.world_snapshot().stage5_systems.trade.is_none());
+
+    let incoming_offer = super::SharedTradeOffer {
+        settlement_nonce: "00000000000000000000000000000002".to_string(),
+        account_id: "trader-account".to_string(),
+        character_index: 1,
+        character_name: "Trader".to_string(),
+        partner_name: active.character_name.clone(),
+        gold: 10,
+        items: Vec::new(),
+    };
+    let event_id = "a".repeat(64);
+    let packets = session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("durable projection");
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DeleteItem { unique_id, count }
+            if *unique_id == offered_item.unique_id && *count == u16::try_from(offered_item.quantity).expect("fixture quantity fits protocol")
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 10 })));
+    assert_eq!(session.world_snapshot().gold, starting_gold - 15);
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == offered_item.unique_id));
+    assert!(session.world_snapshot().stage5_systems.trade.is_none());
+    assert!(session.has_shared_economy_projection_event(&event_id));
+
+    let retry = session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("idempotent retry");
+    assert!(retry.is_empty());
+    assert_eq!(session.world_snapshot().gold, starting_gold - 15);
+}
+
+#[test]
+fn shared_trade_projection_save_failure_rolls_back_and_retries_once() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let starting_gold = session.world_snapshot().gold;
+    let active = session.active_identity().expect("active identity");
+    let offered_item = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion")
+        .expect("demo inventory should include red potion");
+    let before_projection = session
+        .active_character_checkpoint()
+        .expect("pre-projection checkpoint");
+
+    session.trade_request("Trader");
+    session.handle_packet(ClientPacket::TradeReply {
+        accept_invite: true,
+    });
+    let deposit = session.handle_packet(ClientPacket::DepositTradeItem {
+        from: i32::from(offered_item.slot),
+        to: 0,
+    });
+    assert!(deposit
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
+    assert_eq!(
+        session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
+        vec![ServerPacket::TradeGold { amount: 25 }]
+    );
+    let (_, own_offer) = session.shared_trade_confirm();
+    let own_offer = own_offer.expect("completed own offer");
+    session
+        .restore_active_character_checkpoint(&before_projection)
+        .expect("simulate pre-settlement restart");
+    let incoming_offer = super::SharedTradeOffer {
+        settlement_nonce: "00000000000000000000000000000002".to_string(),
+        account_id: "trader-account".to_string(),
+        character_index: 1,
+        character_name: "Trader".to_string(),
+        partner_name: active.character_name.clone(),
+        gold: 10,
+        items: Vec::new(),
+    };
+    let event_id = "d".repeat(64);
+    let before_world = session.world_snapshot();
+    assert_eq!(before_world.gold, starting_gold);
+    assert!(before_world.stage5_systems.trade.is_none());
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert!(session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect_err("injected save failure must reject the projection")
+        .contains("injected account-store persistence failure"));
+    assert_eq!(session.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &session
+                .active_character_checkpoint()
+                .expect("rolled-back live checkpoint"),
+        )
+        .expect("rolled-back checkpoint should serialize"),
+        serde_json::to_string(&before_projection).expect("baseline checkpoint should serialize"),
+        "gold, inventory, trade state, and projection marker must all roll back"
+    );
+    assert!(!session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+
+    let retry = session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("fault is one-shot and durable trade must retry");
+    assert!(retry
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
+    assert!(retry.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DeleteItem { unique_id, count }
+            if *unique_id == offered_item.unique_id
+                && *count == u16::try_from(offered_item.quantity).expect("fixture quantity fits protocol")
+    )));
+    assert!(retry
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 10 })));
+    assert_eq!(session.world_snapshot().gold, starting_gold - 15);
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == offered_item.unique_id));
+    assert!(session.world_snapshot().stage5_systems.trade.is_none());
+    assert!(session.has_shared_economy_projection_event(&event_id));
+    assert!(!session
+        .dirty_economy_projection_event_ids
+        .contains(&event_id));
+    assert!(session
+        .apply_shared_trade_settlement_projection(&event_id, &own_offer, &incoming_offer)
+        .expect("durable second retry")
+        .is_empty());
+}
+#[test]
 fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     // Regression guard for the F-07 trade item-swap exploit: a player deposits a
     // valuable item, then swaps a cheaper item into the same inventory slot
@@ -56351,6 +62125,7 @@ fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     // holds the deposited item and abort the trade rather than handing the
     // swapped-in item to the partner (while the attacker keeps the valuable one).
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_gold = session.world_snapshot().gold;
 
@@ -56430,6 +62205,7 @@ fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
 #[test]
 fn trade_packets_reject_bound_and_rental_items_before_locking() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let red_potion_slot = session
         .world_snapshot()
@@ -56478,6 +62254,7 @@ fn trade_packets_reject_bound_and_rental_items_before_locking() {
 #[test]
 fn trade_confirm_revalidates_offered_items_before_escrow_lock() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_gold = session.world_snapshot().gold;
     let red_potion_slot = session
@@ -56523,10 +62300,209 @@ fn trade_confirm_revalidates_offered_items_before_escrow_lock() {
         .is_some_and(|trade| !trade.completed && !trade.locked));
 }
 
+fn authenticated_demo_mail_session() -> SimulationSession {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+}
+
+fn assert_mail_send_rejected_atomically(
+    session: &mut SimulationSession,
+    name: String,
+    message: String,
+    items_idx: [u64; 5],
+    stamped: bool,
+) {
+    let before = session.world_snapshot();
+    assert_eq!(
+        session.handle_packet(ClientPacket::SendMail {
+            name,
+            message,
+            gold: 250,
+            items_idx,
+            stamped,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(session.world_snapshot(), before);
+}
+
+#[test]
+fn send_mail_requires_real_account_and_active_character_without_demo_scout_fallback() {
+    let mut unauthenticated = SimulationSession::new(SimulationConfig::default());
+    assert_mail_send_rejected_atomically(
+        &mut unauthenticated,
+        "Scout".to_string(),
+        "anonymous".to_string(),
+        [0; 5],
+        false,
+    );
+
+    let mut authenticated_only = SimulationSession::new(SimulationConfig::default());
+    assert!(authenticated_only
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    assert_mail_send_rejected_atomically(
+        &mut authenticated_only,
+        "Scout".to_string(),
+        "before StartGame".to_string(),
+        [0; 5],
+        false,
+    );
+
+    let mut selected_without_account = SimulationSession::new(SimulationConfig::default());
+    selected_without_account.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_mail_send_rejected_atomically(
+        &mut selected_without_account,
+        "Scout".to_string(),
+        "no demo fallback".to_string(),
+        [0; 5],
+        false,
+    );
+}
+
+#[test]
+fn send_mail_client_stamp_never_waives_postage() {
+    let mut session = authenticated_demo_mail_session();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 2_000;
+    session.save_active_character();
+
+    assert_eq!(
+        session.handle_packet(ClientPacket::MailCost {
+            gold: 1_500,
+            items_idx: [0; 5],
+            stamped: true,
+        }),
+        vec![ServerPacket::MailCost { cost: 100 }]
+    );
+    let packets = session.handle_packet(ClientPacket::SendMail {
+        name: "Scout".to_string(),
+        message: "forged stamp".to_string(),
+        gold: 1_500,
+        items_idx: [0; 5],
+        stamped: true,
+    });
+    assert!(matches!(
+        packets.as_slice(),
+        [
+            ServerPacket::LoseGold { gold: 1_600 },
+            ServerPacket::MailSent { result: 1 },
+            ServerPacket::ReceiveMail { .. }
+        ]
+    ));
+    assert_eq!(session.world_snapshot().gold, 400);
+
+    let mut overflow = authenticated_demo_mail_session();
+    overflow
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = u32::MAX;
+    let before_overflow = overflow.world_snapshot();
+    assert_eq!(
+        overflow.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "overflow".to_string(),
+            gold: u32::MAX,
+            items_idx: [0; 5],
+            stamped: true,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(overflow.world_snapshot(), before_overflow);
+}
+
+#[test]
+fn send_mail_rejects_invalid_text_and_every_ambiguous_or_ineligible_attachment_atomically() {
+    for (name, message) in [
+        (
+            "X".repeat(super::super::packets::MAX_MAIL_RECIPIENT_CHARS + 1),
+            "body".to_string(),
+        ),
+        ("Scout\n".to_string(), "body".to_string()),
+        ("Scout".to_string(), "bad\nbody".to_string()),
+        (
+            "Scout".to_string(),
+            "X".repeat(super::super::packets::MAX_MAIL_MESSAGE_CHARS + 1),
+        ),
+    ] {
+        let mut session = authenticated_demo_mail_session();
+        assert_mail_send_rejected_atomically(&mut session, name, message, [0; 5], false);
+    }
+
+    let mut duplicate = authenticated_demo_mail_session();
+    let duplicate_id = {
+        let inventory = duplicate.app.world().resource::<InventoryResource>();
+        super::item_unique_id(
+            inventory
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "dagger")
+                .expect("seed dagger"),
+        )
+    };
+    assert_mail_send_rejected_atomically(
+        &mut duplicate,
+        "Scout".to_string(),
+        "duplicate".to_string(),
+        [duplicate_id, duplicate_id, 0, 0, 0],
+        false,
+    );
+
+    let mut missing = authenticated_demo_mail_session();
+    assert_mail_send_rejected_atomically(
+        &mut missing,
+        "Scout".to_string(),
+        "missing".to_string(),
+        [u64::MAX, 0, 0, 0, 0],
+        false,
+    );
+
+    for mutation in 0..3 {
+        let mut session = authenticated_demo_mail_session();
+        let unique_id = {
+            let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+            let dagger = inventory
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "dagger")
+                .expect("seed dagger");
+            match mutation {
+                0 => dagger.container = ItemContainer::Storage,
+                1 => dagger.rental_locked = true,
+                2 => dagger.rental_binding_flags = super::CRYSTAL_BIND_DONT_TRADE,
+                _ => unreachable!(),
+            }
+            super::item_unique_id(dagger)
+        };
+        assert_mail_send_rejected_atomically(
+            &mut session,
+            "Scout".to_string(),
+            "ineligible".to_string(),
+            [unique_id, 0, 0, 0, 0],
+            false,
+        );
+    }
+}
+
 #[test]
 fn mail_friend_packets_preserve_crystal_ack_surface() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_mail_session();
     session
         .app
         .world_mut()
@@ -56562,7 +62538,7 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
         sent_packets.as_slice(),
         [
             ServerPacket::LoseGold { gold: 250 },
-            ServerPacket::MailSent { result: 0 },
+            ServerPacket::MailSent { result: 1 },
             ServerPacket::ReceiveMail { mail }
         ] if mail.len() == 1
             && mail[0].mail_id == 1
@@ -56603,14 +62579,14 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
         collected_packets.as_slice(),
         [
             ServerPacket::GainedGold { gold: 250 },
-            ServerPacket::ParcelCollected { result: 0 },
+            ServerPacket::ParcelCollected { result: 1 },
             ServerPacket::ReceiveMail { mail }
         ] if mail.len() == 1
             && mail[0].mail_id == 1
             && mail[0].sender_name == "Scout"
             && mail[0].message == "Delivery"
             && mail[0].collected
-            && mail[0].gold == 250
+            && mail[0].gold == 0
             && mail[0].items.is_empty()
             && mail[0].date_sent_binary_datetime != 0
     ));
@@ -56618,12 +62594,14 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
         session.handle_packet(ClientPacket::DeleteMail { mail_id: 1 }),
         vec![ServerPacket::ReceiveMail { mail: Vec::new() }]
     );
-    assert_eq!(
-        session.handle_packet(ClientPacket::LockMail {
-            mail_id: 1,
-            lock: true,
-        }),
-        vec![ServerPacket::ReceiveMail { mail: Vec::new() }]
+    assert!(
+        session
+            .handle_packet(ClientPacket::LockMail {
+                mail_id: 1,
+                lock: true,
+            })
+            .is_empty(),
+        "locking an already-deleted mail is Crystal's silent no-op"
     );
     assert_eq!(
         session.handle_packet(ClientPacket::RefreshFriends),
@@ -56671,8 +62649,7 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
 
 #[test]
 fn mail_send_to_blocked_friend_uses_crystal_blacklist_rejection() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_mail_session();
     session
         .app
         .world_mut()
@@ -56696,19 +62673,7 @@ fn mail_send_to_blocked_friend_uses_crystal_blacklist_rejection() {
         items_idx: [0; 5],
         stamped: false,
     });
-    let blacklist_message = super::localized_text_or_fallback(
-        super::LanguageCode::English,
-        "server.CannotMailPlayerOnBlacklist",
-        "server.CannotMailPlayerOnBlacklist",
-    );
-
-    assert_eq!(
-        packets,
-        vec![ServerPacket::Chat {
-            message: blacklist_message,
-            chat_type: ChatType::System,
-        }]
-    );
+    assert_eq!(packets, vec![ServerPacket::MailSent { result: -1 }]);
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.gold, 1_000);
     assert!(snapshot.stage5_systems.mail.is_empty());
@@ -56719,6 +62684,13 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
     let config = SimulationConfig::default();
     add_rental_mail_target(&config, "ParcelTarget", 81);
     let mut sender = SimulationSession::new(config.clone());
+    assert!(sender
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     sender.handle_packet(ClientPacket::StartGame { character_index: 0 });
     sender
         .app
@@ -56736,6 +62708,7 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
         dagger.added_attack = 7;
         super::item_unique_id(dagger)
     };
+    sender.save_active_character();
 
     let sent_packets = sender.handle_packet(ClientPacket::SendMail {
         name: "ParcelTarget".to_string(),
@@ -56756,7 +62729,7 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
     )));
     assert!(sent_packets
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 0 })));
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
     let sender_snapshot = sender.world_snapshot();
     assert_eq!(sender_snapshot.gold, 1_400);
     assert!(!sender_snapshot
@@ -56803,23 +62776,1502 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
     )));
     assert!(claim_packets
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 0 })));
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
     let recipient_snapshot = recipient.world_snapshot();
     assert_eq!(recipient_snapshot.gold, 2_780);
     assert!(recipient_snapshot.inventory_items.iter().any(|item| {
         item.key == "dagger" && item.durability_current == Some(13) && item.added_attack == 7
     }));
-    assert!(recipient_snapshot
+    assert!(recipient_snapshot.stage5_systems.mail.iter().any(|mail| {
+        mail.id == 1
+            && mail.claimed
+            && mail.gold == 0
+            && mail.items.is_empty()
+            && mail.item_states_json.is_empty()
+    }));
+}
+
+#[test]
+fn cross_account_send_mail_faults_leave_live_store_and_file_unchanged() {
+    for (label, fault) in [
+        (
+            "before-persist",
+            AccountStoreTransactionFault::BeforePersist,
+        ),
+        ("persist", AccountStoreTransactionFault::Persist),
+    ] {
+        let (dir, config) = unique_mail_transaction_store(label);
+        let path = dir.join("accounts.json");
+        let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+        let before_world = sender.world_snapshot();
+        let before_store = serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned"),
+        )
+        .expect("account store should encode");
+        let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+
+        config.inject_account_store_transaction_fault(fault);
+        assert_eq!(
+            sender.handle_packet(ClientPacket::SendMail {
+                name: "AtomicTarget".to_string(),
+                message: format!("fault injection {label}"),
+                gold: 1_500,
+                items_idx: [dagger_unique_id, 0, 0, 0, 0],
+                stamped: false,
+            }),
+            vec![ServerPacket::MailSent { result: -1 }]
+        );
+
+        assert_eq!(sender.world_snapshot(), before_world);
+        assert_eq!(
+            serde_json::to_string(
+                &*config
+                    .account_store
+                    .lock()
+                    .expect("account store mutex should not be poisoned")
+            )
+            .expect("account store should encode"),
+            before_store
+        );
+        assert_eq!(
+            std::fs::read(&path).expect("mail fixture file should remain readable"),
+            before_file
+        );
+
+        let reloaded = SimulationConfig::default().with_account_store_path(path);
+        let store = reloaded
+            .account_store
+            .lock()
+            .expect("reloaded account store mutex should not be poisoned");
+        let sender_save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("reloaded sender save should exist");
+        assert_eq!(sender_save.gold, 3_000);
+        assert!(sender_save.inventory_items_json.iter().any(|state| {
+            serde_json::from_str::<ItemState>(state)
+                .ok()
+                .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+        }));
+        let recipient_mail = store
+            .accounts
+            .get("atomic-target-account")
+            .and_then(|account| account.saves.get(&0))
+            .and_then(|save| save.stage5_systems_json.as_deref())
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .map(|systems| systems.mail)
+            .unwrap_or_default();
+        assert!(recipient_mail.is_empty());
+        drop(store);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+}
+
+#[test]
+fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
+    let (dir, config) = unique_mail_transaction_store("success");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+
+    let packets = sender.handle_packet(ClientPacket::SendMail {
+        name: "AtomicTarget".to_string(),
+        message: "one atomic delivery".to_string(),
+        gold: 1_500,
+        items_idx: [dagger_unique_id, 0, 0, 0, 0],
+        stamped: false,
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { gold } if *gold == 1_600
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DeleteItem { unique_id, count }
+            if *unique_id == dagger_unique_id && *count == 1
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert_eq!(sender.world_snapshot().gold, 1_400);
+    assert!(!sender
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == dagger_unique_id));
+
+    for persisted in [
+        config.clone(),
+        SimulationConfig::default().with_account_store_path(path),
+    ] {
+        let store = persisted
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let sender_save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("sender save should exist");
+        assert_eq!(sender_save.gold, 1_400);
+        assert!(!sender_save.inventory_items_json.iter().any(|state| {
+            serde_json::from_str::<ItemState>(state)
+                .ok()
+                .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+        }));
+        let recipient_save = store
+            .accounts
+            .get("atomic-target-account")
+            .and_then(|account| account.saves.get(&0))
+            .expect("recipient save should exist");
+        let systems = recipient_save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .expect("recipient systems should decode");
+        assert_eq!(
+            systems.mail.len(),
+            1,
+            "one call must write exactly one mail"
+        );
+        let mail = &systems.mail[0];
+        assert_eq!(mail.from, "Scout");
+        assert_eq!(mail.to, "AtomicTarget");
+        assert_eq!(mail.gold, 1_500);
+        assert_eq!(mail.item_states_json.len(), 1);
+        let attachment = serde_json::from_str::<ItemState>(&mail.item_states_json[0])
+            .expect("attachment should decode");
+        assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
+        assert_eq!(attachment.durability_current, Some(13));
+        assert_eq!(attachment.added_attack, 7);
+    }
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance() {
+    let (dir, config) = unique_mail_transaction_store("same-account-stale-sender");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+
+    let mut stale = SimulationSession::new(config.clone());
+    assert!(stale
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(stale.world_snapshot().gold, 3_000);
+    assert!(stale
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == dagger_unique_id));
+
+    assert!(first
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "first removes exact attachment".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    assert!(stale
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "stale sender without attachment".to_string(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert!(
+        super::super::save::persist_active_character_save(stale.app.world())
+            .expect_err("stale full save must fail closed")
+            .contains("stale full character save rejected")
+    );
+    assert!(
+        stale
+            .handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .is_empty(),
+        "an InGame session must not re-enter StartGame"
+    );
+    assert!(stale
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .is_some());
+    assert!(stale
+        .try_handle_packet(ClientPacket::Disconnect)
+        .expect_err("stale disconnect save must fail closed")
+        .contains("stale full character save rejected"));
+    assert!(stale.handle_packet(ClientPacket::LogOut).is_empty());
+    assert!(stale
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .is_some());
+
+    for durable in [
+        config.clone(),
+        SimulationConfig::default().with_account_store_path(path),
+    ] {
+        let store = durable
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let sender_save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("sender save should remain durable");
+        assert_eq!(sender_save.revision, 3);
+        assert_eq!(sender_save.gold, 1_400, "stale balance must not win");
+        assert!(
+            !sender_save.inventory_items_json.iter().any(|state| {
+                serde_json::from_str::<ItemState>(state)
+                    .ok()
+                    .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+            }),
+            "the sent exact attachment must not be resurrected"
+        );
+
+        let recipient_save = store
+            .accounts
+            .get("atomic-target-account")
+            .and_then(|account| account.saves.get(&0))
+            .expect("recipient save should remain durable");
+        assert_eq!(recipient_save.revision, 2);
+        let recipient_mail = recipient_save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .map(|systems| systems.mail)
+            .unwrap_or_default();
+        assert_eq!(recipient_mail.len(), 2);
+        assert!(recipient_mail
+            .iter()
+            .any(|mail| mail.body == "first removes exact attachment"));
+        assert!(recipient_mail
+            .iter()
+            .any(|mail| mail.body == "stale sender without attachment"));
+    }
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_sender_cannot_mail_attachment_missing_from_authoritative_save() {
+    let (dir, config) = unique_mail_transaction_store("stale-authoritative-attachment");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    let mut stale = SimulationSession::new(config.clone());
+    stale.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(first
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "authoritative owner sends once".to_string(),
+            gold: 0,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let before_world = stale.world_snapshot();
+    let before_store = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should encode");
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+    assert_eq!(
+        stale.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "stale duplicate attachment".to_string(),
+            gold: 0,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(stale.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+        )
+        .expect("account store should encode"),
+        before_store
+    );
+    assert_eq!(
+        std::fs::read(&path).expect("rejected stale attachment must preserve file"),
+        before_file
+    );
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item() {
+    let (dir, config) = unique_mail_transaction_store("same-account-stale-gameshop");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    first
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 500_000;
+    first.save_active_character();
+
+    let mut stale = SimulationSession::new(config.clone());
+    stale.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(first
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "attachment before stale shop".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    assert!(stale
+        .handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: 1,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 165_000 })));
+    assert_eq!(stale.world_snapshot().gold, 333_400);
+    assert!(!stale
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == dagger_unique_id));
+    assert!(stale.handle_packet(ClientPacket::LogOut).is_empty());
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let store = reloaded
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let sender_save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .expect("sender save should remain durable");
+    assert_eq!(sender_save.revision, 4);
+    assert_eq!(sender_save.gold, 333_400);
+    assert!(!sender_save.inventory_items_json.iter().any(|state| {
+        serde_json::from_str::<ItemState>(state)
+            .ok()
+            .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+    }));
+    let sender_systems = sender_save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+        .unwrap_or_default();
+    assert_eq!(sender_systems.mail.len(), 1);
+    assert_eq!(sender_systems.mail[0].from, "Gameshop");
+    let target_systems = store
+        .accounts
+        .get("atomic-target-account")
+        .and_then(|account| account.saves.get(&0))
+        .and_then(|save| save.stage5_systems_json.as_deref())
+        .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+        .unwrap_or_default();
+    assert_eq!(target_systems.mail.len(), 1);
+    assert_eq!(target_systems.mail[0].body, "attachment before stale shop");
+    drop(store);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn concurrent_same_account_mail_transactions_have_no_lost_update() {
+    let (dir, config) = unique_mail_transaction_store("same-account-concurrent");
+    let path = dir.join("accounts.json");
+    let (mut first, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    let mut second = SimulationSession::new(config.clone());
+    second.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    second.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let barrier = std::sync::Arc::new(std::sync::Barrier::new(3));
+    let first_barrier = barrier.clone();
+    let first_thread = std::thread::spawn(move || {
+        first_barrier.wait();
+        let packets = first.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "concurrent exact attachment".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        });
+        (first, packets)
+    });
+    let second_barrier = barrier.clone();
+    let second_thread = std::thread::spawn(move || {
+        second_barrier.wait();
+        let packets = second.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "concurrent no attachment".to_string(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        (second, packets)
+    });
+    barrier.wait();
+    let (mut first, first_packets) = first_thread.join().expect("first sender should join");
+    let (mut second, second_packets) = second_thread.join().expect("second sender should join");
+    for packets in [&first_packets, &second_packets] {
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    }
+
+    // Whichever session committed first is stale after the second commit. Its
+    // logout must fail closed instead of rewriting the final durable image.
+    let _ = first.handle_packet(ClientPacket::LogOut);
+    let _ = second.handle_packet(ClientPacket::LogOut);
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let store = reloaded
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let sender_save = store
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .expect("sender save should remain durable");
+    assert_eq!(sender_save.revision, 3);
+    assert_eq!(sender_save.gold, 1_400);
+    assert!(!sender_save.inventory_items_json.iter().any(|state| {
+        serde_json::from_str::<ItemState>(state)
+            .ok()
+            .is_some_and(|item| super::item_unique_id(&item) == dagger_unique_id)
+    }));
+    let target_save = store
+        .accounts
+        .get("atomic-target-account")
+        .and_then(|account| account.saves.get(&0))
+        .expect("target save should remain durable");
+    assert_eq!(target_save.revision, 2);
+    let target_mail = target_save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+        .map(|systems| systems.mail)
+        .unwrap_or_default();
+    assert_eq!(target_mail.len(), 2);
+    let nonces = target_mail
+        .iter()
+        .map(|mail| mail.delivery_nonce.as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(nonces.len(), 2);
+    assert!(nonces.iter().all(|nonce| !nonce.is_empty()));
+    assert!(target_mail
+        .iter()
+        .any(|mail| mail.body == "concurrent exact attachment"));
+    assert!(target_mail
+        .iter()
+        .any(|mail| mail.body == "concurrent no attachment"));
+    drop(store);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn stale_online_recipient_save_cannot_overwrite_committed_external_mail() {
+    let (dir, config) = unique_mail_transaction_store("online-recipient");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(recipient.world_snapshot().stage5_systems.mail.is_empty());
+
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "survive stale online save".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    // The recipient World predates the delivery. Saving it directly must merge
+    // the externally committed mailbox instead of overwriting it.
+    assert!(recipient.world_snapshot().stage5_systems.mail.is_empty());
+    recipient.save_active_character();
+    let systems = stage5_systems_for_account_character(&config, "atomic-target-account", 0);
+    assert_eq!(systems.mail.len(), 1);
+    assert_eq!(systems.mail[0].body, "survive stale online save");
+    assert_eq!(systems.mail[0].gold, 1_500);
+    assert_eq!(systems.mail[0].item_states_json.len(), 1);
+
+    let reloaded = SimulationConfig::default().with_account_store_path(dir.join("accounts.json"));
+    let reloaded_systems =
+        stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0);
+    assert_eq!(reloaded_systems.mail.len(), 1);
+    assert_eq!(reloaded_systems.mail[0].body, "survive stale online save");
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status() {
+    let (dir, config) = unique_mail_transaction_store("online-gameshop-collision");
+    let path = dir.join("accounts.json");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    recipient
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 500;
+    let recipient_before_shop_failure = recipient.world_snapshot();
+    let file_before_shop_failure = std::fs::read(&path).expect("mail fixture file should exist");
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    let rejected_shop_packets = recipient.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    assert!(!rejected_shop_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { .. })));
+    assert_eq!(recipient.world_snapshot(), recipient_before_shop_failure);
+    assert_eq!(
+        std::fs::read(&path).expect("failed game-shop transaction must preserve file"),
+        file_before_shop_failure
+    );
+
+    assert!(recipient
+        .handle_packet(ClientPacket::GameShopBuy {
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 110 })));
+    {
+        let mut stage5 = recipient
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        let local = stage5
+            .stage5_systems
+            .mail
+            .first_mut()
+            .expect("game-shop purchase should create local mail");
+        assert_eq!(local.id, 1);
+        local.opened = true;
+        local.locked = true;
+    }
+
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    let sender_before_failure = sender.world_snapshot();
+    let recipient_before_failure = recipient.world_snapshot();
+    let file_before_failure = std::fs::read(&path).expect("mail fixture file should exist");
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert_eq!(
+        sender.handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "must not partially arrive".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(sender.world_snapshot(), sender_before_failure);
+    assert_eq!(recipient.world_snapshot(), recipient_before_failure);
+    assert_eq!(
+        std::fs::read(&path).expect("failed transaction must preserve file"),
+        file_before_failure
+    );
+
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "external parcel with gold".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let persisted_before_recipient_save =
+        stage5_systems_for_account_character(&config, "atomic-target-account", 0);
+    assert_eq!(persisted_before_recipient_save.mail.len(), 2);
+    assert_eq!(persisted_before_recipient_save.mail[0].id, 1);
+    let persisted_external = persisted_before_recipient_save
+        .mail
+        .iter()
+        .find(|mail| mail.body == "external parcel with gold")
+        .expect("external delivery should be durably appended");
+    assert_eq!(persisted_external.id, 2);
+
+    recipient.save_active_character();
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let systems = stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0);
+    assert_eq!(
+        systems.mail.len(),
+        2,
+        "both distinct deliveries must survive"
+    );
+    let ids = systems
+        .mail
+        .iter()
+        .map(|mail| mail.id)
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(ids.len(), 2, "mail IDs must be unique after save/reload");
+
+    let game_shop_mail = systems
+        .mail
+        .iter()
+        .find(|mail| mail.from == "Gameshop")
+        .expect("game-shop attachment mail must survive");
+    assert!(game_shop_mail.opened, "local opened state must not regress");
+    assert!(game_shop_mail.locked, "local locked state must not regress");
+    assert_eq!(game_shop_mail.item_states_json.len(), 1);
+
+    let external_mail = systems
+        .mail
+        .iter()
+        .find(|mail| mail.body == "external parcel with gold")
+        .expect("external player mail must survive");
+    assert_eq!(external_mail.gold, 1_500);
+    assert_eq!(external_mail.item_states_json.len(), 1);
+    let attachment = serde_json::from_str::<ItemState>(&external_mail.item_states_json[0])
+        .expect("external exact attachment should decode");
+    assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
+    assert_eq!(sender.world_snapshot().gold, 1_400);
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+fn strict_mail_attachment_json(key: &str, unique_id: u64) -> String {
+    let mut item = super::seed_inventory_items()
+        .into_iter()
+        .find(|item| item.key == key)
+        .unwrap_or_else(|| panic!("strict mail fixture {key} must be a seeded Crystal item"));
+    item.unique_id = unique_id;
+    super::validate_item_state_carrier(&item)
+        .expect("strict mail fixture must pass the production carrier validator");
+    serde_json::to_string(&item).expect("strict mail fixture should encode")
+}
+
+#[test]
+fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
+    let local_attachment = strict_mail_attachment_json("bronze-helmet", 91);
+    let external_attachment = strict_mail_attachment_json("dagger", 92);
+    let mut local_mail = vec![Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "local-delivery".to_string(),
+        from: "Gameshop".to_string(),
+        to: "AtomicTarget".to_string(),
+        subject: "Game shop purchase".to_string(),
+        body: "local purchase".to_string(),
+        gold: 0,
+        items: vec!["bronze-helmet".to_string()],
+        item_states_json: vec![local_attachment],
+        opened: true,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    }];
+    let external = Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "external-delivery".to_string(),
+        from: "Scout".to_string(),
+        to: "AtomicTarget".to_string(),
+        subject: String::new(),
+        body: "external parcel".to_string(),
+        gold: 1_500,
+        items: vec!["dagger".to_string()],
+        item_states_json: vec![external_attachment],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    };
+
+    assert!(super::super::save::merge_external_stage5_mail(
+        &mut local_mail,
+        vec![external.clone()]
+    )
+    .expect("collision should be repairable"));
+    assert_eq!(local_mail.len(), 2);
+    assert_eq!(local_mail[0].id, 1, "active local ID must remain stable");
+    assert_eq!(
+        local_mail[1].id, 2,
+        "incoming external entry is deterministically re-keyed"
+    );
+    assert_eq!(local_mail[1].body, external.body);
+    assert_eq!(local_mail[1].gold, external.gold);
+    assert_eq!(local_mail[1].item_states_json, external.item_states_json);
+    assert!(local_mail[0].opened);
+    assert_eq!(
+        local_mail
+            .iter()
+            .map(|mail| mail.id)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        2
+    );
+    assert!(
+        !super::super::save::merge_external_stage5_mail(&mut local_mail, vec![external])
+            .expect("same external delivery should remain identifiable after re-key")
+    );
+    assert_eq!(local_mail.len(), 2);
+}
+
+#[test]
+fn identical_mail_content_with_distinct_delivery_nonces_is_never_deduplicated() {
+    let first = Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "delivery-a".to_string(),
+        from: "Scout".to_string(),
+        to: "AtomicTarget".to_string(),
+        subject: String::new(),
+        body: "same content".to_string(),
+        gold: 500,
+        items: vec!["dagger".to_string()],
+        item_states_json: vec![strict_mail_attachment_json("dagger", 92)],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    };
+    let mut second = first.clone();
+    second.delivery_nonce = "delivery-b".to_string();
+    let mut local_mail = vec![first];
+
+    assert!(
+        super::super::save::merge_external_stage5_mail(&mut local_mail, vec![second.clone()])
+            .expect("distinct delivery should append")
+    );
+    assert_eq!(local_mail.len(), 2);
+    assert_eq!(local_mail[0].id, 1);
+    assert_eq!(local_mail[1].id, 2);
+    assert_eq!(local_mail[0].body, local_mail[1].body);
+    assert_ne!(local_mail[0].delivery_nonce, local_mail[1].delivery_nonce);
+
+    assert!(
+        !super::super::save::merge_external_stage5_mail(&mut local_mail, vec![second])
+            .expect("repeated external delivery should be idempotent")
+    );
+    assert_eq!(local_mail.len(), 2);
+}
+
+#[test]
+fn legacy_same_header_claimed_external_consumes_local_and_silently_prevents_second_claim() {
+    let config = SimulationConfig::default();
+    let mut session = SimulationSession::new(config.clone());
+    assert!(session
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let exact_item = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item.key == "dagger")
+        .expect("starter dagger should exist")
+        .clone();
+    let local_legacy = Stage5MailMessage {
+        id: 41,
+        delivery_nonce: String::new(),
+        from: "Legacy Sender".to_string(),
+        to: "Scout".to_string(),
+        subject: "Legacy parcel".to_string(),
+        body: "Stable header identity".to_string(),
+        gold: 777,
+        items: vec![exact_item.key.clone()],
+        item_states_json: vec![
+            serde_json::to_string(&exact_item).expect("exact legacy item should encode")
+        ],
+        opened: false,
+        locked: true,
+        claimed: false,
+        deleted: false,
+    };
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .mail = vec![local_legacy.clone()];
+
+    let mut external_claimed = local_legacy;
+    external_claimed.gold = 0;
+    external_claimed.items.clear();
+    external_claimed.item_states_json.clear();
+    external_claimed.opened = true;
+    external_claimed.locked = false;
+    external_claimed.claimed = true;
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("demo character save should exist");
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<crate::config::Stage5SystemsState>)
+            .transpose()
+            .expect("persisted stage5 systems should decode")
+            .unwrap_or_default();
+        systems.mail = vec![external_claimed];
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("claimed legacy mail should encode"));
+    }
+    config
+        .save_account_store_account("demo")
+        .expect("claimed legacy mail should persist");
+
+    assert!(session.refresh_active_external_mail());
+    let merged_snapshot = session.world_snapshot();
+    let merged = &merged_snapshot.stage5_systems.mail;
+    assert_eq!(merged.len(), 1);
+    assert_eq!(merged[0].id, 41, "visible legacy ID must remain stable");
+    assert!(merged[0].delivery_nonce.starts_with("legacy-"));
+    assert!(merged[0].claimed);
+    assert_eq!(merged[0].gold, 0);
+    assert!(merged[0].items.is_empty());
+    assert!(merged[0].item_states_json.is_empty());
+
+    let before = session.world_snapshot();
+    assert_eq!(
+        session.handle_packet(ClientPacket::CollectParcel { mail_id: 41 }),
+        Vec::new(),
+        "a repeated direct CollectParcel must be silent"
+    );
+    assert_eq!(session.world_snapshot(), before);
+}
+
+#[test]
+fn legacy_identical_headers_with_different_ids_remain_distinct() {
+    let first = Stage5MailMessage {
+        id: 1,
+        delivery_nonce: String::new(),
+        from: "Legacy Sender".to_string(),
+        to: "Scout".to_string(),
+        subject: "Repeated parcel".to_string(),
+        body: "Same legacy content".to_string(),
+        gold: 500,
+        items: vec!["dagger".to_string()],
+        item_states_json: vec![strict_mail_attachment_json("dagger", 92)],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    };
+    let mut second = first.clone();
+    second.id = 2;
+    let mut local_mail = vec![first];
+
+    assert!(
+        super::super::save::merge_external_stage5_mail(&mut local_mail, vec![second])
+            .expect("different legacy IDs should remain separate")
+    );
+    assert_eq!(local_mail.len(), 2);
+    assert_eq!(local_mail[0].id, 1);
+    assert_eq!(local_mail[1].id, 2);
+    assert_ne!(local_mail[0].delivery_nonce, local_mail[1].delivery_nonce);
+}
+
+#[test]
+fn collision_refresh_keeps_visible_local_id_and_claim_targets_original_mail() {
+    let (dir, config) = unique_mail_transaction_store("visible-mail-id-collision");
+    let path = dir.join("accounts.json");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    recipient
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 500;
+    recipient.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+    recipient.handle_packet(ClientPacket::LockMail {
+        mail_id: 1,
+        lock: true,
+    });
+    let visible_local = recipient.world_snapshot().stage5_systems.mail[0].clone();
+    assert_eq!(visible_local.id, 1);
+    assert_eq!(visible_local.from, "Gameshop");
+    assert!(visible_local.locked);
+
+    // Recreate the legacy/crash-window state under review: the active client
+    // has already seen local id=1, but its durable mailbox does not contain it.
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get_mut("atomic-target-account")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("recipient save should exist");
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .expect("recipient systems should decode");
+        systems.mail.clear();
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("legacy collision fixture should encode"));
+    }
+    config
+        .save_account_store_account("atomic-target-account")
+        .expect("legacy collision fixture should persist");
+
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "external id one".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert_eq!(
+        stage5_systems_for_account_character(&config, "atomic-target-account", 0).mail[0].id,
+        1
+    );
+
+    assert!(recipient.refresh_active_external_mail());
+    // Repeating refresh before save must be idempotent even though durable mail
+    // still carries its pre-merge id=1.
+    assert!(!recipient.refresh_active_external_mail());
+    let merged = recipient.world_snapshot().stage5_systems.mail;
+    assert_eq!(merged.len(), 2);
+    let local = merged
+        .iter()
+        .find(|mail| mail.from == "Gameshop")
+        .expect("visible local mail should remain present");
+    assert_eq!(local.id, 1);
+    assert!(local.locked);
+    let external = merged
+        .iter()
+        .find(|mail| mail.body == "external id one")
+        .expect("incoming external mail should be appended");
+    assert_eq!(external.id, 2);
+    assert!(!external.claimed);
+
+    let claim_packets = recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 });
+    assert!(!claim_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedGold { gold } if *gold == 1_500
+    )));
+    let after_claim = recipient.world_snapshot();
+    assert!(after_claim
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "crystal-item-1288"));
+    assert!(!after_claim
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "dagger" && item.added_attack == 7));
+    assert!(after_claim
         .stage5_systems
         .mail
         .iter()
-        .any(|mail| mail.id == 1 && mail.claimed));
+        .find(|mail| mail.id == 1)
+        .is_some_and(|mail| mail.claimed && mail.from == "Gameshop"));
+    assert!(after_claim
+        .stage5_systems
+        .mail
+        .iter()
+        .find(|mail| mail.id == 2)
+        .is_some_and(|mail| !mail.claimed && mail.gold == 1_500));
+
+    recipient.save_active_character();
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let reloaded_mail =
+        stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0).mail;
+    assert_eq!(reloaded_mail.len(), 2);
+    assert_eq!(
+        reloaded_mail
+            .iter()
+            .map(|mail| mail.id)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        2
+    );
+    assert!(reloaded_mail
+        .iter()
+        .any(|mail| mail.id == 1 && mail.claimed && mail.from == "Gameshop"));
+    assert!(reloaded_mail.iter().any(|mail| {
+        mail.id == 2 && !mail.claimed && mail.gold == 1_500 && mail.item_states_json.len() == 1
+    }));
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn unlocked_active_mail_stays_unlocked_after_save_and_reload() {
+    let (dir, config) = unique_mail_transaction_store("mail-unlock-save");
+    let path = dir.join("accounts.json");
+    let mut recipient = SimulationSession::new(config.clone());
+    assert!(recipient
+        .handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    recipient
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .credit = 500;
+    recipient.handle_packet(ClientPacket::GameShopBuy {
+        g_index: 31,
+        quantity: 1,
+        price_type: 0,
+    });
+
+    recipient.handle_packet(ClientPacket::LockMail {
+        mail_id: 1,
+        lock: true,
+    });
+    recipient.save_active_character();
+    assert!(
+        stage5_systems_for_account_character(&config, "atomic-target-account", 0).mail[0].locked
+    );
+
+    recipient.handle_packet(ClientPacket::LockMail {
+        mail_id: 1,
+        lock: false,
+    });
+    assert!(!recipient.world_snapshot().stage5_systems.mail[0].locked);
+    recipient.save_active_character();
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let mail = stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0)
+        .mail
+        .into_iter()
+        .find(|mail| mail.id == 1)
+        .expect("game-shop mail should survive reload");
+    assert!(
+        !mail.locked,
+        "active unlock must win over stale durable lock"
+    );
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn self_send_mail_is_all_or_nothing_and_persists_once() {
+    let (dir, config) = unique_mail_transaction_store("self-send");
+    let path = dir.join("accounts.json");
+    let (mut sender, _) = prepare_atomic_mail_sender(&config);
+    let before_world = sender.world_snapshot();
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert_eq!(
+        sender.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "self fail".to_string(),
+            gold: 250,
+            items_idx: [0; 5],
+            stamped: false,
+        }),
+        vec![ServerPacket::MailSent { result: -1 }]
+    );
+    assert_eq!(sender.world_snapshot(), before_world);
+    assert_eq!(
+        std::fs::read(&path).expect("mail fixture file should remain readable"),
+        before_file
+    );
+
+    let packets = sender.handle_packet(ClientPacket::SendMail {
+        name: "Scout".to_string(),
+        message: "self success".to_string(),
+        gold: 250,
+        items_idx: [0; 5],
+        stamped: false,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert_eq!(sender.world_snapshot().gold, 2_750);
+    assert_eq!(sender.world_snapshot().stage5_systems.mail.len(), 1);
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let systems = stage5_systems_for_account_character(&reloaded, "demo", 0);
+    assert_eq!(systems.mail.len(), 1);
+    assert_eq!(systems.mail[0].body, "self success");
+    assert_eq!(systems.mail[0].gold, 250);
+    let reloaded_gold = reloaded
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .get("demo")
+        .and_then(|account| account.saves.get(&0))
+        .map(|save| save.gold);
+    assert_eq!(reloaded_gold, Some(2_750));
+
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_parcel_persist_failure_is_silent_and_leaves_world_store_and_file_unchanged() {
+    let (dir, config) = unique_mail_transaction_store("claim-persist-failure");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "claim must persist first".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let mut recipient = SimulationSession::new(config.clone());
+    recipient.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before_world = recipient.world_snapshot();
+    let before_store = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should encode");
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+
+    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+    assert_eq!(
+        recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        Vec::new(),
+        "a direct CollectParcel persistence failure must be silent"
+    );
+    assert_eq!(recipient.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+        )
+        .expect("account store should encode"),
+        before_store
+    );
+    assert_eq!(
+        std::fs::read(&path).expect("failed claim must preserve file"),
+        before_file
+    );
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let mail = stage5_systems_for_account_character(&reloaded, "atomic-target-account", 0)
+        .mail
+        .into_iter()
+        .find(|mail| mail.id == 1)
+        .expect("failed claim mail should remain");
+    assert!(!mail.claimed);
+    assert_eq!(mail.gold, 1_500);
+    assert_eq!(mail.item_states_json.len(), 1);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_external_parcel_is_durable_before_ack_and_repeat_is_silent() {
+    let (dir, config) = unique_mail_transaction_store("claim-durable-success");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "AtomicTarget".to_string(),
+            message: "durable exact parcel".to_string(),
+            gold: 1_500,
+            items_idx: [dagger_unique_id, 0, 0, 0, 0],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+
+    let mut recipient = SimulationSession::new(config.clone());
+    recipient.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let gold_before = recipient.world_snapshot().gold;
+    let packets = recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedGold { gold } if *gold == 1_500
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    let after = recipient.world_snapshot();
+    assert_eq!(after.gold, gold_before + 1_500);
+    assert!(after.inventory_items.iter().any(|item| {
+        item.key == "dagger" && item.durability_current == Some(13) && item.added_attack == 7
+    }));
+    assert!(after
+        .stage5_systems
+        .mail
+        .iter()
+        .any(|mail| mail.id == 1 && mail.claimed && mail.gold == 0));
+
+    let before_repeat = recipient.world_snapshot();
+    assert_eq!(
+        recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        Vec::new(),
+        "an in-memory repeated direct CollectParcel must be silent"
+    );
+    assert_eq!(recipient.world_snapshot(), before_repeat);
+
+    let reloaded_config = SimulationConfig::default().with_account_store_path(path);
+    let mut reloaded = SimulationSession::new(reloaded_config);
+    reloaded.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let reloaded_before_repeat = reloaded.world_snapshot();
+    assert_eq!(
+        reloaded.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        Vec::new(),
+        "a reloaded repeated direct CollectParcel must be silent"
+    );
+    assert_eq!(reloaded.world_snapshot(), reloaded_before_repeat);
+    assert_eq!(reloaded_before_repeat.gold, gold_before + 1_500);
+    assert!(reloaded_before_repeat.inventory_items.iter().any(|item| {
+        item.key == "dagger" && item.durability_current == Some(13) && item.added_attack == 7
+    }));
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn concurrent_sessions_cannot_claim_the_same_durable_mail_twice() {
+    let (dir, config) = unique_mail_transaction_store("claim-concurrent");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    sender.handle_packet(ClientPacket::SendMail {
+        name: "AtomicTarget".to_string(),
+        message: "single winner".to_string(),
+        gold: 1_500,
+        items_idx: [dagger_unique_id, 0, 0, 0, 0],
+        stamped: false,
+    });
+
+    let mut first = SimulationSession::new(config.clone());
+    let mut second = SimulationSession::new(config.clone());
+    for recipient in [&mut first, &mut second] {
+        recipient.handle_packet(ClientPacket::Login {
+            account_id: "atomic-target-account".to_string(),
+            password: "demo".to_string(),
+        });
+        recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    }
+    assert!(first
+        .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    let second_before = second.world_snapshot();
+    assert_eq!(
+        second.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        Vec::new(),
+        "the losing concurrent direct CollectParcel must be silent"
+    );
+    assert_eq!(second.world_snapshot(), second_before);
+    let durable = stage5_systems_for_account_character(&config, "atomic-target-account", 0);
+    assert_eq!(durable.mail.len(), 1);
+    assert!(durable.mail[0].claimed);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_self_mail_is_durable_before_success() {
+    let (dir, config) = unique_mail_transaction_store("claim-self");
+    let path = dir.join("accounts.json");
+    let (mut sender, _) = prepare_atomic_mail_sender(&config);
+    assert!(sender
+        .handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: "self durable claim".to_string(),
+            gold: 250,
+            items_idx: [0; 5],
+            stamped: false,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    assert!(sender
+        .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+
+    let reloaded = SimulationConfig::default().with_account_store_path(path);
+    let systems = stage5_systems_for_account_character(&reloaded, "demo", 0);
+    assert_eq!(systems.mail.len(), 1);
+    assert!(systems.mail[0].claimed);
+    assert_eq!(systems.mail[0].gold, 0);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn collect_parcel_bad_exact_json_is_silent_and_atomic() {
+    let (dir, config) = unique_mail_transaction_store("claim-bad-json");
+    let path = dir.join("accounts.json");
+    let (mut sender, dagger_unique_id) = prepare_atomic_mail_sender(&config);
+    sender.handle_packet(ClientPacket::SendMail {
+        name: "AtomicTarget".to_string(),
+        message: "corrupt exact parcel".to_string(),
+        gold: 1_500,
+        items_idx: [dagger_unique_id, 0, 0, 0, 0],
+        stamped: false,
+    });
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get_mut("atomic-target-account")
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("recipient save should exist");
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<crate::config::Stage5SystemsState>(state).ok())
+            .expect("recipient systems should decode");
+        systems.mail[0].item_states_json = vec!["{not-json".to_string()];
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("corrupt fixture envelope should encode"));
+    }
+    config
+        .save_account_store_account("atomic-target-account")
+        .expect("corrupt fixture should persist");
+
+    let mut recipient = SimulationSession::new(config.clone());
+    recipient.handle_packet(ClientPacket::Login {
+        account_id: "atomic-target-account".to_string(),
+        password: "demo".to_string(),
+    });
+    recipient.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before_world = recipient.world_snapshot();
+    let before_store = serde_json::to_string(
+        &*config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned"),
+    )
+    .expect("account store should encode");
+    let before_file = std::fs::read(&path).expect("mail fixture file should exist");
+    assert_eq!(
+        recipient.handle_packet(ClientPacket::CollectParcel { mail_id: 1 }),
+        Vec::new(),
+        "an invalid direct CollectParcel payload must be silently rejected"
+    );
+    assert_eq!(recipient.world_snapshot(), before_world);
+    assert_eq!(
+        serde_json::to_string(
+            &*config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned")
+        )
+        .expect("account store should encode"),
+        before_store
+    );
+    assert_eq!(
+        std::fs::read(&path).expect("bad JSON claim must preserve file"),
+        before_file
+    );
+    let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]
 fn mail_send_rejection_preserves_attachment_and_gold() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let mut session = authenticated_demo_mail_session();
     session
         .app
         .world_mut()
@@ -56856,6 +64308,7 @@ fn mail_send_rejection_preserves_attachment_and_gold() {
 #[test]
 fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(
@@ -56992,6 +64445,7 @@ fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
 #[test]
 fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let creature = mir2_protocol::ClientIntelligentCreature {
@@ -57072,6 +64526,7 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
 #[test]
 fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let creature = mir2_protocol::ClientIntelligentCreature {
@@ -57136,6 +64591,7 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
 #[test]
 fn intelligent_creature_filter_applies_category_and_grade_rules() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let creature = mir2_protocol::ClientIntelligentCreature {
@@ -57202,6 +64658,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "MirArmour(M)".to_string(),
@@ -57227,6 +64684,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "SharpDagger".to_string(),
@@ -57252,6 +64710,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
             cursed: false,
             socket_slots: 0,
             show_group_pickup: false,
+            exact_item: None,
         },
         1,
         "SpiritBlade".to_string(),
@@ -57327,6 +64786,7 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
 #[test]
 fn hero_packets_preserve_crystal_disabled_and_stage5_control_surface() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(
@@ -57440,6 +64900,7 @@ fn hero_packets_preserve_crystal_disabled_and_stage5_control_surface() {
 #[test]
 fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57507,6 +64968,7 @@ fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
 #[test]
 fn transfer_hero_item_moves_player_bag_item_to_hero_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57538,6 +65000,7 @@ fn transfer_hero_item_moves_player_bag_item_to_hero_inventory() {
 #[test]
 fn take_back_hero_item_returns_to_player_bag_slot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57604,6 +65067,7 @@ fn hero_inventory_transfer_persists_across_save_reload() {
 #[test]
 fn hero_inventory_book_requirement_rejects_missing_required_stat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57633,6 +65097,7 @@ fn hero_inventory_book_requirement_rejects_missing_required_stat() {
 #[test]
 fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57702,6 +65167,7 @@ fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
 #[test]
 fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57783,6 +65249,7 @@ fn new_hero_on_no_hero_map_stays_unsummoned_with_crystal_system_message() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::NewHero {
@@ -57861,6 +65328,7 @@ fn hero_is_unsummoned_when_entering_crystal_no_hero_map() {
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -57903,6 +65371,7 @@ fn hero_is_unsummoned_when_entering_crystal_no_hero_map() {
 #[test]
 fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_gold = session.world_snapshot().gold;
 
@@ -58065,7 +65534,15 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
 #[test]
 fn refine_packets_move_cancel_start_and_check_stage5_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .retain(|item| item.container != ItemContainer::Bag1 || item.slot != 2);
+    add_inventory_crystal_item(&mut session, "BlackIronOre", 2);
 
     let deposit_packets = session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
     assert_eq!(
@@ -58079,12 +65556,12 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     let after_deposit = session.world_snapshot();
     assert_eq!(
         after_deposit.stage5_systems.refine.slots.get(&0),
-        Some(&"training-manual".to_string())
+        Some(&"crystal-item-828".to_string())
     );
     assert!(!after_deposit
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-manual"));
+        .any(|item| item.key == "crystal-item-828"));
 
     let retrieve_packets =
         session.handle_packet(ClientPacket::RetrieveRefineItem { from: 0, to: 2 });
@@ -58100,7 +65577,7 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .world_snapshot()
         .inventory_items
         .iter()
-        .any(|item| item.key == "training-manual"));
+        .any(|item| item.key == "crystal-item-828"));
 
     session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
     let cancel_packets = session.handle_packet(ClientPacket::RefineCancel);
@@ -58130,8 +65607,8 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     assert!(in_oven.stage5_systems.refine.ready);
     assert_eq!(in_oven.stage5_systems.refine.pending_unique_id, 4);
 
-    // The starter ingredient has no DC/MC/SC and there is no BlackIronOre, so
-    // Crystal sets RefinedValue::None and the weapon is smashed on test.
+    // BlackIronOre is present, but there is no DC/MC/SC ingredient, so Crystal
+    // sets RefinedValue::None and the weapon is smashed on test.
     let check_packets = session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
     assert!(check_packets
         .iter()
@@ -58152,6 +65629,7 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
 #[test]
 fn refine_without_proper_materials_smashes_weapon() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Crystal proceeds even with no ingredients (RefinedValue stays None).
@@ -58177,7 +65655,15 @@ fn refine_without_proper_materials_smashes_weapon() {
 fn refine_outcome_is_deterministic_across_runs() {
     fn dagger_survives() -> bool {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .retain(|item| item.container != ItemContainer::Bag1 || item.slot != 2);
+        add_inventory_crystal_item(&mut session, "BlackIronOre", 2);
         session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
         session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
         session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
@@ -58252,6 +65738,7 @@ fn refine_deterministic_1_99_is_in_range_and_deterministic() {
 #[test]
 fn open_door_packet_updates_stage5_gate_state_and_emits_crystal_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let packets = session.handle_packet(ClientPacket::OpenDoor { door_index: 3 });
@@ -58274,12 +65761,17 @@ fn open_door_packet_updates_stage5_gate_state_and_emits_crystal_packet() {
 #[test]
 fn request_info_packets_return_crystal_map_monster_and_npc_data() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let map = crystal_respawn_manifest()
         .maps
         .into_iter()
-        .find(|map| map.map_index >= 0)
-        .expect("crystal respawn manifest should include maps");
+        .find(|map| {
+            map.map_index > 0
+                && map.big_map > 0
+                && crate::runtime::big_map::client_map_info(map.map_index).is_some()
+        })
+        .expect("crystal respawn manifest should include a usable Big Map");
     let monster = crystal_monster_manifest()
         .monsters
         .into_iter()
@@ -58294,10 +65786,13 @@ fn request_info_packets_return_crystal_map_monster_and_npc_data() {
     let map_packets = session.handle_packet(ClientPacket::RequestMapInfo {
         map_index: map.map_index,
     });
+    assert!(map_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::WorldMapSetup { .. })));
     assert!(map_packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::MapInformation { info }
-            if info.map_index == map.map_index && info.file_name == map.map_file_name
+        ServerPacket::NewMapInfo { map_index, info }
+            if *map_index == map.map_index && info.title == map.map_title
     )));
 
     let monster_packets = session.handle_packet(ClientPacket::RequestMonsterInfo {
@@ -58321,6 +65816,7 @@ fn request_info_packets_return_crystal_map_monster_and_npc_data() {
 #[test]
 fn relationship_packets_emit_crystal_hint_and_update_surfaces() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let face_player_message = mir2_game_data::localized_text_or_fallback(
@@ -58392,6 +65888,7 @@ fn relationship_packets_emit_crystal_hint_and_update_surfaces() {
 #[test]
 fn mentor_packets_emit_crystal_hint_and_update_surfaces() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let self_mentor_packets = session.handle_packet(ClientPacket::AddMentor {
@@ -58466,6 +65963,7 @@ fn mentor_packets_emit_crystal_hint_and_update_surfaces() {
 #[test]
 fn item_rental_packets_confirm_records_rented_item_and_binds_loan_payload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_gold = session.world_snapshot().gold;
 
@@ -58564,6 +66062,7 @@ fn item_rental_packets_confirm_records_rented_item_and_binds_loan_payload() {
 #[test]
 fn item_rental_cancel_returns_deposit_and_refunds_locked_fee() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let starting_gold = session.world_snapshot().gold;
 
@@ -58609,6 +66108,7 @@ fn item_rental_cancel_returns_deposit_and_refunds_locked_fee() {
 fn item_rental_records_persist_across_restart() {
     let config = SimulationConfig::default();
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::ItemRentalRequest);
     session.handle_packet(ClientPacket::ItemRentalPeriod { days: 3 });
@@ -58620,6 +66120,7 @@ fn item_rental_records_persist_across_restart() {
     session.save_active_character();
 
     let mut reloaded = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut reloaded);
     reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let packets = reloaded.handle_packet(ClientPacket::GetRentedItems);
 
@@ -58633,8 +66134,285 @@ fn item_rental_records_persist_across_restart() {
 }
 
 #[test]
+fn shared_item_rental_lender_rejects_malformed_envelope_without_mutation() {
+    for case in [
+        "json",
+        "id",
+        "name",
+        "zero-root",
+        "zero-child",
+        "invalid-tree",
+    ] {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        create_and_start_test_character(&mut session, "BadLenderEnvelope");
+        let mut item = malformed_incoming_item_tree(&mut session);
+        match case {
+            "zero-root" => item.quantity = 0,
+            "zero-child" => {
+                item.socketed
+                    .first_mut()
+                    .expect("real BronzeBell child")
+                    .quantity = 0;
+            }
+            "invalid-tree" => {
+                item.socketed
+                    .first_mut()
+                    .expect("real BronzeBell child")
+                    .key = "not-a-crystal-item".to_string();
+            }
+            _ => {}
+        }
+        let mut agreement = super::SharedItemRentalAgreement {
+            item: super::SharedItemRentalItemOffer {
+                transaction_nonce: "test-item-transaction".to_string(),
+                account_id: "owner-account".to_string(),
+                character_index: 91,
+                character_name: "BadLenderEnvelope".to_string(),
+                partner_name: "Borrower".to_string(),
+                item_state_json: serde_json::to_string(&item).unwrap(),
+                item_id: super::item_unique_id(&item),
+                item_name: item.name.clone(),
+                days: 3,
+            },
+            fee: super::SharedItemRentalFeeOffer {
+                transaction_nonce: "test-fee-transaction".to_string(),
+                account_id: "borrower-account".to_string(),
+                character_index: 7,
+                character_name: "Borrower".to_string(),
+                partner_name: "BadLenderEnvelope".to_string(),
+                fee: 41,
+            },
+        };
+        match case {
+            "json" => agreement.item.item_state_json = "{malformed".to_string(),
+            "id" => agreement.item.item_id = agreement.item.item_id.saturating_add(1),
+            "name" => agreement.item.item_name = "Mismatched Name".to_string(),
+            _ => {}
+        }
+
+        let retained = super::seed_inventory_items()
+            .into_iter()
+            .find(|candidate| candidate.key == "dagger")
+            .expect("retained rental fixture");
+        {
+            let mut rental = session
+                .app
+                .world_mut()
+                .resource_mut::<super::ItemRentalResource>();
+            rental.active = Some(super::super::resources::ActiveItemRentalState {
+                transaction_nonce: "test-item-transaction".to_string(),
+                partner_name: "Borrower".to_string(),
+                fee: 41,
+                days: 3,
+                deposited_item: Some(retained),
+                deposited_from: Some(7),
+                gold_locked: true,
+                item_locked: true,
+            });
+            rental
+                .rented_items
+                .push(super::super::resources::ItemRentalRecordState {
+                    item_id: 123,
+                    item_name: "Existing".to_string(),
+                    renting_player_name: "ExistingBorrower".to_string(),
+                    item_return_date_binary_datetime: 456,
+                });
+        }
+        let rental_before = {
+            let rental = session.app.world().resource::<super::ItemRentalResource>();
+            let active = rental.active.as_ref().expect("active rental fixture");
+            (
+                rental.has_rented_item,
+                serde_json::to_string(&rental.rented_items).unwrap(),
+                active.partner_name.clone(),
+                active.fee,
+                active.days,
+                active.deposited_from,
+                active.gold_locked,
+                active.item_locked,
+                serde_json::to_string(
+                    active
+                        .deposited_item
+                        .as_ref()
+                        .expect("retained source item"),
+                )
+                .unwrap(),
+            )
+        };
+        let gold_before = session.app.world().resource::<PlayerRuntimeResource>().gold;
+
+        assert_eq!(
+            session.apply_shared_item_rental_delivery(&super::SharedItemRentalDelivery::Lender(
+                agreement
+            ),),
+            vec![ServerPacket::CancelItemRental],
+            "malformed lender case {case} must fail before delivery"
+        );
+
+        let rental_after = session.app.world().resource::<super::ItemRentalResource>();
+        let active_after = rental_after
+            .active
+            .as_ref()
+            .expect("malformed lender delivery must retain active rental");
+        assert_eq!(
+            (
+                rental_after.has_rented_item,
+                serde_json::to_string(&rental_after.rented_items).unwrap(),
+                active_after.partner_name.clone(),
+                active_after.fee,
+                active_after.days,
+                active_after.deposited_from,
+                active_after.gold_locked,
+                active_after.item_locked,
+                serde_json::to_string(
+                    active_after
+                        .deposited_item
+                        .as_ref()
+                        .expect("malformed delivery retains source item"),
+                )
+                .unwrap(),
+            ),
+            rental_before,
+            "malformed lender case {case} must not mutate rental state"
+        );
+        assert_eq!(
+            session.app.world().resource::<PlayerRuntimeResource>().gold,
+            gold_before,
+            "malformed lender case {case} must not credit gold"
+        );
+    }
+}
+
+#[test]
+fn shared_item_rental_lender_delivery_requires_active_match_and_rejects_replay() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let item = {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let index = inventory
+            .inventory_items
+            .iter()
+            .position(|item| item.key == "dagger")
+            .expect("seed dagger should exist");
+        inventory.inventory_items.remove(index)
+    };
+    {
+        let mut rental = session
+            .app
+            .world_mut()
+            .resource_mut::<super::ItemRentalResource>();
+        rental.active = Some(super::super::resources::ActiveItemRentalState {
+            transaction_nonce: "test-item-transaction".to_string(),
+            partner_name: "Borrower".to_string(),
+            fee: 0,
+            days: 3,
+            deposited_item: Some(item.clone()),
+            deposited_from: Some(4),
+            gold_locked: false,
+            item_locked: true,
+        });
+    }
+    let agreement = super::SharedItemRentalAgreement {
+        item: super::SharedItemRentalItemOffer {
+            transaction_nonce: "test-item-transaction".to_string(),
+            account_id: "demo".to_string(),
+            character_index: 0,
+            character_name: "Scout".to_string(),
+            partner_name: "Borrower".to_string(),
+            item_state_json: serde_json::to_string(&item).expect("item should serialize"),
+            item_id: super::item_unique_id(&item),
+            item_name: item.name.clone(),
+            days: 3,
+        },
+        fee: super::SharedItemRentalFeeOffer {
+            transaction_nonce: "test-fee-transaction".to_string(),
+            account_id: "borrower-account".to_string(),
+            character_index: 7,
+            character_name: "Borrower".to_string(),
+            partner_name: "Scout".to_string(),
+            fee: 41,
+        },
+    };
+    let delivery = super::SharedItemRentalDelivery::Lender(agreement);
+    let gold_before = session.app.world().resource::<PlayerRuntimeResource>().gold;
+
+    let packets = session.apply_shared_item_rental_delivery(&delivery);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 41 })));
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        gold_before + 41
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .rented_items
+            .len(),
+        1
+    );
+
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental]
+    );
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        gold_before + 41,
+        "replay must not credit the rental fee twice"
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .rented_items
+            .len(),
+        1,
+        "replay must not duplicate the lender rental record"
+    );
+
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::ItemRentalResource>()
+        .active = Some(super::super::resources::ActiveItemRentalState {
+        transaction_nonce: "new-item-transaction".to_string(),
+        partner_name: "Borrower".to_string(),
+        fee: 0,
+        days: 3,
+        deposited_item: Some(item),
+        deposited_from: Some(4),
+        gold_locked: false,
+        item_locked: true,
+    });
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental],
+        "an old item-offer nonce must not match a new otherwise-identical rental"
+    );
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        gold_before + 41
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<super::ItemRentalResource>()
+            .rented_items
+            .len(),
+        1
+    );
+}
+
+#[test]
 fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -58649,6 +66427,7 @@ fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() 
         .expect("seed dagger should exist");
     let agreement = super::SharedItemRentalAgreement {
         item: super::SharedItemRentalItemOffer {
+            transaction_nonce: "test-item-transaction".to_string(),
             account_id: "owner-account".to_string(),
             character_index: 91,
             character_name: "Lender".to_string(),
@@ -58659,16 +66438,33 @@ fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() 
             days: 3,
         },
         fee: super::SharedItemRentalFeeOffer {
-            account_id: "borrower-account".to_string(),
+            transaction_nonce: "test-fee-transaction".to_string(),
+            account_id: "demo".to_string(),
             character_index: 0,
             character_name: "Scout".to_string(),
             partner_name: "Lender".to_string(),
             fee: 25,
         },
     };
+    {
+        let mut rental = session
+            .app
+            .world_mut()
+            .resource_mut::<super::ItemRentalResource>();
+        rental.active = Some(super::super::resources::ActiveItemRentalState {
+            transaction_nonce: "test-fee-transaction".to_string(),
+            partner_name: "Lender".to_string(),
+            fee: 25,
+            days: 1,
+            deposited_item: None,
+            deposited_from: None,
+            gold_locked: true,
+            item_locked: false,
+        });
+    }
+    let delivery = super::SharedItemRentalDelivery::Borrower(agreement);
 
-    let packets = session
-        .apply_shared_item_rental_delivery(&super::SharedItemRentalDelivery::Borrower(agreement));
+    let packets = session.apply_shared_item_rental_delivery(&delivery);
 
     assert!(packets.iter().any(|packet| matches!(
         packet,
@@ -58700,6 +66496,56 @@ fn shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory() 
             .resource::<super::ItemRentalResource>()
             .has_rented_item
     );
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental]
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "dagger")
+            .count(),
+        1,
+        "replay must not duplicate the borrower item"
+    );
+
+    {
+        let mut rental = session
+            .app
+            .world_mut()
+            .resource_mut::<super::ItemRentalResource>();
+        rental.has_rented_item = false;
+        rental.active = Some(super::super::resources::ActiveItemRentalState {
+            transaction_nonce: "new-fee-transaction".to_string(),
+            partner_name: "Lender".to_string(),
+            fee: 25,
+            days: 1,
+            deposited_item: None,
+            deposited_from: None,
+            gold_locked: true,
+            item_locked: false,
+        });
+    }
+    assert_eq!(
+        session.apply_shared_item_rental_delivery(&delivery),
+        vec![ServerPacket::CancelItemRental],
+        "an old fee-offer nonce must not match a new otherwise-identical rental"
+    );
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| item.key == "dagger")
+            .count(),
+        1
+    );
 }
 
 #[test]
@@ -58707,6 +66553,7 @@ fn expired_rental_item_is_removed_and_mailed_back_to_owner() {
     let config = SimulationConfig::default();
     add_rental_mail_target(&config, "Lender", 77);
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let rental_unique_id = {
         let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -58796,6 +66643,7 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
     let config = SimulationConfig::default();
     add_rental_mail_target(&config, "Lender", 78);
     let mut session = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let rental_unique_id = {
         let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
@@ -58885,29 +66733,24 @@ fn crystal_door_registry_groups_cells_by_index_and_masks_high_bit() {
 
 #[test]
 fn crystal_open_door_unblocks_then_auto_closes() {
+    const DOOR_INDEX: u8 = 101;
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let player = player_entity(session.app.world()).expect("player entity");
-
-    // Pick a walkable, unoccupied cell to register as a (closed) door cell.
-    let door_cell = (305..360)
-        .map(|x| Point { x, y: 268 })
-        .find(|point| can_occupy(session.app.world(), point.clone(), Some(player)))
-        .expect("a walkable cell for the door");
-    set_player_position(
+    install_isolated_map_fixture(
         &mut session,
-        Point {
-            x: door_cell.x,
-            y: door_cell.y + 1,
+        mir2_game_data::MapBounds {
+            min_x: 50,
+            max_x: 58,
+            min_y: 50,
+            max_y: 58,
         },
     );
-
-    const DOOR_INDEX: u8 = 7;
+    let player = player_entity(session.app.world()).expect("player entity");
+    let door_cell = Point { x: 54, y: 54 };
+    session.force_authoritative_player_transform(Point { x: 54, y: 55 }, MirDirection::Up);
     {
-        let mut map = session
-            .app
-            .world_mut()
-            .resource_mut::<super::MapRuntimeResource>();
+        let mut map = session.app.world_mut().resource_mut::<MapRuntimeResource>();
         map.closed_door_cells.insert((door_cell.x, door_cell.y));
         map.doors.doors.push(super::super::resources::DoorRuntime {
             index: DOOR_INDEX,
@@ -58916,30 +66759,31 @@ fn crystal_open_door_unblocks_then_auto_closes() {
         });
     }
 
-    // A closed door blocks movement onto its cell.
     assert!(
         !can_occupy(session.app.world(), door_cell.clone(), Some(player)),
         "closed door should block"
     );
-
-    // Opening emits OpenDoor{close:false} and unblocks the cell.
-    let open_packets = session.handle_packet(ClientPacket::OpenDoor {
-        door_index: DOOR_INDEX,
-    });
+    let open_packets = super::super::door::open_door(session.app.world_mut(), DOOR_INDEX);
+    assert!(open_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::OpenDoor { door_index, close }
+            if *door_index == DOOR_INDEX && !*close
+    )));
     assert!(
-        open_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::OpenDoor { door_index, close }
-                if *door_index == DOOR_INDEX && !*close
-        )),
-        "expected OpenDoor open broadcast, got {open_packets:?}"
+        !session
+            .app
+            .world()
+            .resource::<MapRuntimeResource>()
+            .closed_door_cells
+            .contains(&(door_cell.x, door_cell.y)),
+        "opening must remove only this door's closed-cell state"
     );
-    assert!(
-        can_occupy(session.app.world(), door_cell.clone(), Some(player)),
-        "open door should be walkable"
-    );
+    assert!(can_occupy(
+        session.app.world(),
+        door_cell.clone(),
+        Some(player)
+    ));
 
-    // After roughly five seconds it auto-closes (OpenDoor{close:true}) and re-blocks.
     let mut closed = false;
     for _ in 0..8 {
         let packets = session.tick();
@@ -58956,32 +66800,40 @@ fn crystal_open_door_unblocks_then_auto_closes() {
     }
     assert!(closed, "door should auto-close after its timer elapses");
     assert!(
-        !can_occupy(session.app.world(), door_cell, Some(player)),
-        "auto-closed door should block again"
+        session
+            .app
+            .world()
+            .resource::<MapRuntimeResource>()
+            .closed_door_cells
+            .contains(&(door_cell.x, door_cell.y)),
+        "auto-close must restore this door's closed-cell state"
     );
+    assert!(!can_occupy(session.app.world(), door_cell, Some(player)));
 }
 
 #[test]
 fn crystal_open_door_only_unblocks_its_own_cells() {
+    const DOOR_A: u8 = 101;
+    const DOOR_B: u8 = 102;
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    install_isolated_map_fixture(
+        &mut session,
+        mir2_game_data::MapBounds {
+            min_x: 50,
+            max_x: 58,
+            min_y: 50,
+            max_y: 58,
+        },
+    );
     let player = player_entity(session.app.world()).expect("player entity");
-
-    // Two distinct walkable cells, registered as two separate doors.
-    let cells: Vec<Point> = (305..360)
-        .map(|x| Point { x, y: 266 })
-        .filter(|point| can_occupy(session.app.world(), point.clone(), Some(player)))
-        .take(2)
-        .collect();
-    assert_eq!(cells.len(), 2, "need two walkable cells");
-    let (cell_a, cell_b) = (cells[0].clone(), cells[1].clone());
-
+    let cell_a = Point { x: 54, y: 54 };
+    let cell_b = Point { x: 55, y: 54 };
+    session.force_authoritative_player_transform(Point { x: 54, y: 55 }, MirDirection::Up);
     {
-        let mut map = session
-            .app
-            .world_mut()
-            .resource_mut::<super::MapRuntimeResource>();
-        for (index, cell) in [(10u8, &cell_a), (11u8, &cell_b)] {
+        let mut map = session.app.world_mut().resource_mut::<MapRuntimeResource>();
+        for (index, cell) in [(DOOR_A, &cell_a), (DOOR_B, &cell_b)] {
             map.closed_door_cells.insert((cell.x, cell.y));
             map.doors.doors.push(super::super::resources::DoorRuntime {
                 index,
@@ -58991,8 +66843,12 @@ fn crystal_open_door_only_unblocks_its_own_cells() {
         }
     }
 
-    // Opening door 10 must unblock only cell A, leaving door 11's cell blocked.
-    session.handle_packet(ClientPacket::OpenDoor { door_index: 10 });
+    let _ = super::super::door::open_door(session.app.world_mut(), DOOR_A);
+    {
+        let map = session.app.world().resource::<MapRuntimeResource>();
+        assert!(!map.closed_door_cells.contains(&(cell_a.x, cell_a.y)));
+        assert!(map.closed_door_cells.contains(&(cell_b.x, cell_b.y)));
+    }
     assert!(can_occupy(session.app.world(), cell_a, Some(player)));
     assert!(!can_occupy(session.app.world(), cell_b, Some(player)));
 }
@@ -59047,6 +66903,7 @@ fn place_mine_spot_in_front(
 #[test]
 fn crystal_mining_swing_emits_mine_effect_and_depletes_stone() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_pickaxe(&mut session);
     let target = place_mine_spot_in_front(&mut session, 40, 0);
@@ -59073,6 +66930,7 @@ fn crystal_mining_swing_emits_mine_effect_and_depletes_stone() {
 #[test]
 fn crystal_mining_swing_broadcasts_mine_node_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_pickaxe(&mut session);
     // Near-full vein (set 0 max_stones = 80): one swing leaves 79 -> stage 2.
@@ -59108,6 +66966,7 @@ fn mine_stage_thresholds_match_fullness() {
 fn crystal_runtime_wires_full_bichon_starter_mine_zone() {
     let mut session =
         SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let mining = session
@@ -59136,6 +66995,7 @@ fn crystal_runtime_wires_full_bichon_starter_mine_zone() {
 fn crystal_runtime_broadcasts_mine_nodes_on_entry() {
     let mut session =
         SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    login_demo_account_for_persistence_test(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let bichon_vein = packets.iter().any(|packet| {
@@ -59155,6 +67015,7 @@ fn crystal_runtime_broadcasts_mine_nodes_on_entry() {
 fn crystal_runtime_bichon_blacksmith_sells_a_pickaxe() {
     let mut session =
         SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
         .app
@@ -59231,6 +67092,7 @@ fn sim_loads_deadmine_collision_from_pack_at_runtime() {
 #[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // Default weapon is a wooden sword (not CanMine).
     let _target = place_mine_spot_in_front(&mut session, 40, 0);
@@ -59244,6 +67106,7 @@ fn crystal_mining_without_pickaxe_does_nothing() {
 #[test]
 fn crystal_mining_depleted_spot_regenerates_timer() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_pickaxe(&mut session);
     let target = place_mine_spot_in_front(&mut session, 0, 0);
@@ -59269,6 +67132,7 @@ fn crystal_mining_depleted_spot_regenerates_timer() {
 #[test]
 fn crystal_mining_guaranteed_set_yields_ore_and_damages_pickaxe() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_pickaxe(&mut session);
 
@@ -59331,6 +67195,7 @@ fn crystal_mining_guaranteed_set_yields_ore_and_damages_pickaxe() {
 #[test]
 fn crystal_attack_into_mine_spot_triggers_mining() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_pickaxe(&mut session);
     // Remove monsters/NPCs so the swing has no creature target ahead.
@@ -59376,6 +67241,7 @@ fn enable_map_hazard(session: &mut SimulationSession, lightning: bool, fire: boo
 #[test]
 fn crystal_lightning_hazard_strikes_on_lightning_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     enable_map_hazard(&mut session, true, false, 30);
 
@@ -59395,6 +67261,7 @@ fn crystal_lightning_hazard_strikes_on_lightning_map() {
 #[test]
 fn crystal_no_hazard_on_normal_map() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     for _ in 0..24 {
@@ -59413,6 +67280,7 @@ fn crystal_no_hazard_on_normal_map() {
 #[test]
 fn crystal_hazard_damages_player_on_direct_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // Isolate the hazard as the only damage source.
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
@@ -59483,6 +67351,7 @@ fn crystal_map_v0_light_outside_fishing_range_is_not_a_cell() {
 
 fn setup_fishing_session() -> SimulationSession {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
@@ -59558,6 +67427,7 @@ fn crystal_fishing_rejected_when_no_fishing_cell_ahead() {
 #[test]
 fn crystal_conquest_movement_allowed_only_for_owning_guild() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Ordinary movements (index 0) are always allowed.
@@ -59612,6 +67482,7 @@ fn crystal_conquest_movement_allowed_only_for_owning_guild() {
 #[test]
 fn crystal_conquest_movement_transfer_gated_by_ownership() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let source = Point { x: 200, y: 200 };
     set_player_position(&mut session, source.clone());
@@ -59679,6 +67550,7 @@ fn crystal_conquest_movement_transfer_gated_by_ownership() {
 #[test]
 fn crystal_ai58_town_guard_attacks_hostile_monsters() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
     let current_tick = runtime_tick(session.app.world());
@@ -59774,6 +67646,7 @@ fn crystal_ai58_town_guard_attacks_hostile_monsters() {
 #[test]
 fn crystal_ai57_town_archer_attacks_red_name_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -59866,6 +67739,7 @@ fn crystal_ai57_town_archer_attacks_red_name_player() {
 #[test]
 fn crystal_ai4_spitting_spider_poisons_player_on_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
@@ -59939,6 +67813,7 @@ fn crystal_ai4_spitting_spider_poisons_player_on_hit() {
 #[test]
 fn crystal_ai4_spitting_spider_poisons_monster_line_victim() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60064,6 +67939,7 @@ fn crystal_ai4_spitting_spider_poisons_monster_line_victim() {
 #[test]
 fn crystal_ai29_bone_spearman_splashes_line_target() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60199,6 +68075,7 @@ fn crystal_ai29_bone_spearman_splashes_line_target() {
 #[test]
 fn crystal_ai44_black_foxman_splashes_line_target_at_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60314,6 +68191,7 @@ fn crystal_ai44_black_foxman_splashes_line_target_at_range() {
 #[test]
 fn crystal_ai26_shaman_zombie_splashes_six_tile_line() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60429,6 +68307,7 @@ fn crystal_ai26_shaman_zombie_splashes_six_tile_line() {
 #[test]
 fn crystal_ai41_yin_devil_node_is_immobile_like_ai42() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60513,6 +68392,7 @@ fn crystal_ai41_yin_devil_node_is_immobile_like_ai42() {
 #[test]
 fn crystal_starter_armour_can_fully_block_scarecrow_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60550,6 +68430,7 @@ fn crystal_starter_armour_can_fully_block_scarecrow_damage() {
 #[test]
 fn crystal_ai31_right_guard_uses_imported_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60601,6 +68482,7 @@ fn crystal_ai31_right_guard_uses_imported_dc_damage() {
 #[test]
 fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60650,6 +68532,7 @@ fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
 #[test]
 fn crystal_ai0_base_monster_uses_imported_dc_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60700,6 +68583,7 @@ fn crystal_ai0_base_monster_uses_imported_dc_damage() {
 #[test]
 fn crystal_ai116_black_hammer_cat_splashes_line_target_at_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     super::super::map::clear_non_player_world_entities(session.app.world_mut());
 
@@ -60835,6 +68719,7 @@ fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i
 #[test]
 fn player_hit_accuracy_includes_crystal_class_base_stat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let stats = super::player_stats(session.app.world());
@@ -60845,6 +68730,7 @@ fn player_hit_accuracy_includes_crystal_class_base_stat() {
 #[test]
 fn player_stats_seed_reflects_real_weapon_dc_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let stats = super::player_stats(session.app.world());
@@ -60870,6 +68756,7 @@ fn player_stats_seed_reflects_real_weapon_dc_range() {
 #[test]
 fn dynamically_granted_crystal_weapon_keeps_template_stats_when_equipped() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let before = super::player_stats(session.app.world());
 
@@ -60913,6 +68800,7 @@ fn dynamically_granted_crystal_weapon_keeps_template_stats_when_equipped() {
 #[test]
 fn player_stats_seed_max_mp_tracks_class_base_not_hardcoded_hundred() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Compute the expected base MP for whatever the seed character actually is.
@@ -60944,6 +68832,7 @@ fn player_stats_seed_max_mp_tracks_class_base_not_hardcoded_hundred() {
 #[test]
 fn mana_restore_caps_at_max_mp_not_legacy_hundred() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let max_mp = super::player_stats(session.app.world()).max_mp();
@@ -60969,6 +68858,7 @@ fn mana_restore_caps_at_max_mp_not_legacy_hundred() {
 #[test]
 fn equipping_dc_range_weapon_produces_damage_spread() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let flat_before = super::crystal_player_melee_damage(session.app.world());
@@ -61005,6 +68895,7 @@ fn luck_biases_basic_melee_attack_power_toward_max() {
     // like the player's spells do, so high Luck shifts the rolls toward MaxDC.
     fn rolled_melee_with_luck(luck: i32) -> Vec<i32> {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         // Open a wide DC spread so a Luck max-bias is observable.
         equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
@@ -61027,6 +68918,7 @@ fn luck_biases_basic_melee_attack_power_toward_max() {
 
     let stats = {
         let mut session = SimulationSession::new(SimulationConfig::default());
+        login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
         equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 24);
@@ -61062,6 +68954,7 @@ fn luck_biases_basic_melee_attack_power_toward_max() {
 #[test]
 fn equipping_hp_gear_raises_max_hp_and_unequip_restores() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player = super::player_entity(session.app.world()).expect("player");
@@ -61090,6 +68983,7 @@ fn equipping_hp_gear_raises_max_hp_and_unequip_restores() {
 #[test]
 fn critical_hit_amplifies_melee_when_crit_stats_present() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Gear grants crit rate 100 / damage 10, but caps clamp them to 18 / 10
@@ -61191,6 +69085,7 @@ fn magic_get_damage_honors_sub_one_multiplier_and_truncates() {
 fn poison_resistance_reduces_player_poison_tick_damage() {
     // Baseline: unresisted green poison applies the full tick.
     let mut baseline = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut baseline);
     baseline.handle_packet(ClientPacket::StartGame { character_index: 0 });
     {
         let player = super::player_entity(baseline.app.world()).expect("player");
@@ -61208,6 +69103,7 @@ fn poison_resistance_reduces_player_poison_tick_damage() {
 
     // With poison resistance the same tick is mitigated.
     let mut resisted = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut resisted);
     resisted.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equipped_armour_push_stat(&mut resisted, super::CRYSTAL_STAT_POISON_RESIST, 5);
     {
@@ -61231,6 +69127,7 @@ fn poison_resistance_reduces_player_poison_tick_damage() {
 #[test]
 fn magic_resistance_grants_miss_chance_against_incoming_magic() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // No resistance: every magic blow lands in full.
@@ -61268,6 +69165,7 @@ fn magic_resistance_grants_miss_chance_against_incoming_magic() {
 #[test]
 fn passive_regen_restores_pools_after_combat_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     {
@@ -61300,6 +69198,7 @@ fn passive_regen_restores_pools_after_combat_delay() {
 #[test]
 fn passive_regen_is_paused_immediately_after_taking_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     {
@@ -61331,6 +69230,7 @@ fn passive_regen_is_paused_immediately_after_taking_damage() {
 #[test]
 fn social_relationships_grant_experience_rate_bonus() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Unattached player: experience is unchanged.
@@ -61367,6 +69267,7 @@ fn social_relationships_grant_experience_rate_bonus() {
 #[test]
 fn player_stats_expose_class_weight_capacities() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let stats = super::player_stats(session.app.world());
@@ -61379,6 +69280,7 @@ fn player_stats_expose_class_weight_capacities() {
 #[test]
 fn class_base_stats_scale_with_level_per_crystal_formula() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 50);
 
@@ -61399,6 +69301,7 @@ fn class_base_stats_scale_with_level_per_crystal_formula() {
 #[test]
 fn zone_player_combat_stats_use_real_engine_ranges() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // The zone combat block is now sourced from the Crystal-numeric stat engine,
@@ -61427,6 +69330,7 @@ fn zone_player_combat_stats_use_real_engine_ranges() {
 #[test]
 fn change_a_mode_packet_stores_attack_mode_and_echoes_crystal_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Default attack mode is Peace (0).
@@ -61448,6 +69352,7 @@ fn change_a_mode_packet_stores_attack_mode_and_echoes_crystal_packet() {
 #[test]
 fn change_p_mode_packet_stores_pet_mode_and_echoes_crystal_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 0);
@@ -61469,6 +69374,7 @@ fn change_p_mode_packet_stores_pet_mode_and_echoes_crystal_packet() {
 #[test]
 fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -61517,6 +69423,7 @@ fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
 #[test]
 fn set_auto_pot_item_packet_routes_by_grid_for_spawned_hero() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -61567,6 +69474,7 @@ fn set_auto_pot_item_packet_routes_by_grid_for_spawned_hero() {
 #[test]
 fn set_auto_pot_packets_no_op_without_spawned_hero() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     assert!(session
@@ -61597,6 +69505,7 @@ fn city_currency_balance(session: &SimulationSession, key: &str) -> u32 {
 #[test]
 fn city_currency_give_take_npc_commands_update_wallet_and_snapshot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
 
@@ -61649,6 +69558,7 @@ fn city_currency_give_take_npc_commands_update_wallet_and_snapshot() {
 fn city_currency_persists_across_save_and_reload() {
     let config = SimulationConfig::default();
     let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
     first.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     execute_crystal_npc_action_line(
@@ -61660,6 +69570,7 @@ fn city_currency_persists_across_save_and_reload() {
     first.save_active_character();
 
     let mut second = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut second);
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
     assert_eq!(city_currency_balance(&second, "feitian"), 420);
 }
@@ -61667,6 +69578,7 @@ fn city_currency_persists_across_save_and_reload() {
 #[test]
 fn trade_offer_and_accept_spends_city_currency_not_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     execute_crystal_npc_action_line(
@@ -61692,6 +69604,7 @@ fn trade_offer_and_accept_spends_city_currency_not_gold() {
 #[test]
 fn trade_accept_rejects_city_currency_when_balance_too_low() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     execute_crystal_npc_action_line(
@@ -61718,6 +69631,7 @@ fn trade_accept_rejects_city_currency_when_balance_too_low() {
 #[test]
 fn auction_buy_spends_city_currency_for_remote_listing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     execute_crystal_npc_action_line(
@@ -61759,6 +69673,7 @@ fn auction_buy_spends_city_currency_for_remote_listing() {
 #[test]
 fn auction_buy_settles_own_city_currency_listing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut packets = Vec::new();
     execute_crystal_npc_action_line(

@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
+pub mod crystal_map_events;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentProfile {
@@ -1191,8 +1193,18 @@ pub struct MonsterSpawnTemplate {
     pub spread: u16,
     pub respawn_delay_ticks: u64,
     pub random_delay_ticks: u64,
+    #[serde(default)]
+    pub disposition: Option<MonsterSpawnDispositionTemplate>,
     pub can_wander: bool,
     pub max_hp: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum MonsterSpawnDispositionTemplate {
+    Friendly,
+    Neutral,
+    Hostile,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1961,6 +1973,20 @@ pub struct CrystalRespawnMap {
     pub map_dark_light: u8,
     #[serde(default)]
     pub weather_particles: u16,
+    #[serde(default)]
+    pub music: u16,
+    #[serde(default)]
+    pub fire: bool,
+    #[serde(default)]
+    pub fire_damage: i32,
+    #[serde(default)]
+    pub lightning: bool,
+    #[serde(default)]
+    pub lightning_damage: i32,
+    #[serde(default)]
+    pub fire_wall_limit: bool,
+    #[serde(default)]
+    pub fire_wall_count: i32,
     #[serde(default)]
     pub no_throw_item: bool,
     #[serde(default)]
@@ -2847,7 +2873,7 @@ mod tests {
         localization_bundle, localized_text, platinum_176_profile, platinum_176_profile_bundle,
         starter_map_collision, starter_scene, starter_server_data, validate_content_profile,
         ContentLevelRate, ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
-        SkillEffectTemplate,
+        MonsterSpawnDispositionTemplate, SkillEffectTemplate,
     };
     use mir2_protocol::{MirClass, Point};
 
@@ -2855,6 +2881,8 @@ mod tests {
     fn starter_scene_loads() {
         let scene = starter_scene();
 
+        assert_eq!(scene.map.file_name, "0");
+        assert_eq!(scene.map.title, "BichonProvince");
         assert_eq!(scene.default_character.name, "Scout");
         assert_eq!(scene.scene_view.width, 24);
         assert_eq!(scene.terrain_patches.len(), 6);
@@ -3152,6 +3180,10 @@ mod tests {
         assert_eq!(data.npc_scripts.len(), 1);
         assert_eq!(data.buffs.len(), 1);
         assert_eq!(data.monster_spawns[0].count, 1);
+        assert_eq!(
+            data.monster_spawns[0].disposition,
+            Some(MonsterSpawnDispositionTemplate::Hostile)
+        );
         assert_eq!(data.skills[0].mana_cost, 6);
         assert!(matches!(
             data.skills[1].effect,
@@ -4071,6 +4103,33 @@ mod tests {
             .expect("DogYoHyun weather map should exist");
         assert_eq!(dog_yo_hyun.weather_particles, 3);
         assert_eq!(dog_yo_hyun.map_dark_light, 0);
+
+        let hazard_maps: Vec<_> = manifest
+            .maps
+            .iter()
+            .filter(|map| map.lightning || map.fire)
+            .collect();
+        assert_eq!(hazard_maps.len(), 12);
+
+        let lightning_cave = crystal_map_respawns_by_file_name("D2081")
+            .expect("Lightning Cave hazard metadata should exist");
+        assert!(lightning_cave.lightning);
+        assert_eq!(lightning_cave.lightning_damage, 100);
+        assert!(!lightning_cave.fire);
+        assert_eq!(lightning_cave.fire_damage, 0);
+        assert_eq!(lightning_cave.music, 0);
+
+        let molten_rock_cave = crystal_map_respawns_by_file_name("D2082")
+            .expect("Molten Rock Cave hazard metadata should exist");
+        assert!(molten_rock_cave.fire);
+        assert_eq!(molten_rock_cave.fire_damage, 100);
+        assert!(!molten_rock_cave.lightning);
+        assert_eq!(molten_rock_cave.lightning_damage, 0);
+
+        assert!(manifest
+            .maps
+            .iter()
+            .all(|map| !map.fire_wall_limit && map.fire_wall_count == 0));
     }
 
     #[test]

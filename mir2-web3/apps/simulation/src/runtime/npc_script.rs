@@ -12,7 +12,7 @@ use mir2_game_data::{
     CrystalNpcInfoTemplate, CrystalNpcScript, CrystalNpcSection,
 };
 use mir2_protocol::{
-    ChatType, MapInformation, MirClass, MirDirection, MirGender, Point, ServerPacket,
+    ChatType, ClientPacket, MapInformation, MirClass, MirDirection, MirGender, Point, ServerPacket,
 };
 
 use super::buffs::*;
@@ -127,13 +127,14 @@ pub(super) struct CrystalNpcContextState {
 
 #[derive(Debug, Clone)]
 pub(super) struct NpcQuestDialog {
-    pub(super) stage_before_action: QuestStage,
+    pub(super) stage: QuestStage,
     pub(super) current: u32,
     pub(super) required: u32,
     pub(super) title: String,
     pub(super) body: Vec<String>,
     pub(super) footer: String,
     pub(super) object_chat: String,
+    pub(super) links: Vec<NpcDialogLinkState>,
 }
 
 pub(super) fn crystal_npc_section<'a>(
@@ -540,13 +541,13 @@ pub(super) fn handle_npc_interaction(
             npc_object_id: context.object_id,
             npc_name: context.name,
             npc_name_key: context.name_key,
-            stage: Some(dialog.stage_before_action),
+            stage: Some(dialog.stage),
             current: dialog.current,
             required: dialog.required,
             title: dialog.title,
             body: dialog.body,
             footer: dialog.footer,
-            links: Vec::new(),
+            links: dialog.links,
             input: None,
         },
     );
@@ -1009,7 +1010,7 @@ pub(super) fn crystal_npc_named_token_value(world: &World, token: &str) -> Optio
                     .guild_territory
                     .rental_days_left
                     .to_string(),
-            )
+            );
         }
         "GUILDEXTENDFEE" => return Some("1000000".to_string()),
         _ => {}
@@ -1118,7 +1119,11 @@ pub(super) fn evaluate_crystal_npc_condition(
             i32::try_from(world.resource::<PlayerRuntimeResource>().gold).unwrap_or(i32::MAX),
             &parts[1..],
         ),
-        "CHECKPKPOINT" => crystal_npc_compare_numeric(world, 0, &parts[1..]),
+        "CHECKPKPOINT" => crystal_npc_compare_numeric(
+            world,
+            world.resource::<PlayerRuntimeResource>().pk_points,
+            &parts[1..],
+        ),
         "CHECKQUEST" => crystal_npc_check_quest(world, &parts[1..]),
         "CHECKITEM" => crystal_npc_check_item(world, &parts[1..]),
         "CHECK" => crystal_npc_check_flag(world, &parts[1..]),
@@ -3436,6 +3441,11 @@ impl SimulationSession {
             return Vec::new();
         }
 
+        if !npc_dialog_actor_is_adjacent(self.app.world(), active_dialog.npc_object_id) {
+            dismiss_dialog(self.app.world_mut());
+            return Vec::new();
+        }
+
         let input_link = target.trim_start().starts_with("@@");
         if input_link && input_value.is_none() {
             let prompt = crystal_npc_input_prompt(&active_dialog, target);
@@ -3471,6 +3481,23 @@ impl SimulationSession {
                 .is_none_or(|input| !crystal_npc_labels_match(&input.target, &normalized_target))
         {
             return Vec::new();
+        }
+
+        if let Some(command) = parse_explicit_npc_quest_command(&normalized_target) {
+            return match command {
+                ExplicitNpcQuestCommand::Accept { quest_index } => {
+                    self.handle_packet(ClientPacket::AcceptQuest {
+                        npc_index: active_dialog.npc_object_id,
+                        quest_index,
+                    })
+                }
+                ExplicitNpcQuestCommand::Finish { quest_index } => {
+                    self.handle_packet(ClientPacket::FinishQuest {
+                        quest_index,
+                        selected_item_index: -1,
+                    })
+                }
+            };
         }
 
         if normalized_target
@@ -3616,5 +3643,113 @@ impl SimulationSession {
         };
 
         self.select_npc_dialog_target_with_input_impl(&target, Some(value.to_string()))
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ExplicitNpcQuestCommand {
+    Accept { quest_index: i32 },
+    Finish { quest_index: i32 },
+}
+
+fn parse_explicit_npc_quest_command(target: &str) -> Option<ExplicitNpcQuestCommand> {
+    let mut parts = target.trim().trim_start_matches('@').split(':');
+    let action = parts.next()?;
+    let quest_index = parts.next()?.parse::<i32>().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    if action.eq_ignore_ascii_case("AcceptQuest") {
+        Some(ExplicitNpcQuestCommand::Accept { quest_index })
+    } else if action.eq_ignore_ascii_case("FinishQuest") {
+        Some(ExplicitNpcQuestCommand::Finish { quest_index })
+    } else {
+        None
+    }
+}
+
+fn npc_dialog_actor_is_adjacent(world: &World, npc_object_id: u32) -> bool {
+    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
+        return false;
+    };
+    if !world.entity(npc_entity).contains::<Npc>() {
+        return false;
+    }
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let (Some(player_position), Some(npc_position)) = (
+        entity_position(world, player),
+        entity_position(world, npc_entity),
+    ) else {
+        return false;
+    };
+    tile_distance(&player_position, &npc_position) <= 1
+}
+
+#[cfg(test)]
+mod dialog_security_tests {
+    use super::*;
+    use mir2_protocol::ClientPacket;
+
+    #[test]
+    fn stale_dialog_quest_link_cannot_be_replayed_after_player_walks_away() {
+        let mut session = SimulationSession::new(crate::config::SimulationConfig::default());
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let player = player_entity(session.app.world()).expect("player entity");
+        session
+            .app
+            .world_mut()
+            .entity_mut(player)
+            .insert(Position(Point { x: 326, y: 270 }));
+        let _ = session.interact(GUIDE_NPC_ID);
+        set_quest_stage(
+            session.app.world_mut(),
+            GUIDE_QUEST_ID,
+            QuestStage::Available,
+        );
+        session
+            .app
+            .world_mut()
+            .resource_mut::<NpcStateResource>()
+            .active_npc_dialog
+            .as_mut()
+            .expect("guide dialog")
+            .links = vec![NpcDialogLinkState {
+            text: "Accept".to_string(),
+            target: format!("@quest:accept:{GUIDE_QUEST_ID}"),
+        }];
+
+        session
+            .app
+            .world_mut()
+            .entity_mut(player)
+            .insert(Position(Point { x: 300, y: 300 }));
+        let packets = session.select_npc_dialog_target(&format!("@quest:accept:{GUIDE_QUEST_ID}"));
+
+        assert!(packets.iter().all(|packet| {
+            !matches!(
+                packet,
+                ServerPacket::ChangeQuest { quest_id, .. }
+                    if *quest_id == GUIDE_QUEST_ID
+            ) && !matches!(
+                packet,
+                ServerPacket::CompleteQuest { completed_quests }
+                    if completed_quests.contains(&GUIDE_QUEST_ID)
+            )
+        }));
+        assert_eq!(
+            quest_stage(session.app.world(), GUIDE_QUEST_ID),
+            Some(QuestStage::Available)
+        );
+        assert!(session.world_snapshot().active_npc_dialog.is_none());
     }
 }

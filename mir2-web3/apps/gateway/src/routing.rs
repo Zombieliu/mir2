@@ -12,22 +12,23 @@ use mir2_game_data::crystal_monster_by_name;
 use mir2_protocol::{
     decode_server_packet, encode_server_packet, ClientPacket, MirDirection, MonsterInfo, NpcInfo,
     ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectPlayerInfo, Point,
-    ServerPacket, Spell,
+    ServerPacket, Spell, UserLocation,
 };
 use mir2_simulation::{
     intelligent_creature_allows_ground_drop, zone_ground_drop_snapshots_for_monster_at_tick,
-    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropLootSnapshot,
-    GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
-    SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
-    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
-    SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
-    WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
-    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
-    ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
-    ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
+    ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GameShopPurchaseOutcome,
+    GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime,
+    SessionId, SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
+    SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
+    WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
+    WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneBossRewardAudit, ZoneCommand,
+    ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as TokioMpscSender};
 
 use crate::GatewayConfig;
@@ -104,6 +105,68 @@ impl ZoneOwnerLease {
     }
 }
 
+/// One immutable teardown snapshot produced at the authoritative Zone owner.
+///
+/// Identity and character state must be captured by the same owner-side
+/// operation. The lease records which fenced owner generation produced the
+/// snapshot, so callers can reject a handoff that races preparation.
+#[derive(Debug, Clone)]
+pub struct PreparedZoneTeardown {
+    pub(crate) owner_lease: ZoneOwnerLease,
+    pub(crate) identity: ActiveSessionIdentity,
+    pub(crate) checkpoint: CharacterSaveRecord,
+}
+
+impl PreparedZoneTeardown {
+    fn new(
+        owner_lease: ZoneOwnerLease,
+        identity: ActiveSessionIdentity,
+        checkpoint: CharacterSaveRecord,
+    ) -> Self {
+        Self {
+            owner_lease,
+            identity,
+            checkpoint,
+        }
+    }
+
+    pub fn owner_lease(&self) -> &ZoneOwnerLease {
+        &self.owner_lease
+    }
+
+    pub fn identity(&self) -> &ActiveSessionIdentity {
+        &self.identity
+    }
+
+    pub fn checkpoint(&self) -> &CharacterSaveRecord {
+        &self.checkpoint
+    }
+
+    pub(crate) fn validate_identity_checkpoint(&self) -> Result<(), String> {
+        if self.identity.account_id.is_empty()
+            || self.identity.account_id.as_str() != self.identity.account_id.trim()
+        {
+            return Err("teardown identity requires a nonempty canonical account id".to_string());
+        }
+        if self.identity.character_index < 0 {
+            return Err("teardown identity requires a nonnegative character index".to_string());
+        }
+        if self.identity.character_name.is_empty() {
+            return Err("teardown identity requires a nonempty character name".to_string());
+        }
+        if self.checkpoint.character.index != self.identity.character_index {
+            return Err(
+                "teardown checkpoint character index does not match its identity".to_string(),
+            );
+        }
+        if self.checkpoint.character.name != self.identity.character_name {
+            return Err(
+                "teardown checkpoint character name does not match its identity".to_string(),
+            );
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ZoneOwnerCommandMode {
     Direct,
@@ -220,6 +283,34 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String>;
 
+    /// Execute one native-receipt purchase only after proving that this exact
+    /// command path can return the authoritative typed transaction outcome.
+    /// Generic Web/Crystal purchases intentionally continue through
+    /// `execute`, including against rolling old Zone Hosts.
+    fn execute_requiring_typed_game_shop_purchase_outcome(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
+            return Err(
+                "typed GameShop outcome execution requires a native idempotent purchase"
+                    .to_string(),
+            );
+        }
+        if !self.supports_typed_game_shop_purchase_outcome(runtime) {
+            return Err(
+                "typed GameShop purchase outcome capability is unavailable before execution"
+                    .to_string(),
+            );
+        }
+        self.execute(runtime, request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        runtime.supports_typed_game_shop_purchase_outcome()
+    }
+
     fn world_snapshot(&self, runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         Ok(runtime.world_snapshot())
     }
@@ -246,9 +337,28 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime.restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self, runtime: &ZoneRuntimeHandle) -> Result<(), String> {
-        runtime.save_active_character();
-        Ok(())
+    fn prepare_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        prepare_zone_teardown_checkpoint(runtime, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        persist_zone_teardown_checkpoint(runtime, prepared)
+    }
+
+    fn release_teardown_fence(&self, runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        release_zone_teardown_fence(runtime)
+    }
+
+    fn save_active_character(&self, runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        runtime.save_active_character()
     }
 
     fn refresh_active_external_mail(
@@ -290,6 +400,29 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String>;
 
+    fn execute_requiring_typed_game_shop_purchase_outcome(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        if !matches!(request.command(), WorldCommand::NativeGameShopPurchase(_)) {
+            return Err(
+                "typed GameShop outcome execution requires a native idempotent purchase"
+                    .to_string(),
+            );
+        }
+        if !self.supports_typed_game_shop_purchase_outcome() {
+            return Err(
+                "typed GameShop purchase outcome capability is unavailable before execution"
+                    .to_string(),
+            );
+        }
+        self.execute(request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        false
+    }
+
     fn world_snapshot(&self) -> Result<WorldSnapshot, String>;
 
     fn active_identity(&self) -> Result<Option<ActiveSessionIdentity>, String>;
@@ -306,6 +439,21 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
             "zone owner RPC transport does not implement restore_active_character_checkpoint"
                 .to_string(),
         )
+    }
+
+    fn prepare_teardown_checkpoint(
+        &self,
+        _owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        Err("zone owner RPC transport does not implement prepare_teardown_checkpoint".to_string())
+    }
+
+    fn persist_teardown_checkpoint(&self, _prepared: &PreparedZoneTeardown) -> Result<(), String> {
+        Err("zone owner RPC transport does not implement persist_teardown_checkpoint".to_string())
+    }
+
+    fn release_teardown_fence(&self) -> Result<(), String> {
+        Err("zone owner RPC transport does not implement release_teardown_fence".to_string())
     }
 
     fn save_active_character(&self) -> Result<(), String>;
@@ -359,6 +507,19 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
         self.transport.execute(request)
     }
 
+    fn execute_requiring_typed_game_shop_purchase_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        self.transport
+            .execute_requiring_typed_game_shop_purchase_outcome(request)
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.transport.supports_typed_game_shop_purchase_outcome()
+    }
+
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         self.transport.world_snapshot()
     }
@@ -386,7 +547,27 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
             .restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self, _runtime: &ZoneRuntimeHandle) -> Result<(), String> {
+    fn prepare_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        self.transport.prepare_teardown_checkpoint(owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        self.transport.persist_teardown_checkpoint(prepared)
+    }
+
+    fn release_teardown_fence(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        self.transport.release_teardown_fence()
+    }
+
+    fn save_active_character(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
         self.transport.save_active_character()
     }
 
@@ -469,13 +650,65 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
             authority.validate_owner_lease(request.owner_lease())?;
         }
         let mode = request.mode();
+        let economy_context = if matches!(
+            mode,
+            ZoneOwnerCommandMode::ProductionPlayer {
+                authenticated: true
+            }
+        ) {
+            runtime
+                .as_mut()
+                .as_any_mut()
+                .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+                .and_then(|runtime| {
+                    runtime.next_in_process_economy_execution_context(request.owner_lease())
+                })
+        } else {
+            None
+        };
         let command = request.into_command();
-        match mode {
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.set_economy_execution_context(economy_context);
+        }
+        let result = match mode {
             ZoneOwnerCommandMode::Direct => runtime.execute_with_outcome(command),
             ZoneOwnerCommandMode::ProductionPlayer { authenticated } => {
                 runtime.execute_production_player_command(authenticated, command)
             }
+        };
+        if let Some(runtime) = runtime
+            .as_mut()
+            .as_any_mut()
+            .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        {
+            runtime.set_economy_execution_context(None);
         }
+        result
+    }
+    fn prepare_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(owner_lease)?;
+        }
+        prepare_zone_teardown_checkpoint(runtime, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(prepared.owner_lease())?;
+        }
+        persist_zone_teardown_checkpoint(runtime, prepared)
     }
 }
 
@@ -595,6 +828,40 @@ impl HostedZoneOwnerCommandClient {
             .restore_active_character_checkpoint(checkpoint)
     }
 
+    pub fn prepare_teardown_checkpoint(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(owner_lease)?;
+        }
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        prepare_zone_teardown_checkpoint(runtime, owner_lease)
+    }
+
+    pub fn persist_teardown_checkpoint(
+        &self,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(prepared.owner_lease())?;
+        }
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        persist_zone_teardown_checkpoint(runtime, prepared)
+    }
+
     pub(crate) fn refresh_replica_zone_binding(&self) -> Result<(), String> {
         let mut runtime = self
             .runtime
@@ -661,16 +928,29 @@ impl HostedZoneOwnerCommandClient {
         request: ZoneOwnerCommandRequest,
         external_commit_authorized: bool,
     ) -> Result<WorldCommandExecution, String> {
-        let economy_context = request.source_sequence().map(|source_sequence| {
-            SharedAccountInventoryExecutionContext {
-                zone_id: request.owner_lease().zone_id().clone(),
-                fencing_generation: request.owner_lease().fencing_token(),
-                source_sequence,
-                created_at_ms: shared_gateway_now_ms(),
-                external_commit_authorized,
-            }
-        });
         let mode = request.mode();
+        // A journal sequence proves ordering, not caller authority. Only an
+        // authenticated production-player command on the active owner may
+        // perform external economy effects. Direct/admin-style requests and
+        // standby replay stay unfenced from the durable store even when the
+        // replication layer attaches a real source sequence.
+        let economy_context = match (external_commit_authorized, mode) {
+            (
+                true,
+                ZoneOwnerCommandMode::ProductionPlayer {
+                    authenticated: true,
+                },
+            ) => request.source_sequence().map(|source_sequence| {
+                SharedAccountInventoryExecutionContext {
+                    zone_id: request.owner_lease().zone_id().clone(),
+                    fencing_generation: request.owner_lease().fencing_token(),
+                    source_sequence,
+                    created_at_ms: shared_gateway_now_ms(),
+                    external_commit_authorized: true,
+                }
+            }),
+            _ => None,
+        };
         let command = request.into_command();
         let mut runtime = self
             .runtime
@@ -733,6 +1013,18 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         self.execute_request(request)
     }
 
+    fn supports_typed_game_shop_purchase_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.runtime
+            .lock()
+            .ok()
+            .and_then(|runtime| {
+                runtime
+                    .as_ref()
+                    .map(|runtime| runtime.supports_typed_game_shop_purchase_outcome())
+            })
+            .unwrap_or(false)
+    }
+
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         HostedZoneOwnerCommandClient::world_snapshot(self)
     }
@@ -759,15 +1051,42 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
     }
 
-    fn save_active_character(&self, _runtime: &ZoneRuntimeHandle) -> Result<(), String> {
-        let runtime = self
+    fn prepare_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        HostedZoneOwnerCommandClient::prepare_teardown_checkpoint(self, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        prepared: &PreparedZoneTeardown,
+    ) -> Result<(), String> {
+        HostedZoneOwnerCommandClient::persist_teardown_checkpoint(self, prepared)
+    }
+
+    fn release_teardown_fence(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        let mut runtime = self
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
-        runtime
-            .as_ref()
-            .map(|runtime| runtime.save_active_character())
-            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        release_zone_teardown_fence(runtime)
+    }
+
+    fn save_active_character(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        runtime.save_active_character()
     }
 
     fn refresh_active_external_mail(
@@ -794,6 +1113,18 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         self.execute_request(request)
     }
 
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        self.runtime
+            .lock()
+            .ok()
+            .and_then(|runtime| {
+                runtime
+                    .as_ref()
+                    .map(|runtime| runtime.supports_typed_game_shop_purchase_outcome())
+            })
+            .unwrap_or(false)
+    }
+
     fn world_snapshot(&self) -> Result<WorldSnapshot, String> {
         HostedZoneOwnerCommandClient::world_snapshot(self)
     }
@@ -813,15 +1144,37 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
     }
 
-    fn save_active_character(&self) -> Result<(), String> {
-        let runtime = self
+    fn prepare_teardown_checkpoint(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        HostedZoneOwnerCommandClient::prepare_teardown_checkpoint(self, owner_lease)
+    }
+
+    fn persist_teardown_checkpoint(&self, prepared: &PreparedZoneTeardown) -> Result<(), String> {
+        HostedZoneOwnerCommandClient::persist_teardown_checkpoint(self, prepared)
+    }
+
+    fn release_teardown_fence(&self) -> Result<(), String> {
+        let mut runtime = self
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
-        runtime
-            .as_ref()
-            .map(|runtime| runtime.save_active_character())
-            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        release_zone_teardown_fence(runtime)
+    }
+
+    fn save_active_character(&self) -> Result<(), String> {
+        let mut runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        let runtime = runtime
+            .as_mut()
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        runtime.save_active_character()
     }
 
     fn refresh_active_external_mail(&self) -> Result<bool, String> {
@@ -983,7 +1336,7 @@ pub trait ZoneRuntimeFactory: Send + Sync {
 
 pub type SharedZoneRuntimeFactory = Arc<dyn ZoneRuntimeFactory>;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SharedAccountInventoryExecutionContext {
     pub zone_id: ZoneId,
     pub fencing_generation: u64,
@@ -995,11 +1348,78 @@ pub struct SharedAccountInventoryExecutionContext {
     pub external_commit_authorized: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SharedTradeSettlementOutcome {
     Committed,
     Duplicate,
+    /// No ordered/fenced execution context was available, so no external
+    /// settlement attempt was made. This is distinct from both a business
+    /// rejection and an acknowledgement-unknown durable attempt.
+    Deferred,
+    DurableCommitted {
+        event_id: String,
+    },
+    DurableDuplicate {
+        event_id: String,
+    },
+    /// PostgreSQL may have committed, but the producer could not confirm the
+    /// outcome. Callers must retain both debited offers and retry the same
+    /// idempotent settlement; they must never roll back or reopen trading.
+    OutcomeUnknown {
+        idempotency_key: String,
+        execution_context: SharedAccountInventoryExecutionContext,
+    },
     Rejected,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SharedAccountInventoryCommitOutcome {
+    Confirmed(SharedAccountInventoryTransactionReceipt),
+    /// No ordered/fenced execution context was available and the service did
+    /// not contact the durable store or mutate the private projection.
+    Deferred {
+        receipt: SharedAccountInventoryTransactionReceipt,
+    },
+    /// PostgreSQL may have committed the immutable economy envelope, but the
+    /// producer could not confirm it. The owning Zone must retain the claim and
+    /// retry the same idempotency key; restoring the drop could credit it twice.
+    OutcomeUnknown {
+        idempotency_key: String,
+        execution_context: SharedAccountInventoryExecutionContext,
+        receipt: SharedAccountInventoryTransactionReceipt,
+    },
+}
+
+impl SharedAccountInventoryCommitOutcome {
+    fn into_receipt(self) -> SharedAccountInventoryTransactionReceipt {
+        match self {
+            Self::Confirmed(receipt)
+            | Self::Deferred { receipt }
+            | Self::OutcomeUnknown { receipt, .. } => receipt,
+        }
+    }
+}
+
+impl std::ops::Deref for SharedAccountInventoryCommitOutcome {
+    type Target = SharedAccountInventoryTransactionReceipt;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Confirmed(receipt)
+            | Self::Deferred { receipt }
+            | Self::OutcomeUnknown { receipt, .. } => receipt,
+        }
+    }
+}
+
+impl std::ops::DerefMut for SharedAccountInventoryCommitOutcome {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self {
+            Self::Confirmed(receipt)
+            | Self::Deferred { receipt }
+            | Self::OutcomeUnknown { receipt, .. } => receipt,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -1013,6 +1433,10 @@ pub enum SharedAccountInventoryCommand {
         request_id: u64,
     },
     GroundDropPickup(GroundDropSnapshot),
+    GroundDropClaimPickup {
+        drop: GroundDropSnapshot,
+        claim_idempotency_key: String,
+    },
     MonsterKillAward(ZoneMonsterKillAward),
     SkillItemConsume {
         spell: Spell,
@@ -1043,7 +1467,29 @@ impl SharedAccountInventoryCommandEnvelope {
                 )
             }
             SharedAccountInventoryCommand::GroundDropPickup(drop) => {
-                format!("ground-drop-pickup:{}", drop.object_id)
+                let payload = serde_json::to_vec(drop).ok()?;
+                let payload_digest = Sha256::digest(payload)
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>();
+                format!("ground-drop-pickup:{}:{payload_digest}", drop.object_id)
+            }
+            SharedAccountInventoryCommand::GroundDropClaimPickup {
+                drop,
+                claim_idempotency_key,
+            } => {
+                if claim_idempotency_key.trim().is_empty() {
+                    return None;
+                }
+                let payload = serde_json::to_vec(drop).ok()?;
+                let payload_digest = Sha256::digest(payload)
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect::<String>();
+                format!(
+                    "ground-drop-claim:{claim_idempotency_key}:{}:{payload_digest}",
+                    drop.object_id
+                )
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => format!(
                 "monster-kill-award:{}:{}:{}:{}",
@@ -1080,8 +1526,21 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         runtime: &mut InProcessWorldRuntime,
         _context: Option<&SharedAccountInventoryExecutionContext>,
         envelope: SharedAccountInventoryCommandEnvelope,
-    ) -> mir2_simulation::SharedAccountInventoryTransactionReceipt {
-        self.commit(runtime, envelope)
+    ) -> SharedAccountInventoryCommitOutcome {
+        SharedAccountInventoryCommitOutcome::Confirmed(self.commit(runtime, envelope))
+    }
+
+    /// Retry a previously uncertain durable command. Durable implementations
+    /// must prove that `expected_idempotency_key` is the key produced by the
+    /// checkpointed execution context before contacting their store.
+    fn retry_commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        _expected_idempotency_key: &str,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        self.commit_fenced(runtime, context, envelope)
     }
 
     fn bootstrap_fenced(
@@ -1099,6 +1558,50 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         _second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         SharedTradeSettlementOutcome::Committed
+    }
+
+    /// Retry a previously uncertain durable trade under its checkpointed
+    /// context and key. See `retry_commit_fenced`.
+    fn retry_trade_fenced(
+        &self,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        _expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.settle_trade_fenced(context, first, second)
+    }
+
+    fn reconcile_ground_drop_projections_fenced(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        Vec::new()
+    }
+
+    fn has_pending_ground_drop_projection_fenced(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        false
+    }
+
+    fn reconcile_trade_projections_fenced(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        Vec::new()
+    }
+
+    fn has_pending_trade_projection_fenced(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        _context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        false
     }
 
     fn commit_ground_drop_pickup(
@@ -1181,7 +1684,8 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { .. } => {
                 SharedAccountInventoryTransactionKind::InventoryItemDrop
             }
-            SharedAccountInventoryCommand::GroundDropPickup(_) => {
+            SharedAccountInventoryCommand::GroundDropPickup(_)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             }
             SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -1209,7 +1713,8 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
                 runtime.commit_shared_inventory_item_drop_transaction(&drop)
             }
-            SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+            SharedAccountInventoryCommand::GroundDropPickup(drop)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(&drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -1616,7 +2121,78 @@ struct SharedItemRentalInvite {
     renting: bool,
 }
 
-const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 2;
+/// A two-party trade whose PostgreSQL COMMIT acknowledgement was lost. Both
+/// offers have already been debited from their private runtimes, so this record
+/// is the recovery authority until the same idempotent settlement is confirmed
+/// durable or confirmed absent.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct UnresolvedSharedTradeSettlement {
+    idempotency_key: String,
+    /// Exact context that produced the uncertain durable envelope. Older
+    /// checkpoints omit it and therefore remain fail-closed instead of being
+    /// retried under a newly generated key.
+    #[serde(default)]
+    execution_context: Option<SharedAccountInventoryExecutionContext>,
+    first_key: ZonePresenceKey,
+    second_key: ZonePresenceKey,
+    first_offer: SharedTradeOffer,
+    second_offer: SharedTradeOffer,
+}
+
+impl UnresolvedSharedTradeSettlement {
+    fn recovery_key(&self) -> String {
+        format!(
+            "{}|{}:{}:{}|{}:{}:{}",
+            self.idempotency_key,
+            self.first_key.account_id,
+            self.first_key.character_index,
+            self.first_offer.settlement_nonce,
+            self.second_key.account_id,
+            self.second_key.character_index,
+            self.second_offer.settlement_nonce
+        )
+    }
+
+    fn involves(&self, key: &ZonePresenceKey) -> bool {
+        &self.first_key == key || &self.second_key == key
+    }
+}
+
+/// A ground-drop settlement whose durable outcome is unknown, detached from
+/// the historical Gateway session while the Zone retains the removed-object
+/// tombstone. Recovery is owned by account/character and the full Zone key.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct UnresolvedGroundDropSettlement {
+    #[serde(default)]
+    idempotency_key: Option<String>,
+    /// Exact context that produced `idempotency_key`; see the trade record.
+    #[serde(default)]
+    execution_context: Option<SharedAccountInventoryExecutionContext>,
+    presence_key: ZonePresenceKey,
+    zone_key: ZoneKey,
+    ticket: GroundDropClaimTicket,
+}
+
+impl UnresolvedGroundDropSettlement {
+    fn recovery_key(&self) -> String {
+        format!(
+            "{}|{}|{}|{}|{}:{}|{}",
+            self.zone_key.shard_id,
+            self.zone_key.map_file_name.to_ascii_lowercase(),
+            self.zone_key.channel_id,
+            self.zone_key.instance_id,
+            self.presence_key.account_id,
+            self.presence_key.character_index,
+            self.ticket.idempotency_key
+        )
+    }
+
+    fn involves(&self, key: &ZonePresenceKey) -> bool {
+        &self.presence_key == key
+    }
+}
+
+const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 2;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
     crate::zone_rpc::DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES;
@@ -1627,22 +2203,29 @@ struct SharedInProcessZoneState {
     next_live_outbound_registration_id: u64,
     #[cfg(test)]
     zone_cadence_tick_count: u64,
+    /// Monotonic command sequence used by the local authoritative Zone owner
+    /// for fenced economy side effects. It is checkpointed with Zone state so
+    /// every in-process session sharing this Zone consumes one ordered stream.
+    next_economy_source_sequence: u64,
     zone_manager: ZoneManager,
     zone_sessions: BTreeMap<ZonePresenceKey, SessionId>,
     zone_session_keys: BTreeMap<SessionId, ZonePresenceKey>,
     pending_zone_packets: BTreeMap<ZonePresenceKey, Vec<ServerPacket>>,
     pending_zone_transforms: BTreeMap<ZonePresenceKey, (Point, MirDirection)>,
     pending_zone_shout_consumes: BTreeMap<ZonePresenceKey, (bool, bool)>,
-    pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropSnapshot>>,
+    pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropClaimTicket>>,
     pending_zone_monster_kill_awards: BTreeMap<ZonePresenceKey, Vec<ZoneMonsterKillAward>>,
     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<i32>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
+    teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
     trade_offers: BTreeMap<ZonePresenceKey, SharedTradeOffer>,
     pending_trade_deliveries: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
     pending_trade_rollbacks: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
+    unresolved_ground_drop_settlements: BTreeMap<String, UnresolvedGroundDropSettlement>,
+    unresolved_trade_settlements: BTreeMap<String, UnresolvedSharedTradeSettlement>,
     pending_rental_invites: BTreeMap<ZonePresenceKey, Vec<SharedItemRentalInvite>>,
     pending_rental_cancels: BTreeMap<ZonePresenceKey, usize>,
     rental_item_offers: BTreeMap<ZonePresenceKey, SharedItemRentalItemOffer>,
@@ -1677,6 +2260,8 @@ pub(crate) mod base64_bytes {
 struct SharedInProcessZoneStateCheckpoint {
     version: u32,
     next_zone_object_id: u32,
+    #[serde(default)]
+    next_economy_source_sequence: u64,
     next_live_outbound_registration_id: u64,
     #[serde(with = "crate::routing::base64_bytes", default)]
     zone_manager_bytes: Vec<u8>,
@@ -1685,15 +2270,21 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_packet_frames: Vec<(ZonePresenceKey, Vec<Vec<u8>>)>,
     pending_zone_transforms: Vec<(ZonePresenceKey, (Point, MirDirection))>,
     pending_zone_shout_consumes: Vec<(ZonePresenceKey, (bool, bool))>,
-    pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropSnapshot>)>,
+    pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropClaimTicket>)>,
     pending_zone_monster_kill_awards: Vec<(ZonePresenceKey, Vec<ZoneMonsterKillAward>)>,
     pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<i32>)>,
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
+    #[serde(default)]
+    teardown_fences: Vec<ZonePresenceKey>,
     players: Vec<(ZonePresenceKey, ZonePlayerPresence)>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
     trade_offers: Vec<(ZonePresenceKey, SharedTradeOffer)>,
     pending_trade_deliveries: Vec<(ZonePresenceKey, Vec<SharedTradeOffer>)>,
     pending_trade_rollbacks: Vec<(ZonePresenceKey, Vec<SharedTradeOffer>)>,
+    #[serde(default)]
+    unresolved_ground_drop_settlements: Vec<UnresolvedGroundDropSettlement>,
+    #[serde(default)]
+    unresolved_trade_settlements: Vec<UnresolvedSharedTradeSettlement>,
     pending_rental_invites: Vec<(ZonePresenceKey, Vec<SharedItemRentalInvite>)>,
     pending_rental_cancels: Vec<(ZonePresenceKey, usize)>,
     rental_item_offers: Vec<(ZonePresenceKey, SharedItemRentalItemOffer)>,
@@ -1733,6 +2324,42 @@ impl SharedInProcessZoneStateCheckpoint {
         } else {
             ZoneManager::restore_checkpoint(&self.zone_manager_bytes)?
         };
+        let mut unresolved_ground = self
+            .unresolved_ground_drop_settlements
+            .drain(..)
+            .map(|settlement| (settlement.recovery_key(), settlement))
+            .collect::<BTreeMap<_, _>>();
+        for (zone_key, session_id, ticket) in zone_manager.detach_all_ground_drop_claims() {
+            let presence_key = self
+                .zone_session_keys
+                .iter()
+                .find_map(|(candidate_session, key)| {
+                    (candidate_session == &session_id).then_some(key.clone())
+                })
+                .ok_or_else(|| {
+                    format!(
+                        "world-only checkpoint cannot detach ground claim without presence for {}",
+                        session_id.as_str()
+                    )
+                })?;
+            let settlement = UnresolvedGroundDropSettlement {
+                idempotency_key: None,
+                execution_context: None,
+                presence_key,
+                zone_key,
+                ticket,
+            };
+            let recovery_key = settlement.recovery_key();
+            if let Some(existing) = unresolved_ground.insert(recovery_key, settlement.clone()) {
+                if existing != settlement {
+                    return Err(
+                        "world-only checkpoint has conflicting detached ground settlements"
+                            .to_string(),
+                    );
+                }
+            }
+        }
+        self.unresolved_ground_drop_settlements = unresolved_ground.into_values().collect();
         zone_manager.leave_all_sessions();
         self.zone_manager_bytes = zone_manager.checkpoint_bytes()?;
 
@@ -1787,6 +2414,7 @@ impl SharedInProcessZoneStateCheckpoint {
         self.pending_zone_monster_kill_awards.clear();
         self.pending_zone_player_damages.clear();
         self.pending_zone_player_heals.clear();
+        self.teardown_fences.clear();
         self.players.clear();
         self.trade_offers.clear();
         self.pending_trade_deliveries.clear();
@@ -1848,6 +2476,7 @@ impl SharedInProcessZoneState {
             next_live_outbound_registration_id: 0,
             #[cfg(test)]
             zone_cadence_tick_count: 0,
+            next_economy_source_sequence: 0,
             zone_manager: ZoneManager::new(),
             zone_sessions: BTreeMap::new(),
             zone_session_keys: BTreeMap::new(),
@@ -1858,12 +2487,15 @@ impl SharedInProcessZoneState {
             pending_zone_monster_kill_awards: BTreeMap::new(),
             pending_zone_player_damages: BTreeMap::new(),
             pending_zone_player_heals: BTreeMap::new(),
+            teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
             players: BTreeMap::new(),
             maps: BTreeMap::new(),
             trade_offers: BTreeMap::new(),
             pending_trade_deliveries: BTreeMap::new(),
             pending_trade_rollbacks: BTreeMap::new(),
+            unresolved_ground_drop_settlements: BTreeMap::new(),
+            unresolved_trade_settlements: BTreeMap::new(),
             pending_rental_invites: BTreeMap::new(),
             pending_rental_cancels: BTreeMap::new(),
             rental_item_offers: BTreeMap::new(),
@@ -1874,10 +2506,17 @@ impl SharedInProcessZoneState {
         }
     }
 
+    fn next_economy_source_sequence(&mut self) -> Option<u64> {
+        let next = self.next_economy_source_sequence.checked_add(1)?;
+        self.next_economy_source_sequence = next;
+        Some(next)
+    }
+
     fn checkpoint(&self) -> Result<SharedInProcessZoneStateCheckpoint, String> {
         Ok(SharedInProcessZoneStateCheckpoint {
             version: SHARED_ZONE_STATE_CHECKPOINT_VERSION,
             next_zone_object_id: self.next_zone_object_id,
+            next_economy_source_sequence: self.next_economy_source_sequence,
             next_live_outbound_registration_id: self.next_live_outbound_registration_id,
             zone_manager_bytes: self.zone_manager.checkpoint_bytes()?,
             zone_sessions: self.zone_sessions.clone().into_iter().collect(),
@@ -1919,11 +2558,22 @@ impl SharedInProcessZoneState {
                 .into_iter()
                 .collect(),
             pending_zone_player_heals: self.pending_zone_player_heals.clone().into_iter().collect(),
+            teardown_fences: self.teardown_fences.clone().into_iter().collect(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
             trade_offers: self.trade_offers.clone().into_iter().collect(),
             pending_trade_deliveries: self.pending_trade_deliveries.clone().into_iter().collect(),
             pending_trade_rollbacks: self.pending_trade_rollbacks.clone().into_iter().collect(),
+            unresolved_ground_drop_settlements: self
+                .unresolved_ground_drop_settlements
+                .values()
+                .cloned()
+                .collect(),
+            unresolved_trade_settlements: self
+                .unresolved_trade_settlements
+                .values()
+                .cloned()
+                .collect(),
             pending_rental_invites: self.pending_rental_invites.clone().into_iter().collect(),
             pending_rental_cancels: self.pending_rental_cancels.clone().into_iter().collect(),
             rental_item_offers: self.rental_item_offers.clone().into_iter().collect(),
@@ -1938,6 +2588,7 @@ impl SharedInProcessZoneState {
         SharedInProcessZoneStateCheckpoint {
             version: SHARED_ZONE_STATE_CHECKPOINT_VERSION,
             next_zone_object_id: self.next_zone_object_id,
+            next_economy_source_sequence: self.next_economy_source_sequence,
             next_live_outbound_registration_id: 0,
             zone_manager_bytes: self.zone_manager.checkpoint_bytes()?,
             zone_sessions: self.zone_sessions.clone().into_iter().collect(),
@@ -1949,11 +2600,22 @@ impl SharedInProcessZoneState {
             pending_zone_monster_kill_awards: Vec::new(),
             pending_zone_player_damages: Vec::new(),
             pending_zone_player_heals: Vec::new(),
+            teardown_fences: Vec::new(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
             trade_offers: Vec::new(),
             pending_trade_deliveries: Vec::new(),
             pending_trade_rollbacks: Vec::new(),
+            unresolved_ground_drop_settlements: self
+                .unresolved_ground_drop_settlements
+                .values()
+                .cloned()
+                .collect(),
+            unresolved_trade_settlements: self
+                .unresolved_trade_settlements
+                .values()
+                .cloned()
+                .collect(),
             pending_rental_invites: Vec::new(),
             pending_rental_cancels: Vec::new(),
             rental_item_offers: Vec::new(),
@@ -2003,12 +2665,156 @@ impl SharedInProcessZoneState {
                 ));
             }
         }
+        let zone_manager = ZoneManager::restore_checkpoint(&checkpoint.zone_manager_bytes)?;
+        let players = checkpoint
+            .players
+            .iter()
+            .cloned()
+            .collect::<BTreeMap<_, _>>();
+        if players.len() != checkpoint.players.len() {
+            return Err("shared Zone checkpoint contains duplicate player presences".to_string());
+        }
+        let mut pending_zone_ground_drop_claims = checkpoint
+            .pending_zone_ground_drop_claims
+            .iter()
+            .cloned()
+            .collect::<BTreeMap<_, _>>();
+        if pending_zone_ground_drop_claims.len() != checkpoint.pending_zone_ground_drop_claims.len()
+        {
+            return Err(
+                "shared Zone checkpoint contains duplicate pending drop-claim presences"
+                    .to_string(),
+            );
+        }
+        for (key, tickets) in &pending_zone_ground_drop_claims {
+            let session_id = zone_sessions.get(key).ok_or_else(|| {
+                format!(
+                    "shared Zone checkpoint has pending drop claim without presence for {}/{}",
+                    key.account_id, key.character_index
+                )
+            })?;
+            if !players.contains_key(key) {
+                return Err(format!(
+                    "shared Zone checkpoint has pending drop claim without player for {}/{}",
+                    key.account_id, key.character_index
+                ));
+            }
+            for ticket in tickets {
+                if &ticket.session_id != session_id {
+                    return Err(format!(
+                        "shared Zone checkpoint pending drop claim session mismatch for {}/{}",
+                        key.account_id, key.character_index
+                    ));
+                }
+                if !zone_manager.has_pending_ground_drop_claim_ticket(session_id, ticket) {
+                    return Err(format!(
+                        "shared Zone checkpoint pending drop claim is absent or mismatched in Zone for {}/{} object {}",
+                        key.account_id, key.character_index, ticket.object_id
+                    ));
+                }
+            }
+        }
+        // The Zone checkpoint is authoritative for a claim that was accepted
+        // before the Gateway had materialized its settlement queue. Restore
+        // those exact tickets, but never invent a Gateway presence: every Zone
+        // ticket must still map to the same session and player.
+        for (session_id, ticket) in zone_manager.pending_ground_drop_claim_tickets() {
+            let key = zone_session_keys.get(&session_id).ok_or_else(|| {
+                format!(
+                    "shared Zone checkpoint has Zone pending drop claim without session mapping for {}",
+                    session_id.as_str()
+                )
+            })?;
+            if zone_sessions.get(key) != Some(&session_id) {
+                return Err(format!(
+                    "shared Zone checkpoint has Zone pending drop claim with inconsistent presence mapping for {}",
+                    session_id.as_str()
+                ));
+            }
+            if !players.contains_key(key) {
+                return Err(format!(
+                    "shared Zone checkpoint has Zone pending drop claim without player for {}/{}",
+                    key.account_id, key.character_index
+                ));
+            }
+            let tickets = pending_zone_ground_drop_claims
+                .entry(key.clone())
+                .or_default();
+            if !tickets.contains(&ticket) {
+                tickets.push(ticket);
+            }
+        }
+        let unresolved_ground_count = checkpoint.unresolved_ground_drop_settlements.len();
+        let unresolved_ground_drop_settlements = checkpoint
+            .unresolved_ground_drop_settlements
+            .into_iter()
+            .map(|settlement| {
+                if settlement.presence_key.account_id.trim().is_empty()
+                    || settlement
+                        .idempotency_key
+                        .as_ref()
+                        .is_some_and(|key| key.trim().is_empty())
+                    || !zone_manager.has_detached_ground_drop_claim_ticket(
+                        &settlement.zone_key,
+                        &settlement.ticket,
+                    )
+                {
+                    return Err(
+                        "shared Zone checkpoint contains invalid detached ground settlement"
+                            .to_string(),
+                    );
+                }
+                Ok((settlement.recovery_key(), settlement))
+            })
+            .collect::<Result<BTreeMap<_, _>, String>>()?;
+        if unresolved_ground_drop_settlements.len() != unresolved_ground_count {
+            return Err(
+                "shared Zone checkpoint contains duplicate detached ground settlements".to_string(),
+            );
+        }
+        let unresolved_count = checkpoint.unresolved_trade_settlements.len();
+        let unresolved_trade_settlements = checkpoint
+            .unresolved_trade_settlements
+            .into_iter()
+            .map(|settlement| {
+                if settlement.idempotency_key.trim().is_empty()
+                    || settlement.first_key == settlement.second_key
+                    || settlement.first_key.account_id != settlement.first_offer.account_id
+                    || settlement.first_key.character_index
+                        != settlement.first_offer.character_index
+                    || settlement.second_key.account_id != settlement.second_offer.account_id
+                    || settlement.second_key.character_index
+                        != settlement.second_offer.character_index
+                    || !settlement
+                        .first_offer
+                        .partner_name
+                        .eq_ignore_ascii_case(&settlement.second_offer.character_name)
+                    || !settlement
+                        .second_offer
+                        .partner_name
+                        .eq_ignore_ascii_case(&settlement.first_offer.character_name)
+                {
+                    return Err(
+                        "shared Zone checkpoint contains invalid unresolved trade settlement"
+                            .to_string(),
+                    );
+                }
+                Ok((settlement.recovery_key(), settlement))
+            })
+            .collect::<Result<BTreeMap<_, _>, String>>()?;
+        if unresolved_trade_settlements.len() != unresolved_count {
+            return Err(
+                "shared Zone checkpoint contains duplicate unresolved trade settlements"
+                    .to_string(),
+            );
+        }
         Ok(Self {
             next_zone_object_id: checkpoint.next_zone_object_id,
             next_live_outbound_registration_id: checkpoint.next_live_outbound_registration_id,
             #[cfg(test)]
             zone_cadence_tick_count: 0,
-            zone_manager: ZoneManager::restore_checkpoint(&checkpoint.zone_manager_bytes)?,
+            next_economy_source_sequence: checkpoint.next_economy_source_sequence,
+            zone_manager,
             zone_sessions,
             zone_session_keys,
             pending_zone_packets: checkpoint
@@ -2035,10 +2841,7 @@ impl SharedInProcessZoneState {
                 .pending_zone_shout_consumes
                 .into_iter()
                 .collect(),
-            pending_zone_ground_drop_claims: checkpoint
-                .pending_zone_ground_drop_claims
-                .into_iter()
-                .collect(),
+            pending_zone_ground_drop_claims,
             pending_zone_monster_kill_awards: checkpoint
                 .pending_zone_monster_kill_awards
                 .into_iter()
@@ -2048,12 +2851,15 @@ impl SharedInProcessZoneState {
                 .into_iter()
                 .collect(),
             pending_zone_player_heals: checkpoint.pending_zone_player_heals.into_iter().collect(),
+            teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
-            players: checkpoint.players.into_iter().collect(),
+            players,
             maps: checkpoint.maps,
             trade_offers: checkpoint.trade_offers.into_iter().collect(),
             pending_trade_deliveries: checkpoint.pending_trade_deliveries.into_iter().collect(),
             pending_trade_rollbacks: checkpoint.pending_trade_rollbacks.into_iter().collect(),
+            unresolved_ground_drop_settlements,
+            unresolved_trade_settlements,
             pending_rental_invites: checkpoint.pending_rental_invites.into_iter().collect(),
             pending_rental_cancels: checkpoint.pending_rental_cancels.into_iter().collect(),
             rental_item_offers: checkpoint.rental_item_offers.into_iter().collect(),
@@ -2157,7 +2963,116 @@ impl SharedInProcessZoneState {
         self.pending_zone_monster_kill_awards.remove(key);
         self.pending_zone_player_damages.remove(key);
         self.pending_zone_player_heals.remove(key);
+        self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
+    }
+
+    fn begin_teardown_fence(&mut self, key: &ZonePresenceKey) -> Result<(), String> {
+        if !self.players.contains_key(key) || !self.zone_sessions.contains_key(key) {
+            return Err("cannot fence a missing shared Zone presence".to_string());
+        }
+        self.teardown_fences.insert(key.clone());
+        // Once the socket has closed, no realtime packet may bypass the
+        // deterministic teardown drain through a stale live registration.
+        self.live_zone_outbounds.remove(key);
+        Ok(())
+    }
+
+    fn release_teardown_fence(&mut self, key: &ZonePresenceKey) {
+        self.teardown_fences.remove(key);
+    }
+
+    fn teardown_fenced(&self, key: &ZonePresenceKey) -> bool {
+        self.teardown_fences.contains(key)
+    }
+
+    fn any_teardown_fenced(&self) -> bool {
+        !self.teardown_fences.is_empty()
+    }
+    fn command_mutates_teardown_fence(&self, command: &ZoneCommand) -> bool {
+        if self.teardown_fences.is_empty() {
+            return false;
+        }
+
+        let source_session_id = match command {
+            ZoneCommand::Join(join) => Some(&join.session_id),
+            ZoneCommand::Leave { session_id }
+            | ZoneCommand::Walk { session_id, .. }
+            | ZoneCommand::Run { session_id, .. }
+            | ZoneCommand::Turn { session_id, .. }
+            | ZoneCommand::TeleportToNpc { session_id, .. }
+            | ZoneCommand::UpdateChatProfile { session_id, .. }
+            | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+            | ZoneCommand::SyncPlayerCombatState { session_id, .. }
+            | ZoneCommand::SyncPlayerTransform { session_id, .. }
+            | ZoneCommand::SyncPlayerVitals { session_id, .. }
+            | ZoneCommand::Chat { session_id, .. }
+            | ZoneCommand::BroadcastPackets { session_id, .. }
+            | ZoneCommand::SyncSharedObjects { session_id, .. }
+            | ZoneCommand::BroadcastSharedObjectPackets { session_id, .. }
+            | ZoneCommand::SyncGroundDrops { session_id, .. }
+            | ZoneCommand::SpawnMonster { session_id, .. }
+            | ZoneCommand::SyncNativeMonsters { session_id, .. }
+            | ZoneCommand::PlayerAttackObject { session_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerCastMagic { session_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
+            | ZoneCommand::ResolveReincarnation { session_id, .. }
+            | ZoneCommand::ClaimGroundDrop { session_id, .. }
+            | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
+            | ZoneCommand::CommitGroundDropClaim { session_id, .. }
+            | ZoneCommand::CommitGroundDropClaimWithTicket { session_id, .. }
+            | ZoneCommand::CancelGroundDropClaim { session_id, .. }
+            | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, .. }
+            | ZoneCommand::TickPlayerMovement { session_id, .. }
+            | ZoneCommand::OpenDoor { session_id, .. }
+            | ZoneCommand::ConfigureHazards { session_id, .. } => Some(session_id),
+            ZoneCommand::Tick { .. } => None,
+        };
+        if source_session_id.is_some_and(|session_id| {
+            self.zone_session_keys
+                .get(session_id)
+                .is_some_and(|key| self.teardown_fenced(key))
+        }) {
+            return true;
+        }
+
+        let target_object_id = match command {
+            ZoneCommand::PlayerAttackObject { object_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { object_id, .. }
+            | ZoneCommand::PlayerRangeAttackObject { object_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { object_id, .. }
+            | ZoneCommand::PlayerCastMagic { object_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { object_id, .. } => Some(*object_id),
+            _ => None,
+        };
+        if target_object_id.is_some_and(|object_id| {
+            self.teardown_fences.iter().any(|key| {
+                self.players
+                    .get(key)
+                    .is_some_and(|presence| presence.zone_object_id == object_id)
+            })
+        }) {
+            return true;
+        }
+
+        matches!(command, ZoneCommand::Tick { .. })
+    }
+
+    fn prepend_zone_monster_kill_awards(
+        &mut self,
+        key: ZonePresenceKey,
+        mut awards: Vec<ZoneMonsterKillAward>,
+    ) {
+        if awards.is_empty() {
+            return;
+        }
+        if let Some(mut later) = self.pending_zone_monster_kill_awards.remove(&key) {
+            awards.append(&mut later);
+        }
+        self.pending_zone_monster_kill_awards.insert(key, awards);
     }
 
     fn zone_session_id_for_key(key: &ZonePresenceKey) -> SessionId {
@@ -2317,17 +3232,125 @@ impl SharedInProcessZoneState {
         self.pending_zone_shout_consumes.remove(key)
     }
 
-    fn queue_zone_ground_drop_claim(&mut self, key: ZonePresenceKey, drop: GroundDropSnapshot) {
+    fn queue_zone_ground_drop_claim(
+        &mut self,
+        key: ZonePresenceKey,
+        ticket: GroundDropClaimTicket,
+    ) {
         self.pending_zone_ground_drop_claims
             .entry(key)
             .or_default()
-            .push(drop);
+            .push(ticket);
+    }
+
+    fn detach_unresolved_ground_drop_settlement(
+        &mut self,
+        key: &ZonePresenceKey,
+        ticket: &GroundDropClaimTicket,
+        idempotency_key: String,
+        execution_context: Option<SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        let Some(session_id) = self.zone_sessions.get(key).cloned() else {
+            return false;
+        };
+        if &ticket.session_id != &session_id {
+            return false;
+        }
+        let Some(zone_key) = self.zone_manager.zone_key_for_session(&session_id) else {
+            return false;
+        };
+        let settlement = UnresolvedGroundDropSettlement {
+            idempotency_key: Some(idempotency_key),
+            execution_context,
+            presence_key: key.clone(),
+            zone_key,
+            ticket: ticket.clone(),
+        };
+        let recovery_key = settlement.recovery_key();
+        match self.unresolved_ground_drop_settlements.get(&recovery_key) {
+            Some(existing) => return existing == &settlement,
+            None => {}
+        }
+        if self
+            .zone_manager
+            .detach_ground_drop_claim(&session_id, ticket)
+            .as_ref()
+            != Some(&settlement.zone_key)
+        {
+            return false;
+        }
+        self.unresolved_ground_drop_settlements
+            .insert(recovery_key, settlement);
+        true
+    }
+
+    fn unresolved_ground_drop_settlement_for_presence(
+        &self,
+        key: &ZonePresenceKey,
+    ) -> Option<UnresolvedGroundDropSettlement> {
+        self.unresolved_ground_drop_settlements
+            .values()
+            .find(|settlement| settlement.involves(key))
+            .cloned()
+    }
+
+    fn retain_unresolved_ground_drop_outcome_key(
+        &mut self,
+        expected: &UnresolvedGroundDropSettlement,
+        idempotency_key: String,
+    ) -> bool {
+        let recovery_key = expected.recovery_key();
+        let Some(stored) = self
+            .unresolved_ground_drop_settlements
+            .get_mut(&recovery_key)
+        else {
+            return false;
+        };
+        if stored != expected {
+            return false;
+        }
+        match stored.idempotency_key.as_ref() {
+            Some(existing) => existing == &idempotency_key,
+            None => {
+                stored.idempotency_key = Some(idempotency_key);
+                true
+            }
+        }
+    }
+
+    fn resolve_unresolved_ground_drop_settlement(
+        &mut self,
+        expected: &UnresolvedGroundDropSettlement,
+        committed: bool,
+        now_ms: u64,
+    ) -> Option<Vec<ZoneOutbound>> {
+        let recovery_key = expected.recovery_key();
+        if self.unresolved_ground_drop_settlements.get(&recovery_key) != Some(expected) {
+            return None;
+        }
+        let outbounds = if committed {
+            Vec::new()
+        } else {
+            let outbounds = self.zone_manager.restore_detached_ground_drop_claim(
+                &expected.zone_key,
+                &expected.ticket,
+                now_ms,
+            )?;
+            self.restore_drop(
+                &expected.zone_key.map_file_name,
+                expected.ticket.drop.clone(),
+            );
+            outbounds
+        };
+        self.unresolved_ground_drop_settlements
+            .remove(&recovery_key);
+        Some(outbounds)
     }
 
     fn take_pending_zone_ground_drop_claims(
         &mut self,
         key: &ZonePresenceKey,
-    ) -> Vec<GroundDropSnapshot> {
+    ) -> Vec<GroundDropClaimTicket> {
         self.pending_zone_ground_drop_claims
             .remove(key)
             .unwrap_or_default()
@@ -2418,7 +3441,24 @@ impl SharedInProcessZoneState {
         Vec<ServerPacket>,
         Option<(Point, MirDirection)>,
         Option<(bool, bool)>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
+        Vec<ZoneMonsterKillAward>,
+        Vec<i32>,
+        Vec<i32>,
+    ) {
+        self.dispatch_zone_outbounds_with_fence_policy(outbounds, current_key, false)
+    }
+
+    fn dispatch_zone_outbounds_with_fence_policy(
+        &mut self,
+        outbounds: Vec<ZoneOutbound>,
+        current_key: Option<&ZonePresenceKey>,
+        allow_fenced_current: bool,
+    ) -> (
+        Vec<ServerPacket>,
+        Option<(Point, MirDirection)>,
+        Option<(bool, bool)>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -2439,6 +3479,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.apply_zone_packets_to_map_layer(&key, &packets);
                     if current_key == Some(&key) {
                         current_packets.extend(packets);
@@ -2454,6 +3499,11 @@ impl SharedInProcessZoneState {
                         let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                             continue;
                         };
+                        if self.teardown_fenced(&key)
+                            && !(allow_fenced_current && current_key == Some(&key))
+                        {
+                            continue;
+                        }
                         self.apply_zone_packets_to_map_layer(&key, &packets);
                         if current_key == Some(&key) {
                             current_packets.extend(packets.clone());
@@ -2464,6 +3514,11 @@ impl SharedInProcessZoneState {
                 }
                 ZoneOutbound::ToAll { packets } => {
                     for key in self.zone_session_keys.values().cloned().collect::<Vec<_>>() {
+                        if self.teardown_fenced(&key)
+                            && !(allow_fenced_current && current_key == Some(&key))
+                        {
+                            continue;
+                        }
                         self.apply_zone_packets_to_map_layer(&key, &packets);
                         if current_key == Some(&key) {
                             current_packets.extend(packets.clone());
@@ -2480,6 +3535,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.update_player_transform(&key, position.clone(), direction);
                     if current_key == Some(&key) {
                         current_transform = Some((position, direction));
@@ -2487,6 +3547,10 @@ impl SharedInProcessZoneState {
                         self.pending_zone_transforms
                             .insert(key, (position, direction));
                     }
+                }
+                ZoneOutbound::NpcTeleportCommit { .. } => {
+                    // Consumed atomically by execute_zone_npc_teleport before
+                    // ordinary outbound dispatch. It must never reach a socket.
                 }
                 ZoneOutbound::ConsumeShoutPermission {
                     session_id,
@@ -2496,27 +3560,45 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     if current_key == Some(&key) {
                         current_shout_consume = Some((map_shout, server_shout));
                     } else {
                         self.queue_zone_shout_consume(key, map_shout, server_shout);
                     }
                 }
-                ZoneOutbound::GroundDropClaimed { session_id, drop } => {
+                // Legacy object-id-only claims are intentionally ignored. A
+                // modern Zone always emits the authority-bearing ticket form.
+                ZoneOutbound::GroundDropClaimed { .. } => {}
+                ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket } => {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
-                    self.remove_shared_drop_for_key(&key, drop.object_id);
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
+                    self.remove_shared_drop_for_key(&key, ticket.object_id);
                     if current_key == Some(&key) {
-                        current_ground_drop_claims.push(drop);
+                        current_ground_drop_claims.push(ticket);
                     } else {
-                        self.queue_zone_ground_drop_claim(key, drop);
+                        self.queue_zone_ground_drop_claim(key, ticket);
                     }
                 }
                 ZoneOutbound::MonsterKillAward { session_id, award } => {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     self.sync_authoritative_zone_drops_for_key(&key, &award.drops);
                     if current_key == Some(&key) {
                         current_monster_kill_awards.push(award);
@@ -2528,6 +3610,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     if current_key == Some(&key) {
                         current_player_damages.push(damage);
                     } else {
@@ -2538,6 +3625,11 @@ impl SharedInProcessZoneState {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
+                    if self.teardown_fenced(&key)
+                        && !(allow_fenced_current && current_key == Some(&key))
+                    {
+                        continue;
+                    }
                     if current_key == Some(&key) {
                         current_player_heals.push(amount);
                     } else {
@@ -2836,6 +3928,35 @@ impl SharedInProcessZoneState {
             .values()
             .map(|presence| (presence.zone_object_id, presence.entity.name.clone()))
             .collect::<BTreeMap<_, _>>();
+        let native_monsters_by_object_id = self
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map(map_file_name))
+            .into_iter()
+            .map(|monster| (monster.object_id, monster))
+            .collect::<BTreeMap<_, _>>();
+        // `ObjectRemove` is also the Crystal AOI-leave packet. This method is
+        // the final global map-index mutation boundary, so defend it directly
+        // instead of relying on every caller to pre-classify observer-local
+        // packets. A retained Zone object remains globally actionable even
+        // while absent from one recipient's viewport.
+        let zone_key = ZoneKey::for_map(map_file_name);
+        let retained_remove_ids = self
+            .zone_manager
+            .zone(&zone_key)
+            .map(|zone| {
+                packets
+                    .iter()
+                    .filter_map(|packet| match packet {
+                        ServerPacket::ObjectRemove { object_id }
+                            if zone.retains_object_id(*object_id) =>
+                        {
+                            Some(*object_id)
+                        }
+                        _ => None,
+                    })
+                    .collect::<BTreeSet<_>>()
+            })
+            .unwrap_or_default();
         let map = self.maps.entry(map_file_name.to_string()).or_default();
         for packet in packets {
             match packet {
@@ -2858,6 +3979,10 @@ impl SharedInProcessZoneState {
                     }
                     if died {
                         map.revived_entity_ids.remove(&info.object_id);
+                        // A live -> dead transition starts a new corpse
+                        // incarnation. A retained Harvest marker belongs to an
+                        // older incarnation and must not reject this corpse.
+                        map.harvested_entity_ids.remove(&info.object_id);
                         let location = map.entities.get(&info.object_id).map(|entity| Point {
                             x: entity.x,
                             y: entity.y,
@@ -2885,6 +4010,10 @@ impl SharedInProcessZoneState {
                     }
                 }
                 ServerPacket::ObjectDied { info } => {
+                    let starts_new_corpse = map
+                        .entities
+                        .get(&info.object_id)
+                        .is_some_and(|entity| !entity.dead && entity.hp.map_or(true, |hp| hp > 0));
                     if let Some(entity) = map.entities.get_mut(&info.object_id) {
                         entity.x = info.location.x;
                         entity.y = info.location.y;
@@ -2892,7 +4021,15 @@ impl SharedInProcessZoneState {
                         entity.hp = Some(0);
                         entity.dead = true;
                     }
-                    map.revived_entity_ids.remove(&info.object_id);
+                    let follows_revive = map.revived_entity_ids.remove(&info.object_id);
+                    if starts_new_corpse || follows_revive {
+                        // Object ids are reused across Crystal monster
+                        // incarnations. Clear an older completed-Harvest marker
+                        // only on the authoritative live -> dead boundary; a
+                        // duplicate late ObjectDied for the same corpse must not
+                        // reopen an already harvested body.
+                        map.harvested_entity_ids.remove(&info.object_id);
+                    }
                     map.dead_entity_ids.insert(
                         info.object_id,
                         SharedDeadEntityState {
@@ -2915,6 +4052,9 @@ impl SharedInProcessZoneState {
                     }
                 }
                 ServerPacket::ObjectRemove { object_id } => {
+                    if retained_remove_ids.contains(object_id) {
+                        continue;
+                    }
                     map.entities.remove(object_id);
                     map.removed_entity_ids.insert(*object_id);
                     map.ground_drops.remove(object_id);
@@ -2999,6 +4139,12 @@ impl SharedInProcessZoneState {
                             if entity.owner_name.is_none() {
                                 entity.owner_name = existing.owner_name.clone();
                             }
+                        }
+                        // ObjectMonster has no relationship field. Rehydrate
+                        // only from the live Zone authority; without one the
+                        // legacy packet remains Neutral/fail-closed.
+                        if let Some(monster) = native_monsters_by_object_id.get(&info.object_id) {
+                            reconcile_shared_entity_with_native_monster(map, &mut entity, monster);
                         }
                         if let Some(dead) = map.dead_entity_ids.get(&info.object_id) {
                             entity.dead = true;
@@ -3523,6 +4669,74 @@ impl SharedInProcessZoneState {
         }
     }
 
+    fn retain_unresolved_trade_settlement(
+        &mut self,
+        settlement: UnresolvedSharedTradeSettlement,
+    ) -> Result<(), String> {
+        let recovery_key = settlement.recovery_key();
+        match self.unresolved_trade_settlements.get(&recovery_key) {
+            Some(existing) if existing == &settlement => Ok(()),
+            Some(_) => Err("conflicting unresolved trade settlement recovery key".to_string()),
+            None => {
+                self.unresolved_trade_settlements
+                    .insert(recovery_key, settlement);
+                Ok(())
+            }
+        }
+    }
+
+    fn unresolved_trade_settlement_for_presence(
+        &self,
+        key: &ZonePresenceKey,
+    ) -> Option<UnresolvedSharedTradeSettlement> {
+        self.unresolved_trade_settlements
+            .values()
+            .find(|settlement| settlement.involves(key))
+            .cloned()
+    }
+
+    fn has_unresolved_trade_settlement_for_presence(&self, key: &ZonePresenceKey) -> bool {
+        self.unresolved_trade_settlements
+            .values()
+            .any(|settlement| settlement.involves(key))
+    }
+
+    fn resolve_unresolved_trade_settlement(
+        &mut self,
+        expected: &UnresolvedSharedTradeSettlement,
+        resolution: UnresolvedSharedTradeResolution,
+    ) -> bool {
+        let recovery_key = expected.recovery_key();
+        if self.unresolved_trade_settlements.get(&recovery_key) != Some(expected) {
+            return false;
+        }
+        self.unresolved_trade_settlements.remove(&recovery_key);
+        match resolution {
+            UnresolvedSharedTradeResolution::Durable => {}
+            UnresolvedSharedTradeResolution::LocalCommit => {
+                self.pending_trade_deliveries
+                    .entry(expected.first_key.clone())
+                    .or_default()
+                    .push(expected.second_offer.clone());
+                self.pending_trade_deliveries
+                    .entry(expected.second_key.clone())
+                    .or_default()
+                    .push(expected.first_offer.clone());
+            }
+            UnresolvedSharedTradeResolution::Rejected => {
+                self.pending_trade_rollbacks
+                    .entry(expected.first_key.clone())
+                    .or_default()
+                    .push(expected.first_offer.clone());
+                self.pending_trade_rollbacks
+                    .entry(expected.second_key.clone())
+                    .or_default()
+                    .push(expected.second_offer.clone());
+            }
+        }
+        true
+    }
+
     fn take_pending_trade_deliveries(&mut self, key: &ZonePresenceKey) -> Vec<SharedTradeOffer> {
         self.pending_trade_deliveries
             .remove(key)
@@ -3673,6 +4887,13 @@ impl SharedInProcessZoneState {
         }
         own_offer
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum UnresolvedSharedTradeResolution {
+    Durable,
+    LocalCommit,
+    Rejected,
 }
 
 type SharedZoneMutationObserver =
@@ -3946,16 +5167,17 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn mark_zone_as_replica(&self, zone_id: &ZoneId) {
-        self.replica_zone_ids
+        // Fixed lock order for operations that need both maps: replicas, then Zones.
+        let mut replica_zone_ids = self
+            .replica_zone_ids
             .lock()
-            .expect("shared Zone replica marker mutex should not be poisoned")
-            .insert(zone_id.clone());
-        if let Some(resources) = self
+            .expect("shared Zone replica marker mutex should not be poisoned");
+        let zones = self
             .zones
             .lock()
-            .expect("shared Zone factory mutex should not be poisoned")
-            .get(zone_id)
-        {
+            .expect("shared Zone factory mutex should not be poisoned");
+        replica_zone_ids.insert(zone_id.clone());
+        if let Some(resources) = zones.get(zone_id) {
             resources
                 .autonomous_ticks_enabled
                 .store(false, Ordering::Release);
@@ -3970,21 +5192,23 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn promote_zone_from_replica(&self, zone_id: &ZoneId) -> Result<(), String> {
-        if !self
+        // Keep the same replicas -> Zones lock order as mark/restore.
+        let mut replica_zone_ids = self
             .replica_zone_ids
             .lock()
-            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?
-            .remove(zone_id)
-        {
-            return Err(format!("Zone {zone_id} is not a standby replica"));
-        }
-        let resources = self
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?;
+        let zones = self
             .zones
             .lock()
-            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?;
+        if !replica_zone_ids.contains(zone_id) {
+            return Err(format!("Zone {zone_id} is not a standby replica"));
+        }
+        let resources = zones
             .get(zone_id)
             .cloned()
             .ok_or_else(|| format!("Zone {zone_id} has no installed replica state"))?;
+        replica_zone_ids.remove(zone_id);
         resources
             .autonomous_ticks_enabled
             .store(true, Ordering::Release);
@@ -4009,13 +5233,20 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn resume_active_zone(&self, zone_id: &ZoneId) -> Result<(), String> {
-        if self.is_zone_replica(zone_id) {
-            return Err(format!("Zone {zone_id} is a standby replica"));
-        }
-        let resources = self
+        // Keep the replica check and tick enable in the same replicas -> Zones
+        // critical section as mark/promote/restore/resource creation.
+        let replica_zone_ids = self
+            .replica_zone_ids
+            .lock()
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?;
+        let zones = self
             .zones
             .lock()
-            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?;
+        if replica_zone_ids.contains(zone_id) {
+            return Err(format!("Zone {zone_id} is a standby replica"));
+        }
+        let resources = zones
             .get(zone_id)
             .cloned()
             .ok_or_else(|| format!("Zone {zone_id} has no active runtime state"))?;
@@ -4113,11 +5344,19 @@ impl SharedInProcessZoneRuntimeFactory {
         self.install_factory_checkpoint(checkpoint)
     }
 
-    /// Restore a World Director image while deliberately discarding legacy
-    /// session-scoped state. This also migrates v1 checkpoints that contained
-    /// orphan players and unbounded pending packet frames. The caller must
-    /// verify the enclosing World Director commitment before invoking this.
+    /// Preserve the existing caller API while using the transactional
+    /// implementation for every World Director restore.
     pub(crate) fn install_world_checkpoint_bytes(&self, bytes: &[u8]) -> Result<usize, String> {
+        self.install_world_checkpoint_bytes_atomically(bytes)
+    }
+
+    /// Restore a complete World Director image without exposing a partially
+    /// restored set of Zones. Every Zone is decoded and restored into an
+    /// isolated resource map before the live map is replaced under one lock.
+    pub(crate) fn install_world_checkpoint_bytes_atomically(
+        &self,
+        bytes: &[u8],
+    ) -> Result<usize, String> {
         let mut checkpoint: SharedInProcessZoneFactoryCheckpoint = serde_json::from_slice(bytes)
             .map_err(|error| format!("failed to decode shared Zone factory checkpoint: {error}"))?;
         checkpoint.zones = checkpoint
@@ -4127,7 +5366,76 @@ impl SharedInProcessZoneRuntimeFactory {
                 Ok((zone_id, zone_checkpoint.into_verified_world_only()?))
             })
             .collect::<Result<BTreeMap<_, _>, String>>()?;
-        self.install_factory_checkpoint(checkpoint)
+        self.install_factory_checkpoint_atomically(checkpoint)
+    }
+
+    fn install_factory_checkpoint_atomically(
+        &self,
+        checkpoint: SharedInProcessZoneFactoryCheckpoint,
+    ) -> Result<usize, String> {
+        if checkpoint.version != SHARED_ZONE_FACTORY_CHECKPOINT_VERSION {
+            return Err(format!(
+                "unsupported shared Zone factory checkpoint version {}, expected {}",
+                checkpoint.version, SHARED_ZONE_FACTORY_CHECKPOINT_VERSION
+            ));
+        }
+
+        let zone_count = checkpoint.zones.len();
+        let mut restored_states = BTreeMap::new();
+        for (zone_id, zone_checkpoint) in checkpoint.zones {
+            restored_states.insert(zone_id, SharedInProcessZoneState::restore(zone_checkpoint)?);
+        }
+
+        let mut staged_resources = BTreeMap::new();
+        for (zone_id, restored) in restored_states {
+            let cadence = self
+                .tick_cadences
+                .get(&zone_id)
+                .copied()
+                .unwrap_or(self.default_tick_cadence);
+            let resources = SharedInProcessZoneResources::new(
+                &zone_id,
+                cadence,
+                self.mutation_capture.clone(),
+                false,
+            );
+            *resources
+                .zone_state
+                .lock()
+                .map_err(|_| format!("staged shared Zone {zone_id} state mutex was poisoned"))? =
+                restored;
+            staged_resources.insert(zone_id, resources);
+        }
+
+        let checkpoint_zone_ids = staged_resources.keys().cloned().collect::<BTreeSet<_>>();
+        // One atomic critical section observes replica markers, rechecks the
+        // live Zone set, replaces it, and initializes every tick flag. The
+        // fixed order is replicas -> Zones, matching mark/promote.
+        let replica_zone_ids = self
+            .replica_zone_ids
+            .lock()
+            .map_err(|_| "shared Zone replica marker mutex was poisoned".to_string())?;
+        let mut live_resources = self
+            .zones
+            .lock()
+            .map_err(|_| "shared Zone factory mutex was poisoned".to_string())?;
+        let current_zone_ids = live_resources.keys().cloned().collect::<BTreeSet<_>>();
+        if !current_zone_ids.is_subset(&checkpoint_zone_ids) {
+            return Err(
+                "shared Zone checkpoint is missing a Zone created during journal replay"
+                    .to_string(),
+            );
+        }
+
+        *live_resources = staged_resources;
+        for (zone_id, resources) in live_resources.iter() {
+            let autonomous_ticks_enabled =
+                self.autonomous_ticks_by_default && !replica_zone_ids.contains(zone_id);
+            resources
+                .autonomous_ticks_enabled
+                .store(autonomous_ticks_enabled, Ordering::Release);
+        }
+        Ok(zone_count)
     }
 
     fn install_factory_checkpoint(
@@ -4234,15 +5542,21 @@ impl SharedInProcessZoneRuntimeFactory {
             .get(zone_id)
             .copied()
             .unwrap_or(self.default_tick_cadence);
-        let autonomous_ticks_enabled = self.autonomous_ticks_by_default
-            && !self
-                .replica_zone_ids
-                .lock()
-                .expect("shared Zone replica marker mutex should not be poisoned")
-                .contains(zone_id);
-        self.zones
+        // Keep replica observation and first resource insertion in the same
+        // replicas -> Zones critical section as mark/promote/restore. Otherwise
+        // a concurrent mark could install the marker between the two locks and
+        // leave a standby resource with autonomous ticks enabled.
+        let replica_zone_ids = self
+            .replica_zone_ids
             .lock()
-            .expect("shared zone factory mutex should not be poisoned")
+            .expect("shared Zone replica marker mutex should not be poisoned");
+        let autonomous_ticks_enabled =
+            self.autonomous_ticks_by_default && !replica_zone_ids.contains(zone_id);
+        let mut zones = self
+            .zones
+            .lock()
+            .expect("shared zone factory mutex should not be poisoned");
+        zones
             .entry(zone_id.clone())
             .or_insert_with(|| {
                 SharedInProcessZoneResources::new(
@@ -4467,6 +5781,9 @@ fn reconcile_shared_entity_with_native_monster(
     entity.hp = Some(monster.hp.max(0));
     entity.max_hp = Some(monster.max_hp.max(1));
     entity.dead = monster.dead || monster.hp <= 0;
+    entity.disposition = monster
+        .disposition
+        .unwrap_or(WorldEntityDisposition::Neutral);
 
     if entity.dead {
         entity.hp = Some(0);
@@ -4483,6 +5800,10 @@ fn reconcile_shared_entity_with_native_monster(
 
     map.removed_entity_ids.remove(&monster.object_id);
     map.dead_entity_ids.remove(&monster.object_id);
+    // A live Zone-native monster can never still be harvested. Keep the shared
+    // action index self-healing even when the explicit ObjectRevived fan-out was
+    // interleaved with a snapshot merge.
+    map.harvested_entity_ids.remove(&monster.object_id);
     if was_dead {
         // Normally ObjectRevived already performs these transitions. Keep the
         // map self-healing if a snapshot is read between the single-writer
@@ -4490,7 +5811,6 @@ fn reconcile_shared_entity_with_native_monster(
         // legacy ObjectMonster packet as a revive.
         map.revived_entity_ids.insert(monster.object_id);
         map.committed_death_drop_anchors.remove(&monster.object_id);
-        map.harvested_entity_ids.remove(&monster.object_id);
     }
 }
 
@@ -4545,12 +5865,20 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         class: None,
         gender: None,
         level: None,
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: None,
         max_hp: None,
         light: info.light,
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
-        disposition: world_entity_disposition_for_monster_ai(info.ai),
+        // ObjectMonster carries behaviour AI but no authoritative relationship.
+        // Keep legacy/missing producers fail-closed until a retained native
+        // snapshot supplies explicit disposition.
+        disposition: WorldEntityDisposition::Neutral,
         sprite: Some(simple_world_entity_sprite_snapshot(
             "Monster", info.image, 3,
         )),
@@ -4574,25 +5902,25 @@ fn world_entity_from_zone_monster_spawn(
         class: None,
         gender: None,
         level: Some(spawn.level),
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: Some(monster.hp),
         max_hp: Some(monster.max_hp),
         light: 0,
         name_colour_argb: spawn.name_colour_argb,
         dead: monster.dead,
-        disposition: world_entity_disposition_for_monster_ai(spawn.ai),
+        disposition: monster
+            .disposition
+            .unwrap_or(WorldEntityDisposition::Neutral),
         sprite: Some(simple_world_entity_sprite_snapshot(
             "Monster",
             spawn.image,
             3,
         )),
         quest_ids: Vec::new(),
-    }
-}
-
-fn world_entity_disposition_for_monster_ai(ai: u8) -> WorldEntityDisposition {
-    match ai {
-        1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113 => WorldEntityDisposition::Neutral,
-        _ => WorldEntityDisposition::Hostile,
     }
 }
 
@@ -4648,6 +5976,7 @@ fn zone_monster_spawn_from_shared_entity(
             entity,
             entity.ai.or_else(|| template_ref.map(|monster| monster.ai)),
         ),
+        disposition: Some(entity.disposition),
         level: entity
             .level
             .or_else(|| template_ref.map(|monster| monster.level))
@@ -4694,6 +6023,13 @@ fn world_entity_from_object_player_info(
         class: Some(info.class),
         gender: Some(info.gender),
         level: Some(info.level),
+        // ObjectPlayerInfo does not carry these authoritative combat flags.
+        // Keep them unknown rather than fabricating a permissive `false`.
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: None,
         max_hp: None,
         light: info.light,
@@ -4718,6 +6054,11 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         class: None,
         gender: None,
         level: None,
+        riding_mount: None,
+        can_mount_attack: None,
+        has_class_weapon: None,
+        dazed: None,
+        fishing: None,
         hp: None,
         max_hp: None,
         light: 10,
@@ -5241,6 +6582,7 @@ fn ground_drop_snapshot_from_spawn_packet(packet: &ServerPacket) -> Option<Groun
                 cursed: false,
                 socket_slots: 0,
                 show_group_pickup: false,
+                exact_item: None,
             },
         }),
         _ => None,
@@ -5275,6 +6617,46 @@ fn remove_object_remove_packets(packets: &mut Vec<ServerPacket>, object_ids: &BT
             ServerPacket::ObjectRemove { object_id } if object_ids.contains(object_id)
         )
     });
+}
+
+fn merge_ground_drop_claim_packets_in_crystal_order(
+    packets: &mut Vec<ServerPacket>,
+    mut claim_packets_by_object_id: BTreeMap<u32, Vec<ServerPacket>>,
+    canceled_claims: &BTreeSet<u32>,
+) {
+    if claim_packets_by_object_id.is_empty() && canceled_claims.is_empty() {
+        return;
+    }
+
+    let original_packets = std::mem::take(packets);
+    let mut ordered_packets = Vec::with_capacity(
+        original_packets.len()
+            + claim_packets_by_object_id
+                .values()
+                .map(Vec::len)
+                .sum::<usize>(),
+    );
+    for packet in original_packets {
+        let removed_object_id = match &packet {
+            ServerPacket::ObjectRemove { object_id } => Some(*object_id),
+            _ => None,
+        };
+        if let Some(object_id) = removed_object_id {
+            if let Some(claim_packets) = claim_packets_by_object_id.remove(&object_id) {
+                // Crystal commits and reports the inventory gain before the
+                // ground object is removed from the scene.
+                ordered_packets.extend(claim_packets);
+            }
+            if canceled_claims.contains(&object_id) {
+                continue;
+            }
+        }
+        ordered_packets.push(packet);
+    }
+    for claim_packets in claim_packets_by_object_id.into_values() {
+        ordered_packets.extend(claim_packets);
+    }
+    *packets = ordered_packets;
 }
 
 fn apply_shared_entity_transform(
@@ -5519,6 +6901,8 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             account_inventory_service: self.account_inventory_service.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
+            last_ground_drop_projection_reconciliation_identity: None,
+            trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: SharedZoneMovementIngress::new(
                 resources.movement_sender,
                 resources.zone_state,
@@ -5530,6 +6914,9 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             local_ground_drop_zone_ids: BTreeMap::new(),
             retired_local_ground_drop_ids: BTreeSet::new(),
             owner_dead_entity_ids: BTreeSet::new(),
+            last_game_shop_purchase_outcome: None,
+            #[cfg(test)]
+            fail_next_npc_teleport_checkpoint_restore: false,
         })
     }
 }
@@ -5926,6 +7313,7 @@ fn shared_zone_owner_loop(
                     execution.map(|execution| WorldCommandExecution {
                         packets: execution.packets,
                         outcome: execution.outcome,
+                        game_shop_purchase_outcome: None,
                     })
                 });
                 let _ = request.response_sender.send(result);
@@ -5943,6 +7331,12 @@ fn run_shared_zone_cadence_tick(
     let mut zone_state = zone_state
         .lock()
         .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+    // A teardown checkpoint must observe a quiescent Zone. ZoneManager only
+    // exposes a global Tick, so pause autonomous mutations while any player is
+    // frozen; explicit teardown performs one final fenced drain itself.
+    if zone_state.any_teardown_fenced() {
+        return Ok(());
+    }
     #[cfg(test)]
     {
         zone_state.zone_cadence_tick_count = zone_state.zone_cadence_tick_count.saturating_add(1);
@@ -5984,6 +7378,9 @@ fn execute_shared_zone_movement(
     let Some(key) = session_state.presence_key.clone() else {
         return Ok(None);
     };
+    if zone_state.teardown_fenced(&key) {
+        return Ok(None);
+    }
     let Some(presence) = zone_state.players.get(&key) else {
         return Ok(None);
     };
@@ -6065,12 +7462,21 @@ fn execute_shared_zone_movement(
     }))
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TradeProjectionReconciliationState {
+    Unknown,
+    Clear(ActiveSessionIdentity),
+    Pending(ActiveSessionIdentity),
+}
+
 struct SharedInProcessZoneSessionRuntime {
     inner: InProcessWorldRuntime,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
+    last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
+    trade_projection_reconciliation_state: TradeProjectionReconciliationState,
     movement_ingress: SharedZoneMovementIngress,
     shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
@@ -6079,6 +7485,9 @@ struct SharedInProcessZoneSessionRuntime {
     local_ground_drop_zone_ids: BTreeMap<(String, u32), u32>,
     retired_local_ground_drop_ids: BTreeSet<(String, u32)>,
     owner_dead_entity_ids: BTreeSet<u32>,
+    last_game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
+    #[cfg(test)]
+    fail_next_npc_teleport_checkpoint_restore: bool,
 }
 
 pub(crate) fn shared_zone_movement_ingress(
@@ -6100,6 +7509,63 @@ pub(crate) fn sync_zone_movement_transform(runtime: &mut ZoneRuntimeHandle) -> R
         return Ok(());
     };
     runtime.sync_pending_zone_movement_transform()
+}
+
+pub(crate) fn prepare_zone_teardown_checkpoint(
+    runtime: &mut ZoneRuntimeHandle,
+    owner_lease: &ZoneOwnerLease,
+) -> Result<Option<PreparedZoneTeardown>, String> {
+    if let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+    {
+        return shared.prepare_teardown_checkpoint(owner_lease);
+    }
+    let Some(identity) = runtime.active_identity() else {
+        return Ok(None);
+    };
+    let checkpoint = runtime
+        .active_character_checkpoint()
+        .ok_or_else(|| "teardown identity has no active character checkpoint".to_string())?;
+    let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
+    prepared.validate_identity_checkpoint()?;
+    Ok(Some(prepared))
+}
+
+pub(crate) fn persist_zone_teardown_checkpoint(
+    runtime: &mut ZoneRuntimeHandle,
+    prepared: &PreparedZoneTeardown,
+) -> Result<(), String> {
+    prepared.validate_identity_checkpoint()?;
+    let identity = runtime
+        .active_identity()
+        .ok_or_else(|| "teardown persist requires the prepared active identity".to_string())?;
+    if identity != prepared.identity {
+        return Err("teardown persist active identity changed after preparation".to_string());
+    }
+    runtime.restore_active_character_checkpoint(prepared.checkpoint())?;
+    runtime.save_active_character()
+}
+
+pub(crate) fn release_zone_teardown_fence(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+    let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+    else {
+        return Ok(());
+    };
+    shared.release_teardown_fence()
+}
+
+#[cfg(test)]
+pub(crate) fn zone_teardown_is_fenced(runtime: &ZoneRuntimeHandle) -> bool {
+    runtime
+        .as_ref()
+        .as_any()
+        .downcast_ref::<SharedInProcessZoneSessionRuntime>()
+        .is_some_and(SharedInProcessZoneSessionRuntime::teardown_is_fenced)
 }
 
 impl fmt::Debug for SharedInProcessZoneSessionRuntime {
@@ -6124,17 +7590,82 @@ impl SharedInProcessZoneSessionRuntime {
         self.economy_execution_context = context;
     }
 
+    fn next_in_process_economy_execution_context(
+        &self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Option<SharedAccountInventoryExecutionContext> {
+        let source_sequence = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .next_economy_source_sequence()?;
+        Some(SharedAccountInventoryExecutionContext {
+            zone_id: owner_lease.zone_id().clone(),
+            fencing_generation: owner_lease.fencing_token(),
+            source_sequence,
+            created_at_ms: shared_gateway_now_ms(),
+            external_commit_authorized: true,
+        })
+    }
+
     fn rebind_account_store(&mut self, authoritative: &GatewayConfig) {
         self.inner.rebind_account_store(authoritative);
+    }
+
+    fn commit_account_inventory_outcome(
+        &mut self,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let is_ground_drop_projection = matches!(
+            &envelope.command,
+            SharedAccountInventoryCommand::GroundDropPickup(_)
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+        );
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        let outcome = service.commit_fenced(&mut self.inner, context.as_ref(), envelope);
+        if is_ground_drop_projection
+            && matches!(
+                &outcome,
+                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed
+            )
+        {
+            // The durable row may already be projected, but invalidating this
+            // cache costs one bounded query and guarantees that an immediate
+            // save/capacity failure is retried for the owning character.
+            self.last_ground_drop_projection_reconciliation_identity = None;
+        }
+        outcome
+    }
+
+    fn retry_account_inventory_outcome(
+        &mut self,
+        recovery_context: &SharedAccountInventoryExecutionContext,
+        expected_idempotency_key: &str,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let service = Arc::clone(&self.account_inventory_service);
+        let outcome = service.retry_commit_fenced(
+            &mut self.inner,
+            Some(recovery_context),
+            expected_idempotency_key,
+            envelope,
+        );
+        if matches!(
+            &outcome,
+            SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed
+        ) {
+            self.last_ground_drop_projection_reconciliation_identity = None;
+        }
+        outcome
     }
 
     fn commit_account_inventory(
         &mut self,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryTransactionReceipt {
-        let service = Arc::clone(&self.account_inventory_service);
-        let context = self.economy_execution_context.clone();
-        service.commit_fenced(&mut self.inner, context.as_ref(), envelope)
+        self.commit_account_inventory_outcome(envelope)
+            .into_receipt()
     }
 
     fn bootstrap_account_inventory(&self) -> bool {
@@ -6149,6 +7680,21 @@ impl SharedInProcessZoneSessionRuntime {
     ) -> SharedTradeSettlementOutcome {
         self.account_inventory_service.settle_trade_fenced(
             self.economy_execution_context.as_ref(),
+            first,
+            second,
+        )
+    }
+
+    fn retry_shared_trade(
+        &self,
+        recovery_context: &SharedAccountInventoryExecutionContext,
+        expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.account_inventory_service.retry_trade_fenced(
+            Some(recovery_context),
+            expected_idempotency_key,
             first,
             second,
         )
@@ -6846,6 +8392,70 @@ impl SharedInProcessZoneSessionRuntime {
         Some(self_entity)
     }
 
+    fn authoritative_zone_owner_correction(&self) -> Vec<ServerPacket> {
+        let snapshot = self.inner.world_snapshot();
+        let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
+            return Vec::new();
+        };
+        vec![ServerPacket::UserLocation {
+            location: UserLocation {
+                position: Point {
+                    x: self_entity.x,
+                    y: self_entity.y,
+                },
+                direction: self_entity.direction,
+            },
+        }]
+    }
+
+    /// Refresh one attack admission from the authenticated personal session at
+    /// the command boundary. This internal command has no BrowserCommand or
+    /// raw ClientPacket representation.
+    fn sync_authoritative_zone_combat_state(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Option<Vec<ServerPacket>> {
+        // `inner` is the authenticated personal SimulationSession runtime. Its
+        // WorldSnapshot is rebuilt from current ECS/resources on every call;
+        // optional predicates stay fail-closed rather than becoming `false`.
+        let snapshot = self.inner.world_snapshot();
+        let self_entity = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)?;
+        let class = self_entity.class?;
+        let has_class_weapon = self_entity.has_class_weapon?;
+        let riding_mount = self_entity.riding_mount?;
+        let mount_attack_allowed = self_entity.can_mount_attack?;
+        let fishing = self_entity.fishing?;
+        let dead = self_entity.dead || snapshot.player_hp? <= 0;
+        // Mirrors Simulation combat's complete attack-blocking set. These are
+        // authoritative active player buffs, not client-provided snapshot data.
+        let attack_blocked = snapshot.active_buffs.iter().any(|buff| {
+            matches!(
+                buff.key.as_str(),
+                "crystal-paralysis"
+                    | "crystal-dazed"
+                    | "crystal-stun"
+                    | "crystal-frozen"
+                    | "crystal-blindness"
+            )
+        });
+        Some(self.dispatch_zone_player_command(
+            ZoneCommand::sync_player_combat_state(
+                session_id.clone(),
+                class,
+                has_class_weapon,
+                riding_mount,
+                mount_attack_allowed,
+                dead,
+                attack_blocked,
+                fishing,
+            ),
+            false,
+        ))
+    }
+
     fn sync_current_shared_ground_drops_to_zone(&mut self, session_id: &SessionId) {
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.clone();
@@ -6915,11 +8525,136 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        let (claim_packets, canceled_claims) =
+        let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
-        remove_object_remove_packets(&mut packets, &canceled_claims);
-        packets.extend(claim_packets);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
         packets
+    }
+
+    fn prepare_teardown_checkpoint(
+        &mut self,
+        owner_lease: &ZoneOwnerLease,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        let Some(identity) = self.inner.active_identity() else {
+            return Ok(None);
+        };
+        let key = ZonePresenceKey::from_identity(&identity);
+        let (
+            mut packets,
+            pending_transform,
+            shout_consume,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+            authoritative_transform,
+            authoritative_vitals,
+        ) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+            zone_state.begin_teardown_fence(&key)?;
+            let session_id = zone_state
+                .zone_sessions
+                .get(&key)
+                .cloned()
+                .ok_or_else(|| "fenced shared Zone presence has no session id".to_string())?;
+            let pending = (
+                zone_state.take_pending_zone_packets(&key),
+                zone_state.take_pending_zone_transform(&key),
+                zone_state.take_pending_zone_shout_consume(&key),
+                zone_state.take_pending_zone_ground_drop_claims(&key),
+                zone_state.take_pending_zone_monster_kill_awards(&key),
+                zone_state.take_pending_zone_player_damages(&key),
+                zone_state.take_pending_zone_player_heals(&key),
+            );
+            (
+                pending.0,
+                pending.1,
+                pending.2,
+                pending.3,
+                pending.4,
+                pending.5,
+                pending.6,
+                zone_state.zone_manager.player_transform(&session_id),
+                zone_state.zone_manager.player_vitals(&session_id),
+            )
+        };
+
+        let authoritative_transform = authoritative_transform.ok_or_else(|| {
+            "fenced shared Zone presence has no authoritative transform".to_string()
+        })?;
+        let authoritative_vitals = authoritative_vitals
+            .ok_or_else(|| "fenced shared Zone presence has no authoritative vitals".to_string())?;
+
+        // Deterministic drain order is part of the persistence contract. Packet
+        // lifecycle effects are applied before rewards and claims, and the final
+        // Zone snapshot wins over any stale private mirror.
+        self.apply_zone_transform(pending_transform);
+        self.apply_zone_shout_consume(shout_consume);
+        packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
+        self.apply_zone_monster_kill_awards_checked(&key, monster_kill_awards)?;
+        let (claim_packets_by_object_id, canceled_claims) =
+            self.apply_zone_ground_drop_claims(ground_drop_claims);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
+
+        // A transport teardown has no ordered/fenced economy command context.
+        // Apply only decisions that were already finalized before teardown;
+        // unresolved PostgreSQL outcomes remain in the recovery ledger for the
+        // next authenticated command. Retrying them here could turn a missing
+        // commit acknowledgement into a false rejection and duplicate assets.
+        packets.extend(self.apply_finalized_shared_trade_packets());
+        packets.extend(
+            self.cancel_pending_shared_trade_offers_for_character(Some(&identity.character_name)),
+        );
+
+        self.inner.force_authoritative_player_transform(
+            authoritative_transform.0,
+            authoritative_transform.1,
+        );
+        self.inner.force_authoritative_player_vitals(
+            Some(authoritative_vitals.0),
+            Some(authoritative_vitals.2),
+        );
+        let checkpoint = self
+            .inner
+            .active_character_checkpoint()
+            .ok_or_else(|| "teardown drain produced no active checkpoint".to_string())?;
+        let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
+        prepared.validate_identity_checkpoint()?;
+        Ok(Some(prepared))
+    }
+
+    fn release_teardown_fence(&mut self) -> Result<(), String> {
+        let Some(key) = self.current_presence_key() else {
+            return Ok(());
+        };
+        self.zone_state
+            .lock()
+            .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+            .release_teardown_fence(&key);
+        Ok(())
+    }
+
+    fn teardown_is_fenced(&self) -> bool {
+        self.current_presence_key().is_some_and(|key| {
+            self.zone_state
+                .lock()
+                .map(|state| state.teardown_fenced(&key))
+                .unwrap_or(true)
+        })
     }
 
     fn dispatch_zone_player_command(
@@ -6934,10 +8669,13 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        let (claim_packets, canceled_claims) =
+        let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
-        remove_object_remove_packets(&mut packets, &canceled_claims);
-        packets.extend(claim_packets);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
         packets
     }
 
@@ -6947,7 +8685,7 @@ impl SharedInProcessZoneSessionRuntime {
         tick_after_command: bool,
     ) -> (
         Vec<ServerPacket>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -6966,7 +8704,7 @@ impl SharedInProcessZoneSessionRuntime {
         commands: Vec<ZoneCommand>,
     ) -> (
         Vec<ServerPacket>,
-        Vec<GroundDropSnapshot>,
+        Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
         Vec<i32>,
         Vec<i32>,
@@ -6989,6 +8727,9 @@ impl SharedInProcessZoneSessionRuntime {
                 .expect("shared zone presence mutex should not be poisoned");
             let mut outbounds = Vec::new();
             for command in commands {
+                if zone_state.command_mutates_teardown_fence(&command) {
+                    continue;
+                }
                 outbounds.extend(zone_state.zone_manager.handle(command));
             }
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key))
@@ -7038,6 +8779,50 @@ impl SharedInProcessZoneSessionRuntime {
             .map(|presence| presence.zone_object_id)
     }
 
+    fn apply_zone_monster_kill_awards_checked(
+        &mut self,
+        key: &ZonePresenceKey,
+        awards: Vec<ZoneMonsterKillAward>,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if awards.is_empty() {
+            return Ok(Vec::new());
+        }
+        let Some(identity) = self.inner.active_identity() else {
+            self.zone_state
+                .lock()
+                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+                .prepend_zone_monster_kill_awards(key.clone(), awards);
+            return Err("monster kill award drain requires an active identity".to_string());
+        };
+
+        let mut packets = Vec::new();
+        let mut awards = awards.into_iter();
+        while let Some(award) = awards.next() {
+            let retry_award = award.clone();
+            let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+                identity: identity.clone(),
+                command: SharedAccountInventoryCommand::MonsterKillAward(award),
+            });
+            debug_assert_eq!(
+                receipt.kind,
+                SharedAccountInventoryTransactionKind::MonsterKillAward
+            );
+            if !receipt.committed {
+                let mut retry = vec![retry_award];
+                retry.extend(awards);
+                self.zone_state
+                    .lock()
+                    .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+                    .prepend_zone_monster_kill_awards(key.clone(), retry);
+                return Err(
+                    "monster kill award economy commit failed during teardown drain".to_string(),
+                );
+            }
+            packets.extend(receipt.packets);
+        }
+        Ok(packets)
+    }
+
     fn apply_zone_monster_kill_awards(
         &mut self,
         awards: Vec<ZoneMonsterKillAward>,
@@ -7062,53 +8847,172 @@ impl SharedInProcessZoneSessionRuntime {
             .collect()
     }
 
+    fn dispatch_zone_fenced_teardown_followup(
+        &mut self,
+        command: ZoneCommand,
+    ) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let (
+            mut packets,
+            transform,
+            shout_consume,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+        ) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let outbounds = zone_state.zone_manager.handle(command);
+            zone_state.dispatch_zone_outbounds_with_fence_policy(outbounds, Some(&key), true)
+        };
+        self.apply_zone_transform(transform);
+        self.apply_zone_shout_consume(shout_consume);
+        packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        self.apply_zone_player_buff_packets(&packets);
+        self.inner.apply_shared_monster_lifecycle_packets(&packets);
+        packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
+        let (claim_packets_by_object_id, canceled_claims) =
+            self.apply_zone_ground_drop_claims(ground_drop_claims);
+        merge_ground_drop_claim_packets_in_crystal_order(
+            &mut packets,
+            claim_packets_by_object_id,
+            &canceled_claims,
+        );
+        packets
+    }
+
     fn apply_zone_ground_drop_claims(
         &mut self,
-        claims: Vec<GroundDropSnapshot>,
-    ) -> (Vec<ServerPacket>, BTreeSet<u32>) {
+        claims: Vec<GroundDropClaimTicket>,
+    ) -> (BTreeMap<u32, Vec<ServerPacket>>, BTreeSet<u32>) {
         if claims.is_empty() {
-            return (Vec::new(), BTreeSet::new());
+            return (BTreeMap::new(), BTreeSet::new());
         }
-        let Some(identity) = self.inner.active_identity() else {
-            return (Vec::new(), BTreeSet::new());
-        };
-        let Some(session_id) = self.current_zone_session_id() else {
-            return (Vec::new(), BTreeSet::new());
-        };
-        let mut packets = Vec::new();
+        let active_identity = self.inner.active_identity();
+        let current_session_id = self.current_zone_session_id();
+        let mut packets_by_object_id = BTreeMap::<u32, Vec<ServerPacket>>::new();
         let mut canceled_claims = BTreeSet::new();
-        for drop in claims {
-            let object_id = drop.object_id;
-            let mut receipt =
-                self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
-                    identity: identity.clone(),
-                    command: SharedAccountInventoryCommand::GroundDropPickup(drop.clone()),
-                });
+        for ticket in claims {
+            let drop = ticket.drop.clone();
+            let object_id = ticket.object_id;
+            let identity_matches_claim = current_session_id.as_ref() == Some(&ticket.session_id);
+            let outcome = match active_identity.as_ref().filter(|_| identity_matches_claim) {
+                Some(identity) => {
+                    self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+                        identity: identity.clone(),
+                        command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                            drop: drop.clone(),
+                            claim_idempotency_key: ticket.idempotency_key.clone(),
+                        },
+                    })
+                }
+                None => SharedAccountInventoryCommitOutcome::Confirmed(
+                    SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                ),
+            };
+            let deferred = matches!(
+                &outcome,
+                SharedAccountInventoryCommitOutcome::Deferred { .. }
+            );
+            let outcome_unknown = match &outcome {
+                SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                    idempotency_key,
+                    execution_context,
+                    ..
+                } => Some((idempotency_key.clone(), execution_context.clone())),
+                SharedAccountInventoryCommitOutcome::Confirmed(_)
+                | SharedAccountInventoryCommitOutcome::Deferred { .. } => None,
+            };
+            let mut receipt = outcome.into_receipt();
             debug_assert_eq!(
                 receipt.kind,
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             );
             let followup = if receipt.committed {
                 self.retire_local_ground_drop_projection(&drop);
-                ZoneCommand::CommitGroundDropClaim {
-                    session_id: session_id.clone(),
-                    object_id,
+                Some(ZoneCommand::CommitGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
+                })
+            } else if let Some((idempotency_key, execution_context)) = outcome_unknown {
+                // The database may already own this claim. Detach it from the
+                // historical session while retaining the Zone tombstone and a
+                // checkpointed account/character recovery authority.
+                if !self.retain_unresolved_zone_ground_drop_claim(
+                    &ticket,
+                    idempotency_key,
+                    Some(execution_context),
+                ) {
+                    self.requeue_zone_ground_drop_claim(ticket);
                 }
+                None
+            } else if deferred {
+                // No durable attempt occurred. Keep the Zone claim hidden and
+                // retry it when a later ordered command provides a fence.
+                self.requeue_zone_ground_drop_claim(ticket);
+                None
             } else {
-                self.restore_zone_ground_drop_claim(drop.clone());
+                self.restore_zone_ground_drop_claim(drop);
                 canceled_claims.insert(object_id);
-                ZoneCommand::CancelGroundDropClaim {
-                    session_id: session_id.clone(),
-                    object_id,
+                Some(ZoneCommand::CancelGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
                     now_ms: Self::zone_now_ms(),
-                }
+                })
             };
-            receipt
-                .packets
-                .extend(self.dispatch_zone_player_command(followup, false));
-            packets.extend(receipt.packets);
+            if let Some(followup) = followup {
+                let followup_packets = if self.teardown_is_fenced() {
+                    self.dispatch_zone_fenced_teardown_followup(followup)
+                } else {
+                    self.dispatch_zone_player_command(followup, false)
+                };
+                receipt.packets.extend(followup_packets);
+            }
+            packets_by_object_id
+                .entry(object_id)
+                .or_default()
+                .extend(receipt.packets);
         }
-        (packets, canceled_claims)
+        (packets_by_object_id, canceled_claims)
+    }
+    fn retain_unresolved_zone_ground_drop_claim(
+        &mut self,
+        ticket: &GroundDropClaimTicket,
+        idempotency_key: String,
+        execution_context: Option<SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .detach_unresolved_ground_drop_settlement(
+                &key,
+                ticket,
+                idempotency_key,
+                execution_context,
+            )
+    }
+
+    fn requeue_zone_ground_drop_claim(&mut self, ticket: GroundDropClaimTicket) {
+        let Some(key) = self.current_presence_key() else {
+            return;
+        };
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .queue_zone_ground_drop_claim(key, ticket);
     }
 
     fn restore_zone_ground_drop_claim(&mut self, drop: GroundDropSnapshot) {
@@ -7136,11 +9040,60 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
+        let Some(current_key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let packets = {
+            let zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let Some(map_file_name) = zone_state
+                .players
+                .get(&current_key)
+                .map(|presence| presence.map_file_name.as_str())
+            else {
+                return Vec::new();
+            };
+            let zone_key = ZoneKey::for_map(map_file_name);
+            packets
+                .iter()
+                .filter(|packet| {
+                    // BroadcastPackets carries a personal SimulationSession's
+                    // player-action projection. Its ObjectRemove can mean only
+                    // that a static object left this one session's private
+                    // viewport. Do not feed that visibility event back into
+                    // the single-writer Zone as a world deletion. Player-owned
+                    // summons remain eligible for their real lifecycle remove.
+                    !matches!(
+                        packet,
+                        ServerPacket::ObjectRemove { object_id }
+                            if zone_state
+                                .shared_entity(map_file_name, *object_id)
+                                .is_some_and(|entity| {
+                                    entity.owner_name.is_none()
+                                        && matches!(
+                                            entity.kind,
+                                            WorldEntityKind::Npc | WorldEntityKind::Monster
+                                        )
+                                })
+                                && zone_state
+                                    .zone_manager
+                                    .zone(&zone_key)
+                                    .is_some_and(|zone| zone.retains_object_id(*object_id))
+                    )
+                })
+                .cloned()
+                .collect::<Vec<_>>()
+        };
+        if packets.is_empty() {
+            return Vec::new();
+        }
         self.dispatch_zone_player_command(
             ZoneCommand::BroadcastPackets {
                 session_id,
                 owner_local_object_id,
-                packets: packets.to_vec(),
+                packets,
                 now_ms: Self::zone_now_ms(),
             },
             false,
@@ -7226,6 +9179,27 @@ impl SharedInProcessZoneSessionRuntime {
             let observer_packets = packets
                 .iter()
                 .filter(|packet| {
+                    // A personal SimulationSession also emits ObjectRemove
+                    // when a static shared object leaves its private data
+                    // range. Feeding that viewport packet back into the Zone
+                    // would turn it into a real world deletion. Static NPCs
+                    // and unowned native monsters are already single-writer
+                    // Zone objects; only their Zone lifecycle may remove them.
+                    let personal_viewport_remove = match packet {
+                        ServerPacket::ObjectRemove { object_id } => zone_state
+                            .shared_entity(&map_file_name, *object_id)
+                            .is_some_and(|entity| {
+                                entity.owner_name.is_none()
+                                    && matches!(
+                                        entity.kind,
+                                        WorldEntityKind::Npc | WorldEntityKind::Monster
+                                    )
+                            }),
+                        _ => false,
+                    };
+                    if personal_viewport_remove {
+                        return false;
+                    }
                     let shared_actor_packet = shared_entity_observer_packet_object_id(packet)
                         .is_some_and(|object_id| {
                             observer_object_ids.contains(&object_id)
@@ -7389,26 +9363,40 @@ impl SharedInProcessZoneSessionRuntime {
                 .as_ref()
                 .and_then(|key| zone_state.players.get(key))
                 .map(|presence| presence.zone_object_id);
-            if let (Some(local_self_object_id), Some(zone_object_id)) =
-                (local_self_object_id, zone_object_id)
-            {
-                let packets = packets
-                    .iter()
-                    .map(|packet| match packet {
+            // The command tail includes Zone-generated AOI diffs as well as
+            // true shared-world lifecycle packets. `ObjectRemove` only means a
+            // global deletion when the single-writer Zone no longer retains the
+            // object; otherwise it is local viewport bookkeeping. Filtering at
+            // this second map-layer application boundary is essential because
+            // the initial Zone outbound dispatch already made the same
+            // distinction before the aggregate packet list reached us again.
+            let zone_key = ZoneKey::for_map(map_file_name);
+            let packets = packets
+                .iter()
+                .filter(|packet| {
+                    !matches!(
+                        packet,
+                        ServerPacket::ObjectRemove { object_id }
+                            if zone_state
+                                .zone_manager
+                                .zone(&zone_key)
+                                .is_some_and(|zone| zone.retains_object_id(*object_id))
+                    )
+                })
+                .map(|packet| match packet {
+                    ServerPacket::ObjectMonster { info }
+                        if local_self_object_id.is_some_and(|local_self_object_id| {
+                            info.master_object_id == local_self_object_id
+                        }) && zone_object_id.is_some() =>
+                    {
+                        let mut info = info.clone();
+                        info.master_object_id = zone_object_id.expect("checked above");
                         ServerPacket::ObjectMonster { info }
-                            if info.master_object_id == local_self_object_id =>
-                        {
-                            let mut info = info.clone();
-                            info.master_object_id = zone_object_id;
-                            ServerPacket::ObjectMonster { info }
-                        }
-                        packet => packet.clone(),
-                    })
-                    .collect::<Vec<_>>();
-                zone_state.apply_shared_entity_packets(map_file_name, &packets);
-            } else {
-                zone_state.apply_shared_entity_packets(map_file_name, packets);
-            }
+                    }
+                    packet => packet.clone(),
+                })
+                .collect::<Vec<_>>();
+            zone_state.apply_shared_entity_packets(map_file_name, &packets);
         }
     }
 
@@ -7753,20 +9741,51 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
+        let trusted_physical_monster_target = match &attack.kind {
+            ZoneNativePlayerAttackKind::Melee { .. } => attack
+                .monster
+                .as_ref()
+                .is_some_and(ZoneMonsterSpawn::is_authoritatively_melee_attackable_by_player),
+            ZoneNativePlayerAttackKind::Range { .. } => attack
+                .monster
+                .as_ref()
+                .is_some_and(ZoneMonsterSpawn::is_authoritatively_hostile_to_player),
+            ZoneNativePlayerAttackKind::Magic { .. } => true,
+        };
+        if matches!(
+            &attack.kind,
+            ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
+        ) && !is_player_target
+            && !trusted_physical_monster_target
+        {
+            return self.authoritative_zone_owner_correction();
+        }
         let now_ms = Self::zone_now_ms();
-        let mut packets = if let Some(monster) = attack.monster.as_ref() {
-            self.dispatch_zone_player_command(
-                ZoneCommand::SpawnMonster {
-                    session_id: session_id.clone(),
-                    monster: monster.clone(),
-                    now_ms,
-                },
-                false,
-            )
+        let mut packets = if matches!(
+            &attack.kind,
+            ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
+        ) {
+            let Some(packets) = self.sync_authoritative_zone_combat_state(&session_id) else {
+                return self.authoritative_zone_owner_correction();
+            };
+            packets
         } else {
             Vec::new()
         };
+        let materialized_monster = attack.monster.take();
         if let ZoneNativePlayerAttackKind::Magic { spell, .. } = &attack.kind {
+            // Magic remains on its existing lifecycle. Only melee/range use
+            // the new admission+materialization atomic Zone transaction.
+            if let Some(monster) = materialized_monster.as_ref() {
+                packets.extend(self.dispatch_zone_player_command(
+                    ZoneCommand::SpawnMonster {
+                        session_id: session_id.clone(),
+                        monster: monster.clone(),
+                        now_ms,
+                    },
+                    false,
+                ));
+            }
             if gateway_zone_magic_requires_item_preflight_only(*spell)
                 && self
                     .inner
@@ -7814,32 +9833,63 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let command = match attack.kind {
             ZoneNativePlayerAttackKind::Melee { spell, attack_type } => {
-                ZoneCommand::PlayerAttackObject {
-                    session_id,
-                    object_id: attack.object_id,
-                    direction: attack.direction,
-                    spell,
-                    level: attack.level,
-                    attack_type,
-                    damage: attack.damage,
-                    now_ms,
+                if is_player_target {
+                    ZoneCommand::PlayerAttackObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        direction: attack.direction,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
+                } else {
+                    ZoneCommand::PlayerAttackMaterializedObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        monster: materialized_monster,
+                        direction: attack.direction,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
                 }
             }
             ZoneNativePlayerAttackKind::Range {
                 target,
                 spell,
                 attack_type,
-            } => ZoneCommand::PlayerRangeAttackObject {
-                session_id,
-                object_id: attack.object_id,
-                direction: attack.direction,
-                target,
-                spell,
-                level: attack.level,
-                attack_type,
-                damage: attack.damage,
-                now_ms,
-            },
+            } => {
+                if is_player_target {
+                    ZoneCommand::PlayerRangeAttackObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        direction: attack.direction,
+                        target,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
+                } else {
+                    ZoneCommand::PlayerRangeAttackMaterializedObject {
+                        session_id,
+                        object_id: attack.object_id,
+                        monster: materialized_monster,
+                        direction: attack.direction,
+                        target,
+                        spell,
+                        level: attack.level,
+                        attack_type,
+                        damage: attack.damage,
+                        now_ms,
+                    }
+                }
+            }
             ZoneNativePlayerAttackKind::Magic {
                 target,
                 spell,
@@ -8216,6 +10266,127 @@ impl SharedInProcessZoneSessionRuntime {
             .unwrap_or_default()
     }
 
+    fn execute_zone_npc_teleport(
+        &mut self,
+        session_id: SessionId,
+        object_id: u32,
+    ) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let Some(mut checkpoint) = self.inner.active_character_checkpoint() else {
+            return Vec::new();
+        };
+        let available_gold = self.inner.world_snapshot().gold;
+        if checkpoint.gold != available_gold {
+            return Vec::new();
+        }
+
+        let zone_state_handle = Arc::clone(&self.zone_state);
+        let mut zone_state = zone_state_handle
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(old_transform) = zone_state.zone_manager.player_transform(&session_id) else {
+            return Vec::new();
+        };
+        let mut outbounds = zone_state.zone_manager.handle(ZoneCommand::TeleportToNpc {
+            session_id: session_id.clone(),
+            object_id,
+            available_gold,
+        });
+        let commit = outbounds.iter().find_map(|outbound| match outbound {
+            ZoneOutbound::NpcTeleportCommit {
+                session_id: committed_session,
+                gold_cost,
+                map,
+            } if committed_session == &session_id => Some((*gold_cost, map.clone())),
+            _ => None,
+        });
+        let Some((gold_cost, map)) = commit else {
+            return Vec::new();
+        };
+        let Some(proposed_transform) = outbounds.iter().find_map(|outbound| match outbound {
+            ZoneOutbound::SaveTransform {
+                session_id: transformed_session,
+                position,
+                direction,
+            } if transformed_session == &session_id => Some((position.clone(), *direction)),
+            _ => None,
+        }) else {
+            let _ = zone_state
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: old_transform.0,
+                    direction: old_transform.1,
+                });
+            return Vec::new();
+        };
+        let Some(remaining_gold) = checkpoint.gold.checked_sub(gold_cost) else {
+            let _ = zone_state
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: old_transform.0,
+                    direction: old_transform.1,
+                });
+            return Vec::new();
+        };
+        checkpoint.gold = remaining_gold;
+        #[cfg(test)]
+        let force_checkpoint_failure =
+            std::mem::take(&mut self.fail_next_npc_teleport_checkpoint_restore);
+        #[cfg(not(test))]
+        let force_checkpoint_failure = false;
+        if force_checkpoint_failure
+            || self
+                .inner
+                .restore_active_character_checkpoint(&checkpoint)
+                .is_err()
+        {
+            let _ = zone_state
+                .zone_manager
+                .handle(ZoneCommand::SyncPlayerTransform {
+                    session_id,
+                    position: old_transform.0,
+                    direction: old_transform.1,
+                });
+            return Vec::new();
+        }
+        outbounds.retain(|outbound| !matches!(outbound, ZoneOutbound::NpcTeleportCommit { .. }));
+        let (zone_packets, transform, _, _, _, _, _) =
+            zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
+        drop(zone_state);
+
+        debug_assert_eq!(transform, Some(proposed_transform.clone()));
+        let (position, direction) = transform.unwrap_or(proposed_transform);
+        self.apply_zone_transform(Some((position.clone(), direction)));
+        let mut packets = vec![
+            ServerPacket::LoseGold { gold: gold_cost },
+            ServerPacket::MapChanged {
+                map_index: map.map_index,
+                file_name: map.file_name,
+                title: map.title,
+                mini_map: map.mini_map,
+                big_map: map.big_map,
+                lights: map.lights,
+                location: position.clone(),
+                direction,
+                map_dark_light: map.map_dark_light,
+                music: map.music,
+                weather: map.weather,
+            },
+            ServerPacket::UserLocation {
+                location: UserLocation {
+                    position,
+                    direction,
+                },
+            },
+        ];
+        packets.extend(zone_packets);
+        packets
+    }
+
     fn execute_zone_player_packet(&mut self, packet: &ClientPacket) -> Option<Vec<ServerPacket>> {
         let session_id = self.current_zone_session_id()?;
         match packet {
@@ -8238,9 +10409,16 @@ impl SharedInProcessZoneSessionRuntime {
                 let mut packets = execution.packets;
                 if matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. }) {
                     packets.extend(self.sync_newly_active_private_monsters_to_zone());
-                    packets.extend(self.apply_zone_current_position_map_transfer());
                 }
+                // Crystal Turn invokes CheckMovement on the standing tile after
+                // applying the requested direction.  Walk/Run and Turn must all
+                // hand an admitted MapCoord transfer back to the personal
+                // session so Gateway can commit the real map change/rebind.
+                packets.extend(self.apply_zone_current_position_map_transfer());
                 Some(packets)
+            }
+            ClientPacket::TeleportToNpc { object_id } => {
+                Some(self.execute_zone_npc_teleport(session_id, *object_id))
             }
             ClientPacket::Chat {
                 message,
@@ -8306,7 +10484,306 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 
+    fn reconcile_durable_ground_drop_projections(&mut self) -> Vec<ServerPacket> {
+        let identity = self.inner.active_identity();
+        if identity.is_none()
+            || identity == self.last_ground_drop_projection_reconciliation_identity
+        {
+            return Vec::new();
+        }
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        let packets =
+            service.reconcile_ground_drop_projections_fenced(&mut self.inner, context.as_ref());
+        if !service.has_pending_ground_drop_projection_fenced(&self.inner, context.as_ref()) {
+            self.last_ground_drop_projection_reconciliation_identity = identity;
+        }
+        packets
+    }
+
+    fn note_durable_trade_projection_pending(&mut self) {
+        self.trade_projection_reconciliation_state = self
+            .inner
+            .active_identity()
+            .map(TradeProjectionReconciliationState::Pending)
+            .unwrap_or(TradeProjectionReconciliationState::Unknown);
+    }
+
+    fn reconcile_durable_trade_projections(&mut self) -> Vec<ServerPacket> {
+        let Some(identity) = self.inner.active_identity() else {
+            self.trade_projection_reconciliation_state =
+                TradeProjectionReconciliationState::Unknown;
+            return Vec::new();
+        };
+        // Unknown/Pending states always re-query. Only a confirmed Clear state
+        // for this exact character may use the no-local-trade fast path.
+        let should_reconcile = match &self.trade_projection_reconciliation_state {
+            TradeProjectionReconciliationState::Clear(cached_identity)
+                if cached_identity == &identity =>
+            {
+                self.inner.has_active_shared_trade_state()
+            }
+            TradeProjectionReconciliationState::Unknown
+            | TradeProjectionReconciliationState::Clear(_)
+            | TradeProjectionReconciliationState::Pending(_) => true,
+        };
+        if !should_reconcile {
+            return Vec::new();
+        }
+        let service = Arc::clone(&self.account_inventory_service);
+        let context = self.economy_execution_context.clone();
+        let packets = service.reconcile_trade_projections_fenced(&mut self.inner, context.as_ref());
+        self.trade_projection_reconciliation_state =
+            if service.has_pending_trade_projection_fenced(&self.inner, context.as_ref()) {
+                TradeProjectionReconciliationState::Pending(identity)
+            } else {
+                TradeProjectionReconciliationState::Clear(identity)
+            };
+        packets
+    }
+
+    fn has_pending_durable_trade_projection(&self) -> bool {
+        if self.has_unresolved_trade_settlement() {
+            return true;
+        }
+        let Some(identity) = self.inner.active_identity() else {
+            return false;
+        };
+        match &self.trade_projection_reconciliation_state {
+            TradeProjectionReconciliationState::Unknown
+            | TradeProjectionReconciliationState::Pending(_) => true,
+            TradeProjectionReconciliationState::Clear(cached_identity)
+                if cached_identity != &identity =>
+            {
+                true
+            }
+            TradeProjectionReconciliationState::Clear(_) => {
+                self.inner.has_active_shared_trade_state()
+                    && self
+                        .account_inventory_service
+                        .has_pending_trade_projection_fenced(
+                            &self.inner,
+                            self.economy_execution_context.as_ref(),
+                        )
+            }
+        }
+    }
+
+    /// Retry one detached ground-drop settlement for the same account and
+    /// character. Unknown stays hidden; a durable commit retires the recovery
+    /// record, while only a definitive rejection restores the exact Zone drop.
+    fn resolve_unresolved_ground_drop_settlement(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let settlement = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .unresolved_ground_drop_settlement_for_presence(&key);
+        let Some(settlement) = settlement else {
+            return Vec::new();
+        };
+        let Some(identity) = self.inner.active_identity() else {
+            return Vec::new();
+        };
+        if ZonePresenceKey::from_identity(&identity) != settlement.presence_key {
+            return Vec::new();
+        }
+        if !self
+            .economy_execution_context
+            .as_ref()
+            .is_some_and(|context| context.external_commit_authorized)
+        {
+            return Vec::new();
+        }
+        let Some(expected_idempotency_key) = settlement.idempotency_key.as_deref() else {
+            return Vec::new();
+        };
+        let Some(recovery_context) = settlement.execution_context.as_ref() else {
+            return Vec::new();
+        };
+        let outcome = self.retry_account_inventory_outcome(
+            recovery_context,
+            expected_idempotency_key,
+            SharedAccountInventoryCommandEnvelope {
+                identity,
+                command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                    drop: settlement.ticket.drop.clone(),
+                    claim_idempotency_key: settlement.ticket.idempotency_key.clone(),
+                },
+            },
+        );
+        let receipt = match outcome {
+            SharedAccountInventoryCommitOutcome::Deferred { .. } => return Vec::new(),
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                idempotency_key,
+                execution_context,
+                ..
+            } => {
+                if idempotency_key != expected_idempotency_key
+                    || execution_context != *recovery_context
+                {
+                    return Vec::new();
+                }
+                self.zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .retain_unresolved_ground_drop_outcome_key(&settlement, idempotency_key);
+                return Vec::new();
+            }
+            SharedAccountInventoryCommitOutcome::Confirmed(receipt) => receipt,
+        };
+        if receipt.committed {
+            self.retire_local_ground_drop_projection(&settlement.ticket.drop);
+        }
+        let dispatched = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let Some(outbounds) = zone_state.resolve_unresolved_ground_drop_settlement(
+                &settlement,
+                receipt.committed,
+                Self::zone_now_ms(),
+            ) else {
+                return Vec::new();
+            };
+            zone_state.dispatch_zone_outbounds(outbounds, Some(&key))
+        };
+        let (
+            mut zone_packets,
+            transform,
+            shout_consume,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+        ) = dispatched;
+        self.apply_zone_transform(transform);
+        self.apply_zone_shout_consume(shout_consume);
+        zone_packets.extend(self.apply_zone_player_damages(player_damages));
+        self.apply_zone_player_heals(player_heals);
+        self.apply_zone_player_buff_packets(&zone_packets);
+        self.inner
+            .apply_shared_monster_lifecycle_packets(&zone_packets);
+        zone_packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
+        if !ground_drop_claims.is_empty() {
+            let (claim_packets, canceled_claims) =
+                self.apply_zone_ground_drop_claims(ground_drop_claims);
+            merge_ground_drop_claim_packets_in_crystal_order(
+                &mut zone_packets,
+                claim_packets,
+                &canceled_claims,
+            );
+        }
+        let mut packets = receipt.packets;
+        packets.extend(zone_packets);
+        packets
+    }
+
+    fn has_unresolved_trade_settlement(&self) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .has_unresolved_trade_settlement_for_presence(&key)
+    }
+
+    /// Retry one retained commit-ack-unknown trade with the exact same offers.
+    /// The shared checkpoint record is removed only after a definitive durable,
+    /// local-development, or rejected result has been observed.
+    fn resolve_unresolved_trade_settlement(&mut self) -> bool {
+        let Some(key) = self.current_presence_key() else {
+            return false;
+        };
+        let settlement = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .unresolved_trade_settlement_for_presence(&key);
+        let Some(settlement) = settlement else {
+            return false;
+        };
+        if !self
+            .economy_execution_context
+            .as_ref()
+            .is_some_and(|context| context.external_commit_authorized)
+        {
+            return true;
+        }
+        let Some(recovery_context) = settlement.execution_context.as_ref() else {
+            return true;
+        };
+        let outcome = self.retry_shared_trade(
+            recovery_context,
+            &settlement.idempotency_key,
+            &settlement.first_offer,
+            &settlement.second_offer,
+        );
+        let resolution = match outcome {
+            SharedTradeSettlementOutcome::Deferred => {
+                // The prior uncertain attempt still owns both offers. Missing
+                // context on this pass cannot resolve or roll it back.
+                self.note_durable_trade_projection_pending();
+                None
+            }
+            SharedTradeSettlementOutcome::DurableCommitted { .. }
+            | SharedTradeSettlementOutcome::DurableDuplicate { .. } => {
+                self.note_durable_trade_projection_pending();
+                Some(UnresolvedSharedTradeResolution::Durable)
+            }
+            SharedTradeSettlementOutcome::Committed | SharedTradeSettlementOutcome::Duplicate => {
+                self.trade_projection_reconciliation_state =
+                    TradeProjectionReconciliationState::Unknown;
+                Some(UnresolvedSharedTradeResolution::LocalCommit)
+            }
+            SharedTradeSettlementOutcome::Rejected => {
+                self.trade_projection_reconciliation_state =
+                    TradeProjectionReconciliationState::Unknown;
+                Some(UnresolvedSharedTradeResolution::Rejected)
+            }
+            SharedTradeSettlementOutcome::OutcomeUnknown {
+                idempotency_key,
+                execution_context,
+            } => {
+                if idempotency_key != settlement.idempotency_key
+                    || execution_context != *recovery_context
+                {
+                    return true;
+                }
+                self.note_durable_trade_projection_pending();
+                None
+            }
+        };
+        if let Some(resolution) = resolution {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .resolve_unresolved_trade_settlement(&settlement, resolution);
+        }
+        self.has_unresolved_trade_settlement()
+    }
+
     fn apply_pending_shared_trade_packets(&mut self) -> Vec<ServerPacket> {
+        let mut packets = self.resolve_unresolved_ground_drop_settlement();
+        packets.extend(self.reconcile_durable_ground_drop_projections());
+        let unresolved_trade = self.resolve_unresolved_trade_settlement();
+        if unresolved_trade {
+            self.note_durable_trade_projection_pending();
+        } else {
+            packets.extend(self.reconcile_durable_trade_projections());
+        }
+        packets.extend(self.apply_finalized_shared_trade_packets());
+        packets
+    }
+
+    /// Materialize only trade deliveries/rollbacks whose settlement outcome is
+    /// already final. This performs no external lookup or commit and is safe in
+    /// teardown/Drop paths that intentionally lack an economy command context.
+    fn apply_finalized_shared_trade_packets(&mut self) -> Vec<ServerPacket> {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
         };
@@ -8361,15 +10838,19 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
-    fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
+    fn cancel_pending_shared_trade_offers_for_character(
+        &mut self,
+        character_name: Option<&str>,
+    ) -> Vec<ServerPacket> {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
         };
-        let character_name = self
-            .inner
-            .active_identity()
-            .map(|identity| identity.character_name)
-            .unwrap_or_default();
+        let character_name = character_name.map(str::to_owned).unwrap_or_else(|| {
+            self.inner
+                .active_identity()
+                .map(|identity| identity.character_name)
+                .unwrap_or_default()
+        });
         let own_offer = self
             .zone_state
             .lock()
@@ -8378,6 +10859,10 @@ impl SharedInProcessZoneSessionRuntime {
         own_offer
             .map(|offer| self.inner.rollback_shared_trade_offer(&offer))
             .unwrap_or_default()
+    }
+
+    fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
+        self.cancel_pending_shared_trade_offers_for_character(None)
     }
 
     fn cancel_pending_shared_rental_offers(&mut self) {
@@ -8559,7 +11044,9 @@ impl SharedInProcessZoneSessionRuntime {
                         rollback_self = Some(offer.clone());
                     }
                 } else {
-                    zone_state.trade_offers.insert(self_key, offer.clone());
+                    zone_state
+                        .trade_offers
+                        .insert(self_key.clone(), offer.clone());
                 }
             } else {
                 rollback_self = Some(offer.clone());
@@ -8567,29 +11054,56 @@ impl SharedInProcessZoneSessionRuntime {
         }
 
         let mut deliver_to_self = Vec::new();
+        let mut durable_settlement = false;
+        let mut unknown_settlement = false;
         if let Some((partner_key, partner_offer)) = matched_offer {
             let settlement = self.settle_shared_trade(&offer, &partner_offer);
             let mut zone_state = self
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
-            if matches!(
-                settlement,
-                SharedTradeSettlementOutcome::Committed | SharedTradeSettlementOutcome::Duplicate
-            ) {
-                zone_state
-                    .pending_trade_deliveries
-                    .entry(partner_key)
-                    .or_default()
-                    .push(offer.clone());
-                deliver_to_self.push(partner_offer);
-            } else {
-                zone_state
-                    .pending_trade_rollbacks
-                    .entry(partner_key)
-                    .or_default()
-                    .push(partner_offer);
-                rollback_self = Some(offer.clone());
+            match settlement {
+                SharedTradeSettlementOutcome::Committed
+                | SharedTradeSettlementOutcome::Duplicate => {
+                    zone_state
+                        .pending_trade_deliveries
+                        .entry(partner_key)
+                        .or_default()
+                        .push(offer.clone());
+                    deliver_to_self.push(partner_offer);
+                }
+                SharedTradeSettlementOutcome::DurableCommitted { .. }
+                | SharedTradeSettlementOutcome::DurableDuplicate { .. } => {
+                    durable_settlement = true;
+                }
+                SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key,
+                    execution_context,
+                } => {
+                    let unresolved = UnresolvedSharedTradeSettlement {
+                        idempotency_key,
+                        execution_context: Some(execution_context),
+                        first_key: self_key.clone(),
+                        second_key: partner_key,
+                        first_offer: offer.clone(),
+                        second_offer: partner_offer,
+                    };
+                    // A conflicting cryptographic idempotency key must still
+                    // fail closed: retain the existing recovery authority and
+                    // keep this character's trade gate Pending.
+                    let _ = zone_state.retain_unresolved_trade_settlement(unresolved);
+                    unknown_settlement = true;
+                }
+                SharedTradeSettlementOutcome::Deferred | SharedTradeSettlementOutcome::Rejected => {
+                    // This is the initial attempt and Deferred guarantees that
+                    // no store call occurred, so returning both offers is safe.
+                    zone_state
+                        .pending_trade_rollbacks
+                        .entry(partner_key)
+                        .or_default()
+                        .push(partner_offer);
+                    rollback_self = Some(offer.clone());
+                }
             }
         }
 
@@ -8599,20 +11113,33 @@ impl SharedInProcessZoneSessionRuntime {
         for offer in deliver_to_self {
             packets.extend(self.inner.apply_shared_trade_delivery(&offer));
         }
+        if unknown_settlement {
+            // Neither side may regain or reuse the debited assets until the
+            // exact same idempotent settlement produces a definitive result.
+            self.note_durable_trade_projection_pending();
+        }
+        if durable_settlement {
+            // The durable commit creates projection work after a previously
+            // cached Clear result. Invalidate the fast path before attempting
+            // immediate private reconciliation so save/mark failures remain
+            // fail-closed on subsequent commands and ticks.
+            self.note_durable_trade_projection_pending();
+            packets.extend(self.reconcile_durable_trade_projections());
+        }
         packets
     }
 
-    fn pick_up_shared_drop(&mut self, object_id: Option<u32>) -> Vec<ServerPacket> {
+    fn pick_up_shared_drop(&mut self, object_id: Option<u32>) -> Option<Vec<ServerPacket>> {
         let snapshot = self.inner.world_snapshot();
         let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
-            return Vec::new();
+            return None;
         };
         let Some(session_id) = self.current_zone_session_id() else {
-            return Vec::new();
+            return None;
         };
         self.sync_current_shared_ground_drops_to_zone(&session_id);
         let picker_group_members = snapshot.stage5_systems.group.members.clone();
-        self.dispatch_zone_player_command(
+        Some(self.dispatch_zone_player_command(
             ZoneCommand::ClaimGroundDrop {
                 session_id,
                 object_id,
@@ -8624,7 +11151,7 @@ impl SharedInProcessZoneSessionRuntime {
                 now_ms: Self::zone_now_ms(),
             },
             false,
-        )
+        ))
     }
 
     fn pick_up_shared_drop_with_intelligent_creature(
@@ -8769,13 +11296,13 @@ impl SharedInProcessZoneSessionRuntime {
     fn apply_shared_intelligent_creature_drop_claims(
         &mut self,
         active_creature: &mir2_protocol::ClientIntelligentCreature,
-        claims: Vec<GroundDropSnapshot>,
+        claims: Vec<GroundDropClaimTicket>,
     ) -> (Vec<ServerPacket>, BTreeSet<u32>) {
         let mut packets = Vec::new();
         let mut canceled_claims = BTreeSet::new();
-        for drop in claims {
+        for ticket in claims {
             let (claim_packets, canceled_object_id) =
-                self.apply_shared_intelligent_creature_drop_claim(active_creature, drop);
+                self.apply_shared_intelligent_creature_drop_claim(active_creature, ticket);
             if let Some(object_id) = canceled_object_id {
                 canceled_claims.insert(object_id);
             }
@@ -8787,58 +11314,96 @@ impl SharedInProcessZoneSessionRuntime {
     fn apply_shared_intelligent_creature_drop_claim(
         &mut self,
         active_creature: &mir2_protocol::ClientIntelligentCreature,
-        drop: GroundDropSnapshot,
+        ticket: GroundDropClaimTicket,
     ) -> (Vec<ServerPacket>, Option<u32>) {
-        let Some(session_id) = self.current_zone_session_id() else {
-            self.restore_zone_ground_drop_claim(drop);
-            return (Vec::new(), None);
+        let drop = ticket.drop.clone();
+        let object_id = ticket.object_id;
+        let session_matches_claim =
+            self.current_zone_session_id().as_ref() == Some(&ticket.session_id);
+        let eligible = session_matches_claim
+            && intelligent_creature_allows_ground_drop(active_creature, &drop);
+        let active_identity = self.inner.active_identity();
+        let outcome = match active_identity.as_ref().filter(|_| eligible) {
+            Some(identity) => {
+                self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+                    identity: identity.clone(),
+                    command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                        drop: drop.clone(),
+                        claim_idempotency_key: ticket.idempotency_key.clone(),
+                    },
+                })
+            }
+            None => SharedAccountInventoryCommitOutcome::Confirmed(
+                SharedAccountInventoryTransactionReceipt {
+                    kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                    committed: false,
+                    packets: Vec::new(),
+                },
+            ),
         };
-        if !intelligent_creature_allows_ground_drop(active_creature, &drop) {
-            let object_id = drop.object_id;
-            self.restore_zone_ground_drop_claim(drop.clone());
-            let packets = self.dispatch_zone_player_command(
-                ZoneCommand::CancelGroundDropClaim {
-                    session_id,
-                    object_id,
-                    now_ms: Self::zone_now_ms(),
-                },
-                false,
-            );
-            return (packets, Some(object_id));
-        }
-        let object_id = drop.object_id;
-        let mut packets = self.inner.apply_shared_ground_drop_pickup(&drop);
-        let gained = packets.iter().any(|packet| {
-            matches!(
-                packet,
-                ServerPacket::GainedGold { .. } | ServerPacket::GainedItem { .. }
-            )
-        });
-        if gained {
+        let deferred = matches!(
+            &outcome,
+            SharedAccountInventoryCommitOutcome::Deferred { .. }
+        );
+        let outcome_unknown = match &outcome {
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                idempotency_key,
+                execution_context,
+                ..
+            } => Some((idempotency_key.clone(), execution_context.clone())),
+            SharedAccountInventoryCommitOutcome::Confirmed(_)
+            | SharedAccountInventoryCommitOutcome::Deferred { .. } => None,
+        };
+        let mut receipt = outcome.into_receipt();
+        debug_assert_eq!(
+            receipt.kind,
+            SharedAccountInventoryTransactionKind::GroundDropPickup
+        );
+        let (followup, canceled_object_id) = if receipt.committed {
             self.retire_local_ground_drop_projection(&drop);
-            packets.insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
-            packets.extend(self.dispatch_zone_player_command(
-                ZoneCommand::CommitGroundDropClaim {
-                    session_id,
-                    object_id,
-                },
-                false,
-            ));
-            (packets, None)
+            receipt
+                .packets
+                .insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
+            (
+                Some(ZoneCommand::CommitGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
+                }),
+                None,
+            )
+        } else if let Some((idempotency_key, execution_context)) = outcome_unknown {
+            if !self.retain_unresolved_zone_ground_drop_claim(
+                &ticket,
+                idempotency_key,
+                Some(execution_context),
+            ) {
+                self.requeue_zone_ground_drop_claim(ticket);
+            }
+            (None, None)
+        } else if deferred {
+            self.requeue_zone_ground_drop_claim(ticket);
+            (None, None)
         } else {
             self.restore_zone_ground_drop_claim(drop);
-            let packets = self.dispatch_zone_player_command(
-                ZoneCommand::CancelGroundDropClaim {
-                    session_id,
-                    object_id,
+            (
+                Some(ZoneCommand::CancelGroundDropClaimWithTicket {
+                    session_id: ticket.session_id.clone(),
+                    ticket,
                     now_ms: Self::zone_now_ms(),
-                },
-                false,
-            );
-            (packets, Some(object_id))
+                }),
+                Some(object_id),
+            )
+        };
+        if let Some(followup) = followup {
+            let followup_packets = if self.teardown_is_fenced() {
+                self.dispatch_zone_fenced_teardown_followup(followup)
+            } else {
+                self.dispatch_zone_player_command(followup, false)
+            };
+            receipt.packets.extend(followup_packets);
         }
+        (receipt.packets, canceled_object_id)
     }
-
     fn adjacent_remote_player_name(&self) -> Option<String> {
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
@@ -8861,7 +11426,10 @@ impl SharedInProcessZoneSessionRuntime {
 
 impl Drop for SharedInProcessZoneSessionRuntime {
     fn drop(&mut self) {
-        let _ = self.apply_pending_shared_trade_packets();
+        // Drop is outside an ordered/fenced command. Preserve unresolved
+        // durable outcomes for checkpoint/new-login recovery and only apply
+        // already-finalized local deliveries or rollbacks.
+        let _ = self.apply_finalized_shared_trade_packets();
         let _ = self.cancel_pending_shared_trade_offers();
         self.remove_presence();
     }
@@ -8881,10 +11449,29 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        self.last_game_shop_purchase_outcome = None;
+        if self.current_presence_key().is_some_and(|key| {
+            self.zone_state
+                .lock()
+                .map(|state| state.teardown_fenced(&key))
+                .unwrap_or(true)
+        }) {
+            return Err("shared Zone session is fenced for teardown".to_string());
+        }
         let removes_presence = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::Disconnect | ClientPacket::LogOut)
         );
+        let departing_character_name = removes_presence
+            .then(|| {
+                self.inner
+                    .active_identity()
+                    .map(|identity| identity.character_name)
+            })
+            .flatten();
+        if removes_presence {
+            self.sync_pending_zone_movement_transform()?;
+        }
         let is_low_latency_zone_player_packet = matches!(
             &command,
             WorldCommand::ClientPacket(
@@ -8908,6 +11495,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         ) && !is_personal_session_chat_packet;
         let is_low_latency_zone_packet =
             is_low_latency_zone_player_packet || is_low_latency_zone_chat_packet;
+        let is_start_game = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::StartGame { .. })
+        );
         let is_transfer_map_command = matches!(&command, WorldCommand::TransferMap { .. });
         let is_authoritative_move_to = matches!(&command, WorldCommand::MoveTo { .. });
         let is_handoff_transform = matches!(&command, WorldCommand::ApplyHandoffTransform { .. });
@@ -8927,11 +11518,28 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
         );
         let is_world_tick = matches!(&command, WorldCommand::Tick);
+        let is_game_shop_buy = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. })
+                | WorldCommand::NativeGameShopPurchase(_)
+        );
         let skip_tail_zone_snapshot = is_low_latency_zone_packet || is_world_tick;
         let forwards_delayed_player_action_packets = matches!(&command, WorldCommand::Tick);
         let is_trade_cancel = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::TradeCancel)
+        );
+        let is_trade_state_mutation = matches!(
+            &command,
+            WorldCommand::ClientPacket(
+                ClientPacket::TradeRequest
+                    | ClientPacket::TradeReply { .. }
+                    | ClientPacket::TradeGold { .. }
+                    | ClientPacket::DepositTradeItem { .. }
+                    | ClientPacket::RetrieveTradeItem { .. }
+                    | ClientPacket::TradeConfirm { .. }
+                    | ClientPacket::TradeCancel
+            )
         );
         let shared_trade_confirm = match &command {
             WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked }) => Some(*locked),
@@ -9061,7 +11669,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             ) => self.local_self_object_id(),
             _ => None,
         };
-        let unavailable_shared_target = !routes_zone_native_player_attack
+        let mut unavailable_shared_target = !routes_zone_native_player_attack
             && match &command {
                 WorldCommand::Attack { object_id } => {
                     !self.shared_action_target_available(*object_id)
@@ -9110,6 +11718,15 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             packets.extend(self.apply_pending_shared_rental_packets());
             packets
         };
+        if removes_presence {
+            // Roll back an unmatched, already-debited offer before the inner
+            // LogOut/Disconnect path persists and clears the active character.
+            // Matched durable trades have already left `trade_offers` and are
+            // recovered through their PostgreSQL projection rows instead.
+            packets.extend(self.cancel_pending_shared_trade_offers_for_character(
+                departing_character_name.as_deref(),
+            ));
+        }
         if !is_low_latency_zone_packet && !revives_presented_private_death {
             // Damage/heal outbounds are deltas used for client packets. The
             // shared Zone is the exact vitals authority, so reconcile after
@@ -9118,16 +11735,37 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             // disagree with the Zone snapshot.
             self.force_inner_to_current_zone_vitals();
         }
+        // Harvest is admitted by the shared Zone from freshly synchronized,
+        // trusted session state before any corpse is materialized in the
+        // private compatibility runtime. Missing identity/state fails closed.
+        let shared_harvest_rejected = if shared_harvest_direction.is_some() {
+            match self.current_zone_session_id() {
+                Some(session_id) => {
+                    let synced = self
+                        .sync_authoritative_zone_combat_state(&session_id)
+                        .map(|sync_packets| {
+                            packets.extend(sync_packets);
+                        })
+                        .is_some();
+                    !synced
+                        || !self
+                            .zone_state
+                            .lock()
+                            .expect("shared zone presence mutex should not be poisoned")
+                            .zone_manager
+                            .player_harvest_admitted(&session_id, Self::zone_now_ms())
+                }
+                None => true,
+            }
+        } else {
+            false
+        };
+        unavailable_shared_target |= shared_harvest_rejected;
         if is_world_tick
             && self.recent_zone_player_movement_input_window_active(Self::zone_now_ms())
         {
             self.filter_stale_owner_dead_entity_packets(&mut packets);
             return Ok(packets);
-        }
-        if removes_presence {
-            packets.extend(self.cancel_pending_shared_trade_offers());
-            self.cancel_pending_shared_rental_offers();
-            packets.extend(self.remove_presence());
         }
         if !unavailable_shared_target {
             if let Some(object_id) = shared_action_target_id {
@@ -9158,16 +11796,28 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             None
         };
-        let mut command_packets = if unavailable_shared_target {
+        let blocks_durable_trade_mutation =
+            is_trade_state_mutation && self.has_pending_durable_trade_projection();
+        let mut command_packets = if blocks_durable_trade_mutation {
             Vec::new()
+        } else if unavailable_shared_target {
+            if shared_harvest_direction.is_some() {
+                self.authoritative_zone_owner_correction()
+            } else {
+                Vec::new()
+            }
         } else if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
         } else if is_trade_cancel {
-            let cancel_packets = self.cancel_pending_shared_trade_offers();
-            if cancel_packets.is_empty() {
-                self.inner.shared_trade_cancel(false)
+            if self.has_pending_durable_trade_projection() {
+                Vec::new()
             } else {
-                cancel_packets
+                let cancel_packets = self.cancel_pending_shared_trade_offers();
+                if cancel_packets.is_empty() {
+                    self.inner.shared_trade_cancel(false)
+                } else {
+                    cancel_packets
+                }
             }
         } else if is_item_rental_lock_fee {
             self.execute_shared_item_rental_lock_fee()
@@ -9181,7 +11831,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else if let Some(partner_name) = shared_rental_partner {
             self.execute_shared_item_rental_request(partner_name)
         } else if let Some(partner_name) = shared_trade_partner {
-            self.inner.trade_request(&partner_name)
+            if self.inner.has_active_shared_trade_state()
+                || self.has_pending_durable_trade_projection()
+            {
+                Vec::new()
+            } else {
+                self.inner.trade_request(&partner_name)
+            }
         } else if let Some(amount) = shared_gold_drop_amount {
             self.execute_shared_gold_drop(amount)
         } else if let Some((unique_id, count, hero_inventory)) = shared_inventory_item_drop {
@@ -9190,14 +11846,29 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 None => self.inner.execute(command)?,
             }
         } else if let Some(object_id) = shared_pickup_object_id {
-            let shared_packets = self.pick_up_shared_drop(object_id);
-            if shared_packets.is_empty() {
-                self.inner.execute(command)?
-            } else {
-                shared_packets
+            match self.pick_up_shared_drop(object_id) {
+                Some(shared_packets) => shared_packets,
+                None => self.inner.execute(command)?,
             }
+        } else if let Some((mouse_mode, location)) = shared_intelligent_creature_pickup {
+            // Shared creature pickup is authoritative even when it produces no
+            // packets. Never fall back to the personal SimulationSession path.
+            self.pick_up_shared_drop_with_intelligent_creature(location, mouse_mode)
+        } else if shared_harvest_direction.is_some() {
+            self.inner.execute(command)?
         } else if let Some(attack) = zone_native_player_attack {
             self.execute_zone_native_player_attack(attack)
+        } else if is_world_tick {
+            // Session is personal; Zone is world. Drain the shared Zone above,
+            // then advance only personal compatibility timers here. Running
+            // the full private world tick would create a second monster/hazard
+            // authority that can move, kill, or damage the same objects and
+            // player independently of the Zone.
+            self.inner.tick_shared_zone_personal_state()
+        } else if is_game_shop_buy {
+            let execution = self.inner.execute_with_outcome(command)?;
+            self.last_game_shop_purchase_outcome = execution.game_shop_purchase_outcome;
+            execution.packets
         } else if let WorldCommand::ClientPacket(packet) = &command {
             if let Some(zone_packets) = self.execute_zone_player_packet(packet) {
                 zone_packets
@@ -9207,6 +11878,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        if removes_presence {
+            self.cancel_pending_shared_rental_offers();
+            packets.extend(self.remove_presence());
+        }
         if shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some() {
             self.remap_player_ground_drop_packets(&mut command_packets);
         }
@@ -9215,9 +11890,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 command_packets = self.execute_shared_npc_interact(object_id);
             } else if let Some((object_id, key)) = shared_call_npc {
                 command_packets = self.execute_shared_npc_call(object_id, &key);
-            } else if let Some((mouse_mode, location)) = shared_intelligent_creature_pickup {
-                command_packets =
-                    self.pick_up_shared_drop_with_intelligent_creature(location, mouse_mode);
             }
         }
         if is_world_tick
@@ -9332,6 +12004,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if !removes_presence && !skip_tail_zone_snapshot {
             packets.extend(self.sync_zone_snapshot());
         }
+        if is_start_game && self.current_presence_key().is_some() {
+            // The pre-command recovery pass cannot see an identity/presence
+            // before StartGame. Resolve durable recovery immediately after the
+            // authoritative Zone join so the first playable snapshot already
+            // contains post-restart economy state.
+            packets.extend(self.apply_pending_shared_trade_packets());
+        }
         if let Some(current_key) = self.current_presence_key() {
             self.zone_state
                 .lock()
@@ -9340,6 +12019,42 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }
         self.filter_stale_owner_dead_entity_packets(&mut packets);
         Ok(packets)
+    }
+
+    fn execute_with_outcome(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let command_kind = command.kind();
+        let skips_snapshot = matches!(
+            &command,
+            WorldCommand::ClientPacket(
+                ClientPacket::KeepAlive { .. }
+                    | ClientPacket::Turn { .. }
+                    | ClientPacket::Walk { .. }
+                    | ClientPacket::Run { .. }
+            ) | WorldCommand::Tick
+        );
+        let packets = self.execute(command)?;
+        let packet_count = packets.len();
+        Ok(WorldCommandExecution {
+            packets,
+            outcome: WorldCommandOutcome {
+                command_kind,
+                packet_count,
+                snapshot_tick: if skips_snapshot {
+                    0
+                } else {
+                    self.world_snapshot().tick
+                },
+                active_identity: self.active_identity(),
+            },
+            game_shop_purchase_outcome: self.last_game_shop_purchase_outcome.take(),
+        })
+    }
+
+    fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
+        self.inner.supports_typed_game_shop_purchase_outcome()
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {
@@ -9428,14 +12143,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.inner.restore_active_character_checkpoint(checkpoint)
     }
 
-    fn save_active_character(&self) {
-        self.inner.save_active_character();
+    fn save_active_character(&mut self) -> Result<(), String> {
+        self.sync_pending_zone_movement_transform()?;
+        self.inner.save_active_character()
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {
-        let changed = self.inner.refresh_active_external_mail();
-        self.sync_zone_snapshot();
-        changed
+        self.inner.refresh_active_external_mail()
     }
 }
 
@@ -9828,22 +12542,25 @@ mod tests {
         delayed_player_action_packets, filter_stale_owner_dead_entity_packets,
         gateway_zone_magic_requires_item_consumption, gateway_zone_magic_targets_ground,
         gateway_zone_magic_targets_summon, ground_drop_spawn_packet,
-        shared_entity_observer_packet_object_id, shared_gateway_now_ms,
-        shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
+        reconcile_shared_entity_with_native_monster, shared_entity_observer_packet_object_id,
+        shared_gateway_now_ms, shared_npc_entity_side_effect_packets, shared_zone_movement_ingress,
         suppress_personal_tick_shared_monster_motion, sync_zone_movement_transform,
         world_entity_from_monster_info, zone_monster_spawn_from_shared_entity,
-        InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
-        InProcessNpcWorldService, InProcessZoneRuntimeFactory, MapZoneSessionRouter,
-        PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
-        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryExecutionContext,
+        HostedZoneOwnerCommandClient, InMemoryZoneOwnerLeaseAuthority,
+        InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
+        MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
+        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
+        SharedAccountInventoryCommitOutcome, SharedAccountInventoryExecutionContext,
         SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
-        SharedInProcessZoneRuntimeFactory, SharedInProcessZoneSessionRuntime,
-        SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
-        SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
-        SharedNpcWorldTransactionReceipt, SharedSessionRouter, SharedTradeSettlementOutcome,
-        SharedZoneMovementIngress, SharedZoneMutationGate, SharedZoneRuntimeFactory, ZoneId,
-        ZoneNativePlayerAttack, ZoneNativePlayerAttackKind, ZonePresenceKey, ZoneRegistry,
-        ZoneRuntimeFactory,
+        SharedInProcessZoneFactoryCheckpoint, SharedInProcessZoneRuntimeFactory,
+        SharedInProcessZoneSessionRuntime, SharedInProcessZoneState, SharedNpcEntitySideEffect,
+        SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope, SharedNpcWorldService,
+        SharedNpcWorldServiceHandle, SharedNpcWorldTransactionReceipt, SharedSessionRouter,
+        SharedTradeSettlementOutcome, SharedZoneMovementIngress, SharedZoneMutationGate,
+        SharedZoneRuntimeFactory, TradeProjectionReconciliationState,
+        UnresolvedSharedTradeSettlement, ZoneId, ZoneMapSnapshotLayer, ZoneNativePlayerAttack,
+        ZoneNativePlayerAttackKind, ZoneOwnerCommandRequest, ZoneOwnerLease, ZonePresenceKey,
+        ZoneRegistry, ZoneRuntimeFactory,
     };
 
     use crate::{GatewayConfig, GatewaySession};
@@ -9855,12 +12572,14 @@ mod tests {
         UserItemStat,
     };
     use mir2_simulation::{
-        GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime, QuestStage, SessionId,
-        SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-        SharedNpcSavedValue, SharedTradeOffer, WorldCommand, WorldEntityDisposition,
-        WorldEntityKind, WorldEntitySnapshot, WorldRuntime, ZoneBossRewardAudit, ZoneChatProfile,
-        ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
-        ZoneOutbound, ZonePlayerCombatStats, ZoneRuntimeHandle,
+        GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime,
+        QuestStage, SessionId, SharedAccountInventoryTransactionKind,
+        SharedAccountInventoryTransactionReceipt, SharedNpcSavedValue, SharedTradeOffer,
+        WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime,
+        ZoneBossRewardAudit, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
+        ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+        ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
+        ZonePlayerCombatStats, ZoneRuntime, ZoneRuntimeHandle,
     };
     use std::{
         collections::{BTreeMap, BTreeSet},
@@ -9871,6 +12590,121 @@ mod tests {
         thread,
         time::{Duration, Instant},
     };
+
+    #[test]
+    fn atomic_world_checkpoint_restore_preserves_factory_when_later_zone_is_invalid() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let original_zone = ZoneId::new("atomic-original");
+        let original_resources = factory.resources_for_zone(&original_zone);
+        original_resources
+            .zone_state
+            .lock()
+            .unwrap()
+            .next_zone_object_id = 91_337;
+        let original_bytes = factory.world_checkpoint_bytes().unwrap();
+
+        let mut candidate: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&original_bytes).unwrap();
+        let mut corrupt_later_zone = candidate
+            .zones
+            .values()
+            .next()
+            .expect("the original Zone checkpoint must exist")
+            .clone();
+        corrupt_later_zone.version = corrupt_later_zone.version.saturating_add(1);
+        candidate
+            .zones
+            .insert(ZoneId::new("zz-corrupt-later-zone"), corrupt_later_zone);
+        let candidate_bytes = serde_json::to_vec(&candidate).unwrap();
+
+        let error = factory
+            .install_world_checkpoint_bytes_atomically(&candidate_bytes)
+            .expect_err("an invalid later Zone must reject the entire factory restore");
+        assert!(error.contains("unsupported shared Zone state checkpoint version"));
+        assert_eq!(factory.world_checkpoint_bytes().unwrap(), original_bytes);
+        assert_eq!(factory.active_zone_count(), 1);
+    }
+
+    #[test]
+    fn atomic_world_checkpoint_restore_preserves_replica_state_and_tick_flags() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let replica_zone = ZoneId::new("atomic-replica");
+        factory.resources_for_zone(&replica_zone);
+        factory.mark_zone_as_replica(&replica_zone);
+        assert!(factory.is_zone_replica(&replica_zone));
+        assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+
+        let mut candidate: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&factory.world_checkpoint_bytes().unwrap()).unwrap();
+        let normal_zone = ZoneId::new("atomic-normal");
+        let normal_checkpoint = candidate
+            .zones
+            .get(&replica_zone)
+            .expect("the replica checkpoint must exist")
+            .clone();
+        candidate
+            .zones
+            .insert(normal_zone.clone(), normal_checkpoint);
+
+        let restored = factory
+            .install_world_checkpoint_bytes_atomically(&serde_json::to_vec(&candidate).unwrap())
+            .unwrap();
+        assert_eq!(restored, 2);
+        assert_eq!(factory.active_zone_count(), 2);
+        assert!(factory.is_zone_replica(&replica_zone));
+        assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+        assert!(!factory.is_zone_replica(&normal_zone));
+        assert!(factory.autonomous_ticks_enabled(&normal_zone));
+
+        factory.promote_zone_from_replica(&replica_zone).unwrap();
+        assert!(!factory.is_zone_replica(&replica_zone));
+        assert!(factory.autonomous_ticks_enabled(&replica_zone));
+    }
+
+    #[test]
+    fn failed_replica_promotion_preserves_the_replica_marker() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let missing_zone = ZoneId::new("missing-replica-state");
+        factory.mark_zone_as_replica(&missing_zone);
+
+        let error = factory
+            .promote_zone_from_replica(&missing_zone)
+            .expect_err("a replica without installed state must not be promoted");
+        assert!(error.contains("has no installed replica state"));
+        assert!(factory.is_zone_replica(&missing_zone));
+    }
+    #[test]
+    fn first_resource_creation_honors_an_existing_replica_marker() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let replica_zone = ZoneId::new("replica-before-resource");
+        factory.mark_zone_as_replica(&replica_zone);
+
+        factory.resources_for_zone(&replica_zone);
+
+        assert!(factory.is_zone_replica(&replica_zone));
+        assert!(!factory.autonomous_ticks_enabled(&replica_zone));
+    }
+
+    #[test]
+    fn economy_source_sequence_survives_checkpoint_and_exhaustion_fails_closed() {
+        let mut state = SharedInProcessZoneState::new();
+        assert_eq!(state.next_economy_source_sequence(), Some(1));
+        assert_eq!(state.next_economy_source_sequence(), Some(2));
+
+        let checkpoint = state.checkpoint().expect("checkpoint");
+        let mut restored = SharedInProcessZoneState::restore(checkpoint).expect("restore");
+        assert_eq!(restored.next_economy_source_sequence(), Some(3));
+
+        restored.next_economy_source_sequence = u64::MAX - 1;
+        assert_eq!(restored.next_economy_source_sequence(), Some(u64::MAX));
+        assert_eq!(restored.next_economy_source_sequence(), None);
+
+        let exhausted_checkpoint = restored.checkpoint().expect("exhausted checkpoint");
+        let mut exhausted =
+            SharedInProcessZoneState::restore(exhausted_checkpoint).expect("exhausted restore");
+        assert_eq!(exhausted.next_economy_source_sequence(), None);
+        assert_eq!(exhausted.next_economy_source_sequence, u64::MAX);
+    }
 
     #[test]
     fn pending_zone_packets_never_exceed_rpc_outbound_capacity() {
@@ -9937,6 +12771,110 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn checkpoint_restore_requires_pending_drop_claims_to_match_presence_and_zone() {
+        let mut state = SharedInProcessZoneState::new();
+        let key = ZonePresenceKey {
+            account_id: "claim-restore-account".to_string(),
+            character_index: 0,
+        };
+        let session_id = SessionId::new("claim-restore-session");
+        let zone_object_id = state.upsert_player(
+            key.clone(),
+            "ClaimRestorer",
+            "0".to_string(),
+            shared_picker_entity(101, 330, 270),
+            80,
+        );
+        state.zone_sessions.insert(key.clone(), session_id.clone());
+        state
+            .zone_session_keys
+            .insert(session_id.clone(), key.clone());
+        state.zone_manager.join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: key.account_id.clone(),
+            character_index: key.character_index,
+            object_id: zone_object_id,
+            name: "ClaimRestorer".to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 1,
+            hp: 10,
+            max_hp: 10,
+            mp: 10,
+            map_file_name: "0".to_string(),
+            position: Point { x: 330, y: 270 },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        });
+        let drop = GroundDropSnapshot {
+            object_id: 8_801,
+            name: "Checkpoint Claim Gold".to_string(),
+            name_colour_argb: -1,
+            icon: 0,
+            x: 330,
+            y: 270,
+            quantity: 1,
+            source_monster: "checkpoint-claim-test".to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: None,
+            loot: GroundDropLootSnapshot::Gold { amount: 25 },
+        };
+        state.zone_manager.handle(ZoneCommand::SyncGroundDrops {
+            session_id: session_id.clone(),
+            drops: vec![drop.clone()],
+            now_ms: 1_000,
+        });
+        let outbounds = state.zone_manager.handle(ZoneCommand::ClaimGroundDrop {
+            session_id: session_id.clone(),
+            object_id: Some(drop.object_id),
+            target: Point { x: 330, y: 270 },
+            group_members: Vec::new(),
+            now_ms: 1_001,
+        });
+        let _ = state.dispatch_zone_outbounds(outbounds, None);
+        assert_eq!(state.pending_zone_ground_drop_claims[&key].len(), 1);
+
+        let checkpoint = state.checkpoint().expect("checkpoint with pending claim");
+        SharedInProcessZoneState::restore(checkpoint.clone())
+            .expect("an exact pending claim should restore");
+
+        let expected_ticket = checkpoint.pending_zone_ground_drop_claims[0].1[0].clone();
+        let mut missing_gateway_pending_entry = checkpoint.clone();
+        missing_gateway_pending_entry
+            .pending_zone_ground_drop_claims
+            .clear();
+        let restored = SharedInProcessZoneState::restore(missing_gateway_pending_entry)
+            .expect("the authoritative Zone ticket should hydrate the missing Gateway entry");
+        assert_eq!(
+            restored.pending_zone_ground_drop_claims.get(&key),
+            Some(&vec![expected_ticket])
+        );
+
+        let mut tampered_ticket = checkpoint.clone();
+        tampered_ticket.pending_zone_ground_drop_claims[0].1[0]
+            .idempotency_key
+            .push_str("-tampered");
+        let error = SharedInProcessZoneState::restore(tampered_ticket)
+            .expect_err("a pending ticket absent from the restored Zone must fail");
+        assert!(error.contains("absent or mismatched in Zone"));
+
+        let mut wrong_session = checkpoint.clone();
+        wrong_session.pending_zone_ground_drop_claims[0].1[0].session_id =
+            SessionId::new("wrong-session");
+        let error = SharedInProcessZoneState::restore(wrong_session)
+            .expect_err("a pending ticket with the wrong presence session must fail");
+        assert!(error.contains("session mismatch"));
+
+        let mut orphaned_presence = checkpoint;
+        orphaned_presence.pending_zone_ground_drop_claims[0]
+            .0
+            .account_id = "orphaned-claim-account".to_string();
+        let error = SharedInProcessZoneState::restore(orphaned_presence)
+            .expect_err("a pending ticket without a presence must fail");
+        assert!(error.contains("without presence"));
+    }
     #[test]
     fn world_checkpoint_removes_sessions_players_and_pending_packets() {
         let mut state = SharedInProcessZoneState::new();
@@ -10311,16 +13249,16 @@ mod tests {
     // --- map=zone integration harness (oracle for the per-zone-tick + handoff steps) ---
 
     fn open_per_map_session(registry: &ZoneRegistry, map: &str, account: &str) -> GatewaySession {
-        let routed = registry.open_session_for(
+        GatewaySession::new_with_zone_registry_route(
             GatewayConfig::default(),
+            registry,
             SessionRouteRequest {
                 account_id: Some(account.to_string()),
                 character_index: Some(0),
                 map_file_name: Some(map.to_string()),
                 ..SessionRouteRequest::anonymous()
             },
-        );
-        GatewaySession::with_routed_world_runtime(routed.zone_id, routed.runtime)
+        )
     }
 
     fn session_sees_player(session: &GatewaySession, name: &str) -> bool {
@@ -10451,8 +13389,8 @@ mod tests {
                 self.inner.restore_active_character_checkpoint(checkpoint)
             }
 
-            fn save_active_character(&self) {
-                self.inner.save_active_character();
+            fn save_active_character(&mut self) -> Result<(), String> {
+                self.inner.save_active_character()
             }
 
             fn refresh_active_external_mail(&mut self) -> bool {
@@ -10539,8 +13477,8 @@ mod tests {
                 self.inner.active_identity()
             }
 
-            fn save_active_character(&self) {
-                self.inner.save_active_character();
+            fn save_active_character(&mut self) -> Result<(), String> {
+                self.inner.save_active_character()
             }
 
             fn refresh_active_external_mail(&mut self) -> bool {
@@ -10671,33 +13609,12 @@ mod tests {
 
     #[test]
     fn shared_in_process_factory_isolates_state_by_zone_id() {
-        let registry = ZoneRegistry::with_router(
-            ZoneId::primary(),
-            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
-            Arc::new(MapZoneSessionRouter::new().with_route("0", ZoneId::new("bichon-0")))
-                as SharedSessionRouter,
-        );
-        let mut bichon = GatewaySession::with_routed_world_runtime(
-            ZoneId::new("bichon-0"),
-            registry
-                .open_session_for(
-                    GatewayConfig::default(),
-                    SessionRouteRequest {
-                        account_id: Some("demo".to_string()),
-                        character_index: Some(0),
-                        map_file_name: Some("0".to_string()),
-                        ..SessionRouteRequest::anonymous()
-                    },
-                )
-                .runtime,
-        );
-        let mut primary = GatewaySession::with_routed_world_runtime(
-            ZoneId::primary(),
-            registry.open_session(GatewayConfig::default()).runtime,
-        );
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let mut bichon = factory.create_runtime(GatewayConfig::default(), &ZoneId::new("bichon-0"));
+        let mut primary = factory.create_runtime(GatewayConfig::default(), &ZoneId::primary());
 
-        start_demo_character(&mut bichon);
-        start_new_character(&mut primary, "second", "Blade");
+        start_new_runtime_handle(&mut bichon, "bichon-isolation", "Scout");
+        start_new_runtime_handle(&mut primary, "primary-isolation", "Blade");
 
         let bichon_snapshot = bichon.world_snapshot();
         let primary_snapshot = primary.world_snapshot();
@@ -10798,6 +13715,147 @@ mod tests {
     }
 
     #[test]
+    fn command_tail_aoi_remove_does_not_tombstone_retained_shared_npc_globally() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-command-tail-aoi-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Assistant_Jane")
+            .expect("full Crystal runtime should expose Assistant Jane");
+
+        assert!(
+            zone_state
+                .lock()
+                .expect("shared zone state should lock")
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .is_some_and(|zone| zone.retains_object_id(npc.object_id)),
+            "shared NPC should remain authoritative while outside one observer's AOI"
+        );
+
+        runtime.apply_shared_entity_packets_to_current_map(&[ServerPacket::ObjectRemove {
+            object_id: npc.object_id,
+        }]);
+
+        let state = zone_state.lock().expect("shared zone state should lock");
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
+    fn final_shared_entity_apply_does_not_tombstone_retained_shared_npc_globally() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-final-apply-aoi-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc)
+            .expect("full Crystal runtime should expose a nearby shared NPC");
+
+        let mut state = zone_state.lock().expect("shared zone state should lock");
+        assert!(
+            state
+                .zone_manager
+                .zone(&ZoneKey::for_map("0"))
+                .is_some_and(|zone| zone.retains_object_id(npc.object_id)),
+            "shared NPC should remain authoritative while outside one observer's AOI"
+        );
+
+        state.apply_shared_entity_packets(
+            "0",
+            &[ServerPacket::ObjectRemove {
+                object_id: npc.object_id,
+            }],
+        );
+
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
+    fn personal_viewport_remove_does_not_delete_retained_shared_npc_from_zone() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-personal-viewport-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Assistant_Jane")
+            .expect("full Crystal runtime should expose Assistant Jane");
+
+        runtime.dispatch_shared_entity_observer_packets(&[ServerPacket::ObjectRemove {
+            object_id: npc.object_id,
+        }]);
+
+        let state = zone_state.lock().expect("shared zone state should lock");
+        let zone = state
+            .zone_manager
+            .zone(&ZoneKey::for_map("0"))
+            .expect("started runtime should retain its shared Zone");
+        assert!(zone.retains_object_id(npc.object_id));
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
+    fn player_observer_broadcast_does_not_delete_retained_shared_npc_from_zone() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-player-observer-remove", "Observer");
+        let npc = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.name == "Merchant_John")
+            .expect("full Crystal runtime should expose Merchant John");
+        let owner_local_object_id = runtime
+            .local_self_object_id()
+            .expect("started runtime should expose its local self object id");
+
+        runtime.dispatch_zone_observer_packets(
+            owner_local_object_id,
+            &[ServerPacket::ObjectRemove {
+                object_id: npc.object_id,
+            }],
+        );
+
+        let state = zone_state.lock().expect("shared zone state should lock");
+        let zone = state
+            .zone_manager
+            .zone(&ZoneKey::for_map("0"))
+            .expect("started runtime should retain its shared Zone");
+        assert!(zone.retains_object_id(npc.object_id));
+        let map = state
+            .map_layer(Some("0"))
+            .expect("shared map layer should still exist");
+        assert!(map.entities.contains_key(&npc.object_id));
+        assert!(!map.removed_entity_ids.contains(&npc.object_id));
+    }
+
+    #[test]
     fn shared_zone_seeds_current_map_npcs_for_later_owner_aoi_entry() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
@@ -10835,6 +13893,127 @@ mod tests {
                     && info.name == "MirGuide_Peter"
                     && info.location == (Point { x: 328, y: 258 })
         )));
+    }
+
+    #[test]
+    fn retained_shared_npc_survives_owner_aoi_leave_and_reentry() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-aoi-round-trip", "Walker");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session");
+        let jane_object_id = 3;
+
+        let away = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id: session_id.clone(),
+                position: Point { x: 324, y: 262 },
+                direction: MirDirection::UpLeft,
+            },
+            false,
+        );
+        assert!(away.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRemove { object_id } if *object_id == jane_object_id
+        )));
+        runtime.apply_shared_entity_packets_to_current_map(&away);
+        {
+            let state = zone_state.lock().expect("shared zone state should lock");
+            let map = state
+                .map_layer(Some("0"))
+                .expect("shared map layer should still exist");
+            assert!(map.entities.contains_key(&jane_object_id));
+            assert!(!map.removed_entity_ids.contains(&jane_object_id));
+        }
+
+        let returned = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: Point { x: 284, y: 606 },
+                direction: MirDirection::Down,
+            },
+            false,
+        );
+        assert!(returned.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectNpc { info }
+                if info.object_id == jane_object_id && info.name == "Assistant_Jane"
+        )));
+        runtime.apply_shared_entity_packets_to_current_map(&returned);
+
+        let snapshot = runtime.world_snapshot();
+        assert!(snapshot.entities.iter().any(|entity| {
+            entity.object_id == jane_object_id
+                && entity.kind == WorldEntityKind::Npc
+                && entity.name == "Assistant_Jane"
+        }));
+    }
+
+    #[test]
+    fn retained_shared_npc_survives_personal_ticks_outside_aoi() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "npc-personal-tick-aoi", "Walker");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started runtime should have a Zone session");
+        let jane_object_id = 3;
+
+        let away = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id: session_id.clone(),
+                position: Point { x: 290, y: 625 },
+                direction: MirDirection::Down,
+            },
+            false,
+        );
+        runtime.apply_shared_entity_packets_to_current_map(&away);
+        runtime.force_inner_to_current_zone_transform();
+        for _ in 0..32 {
+            runtime
+                .execute(WorldCommand::Tick)
+                .expect("personal world tick outside Jane AOI should execute");
+        }
+        {
+            let state = zone_state.lock().expect("shared zone state should lock");
+            assert!(
+                state
+                    .zone_manager
+                    .zone(&ZoneKey::for_map("0"))
+                    .is_some_and(|zone| zone.retains_object_id(jane_object_id)),
+                "personal viewport ticks must not delete Jane from the Zone"
+            );
+            let map = state
+                .map_layer(Some("0"))
+                .expect("shared map layer should still exist");
+            assert!(map.entities.contains_key(&jane_object_id));
+            assert!(!map.removed_entity_ids.contains(&jane_object_id));
+        }
+
+        let returned = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: Point { x: 284, y: 606 },
+                direction: MirDirection::Down,
+            },
+            false,
+        );
+        runtime.apply_shared_entity_packets_to_current_map(&returned);
+        runtime.force_inner_to_current_zone_transform();
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("personal world tick after returning to Jane should execute");
+
+        assert!(runtime.world_snapshot().entities.iter().any(|entity| {
+            entity.object_id == jane_object_id
+                && entity.kind == WorldEntityKind::Npc
+                && entity.name == "Assistant_Jane"
+        }));
     }
 
     #[test]
@@ -11087,7 +14266,7 @@ mod tests {
     }
 
     #[test]
-    fn world_entity_from_monster_info_preserves_neutral_ai_disposition() {
+    fn world_entity_from_monster_info_fails_closed_without_explicit_disposition() {
         let mut guard_info = shared_monster_info(9003, 0);
         guard_info.name = "Royal_Guard".to_string();
         guard_info.ai = 6;
@@ -11098,8 +14277,8 @@ mod tests {
         let mut hostile_info = shared_monster_info(9004, 0);
         hostile_info.ai = 0;
 
-        let hostile = world_entity_from_monster_info(&hostile_info);
-        assert_eq!(hostile.disposition, WorldEntityDisposition::Hostile);
+        let unknown = world_entity_from_monster_info(&hostile_info);
+        assert_eq!(unknown.disposition, WorldEntityDisposition::Neutral);
     }
 
     #[test]
@@ -11225,9 +14404,8 @@ mod tests {
         assert_eq!(entity.kind, WorldEntityKind::Monster);
         assert_eq!((entity.x, entity.y), (331, 270));
         assert_eq!(entity.direction, MirDirection::Down);
-        // ai 6 is a Crystal Neutral AI (see monster_disposition_for_ai /
-        // world_entity_disposition_for_monster_ai); the shared-zone packet path
-        // must record it as Neutral, matching world_entity_from_monster_info.
+        // ObjectMonster has no authoritative relationship field, so the
+        // shared-zone packet path remains fail-closed.
         assert_eq!(entity.disposition, WorldEntityDisposition::Neutral);
         assert_eq!(
             entity
@@ -11248,6 +14426,7 @@ mod tests {
             name_colour_argb: -1,
             image: 29,
             ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile),
             level: 30,
             max_hp: 285,
             hp: 285,
@@ -11319,6 +14498,7 @@ mod tests {
             name_colour_argb: -1,
             image: 29,
             ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile),
             level: 30,
             max_hp: 285,
             hp: 285,
@@ -12530,7 +15710,8 @@ mod tests {
                         }],
                     }
                 }
-                SharedAccountInventoryCommand::GroundDropPickup(_) => {
+                SharedAccountInventoryCommand::GroundDropPickup(_)
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
                     *self
                         .ground_drop_calls
                         .lock()
@@ -12583,6 +15764,222 @@ mod tests {
     }
 
     #[derive(Debug)]
+    struct EconomyContextFenceProbe {
+        contexts: Arc<Mutex<Vec<Option<SharedAccountInventoryExecutionContext>>>>,
+    }
+
+    impl SharedAccountInventoryService for EconomyContextFenceProbe {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn commit_fenced(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryCommitOutcome {
+            self.contexts
+                .lock()
+                .expect("economy fence contexts should lock")
+                .push(context.cloned());
+            let SharedAccountInventoryCommand::GoldDrop { .. } = &envelope.command else {
+                panic!("economy fence probe only accepts GoldDrop")
+            };
+            if context.is_none_or(|context| !context.external_commit_authorized) {
+                return SharedAccountInventoryCommitOutcome::Deferred {
+                    receipt: SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GoldDrop,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                };
+            }
+            SharedAccountInventoryCommitOutcome::Confirmed(
+                InProcessAccountInventoryService::new().commit(runtime, envelope),
+            )
+        }
+    }
+
+    #[test]
+    fn hosted_owner_only_fences_authenticated_active_production_economy() {
+        let contexts = Arc::new(Mutex::new(Vec::new()));
+        let service = Arc::new(EconomyContextFenceProbe {
+            contexts: Arc::clone(&contexts),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "hosted-economy-fence", "FenceOwner");
+        let mut checkpoint = runtime
+            .inner
+            .active_character_checkpoint()
+            .expect("active character checkpoint");
+        checkpoint.gold = 100;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .expect("seed test gold");
+        let starting_gold = runtime.world_snapshot().gold;
+        let client = HostedZoneOwnerCommandClient::new(Box::new(runtime));
+        let lease = ZoneOwnerLease::in_process(&ZoneId::new("test-shared-zone"));
+
+        let direct = client
+            .execute_request(
+                ZoneOwnerCommandRequest::direct(
+                    lease.clone(),
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(41),
+            )
+            .expect("direct command should fail closed without a durable context");
+        assert!(direct.packets.is_empty());
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold);
+
+        let unauthenticated = client
+            .execute_request(
+                ZoneOwnerCommandRequest::production_player(
+                    lease.clone(),
+                    false,
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(42),
+            )
+            .expect("unauthenticated production command should be rejected");
+        assert!(!unauthenticated
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { .. })));
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold);
+
+        let replay = client
+            .execute_replay_request(
+                ZoneOwnerCommandRequest::production_player(
+                    lease.clone(),
+                    true,
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(43),
+            )
+            .expect("standby replay should apply without external economy authority");
+        assert!(replay.packets.is_empty());
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold);
+
+        let active = client
+            .execute_request(
+                ZoneOwnerCommandRequest::production_player(
+                    lease,
+                    true,
+                    WorldCommand::ClientPacket(ClientPacket::DropGold { amount: 1 }),
+                )
+                .with_source_sequence(44),
+            )
+            .expect("active authenticated production command should commit");
+        assert!(active
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 1 })));
+        assert_eq!(client.world_snapshot().unwrap().gold, starting_gold - 1);
+
+        let contexts = contexts.lock().expect("economy fence contexts should lock");
+        assert_eq!(contexts.len(), 4);
+        assert_eq!(
+            contexts[0], None,
+            "Direct mode is not externally authorized"
+        );
+        assert_eq!(
+            contexts[1], None,
+            "unauthenticated production mode is not externally authorized"
+        );
+        assert_eq!(
+            contexts[2], None,
+            "standby replay is not externally authorized"
+        );
+        let active_context = contexts[3]
+            .as_ref()
+            .expect("active production command should receive a context");
+        assert_eq!(active_context.source_sequence, 44);
+        assert_eq!(active_context.fencing_generation, 1);
+        assert!(active_context.external_commit_authorized);
+    }
+
+    #[derive(Debug)]
+    struct GroundDropProjectionReconciliationProbe {
+        calls: Arc<Mutex<usize>>,
+        pending: Arc<Mutex<bool>>,
+    }
+
+    impl SharedAccountInventoryService for GroundDropProjectionReconciliationProbe {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn reconcile_ground_drop_projections_fenced(
+            &self,
+            _runtime: &mut InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> Vec<ServerPacket> {
+            *self
+                .calls
+                .lock()
+                .expect("ground projection probe should lock") += 1;
+            Vec::new()
+        }
+
+        fn has_pending_ground_drop_projection_fenced(
+            &self,
+            _runtime: &InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> bool {
+            *self
+                .pending
+                .lock()
+                .expect("ground projection pending should lock")
+        }
+    }
+
+    #[derive(Debug)]
+    struct TradeProjectionReconciliationProbe {
+        calls: Arc<Mutex<usize>>,
+        pending: Arc<Mutex<bool>>,
+    }
+
+    impl SharedAccountInventoryService for TradeProjectionReconciliationProbe {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn reconcile_trade_projections_fenced(
+            &self,
+            _runtime: &mut InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> Vec<ServerPacket> {
+            *self.calls.lock().expect("projection probe should lock") += 1;
+            Vec::new()
+        }
+
+        fn has_pending_trade_projection_fenced(
+            &self,
+            _runtime: &InProcessWorldRuntime,
+            _context: Option<&SharedAccountInventoryExecutionContext>,
+        ) -> bool {
+            *self.pending.lock().expect("projection pending should lock")
+        }
+    }
+
+    #[derive(Debug)]
     struct RecordingTradeSettlementService {
         bootstraps: Arc<Mutex<usize>>,
         trades: Arc<Mutex<Vec<(SharedTradeOffer, SharedTradeOffer)>>>,
@@ -12621,6 +16018,998 @@ mod tests {
                 .push((first.clone(), second.clone()));
             SharedTradeSettlementOutcome::Committed
         }
+    }
+
+    #[derive(Debug)]
+    struct UnknownThenRejectedTradeSettlementService {
+        unresolved: Arc<Mutex<bool>>,
+        calls: Arc<Mutex<usize>>,
+    }
+
+    impl SharedAccountInventoryService for UnknownThenRejectedTradeSettlementService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn settle_trade_fenced(
+            &self,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            first: &SharedTradeOffer,
+            second: &SharedTradeOffer,
+        ) -> SharedTradeSettlementOutcome {
+            *self.calls.lock().expect("settlement calls should lock") += 1;
+            if context.is_none() {
+                return SharedTradeSettlementOutcome::Deferred;
+            }
+            if *self.unresolved.lock().expect("settlement mode should lock") {
+                let mut nonces = [
+                    first.settlement_nonce.as_str(),
+                    second.settlement_nonce.as_str(),
+                ];
+                nonces.sort_unstable();
+                SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key: format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]),
+                    execution_context: context
+                        .expect("unknown trade outcome requires a test context")
+                        .clone(),
+                }
+            } else {
+                SharedTradeSettlementOutcome::Rejected
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    struct UnknownThenCommittedTradeSettlementService {
+        unresolved: Arc<Mutex<bool>>,
+        calls: Arc<Mutex<usize>>,
+    }
+
+    impl SharedAccountInventoryService for UnknownThenCommittedTradeSettlementService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn settle_trade_fenced(
+            &self,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            first: &SharedTradeOffer,
+            second: &SharedTradeOffer,
+        ) -> SharedTradeSettlementOutcome {
+            *self.calls.lock().expect("settlement calls should lock") += 1;
+            let Some(context) = context else {
+                return SharedTradeSettlementOutcome::Deferred;
+            };
+            if *self.unresolved.lock().expect("settlement mode should lock") {
+                let mut nonces = [
+                    first.settlement_nonce.as_str(),
+                    second.settlement_nonce.as_str(),
+                ];
+                nonces.sort_unstable();
+                SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key: format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]),
+                    execution_context: context.clone(),
+                }
+            } else {
+                SharedTradeSettlementOutcome::Committed
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    struct UnknownThenCommittedGroundDropService {
+        unresolved: Arc<Mutex<bool>>,
+        calls: Arc<Mutex<usize>>,
+    }
+
+    impl SharedAccountInventoryService for UnknownThenCommittedGroundDropService {
+        fn commit(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryTransactionReceipt {
+            InProcessAccountInventoryService::new().commit(runtime, envelope)
+        }
+
+        fn commit_fenced(
+            &self,
+            runtime: &mut InProcessWorldRuntime,
+            context: Option<&SharedAccountInventoryExecutionContext>,
+            envelope: SharedAccountInventoryCommandEnvelope,
+        ) -> SharedAccountInventoryCommitOutcome {
+            if !matches!(
+                &envelope.command,
+                SharedAccountInventoryCommand::GroundDropPickup(_)
+                    | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+            ) {
+                return SharedAccountInventoryCommitOutcome::Confirmed(
+                    InProcessAccountInventoryService::new().commit(runtime, envelope),
+                );
+            }
+            *self
+                .calls
+                .lock()
+                .expect("ground settlement calls should lock") += 1;
+            if context.is_none() {
+                return SharedAccountInventoryCommitOutcome::Deferred {
+                    receipt: SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                };
+            }
+            if *self
+                .unresolved
+                .lock()
+                .expect("ground settlement mode should lock")
+            {
+                let idempotency_key = envelope.stable_idempotency_key();
+                SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                    idempotency_key,
+                    execution_context: context
+                        .expect("unknown ground outcome requires a test context")
+                        .clone(),
+                    receipt: SharedAccountInventoryTransactionReceipt {
+                        kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                        committed: false,
+                        packets: Vec::new(),
+                    },
+                }
+            } else {
+                SharedAccountInventoryCommitOutcome::Confirmed(
+                    InProcessAccountInventoryService::new().commit(runtime, envelope),
+                )
+            }
+        }
+    }
+
+    #[test]
+    fn active_character_retries_pending_ground_drop_projection_then_caches_clear_state() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(true));
+        let service = Arc::new(GroundDropProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "drop-reconcile-on-start", "DropOwner");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "StartGame should reconcile immediately after the Zone join"
+        );
+
+        runtime.execute(WorldCommand::Tick).expect("pending tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 2);
+        runtime.execute(WorldCommand::Tick).expect("retry tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 3);
+
+        *pending.lock().expect("projection pending should lock") = false;
+        runtime.execute(WorldCommand::Tick).expect("clear tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 4);
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("cached clear tick");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            4,
+            "a clear identity should not poll PostgreSQL on ordinary ticks"
+        );
+    }
+
+    #[test]
+    fn commit_ack_unknown_ground_claim_is_checkpointed_and_retried_without_restore() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenCommittedGroundDropService {
+            unresolved: unresolved.clone(),
+            calls: calls.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(Arc::clone(&zone_state), service);
+        start_new_runtime(&mut runtime, "ground-ack-unknown", "ClaimOwner");
+        runtime.set_economy_execution_context(Some(SharedAccountInventoryExecutionContext {
+            zone_id: ZoneId::new("test-shared-zone"),
+            fencing_generation: 1,
+            source_sequence: 1,
+            created_at_ms: 1_000,
+            external_commit_authorized: true,
+        }));
+        let self_entity = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("runtime should expose self player");
+        let drop = shared_gold_drop(91_001, self_entity.x, self_entity.y, None, None);
+        let object_id = drop.object_id;
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let key = runtime
+            .current_presence_key()
+            .expect("active shared Zone presence");
+        let initial_gold = runtime.inner.world_snapshot().gold;
+        runtime.restore_zone_ground_drop_claim(drop.clone());
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncGroundDrops {
+                session_id: session_id.clone(),
+                drops: vec![drop],
+                now_ms: 1_000,
+            },
+            false,
+        );
+
+        let first_packets = runtime.dispatch_zone_player_command(
+            ZoneCommand::ClaimGroundDrop {
+                session_id,
+                object_id: Some(object_id),
+                target: Point {
+                    x: self_entity.x,
+                    y: self_entity.y,
+                },
+                group_members: Vec::new(),
+                now_ms: 1_001,
+            },
+            false,
+        );
+
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold);
+        assert!(first_packets
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        let checkpoint = {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            assert!(!state.pending_zone_ground_drop_claims.contains_key(&key));
+            assert!(state
+                .zone_manager
+                .pending_ground_drop_claim_tickets()
+                .is_empty());
+            let settlement = state
+                .unresolved_ground_drop_settlement_for_presence(&key)
+                .expect("unknown claim must detach into recovery authority");
+            assert_eq!(
+                settlement.execution_context,
+                Some(SharedAccountInventoryExecutionContext {
+                    zone_id: ZoneId::new("test-shared-zone"),
+                    fencing_generation: 1,
+                    source_sequence: 1,
+                    created_at_ms: 1_000,
+                    external_commit_authorized: true,
+                })
+            );
+            assert!(state
+                .zone_manager
+                .has_detached_ground_drop_claim_ticket(&settlement.zone_key, &settlement.ticket,));
+            state.checkpoint().expect("unknown claim checkpoint")
+        };
+        SharedInProcessZoneState::restore(checkpoint)
+            .expect("unknown claim must survive checkpoint restore");
+        let world_checkpoint = zone_state
+            .lock()
+            .expect("shared Zone state should lock")
+            .world_checkpoint()
+            .expect("world-only unknown claim checkpoint");
+        assert!(world_checkpoint.zone_sessions.is_empty());
+        assert!(world_checkpoint.zone_session_keys.is_empty());
+        assert!(world_checkpoint.players.is_empty());
+        assert!(world_checkpoint.pending_zone_ground_drop_claims.is_empty());
+        assert_eq!(world_checkpoint.unresolved_ground_drop_settlements.len(), 1);
+        let restored_world = SharedInProcessZoneState::restore(world_checkpoint)
+            .expect("world-only unknown claim must restore");
+        assert!(restored_world.zone_sessions.is_empty());
+        assert!(restored_world.players.is_empty());
+        assert_eq!(restored_world.unresolved_ground_drop_settlements.len(), 1);
+        let detached = restored_world
+            .unresolved_ground_drop_settlements
+            .values()
+            .next()
+            .expect("detached recovery record");
+        assert!(restored_world
+            .zone_manager
+            .has_detached_ground_drop_claim_ticket(&detached.zone_key, &detached.ticket));
+
+        runtime.set_economy_execution_context(None);
+        let deferred_packets = runtime.apply_pending_shared_trade_packets();
+        assert!(deferred_packets.is_empty());
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold);
+        assert!(zone_state
+            .lock()
+            .expect("shared Zone state should lock")
+            .unresolved_ground_drop_settlement_for_presence(&key)
+            .is_some());
+
+        runtime.set_economy_execution_context(Some(SharedAccountInventoryExecutionContext {
+            zone_id: ZoneId::new("test-shared-zone"),
+            fencing_generation: 1,
+            source_sequence: 2,
+            created_at_ms: 1_001,
+            external_commit_authorized: true,
+        }));
+        *unresolved.lock().expect("ground settlement mode") = false;
+        let retry_packets = runtime.apply_pending_shared_trade_packets();
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold + 25);
+        assert!(retry_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold } if *gold == 25)));
+        {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            assert!(!state.pending_zone_ground_drop_claims.contains_key(&key));
+            assert!(state
+                .zone_manager
+                .pending_ground_drop_claim_tickets()
+                .is_empty());
+            assert!(state.unresolved_ground_drop_settlements.is_empty());
+        }
+
+        assert!(runtime.apply_pending_shared_trade_packets().is_empty());
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(runtime.inner.world_snapshot().gold, initial_gold + 25);
+    }
+
+    #[test]
+    fn deferred_trade_recovery_keeps_authority_then_retries_the_real_key() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenRejectedTradeSettlementService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(Arc::clone(&zone_state), service);
+        start_new_runtime(&mut runtime, "trade-deferred-recovery", "DeferredOwner");
+        let identity = runtime
+            .inner
+            .active_identity()
+            .expect("active trade owner identity");
+        let first_key = ZonePresenceKey::from_identity(&identity);
+        let second_key = ZonePresenceKey {
+            account_id: "trade-deferred-partner".to_string(),
+            character_index: 0,
+        };
+        let first_offer = SharedTradeOffer {
+            settlement_nonce: "00000000000000000000000000000091".to_string(),
+            account_id: identity.account_id.clone(),
+            character_index: identity.character_index,
+            character_name: identity.character_name.clone(),
+            partner_name: "DeferredPartner".to_string(),
+            gold: 30,
+            items: Vec::new(),
+        };
+        let second_offer = SharedTradeOffer {
+            settlement_nonce: "00000000000000000000000000000092".to_string(),
+            account_id: second_key.account_id.clone(),
+            character_index: second_key.character_index,
+            character_name: "DeferredPartner".to_string(),
+            partner_name: identity.character_name,
+            gold: 0,
+            items: Vec::new(),
+        };
+        let mut nonces = [
+            first_offer.settlement_nonce.as_str(),
+            second_offer.settlement_nonce.as_str(),
+        ];
+        nonces.sort_unstable();
+        let idempotency_key = format!("test-commit-ack-unknown:{}:{}", nonces[0], nonces[1]);
+        zone_state
+            .lock()
+            .expect("shared Zone state should lock")
+            .retain_unresolved_trade_settlement(UnresolvedSharedTradeSettlement {
+                idempotency_key: idempotency_key.clone(),
+                execution_context: Some(SharedAccountInventoryExecutionContext {
+                    zone_id: ZoneId::new("test-origin-zone"),
+                    fencing_generation: 1,
+                    source_sequence: 90,
+                    created_at_ms: 9_000,
+                    external_commit_authorized: true,
+                }),
+                first_key: first_key.clone(),
+                second_key: second_key.clone(),
+                first_offer,
+                second_offer,
+            })
+            .expect("fixture unresolved trade should insert");
+
+        runtime.set_economy_execution_context(None);
+        assert!(runtime.resolve_unresolved_trade_settlement());
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 0);
+        {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            assert_eq!(state.unresolved_trade_settlements.len(), 1);
+            assert!(state.pending_trade_rollbacks.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+        }
+
+        runtime.set_economy_execution_context(Some(SharedAccountInventoryExecutionContext {
+            zone_id: ZoneId::new("test-shared-zone"),
+            fencing_generation: 2,
+            source_sequence: 91,
+            created_at_ms: 9_100,
+            external_commit_authorized: true,
+        }));
+        assert!(runtime.resolve_unresolved_trade_settlement());
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+        {
+            let state = zone_state.lock().expect("shared Zone state should lock");
+            let retained = state
+                .unresolved_trade_settlement_for_presence(&first_key)
+                .expect("ordered unknown result should remain retained");
+            assert_eq!(retained.idempotency_key, idempotency_key);
+            assert!(state.pending_trade_rollbacks.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+        }
+
+        *unresolved.lock().expect("settlement mode should lock") = false;
+        assert!(!runtime.resolve_unresolved_trade_settlement());
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        let state = zone_state.lock().expect("shared Zone state should lock");
+        assert!(state.unresolved_trade_settlements.is_empty());
+        assert!(state
+            .pending_trade_rollbacks
+            .get(&first_key)
+            .is_some_and(|offers| offers.len() == 1));
+        assert!(state
+            .pending_trade_rollbacks
+            .get(&second_key)
+            .is_some_and(|offers| offers.len() == 1));
+    }
+
+    #[test]
+    fn unknown_ground_claim_survives_process_restart_and_credits_once_after_new_login() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenCommittedGroundDropService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let first_factory = Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service)),
+        );
+        let first_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&first_factory) as SharedZoneRuntimeFactory,
+        );
+        let config = GatewayConfig::default();
+        let mut owner = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        let mut claimant = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        start_demo_character(&mut owner);
+        start_new_character(&mut claimant, "ground-restart-claimant", "RestartClaimant");
+        let claimant_identity = claimant
+            .active_identity()
+            .expect("claimant should have an active character");
+        let character_index = claimant_identity.character_index;
+        let starting_gold = claimant.world_snapshot().gold;
+
+        owner.handle_packet(ClientPacket::DropGold { amount: 25 });
+        let shared_drop = claimant
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| {
+                matches!(
+                    &drop.loot,
+                    GroundDropLootSnapshot::Gold { amount } if *amount == 25
+                )
+            })
+            .expect("claimant should observe the shared gold drop");
+        let object_id = shared_drop.object_id;
+        claimant.transfer_map(&format!("crystal:0:{}:{}", shared_drop.x, shared_drop.y));
+        let unknown_packets = claimant
+            .execute_production_player_command(true, WorldCommand::PickUp { object_id })
+            .expect("ordered claimant pickup should execute")
+            .packets;
+
+        assert!(
+            unknown_packets
+                .iter()
+                .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })),
+            "unknown pickup must not deliver gold: {unknown_packets:#?}"
+        );
+        assert_eq!(claimant.world_snapshot().gold, starting_gold);
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 1);
+
+        let (zone_key, ticket) = {
+            let resources = first_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("first factory zone state should lock");
+            let settlement = state
+                .unresolved_ground_drop_settlements
+                .values()
+                .next()
+                .expect("unknown pickup should retain one recovery record");
+            assert!(state
+                .zone_manager
+                .has_detached_ground_drop_claim_ticket(&settlement.zone_key, &settlement.ticket,));
+            (settlement.zone_key.clone(), settlement.ticket.clone())
+        };
+        let world_checkpoint_bytes = first_factory
+            .world_checkpoint_bytes()
+            .expect("world-only checkpoint should preserve unknown pickup");
+
+        drop(claimant);
+        drop(owner);
+        assert_eq!(
+            *calls.lock().expect("ground settlement calls"),
+            1,
+            "teardown and Drop must not retry without an economy command context"
+        );
+
+        let restored_factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service));
+        assert_eq!(
+            restored_factory
+                .install_world_checkpoint_bytes(&world_checkpoint_bytes)
+                .expect("fresh factory should install world-only checkpoint"),
+            1
+        );
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("restored factory zone state should lock");
+            assert_eq!(state.unresolved_ground_drop_settlements.len(), 1);
+            assert!(state
+                .zone_manager
+                .has_detached_ground_drop_claim_ticket(&zone_key, &ticket));
+        }
+
+        *unresolved.lock().expect("ground settlement mode") = false;
+        let restored_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&restored_factory) as SharedZoneRuntimeFactory,
+        );
+        let mut resumed = GatewaySession::new_with_zone_registry(config, &restored_registry);
+        resumed.handle_packet(ClientPacket::Login {
+            account_id: claimant_identity.account_id.clone(),
+            password: claimant_identity.account_id.clone(),
+        });
+        let recovery_packets = resumed
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame { character_index }),
+            )
+            .expect("ordered StartGame should recover the durable pickup")
+            .packets;
+
+        assert!(recovery_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(resumed.world_snapshot().gold, starting_gold + 25);
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("resolved factory zone state should lock");
+            assert!(state.unresolved_ground_drop_settlements.is_empty());
+            let zone = state
+                .zone_manager
+                .zone(&zone_key)
+                .expect("restored Zone should remain present");
+            assert!(!zone.has_ground_drop(object_id));
+            assert!(
+                zone.has_detached_ground_drop_claim_ticket(&ticket),
+                "the committed object's tombstone must continue blocking restoration"
+            );
+        }
+
+        let later_packets = resumed.handle_packet(ClientPacket::KeepAlive { time: 73 });
+        assert!(later_packets
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert_eq!(*calls.lock().expect("ground settlement calls"), 2);
+        assert_eq!(resumed.world_snapshot().gold, starting_gold + 25);
+    }
+
+    #[test]
+    fn unknown_trade_survives_process_restart_and_delivers_both_sides_once_after_new_logins() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenCommittedTradeSettlementService {
+            unresolved: Arc::clone(&unresolved),
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let first_factory = Arc::new(
+            SharedInProcessZoneRuntimeFactory::with_account_inventory_service(Arc::clone(&service)),
+        );
+        let first_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&first_factory) as SharedZoneRuntimeFactory,
+        );
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        let mut second = GatewaySession::new_with_zone_registry(config.clone(), &first_registry);
+        start_demo_character(&mut first);
+        start_new_character(&mut second, "trade-restart-second", "RestartBob");
+        let first_identity = first.active_identity().expect("first trade identity");
+        let second_identity = second.active_identity().expect("second trade identity");
+
+        first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let funding_drop = second
+            .world_snapshot()
+            .ground_drops
+            .into_iter()
+            .find(|drop| {
+                matches!(
+                    &drop.loot,
+                    GroundDropLootSnapshot::Gold { amount } if *amount == 100
+                )
+            })
+            .expect("second party should observe funding gold");
+        second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
+        second.pick_up(funding_drop.object_id);
+        let first_starting_gold = first.world_snapshot().gold;
+        let second_starting_gold = second.world_snapshot().gold;
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        let first_confirm = first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert!(first_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 30 })));
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
+        let unknown_packets = second
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked: true }),
+            )
+            .expect("authenticated ordered trade confirmation should execute")
+            .packets;
+        assert!(unknown_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
+        assert!(
+            unknown_packets
+                .iter()
+                .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })),
+            "unknown settlement must not deliver either offer: {unknown_packets:#?}"
+        );
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 40);
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+        first
+            .save_active_character()
+            .expect("first debited offer should persist before process restart");
+        second
+            .save_active_character()
+            .expect("second debited offer should persist before process restart");
+
+        let unresolved_authority = {
+            let resources = first_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("first factory Zone state should lock");
+            let settlement = state
+                .unresolved_trade_settlements
+                .values()
+                .next()
+                .expect("unknown trade should retain one recovery record")
+                .clone();
+            assert!(settlement.execution_context.is_some());
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+            settlement
+        };
+        let world_checkpoint_bytes = first_factory
+            .world_checkpoint_bytes()
+            .expect("world-only checkpoint should preserve unknown trade");
+
+        drop(second);
+        drop(first);
+        assert_eq!(
+            *calls.lock().expect("settlement calls should lock"),
+            1,
+            "teardown and Drop must not retry without an economy command context"
+        );
+
+        let restored_factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service));
+        assert_eq!(
+            restored_factory
+                .install_world_checkpoint_bytes(&world_checkpoint_bytes)
+                .expect("fresh factory should install world-only checkpoint"),
+            1
+        );
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("restored factory Zone state should lock");
+            assert_eq!(state.unresolved_trade_settlements.len(), 1);
+            assert_eq!(
+                state.unresolved_trade_settlements.values().next(),
+                Some(&unresolved_authority),
+                "restart must preserve the exact old key, context, parties, and offers"
+            );
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+        }
+
+        *unresolved.lock().expect("settlement mode should lock") = false;
+        let restored_registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&restored_factory) as SharedZoneRuntimeFactory,
+        );
+        let mut resumed_first =
+            GatewaySession::new_with_zone_registry(config.clone(), &restored_registry);
+        resumed_first.handle_packet(ClientPacket::Login {
+            account_id: first_identity.account_id.clone(),
+            password: "demo".to_string(),
+        });
+        let first_recovery = resumed_first
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame {
+                    character_index: first_identity.character_index,
+                }),
+            )
+            .expect("first party StartGame should resolve and deliver the trade")
+            .packets;
+        assert!(first_recovery
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 40 })));
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        assert_eq!(
+            resumed_first.world_snapshot().gold,
+            first_starting_gold - 30 + 40
+        );
+
+        let mut resumed_second = GatewaySession::new_with_zone_registry(config, &restored_registry);
+        resumed_second.handle_packet(ClientPacket::Login {
+            account_id: second_identity.account_id.clone(),
+            password: second_identity.account_id.clone(),
+        });
+        let second_recovery = resumed_second
+            .execute_production_player_command(
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame {
+                    character_index: second_identity.character_index,
+                }),
+            )
+            .expect("second party StartGame should consume the finalized delivery")
+            .packets;
+        assert!(second_recovery
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        assert_eq!(
+            resumed_second.world_snapshot().gold,
+            second_starting_gold - 40 + 30
+        );
+
+        {
+            let resources = restored_factory.resources_for_zone(&ZoneId::primary());
+            let state = resources
+                .zone_state
+                .lock()
+                .expect("resolved factory Zone state should lock");
+            assert!(state.unresolved_trade_settlements.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+        }
+        for packets in [
+            resumed_first.handle_packet(ClientPacket::KeepAlive { time: 74 }),
+            resumed_second.handle_packet(ClientPacket::KeepAlive { time: 75 }),
+        ] {
+            assert!(packets
+                .iter()
+                .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        }
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 2);
+        assert_eq!(
+            resumed_first.world_snapshot().gold,
+            first_starting_gold - 30 + 40
+        );
+        assert_eq!(
+            resumed_second.world_snapshot().gold,
+            second_starting_gold - 40 + 30
+        );
+    }
+
+    #[test]
+    fn active_character_reconciles_durable_trade_projection_once_without_local_trade_state() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(false));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending,
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-reconcile-on-start", "TradeStart");
+        assert!(!runtime.inner.has_active_shared_trade_state());
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "StartGame should reconcile immediately after the Zone join"
+        );
+
+        runtime.execute(WorldCommand::Tick).expect("first tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 1);
+        runtime.execute(WorldCommand::Tick).expect("second tick");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "an identity with no pending trade should not poll on every tick"
+        );
+    }
+
+    #[test]
+    fn unreconciled_character_blocks_trade_mutation_until_projection_query_succeeds() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(true));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-reconcile-fail-closed", "TradeGuard");
+
+        assert!(runtime.has_pending_durable_trade_projection());
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            1,
+            "StartGame should make the first fail-closed reconciliation attempt"
+        );
+        runtime.execute(WorldCommand::Tick).expect("pending tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 2);
+        assert!(runtime.has_pending_durable_trade_projection());
+
+        *pending.lock().expect("projection pending should lock") = false;
+        runtime.execute(WorldCommand::Tick).expect("recovered tick");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 3);
+        assert!(!runtime.has_pending_durable_trade_projection());
+    }
+
+    #[test]
+    fn durable_settlement_invalidates_clear_projection_cache_without_local_trade_state() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(false));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls: calls.clone(),
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-cache-invalidate", "TradeCache");
+
+        runtime.execute(WorldCommand::Tick).expect("initial clear");
+        assert_eq!(*calls.lock().expect("probe count should lock"), 1);
+        assert!(!runtime.inner.has_active_shared_trade_state());
+        assert!(!runtime.has_pending_durable_trade_projection());
+
+        *pending.lock().expect("pending flag should lock") = true;
+        runtime.note_durable_trade_projection_pending();
+        assert!(
+            runtime.has_pending_durable_trade_projection(),
+            "a durable settlement must invalidate the old clear cache even after local trade clears"
+        );
+
+        let mutations = [
+            ClientPacket::TradeRequest,
+            ClientPacket::TradeReply {
+                accept_invite: false,
+            },
+            ClientPacket::TradeGold { amount: 1 },
+            ClientPacket::DepositTradeItem { from: 0, to: 0 },
+            ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::TradeConfirm { locked: false },
+            ClientPacket::TradeCancel,
+        ];
+        for packet in mutations {
+            assert!(runtime
+                .execute(WorldCommand::ClientPacket(packet))
+                .expect("guarded trade packet")
+                .is_empty());
+        }
+        assert!(!runtime.inner.has_active_shared_trade_state());
+        let calls_while_pending = *calls.lock().expect("probe count should lock");
+        assert!(
+            calls_while_pending > 1,
+            "pending reconciliation must remain live across guarded commands"
+        );
+
+        *pending.lock().expect("pending flag should lock") = false;
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("projection clears");
+        assert_eq!(
+            *calls.lock().expect("probe count should lock"),
+            calls_while_pending + 1
+        );
+        assert!(!runtime.has_pending_durable_trade_projection());
+    }
+
+    #[test]
+    fn pending_durable_trade_blocks_every_trade_state_mutation_packet() {
+        let calls = Arc::new(Mutex::new(0));
+        let pending = Arc::new(Mutex::new(false));
+        let service = Arc::new(TradeProjectionReconciliationProbe {
+            calls,
+            pending: pending.clone(),
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "trade-pending-mutations", "TradeGuard");
+        runtime
+            .execute(WorldCommand::Tick)
+            .expect("initial reconcile");
+
+        runtime.inner.trade_request("Trader");
+        runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeReply {
+                accept_invite: true,
+            }))
+            .expect("accept local fixture trade");
+        runtime
+            .inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
+                amount: 25,
+            }))
+            .expect("offer fixture gold");
+        let (_, offer) = runtime.inner.shared_trade_confirm();
+        let offer = offer.expect("completed fixture offer");
+        let before = runtime.inner.world_snapshot();
+        *pending.lock().expect("pending flag should lock") = true;
+
+        let mutations = [
+            ClientPacket::TradeRequest,
+            ClientPacket::TradeReply {
+                accept_invite: false,
+            },
+            ClientPacket::TradeGold { amount: 1 },
+            ClientPacket::DepositTradeItem { from: 0, to: 0 },
+            ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::TradeConfirm { locked: false },
+            ClientPacket::TradeCancel,
+        ];
+        for packet in mutations {
+            assert!(runtime
+                .execute(WorldCommand::ClientPacket(packet))
+                .expect("guarded trade packet")
+                .is_empty());
+        }
+
+        let after = runtime.inner.world_snapshot();
+        let trade = after
+            .stage5_systems
+            .trade
+            .expect("trade state is preserved");
+        assert_eq!(after.gold, before.gold);
+        assert_eq!(trade.settlement_nonce, offer.settlement_nonce);
+        assert_eq!(trade.partner, offer.partner_name);
+        assert_eq!(trade.offered_gold, offer.gold);
+        assert!(trade.completed);
     }
 
     #[test]
@@ -12702,8 +17091,21 @@ mod tests {
             ownership_remaining_ticks: None,
             loot: GroundDropLootSnapshot::Gold { amount: 25 },
         };
+        let claim_session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let claim_ticket = GroundDropClaimTicket {
+            claim_id: 1,
+            object_id: gold_drop.object_id,
+            drop_generation: 1,
+            payload_digest: "actor-boundary-payload".to_string(),
+            idempotency_key: "actor-boundary-claim".to_string(),
+            session_id: claim_session_id,
+            owner_object_id: gold_drop.owner_object_id,
+            drop: gold_drop,
+        };
         let (pickup_packets, canceled_claims) =
-            runtime.apply_zone_ground_drop_claims(vec![gold_drop]);
+            runtime.apply_zone_ground_drop_claims(vec![claim_ticket]);
         assert_eq!(
             *ground_drop_calls
                 .lock()
@@ -12719,16 +17121,123 @@ mod tests {
                     && envelope.identity.character_name == "Blade"
                     && matches!(
                         &envelope.command,
-                        SharedAccountInventoryCommand::GroundDropPickup(drop)
-                            if drop.object_id == 9101 && drop.name == "Actor Boundary Gold"
+                        SharedAccountInventoryCommand::GroundDropClaimPickup {
+                            drop,
+                            claim_idempotency_key,
+                        } if drop.object_id == 9101
+                            && drop.name == "Actor Boundary Gold"
+                            && claim_idempotency_key == "actor-boundary-claim"
                     )
             }));
         assert!(canceled_claims.contains(&9101));
         assert!(pickup_packets
-            .iter()
+            .values()
+            .flatten()
             .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
     }
 
+    #[test]
+    fn intelligent_creature_shared_pickup_uses_ticket_bound_account_service() {
+        let commands = Arc::new(Mutex::new(Vec::new()));
+        let ground_drop_calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(RecordingAccountInventoryService {
+            commands: commands.clone(),
+            ground_drop_calls: ground_drop_calls.clone(),
+            monster_award_calls: Arc::new(Mutex::new(0)),
+            skill_item_calls: Arc::new(Mutex::new(0)),
+            ground_drop_committed: true,
+            monster_award_committed: true,
+            skill_item_committed: true,
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "pet-ticket-account-service", "Blade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let drop = shared_gold_drop(9_201, 330, 270, None, None);
+        let ticket = GroundDropClaimTicket {
+            claim_id: 7,
+            object_id: drop.object_id,
+            drop_generation: 3,
+            payload_digest: "pet-ticket-payload".to_string(),
+            idempotency_key: "pet-ticket-claim".to_string(),
+            session_id,
+            owner_object_id: drop.owner_object_id,
+            drop,
+        };
+
+        let (packets, canceled) =
+            runtime.apply_shared_intelligent_creature_drop_claim(&shared_pickup_creature(), ticket);
+
+        assert_eq!(*ground_drop_calls.lock().expect("ground drop calls"), 1);
+        assert!(canceled.is_none());
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::IntelligentCreaturePickup { object_id } if *object_id == 9_201
+        )));
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+        assert!(commands.lock().expect("commands").iter().any(|envelope| {
+            matches!(
+                &envelope.command,
+                SharedAccountInventoryCommand::GroundDropClaimPickup {
+                    drop,
+                    claim_idempotency_key,
+                } if drop.object_id == 9_201 && claim_idempotency_key == "pet-ticket-claim"
+            )
+        }));
+    }
+
+    #[test]
+    fn intelligent_creature_shared_pickup_service_failure_cancels_without_personal_fallback() {
+        let commands = Arc::new(Mutex::new(Vec::new()));
+        let ground_drop_calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(RecordingAccountInventoryService {
+            commands,
+            ground_drop_calls: ground_drop_calls.clone(),
+            monster_award_calls: Arc::new(Mutex::new(0)),
+            skill_item_calls: Arc::new(Mutex::new(0)),
+            ground_drop_committed: false,
+            monster_award_committed: true,
+            skill_item_committed: true,
+        }) as SharedAccountInventoryServiceHandle;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime =
+            shared_session_runtime_with_account_inventory_service(zone_state, service);
+        start_new_runtime(&mut runtime, "pet-ticket-service-failure", "Blade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("active shared Zone session");
+        let drop = shared_gold_drop(9_202, 330, 270, None, None);
+        let ticket = GroundDropClaimTicket {
+            claim_id: 8,
+            object_id: drop.object_id,
+            drop_generation: 4,
+            payload_digest: "pet-ticket-failure-payload".to_string(),
+            idempotency_key: "pet-ticket-failure-claim".to_string(),
+            session_id,
+            owner_object_id: drop.owner_object_id,
+            drop,
+        };
+
+        let (packets, canceled) =
+            runtime.apply_shared_intelligent_creature_drop_claim(&shared_pickup_creature(), ticket);
+
+        assert_eq!(*ground_drop_calls.lock().expect("ground drop calls"), 1);
+        assert_eq!(canceled, Some(9_202));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::IntelligentCreaturePickup { .. } | ServerPacket::GainedGold { .. }
+        )));
+        assert!(runtime
+            .world_snapshot()
+            .ground_drops
+            .iter()
+            .any(|drop| drop.object_id == 9_202));
+    }
     #[test]
     fn shared_in_process_runtime_prechecks_item_skill_before_consuming_items() {
         let commands = Arc::new(Mutex::new(Vec::new()));
@@ -14299,6 +18808,83 @@ mod tests {
     }
 
     #[test]
+    fn shared_zone_state_clears_stale_harvest_only_for_a_new_corpse_incarnation() {
+        let mut state = SharedInProcessZoneState::new();
+        let mut entity = shared_monster_entity(77);
+        entity.hp = Some(12);
+        entity.max_hp = Some(12);
+        entity.dead = false;
+        state.sync_map_layer(
+            "0".to_string(),
+            vec![entity],
+            BTreeSet::new(),
+            Vec::new(),
+            BTreeSet::new(),
+        );
+        let harvested = ServerPacket::ObjectHarvested {
+            movement: ObjectMovement {
+                object_id: 77,
+                position: Point { x: 329, y: 269 },
+                direction: MirDirection::Down,
+            },
+        };
+        let died = ServerPacket::ObjectDied {
+            info: ObjectDiedInfo {
+                object_id: 77,
+                location: Point { x: 329, y: 269 },
+                direction: MirDirection::Down,
+                kind: 0,
+            },
+        };
+
+        // Reproduce a missed-incarnation projection: the entity is live while
+        // the map layer still carries the preceding corpse's Harvest marker.
+        state.apply_shared_entity_packets("0", &[harvested.clone()]);
+        state.apply_shared_entity_packets("0", &[died.clone()]);
+        assert!(!state
+            .map_layer(Some("0"))
+            .expect("shared map layer should exist")
+            .harvested_entity_ids
+            .contains(&77));
+
+        // Once this corpse is harvested, a duplicate late death packet for the
+        // same corpse must not reopen it.
+        state.apply_shared_entity_packets("0", &[harvested]);
+        state.apply_shared_entity_packets("0", &[died]);
+        assert!(state
+            .map_layer(Some("0"))
+            .expect("shared map layer should exist")
+            .harvested_entity_ids
+            .contains(&77));
+    }
+
+    #[test]
+    fn live_native_reconcile_clears_stale_harvest_marker() {
+        let mut map = ZoneMapSnapshotLayer::default();
+        map.harvested_entity_ids.insert(77);
+        let mut entity = shared_monster_entity(77);
+        let monster = ZoneNativeMonsterSnapshot {
+            object_id: 77,
+            name: entity.name.clone(),
+            position: Point {
+                x: entity.x,
+                y: entity.y,
+            },
+            hp: 12,
+            max_hp: 12,
+            dead: false,
+            disposition: Some(WorldEntityDisposition::Neutral),
+            hostile_to_player: false,
+        };
+
+        reconcile_shared_entity_with_native_monster(&mut map, &mut entity, &monster);
+
+        assert!(!map.harvested_entity_ids.contains(&77));
+        assert!(!entity.dead);
+        assert_eq!(entity.hp, Some(12));
+    }
+
+    #[test]
     fn shared_zone_state_resolves_harvest_target_across_crystal_front_scan() {
         let mut state = SharedInProcessZoneState::new();
         let mut corpse = shared_monster_entity(77);
@@ -15445,6 +20031,57 @@ mod tests {
     }
 
     #[test]
+    fn shared_gateway_turn_commits_allowed_crystal_map_coordinate_transfer() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(Arc::clone(&zone_state));
+        start_new_runtime(&mut runtime, "mapcoord-turn", "MapCoordTurn");
+
+        let mut checkpoint = runtime
+            .inner
+            .active_character_checkpoint()
+            .expect("started character checkpoint");
+        checkpoint.pk_points = 200;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .expect("PK gate fixture should restore");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:3:861:686".to_string(),
+            })
+            .expect("fixture should enter the Crystal source coordinate");
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Turn {
+                direction: MirDirection::Left,
+            }))
+            .expect("shared Turn should execute");
+
+        assert!(
+            packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::MapInformation { info } if info.file_name == "D1801"
+            )),
+            "allowed shared Turn must commit the authoritative E1 transfer: {packets:?}"
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == Point { x: 128, y: 171 }
+                    && location.direction == MirDirection::Left
+        )));
+        let snapshot = runtime.world_snapshot();
+        assert_eq!(snapshot.map_file_name.as_deref(), Some("D1801"));
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("transferred player snapshot");
+        assert_eq!((player.x, player.y), (128, 171));
+        assert_eq!(player.direction, MirDirection::Left);
+    }
+
+    #[test]
     fn shared_in_process_registry_routes_monster_attack_through_zone_native_combat() {
         let (mut first, mut second) = started_shared_zone_sessions();
         let map_file_name = first
@@ -15628,6 +20265,22 @@ mod tests {
             MirDirection::Left,
         );
 
+        let unrelated_private_ai_before = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .filter(|entity| {
+                entity.kind == WorldEntityKind::Monster && entity.object_id != corpse.object_id
+            })
+            .map(|entity| {
+                (
+                    entity.object_id,
+                    (entity.x, entity.y, entity.hp, entity.dead),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+
         let packets = runtime
             .execute(WorldCommand::ClientPacket(ClientPacket::Harvest {
                 direction: MirDirection::Left,
@@ -15658,6 +20311,35 @@ mod tests {
                 .any(|entity| entity.object_id == unrelated_shared_monster.object_id),
             "Harvest must not materialize and tick unrelated shared monsters"
         );
+        let unrelated_private_ai_after = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .filter(|entity| {
+                entity.kind == WorldEntityKind::Monster && entity.object_id != corpse.object_id
+            })
+            .map(|entity| {
+                (
+                    entity.object_id,
+                    (entity.x, entity.y, entity.hp, entity.dead),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        for (object_id, before) in &unrelated_private_ai_before {
+            assert_eq!(
+                unrelated_private_ai_after.get(object_id),
+                Some(before),
+                "Harvest must not advance unrelated private monster AI {object_id}"
+            );
+            assert!(!packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectWalk { movement }
+                    | ServerPacket::ObjectRun { movement }
+                    | ServerPacket::ObjectTurn { movement }
+                    if movement.object_id == *object_id
+            )));
+        }
 
         let mut all_packets = packets;
         for _ in 0..6 {
@@ -16210,6 +20892,106 @@ mod tests {
     }
 
     #[test]
+    fn shared_gateway_tick_does_not_run_private_monster_authority() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+
+        let before = runtime.inner.world_snapshot();
+        let player_object_id = before
+            .player_object_id
+            .expect("started session should expose its local player id");
+        let target = before
+            .entities
+            .iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 0)
+            })
+            .cloned()
+            .expect("starter scene should expose a live hostile monster");
+        let adjacent = Point {
+            x: target.x.saturating_sub(1),
+            y: target.y,
+        };
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("started session should have a shared-Zone session");
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: adjacent.clone(),
+                direction: MirDirection::Right,
+            },
+            false,
+        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(adjacent, MirDirection::Right);
+        let before = runtime.inner.world_snapshot();
+        let before_hp = before.player_hp;
+        let before_tick = before.tick;
+        let before_target = before
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == target.object_id)
+            .cloned()
+            .expect("private compatibility world should retain the target");
+
+        let mut packets = Vec::new();
+        for _ in 0..64 {
+            packets.extend(
+                runtime
+                    .execute(WorldCommand::Tick)
+                    .expect("shared Gateway personal tick should execute"),
+            );
+        }
+
+        let after = runtime.inner.world_snapshot();
+        let after_target = after
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == target.object_id)
+            .expect("passive personal ticks must not retire the Zone-owned target");
+        assert_eq!(after.tick, before_tick.saturating_add(64));
+        assert_eq!(after.player_hp, before_hp);
+        assert_eq!(
+            (
+                after_target.x,
+                after_target.y,
+                after_target.direction,
+                after_target.hp,
+                after_target.dead,
+            ),
+            (
+                before_target.x,
+                before_target.y,
+                before_target.direction,
+                before_target.hp,
+                before_target.dead,
+            ),
+            "the personal compatibility clock must not move or damage a Zone-owned monster"
+        );
+        assert!(
+            !packets.iter().any(|packet| match packet {
+                ServerPacket::ObjectWalk { movement }
+                | ServerPacket::ObjectRun { movement }
+                | ServerPacket::ObjectTurn { movement } => {
+                    movement.object_id == target.object_id
+                }
+                ServerPacket::ObjectAttack { info } => info.object_id == target.object_id,
+                ServerPacket::ObjectDied { info } => {
+                    info.object_id == target.object_id || info.object_id == player_object_id
+                }
+                ServerPacket::Death { .. } => true,
+                _ => false,
+            }),
+            "shared Gateway ticks must not emit private monster movement/combat/death: {packets:?}"
+        );
+    }
+
+    #[test]
     fn shared_in_process_registry_post_movement_grace_yields_world_tick() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state);
@@ -16308,8 +21090,11 @@ mod tests {
             "equipmentItemsJson": []
         });
         first.stage5_command("qa.applyNativeState", vec![native_state.to_string()]);
-        first.transfer_map("crystal:0102:3:7");
-        second.transfer_map("crystal:0102:9:7");
+        // MeatStore (0102) is authoritatively `NoMount` in Server.MirDB.
+        // Exercise mounted three-tile movement on a known walkable, mount-allowed
+        // Bichon fixture instead of relying on the former incomplete map metadata.
+        first.transfer_map("crystal:0:330:270");
+        second.transfer_map("crystal:0:340:270");
 
         first.stage5_command("qa.giveItem", vec!["crystal-item-769".to_string()]);
         let mount_unique_id = first
@@ -16916,7 +21701,12 @@ mod tests {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
         let mut second = shared_session_runtime(zone_state.clone());
-        start_demo_runtime(&mut first);
+        start_new_runtime_with_class(&mut first, "first-range", "Arrow", MirClass::Archer);
+        equip_runtime_crystal_items_for_class(
+            &mut first,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
         start_new_runtime(&mut second, "second-range", "Blade");
         let target = first
             .inner
@@ -16924,7 +21714,9 @@ mod tests {
             .entities
             .into_iter()
             .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
         let attacker_position = Point {
@@ -16988,7 +21780,12 @@ mod tests {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
         let mut second = shared_session_runtime(zone_state.clone());
-        start_demo_runtime(&mut first);
+        start_new_runtime_with_class(&mut first, "first-range-window", "Arrow", MirClass::Archer);
+        equip_runtime_crystal_items_for_class(
+            &mut first,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
         start_new_runtime(&mut second, "second-range-window", "Blade");
         let target = first
             .inner
@@ -16996,7 +21793,9 @@ mod tests {
             .entities
             .into_iter()
             .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
         let attacker_position = Point {
@@ -17058,6 +21857,569 @@ mod tests {
     }
 
     #[test]
+    fn gateway_refreshes_trusted_range_admission_and_rejects_unauthorized_sessions() {
+        for (case, account_id, name, class, weapon) in [
+            (
+                "warrior",
+                "range-war",
+                "DenyWar",
+                MirClass::Warrior,
+                "WoodenSword",
+            ),
+            (
+                "archer-without-class-weapon",
+                "range-bow",
+                "DenyBow",
+                MirClass::Archer,
+                "WoodenSword",
+            ),
+        ] {
+            let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+            let mut runtime = shared_session_runtime(zone_state);
+            start_new_runtime_with_class(&mut runtime, account_id, name, class);
+            equip_runtime_crystal_items_for_class(
+                &mut runtime,
+                class,
+                &[(weapon, mir2_simulation::EquipmentSlot::Weapon, 1)],
+            );
+            let (target, attacker_position) = prepare_gateway_range_fixture(&mut runtime, 3);
+            let packets = runtime
+                .execute(gateway_range_attack_command(&target, attacker_position))
+                .expect("unauthorized range intent should be handled");
+
+            assert!(
+                packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })),
+                "{case} should receive an owner correction: {packets:?}"
+            );
+            assert!(
+                !packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+                )),
+                "{case} must not launch a shared range attack: {packets:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn gateway_unauthorized_materialized_range_is_atomic() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime_with_class(
+            &mut runtime,
+            "range-atomic-warrior",
+            "AtomicWarrior",
+            MirClass::Warrior,
+        );
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        let mut target = shared_monster_entity(260_901);
+        target.name = "RakingCat0".to_string();
+        target.x = 331;
+        target.y = 270;
+        target.disposition = WorldEntityDisposition::Hostile;
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("shared monster should materialize");
+        let before = zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .checkpoint_bytes()
+            .expect("Zone checkpoint");
+
+        let packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::Right,
+            level: 0,
+            damage: 999,
+            monster: Some(monster.clone()),
+            kind: ZoneNativePlayerAttackKind::Range {
+                target: Point {
+                    x: target.x,
+                    y: target.y,
+                },
+                spell: Spell::None,
+                attack_type: 0,
+            },
+        });
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { .. }
+                | ServerPacket::RangeAttack { .. }
+                | ServerPacket::ObjectRangeAttack { .. }
+        )));
+        let state = zone_state.lock().expect("Zone state should lock");
+        assert!(state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .iter()
+            .all(|monster| monster.object_id != target.object_id));
+        assert_eq!(
+            state
+                .zone_manager
+                .checkpoint_bytes()
+                .expect("Zone checkpoint"),
+            before
+        );
+    }
+
+    #[test]
+    fn gateway_legal_archer_cannot_materialize_neutral_range_target() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime_with_class(
+            &mut runtime,
+            "range-neutral-archer",
+            "NeutralArrow",
+            MirClass::Archer,
+        );
+        equip_runtime_crystal_items_for_class(
+            &mut runtime,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 330, y: 270 }, MirDirection::Right);
+        let target = shared_monster_entity(260_902);
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("neutral shared monster should be representable");
+        assert_eq!(monster.ai, 1);
+        let before = zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .checkpoint_bytes()
+            .expect("Zone checkpoint");
+
+        let packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::Right,
+            level: 0,
+            damage: 999,
+            monster: Some(monster),
+            kind: ZoneNativePlayerAttackKind::Range {
+                target: Point {
+                    x: target.x,
+                    y: target.y,
+                },
+                spell: Spell::None,
+                attack_type: 0,
+            },
+        });
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { .. }
+                | ServerPacket::RangeAttack { .. }
+                | ServerPacket::ObjectRangeAttack { .. }
+        )));
+        let state = zone_state.lock().expect("Zone state should lock");
+        assert!(state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .iter()
+            .all(|monster| monster.object_id != target.object_id));
+        assert_eq!(
+            state
+                .zone_manager
+                .checkpoint_bytes()
+                .expect("Zone checkpoint"),
+            before
+        );
+    }
+
+    #[test]
+    fn gateway_melee_materializes_neutral_harvestable_deer() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "neutral-deer-melee", "DeerBlade");
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 330, y: 270 }, MirDirection::UpLeft);
+        let mut target = shared_monster_entity(260_904);
+        target.ai = Some(2);
+        target.x = 329;
+        target.y = 269;
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("neutral Deer should be representable");
+        assert_eq!(monster.disposition, Some(WorldEntityDisposition::Neutral));
+        assert!(monster.is_authoritatively_melee_attackable_by_player());
+        assert!(!monster.is_authoritatively_hostile_to_player());
+
+        let packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(monster),
+            kind: ZoneNativePlayerAttackKind::Melee {
+                spell: Spell::None as u8,
+                attack_type: 0,
+            },
+        });
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+        assert!(zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .iter()
+            .any(|monster| monster.object_id == target.object_id));
+    }
+
+    #[test]
+    fn gateway_prefilter_uses_explicit_disposition_for_friendly_and_hostile_ai0() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(
+            &mut runtime,
+            "explicit-disposition-warrior",
+            "DispositionBlade",
+        );
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should own a Zone session");
+        assert!(runtime
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 330, y: 270 }, MirDirection::UpLeft);
+        let mut target = shared_monster_entity(260_903);
+        target.ai = Some(0);
+        target.disposition = WorldEntityDisposition::Friendly;
+        let monster = zone_monster_spawn_from_shared_entity(&target, 0)
+            .expect("friendly shared monster should be representable");
+        assert_eq!(monster.ai, 0);
+        assert_eq!(monster.disposition, Some(WorldEntityDisposition::Friendly));
+        let before = zone_state
+            .lock()
+            .expect("Zone state should lock")
+            .zone_manager
+            .checkpoint_bytes()
+            .expect("Zone checkpoint");
+
+        let melee_packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(monster.clone()),
+            kind: ZoneNativePlayerAttackKind::Melee {
+                spell: Spell::None as u8,
+                attack_type: 0,
+            },
+        });
+
+        assert!(matches!(
+            melee_packets.as_slice(),
+            [ServerPacket::UserLocation { .. }]
+        ));
+        assert!(!melee_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { .. }
+                | ServerPacket::ObjectAttack { .. }
+                | ServerPacket::DamageIndicator { .. }
+        )));
+
+        let range_packets = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: target.object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(monster.clone()),
+            kind: ZoneNativePlayerAttackKind::Range {
+                target: Point {
+                    x: target.x,
+                    y: target.y,
+                },
+                spell: Spell::None,
+                attack_type: 0,
+            },
+        });
+        assert!(matches!(
+            range_packets.as_slice(),
+            [ServerPacket::UserLocation { .. }]
+        ));
+
+        let mut incomplete = monster.clone();
+        incomplete.object_id = target.object_id + 10;
+        incomplete.disposition = None;
+        let incomplete_packets =
+            runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+                object_id: incomplete.object_id,
+                is_player_target: false,
+                is_red_player_target: false,
+                direction: MirDirection::UpLeft,
+                level: 0,
+                damage: 999,
+                monster: Some(incomplete),
+                kind: ZoneNativePlayerAttackKind::Melee {
+                    spell: Spell::None as u8,
+                    attack_type: 0,
+                },
+            });
+        assert!(matches!(
+            incomplete_packets.as_slice(),
+            [ServerPacket::UserLocation { .. }]
+        ));
+        {
+            let state = zone_state.lock().expect("Zone state should lock");
+            assert!(state
+                .zone_manager
+                .native_monster_snapshots(&ZoneKey::for_map("0"))
+                .iter()
+                .all(|monster| monster.object_id != target.object_id));
+            assert_eq!(
+                state
+                    .zone_manager
+                    .checkpoint_bytes()
+                    .expect("Zone checkpoint"),
+                before
+            );
+        }
+
+        let hostile_object_id = target.object_id + 1;
+        let mut hostile = target;
+        hostile.object_id = hostile_object_id;
+        hostile.disposition = WorldEntityDisposition::Hostile;
+        let hostile_spawn = zone_monster_spawn_from_shared_entity(&hostile, 0)
+            .expect("hostile AI0 monster should be representable");
+        assert_eq!(hostile_spawn.ai, 0);
+        assert_eq!(
+            hostile_spawn.disposition,
+            Some(WorldEntityDisposition::Hostile)
+        );
+        let accepted = runtime.execute_zone_native_player_attack(ZoneNativePlayerAttack {
+            object_id: hostile_object_id,
+            is_player_target: false,
+            is_red_player_target: false,
+            direction: MirDirection::UpLeft,
+            level: 0,
+            damage: 999,
+            monster: Some(hostile_spawn),
+            kind: ZoneNativePlayerAttackKind::Melee {
+                spell: Spell::None as u8,
+                attack_type: 0,
+            },
+        });
+        assert!(accepted
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    }
+
+    #[test]
+    fn gateway_refreshes_changed_combat_state_before_the_next_range_intent() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut attacker = shared_session_runtime(zone_state.clone());
+        let mut observer = shared_session_runtime(zone_state);
+        start_new_runtime_with_class(
+            &mut attacker,
+            "range-stale-a",
+            "FreshArrow",
+            MirClass::Archer,
+        );
+        equip_runtime_crystal_items_for_class(
+            &mut attacker,
+            MirClass::Archer,
+            &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
+        start_new_runtime(&mut observer, "range-stale-o", "Watcher");
+        let (target, attacker_position) = prepare_gateway_range_fixture(&mut attacker, 3);
+        observer.sync_zone_snapshot();
+
+        let session_id = attacker
+            .current_zone_session_id()
+            .expect("attacker should have a Zone session");
+        assert!(attacker
+            .sync_authoritative_zone_combat_state(&session_id)
+            .is_some());
+        equip_runtime_crystal_items_for_class(
+            &mut attacker,
+            MirClass::Archer,
+            &[("WoodenSword", mir2_simulation::EquipmentSlot::Weapon, 1)],
+        );
+        // Seed the Zone with the previously valid record to prove that the
+        // Gateway refreshes instead of trusting stale admission.
+        let _ = attacker.dispatch_zone_player_command(
+            ZoneCommand::sync_player_combat_state(
+                session_id,
+                MirClass::Archer,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+            ),
+            false,
+        );
+
+        let packets = attacker
+            .execute(gateway_range_attack_command(&target, attacker_position))
+            .expect("changed-state range intent should be handled");
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+        )));
+        let observer_packets = observer
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+                time: 1,
+            }))
+            .expect("observer should drain pending packets");
+        assert!(!observer_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectRangeAttack { .. })));
+    }
+
+    #[test]
+    fn gateway_refreshes_mount_attack_capability_before_each_melee_intent() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_new_runtime(&mut runtime, "mount-melee", "MountedBlade");
+        equip_runtime_crystal_items_for_class(
+            &mut runtime,
+            MirClass::Warrior,
+            &[("RedTiger", mir2_simulation::EquipmentSlot::Mount, 1)],
+        );
+        let ride_packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+                unique_id: 13,
+                grid: MirGridType::Equipment,
+            }))
+            .expect("mount ride should execute");
+        assert!(ride_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MountUpdate {
+                riding_mount: true,
+                ..
+            }
+        )));
+        let (target, attacker_position) = prepare_gateway_range_fixture(&mut runtime, 1);
+        let mounted = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .expect("self snapshot");
+        assert_eq!(mounted.riding_mount, Some(true));
+        assert_eq!(mounted.can_mount_attack, Some(false));
+
+        // Seed a previously permissive trusted state. The attack boundary must
+        // replace it from the authenticated personal snapshot before admission.
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("runtime should have a Zone session");
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::sync_player_combat_state(
+                session_id,
+                MirClass::Warrior,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+            ),
+            false,
+        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(attacker_position, MirDirection::Right);
+
+        let packets = runtime
+            .execute(WorldCommand::Attack {
+                object_id: target.object_id,
+            })
+            .expect("mounted melee intent should be handled");
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    }
+
+    #[test]
+    fn gateway_shared_range_uses_crystal_nine_tile_boundary() {
+        for (distance, accepted) in [(9, true), (10, false)] {
+            let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+            let mut runtime = shared_session_runtime(zone_state);
+            start_new_runtime_with_class(
+                &mut runtime,
+                &format!("range-b-{distance}"),
+                &format!("Range{distance}"),
+                MirClass::Archer,
+            );
+            equip_runtime_crystal_items_for_class(
+                &mut runtime,
+                MirClass::Archer,
+                &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
+            );
+            let (target, attacker_position) = prepare_gateway_range_fixture(&mut runtime, distance);
+            let packets = runtime
+                .execute(gateway_range_attack_command(&target, attacker_position))
+                .expect("boundary range intent should execute");
+            let launched = packets.iter().any(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectRangeAttack { info }
+                        if info.target_id == target.object_id
+                )
+            });
+            assert_eq!(launched, accepted, "distance={distance}: {packets:?}");
+            if !accepted {
+                assert!(packets
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+            }
+        }
+    }
+
+    #[test]
     fn shared_in_process_runtime_routes_magic_through_shared_zone() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
@@ -17071,7 +22433,9 @@ mod tests {
             .entities
             .into_iter()
             .find(|entity| {
-                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+                entity.kind == WorldEntityKind::Monster
+                    && entity.disposition == WorldEntityDisposition::Hostile
+                    && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
         let attacker_position = Point {
@@ -17139,12 +22503,7 @@ mod tests {
     fn shared_in_process_runtime_applies_current_map_shared_monsters_to_local_runtime() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
-        runtime
-            .inner
-            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
-                character_index: 0,
-            }))
-            .expect("start game should succeed");
+        start_demo_runtime(&mut runtime);
         let mut monster = runtime
             .inner
             .world_snapshot()
@@ -17154,6 +22513,15 @@ mod tests {
                 entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
+        let authoritative_hp = zone_state
+            .lock()
+            .expect("shared zone state should lock")
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .into_iter()
+            .find(|native| native.object_id == monster.object_id)
+            .map(|native| native.hp)
+            .expect("starter monster should have Zone-native vitals");
         monster.hp = Some(1);
 
         zone_state
@@ -17175,7 +22543,7 @@ mod tests {
             .into_iter()
             .find(|entity| entity.object_id == monster.object_id)
             .and_then(|entity| entity.hp);
-        assert_eq!(local_hp, Some(1));
+        assert_eq!(local_hp, Some(authoritative_hp));
     }
 
     #[test]
@@ -17339,7 +22707,7 @@ mod tests {
             }))
             .expect("observer keepalive should execute");
 
-        assert!(observer_packets
+        assert!(!observer_packets
             .iter()
             .any(|packet| packet == &attack_packet));
         assert!(observer_packets.iter().any(|packet| matches!(
@@ -17705,19 +23073,20 @@ mod tests {
             object_id: shared_guide.object_id,
             key: "@Main".to_string(),
         });
-        let snapshot = second.world_snapshot();
-
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectChat { object_id, .. } if *object_id == shared_guide.object_id
         )));
+        let dialog_snapshot = second.world_snapshot();
         assert_eq!(
-            snapshot
+            dialog_snapshot
                 .active_npc_dialog
                 .as_ref()
                 .map(|dialog| dialog.npc_object_id),
             Some(shared_guide.object_id)
         );
+        second.select_npc_dialog_target("@AcceptQuest:1001");
+        let snapshot = second.world_snapshot();
         assert!(
             snapshot.quest_log.iter().any(|quest| {
                 shared_guide.quest_ids.contains(&quest.quest_id)
@@ -17981,6 +23350,24 @@ mod tests {
             packet,
             ServerPacket::ObjectRemove { object_id } if *object_id == shared_drop.object_id
         )));
+        let gained_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::GainedItem { .. }))
+            .expect("shared pickup should report the gained item");
+        let remove_index = packets
+            .iter()
+            .position(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::ObjectRemove { object_id }
+                        if *object_id == shared_drop.object_id
+                )
+            })
+            .expect("shared pickup should remove the claimed ground object");
+        assert!(
+            gained_index < remove_index,
+            "Crystal sends GainedItem before ObjectRemove"
+        );
         let second_snapshot = second.world_snapshot();
         assert!(second_snapshot
             .inventory_items
@@ -18005,6 +23392,17 @@ mod tests {
             .ground_drops
             .iter()
             .any(|drop| drop.object_id == shared_drop.object_id));
+    }
+
+    #[test]
+    fn shared_pickup_zone_path_is_handled_even_when_it_emits_no_packets() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_new_runtime(&mut runtime, "zone-empty-pickup", "Scout");
+
+        let result = runtime.pick_up_shared_drop(Some(u32::MAX));
+
+        assert_eq!(result, Some(Vec::new()));
     }
 
     #[test]
@@ -18827,6 +24225,128 @@ mod tests {
     }
 
     #[test]
+    fn unfenced_initial_trade_is_deferred_and_rolls_back_exactly_once() {
+        let unresolved = Arc::new(Mutex::new(true));
+        let calls = Arc::new(Mutex::new(0));
+        let service = Arc::new(UnknownThenRejectedTradeSettlementService {
+            unresolved,
+            calls: Arc::clone(&calls),
+        }) as SharedAccountInventoryServiceHandle;
+        let factory =
+            Arc::new(SharedInProcessZoneRuntimeFactory::with_account_inventory_service(service));
+        let registry = ZoneRegistry::new(
+            ZoneId::primary(),
+            Arc::clone(&factory) as SharedZoneRuntimeFactory,
+        );
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut second = GatewaySession::new_with_zone_registry(config, &registry);
+        start_demo_character(&mut first);
+        start_new_character(&mut second, "trade-deferred-second", "DeferredBob");
+
+        let first_starting_gold = first.world_snapshot().gold;
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        let second_packets = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+        assert!(second_packets
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 92 });
+        assert!(rollback
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        {
+            let resources = factory.resources_for_zone(&ZoneId::primary());
+            let state = resources.zone_state.lock().expect("zone state should lock");
+            assert!(state.unresolved_trade_settlements.is_empty());
+            assert!(state.pending_trade_deliveries.is_empty());
+            assert!(state.pending_trade_rollbacks.is_empty());
+        }
+
+        let repeat = first.handle_packet(ClientPacket::KeepAlive { time: 93 });
+        assert!(repeat
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        assert_eq!(*calls.lock().expect("settlement calls should lock"), 1);
+    }
+    #[test]
+    fn shared_trade_repeat_request_cannot_replace_debited_unmatched_offer() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        let starting_gold = first.world_snapshot().gold;
+        let red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        let original = first
+            .world_snapshot()
+            .stage5_systems
+            .trade
+            .expect("completed unmatched offer");
+        assert_eq!(first.world_snapshot().gold, starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        assert!(first.handle_packet(ClientPacket::TradeRequest).is_empty());
+        let preserved = first
+            .world_snapshot()
+            .stage5_systems
+            .trade
+            .expect("original unmatched offer remains");
+        assert_eq!(preserved.settlement_nonce, original.settlement_nonce);
+        assert_eq!(preserved.offered_gold, 30);
+        assert!(preserved.completed);
+
+        second.handle_packet(ClientPacket::TradeCancel);
+        first.handle_packet(ClientPacket::KeepAlive { time: 31 });
+        assert_eq!(first.world_snapshot().gold, starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+    }
+
+    #[test]
+    fn unmatched_offerer_logout_rolls_back_before_persisting_character() {
+        let (mut first, _second) = started_shared_zone_sessions();
+        let starting_gold = first.world_snapshot().gold;
+        let red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert_eq!(first.world_snapshot().gold, starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        let logout = first.handle_packet(ClientPacket::LogOut);
+        assert!(logout
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert!(logout.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.count == 5
+        )));
+        assert!(logout
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
+
+        first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(first.world_snapshot().gold, starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+        assert!(first.world_snapshot().stage5_systems.trade.is_none());
+    }
+
+    #[test]
     fn shared_in_process_registry_rolls_back_pending_trade_when_partner_cancels() {
         let (mut first, mut second) = started_shared_zone_sessions();
         let first_starting_gold = first.world_snapshot().gold;
@@ -18975,6 +24495,292 @@ mod tests {
         assert_eq!(session.world_snapshot().free_bag_slots, 0);
     }
 
+    #[test]
+    fn shared_runtime_npc_teleport_routes_protocol_atomically_and_persists_transform() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let map = ZoneMapMetadata {
+            map_index: 1,
+            file_name: "0".to_string(),
+            title: "BichonProvince".to_string(),
+            mini_map: 1,
+            big_map: 101,
+            lights: 2,
+            map_dark_light: 0,
+            music: 0,
+            weather: 0,
+        };
+        let configured_zone = ZoneRuntime::new_with_collision_and_npc_teleport_config(
+            ZoneKey::for_map("0"),
+            ZoneCollision::unbounded(),
+            ZoneNpcTeleportConfig {
+                enabled: true,
+                cost: 3_000,
+                maps: BTreeMap::from([("0".to_string(), map)]),
+                destinations: vec![ZoneNpcTeleportDestination {
+                    map_file_name: "0".to_string(),
+                    object_id: 900,
+                }],
+            },
+        );
+        assert!(zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .install_empty_zone(configured_zone));
+
+        let mut runtime = shared_session_runtime(Arc::clone(&zone_state));
+        start_demo_runtime(&mut runtime);
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.gold = 9_000;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .handle(ZoneCommand::SyncSharedObjects {
+                session_id,
+                packets: vec![ServerPacket::ObjectNpc {
+                    info: NpcInfo {
+                        object_id: 900,
+                        name: "Teleport Guide".to_string(),
+                        name_colour_argb: -1,
+                        image: 12,
+                        colour_argb: -1,
+                        location: Point { x: 40, y: 40 },
+                        direction: MirDirection::Down,
+                        quest_ids: Vec::new(),
+                    },
+                }],
+                include_owner: false,
+                now_ms: 1,
+            });
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+
+        assert!(matches!(
+            packets.first(),
+            Some(ServerPacket::LoseGold { gold: 3_000 })
+        ));
+        assert!(matches!(
+            packets.get(1),
+            Some(ServerPacket::MapChanged {
+                map_index: 1,
+                file_name,
+                location,
+                ..
+            }) if file_name == "0" && location == &Point { x: 40, y: 41 }
+        ));
+        assert!(matches!(
+            packets.get(2),
+            Some(ServerPacket::UserLocation { location })
+                if location.position == Point { x: 40, y: 41 }
+        ));
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+        let self_entity = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!((self_entity.x, self_entity.y), (40, 41));
+
+        let second_attempt = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+        assert!(second_attempt.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
+            .unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .unwrap();
+        let saved_entity = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!((saved_entity.x, saved_entity.y), (40, 41));
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+    }
+
+    #[test]
+    fn shared_runtime_npc_teleport_checkpoint_failure_rolls_back_before_dispatch() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let map = ZoneMapMetadata {
+            map_index: 1,
+            file_name: "0".to_string(),
+            title: "BichonProvince".to_string(),
+            mini_map: 1,
+            big_map: 101,
+            lights: 2,
+            map_dark_light: 0,
+            music: 0,
+            weather: 0,
+        };
+        assert!(zone_state.lock().unwrap().zone_manager.install_empty_zone(
+            ZoneRuntime::new_with_collision_and_npc_teleport_config(
+                ZoneKey::for_map("0"),
+                ZoneCollision::unbounded(),
+                ZoneNpcTeleportConfig {
+                    enabled: true,
+                    cost: 3_000,
+                    maps: BTreeMap::from([("0".to_string(), map)]),
+                    destinations: vec![ZoneNpcTeleportDestination {
+                        map_file_name: "0".to_string(),
+                        object_id: 900,
+                    }],
+                },
+            )
+        ));
+
+        let mut runtime = shared_session_runtime(Arc::clone(&zone_state));
+        start_demo_runtime(&mut runtime);
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.gold = 9_000;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let session_id = runtime.current_zone_session_id().unwrap();
+        let old_zone_transform = zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .player_transform(&session_id)
+            .unwrap();
+        zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .handle(ZoneCommand::SyncSharedObjects {
+                session_id: session_id.clone(),
+                packets: vec![ServerPacket::ObjectNpc {
+                    info: NpcInfo {
+                        object_id: 900,
+                        name: "Teleport Guide".to_string(),
+                        name_colour_argb: -1,
+                        image: 12,
+                        colour_argb: -1,
+                        location: Point { x: 40, y: 40 },
+                        direction: MirDirection::Down,
+                        quest_ids: Vec::new(),
+                    },
+                }],
+                include_owner: false,
+                now_ms: 1,
+            });
+
+        runtime.fail_next_npc_teleport_checkpoint_restore = true;
+        let rejected = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+
+        assert!(rejected.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, 9_000);
+        assert_eq!(
+            zone_state
+                .lock()
+                .unwrap()
+                .zone_manager
+                .player_transform(&session_id),
+            Some(old_zone_transform.clone())
+        );
+        let private_player = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (private_player.x, private_player.y, private_player.direction),
+            (
+                old_zone_transform.0.x,
+                old_zone_transform.0.y,
+                old_zone_transform.1
+            )
+        );
+
+        let retry = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 900,
+            }))
+            .unwrap();
+        assert!(matches!(
+            retry.first(),
+            Some(ServerPacket::LoseGold { gold: 3_000 })
+        ));
+        assert_eq!(runtime.world_snapshot().gold, 6_000);
+        assert_eq!(
+            zone_state
+                .lock()
+                .unwrap()
+                .zone_manager
+                .player_transform(&session_id),
+            Some((Point { x: 40, y: 41 }, MirDirection::Down))
+        );
+    }
+
+    #[test]
+    fn shared_runtime_real_disabled_npc_teleport_is_silent_and_zero_mutation() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.gold = 5_000;
+        runtime
+            .inner
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let before = runtime.world_snapshot();
+
+        let packets = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
+                object_id: 1,
+            }))
+            .unwrap();
+        let after = runtime.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert_eq!(after.gold, before.gold);
+        let before_player = before
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        let after_player = after
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (after_player.x, after_player.y, after_player.direction),
+            (before_player.x, before_player.y, before_player.direction)
+        );
+    }
+
     fn started_shared_zone_sessions() -> (GatewaySession, GatewaySession) {
         let registry = ZoneRegistry::in_process();
         let config = GatewayConfig::default();
@@ -19023,6 +24829,8 @@ mod tests {
             account_inventory_service,
             npc_world_service,
             economy_execution_context: None,
+            last_ground_drop_projection_reconciliation_identity: None,
+            trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),
             shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
@@ -19031,7 +24839,41 @@ mod tests {
             local_ground_drop_zone_ids: Default::default(),
             retired_local_ground_drop_ids: Default::default(),
             owner_dead_entity_ids: Default::default(),
+            last_game_shop_purchase_outcome: None,
+            fail_next_npc_teleport_checkpoint_restore: false,
         }
+    }
+
+    #[test]
+    fn shared_in_process_runtime_delegates_typed_game_shop_outcome() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("login should execute");
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("StartGame should execute");
+
+        let execution = runtime
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::GameShopBuy {
+                g_index: 31,
+                quantity: 1,
+                price_type: 1,
+            }))
+            .expect("shared game-shop command should execute once");
+        let outcome = execution
+            .game_shop_purchase_outcome
+            .expect("shared runtime must retain the typed purchase outcome");
+        assert_eq!(
+            (outcome.g_index, outcome.quantity, outcome.price_type),
+            (31, 1, 1)
+        );
     }
 
     fn start_demo_character(session: &mut GatewaySession) {
@@ -19120,6 +24962,10 @@ mod tests {
                 _ => None,
             })
             .expect("new character should return an index");
+        session.handle_packet(ClientPacket::Login {
+            account_id: account_id.to_string(),
+            password: account_id.to_string(),
+        });
         session.handle_packet(ClientPacket::StartGame { character_index });
     }
 
@@ -19178,6 +25024,14 @@ mod tests {
         runtime: &mut SharedInProcessZoneSessionRuntime,
         items: &[(&str, mir2_simulation::EquipmentSlot, u32)],
     ) {
+        equip_runtime_crystal_items_for_class(runtime, MirClass::Taoist, items);
+    }
+
+    fn equip_runtime_crystal_items_for_class(
+        runtime: &mut SharedInProcessZoneSessionRuntime,
+        class: MirClass,
+        items: &[(&str, mir2_simulation::EquipmentSlot, u32)],
+    ) {
         let snapshot = runtime.inner.world_snapshot();
         let identity = runtime
             .inner
@@ -19213,7 +25067,7 @@ mod tests {
             "character": {
                 "name": identity.character_name,
                 "level": 35,
-                "class": "Taoist",
+                "class": class,
                 "gender": "Male"
             },
             "mapFileName": snapshot.map_file_name.unwrap_or_else(|| "0".to_string()),
@@ -19241,6 +25095,55 @@ mod tests {
             .expect("equipment fixture should apply through the test runtime");
     }
 
+    fn prepare_gateway_range_fixture(
+        runtime: &mut SharedInProcessZoneSessionRuntime,
+        distance: i32,
+    ) -> (WorldEntitySnapshot, Point) {
+        let target = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| {
+                entity.kind == WorldEntityKind::Monster && entity.hp.is_some_and(|hp| hp > 1)
+            })
+            .expect("starter scene should expose a live range target");
+        let attacker_position = Point {
+            x: target.x.saturating_sub(distance),
+            y: target.y,
+        };
+        let session_id = runtime
+            .current_zone_session_id()
+            .expect("range fixture should have a Zone session");
+        let _ = runtime.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id,
+                position: attacker_position.clone(),
+                direction: MirDirection::Right,
+            },
+            false,
+        );
+        runtime
+            .inner
+            .force_authoritative_player_transform(attacker_position.clone(), MirDirection::Right);
+        (target, attacker_position)
+    }
+
+    fn gateway_range_attack_command(
+        target: &WorldEntitySnapshot,
+        attacker_position: Point,
+    ) -> WorldCommand {
+        WorldCommand::ClientPacket(ClientPacket::RangeAttack {
+            direction: MirDirection::Right,
+            location: attacker_position,
+            target_id: target.object_id,
+            target_location: Point {
+                x: target.x,
+                y: target.y,
+            },
+        })
+    }
+
     fn shared_monster_entity(object_id: u32) -> WorldEntitySnapshot {
         WorldEntitySnapshot {
             object_id,
@@ -19254,6 +25157,11 @@ mod tests {
             class: None,
             gender: None,
             level: None,
+            riding_mount: None,
+            can_mount_attack: None,
+            has_class_weapon: None,
+            dazed: None,
+            fishing: None,
             hp: Some(12),
             max_hp: Some(12),
             light: 0,
@@ -19338,6 +25246,11 @@ mod tests {
             class: Some(MirClass::Warrior),
             gender: Some(MirGender::Male),
             level: Some(7),
+            riding_mount: None,
+            can_mount_attack: None,
+            has_class_weapon: None,
+            dazed: None,
+            fishing: None,
             hp: None,
             max_hp: None,
             light: 3,
@@ -19405,5 +25318,9 @@ mod tests {
             pickup_grade: 0,
             maintain_food_time: 24_000,
         }
+    }
+
+    mod abnormal_teardown_zone_drain_tests {
+        include!("abnormal_teardown_zone_drain_tests.rs");
     }
 }

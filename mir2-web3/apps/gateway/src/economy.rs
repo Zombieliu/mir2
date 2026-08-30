@@ -6,9 +6,10 @@
 //! event are committed in one PostgreSQL transaction.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use mir2_protocol::ServerPacket;
 use mir2_simulation::{
     ActiveSessionIdentity, GroundDropLootSnapshot, InProcessWorldRuntime,
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
@@ -20,11 +21,14 @@ use sha2::{Digest, Sha256};
 
 use crate::routing::{
     SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
-    SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
-    SharedTradeSettlementOutcome,
+    SharedAccountInventoryCommitOutcome, SharedAccountInventoryExecutionContext,
+    SharedAccountInventoryService, SharedTradeSettlementOutcome,
 };
 
 const ECONOMY_EVENT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-event.v1\0";
+const ECONOMY_BUSINESS_EFFECT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-business-effect.v1\0";
+const ECONOMY_RECEIPT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-receipt.v1\0";
+const ECONOMY_TRADE_SETTLEMENT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-trade-settlement.v1\0";
 const ECONOMY_BOOTSTRAP_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-bootstrap.v1\0";
 const ECONOMY_TRADE_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-trade.v1\0";
 const MAX_ECONOMY_LEGS: usize = 128;
@@ -204,6 +208,37 @@ impl EconomyTransactionEnvelope {
         hasher.update(payload);
         Ok(hex_lower(&hasher.finalize()))
     }
+
+    /// Identifies the immutable asset mutation independently of the producer
+    /// attempt that delivered it. Fence, sequence, and wall-clock fields still
+    /// bind `event_id`, but retries after a Host restart compare this digest so
+    /// the same authoritative effect can recover without becoming a new debit
+    /// or credit.
+    pub fn business_effect_id(&self) -> Result<String, String> {
+        self.validate()?;
+        let payload = serde_json::to_vec(&EconomyBusinessEffect {
+            idempotency_key: &self.idempotency_key,
+            transaction_kind: self.transaction_kind,
+            zone_id: &self.zone_id,
+            legs: &self.legs,
+            metadata: &self.metadata,
+        })
+        .map_err(|error| format!("encode economy business effect: {error}"))?;
+        let mut hasher = Sha256::new();
+        hasher.update(ECONOMY_BUSINESS_EFFECT_DOMAIN);
+        hasher.update(payload);
+        Ok(hex_lower(&hasher.finalize()))
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EconomyBusinessEffect<'a> {
+    idempotency_key: &'a str,
+    transaction_kind: EconomyTransactionKind,
+    zone_id: &'a str,
+    legs: &'a [EconomyLeg],
+    metadata: &'a BTreeMap<String, String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -215,6 +250,11 @@ pub struct EconomyTransactionReceipt {
     pub committed_at_ms: u64,
     pub balances_after: BTreeMap<String, i64>,
     pub duplicate: bool,
+    /// The same authoritative world drop was already settled to a different
+    /// recipient. Gateway must remove the stale reappearing drop but must not
+    /// project the original recipient's asset mutation into this character.
+    #[serde(default)]
+    pub settled_elsewhere: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -237,8 +277,296 @@ pub struct EconomyOutboxEvent {
     pub event_id: String,
     pub idempotency_key: String,
     pub envelope: EconomyTransactionEnvelope,
+    /// Integrity commitment for the transaction row used during projection
+    /// recovery. This prevents a damaged receipt balance from authorizing a
+    /// second private projection.
+    #[serde(default)]
+    pub receipt_digest: String,
+}
+/// Canonical typed materialization instructions held by a trade outbox event.
+/// They are serialized into `EconomyTransactionEnvelope::metadata`, so the
+/// canonical event id and receipt/outbox integrity proof bind both offers.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct TradeProjectionIntent {
+    version: u8,
+    first: SharedTradeOffer,
+    second: SharedTradeOffer,
 }
 
+/// Canonical private materialization instructions for a ground-drop pickup.
+///
+/// A Zone removes a drop as soon as the ledger transaction commits. The
+/// character save is a separate durable boundary, so this intent is written in
+/// the same transaction as the receipt/outbox and is the recovery authority if
+/// the immediate character projection cannot be saved.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GroundDropProjectionIntent {
+    version: u8,
+    identity: ActiveSessionIdentity,
+    drop: mir2_simulation::GroundDropSnapshot,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    claim_idempotency_key: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct DurableGroundDropProjection {
+    event_id: String,
+    intent: GroundDropProjectionIntent,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct GroundDropProjectionRow {
+    account_id: String,
+    character_index: i32,
+    intent: GroundDropProjectionIntent,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct DurableTradeProjection {
+    event_id: String,
+    own_offer: SharedTradeOffer,
+    incoming_offer: SharedTradeOffer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct TradeProjectionRow {
+    account_id: String,
+    character_index: i32,
+    own_offer: SharedTradeOffer,
+    incoming_offer: SharedTradeOffer,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DuplicateBusinessEffect {
+    Exact,
+    SettledElsewhere,
+}
+
+fn receipt_integrity_digest(receipt: &EconomyTransactionReceipt) -> Result<String, String> {
+    let payload = serde_json::to_vec(receipt)
+        .map_err(|error| format!("encode economy receipt integrity payload: {error}"))?;
+    let mut hasher = Sha256::new();
+    hasher.update(ECONOMY_RECEIPT_DOMAIN);
+    hasher.update(payload);
+    Ok(hex_lower(&hasher.finalize()))
+}
+
+fn same_ground_drop_effect_except_recipient(
+    stored: &EconomyTransactionEnvelope,
+    requested: &EconomyTransactionEnvelope,
+) -> bool {
+    let stored_operation = stored.metadata.get("operation").map(String::as_str);
+    let requested_operation = requested.metadata.get("operation").map(String::as_str);
+    let is_ground_drop = |value: Option<&str>| {
+        matches!(value, Some("groundDropGoldPickup" | "groundDropItemPickup"))
+    };
+    if !is_ground_drop(stored_operation)
+        || stored_operation != requested_operation
+        || stored.idempotency_key != requested.idempotency_key
+        || stored.transaction_kind != requested.transaction_kind
+        || stored.zone_id != requested.zone_id
+        || stored.legs.len() != requested.legs.len()
+    {
+        return false;
+    }
+    let mut stored_metadata = stored.metadata.clone();
+    let mut requested_metadata = requested.metadata.clone();
+    stored_metadata.remove("characterName");
+    requested_metadata.remove("characterName");
+    // The recovery intent contains the recipient identity. It is deliberately
+    // excluded here because a stale reappearing world drop must classify as
+    // settled elsewhere instead of being able to credit a second claimant.
+    stored_metadata.remove("groundDropProjectionV1");
+    requested_metadata.remove("groundDropProjectionV1");
+    stored_metadata == requested_metadata
+        && stored
+            .legs
+            .iter()
+            .zip(&requested.legs)
+            .all(|(left, right)| {
+                left.delta == right.delta
+                    && left.balance.asset_kind == right.balance.asset_kind
+                    && left.balance.asset_key == right.balance.asset_key
+            })
+}
+
+fn validate_duplicate_business_effect(
+    stored_event: &EconomyOutboxEvent,
+    stored_receipt: &EconomyTransactionReceipt,
+    requested: &EconomyTransactionEnvelope,
+) -> Result<DuplicateBusinessEffect, String> {
+    let stored_event_id = stored_event.envelope.event_id()?;
+    let stored_business_effect_id = stored_event.envelope.business_effect_id()?;
+    let requested_business_effect_id = requested.business_effect_id()?;
+    let expected_balance_keys = aggregate_legs(&stored_event.envelope.legs)?
+        .keys()
+        .map(balance_receipt_key)
+        .collect::<Result<BTreeSet<_>, _>>()?;
+    let receipt_balance_keys = stored_receipt
+        .balances_after
+        .keys()
+        .cloned()
+        .collect::<BTreeSet<_>>();
+    if stored_receipt.idempotency_key != stored_event.idempotency_key
+        || stored_receipt.transaction_kind != stored_event.envelope.transaction_kind
+        || stored_receipt.event_id != stored_event.event_id
+        || stored_event.event_id != stored_event_id
+        || stored_event.idempotency_key != stored_event.envelope.idempotency_key
+        || stored_event.envelope.idempotency_key != requested.idempotency_key
+        || stored_event.receipt_digest.is_empty()
+        || receipt_integrity_digest(stored_receipt)? != stored_event.receipt_digest
+        || expected_balance_keys != receipt_balance_keys
+    {
+        return Err(format!(
+            "economy idempotency conflict for {}",
+            requested.idempotency_key
+        ));
+    }
+    if stored_business_effect_id == requested_business_effect_id {
+        Ok(DuplicateBusinessEffect::Exact)
+    } else if same_ground_drop_effect_except_recipient(&stored_event.envelope, requested) {
+        Ok(DuplicateBusinessEffect::SettledElsewhere)
+    } else {
+        Err(format!(
+            "economy idempotency conflict for {}",
+            requested.idempotency_key
+        ))
+    }
+}
+
+fn duplicate_receipt_from_stored(
+    stored_event: &EconomyOutboxEvent,
+    stored_receipt: &EconomyTransactionReceipt,
+    requested: &EconomyTransactionEnvelope,
+) -> Result<EconomyTransactionReceipt, String> {
+    let duplicate_effect =
+        validate_duplicate_business_effect(stored_event, stored_receipt, requested)?;
+    let mut receipt = stored_receipt.clone();
+    receipt.duplicate = true;
+    receipt.settled_elsewhere = duplicate_effect == DuplicateBusinessEffect::SettledElsewhere;
+    Ok(receipt)
+}
+fn trade_projection_rows_from_envelope(
+    envelope: &EconomyTransactionEnvelope,
+    event_id: &str,
+) -> Result<Vec<TradeProjectionRow>, String> {
+    if envelope.transaction_kind != EconomyTransactionKind::Trade {
+        return Ok(Vec::new());
+    }
+    if envelope.metadata.get("operation").map(String::as_str) != Some("playerTrade") {
+        return Err("economy trade projection requires playerTrade operation".to_string());
+    }
+    let encoded = envelope
+        .metadata
+        .get("tradeProjectionV1")
+        .ok_or_else(|| "economy trade projection intent is missing".to_string())?;
+    let intent: TradeProjectionIntent = serde_json::from_str(encoded)
+        .map_err(|error| format!("decode economy trade projection intent: {error}"))?;
+    if intent.version != 1 {
+        return Err("unsupported economy trade projection intent version".to_string());
+    }
+    let context = SharedAccountInventoryExecutionContext {
+        zone_id: crate::ZoneId::new(envelope.zone_id.clone()),
+        fencing_generation: envelope.fencing_generation,
+        source_sequence: envelope.source_sequence,
+        created_at_ms: envelope.created_at_ms,
+        external_commit_authorized: true,
+    };
+    let expected = economy_transaction_for_trade(&context, &intent.first, &intent.second)?
+        .ok_or_else(|| "economy trade projection cannot be empty".to_string())?;
+    if &expected != envelope || expected.event_id()? != event_id {
+        return Err("economy trade projection intent does not bind the envelope".to_string());
+    }
+    Ok(vec![
+        TradeProjectionRow {
+            account_id: intent.first.account_id.clone(),
+            character_index: intent.first.character_index,
+            own_offer: intent.first.clone(),
+            incoming_offer: intent.second.clone(),
+        },
+        TradeProjectionRow {
+            account_id: intent.second.account_id.clone(),
+            character_index: intent.second.character_index,
+            own_offer: intent.second,
+            incoming_offer: intent.first,
+        },
+    ])
+}
+
+fn ground_drop_projection_from_envelope(
+    envelope: &EconomyTransactionEnvelope,
+    event_id: &str,
+) -> Result<Option<GroundDropProjectionRow>, String> {
+    let operation = envelope.metadata.get("operation").map(String::as_str);
+    if !matches!(
+        operation,
+        Some("groundDropGoldPickup" | "groundDropItemPickup")
+    ) {
+        return Ok(None);
+    }
+    if envelope.transaction_kind != EconomyTransactionKind::Reward {
+        return Err("economy ground-drop projection requires reward transaction".to_string());
+    }
+    let encoded = envelope
+        .metadata
+        .get("groundDropProjectionV1")
+        .ok_or_else(|| "economy ground-drop projection intent is missing".to_string())?;
+    let intent: GroundDropProjectionIntent = serde_json::from_str(encoded)
+        .map_err(|error| format!("decode economy ground-drop projection intent: {error}"))?;
+    if intent.version != 1 {
+        return Err("unsupported economy ground-drop projection intent version".to_string());
+    }
+    if intent
+        .claim_idempotency_key
+        .as_deref()
+        .is_some_and(|key| key.trim().is_empty())
+    {
+        return Err("economy ground-drop projection claim key is empty".to_string());
+    }
+    let command = SharedAccountInventoryCommandEnvelope {
+        identity: intent.identity.clone(),
+        command: match &intent.claim_idempotency_key {
+            Some(claim_idempotency_key) => SharedAccountInventoryCommand::GroundDropClaimPickup {
+                drop: intent.drop.clone(),
+                claim_idempotency_key: claim_idempotency_key.clone(),
+            },
+            None => SharedAccountInventoryCommand::GroundDropPickup(intent.drop.clone()),
+        },
+    };
+    let context = SharedAccountInventoryExecutionContext {
+        zone_id: crate::ZoneId::new(envelope.zone_id.clone()),
+        fencing_generation: envelope.fencing_generation,
+        source_sequence: envelope.source_sequence,
+        created_at_ms: envelope.created_at_ms,
+        external_commit_authorized: true,
+    };
+    let expected = economy_transaction_for_command(&context, &command, None)
+        .ok_or_else(|| "economy ground-drop projection cannot be empty".to_string())?;
+    if &expected != envelope || expected.event_id()? != event_id {
+        return Err("economy ground-drop projection intent does not bind the envelope".to_string());
+    }
+    Ok(Some(GroundDropProjectionRow {
+        account_id: intent.identity.account_id.clone(),
+        character_index: intent.identity.character_index,
+        intent,
+    }))
+}
+
+fn validate_stored_economy_transaction(
+    event: &EconomyOutboxEvent,
+    receipt: &EconomyTransactionReceipt,
+) -> Result<(), String> {
+    if validate_duplicate_business_effect(event, receipt, &event.envelope)?
+        != DuplicateBusinessEffect::Exact
+    {
+        return Err("stored economy transaction is not an exact effect".to_string());
+    }
+    let _ = trade_projection_rows_from_envelope(&event.envelope, &event.event_id)?;
+    let _ = ground_drop_projection_from_envelope(&event.envelope, &event.event_id)?;
+    Ok(())
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClaimedEconomyEvent {
     pub event: EconomyOutboxEvent,
@@ -415,12 +743,57 @@ impl PostgresEconomyStore {
         })
     }
 
+    /// Read a previously committed effect before runtime capacity preflight.
+    /// The same integrity checks used by `transact` fail closed on damaged
+    /// receipt/outbox rows, while the subsequent `transact` still serializes a
+    /// race with a concurrent producer under the idempotency advisory lock.
+    pub fn lookup(
+        &self,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<Option<EconomyTransactionReceipt>, String> {
+        envelope.validate()?;
+        let mut client = self.connect()?;
+        mir2_simulation::apply_migrations(&mut client)?;
+        let mut transaction = client
+            .transaction()
+            .map_err(|error| format!("economy lookup transaction begin failed: {error}"))?;
+        transaction
+            .query_one(
+                "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
+                &[&envelope.idempotency_key],
+            )
+            .map_err(|error| format!("economy idempotency lookup lock failed: {error}"))?;
+        let row = transaction
+            .query_opt(
+                "SELECT tx.receipt,outbox.payload
+                 FROM game_economy_transactions tx
+                 JOIN game_economy_outbox outbox ON outbox.event_id=tx.event_id
+                 WHERE tx.idempotency_key=$1",
+                &[&envelope.idempotency_key],
+            )
+            .map_err(|error| format!("economy idempotency lookup failed: {error}"))?;
+        let result = if let Some(row) = row {
+            let receipt: EconomyTransactionReceipt = serde_json::from_value(row.get("receipt"))
+                .map_err(|error| format!("decode stored economy receipt: {error}"))?;
+            let event: EconomyOutboxEvent = serde_json::from_value(row.get("payload"))
+                .map_err(|error| format!("decode stored economy outbox event: {error}"))?;
+            Some(duplicate_receipt_from_stored(&event, &receipt, envelope)?)
+        } else {
+            None
+        };
+        transaction
+            .commit()
+            .map_err(|error| format!("economy idempotency lookup commit failed: {error}"))?;
+        Ok(result)
+    }
     pub fn transact(
         &self,
         envelope: &EconomyTransactionEnvelope,
     ) -> Result<EconomyTransactionReceipt, String> {
         envelope.validate()?;
         let event_id = envelope.event_id()?;
+        let trade_projection_rows = trade_projection_rows_from_envelope(envelope, &event_id)?;
+        let ground_drop_projection = ground_drop_projection_from_envelope(envelope, &event_id)?;
         let mut client = self.connect()?;
         mir2_simulation::apply_migrations(&mut client)?;
         let mut transaction = client
@@ -434,21 +807,19 @@ impl PostgresEconomyStore {
             .map_err(|error| format!("economy idempotency lock failed: {error}"))?;
         if let Some(row) = transaction
             .query_opt(
-                "SELECT receipt FROM game_economy_transactions WHERE idempotency_key = $1",
+                "SELECT tx.receipt,outbox.payload
+                 FROM game_economy_transactions tx
+                 JOIN game_economy_outbox outbox ON outbox.event_id=tx.event_id
+                 WHERE tx.idempotency_key = $1",
                 &[&envelope.idempotency_key],
             )
             .map_err(|error| format!("economy idempotency lookup failed: {error}"))?
         {
-            let mut receipt: EconomyTransactionReceipt = serde_json::from_value(row.get("receipt"))
+            let receipt: EconomyTransactionReceipt = serde_json::from_value(row.get("receipt"))
                 .map_err(|error| format!("decode stored economy receipt: {error}"))?;
-            if receipt.event_id != event_id {
-                return Err(format!(
-                    "economy idempotency conflict for {}",
-                    envelope.idempotency_key
-                ));
-            }
-            receipt.duplicate = true;
-            return Ok(receipt);
+            let event: EconomyOutboxEvent = serde_json::from_value(row.get("payload"))
+                .map_err(|error| format!("decode stored economy outbox event: {error}"))?;
+            return duplicate_receipt_from_stored(&event, &receipt, envelope);
         }
 
         let characters = envelope
@@ -549,6 +920,7 @@ impl PostgresEconomyStore {
             committed_at_ms,
             balances_after,
             duplicate: false,
+            settled_elsewhere: false,
         };
         let receipt_json = serde_json::to_value(&receipt)
             .map_err(|error| format!("encode economy receipt: {error}"))?;
@@ -556,6 +928,7 @@ impl PostgresEconomyStore {
             event_id: event_id.clone(),
             idempotency_key: envelope.idempotency_key.clone(),
             envelope: envelope.clone(),
+            receipt_digest: receipt_integrity_digest(&receipt)?,
         };
         let event_json = serde_json::to_value(&event)
             .map_err(|error| format!("encode economy outbox event: {error}"))?;
@@ -586,10 +959,243 @@ impl PostgresEconomyStore {
                 ],
             )
             .map_err(|error| format!("economy outbox insert failed: {error}"))?;
+        for projection in &trade_projection_rows {
+            let own_offer = serde_json::to_value(&projection.own_offer)
+                .map_err(|error| format!("encode own trade projection offer: {error}"))?;
+            let incoming_offer = serde_json::to_value(&projection.incoming_offer)
+                .map_err(|error| format!("encode incoming trade projection offer: {error}"))?;
+            transaction
+                .execute(
+                    "INSERT INTO game_economy_trade_projections
+                     (event_id,account_id,character_index,own_offer,incoming_offer,status)
+                     VALUES ($1,$2,$3,$4,$5,'pending')",
+                    &[
+                        &event_id,
+                        &projection.account_id,
+                        &projection.character_index,
+                        &own_offer,
+                        &incoming_offer,
+                    ],
+                )
+                .map_err(|error| format!("economy trade projection insert failed: {error}"))?;
+        }
+        if let Some(projection) = ground_drop_projection {
+            let intent = serde_json::to_value(&projection.intent)
+                .map_err(|error| format!("encode ground-drop projection intent: {error}"))?;
+            transaction
+                .execute(
+                    "INSERT INTO game_economy_ground_drop_projections
+                     (event_id,account_id,character_index,intent,status)
+                     VALUES ($1,$2,$3,$4,'pending')",
+                    &[
+                        &event_id,
+                        &projection.account_id,
+                        &projection.character_index,
+                        &intent,
+                    ],
+                )
+                .map_err(|error| {
+                    format!("economy ground-drop projection insert failed: {error}")
+                })?;
+        }
         transaction
             .commit()
             .map_err(|error| format!("economy transaction commit failed: {error}"))?;
         Ok(receipt)
+    }
+
+    fn pending_trade_projections(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Vec<DurableTradeProjection>, String> {
+        let mut client = self.connect()?;
+        mir2_simulation::apply_migrations(&mut client)?;
+        let rows = client
+            .query(
+                "SELECT projection.event_id,projection.own_offer,projection.incoming_offer,
+                        transaction.receipt,outbox.payload
+                 FROM game_economy_trade_projections projection
+                 JOIN game_economy_transactions transaction
+                   ON transaction.event_id=projection.event_id
+                 JOIN game_economy_outbox outbox
+                   ON outbox.event_id=projection.event_id
+                 WHERE projection.account_id=$1
+                   AND projection.character_index=$2
+                   AND projection.status='pending'
+                 ORDER BY projection.event_id",
+                &[&identity.account_id, &identity.character_index],
+            )
+            .map_err(|error| format!("economy pending trade projection query failed: {error}"))?;
+        rows.into_iter()
+            .map(|row| {
+                let event_id: String = row.get("event_id");
+                let own_offer: SharedTradeOffer = serde_json::from_value(row.get("own_offer"))
+                    .map_err(|error| format!("decode own trade projection offer: {error}"))?;
+                let incoming_offer: SharedTradeOffer =
+                    serde_json::from_value(row.get("incoming_offer")).map_err(|error| {
+                        format!("decode incoming trade projection offer: {error}")
+                    })?;
+                let receipt: EconomyTransactionReceipt = serde_json::from_value(row.get("receipt"))
+                    .map_err(|error| format!("decode trade projection receipt: {error}"))?;
+                let event: EconomyOutboxEvent = serde_json::from_value(row.get("payload"))
+                    .map_err(|error| format!("decode trade projection outbox: {error}"))?;
+                validate_stored_economy_transaction(&event, &receipt)?;
+                let expected = trade_projection_rows_from_envelope(&event.envelope, &event_id)?;
+                if event.event_id != event_id
+                    || !expected.iter().any(|projection| {
+                        projection.account_id == identity.account_id
+                            && projection.character_index == identity.character_index
+                            && projection.own_offer == own_offer
+                            && projection.incoming_offer == incoming_offer
+                    })
+                {
+                    return Err("economy pending trade projection integrity conflict".to_string());
+                }
+                Ok(DurableTradeProjection {
+                    event_id,
+                    own_offer,
+                    incoming_offer,
+                })
+            })
+            .collect()
+    }
+
+    pub fn mark_trade_projection_projected(
+        &self,
+        identity: &ActiveSessionIdentity,
+        event_id: &str,
+    ) -> Result<(), String> {
+        if event_id.len() != 64
+            || !event_id
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        {
+            return Err("invalid economy trade projection event id".to_string());
+        }
+        let mut client = self.connect()?;
+        mir2_simulation::apply_migrations(&mut client)?;
+        let updated = client
+            .execute(
+                "UPDATE game_economy_trade_projections
+                 SET status='projected',projected_at_ms=$4,updated_at=now()
+                 WHERE event_id=$1 AND account_id=$2 AND character_index=$3 AND status='pending'",
+                &[
+                    &event_id,
+                    &identity.account_id,
+                    &identity.character_index,
+                    &(now_ms() as i64),
+                ],
+            )
+            .map_err(|error| format!("economy trade projection mark failed: {error}"))?;
+        if updated == 1 {
+            return Ok(());
+        }
+        let status = client
+            .query_opt(
+                "SELECT status FROM game_economy_trade_projections
+                 WHERE event_id=$1 AND account_id=$2 AND character_index=$3",
+                &[&event_id, &identity.account_id, &identity.character_index],
+            )
+            .map_err(|error| format!("economy trade projection status read failed: {error}"))?
+            .map(|row| row.get::<_, String>("status"));
+        if status.as_deref() == Some("projected") {
+            Ok(())
+        } else {
+            Err("economy trade projection row is missing or invalid".to_string())
+        }
+    }
+    fn pending_ground_drop_projections(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Vec<DurableGroundDropProjection>, String> {
+        let mut client = self.connect()?;
+        mir2_simulation::apply_migrations(&mut client)?;
+        let rows = client
+            .query(
+                "SELECT projection.event_id,projection.intent,transaction.receipt,outbox.payload
+                 FROM game_economy_ground_drop_projections projection
+                 JOIN game_economy_transactions transaction
+                   ON transaction.event_id=projection.event_id
+                 JOIN game_economy_outbox outbox
+                   ON outbox.event_id=projection.event_id
+                 WHERE projection.account_id=$1
+                   AND projection.character_index=$2
+                   AND projection.status='pending'
+                 ORDER BY projection.event_id",
+                &[&identity.account_id, &identity.character_index],
+            )
+            .map_err(|error| {
+                format!("economy pending ground-drop projection query failed: {error}")
+            })?;
+        rows.into_iter()
+            .map(|row| {
+                let event_id: String = row.get("event_id");
+                let intent: GroundDropProjectionIntent = serde_json::from_value(row.get("intent"))
+                    .map_err(|error| format!("decode ground-drop projection intent: {error}"))?;
+                let receipt: EconomyTransactionReceipt = serde_json::from_value(row.get("receipt"))
+                    .map_err(|error| format!("decode ground-drop projection receipt: {error}"))?;
+                let event: EconomyOutboxEvent = serde_json::from_value(row.get("payload"))
+                    .map_err(|error| format!("decode ground-drop projection outbox: {error}"))?;
+                validate_stored_economy_transaction(&event, &receipt)?;
+                let expected = ground_drop_projection_from_envelope(&event.envelope, &event_id)?
+                    .ok_or_else(|| "ground-drop projection event is not a pickup".to_string())?;
+                if event.event_id != event_id
+                    || expected.account_id != identity.account_id
+                    || expected.character_index != identity.character_index
+                    || expected.intent != intent
+                {
+                    return Err(
+                        "economy pending ground-drop projection integrity conflict".to_string()
+                    );
+                }
+                Ok(DurableGroundDropProjection { event_id, intent })
+            })
+            .collect()
+    }
+
+    pub fn mark_ground_drop_projection_projected(
+        &self,
+        identity: &ActiveSessionIdentity,
+        event_id: &str,
+    ) -> Result<(), String> {
+        if event_id.len() != 64
+            || !event_id
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+        {
+            return Err("invalid economy ground-drop projection event id".to_string());
+        }
+        let mut client = self.connect()?;
+        mir2_simulation::apply_migrations(&mut client)?;
+        let updated = client
+            .execute(
+                "UPDATE game_economy_ground_drop_projections
+                 SET status='projected',projected_at_ms=$4,updated_at=now()
+                 WHERE event_id=$1 AND account_id=$2 AND character_index=$3 AND status='pending'",
+                &[
+                    &event_id,
+                    &identity.account_id,
+                    &identity.character_index,
+                    &(now_ms() as i64),
+                ],
+            )
+            .map_err(|error| format!("economy ground-drop projection mark failed: {error}"))?;
+        if updated == 1 {
+            return Ok(());
+        }
+        let status = client
+            .query_opt(
+                "SELECT status FROM game_economy_ground_drop_projections
+                 WHERE event_id=$1 AND account_id=$2 AND character_index=$3",
+                &[&event_id, &identity.account_id, &identity.character_index],
+            )
+            .map_err(|error| format!("economy ground-drop projection status read failed: {error}"))?
+            .map(|row| row.get::<_, String>("status"));
+        if status.as_deref() == Some("projected") {
+            Ok(())
+        } else {
+            Err("economy ground-drop projection row is missing or invalid".to_string())
+        }
     }
 
     pub fn balance(&self, key: &EconomyBalanceKey) -> Result<i64, String> {
@@ -905,25 +1511,119 @@ impl PostgresEconomyStore {
     }
 }
 
+trait EconomySettlementStore: std::fmt::Debug + Send + Sync {
+    fn ensure_migrated(&self) -> Result<(), String>;
+
+    fn bootstrap_character(
+        &self,
+        identity: &ActiveSessionIdentity,
+        snapshot: &WorldSnapshot,
+        bootstrapped_at_ms: u64,
+    ) -> Result<EconomyBootstrapReceipt, String>;
+
+    fn lookup(
+        &self,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<Option<EconomyTransactionReceipt>, String>;
+
+    fn transact(
+        &self,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<EconomyTransactionReceipt, String>;
+
+    fn pending_trade_projections(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Vec<DurableTradeProjection>, String>;
+
+    fn mark_trade_projection_projected(
+        &self,
+        identity: &ActiveSessionIdentity,
+        event_id: &str,
+    ) -> Result<(), String>;
+
+    fn pending_ground_drop_projections(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Vec<DurableGroundDropProjection>, String>;
+
+    fn mark_ground_drop_projection_projected(
+        &self,
+        identity: &ActiveSessionIdentity,
+        event_id: &str,
+    ) -> Result<(), String>;
+}
+
+impl EconomySettlementStore for PostgresEconomyStore {
+    fn ensure_migrated(&self) -> Result<(), String> {
+        PostgresEconomyStore::ensure_migrated(self)
+    }
+
+    fn bootstrap_character(
+        &self,
+        identity: &ActiveSessionIdentity,
+        snapshot: &WorldSnapshot,
+        bootstrapped_at_ms: u64,
+    ) -> Result<EconomyBootstrapReceipt, String> {
+        PostgresEconomyStore::bootstrap_character(self, identity, snapshot, bootstrapped_at_ms)
+    }
+
+    fn lookup(
+        &self,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<Option<EconomyTransactionReceipt>, String> {
+        PostgresEconomyStore::lookup(self, envelope)
+    }
+
+    fn transact(
+        &self,
+        envelope: &EconomyTransactionEnvelope,
+    ) -> Result<EconomyTransactionReceipt, String> {
+        PostgresEconomyStore::transact(self, envelope)
+    }
+
+    fn pending_trade_projections(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Vec<DurableTradeProjection>, String> {
+        PostgresEconomyStore::pending_trade_projections(self, identity)
+    }
+
+    fn mark_trade_projection_projected(
+        &self,
+        identity: &ActiveSessionIdentity,
+        event_id: &str,
+    ) -> Result<(), String> {
+        PostgresEconomyStore::mark_trade_projection_projected(self, identity, event_id)
+    }
+
+    fn pending_ground_drop_projections(
+        &self,
+        identity: &ActiveSessionIdentity,
+    ) -> Result<Vec<DurableGroundDropProjection>, String> {
+        PostgresEconomyStore::pending_ground_drop_projections(self, identity)
+    }
+
+    fn mark_ground_drop_projection_projected(
+        &self,
+        identity: &ActiveSessionIdentity,
+        event_id: &str,
+    ) -> Result<(), String> {
+        PostgresEconomyStore::mark_ground_drop_projection_projected(self, identity, event_id)
+    }
+}
 /// Gate 18 bridge from real Mir2 Zone rewards/pickups to the Gate 17 ledger.
 ///
 /// The active owner commits PostgreSQL before mutating its private character
 /// projection. A verified standby replay never writes PostgreSQL; it only
-/// rebuilds the same private projection. A duplicate authoritative transaction
-/// without a local cached projection is treated as already materialized (the
-/// base snapshot or outbox projector owns recovery), so a post-promotion retry
-/// cannot credit the character twice.
+/// rebuilds the same private projection. On active-owner restart, the durable
+/// receipt is the immutable recovery witness: a projection exactly one delta
+/// behind is replayed once, an equal projection is already materialized, and
+/// every other state fails closed.
 #[derive(Debug)]
 pub struct PostgresEconomyAccountInventoryService {
-    store: PostgresEconomyStore,
+    store: Arc<dyn EconomySettlementStore>,
     projected_receipts: Mutex<BTreeMap<String, SharedAccountInventoryTransactionReceipt>>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ProjectionRecoveryState {
-    Materialized,
-    NeedsReplay,
-    Diverged,
 }
 
 impl PostgresEconomyAccountInventoryService {
@@ -932,6 +1632,10 @@ impl PostgresEconomyAccountInventoryService {
     }
 
     pub fn with_store(store: PostgresEconomyStore) -> Self {
+        Self::with_backend(Arc::new(store))
+    }
+
+    fn with_backend(store: Arc<dyn EconomySettlementStore>) -> Self {
         Self {
             store,
             projected_receipts: Mutex::new(BTreeMap::new()),
@@ -953,7 +1657,8 @@ impl PostgresEconomyAccountInventoryService {
             SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
                 runtime.commit_shared_inventory_item_drop_transaction(drop)
             }
-            SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+            SharedAccountInventoryCommand::GroundDropPickup(drop)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -965,6 +1670,26 @@ impl PostgresEconomyAccountInventoryService {
             SharedAccountInventoryCommand::SkillItemConsume { spell, .. } => {
                 runtime.commit_shared_skill_item_consumption_transaction(*spell)
             }
+        }
+    }
+
+    fn apply_ground_projection_atomically(
+        runtime: &mut InProcessWorldRuntime,
+        event_id: &str,
+        envelope: &SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let drop = match &envelope.command {
+            SharedAccountInventoryCommand::GroundDropPickup(drop)
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => drop,
+            _ => return Self::failed_receipt(&envelope.command),
+        };
+        match runtime.apply_shared_ground_drop_projection(event_id, drop) {
+            Ok(packets) => SharedAccountInventoryTransactionReceipt {
+                kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+                committed: true,
+                packets,
+            },
+            Err(_) => Self::failed_receipt(&envelope.command),
         }
     }
 
@@ -988,35 +1713,160 @@ impl PostgresEconomyAccountInventoryService {
         }
     }
 
-    fn projection_recovery_state(
+    fn persist_projection_marker(
+        runtime: &mut InProcessWorldRuntime,
+        event_id: &str,
+        command: &SharedAccountInventoryCommand,
+        receipt: SharedAccountInventoryTransactionReceipt,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        if !receipt.committed {
+            return receipt;
+        }
+        if runtime
+            .persist_shared_economy_projection_event(event_id)
+            .is_err()
+        {
+            return Self::failed_receipt(command);
+        }
+        receipt
+    }
+    fn materialize_external_receipt(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        envelope: &SharedAccountInventoryCommandEnvelope,
+        transaction_receipt: &EconomyTransactionReceipt,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        // Another character already owns this exact world drop.  It is
+        // terminally committed at the Zone layer but must never be projected
+        // into this character.
+        if transaction_receipt.settled_elsewhere {
+            return Self::already_materialized_receipt(&envelope.command);
+        }
+        let receipt = if Self::is_ground_drop_pickup(&envelope.command) {
+            Self::apply_ground_projection_atomically(
+                runtime,
+                &transaction_receipt.event_id,
+                envelope,
+            )
+        } else {
+            let projection =
+                if runtime.has_shared_economy_projection_event(&transaction_receipt.event_id) {
+                    Self::already_materialized_receipt(&envelope.command)
+                } else {
+                    Self::apply_projection(runtime, envelope)
+                };
+            Self::persist_projection_marker(
+                runtime,
+                &transaction_receipt.event_id,
+                &envelope.command,
+                projection,
+            )
+        };
+        if receipt.committed && Self::is_ground_drop_pickup(&envelope.command) {
+            let _ = self.store.mark_ground_drop_projection_projected(
+                &envelope.identity,
+                &transaction_receipt.event_id,
+            );
+        }
+        receipt
+    }
+
+    fn is_ground_drop_pickup(command: &SharedAccountInventoryCommand) -> bool {
+        matches!(
+            command,
+            SharedAccountInventoryCommand::GroundDropPickup(_)
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+        )
+    }
+
+    fn projection_envelope(
+        intent: &GroundDropProjectionIntent,
+    ) -> SharedAccountInventoryCommandEnvelope {
+        SharedAccountInventoryCommandEnvelope {
+            identity: intent.identity.clone(),
+            command: match &intent.claim_idempotency_key {
+                Some(claim_idempotency_key) => {
+                    SharedAccountInventoryCommand::GroundDropClaimPickup {
+                        drop: intent.drop.clone(),
+                        claim_idempotency_key: claim_idempotency_key.clone(),
+                    }
+                }
+                None => SharedAccountInventoryCommand::GroundDropPickup(intent.drop.clone()),
+            },
+        }
+    }
+
+    fn materialize_pending_ground_drop_projection(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        projection: &DurableGroundDropProjection,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let envelope = Self::projection_envelope(&projection.intent);
+        let receipt =
+            Self::apply_ground_projection_atomically(runtime, &projection.event_id, &envelope);
+        if receipt.committed {
+            // A status-write failure is deliberately retained as pending. A
+            // retry observes the durable character marker and only re-attempts
+            // this idempotent status update.
+            let _ = self.store.mark_ground_drop_projection_projected(
+                &projection.intent.identity,
+                &projection.event_id,
+            );
+        }
+        receipt
+    }
+
+    /// Replay committed ground-drop rewards that were not yet persisted in the
+    /// private character checkpoint. The coordinator should call this after a
+    /// character becomes active and before allowing a stale Zone snapshot to
+    /// recreate or offer the old drop.
+    pub fn reconcile_ground_drop_projections_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        let Some(context) = context else {
+            return Vec::new();
+        };
+        if !context.external_commit_authorized {
+            return Vec::new();
+        }
+        let Some(identity) = runtime.active_identity() else {
+            return Vec::new();
+        };
+        let pending = match self.store.pending_ground_drop_projections(&identity) {
+            Ok(pending) => pending,
+            Err(_) => return Vec::new(),
+        };
+        let mut packets = Vec::new();
+        for projection in pending {
+            let mut receipt = self.materialize_pending_ground_drop_projection(runtime, &projection);
+            if receipt.committed {
+                packets.append(&mut receipt.packets);
+            }
+        }
+        packets
+    }
+
+    /// Fail closed while a durable ground-drop projection cannot be read. This
+    /// lets the coordinator block only stale-drop restoration/reclaim paths.
+    pub fn has_pending_ground_drop_projection_fenced(
         &self,
         runtime: &InProcessWorldRuntime,
-        transaction: &EconomyTransactionEnvelope,
-    ) -> Result<ProjectionRecoveryState, String> {
-        let identity = runtime
-            .active_identity()
-            .ok_or_else(|| "economy projection recovery requires an active identity".to_string())?;
-        let snapshot = runtime.world_snapshot();
-        let deltas = aggregate_legs(&transaction.legs)?;
-        let mut all_materialized = true;
-        let mut all_need_replay = true;
-        for (balance, delta) in deltas {
-            if balance.account_id != identity.account_id
-                || balance.character_index != identity.character_index
-            {
-                return Ok(ProjectionRecoveryState::Diverged);
-            }
-            let ledger_after = self.store.balance(&balance)?;
-            let runtime_amount = runtime_balance_amount(&snapshot, &balance)?;
-            all_materialized &= runtime_amount == ledger_after;
-            all_need_replay &= runtime_amount
-                .checked_add(delta)
-                .is_some_and(|after| after == ledger_after);
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        let Some(context) = context else {
+            return true;
+        };
+        if !context.external_commit_authorized {
+            return true;
         }
-        match (all_materialized, all_need_replay) {
-            (true, _) => Ok(ProjectionRecoveryState::Materialized),
-            (false, true) => Ok(ProjectionRecoveryState::NeedsReplay),
-            (false, false) => Ok(ProjectionRecoveryState::Diverged),
+        let Some(identity) = runtime.active_identity() else {
+            return false;
+        };
+        match self.store.pending_ground_drop_projections(&identity) {
+            Ok(pending) => !pending.is_empty(),
+            Err(_) => true,
         }
     }
 }
@@ -1037,99 +1887,149 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         runtime: &mut InProcessWorldRuntime,
         context: Option<&SharedAccountInventoryExecutionContext>,
         envelope: SharedAccountInventoryCommandEnvelope,
-    ) -> SharedAccountInventoryTransactionReceipt {
-        if runtime.active_identity().as_ref() != Some(&envelope.identity) {
-            return Self::failed_receipt(&envelope.command);
-        }
+    ) -> SharedAccountInventoryCommitOutcome {
         let Some(context) = context else {
-            return Self::failed_receipt(&envelope.command);
-        };
-        if !self.bootstrap_fenced(runtime, Some(context)) {
-            return Self::failed_receipt(&envelope.command);
-        }
-        let stable_key = envelope.stable_idempotency_key();
-        if self
-            .projected_receipts
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .get(&stable_key)
-            .is_some()
-        {
-            return Self::already_materialized_receipt(&envelope.command);
-        }
-
-        if !context.external_commit_authorized {
-            let receipt = Self::apply_projection(runtime, &envelope);
-            if receipt.committed {
-                self.projected_receipts
-                    .lock()
-                    .unwrap_or_else(std::sync::PoisonError::into_inner)
-                    .insert(stable_key, receipt.clone());
-            }
-            return receipt;
-        }
-
-        if !preflight_projection(runtime, &envelope.command) {
-            return Self::failed_receipt(&envelope.command);
-        }
-        let experience_balance_delta = match &envelope.command {
-            SharedAccountInventoryCommand::MonsterKillAward(award) => {
-                Some(runtime.shared_monster_kill_experience_balance_delta(award.experience))
-            }
-            _ => None,
-        };
-        let Some(transaction) =
-            economy_transaction_for_command(context, &envelope, experience_balance_delta)
-        else {
-            // Commands without an external asset delta remain deterministic
-            // Zone-only effects. Skill-item consumption is deliberately
-            // rejected until its exact inventory component IDs are included.
-            return match &envelope.command {
-                SharedAccountInventoryCommand::MonsterKillAward(award) if award.experience == 0 => {
-                    Self::apply_projection(runtime, &envelope)
-                }
-                _ => Self::failed_receipt(&envelope.command),
+            return SharedAccountInventoryCommitOutcome::Deferred {
+                receipt: Self::failed_receipt(&envelope.command),
             };
         };
-        let transaction_receipt = match self.store.transact(&transaction) {
-            Ok(receipt) => receipt,
-            Err(_) => return Self::failed_receipt(&envelope.command),
-        };
-        if transaction_receipt.duplicate {
-            // A new Host cannot infer projection state from its empty
-            // process-local receipt cache. Compare the restored character
-            // balances with PostgreSQL: equal means the checkpoint already
-            // contains the effect; exactly one transaction delta behind means
-            // the crash happened before projection; every other state is a
-            // split-brain/divergence and fails closed.
-            let receipt = match self.projection_recovery_state(runtime, &transaction) {
-                Ok(ProjectionRecoveryState::Materialized) => {
-                    Self::already_materialized_receipt(&envelope.command)
+        let mut outcome_unknown = None;
+        let receipt = (|| -> SharedAccountInventoryTransactionReceipt {
+            if runtime.active_identity().as_ref() != Some(&envelope.identity) {
+                return Self::failed_receipt(&envelope.command);
+            }
+            let stable_key = envelope.stable_idempotency_key();
+            let ground_outcome_key = Self::is_ground_drop_pickup(&envelope.command)
+                .then(|| economy_transaction_for_command(context, &envelope, None))
+                .flatten()
+                .map(|transaction| transaction.idempotency_key);
+            if !self.bootstrap_fenced(runtime, Some(context)) {
+                outcome_unknown = ground_outcome_key;
+                return Self::failed_receipt(&envelope.command);
+            }
+            if self
+                .projected_receipts
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .get(&stable_key)
+                .is_some()
+            {
+                return Self::already_materialized_receipt(&envelope.command);
+            }
+
+            if !context.external_commit_authorized {
+                let receipt = Self::apply_projection(runtime, &envelope);
+                if receipt.committed {
+                    self.projected_receipts
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner)
+                        .insert(stable_key, receipt.clone());
                 }
-                Ok(ProjectionRecoveryState::NeedsReplay) => {
-                    Self::apply_projection(runtime, &envelope)
+                return receipt;
+            }
+
+            let experience_balance_delta = match &envelope.command {
+                SharedAccountInventoryCommand::MonsterKillAward(award) => {
+                    Some(runtime.shared_monster_kill_experience_balance_delta(award.experience))
                 }
-                Ok(ProjectionRecoveryState::Diverged) | Err(_) => {
+                _ => None,
+            };
+            let Some(transaction) =
+                economy_transaction_for_command(context, &envelope, experience_balance_delta)
+            else {
+                // Commands without an external asset delta remain deterministic
+                // Zone-only effects. Skill-item consumption is deliberately
+                // rejected until its exact inventory component IDs are included.
+                return match &envelope.command {
+                    SharedAccountInventoryCommand::MonsterKillAward(award)
+                        if award.experience == 0 =>
+                    {
+                        Self::apply_projection(runtime, &envelope)
+                    }
+                    _ => Self::failed_receipt(&envelope.command),
+                };
+            };
+
+            // An integrity-validated durable receipt is authoritative even when a
+            // later stale checkpoint has a full inventory or capped gold. Lookup
+            // deliberately precedes runtime preflight; `transact` repeats the
+            // check under its advisory lock to close the producer race.
+            let transaction_receipt = match self.store.lookup(&transaction) {
+                Ok(Some(receipt)) => receipt,
+                Ok(None) => {
+                    if !preflight_projection(runtime, &envelope.command) {
+                        return Self::failed_receipt(&envelope.command);
+                    }
+                    match self.store.transact(&transaction) {
+                        Ok(receipt) => receipt,
+                        // A PostgreSQL commit acknowledgement can be lost after the
+                        // transaction is already durable. Re-read the same stable
+                        // envelope before allowing a Zone pickup to be restored.
+                        Err(_) => match self.store.lookup(&transaction) {
+                            Ok(Some(receipt)) => receipt,
+                            Ok(None) => return Self::failed_receipt(&envelope.command),
+                            Err(_) => {
+                                outcome_unknown = Some(transaction.idempotency_key.clone());
+                                return Self::failed_receipt(&envelope.command);
+                            }
+                        },
+                    }
+                }
+                Err(_) => {
+                    if Self::is_ground_drop_pickup(&envelope.command) {
+                        outcome_unknown = Some(transaction.idempotency_key.clone());
+                    }
                     return Self::failed_receipt(&envelope.command);
                 }
             };
+            let receipt =
+                self.materialize_external_receipt(runtime, &envelope, &transaction_receipt);
             if receipt.committed {
                 self.projected_receipts
                     .lock()
                     .unwrap_or_else(std::sync::PoisonError::into_inner)
                     .insert(stable_key, receipt.clone());
+                return receipt;
             }
-            return receipt;
+            if Self::is_ground_drop_pickup(&envelope.command) {
+                // The ledger/outbox/pending-projection row are already atomically
+                // committed. Do not let a full bag or failed character save restore
+                // a Zone drop that another player could steal; reconciliation owns
+                // the later private materialization.
+                return Self::already_materialized_receipt(&envelope.command);
+            }
+            receipt
+        })();
+        match outcome_unknown {
+            Some(idempotency_key) => SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                idempotency_key,
+                execution_context: context.clone(),
+                receipt,
+            },
+            None => SharedAccountInventoryCommitOutcome::Confirmed(receipt),
         }
+    }
 
-        let receipt = Self::apply_projection(runtime, &envelope);
-        if receipt.committed {
-            self.projected_receipts
-                .lock()
-                .unwrap_or_else(std::sync::PoisonError::into_inner)
-                .insert(stable_key, receipt.clone());
+    fn retry_commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        expected_idempotency_key: &str,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let Some(context) = context else {
+            return SharedAccountInventoryCommitOutcome::Deferred {
+                receipt: Self::failed_receipt(&envelope.command),
+            };
+        };
+        let generated_key = economy_transaction_for_command(context, &envelope, None)
+            .map(|transaction| transaction.idempotency_key);
+        if generated_key.as_deref() != Some(expected_idempotency_key) {
+            return SharedAccountInventoryCommitOutcome::Deferred {
+                receipt: Self::failed_receipt(&envelope.command),
+            };
         }
-        receipt
+        self.commit_fenced(runtime, Some(context), envelope)
     }
 
     fn bootstrap_fenced(
@@ -1151,6 +2051,26 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             .is_ok()
     }
 
+    fn reconcile_ground_drop_projections_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        PostgresEconomyAccountInventoryService::reconcile_ground_drop_projections_fenced(
+            self, runtime, context,
+        )
+    }
+
+    fn has_pending_ground_drop_projection_fenced(
+        &self,
+        runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        PostgresEconomyAccountInventoryService::has_pending_ground_drop_projection_fenced(
+            self, runtime, context,
+        )
+    }
+
     fn settle_trade_fenced(
         &self,
         context: Option<&SharedAccountInventoryExecutionContext>,
@@ -1158,7 +2078,7 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         let Some(context) = context else {
-            return SharedTradeSettlementOutcome::Rejected;
+            return SharedTradeSettlementOutcome::Deferred;
         };
         if !context.external_commit_authorized {
             return SharedTradeSettlementOutcome::Committed;
@@ -1169,47 +2089,111 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
             Err(_) => return SharedTradeSettlementOutcome::Rejected,
         };
         match self.store.transact(&transaction) {
-            Ok(receipt) if receipt.duplicate => SharedTradeSettlementOutcome::Duplicate,
-            Ok(_) => SharedTradeSettlementOutcome::Committed,
-            Err(_) => SharedTradeSettlementOutcome::Rejected,
+            Ok(receipt) if receipt.duplicate => SharedTradeSettlementOutcome::DurableDuplicate {
+                event_id: receipt.event_id,
+            },
+            Ok(receipt) => SharedTradeSettlementOutcome::DurableCommitted {
+                event_id: receipt.event_id,
+            },
+            // A committed PostgreSQL transaction may still report an error when
+            // its acknowledgement is lost. Only an integrity-validated lookup
+            // may resolve that ambiguity; callers retain the debited offers if
+            // the outcome remains unknown.
+            Err(_) => match self.store.lookup(&transaction) {
+                Ok(Some(receipt)) => SharedTradeSettlementOutcome::DurableDuplicate {
+                    event_id: receipt.event_id,
+                },
+                Ok(None) => SharedTradeSettlementOutcome::Rejected,
+                Err(_) => SharedTradeSettlementOutcome::OutcomeUnknown {
+                    idempotency_key: transaction.idempotency_key,
+                    execution_context: context.clone(),
+                },
+            },
         }
     }
-}
 
-fn runtime_balance_amount(
-    snapshot: &WorldSnapshot,
-    balance: &EconomyBalanceKey,
-) -> Result<i64, String> {
-    match balance.asset_kind.as_str() {
-        "gold" if balance.asset_key == "gold" => Ok(i64::from(snapshot.gold)),
-        "experience" if balance.asset_key == "experience" => Ok(snapshot.player_experience),
-        "item_quantity" => snapshot
-            .inventory_items
-            .iter()
-            .chain(snapshot.belt_items.iter())
-            .chain(snapshot.storage_items.iter())
-            .chain(snapshot.hero_inventory_items.iter())
-            .filter(|item| item.key == balance.asset_key)
-            .try_fold(0_i64, |total, item| {
-                total
-                    .checked_add(i64::from(item.quantity))
-                    .ok_or_else(|| "runtime item quantity overflow".to_string())
-            })
-            .and_then(|total| {
-                snapshot
-                    .equipment_items
-                    .iter()
-                    .filter(|item| item.key == balance.asset_key)
-                    .try_fold(total, |total, item| {
-                        total
-                            .checked_add(i64::from(item.quantity))
-                            .ok_or_else(|| "runtime equipment quantity overflow".to_string())
-                    })
-            }),
-        kind => Err(format!(
-            "unsupported runtime economy balance {kind}/{}",
-            balance.asset_key
-        )),
+    fn retry_trade_fenced(
+        &self,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        let Some(context) = context else {
+            return SharedTradeSettlementOutcome::Deferred;
+        };
+        let generated_key = match economy_transaction_for_trade(context, first, second) {
+            Ok(Some(transaction)) => transaction.idempotency_key,
+            Ok(None) | Err(_) => return SharedTradeSettlementOutcome::Deferred,
+        };
+        if generated_key != expected_idempotency_key {
+            return SharedTradeSettlementOutcome::Deferred;
+        }
+        self.settle_trade_fenced(Some(context), first, second)
+    }
+
+    fn reconcile_trade_projections_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> Vec<ServerPacket> {
+        let Some(context) = context else {
+            return Vec::new();
+        };
+        if !context.external_commit_authorized {
+            return Vec::new();
+        }
+        let Some(identity) = runtime.active_identity() else {
+            return Vec::new();
+        };
+        let pending = match self.store.pending_trade_projections(&identity) {
+            Ok(pending) => pending,
+            Err(_) => return Vec::new(),
+        };
+        let mut packets = Vec::new();
+        for projection in pending {
+            match runtime.apply_shared_trade_settlement_projection(
+                &projection.event_id,
+                &projection.own_offer,
+                &projection.incoming_offer,
+            ) {
+                Ok(mut projected_packets) => {
+                    // The runtime call persists the event marker together with
+                    // the character state. A mark failure is intentionally
+                    // left pending; retry observes the marker and only repeats
+                    // this idempotent durable status update. The already-durable
+                    // client update must not be suppressed by that retry work.
+                    packets.append(&mut projected_packets);
+                    let _ = self
+                        .store
+                        .mark_trade_projection_projected(&identity, &projection.event_id);
+                }
+                Err(_) => {}
+            }
+        }
+        packets
+    }
+
+    fn has_pending_trade_projection_fenced(
+        &self,
+        runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+    ) -> bool {
+        let Some(context) = context else {
+            return true;
+        };
+        if !context.external_commit_authorized {
+            return true;
+        }
+        let Some(identity) = runtime.active_identity() else {
+            return false;
+        };
+        match self.store.pending_trade_projections(&identity) {
+            Ok(pending) => !pending.is_empty(),
+            // The World Director must not discard session-bound trade state if
+            // the durable query is unavailable or integrity verification fails.
+            Err(_) => true,
+        }
     }
 }
 
@@ -1221,7 +2205,8 @@ fn command_kind(command: &SharedAccountInventoryCommand) -> SharedAccountInvento
         SharedAccountInventoryCommand::InventoryItemDrop { .. } => {
             SharedAccountInventoryTransactionKind::InventoryItemDrop
         }
-        SharedAccountInventoryCommand::GroundDropPickup(_) => {
+        SharedAccountInventoryCommand::GroundDropPickup(_)
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
             SharedAccountInventoryTransactionKind::GroundDropPickup
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -1244,7 +2229,8 @@ fn preflight_projection(
         SharedAccountInventoryCommand::InventoryItemDrop { drop, .. } => {
             runtime.can_commit_shared_inventory_item_drop(drop)
         }
-        SharedAccountInventoryCommand::GroundDropPickup(drop) => {
+        SharedAccountInventoryCommand::GroundDropPickup(drop)
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
             runtime.can_commit_shared_ground_drop_pickup(drop)
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => runtime.active_identity().is_some(),
@@ -1264,11 +2250,44 @@ fn economy_transaction_for_command(
     experience_balance_delta: Option<i64>,
 ) -> Option<EconomyTransactionEnvelope> {
     let identity = &command.identity;
-    let stable_key = command.stable_idempotency_key();
+    // Ground-drop economic identity belongs to the authoritative Zone object
+    // generation, not the player who happens to claim it. A stale checkpoint
+    // can therefore never credit the same drop to a second account.
+    let stable_key = match &command.command {
+        SharedAccountInventoryCommand::GroundDropClaimPickup {
+            claim_idempotency_key,
+            ..
+        } => claim_idempotency_key.clone(),
+        _ => command.stable_idempotency_key(),
+    };
     let mut metadata = BTreeMap::from([
         ("producer".to_string(), "mir2-zone".to_string()),
         ("characterName".to_string(), identity.character_name.clone()),
     ]);
+    let ground_drop_projection_intent = match &command.command {
+        SharedAccountInventoryCommand::GroundDropPickup(drop) => Some(GroundDropProjectionIntent {
+            version: 1,
+            identity: identity.clone(),
+            drop: drop.clone(),
+            claim_idempotency_key: None,
+        }),
+        SharedAccountInventoryCommand::GroundDropClaimPickup {
+            drop,
+            claim_idempotency_key,
+        } => Some(GroundDropProjectionIntent {
+            version: 1,
+            identity: identity.clone(),
+            drop: drop.clone(),
+            claim_idempotency_key: Some(claim_idempotency_key.clone()),
+        }),
+        _ => None,
+    };
+    if let Some(intent) = ground_drop_projection_intent {
+        metadata.insert(
+            "groundDropProjectionV1".to_string(),
+            serde_json::to_string(&intent).ok()?,
+        );
+    }
     let (transaction_kind, legs) = match &command.command {
         SharedAccountInventoryCommand::GoldDrop { amount, request_id } if *amount > 0 => {
             metadata.insert("operation".to_string(), "playerGoldDrop".to_string());
@@ -1304,7 +2323,8 @@ fn economy_transaction_for_command(
                 }],
             )
         }
-        SharedAccountInventoryCommand::GroundDropPickup(drop) => match &drop.loot {
+        SharedAccountInventoryCommand::GroundDropPickup(drop)
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => match &drop.loot {
             GroundDropLootSnapshot::Gold { amount } => {
                 metadata.insert("operation".to_string(), "groundDropGoldPickup".to_string());
                 metadata.insert("objectId".to_string(), drop.object_id.to_string());
@@ -1429,6 +2449,13 @@ fn economy_transaction_for_trade(
         return Err("economy trade partners are not reciprocal".to_string());
     }
 
+    let intent = TradeProjectionIntent {
+        version: 1,
+        first: first.clone(),
+        second: second.clone(),
+    };
+    let intent_json = serde_json::to_string(&intent)
+        .map_err(|error| format!("encode economy trade projection intent: {error}"))?;
     let mut legs = Vec::new();
     append_trade_offer_legs(first, second, &mut legs)?;
     append_trade_offer_legs(second, first, &mut legs)?;
@@ -1436,10 +2463,12 @@ fn economy_transaction_for_trade(
         return Ok(None);
     }
     let business_digest = trade_business_digest(first, second)?;
+    let settlement_digest = trade_settlement_digest(first, second, &business_digest)?;
     let metadata = BTreeMap::from([
         ("operation".to_string(), "playerTrade".to_string()),
         ("producer".to_string(), "mir2-zone".to_string()),
         ("tradeDigest".to_string(), business_digest.clone()),
+        ("settlementDigest".to_string(), settlement_digest.clone()),
         (
             "participants".to_string(),
             format!(
@@ -1447,12 +2476,10 @@ fn economy_transaction_for_trade(
                 first.account_id, first.character_index, second.account_id, second.character_index
             ),
         ),
+        ("tradeProjectionV1".to_string(), intent_json),
     ]);
     Ok(Some(EconomyTransactionEnvelope {
-        idempotency_key: format!(
-            "zone:{}:trade:{}:{business_digest}",
-            context.zone_id, context.source_sequence
-        ),
+        idempotency_key: format!("zone:{}:trade:{settlement_digest}", context.zone_id),
         transaction_kind: EconomyTransactionKind::Trade,
         zone_id: context.zone_id.as_str().to_string(),
         fencing_generation: context.fencing_generation,
@@ -1516,6 +2543,35 @@ fn append_trade_offer_legs(
     Ok(())
 }
 
+fn trade_settlement_digest(
+    first: &SharedTradeOffer,
+    second: &SharedTradeOffer,
+    business_digest: &str,
+) -> Result<String, String> {
+    let valid_nonce = |nonce: &str| {
+        nonce.len() == 32
+            && nonce
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    };
+    if !valid_nonce(&first.settlement_nonce)
+        || !valid_nonce(&second.settlement_nonce)
+        || first.settlement_nonce == second.settlement_nonce
+    {
+        return Err("economy trade requires two distinct persistent settlement nonces".to_string());
+    }
+    let mut nonces = [
+        first.settlement_nonce.as_str(),
+        second.settlement_nonce.as_str(),
+    ];
+    nonces.sort_unstable();
+    let payload = serde_json::to_vec(&(nonces, business_digest))
+        .map_err(|error| format!("encode economy trade settlement: {error}"))?;
+    let mut hasher = Sha256::new();
+    hasher.update(ECONOMY_TRADE_SETTLEMENT_DOMAIN);
+    hasher.update(payload);
+    Ok(hex_lower(&hasher.finalize()))
+}
 fn trade_business_digest(
     first: &SharedTradeOffer,
     second: &SharedTradeOffer,
@@ -1728,7 +2784,10 @@ fn hex_lower(bytes: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mir2_simulation::{ActiveSessionIdentity, GroundDropSnapshot};
+    use mir2_protocol::ClientPacket;
+    use mir2_simulation::{
+        AccountStoreTransactionFault, ActiveSessionIdentity, GroundDropSnapshot,
+    };
 
     fn leg(account: &str, asset: &str, delta: i64) -> EconomyLeg {
         EconomyLeg {
@@ -1737,6 +2796,1565 @@ mod tests {
         }
     }
 
+    #[derive(Debug, Default)]
+    struct FakeEconomyStore {
+        state: Mutex<FakeEconomyState>,
+    }
+
+    #[derive(Debug, Default, Clone)]
+    struct FakeEconomyState {
+        balances: BTreeMap<EconomyBalanceKey, i64>,
+        bootstrapped: BTreeSet<(String, i32)>,
+        transactions: BTreeMap<String, (EconomyOutboxEvent, EconomyTransactionReceipt)>,
+        trade_projections: BTreeMap<(String, String, i32), FakeTradeProjectionRow>,
+        ground_drop_projections: BTreeMap<(String, String, i32), FakeGroundDropProjectionRow>,
+        fail_next_transact: bool,
+        commit_then_fail_next_transact: bool,
+        fail_lookup_after_commit_then_error: bool,
+        fail_next_lookup: bool,
+        fail_next_trade_projection_mark: bool,
+        fail_next_ground_drop_projection_mark: bool,
+        fail_pending_trade_projection_query: bool,
+        fail_pending_ground_drop_projection_query: bool,
+        fail_next_bootstrap: bool,
+        delay_commit_visibility_until_lookup: bool,
+        pending_transaction: Option<(String, EconomyOutboxEvent, EconomyTransactionReceipt)>,
+        store_calls: usize,
+    }
+
+    #[derive(Debug, Clone)]
+    struct FakeTradeProjectionRow {
+        own_offer: SharedTradeOffer,
+        incoming_offer: SharedTradeOffer,
+        projected: bool,
+    }
+
+    #[derive(Debug, Clone)]
+    struct FakeGroundDropProjectionRow {
+        intent: GroundDropProjectionIntent,
+        projected: bool,
+    }
+    impl FakeEconomyStore {
+        fn fail_next_bootstrap(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_next_bootstrap = true;
+        }
+
+        fn delay_commit_visibility_until_lookup(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .delay_commit_visibility_until_lookup = true;
+        }
+
+        fn fail_next_trade_projection_mark(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_next_trade_projection_mark = true;
+        }
+
+        fn fail_pending_trade_projection_query(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_pending_trade_projection_query = true;
+        }
+
+        fn fail_next_ground_drop_projection_mark(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_next_ground_drop_projection_mark = true;
+        }
+
+        fn fail_pending_ground_drop_projection_query(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_pending_ground_drop_projection_query = true;
+        }
+        fn fail_next_transact(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_next_transact = true;
+        }
+
+        fn commit_then_fail_next_transact(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .commit_then_fail_next_transact = true;
+        }
+
+        fn commit_then_fail_next_transact_and_lookup(&self) {
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            state.commit_then_fail_next_transact = true;
+            state.fail_lookup_after_commit_then_error = true;
+        }
+
+        fn fail_next_lookup(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .fail_next_lookup = true;
+        }
+
+        fn balance(&self, key: &EconomyBalanceKey) -> i64 {
+            *self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .balances
+                .get(key)
+                .unwrap_or(&0)
+        }
+
+        fn transaction_count(&self) -> usize {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .transactions
+                .len()
+        }
+
+        fn transaction_keys(&self) -> Vec<String> {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .transactions
+                .keys()
+                .cloned()
+                .collect()
+        }
+
+        fn store_call_count(&self) -> usize {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .store_calls
+        }
+
+        fn record_store_call(&self) {
+            self.state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .store_calls += 1;
+        }
+    }
+
+    impl EconomySettlementStore for FakeEconomyStore {
+        fn ensure_migrated(&self) -> Result<(), String> {
+            self.record_store_call();
+            Ok(())
+        }
+
+        fn bootstrap_character(
+            &self,
+            identity: &ActiveSessionIdentity,
+            snapshot: &WorldSnapshot,
+            bootstrapped_at_ms: u64,
+        ) -> Result<EconomyBootstrapReceipt, String> {
+            self.record_store_call();
+            let opening = EconomyOpeningSnapshot::from_runtime(identity, snapshot)?;
+            let snapshot_digest = opening.digest()?;
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.fail_next_bootstrap {
+                state.fail_next_bootstrap = false;
+                return Err("injected bootstrap failure".to_string());
+            }
+            let character = (identity.account_id.clone(), identity.character_index);
+            let duplicate = !state.bootstrapped.insert(character);
+            if !duplicate {
+                for ((asset_kind, asset_key), amount) in opening.balance_amounts() {
+                    state.balances.insert(
+                        EconomyBalanceKey {
+                            account_id: identity.account_id.clone(),
+                            character_index: identity.character_index,
+                            asset_kind,
+                            asset_key,
+                        },
+                        amount,
+                    );
+                }
+            }
+            Ok(EconomyBootstrapReceipt {
+                account_id: identity.account_id.clone(),
+                character_index: identity.character_index,
+                snapshot_digest,
+                gold: opening.gold,
+                experience: opening.experience,
+                item_quantity: opening.total_item_quantity,
+                item_kind_count: opening.item_quantities.len(),
+                bootstrapped_at_ms,
+                duplicate,
+            })
+        }
+
+        fn lookup(
+            &self,
+            envelope: &EconomyTransactionEnvelope,
+        ) -> Result<Option<EconomyTransactionReceipt>, String> {
+            self.record_store_call();
+            envelope.validate()?;
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if let Some((idempotency_key, event, receipt)) = state.pending_transaction.take() {
+                state.transactions.insert(idempotency_key, (event, receipt));
+            }
+            if state.fail_next_lookup {
+                state.fail_next_lookup = false;
+                return Err("injected lookup failure".to_string());
+            }
+            state
+                .transactions
+                .get(&envelope.idempotency_key)
+                .map(|(event, receipt)| duplicate_receipt_from_stored(event, receipt, envelope))
+                .transpose()
+        }
+
+        fn transact(
+            &self,
+            envelope: &EconomyTransactionEnvelope,
+        ) -> Result<EconomyTransactionReceipt, String> {
+            self.record_store_call();
+            envelope.validate()?;
+            let event_id = envelope.event_id()?;
+            let projection_rows = trade_projection_rows_from_envelope(envelope, &event_id)?;
+            let ground_drop_projection = ground_drop_projection_from_envelope(envelope, &event_id)?;
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.fail_next_transact {
+                state.fail_next_transact = false;
+                return Err("injected pre-commit failure".to_string());
+            }
+            if let Some((stored_event, stored_receipt)) =
+                state.transactions.get(&envelope.idempotency_key)
+            {
+                return duplicate_receipt_from_stored(stored_event, stored_receipt, envelope);
+            }
+
+            let aggregated = aggregate_legs(&envelope.legs)?;
+            let mut next_balances = state.balances.clone();
+            let mut balances_after = BTreeMap::new();
+            for (key, delta) in aggregated {
+                let current = *next_balances.get(&key).unwrap_or(&0);
+                let after = current
+                    .checked_add(delta)
+                    .ok_or_else(|| "economy balance overflow".to_string())?;
+                if after < 0 || (key.asset_kind == "item" && after > 1) {
+                    return Err("invalid fake economy balance transition".to_string());
+                }
+                next_balances.insert(key.clone(), after);
+                balances_after.insert(balance_receipt_key(&key)?, after);
+            }
+            let receipt = EconomyTransactionReceipt {
+                idempotency_key: envelope.idempotency_key.clone(),
+                event_id: event_id.clone(),
+                transaction_kind: envelope.transaction_kind,
+                committed_at_ms: envelope.created_at_ms,
+                balances_after,
+                duplicate: false,
+                settled_elsewhere: false,
+            };
+            let event = EconomyOutboxEvent {
+                event_id: receipt.event_id.clone(),
+                idempotency_key: envelope.idempotency_key.clone(),
+                envelope: envelope.clone(),
+                receipt_digest: receipt_integrity_digest(&receipt)?,
+            };
+            state.balances = next_balances;
+            let delayed_visibility = state.delay_commit_visibility_until_lookup;
+            state.delay_commit_visibility_until_lookup = false;
+            if delayed_visibility {
+                state.pending_transaction =
+                    Some((envelope.idempotency_key.clone(), event, receipt.clone()));
+            } else {
+                state
+                    .transactions
+                    .insert(envelope.idempotency_key.clone(), (event, receipt.clone()));
+            }
+            for projection in projection_rows {
+                state.trade_projections.insert(
+                    (
+                        receipt.event_id.clone(),
+                        projection.account_id,
+                        projection.character_index,
+                    ),
+                    FakeTradeProjectionRow {
+                        own_offer: projection.own_offer,
+                        incoming_offer: projection.incoming_offer,
+                        projected: false,
+                    },
+                );
+            }
+            if let Some(projection) = ground_drop_projection {
+                state.ground_drop_projections.insert(
+                    (
+                        receipt.event_id.clone(),
+                        projection.account_id,
+                        projection.character_index,
+                    ),
+                    FakeGroundDropProjectionRow {
+                        intent: projection.intent,
+                        projected: false,
+                    },
+                );
+            }
+            if delayed_visibility {
+                return Err("injected delayed commit visibility".to_string());
+            }
+            if state.commit_then_fail_next_transact {
+                state.commit_then_fail_next_transact = false;
+                if state.fail_lookup_after_commit_then_error {
+                    state.fail_lookup_after_commit_then_error = false;
+                    state.fail_next_lookup = true;
+                }
+                return Err("injected post-commit acknowledgement failure".to_string());
+            }
+            Ok(receipt)
+        }
+
+        fn pending_trade_projections(
+            &self,
+            identity: &ActiveSessionIdentity,
+        ) -> Result<Vec<DurableTradeProjection>, String> {
+            self.record_store_call();
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.fail_pending_trade_projection_query {
+                state.fail_pending_trade_projection_query = false;
+                return Err("injected pending trade projection query failure".to_string());
+            }
+            let mut pending = Vec::new();
+            for ((event_id, account_id, character_index), projection) in &state.trade_projections {
+                if account_id != &identity.account_id
+                    || *character_index != identity.character_index
+                    || projection.projected
+                {
+                    continue;
+                }
+                let (event, receipt) = state
+                    .transactions
+                    .values()
+                    .find(|(event, _)| &event.event_id == event_id)
+                    .ok_or_else(|| "fake economy trade projection event is missing".to_string())?;
+                validate_stored_economy_transaction(event, receipt)?;
+                let expected = trade_projection_rows_from_envelope(&event.envelope, event_id)?;
+                if !expected.iter().any(|expected| {
+                    expected.account_id == *account_id
+                        && expected.character_index == *character_index
+                        && expected.own_offer == projection.own_offer
+                        && expected.incoming_offer == projection.incoming_offer
+                }) {
+                    return Err("fake economy trade projection integrity conflict".to_string());
+                }
+                pending.push(DurableTradeProjection {
+                    event_id: event_id.clone(),
+                    own_offer: projection.own_offer.clone(),
+                    incoming_offer: projection.incoming_offer.clone(),
+                });
+            }
+            Ok(pending)
+        }
+
+        fn mark_trade_projection_projected(
+            &self,
+            identity: &ActiveSessionIdentity,
+            event_id: &str,
+        ) -> Result<(), String> {
+            self.record_store_call();
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.fail_next_trade_projection_mark {
+                state.fail_next_trade_projection_mark = false;
+                return Err("injected trade projection mark failure".to_string());
+            }
+            let projection = state
+                .trade_projections
+                .get_mut(&(
+                    event_id.to_string(),
+                    identity.account_id.clone(),
+                    identity.character_index,
+                ))
+                .ok_or_else(|| "fake economy trade projection row is missing".to_string())?;
+            projection.projected = true;
+            Ok(())
+        }
+
+        fn pending_ground_drop_projections(
+            &self,
+            identity: &ActiveSessionIdentity,
+        ) -> Result<Vec<DurableGroundDropProjection>, String> {
+            self.record_store_call();
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.fail_pending_ground_drop_projection_query {
+                state.fail_pending_ground_drop_projection_query = false;
+                return Err("injected pending ground-drop projection query failure".to_string());
+            }
+            let mut pending = Vec::new();
+            for ((event_id, account_id, character_index), projection) in
+                &state.ground_drop_projections
+            {
+                if account_id != &identity.account_id
+                    || *character_index != identity.character_index
+                    || projection.projected
+                {
+                    continue;
+                }
+                let (event, receipt) = state
+                    .transactions
+                    .values()
+                    .find(|(event, _)| &event.event_id == event_id)
+                    .ok_or_else(|| {
+                        "fake economy ground-drop projection event is missing".to_string()
+                    })?;
+                validate_stored_economy_transaction(event, receipt)?;
+                let expected = ground_drop_projection_from_envelope(&event.envelope, event_id)?
+                    .ok_or_else(|| {
+                        "fake economy ground-drop projection is not a pickup".to_string()
+                    })?;
+                if expected.account_id != *account_id
+                    || expected.character_index != *character_index
+                    || expected.intent != projection.intent
+                {
+                    return Err(
+                        "fake economy ground-drop projection integrity conflict".to_string()
+                    );
+                }
+                pending.push(DurableGroundDropProjection {
+                    event_id: event_id.clone(),
+                    intent: projection.intent.clone(),
+                });
+            }
+            Ok(pending)
+        }
+
+        fn mark_ground_drop_projection_projected(
+            &self,
+            identity: &ActiveSessionIdentity,
+            event_id: &str,
+        ) -> Result<(), String> {
+            self.record_store_call();
+            let mut state = self
+                .state
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if state.fail_next_ground_drop_projection_mark {
+                state.fail_next_ground_drop_projection_mark = false;
+                return Err("injected ground-drop projection mark failure".to_string());
+            }
+            let projection = state
+                .ground_drop_projections
+                .get_mut(&(
+                    event_id.to_string(),
+                    identity.account_id.clone(),
+                    identity.character_index,
+                ))
+                .ok_or_else(|| "fake economy ground-drop projection row is missing".to_string())?;
+            projection.projected = true;
+            Ok(())
+        }
+    }
+    fn start_test_runtime(
+        account_id: &str,
+        character_name: &str,
+    ) -> Result<InProcessWorldRuntime, String> {
+        start_test_runtime_with_config(crate::GatewayConfig::default(), account_id, character_name)
+    }
+
+    fn start_test_runtime_with_config(
+        config: crate::GatewayConfig,
+        account_id: &str,
+        character_name: &str,
+    ) -> Result<InProcessWorldRuntime, String> {
+        use mir2_protocol::{ClientPacket, MirClass, MirGender, ServerPacket};
+        use mir2_simulation::WorldCommand;
+
+        let mut runtime = InProcessWorldRuntime::new(config);
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::NewAccount {
+            account_id: account_id.to_string(),
+            password: account_id.to_string(),
+            birth_date_binary: 0,
+            user_name: String::new(),
+            secret_question: String::new(),
+            secret_answer: String::new(),
+            email_address: String::new(),
+        }))?;
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: account_id.to_string(),
+            password: account_id.to_string(),
+        }))?;
+        let character_index = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::NewCharacter {
+                name: character_name.to_string(),
+                gender: MirGender::Male,
+                class: MirClass::Warrior,
+            }))?
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+                _ => None,
+            })
+            .ok_or_else(|| "economy test character creation returned no index".to_string())?;
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index,
+        }))?;
+        Ok(runtime)
+    }
+
+    fn claimed_gold_pickup(
+        identity: ActiveSessionIdentity,
+        object_id: u32,
+        amount: u32,
+        claim_idempotency_key: &str,
+    ) -> SharedAccountInventoryCommandEnvelope {
+        SharedAccountInventoryCommandEnvelope {
+            identity,
+            command: SharedAccountInventoryCommand::GroundDropClaimPickup {
+                drop: GroundDropSnapshot {
+                    object_id,
+                    name: format!("{amount} Gold"),
+                    name_colour_argb: -1,
+                    icon: 0,
+                    x: 10,
+                    y: 20,
+                    quantity: amount,
+                    source_monster: "Economy recovery test".to_string(),
+                    owner_object_id: None,
+                    ownership_remaining_ticks: None,
+                    loot: GroundDropLootSnapshot::Gold { amount },
+                },
+                claim_idempotency_key: claim_idempotency_key.to_string(),
+            },
+        }
+    }
+
+    fn external_context(
+        fencing_generation: u64,
+        source_sequence: u64,
+        created_at_ms: u64,
+    ) -> SharedAccountInventoryExecutionContext {
+        SharedAccountInventoryExecutionContext {
+            zone_id: crate::ZoneId::new("map:0"),
+            fencing_generation,
+            source_sequence,
+            created_at_ms,
+            external_commit_authorized: true,
+        }
+    }
+
+    fn gold_trade_offer(
+        identity: ActiveSessionIdentity,
+        partner_name: impl Into<String>,
+        settlement_nonce: impl Into<String>,
+        gold: u32,
+    ) -> SharedTradeOffer {
+        SharedTradeOffer {
+            settlement_nonce: settlement_nonce.into(),
+            account_id: identity.account_id,
+            character_index: identity.character_index,
+            character_name: identity.character_name,
+            partner_name: partner_name.into(),
+            gold,
+            items: Vec::new(),
+        }
+    }
+
+    fn bootstrap_trade_balance(
+        store: &FakeEconomyStore,
+        identity: &ActiveSessionIdentity,
+        runtime: &InProcessWorldRuntime,
+        context: &SharedAccountInventoryExecutionContext,
+        gold: i64,
+    ) {
+        store
+            .bootstrap_character(identity, &runtime.world_snapshot(), context.created_at_ms)
+            .expect("bootstrap trade character");
+        store
+            .state
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .balances
+            .insert(
+                EconomyBalanceKey::gold(&identity.account_id, identity.character_index),
+                gold,
+            );
+    }
+
+    #[test]
+    fn missing_context_ground_drop_is_explicitly_deferred_without_store_access() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime =
+            start_test_runtime("economy-ground-no-context", "NoContextGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let command = claimed_gold_pickup(identity, 99_006, 25, "ground-no-context");
+        let initial_gold = runtime.world_snapshot().gold;
+        let initial_store_calls = store.store_call_count();
+
+        let outcome = service.commit_fenced(&mut runtime, None, command);
+
+        assert!(matches!(
+            outcome,
+            SharedAccountInventoryCommitOutcome::Deferred { receipt }
+                if receipt.kind == SharedAccountInventoryTransactionKind::GroundDropPickup
+                && !receipt.committed
+        ));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(store.transaction_count(), 0);
+        assert_eq!(store.store_call_count(), initial_store_calls);
+    }
+
+    #[test]
+    fn missing_context_trade_is_explicitly_deferred_without_store_access() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let alice = start_test_runtime("economy-trade-no-context-alice", "NoContextAlice").unwrap();
+        let bob = start_test_runtime("economy-trade-no-context-bob", "NoContextBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let first = gold_trade_offer(
+            alice_identity,
+            bob_identity.character_name.clone(),
+            "00000000000000000000000000000085",
+            10,
+        );
+        let second = gold_trade_offer(
+            bob_identity,
+            first.character_name.clone(),
+            "00000000000000000000000000000086",
+            0,
+        );
+        let initial_store_calls = store.store_call_count();
+        let outcome = service.settle_trade_fenced(None, &first, &second);
+
+        assert_eq!(outcome, SharedTradeSettlementOutcome::Deferred);
+        assert_eq!(store.transaction_count(), 0);
+        assert_eq!(store.store_call_count(), initial_store_calls);
+    }
+
+    #[test]
+    fn ground_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-retry-key", "RetryGround").unwrap();
+        let command = claimed_gold_pickup(
+            runtime.active_identity().unwrap(),
+            99_007,
+            25,
+            "ground-retry-key",
+        );
+        let original_context = external_context(7, 81, 8_100);
+        let expected_key = economy_transaction_for_command(&original_context, &command, None)
+            .expect("ground recovery transaction")
+            .idempotency_key;
+        let mut replacement_context = original_context.clone();
+        replacement_context.zone_id = crate::ZoneId::new("map:replacement");
+        replacement_context.fencing_generation = 8;
+        replacement_context.source_sequence = 82;
+        let initial_store_calls = store.store_call_count();
+
+        let mismatched = service.retry_commit_fenced(
+            &mut runtime,
+            Some(&replacement_context),
+            &expected_key,
+            command.clone(),
+        );
+        assert!(matches!(
+            mismatched,
+            SharedAccountInventoryCommitOutcome::Deferred { .. }
+        ));
+        assert_eq!(store.store_call_count(), initial_store_calls);
+        assert_eq!(store.transaction_count(), 0);
+
+        let recovered = service.retry_commit_fenced(
+            &mut runtime,
+            Some(&original_context),
+            &expected_key,
+            command,
+        );
+        assert!(matches!(
+            recovered,
+            SharedAccountInventoryCommitOutcome::Confirmed(ref receipt) if receipt.committed
+        ));
+        assert_eq!(store.transaction_keys(), vec![expected_key]);
+    }
+
+    #[test]
+    fn trade_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let alice = start_test_runtime("economy-trade-retry-alice", "RetryAlice").unwrap();
+        let bob = start_test_runtime("economy-trade-retry-bob", "RetryBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let first = gold_trade_offer(
+            alice_identity.clone(),
+            bob_identity.character_name.clone(),
+            "00000000000000000000000000000087",
+            10,
+        );
+        let second = gold_trade_offer(
+            bob_identity.clone(),
+            alice_identity.character_name.clone(),
+            "00000000000000000000000000000088",
+            0,
+        );
+        let original_context = external_context(9, 91, 9_100);
+        bootstrap_trade_balance(&store, &alice_identity, &alice, &original_context, 10);
+        bootstrap_trade_balance(&store, &bob_identity, &bob, &original_context, 0);
+        let expected_key = economy_transaction_for_trade(&original_context, &first, &second)
+            .expect("valid trade recovery transaction")
+            .expect("non-empty trade recovery transaction")
+            .idempotency_key;
+        let mut replacement_context = original_context.clone();
+        replacement_context.zone_id = crate::ZoneId::new("map:replacement");
+        replacement_context.fencing_generation = 10;
+        replacement_context.source_sequence = 92;
+        let initial_store_calls = store.store_call_count();
+
+        assert_eq!(
+            service.retry_trade_fenced(Some(&replacement_context), &expected_key, &first, &second,),
+            SharedTradeSettlementOutcome::Deferred
+        );
+        assert_eq!(store.store_call_count(), initial_store_calls);
+        assert_eq!(store.transaction_count(), 0);
+
+        assert!(matches!(
+            service.retry_trade_fenced(Some(&original_context), &expected_key, &first, &second,),
+            SharedTradeSettlementOutcome::DurableCommitted { .. }
+        ));
+        assert_eq!(store.transaction_keys(), vec![expected_key]);
+    }
+
+    #[test]
+    fn committed_then_ack_error_trade_recovers_by_lookup_and_keeps_projections_pending() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let alice = start_test_runtime("economy-trade-ack-alice", "AckAlice").unwrap();
+        let bob = start_test_runtime("economy-trade-ack-bob", "AckBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let context = external_context(81, 901, 90_001);
+        bootstrap_trade_balance(&store, &alice_identity, &alice, &context, 10);
+        bootstrap_trade_balance(&store, &bob_identity, &bob, &context, 0);
+        let first = gold_trade_offer(
+            alice_identity.clone(),
+            bob_identity.character_name.clone(),
+            "00000000000000000000000000000081",
+            10,
+        );
+        let second = gold_trade_offer(
+            bob_identity.clone(),
+            alice_identity.character_name.clone(),
+            "00000000000000000000000000000082",
+            0,
+        );
+
+        store.commit_then_fail_next_transact();
+        let outcome = service.settle_trade_fenced(Some(&context), &first, &second);
+
+        assert!(matches!(
+            outcome,
+            SharedTradeSettlementOutcome::DurableDuplicate { .. }
+        ));
+        assert_eq!(store.transaction_count(), 1);
+        assert!(service.has_pending_trade_projection_fenced(&alice, Some(&context)));
+        assert!(service.has_pending_trade_projection_fenced(&bob, Some(&context)));
+    }
+
+    #[test]
+    fn committed_then_ack_error_ground_pickup_recovers_exactly_once() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-ack", "AckGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(82, 902, 90_002);
+        let command = claimed_gold_pickup(identity.clone(), 99_001, 25, "ground-ack-claim");
+        let initial_gold = runtime.world_snapshot().gold;
+
+        store.commit_then_fail_next_transact();
+        let first = service.commit_fenced(&mut runtime, Some(&context), command.clone());
+        assert!(first.committed);
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+        assert_eq!(
+            store.balance(&EconomyBalanceKey::gold(
+                &identity.account_id,
+                identity.character_index
+            )),
+            i64::from(initial_gold) + 25
+        );
+
+        let replay = service.commit_fenced(&mut runtime, Some(&context), command);
+        assert!(replay.committed);
+        assert!(replay.packets.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn delayed_commit_visibility_is_resolved_before_absent_can_be_observed() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-delayed", "DelayedGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(85, 905, 90_005);
+        let command = claimed_gold_pickup(identity, 99_003, 25, "ground-delayed-claim");
+        let initial_gold = runtime.world_snapshot().gold;
+
+        store.delay_commit_visibility_until_lookup();
+        let outcome = service.commit_fenced(&mut runtime, Some(&context), command);
+
+        assert!(outcome.committed);
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn ground_bootstrap_failure_stays_unknown_until_retry() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime =
+            start_test_runtime("economy-ground-bootstrap", "BootstrapGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(86, 906, 90_006);
+        let command = claimed_gold_pickup(identity, 99_004, 25, "ground-bootstrap-claim");
+        let expected_key = economy_transaction_for_command(&context, &command, None)
+            .expect("transaction")
+            .idempotency_key;
+        let initial_gold = runtime.world_snapshot().gold;
+
+        store.fail_next_bootstrap();
+        assert!(matches!(
+            service.commit_fenced(&mut runtime, Some(&context), command.clone()),
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown { idempotency_key, .. }
+                if idempotency_key == expected_key
+        ));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(store.transaction_count(), 0);
+
+        assert!(
+            service
+                .commit_fenced(&mut runtime, Some(&context), command)
+                .committed
+        );
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn ground_initial_lookup_failure_stays_unknown_until_retry() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-lookup", "LookupGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(87, 907, 90_007);
+        let command = claimed_gold_pickup(identity, 99_005, 25, "ground-lookup-claim");
+        let expected_key = economy_transaction_for_command(&context, &command, None)
+            .expect("transaction")
+            .idempotency_key;
+        let initial_gold = runtime.world_snapshot().gold;
+
+        store.fail_next_lookup();
+        assert!(matches!(
+            service.commit_fenced(&mut runtime, Some(&context), command.clone()),
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown { idempotency_key, .. }
+                if idempotency_key == expected_key
+        ));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(store.transaction_count(), 0);
+
+        assert!(
+            service
+                .commit_fenced(&mut runtime, Some(&context), command)
+                .committed
+        );
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn commit_ack_error_with_lookup_failure_returns_ground_outcome_unknown() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-unknown", "UnknownGround").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(84, 904, 90_004);
+        let command = claimed_gold_pickup(identity.clone(), 99_002, 25, "ground-unknown-claim");
+        let transaction =
+            economy_transaction_for_command(&context, &command, None).expect("transaction");
+        let expected_key = transaction.idempotency_key.clone();
+        let initial_gold = runtime.world_snapshot().gold;
+
+        store.commit_then_fail_next_transact_and_lookup();
+        let outcome = service.commit_fenced(&mut runtime, Some(&context), command);
+
+        assert!(matches!(
+            outcome,
+            SharedAccountInventoryCommitOutcome::OutcomeUnknown {
+                idempotency_key,
+                ..
+            } if idempotency_key == expected_key
+        ));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(store.transaction_count(), 1);
+        assert_eq!(
+            store.balance(&EconomyBalanceKey::gold(
+                &identity.account_id,
+                identity.character_index
+            )),
+            i64::from(initial_gold) + 25
+        );
+    }
+
+    #[test]
+    fn commit_ack_error_with_lookup_failure_returns_trade_outcome_unknown() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let alice = start_test_runtime("economy-trade-unknown-alice", "UnknownAlice").unwrap();
+        let bob = start_test_runtime("economy-trade-unknown-bob", "UnknownBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let context = external_context(83, 903, 90_003);
+        bootstrap_trade_balance(&store, &alice_identity, &alice, &context, 10);
+        bootstrap_trade_balance(&store, &bob_identity, &bob, &context, 0);
+        let first = gold_trade_offer(
+            alice_identity.clone(),
+            bob_identity.character_name.clone(),
+            "00000000000000000000000000000083",
+            10,
+        );
+        let second = gold_trade_offer(
+            bob_identity.clone(),
+            alice_identity.character_name.clone(),
+            "00000000000000000000000000000084",
+            0,
+        );
+        let expected_key = economy_transaction_for_trade(&context, &first, &second)
+            .unwrap()
+            .unwrap()
+            .idempotency_key;
+
+        store.commit_then_fail_next_transact();
+        store.fail_next_lookup();
+        let outcome = service.settle_trade_fenced(Some(&context), &first, &second);
+
+        assert_eq!(
+            outcome,
+            SharedTradeSettlementOutcome::OutcomeUnknown {
+                idempotency_key: expected_key,
+                execution_context: context,
+            }
+        );
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn business_effect_id_ignores_attempt_fields_but_binds_payload() {
+        let mut first = EconomyTransactionEnvelope {
+            idempotency_key: "reward:stable-generation".to_string(),
+            transaction_kind: EconomyTransactionKind::Reward,
+            zone_id: "map:0".to_string(),
+            fencing_generation: 7,
+            source_sequence: 12,
+            created_at_ms: 1,
+            legs: vec![leg("alice", "drop:1", 1)],
+            metadata: BTreeMap::from([("operation".to_string(), "pickup".to_string())]),
+        };
+        let first_business_effect = first.business_effect_id().unwrap();
+        let first_event = first.event_id().unwrap();
+        first.fencing_generation = 99;
+        first.source_sequence = 8_000;
+        first.created_at_ms = 77_777;
+        assert_eq!(first_business_effect, first.business_effect_id().unwrap());
+        assert_ne!(first_event, first.event_id().unwrap());
+        first.legs[0].delta = 2;
+        assert_ne!(first_business_effect, first.business_effect_id().unwrap());
+    }
+
+    #[test]
+    fn durable_commit_before_projection_replays_under_new_context_exactly_once() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let original_runtime =
+            start_test_runtime("economy-recovery", "RecoveryA").expect("original runtime");
+        let identity = original_runtime.active_identity().expect("active identity");
+        let command = claimed_gold_pickup(identity.clone(), 9_001, 25, "drop-generation:7");
+        let original_context = external_context(7, 12, 1_000);
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        assert!(service.bootstrap_fenced(&original_runtime, Some(&original_context)));
+        let original_gold = original_runtime.world_snapshot().gold;
+        let transaction = economy_transaction_for_command(&original_context, &command, None)
+            .expect("economy transaction");
+
+        // Durable ledger/outbox commit succeeds, then the producer crashes
+        // before apply_projection and before its process-local receipt cache.
+        let first_receipt = store.transact(&transaction).expect("durable commit");
+        assert!(!first_receipt.duplicate);
+        assert_eq!(
+            store.balance(&EconomyBalanceKey::gold(
+                &identity.account_id,
+                identity.character_index
+            )),
+            i64::from(original_gold) + 25
+        );
+        assert_eq!(original_runtime.world_snapshot().gold, original_gold);
+        drop(service);
+
+        let mut recovered_runtime =
+            start_test_runtime("economy-recovery", "RecoveryA").expect("recovered runtime");
+        let recovered_identity = recovered_runtime
+            .active_identity()
+            .expect("recovered identity");
+        assert_eq!(recovered_identity, identity);
+        let recovered_command =
+            claimed_gold_pickup(recovered_identity, 9_001, 25, "drop-generation:7");
+        let recovered_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let recovered_context = external_context(99, 8_000, 77_777);
+        let recovered = recovered_service.commit_fenced(
+            &mut recovered_runtime,
+            Some(&recovered_context),
+            recovered_command.clone(),
+        );
+        assert!(recovered.committed);
+        assert_eq!(recovered_runtime.world_snapshot().gold, original_gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+
+        // A fresh producer restoring a projection that already includes the
+        // credit and marker treats the same durable receipt as materialized.
+        let checkpoint = recovered_runtime
+            .active_character_checkpoint()
+            .expect("durable recovered checkpoint");
+        let mut materialized_runtime =
+            start_test_runtime("economy-recovery", "RecoveryA").expect("materialized runtime");
+        materialized_runtime
+            .restore_active_character_checkpoint(&checkpoint)
+            .expect("restore recovered checkpoint");
+        assert!(materialized_runtime.has_shared_economy_projection_event(&first_receipt.event_id));
+        let materialized_service =
+            PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let materialized = materialized_service.commit_fenced(
+            &mut materialized_runtime,
+            Some(&external_context(100, 8_001, 88_888)),
+            recovered_command,
+        );
+        assert!(materialized.committed);
+        assert!(materialized.packets.is_empty());
+        assert_eq!(
+            materialized_runtime.world_snapshot().gold,
+            original_gold + 25
+        );
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn stale_cross_player_reclaim_removes_drop_without_second_credit() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let alice_runtime =
+            start_test_runtime("economy-alice", "EconomyAlice").expect("Alice runtime");
+        let alice_identity = alice_runtime.active_identity().expect("Alice identity");
+        let claim_key = "ground-drop:map:0:9004:generation:10:digest";
+        let alice_command = claimed_gold_pickup(alice_identity.clone(), 9_004, 25, claim_key);
+        let alice_context = external_context(10, 15, 4_000);
+        store
+            .bootstrap_character(&alice_identity, &alice_runtime.world_snapshot(), 4_000)
+            .expect("Alice bootstrap");
+        let alice_transaction =
+            economy_transaction_for_command(&alice_context, &alice_command, None)
+                .expect("Alice transaction");
+        store
+            .transact(&alice_transaction)
+            .expect("Alice durable commit");
+
+        let mut bob_runtime = start_test_runtime("economy-bob", "EconomyBob").expect("Bob runtime");
+        let bob_identity = bob_runtime.active_identity().expect("Bob identity");
+        let bob_initial_gold = bob_runtime.world_snapshot().gold;
+        let bob_command = claimed_gold_pickup(bob_identity.clone(), 9_004, 25, claim_key);
+        let bob_transaction =
+            economy_transaction_for_command(&external_context(11, 16, 5_000), &bob_command, None)
+                .expect("Bob transaction");
+        assert_eq!(
+            alice_transaction.idempotency_key,
+            bob_transaction.idempotency_key
+        );
+        assert_ne!(
+            alice_transaction.business_effect_id().unwrap(),
+            bob_transaction.business_effect_id().unwrap()
+        );
+
+        let bob_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let result = bob_service.commit_fenced(
+            &mut bob_runtime,
+            Some(&external_context(11, 16, 5_000)),
+            bob_command,
+        );
+        assert!(result.committed);
+        assert!(result.packets.is_empty());
+        assert_eq!(bob_runtime.world_snapshot().gold, bob_initial_gold);
+        assert_eq!(store.transaction_count(), 1);
+        assert_eq!(
+            store.balance(&EconomyBalanceKey::gold(
+                &bob_identity.account_id,
+                bob_identity.character_index
+            )),
+            i64::from(bob_initial_gold)
+        );
+    }
+
+    #[test]
+    fn durable_marked_pickup_bypasses_capacity_preflight_after_state_changes() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let mut runtime = start_test_runtime("economy-marked-capacity", "CapacityA").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let command = claimed_gold_pickup(identity, 9_007, 25, "drop-generation:capacity");
+        let context = external_context(14, 20, 8_000);
+        let first_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        assert!(
+            first_service
+                .commit_fenced(&mut runtime, Some(&context), command.clone())
+                .committed
+        );
+
+        // A later saved state can be at the gold cap. The durable event marker
+        // remains authoritative; retry must not re-run the capacity preflight
+        // and resurrect the already-settled ground drop.
+        let mut checkpoint = runtime.active_character_checkpoint().unwrap();
+        checkpoint.gold = u32::MAX;
+        runtime
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let drop = match &command.command {
+            SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => drop,
+            _ => unreachable!("claimed gold pickup"),
+        };
+        assert!(!runtime.can_commit_shared_ground_drop_pickup(drop));
+
+        let retry_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let retry_context = external_context(99, 9_999, 99_999);
+        let retry = retry_service.commit_fenced(&mut runtime, Some(&retry_context), command);
+        assert!(retry.committed);
+        assert!(retry.packets.is_empty());
+        assert_eq!(store.transaction_count(), 1);
+    }
+    #[test]
+    fn committed_ground_drop_survives_full_projection_and_reconciles_later() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-capacity", "GroundCapacity").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(21, 31, 10_001);
+        let command = claimed_gold_pickup(identity.clone(), 91_001, 25, "ground-capacity-claim");
+        let checkpoint = runtime.active_character_checkpoint().unwrap();
+        let initial_gold = runtime.world_snapshot().gold;
+        store
+            .bootstrap_character(&identity, &runtime.world_snapshot(), context.created_at_ms)
+            .unwrap();
+        let transaction = economy_transaction_for_command(&context, &command, None).unwrap();
+        store.transact(&transaction).unwrap();
+
+        // The Zone receipt already committed; make the private character state
+        // unable to accept it. The immediate call must still remove the world
+        // drop and leave a durable pending projection rather than restoring it.
+        let mut full_checkpoint = checkpoint.clone();
+        full_checkpoint.gold = u32::MAX;
+        runtime
+            .restore_active_character_checkpoint(&full_checkpoint)
+            .unwrap();
+        let zone_receipt = service.commit_fenced(&mut runtime, Some(&context), command.clone());
+        assert!(zone_receipt.committed);
+        assert!(service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+
+        runtime
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        let _ = service.reconcile_ground_drop_projections_fenced(&mut runtime, Some(&context));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert!(!service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn stale_cross_player_reclaim_keeps_original_ground_projection_pending() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let alice_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let bob_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut alice = start_test_runtime("economy-ground-alice", "GroundAlice").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let alice_context = external_context(22, 32, 10_002);
+        let claim_key = "ground-cross-player-claim";
+        let alice_command = claimed_gold_pickup(alice_identity.clone(), 91_002, 25, claim_key);
+        store
+            .bootstrap_character(
+                &alice_identity,
+                &alice.world_snapshot(),
+                alice_context.created_at_ms,
+            )
+            .unwrap();
+        let alice_transaction =
+            economy_transaction_for_command(&alice_context, &alice_command, None).unwrap();
+        store.transact(&alice_transaction).unwrap();
+
+        let mut bob = start_test_runtime("economy-ground-bob", "GroundBob").unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let bob_initial_gold = bob.world_snapshot().gold;
+        let bob_context = external_context(23, 33, 10_003);
+        let bob_command = claimed_gold_pickup(bob_identity, 91_002, 25, claim_key);
+        let stale_receipt = bob_service.commit_fenced(&mut bob, Some(&bob_context), bob_command);
+        assert!(stale_receipt.committed);
+        assert_eq!(bob.world_snapshot().gold, bob_initial_gold);
+        assert!(
+            alice_service.has_pending_ground_drop_projection_fenced(&alice, Some(&alice_context))
+        );
+        let _ = alice_service
+            .reconcile_ground_drop_projections_fenced(&mut alice, Some(&alice_context));
+        assert!(
+            !alice_service.has_pending_ground_drop_projection_fenced(&alice, Some(&alice_context))
+        );
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn ground_drop_projection_mark_failure_retries_without_double_credit() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut runtime = start_test_runtime("economy-ground-mark", "GroundMark").unwrap();
+        let identity = runtime.active_identity().unwrap();
+        let context = external_context(24, 34, 10_004);
+        let command = claimed_gold_pickup(identity.clone(), 91_003, 25, "ground-mark-claim");
+        let initial_gold = runtime.world_snapshot().gold;
+        store
+            .bootstrap_character(&identity, &runtime.world_snapshot(), context.created_at_ms)
+            .unwrap();
+        let transaction = economy_transaction_for_command(&context, &command, None).unwrap();
+        store.transact(&transaction).unwrap();
+
+        // Query unavailability is fail-closed: a coordinator must not restore
+        // or re-offer the world drop while it cannot inspect this durable row.
+        store.fail_pending_ground_drop_projection_query();
+        assert!(service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+        store.fail_next_ground_drop_projection_mark();
+        let _ = service.reconcile_ground_drop_projections_fenced(&mut runtime, Some(&context));
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert!(service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+
+        let retry_packets =
+            service.reconcile_ground_drop_projections_fenced(&mut runtime, Some(&context));
+        assert!(retry_packets.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        assert!(!service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+    }
+
+    #[test]
+    fn gateway_ground_projection_save_failure_rolls_back_then_retries_once() {
+        let config = crate::GatewayConfig::default();
+        let mut runtime = start_test_runtime_with_config(
+            config.clone(),
+            "economy-ground-save-fail",
+            "GroundSaveFail",
+        )
+        .expect("runtime");
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let identity = runtime.active_identity().expect("identity");
+        let context = external_context(88, 908, 90_008);
+        let command = claimed_gold_pickup(identity, 99_006, 25, "gateway-ground-save-failure");
+        let event_id = economy_transaction_for_command(&context, &command, None)
+            .expect("transaction")
+            .event_id()
+            .expect("event id");
+        let before_world = runtime.world_snapshot();
+        let before_checkpoint = serde_json::to_vec(
+            &runtime
+                .active_character_checkpoint()
+                .expect("active checkpoint"),
+        )
+        .expect("encode checkpoint");
+
+        config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+        let first = service.commit_fenced(&mut runtime, Some(&context), command);
+
+        assert!(first.committed);
+        assert!(first.packets.is_empty());
+        assert_eq!(runtime.world_snapshot(), before_world);
+        assert_eq!(
+            serde_json::to_vec(
+                &runtime
+                    .active_character_checkpoint()
+                    .expect("rolled-back checkpoint"),
+            )
+            .expect("encode rolled-back checkpoint"),
+            before_checkpoint,
+        );
+        assert!(!runtime.has_shared_economy_projection_event(&event_id));
+        assert!(service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+        assert_eq!(store.transaction_count(), 1);
+
+        let retry = service.reconcile_ground_drop_projections_fenced(&mut runtime, Some(&context));
+        assert!(retry
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+        assert_eq!(runtime.world_snapshot().gold, before_world.gold + 25);
+        assert!(runtime.has_shared_economy_projection_event(&event_id));
+        assert!(!service.has_pending_ground_drop_projection_fenced(&runtime, Some(&context)));
+        assert_eq!(store.transaction_count(), 1);
+
+        assert!(service
+            .reconcile_ground_drop_projections_fenced(&mut runtime, Some(&context))
+            .is_empty());
+        assert_eq!(runtime.world_snapshot().gold, before_world.gold + 25);
+        assert_eq!(store.transaction_count(), 1);
+    }
+
+    #[test]
+    fn durable_projection_marker_prevents_replay_after_offsetting_transaction() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let mut runtime = start_test_runtime("economy-marker", "MarkerA").expect("runtime");
+        let identity = runtime.active_identity().expect("identity");
+        let initial_gold = runtime.world_snapshot().gold;
+        let claim = claimed_gold_pickup(identity.clone(), 9_005, 25, "drop-generation:11");
+        let first_context = external_context(12, 17, 6_000);
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let first = service.commit_fenced(&mut runtime, Some(&first_context), claim.clone());
+        assert!(first.committed);
+        assert_eq!(runtime.world_snapshot().gold, initial_gold + 25);
+        let first_transaction = economy_transaction_for_command(&first_context, &claim, None)
+            .expect("first transaction");
+        let first_event_id = first_transaction.event_id().unwrap();
+        assert!(runtime.has_shared_economy_projection_event(&first_event_id));
+
+        let debit = EconomyTransactionEnvelope {
+            idempotency_key: "marker-offset-debit".to_string(),
+            transaction_kind: EconomyTransactionKind::Consume,
+            zone_id: "map:0".to_string(),
+            fencing_generation: 12,
+            source_sequence: 18,
+            created_at_ms: 6_100,
+            legs: vec![EconomyLeg {
+                balance: EconomyBalanceKey::gold(
+                    identity.account_id.clone(),
+                    identity.character_index,
+                ),
+                delta: -25,
+            }],
+            metadata: BTreeMap::from([("operation".to_string(), "offsetDebit".to_string())]),
+        };
+        store.transact(&debit).expect("offset ledger debit");
+        let debit_projection = runtime.commit_shared_gold_drop_transaction(25);
+        assert!(debit_projection.committed);
+        runtime
+            .save_active_character()
+            .expect("persist offset state");
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+
+        let recovered_service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let retry = recovered_service.commit_fenced(
+            &mut runtime,
+            Some(&external_context(99, 9_999, 99_999)),
+            claim,
+        );
+        assert!(retry.committed);
+        assert!(retry.packets.is_empty());
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(store.transaction_count(), 2);
+    }
+
+    #[test]
+    fn corrupted_duplicate_receipt_fields_fail_closed() {
+        let store = FakeEconomyStore::default();
+        let runtime = start_test_runtime("economy-integrity", "IntegrityA").expect("runtime");
+        let identity = runtime.active_identity().expect("identity");
+        store
+            .bootstrap_character(&identity, &runtime.world_snapshot(), 7_000)
+            .expect("bootstrap");
+        let command = claimed_gold_pickup(identity, 9_006, 25, "drop-generation:12");
+        let transaction =
+            economy_transaction_for_command(&external_context(13, 19, 7_000), &command, None)
+                .expect("transaction");
+        store.transact(&transaction).expect("first commit");
+        let original = store
+            .state
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone();
+
+        for corruption in 0..3 {
+            {
+                let mut state = store
+                    .state
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner);
+                *state = original.clone();
+                let (_, receipt) = state
+                    .transactions
+                    .get_mut(&transaction.idempotency_key)
+                    .expect("stored transaction");
+                match corruption {
+                    0 => receipt.idempotency_key.push_str(":tampered"),
+                    1 => receipt.transaction_kind = EconomyTransactionKind::Consume,
+                    _ => {
+                        *receipt
+                            .balances_after
+                            .values_mut()
+                            .next()
+                            .expect("stored balance") += 1;
+                    }
+                }
+            }
+            assert!(
+                store.transact(&transaction).is_err(),
+                "corruption {corruption}"
+            );
+        }
+    }
+    #[test]
+    fn store_failure_before_commit_leaves_ledger_and_projection_unchanged() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let mut runtime = start_test_runtime("economy-precommit", "PrecommitA").expect("runtime");
+        let identity = runtime.active_identity().expect("active identity");
+        let command = claimed_gold_pickup(identity.clone(), 9_002, 25, "drop-generation:8");
+        let initial_gold = runtime.world_snapshot().gold;
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        store.fail_next_transact();
+        let receipt =
+            service.commit_fenced(&mut runtime, Some(&external_context(8, 13, 2_000)), command);
+
+        assert!(!receipt.committed);
+        assert_eq!(runtime.world_snapshot().gold, initial_gold);
+        assert_eq!(
+            store.balance(&EconomyBalanceKey::gold(
+                &identity.account_id,
+                identity.character_index
+            )),
+            i64::from(initial_gold)
+        );
+        assert_eq!(store.transaction_count(), 0);
+    }
+
+    #[test]
+    fn reused_idempotency_key_with_changed_payload_fails_closed() {
+        let store = FakeEconomyStore::default();
+        let runtime = start_test_runtime("economy-conflict", "ConflictA").expect("runtime");
+        let identity = runtime.active_identity().expect("active identity");
+        store
+            .bootstrap_character(&identity, &runtime.world_snapshot(), 1_000)
+            .expect("bootstrap");
+        let command = claimed_gold_pickup(identity.clone(), 9_003, 25, "drop-generation:9");
+        let context = external_context(9, 14, 3_000);
+        let first =
+            economy_transaction_for_command(&context, &command, None).expect("first transaction");
+        store.transact(&first).expect("first commit");
+        let ledger_after = store.balance(&EconomyBalanceKey::gold(
+            &identity.account_id,
+            identity.character_index,
+        ));
+        let mut conflict = first.clone();
+        conflict.legs[0].delta = 26;
+        assert!(store.transact(&conflict).is_err());
+        assert_eq!(
+            store.balance(&EconomyBalanceKey::gold(
+                &identity.account_id,
+                identity.character_index
+            )),
+            ledger_after
+        );
+        assert_eq!(store.transaction_count(), 1);
+    }
+    #[test]
+    fn durable_trade_rows_reconcile_each_party_after_ledger_commit_and_retry_mark() {
+        use mir2_simulation::WorldCommand;
+
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let mut alice = start_test_runtime("economy-trade-alice", "TradeAlice").unwrap();
+        let mut bob = start_test_runtime("economy-trade-bob", "TradeBob").unwrap();
+        let alice_identity = alice.active_identity().unwrap();
+        let bob_identity = bob.active_identity().unwrap();
+        let context = external_context(51, 8_001, 55_000);
+        assert!(
+            service
+                .commit_fenced(
+                    &mut alice,
+                    Some(&context),
+                    claimed_gold_pickup(alice_identity.clone(), 90_001, 25, "trade-fixture-gold"),
+                )
+                .committed
+        );
+        assert!(service.bootstrap_fenced(&alice, Some(&context)));
+        assert!(service.bootstrap_fenced(&bob, Some(&context)));
+
+        assert!(!alice.trade_request(&bob_identity.character_name).is_empty());
+        assert!(!bob.trade_request(&alice_identity.character_name).is_empty());
+        let deposited = alice
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
+                amount: 10,
+            }))
+            .unwrap();
+        assert!(deposited
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeGold { amount: 10 })));
+        let (_, alice_offer) = alice.shared_trade_confirm();
+        let (_, bob_offer) = bob.shared_trade_confirm();
+        let alice_offer = alice_offer.expect("Alice trade offer");
+        let bob_offer = bob_offer.expect("Bob trade offer");
+        let transaction = economy_transaction_for_trade(&context, &alice_offer, &bob_offer)
+            .unwrap()
+            .expect("nonempty trade transaction");
+        let event_id = transaction.event_id().unwrap();
+
+        // Simulated crash after the atomic ledger/outbox/projection-intent
+        // transaction, before either character receives its delivery.
+        let receipt = store.transact(&transaction).unwrap();
+        assert_eq!(receipt.event_id, event_id);
+        assert!(service.has_pending_trade_projection_fenced(&alice, Some(&context)));
+        assert!(service.has_pending_trade_projection_fenced(&bob, Some(&context)));
+
+        let alice_packets = service.reconcile_trade_projections_fenced(&mut alice, Some(&context));
+        assert!(alice_packets.is_empty());
+        assert!(!service.has_pending_trade_projection_fenced(&alice, Some(&context)));
+
+        // A database mark failure must preserve the pending row but cannot hide
+        // the just-persisted client delivery. The following retry sees the
+        // durable character marker and only marks the row projected.
+        store.fail_next_trade_projection_mark();
+        let bob_packets = service.reconcile_trade_projections_fenced(&mut bob, Some(&context));
+        assert!(!bob_packets.is_empty());
+        assert!(service.has_pending_trade_projection_fenced(&bob, Some(&context)));
+        assert!(service
+            .reconcile_trade_projections_fenced(&mut bob, Some(&context))
+            .is_empty());
+        assert!(!service.has_pending_trade_projection_fenced(&bob, Some(&context)));
+    }
+
+    #[test]
+    fn pending_trade_projection_query_failure_fails_closed() {
+        let store = Arc::new(FakeEconomyStore::default());
+        let service = PostgresEconomyAccountInventoryService::with_backend(store.clone());
+        let runtime = start_test_runtime("economy-trade-query", "TradeQuery").unwrap();
+        let context = external_context(52, 8_002, 55_001);
+        store.fail_pending_trade_projection_query();
+        assert!(service.has_pending_trade_projection_fenced(&runtime, Some(&context)));
+    }
     #[test]
     fn trade_requires_two_sided_asset_conservation() {
         let valid = EconomyTransactionEnvelope {
@@ -1809,9 +4427,22 @@ mod tests {
         assert_eq!(envelope.fencing_generation, 9);
         assert_eq!(envelope.source_sequence, 42);
         assert_eq!(envelope.created_at_ms, 77);
+        assert!(envelope
+            .idempotency_key
+            .starts_with("zone:map:0:alice:3:ground-drop-pickup:9001:"));
         assert_eq!(
-            envelope.idempotency_key,
-            "zone:map:0:alice:3:ground-drop-pickup:9001"
+            envelope.idempotency_key.len(),
+            "zone:map:0:alice:3:ground-drop-pickup:9001:".len() + 64
+        );
+        let mut changed_command = command.clone();
+        let SharedAccountInventoryCommand::GroundDropPickup(drop) = &mut changed_command.command
+        else {
+            unreachable!("ground drop command")
+        };
+        drop.loot = GroundDropLootSnapshot::Gold { amount: 26 };
+        assert_ne!(
+            command.stable_idempotency_key(),
+            changed_command.stable_idempotency_key()
         );
         assert_eq!(envelope.legs.len(), 1);
         assert_eq!(
@@ -1959,6 +4590,7 @@ mod tests {
             external_commit_authorized: true,
         };
         let alice = SharedTradeOffer {
+            settlement_nonce: "00000000000000000000000000000001".to_string(),
             account_id: "alice".to_string(),
             character_index: 0,
             character_name: "Alice".to_string(),
@@ -1971,6 +4603,7 @@ mod tests {
             }],
         };
         let bob = SharedTradeOffer {
+            settlement_nonce: "00000000000000000000000000000002".to_string(),
             account_id: "bob".to_string(),
             character_index: 1,
             character_name: "Bob".to_string(),
@@ -1997,5 +4630,28 @@ mod tests {
             aggregated[&EconomyBalanceKey::item_quantity("bob", 1, "iron-ore")],
             2
         );
+
+        let changed_context = SharedAccountInventoryExecutionContext {
+            fencing_generation: 88,
+            source_sequence: 9_999,
+            created_at_ms: 88_888,
+            ..context.clone()
+        };
+        let retry = economy_transaction_for_trade(&changed_context, &alice, &bob)
+            .expect("retry should map")
+            .expect("retry remains non-empty");
+        assert_eq!(transaction.idempotency_key, retry.idempotency_key);
+        assert_eq!(
+            transaction.business_effect_id().unwrap(),
+            retry.business_effect_id().unwrap()
+        );
+        assert_ne!(transaction.event_id().unwrap(), retry.event_id().unwrap());
+
+        let mut later_alice = alice.clone();
+        later_alice.settlement_nonce = "00000000000000000000000000000003".to_string();
+        let later_trade = economy_transaction_for_trade(&changed_context, &later_alice, &bob)
+            .expect("later trade should map")
+            .expect("later trade remains non-empty");
+        assert_ne!(transaction.idempotency_key, later_trade.idempotency_key);
     }
 }

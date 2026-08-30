@@ -20,6 +20,7 @@ use super::components::{
     PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
+use super::map_events::{authorized_map_coordinate_transfers, crystal_map_coordinate_source_cells};
 use super::monsters::{
     build_crystal_current_map_full_spawn_table, build_crystal_current_map_visible_spawn_table,
     build_spawn_table, initial_general_meow_meow_state, initial_monster_ai_state_for_object,
@@ -59,11 +60,11 @@ pub(crate) struct ZoneMapCollisionData {
 }
 
 pub(super) fn normalize_map_file_name(file_name: &str) -> String {
-    file_name
-        .trim()
-        .trim_end_matches(".map")
-        .trim_end_matches(".MAP")
-        .to_ascii_lowercase()
+    let normalized = file_name.trim().to_ascii_lowercase();
+    normalized
+        .strip_suffix(".map")
+        .unwrap_or(&normalized)
+        .to_owned()
 }
 
 /// When set, the shared multiplayer zone hosts every map at its *full* size
@@ -97,7 +98,8 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     };
     let mut blocked_cells = collision.blocked_set;
     blocked_cells.extend(collision.closed_door_set);
-    let transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    let mut transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    transfer_source_cells.extend(crystal_map_coordinate_source_cells(map_file_name));
     let mut doors: BTreeMap<u8, Vec<(i32, i32)>> = BTreeMap::new();
     for door in &collision.collision.doors {
         let cell = (door.x, door.y);
@@ -303,6 +305,7 @@ pub(super) fn transfer_for_current_player_position(world: &World) -> Option<MapT
         .chain(crystal_movement_transfer_records_for_map(
             &map.current_map.file_name,
         ))
+        .chain(authorized_map_coordinate_transfers(world))
         .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
         .find(|transfer| point_in_bounds(&transfer.from_bounds, &position))
 }
@@ -322,6 +325,8 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
             .iter()
             .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
+        || crystal_map_coordinate_source_cells(&map.current_map.file_name)
+            .any(|(x, y)| point.x == x && point.y == y)
 }
 
 pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> Vec<ServerPacket> {
@@ -538,16 +543,34 @@ pub(super) fn filter_decor_objects(
 }
 
 pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPacket> {
-    if let Some((map_file_name, position)) = parse_debug_crystal_transfer_key(key) {
-        let map_info = super::npc_script::crystal_npc_move_map_information(world, &map_file_name);
-        return relocate_player_to_map(world, map_info, position, MirDirection::Down, None);
+    match crate::world_runtime::parse_debug_crystal_transfer_key(key) {
+        Ok(Some((map_file_name, position))) => {
+            let map_info =
+                super::npc_script::crystal_npc_move_map_information(world, &map_file_name);
+            return relocate_player_to_map(world, map_info, position, MirDirection::Down, None);
+        }
+        Err(_) => {
+            let language = super::session::current_language(world);
+            return vec![super::session::system_message(&localized_text_or_fallback(
+                language,
+                "server.InvalidPacketReceived",
+                "server.InvalidPacketReceived",
+            ))];
+        }
+        Ok(None) => {}
     }
 
-    let Some(transfer) = transfer_for_key(
+    let transfer = transfer_for_key(
         &world.resource::<RuntimeConfigResource>().config,
         world.resource::<MapRuntimeResource>(),
         key,
-    ) else {
+    )
+    .or_else(|| {
+        authorized_map_coordinate_transfers(world)
+            .into_iter()
+            .find(|transfer| transfer.key == key)
+    });
+    let Some(transfer) = transfer else {
         let language = super::session::current_language(world);
         return vec![super::session::system_message(&localized_text_or_fallback(
             language,
@@ -722,17 +745,6 @@ fn dismount_for_no_mount_map(world: &mut World, packets: &mut Vec<ServerPacket>)
         ),
         chat_type: ChatType::System,
     });
-}
-
-pub(super) fn parse_debug_crystal_transfer_key(key: &str) -> Option<(String, Point)> {
-    let mut parts = key.split(':');
-    if parts.next()? != "crystal" {
-        return None;
-    }
-    let map_file_name = parts.next()?.trim().trim_end_matches(".map").to_string();
-    let x = parts.next()?.parse::<i32>().ok()?;
-    let y = parts.next()?.parse::<i32>().ok()?;
-    Some((map_file_name, Point { x, y }))
 }
 
 pub(super) fn clear_non_player_world_entities(world: &mut World) {
@@ -1100,19 +1112,16 @@ fn despawn_stage5_hero_for_no_hero_map(world: &mut World, packets: &mut Vec<Serv
 }
 
 pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
-    let (map_file_name, character) = {
+    let map_file_name = {
         let map = world.resource::<MapRuntimeResource>();
-        let Some(character) = world
+        if world
             .resource::<SessionResource>()
             .selected_character
-            .clone()
-        else {
+            .is_none()
+        {
             return;
-        };
-        (
-            normalize_map_file_name(&map.current_map.file_name),
-            character,
-        )
+        }
+        normalize_map_file_name(&map.current_map.file_name)
     };
     let quest_ids_by_npc = super::npc::crystal_quest_ids_by_npc();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
@@ -1120,9 +1129,6 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
     for npc in crystal_npc_info_manifest().npcs {
         let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
         if npc_map_file_name.as_deref() != Some(map_file_name.as_str()) {
-            continue;
-        }
-        if !super::npc::crystal_npc_visible_to_character(&npc, &character) {
             continue;
         }
         if !config.npc_script_is_allowed(&npc.script_key) {
@@ -1850,27 +1856,16 @@ pub(super) fn runtime_world_map_collision_data(
 
 pub(super) fn refresh_runtime_map_collision(world: &mut World) {
     let current_map = world.resource::<MapRuntimeResource>().current_map.clone();
-    let spawn_source = world
-        .resource::<RuntimeConfigResource>()
-        .config
-        .monster_spawn_source;
+    let config = &world.resource::<RuntimeConfigResource>().config;
     // The activated world walks the full map everywhere (gz map-pack backed), so
     // players are never fenced into the Bichon starter slice — they can reach
     // every transfer and roam all maps. Other sources keep their prior collision.
-    let collision = if spawn_source == MonsterSpawnSource::CrystalWorld {
-        runtime_world_map_collision_data(&current_map.file_name)
-            .map(|collision| (*collision).clone())
+    let collision = if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+        crystal_world_collision_data_or_config(config, &current_map.file_name)
     } else {
         runtime_active_map_collision_data(&current_map)
-    }
-    .unwrap_or_else(|| {
-        let fallback = world
-            .resource::<RuntimeConfigResource>()
-            .config
-            .map_collision
-            .clone();
-        runtime_map_collision_from_template(fallback)
-    });
+            .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()))
+    };
 
     let doors = super::resources::DoorRegistry::from_templates(&collision.collision.doors);
     {
@@ -1893,7 +1888,7 @@ pub(super) fn runtime_active_map_collision_data(
     if normalize_map_file_name(&map.file_name) == normalize_map_file_name("0")
         && map.title != "Starter Field"
     {
-        return runtime_full_map_collision_data(&map.file_name)
+        return runtime_world_map_collision_data(&map.file_name)
             .map(|collision| (*collision).clone())
             .or_else(|| runtime_map_collision_data(&map.file_name));
     }
@@ -1904,7 +1899,20 @@ pub(super) fn collision_data_for_map_or_config(
     config: &SimulationConfig,
     map_file_name: &str,
 ) -> RuntimeMapCollisionData {
-    runtime_map_collision_data(map_file_name)
+    if config.monster_spawn_source == MonsterSpawnSource::CrystalWorld {
+        crystal_world_collision_data_or_config(config, map_file_name)
+    } else {
+        runtime_map_collision_data(map_file_name)
+            .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()))
+    }
+}
+
+fn crystal_world_collision_data_or_config(
+    config: &SimulationConfig,
+    map_file_name: &str,
+) -> RuntimeMapCollisionData {
+    runtime_world_map_collision_data(map_file_name)
+        .map(|collision| (*collision).clone())
         .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()))
 }
 
@@ -2150,3 +2158,7 @@ impl SimulationSession {
         apply_map_transfer(self.app.world_mut(), key)
     }
 }
+
+#[cfg(test)]
+#[path = "map_collision_source_tests.rs"]
+mod map_collision_source_tests;

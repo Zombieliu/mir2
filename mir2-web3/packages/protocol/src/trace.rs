@@ -96,6 +96,45 @@ mod tests {
         assert_eq!(server_packet_display_name(&packet), "NewMapInfo");
         assert_eq!(trace_server_packets(&[packet])[0].packet, "NewMapInfo");
     }
+
+    #[test]
+    fn storage_v2_packets_have_distinct_trace_names_and_ids() {
+        let client_trace = trace_client_packets(&[
+            ClientPacket::StoreItemV2 {
+                request_id: "store-1".into(),
+                from: 1,
+                to: 2,
+            },
+            ClientPacket::TakeBackItemV2 {
+                request_id: "take-2".into(),
+                from: 3,
+                to: 4,
+            },
+        ]);
+        assert_eq!(client_trace[0].packet_id, 153);
+        assert_eq!(client_trace[0].packet, "StoreItemV2");
+        assert_eq!(client_trace[1].packet_id, 154);
+        assert_eq!(client_trace[1].packet, "TakeBackItemV2");
+
+        let server_trace = trace_server_packets(&[
+            ServerPacket::StoreItemV2 {
+                request_id: "store-1".into(),
+                from: 1,
+                to: 2,
+                success: true,
+            },
+            ServerPacket::TakeBackItemV2 {
+                request_id: "take-2".into(),
+                from: 3,
+                to: 4,
+                success: false,
+            },
+        ]);
+        assert_eq!(server_trace[0].packet_id, 281);
+        assert_eq!(server_trace[0].packet, "StoreItemV2");
+        assert_eq!(server_trace[1].packet_id, 282);
+        assert_eq!(server_trace[1].packet, "TakeBackItemV2");
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -159,6 +198,8 @@ pub fn client_packet_name(packet: &ClientPacket) -> &'static str {
         ClientPacket::MoveItem { .. } => "MoveItem",
         ClientPacket::StoreItem { .. } => "StoreItem",
         ClientPacket::TakeBackItem { .. } => "TakeBackItem",
+        ClientPacket::StoreItemV2 { .. } => "StoreItemV2",
+        ClientPacket::TakeBackItemV2 { .. } => "TakeBackItemV2",
         ClientPacket::MergeItem { .. } => "MergeItem",
         ClientPacket::EquipItem { .. } => "EquipItem",
         ClientPacket::RemoveItem { .. } => "RemoveItem",
@@ -354,6 +395,8 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::RefineItem { .. } => "RefineItem",
         ServerPacket::TakeBackItem { .. } => "TakeBackItem",
         ServerPacket::StoreItem { .. } => "StoreItem",
+        ServerPacket::StoreItemV2 { .. } => "StoreItemV2",
+        ServerPacket::TakeBackItemV2 { .. } => "TakeBackItemV2",
         ServerPacket::SplitItem { .. } => "SplitItem",
         ServerPacket::SplitItem1 { .. } => "SplitItem1",
         ServerPacket::UseItem { .. } => "UseItem",

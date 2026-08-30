@@ -5,6 +5,7 @@ use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
     crystal_monster_by_name, crystal_starter_region_respawns, starter_server_data,
     CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
+    MonsterSpawnDispositionTemplate,
 };
 use mir2_protocol::{
     MirDirection, MonsterInfo, ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo,
@@ -460,12 +461,21 @@ pub(super) fn build_starter_spawn_table(config: &SimulationConfig) -> MonsterSpa
                     random_delay_ticks: spawn.random_delay_ticks,
                 },
                 ai: 0,
-                disposition: if spawn.can_wander {
-                    WorldEntityDisposition::Hostile
-                } else {
-                    WorldEntityDisposition::Neutral
+                disposition: match spawn.disposition {
+                    Some(MonsterSpawnDispositionTemplate::Friendly) => {
+                        WorldEntityDisposition::Friendly
+                    }
+                    Some(MonsterSpawnDispositionTemplate::Hostile) => {
+                        WorldEntityDisposition::Hostile
+                    }
+                    Some(MonsterSpawnDispositionTemplate::Neutral) | None => {
+                        WorldEntityDisposition::Neutral
+                    }
                 },
-                hostile_to_player: spawn.can_wander,
+                hostile_to_player: matches!(
+                    spawn.disposition,
+                    Some(MonsterSpawnDispositionTemplate::Hostile)
+                ),
                 view_range: if spawn.can_wander { 4 } else { 0 },
                 can_wander: spawn.can_wander,
                 move_interval_ticks: 1,
@@ -963,7 +973,13 @@ pub(super) fn is_hidden_or_sleeping_target(
 }
 
 pub(super) fn monster_is_damageable(world: &World, monster_entity: Entity) -> bool {
-    let entry = world.entity(monster_entity);
+    let Ok(entry) = world.get_entity(monster_entity) else {
+        // Activation/respawn queues can retain an entity generation for one
+        // boundary after another system despawns it. A stale handle is not an
+        // attackable monster and must fail closed instead of panicking the
+        // authoritative runtime.
+        return false;
+    };
     let Some(agent) = entry.get::<MonsterAgent>() else {
         return false;
     };
@@ -1170,15 +1186,16 @@ fn spawn_runtime_monster_with_position_policy(
     activation_delay_ticks: u64,
     trusted_shared_position: bool,
 ) -> Option<Entity> {
-    let (config, current_map_file_name) = {
-        let map = world.resource::<MapRuntimeResource>();
-        (
-            world.resource::<RuntimeConfigResource>().config.clone(),
-            map.current_map.file_name.clone(),
-        )
-    };
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    // `can_occupy` is authoritative for the active map: it reads the
+    // collision source already refreshed into MapRuntimeResource after
+    // StartGame/map transfer. Re-resolving from `config.monster_spawn_source`
+    // here can select starter collision while the active map is full Crystal
+    // Bichon (the Jar1 slave then gets rejected at a valid death tile). Keep
+    // the summoned compatibility escape hatch unchanged, but make ordinary
+    // monster spawns use the same static collision decision as occupancy.
     let valid_spawn_point = trusted_shared_position
-        || is_static_spawnable_point_on_map(&config, &current_map_file_name, &position)
+        || super::movement::can_occupy(world, position.clone(), None)
         || (summoned.is_some() && runtime_position_exists(world, &position));
     if !valid_spawn_point {
         return None;
@@ -1640,6 +1657,16 @@ pub(super) fn crystal_monster_effect_for_name(name: &str) -> u8 {
 #[allow(deprecated)]
 pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
     let tick = super::session::runtime_tick(world);
+    let awaiting_harvest = world
+        .iter_entities()
+        .filter_map(|entity| {
+            let agent = entity.get::<MonsterAgent>()?;
+            let harvest = entity.get::<HarvestMonsterState>()?;
+            let spawn_ref = entity.get::<SpawnSlotRef>()?;
+            (agent.dead && !harvest.harvested)
+                .then_some((spawn_ref.rule_index, spawn_ref.slot_index))
+        })
+        .collect::<BTreeSet<_>>();
     let mut due_respawns = Vec::new();
     {
         let mut spawn_table = world.resource_mut::<MonsterSpawnTable>();
@@ -1649,6 +1676,14 @@ pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
                     continue;
                 };
                 if tick < respawn_tick {
+                    continue;
+                }
+                // A harvestable Crystal corpse is an authoritative lifecycle
+                // boundary. Keep its due respawn pending until the final
+                // ObjectHarvested pass; otherwise every compatibility tick
+                // can revive it and reset multi-pass skinning progress while
+                // the shared Zone correctly retains the corpse.
+                if awaiting_harvest.contains(&(rule_index, slot_index)) {
                     continue;
                 }
                 let Some(entity) = slot.entity else {

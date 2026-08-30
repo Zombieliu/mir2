@@ -157,6 +157,8 @@ pub enum ClientPacketId {
     UnlockStorage = 150,
     SetStoragePassword = 151,
     RemoveStoragePassword = 152,
+    StoreItemV2 = 153,
+    TakeBackItemV2 = 154,
 }
 
 impl TryFrom<i16> for ClientPacketId {
@@ -317,6 +319,8 @@ impl TryFrom<i16> for ClientPacketId {
             150 => Ok(Self::UnlockStorage),
             151 => Ok(Self::SetStoragePassword),
             152 => Ok(Self::RemoveStoragePassword),
+            153 => Ok(Self::StoreItemV2),
+            154 => Ok(Self::TakeBackItemV2),
             other => Err(PacketCodecError::UnknownClientPacketId(other)),
         }
     }
@@ -611,6 +615,8 @@ pub enum ServerPacketId {
     /// plus the live `ObjectPlayer`s; the web gateway has no world context inside
     /// `server_packet_to_event`, so the simulation pre-resolves it here.
     GroupMemberInfo = 280,
+    StoreItemV2 = 281,
+    TakeBackItemV2 = 282,
 }
 
 impl TryFrom<i16> for ServerPacketId {
@@ -899,6 +905,8 @@ impl TryFrom<i16> for ServerPacketId {
             278 => Ok(Self::StoragePasswordResult),
             279 => Ok(Self::MineNodeState),
             280 => Ok(Self::GroupMemberInfo),
+            281 => Ok(Self::StoreItemV2),
+            282 => Ok(Self::TakeBackItemV2),
             other => Err(PacketCodecError::UnknownServerPacketId(other)),
         }
     }

@@ -3,13 +3,13 @@ use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::World;
+use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
-    crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_index,
-    crystal_monster_by_name, crystal_npc_info_manifest, crystal_recipe_bootstrap_packets,
-    format_localized_text, localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
+    crystal_map_respawns_by_file_name, crystal_monster_by_index, crystal_monster_by_name,
+    crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
+    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientAuction, ClientBuff,
@@ -23,25 +23,31 @@ use mir2_protocol::{
 };
 
 use crate::config::{
-    CharacterRecord, CharacterSaveRecord, EquipmentSlot, GroundDropLootSnapshot,
-    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, MonsterSpawnSource,
-    NpcScriptDiagnosticSnapshot, QuestStage, SimulationConfig, Stage5AuctionListing,
-    Stage5HeroState, Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
-    Stage5SystemsState, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
-    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
+    new_stage5_mail_delivery_nonce, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
+    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, MapTransferSnapshot,
+    MonsterSpawnSource, NpcScriptDiagnosticSnapshot, QuestStage, SimulationConfig,
+    Stage5AuctionListing, Stage5HeroState, Stage5ItemRentalRecordSnapshot,
+    Stage5ItemRentalSnapshot, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
+    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
+    WorldSnapshot,
 };
 
+use super::big_map::{
+    client_map_info, search as search_big_map, teleport_to_npc_cost, world_map_setup, SearchMapHit,
+};
 use super::combat::{
-    crystal_player_attack_blocked_by_status, crystal_player_magic_blocked_by_status,
-    crystal_player_movement_blocked_by_status, crystal_player_slowed_by_status,
+    crystal_player_attack_blocked_by_status, crystal_player_can_mount_attack,
+    crystal_player_has_class_weapon, crystal_player_is_dazed,
+    crystal_player_magic_blocked_by_status, crystal_player_movement_blocked_by_status,
+    crystal_player_slowed_by_status, melee_target_is_authoritatively_attackable_in_direction,
 };
 use super::components::{
-    current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
-    entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
-    CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState, GroundDrop,
-    HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState, MonsterPoisonState,
-    MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
-    SummonedMonster,
+    current_hero_object_id, current_player_is_dead, current_player_object_id, entity_by_object_id,
+    entity_facing, entity_object_id, entity_player_vitals, entity_position, hero_entity,
+    player_entity, CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState,
+    GroundDrop, HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState,
+    MonsterPoisonState, MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position,
+    RemotePlayer, SelfPlayer, SummonedMonster,
 };
 use super::crystal_compat::{
     BASE_STORAGE_SLOTS, BUFF_GENERAL_MEOW_MEOW_SHIELD, CRYSTAL_BIND_DONT_STORE,
@@ -51,7 +57,7 @@ use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_WEAPON, CRYSTAL_POTION_SHAPE_NORMAL, CRYSTAL_POTION_SHAPE_SUN_POTION,
     CRYSTAL_RED_NAME_PK_POINTS, CRYSTAL_STAT_HP, CRYSTAL_STAT_LUCK, CRYSTAL_STAT_MAX_DC,
     CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC,
-    CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MP,
+    CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MP, GUIDE_NPC_ID, GUIDE_QUEST_ID,
 };
 use super::drops::*;
 use super::drops::{
@@ -74,9 +80,13 @@ use super::items::{
     ItemState,
 };
 use super::map::{
-    active_scene_view, crystal_movement_transfer_records_for_map, current_map_disallows_drug,
+    active_scene_view, apply_current_player_position_map_transfer,
+    crystal_movement_transfer_records_for_map, current_map_disallows_drug,
     current_map_disallows_hero, filter_decor_objects, filter_terrain_patches, is_safe_zone_point,
     normalize_map_file_name, rebuild_world, spawn_stage5_hero,
+};
+use super::map_events::{
+    authorized_map_coordinate_transfers, map_coordinate_hint_packets_for_path,
 };
 use super::monster_ai::advance_world;
 use super::monsters::{
@@ -84,15 +94,17 @@ use super::monsters::{
     crystal_respawn_object_monster_packet, crystal_world_respawn_spawns, point_in_data_range,
     start_game_visible_respawn_spawns,
 };
-use super::movement::{current_location, town_revive_packets};
+use super::movement::{current_location, tile_distance, town_revive_packets};
 use super::npc::{
-    buy_item_impl, crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog,
-    sell_item_impl,
+    buy_item_impl, crystal_npc_object_visible_in_world, crystal_npc_visible_to_character,
+    crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl, CrystalNpcLocalTime, NpcFlagState,
 };
 use super::quests::{
-    begin_quest, can_accept_quest, complete_quest_with_selection, completed_quest_ids,
-    crystal_quest_reward_selection_missing, crystal_quest_task_list, ensure_runtime_quest,
-    quest_definition_exists, quest_log_snapshots, quest_template_by_id,
+    abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
+    completed_quest_ids, crystal_quest_finish_npc_matches, crystal_quest_info_by_id,
+    crystal_quest_reward_selection_missing, crystal_quest_start_npc_matches,
+    crystal_quest_task_list, ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
+    quest_template_by_id,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -104,11 +116,11 @@ use super::resources::{
     crystal_packet_action_ready, crystal_packet_attack_delay_ticks,
     crystal_packet_move_delay_ticks, crystal_packet_spell_delay_ticks,
     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
-    queue_crystal_movement_retry, BuffResource, GmRuntimeResource, HeroInventoryResource,
-    InventoryResource, ItemRentalResource, MapRuntimeResource, MountResource, NpcStateResource,
-    PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource,
-    QuestResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
-    Stage5SystemsResource,
+    queue_crystal_movement_retry, BuffResource, FishingResource, GmRuntimeResource,
+    HeroInventoryResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
+    MountResource, NpcStateResource, PlayerActionKind, PlayerPermissionResource,
+    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::save::*;
 use super::session::SimulationSession;
@@ -119,9 +131,36 @@ use super::social_economy::{
     social_blocks_outgoing_mail, stage5_market_sale_price, stage5_market_settlement,
     stage5_trade_item_can_enter,
 };
-use super::stage5::{push_unique, push_unique_u8, stage5_item_name, stage5_player_name};
+use super::stage5::{
+    exact_mail_item_state_is_valid, game_shop_stock_level, push_unique, push_unique_u8,
+    stage5_claim_mail_authoritative, stage5_item_name, stage5_player_name,
+    validate_stage5_guild_storage_item_carriers, Stage5MailClaimOutcome,
+};
 
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
+const CRYSTAL_MAIL_CAPACITY: usize = 100;
+pub(super) const MAX_MAIL_RECIPIENT_CHARS: usize = 20;
+pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 1_000;
+const MAIL_TARGET_DURABLE_IDENTITY_MISMATCH: &str = "mail target durable save identity mismatch";
+
+#[derive(Resource, Debug, Default)]
+struct BigMapConnectionState {
+    world_map_setup_sent: bool,
+    sent_map_indexes: BTreeSet<i32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ActiveGmAuthorizationIdentity {
+    account_id: String,
+    character_index: i32,
+    character_name: String,
+}
+
+#[derive(Resource, Debug, Clone, Default)]
+struct AccountGmAuthorizationState {
+    password_authorized_identity: Option<ActiveGmAuthorizationIdentity>,
+    login_pending_identity: Option<ActiveGmAuthorizationIdentity>,
+}
 
 pub(super) fn system_message(message: &str) -> ServerPacket {
     ServerPacket::Chat {
@@ -181,11 +220,63 @@ fn current_stage5_character_index(world: &World) -> i32 {
 }
 
 fn stage5_mail_cost(gold: u32, stamped: bool) -> u32 {
-    if stamped {
-        0
-    } else {
-        (gold / 1_000) * 100
+    // `stamped` is client-controlled. Until a server-side stamp inventory and
+    // consume operation exists, it must never authorize free postage.
+    let _ = stamped;
+    (gold / 1_000) * 100
+}
+
+#[derive(Debug, Clone)]
+struct Stage5MailSender {
+    account_id: String,
+    character_index: i32,
+    character_name: String,
+}
+
+fn stage5_mail_sender(world: &World) -> Option<Stage5MailSender> {
+    if !is_in_world(world) {
+        return None;
     }
+    let session = world.resource::<SessionResource>();
+    let account_id = active_session_mutating_account_id(session)?;
+    let character = session.selected_character.as_ref()?;
+    let character_name = character.name.trim();
+    if character_name.is_empty() {
+        return None;
+    }
+    Some(Stage5MailSender {
+        account_id,
+        character_index: character.index,
+        character_name: character_name.to_string(),
+    })
+}
+
+fn stage5_mail_sender_exists(config: &SimulationConfig, sender: &Stage5MailSender) -> bool {
+    config
+        .account_store
+        .lock()
+        .ok()
+        .and_then(|store| {
+            store.accounts.get(&sender.account_id).map(|account| {
+                account.characters.iter().any(|character| {
+                    character.index == sender.character_index
+                        && character.name == sender.character_name
+                })
+            })
+        })
+        .unwrap_or(false)
+}
+
+fn stage5_mail_recipient_is_valid(name: &str) -> bool {
+    let trimmed = name.trim();
+    !trimmed.is_empty()
+        && trimmed == name
+        && trimmed.chars().count() <= MAX_MAIL_RECIPIENT_CHARS
+        && !trimmed.chars().any(char::is_control)
+}
+
+fn stage5_mail_message_is_valid(message: &str) -> bool {
+    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS && !message.chars().any(char::is_control)
 }
 
 #[derive(Debug, Clone)]
@@ -215,58 +306,22 @@ fn stage5_mail_target_for_name(config: &SimulationConfig, name: &str) -> Option<
     None
 }
 
-fn stage5_mail_target_is_current(world: &World, target: &Stage5MailTarget) -> bool {
-    let session = world.resource::<SessionResource>();
-    let account_id = session.account_id.as_deref().unwrap_or("demo");
-    account_id == target.account_id
-        && session
-            .selected_character
-            .as_ref()
-            .is_some_and(|character| character.index == target.character_index)
-}
-
-fn stage5_push_mail_to_local_world(world: &mut World, mut mail: Stage5MailMessage) {
-    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-    let id = stage5
-        .stage5_systems
-        .mail
-        .iter()
-        .map(|mail| mail.id)
-        .max()
-        .unwrap_or(0)
-        .saturating_add(1);
-    mail.id = id;
-    stage5.stage5_systems.mail.push(mail);
-}
-
-fn stage5_push_mail_to_saved_character(
-    config: &SimulationConfig,
-    target: &Stage5MailTarget,
+pub(super) fn stage5_append_mail_to_save(
+    save: &mut CharacterSaveRecord,
+    recipient_name: &str,
     mut mail: Stage5MailMessage,
-) -> Result<(), String> {
-    let mut store = config
-        .account_store
-        .lock()
-        .map_err(|_| "account store mutex poisoned".to_string())?;
-    let account = store
-        .accounts
-        .get_mut(&target.account_id)
-        .ok_or_else(|| format!("mail target account {} not found", target.account_id))?;
-    let character = account
-        .characters
-        .iter()
-        .find(|character| character.index == target.character_index)
-        .cloned()
-        .ok_or_else(|| format!("mail target character {} not found", target.character_name))?;
-    let save = account
-        .saves
-        .entry(character.index)
-        .or_insert_with(|| CharacterSaveRecord::new(character.clone()));
-    let mut systems = save
-        .stage5_systems_json
-        .as_deref()
-        .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
-        .unwrap_or_default();
+) -> Result<Stage5MailMessage, String> {
+    if mail.delivery_nonce.is_empty() {
+        mail.delivery_nonce = new_stage5_mail_delivery_nonce();
+    }
+    let mut systems = match save.stage5_systems_json.as_deref() {
+        Some(state) => serde_json::from_str::<Stage5SystemsState>(state)
+            .map_err(|error| format!("failed to decode stage5 mail: {error}"))?,
+        None => Stage5SystemsState::default(),
+    };
+    if systems.mail.iter().filter(|mail| !mail.deleted).count() >= CRYSTAL_MAIL_CAPACITY {
+        return Err("mailbox is full".to_string());
+    }
     mail.id = systems
         .mail
         .iter()
@@ -274,14 +329,215 @@ fn stage5_push_mail_to_saved_character(
         .max()
         .unwrap_or(0)
         .saturating_add(1);
-    mail.to = character.name;
-    systems.mail.push(mail);
+    mail.to = recipient_name.to_string();
+    systems.mail.push(mail.clone());
     save.stage5_systems_json = Some(
         serde_json::to_string(&systems)
             .map_err(|error| format!("failed to encode stage5 mail: {error}"))?,
     );
-    drop(store);
-    config.save_account_store()
+    Ok(mail)
+}
+
+fn stage5_take_mail_attachments_from_save(
+    save: &mut CharacterSaveRecord,
+    attachment_ids: &[u64],
+    expected_states_json: &[String],
+) -> Result<Vec<ItemState>, String> {
+    if attachment_ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    if attachment_ids.len() != expected_states_json.len() {
+        return Err("mail attachment snapshot length changed before commit".to_string());
+    }
+    let attachment_id_set = attachment_ids.iter().copied().collect::<BTreeSet<_>>();
+    let mut removed = BTreeSet::new();
+    let mut authoritative = Vec::with_capacity(attachment_ids.len());
+    let mut retained = Vec::with_capacity(save.inventory_items_json.len());
+    for state in save.inventory_items_json.drain(..) {
+        let item = serde_json::from_str::<ItemState>(&state)
+            .map_err(|error| format!("failed to decode sender inventory: {error}"))?;
+        let unique_id = item_unique_id(&item);
+        if attachment_id_set.contains(&unique_id) {
+            if !removed.insert(unique_id)
+                || !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                || !exact_mail_item_state_is_valid(&item)
+                || !stage5_trade_item_can_enter(&item)
+            {
+                return Err("mail attachment changed before commit".to_string());
+            }
+            authoritative.push(item);
+        } else {
+            retained.push(state);
+        }
+    }
+    if removed != attachment_id_set {
+        return Err("mail attachment missing from sender save".to_string());
+    }
+    authoritative.sort_by_key(|item| {
+        attachment_ids
+            .iter()
+            .position(|unique_id| *unique_id == item_unique_id(item))
+            .unwrap_or(usize::MAX)
+    });
+    for (item, expected) in authoritative.iter().zip(expected_states_json) {
+        let encoded = serde_json::to_string(item)
+            .map_err(|error| format!("failed to encode authoritative attachment: {error}"))?;
+        if &encoded != expected {
+            return Err("mail attachment differs from authoritative persisted item".to_string());
+        }
+    }
+    save.inventory_items_json = retained;
+    Ok(authoritative)
+}
+
+struct Stage5MailCommit {
+    sender_gold: u32,
+    sender_inventory_items: Vec<ItemState>,
+    sender_mail: Vec<Stage5MailMessage>,
+    sender_baseline_revision: u64,
+    sender_committed_revision: u64,
+}
+
+fn stage5_commit_mail_transaction(
+    config: &SimulationConfig,
+    sender: &Stage5MailSender,
+    target: &Stage5MailTarget,
+    mut mail: Stage5MailMessage,
+    total: u32,
+    attachment_ids: &[u64],
+    expected_attachment_states_json: &[String],
+) -> Result<Stage5MailCommit, String> {
+    let self_mail =
+        sender.account_id == target.account_id && sender.character_index == target.character_index;
+    let touched_accounts = vec![sender.account_id.clone(), target.account_id.clone()];
+    config.commit_account_store_transaction(&touched_accounts, move |store| {
+        let sender_character = store
+            .accounts
+            .get(&sender.account_id)
+            .and_then(|account| {
+                account.characters.iter().find(|character| {
+                    character.index == sender.character_index
+                        && character.name == sender.character_name
+                })
+            })
+            .ok_or_else(|| "mail sender changed before commit".to_string())?;
+        let mut sender_save = store
+            .accounts
+            .get(&sender.account_id)
+            .and_then(|account| account.saves.get(&sender.character_index))
+            .cloned()
+            .ok_or_else(|| "mail sender durable save changed before commit".to_string())?;
+        if sender_save.character.index != sender_character.index
+            || sender_save.character.name != sender_character.name
+        {
+            return Err("mail sender save identity mismatch".to_string());
+        }
+        let mut staged_target_save = if self_mail {
+            None
+        } else {
+            let target_account = store
+                .accounts
+                .get(&target.account_id)
+                .ok_or_else(|| format!("mail target account {} not found", target.account_id))?;
+            let target_character = target_account
+                .characters
+                .iter()
+                .find(|character| {
+                    character.index == target.character_index
+                        && character.name == target.character_name
+                })
+                .cloned()
+                .ok_or_else(|| {
+                    format!("mail target character {} not found", target.character_name)
+                })?;
+            let target_save = match target_account.saves.get(&target.character_index) {
+                Some(target_save) => {
+                    if target_save.character.index != target_character.index
+                        || target_save.character.name != target_character.name
+                    {
+                        return Err(MAIL_TARGET_DURABLE_IDENTITY_MISMATCH.to_string());
+                    }
+                    target_save.clone()
+                }
+                None => CharacterSaveRecord::new(target_character),
+            };
+            Some(target_save)
+        };
+        let sender_baseline_revision = sender_save.revision;
+        sender_save.gold = sender_save
+            .gold
+            .checked_sub(total)
+            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        let removed_attachments = stage5_take_mail_attachments_from_save(
+            &mut sender_save,
+            attachment_ids,
+            expected_attachment_states_json,
+        )?;
+        mail.items = removed_attachments
+            .iter()
+            .map(|item| item.key.clone())
+            .collect();
+        mail.item_states_json = removed_attachments
+            .iter()
+            .map(serde_json::to_string)
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("failed to encode authoritative mail attachment: {error}"))?;
+
+        let _committed_mail = if self_mail {
+            stage5_append_mail_to_save(&mut sender_save, &target.character_name, mail)?
+        } else {
+            let mut target_save = staged_target_save
+                .take()
+                .expect("non-self mail target save should be staged");
+            let committed =
+                stage5_append_mail_to_save(&mut target_save, &target.character_name, mail)?;
+            target_save.revision = target_save
+                .revision
+                .checked_add(1)
+                .ok_or_else(|| "mail target revision exhausted".to_string())?;
+            store
+                .accounts
+                .get_mut(&target.account_id)
+                .expect("validated mail target account should exist")
+                .saves
+                .insert(target.character_index, target_save);
+            committed
+        };
+
+        let sender_committed_revision = sender_baseline_revision
+            .checked_add(1)
+            .ok_or_else(|| "mail sender revision exhausted".to_string())?;
+        sender_save.revision = sender_committed_revision;
+        let sender_gold = sender_save.gold;
+        let sender_inventory_items = sender_save
+            .inventory_items_json
+            .iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("failed to decode committed sender inventory: {error}"))?;
+        let sender_mail = sender_save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>)
+            .transpose()
+            .map_err(|error| format!("failed to decode committed sender mailbox: {error}"))?
+            .unwrap_or_default()
+            .mail;
+        store
+            .accounts
+            .get_mut(&sender.account_id)
+            .expect("validated mail sender account should exist")
+            .saves
+            .insert(sender.character_index, sender_save);
+
+        Ok(Stage5MailCommit {
+            sender_gold,
+            sender_inventory_items,
+            sender_mail,
+            sender_baseline_revision,
+            sender_committed_revision,
+        })
+    })
 }
 
 fn stage5_mail_attachment_ids(items_idx: &[u64; 5]) -> Option<Vec<u64>> {
@@ -304,31 +560,46 @@ fn stage5_mail_attachment_states(world: &World, unique_ids: &[u64]) -> Option<Ve
     let inventory = world.resource::<InventoryResource>();
     let mut items = Vec::with_capacity(unique_ids.len());
     for unique_id in unique_ids {
-        let item = inventory
+        let matches = inventory
             .inventory_items
             .iter()
-            .find(|item| item_matches_inventory_unique_id(item, *unique_id))?
-            .clone();
+            .filter(|item| item_matches_inventory_unique_id(item, *unique_id))
+            .collect::<Vec<_>>();
+        let [item] = matches.as_slice() else {
+            return None;
+        };
+        if !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            || !exact_mail_item_state_is_valid(item)
+            || !stage5_trade_item_can_enter(item)
+        {
+            return None;
+        }
+        let item = (*item).clone();
         items.push(item);
     }
     Some(items)
 }
 
 fn stage5_mail_attachment_user_items(mail: &Stage5MailMessage) -> Vec<UserItem> {
-    let mut items = mail
-        .item_states_json
-        .iter()
-        .filter_map(|state| serde_json::from_str::<ItemState>(state).ok())
-        .map(|item| user_item_from_item_state(&item))
-        .collect::<Vec<_>>();
-    if !items.is_empty() {
-        return items;
+    if !mail.item_states_json.is_empty() {
+        let Ok(items) = mail
+            .item_states_json
+            .iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+        else {
+            return Vec::new();
+        };
+        return items.iter().map(user_item_from_item_state).collect();
     }
-    items.extend(mail.items.iter().enumerate().map(|(index, key)| {
-        let unique_id = (u64::from(mail.id) << 32) | u64::try_from(index + 1).unwrap_or(1);
-        stage5_guild_user_item_for_key(key, unique_id)
-    }));
-    items
+    mail.items
+        .iter()
+        .enumerate()
+        .map(|(index, key)| {
+            let unique_id = (u64::from(mail.id) << 32) | u64::try_from(index + 1).unwrap_or(1);
+            stage5_guild_user_item_for_key(key, unique_id)
+        })
+        .collect()
 }
 
 fn stage5_mail_to_client_mail(mail: &Stage5MailMessage) -> ClientMail {
@@ -373,7 +644,10 @@ fn stage5_send_mail_packet(
     items_idx: [u64; 5],
     stamped: bool,
 ) -> Vec<ServerPacket> {
-    if name.trim().is_empty() {
+    let Some(sender) = stage5_mail_sender(world) else {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    };
+    if !stage5_mail_recipient_is_valid(&name) || !stage5_mail_message_is_valid(&message) {
         return vec![ServerPacket::MailSent { result: -1 }];
     }
     let Some(attachment_ids) = stage5_mail_attachment_ids(&items_idx) else {
@@ -386,12 +660,12 @@ fn stage5_send_mail_packet(
             .social,
         &name,
     ) {
-        return vec![system_message_key(
-            world,
-            "server.CannotMailPlayerOnBlacklist",
-        )];
+        return vec![ServerPacket::MailSent { result: -1 }];
     }
     let config = world.resource::<RuntimeConfigResource>().config.clone();
+    if !stage5_mail_sender_exists(&config, &sender) {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    }
     let Some(target) = stage5_mail_target_for_name(&config, &name) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
@@ -399,10 +673,15 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     let cost = stage5_mail_cost(gold, stamped);
-    let total = gold.saturating_add(cost);
+    let Some(total) = gold.checked_add(cost) else {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    };
     if world.resource::<PlayerRuntimeResource>().gold < total {
         return vec![ServerPacket::MailSent { result: -1 }];
     }
+    let Some(sender_save) = snapshot_active_character_save(world) else {
+        return vec![ServerPacket::MailSent { result: -1 }];
+    };
 
     let item_states_json = match attachment_states
         .iter()
@@ -414,205 +693,298 @@ fn stage5_send_mail_packet(
     };
     let mail = Stage5MailMessage {
         id: 0,
-        from: current_stage5_character_name(world),
+        delivery_nonce: new_stage5_mail_delivery_nonce(),
+        from: sender.character_name.clone(),
         to: target.character_name.clone(),
         subject: String::new(),
         body: message,
         gold,
-        items: attachment_states
-            .iter()
-            .map(|item| item.key.clone())
-            .collect(),
-        item_states_json,
+        items: Vec::new(),
+        item_states_json: Vec::new(),
         opened: false,
         locked: false,
         claimed: false,
         deleted: false,
     };
-    if stage5_mail_target_is_current(world, &target) {
-        stage5_push_mail_to_local_world(world, mail);
-    } else if stage5_push_mail_to_saved_character(&config, &target, mail).is_err() {
-        return vec![ServerPacket::MailSent { result: -1 }];
+    let committed = match stage5_commit_mail_transaction(
+        &config,
+        &sender,
+        &target,
+        mail,
+        total,
+        &attachment_ids,
+        &item_states_json,
+    ) {
+        Ok(committed) => committed,
+        Err(error) => {
+            if error == MAIL_TARGET_DURABLE_IDENTITY_MISMATCH {
+                return Vec::new();
+            }
+            eprintln!("mail transaction failed: {error}");
+            return vec![ServerPacket::MailSent { result: -1 }];
+        }
+    };
+
+    if committed.sender_baseline_revision == sender_save.revision {
+        world
+            .resource::<SessionResource>()
+            .advance_active_save_revision(
+                sender_save.revision,
+                committed.sender_committed_revision,
+            );
     }
 
-    if total > 0 {
-        world.resource_mut::<PlayerRuntimeResource>().gold -= total;
-    }
-    if !attachment_ids.is_empty() {
-        let attachment_id_set = attachment_ids.iter().copied().collect::<BTreeSet<_>>();
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .retain(|item| !attachment_id_set.contains(&item_unique_id(item)));
-    }
+    // The durable sender image is authoritative. A stale same-account session
+    // is fully synchronized for the fields this transaction can affect, so an
+    // attachment removed by another session cannot remain in this World.
+    let committed_ids = committed
+        .sender_inventory_items
+        .iter()
+        .map(item_unique_id)
+        .collect::<BTreeSet<_>>();
+    let removed_from_live = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .filter(|item| !committed_ids.contains(&item_unique_id(item)))
+        .cloned()
+        .collect::<Vec<_>>();
+    world.resource_mut::<PlayerRuntimeResource>().gold = committed.sender_gold;
+    world.resource_mut::<InventoryResource>().inventory_items = committed.sender_inventory_items;
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .mail = committed.sender_mail;
 
     let mut packets = Vec::new();
     if total > 0 {
         packets.push(ServerPacket::LoseGold { gold: total });
     }
-    for item in attachment_states {
+    for item in removed_from_live {
         packets.push(ServerPacket::DeleteItem {
             unique_id: item_unique_id(&item),
             count: item.quantity.min(u32::from(u16::MAX)) as u16,
         });
     }
-    packets.push(ServerPacket::MailSent { result: 0 });
+    packets.push(ServerPacket::MailSent { result: 1 });
     packets.push(stage5_receive_mail_packet(world));
     packets
 }
 
 fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
     let Some(mail_id) = u32::try_from(mail_id).ok() else {
-        return vec![ServerPacket::ParcelCollected { result: -1 }];
+        return Vec::new();
     };
-    let (mail_index, gold, items, item_states_json) = {
-        let stage5 = world.resource::<Stage5SystemsResource>();
-        let Some(mail_index) = stage5
-            .stage5_systems
-            .mail
-            .iter()
-            .position(|mail| mail.id == mail_id && !mail.deleted)
-        else {
-            return vec![ServerPacket::ParcelCollected { result: -1 }];
-        };
-        let mail = &stage5.stage5_systems.mail[mail_index];
-        if mail.claimed {
-            return vec![ServerPacket::ParcelCollected { result: 0 }];
-        }
-        (
-            mail_index,
-            mail.gold,
-            mail.items.clone(),
-            mail.item_states_json.clone(),
-        )
-    };
-    let item_states = item_states_json
-        .iter()
-        .filter_map(|state| serde_json::from_str::<ItemState>(state).ok())
-        .collect::<Vec<_>>();
-    let keyed_items = if item_states.is_empty() {
-        items
-    } else {
-        Vec::new()
-    };
-    {
-        let inventory = world.resource::<InventoryResource>();
-        let free_slots =
-            empty_slots_for_inventory_container(&inventory.inventory_items, ItemContainer::Bag1)
-                .len();
-        if item_states.len() > free_slots {
-            return vec![ServerPacket::ParcelCollected { result: -1 }];
-        }
-        for item_key in &keyed_items {
-            if !can_gain_item_quantity(inventory, ItemContainer::Bag1, item_key, 1) {
-                return vec![ServerPacket::ParcelCollected { result: -1 }];
-            }
-        }
-    }
-
-    if gold > 0 {
-        world.resource_mut::<PlayerRuntimeResource>().gold = world
-            .resource::<PlayerRuntimeResource>()
-            .gold
-            .saturating_add(gold);
-    }
-    let mut gained_items = Vec::new();
-    for mut item in item_states {
-        let Some((container, slot)) = find_empty_inventory_item_slot(
-            &world.resource::<InventoryResource>().inventory_items,
-            ItemContainer::Bag1,
-        ) else {
-            return vec![ServerPacket::ParcelCollected { result: -1 }];
-        };
-        item.container = container;
-        item.slot = slot;
-        item.unique_id = allocate_item_unique_id(
-            world.resource::<InventoryResource>(),
-            item.container,
-            item.slot,
-        );
-        gained_items.push(user_item_from_item_state(&item));
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .push(item);
-    }
-    for item_key in keyed_items {
-        let item = add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item_key,
-            &stage5_item_name(&item_key),
-            "Crystal mail attachment.",
-            20,
-            1,
-            1,
-        );
-        gained_items.push(user_item_from_item_state(&item));
-    }
-    world
-        .resource_mut::<Stage5SystemsResource>()
+    let base_inventory = world.resource::<InventoryResource>().clone();
+    let base_player = world.resource::<PlayerRuntimeResource>().clone();
+    let base_mail = world
+        .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .mail[mail_index]
-        .claimed = true;
+        .mail
+        .clone();
+    let committed = commit_active_character_save_transaction(world, move |save| {
+        let mut staged_inventory = base_inventory;
+        staged_inventory.inventory_items =
+            decode_mail_claim_item_states(&save.inventory_items_json, "active inventory")?;
+        staged_inventory.belt_items =
+            decode_mail_claim_item_states(&save.belt_items_json, "active belt")?;
+        staged_inventory.storage_items =
+            decode_mail_claim_item_states(&save.storage_items_json, "active storage")?;
+
+        let mut staged_player = base_player;
+        staged_player.gold = save.gold;
+        staged_player.credit = save.credit;
+        let mut staged_systems = save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>)
+            .transpose()
+            .map_err(|error| format!("failed to decode staged claim mailbox: {error}"))?
+            .unwrap_or_default();
+        let mut visible_mail = base_mail;
+        merge_external_stage5_mail(&mut visible_mail, std::mem::take(&mut staged_systems.mail))?;
+        staged_systems.mail = visible_mail;
+
+        let mut staged_world = World::new();
+        staged_world.insert_resource(staged_inventory);
+        staged_world.insert_resource(staged_player);
+        staged_world.insert_resource(Stage5SystemsResource {
+            stage5_systems: staged_systems,
+        });
+        let claim = stage5_claim_mail_authoritative(&mut staged_world, mail_id)
+            .map_err(|error| format!("mail claim rejected: {error:?}"))?;
+
+        let staged_inventory = staged_world.resource::<InventoryResource>().clone();
+        let staged_player = staged_world.resource::<PlayerRuntimeResource>();
+        let committed_gold = staged_player.gold;
+        let committed_credit = staged_player.credit;
+        let staged_systems = staged_world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .clone();
+        save.gold = committed_gold;
+        save.credit = committed_credit;
+        save.inventory_items_json = encode_state_vec(&staged_inventory.inventory_items);
+        save.belt_items_json = encode_state_vec(&staged_inventory.belt_items);
+        save.stage5_systems_json = Some(
+            serde_json::to_string(&staged_systems)
+                .map_err(|error| format!("failed to encode staged claim mailbox: {error}"))?,
+        );
+
+        Ok(Stage5MailClaimCommit {
+            claim,
+            gold: committed_gold,
+            inventory_items: staged_inventory.inventory_items,
+            belt_items: staged_inventory.belt_items,
+            stage5_systems: staged_systems,
+        })
+    });
+    let Ok(committed) = committed else {
+        if let Err(error) = committed {
+            eprintln!("mail claim transaction failed: {error}");
+        }
+        // Crystal PlayerObject.CollectMail silently returns when the addressed
+        // mail is absent or cannot be collected. ParcelCollected(-1) belongs to
+        // the NPCScript bulk [@COLLECTPARCEL] path, not this single-mail command.
+        return Vec::new();
+    };
+
+    // The durable account-store transaction is authoritative. Only after it
+    // succeeds do we mirror the exact staged result into the active World and
+    // emit currency/item/success packets.
+    world.resource_mut::<PlayerRuntimeResource>().gold = committed.gold;
+    {
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        inventory.inventory_items = committed.inventory_items;
+        inventory.belt_items = committed.belt_items;
+    }
+    world.resource_mut::<Stage5SystemsResource>().stage5_systems = committed.stage5_systems;
 
     let mut packets = Vec::new();
-    if gold > 0 {
-        packets.push(ServerPacket::GainedGold { gold });
+    if committed.claim.gold > 0 {
+        packets.push(ServerPacket::GainedGold {
+            gold: committed.claim.gold,
+        });
     }
-    for item in gained_items {
-        packets.push(ServerPacket::GainedItem { item });
+    for item in committed.claim.items {
+        packets.push(ServerPacket::GainedItem {
+            item: user_item_from_item_state(&item),
+        });
     }
-    packets.push(ServerPacket::ParcelCollected { result: 0 });
+    packets.push(ServerPacket::ParcelCollected { result: 1 });
     packets.push(stage5_receive_mail_packet(world));
     packets
 }
 
-fn stage5_read_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
-    if let Ok(mail_id) = u32::try_from(mail_id) {
-        if let Some(mail) = world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .mail
-            .iter_mut()
-            .find(|mail| mail.id == mail_id && !mail.deleted)
-        {
-            mail.opened = true;
-        }
-    }
-    vec![stage5_receive_mail_packet(world)]
+#[derive(Debug, Clone)]
+struct Stage5MailClaimCommit {
+    claim: Stage5MailClaimOutcome,
+    gold: u32,
+    inventory_items: Vec<ItemState>,
+    belt_items: Vec<ItemState>,
+    stage5_systems: Stage5SystemsState,
 }
 
-fn stage5_lock_mail_packet(world: &mut World, mail_id: u64, lock: bool) -> Vec<ServerPacket> {
-    if let Ok(mail_id) = u32::try_from(mail_id) {
-        if let Some(mail) = world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .mail
-            .iter_mut()
-            .find(|mail| mail.id == mail_id && !mail.deleted)
-        {
-            mail.locked = lock;
-        }
-    }
-    vec![stage5_receive_mail_packet(world)]
+fn decode_mail_claim_item_states(states: &[String], label: &str) -> Result<Vec<ItemState>, String> {
+    states
+        .iter()
+        .map(|state| {
+            serde_json::from_str::<ItemState>(state)
+                .map_err(|error| format!("failed to decode {label} for mail claim: {error}"))
+        })
+        .collect()
 }
 
-fn stage5_delete_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
-    if let Ok(mail_id) = u32::try_from(mail_id) {
-        if let Some(mail) = world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
+#[derive(Debug, Clone, Copy)]
+enum Stage5MailStatusMutation {
+    Read,
+    Lock { locked: bool },
+    Delete,
+}
+
+/// Mutate mailbox status from the lock-held, latest durable character save.
+///
+/// The live ECS mailbox is deliberately not touched by the transaction
+/// closure.  That makes malformed/missing/deleted/locked requests and any
+/// persistence failure observationally atomic: the account store, file and
+/// World all remain unchanged unless the durable commit succeeds.
+fn stage5_commit_mail_status_transaction(
+    world: &World,
+    mail_id: u64,
+    mutation: Stage5MailStatusMutation,
+) -> Result<Stage5SystemsState, String> {
+    let exact_mail_id = u32::try_from(mail_id)
+        .map_err(|_| "mail status request has an invalid mail identity".to_string())?;
+
+    commit_active_character_save_transaction(world, move |save| {
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<Stage5SystemsState>)
+            .transpose()
+            .map_err(|error| format!("failed to decode durable mailbox: {error}"))?
+            .unwrap_or_default();
+        let mail = systems
             .mail
             .iter_mut()
-            .find(|mail| mail.id == mail_id)
-        {
-            if !mail.locked {
+            .find(|mail| mail.id == exact_mail_id && u64::from(mail.id) == mail_id)
+            .ok_or_else(|| "mail identity not found in durable mailbox".to_string())?;
+        if mail.deleted {
+            return Err("mail status request targets deleted mail".to_string());
+        }
+        match mutation {
+            Stage5MailStatusMutation::Read => mail.opened = true,
+            Stage5MailStatusMutation::Lock { locked } => mail.locked = locked,
+            Stage5MailStatusMutation::Delete => {
+                if mail.locked {
+                    return Err("locked mail cannot be deleted".to_string());
+                }
                 mail.deleted = true;
             }
         }
+        save.stage5_systems_json = Some(
+            serde_json::to_string(&systems)
+                .map_err(|error| format!("failed to encode durable mailbox: {error}"))?,
+        );
+        Ok(systems)
+    })
+}
+
+fn stage5_mail_status_packet(
+    world: &mut World,
+    mail_id: u64,
+    mutation: Stage5MailStatusMutation,
+) -> Vec<ServerPacket> {
+    match stage5_commit_mail_status_transaction(world, mail_id, mutation) {
+        Ok(committed_mailbox) => {
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = committed_mailbox;
+            vec![stage5_receive_mail_packet(world)]
+        }
+        Err(error) => {
+            eprintln!("mail status transaction rejected: {error}");
+            // Crystal MirConnection/PlayerObject silently returns when the
+            // request is out of Game stage or the addressed mail is absent.
+            // Never project the stale live mailbox on an identity/persistence
+            // rejection because it may belong to a previously bound account.
+            Vec::new()
+        }
     }
-    vec![stage5_receive_mail_packet(world)]
+}
+
+fn stage5_read_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
+    stage5_mail_status_packet(world, mail_id, Stage5MailStatusMutation::Read)
+}
+
+fn stage5_lock_mail_packet(world: &mut World, mail_id: u64, lock: bool) -> Vec<ServerPacket> {
+    stage5_mail_status_packet(
+        world,
+        mail_id,
+        Stage5MailStatusMutation::Lock { locked: lock },
+    )
+}
+
+fn stage5_delete_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
+    stage5_mail_status_packet(world, mail_id, Stage5MailStatusMutation::Delete)
 }
 
 fn stage5_friend_entries(world: &World) -> Vec<ClientFriend> {
@@ -801,15 +1173,6 @@ fn stage5_hero_ready_for_inventory(world: &World) -> bool {
         && current_hero_object_id(world).is_some()
 }
 
-fn player_item_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
-    resources
-        .belt_items
-        .iter()
-        .chain(resources.inventory_items.iter())
-        .chain(resources.storage_items.iter())
-        .any(|item| item_unique_id(item) == unique_id)
-}
-
 fn transfer_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
     let failed_packet = ServerPacket::TransferHeroItem {
         from,
@@ -922,19 +1285,24 @@ fn take_back_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<Serv
         return vec![failed_packet];
     };
 
-    let mut item = {
-        let mut hero_inventory = world.resource_mut::<HeroInventoryResource>();
-        hero_inventory.items.remove(hero_index)
-    };
+    let mut item = world.resource::<HeroInventoryResource>().items[hero_index].clone();
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return vec![failed_packet];
+    }
     item.slot = to_inventory_slot;
     item.container = to_container;
-    {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        if player_item_unique_id_is_used(&inventory, item_unique_id(&item)) {
-            item.unique_id = allocate_item_unique_id(&inventory, item.container, item.slot);
-        }
-        inventory.inventory_items.push(item);
+    normalize_incoming_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return vec![failed_packet];
     }
+    world
+        .resource_mut::<HeroInventoryResource>()
+        .items
+        .remove(hero_index);
+    world
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(item);
 
     vec![ServerPacket::TakeBackHeroItem {
         from,
@@ -2170,24 +2538,67 @@ fn stage5_guild_user_item_for_key(key: &str, unique_id: u64) -> UserItem {
     }
 }
 
-fn stage5_guild_storage_item_from_state(world: &World, key: &str, slot: u8) -> GuildStorageItem {
-    let stage5 = world.resource::<Stage5SystemsResource>();
-    let guild = &stage5.stage5_systems.guild;
-    let user_id = guild
-        .storage_item_users
-        .get(&slot)
-        .copied()
-        .map(i64::from)
-        .unwrap_or_else(|| i64::from(current_stage5_character_index(world)));
-    let item = guild
-        .storage_item_states
-        .get(&slot)
-        .and_then(|json| serde_json::from_str::<ItemState>(json).ok())
-        .map(|item| user_item_from_item_state(&item))
-        .unwrap_or_else(|| stage5_guild_user_item_for_key(key, 90_000 + u64::from(slot)));
-    GuildStorageItem { item, user_id }
+#[derive(Debug, Clone)]
+struct ValidatedStage5GuildStorageItem {
+    state: ItemState,
+    packet: GuildStorageItem,
 }
 
+fn validate_stage5_guild_storage_packet_snapshot(
+    systems: &Stage5SystemsState,
+) -> Result<BTreeMap<u8, ValidatedStage5GuildStorageItem>, String> {
+    validate_stage5_guild_storage_item_carriers(&systems.guild)?;
+    let guild = &systems.guild;
+    if guild.storage_items.len() != guild.storage_item_users.len() {
+        return Err(format!(
+            "stage5 guild storage key/owner length mismatch: {} keys, {} owners",
+            guild.storage_items.len(),
+            guild.storage_item_users.len()
+        ));
+    }
+
+    let mut validated = BTreeMap::new();
+    for (slot, key) in &guild.storage_items {
+        let encoded = guild.storage_item_states.get(slot).ok_or_else(|| {
+            format!("stage5 guild storage slot {slot} is missing exact item state")
+        })?;
+        let owner = guild.storage_item_users.get(slot).copied().ok_or_else(|| {
+            format!("stage5 guild storage slot {slot} is missing exact item owner")
+        })?;
+        let state = serde_json::from_str::<ItemState>(encoded).map_err(|error| {
+            format!("failed to decode stage5 guild storage slot {slot}: {error}")
+        })?;
+        if state.key != *key {
+            return Err(format!(
+                "stage5 guild storage slot {slot} key/state mismatch: {key} != {}",
+                state.key
+            ));
+        }
+        validate_committed_item_state_carrier(&state).map_err(|error| {
+            format!("invalid stage5 guild storage slot {slot} carrier: {error}")
+        })?;
+        let item = try_user_item_from_item_state(&state).map_err(|error| {
+            format!("failed to convert stage5 guild storage slot {slot}: {error}")
+        })?;
+        validated.insert(
+            *slot,
+            ValidatedStage5GuildStorageItem {
+                state,
+                packet: GuildStorageItem {
+                    item,
+                    user_id: i64::from(owner),
+                },
+            },
+        );
+    }
+
+    if validated.len() != guild.storage_item_states.len()
+        || validated.len() != guild.storage_item_users.len()
+    {
+        return Err("stage5 guild storage maps do not have exact slot correspondence".to_string());
+    }
+    Ok(validated)
+}
 fn stage5_swap_guild_storage_map<T>(map: &mut BTreeMap<u8, T>, from: u8, to: u8) {
     if from == to {
         return;
@@ -2521,6 +2932,12 @@ fn stage5_guild_storage_gold_packet(
     if !is_in_world(world) {
         return Vec::new();
     }
+    let player_name = current_stage5_character_name(world);
+    let failure_receipt = || ServerPacket::GuildStorageGoldChange {
+        amount,
+        change_type: change_type.saturating_add(3),
+        name: player_name.clone(),
+    };
     if world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -2528,19 +2945,21 @@ fn stage5_guild_storage_gold_packet(
         .name
         .is_empty()
     {
-        return vec![stage5_guild_not_in_guild_chat(world)];
+        return vec![stage5_guild_not_in_guild_chat(world), failure_receipt()];
     }
     if !stage5_guild_player_in_safe_zone(world) {
-        return vec![system_message_key(
-            world,
-            "server.CannotUseGuildStorageOutsideSafezones",
-        )];
+        return vec![
+            system_message_key(world, "server.CannotUseGuildStorageOutsideSafezones"),
+            failure_receipt(),
+        ];
     }
-    let player_name = current_stage5_character_name(world);
     match change_type {
         0 => {
             if world.resource::<PlayerRuntimeResource>().gold < amount {
-                return vec![system_message_key(world, "server.InsufficientGold")];
+                return vec![
+                    system_message_key(world, "server.InsufficientGold"),
+                    failure_receipt(),
+                ];
             }
             if world
                 .resource::<Stage5SystemsResource>()
@@ -2549,7 +2968,10 @@ fn stage5_guild_storage_gold_packet(
                 .storage_gold
                 > u32::MAX.saturating_sub(amount)
             {
-                return vec![system_message_key(world, "server.GuildGoldLimitReached")];
+                return vec![
+                    system_message_key(world, "server.GuildGoldLimitReached"),
+                    failure_receipt(),
+                ];
             }
             world.resource_mut::<PlayerRuntimeResource>().gold -= amount;
             {
@@ -2569,20 +2991,29 @@ fn stage5_guild_storage_gold_packet(
                 },
             ]
         }
-        _ => {
+        1 => {
             let guild_gold = world
                 .resource::<Stage5SystemsResource>()
                 .stage5_systems
                 .guild
                 .storage_gold;
             if guild_gold < amount {
-                return vec![system_message_key(world, "server.InsufficientGold")];
+                return vec![
+                    system_message_key(world, "server.InsufficientGold"),
+                    failure_receipt(),
+                ];
             }
             if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), amount) {
-                return vec![system_message_key(world, "server.GoldLimitReached")];
+                return vec![
+                    system_message_key(world, "server.GoldLimitReached"),
+                    failure_receipt(),
+                ];
             }
             if stage5_current_guild_rank_index(world) != 0 {
-                return vec![system_message_key(world, "server.InsufficientRank")];
+                return vec![
+                    system_message_key(world, "server.InsufficientRank"),
+                    failure_receipt(),
+                ];
             }
             world.resource_mut::<PlayerRuntimeResource>().gold += amount;
             world
@@ -2599,15 +3030,17 @@ fn stage5_guild_storage_gold_packet(
                 },
             ]
         }
+        _ => Vec::new(),
     }
 }
 
-fn stage5_guild_storage_list_packet(world: &World) -> ServerPacket {
-    let stage5 = world.resource::<Stage5SystemsResource>();
+fn stage5_guild_storage_list_packet(
+    validated: &BTreeMap<u8, ValidatedStage5GuildStorageItem>,
+) -> ServerPacket {
     let mut items = vec![None; GUILD_STORAGE_SLOT_COUNT];
-    for (slot, key) in &stage5.stage5_systems.guild.storage_items {
+    for (slot, stored) in validated {
         if let Some(target) = items.get_mut(usize::from(*slot)) {
-            *target = Some(stage5_guild_storage_item_from_state(world, key, *slot));
+            *target = Some(stored.packet.clone());
         }
     }
     ServerPacket::GuildStorageList { items }
@@ -2641,6 +3074,13 @@ fn stage5_guild_storage_item_packet(
         ];
     }
 
+    let validated_storage = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        match validate_stage5_guild_storage_packet_snapshot(&stage5.stage5_systems) {
+            Ok(validated) => validated,
+            Err(_) => return vec![stage5_guild_storage_failure(change_type, from, to)],
+        }
+    };
     let user = current_stage5_character_index(world);
     match change_type {
         0 => {
@@ -2670,43 +3110,58 @@ fn stage5_guild_storage_item_packet(
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
             let item = world.resource::<InventoryResource>().inventory_items[item_index].clone();
-            if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE) {
+            if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE)
+                || validate_committed_item_state_carrier(&item).is_err()
+            {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
-            if world
-                .resource::<Stage5SystemsResource>()
-                .stage5_systems
-                .guild
-                .storage_items
-                .contains_key(&to_slot)
-            {
+            if validated_storage.contains_key(&to_slot) {
                 return vec![
                     stage5_guild_storage_failure(change_type, from, to),
                     system_message_key(world, "server.TargetSlotNotEmpty"),
                 ];
             }
-            let item = world
-                .resource_mut::<InventoryResource>()
-                .inventory_items
-                .remove(item_index);
-            {
-                let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-                let guild = &mut stage5.stage5_systems.guild;
-                guild.storage_items.insert(to_slot, item.key.clone());
-                if let Ok(encoded) = serde_json::to_string(&item) {
-                    guild.storage_item_states.insert(to_slot, encoded);
-                }
-                guild.storage_item_users.insert(to_slot, user);
+            let Ok(encoded) = serde_json::to_string(&item) else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+
+            let mut next_systems = world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .clone();
+            next_systems
+                .guild
+                .storage_items
+                .insert(to_slot, item.key.clone());
+            next_systems
+                .guild
+                .storage_item_states
+                .insert(to_slot, encoded);
+            next_systems.guild.storage_item_users.insert(to_slot, user);
+            let Ok(next_storage) = validate_stage5_guild_storage_packet_snapshot(&next_systems)
+            else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+            let Some(stored_packet) = next_storage
+                .get(&to_slot)
+                .map(|stored| stored.packet.clone())
+            else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+
+            let mut next_inventory = world.resource::<InventoryResource>().clone();
+            if item_index >= next_inventory.inventory_items.len() {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
+            next_inventory.inventory_items.remove(item_index);
+            *world.resource_mut::<InventoryResource>() = next_inventory;
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = next_systems;
             vec![ServerPacket::GuildStorageItemChange {
                 change_type: 0,
                 to,
                 from,
                 user,
-                item: Some(GuildStorageItem {
-                    item: user_item_from_item_state(&item),
-                    user_id: i64::from(user),
-                }),
+                item: Some(stored_packet),
             }]
         }
         1 => {
@@ -2736,59 +3191,41 @@ fn stage5_guild_storage_item_packet(
                     system_message_key(world, "server.TargetSlotNotEmpty"),
                 ];
             }
-            let (item_key, item_state_json) = {
-                let stage5 = world.resource::<Stage5SystemsResource>();
-                let guild = &stage5.stage5_systems.guild;
-                let Some(item_key) = guild.storage_items.get(&from_slot).cloned() else {
-                    return vec![stage5_guild_storage_failure(change_type, from, to)];
-                };
-                (item_key, guild.storage_item_states.get(&from_slot).cloned())
+            let Some(stored) = validated_storage.get(&from_slot) else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
-            if let Some((container, slot)) = inventory_container_and_slot_for_index(to_slot) {
-                if let Some(mut item) =
-                    item_state_json.and_then(|json| serde_json::from_str::<ItemState>(&json).ok())
-                {
-                    item.container = container;
-                    item.slot = slot;
-                    if item.unique_id == 0
-                        || world
-                            .resource::<InventoryResource>()
-                            .inventory_items
-                            .iter()
-                            .any(|candidate| item_unique_id(candidate) == item_unique_id(&item))
-                    {
-                        item.unique_id = allocate_item_unique_id(
-                            world.resource::<InventoryResource>(),
-                            container,
-                            slot,
-                        );
-                    }
-                    world
-                        .resource_mut::<InventoryResource>()
-                        .inventory_items
-                        .push(item);
-                } else {
-                    add_or_increment_item(
-                        world,
-                        container,
-                        &item_key,
-                        &stage5_item_name(&item_key),
-                        "Stage 5 guild storage retrieve.",
-                        slot,
-                        1,
-                        1,
-                    );
-                }
-            } else {
+            let Some((container, slot)) = inventory_container_and_slot_for_index(to_slot) else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            };
+            let mut prepared_item = stored.state.clone();
+            prepared_item.container = container;
+            prepared_item.slot = slot;
+            normalize_incoming_item_tree_unique_ids(
+                world.resource::<InventoryResource>(),
+                &mut prepared_item,
+                &[],
+            );
+            if validate_committed_item_state_carrier(&prepared_item).is_err()
+                || try_user_item_from_item_state(&prepared_item).is_err()
+            {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
-            {
-                let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-                let guild = &mut stage5.stage5_systems.guild;
-                guild.storage_items.remove(&from_slot);
-                guild.storage_item_states.remove(&from_slot);
-                guild.storage_item_users.remove(&from_slot);
+
+            let mut next_inventory = world.resource::<InventoryResource>().clone();
+            next_inventory.inventory_items.push(prepared_item);
+            let mut next_systems = world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .clone();
+            next_systems.guild.storage_items.remove(&from_slot);
+            next_systems.guild.storage_item_states.remove(&from_slot);
+            next_systems.guild.storage_item_users.remove(&from_slot);
+            if validate_stage5_guild_storage_packet_snapshot(&next_systems).is_err() {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
+
+            *world.resource_mut::<InventoryResource>() = next_inventory;
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = next_systems;
             vec![ServerPacket::GuildStorageItemChange {
                 change_type: 1,
                 to,
@@ -2812,32 +3249,38 @@ fn stage5_guild_storage_item_packet(
             {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
-            let moved_key = {
-                let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-                let guild = &mut stage5.stage5_systems.guild;
-                let Some(moved) = guild.storage_items.get(&from_slot).cloned() else {
-                    return vec![stage5_guild_storage_failure(change_type, from, to)];
-                };
-                stage5_swap_guild_storage_map(&mut guild.storage_items, from_slot, to_slot);
-                stage5_swap_guild_storage_map(&mut guild.storage_item_states, from_slot, to_slot);
-                stage5_swap_guild_storage_map(&mut guild.storage_item_users, from_slot, to_slot);
-                moved
+            let Some(moved_item) = validated_storage
+                .get(&from_slot)
+                .map(|stored| stored.packet.clone())
+            else {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
+
+            let mut next_systems = world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .clone();
+            let guild = &mut next_systems.guild;
+            stage5_swap_guild_storage_map(&mut guild.storage_items, from_slot, to_slot);
+            stage5_swap_guild_storage_map(&mut guild.storage_item_states, from_slot, to_slot);
+            stage5_swap_guild_storage_map(&mut guild.storage_item_users, from_slot, to_slot);
+            if validate_stage5_guild_storage_packet_snapshot(&next_systems).is_err() {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            }
+
+            world.resource_mut::<Stage5SystemsResource>().stage5_systems = next_systems;
             vec![ServerPacket::GuildStorageItemChange {
                 change_type: 2,
                 to,
                 from,
                 user,
-                item: Some(stage5_guild_storage_item_from_state(
-                    world, &moved_key, to_slot,
-                )),
+                item: Some(moved_item),
             }]
         }
-        3 => vec![stage5_guild_storage_list_packet(world)],
+        3 => vec![stage5_guild_storage_list_packet(&validated_storage)],
         _ => vec![stage5_guild_storage_failure(change_type, from, to)],
     }
 }
-
 const CRYSTAL_QUEST_STATE_ADD: u8 = 0;
 const CRYSTAL_QUEST_STATE_UPDATE: u8 = 1;
 const CRYSTAL_QUEST_STATE_REMOVE: u8 = 2;
@@ -2909,7 +3352,264 @@ fn stage5_quest_remove_packet(quest_id: i32, completed: bool) -> ServerPacket {
     }
 }
 
-fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+fn active_npc_allows_quest_request(
+    world: &World,
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+    selected_item_index: Option<i32>,
+) -> bool {
+    let Some(active_dialog) = world
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+    else {
+        return false;
+    };
+    let npc_object_id = active_dialog.npc_object_id;
+    if !active_dialog.links.iter().any(|link| {
+        quest_dialog_link_allows_operation(&link.target, quest_id, finish, selected_item_index)
+    }) {
+        return false;
+    }
+
+    if !quest_npc_matches_request(quest_id, requested_npc_index, finish, npc_object_id) {
+        return false;
+    }
+
+    npc_is_adjacent_to_player(world, npc_object_id)
+}
+
+fn quest_npc_matches_request(
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+    npc_object_id: u32,
+) -> bool {
+    if quest_template_by_id(quest_id).is_some() {
+        quest_id == GUIDE_QUEST_ID
+            && npc_object_id == GUIDE_NPC_ID
+            && requested_npc_index.is_none_or(|index| index == GUIDE_NPC_ID)
+    } else if let Some(info) = crystal_quest_info_by_id(quest_id) {
+        let requested_matches = requested_npc_index
+            .is_none_or(|index| index == npc_object_id || index == info.npc_index);
+        requested_matches
+            && if finish {
+                crystal_quest_finish_npc_matches(&info, npc_object_id)
+            } else {
+                crystal_quest_start_npc_matches(&info, npc_object_id)
+            }
+    } else {
+        false
+    }
+}
+
+fn npc_is_adjacent_to_player(world: &World, npc_object_id: u32) -> bool {
+    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
+        return false;
+    };
+    if !world.entity(npc_entity).contains::<Npc>() {
+        return false;
+    }
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let (Some(player_position), Some(npc_position)) = (
+        entity_position(world, player),
+        entity_position(world, npc_entity),
+    ) else {
+        return false;
+    };
+    tile_distance(&player_position, &npc_position) <= 1
+}
+
+fn quest_dialog_link_allows_operation(
+    target: &str,
+    quest_id: i32,
+    finish: bool,
+    selected_item_index: Option<i32>,
+) -> bool {
+    let target = target.trim();
+    let explicit = if finish {
+        format!("@FinishQuest:{quest_id}")
+    } else {
+        format!("@AcceptQuest:{quest_id}")
+    };
+    let crystal = if finish {
+        format!("@quest:finish:{quest_id}")
+    } else {
+        format!("@quest:accept:{quest_id}")
+    };
+    target.eq_ignore_ascii_case(&explicit)
+        || target.eq_ignore_ascii_case(&crystal)
+        || (finish
+            && selected_item_index.is_some_and(|selected| {
+                target.eq_ignore_ascii_case(&format!("@quest:finish:{quest_id}:{selected}"))
+            }))
+}
+
+#[cfg(test)]
+mod quest_dialog_operation_link_tests {
+    use bevy_ecs::prelude::World;
+    use mir2_protocol::Point;
+
+    use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
+    use super::super::npc::{ActiveNpcDialogState, NpcDialogLinkState};
+    use super::super::resources::NpcStateResource;
+    use super::{
+        active_npc_allows_quest_request, quest_dialog_link_allows_operation, GUIDE_NPC_ID,
+        GUIDE_QUEST_ID,
+    };
+
+    #[test]
+    fn starter_and_crystal_dialog_links_preserve_web_and_native_quest_actions() {
+        assert!(quest_dialog_link_allows_operation(
+            "@AcceptQuest:1001",
+            1001,
+            false,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@quest:accept:42",
+            42,
+            false,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@FinishQuest:1001",
+            1001,
+            true,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@quest:finish:42",
+            42,
+            true,
+            None,
+        ));
+        assert!(quest_dialog_link_allows_operation(
+            "@quest:finish:42:2",
+            42,
+            true,
+            Some(2),
+        ));
+        assert!(!quest_dialog_link_allows_operation(
+            "@quest:finish:42:1",
+            42,
+            true,
+            Some(2),
+        ));
+        assert!(!quest_dialog_link_allows_operation(
+            "@quest:accept:43",
+            42,
+            false,
+            None,
+        ));
+    }
+
+    #[test]
+    fn quest_packets_require_the_exact_active_dialog_even_beside_the_correct_npc() {
+        let mut world = World::new();
+        world.insert_resource(NpcStateResource::new());
+        let player = world
+            .spawn((SelfPlayer, ObjectId(1), Position(Point { x: 10, y: 10 })))
+            .id();
+        world.spawn((
+            Npc,
+            ObjectId(GUIDE_NPC_ID),
+            Position(Point { x: 11, y: 10 }),
+        ));
+
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(0),
+            false,
+            None,
+        ));
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(GUIDE_NPC_ID),
+            false,
+            None,
+        ));
+
+        world.resource_mut::<NpcStateResource>().active_npc_dialog = Some(ActiveNpcDialogState {
+            npc_object_id: GUIDE_NPC_ID,
+            npc_name: "Village Guide".to_string(),
+            npc_name_key: None,
+            stage: None,
+            current: 0,
+            required: 1,
+            title: "Quest".to_string(),
+            body: Vec::new(),
+            footer: String::new(),
+            links: vec![NpcDialogLinkState {
+                text: "Accept".to_string(),
+                target: format!("@AcceptQuest:{GUIDE_QUEST_ID}"),
+            }],
+            input: None,
+        });
+        assert!(
+            !active_npc_allows_quest_request(&world, GUIDE_QUEST_ID, Some(0), false, None,),
+            "the removed Web sentinel must not impersonate a concrete NPC"
+        );
+        assert!(active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(GUIDE_NPC_ID),
+            false,
+            None,
+        ));
+
+        world
+            .resource_mut::<NpcStateResource>()
+            .active_npc_dialog
+            .as_mut()
+            .expect("active quest dialog")
+            .links = vec![NpcDialogLinkState {
+            text: "Complete".to_string(),
+            target: format!("@FinishQuest:{GUIDE_QUEST_ID}"),
+        }];
+        assert!(active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+
+        world
+            .entity_mut(player)
+            .get_mut::<Position>()
+            .expect("player position")
+            .0 = Point { x: 20, y: 20 };
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            Some(GUIDE_NPC_ID),
+            false,
+            None,
+        ));
+        assert!(!active_npc_allows_quest_request(
+            &world,
+            GUIDE_QUEST_ID,
+            None,
+            true,
+            None,
+        ));
+    }
+}
+
+pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
@@ -2946,7 +3646,7 @@ fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPac
     }
 }
 
-fn stage5_finish_quest_packet(
+pub(super) fn stage5_finish_quest_packet(
     world: &mut World,
     quest_id: i32,
     selected_item_index: Option<i32>,
@@ -2956,6 +3656,20 @@ fn stage5_finish_quest_packet(
     }
     if ensure_runtime_quest(world, quest_id) != QuestStage::ReadyToTurnIn {
         return Vec::new();
+    }
+    if let Some(quest) = quest_template_by_id(quest_id) {
+        let proof_quantity = world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .filter(|item| {
+                item.container == ItemContainer::Quest && item.key == quest.quest_item.key
+            })
+            .map(|item| item.quantity)
+            .sum::<u32>();
+        if proof_quantity < quest.quest_item.quantity {
+            return Vec::new();
+        }
     }
     if crystal_quest_reward_selection_missing(quest_id, selected_item_index) {
         return vec![system_message_key(world, "client.YouMustSelectRewardItem")];
@@ -2976,30 +3690,8 @@ fn stage5_abandon_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPa
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(stage) = stage5_quest_stage(world, quest_id) else {
+    if !abandon_quest(world, quest_id) {
         return Vec::new();
-    };
-    if matches!(stage, QuestStage::Available | QuestStage::Completed) {
-        return Vec::new();
-    }
-    {
-        let mut quests = world.resource_mut::<QuestResource>();
-        if let Some(quest) = quests
-            .quests
-            .iter_mut()
-            .find(|quest| quest.quest_id == quest_id)
-        {
-            quest.stage = QuestStage::Available;
-            quest.current = 0;
-        }
-    }
-    if let Some(template) = quest_template_by_id(quest_id) {
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .retain(|item| {
-                item.container != ItemContainer::Quest || item.key != template.quest_item.key
-            });
     }
     vec![stage5_quest_remove_packet(quest_id, false)]
 }
@@ -3905,19 +4597,81 @@ fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacke
     packets
 }
 
-fn request_map_info_packet(world: &World, map_index: i32) -> Vec<ServerPacket> {
-    let mut info = world.resource::<MapRuntimeResource>().current_map.clone();
-    if let Some(map) = crystal_map_respawns_by_index(map_index) {
-        info.map_index = map.map_index;
-        info.file_name = map.map_file_name;
-        info.title = map.map_title;
-        info.mini_map = map.mini_map;
-        info.big_map = map.big_map;
-        info.lights = map.light;
-        info.map_dark_light = map.map_dark_light;
-        info.weather_particles = map.weather_particles;
+fn request_map_info_packet(world: &mut World, map_index: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) || map_index <= 0 {
+        return Vec::new();
     }
-    vec![ServerPacket::MapInformation { info }]
+
+    let Some(info) = client_map_info(map_index) else {
+        return Vec::new();
+    };
+
+    if !world.contains_resource::<BigMapConnectionState>() {
+        world.insert_resource(BigMapConnectionState::default());
+    }
+
+    let (send_setup, send_map_info) = {
+        let mut state = world.resource_mut::<BigMapConnectionState>();
+        let send_setup = !state.world_map_setup_sent;
+        state.world_map_setup_sent = true;
+        let send_map_info = state.sent_map_indexes.insert(map_index);
+        (send_setup, send_map_info)
+    };
+
+    let mut packets = Vec::with_capacity(2);
+    if send_setup {
+        packets.push(ServerPacket::WorldMapSetup {
+            setup: world_map_setup(),
+            teleport_to_npc_cost: teleport_to_npc_cost(),
+        });
+    }
+    if send_map_info {
+        packets.push(ServerPacket::NewMapInfo { map_index, info });
+    }
+    packets
+}
+
+fn search_map_packets(world: &mut World, text: &str) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+
+    let Ok(hit) = search_big_map(text) else {
+        return Vec::new();
+    };
+
+    let Some(hit) = hit else {
+        return vec![ServerPacket::SearchMapResult {
+            map_index: -1,
+            npc_index: 0,
+        }];
+    };
+
+    let (map_index, npc_index) = match hit {
+        SearchMapHit::Map { map_index } => (map_index, 0),
+        SearchMapHit::Npc {
+            map_index,
+            object_id,
+        } => (map_index, object_id),
+    };
+    let mut packets = request_map_info_packet(world, map_index);
+    packets.push(ServerPacket::SearchMapResult {
+        map_index,
+        npc_index,
+    });
+    packets
+}
+
+fn teleport_to_npc_packets(world: &World, object_id: u32) -> Vec<ServerPacket> {
+    if !is_in_world(world) || object_id == 0 {
+        return Vec::new();
+    }
+
+    // Crystal silently rejects an unknown/ineligible NPC, insufficient gold,
+    // or an invalid destination. The imported WorldMap.ini is disabled and the
+    // authoritative NPC catalog has zero CanTeleportTo entries. BM-BE-01 must
+    // therefore preserve transform and currency and emit no fabricated success.
+    Vec::new()
 }
 
 fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
@@ -4237,11 +4991,20 @@ pub(super) fn stage5_trade_request_packet(
     if !is_in_world(world) {
         return Vec::new();
     }
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .is_some()
+    {
+        return Vec::new();
+    }
     let partner = partner_name.unwrap_or_else(|| "Trader".to_string());
     world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems
         .trade = Some(Stage5TradeState {
+        settlement_nonce: new_stage5_mail_delivery_nonce(),
         partner: partner.clone(),
         offered_items: Vec::new(),
         offered_slots: BTreeMap::new(),
@@ -4272,6 +5035,7 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
             .stage5_systems
             .trade
             .get_or_insert_with(|| Stage5TradeState {
+                settlement_nonce: new_stage5_mail_delivery_nonce(),
                 partner: "Trader".to_string(),
                 offered_items: Vec::new(),
                 offered_slots: BTreeMap::new(),
@@ -4716,7 +5480,7 @@ pub(super) fn stage5_intelligent_creature_pickup_packet(
     packets
 }
 
-pub(super) fn tick_stage5_intelligent_creatures(
+pub(super) fn tick_stage5_intelligent_creature_maintenance(
     world: &mut World,
     tick: u64,
     packets: &mut Vec<ServerPacket>,
@@ -4755,6 +5519,14 @@ pub(super) fn tick_stage5_intelligent_creatures(
     if changed {
         packets.push(stage5_intelligent_creature_list_packet(world));
     }
+}
+
+pub(super) fn tick_stage5_intelligent_creatures(
+    world: &mut World,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    tick_stage5_intelligent_creature_maintenance(world, tick, packets);
     if let Some(location) = stage5_intelligent_creature_auto_pickup_location(world) {
         packets.extend(stage5_intelligent_creature_pickup_packet(
             world, location, None,
@@ -4925,6 +5697,135 @@ pub(super) fn prepare_chat_packet(
     })
 }
 
+fn strict_active_account_authorization(
+    world: &World,
+) -> Option<(ActiveGmAuthorizationIdentity, u8)> {
+    let session = world.resource::<SessionResource>();
+    let account_id = active_session_mutating_account_id(session)?;
+    let character = session.selected_character.as_ref()?;
+    let identity = ActiveGmAuthorizationIdentity {
+        account_id: account_id.clone(),
+        character_index: character.index,
+        character_name: character.name.clone(),
+    };
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let stored_level =
+        {
+            let store = config.account_store.lock().ok()?;
+            let account = store.accounts.get(&account_id)?;
+            if !account.characters.iter().any(|candidate| {
+                candidate.index == character.index && candidate.name == character.name
+            }) {
+                return None;
+            }
+            account.gm_level
+        };
+    let env_level = if crate::config::account_is_env_gm(&account_id) {
+        1
+    } else {
+        0
+    };
+    Some((identity, stored_level.max(env_level)))
+}
+
+fn reset_account_derived_gm_runtime(gm: &mut GmRuntimeResource) {
+    gm.login_pending = false;
+    gm.gm_never_die = false;
+    gm.game_master = false;
+    gm.observer = false;
+    gm.allow_guild_invite = true;
+    gm.enable_group_recall = false;
+    gm.allow_trade = true;
+    gm.allow_observe = false;
+    gm.pearls = 0;
+    gm.light = 0;
+    gm.transform_paused = false;
+}
+
+fn clear_account_derived_gm_permissions(world: &mut World) {
+    world.resource_mut::<PlayerPermissionResource>().gm_level = 0;
+    world.remove_resource::<AccountGmAuthorizationState>();
+    reset_account_derived_gm_runtime(&mut world.resource_mut::<GmRuntimeResource>());
+}
+
+fn revalidate_cached_gm_authorization(world: &mut World) -> Option<ActiveGmAuthorizationIdentity> {
+    let Some((identity, account_level)) = strict_active_account_authorization(world) else {
+        clear_account_derived_gm_permissions(world);
+        return None;
+    };
+    let identity_mismatch = world
+        .get_resource::<AccountGmAuthorizationState>()
+        .is_some_and(|state| {
+            state
+                .password_authorized_identity
+                .as_ref()
+                .is_some_and(|bound| bound != &identity)
+                || state
+                    .login_pending_identity
+                    .as_ref()
+                    .is_some_and(|bound| bound != &identity)
+        });
+    if identity_mismatch {
+        clear_account_derived_gm_permissions(world);
+        world.resource_mut::<PlayerPermissionResource>().gm_level = account_level;
+        return Some(identity);
+    }
+    let password_level = world
+        .get_resource::<AccountGmAuthorizationState>()
+        .and_then(|state| state.password_authorized_identity.as_ref())
+        .is_some_and(|bound| bound == &identity) as u8;
+    let authorized_level = account_level.max(password_level);
+    let cached_level = world.resource::<PlayerPermissionResource>().gm_level;
+    if cached_level > authorized_level {
+        reset_account_derived_gm_runtime(&mut world.resource_mut::<GmRuntimeResource>());
+        if let Some(mut state) = world.get_resource_mut::<AccountGmAuthorizationState>() {
+            state.login_pending_identity = None;
+        }
+    }
+    world.resource_mut::<PlayerPermissionResource>().gm_level = authorized_level;
+    Some(identity)
+}
+
+fn gm_command_keyword(message: &str) -> Option<&str> {
+    message
+        .trim_start()
+        .strip_prefix('@')?
+        .split_whitespace()
+        .next()
+}
+
+fn bind_gm_login_prompt(world: &mut World, identity: ActiveGmAuthorizationIdentity) {
+    if let Some(mut state) = world.get_resource_mut::<AccountGmAuthorizationState>() {
+        state.login_pending_identity = Some(identity);
+    } else {
+        world.insert_resource(AccountGmAuthorizationState {
+            password_authorized_identity: None,
+            login_pending_identity: Some(identity),
+        });
+    }
+}
+
+fn gm_login_prompt_matches(world: &World, identity: &ActiveGmAuthorizationIdentity) -> bool {
+    world
+        .get_resource::<AccountGmAuthorizationState>()
+        .and_then(|state| state.login_pending_identity.as_ref())
+        == Some(identity)
+}
+
+fn finish_gm_login_attempt(
+    world: &mut World,
+    identity: ActiveGmAuthorizationIdentity,
+    granted: bool,
+) {
+    let mut state = world
+        .get_resource_mut::<AccountGmAuthorizationState>()
+        .expect("a validated GM login prompt should have an authorization binding");
+    state.login_pending_identity = None;
+    if granted {
+        state.password_authorized_identity = Some(identity);
+    }
+}
+
 pub(super) fn handle_chat_packet(
     world: &mut World,
     message: String,
@@ -4934,7 +5835,20 @@ pub(super) fn handle_chat_packet(
     // candidate (Crystal `PlayerObject.Chat`, GMLogin branch). It is checked
     // before everything else and consumed regardless of outcome.
     if super::gm_commands::gm_login_pending(world) {
-        return super::gm_commands::resolve_gm_login_password(world, &message);
+        let Some((identity, _)) = strict_active_account_authorization(world) else {
+            clear_account_derived_gm_permissions(world);
+            return Vec::new();
+        };
+        if !gm_login_prompt_matches(world, &identity) {
+            clear_account_derived_gm_permissions(world);
+            return Vec::new();
+        }
+        let password_granted =
+            world.resource::<GmRuntimeResource>().password.as_deref() == Some(message.as_str());
+        let packets = super::gm_commands::resolve_gm_login_password(world, &message);
+        finish_gm_login_attempt(world, identity, password_granted);
+        let _ = revalidate_cached_gm_authorization(world);
+        return packets;
     }
 
     // Crystal consumes EVERY `@`-prefixed line as a command attempt — it is never
@@ -4943,6 +5857,13 @@ pub(super) fn handle_chat_packet(
     // claims `@` lines; a non-GM issuing a GM-gated command gets Crystal's silent
     // `return;`, so command existence still never leaks to ordinary players.
     if super::gm_commands::is_gm_command(&message) {
+        let Some(identity) = revalidate_cached_gm_authorization(world) else {
+            return Vec::new();
+        };
+        if gm_command_keyword(&message).is_some_and(|command| command.eq_ignore_ascii_case("LOGIN"))
+        {
+            bind_gm_login_prompt(world, identity);
+        }
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
             return packets;
         }
@@ -5259,7 +6180,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .map(|buff| buff.snapshot(tick, language))
             .collect(),
         stage5_systems,
-        map_transfers: collect_map_transfer_snapshots(config, map),
+        map_transfers: collect_map_transfer_snapshots(world),
         interaction_hints: build_interaction_hints(world, resources),
     }
 }
@@ -5628,6 +6549,52 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
+fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+    let individual_purchases = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .game_shop_individual_purchases
+        .clone();
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let global_purchases = config
+        .account_store
+        .lock()
+        .map(|store| store.game_shop_global_purchases.clone())
+        .ok();
+
+    for packet in packets {
+        let ServerPacket::GameShopInfo { item, stock_level } = packet else {
+            continue;
+        };
+        // Preserve the checked-in unlimited catalog byte-for-byte. Only a
+        // future finite row is projected from durable counters.
+        if item.stock == 0 {
+            continue;
+        }
+        let purchases = if item.i_stock {
+            individual_purchases
+                .get(&item.g_index)
+                .copied()
+                .unwrap_or_default()
+        } else {
+            global_purchases
+                .as_ref()
+                .and_then(|purchases| purchases.get(&item.g_index))
+                .copied()
+                // A poisoned shared store must not expose finite stock as
+                // available. Purchase remains authoritative in the commit.
+                .unwrap_or_else(|| {
+                    if global_purchases.is_some() {
+                        0
+                    } else {
+                        u64::MAX
+                    }
+                })
+        };
+        *stock_level = game_shop_stock_level(item.stock, purchases);
+    }
+}
+
 pub(super) fn start_game_base_stats_packet(class: MirClass) -> Vec<ServerPacket> {
     let mut packets = Vec::new();
     if let Some(payload) = crystal_base_stats_info_packet_payload(class) {
@@ -5729,6 +6696,8 @@ pub(super) fn start_game_static_visible_object_packets(
     player_position: &Point,
     character: &CharacterRecord,
     config: &SimulationConfig,
+    npc_flags: &[NpcFlagState],
+    local_time: CrystalNpcLocalTime,
 ) -> Vec<ServerPacket> {
     let normalized_map = normalize_map_file_name(map_file_name);
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
@@ -5747,7 +6716,7 @@ pub(super) fn start_game_static_visible_object_packets(
         if !point_in_data_range(&npc.location, player_position) {
             continue;
         }
-        if !crystal_npc_visible_to_character(&npc, character) {
+        if !crystal_npc_visible_to_character(&npc, character, npc_flags, local_time) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
@@ -5800,29 +6769,31 @@ pub(super) fn start_game_static_visible_object_packets(
                 ));
             }
         }
-        for spell in map.safe_zone_spells {
-            if !point_in_data_range(&spell.location, player_position) {
-                continue;
-            }
-            let spell_kind = match spell.spell.as_str() {
-                "TrapHexagon" => Spell::TrapHexagon,
-                "Healing" => Spell::Healing,
-                _ => Spell::None,
-            };
-            objects.push((
-                spell.location.y,
-                spell.location.x,
-                spell.object_id,
-                ServerPacket::ObjectSpell {
-                    info: ObjectSpellInfo {
-                        object_id: spell.object_id,
-                        location: spell.location,
-                        spell: spell_kind,
-                        direction: MirDirection::Up,
-                        param: false,
+        if config.safe_zone_border_effects {
+            for spell in map.safe_zone_spells {
+                if !point_in_data_range(&spell.location, player_position) {
+                    continue;
+                }
+                let spell_kind = match spell.spell.as_str() {
+                    "TrapHexagon" => Spell::TrapHexagon,
+                    "Healing" => Spell::Healing,
+                    _ => Spell::None,
+                };
+                objects.push((
+                    spell.location.y,
+                    spell.location.x,
+                    spell.object_id,
+                    ServerPacket::ObjectSpell {
+                        info: ObjectSpellInfo {
+                            object_id: spell.object_id,
+                            location: spell.location,
+                            spell: spell_kind,
+                            direction: MirDirection::Up,
+                            param: false,
+                        },
                     },
-                },
-            ));
+                ));
+            }
         }
     }
 
@@ -5949,10 +6920,9 @@ pub(super) fn user_quest_inventory_slots(items: &[ItemState]) -> Vec<Option<User
     slots
 }
 
-pub(super) fn collect_map_transfer_snapshots(
-    config: &SimulationConfig,
-    map: &MapRuntimeResource,
-) -> Vec<MapTransferSnapshot> {
+pub(super) fn collect_map_transfer_snapshots(world: &World) -> Vec<MapTransferSnapshot> {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let map = world.resource::<MapRuntimeResource>();
     let current_map = normalize_map_file_name(&map.current_map.file_name);
     let mut transfers: Vec<MapTransferSnapshot> = config
         .map_transfers
@@ -5971,6 +6941,19 @@ pub(super) fn collect_map_transfer_snapshots(
 
     transfers.extend(
         crystal_movement_transfer_records_for_map(&map.current_map.file_name)
+            .into_iter()
+            .map(|transfer| MapTransferSnapshot {
+                key: transfer.key,
+                map_file_name: transfer.from_map_file_name,
+                bounds: transfer.from_bounds,
+                to_map_file_name: transfer.to_map_file_name,
+                to_map_title: transfer.to_map_title,
+                to_position: transfer.to_position,
+                to_direction: transfer.to_direction,
+            }),
+    );
+    transfers.extend(
+        authorized_map_coordinate_transfers(world)
             .into_iter()
             .map(|transfer| MapTransferSnapshot {
                 key: transfer.key,
@@ -6032,6 +7015,30 @@ pub(super) fn collect_world_entities(
         .get_resource::<MountResource>()
         .filter(|mount| mount.riding_mount)
         .map(|mount| mount.mount_type);
+    // These predicates are emitted only for the local player because their
+    // authoritative sources live in this personal SimulationSession. Shared
+    // remote players remain `None` until Zone state models the same fields.
+    let self_riding_mount = world
+        .get_resource::<MountResource>()
+        .map(|mount| mount.riding_mount);
+    let self_can_mount_attack = world
+        .get_resource::<MountResource>()
+        .map(|_| crystal_player_can_mount_attack(world));
+    let self_has_class_weapon = player_entity(world).and_then(|player| {
+        (world.entity(player).contains::<CharacterBody>()
+            && world.get_resource::<InventoryResource>().is_some())
+        .then(|| crystal_player_has_class_weapon(world))
+    });
+    let self_dazed = player_entity(world).and_then(|_| {
+        world
+            .get_resource::<BuffResource>()
+            .map(|_| crystal_player_is_dazed(world))
+    });
+    let self_fishing = player_entity(world).and_then(|_| {
+        world
+            .get_resource::<FishingResource>()
+            .map(|fishing| fishing.fishing)
+    });
     for entity in world.iter_entities() {
         let Some(object_id) = entity.get::<ObjectId>() else {
             continue;
@@ -6055,6 +7062,9 @@ pub(super) fn collect_world_entities(
         let remote_marker = entity.get::<RemotePlayer>();
         let npc_marker = entity.get::<Npc>();
         let npc_agent = entity.get::<NpcAgent>();
+        if npc_marker.is_some() && !crystal_npc_object_visible_in_world(world, object_id.0) {
+            continue;
+        }
 
         if self_marker.is_none() && !point_in_scene_data_range(scene_view, &position.0) {
             continue;
@@ -6174,6 +7184,17 @@ pub(super) fn collect_world_entities(
             light,
             name_colour_argb,
             dead,
+            riding_mount: self_marker.is_some().then_some(self_riding_mount).flatten(),
+            can_mount_attack: self_marker
+                .is_some()
+                .then_some(self_can_mount_attack)
+                .flatten(),
+            has_class_weapon: self_marker
+                .is_some()
+                .then_some(self_has_class_weapon)
+                .flatten(),
+            dazed: self_marker.is_some().then_some(self_dazed).flatten(),
+            fishing: self_marker.is_some().then_some(self_fishing).flatten(),
             disposition,
             sprite,
             quest_ids,
@@ -6453,6 +7474,7 @@ fn ground_drop_loot_snapshot(loot: &DropLoot) -> GroundDropLootSnapshot {
             cursed,
             socket_slots,
             show_group_pickup,
+            exact_item,
         } => GroundDropLootSnapshot::InventoryItem {
             key: key.clone(),
             name: name.clone(),
@@ -6466,6 +7488,7 @@ fn ground_drop_loot_snapshot(loot: &DropLoot) -> GroundDropLootSnapshot {
             cursed: *cursed,
             socket_slots: *socket_slots,
             show_group_pickup: *show_group_pickup,
+            exact_item: exact_item.clone(),
         },
     }
 }
@@ -6678,6 +7701,9 @@ pub(super) fn visible_object_bundle_for_entity(
     }
 
     if entry.get::<Npc>().is_some() {
+        if !crystal_npc_object_visible_in_world(world, object_id) {
+            return None;
+        }
         let name = entry.get::<DisplayName>()?.resolve(language);
         let position = entry.get::<Position>()?.0.clone();
         let facing = entry.get::<Facing>()?.0;
@@ -6837,15 +7863,17 @@ fn stage5_get_ranking_packet(
         return Vec::new();
     }
 
-    let session = world.resource::<SessionResource>();
-    let Some(session_account_id) = session.account_id.clone() else {
+    // Crystal only serves rankings in Game/Observer
+    // (`MirConnection.cs:2182-2185`). For the Simulation Game state, also prove
+    // that the exact bound account still owns the selected character before
+    // enumerating any cross-account ranking payload.
+    let Some((active_identity, _)) = strict_active_account_authorization(world) else {
         return Vec::new();
     };
-    let active_character_index = session
-        .selected_character
-        .as_ref()
-        .map(|character| character.index);
-    let active_key = active_character_index.map(|index| (session_account_id.clone(), index));
+    let active_key = Some((
+        active_identity.account_id.clone(),
+        active_identity.character_index,
+    ));
     let active_save = snapshot_active_character_save(world);
     let config = world.resource::<RuntimeConfigResource>().config.clone();
 
@@ -6957,12 +7985,30 @@ fn stage5_get_ranking_packet(
 
 impl SimulationSession {
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
+        match self.try_handle_packet(packet) {
+            Ok(packets) => packets,
+            Err(_error) => {
+                eprintln!("simulation packet execution rejected; details suppressed");
+                Vec::new()
+            }
+        }
+    }
+
+    pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
+            if let Err(error) = persist_active_character_save(self.app.world()) {
+                clear_account_derived_gm_permissions(self.app.world_mut());
+                return Err(error);
+            }
+        }
         if let ClientPacket::StartGame { character_index } = packet {
-            return self.start_game(character_index);
+            let mut packets = self.start_game(character_index);
+            apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
+            return Ok(packets);
         }
 
         let packets = self.handle_packet_impl(packet);
-        self.finalize_packets(packets)
+        Ok(self.finalize_packets(packets))
     }
 
     fn handle_packet_impl(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
@@ -6975,7 +8021,7 @@ impl SimulationSession {
                 vec![ServerPacket::ClientVersion { result: 1 }]
             }
             ClientPacket::Disconnect => {
-                persist_active_character_save(self.app.world());
+                clear_account_derived_gm_permissions(self.app.world_mut());
                 vec![ServerPacket::Disconnect { reason: 0 }]
             }
             ClientPacket::KeepAlive { time } => vec![ServerPacket::KeepAlive { time }],
@@ -7103,8 +8149,6 @@ impl SimulationSession {
             // and replies with `S.Revived` + broadcast `S.ObjectRevived`.
             ClientPacket::TownRevive => town_revive_packets(self.app.world_mut()),
             ClientPacket::ReplaceWedRing { .. }
-            | ClientPacket::TeleportToNpc { .. }
-            | ClientPacket::SearchMap { .. }
             | ClientPacket::Inspect { .. }
             | ClientPacket::Observe { .. }
             | ClientPacket::ChangeTrade { .. }
@@ -7120,8 +8164,12 @@ impl SimulationSession {
             | ClientPacket::DowngradeAwakening { .. }
             | ClientPacket::ResetAddedItem { .. }
             | ClientPacket::GuildBuffUpdate { .. }
-            | ClientPacket::GameShopBuy { .. }
             | ClientPacket::ReportIssue { .. } => Vec::new(),
+            ClientPacket::GameShopBuy {
+                g_index,
+                quantity,
+                price_type,
+            } => self.game_shop_buy_packet(g_index, quantity, price_type),
             ClientPacket::GetRanking {
                 rank_type,
                 rank_index,
@@ -7219,7 +8267,11 @@ impl SimulationSession {
                 stage5_open_door_packet(self.app.world_mut(), door_index)
             }
             ClientPacket::RequestMapInfo { map_index } => {
-                request_map_info_packet(self.app.world(), map_index)
+                request_map_info_packet(self.app.world_mut(), map_index)
+            }
+            ClientPacket::SearchMap { text } => search_map_packets(self.app.world_mut(), &text),
+            ClientPacket::TeleportToNpc { object_id } => {
+                teleport_to_npc_packets(self.app.world(), object_id)
             }
             ClientPacket::RequestMonsterInfo { monster_index } => {
                 request_monster_info_packet(monster_index)
@@ -7265,17 +8317,65 @@ impl SimulationSession {
             ClientPacket::GroupInvite { accept_invite } => {
                 stage5_group_invite_reply_packet(self.app.world_mut(), accept_invite)
             }
-            ClientPacket::AcceptQuest { quest_index, .. } => {
-                stage5_accept_quest_packet(self.app.world_mut(), quest_index)
+            ClientPacket::AcceptQuest {
+                npc_index,
+                quest_index,
+            } => {
+                if !active_npc_allows_quest_request(
+                    self.app.world(),
+                    quest_index,
+                    Some(npc_index),
+                    false,
+                    None,
+                ) {
+                    Vec::new()
+                } else {
+                    let packets = stage5_accept_quest_packet(self.app.world_mut(), quest_index);
+                    if packets.iter().any(|packet| {
+                        matches!(
+                            packet,
+                            ServerPacket::ChangeQuest {
+                                quest_id,
+                                taken: true,
+                                ..
+                            } if *quest_id == quest_index
+                        )
+                    }) {
+                        dismiss_dialog(self.app.world_mut());
+                    }
+                    packets
+                }
             }
             ClientPacket::FinishQuest {
                 quest_index,
                 selected_item_index,
-            } => stage5_finish_quest_packet(
-                self.app.world_mut(),
-                quest_index,
-                (selected_item_index >= 0).then_some(selected_item_index),
-            ),
+            } => {
+                if !active_npc_allows_quest_request(
+                    self.app.world(),
+                    quest_index,
+                    None,
+                    true,
+                    (selected_item_index >= 0).then_some(selected_item_index),
+                ) {
+                    Vec::new()
+                } else {
+                    let packets = stage5_finish_quest_packet(
+                        self.app.world_mut(),
+                        quest_index,
+                        (selected_item_index >= 0).then_some(selected_item_index),
+                    );
+                    if packets.iter().any(|packet| {
+                        matches!(
+                            packet,
+                            ServerPacket::CompleteQuest { completed_quests }
+                                if completed_quests.contains(&quest_index)
+                        )
+                    }) {
+                        dismiss_dialog(self.app.world_mut());
+                    }
+                    packets
+                }
+            }
             ClientPacket::AbandonQuest { quest_index } => {
                 stage5_abandon_quest_packet(self.app.world_mut(), quest_index)
             }
@@ -7397,9 +8497,12 @@ impl SimulationSession {
                         return vec![ServerPacket::Login { result: 4 }];
                     }
                 };
+                clear_account_derived_gm_permissions(self.app.world_mut());
                 let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                 session.account_id = Some(account_id);
                 session.characters = characters;
+                session.selected_character = None;
+                session.clear_active_save_revision();
                 vec![ServerPacket::LoginSuccess {
                     characters: session
                         .characters
@@ -7413,6 +8516,13 @@ impl SimulationSession {
                 gender,
                 class,
             } => {
+                let account_id = match crystal_character_select_state(
+                    self.app.world().resource::<SessionResource>(),
+                ) {
+                    CrystalCharacterSelectState::Authenticated { account_id } => account_id,
+                    CrystalCharacterSelectState::Unauthenticated
+                    | CrystalCharacterSelectState::InGame => return Vec::new(),
+                };
                 let config = self
                     .app
                     .world()
@@ -7422,14 +8532,7 @@ impl SimulationSession {
                 if !config.class_is_allowed(class) {
                     return vec![ServerPacket::NewCharacter { result: 1 }];
                 }
-                let account_id = self
-                    .app
-                    .world()
-                    .resource::<SessionResource>()
-                    .account_id
-                    .clone()
-                    .unwrap_or_else(|| "demo".to_string());
-                let character = add_character_to_account(
+                let character = match add_character_to_account(
                     &config,
                     &account_id,
                     CharacterRecord {
@@ -7439,7 +8542,10 @@ impl SimulationSession {
                         class,
                         gender,
                     },
-                );
+                ) {
+                    Ok(character) => character,
+                    Err(_) => return vec![ServerPacket::NewCharacter { result: 1 }],
+                };
                 self.app
                     .world_mut()
                     .resource_mut::<SessionResource>()
@@ -7470,7 +8576,39 @@ impl SimulationSession {
             }
             ClientPacket::StartGame { character_index } => self.start_game(character_index),
             ClientPacket::LogOut => {
-                persist_active_character_save(self.app.world());
+                let (account_id, in_game) = {
+                    let session = self.app.world().resource::<SessionResource>();
+                    (
+                        active_session_mutating_account_id(session),
+                        session.selected_character.is_some(),
+                    )
+                };
+                if !in_game {
+                    clear_account_derived_gm_permissions(self.app.world_mut());
+                    if account_id.is_none() {
+                        self.app
+                            .world_mut()
+                            .resource_mut::<SessionResource>()
+                            .characters
+                            .clear();
+                    }
+                    return Vec::new();
+                }
+                let Some(account_id) = account_id else {
+                    clear_account_derived_gm_permissions(self.app.world_mut());
+                    self.app
+                        .world_mut()
+                        .resource_mut::<SessionResource>()
+                        .characters
+                        .clear();
+                    return Vec::new();
+                };
+                // Map metadata de-duplication is scoped to one in-world
+                // connection. A later StartGame must receive setup/map info
+                // again even when the SimulationSession object is reused.
+                self.app
+                    .world_mut()
+                    .remove_resource::<BigMapConnectionState>();
                 {
                     let config = self
                         .app
@@ -7481,9 +8619,8 @@ impl SimulationSession {
                     {
                         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                         session.selected_character = None;
-                        if let Some(account_id) = session.account_id.clone() {
-                            session.characters = account_characters(&config, &account_id);
-                        }
+                        session.clear_active_save_revision();
+                        session.characters = account_characters(&config, &account_id);
                     }
                     self.app
                         .world_mut()
@@ -7506,6 +8643,7 @@ impl SimulationSession {
                     inventory.storage_unlocked =
                         !inventory.storage_has_password || !config.require_storage_password;
                 }
+                clear_account_derived_gm_permissions(self.app.world_mut());
                 rebuild_world(self.app.world_mut());
                 let session = self.app.world().resource::<SessionResource>();
                 vec![ServerPacket::LogOutSuccess {
@@ -7523,9 +8661,22 @@ impl SimulationSession {
                         .world_mut()
                         .entity_mut(player)
                         .insert(Facing(direction));
-                    let mut packets = vec![ServerPacket::UserLocation {
-                        location: current_location(self.app.world()),
-                    }];
+                    self.app
+                        .world_mut()
+                        .resource_mut::<PlayerRuntimeResource>()
+                        .player_direction = direction;
+                    let location = current_location(self.app.world());
+                    let mut packets =
+                        apply_current_player_position_map_transfer(self.app.world_mut());
+                    if packets.is_empty() {
+                        packets.push(ServerPacket::UserLocation {
+                            location: location.clone(),
+                        });
+                        packets.extend(map_coordinate_hint_packets_for_path(
+                            self.app.world(),
+                            std::slice::from_ref(&location.position),
+                        ));
+                    }
                     packets.extend(advance_world(self.app.world_mut()));
                     packets
                 } else {
@@ -7615,6 +8766,54 @@ impl SimulationSession {
             ClientPacket::TakeBackItem { from, to } => {
                 take_back_item_impl(self.app.world_mut(), from, to)
             }
+            ClientPacket::StoreItemV2 {
+                request_id,
+                from,
+                to,
+            } => {
+                if !mir2_protocol::is_valid_request_id(&request_id) {
+                    Vec::new()
+                } else {
+                    store_item_impl(self.app.world_mut(), from, to)
+                        .into_iter()
+                        .map(|packet| match packet {
+                            ServerPacket::StoreItem { from, to, success } => {
+                                ServerPacket::StoreItemV2 {
+                                    request_id: request_id.clone(),
+                                    from,
+                                    to,
+                                    success,
+                                }
+                            }
+                            other => other,
+                        })
+                        .collect()
+                }
+            }
+            ClientPacket::TakeBackItemV2 {
+                request_id,
+                from,
+                to,
+            } => {
+                if !mir2_protocol::is_valid_request_id(&request_id) {
+                    Vec::new()
+                } else {
+                    take_back_item_impl(self.app.world_mut(), from, to)
+                        .into_iter()
+                        .map(|packet| match packet {
+                            ServerPacket::TakeBackItem { from, to, success } => {
+                                ServerPacket::TakeBackItemV2 {
+                                    request_id: request_id.clone(),
+                                    from,
+                                    to,
+                                    success,
+                                }
+                            }
+                            other => other,
+                        })
+                        .collect()
+                }
+            }
             ClientPacket::MergeItem {
                 grid_from,
                 grid_to,
@@ -7697,6 +8896,17 @@ impl SimulationSession {
             ClientPacket::Attack { direction, spell } => {
                 if current_player_is_dead(self.app.world())
                     || crystal_player_attack_blocked_by_status(self.app.world())
+                {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
+                if is_in_world(self.app.world())
+                    && melee_target_is_authoritatively_attackable_in_direction(
+                        self.app.world(),
+                        direction,
+                        spell,
+                    ) == Some(false)
                 {
                     return vec![ServerPacket::UserLocation {
                         location: current_location(self.app.world()),
@@ -7958,5 +9168,232 @@ impl SimulationSession {
 
         self.visible_objects = next_object_ids;
         final_packets
+    }
+}
+
+#[cfg(test)]
+mod game_shop_start_stock_tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_store_path() -> std::path::PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or_default();
+        std::env::temp_dir()
+            .join(format!(
+                "mir2-game-shop-start-stock-{}-{unique}",
+                std::process::id()
+            ))
+            .join("accounts.json")
+    }
+
+    fn product(game_shop_index: i32) -> mir2_protocol::GameShopItem {
+        crystal_game_shop_info_packet_payloads()
+            .into_iter()
+            .find_map(|payload| {
+                match decode_crystal_payload(ServerPacketId::GameShopInfo, payload) {
+                    ServerPacket::GameShopInfo { item, .. } if item.g_index == game_shop_index => {
+                        Some(item)
+                    }
+                    _ => None,
+                }
+            })
+            .expect("game-shop fixture product should exist")
+    }
+
+    #[test]
+    fn reloaded_start_world_projects_individual_and_global_finite_stock() {
+        let path = temp_store_path();
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            store.game_shop_global_purchases.insert(2, 7);
+            let save = store
+                .accounts
+                .get_mut("demo")
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("demo save should exist");
+            let mut systems = Stage5SystemsState::default();
+            systems.game_shop_individual_purchases.insert(1, 4);
+            save.stage5_systems_json =
+                Some(serde_json::to_string(&systems).expect("stage5 systems should encode"));
+        }
+        config
+            .save_account_store()
+            .expect("stock fixture should persist");
+
+        let reloaded = SimulationConfig::default().with_account_store_path(path.clone());
+        let mut session = SimulationSession::new(reloaded);
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let mut individual = product(1);
+        individual.stock = 10;
+        individual.i_stock = true;
+        let mut global = product(2);
+        global.stock = 10;
+        global.i_stock = false;
+        let mut packets = vec![
+            ServerPacket::GameShopInfo {
+                item: individual,
+                stock_level: 10,
+            },
+            ServerPacket::GameShopInfo {
+                item: global,
+                stock_level: 10,
+            },
+        ];
+        apply_start_game_dynamic_game_shop_stock(session.app.world(), &mut packets);
+        assert!(matches!(
+            &packets[0],
+            ServerPacket::GameShopInfo { stock_level: 6, .. }
+        ));
+        assert!(matches!(
+            &packets[1],
+            ServerPacket::GameShopInfo { stock_level: 3, .. }
+        ));
+
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::remove_dir_all(parent);
+        }
+    }
+
+    #[test]
+    fn checked_in_unlimited_start_packets_remain_byte_identical() {
+        let session = SimulationSession::new(SimulationConfig::default());
+        let mut packets = start_game_account_social_and_shop_packets();
+        let before = packets
+            .iter()
+            .map(mir2_protocol::encode_server_packet)
+            .collect::<Result<Vec<_>, _>>()
+            .expect("start packets should encode");
+        apply_start_game_dynamic_game_shop_stock(session.app.world(), &mut packets);
+        let after = packets
+            .iter()
+            .map(mir2_protocol::encode_server_packet)
+            .collect::<Result<Vec<_>, _>>()
+            .expect("start packets should encode");
+        assert_eq!(after, before);
+        assert!(packets.iter().all(|packet| match packet {
+            ServerPacket::GameShopInfo { item, stock_level } => {
+                item.stock == 0 && *stock_level == 0
+            }
+            _ => true,
+        }));
+    }
+}
+
+#[cfg(test)]
+mod mail_status_transaction_tests {
+    use super::*;
+    use crate::config::{
+        deliver_stage5_system_mail, AccountStoreTransactionFault, Stage5MailDelivery,
+        Stage5MailTargetKind,
+    };
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn test_config(label: &str) -> (SimulationConfig, u32) {
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "mir2-mail-status-unit-{label}-{}-{suffix}.json",
+            std::process::id()
+        ));
+        let config = SimulationConfig::default().with_account_store_path(path);
+        let receipt = deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "System".to_string(),
+                subject: "Failure test".to_string(),
+                body: "Must remain unchanged".to_string(),
+                gold: 0,
+                items: Vec::new(),
+            },
+        )
+        .expect("mail fixture should persist");
+        (config, receipt.mail_ids[0])
+    }
+
+    fn start_test_session(config: SimulationConfig) -> SimulationSession {
+        let mut session = SimulationSession::new(config);
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        assert!(session
+            .handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        session
+    }
+
+    #[test]
+    fn status_persist_failure_does_not_mutate_world_store_or_file() {
+        for mutation in ["read", "lock", "delete"] {
+            let (config, mail_id) = test_config(&format!("persist-failure-{mutation}"));
+            let mut session = start_test_session(config.clone());
+            let before_world = session.world_snapshot();
+            let before_store = {
+                let store = config
+                    .account_store
+                    .lock()
+                    .expect("account store should not be poisoned");
+                serde_json::to_value(&*store).expect("account store snapshot should serialize")
+            };
+            let account_store_path = config
+                .account_store_path
+                .as_deref()
+                .expect("test config should have a file store");
+            let before_file =
+                std::fs::read(account_store_path).expect("account-store file should exist");
+
+            config.inject_account_store_transaction_fault(AccountStoreTransactionFault::Persist);
+            let command = match mutation {
+                "read" => ClientPacket::ReadMail {
+                    mail_id: u64::from(mail_id),
+                },
+                "lock" => ClientPacket::LockMail {
+                    mail_id: u64::from(mail_id),
+                    lock: true,
+                },
+                "delete" => ClientPacket::DeleteMail {
+                    mail_id: u64::from(mail_id),
+                },
+                _ => unreachable!("fixed mail mutation fixture"),
+            };
+            let after = session.handle_packet(command);
+
+            assert!(
+                after.is_empty(),
+                "Crystal-compatible persistence rejection must be silent for {mutation}: {after:?}"
+            );
+            assert_eq!(session.world_snapshot(), before_world);
+            let after_store = {
+                let store = config
+                    .account_store
+                    .lock()
+                    .expect("account store should not be poisoned");
+                serde_json::to_value(&*store).expect("account store snapshot should serialize")
+            };
+            assert_eq!(after_store, before_store);
+            let after_file =
+                std::fs::read(account_store_path).expect("account-store file should still exist");
+            assert_eq!(after_file, before_file);
+        }
     }
 }

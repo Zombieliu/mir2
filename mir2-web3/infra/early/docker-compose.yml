@@ -97,6 +97,8 @@ services:
       dockerfile: Dockerfile
       target: gateway
     image: mir2-early-gateway:local
+    labels:
+      com.obelisk.mir2.role: "gateway"
     cpus: "1.0"
     mem_limit: "1536m"
     restart: unless-stopped
@@ -107,6 +109,8 @@ services:
       MIR2_GATEWAY_TCP_ADDR: "0.0.0.0:7000"
       MIR2_GATEWAY_WEB_ADDR: "0.0.0.0:7010"
       MIR2_GATEWAY_INSTANCE_ID: "early-gateway-1"
+      MIR2_SAVE_RECOVERY_DIR: "/var/lib/obelisk/save-recovery/gateway"
+      MIR2_SAVE_RECOVERY_MAC_KEY: "${MIR2_GATEWAY_SAVE_RECOVERY_MAC_KEY:?set MIR2_GATEWAY_SAVE_RECOVERY_MAC_KEY to a stable 64-hex secret}"
       MIR2_ZONE_HOST_ADDRS: "zone:7020"
       MIR2_ZONE_HOST_TOKEN: "${MIR2_EARLY_ZONE_TOKEN:-replace-with-at-least-32-random-bytes}"
       MIR2_ZONE_RPC_REUSE_CONNECTIONS: "true"
@@ -129,6 +133,8 @@ services:
       MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT: "4"
       MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT: "16"
       MIR2_ZONE_TOPOLOGY_JSON: *topology
+    volumes:
+      - gateway-save-recovery:/var/lib/obelisk/save-recovery/gateway
     depends_on:
       postgres:
         condition: service_healthy
@@ -149,5 +155,7 @@ services:
       retries: 30
 
 volumes:
+  gateway-save-recovery:
+    name: mir2-early-gateway-save-recovery-v1
   postgres-data:
   redis-data:

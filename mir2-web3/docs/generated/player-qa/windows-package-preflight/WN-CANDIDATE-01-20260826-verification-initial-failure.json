@@ -1,0 +1,51 @@
+{
+    "schema":  "mir2.windows.package-verification.v4",
+    "packageRoot":  "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-package-clean\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-01-20260826.staging-c73af16c99bf4445985209f44d649f92",
+    "nonvisual":  true,
+    "launchRequested":  false,
+    "sourceRepoCheck":  "checked",
+    "currentSourceRevision":  "4c7e60baa5d85e63858a6fd1717af01c5f893f3d",
+    "attestationPresent":  true,
+    "attestationSha256":  "60AB3279F50CA85357F535430D5F80708594D1BC10B8831AFBD36971CDEDCCAA",
+    "packageManifestPresent":  true,
+    "packageManifestSha256":  "6E6042BEA21F06D8A75612F1EF0AE49EE3AC2ABC4F98601509BEA2D1A4381DC2",
+    "packageManifestAggregateSha256":  "22E1391C434F665A0E4071721085FBA4D721A92D7C5D0F733C346408092A16F5",
+    "trustedSignerThumbprint":  "B179E9D6222332C9DB5E960BAECF9990252CFBC7",
+    "detachedSignatureValid":  true,
+    "exeSha256":  "822C718721EE6F1AB20C137AF00B86F4D887D4828776BD2D36EB231AA1216972",
+    "peValid":  true,
+    "peImports":  [
+                      "VCRUNTIME140.dll",
+                      "api-ms-win-core-synch-l1-2-0.dll",
+                      "api-ms-win-crt-heap-l1-1-0.dll",
+                      "api-ms-win-crt-locale-l1-1-0.dll",
+                      "api-ms-win-crt-math-l1-1-0.dll",
+                      "api-ms-win-crt-runtime-l1-1-0.dll",
+                      "api-ms-win-crt-stdio-l1-1-0.dll",
+                      "api-ms-win-crt-string-l1-1-0.dll",
+                      "bcryptprimitives.dll",
+                      "combase.dll",
+                      "dwmapi.dll",
+                      "gdi32.dll",
+                      "imm32.dll",
+                      "kernel32.dll",
+                      "ntdll.dll",
+                      "ole32.dll",
+                      "oleaut32.dll",
+                      "setupapi.dll",
+                      "shell32.dll",
+                      "uiautomationcore.dll",
+                      "user32.dll",
+                      "uxtheme.dll",
+                      "ws2_32.dll"
+                  ],
+    "peDelayImports":  [
+
+                       ],
+    "packageFileCount":  10258,
+    "failures":  [
+                     "EXE contains machine/CI absolute source path or directory-qualified PDB path: //rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library"
+                 ],
+    "passed":  false,
+    "visualAccepted":  false
+}
