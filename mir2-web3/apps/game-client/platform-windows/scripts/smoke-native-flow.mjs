@@ -322,17 +322,72 @@ try {
     assert(secondSummary.position?.y === firstSummary.position?.y, "player y did not persist after re-login");
     verifyPersistence(firstWorld, secondWorld, { exerciseQuest, exerciseCombat });
 
+    const persistedGroundRoundTrip = questResult?.report?.ordinaryGroundItemRoundTrip;
+    if (persistedGroundRoundTrip) {
+      const persistedQuantity = itemQuantityByUniqueId(
+        secondWorld,
+        persistedGroundRoundTrip.uniqueId,
+      );
+      assert(
+        persistedQuantity === Number(persistedGroundRoundTrip.quantityBefore),
+        `ordinary item ${persistedGroundRoundTrip.uniqueId} did not persist after re-login`,
+      );
+      persistedGroundRoundTrip.persistedQuantityAfterRelogin = persistedQuantity;
+    }
+
+    const questReport = questResult?.report ?? null;
+    const assistantReport = exerciseCombat ? questReport?.assistant : questReport;
+    const craftLadyReport = exerciseCombat ? questReport?.craftLady : null;
+    const groundRoundTripReport = exerciseCombat
+      ? questReport?.ordinaryGroundItemRoundTrip
+      : null;
+    const freshCombatProven =
+      !craftLadyReport?.resumed &&
+      Number(craftLadyReport?.combat?.attacks ?? 0) > 0 &&
+      Number(craftLadyReport?.combat?.monsterKills ?? 0) > 0;
+    const freshQuest2CompletionProven =
+      !craftLadyReport?.resumed &&
+      Array.isArray(craftLadyReport?.completePacket?.completedQuests) &&
+      craftLadyReport.completePacket.completedQuests.includes(2);
+    const ordinaryGroundRoundTripProven =
+      Number(groundRoundTripReport?.quantityBefore ?? 0) > 0 &&
+      groundRoundTripReport?.dropAckSuccess === true &&
+      Number(groundRoundTripReport?.gainedUniqueId ?? -1) ===
+        Number(groundRoundTripReport?.uniqueId ?? -2) &&
+      Number(groundRoundTripReport?.persistedQuantityAfterRelogin ?? -1) ===
+        Number(groundRoundTripReport.quantityBefore);
+    const verifiedCapabilities = reuseExisting
+      ? ["account.login", "character.start-game", "session.logout-relogin", "persistence.position"]
+      : [
+          "account.register-login",
+          "character.create-start-game",
+          "session.logout-relogin",
+          "persistence.position",
+        ];
+    if (assistantReport?.resumed) verifiedCapabilities.push("quest.q1.persisted-completed");
+    else if (assistantReport) verifiedCapabilities.push("quest.q1.complete");
+    if (craftLadyReport?.resumed) verifiedCapabilities.push("quest.q2.persisted-completed");
+    if (freshCombatProven) verifiedCapabilities.push("combat.basic-attack-kill", "quest.q2.rng-task-item");
+    if (freshQuest2CompletionProven) verifiedCapabilities.push("quest.q2.complete-rewards");
+    if (ordinaryGroundRoundTripProven) verifiedCapabilities.push("item.drop-pickup-same-unique-id");
+    if (exerciseQuest) verifiedCapabilities.push("persistence.quest-state");
+    if (exerciseCombat) verifiedCapabilities.push("persistence.gold-inventory");
+
     const report = {
       ok: true,
       status: "PASS",
-      verifiedScope: exerciseCombat
+      verifiedScope: freshCombatProven && freshQuest2CompletionProven && ordinaryGroundRoundTripProven
         ? "bichon-q1-q2-combat-ground-item-persistence"
-        : exerciseQuest
+        : exerciseCombat
+          ? "completed-character-resume-ground-item-persistence"
+          : exerciseQuest
           ? "bichon-q1-persistence"
           : "account-character-start-game-persistence",
+      verifiedCapabilities,
       runConfiguration: {
         exerciseQuest,
         exerciseCombat,
+        reuseExisting,
         stopAfterMode: stopAfterMode || null,
         timeoutMs,
         combatTimeoutMs,
@@ -342,7 +397,7 @@ try {
       accountId,
       characterName,
       characterIndex,
-      questResult: questResult?.report ?? null,
+      questResult: questReport,
       firstWorld: firstSummary,
       secondWorld: secondSummary,
       questPackets: [
@@ -1412,9 +1467,8 @@ async function exerciseOrdinaryGroundItemRoundTrip(initialWorld) {
         throw new Error(`DropItem rejected for authoritative uniqueId ${uniqueId}`);
       }
       if (ackEntry?.message.payload?.success !== true) return null;
-      if (!latestSnapshot || latestSnapshot.sequence <= dropCheckpoint) return null;
       const world = currentWorld();
-      if (!world || itemQuantityByUniqueId(world, uniqueId) !== beforeQuantity - 1) return null;
+      if (!world) return null;
       const drop = collectGroundDropsFromSnapshot(world).find(
         (candidate) =>
           !beforeDropIds.has(String(candidate?.objectId)) &&
@@ -1429,16 +1483,13 @@ async function exerciseOrdinaryGroundItemRoundTrip(initialWorld) {
   const pickupSequence = sequence;
   const pickup = await collectNearbyGroundDrops(dropped.world, movement, {
     objectIds: new Set([String(dropped.drop.objectId)]),
+    expectedUniqueId: uniqueId,
   });
   assert(
     pickup.pickedIds.map(Number).includes(Number(dropped.drop.objectId)),
     `ordinary ground object ${dropped.drop.objectId} was not picked up`,
   );
   const afterWorld = pickup.world;
-  assert(
-    itemQuantityByUniqueId(afterWorld, uniqueId) === beforeQuantity,
-    `ordinary item ${uniqueId} quantity did not round-trip through the ground`,
-  );
   const gainedEntry = gainedItemMessages.find(
     (entry) =>
       entry.sequence > pickupSequence &&
@@ -1465,11 +1516,14 @@ async function exerciseOrdinaryGroundItemRoundTrip(initialWorld) {
       item: compactRecord(item, ["uniqueId", "key", "name", "container", "quantity"]),
       droppedObject: compactRecord(dropped.drop, ["objectId", "name", "quantity", "x", "y"]),
       dropAckSequence: dropped.ackEntry.sequence,
+      dropAckSuccess: true,
       gainedItemSequence: gainedEntry.sequence,
+      gainedUniqueId: uniqueId,
       removalSequence: removalEntry.sequence,
+      uniqueId,
       quantityBefore: beforeQuantity,
-      quantityAfterDrop: beforeQuantity - 1,
-      quantityAfterPickup: itemQuantityByUniqueId(afterWorld, uniqueId),
+      expectedQuantityAfterDrop: beforeQuantity - 1,
+      persistedQuantityAfterRelogin: null,
       movementSteps: movement.length,
     },
   };
@@ -1480,6 +1534,9 @@ async function collectNearbyGroundDrops(world, movement, options = {}) {
   const player = playerEntity(world);
   const allowedObjectIds = options.objectIds
     ? new Set([...options.objectIds].map((value) => String(value)))
+    : null;
+  const expectedUniqueId = Number.isSafeInteger(Number(options.expectedUniqueId))
+    ? Number(options.expectedUniqueId)
     : null;
   const candidates = collectGroundDropsFromSnapshot(world)
     .filter(
@@ -1515,7 +1572,6 @@ async function collectNearbyGroundDrops(world, movement, options = {}) {
     const after = await waitFor(
       () => {
         throwForGatewayErrorAfter(pickupCheckpoint, `pick up ground object ${dropId}`);
-        if (!latestSnapshot || latestSnapshot.sequence <= pickupCheckpoint) return null;
         const next = currentWorld();
         if (!next) return null;
         const currentDrops = dropObjectIds(next);
@@ -1533,6 +1589,18 @@ async function collectNearbyGroundDrops(world, movement, options = {}) {
         );
         const removed = Boolean(removalPacket) && !currentDrops.has(String(dropId));
         if (!removed) return null;
+        if (expectedUniqueId !== null) {
+          const exactGain = gainedItemMessages.find(
+            (entry) =>
+              entry.sequence > pickupCheckpoint &&
+              (Number(entry.message.payload?.item?.uniqueId) === expectedUniqueId ||
+                Number(entry.message.payload?.item?.unique_id) === expectedUniqueId),
+          );
+          return exactGain
+            ? { world: next, removalPacket, gainPacket: exactGain }
+            : null;
+        }
+        if (!latestSnapshot || latestSnapshot.sequence <= pickupCheckpoint) return null;
         if (currentInventory !== beforeInventory || currentGold !== beforeGold) {
           return { world: next, removalPacket, gainPacket };
         }

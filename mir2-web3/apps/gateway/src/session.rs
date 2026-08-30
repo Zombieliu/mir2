@@ -23,6 +23,7 @@ use crate::routing::{
     SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest,
     ZoneOwnerLease, ZoneRegistry,
 };
+use crate::tcp::chat_broadcast::load_line_messages_from_env;
 
 #[path = "save_recovery.rs"]
 pub(crate) mod save_recovery;
@@ -459,6 +460,7 @@ impl GatewaySession {
     }
 
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        let is_start_game = matches!(packet, ClientPacket::StartGame { .. });
         if let ClientPacket::Login {
             account_id,
             password,
@@ -467,7 +469,13 @@ impl GatewaySession {
             self.prepare_standard_login_recovery(account_id, password)?;
         }
         self.execute_world_command(WorldCommand::ClientPacket(packet))
-            .map(|execution| execution.packets)
+            .map(|execution| {
+                let mut packets = execution.packets;
+                if is_start_game {
+                    append_start_game_announcements(&mut packets);
+                }
+                packets
+            })
     }
 
     pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
@@ -1328,6 +1336,18 @@ fn next_gateway_session_id() -> String {
     let sequence = NEXT_GATEWAY_SESSION_SEQUENCE.fetch_add(1, Ordering::Relaxed);
     let now_ms = gateway_now_ms();
     format!("gateway-{}-{now_ms}-{sequence}", std::process::id())
+}
+
+fn append_start_game_announcements(packets: &mut Vec<ServerPacket>) {
+    let lines = load_line_messages_from_env().unwrap_or_else(|_| {
+        crate::tcp::chat_broadcast::default_line_messages()
+    });
+    for line in lines {
+        packets.push(ServerPacket::Chat {
+            message: line,
+            chat_type: ChatType::LineMessage,
+        });
+    }
 }
 
 fn gateway_now_ms() -> u64 {

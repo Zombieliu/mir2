@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
+use std::fs::{self, File, OpenOptions};
+use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -28,6 +29,8 @@ const DIRECTOR_SIMULATION_CHECKPOINT_DOMAIN: &[u8] =
 const DIRECTOR_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
 const DIRECTOR_RUNTIME_CHECKPOINT_DOMAIN: &[u8] = b"obelisk.world-director.runtime-checkpoint.v1\0";
 const DIRECTOR_RUNTIME_CHECKPOINT_INTERVAL_MS: u64 = 30_000;
+const MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
+static DIRECTOR_CHECKPOINT_TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 const MAX_DIRECTOR_TEXT_BYTES: usize = 512;
 const BASIS_POINTS: u64 = 10_000;
 
@@ -1452,27 +1455,19 @@ impl WorldDirectorRuntimeService {
             last_checkpoint_at_ms: 0,
             last_advance: None,
         };
-        if let Some(path) = checkpoint_path.as_deref().filter(|path| path.exists()) {
-            match restore_runtime_checkpoint(
+        let mut restored_checkpoint_bytes = 0;
+        if let Some(path) = checkpoint_path.as_deref() {
+            if let Some((restored, file_bytes)) = restore_runtime_checkpoint(
                 path,
                 &committee.iter().cloned().collect::<Vec<_>>(),
                 &trusted_director,
                 factory.as_ref(),
-            ) {
-                Ok(restored) => state = restored,
-                Err(error) => {
-                    eprintln!(
-                        "world director checkpoint skipped, starting from empty state: {error}"
-                    );
-                }
+            )? {
+                state = restored;
+                restored_checkpoint_bytes = file_bytes;
             }
         }
         let restored_checkpoint_at_ms = state.last_checkpoint_at_ms;
-        let restored_checkpoint_bytes = checkpoint_path
-            .as_deref()
-            .and_then(|path| fs::metadata(path).ok())
-            .map(|metadata| metadata.len())
-            .unwrap_or_default();
         Ok(Self {
             committee,
             trusted_director,
@@ -1715,27 +1710,355 @@ struct RuntimeCheckpointVersionProbe {
     version: u32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct DirectorCheckpointFileIdentity {
+    volume_id: u64,
+    object_id: [u8; 16],
+    length: u64,
+    modified_high: u64,
+    modified_low: u64,
+}
+
+fn validate_director_checkpoint_metadata(
+    metadata: &fs::Metadata,
+    phase: &str,
+) -> Result<(), String> {
+    if metadata.file_type().is_symlink() || !metadata.is_file() {
+        return Err(format!(
+            "world director checkpoint is not a regular file {phase}"
+        ));
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+
+        const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0000_0400;
+        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            return Err(format!(
+                "world director checkpoint is a Windows reparse point {phase}"
+            ));
+        }
+    }
+    if metadata.len() > MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES {
+        return Err(format!(
+            "world director checkpoint is {} bytes {phase} (limit {MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES})",
+            metadata.len()
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(windows)]
+fn open_director_checkpoint_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::windows::fs::OpenOptionsExt;
+
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+}
+
+#[cfg(any(target_os = "linux", target_os = "android"))]
+fn open_director_checkpoint_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::unix::fs::OpenOptionsExt;
+
+    const O_NOFOLLOW: i32 = 0x0002_0000;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+}
+
+#[cfg(all(unix, not(any(target_os = "linux", target_os = "android"))))]
+fn open_director_checkpoint_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::unix::fs::OpenOptionsExt;
+
+    const O_NOFOLLOW: i32 = 0x0000_0100;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+}
+
+#[cfg(not(any(unix, windows)))]
+fn open_director_checkpoint_no_follow(path: &Path) -> io::Result<File> {
+    OpenOptions::new().read(true).open(path)
+}
+
+#[cfg(unix)]
+fn director_checkpoint_file_identity(file: &File) -> io::Result<DirectorCheckpointFileIdentity> {
+    use std::os::unix::fs::MetadataExt;
+
+    let metadata = file.metadata()?;
+    let mut object_id = [0u8; 16];
+    object_id[..8].copy_from_slice(&metadata.ino().to_ne_bytes());
+    Ok(DirectorCheckpointFileIdentity {
+        volume_id: metadata.dev(),
+        object_id,
+        length: metadata.len(),
+        modified_high: metadata.mtime() as u64,
+        modified_low: metadata.mtime_nsec() as u64,
+    })
+}
+
+#[cfg(windows)]
+fn director_checkpoint_file_identity(file: &File) -> io::Result<DirectorCheckpointFileIdentity> {
+    use std::ffi::c_void;
+    use std::mem::{size_of, MaybeUninit};
+    use std::os::windows::io::AsRawHandle;
+
+    const FILE_ID_INFO_CLASS: i32 = 18;
+
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    struct FileTime {
+        low: u32,
+        high: u32,
+    }
+
+    #[repr(C)]
+    struct ByHandleFileInformation {
+        file_attributes: u32,
+        creation_time: FileTime,
+        last_access_time: FileTime,
+        last_write_time: FileTime,
+        volume_serial_number: u32,
+        file_size_high: u32,
+        file_size_low: u32,
+        number_of_links: u32,
+        file_index_high: u32,
+        file_index_low: u32,
+    }
+
+    #[repr(C)]
+    struct FileIdInfo {
+        volume_serial_number: u64,
+        file_id: [u8; 16],
+    }
+
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn GetFileInformationByHandle(
+            file: *mut c_void,
+            information: *mut ByHandleFileInformation,
+        ) -> i32;
+        fn GetFileInformationByHandleEx(
+            file: *mut c_void,
+            information_class: i32,
+            information: *mut c_void,
+            buffer_size: u32,
+        ) -> i32;
+    }
+
+    let raw_handle = file.as_raw_handle();
+    let mut information = MaybeUninit::<ByHandleFileInformation>::uninit();
+    if unsafe { GetFileInformationByHandle(raw_handle, information.as_mut_ptr()) } == 0 {
+        return Err(io::Error::last_os_error());
+    }
+    let information = unsafe { information.assume_init() };
+    let mut file_id = MaybeUninit::<FileIdInfo>::uninit();
+    if unsafe {
+        GetFileInformationByHandleEx(
+            raw_handle,
+            FILE_ID_INFO_CLASS,
+            file_id.as_mut_ptr().cast::<c_void>(),
+            size_of::<FileIdInfo>() as u32,
+        )
+    } == 0
+    {
+        return Err(io::Error::last_os_error());
+    }
+    let file_id = unsafe { file_id.assume_init() };
+    if file_id.file_id.iter().all(|byte| *byte == 0) {
+        return Err(io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "Windows returned an all-zero world director checkpoint file identifier",
+        ));
+    }
+    Ok(DirectorCheckpointFileIdentity {
+        volume_id: file_id.volume_serial_number,
+        object_id: file_id.file_id,
+        length: (u64::from(information.file_size_high) << 32)
+            | u64::from(information.file_size_low),
+        modified_high: u64::from(information.last_write_time.high),
+        modified_low: u64::from(information.last_write_time.low),
+    })
+}
+
+#[cfg(not(any(unix, windows)))]
+fn director_checkpoint_file_identity(file: &File) -> io::Result<DirectorCheckpointFileIdentity> {
+    let metadata = file.metadata()?;
+    let modified = metadata
+        .modified()?
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default();
+    Ok(DirectorCheckpointFileIdentity {
+        volume_id: 0,
+        object_id: [0; 16],
+        length: metadata.len(),
+        modified_high: modified.as_secs(),
+        modified_low: u64::from(modified.subsec_nanos()),
+    })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DirectorCheckpointReadPhase {
+    AncestorsGuarded,
+    FileOpened,
+    BeforePathReopen,
+}
+
+fn read_runtime_checkpoint_bytes(path: &Path) -> Result<Option<(Vec<u8>, u64)>, String> {
+    read_runtime_checkpoint_bytes_with_callback(path, |_| Ok(()))
+}
+
+fn read_runtime_checkpoint_bytes_with_callback<F>(
+    path: &Path,
+    mut hook: F,
+) -> Result<Option<(Vec<u8>, u64)>, String>
+where
+    F: FnMut(DirectorCheckpointReadPhase) -> Result<(), String>,
+{
+    let path = normalize_director_checkpoint_path(path)?;
+    match fs::symlink_metadata(&path) {
+        Ok(_) => {}
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            validate_missing_director_checkpoint_path(&path)?;
+            return Ok(None);
+        }
+        Err(error) => {
+            return Err(format!(
+                "failed to inspect world director checkpoint {}: {error}",
+                path.display()
+            ));
+        }
+    }
+
+    let directory = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .ok_or_else(|| {
+            format!(
+                "world director checkpoint has no parent directory: {}",
+                path.display()
+            )
+        })?;
+    let ancestors = DirectorCheckpointAncestorGuard::capture(directory)?;
+    hook(DirectorCheckpointReadPhase::AncestorsGuarded)?;
+    ancestors.verify("before checkpoint open")?;
+
+    let before = fs::symlink_metadata(&path).map_err(|error| {
+        format!(
+            "failed to re-inspect world director checkpoint {} after guarding ancestors: {error}",
+            path.display()
+        )
+    })?;
+    validate_director_checkpoint_metadata(&before, "before read")?;
+
+    let mut file = open_director_checkpoint_no_follow(&path).map_err(|error| {
+        format!(
+            "failed to open world director checkpoint {} without following links: {error}",
+            path.display()
+        )
+    })?;
+    hook(DirectorCheckpointReadPhase::FileOpened)?;
+    ancestors.verify("after checkpoint open")?;
+    let opened_metadata = file.metadata().map_err(|error| {
+        format!(
+            "failed to inspect opened world director checkpoint {}: {error}",
+            path.display()
+        )
+    })?;
+    validate_director_checkpoint_metadata(&opened_metadata, "after open")?;
+    let identity_before = director_checkpoint_file_identity(&file).map_err(|error| {
+        format!(
+            "failed to identify opened world director checkpoint {}: {error}",
+            path.display()
+        )
+    })?;
+    let mut bytes = Vec::with_capacity(identity_before.length.min(1024 * 1024) as usize);
+    Read::by_ref(&mut file)
+        .take(MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES.saturating_add(1))
+        .read_to_end(&mut bytes)
+        .map_err(|error| {
+            format!(
+                "failed to read world director checkpoint {}: {error}",
+                path.display()
+            )
+        })?;
+    if bytes.len() as u64 > MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES {
+        return Err(format!(
+            "world director checkpoint exceeded the {MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES}-byte limit while reading"
+        ));
+    }
+    let identity_after_handle = director_checkpoint_file_identity(&file).map_err(|error| {
+        format!(
+            "failed to re-identify world director checkpoint {} after read: {error}",
+            path.display()
+        )
+    })?;
+    if identity_before != identity_after_handle || bytes.len() as u64 != identity_before.length {
+        return Err(
+            "world director checkpoint changed while its stable handle was read".to_string(),
+        );
+    }
+
+    hook(DirectorCheckpointReadPhase::BeforePathReopen)?;
+    ancestors.verify("before checkpoint path re-open")?;
+    let reopened = open_director_checkpoint_no_follow(&path).map_err(|error| {
+        format!(
+            "failed to reopen world director checkpoint {} for identity verification: {error}",
+            path.display()
+        )
+    })?;
+    let reopened_metadata = reopened.metadata().map_err(|error| {
+        format!(
+            "failed to inspect reopened world director checkpoint {}: {error}",
+            path.display()
+        )
+    })?;
+    validate_director_checkpoint_metadata(&reopened_metadata, "after read")?;
+    let identity_after_path = director_checkpoint_file_identity(&reopened).map_err(|error| {
+        format!(
+            "failed to identify reopened world director checkpoint {}: {error}",
+            path.display()
+        )
+    })?;
+    let after = fs::symlink_metadata(&path).map_err(|error| {
+        format!(
+            "failed to inspect world director checkpoint {} after read: {error}",
+            path.display()
+        )
+    })?;
+    validate_director_checkpoint_metadata(&after, "after read")?;
+    ancestors.verify("after checkpoint read")?;
+    if identity_before != identity_after_path || after.len() != identity_before.length {
+        return Err(
+            "world director checkpoint path identity changed during validation".to_string(),
+        );
+    }
+    Ok(Some((bytes, identity_before.length)))
+}
+
 fn restore_runtime_checkpoint(
     path: &Path,
     committee: &[String],
     trusted_director: &str,
     factory: &SharedInProcessZoneRuntimeFactory,
-) -> Result<WorldDirectorRuntimeState, String> {
-    let bytes = fs::read(path).map_err(|error| {
-        format!(
-            "failed to read world director checkpoint {}: {error}",
-            path.display()
-        )
-    })?;
-    // Peek only the version field before the full decode so a checkpoint written
-    // by the older binary-array format can be skipped cleanly, without failing
-    // the base64 decode of multi-megabyte number arrays.
+) -> Result<Option<(WorldDirectorRuntimeState, u64)>, String> {
+    let Some((bytes, file_bytes)) = read_runtime_checkpoint_bytes(path)? else {
+        return Ok(None);
+    };
+    // Peek only the version field before the full decode so an incompatible
+    // checkpoint fails with an explicit version error instead of an unrelated
+    // base64 decode error from the older multi-megabyte number-array format.
     let stored_version = serde_json::from_slice::<RuntimeCheckpointVersionProbe>(&bytes)
         .map(|probe| probe.version)
-        .unwrap_or_default();
+        .map_err(|error| format!("world director runtime checkpoint decode failed: {error}"))?;
     if stored_version != DIRECTOR_RUNTIME_CHECKPOINT_VERSION {
         return Err(format!(
-            "world director checkpoint version {stored_version} is not the current format (expected {DIRECTOR_RUNTIME_CHECKPOINT_VERSION}); it will be discarded"
+            "world director checkpoint version {stored_version} is not the current format (expected {DIRECTOR_RUNTIME_CHECKPOINT_VERSION}); refusing to start with configured incompatible state"
         ));
     }
     let checkpoint: WorldDirectorRuntimeCheckpoint = serde_json::from_slice(&bytes)
@@ -1749,19 +2072,793 @@ fn restore_runtime_checkpoint(
     for finalized in &checkpoint.finalized {
         control_log.import_finalized(finalized.clone())?;
     }
-    factory.install_world_checkpoint_bytes(&checkpoint.zone_factory_checkpoint)?;
-    Ok(WorldDirectorRuntimeState {
-        control_log,
-        adapter: Mir2DirectorSimulationAdapter::restore(
-            &checkpoint.simulation_checkpoint,
-            trusted_director,
-        )?,
-        spawned_monsters_total: checkpoint.spawned_monsters_total,
-        broadcast_messages_total: checkpoint.broadcast_messages_total,
-        last_advance_at_ms: checkpoint.last_advance_at_ms,
-        last_checkpoint_at_ms: checkpoint.last_checkpoint_at_ms,
-        last_advance: checkpoint.last_advance,
+    let adapter = Mir2DirectorSimulationAdapter::restore(
+        &checkpoint.simulation_checkpoint,
+        trusted_director,
+    )?;
+    factory.install_world_checkpoint_bytes_atomically(&checkpoint.zone_factory_checkpoint)?;
+    Ok(Some((
+        WorldDirectorRuntimeState {
+            control_log,
+            adapter,
+            spawned_monsters_total: checkpoint.spawned_monsters_total,
+            broadcast_messages_total: checkpoint.broadcast_messages_total,
+            last_advance_at_ms: checkpoint.last_advance_at_ms,
+            last_checkpoint_at_ms: checkpoint.last_checkpoint_at_ms,
+            last_advance: checkpoint.last_advance,
+        },
+        file_bytes,
+    )))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DirectorCheckpointPublishPhase {
+    TempCreated,
+    TempWritten,
+    TempSynced,
+    BeforeRename,
+    Renamed,
+    BeforeDirectorySync,
+    DirectorySynced,
+}
+
+fn validate_director_checkpoint_directory(
+    path: &Path,
+    metadata: &fs::Metadata,
+) -> Result<(), String> {
+    if metadata.file_type().is_symlink() || !metadata.is_dir() {
+        return Err(format!(
+            "world director checkpoint directory contains a non-directory or symbolic-link component: {}",
+            path.display()
+        ));
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+
+        const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0000_0400;
+        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            return Err(format!(
+                "world director checkpoint directory contains a Windows reparse-point component: {}",
+                path.display()
+            ));
+        }
+    }
+    Ok(())
+}
+
+#[cfg(windows)]
+fn open_director_checkpoint_directory_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::windows::fs::OpenOptionsExt;
+
+    const FILE_READ_ATTRIBUTES: u32 = 0x0000_0080;
+    const FILE_SHARE_READ: u32 = 0x0000_0001;
+    const FILE_SHARE_WRITE: u32 = 0x0000_0002;
+    const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    OpenOptions::new()
+        .access_mode(FILE_READ_ATTRIBUTES)
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+}
+
+#[cfg(any(target_os = "linux", target_os = "android"))]
+fn open_director_checkpoint_directory_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::unix::fs::OpenOptionsExt;
+
+    const O_NOFOLLOW: i32 = 0x0002_0000;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+}
+
+#[cfg(all(unix, not(any(target_os = "linux", target_os = "android"))))]
+fn open_director_checkpoint_directory_no_follow(path: &Path) -> io::Result<File> {
+    use std::os::unix::fs::OpenOptionsExt;
+
+    const O_NOFOLLOW: i32 = 0x0000_0100;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+}
+
+#[cfg(not(any(unix, windows)))]
+fn open_director_checkpoint_directory_no_follow(path: &Path) -> io::Result<File> {
+    OpenOptions::new().read(true).open(path)
+}
+
+fn normalize_director_checkpoint_path(path: &Path) -> Result<PathBuf, String> {
+    if path.as_os_str().is_empty() {
+        return Err("world director checkpoint path must not be empty".to_string());
+    }
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .map_err(|error| format!("failed to resolve checkpoint path: {error}"))?
+            .join(path)
+    };
+    let mut normalized = PathBuf::new();
+    for component in absolute.components() {
+        match component {
+            std::path::Component::Prefix(prefix) => normalized.push(prefix.as_os_str()),
+            std::path::Component::RootDir => {
+                normalized.push(Path::new(std::path::MAIN_SEPARATOR_STR));
+            }
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                if !normalized.pop() {
+                    return Err(format!(
+                        "world director checkpoint path escapes its filesystem root: {}",
+                        path.display()
+                    ));
+                }
+            }
+            std::path::Component::Normal(component) => normalized.push(component),
+        }
+    }
+    if !normalized.is_absolute() {
+        return Err(format!(
+            "failed to resolve an absolute world director checkpoint path: {}",
+            path.display()
+        ));
+    }
+    Ok(normalized)
+}
+
+fn director_checkpoint_same_object(
+    left: DirectorCheckpointFileIdentity,
+    right: DirectorCheckpointFileIdentity,
+) -> bool {
+    left.volume_id == right.volume_id && left.object_id == right.object_id
+}
+
+struct DirectorCheckpointAncestorEntry {
+    path: PathBuf,
+    handle: File,
+    identity: DirectorCheckpointFileIdentity,
+}
+
+struct DirectorCheckpointAncestorGuard {
+    entries: Vec<DirectorCheckpointAncestorEntry>,
+}
+
+impl DirectorCheckpointAncestorGuard {
+    fn capture(directory: &Path) -> Result<Self, String> {
+        let directory = normalize_director_checkpoint_path(directory)?;
+        let mut entries = Vec::new();
+        for ancestor in directory.ancestors().collect::<Vec<_>>().into_iter().rev() {
+            if ancestor.as_os_str().is_empty() {
+                continue;
+            }
+            let handle =
+                open_director_checkpoint_directory_no_follow(ancestor).map_err(|error| {
+                    format!(
+                        "failed to open world director checkpoint ancestor {} without following links: {error}",
+                        ancestor.display()
+                    )
+                })?;
+            let metadata = handle.metadata().map_err(|error| {
+                format!(
+                    "failed to inspect opened world director checkpoint ancestor {}: {error}",
+                    ancestor.display()
+                )
+            })?;
+            validate_director_checkpoint_directory(ancestor, &metadata)?;
+            let identity = director_checkpoint_file_identity(&handle).map_err(|error| {
+                format!(
+                    "failed to identify world director checkpoint ancestor {}: {error}",
+                    ancestor.display()
+                )
+            })?;
+            entries.push(DirectorCheckpointAncestorEntry {
+                path: ancestor.to_path_buf(),
+                handle,
+                identity,
+            });
+        }
+        if entries.is_empty() {
+            return Err(
+                "world director checkpoint has no verifiable directory ancestor".to_string(),
+            );
+        }
+        Ok(Self { entries })
+    }
+
+    fn verify(&self, phase: &str) -> Result<(), String> {
+        for entry in &self.entries {
+            let held_metadata = entry.handle.metadata().map_err(|error| {
+                format!(
+                    "failed to inspect held world director checkpoint ancestor {} {phase}: {error}",
+                    entry.path.display()
+                )
+            })?;
+            validate_director_checkpoint_directory(&entry.path, &held_metadata)?;
+            let held_identity =
+                director_checkpoint_file_identity(&entry.handle).map_err(|error| {
+                    format!(
+                        "failed to re-identify held world director checkpoint ancestor {} {phase}: {error}",
+                        entry.path.display()
+                    )
+                })?;
+            if !director_checkpoint_same_object(entry.identity, held_identity) {
+                return Err(format!(
+                    "world director checkpoint ancestor handle identity changed {phase}: {}",
+                    entry.path.display()
+                ));
+            }
+
+            let reopened =
+                open_director_checkpoint_directory_no_follow(&entry.path).map_err(|error| {
+                    format!(
+                        "failed to reopen world director checkpoint ancestor {} {phase}: {error}",
+                        entry.path.display()
+                    )
+                })?;
+            let reopened_metadata = reopened.metadata().map_err(|error| {
+                format!(
+                    "failed to inspect reopened world director checkpoint ancestor {} {phase}: {error}",
+                    entry.path.display()
+                )
+            })?;
+            validate_director_checkpoint_directory(&entry.path, &reopened_metadata)?;
+            let reopened_identity =
+                director_checkpoint_file_identity(&reopened).map_err(|error| {
+                    format!(
+                        "failed to identify reopened world director checkpoint ancestor {} {phase}: {error}",
+                        entry.path.display()
+                    )
+                })?;
+            if !director_checkpoint_same_object(entry.identity, reopened_identity) {
+                return Err(format!(
+                    "world director checkpoint ancestor path identity changed {phase}: {}",
+                    entry.path.display()
+                ));
+            }
+        }
+        Ok(())
+    }
+}
+
+fn validate_missing_director_checkpoint_path(path: &Path) -> Result<(), String> {
+    let directory = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .ok_or_else(|| {
+            format!(
+                "world director checkpoint has no parent directory: {}",
+                path.display()
+            )
+        })?;
+    let mut entries = Vec::new();
+    let mut missing_component_seen = false;
+    for ancestor in directory.ancestors().collect::<Vec<_>>().into_iter().rev() {
+        if ancestor.as_os_str().is_empty() || missing_component_seen {
+            continue;
+        }
+        let metadata = match fs::symlink_metadata(ancestor) {
+            Ok(metadata) => metadata,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                missing_component_seen = true;
+                continue;
+            }
+            Err(error) => {
+                return Err(format!(
+                    "failed to inspect missing-checkpoint ancestor {}: {error}",
+                    ancestor.display()
+                ));
+            }
+        };
+        validate_director_checkpoint_directory(ancestor, &metadata)?;
+        let handle = open_director_checkpoint_directory_no_follow(ancestor).map_err(|error| {
+            format!(
+                "failed to open missing-checkpoint ancestor {} without following links: {error}",
+                ancestor.display()
+            )
+        })?;
+        let opened_metadata = handle.metadata().map_err(|error| {
+            format!(
+                "failed to inspect opened missing-checkpoint ancestor {}: {error}",
+                ancestor.display()
+            )
+        })?;
+        validate_director_checkpoint_directory(ancestor, &opened_metadata)?;
+        let identity = director_checkpoint_file_identity(&handle).map_err(|error| {
+            format!(
+                "failed to identify missing-checkpoint ancestor {}: {error}",
+                ancestor.display()
+            )
+        })?;
+        entries.push(DirectorCheckpointAncestorEntry {
+            path: ancestor.to_path_buf(),
+            handle,
+            identity,
+        });
+    }
+    if entries.is_empty() {
+        return Err(
+            "world director missing checkpoint has no verifiable existing ancestor".to_string(),
+        );
+    }
+    let ancestors = DirectorCheckpointAncestorGuard { entries };
+    ancestors.verify("while validating a missing checkpoint")?;
+    match fs::symlink_metadata(path) {
+        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
+        Ok(_) => Err(format!(
+            "world director checkpoint appeared while its missing path was validated: {}",
+            path.display()
+        )),
+        Err(error) => Err(format!(
+            "world director missing checkpoint path is not traversable {}: {error}",
+            path.display()
+        )),
+    }
+}
+
+fn ensure_director_checkpoint_directory_inner(
+    path: &Path,
+) -> Result<DirectorCheckpointAncestorGuard, String> {
+    match fs::symlink_metadata(path) {
+        Ok(metadata) => {
+            validate_director_checkpoint_directory(path, &metadata)?;
+            let guard = DirectorCheckpointAncestorGuard::capture(path)?;
+            guard.verify("while accepting an existing checkpoint directory")?;
+            return Ok(guard);
+        }
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(format!(
+                "failed to inspect world director checkpoint directory {}: {error}",
+                path.display()
+            ));
+        }
+    }
+    let parent = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .ok_or_else(|| {
+            format!(
+                "missing world director checkpoint directory has no verifiable parent: {}",
+                path.display()
+            )
+        })?;
+    let parent_guard = ensure_director_checkpoint_directory_inner(parent)?;
+    parent_guard.verify("immediately before checkpoint directory creation")?;
+    match fs::create_dir(path) {
+        Ok(()) => {}
+        Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
+            let metadata = fs::symlink_metadata(path).map_err(|inspect_error| {
+                format!(
+                    "failed to inspect raced world director checkpoint directory {}: {inspect_error}",
+                    path.display()
+                )
+            })?;
+            validate_director_checkpoint_directory(path, &metadata)?;
+        }
+        Err(error) => {
+            return Err(format!(
+                "failed to create world director checkpoint directory {}: {error}",
+                path.display()
+            ));
+        }
+    }
+    parent_guard.verify("immediately after checkpoint directory creation")?;
+    sync_director_checkpoint_directory(parent).map_err(|error| {
+        format!(
+            "failed to sync parent of new world director checkpoint directory {}: {error}",
+            parent.display()
+        )
+    })?;
+    parent_guard.verify("after syncing a newly created checkpoint directory")?;
+    let guard = DirectorCheckpointAncestorGuard::capture(path)?;
+    guard.verify("after capturing a newly created checkpoint directory")?;
+    Ok(guard)
+}
+
+fn ensure_director_checkpoint_directory(
+    path: &Path,
+) -> Result<(PathBuf, DirectorCheckpointAncestorGuard), String> {
+    let checkpoint_path = normalize_director_checkpoint_path(path)?;
+    let directory = checkpoint_path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .ok_or_else(|| {
+            format!(
+                "world director checkpoint has no parent directory: {}",
+                checkpoint_path.display()
+            )
+        })?;
+    let ancestors = ensure_director_checkpoint_directory_inner(directory)?;
+    ancestors.verify("after checkpoint directory creation")?;
+    Ok((checkpoint_path, ancestors))
+}
+
+#[cfg(unix)]
+fn sync_director_checkpoint_directory(path: &Path) -> io::Result<()> {
+    OpenOptions::new().read(true).open(path)?.sync_all()
+}
+
+#[cfg(windows)]
+fn sync_director_checkpoint_directory(path: &Path) -> io::Result<()> {
+    use std::os::windows::fs::OpenOptionsExt;
+
+    const GENERIC_READ: u32 = 0x8000_0000;
+    const GENERIC_WRITE: u32 = 0x4000_0000;
+    const FILE_SHARE_READ: u32 = 0x0000_0001;
+    const FILE_SHARE_WRITE: u32 = 0x0000_0002;
+    const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    OpenOptions::new()
+        .access_mode(GENERIC_READ | GENERIC_WRITE)
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)?
+        .sync_all()
+}
+
+#[cfg(not(any(unix, windows)))]
+fn sync_director_checkpoint_directory(_path: &Path) -> io::Result<()> {
+    Ok(())
+}
+
+struct CreatedDirectorCheckpointTemp {
+    file: File,
+    created_identity: DirectorCheckpointFileIdentity,
+}
+
+#[cfg(windows)]
+fn create_director_checkpoint_temp(path: &Path) -> io::Result<CreatedDirectorCheckpointTemp> {
+    use std::os::windows::fs::OpenOptionsExt;
+
+    const DELETE: u32 = 0x0001_0000;
+    const GENERIC_READ: u32 = 0x8000_0000;
+    const GENERIC_WRITE: u32 = 0x4000_0000;
+    const FILE_SHARE_READ: u32 = 0x0000_0001;
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    let file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .access_mode(GENERIC_READ | GENERIC_WRITE | DELETE)
+        .share_mode(FILE_SHARE_READ)
+        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)?;
+    let created_identity = director_checkpoint_file_identity(&file)?;
+    Ok(CreatedDirectorCheckpointTemp {
+        file,
+        created_identity,
     })
+}
+
+#[cfg(unix)]
+fn create_director_checkpoint_temp(path: &Path) -> io::Result<CreatedDirectorCheckpointTemp> {
+    use std::os::unix::fs::OpenOptionsExt;
+
+    let file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .mode(0o600)
+        .open(path)?;
+    let created_identity = director_checkpoint_file_identity(&file)?;
+    Ok(CreatedDirectorCheckpointTemp {
+        file,
+        created_identity,
+    })
+}
+
+#[cfg(not(any(unix, windows)))]
+fn create_director_checkpoint_temp(path: &Path) -> io::Result<CreatedDirectorCheckpointTemp> {
+    let file = OpenOptions::new().create_new(true).write(true).open(path)?;
+    let created_identity = director_checkpoint_file_identity(&file)?;
+    Ok(CreatedDirectorCheckpointTemp {
+        file,
+        created_identity,
+    })
+}
+
+#[cfg(windows)]
+fn windows_extended_path(path: &Path) -> io::Result<Vec<u16>> {
+    use std::os::windows::ffi::OsStrExt;
+
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()?.join(path)
+    };
+    let wide = absolute.as_os_str().encode_wide().collect::<Vec<_>>();
+    if wide.starts_with(&[b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16]) {
+        Ok(wide)
+    } else if wide.starts_with(&[b'\\' as u16, b'\\' as u16]) {
+        let mut value = "\\\\?\\UNC\\".encode_utf16().collect::<Vec<_>>();
+        value.extend_from_slice(&wide[2..]);
+        Ok(value)
+    } else {
+        let mut value = "\\\\?\\".encode_utf16().collect::<Vec<_>>();
+        value.extend_from_slice(&wide);
+        Ok(value)
+    }
+}
+
+#[cfg(windows)]
+fn durable_replace_director_checkpoint(
+    file: &File,
+    _from: &Path,
+    to: &Path,
+    _ancestors: &DirectorCheckpointAncestorGuard,
+) -> io::Result<()> {
+    use std::ffi::c_void;
+    use std::mem::{offset_of, size_of};
+    use std::os::windows::io::AsRawHandle;
+    use std::ptr;
+
+    const FILE_RENAME_INFO_CLASS: i32 = 3;
+    const FILE_RENAME_REPLACE_IF_EXISTS: u32 = 0x0000_0001;
+
+    #[repr(C)]
+    struct FileRenameInfo {
+        flags: u32,
+        root_directory: *mut c_void,
+        file_name_length: u32,
+        file_name: [u16; 1],
+    }
+
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn SetFileInformationByHandle(
+            file: *mut c_void,
+            information_class: i32,
+            information: *const c_void,
+            buffer_size: u32,
+        ) -> i32;
+    }
+
+    let file_name = windows_extended_path(to)?;
+    let file_name_bytes = file_name
+        .len()
+        .checked_mul(size_of::<u16>())
+        .and_then(|length| u32::try_from(length).ok())
+        .ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, "checkpoint path is too long")
+        })?;
+    let file_name_offset = offset_of!(FileRenameInfo, file_name);
+    let buffer_size = file_name_offset
+        .checked_add(file_name_bytes as usize)
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "rename buffer overflow"))?;
+    let word_size = size_of::<usize>();
+    let mut storage = vec![0usize; (buffer_size + word_size - 1) / word_size];
+    let information = storage.as_mut_ptr().cast::<FileRenameInfo>();
+    unsafe {
+        (*information).flags = FILE_RENAME_REPLACE_IF_EXISTS;
+        (*information).root_directory = ptr::null_mut();
+        (*information).file_name_length = file_name_bytes;
+        ptr::copy_nonoverlapping(
+            file_name.as_ptr(),
+            (*information).file_name.as_mut_ptr(),
+            file_name.len(),
+        );
+    }
+    let renamed = unsafe {
+        SetFileInformationByHandle(
+            file.as_raw_handle(),
+            FILE_RENAME_INFO_CLASS,
+            information.cast::<c_void>(),
+            buffer_size as u32,
+        )
+    };
+    if renamed == 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(unix)]
+fn durable_replace_director_checkpoint(
+    _file: &File,
+    from: &Path,
+    to: &Path,
+    ancestors: &DirectorCheckpointAncestorGuard,
+) -> io::Result<()> {
+    use std::ffi::{c_char, CString};
+    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::io::AsRawFd;
+
+    extern "C" {
+        fn renameat(
+            old_directory: i32,
+            old_path: *const c_char,
+            new_directory: i32,
+            new_path: *const c_char,
+        ) -> i32;
+    }
+
+    if from.parent() != to.parent() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "checkpoint rename must remain within one guarded directory",
+        ));
+    }
+    let directory = ancestors.entries.last().ok_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "checkpoint ancestor guard is empty",
+        )
+    })?;
+    let source = CString::new(
+        from.file_name()
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "temp path has no name"))?
+            .as_bytes(),
+    )
+    .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "temp name contains NUL"))?;
+    let destination = CString::new(
+        to.file_name()
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "path has no name"))?
+            .as_bytes(),
+    )
+    .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "path name contains NUL"))?;
+    let renamed = unsafe {
+        renameat(
+            directory.handle.as_raw_fd(),
+            source.as_ptr(),
+            directory.handle.as_raw_fd(),
+            destination.as_ptr(),
+        )
+    };
+    if renamed == 0 {
+        Ok(())
+    } else {
+        Err(io::Error::last_os_error())
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
+fn durable_replace_director_checkpoint(
+    _file: &File,
+    _from: &Path,
+    _to: &Path,
+    _ancestors: &DirectorCheckpointAncestorGuard,
+) -> io::Result<()> {
+    Err(io::Error::new(
+        io::ErrorKind::Unsupported,
+        "this platform has no controlled checkpoint rename implementation",
+    ))
+}
+
+#[cfg(windows)]
+fn delete_director_checkpoint_temp_by_handle(file: &File) -> io::Result<()> {
+    use std::ffi::c_void;
+    use std::mem::size_of;
+    use std::os::windows::io::AsRawHandle;
+
+    const FILE_DISPOSITION_INFO_CLASS: i32 = 4;
+
+    #[repr(C)]
+    struct FileDispositionInfo {
+        // Windows BOOLEAN is an unsigned byte, not Win32 BOOL.
+        delete_file: u8,
+    }
+
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn SetFileInformationByHandle(
+            file: *mut c_void,
+            information_class: i32,
+            information: *const c_void,
+            buffer_size: u32,
+        ) -> i32;
+    }
+
+    let information = FileDispositionInfo { delete_file: 1 };
+    let deleted = unsafe {
+        SetFileInformationByHandle(
+            file.as_raw_handle(),
+            FILE_DISPOSITION_INFO_CLASS,
+            (&information as *const FileDispositionInfo).cast::<c_void>(),
+            size_of::<FileDispositionInfo>() as u32,
+        )
+    };
+    if deleted == 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(not(windows))]
+fn delete_director_checkpoint_temp_by_handle(_file: &File) -> io::Result<()> {
+    Err(io::Error::new(
+        io::ErrorKind::Unsupported,
+        "safe handle-bound temporary checkpoint deletion is unavailable; leaving the file in place",
+    ))
+}
+
+fn verify_director_checkpoint_path_identity(
+    path: &Path,
+    expected: DirectorCheckpointFileIdentity,
+) -> Result<(), String> {
+    let file = open_director_checkpoint_no_follow(path).map_err(|error| {
+        format!(
+            "failed to reopen world director checkpoint {} for publication verification: {error}",
+            path.display()
+        )
+    })?;
+    let metadata = file.metadata().map_err(|error| {
+        format!(
+            "failed to inspect published world director checkpoint {}: {error}",
+            path.display()
+        )
+    })?;
+    validate_director_checkpoint_metadata(&metadata, "after publication")?;
+    let actual = director_checkpoint_file_identity(&file).map_err(|error| {
+        format!(
+            "failed to identify published world director checkpoint {}: {error}",
+            path.display()
+        )
+    })?;
+    if actual != expected {
+        return Err(format!(
+            "published world director checkpoint {} does not identify the synced temporary file",
+            path.display()
+        ));
+    }
+    Ok(())
+}
+
+fn safely_remove_director_checkpoint_temp(
+    path: &Path,
+    ancestors: &DirectorCheckpointAncestorGuard,
+    created: CreatedDirectorCheckpointTemp,
+) -> Result<(), String> {
+    ancestors.verify("before temporary checkpoint cleanup")?;
+    let handle_identity = director_checkpoint_file_identity(&created.file).map_err(|error| {
+        format!(
+            "failed to re-identify created temporary checkpoint {} for cleanup: {error}",
+            path.display()
+        )
+    })?;
+    if !director_checkpoint_same_object(created.created_identity, handle_identity) {
+        return Err(format!(
+            "created temporary checkpoint handle identity changed before cleanup: {}",
+            path.display()
+        ));
+    }
+
+    #[cfg(not(windows))]
+    {
+        match open_director_checkpoint_no_follow(path) {
+            Ok(current_path_file) => {
+                let current_path_identity = director_checkpoint_file_identity(&current_path_file)
+                    .map_err(|error| {
+                    format!(
+                        "failed to identify current temporary checkpoint path {}: {error}",
+                        path.display()
+                    )
+                })?;
+                if !director_checkpoint_same_object(created.created_identity, current_path_identity)
+                {
+                    return Err(format!(
+                        "temporary checkpoint path was replaced; refusing path-based cleanup: {}",
+                        path.display()
+                    ));
+                }
+            }
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+            Err(error) => return Err(format!("failed to inspect temp path for cleanup: {error}")),
+        }
+    }
+
+    ancestors.verify("immediately before temporary checkpoint handle cleanup")?;
+    delete_director_checkpoint_temp_by_handle(&created.file).map_err(|error| {
+        format!(
+            "failed to delete created temporary checkpoint by handle {}: {error}",
+            path.display()
+        )
+    })?;
+    drop(created.file);
+    ancestors.verify("after temporary checkpoint handle cleanup")?;
+    Ok(())
 }
 
 fn persist_runtime_checkpoint(
@@ -1769,16 +2866,33 @@ fn persist_runtime_checkpoint(
     state: &WorldDirectorRuntimeState,
     factory: &SharedInProcessZoneRuntimeFactory,
 ) -> Result<PersistedWorldDirectorCheckpoint, String> {
-    if let Some(parent) = path
+    persist_runtime_checkpoint_with_callback(path, state, factory, |_| Ok(()))
+}
+
+fn persist_runtime_checkpoint_with_callback<F>(
+    path: &Path,
+    state: &WorldDirectorRuntimeState,
+    factory: &SharedInProcessZoneRuntimeFactory,
+    mut hook: F,
+) -> Result<PersistedWorldDirectorCheckpoint, String>
+where
+    F: FnMut(DirectorCheckpointPublishPhase) -> Result<(), String>,
+{
+    let (path, ancestors) = ensure_director_checkpoint_directory(path)?;
+    let directory = path
         .parent()
-        .filter(|parent| !parent.as_os_str().is_empty())
-    {
-        fs::create_dir_all(parent).map_err(|error| {
-            format!(
-                "failed to create world director checkpoint directory {}: {error}",
-                parent.display()
-            )
-        })?;
+        .expect("normalized checkpoint path must have a parent directory")
+        .to_path_buf();
+    ancestors.verify("before inspecting an existing checkpoint")?;
+    match fs::symlink_metadata(&path) {
+        Ok(metadata) => validate_director_checkpoint_metadata(&metadata, "before replacement")?,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(format!(
+                "failed to inspect existing world director checkpoint {}: {error}",
+                path.display()
+            ));
+        }
     }
     let zone_factory_checkpoint = factory.world_checkpoint_bytes()?;
     let zone_factory_bytes = zone_factory_checkpoint.len() as u64;
@@ -1795,23 +2909,140 @@ fn persist_runtime_checkpoint(
         state_commitment: String::new(),
     };
     checkpoint.state_commitment = runtime_checkpoint_commitment(&checkpoint)?;
-    let bytes = serde_json::to_vec(&checkpoint)
+    let mut bytes = serde_json::to_vec(&checkpoint)
         .map_err(|error| format!("world director runtime checkpoint encode failed: {error}"))?;
-    let temporary = path.with_extension(format!("tmp-{}", std::process::id()));
-    fs::write(&temporary, [&bytes[..], b"\n"].concat()).map_err(|error| {
-        format!(
-            "failed to write world director checkpoint {}: {error}",
-            temporary.display()
-        )
-    })?;
-    fs::rename(&temporary, path).map_err(|error| {
-        format!(
-            "failed to publish world director checkpoint {}: {error}",
-            path.display()
-        )
-    })?;
+    bytes.push(b'\n');
+    if bytes.len() as u64 > MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES {
+        return Err(format!(
+            "world director runtime checkpoint is {} bytes (limit {MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES})",
+            bytes.len()
+        ));
+    }
+
+    let mut temporary_name = path
+        .file_name()
+        .ok_or_else(|| "world director checkpoint path has no file name".to_string())?
+        .to_os_string();
+    temporary_name.push(format!(
+        ".{}.{}.tmp",
+        std::process::id(),
+        DIRECTOR_CHECKPOINT_TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed)
+    ));
+    let temporary = directory.join(temporary_name);
+    let mut published = false;
+    let mut created_temp = None;
+    let publication = (|| -> Result<DirectorCheckpointFileIdentity, String> {
+        ancestors.verify("before temporary checkpoint creation")?;
+        let created = create_director_checkpoint_temp(&temporary).map_err(|error| {
+            format!(
+                "failed to create world director checkpoint temp {}: {error}",
+                temporary.display()
+            )
+        })?;
+        created_temp = Some(created);
+        let created = created_temp
+            .as_mut()
+            .expect("successful temp creation must retain its handle");
+        let created_identity = created.created_identity;
+        let file = &mut created.file;
+        let created_metadata = file.metadata().map_err(|error| {
+            format!(
+                "failed to inspect world director checkpoint temp {}: {error}",
+                temporary.display()
+            )
+        })?;
+        validate_director_checkpoint_metadata(&created_metadata, "after temp create")?;
+        hook(DirectorCheckpointPublishPhase::TempCreated)?;
+        ancestors.verify("after temporary checkpoint creation")?;
+        file.write_all(&bytes).map_err(|error| {
+            format!(
+                "failed to write world director checkpoint temp {}: {error}",
+                temporary.display()
+            )
+        })?;
+        hook(DirectorCheckpointPublishPhase::TempWritten)?;
+        file.flush().map_err(|error| {
+            format!(
+                "failed to flush world director checkpoint temp {}: {error}",
+                temporary.display()
+            )
+        })?;
+        file.sync_all().map_err(|error| {
+            format!(
+                "failed to sync world director checkpoint temp {}: {error}",
+                temporary.display()
+            )
+        })?;
+        let written_identity = director_checkpoint_file_identity(&file).map_err(|error| {
+            format!(
+                "failed to identify synced world director checkpoint temp {}: {error}",
+                temporary.display()
+            )
+        })?;
+        if !director_checkpoint_same_object(created_identity, written_identity) {
+            return Err(
+                "synced temporary checkpoint no longer identifies the create_new file".to_string(),
+            );
+        }
+        if written_identity.length != bytes.len() as u64 {
+            return Err(
+                "synced world director checkpoint temp has an unexpected length".to_string(),
+            );
+        }
+        hook(DirectorCheckpointPublishPhase::TempSynced)?;
+        verify_director_checkpoint_path_identity(&temporary, written_identity)?;
+        ancestors.verify("after temporary checkpoint sync")?;
+        hook(DirectorCheckpointPublishPhase::BeforeRename)?;
+        ancestors.verify("immediately before checkpoint rename")?;
+        verify_director_checkpoint_path_identity(&temporary, written_identity)?;
+        durable_replace_director_checkpoint(file, &temporary, &path, &ancestors).map_err(
+            |error| {
+                format!(
+                    "failed to atomically publish world director checkpoint {}: {error}",
+                    path.display()
+                )
+            },
+        )?;
+        published = true;
+        file.sync_all().map_err(|error| {
+            format!("renamed checkpoint handle could not be synced after publication: {error}")
+        })?;
+        hook(DirectorCheckpointPublishPhase::Renamed)?;
+        ancestors.verify("after checkpoint rename")?;
+        verify_director_checkpoint_path_identity(&path, written_identity)?;
+        hook(DirectorCheckpointPublishPhase::BeforeDirectorySync)?;
+        ancestors.verify("before checkpoint directory sync")?;
+        sync_director_checkpoint_directory(&directory).map_err(|error| {
+            format!(
+                "failed to sync world director checkpoint directory {}: {error}",
+                directory.display()
+            )
+        })?;
+        hook(DirectorCheckpointPublishPhase::DirectorySynced)?;
+        ancestors.verify("after checkpoint directory sync")?;
+        verify_director_checkpoint_path_identity(&path, written_identity)?;
+        Ok(written_identity)
+    })();
+    if let Err(error) = publication {
+        if published {
+            return Err(format!(
+                "world director checkpoint was published, but durability/verification is uncertain: {error}"
+            ));
+        }
+        if let Some(created) = created_temp.take() {
+            if let Err(cleanup_error) =
+                safely_remove_director_checkpoint_temp(&temporary, &ancestors, created)
+            {
+                eprintln!(
+                    "world director checkpoint temp cleanup failed closed for {}: {cleanup_error}",
+                    temporary.display()
+                );
+            }
+        }
+        return Err(error);
+    }
     Ok(PersistedWorldDirectorCheckpoint {
-        file_bytes: bytes.len().saturating_add(1) as u64,
+        file_bytes: bytes.len() as u64,
         zone_factory_bytes,
     })
 }
@@ -2116,6 +3347,77 @@ fn hex_digest(bytes: impl AsRef<[u8]>) -> String {
 mod tests {
     use super::*;
     use crate::consensus_log::CommonwareControlLog;
+
+    static CHECKPOINT_TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
+
+    struct CheckpointTestDirectory(PathBuf);
+
+    impl CheckpointTestDirectory {
+        fn new(label: &str) -> Self {
+            let path = std::env::temp_dir().join(format!(
+                "mir2-world-director-checkpoint-{label}-{}-{}",
+                std::process::id(),
+                CHECKPOINT_TEST_SEQUENCE.fetch_add(1, Ordering::Relaxed)
+            ));
+            fs::create_dir(&path).unwrap();
+            Self(path)
+        }
+
+        fn checkpoint(&self, name: &str) -> PathBuf {
+            self.0.join(name)
+        }
+    }
+
+    impl Drop for CheckpointTestDirectory {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    fn checkpoint_test_committee() -> Vec<String> {
+        [
+            "validator-a".to_string(),
+            "validator-b".to_string(),
+            "validator-c".to_string(),
+            "validator-d".to_string(),
+        ]
+        .to_vec()
+    }
+
+    fn checkpoint_test_service(
+        path: PathBuf,
+    ) -> (
+        Vec<String>,
+        String,
+        Arc<SharedInProcessZoneRuntimeFactory>,
+        WorldDirectorRuntimeService,
+    ) {
+        let committee = checkpoint_test_committee();
+        let director = NodeSigningIdentity::from_seed([91; 32])
+            .public_key()
+            .to_string();
+        let factory = Arc::new(SharedInProcessZoneRuntimeFactory::new());
+        let service = WorldDirectorRuntimeService::new(
+            committee.clone(),
+            director.clone(),
+            Arc::clone(&factory),
+            Some(path),
+        )
+        .unwrap();
+        (committee, director, factory, service)
+    }
+
+    fn checkpoint_startup_error(path: PathBuf) -> String {
+        let director = NodeSigningIdentity::from_seed([92; 32]);
+        WorldDirectorRuntimeService::new(
+            checkpoint_test_committee(),
+            director.public_key(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()),
+            Some(path),
+        )
+        .err()
+        .expect("an existing invalid checkpoint must fail startup")
+    }
 
     fn snapshot() -> WorldTelemetrySnapshot {
         WorldTelemetrySnapshot {
@@ -2547,7 +3849,299 @@ mod tests {
     }
 
     #[test]
-    fn runtime_service_reports_durable_checkpoint_write_failures() {
+    fn runtime_service_allows_an_explicitly_configured_missing_checkpoint() {
+        let directory = CheckpointTestDirectory::new("missing");
+        let checkpoint_path = directory.checkpoint("checkpoint.json");
+        let (_, _, _, service) = checkpoint_test_service(checkpoint_path.clone());
+
+        assert!(!checkpoint_path.exists());
+        let status = service.status().unwrap();
+        assert!(status.checkpoint.configured);
+        assert_eq!(status.checkpoint.file_bytes, 0);
+        assert_eq!(status.installed_command_count, 0);
+        assert_eq!(status.spawned_monsters_total, 0);
+
+        let nested_checkpoint = directory
+            .0
+            .join("missing-parent")
+            .join("missing-child")
+            .join("checkpoint.json");
+        let (_, _, _, nested_service) = checkpoint_test_service(nested_checkpoint.clone());
+        assert!(!nested_checkpoint.exists());
+        assert!(!directory.0.join("missing-parent").exists());
+        assert!(nested_service.status().unwrap().checkpoint.configured);
+    }
+
+    #[test]
+    fn runtime_service_fails_closed_for_corrupt_or_incompatible_checkpoint() {
+        let directory = CheckpointTestDirectory::new("invalid");
+        let corrupt = directory.checkpoint("corrupt.json");
+        fs::write(&corrupt, b"{not-json").unwrap();
+        let corrupt_error = checkpoint_startup_error(corrupt);
+        assert!(corrupt_error.contains("checkpoint decode failed"));
+
+        let incompatible = directory.checkpoint("incompatible.json");
+        fs::write(&incompatible, br#"{"version":2}"#).unwrap();
+        let incompatible_error = checkpoint_startup_error(incompatible);
+        assert!(incompatible_error.contains("is not the current format"));
+    }
+
+    #[test]
+    fn runtime_service_fails_closed_before_reading_an_oversized_checkpoint() {
+        let directory = CheckpointTestDirectory::new("oversized");
+        let checkpoint_path = directory.checkpoint("checkpoint.json");
+        let file = File::create(&checkpoint_path).unwrap();
+        file.set_len(MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES + 1)
+            .unwrap();
+        drop(file);
+
+        let error = checkpoint_startup_error(checkpoint_path);
+        assert!(error.contains("limit"));
+        assert!(error.contains(&(MAX_DIRECTOR_RUNTIME_CHECKPOINT_BYTES + 1).to_string()));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn runtime_service_rejects_a_symbolic_link_checkpoint() {
+        use std::os::unix::fs::symlink;
+
+        let directory = CheckpointTestDirectory::new("symlink");
+        let target = directory.checkpoint("target.json");
+        let checkpoint_path = directory.checkpoint("checkpoint.json");
+        fs::write(&target, br#"{"version":3}"#).unwrap();
+        symlink(&target, &checkpoint_path).unwrap();
+
+        let error = checkpoint_startup_error(checkpoint_path);
+        assert!(error.contains("not a regular file") || error.contains("without following links"));
+
+        let real_parent = directory.checkpoint("real-parent");
+        let linked_parent = directory.checkpoint("linked-parent");
+        fs::create_dir(&real_parent).unwrap();
+        fs::write(real_parent.join("checkpoint.json"), br#"{"version":3}"#).unwrap();
+        symlink(&real_parent, &linked_parent).unwrap();
+        let parent_error = checkpoint_startup_error(linked_parent.join("checkpoint.json"));
+        assert!(parent_error.contains("symbolic-link component"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn runtime_service_rejects_a_windows_symlink_checkpoint_when_supported() {
+        use std::os::windows::fs::symlink_file;
+
+        let directory = CheckpointTestDirectory::new("windows-symlink");
+        let target = directory.checkpoint("target.json");
+        let checkpoint_path = directory.checkpoint("checkpoint.json");
+        fs::write(&target, br#"{"version":3}"#).unwrap();
+        match symlink_file(&target, &checkpoint_path) {
+            Ok(()) => {
+                let error = checkpoint_startup_error(checkpoint_path);
+                assert!(
+                    error.contains("not a regular file")
+                        || error.contains("reparse point")
+                        || error.contains("without following links")
+                );
+            }
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    io::ErrorKind::PermissionDenied | io::ErrorKind::Unsupported
+                ) => {}
+            Err(error) => panic!("unexpected Windows symlink creation failure: {error}"),
+        }
+    }
+
+    #[test]
+    fn checkpoint_read_rejects_an_ancestor_replacement_race() {
+        let directory = CheckpointTestDirectory::new("read-ancestor-race");
+        let guarded_directory = directory.checkpoint("guarded");
+        let replacement_directory = directory.checkpoint("replacement");
+        let parked_directory = directory.checkpoint("parked");
+        fs::create_dir(&guarded_directory).unwrap();
+        fs::create_dir(&replacement_directory).unwrap();
+        let checkpoint_path = guarded_directory.join("checkpoint.json");
+        let (_, _, factory, service) = checkpoint_test_service(checkpoint_path.clone());
+        {
+            let state = service.state.lock().unwrap();
+            persist_runtime_checkpoint(&checkpoint_path, &state, factory.as_ref()).unwrap();
+        }
+        let checkpoint_bytes = fs::read(&checkpoint_path).unwrap();
+        fs::write(
+            replacement_directory.join("checkpoint.json"),
+            &checkpoint_bytes,
+        )
+        .unwrap();
+
+        let mut attempted = false;
+        let error = read_runtime_checkpoint_bytes_with_callback(&checkpoint_path, |phase| {
+            if phase != DirectorCheckpointReadPhase::AncestorsGuarded {
+                return Ok(());
+            }
+            attempted = true;
+            fs::rename(&guarded_directory, &parked_directory).map_err(|error| {
+                format!("ancestor replacement was blocked by the held directory guard: {error}")
+            })?;
+            fs::rename(&replacement_directory, &guarded_directory).map_err(|error| {
+                format!("failed to install the replacement checkpoint directory: {error}")
+            })?;
+            Ok(())
+        })
+        .expect_err("an ancestor replacement must never yield checkpoint bytes");
+        assert!(attempted);
+        assert!(
+            error.contains("ancestor path identity changed")
+                || error.contains("blocked by the held directory guard")
+        );
+    }
+
+    #[test]
+    fn checkpoint_publish_rejects_an_ancestor_replacement_and_preserves_old_bytes() {
+        let directory = CheckpointTestDirectory::new("write-ancestor-race");
+        let guarded_directory = directory.checkpoint("guarded");
+        let replacement_directory = directory.checkpoint("replacement");
+        let parked_directory = directory.checkpoint("parked");
+        fs::create_dir(&guarded_directory).unwrap();
+        fs::create_dir(&replacement_directory).unwrap();
+        let checkpoint_path = guarded_directory.join("checkpoint.json");
+        let (_, _, factory, service) = checkpoint_test_service(checkpoint_path.clone());
+        let mut state = service.state.lock().unwrap();
+        state.spawned_monsters_total = 11;
+        persist_runtime_checkpoint(&checkpoint_path, &state, factory.as_ref()).unwrap();
+        let old_bytes = fs::read(&checkpoint_path).unwrap();
+        fs::write(replacement_directory.join("checkpoint.json"), &old_bytes).unwrap();
+
+        state.spawned_monsters_total = 22;
+        let mut attempted = false;
+        let error = persist_runtime_checkpoint_with_callback(
+            &checkpoint_path,
+            &state,
+            factory.as_ref(),
+            |phase| {
+                if phase != DirectorCheckpointPublishPhase::BeforeRename {
+                    return Ok(());
+                }
+                attempted = true;
+                fs::rename(&guarded_directory, &parked_directory).map_err(|error| {
+                    format!("ancestor replacement was blocked by the held directory guard: {error}")
+                })?;
+                fs::rename(&replacement_directory, &guarded_directory).map_err(|error| {
+                    format!("failed to install the replacement checkpoint directory: {error}")
+                })?;
+                Ok(())
+            },
+        )
+        .err()
+        .expect("an ancestor replacement must reject checkpoint publication");
+        assert!(attempted);
+        assert!(
+            error.contains("ancestor path identity changed")
+                || error.contains("blocked by the held directory guard")
+        );
+        assert_eq!(fs::read(&checkpoint_path).unwrap(), old_bytes);
+        if parked_directory.exists() {
+            assert_eq!(
+                fs::read(parked_directory.join("checkpoint.json")).unwrap(),
+                old_bytes
+            );
+        }
+    }
+
+    #[test]
+    fn checkpoint_publication_faults_leave_a_complete_old_or_new_image() {
+        let directory = CheckpointTestDirectory::new("faults");
+        let seed_path = directory.checkpoint("seed.json");
+        let (committee, trusted_director, factory, service) =
+            checkpoint_test_service(seed_path.clone());
+        let mut state = service.state.lock().unwrap();
+        state.spawned_monsters_total = 11;
+        state.last_checkpoint_at_ms = 11;
+        persist_runtime_checkpoint(&seed_path, &state, factory.as_ref()).unwrap();
+        let old_bytes = fs::read(&seed_path).unwrap();
+        state.spawned_monsters_total = 22;
+        state.last_checkpoint_at_ms = 22;
+
+        let phases = [
+            DirectorCheckpointPublishPhase::TempCreated,
+            DirectorCheckpointPublishPhase::TempWritten,
+            DirectorCheckpointPublishPhase::TempSynced,
+            DirectorCheckpointPublishPhase::BeforeRename,
+            DirectorCheckpointPublishPhase::Renamed,
+            DirectorCheckpointPublishPhase::BeforeDirectorySync,
+            DirectorCheckpointPublishPhase::DirectorySynced,
+        ];
+        for (index, injected_phase) in phases.into_iter().enumerate() {
+            let checkpoint_path = directory.checkpoint(&format!("phase-{index}.json"));
+            fs::write(&checkpoint_path, &old_bytes).unwrap();
+            let error = persist_runtime_checkpoint_with_callback(
+                &checkpoint_path,
+                &state,
+                factory.as_ref(),
+                |observed_phase| {
+                    if observed_phase == injected_phase {
+                        Err(format!("injected checkpoint fault at {observed_phase:?}"))
+                    } else {
+                        Ok(())
+                    }
+                },
+            )
+            .err()
+            .expect("the selected publication phase must inject a failure");
+            assert!(error.contains("injected checkpoint fault"));
+
+            let checkpoint_bytes = fs::read(&checkpoint_path).unwrap();
+            if matches!(
+                injected_phase,
+                DirectorCheckpointPublishPhase::TempCreated
+                    | DirectorCheckpointPublishPhase::TempWritten
+                    | DirectorCheckpointPublishPhase::TempSynced
+                    | DirectorCheckpointPublishPhase::BeforeRename
+            ) {
+                assert_eq!(
+                    checkpoint_bytes, old_bytes,
+                    "phase {injected_phase:?} must preserve every byte of the old checkpoint"
+                );
+            }
+
+            let restored_factory = SharedInProcessZoneRuntimeFactory::new();
+            let restored = restore_runtime_checkpoint(
+                &checkpoint_path,
+                &committee,
+                &trusted_director,
+                &restored_factory,
+            )
+            .unwrap()
+            .expect("fault injection must leave a checkpoint path")
+            .0;
+            assert!(
+                matches!(restored.spawned_monsters_total, 11 | 22),
+                "phase {injected_phase:?} produced neither the old nor new complete checkpoint"
+            );
+            if matches!(
+                injected_phase,
+                DirectorCheckpointPublishPhase::TempCreated
+                    | DirectorCheckpointPublishPhase::TempWritten
+                    | DirectorCheckpointPublishPhase::TempSynced
+                    | DirectorCheckpointPublishPhase::BeforeRename
+            ) {
+                assert_eq!(restored.spawned_monsters_total, 11);
+            } else {
+                assert_eq!(restored.spawned_monsters_total, 22);
+            }
+            let leaked_temp = fs::read_dir(&directory.0).unwrap().any(|entry| {
+                entry
+                    .unwrap()
+                    .file_name()
+                    .to_string_lossy()
+                    .ends_with(".tmp")
+            });
+            #[cfg(windows)]
+            assert!(!leaked_temp, "phase {injected_phase:?} leaked a temp file");
+            #[cfg(not(windows))]
+            let _ = leaked_temp;
+        }
+    }
+
+    #[test]
+    fn runtime_service_fails_startup_for_non_directory_checkpoint_parent() {
         let nonce = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
@@ -2559,7 +4153,7 @@ mod tests {
         std::fs::write(&checkpoint_parent, b"not-a-directory").unwrap();
         let checkpoint_path = checkpoint_parent.join("checkpoint.json");
         let director = NodeSigningIdentity::from_seed([71; 32]);
-        let service = WorldDirectorRuntimeService::new(
+        let error = WorldDirectorRuntimeService::new(
             [
                 "validator-a".to_string(),
                 "validator-b".to_string(),
@@ -2570,22 +4164,68 @@ mod tests {
             Arc::new(SharedInProcessZoneRuntimeFactory::new()),
             Some(checkpoint_path),
         )
-        .unwrap();
-
-        let error = service
-            .advance(DIRECTOR_RUNTIME_CHECKPOINT_INTERVAL_MS)
-            .expect_err("a file where the checkpoint directory belongs must reject persistence");
-        assert!(error.contains("failed to create world director checkpoint directory"));
-        let status = service.status().unwrap();
-        assert!(status.checkpoint.configured);
-        assert_eq!(status.checkpoint.file_bytes, 0);
-        assert_eq!(status.checkpoint.write_attempts_total, 1);
-        assert_eq!(status.checkpoint.writes_total, 0);
-        assert_eq!(status.checkpoint.write_failures_total, 1);
-        assert_eq!(status.checkpoint.write_bytes_total, 0);
-        assert_eq!(status.checkpoint.write_last_bytes, 0);
-        assert_eq!(status.checkpoint.last_success_at_ms, 0);
+        .err()
+        .expect("a file where the checkpoint directory belongs must fail startup");
+        assert!(error.contains("non-directory or symbolic-link component"));
 
         std::fs::remove_file(checkpoint_parent).unwrap();
+    }
+
+    #[test]
+    fn pre_existing_checkpoint_temp_is_never_adopted_or_removed() {
+        let directory = CheckpointTestDirectory::new("pre-existing-temp");
+        let temporary = directory.checkpoint("checkpoint.pre-existing.tmp");
+        let original_bytes = b"pre-existing-temp-must-survive";
+        fs::write(&temporary, original_bytes).unwrap();
+
+        let error = create_director_checkpoint_temp(&temporary)
+            .err()
+            .expect("create_new must reject a pre-existing temporary path");
+        assert_eq!(error.kind(), io::ErrorKind::AlreadyExists);
+        assert_eq!(fs::read(&temporary).unwrap(), original_bytes);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_temp_handle_blocks_replacement_and_cleanup_deletes_only_created_object() {
+        let directory = CheckpointTestDirectory::new("temp-handle-cleanup");
+        let temporary = directory.checkpoint("checkpoint.created.tmp");
+        let replacement = directory.checkpoint("replacement-candidate.tmp");
+        let replacement_bytes = b"replacement-must-not-be-deleted";
+        fs::write(&replacement, replacement_bytes).unwrap();
+        let created = create_director_checkpoint_temp(&temporary).unwrap();
+        let ancestors = DirectorCheckpointAncestorGuard::capture(&directory.0).unwrap();
+
+        OpenOptions::new()
+            .write(true)
+            .open(&temporary)
+            .expect_err("the verified temporary handle must deny a second writer");
+        let _replace_error = fs::rename(&replacement, &temporary)
+            .expect_err("the verified temporary handle must deny path replacement");
+        assert_eq!(fs::read(&replacement).unwrap(), replacement_bytes);
+        assert!(temporary.exists());
+
+        safely_remove_director_checkpoint_temp(&temporary, &ancestors, created).unwrap();
+        assert!(!temporary.exists());
+        assert_eq!(fs::read(&replacement).unwrap(), replacement_bytes);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn unix_temp_cleanup_refuses_to_delete_a_replacement_path() {
+        let directory = CheckpointTestDirectory::new("temp-replacement-cleanup");
+        let temporary = directory.checkpoint("checkpoint.created.tmp");
+        let parked = directory.checkpoint("checkpoint.created.parked");
+        let replacement_bytes = b"replacement-must-survive";
+        let created = create_director_checkpoint_temp(&temporary).unwrap();
+        let ancestors = DirectorCheckpointAncestorGuard::capture(&directory.0).unwrap();
+        fs::rename(&temporary, &parked).unwrap();
+        fs::write(&temporary, replacement_bytes).unwrap();
+
+        let error = safely_remove_director_checkpoint_temp(&temporary, &ancestors, created)
+            .expect_err("path replacement must make cleanup fail closed");
+        assert!(error.contains("path was replaced"));
+        assert_eq!(fs::read(&temporary).unwrap(), replacement_bytes);
+        assert!(parked.exists());
     }
 }

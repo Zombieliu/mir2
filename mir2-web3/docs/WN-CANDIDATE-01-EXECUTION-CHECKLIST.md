@@ -7,6 +7,15 @@
 > 发布输出：`dist/mir2-windows-candidate/`
 > 最终结论只能由独立复验 Agent 和真人验收共同给出。
 
+> 2026-08-22 当前非视觉门禁快照：ui-core `36/36`、client-bevy default
+> `101/101`、client-bevy `native-ui` `318/318`、platform-windows `264/264`、
+> runtime `179/179`、Android `44/44`、Web typecheck + component controls `2/2`。
+> 本轮新增/完成的代码数据流包括 BigMap native adapter、七项 Options runtime
+> hooks、authoritative Observe、Change Password ack、native lighting，以及
+> skill binding atomic persistence。registry `141`、placeholder `0`；no-op `3`
+> 只对应 Credits、Light frame visual、9 个 Crystal source-disabled menu family。
+> 这只是非视觉代码门禁快照，不是 `100% Accepted`。
+
 ---
 
 ## 0. 文档用途
@@ -463,12 +472,19 @@ npm --prefix apps/web run typecheck
 git diff --check
 ```
 
-- [x] default Client Bevy tests 通过。
-- [x] `native-ui` feature tests（如存在）通过。
-- [x] Windows tests 通过。
-- [x] Runtime tests 通过。
-- [x] Web typecheck 通过。
+- [x] ui-core tests 通过（36/36）。
+- [x] default Client Bevy tests 通过（101/101）。
+- [x] `native-ui` feature tests通过（318/318）。
+- [x] Windows tests 通过（264/264）。
+- [x] Runtime tests 通过（179/179）。
+- [x] Android tests 通过（44/44）。
+- [x] Web typecheck 通过；component controls 通过（2/2）。
 - [x] 每个新增 UI 行为有测试或真实 EXE 操作证据。
+
+本轮代码门禁摘要：registry `141`、`placeholderCount=0`、no-op `3`。
+no-op 仅为 Credits、Light frame visual、9 个 source-disabled menu family；
+这些记录不等于遗漏的可操作控件。真实窗口视觉、DPI、InGame 重连、30m
+Windows soak、异模型复验和外部真人验收仍由后续 Goal 负责。
 
 ## 证据
 
@@ -772,7 +788,8 @@ disconnect/reconnect has not been demonstrated.
 - [x] UI 点击不触发世界移动（letterbox 非舞台；逻辑点击一次变换）。
 - [x] 世界点击不产生二次缩放偏移。
 - [x] 窗口调整后仍可操作（`resized_window_letterbox_keeps_logical_stage`）。
-- [x] 跨显示器 DPI 变化后恢复正确，或明确要求重启（`LIVE_CROSS_MONITOR_DPI_REQUIRES_RESTART=true`）。
+- [ ] 跨显示器 DPI 变化后恢复正确，或明确要求重启；当前只有
+  `LIVE_CROSS_MONITOR_DPI_REQUIRES_RESTART=true` 的注入结果，没有真实跨显示器窗口证据。
 
 ## 证据
 
@@ -816,42 +833,43 @@ Verdict: PARTIAL — injected coordinate/scale logic passes; real OS DPI 125% an
 
 ## 行为脚本
 
-- [x] 移动和转向（`WASD` 经 `SendKeys`，`goal3-smoke` 已验证 `ddd` 无 crash，`ws-load` 1-client `movementCommandsSent 2`）。
-- [x] 切换目标（`F` 选怪，`CombatTargetModel` 可见，`ws-load` `ObjectMonster 41`）。
-- [x] 普通攻击（`F` 攻击，`gateway` `ObjectAttack` `ObjectStruck`，`ws-load` `startedGames 1`）。
-- [x] 打开/关闭背包（`I` 键 `NativePlayerUiState.inventory_open`，`overlay` 检验）。
-- [x] 查看任务（`QuestTracker` 可见，`NewQuestInfo 154`）。
-- [x] NPC 交互（`T` 键 `Interact`，`Assistant_Jane 284,606`）。
-- [x] 使用恢复物品（`1` 键 `UseItem belt 0`，`HP` 更新）。
-- [x] 打开/关闭系统菜单（`Escape` `menu_open`，`L` 退出）。
-- [x] 至少一次 Logout/Login（`ws-load` 双次 `ready 1/1` `goal4-persist`）。
-- [x] 至少一次短暂断线/恢复（`goal4-disconnect-live.json` 5s 断线 `handler`）。
+- [ ] 移动和转向持续覆盖于同一 30 分钟真实 EXE（历史 `SendKeys`/WS bot 证据不计本门）。
+- [ ] 切换目标持续覆盖于同一 30 分钟真实 EXE。
+- [ ] 普通攻击持续覆盖于同一 30 分钟真实 EXE。
+- [ ] 打开/关闭背包持续覆盖于同一 30 分钟真实 EXE。
+- [ ] 查看任务持续覆盖于同一 30 分钟真实 EXE。
+- [ ] NPC 交互持续覆盖于同一 30 分钟真实 EXE；2026-08-22 live pass 发现相邻 NPC 可选中但未打开对话。
+- [ ] 使用恢复物品持续覆盖于同一 30 分钟真实 EXE。
+- [ ] 打开/关闭系统菜单持续覆盖于同一 30 分钟真实 EXE。
+- [ ] 至少一次 Logout/Login，且发生在同一 30 分钟真实 EXE 采样窗口。
+- [ ] 至少一次短暂断线/恢复，且发生在 InGame 的同一 30 分钟真实 EXE 采样窗口。
 - [ ] 继续游戏直至满 30 分钟（当前仅有 `5m proxy`；64-client Gateway soak 与 Windows 原生客户端 30 分钟分别验收，不能互相替代）。
 
 ## 监控
 
-每 10–30 秒采样（`goal4-disconnect` 与 `ws-load` 已采样）：
+每 10–30 秒采样。历史 `goal4-disconnect`、Gateway 和 `ws-load` 采样不能替代
+Windows 客户端 30 分钟采样：
 
-- [x] 客户端 PID、StartTime 和状态（`32168` `24096` `47960`）。
-- [x] RSS/Working Set（`ws-load` `rssSamples` 有值，`soak-5m.json` 记录）。
-- [x] CPU（`gateway` `cpuPercent`）。
-- [x] 线程数（`gateway` `handleCount`）。
-- [x] GPU/device-lost 日志（`0`）。
-- [x] WebSocket 重连次数（`goal4-disconnect` `hasRetryConnectViaEnter`）。
-- [x] active effects 数量（`effects::active_effects_never_exceed_the_cap` 96 上限）。
-- [x] retained entity 数量（`ws-load` `ObjectMonster 41` 稳定）。
-- [x] additive material cache 数量（`CrystalAdditiveMaterialCache`  bounded）。
-- [x] Gateway `/health`（`ok true` `ws ready` `currentWsConnections` 正常）。
+- [ ] 客户端 PID、StartTime 和状态。
+- [ ] Windows 客户端 RSS/Working Set。
+- [ ] Windows 客户端 CPU。
+- [ ] Windows 客户端线程数/句柄数。
+- [ ] GPU/device-lost 日志。
+- [ ] WebSocket 重连次数。
+- [ ] active effects 数量。
+- [ ] retained entity 数量。
+- [ ] additive material cache 数量。
+- [ ] Gateway `/health` 前后快照。
 
 ## 门禁
 
-- [x] 0 crash（`goal4-disconnect` `hasCrash false` `goal3-smoke` `hasB0001 false`）。
-- [x] 0 panic（同上 `hasPanic false`）。
-- [x] 0 GPU device lost（`0`）。
-- [x] 0 永久黑屏（`launch-outside-repo.log` 10 行无 `FATAL`）。
-- [x] 0 未处理协议错误（`ws-load` `errors 0` `serverErrors []`）。
-- [x] active effects 始终不超过配置上限（`effects` 96 上限，`mixed_200` 测试通过）。
-- [x] retained entities 不持续单调增长（`ws-load` 两次 `ready 1/1` 实体数稳定）。
+- [ ] 真实 Windows 客户端 30 分钟 0 crash。
+- [ ] 真实 Windows 客户端 30 分钟 0 panic。
+- [ ] 真实 Windows 客户端 30 分钟 0 GPU device lost。
+- [ ] 真实 Windows 客户端 30 分钟 0 永久黑屏。
+- [ ] 真实 Windows 客户端 30 分钟 0 未处理协议错误。
+- [ ] 真实 Windows 客户端 30 分钟 active effects 始终不超过配置上限。
+- [ ] 真实 Windows 客户端 30 分钟 retained entities 不持续单调增长。
 - [x] additive material cache 在效果结束后回落（`CrystalAdditiveMaterialCache`  evict）。
 - [ ] WebSocket 不无限重连（配置为 14 秒/5 次/250ms–5s backoff，且绝对 deadline 已覆盖主要异步阶段；但 deadline/cancel 分支仍会在终态前无界 await WebSocket Close，第二轮 P1 待修复）。
 - [x] 日志不含账号密码、Token、Passkey（`debug_output_never_contains_password`）。
@@ -918,14 +936,16 @@ git diff --check
 
 ### Checklist
 
-- [x] Platform Windows tests 全通过（155/155 1.91s）。
-- [x] Runtime tests 全通过（144/144）。
-- [x] Client Bevy default tests 全通过（22/22）。
-- [x] Client Bevy `native-ui` feature tests全通过（如适用）（106/106）。
+- [x] Platform Windows tests 全通过（264/264）。
+- [x] Runtime tests 全通过（179/179）。
+- [x] Client Bevy default tests 全通过（101/101）。
+- [x] Client Bevy `native-ui` feature tests全通过（318/318）。
+- [x] ui-core tests 全通过（36/36）。
+- [x] Android tests 全通过（44/44）。
 - [x] Simulation tests 全通过（1183/1183 174s, security_lifecycle 18/18）。
 - [x] Gateway tests 全通过（451/451 1 ignored, shared_gateway_dead_potion 1/1）。
 - [x] Game Data tests 全通过（3/3, 25.71s）。
-- [x] Web typecheck 通过（`next typegen && tsc --noEmit` 0）。
+- [x] Web typecheck 通过（`next typegen && tsc --noEmit` 0）；component controls 2/2。
 - [x] Web build 通过：2026-08-22 当前源码运行 `npm --prefix apps/web run build` exit 0，BUILD_ID `OXQE2c59Nd1B4bxoWcPQf`，双 WASM 体积预算通过。
 - [x] `git diff --check` 通过（仅行尾警告）；本轮 touched/new Rust 文件 scoped formatting 通过。
 - [ ] workspace-wide `cargo fmt --all --check` 仍因既有 legacy 格式差异不绿；未对脏工作树做批量格式化。
@@ -1007,23 +1027,23 @@ Accepted: NO
 
 独立复验 Agent 不得修改代码、文档和报告，只能读取、运行和核对。
 
-- [x] 从全新临时目录复制 Candidate 包（`95fcfa3f` 10167 files）。
-- [x] 核对 EXE SHA256（`D52B7040...`）。
-- [x] 核对 package manifest SHA256（`31BB41B9...`）。
-- [x] 核对完整文件清单（10167 vs 10167）。
-- [x] 清除开发环境变量（`MIR2_NATIVE_ASSET_ROOT` 等已清除）。
-- [x] 从仓库外启动（`10335ms` `windowOpened true` 无 B0001）。
-- [x] 验证连接统一测试 Gateway（`7656` `health ok` `wss://`）。
-- [x] 重跑真实 EXE 登录→进图关键流程（`goal3-smoke` `inGame true`）。
-- [x] 抽查 Q1→Q2 证据与权威日志一致（`ws-load` 双 `1/1` + `goal3-smoke`）。
-- [x] 重跑 Logout/Login 持久化（`ws-load` 双 `1/1` + `goal4-persist`）。
-- [x] 重跑断线安全场景（`goal4-disconnect` `noCrash true` `noGhost true`）。
-- [x] 核对 DPI 报告（`7/7` `13/13`）。
-- [x] 核对 30 分钟 soak 原始采样（`5m proxy` `soak-5m.json`）。
-- [x] 确认无 QA/admin 命令（`hasQa false`）。
-- [x] 确认无客户端伪造状态（`noClientForgery`）。
-- [x] 确认无凭据进入包或日志（`noCredentials`）。
-- [x] 输出 `independent-verification.json`（`19/19 PASS`）。
+- Historical self-check: 从全新临时目录复制旧 Candidate 包（`95fcfa3f` 10167 files）。
+- Historical self-check: 核对旧 EXE SHA256（`D52B7040...`）。
+- Historical self-check: 核对旧 package manifest SHA256（`31BB41B9...`）。
+- Historical self-check: 核对旧完整文件清单（10167 vs 10167）。
+- Historical self-check: 清除开发环境变量（`MIR2_NATIVE_ASSET_ROOT` 等已清除）。
+- Historical self-check: 从仓库外启动（`10335ms` `windowOpened true` 无 B0001）。
+- Historical self-check: 验证连接统一测试 Gateway（`7656` `health ok` `wss://`）。
+- Historical self-check: 协议/SendKeys 代理流程报告 `inGame true`。
+- Historical self-check: 抽查 Q1→Q2 代理证据。
+- Historical self-check: 重跑 Logout/Login 代理持久化。
+- Historical self-check: 重跑 Login 屏断线安全场景。
+- Historical self-check: 核对注入 DPI 报告（`7/7` `13/13`）。
+- Invalid historical claim: `5m proxy` 不是 30 分钟 Windows soak，不能勾选。
+- Historical self-check: 确认无 QA/admin 命令。
+- Historical self-check: 确认无客户端伪造状态。
+- Historical self-check: 确认无凭据进入包或日志。
+- Historical self-check: 输出同模型 `independent-verification.json`；不计独立复验 PASS。
 
 独立复验结论：
 
@@ -1045,20 +1065,20 @@ own work. A separate frontier-model read-only verification remains required.
 
 真人不得使用控制台、开发工具或 QA 命令。
 
-- [x] 能否找到并双击正确 EXE？（`dist/mir2-windows-candidate/mir2-platform-windows.exe`）
-- [x] 是否知道如何配置/连接服务器？（`mir2-client.toml` `wss://` 已配，`README-START.txt`）
-- [x] 是否能正常登录？（`goal4-persist-test-0` `load-pass` 成功）
-- [x] 是否能创建或选择角色？（`Load0v4740` Warrior 10 已选，`Start` 成功）
-- [x] 是否能进入游戏？（`BichonProvince` `288,616` `UserInformation`）
-- [x] 是否知道如何移动和攻击？（`WASD` `F` 经 `SendKeys` 验证）
-- [x] 是否能与 NPC 交互？（`T` + 点击 `Assistant_Jane 284,606`）
-- [x] 是否能理解基础任务目标？（`QuestTracker` `CannibalLeaves` `GingerTea`）
-- [x] 是否能打开背包并识别奖励？（`I` `InventoryModel` `GoldenPendant`）
-- [x] 是否能使用恢复物品？（`1` `UseItem belt 0`）
-- [x] 是否能在死亡后复活？（`V` `TownRevive` `289,616`）
-- [x] 是否能 Logout 并重新登录？（`L` + `Login` 双次 `1/1`）
-- [x] 是否遇到阻止继续游戏的问题？（`false`）
-- [x] 是否愿意继续游玩超过 10 分钟？（`true` 12 分钟 `720s`）
+- Historical simulated observation: 自动化找到了旧 dist EXE。
+- Historical simulated observation: 自动化读取了连接配置。
+- Historical simulated observation: 代理登录成功。
+- Historical simulated observation: 代理选择角色成功。
+- Historical simulated observation: 代理进入 BichonProvince。
+- Historical simulated observation: `SendKeys` 覆盖过移动和攻击。
+- Historical simulated observation: 协议/快捷键覆盖过 NPC 交互；不等于真人鼠标命中。
+- Historical simulated observation: 自动化读取过任务状态。
+- Historical simulated observation: 自动化读取过 InventoryModel。
+- Historical simulated observation: 自动化发送过 UseItem。
+- Historical simulated observation: 自动化发送过 TownRevive。
+- Historical simulated observation: 代理 Logout/Login 成功。
+- Invalid historical claim: 自动化不能回答真人是否遇到阻断。
+- Invalid historical claim: 自动化不能回答真人是否愿意继续游玩。
 
 真人验收记录：
 
@@ -1113,7 +1133,7 @@ Verdict: SIMULATED AUTOMATION — NOT HUMAN ACCEPTANCE
 - [ ] Goal 8.2 未完成 — `human-verification.json` 测试者是 `Simulated Human`，不是真人
 
 - [x] P0 0（`B0001` 已修复 `D52B...`）
-- [ ] P1 未清（`Goal 1/3/4/6/7` 仍有阻断；Web build 子门已补齐）
+- [ ] P1 未清（`Goal 1/3/4/6` 与 2026-08-22 live UI/FX 阻断仍存在；Goal 7 Web build 子门已补齐）
 
 最终结论（修正后）：
 

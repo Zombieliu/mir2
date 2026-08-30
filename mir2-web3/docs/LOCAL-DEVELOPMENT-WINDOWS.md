@@ -122,6 +122,12 @@ Starter 模式：
 
 - 拒绝已被占用的端口。
 - 增量构建 `mir2-gateway.exe`，除非存在可用二进制并传入 `-SkipGatewayBuild`。
+- 首次运行时在 `.mir2-data/local-secrets/save-recovery-mac-key.hex` 生成一次
+  当前用户专用的 32-byte save-recovery MAC key；后续重启复用同一 key，绝不使用
+  每进程随机值。对应 journal 位于 `.mir2-data/save-recovery/v1/`。
+- 若持久 key 格式或私有 ACL 不合格则 fail closed；可单独运行
+  `powershell -File scripts/Initialize-LocalSaveRecovery.ps1 -SelfTest` 验证生成、重启稳定性、
+  原子发布和 ACL。
 - 在隐藏窗口中启动 Gateway，并等待 `/health` 最多 60 秒。
 - 注入正确的 `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL`。
 - 设置 `MIR2_USE_PREBUILT_BEVY_RUNTIME=1`。
@@ -133,6 +139,11 @@ Starter 模式：
 ```powershell
 .\scripts\start-developer.ps1 -ReuseGateway -OpenBrowser
 ```
+
+Docker 开发路径读取同一宿主机持久 secret 文件，以只读 `0400` secret 注入容器；
+文件缺失或不是 64 位小写十六进制时 Gateway 容器以配置错误退出。Windows Candidate
+包本身只包含客户端，不携带 Gateway 或任何 recovery secret；其连接的 Gateway 必须按部署
+模板配置独立的持久 key。
 
 浏览器可能先于 Next dev server 完成编译而打开；看到暂时无法访问时，等待 Web 终端显示 ready 后刷新。
 

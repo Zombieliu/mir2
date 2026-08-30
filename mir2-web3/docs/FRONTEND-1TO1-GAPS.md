@@ -1,6 +1,18 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-19
+Last updated: 2026-08-29
+
+> 2026-08-29 Windows-native login/bulletin parity checkpoint: the Gateway now
+> appends `LineMessage.txt` announcements to the `StartGame` bootstrap instead
+> of waiting for the 10-minute broadcast tick, and the native Windows host now
+> renders a first-login bulletin modal plus a shell-only build stamp. Candidate
+> / test runs show bottom-left `Build: <candidate> · <git> · Windows x64` text
+> and a top-right mode badge; release builds fall back to the simplified stamp
+> without the test badge. This closes the missing “enter game but no Crystal
+> announcement” regression and the missing build/version provenance marker on
+> login/select. It does not close final in-game HUD parity: the main-dialog
+> bitmap text, exact panel framing, and broader same-scene visual matching are
+> still materially behind Crystal and remain explicit frontend gaps.
 
 > 2026-08-19 Windows-native alternate-class/combat checkpoint: Archer
 > `ARArmour`/`ARHair`/`ARWeapon` and Assassin

@@ -27,6 +27,17 @@ called, and no human visual/feel sign-off was performed in this code-only run.
   - requires the same run id, scene, UI state, DPI and a capture delta no greater
     than five minutes;
   - for world scenes, requires exact map, x, y and light equality;
+  - requires a compact, byte-exact
+    `mir2-native-capture-attestation-v1` statement plus RSA-PKCS1-SHA256
+    signature and DER SPKI; the independently supplied SPKI SHA-256 pin must
+    match, the RSA modulus must be at least 3072 bits, and a self-selected
+    signer is rejected;
+  - binds that signed statement to the native sidecar bytes, PNG bytes, running
+    EXE digest, source revision, v4 package-manifest digest, formal package
+    verification output, canonical release statement and detached CMS bytes;
+    the package verification must be nonvisual, passing, signed by the separate
+    externally pinned release signer, and report a validated build attestation,
+    manifest and PE image;
   - binds the Gemini report to ordered reference, candidate and pair-context
     evidence plus the tracked review-schema SHA-256;
   - requires an identified Gemini/Antigravity provider, `sameScene=true`, scene
@@ -51,8 +62,34 @@ called, and no human visual/feel sign-off was performed in this code-only run.
     an acceptance-eligible v1 sidecar;
   - reads effective light only from the latest matching-map native lighting
     bridge and cross-checks the actual running EXE against packaged
-    `VERSION.json` plus `PACKAGE-MANIFEST.json`; development or stale packages
-    remain draft rather than accepting environment-supplied digest claims.
+    provenance; development or stale packages remain draft rather than
+    accepting environment-supplied digest claims.
+- `apps/game-client/platform-windows/src/capture/provenance.rs`
+  - acts as an in-process defense-in-depth check and promotes a native sidecar
+    to strict v1 only when the running EXE is inside a
+    complete v4 Candidate package and
+    `MIR2_NATIVE_TRUSTED_SIGNER_THUMBPRINT` supplies the exact out-of-band
+    Code Signing certificate thumbprint;
+  - verifies the detached CMS signature mathematically with Windows CryptoAPI,
+    requires exactly one current signer, exact thumbprint, Code Signing EKU and
+    compatible Digital Signature KeyUsage;
+  - parses closed `VERSION.json`, `PACKAGE-MANIFEST.json` and
+    `BUILD-ATTESTATION.json` schemas, reconstructs the byte-exact canonical
+    release statement, and binds the statement to the EXE, manifest,
+    attestation, source revision and clean-worktree digest;
+  - recursively re-hashes the real staged payload, rejects reparse/symlink
+    roots and entries, and requires exact ordered path/size/hash/count/aggregate
+    equality instead of trusting locally editable JSON fields;
+  - revalidates the package on every capture request rather than caching one
+    successful result across later package or lazy-asset mutations;
+  - recomputes the clean-worktree v2 digest from the signed revision, validates
+    the pinned structured Cargo/Rust build contract and exact .NET round-trip
+    UTC timestamp shape; any missing/malformed/modified/unsigned input remains a
+    draft capture;
+  - is deliberately not the final trust root because the launch operator also
+    controls its environment. Final acceptance additionally requires the
+    separately signed capture attestation and two independent reviewer-supplied
+    pins enforced by `verify-native-visual-pair.mjs`.
 - `apps/gateway/src/bin/crystal_original_capture_relay.rs`
   - is a loopback-only, transparent Crystal TCP relay: client-to-server bytes
     are forwarded opaquely and are never decoded or persisted;
@@ -109,7 +146,9 @@ node --test --test-concurrency=1 tools/antigravity-visual-review/review.test.mjs
   16 passed; 0 failed
 
 node --test --test-concurrency=1 apps/web/scripts/test-native-visual-pair.mjs
-  6 passed; 0 failed
+  7 passed; 0 failed
+  (includes untrusted signer, changed attestation and changed package-result
+  rejection vectors)
 
 node tools/antigravity-visual-review/review.mjs --self-test
   ok=true; schemaSha256=322a4efc36b563e249c3e0079f28643f2b2af6a2a8edd81f5bdb206bd9170dd2
@@ -119,12 +158,17 @@ git diff --check -- <scoped visual-review files>
 
 cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml \
   capture:: --jobs 1 -- --test-threads=1
-  15 passed; 0 failed; 297 filtered out
+  23 passed; 0 failed; 297 filtered out
 
 cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml \
   capture_light_state_requires_matching_map_and_preserves_dark_override \
   --jobs 1 -- --test-threads=1
-  1 passed; 0 failed; 311 filtered out
+  1 passed; 0 failed; 319 filtered out
+
+cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml \
+  provenance:: --jobs 1 -- --test-threads=1
+  10 passed; 0 failed; 310 filtered out
+  (includes a real detached CMS/Code Signing certificate CryptoAPI fixture)
 
 node --test --test-concurrency=1 apps/web/scripts/test-original-visual-pair.mjs
   7 passed; 0 failed
@@ -146,8 +190,9 @@ PowerShell parser check: apps/web/scripts/capture-original-visual-pair.ps1
 
 1. Generate the first real Crystal asset manifest and same-run content-addressed
    evidence files from the exact original client installation used for the baseline.
-2. Build a fresh packaged Candidate containing `PACKAGE-MANIFEST.json`, then
-   capture Login, Select, InGame and core-panel pairs from one deterministic
-   run; run Gemini scoring against those exact hashes.
+2. Build and sign a fresh formal Candidate containing the v4 manifest,
+   attestation and release statement, launch it with the independently trusted
+   signer thumbprint, then capture Login, Select, InGame and core-panel pairs
+   from one deterministic run; run Gemini scoring against those exact hashes.
 3. Complete the final human 20-minute visual and input-feel acceptance. Model
    review remains a defect classifier and cannot substitute for this signature.

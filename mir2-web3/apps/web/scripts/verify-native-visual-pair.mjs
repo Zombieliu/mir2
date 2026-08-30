@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { TextDecoder } from "node:util";
 import { inflateSync } from "node:zlib";
 
 import {
@@ -23,12 +24,14 @@ const DEFAULT_OUTPUT_ROOT = path.join(
   "native-visual-pairs",
 );
 const CAPTURE_SCHEMA_VERSION = "mir2-native-visual-capture-v1";
+const CAPTURE_ATTESTATION_SCHEMA_VERSION = "mir2-native-capture-attestation-v1";
 const PAIR_SCHEMA_VERSION = "mir2-native-visual-pair-v1";
 const REQUIRED_WIDTH = 1024;
 const REQUIRED_HEIGHT = 768;
 const MAX_CAPTURE_DELTA_MS = 5 * 60 * 1000;
 const MIN_SCENE_ALIGNMENT_CONFIDENCE = 0.9;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
+const SHA1_THUMBPRINT_PATTERN = /^[0-9A-F]{40}$/;
 const RUN_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,95}$/;
 const SCENES = new Set([
   "login",
@@ -47,6 +50,16 @@ export function parsePairArgs(argv) {
     "candidate-image",
     "reference-state",
     "candidate-state",
+    "candidate-attestation",
+    "candidate-attestation-signature",
+    "candidate-attestation-spki",
+    "candidate-package-verification",
+    "candidate-release-statement",
+    "candidate-release-signature",
+    "trusted-capture-spki-sha256",
+    "trusted-release-signer-thumbprint",
+    "expected-candidate",
+    "expected-source-revision",
     "review-report",
     "provider",
     "model",
@@ -91,12 +104,39 @@ export async function verifyVisualPair({
   candidateImagePath,
   referenceStatePath,
   candidateStatePath,
+  candidateAttestationPath,
+  candidateAttestationSignaturePath,
+  candidateAttestationSpkiPath,
+  candidatePackageVerificationPath,
+  candidateReleaseStatementPath,
+  candidateReleaseSignaturePath,
+  trustedCaptureSpkiSha256,
+  trustedReleaseSignerThumbprint,
+  expectedCandidate,
+  expectedSourceRevision,
 }) {
-  const [referenceImage, candidateImage, referenceState, candidateState] = await Promise.all([
+  const [
+    referenceImage,
+    candidateImage,
+    referenceState,
+    candidateState,
+    candidateAttestation,
+    candidateAttestationSignature,
+    candidateAttestationSpki,
+    candidatePackageVerification,
+    candidateReleaseStatement,
+    candidateReleaseSignature,
+  ] = await Promise.all([
     describePng(referenceImagePath, "--reference-image"),
     describePng(candidateImagePath, "--candidate-image"),
     readJsonFile(referenceStatePath, "--reference-state"),
     readJsonFile(candidateStatePath, "--candidate-state"),
+    readJsonFile(candidateAttestationPath, "--candidate-attestation", { canonical: true }),
+    readBinaryFile(candidateAttestationSignaturePath, "--candidate-attestation-signature"),
+    readBinaryFile(candidateAttestationSpkiPath, "--candidate-attestation-spki"),
+    readJsonFile(candidatePackageVerificationPath, "--candidate-package-verification"),
+    readJsonFile(candidateReleaseStatementPath, "--candidate-release-statement", { canonical: true }),
+    readBinaryFile(candidateReleaseSignaturePath, "--candidate-release-signature"),
   ]);
 
   const reference = validateCaptureState(
@@ -111,6 +151,21 @@ export async function verifyVisualPair({
     candidateImage,
     "windows-native",
   );
+  const attestation = validateCandidateAttestation({
+    statement: candidateAttestation,
+    signature: candidateAttestationSignature,
+    spki: candidateAttestationSpki,
+    packageVerification: candidatePackageVerification,
+    releaseStatement: candidateReleaseStatement,
+    releaseSignature: candidateReleaseSignature,
+    candidate,
+    candidateImage,
+    candidateState,
+    trustedCaptureSpkiSha256,
+    trustedReleaseSignerThumbprint,
+    expectedCandidate,
+    expectedSourceRevision,
+  });
   assertEqual(reference.runId, candidate.runId, "runId");
   assertEqual(reference.scene, candidate.scene, "scene");
   assertEqual(reference.uiState, candidate.uiState, "uiState");
@@ -143,7 +198,10 @@ export async function verifyVisualPair({
       captureDeltaMs,
     },
     reference: pairCaptureDescriptor(reference, referenceImage, referenceState.path),
-    candidate: pairCaptureDescriptor(candidate, candidateImage, candidateState.path),
+    candidate: {
+      ...pairCaptureDescriptor(candidate, candidateImage, candidateState.path),
+      attestation,
+    },
   };
 }
 
@@ -265,6 +323,284 @@ export function buildAcceptanceGate(reviewGate, requireReview) {
       ? modelPassed ? "READY_FOR_HUMAN_ACCEPTANCE" : "MODEL_BLOCKED"
       : "READY_FOR_MODEL_REVIEW",
   };
+}
+
+export function validateCandidateAttestation({
+  statement,
+  signature,
+  spki,
+  packageVerification,
+  releaseStatement,
+  releaseSignature,
+  candidate,
+  candidateImage,
+  candidateState,
+  trustedCaptureSpkiSha256,
+  trustedReleaseSignerThumbprint,
+  expectedCandidate,
+  expectedSourceRevision,
+}) {
+  const trustedSpki = normalizeSha256(
+    trustedCaptureSpkiSha256,
+    "--trusted-capture-spki-sha256",
+  );
+  const trustedReleaseSigner = normalizeThumbprint(
+    trustedReleaseSignerThumbprint,
+    "--trusted-release-signer-thumbprint",
+  );
+  const expectedCandidateIdentity = normalizeCandidate(
+    expectedCandidate,
+    "--expected-candidate",
+  );
+  const expectedRevision = normalizeRevision(
+    expectedSourceRevision,
+    "--expected-source-revision",
+  );
+  const value = statement.value;
+  const fields = [
+    "schemaVersion",
+    "attestedAt",
+    "runId",
+    "scene",
+    "capturedAt",
+    "stateSha256",
+    "imageSha256",
+    "processId",
+    "processStartUtc",
+    "exeSha256",
+    "candidate",
+    "sourceRevision",
+    "packageManifestSha256",
+    "releaseStatementSha256",
+    "releaseSignatureSha256",
+    "packageVerificationSha256",
+    "trustedReleaseSignerThumbprint",
+    "signatureAlgorithm",
+    "evidenceSignerSpkiSha256",
+  ];
+  assertClosedObject(value, statement.path, fields);
+  assertEqual(
+    value.schemaVersion,
+    CAPTURE_ATTESTATION_SCHEMA_VERSION,
+    `${statement.path} schemaVersion`,
+  );
+  assertEqual(value.signatureAlgorithm, "RSA-PKCS1-SHA256", `${statement.path} signatureAlgorithm`);
+  if (!RUN_ID_PATTERN.test(String(value.runId ?? ""))) {
+    throw new Error(`${statement.path} has an invalid runId.`);
+  }
+  if (!SCENES.has(value.scene)) {
+    throw new Error(`${statement.path} has an unsupported scene.`);
+  }
+  if (!Number.isSafeInteger(value.processId) || value.processId <= 0) {
+    throw new Error(`${statement.path} processId must be a positive integer.`);
+  }
+  if (!/^[0-9a-f]{40}$/.test(String(value.sourceRevision ?? ""))) {
+    throw new Error(`${statement.path} sourceRevision must be a lowercase Git revision.`);
+  }
+  if (!/^WN-CANDIDATE-[A-Za-z0-9._-]+$/.test(String(value.candidate ?? ""))) {
+    throw new Error(`${statement.path} candidate identity is invalid.`);
+  }
+  assertEqual(value.candidate, expectedCandidateIdentity, "expected Candidate identity");
+  assertEqual(value.sourceRevision, expectedRevision, "expected source revision");
+  for (const field of [
+    "stateSha256",
+    "imageSha256",
+    "exeSha256",
+    "packageManifestSha256",
+    "releaseStatementSha256",
+    "releaseSignatureSha256",
+    "packageVerificationSha256",
+    "evidenceSignerSpkiSha256",
+  ]) {
+    assertSha256(value[field], `${statement.path} ${field}`);
+    if (value[field] !== value[field].toLowerCase()) {
+      throw new Error(`${statement.path} ${field} must be lowercase.`);
+    }
+  }
+
+  const capturedAt = strictTimestamp(value.capturedAt, `${statement.path} capturedAt`);
+  const processStart = strictTimestamp(value.processStartUtc, `${statement.path} processStartUtc`);
+  const attestedAt = strictTimestamp(value.attestedAt, `${statement.path} attestedAt`);
+  if (processStart > capturedAt || capturedAt > attestedAt) {
+    throw new Error(`${statement.path} process/capture/attestation timestamps are out of order.`);
+  }
+  if (attestedAt - capturedAt > 15 * 60 * 1000) {
+    throw new Error(`${statement.path} was signed more than 15 minutes after capture.`);
+  }
+
+  assertEqual(value.runId, candidate.runId, "candidate attestation runId");
+  assertEqual(value.scene, candidate.scene, "candidate attestation scene");
+  assertEqual(value.capturedAt, candidate.capturedAt, "candidate attestation capturedAt");
+  assertEqual(value.stateSha256, candidateState.sha256, "candidate state SHA-256");
+  assertEqual(value.imageSha256, candidateImage.sha256, "candidate image SHA-256");
+  assertEqual(
+    value.exeSha256,
+    candidate.build.executableSha256.toLowerCase(),
+    "candidate EXE SHA-256",
+  );
+  assertEqual(value.sourceRevision, candidate.build.sourceRevision, "candidate source revision");
+  assertEqual(
+    value.packageManifestSha256,
+    candidate.build.assetManifestSha256.toLowerCase(),
+    "candidate package-manifest SHA-256",
+  );
+  assertEqual(
+    value.releaseStatementSha256,
+    releaseStatement.sha256,
+    "release statement SHA-256",
+  );
+  assertEqual(
+    value.releaseSignatureSha256,
+    releaseSignature.sha256,
+    "release signature SHA-256",
+  );
+  assertEqual(
+    value.packageVerificationSha256,
+    packageVerification.sha256,
+    "package verification SHA-256",
+  );
+  assertEqual(
+    normalizeThumbprint(value.trustedReleaseSignerThumbprint, "attested release signer"),
+    trustedReleaseSigner,
+    "trusted release signer",
+  );
+
+  validateReleaseStatement(releaseStatement.value, value, releaseStatement.path);
+  validatePackageVerification(
+    packageVerification.value,
+    value,
+    releaseStatement.value,
+    trustedReleaseSigner,
+    packageVerification.path,
+  );
+
+  const actualSpkiSha256 = crypto.createHash("sha256").update(spki.bytes).digest("hex");
+  assertEqual(actualSpkiSha256, trustedSpki, "trusted capture signer SPKI SHA-256");
+  assertEqual(value.evidenceSignerSpkiSha256, trustedSpki, "attested capture signer SPKI SHA-256");
+  let publicKey;
+  try {
+    publicKey = crypto.createPublicKey({ key: spki.bytes, format: "der", type: "spki" });
+  } catch (error) {
+    throw new Error(`${spki.path} is not a valid DER SPKI public key: ${error.message}`);
+  }
+  if (publicKey.asymmetricKeyType !== "rsa") {
+    throw new Error(`${spki.path} evidence signer must use RSA.`);
+  }
+  const modulusLength = publicKey.asymmetricKeyDetails?.modulusLength;
+  if (!Number.isSafeInteger(modulusLength) || modulusLength < 3072) {
+    throw new Error(`${spki.path} evidence signer RSA modulus must be at least 3072 bits.`);
+  }
+  const signatureValid = crypto.verify(
+    "sha256",
+    statement.bytes,
+    { key: publicKey, padding: crypto.constants.RSA_PKCS1_PADDING },
+    signature.bytes,
+  );
+  if (!signatureValid) throw new Error(`${statement.path} evidence signature is invalid.`);
+
+  return {
+    schemaVersion: value.schemaVersion,
+    statement: fileDescriptor(statement),
+    signature: fileDescriptor(signature),
+    signerSpki: fileDescriptor(spki),
+    packageVerification: fileDescriptor(packageVerification),
+    releaseStatement: fileDescriptor(releaseStatement),
+    releaseSignature: fileDescriptor(releaseSignature),
+    trustedCaptureSpkiSha256: trustedSpki,
+    trustedReleaseSignerThumbprint: trustedReleaseSigner,
+  };
+}
+
+function validateReleaseStatement(release, attestation, label) {
+  assertClosedObject(release, label, [
+    "schema",
+    "candidate",
+    "exeSha256",
+    "packageManifestSha256",
+    "packageManifestAggregateSha256",
+    "versionSha256",
+    "buildAttestationSha256",
+    "gitRevision",
+    "worktreeDirty",
+    "worktreeStatusSha256",
+  ]);
+  assertEqual(release.schema, "mir2.windows.release-statement.v1", `${label} schema`);
+  assertEqual(release.candidate, attestation.candidate, `${label} candidate`);
+  assertEqual(String(release.exeSha256).toLowerCase(), attestation.exeSha256, `${label} EXE SHA-256`);
+  assertEqual(
+    String(release.packageManifestSha256).toLowerCase(),
+    attestation.packageManifestSha256,
+    `${label} package-manifest SHA-256`,
+  );
+  assertEqual(release.gitRevision, attestation.sourceRevision, `${label} source revision`);
+  if (release.worktreeDirty !== false) throw new Error(`${label} must bind a clean worktree.`);
+  for (const field of [
+    "exeSha256",
+    "packageManifestSha256",
+    "packageManifestAggregateSha256",
+    "versionSha256",
+    "buildAttestationSha256",
+    "worktreeStatusSha256",
+  ]) {
+    assertSha256(release[field], `${label} ${field}`);
+  }
+}
+
+function validatePackageVerification(
+  verification,
+  attestation,
+  releaseStatement,
+  trustedReleaseSigner,
+  label,
+) {
+  if (!verification || typeof verification !== "object" || Array.isArray(verification)) {
+    throw new Error(`${label} must be an object.`);
+  }
+  assertEqual(verification.schema, "mir2.windows.package-verification.v4", `${label} schema`);
+  if (verification.passed !== true || verification.detachedSignatureValid !== true) {
+    throw new Error(`${label} did not pass detached Candidate verification.`);
+  }
+  if (
+    verification.nonvisual !== true
+    || verification.launchRequested !== false
+    || verification.visualAccepted !== false
+  ) {
+    throw new Error(`${label} must be a nonvisual package verification result.`);
+  }
+  if (
+    verification.attestationPresent !== true
+    || verification.packageManifestPresent !== true
+    || verification.peValid !== true
+  ) {
+    throw new Error(`${label} is missing a validated attestation, manifest, or PE image.`);
+  }
+  if (!Array.isArray(verification.failures) || verification.failures.length !== 0) {
+    throw new Error(`${label} must contain an empty failures array.`);
+  }
+  assertEqual(
+    normalizeThumbprint(verification.trustedSignerThumbprint, `${label} trusted signer`),
+    trustedReleaseSigner,
+    `${label} trusted release signer`,
+  );
+  assertEqual(String(verification.exeSha256).toLowerCase(), attestation.exeSha256, `${label} EXE SHA-256`);
+  assertEqual(
+    String(verification.packageManifestSha256).toLowerCase(),
+    attestation.packageManifestSha256,
+    `${label} package-manifest SHA-256`,
+  );
+  assertEqual(
+    String(verification.packageManifestAggregateSha256).toLowerCase(),
+    String(releaseStatement.packageManifestAggregateSha256).toLowerCase(),
+    `${label} package-manifest aggregate SHA-256`,
+  );
+  assertEqual(
+    String(verification.attestationSha256).toLowerCase(),
+    String(releaseStatement.buildAttestationSha256).toLowerCase(),
+    `${label} build-attestation SHA-256`,
+  );
+  if (!Number.isSafeInteger(verification.packageFileCount) || verification.packageFileCount <= 0) {
+    throw new Error(`${label} packageFileCount must be positive.`);
+  }
 }
 
 function validateCaptureState(value, statePath, image, expectedProducer) {
@@ -442,21 +778,49 @@ function crc32(bytes) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-async function readJsonFile(value, flag) {
+async function readBinaryFile(value, flag, { maxBytes = 1024 * 1024 } = {}) {
   const filePath = await requireFile(value, flag);
-  const text = await fs.readFile(filePath, "utf8");
-  try {
-    return { path: filePath, value: JSON.parse(text) };
-  } catch (error) {
-    throw new Error(`${flag} is not valid JSON: ${filePath}: ${error.message}`);
+  const bytes = await fs.readFile(filePath);
+  if (bytes.length === 0) throw new Error(`${flag} must not be empty: ${filePath}`);
+  if (bytes.length > maxBytes) {
+    throw new Error(`${flag} exceeds the ${maxBytes}-byte limit: ${filePath}`);
   }
+  return {
+    path: filePath,
+    bytes,
+    sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+  };
+}
+
+async function readJsonFile(value, flag, { canonical = false } = {}) {
+  const binary = await readBinaryFile(value, flag);
+  let text;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(binary.bytes);
+  } catch (error) {
+    throw new Error(`${flag} is not valid UTF-8: ${binary.path}: ${error.message}`);
+  }
+  if (text.charCodeAt(0) === 0xfeff) {
+    throw new Error(`${flag} must not contain a UTF-8 BOM: ${binary.path}`);
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${flag} is not valid JSON: ${binary.path}: ${error.message}`);
+  }
+  if (canonical && JSON.stringify(parsed) !== text) {
+    throw new Error(`${flag} must be compact canonical JSON with no BOM or surrounding whitespace: ${binary.path}`);
+  }
+  return { ...binary, text, value: parsed };
 }
 
 async function requireFile(value, flag) {
   if (!value || value === true) throw new Error(`${flag} is required.`);
   const filePath = path.resolve(String(value));
-  const stat = await fs.stat(filePath).catch(() => null);
-  if (!stat?.isFile()) throw new Error(`${flag} file does not exist: ${filePath}`);
+  const stat = await fs.lstat(filePath).catch(() => null);
+  if (!stat?.isFile()) throw new Error(`${flag} file does not exist or is not a regular file: ${filePath}`);
+  if (stat.isSymbolicLink()) throw new Error(`${flag} must not be a symbolic link: ${filePath}`);
   return filePath;
 }
 
@@ -473,6 +837,67 @@ function assertSha256(value, label) {
   if (typeof value !== "string" || !SHA256_PATTERN.test(value.toLowerCase())) {
     throw new Error(`${label} must be a lowercase or uppercase SHA-256 hex digest.`);
   }
+}
+
+function normalizeSha256(value, label) {
+  if (typeof value !== "string") throw new Error(`${label} must be a SHA-256 hex digest.`);
+  const normalized = value.trim().toLowerCase();
+  if (!SHA256_PATTERN.test(normalized)) throw new Error(`${label} must be a SHA-256 hex digest.`);
+  return normalized;
+}
+
+function normalizeThumbprint(value, label) {
+  if (typeof value !== "string") throw new Error(`${label} must be a SHA-1 certificate thumbprint.`);
+  const normalized = value.replace(/[\s:]/g, "").toUpperCase();
+  if (!SHA1_THUMBPRINT_PATTERN.test(normalized)) {
+    throw new Error(`${label} must be a 40-character SHA-1 certificate thumbprint.`);
+  }
+  return normalized;
+}
+
+function normalizeCandidate(value, label) {
+  if (typeof value !== "string" || !/^WN-CANDIDATE-[A-Za-z0-9._-]+$/.test(value)) {
+    throw new Error(`${label} must be a formal WN-CANDIDATE identity.`);
+  }
+  return value;
+}
+
+function normalizeRevision(value, label) {
+  if (typeof value !== "string" || !/^[0-9a-f]{40}$/.test(value)) {
+    throw new Error(`${label} must be a lowercase 40-character Git revision.`);
+  }
+  return value;
+}
+
+function strictTimestamp(value, label) {
+  if (typeof value !== "string") throw new Error(`${label} must be an explicit UTC timestamp.`);
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,7}))?(?:Z|\+00:00)$/.exec(value);
+  if (!match) throw new Error(`${label} must be an explicit UTC ISO-8601 timestamp.`);
+  const [year, month, day, hour, minute, second] = match.slice(1, 7).map(Number);
+  const millisecond = Number((match[7] ?? "").padEnd(3, "0").slice(0, 3));
+  if (year < 2000) throw new Error(`${label} has an unsupported calendar year.`);
+  const timestamp = Date.UTC(year, month - 1, day, hour, minute, second, millisecond);
+  const roundTrip = new Date(timestamp);
+  if (
+    roundTrip.getUTCFullYear() !== year
+    || roundTrip.getUTCMonth() !== month - 1
+    || roundTrip.getUTCDate() !== day
+    || roundTrip.getUTCHours() !== hour
+    || roundTrip.getUTCMinutes() !== minute
+    || roundTrip.getUTCSeconds() !== second
+    || roundTrip.getUTCMilliseconds() !== millisecond
+  ) {
+    throw new Error(`${label} is not a valid calendar timestamp.`);
+  }
+  return timestamp;
+}
+
+function fileDescriptor(evidence) {
+  return {
+    path: evidence.path,
+    bytes: evidence.bytes.length,
+    sha256: evidence.sha256,
+  };
 }
 
 function assertEqual(left, right, label) {
@@ -534,6 +959,16 @@ async function main() {
     candidateImagePath: args["candidate-image"],
     referenceStatePath: args["reference-state"],
     candidateStatePath: args["candidate-state"],
+    candidateAttestationPath: args["candidate-attestation"],
+    candidateAttestationSignaturePath: args["candidate-attestation-signature"],
+    candidateAttestationSpkiPath: args["candidate-attestation-spki"],
+    candidatePackageVerificationPath: args["candidate-package-verification"],
+    candidateReleaseStatementPath: args["candidate-release-statement"],
+    candidateReleaseSignaturePath: args["candidate-release-signature"],
+    trustedCaptureSpkiSha256: args["trusted-capture-spki-sha256"],
+    trustedReleaseSignerThumbprint: args["trusted-release-signer-thumbprint"],
+    expectedCandidate: args["expected-candidate"],
+    expectedSourceRevision: args["expected-source-revision"],
   });
   const outputDirectory = path.resolve(args.output ?? path.join(DEFAULT_OUTPUT_ROOT, pair.runId));
   await fs.mkdir(outputDirectory, { recursive: true });
@@ -612,7 +1047,17 @@ function printHelp() {
   console.log(`Usage:
   node apps/web/scripts/verify-native-visual-pair.mjs \\
     --reference-image <original.png> --reference-state <original.json> \\
-    --candidate-image <native.png> --candidate-state <native.json> [options]
+    --candidate-image <native.png> --candidate-state <native.json> \\
+    --candidate-attestation <capture-attestation.json> \\
+    --candidate-attestation-signature <capture-attestation.sig> \\
+    --candidate-attestation-spki <capture-attestation.spki.der> \\
+    --candidate-package-verification <package-verification.json> \\
+    --candidate-release-statement <RELEASE-STATEMENT.json> \\
+    --candidate-release-signature <RELEASE-STATEMENT.p7s> \\
+    --trusted-capture-spki-sha256 <sha256> \\
+    --trusted-release-signer-thumbprint <sha1> \\
+    --expected-candidate <WN-CANDIDATE-id> \\
+    --expected-source-revision <40-char-git-sha> [options]
 
 Options:
   --output <directory>       Pair context, manifest, and optional review output.

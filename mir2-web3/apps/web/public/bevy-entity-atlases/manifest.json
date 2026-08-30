@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "kind": "mir2-bevy-entity-atlas-manifest",
-  "generatedAt": "2026-08-12T14:01:21.740Z",
+  "generatedAt": "2026-08-21T16:32:49.241Z",
   "atlases": [
     {
       "key": "starter-bichon-base",
@@ -125284,7 +125284,7 @@
     "imageBytes": 13164823,
     "rgbaBytes": 117440512,
     "pageCount": 7,
-    "durationMs": 34347
+    "durationMs": 223138
   },
   "pipeline": {
     "version": "0.3.0",

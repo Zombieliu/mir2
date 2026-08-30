@@ -22,6 +22,7 @@ mod gateway;
 mod input;
 mod map_parser;
 mod native_protocol;
+mod parity_ui;
 mod session_config;
 mod shell_bridge;
 
@@ -105,6 +106,7 @@ fn main() {
     // its former player/control/bag placeholder panels are suppressed once the
     // Crystal MainDialog owns those regions.
     app.add_plugins(mir2_client_bevy::quest_ui::Mir2QuestUiPlugin);
+    app.add_plugins(parity_ui::Mir2NativeParityUiPlugin);
     // F12 and optional state-triggered PNG capture are disabled unless an
     // explicit capture directory is configured for native acceptance.
     app.add_plugins(capture::Mir2NativeScreenshotPlugin);

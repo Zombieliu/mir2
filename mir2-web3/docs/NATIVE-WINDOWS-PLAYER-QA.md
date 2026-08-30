@@ -1,5 +1,14 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-08-29 login/bulletin parity update: native Windows shell screens now
+> expose a bottom-left build stamp (`candidate/git/platform`) and show a
+> top-right mode badge for Candidate / test runs. Entering the world now also
+> opens a first-login bulletin modal sourced from `LineMessage.txt`, matching
+> Crystal’s expectation that announcements are visible immediately instead of
+> only via the periodic chat broadcaster. Focused regressions passed at
+> `mir2-platform-windows` 2/2 (`parity_ui`) and `mir2-gateway`
+> `start_game_emits_bootstrap_sequence`.
+
 > 2026-08-19 alternate-class/combat-overlay update: the native resolver now
 > mirrors the Web alternate libraries for Archer walk/run/range actions
 > (`ARArmour` / `ARHair` / `ARWeapon`) and Assassin body/hair plus directional
