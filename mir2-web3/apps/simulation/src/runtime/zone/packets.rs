@@ -317,11 +317,37 @@ pub(crate) fn chat_packet(message: impl Into<String>, chat_type: ChatType) -> Se
     }
 }
 
+/// Actor id carried by packets that assert an action originated from the
+/// owning player. These packets cross from a personal compatibility runtime
+/// into the shared Zone and must never be rewritten from an arbitrary actor.
+pub(crate) fn owner_action_actor_id(packet: &ServerPacket) -> Option<u32> {
+    match packet {
+        // Movement packets can also describe a retained monster/NPC moving in
+        // the private compatibility runtime. They must keep their object actor
+        // so the shared Zone can relocate that object in AOI. Harvest and the
+        // combat/cast packets below are player intents/results and therefore
+        // require the authenticated local player actor.
+        ServerPacket::ObjectHarvest { movement } => Some(movement.object_id),
+        ServerPacket::ObjectAttack { info } => Some(info.object_id),
+        ServerPacket::ObjectRangeAttack { info } => Some(info.object_id),
+        ServerPacket::ObjectMagic { object_id, .. }
+        | ServerPacket::ObjectDash { object_id, .. }
+        | ServerPacket::ObjectDashFail { object_id, .. }
+        | ServerPacket::ObjectDashAttack { object_id, .. } => Some(*object_id),
+        ServerPacket::ObjectProjectile { source_id, .. } => Some(*source_id),
+        ServerPacket::ObjectSpell { info } => Some(info.object_id),
+        _ => None,
+    }
+}
+
 pub(crate) fn observer_action_packet(
     player: &ZonePlayer,
     owner_local_object_id: u32,
     packet: &ServerPacket,
 ) -> Option<ServerPacket> {
+    if owner_action_actor_id(packet).is_some_and(|actor_id| actor_id != owner_local_object_id) {
+        return None;
+    }
     let rebase_object_id = |object_id: u32| {
         if object_id == owner_local_object_id {
             player.object_id
@@ -822,6 +848,11 @@ pub(crate) fn shared_object_action_packet(
     local_self_object_id: Option<u32>,
     packet: &ServerPacket,
 ) -> Option<ServerPacket> {
+    if let Some(actor_id) = owner_action_actor_id(packet) {
+        if Some(actor_id) != local_self_object_id {
+            return None;
+        }
+    }
     let rebase_object_id = |object_id: u32| {
         if Some(object_id) == local_self_object_id {
             player.object_id
@@ -839,13 +870,20 @@ pub(crate) fn shared_object_action_packet(
         ServerPacket::ObjectRun { movement } => Some(ServerPacket::ObjectRun {
             movement: movement.clone(),
         }),
-        ServerPacket::ObjectAttack { info } => {
-            Some(ServerPacket::ObjectAttack { info: info.clone() })
-        }
+        ServerPacket::ObjectAttack { info } => Some(ServerPacket::ObjectAttack {
+            info: ObjectAttackInfo {
+                object_id: player.object_id,
+                location: player.position.clone(),
+                direction: info.direction,
+                spell: info.spell,
+                level: info.level,
+                attack_type: info.attack_type,
+            },
+        }),
         ServerPacket::ObjectRangeAttack { info } => Some(ServerPacket::ObjectRangeAttack {
             info: ObjectRangeAttackInfo {
-                object_id: info.object_id,
-                location: info.location.clone(),
+                object_id: player.object_id,
+                location: player.position.clone(),
                 direction: info.direction,
                 target_id: rebase_object_id(info.target_id),
                 target: info.target.clone(),
@@ -855,8 +893,8 @@ pub(crate) fn shared_object_action_packet(
             },
         }),
         ServerPacket::ObjectMagic {
-            object_id,
-            location,
+            object_id: _,
+            location: _,
             direction,
             spell,
             target_id,
@@ -866,8 +904,8 @@ pub(crate) fn shared_object_action_packet(
             self_broadcast,
             secondary_target_ids,
         } => Some(ServerPacket::ObjectMagic {
-            object_id: *object_id,
-            location: location.clone(),
+            object_id: player.object_id,
+            location: player.position.clone(),
             direction: *direction,
             spell: *spell,
             target_id: rebase_object_id(*target_id),
@@ -883,12 +921,28 @@ pub(crate) fn shared_object_action_packet(
         }),
         ServerPacket::ObjectProjectile {
             spell,
-            source_id,
+            source_id: _,
             destination_id,
         } => Some(ServerPacket::ObjectProjectile {
             spell: *spell,
-            source_id: *source_id,
+            source_id: player.object_id,
             destination_id: rebase_object_id(*destination_id),
+        }),
+        ServerPacket::ObjectHarvest { movement } => Some(ServerPacket::ObjectHarvest {
+            movement: ObjectMovement {
+                object_id: player.object_id,
+                position: player.position.clone(),
+                direction: movement.direction,
+            },
+        }),
+        ServerPacket::ObjectSpell { info } => Some(ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id: player.object_id,
+                location: player.position.clone(),
+                spell: info.spell,
+                direction: info.direction,
+                param: info.param,
+            },
         }),
         ServerPacket::ObjectStruck { info } => Some(ServerPacket::ObjectStruck {
             info: ObjectStruckInfo {

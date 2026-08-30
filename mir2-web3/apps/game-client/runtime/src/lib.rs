@@ -2,10 +2,15 @@ mod additive_material;
 pub mod entity_animation;
 mod entity_animation_bridge;
 mod interpolation;
+mod lighting;
 mod local_motion;
 mod motion;
 mod movement_shadow;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod native_ingest;
+#[cfg(target_arch = "wasm32")]
+#[path = "native_ingest_wasm.rs"]
+mod native_ingest;
 mod presentation_pose;
 mod remote_motion;
 
@@ -13,12 +18,22 @@ use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 
 use bevy::asset::{AssetMetaCheck, AssetPlugin, LoadState, RenderAssetUsages};
+use bevy::camera::{visibility::RenderLayers, ClearColorConfig, RenderTarget};
 use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
-use bevy::math::{URect, UVec2};
+use bevy::math::{Rect, URect, UVec2};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
+use mir2_client_bevy::pending_operations::{
+    apply_inventory_operation_ack, apply_storage_operation_ack, mark_authoritative_refresh,
+    reconcile_inventory_refresh, reconcile_mail_refresh, reconcile_shop_refresh,
+    reconcile_storage_refresh, request_session_reset,
+    request_session_reset_preserving_exact_game_shop_receipt, AuthoritativeModelDomain,
+    AuthoritativeModelRevisions, InventoryOperationAck, InventoryOperationFeedback,
+    PendingLifecycleSet, PendingOperationKey, PendingOperations, SessionResetGameShopPreservation,
+    SessionResetRevision, StorageOperationAck,
+};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
@@ -55,6 +70,9 @@ thread_local! {
     static PENDING_MAP_RENDER_STATE: RefCell<Option<MapRenderState>> = const { RefCell::new(None) };
     static PENDING_MAP_RENDER_IMAGE_OPS: RefCell<Vec<PendingMapRenderImageOp>> = const { RefCell::new(Vec::new()) };
     static PENDING_MAP_CAMERA_OFFSET: Cell<(f32, f32)> = const { Cell::new((0.0, 0.0)) };
+    static PENDING_EFFECT_RENDER_STATE: RefCell<Option<EffectRenderState>> = const { RefCell::new(None) };
+    static PENDING_LIGHTING_RENDER_STATE: RefCell<Option<lighting::LightingRenderState>> = const { RefCell::new(None) };
+    static PENDING_SCENE_RESET: Cell<bool> = const { Cell::new(false) };
     // Optional self-player motion window (from_x, from_y, to_x, to_y, started_ms,
     // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
     // (the default) ⇒ `follow_player` keeps the camera pinned at origin = the
@@ -82,6 +100,79 @@ struct RuntimeMapRenderState {
     snapshot: Option<MapRenderState>,
 }
 
+#[derive(Resource, Default, Clone)]
+struct RuntimeEffectRenderState {
+    snapshot: Option<EffectRenderState>,
+}
+
+#[derive(Resource, Default, Clone)]
+struct RuntimeLightingRenderState {
+    snapshot: Option<lighting::LightingRenderState>,
+}
+
+#[derive(Resource, Default)]
+struct RuntimeLightingSceneResetTracker(u64);
+
+#[derive(Resource, Default)]
+struct RuntimeSessionResetTracker(u64);
+
+#[derive(Resource, Default)]
+struct SceneResetRevision(u64);
+
+#[derive(Resource, Default)]
+struct RuntimeSceneResetTracker(u64);
+
+#[derive(Resource, Default)]
+struct RuntimeSceneModelResetTracker(u64);
+
+#[derive(Resource, Default)]
+struct RuntimeEffectShadowCleanupTracker(u64);
+
+/// Production native session-boundary pipeline, factored as a plugin so host
+/// state-machine tests can exercise the exact same reset and receipt systems
+/// without creating a renderer/window.
+pub struct Mir2NativeSessionBoundaryPlugin;
+
+impl Plugin for Mir2NativeSessionBoundaryPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<mir2_client_bevy::read_model::UiReadModel>()
+            .init_resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+            .init_resource::<mir2_client_bevy::map::MapModel>()
+            .init_resource::<mir2_client_bevy::entities::EntityModelSet>()
+            .init_resource::<mir2_client_bevy::inventory::InventoryModel>()
+            .init_resource::<mir2_client_bevy::chat::ChatModel>()
+            .init_resource::<mir2_client_bevy::mail::MailModel>()
+            .init_resource::<mir2_client_bevy::shop::ShopModel>()
+            .init_resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .init_resource::<mir2_client_bevy::storage::StorageModel>()
+            .init_resource::<mir2_client_bevy::skill_model::SkillModel>()
+            .init_resource::<mir2_client_bevy::social::SocialModel>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<InventoryOperationFeedback>()
+            .init_resource::<AuthoritativeModelRevisions>()
+            .init_resource::<SessionResetRevision>()
+            .init_resource::<SessionResetGameShopPreservation>()
+            .init_resource::<RuntimeSessionResetTracker>()
+            .init_resource::<SceneResetRevision>()
+            .init_resource::<native_ingest::NativeInbound>()
+            .configure_sets(
+                Update,
+                PendingLifecycleSet::Ingest.before(PendingLifecycleSet::UiReset),
+            )
+            .add_systems(
+                Update,
+                (
+                    ingest_pending_scene_and_data_reset,
+                    apply_session_reset_to_runtime_models,
+                    ingest_pending_game_shop_receipt,
+                )
+                    .chain()
+                    .in_set(PendingLifecycleSet::Ingest),
+            )
+            .add_systems(PostUpdate, finalize_consumed_game_shop_preservation);
+    }
+}
+
 /// Map-tile atlas registry. Deliberately SEPARATE from
 /// `RuntimeEntityRenderAtlases` so the entity render path's atlas-layout
 /// retain logic (which evicts layouts not referenced by the entity snapshot)
@@ -91,6 +182,8 @@ struct RuntimeMapRenderAtlases {
     images: HashMap<String, Handle<Image>>,
     url_image_keys: HashSet<String>,
     layouts: HashMap<String, (Handle<TextureAtlasLayout>, HashMap<String, usize>)>,
+    layout_rects: HashMap<String, HashMap<String, URect>>,
+    layout_sizes: HashMap<String, UVec2>,
     revision: u64,
 }
 
@@ -110,10 +203,173 @@ struct RuntimeMapCameraOffset {
 struct SceneRegistry {
     entities: HashMap<String, SceneEntityHandles>,
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
+    /// Strong references for replacement images that are still loading.
+    ///
+    /// The currently rendered Sprite owns only the old image while an atomic
+    /// actor/non-actor handoff is deferred. Without this bounded per-layer
+    /// cache, the temporary `AssetServer::load` handle is dropped at the end of
+    /// every preflight tick, so Bevy may cancel/unload the replacement before
+    /// it can ever become ready. That permanently freezes the old direction.
+    entity_render_pending_images: HashMap<String, Handle<Image>>,
+    /// Last committed world-space root for each retained actor composite.
+    /// During a deferred image handoff every old body/hair/weapon/mount layer
+    /// moves by the same root delta, preserving the old frame's internal
+    /// geometry until the complete replacement is ready.
+    entity_render_actor_roots: HashMap<String, Vec3>,
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
+    effect_render: HashMap<String, EffectRenderLayerHandle>,
+    effect_render_masks: HashMap<String, EffectRenderLayerHandle>,
+    effect_render_shadows: HashMap<String, EffectShadowLayerHandle>,
+    effect_render_images: HashMap<String, Handle<Image>>,
+    lighting_layers: HashMap<String, EffectRenderLayerHandle>,
+    lighting_images: Vec<Handle<Image>>,
+    lighting_darkness: Option<LightingDarknessHandle>,
     map: MapSceneCache,
     map_render: MapRenderSceneCache,
     mine_nodes: HashMap<(i32, i32), MineNodeHandles>,
+}
+
+/// Renderer-side counts used by the opt-in Windows native soak diagnostics.
+///
+/// These are deliberately separate counters instead of one aggregate scene
+/// count: `entities` is the legacy object renderer, while
+/// `entity_render_layers` is the retained native layer renderer. Combining
+/// them would make a healthy renderer switch look like a leak.
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeSoakCounts {
+    snapshot_effects: usize,
+    retained_effect_primary: usize,
+    retained_effect_masks: usize,
+    retained_effect_shadows: usize,
+    retained_effect_images: usize,
+    retained_entity_layers: usize,
+    legacy_scene_entities: usize,
+    entity_atlases: usize,
+    map_render_tiles: usize,
+    map_spawned_entities: usize,
+    mine_nodes: usize,
+    lighting_layers: usize,
+    lighting_images: usize,
+    additive_cache_entries: usize,
+    additive_cache_live_entries: usize,
+    additive_asset_count: usize,
+}
+
+/// Take a renderer-only snapshot without touching ECS entities or the native
+/// ingest queue. The registry maps are the authoritative retained counts;
+/// Bevy despawn commands are deferred and therefore unsuitable as same-frame
+/// leak metrics.
+#[cfg(not(target_arch = "wasm32"))]
+fn native_soak_counts(
+    registry: &SceneRegistry,
+    effect_state: &RuntimeEffectRenderState,
+    additive_cache: &additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &Assets<additive_material::CrystalAdditiveMaterial>,
+) -> NativeSoakCounts {
+    NativeSoakCounts {
+        snapshot_effects: effect_state
+            .snapshot
+            .as_ref()
+            .map_or(0, |snapshot| snapshot.effects.len()),
+        retained_effect_primary: registry.effect_render.len(),
+        retained_effect_masks: registry.effect_render_masks.len(),
+        retained_effect_shadows: registry.effect_render_shadows.len(),
+        retained_effect_images: registry.effect_render_images.len(),
+        retained_entity_layers: registry.entity_render_layers.len(),
+        legacy_scene_entities: registry.entities.len(),
+        entity_atlases: registry.entity_render_atlases.len(),
+        map_render_tiles: registry.map_render.tiles.len(),
+        map_spawned_entities: registry.map.spawned.len(),
+        mine_nodes: registry.mine_nodes.len(),
+        lighting_layers: registry.lighting_layers.len(),
+        lighting_images: registry.lighting_images.len(),
+        additive_cache_entries: additive_cache.len(),
+        additive_cache_live_entries: additive_cache.live_len(additive_materials),
+        additive_asset_count: additive_materials.len(),
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Default)]
+struct NativeSoakMetricsClock {
+    initialized: bool,
+    enabled: bool,
+    last_sample_ms: Option<u64>,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_soak_metrics_json(
+    process_id: u32,
+    timestamp_ms: u64,
+    counts: &NativeSoakCounts,
+) -> String {
+    serde_json::json!({
+        "processId": process_id,
+        "timestampMs": timestamp_ms,
+        "snapshotEffects": counts.snapshot_effects,
+        "retainedEffectPrimary": counts.retained_effect_primary,
+        "retainedEffectMasks": counts.retained_effect_masks,
+        "retainedEffectShadows": counts.retained_effect_shadows,
+        "retainedEffectImages": counts.retained_effect_images,
+        "retainedEntityLayers": counts.retained_entity_layers,
+        "legacySceneEntities": counts.legacy_scene_entities,
+        "entityAtlases": counts.entity_atlases,
+        "mapRenderTiles": counts.map_render_tiles,
+        "mapSpawnedEntities": counts.map_spawned_entities,
+        "mineNodes": counts.mine_nodes,
+        "lightingLayers": counts.lighting_layers,
+        "lightingImages": counts.lighting_images,
+        "additiveCacheEntries": counts.additive_cache_entries,
+        "additiveCacheLiveEntries": counts.additive_cache_live_entries,
+        "additiveAssetCount": counts.additive_asset_count,
+    })
+    .to_string()
+}
+
+/// Emit one compact, local-only diagnostic line at most once per 10 seconds.
+/// The environment is read once on the first system run, so the normal path
+/// adds no per-frame environment lookup and no output. WASM never registers
+/// this system and therefore remains a no-op.
+#[cfg(not(target_arch = "wasm32"))]
+fn emit_native_soak_metrics(
+    time: Res<Time>,
+    registry: Res<SceneRegistry>,
+    effect_state: Res<RuntimeEffectRenderState>,
+    additive_cache: Res<additive_material::CrystalAdditiveMaterialCache>,
+    additive_materials: Res<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut clock: Local<NativeSoakMetricsClock>,
+) {
+    if !clock.initialized {
+        clock.enabled = std::env::var("MIR2_NATIVE_SOAK_METRICS")
+            .map(|value| value.trim() == "1")
+            .unwrap_or(false);
+        clock.initialized = true;
+    }
+    if !clock.enabled {
+        return;
+    }
+
+    let elapsed_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    if clock
+        .last_sample_ms
+        .is_some_and(|last| elapsed_ms.saturating_sub(last) < NATIVE_SOAK_METRICS_INTERVAL_MS)
+    {
+        return;
+    }
+    clock.last_sample_ms = Some(elapsed_ms);
+
+    let counts = native_soak_counts(
+        &registry,
+        &effect_state,
+        &additive_cache,
+        &additive_materials,
+    );
+    let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts);
+    eprintln!("[native-soak] {line}");
 }
 
 #[derive(Default)]
@@ -144,10 +400,32 @@ struct MapRenderTileHandle {
     last_seen_generation: u64,
 }
 
+/// One preloaded phase of a Crystal map animation family. Every family frame
+/// is resident before the scene handoff; this component lets a lightweight
+/// clock toggle visibility without rebinding textures or exposing empty frames.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+struct MapAnimationFrame {
+    phase: u32,
+    frame_count: u32,
+    animation_tick: u32,
+}
+
 #[derive(Clone, Copy)]
 struct AppliedMapRenderState {
     producer_revision: Option<u64>,
     image_revision: u64,
+}
+
+fn map_render_revision_is_current(
+    producer_revision: Option<u64>,
+    applied: Option<&AppliedMapRenderState>,
+    image_revision: u64,
+) -> bool {
+    producer_revision.is_some()
+        && applied.is_some_and(|applied| {
+            applied.producer_revision == producer_revision
+                && applied.image_revision == image_revision
+        })
 }
 
 #[derive(Clone, Copy)]
@@ -166,15 +444,46 @@ struct EntityRenderLayerHandle {
     image_key: String,
     atlas_key: Option<String>,
     atlas_rect_key: Option<String>,
+    additive: bool,
 }
 
 #[derive(Clone)]
 struct EntityRenderAtlasHandle {
     layout: Handle<TextureAtlasLayout>,
     rects: HashMap<String, usize>,
+    uv_rects: HashMap<String, URect>,
     size: UVec2,
     image_key: Option<String>,
     image: Option<Handle<Image>>,
+}
+
+/// Retained additive scene-effect sprite (map/ground/cast/projectile/impact).
+/// Keyed by the producer stable effect sprite key so sync_effect_render
+/// updates Transform/Material IN PLACE instead of despawn + respawn per frame.
+#[derive(Clone)]
+struct EffectRenderLayerHandle {
+    entity: Entity,
+    image_key: String,
+    additive: bool,
+}
+
+/// Retained procedural ground shadow for a scene effect. The mesh and material
+/// are owned by the handle so removing an effect can release both GPU-facing
+/// assets immediately instead of relying on asset-server ref counting.
+#[derive(Clone)]
+struct EffectShadowLayerHandle {
+    entity: Entity,
+    mesh: Handle<Mesh>,
+    material: Handle<ColorMaterial>,
+}
+
+#[derive(Clone)]
+struct LightingDarknessHandle {
+    composite_entity: Entity,
+    buffer_camera: Entity,
+    buffer_image: Handle<Image>,
+    stage_size: UVec2,
+    material: Handle<lighting::CrystalMultiplyMaterial>,
 }
 
 struct PendingEntityRenderAtlasImage {
@@ -192,6 +501,18 @@ struct MirObject;
 
 #[derive(Component)]
 struct MirEntityRenderLayer;
+
+#[derive(Component)]
+struct MirEffectRenderLayer;
+
+#[derive(Component)]
+struct MirLightingBufferLayer;
+
+#[derive(Component)]
+struct MirLightingBufferCamera;
+
+#[derive(Component)]
+struct MirLightingComposite;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -351,8 +672,6 @@ struct EntityRenderAtlasRect {
 struct EntityRenderEntry {
     object_id: String,
     #[serde(default)]
-    dead: bool,
-    #[serde(default)]
     is_self: bool,
     #[serde(default)]
     grid_x: Option<i32>,
@@ -396,6 +715,8 @@ struct EntityRenderLayer {
     z: f32,
     #[serde(default)]
     opacity: Option<f32>,
+    #[serde(default)]
+    additive: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -484,6 +805,12 @@ struct MapTile {
     z: f32,
     #[serde(default)]
     opacity: Option<f32>,
+    #[serde(default)]
+    animation_phase: u32,
+    #[serde(default = "default_map_animation_frame_count")]
+    animation_frame_count: u32,
+    #[serde(default)]
+    animation_tick: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -491,6 +818,8 @@ struct MapTile {
 struct MapStandaloneTile {
     key: String,
     image_key: String,
+    #[serde(default)]
+    image_url: Option<String>,
     left: f32,
     top: f32,
     width: f32,
@@ -500,6 +829,16 @@ struct MapStandaloneTile {
     opacity: Option<f32>,
     #[serde(default)]
     additive: bool,
+    #[serde(default)]
+    animation_phase: u32,
+    #[serde(default = "default_map_animation_frame_count")]
+    animation_frame_count: u32,
+    #[serde(default)]
+    animation_tick: u32,
+}
+
+const fn default_map_animation_frame_count() -> u32 {
+    1
 }
 
 fn map_render_active_image_keys(snapshot: &MapRenderState) -> HashSet<String> {
@@ -514,6 +853,101 @@ fn map_render_active_image_keys(snapshot: &MapRenderState) -> HashSet<String> {
                 .map(|tile| tile.image_key.clone()),
         )
         .chain(snapshot.retained_image_keys.iter().cloned())
+        .collect()
+}
+
+fn map_render_url_image_sources(snapshot: &MapRenderState) -> Vec<(String, String)> {
+    snapshot
+        .atlases
+        .iter()
+        .filter_map(|atlas| {
+            atlas
+                .image_url
+                .as_deref()
+                .map(|url| (atlas.key.clone(), browser_asset_path(url)))
+        })
+        .chain(snapshot.standalone_tiles.iter().filter_map(|tile| {
+            tile.image_url
+                .as_deref()
+                .map(|url| (tile.image_key.clone(), browser_asset_path(url)))
+        }))
+        .collect()
+}
+
+/// Snapshot of the active scene-effect sprites pushed by the native Windows
+/// producer (apps/game-client/platform-windows/src/effects.rs). Each entry is
+/// one additive (Crystal SourceAlpha + One) sprite placed in screen-stage
+/// coordinates, mirroring MapStandaloneTile + EntityRenderLayer. The native
+/// producer only emits entries whose source frame PNG actually exists under the
+/// asset root, so a missing asset never produces a sprite here.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EffectRenderState {
+    enabled: bool,
+    stage_width: f32,
+    stage_height: f32,
+    #[serde(default)]
+    effects: Vec<EffectRenderEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EffectRenderEntry {
+    /// Stable per-effect-sprite identity reused for retained in-place updates.
+    key: String,
+    /// Optional standalone PNG URL (native keyed effect frame). When absent
+    /// the producer supplied a keyed atlas image via an out-of-band upload.
+    #[serde(default)]
+    image_url: Option<String>,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+    z: f32,
+    #[serde(default)]
+    additive: bool,
+    /// Crystal DrawBlend rate; omitted legacy entries retain full strength.
+    #[serde(default)]
+    opacity: Option<f32>,
+    #[serde(default)]
+    mask_image_url: Option<String>,
+    /// Mask geometry (optional). mask_x/mask_y and frame_x/frame_y are both
+    /// expressed in the same local (frame) origin; the mask is placed at
+    /// (mask_x - frame_x, mask_y - frame_y) relative to the primary anchor.
+    #[serde(default)]
+    mask_width: Option<f32>,
+    #[serde(default)]
+    mask_height: Option<f32>,
+    #[serde(default)]
+    mask_x: Option<f32>,
+    #[serde(default)]
+    mask_y: Option<f32>,
+    #[serde(default)]
+    frame_x: Option<f32>,
+    #[serde(default)]
+    frame_y: Option<f32>,
+    #[serde(default)]
+    shadow_x: Option<f32>,
+    #[serde(default)]
+    shadow_y: Option<f32>,
+}
+
+/// Active image keys for an effect snapshot (URL-loaded standalone frames,
+/// including mask frames).
+fn effect_render_active_image_keys(snapshot: &EffectRenderState) -> HashSet<String> {
+    snapshot
+        .effects
+        .iter()
+        .flat_map(|effect| {
+            let mut keys = Vec::new();
+            if let Some(url) = effect.image_url.as_ref() {
+                keys.push(browser_asset_path(url));
+            }
+            if let Some(url) = effect.mask_image_url.as_ref() {
+                keys.push(browser_asset_path(url));
+            }
+            keys
+        })
         .collect()
 }
 
@@ -630,6 +1064,15 @@ pub fn set_mir2_world_state(snapshot_json: String) {
     }
 }
 
+/// Drop only retained scene/world presentation state. Inventory, mail, shop,
+/// storage, HUD read models, UI pending operations, and login/session state are
+/// intentionally left untouched. Native hosts use the matching
+/// `push_native_scene_reset` entry point.
+#[wasm_bindgen(js_name = resetMir2Scene)]
+pub fn reset_mir2_scene() {
+    PENDING_SCENE_RESET.with(|pending| pending.set(true));
+}
+
 #[wasm_bindgen(js_name = setMir2EntityRenderState)]
 pub fn set_mir2_entity_render_state(snapshot_json: String) {
     match serde_json::from_str::<EntityRenderState>(&snapshot_json) {
@@ -680,6 +1123,32 @@ pub fn set_mir2_map_render_state(json: String) {
             });
         }
         Err(error) => publish_status("map-render-decode-error", &error.to_string()),
+    }
+}
+
+#[wasm_bindgen(js_name = setMir2EffectRenderState)]
+pub fn set_mir2_effect_render_state(json: String) {
+    match serde_json::from_str::<EffectRenderState>(&json) {
+        Ok(snapshot) => {
+            PENDING_EFFECT_RENDER_STATE.with(|pending| {
+                *pending.borrow_mut() = Some(snapshot);
+            });
+        }
+        Err(error) => publish_status("effect-render-decode-error", &error.to_string()),
+    }
+}
+
+/// Replace the retained native lighting snapshot. The schema is shared with
+/// the Windows ingress and intentionally remains usable by a future WASM host.
+#[wasm_bindgen(js_name = setMir2LightingRenderState)]
+pub fn set_mir2_lighting_render_state(json: String) {
+    match serde_json::from_str::<lighting::LightingRenderState>(&json) {
+        Ok(snapshot) => {
+            PENDING_LIGHTING_RENDER_STATE.with(|pending| {
+                *pending.borrow_mut() = Some(snapshot);
+            });
+        }
+        Err(error) => publish_status("lighting-render-decode-error", &error.to_string()),
     }
 }
 
@@ -758,6 +1227,17 @@ pub fn set_mir2_self_camera_motion(
         .with(|cell| cell.set(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms))));
 }
 
+/// Clear the retained self-camera interpolation window immediately.
+///
+/// Native hosts call this when the server corrects a locally predicted move or
+/// the active scene is reset. Waiting for the old window to expire would keep
+/// scrolling the world after authority has already returned the player to the
+/// source tile.
+#[wasm_bindgen(js_name = clearMir2SelfCameraMotion)]
+pub fn clear_mir2_self_camera_motion() {
+    PENDING_SELF_CAMERA_MOTION.with(|cell| cell.set(None));
+}
+
 /// Window/surface configuration for a Mir2 runtime host.
 ///
 /// Platform-neutral so the same Bevy app can open a Web canvas (WASM host), a
@@ -826,16 +1306,36 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeEntityRenderAtlases::default())
         .insert_resource(RuntimeMapRenderState::default())
         .insert_resource(RuntimeMapRenderAtlases::default())
+        .insert_resource(RuntimeEffectRenderState::default())
+        .insert_resource(RuntimeLightingRenderState::default())
+        .insert_resource(RuntimeLightingSceneResetTracker::default())
         .insert_resource(RuntimeMapCameraOffset::default())
         .insert_resource(SceneRegistry::default())
         .insert_resource(interpolation::SnapshotBuffer::default())
         .insert_resource(motion::EntityMotionTable::default())
         .insert_resource(presentation_pose::PresentationPoseBuffer::default())
         .insert_resource(mir2_client_bevy::read_model::UiReadModel::default())
+        .insert_resource(mir2_client_bevy::read_model::UiSurfaceSignals::default())
         .insert_resource(mir2_client_bevy::map::MapModel::default())
         .insert_resource(mir2_client_bevy::entities::EntityModelSet::default())
         .insert_resource(mir2_client_bevy::inventory::InventoryModel::default())
         .insert_resource(mir2_client_bevy::chat::ChatModel::default())
+        .insert_resource(mir2_client_bevy::mail::MailModel::default())
+        .insert_resource(mir2_client_bevy::shop::ShopModel::default())
+        .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
+        .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+        .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
+        .insert_resource(mir2_client_bevy::social::SocialModel::default())
+        .insert_resource(PendingOperations::default())
+        .insert_resource(InventoryOperationFeedback::default())
+        .insert_resource(AuthoritativeModelRevisions::default())
+        .insert_resource(SessionResetRevision::default())
+        .insert_resource(SessionResetGameShopPreservation::default())
+        .insert_resource(RuntimeSessionResetTracker::default())
+        .insert_resource(SceneResetRevision::default())
+        .insert_resource(RuntimeSceneResetTracker::default())
+        .insert_resource(RuntimeSceneModelResetTracker::default())
+        .insert_resource(RuntimeEffectShadowCleanupTracker::default())
         .insert_resource(native_ingest::NativeInbound::new())
         .add_plugins(
             DefaultPlugins
@@ -860,29 +1360,96 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 }),
         )
         .add_plugins((
+            Mir2NativeSessionBoundaryPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
+            lighting::CrystalMultiplyMaterialPlugin,
             motion::CrystalMoveClockPlugin,
             local_motion::LocalMotionPresentationShadowPlugin,
             movement_shadow::MovementShadowPlugin,
             remote_motion::RemoteMotionPresentationPlugin,
         ))
         .add_systems(Startup, setup_scene)
+        .configure_sets(
+            Update,
+            PendingLifecycleSet::Ingest.before(PendingLifecycleSet::UiReset),
+        )
         .add_systems(
             Update,
             (
+                apply_scene_reset_to_runtime,
+                cleanup_reset_effect_shadows,
+                apply_scene_reset_to_lighting,
+                apply_scene_reset_to_scene_models,
                 ingest_pending_world_state,
+            )
+                .chain()
+                .after(ingest_pending_game_shop_receipt)
+                .in_set(PendingLifecycleSet::Ingest),
+        )
+        .add_systems(
+            Update,
+            (
                 motion::update_entity_motion_table,
                 ingest_pending_entity_render_state,
                 ingest_pending_entity_render_atlases,
                 ingest_pending_map_render_state,
+            )
+                .chain()
+                .after(ingest_pending_world_state)
+                .in_set(PendingLifecycleSet::Ingest),
+        )
+        .add_systems(
+            Update,
+            (
                 ingest_pending_map_render_images,
+                ingest_pending_effect_render_state,
+                ingest_pending_lighting_render_state,
+            )
+                .chain()
+                .after(ingest_pending_map_render_state)
+                .in_set(PendingLifecycleSet::Ingest),
+        )
+        .add_systems(
+            Update,
+            (
                 ingest_pending_ui_read_model,
                 ingest_pending_map_model,
                 ingest_pending_entity_model_set,
                 ingest_pending_inventory_model,
+            )
+                .chain()
+                .after(ingest_pending_effect_render_state)
+                .in_set(PendingLifecycleSet::Ingest),
+        )
+        .add_systems(
+            Update,
+            (
+                ingest_pending_inventory_operation_ack,
+                ingest_pending_wallet_patch,
+                ingest_pending_mail_model,
+                ingest_pending_shop_model,
+                ingest_pending_game_shop_info,
+                ingest_pending_game_shop_stock,
+                ingest_pending_npc_shop_service,
+                ingest_pending_storage_patch,
+                ingest_pending_storage_items,
+                ingest_pending_storage_model,
+                ingest_pending_skill_model,
+                ingest_pending_social_model,
                 ingest_pending_chat_line,
+            )
+                .chain()
+                .after(ingest_pending_inventory_model)
+                .in_set(PendingLifecycleSet::Ingest),
+        )
+        .add_systems(
+            Update,
+            (
                 sync_map_render,
+                animate_map_tiles,
                 sync_map_scene,
+                sync_effect_render,
+                sync_lighting_render,
                 sync_entities,
                 sync_mine_nodes,
                 begin_presentation_pose_frame,
@@ -892,6 +1459,11 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             )
                 .chain(),
         );
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(
+        Update,
+        emit_native_soak_metrics.after(publish_presentation_pose_frame),
+    );
     app
 }
 
@@ -1083,6 +1655,48 @@ fn ingest_pending_ui_read_model(
     );
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct WalletPatch {
+    #[serde(default)]
+    gold: Option<u32>,
+    #[serde(default)]
+    credit: Option<u32>,
+}
+
+/// Apply packet-first absolute wallet values after the most recent full HUD
+/// snapshot. The gateway computes these values from the authoritative packet
+/// stream; this runtime only merges fields that are explicitly present.
+fn ingest_pending_wallet_patch(
+    mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
+    mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::WalletPatch(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::WalletPatch(json) = message {
+                match serde_json::from_str::<WalletPatch>(&json) {
+                    Ok(patch) if patch.gold.is_some() || patch.credit.is_some() => {
+                        if let Some(gold) = patch.gold {
+                            ui.player.gold = gold;
+                            inventory.gold = gold;
+                        }
+                        if let Some(credit) = patch.credit {
+                            ui.player.credit = credit;
+                        }
+                    }
+                    Ok(_) => {}
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native wallet patch");
+                        eprintln!("[runtime] wallet patch decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
 fn ingest_pending_map_model(
     mut map: ResMut<mir2_client_bevy::map::MapModel>,
     native: Res<native_ingest::NativeInbound>,
@@ -1134,6 +1748,9 @@ fn ingest_pending_entity_model_set(
 
 fn ingest_pending_inventory_model(
     mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
+    storage: Res<mir2_client_bevy::storage::StorageModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
     native: Res<native_ingest::NativeInbound>,
 ) {
     native.drain_matching(
@@ -1147,11 +1764,765 @@ fn ingest_pending_inventory_model(
             if let native_ingest::NativeInboundMessage::InventoryModel(json) = message {
                 match serde_json::from_str::<mir2_client_bevy::inventory::InventoryModel>(&json) {
                     Ok(model) => {
+                        let old = inventory.clone();
+                        reconcile_inventory_refresh(&mut pending, &old, &model);
                         *inventory = model;
+                        let storage_snapshot = storage.clone();
+                        reconcile_storage_refresh(
+                            &mut pending,
+                            &inventory,
+                            &storage_snapshot,
+                            &storage_snapshot,
+                        );
+                        mark_authoritative_refresh(
+                            &mut revisions,
+                            AuthoritativeModelDomain::Inventory,
+                        );
                     }
                     Err(error) => {
                         publish_status("native-decode-error", "invalid native inventory model");
                         eprintln!("[runtime] inventory model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_inventory_operation_ack(
+    mut pending: ResMut<PendingOperations>,
+    mut feedback: ResMut<InventoryOperationFeedback>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::InventoryOperationAck(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::InventoryOperationAck(json) = message {
+                match serde_json::from_str::<InventoryOperationAck>(&json) {
+                    Ok(ack) => {
+                        apply_inventory_operation_ack(&mut pending, &mut feedback, ack);
+                    }
+                    Err(error) => {
+                        publish_status(
+                            "native-decode-error",
+                            "invalid inventory operation acknowledgement",
+                        );
+                        eprintln!("[runtime] inventory operation ack decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_scene_and_data_reset(
+    mut scene_reset: ResMut<SceneResetRevision>,
+    mut reset: ResMut<SessionResetRevision>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    mut preservation: ResMut<SessionResetGameShopPreservation>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    PENDING_SCENE_RESET.with(|requested| {
+        if requested.replace(false) {
+            discard_pending_scene_thread_locals();
+            scene_reset.0 = scene_reset.0.wrapping_add(1);
+        }
+    });
+    native.discard_stale_data_before_latest_reset();
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::SceneReset
+                    | native_ingest::NativeInboundMessage::DataReset
+                    | native_ingest::NativeInboundMessage::DataResetPreservingExactGameShopReceipt(
+                        _
+                    )
+            )
+        },
+        |message| {
+            scene_reset.0 = scene_reset.0.wrapping_add(1);
+            match message {
+                native_ingest::NativeInboundMessage::DataReset => {
+                    // DataReset is a session boundary and therefore includes
+                    // the complete SceneReset semantics as well.
+                    request_session_reset(&mut reset, &mut revisions, &mut pending);
+                }
+                native_ingest::NativeInboundMessage::DataResetPreservingExactGameShopReceipt(
+                    receipt,
+                ) => {
+                    let _ = request_session_reset_preserving_exact_game_shop_receipt(
+                        &mut reset,
+                        &mut revisions,
+                        &mut pending,
+                        &mut preservation,
+                        receipt,
+                    );
+                }
+                native_ingest::NativeInboundMessage::SceneReset => {}
+                _ => unreachable!("reset consumer matched a non-reset message"),
+            }
+        },
+    );
+}
+
+fn discard_pending_scene_thread_locals() {
+    PENDING_WORLD_STATE.with(|pending| *pending.borrow_mut() = None);
+    PENDING_ENTITY_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
+    PENDING_ENTITY_RENDER_ATLASES.with(|pending| pending.borrow_mut().clear());
+    PENDING_MAP_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
+    PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| pending.borrow_mut().clear());
+    PENDING_MAP_CAMERA_OFFSET.with(|offset| offset.set((0.0, 0.0)));
+    PENDING_EFFECT_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
+    PENDING_LIGHTING_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
+}
+
+fn apply_scene_reset_to_runtime(
+    reset: Res<SceneResetRevision>,
+    mut tracker: ResMut<RuntimeSceneResetTracker>,
+    mut state: ResMut<RuntimeWorldState>,
+    mut entity_render_state: ResMut<RuntimeEntityRenderState>,
+    mut entity_atlases: ResMut<RuntimeEntityRenderAtlases>,
+    mut map_render_state: ResMut<RuntimeMapRenderState>,
+    mut map_atlases: ResMut<RuntimeMapRenderAtlases>,
+    mut effect_render_state: ResMut<RuntimeEffectRenderState>,
+    mut map_camera_offset: ResMut<RuntimeMapCameraOffset>,
+    mut snapshots: ResMut<interpolation::SnapshotBuffer>,
+    mut motion_table: ResMut<motion::EntityMotionTable>,
+    mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
+    mut registry: ResMut<SceneRegistry>,
+    mut commands: Commands,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+
+    state.snapshot = None;
+    entity_render_state.snapshot = None;
+    entity_atlases.images.clear();
+    map_render_state.snapshot = None;
+    *map_atlases = RuntimeMapRenderAtlases::default();
+    effect_render_state.snapshot = None;
+    *map_camera_offset = RuntimeMapCameraOffset::default();
+    *snapshots = interpolation::SnapshotBuffer::default();
+    *motion_table = motion::EntityMotionTable::default();
+    *presentation_poses = presentation_pose::PresentationPoseBuffer::default();
+
+    clear_scene_registry(
+        &mut commands,
+        &mut registry,
+        &mut additive_cache,
+        &mut additive_materials,
+    );
+}
+
+fn cleanup_reset_effect_shadows(
+    reset: Res<SceneResetRevision>,
+    mut tracker: ResMut<RuntimeEffectShadowCleanupTracker>,
+    mut registry: ResMut<SceneRegistry>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut shadow_materials: ResMut<Assets<ColorMaterial>>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+
+    for (_, handle) in registry.effect_render_shadows.drain() {
+        commands.entity(handle.entity).despawn();
+        meshes.remove(handle.mesh.id());
+        shadow_materials.remove(handle.material.id());
+    }
+}
+
+fn apply_scene_reset_to_lighting(
+    reset: Res<SceneResetRevision>,
+    mut tracker: ResMut<RuntimeLightingSceneResetTracker>,
+    mut state: ResMut<RuntimeLightingRenderState>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+    state.snapshot = None;
+}
+
+fn apply_scene_reset_to_scene_models(
+    reset: Res<SceneResetRevision>,
+    mut tracker: ResMut<RuntimeSceneModelResetTracker>,
+    mut map: ResMut<mir2_client_bevy::map::MapModel>,
+    mut entities: ResMut<mir2_client_bevy::entities::EntityModelSet>,
+    mut surface_signals: ResMut<mir2_client_bevy::read_model::UiSurfaceSignals>,
+    mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
+    mut social: ResMut<mir2_client_bevy::social::SocialModel>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+    *map = mir2_client_bevy::map::MapModel::default();
+    *entities = mir2_client_bevy::entities::EntityModelSet::default();
+    social.clear_scene();
+    surface_signals.npc_shop_open_requested = false;
+    let _ = shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal::default());
+}
+
+fn apply_session_reset_to_runtime_models(
+    reset: Res<SessionResetRevision>,
+    mut tracker: ResMut<RuntimeSessionResetTracker>,
+    mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
+    mut surface_signals: ResMut<mir2_client_bevy::read_model::UiSurfaceSignals>,
+    mut map: ResMut<mir2_client_bevy::map::MapModel>,
+    mut entities: ResMut<mir2_client_bevy::entities::EntityModelSet>,
+    mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
+    mut chat: ResMut<mir2_client_bevy::chat::ChatModel>,
+    mut mail: ResMut<mir2_client_bevy::mail::MailModel>,
+    mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
+    mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
+    mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
+    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    mut social: ResMut<mir2_client_bevy::social::SocialModel>,
+    mut inventory_feedback: ResMut<InventoryOperationFeedback>,
+    mut preservation: ResMut<SessionResetGameShopPreservation>,
+) {
+    if tracker.0 == reset.0 {
+        return;
+    }
+    tracker.0 = reset.0;
+    *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    surface_signals.npc_shop_open_requested = false;
+    *map = mir2_client_bevy::map::MapModel::default();
+    *entities = mir2_client_bevy::entities::EntityModelSet::default();
+    *inventory = mir2_client_bevy::inventory::InventoryModel::default();
+    *chat = mir2_client_bevy::chat::ChatModel::default();
+    *mail = mir2_client_bevy::mail::MailModel::default();
+    *shop = mir2_client_bevy::shop::ShopModel::default();
+    let preserved_receipt = preservation.receipt_for(reset.0).cloned();
+    if let Some(receipt) = preserved_receipt.as_ref() {
+        let _ = game_shop.clear_session_preserving_exact_receipt(receipt);
+    } else {
+        game_shop.clear_session();
+        let _ = preservation.clear_if_stale(reset.0);
+    }
+    *storage = mir2_client_bevy::storage::StorageModel::default();
+    *skills = mir2_client_bevy::skill_model::SkillModel::default();
+    social.clear_session();
+    inventory_feedback.last = None;
+}
+
+fn decode_required_array(
+    json: &str,
+    field: &str,
+    model_name: &str,
+) -> Result<serde_json::Value, String> {
+    let value = serde_json::from_str::<serde_json::Value>(json)
+        .map_err(|error| format!("invalid native {model_name} JSON: {error}"))?;
+    if !value.get(field).is_some_and(serde_json::Value::is_array) {
+        return Err(format!(
+            "invalid native {model_name} JSON: `{field}` must be an array"
+        ));
+    }
+    Ok(value)
+}
+
+fn ingest_pending_mail_model(
+    mut mail: ResMut<mir2_client_bevy::mail::MailModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::MailModel(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::MailModel(json) = message {
+                match decode_required_array(&json, "mails", "mail model").and_then(|value| {
+                    serde_json::from_value::<mir2_client_bevy::mail::MailModel>(value)
+                        .map_err(|error| error.to_string())
+                }) {
+                    Ok(model) => {
+                        let old = mail.clone();
+                        let selected_valid = model
+                            .selected_id
+                            .and_then(|id| model.mails.iter().find(|m| m.id == id).map(|_| id))
+                            .or_else(|| {
+                                mail.selected_id.and_then(|id| {
+                                    model.mails.iter().find(|m| m.id == id).map(|_| id)
+                                })
+                            });
+                        mail.mails = model.mails;
+                        mail.selected_id = selected_valid;
+                        reconcile_mail_refresh(&mut pending, &old, &mail);
+                        mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Mail);
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native mail model");
+                        eprintln!("[runtime] mail model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_shop_model(
+    mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::ShopModel(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::ShopModel(json) = message {
+                match decode_required_array(&json, "goods", "shop model").and_then(|value| {
+                    serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(value)
+                        .map_err(|error| error.to_string())
+                }) {
+                    Ok(model) => {
+                        let old = shop.clone();
+                        let selected_valid = model
+                            .selected_id
+                            .and_then(|id| {
+                                model.goods.iter().find(|g| g.unique_id == id).map(|_| id)
+                            })
+                            .or_else(|| {
+                                shop.selected_id.and_then(|id| {
+                                    model.goods.iter().find(|g| g.unique_id == id).map(|_| id)
+                                })
+                            });
+                        shop.goods = model.goods;
+                        shop.selected_id = selected_valid;
+                        reconcile_shop_refresh(&mut pending, &old, &shop);
+                        mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Shop);
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native shop model");
+                        eprintln!("[runtime] shop model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+/// Accumulate packet-first GameShopInfo entries. Unlike NPC ShopModel, a
+/// GameShopInfo packet is one catalog row, so replacing the resource here
+/// would silently lose most of Crystal's approximately 105 products.
+fn ingest_pending_game_shop_info(
+    mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::GameShopInfo(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::GameShopInfo(json) = message {
+                let value = match serde_json::from_str::<serde_json::Value>(&json) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native GameShopInfo");
+                        eprintln!("[runtime] GameShopInfo decode error: {error}");
+                        return;
+                    }
+                };
+                let entry_value = value.get("entry").cloned().unwrap_or(value);
+                match serde_json::from_value::<mir2_client_bevy::game_shop::GameShopEntry>(
+                    entry_value,
+                ) {
+                    Ok(entry) if entry.game_shop_index >= 0 && entry.item_index >= 0 => {
+                        game_shop.upsert(entry);
+                        mark_authoritative_refresh(
+                            &mut revisions,
+                            AuthoritativeModelDomain::GameShop,
+                        );
+                    }
+                    Ok(_) => {
+                        publish_status("native-decode-error", "invalid native GameShopInfo index");
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native GameShopInfo");
+                        eprintln!("[runtime] GameShopInfo entry decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+/// Apply stock-only patches without replacing the cash catalog or changing
+/// selection/payment state. Unknown gIndex patches are retained by the model
+/// until their GameShopInfo row arrives.
+fn ingest_pending_game_shop_stock(
+    mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::GameShopStock(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::GameShopStock(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::game_shop::GameShopStockPatch>(&json)
+                {
+                    Ok(patch) if patch.game_shop_index >= 0 => {
+                        game_shop.apply_stock_patch_value(patch);
+                        mark_authoritative_refresh(
+                            &mut revisions,
+                            AuthoritativeModelDomain::GameShop,
+                        );
+                    }
+                    Ok(_) => {
+                        publish_status("native-decode-error", "invalid native GameShopStock index");
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native GameShopStock");
+                        eprintln!("[runtime] GameShopStock decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+/// Apply only an exact native receipt. Catalog, stock, wallet, chat and mail
+/// refreshes deliberately do not release this pending purchase.
+fn ingest_pending_game_shop_receipt(
+    mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
+    mut pending: ResMut<PendingOperations>,
+    reset: Res<SessionResetRevision>,
+    mut preservation: ResMut<SessionResetGameShopPreservation>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::GameShopReceipt(_)
+            )
+        },
+        |message| {
+            let native_ingest::NativeInboundMessage::GameShopReceipt(json) = message else {
+                return;
+            };
+            let Ok(receipt) =
+                serde_json::from_str::<mir2_client_bevy::game_shop::GameShopReceipt>(&json)
+            else {
+                publish_status("native-decode-error", "invalid native GameShopReceipt");
+                return;
+            };
+            let request_id = receipt.request_id.clone();
+            if game_shop.apply_receipt(receipt) {
+                pending.release(&PendingOperationKey::GameShop(request_id.clone()));
+                let _ = preservation.mark_consumed(reset.0, &request_id);
+            }
+        },
+    );
+}
+
+/// Keep a preserving receipt alive for the complete `Update` schedule. Runtime
+/// model ingest, overlay reset and UiState reconciliation all observe it before
+/// this PostUpdate cleanup releases the retained payload.
+fn finalize_consumed_game_shop_preservation(
+    reset: Res<SessionResetRevision>,
+    mut preservation: ResMut<SessionResetGameShopPreservation>,
+) {
+    let _ = preservation.clear_if_consumed(reset.0);
+}
+
+/// Apply one packet-authoritative NPC service transition and request the UI
+/// surface. The goods list remains independent so Sell/Repair packets cannot
+/// fabricate a Buy catalogue.
+fn ingest_pending_npc_shop_service(
+    mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
+    mut surface_signals: ResMut<mir2_client_bevy::read_model::UiSurfaceSignals>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::NpcShopService(_)
+            )
+        },
+        |message| {
+            let native_ingest::NativeInboundMessage::NpcShopService(json) = message else {
+                return;
+            };
+            let Ok(signal) =
+                serde_json::from_str::<mir2_client_bevy::shop::NpcShopServiceSignal>(&json)
+            else {
+                publish_status("native-decode-error", "invalid native NPC service");
+                return;
+            };
+            if shop.apply_service_signal(signal) {
+                surface_signals.npc_shop_open_requested = true;
+            } else {
+                publish_status("native-decode-error", "invalid native NPC service");
+            }
+        },
+    );
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(default)]
+struct StorageModelPatch {
+    size: Option<u16>,
+    has_password: Option<bool>,
+    unlocked: Option<bool>,
+    has_expanded: Option<bool>,
+    expiry: Option<i64>,
+    ack: Option<StorageOperationAck>,
+}
+
+impl StorageModelPatch {
+    fn is_empty(&self) -> bool {
+        self.size.is_none()
+            && self.has_password.is_none()
+            && self.unlocked.is_none()
+            && self.has_expanded.is_none()
+            && self.expiry.is_none()
+            && self.ack.is_none()
+    }
+
+    fn apply_to(&self, storage: &mut mir2_client_bevy::storage::StorageModel) {
+        if let Some(size) = self.size {
+            storage.size = size;
+        }
+        if let Some(has_password) = self.has_password {
+            storage.has_password = has_password;
+        }
+        if let Some(unlocked) = self.unlocked {
+            storage.unlocked = unlocked;
+        }
+        if let Some(has_expanded) = self.has_expanded {
+            storage.has_expanded = has_expanded;
+        }
+        if let Some(expiry) = self.expiry {
+            storage.expiry = expiry;
+        }
+    }
+}
+
+fn ingest_pending_storage_patch(
+    mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
+    inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::StoragePatch(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::StoragePatch(json) = message {
+                match serde_json::from_str::<StorageModelPatch>(&json) {
+                    Ok(patch) if !patch.is_empty() => {
+                        let old = storage.clone();
+                        if let Some(ack) = patch.ack.as_ref() {
+                            apply_storage_operation_ack(&mut pending, ack);
+                        }
+                        patch.apply_to(&mut storage);
+                        reconcile_storage_refresh(&mut pending, &inventory, &old, &storage);
+                        mark_authoritative_refresh(
+                            &mut revisions,
+                            AuthoritativeModelDomain::Storage,
+                        );
+                    }
+                    Ok(_) => {
+                        publish_status("native-decode-error", "empty native storage patch");
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native storage patch");
+                        eprintln!("[runtime] storage patch decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_storage_items(
+    mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
+    inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::StorageItems(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::StorageItems(json) = message {
+                match decode_required_array(&json, "items", "storage items").and_then(|value| {
+                    serde_json::from_value::<Vec<mir2_client_bevy::inventory::ItemModel>>(
+                        value.get("items").cloned().unwrap_or_default(),
+                    )
+                    .map_err(|error| error.to_string())
+                }) {
+                    Ok(items) => {
+                        let old = storage.clone();
+                        storage.items = items;
+                        let selected_storage = storage.selected_storage_slot.filter(|slot| {
+                            storage
+                                .items
+                                .iter()
+                                .any(|item| item.container == 4 && item.slot == *slot)
+                        });
+                        storage.selected_storage_slot = selected_storage;
+                        reconcile_storage_refresh(&mut pending, &inventory, &old, &storage);
+                        mark_authoritative_refresh(
+                            &mut revisions,
+                            AuthoritativeModelDomain::Storage,
+                        );
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native storage items");
+                        eprintln!("[runtime] storage items decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_storage_model(
+    mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
+    inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
+    mut revisions: ResMut<AuthoritativeModelRevisions>,
+    mut pending: ResMut<PendingOperations>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::StorageModel(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::StorageModel(json) = message {
+                match decode_required_array(&json, "items", "storage model").and_then(|value| {
+                    serde_json::from_value::<mir2_client_bevy::storage::StorageModel>(value)
+                        .map_err(|error| error.to_string())
+                }) {
+                    Ok(model) => {
+                        let old = storage.clone();
+                        let drafts = (
+                            storage.password_draft.clone(),
+                            storage.new_password_draft.clone(),
+                            storage.confirm_password_draft.clone(),
+                        );
+                        let selected_bag = storage.selected_bag_slot;
+                        let selected_storage = storage.selected_storage_slot;
+                        let selected_storage = model
+                            .selected_storage_slot
+                            .filter(|slot| {
+                                model
+                                    .items
+                                    .iter()
+                                    .any(|item| item.container == 4 && item.slot == *slot)
+                            })
+                            .or_else(|| {
+                                selected_storage.filter(|slot| {
+                                    model
+                                        .items
+                                        .iter()
+                                        .any(|item| item.container == 4 && item.slot == *slot)
+                                })
+                            });
+                        *storage = model;
+                        // Restore UI-only drafts/selections
+                        if storage.password_draft.is_empty() {
+                            storage.password_draft = drafts.0;
+                        }
+                        if storage.new_password_draft.is_empty() {
+                            storage.new_password_draft = drafts.1;
+                        }
+                        if storage.confirm_password_draft.is_empty() {
+                            storage.confirm_password_draft = drafts.2;
+                        }
+                        if storage.selected_bag_slot.is_none() {
+                            storage.selected_bag_slot = selected_bag;
+                        }
+                        storage.selected_storage_slot = selected_storage;
+                        reconcile_storage_refresh(&mut pending, &inventory, &old, &storage);
+                        mark_authoritative_refresh(
+                            &mut revisions,
+                            AuthoritativeModelDomain::Storage,
+                        );
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native storage model");
+                        eprintln!("[runtime] storage model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_skill_model(
+    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::SkillModel(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::SkillModel(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(&json) {
+                    Ok(model) => {
+                        *skills = model;
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native skill model");
+                        eprintln!("[runtime] skill model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_social_model(
+    mut social: ResMut<mir2_client_bevy::social::SocialModel>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::SocialModel(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::SocialModel(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::social::SocialModel>(&json) {
+                    Ok(model) => social.apply_authoritative(model),
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native social model");
+                        eprintln!("[runtime] social model decode error: {error}");
                     }
                 }
             }
@@ -1215,6 +2586,762 @@ fn ingest_pending_map_render_state(
     camera_offset.y = y;
 }
 
+fn ingest_pending_effect_render_state(
+    mut state: ResMut<RuntimeEffectRenderState>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    PENDING_EFFECT_RENDER_STATE.with(|pending| {
+        if let Some(snapshot) = pending.borrow_mut().take() {
+            state.snapshot = Some(snapshot);
+        }
+    });
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::EffectRenderState(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::EffectRenderState(json) = message {
+                if let Ok(snapshot) = serde_json::from_str::<EffectRenderState>(&json) {
+                    state.snapshot = Some(snapshot);
+                } else {
+                    publish_status("native-decode-error", "invalid native effect render state");
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_lighting_render_state(
+    mut state: ResMut<RuntimeLightingRenderState>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    PENDING_LIGHTING_RENDER_STATE.with(|pending| {
+        if let Some(snapshot) = pending.borrow_mut().take() {
+            state.snapshot = Some(snapshot);
+        }
+    });
+    #[cfg(not(target_arch = "wasm32"))]
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::LightingRenderState(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::LightingRenderState(json) = message {
+                if let Ok(snapshot) = serde_json::from_str::<lighting::LightingRenderState>(&json) {
+                    state.snapshot = Some(snapshot);
+                } else {
+                    publish_status(
+                        "native-decode-error",
+                        "invalid native lighting render state",
+                    );
+                }
+            }
+        },
+    );
+    #[cfg(target_arch = "wasm32")]
+    let _ = native;
+}
+
+/// Retained Crystal light buffer. A dedicated camera clears an offscreen image
+/// to Crystal's darkness colour and adds every `Lighting/N.png` source on an
+/// isolated render layer. A full-stage main-pass mesh then multiplies the
+/// completed light-buffer RGB with the world. This preserves Crystal's
+/// `scene * (darkness + lights)` equation instead of the visibly-wrong
+/// `scene * darkness + lights` approximation. Day has no light pass.
+fn sync_lighting_render(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    state: Res<RuntimeLightingRenderState>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut images: ResMut<Assets<Image>>,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
+    mut multiply_materials: ResMut<Assets<lighting::CrystalMultiplyMaterial>>,
+    mut registry: ResMut<SceneRegistry>,
+    mut additive_material_query: Query<
+        &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
+    >,
+    mut transform_query: Query<&mut Transform>,
+    mut camera_query: Query<&mut Camera, With<MirLightingBufferCamera>>,
+) {
+    macro_rules! clear_lighting {
+        () => {
+            clear_lighting_render_layers(
+                &mut commands,
+                &mut registry,
+                &mut additive_cache,
+                &mut additive_materials,
+                &mut multiply_materials,
+                &mut images,
+            )
+        };
+    }
+    let Some(snapshot) = state.snapshot.as_ref() else {
+        clear_lighting!();
+        return;
+    };
+    let Some(setting) = lighting::effective_light_setting(snapshot) else {
+        clear_lighting!();
+        return;
+    };
+    let Some(darkness) = lighting::darkness_color(setting, snapshot.map_dark_light) else {
+        clear_lighting!();
+        return;
+    };
+    let Some(stage_size) = snapshot
+        .enabled
+        .then(|| lighting::validated_stage_size(snapshot))
+        .flatten()
+    else {
+        clear_lighting!();
+        return;
+    };
+
+    if registry
+        .lighting_darkness
+        .as_ref()
+        .is_some_and(|handle| handle.stage_size != stage_size)
+    {
+        clear_lighting!();
+    }
+
+    // Preload all ten native light textures once. Crystal owns ten range slots;
+    // retaining these handles prevents source churn while the player walks.
+    if registry.lighting_images.len() != lighting::LIGHT_TEXTURE_COUNT {
+        registry.lighting_images = (0..lighting::LIGHT_TEXTURE_COUNT)
+            .map(|range| asset_server.load(lighting::light_texture_path(range)))
+            .collect();
+    }
+
+    let dark_position = Vec3::new(0.0, 0.0, 500.0);
+    if let Some(handle) = registry.lighting_darkness.as_mut() {
+        if let Ok(mut camera) = camera_query.get_mut(handle.buffer_camera) {
+            camera.clear_color = ClearColorConfig::Custom(darkness);
+        }
+        if let Ok(mut transform) = transform_query.get_mut(handle.composite_entity) {
+            transform.translation = dark_position;
+            transform.scale = Vec3::new(snapshot.stage_width, snapshot.stage_height, 1.0);
+        }
+    } else {
+        let buffer_image = images.add(Image::new_target_texture(
+            stage_size.x,
+            stage_size.y,
+            TextureFormat::Rgba8Unorm,
+            Some(TextureFormat::Rgba8UnormSrgb),
+        ));
+        let buffer_camera = commands
+            .spawn((
+                Camera2d,
+                Camera {
+                    order: -1,
+                    clear_color: ClearColorConfig::Custom(darkness),
+                    ..default()
+                },
+                RenderTarget::Image(buffer_image.clone().into()),
+                Msaa::Off,
+                RenderLayers::layer(lighting::LIGHT_BUFFER_RENDER_LAYER),
+                MirLightingBufferCamera,
+            ))
+            .id();
+        let mesh = additive_cache.unit_quad(&mut meshes);
+        let material = multiply_materials.add(lighting::CrystalMultiplyMaterial {
+            light_buffer: buffer_image.clone(),
+        });
+        let composite_entity = commands
+            .spawn((
+                Mesh2d(mesh),
+                MeshMaterial2d(material.clone()),
+                Transform::from_translation(dark_position).with_scale(Vec3::new(
+                    snapshot.stage_width,
+                    snapshot.stage_height,
+                    1.0,
+                )),
+                MirLightingComposite,
+            ))
+            .id();
+        registry.lighting_darkness = Some(LightingDarknessHandle {
+            composite_entity,
+            buffer_camera,
+            buffer_image,
+            stage_size,
+            material,
+        });
+    }
+
+    let mut alive = HashSet::new();
+    for light in lighting::resolved_lights(snapshot) {
+        alive.insert(light.key.clone());
+        let image = registry.lighting_images[light.range].clone();
+        let position = lighting_layer_position(snapshot, &light);
+        if let Some(handle) = registry.lighting_layers.get_mut(&light.key) {
+            let image_key = lighting::light_texture_path(light.range);
+            let cache_key = lighting_material_cache_key(&light.key);
+            let material =
+                additive_cache.material(&cache_key, image, light.opacity, &mut additive_materials);
+            if handle.image_key != image_key {
+                if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                    *binding = MeshMaterial2d(material);
+                }
+                handle.image_key = image_key;
+            }
+            if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                transform.translation = position;
+                transform.scale = Vec3::new(light.width, light.height, 1.0);
+            }
+        } else {
+            let mesh = additive_cache.unit_quad(&mut meshes);
+            let cache_key = lighting_material_cache_key(&light.key);
+            let material =
+                additive_cache.material(&cache_key, image, light.opacity, &mut additive_materials);
+            let entity = commands
+                .spawn((
+                    Mesh2d(mesh),
+                    MeshMaterial2d(material),
+                    Transform::from_translation(position).with_scale(Vec3::new(
+                        light.width,
+                        light.height,
+                        1.0,
+                    )),
+                    RenderLayers::layer(lighting::LIGHT_BUFFER_RENDER_LAYER),
+                    MirLightingBufferLayer,
+                ))
+                .id();
+            registry.lighting_layers.insert(
+                light.key.clone(),
+                EffectRenderLayerHandle {
+                    entity,
+                    image_key: lighting::light_texture_path(light.range),
+                    additive: true,
+                },
+            );
+        }
+    }
+
+    let stale: Vec<String> = registry
+        .lighting_layers
+        .keys()
+        .filter(|key| !alive.contains(*key))
+        .cloned()
+        .collect();
+    for key in stale {
+        if let Some(handle) = registry.lighting_layers.remove(&key) {
+            commands.entity(handle.entity).despawn();
+            additive_cache.evict(&lighting_material_cache_key(&key), &mut additive_materials);
+        }
+    }
+}
+
+fn lighting_material_cache_key(source_key: &str) -> String {
+    format!("native-lighting:{source_key}")
+}
+
+fn lighting_layer_position(
+    snapshot: &lighting::LightingRenderState,
+    light: &lighting::ResolvedLight,
+) -> Vec3 {
+    Vec3::new(
+        light.left + light.width * 0.5 - snapshot.stage_width * 0.5,
+        snapshot.stage_height * 0.5 - (light.top + light.height * 0.5),
+        0.0,
+    )
+}
+
+fn clear_lighting_render_layers(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+    multiply_materials: &mut Assets<lighting::CrystalMultiplyMaterial>,
+    images: &mut Assets<Image>,
+) {
+    for (key, handle) in registry.lighting_layers.drain() {
+        commands.entity(handle.entity).despawn();
+        additive_cache.evict(&lighting_material_cache_key(&key), additive_materials);
+    }
+    if let Some(handle) = registry.lighting_darkness.take() {
+        commands.entity(handle.composite_entity).despawn();
+        commands.entity(handle.buffer_camera).despawn();
+        multiply_materials.remove(handle.material.id());
+        images.remove(handle.buffer_image.id());
+    }
+    registry.lighting_images.clear();
+}
+
+/// RETAIN-IN-PLACE renderer for authoritative scene-effect sprites (map/
+/// ground/cast/projectile/impact). Mirrors `sync_entity_render_layers` and the
+/// map standalone-tile path: effects arrive as screen-stage rectangles with a
+/// stable key, and this system spawns/updates/despawns one sprite per key so a
+/// transient effect updates its frame by rewriting the image/transform instead
+/// of despawn + respawn every tick. Additive effects use the shared Crystal
+/// SourceAlpha + One material so bright frames add to the scene exactly like
+/// Crystal DrawBlend. Mask frames render as a second additive layer at z+1;
+/// shadow frames render below the primary at primary + shadow offset. When no
+/// native effect snapshot is present the effect layer is a no-op, so WASM/Web
+/// behavior is byte-identical.
+fn sync_effect_render(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    state: Res<RuntimeEffectRenderState>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut shadow_materials: ResMut<Assets<ColorMaterial>>,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
+    mut registry: ResMut<SceneRegistry>,
+    mut sprite_query: Query<&mut Sprite>,
+    mut additive_material_query: Query<
+        &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
+    >,
+    mut transform_query: Query<&mut Transform>,
+) {
+    let Some(snapshot) = &state.snapshot else {
+        clear_effect_render_layers(
+            &mut commands,
+            &mut registry,
+            &mut additive_cache,
+            &mut additive_materials,
+            &mut meshes,
+            &mut shadow_materials,
+        );
+        return;
+    };
+    if !snapshot.enabled {
+        clear_effect_render_layers(
+            &mut commands,
+            &mut registry,
+            &mut additive_cache,
+            &mut additive_materials,
+            &mut meshes,
+            &mut shadow_materials,
+        );
+        return;
+    }
+
+    // Preload any standalone frame URLs referenced this snapshot (including masks).
+    let active_image_keys = effect_render_active_image_keys(snapshot);
+    for image_key in &active_image_keys {
+        if !registry.effect_render_images.contains_key(image_key) {
+            registry
+                .effect_render_images
+                .insert(image_key.clone(), asset_server.load(image_key.clone()));
+        }
+    }
+
+    let mut alive = HashSet::new();
+    let mut stale_images: HashSet<String> = registry.effect_render_images.keys().cloned().collect();
+    for effect in &snapshot.effects {
+        alive.insert(effect.key.clone());
+        let opacity = effect.opacity.unwrap_or(1.0).clamp(0.0, 1.0);
+        let image_key = effect.image_url.as_ref().map(|url| browser_asset_path(url));
+        if let Some(image_key) = &image_key {
+            stale_images.remove(image_key);
+        }
+        let mask_image_key_opt = effect
+            .mask_image_url
+            .as_ref()
+            .map(|url| browser_asset_path(url));
+        if let Some(mask_key) = &mask_image_key_opt {
+            stale_images.remove(mask_key);
+        }
+        let position = effect_render_layer_position(snapshot, effect);
+        let bound_image = image_key
+            .as_ref()
+            .and_then(|key| registry.effect_render_images.get(key).cloned());
+        let bound_mask_image = mask_image_key_opt
+            .as_ref()
+            .and_then(|key| registry.effect_render_images.get(key).cloned());
+
+        // Primary: spawn/update in place, rebuild when additive toggles.
+        if let Some(existing_additive) = registry.effect_render.get(&effect.key).map(|h| h.additive)
+        {
+            if existing_additive != effect.additive {
+                if let Some(old) = registry.effect_render.remove(&effect.key) {
+                    commands.entity(old.entity).despawn();
+                    if old.additive {
+                        additive_cache.evict(&effect.key, &mut additive_materials);
+                    }
+                }
+                // Rebuild below.
+            } else if let Some(handle) = registry.effect_render.get_mut(&effect.key) {
+                let image_changed = handle.image_key != image_key.as_deref().unwrap_or_default();
+                if let Some(image) = bound_image.clone() {
+                    if effect.additive {
+                        // Refresh on every snapshot because opacity can change
+                        // without a frame/image change.
+                        let material = additive_cache.material(
+                            &effect.key,
+                            image,
+                            opacity,
+                            &mut additive_materials,
+                        );
+                        if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                            *binding = MeshMaterial2d(material);
+                        }
+                    } else if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                        if image_changed {
+                            sprite.image = image;
+                        }
+                        sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity);
+                    }
+                }
+                if image_changed {
+                    handle.image_key = image_key.clone().unwrap_or_default();
+                }
+                if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                    transform.translation = position;
+                    if effect.additive {
+                        transform.scale =
+                            Vec3::new(effect.width.max(1.0), effect.height.max(1.0), 1.0);
+                    }
+                }
+            }
+        }
+        if !registry.effect_render.contains_key(&effect.key) {
+            if let Some(image_key) = &image_key {
+                if let Some(image) = registry.effect_render_images.get(image_key).cloned() {
+                    let entity = if effect.additive {
+                        let mesh = additive_cache.unit_quad(&mut meshes);
+                        let material = additive_cache.material(
+                            &effect.key,
+                            image,
+                            opacity,
+                            &mut additive_materials,
+                        );
+                        commands
+                            .spawn((
+                                MirEffectRenderLayer,
+                                Mesh2d(mesh),
+                                MeshMaterial2d(material),
+                                Transform::from_translation(position).with_scale(Vec3::new(
+                                    effect.width.max(1.0),
+                                    effect.height.max(1.0),
+                                    1.0,
+                                )),
+                            ))
+                            .id()
+                    } else {
+                        commands
+                            .spawn((
+                                MirEffectRenderLayer,
+                                Sprite {
+                                    image,
+                                    custom_size: Some(Vec2::new(
+                                        effect.width.max(1.0),
+                                        effect.height.max(1.0),
+                                    )),
+                                    color: Color::srgba(1.0, 1.0, 1.0, opacity),
+                                    ..default()
+                                },
+                                Transform::from_translation(position),
+                            ))
+                            .id()
+                    };
+                    registry.effect_render.insert(
+                        effect.key.clone(),
+                        EffectRenderLayerHandle {
+                            entity,
+                            image_key: image_key.clone(),
+                            additive: effect.additive,
+                        },
+                    );
+                }
+            }
+        }
+
+        // Mask: second additive layer at z+1, strictly synced. The producer sends
+        // both the primary frame's local offset (frame_x/frame_y) and the mask's
+        // local offset (mask_x/mask_y) in the SAME origin; the mask is placed at
+        // (mask_x-frame_x, mask_y-frame_y) relative to the primary anchor, so a
+        // different frame/mask origin is honored exactly. Fallback centers the
+        // mask on the primary frame when no geometry is supplied.
+        if let Some(mask_image_key) = &mask_image_key_opt {
+            let mask_key = format!("{}:mask", effect.key);
+            let mask_w = effect.mask_width.unwrap_or(effect.width);
+            let mask_h = effect.mask_height.unwrap_or(effect.height);
+            let mask_dx = match (effect.mask_x, effect.frame_x) {
+                (Some(mx), Some(fx)) => mx - fx,
+                _ => (effect.width - mask_w) * 0.5,
+            };
+            let mask_dy = match (effect.mask_y, effect.frame_y) {
+                (Some(my), Some(fy)) => my - fy,
+                _ => (effect.height - mask_h) * 0.5,
+            };
+            let mask_left = effect.left + mask_dx;
+            let mask_top = effect.top + mask_dy;
+            let mask_center_x = mask_left + mask_w * 0.5;
+            let mask_center_y = mask_top + mask_h * 0.5;
+            let mask_pos = Vec3::new(
+                mask_center_x - snapshot.stage_width * 0.5,
+                snapshot.stage_height * 0.5 - mask_center_y,
+                effect.z / 100_000.0 + 0.0001,
+            );
+            if let Some(handle) = registry.effect_render_masks.get_mut(&mask_key) {
+                if let Some(image) = bound_mask_image.clone() {
+                    // Keep the mask at the same DrawBlend rate as the primary,
+                    // including an opacity-only retained update.
+                    let material =
+                        additive_cache.material(&mask_key, image, opacity, &mut additive_materials);
+                    if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                        *binding = MeshMaterial2d(material);
+                    }
+                }
+                if handle.image_key != *mask_image_key {
+                    handle.image_key = mask_image_key.clone();
+                }
+                if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                    transform.translation = mask_pos;
+                    transform.scale = Vec3::new(mask_w.max(1.0), mask_h.max(1.0), 1.0);
+                }
+            } else if let Some(image) = bound_mask_image.clone() {
+                let mesh = additive_cache.unit_quad(&mut meshes);
+                let material =
+                    additive_cache.material(&mask_key, image, opacity, &mut additive_materials);
+                let entity = commands
+                    .spawn((
+                        MirEffectRenderLayer,
+                        Mesh2d(mesh),
+                        MeshMaterial2d(material),
+                        Transform::from_translation(mask_pos).with_scale(Vec3::new(
+                            mask_w.max(1.0),
+                            mask_h.max(1.0),
+                            1.0,
+                        )),
+                    ))
+                    .id();
+                registry.effect_render_masks.insert(
+                    mask_key,
+                    EffectRenderLayerHandle {
+                        entity,
+                        image_key: mask_image_key.clone(),
+                        additive: true,
+                    },
+                );
+            }
+        } else {
+            let mask_key = format!("{}:mask", effect.key);
+            if let Some(handle) = registry.effect_render_masks.remove(&mask_key) {
+                commands.entity(handle.entity).despawn();
+                additive_cache.evict(&mask_key, &mut additive_materials);
+            }
+        }
+
+        // Shadow metadata is a complete pair: Some(0) is still a valid axis,
+        // while a missing axis means the producer has no legal shadow for this
+        // frame. The shadow is an independent procedural ellipse, so its offset
+        // can never move or resize the primary effect frame.
+        let shadow_key = format!("{}:shadow", effect.key);
+        match (effect.shadow_x, effect.shadow_y) {
+            (Some(shadow_x), Some(shadow_y)) => {
+                let shadow_size = Vec2::new(
+                    (effect.width * 0.70).max(8.0),
+                    (effect.height * 0.24).max(4.0),
+                );
+                let primary_position = effect_render_layer_position(snapshot, effect);
+                let shadow_position = Vec3::new(
+                    primary_position.x + shadow_x,
+                    primary_position.y - shadow_y,
+                    primary_position.z - 0.0005,
+                );
+
+                if let Some(handle) = registry.effect_render_shadows.get(&shadow_key) {
+                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        transform.translation = shadow_position;
+                        transform.scale = Vec3::new(shadow_size.x, shadow_size.y, 1.0);
+                    }
+                } else {
+                    let mesh = meshes.add(Ellipse::new(0.5, 0.5));
+                    let material = shadow_materials.add(ColorMaterial::from_color(Color::srgba(
+                        0.02, 0.01, 0.01, 0.28,
+                    )));
+                    let entity = commands
+                        .spawn((
+                            MirEffectRenderLayer,
+                            Mesh2d(mesh.clone()),
+                            MeshMaterial2d(material.clone()),
+                            Transform::from_translation(shadow_position).with_scale(Vec3::new(
+                                shadow_size.x,
+                                shadow_size.y,
+                                1.0,
+                            )),
+                        ))
+                        .id();
+                    registry.effect_render_shadows.insert(
+                        shadow_key,
+                        EffectShadowLayerHandle {
+                            entity,
+                            mesh,
+                            material,
+                        },
+                    );
+                }
+            }
+            _ => remove_effect_shadow_layer(
+                &shadow_key,
+                &mut commands,
+                &mut registry,
+                &mut meshes,
+                &mut shadow_materials,
+            ),
+        }
+    }
+
+    // Despawn retained effect sprites no longer in the snapshot (plus mask/shadow).
+    let stale: Vec<String> = registry
+        .effect_render
+        .keys()
+        .filter(|key| !alive.contains(*key))
+        .cloned()
+        .collect();
+    for key in stale {
+        if let Some(handle) = registry.effect_render.remove(&key) {
+            commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&key, &mut additive_materials);
+            }
+        }
+        let mask_key = format!("{}:mask", key);
+        if let Some(handle) = registry.effect_render_masks.remove(&mask_key) {
+            commands.entity(handle.entity).despawn();
+            additive_cache.evict(&mask_key, &mut additive_materials);
+        }
+        let shadow_key = format!("{}:shadow", key);
+        remove_effect_shadow_layer(
+            &shadow_key,
+            &mut commands,
+            &mut registry,
+            &mut meshes,
+            &mut shadow_materials,
+        );
+    }
+
+    // Evict standalone images no longer referenced by any effect.
+    registry
+        .effect_render_images
+        .retain(|key, _| !stale_images.contains(key));
+}
+
+/// Screen-stage to centred world coords, Y flipped — identical to
+/// `entity_render_layer_position` so effects share the entities/map z-space.
+fn effect_render_layer_position(snapshot: &EffectRenderState, effect: &EffectRenderEntry) -> Vec3 {
+    let center_x = effect.left + effect.width * 0.5;
+    let center_y = effect.top + effect.height * 0.5;
+    Vec3::new(
+        center_x - snapshot.stage_width * 0.5,
+        snapshot.stage_height * 0.5 - center_y,
+        effect.z / 100_000.0,
+    )
+}
+
+fn clear_effect_render_layers(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+    meshes: &mut Assets<Mesh>,
+    shadow_materials: &mut Assets<ColorMaterial>,
+) {
+    for (key, handle) in registry.effect_render.drain() {
+        commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&key, additive_materials);
+        }
+    }
+    for (key, handle) in registry.effect_render_masks.drain() {
+        commands.entity(handle.entity).despawn();
+        additive_cache.evict(&key, additive_materials);
+    }
+    for (_, handle) in registry.effect_render_shadows.drain() {
+        commands.entity(handle.entity).despawn();
+        meshes.remove(handle.mesh.id());
+        shadow_materials.remove(handle.material.id());
+    }
+    registry.effect_render_images.clear();
+}
+
+fn remove_effect_shadow_layer(
+    key: &str,
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    meshes: &mut Assets<Mesh>,
+    shadow_materials: &mut Assets<ColorMaterial>,
+) {
+    if let Some(handle) = registry.effect_render_shadows.remove(key) {
+        commands.entity(handle.entity).despawn();
+        meshes.remove(handle.mesh.id());
+        shadow_materials.remove(handle.material.id());
+    }
+}
+
+/// Despawn every retained scene entity and clear every renderer-side scene
+/// registry. This is intentionally narrower than the session read-model reset:
+/// personal UI/read-model resources are not reachable from this function.
+fn clear_scene_registry(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+) {
+    for (_, handles) in registry.entities.drain() {
+        commands.entity(handles.root).despawn();
+    }
+    for (key, handle) in registry.entity_render_layers.drain() {
+        commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
+        }
+    }
+    registry.entity_render_actor_roots.clear();
+    registry.entity_render_pending_images.clear();
+    registry.entity_render_atlases.clear();
+
+    // Keep the shadow handles until cleanup_reset_effect_shadows can remove
+    // their mesh/material assets; this reset system intentionally has a
+    // bounded parameter list because it is part of a chained system tuple.
+    clear_effect_render_layers_for_scene_reset(
+        commands,
+        registry,
+        additive_cache,
+        additive_materials,
+    );
+
+    for entity in registry.map.spawned.drain(..) {
+        commands.entity(entity).despawn();
+    }
+    for (_, handle) in registry.map_render.tiles.drain() {
+        commands.entity(handle.entity).despawn();
+    }
+    for (_, handles) in registry.mine_nodes.drain() {
+        commands.entity(handles.root).despawn();
+    }
+
+    registry.map = MapSceneCache::default();
+    registry.map_render = MapRenderSceneCache::default();
+}
+
+fn clear_effect_render_layers_for_scene_reset(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+) {
+    for (key, handle) in registry.effect_render.drain() {
+        commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&key, additive_materials);
+        }
+    }
+    for (key, handle) in registry.effect_render_masks.drain() {
+        commands.entity(handle.entity).despawn();
+        additive_cache.evict(&key, additive_materials);
+    }
+    registry.effect_render_images.clear();
+}
+
 fn ingest_pending_map_render_images(
     mut atlas_resource: ResMut<RuntimeMapRenderAtlases>,
     mut images: ResMut<Assets<Image>>,
@@ -1259,6 +3386,130 @@ fn ingest_pending_map_render_images(
 /// objects interleave with actors by cell row) — Crystal's single y-sorted band.
 const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
 const MAP_TILE_Z_DENOM: f32 = 100_000.0;
+const CRYSTAL_MAP_ANIMATION_INTERVAL_MS: u128 = 100;
+
+fn crystal_map_animation_count(elapsed: std::time::Duration) -> u64 {
+    (elapsed.as_millis() / CRYSTAL_MAP_ANIMATION_INTERVAL_MS).min(u128::from(u64::MAX)) as u64
+}
+
+/// Crystal middle/front animation formula:
+/// `(count % (frames + frames*tick)) / (1 + tick)`.
+/// Tile animations use the same phase selection with tick zero; their source
+/// frame step is already resolved by the Windows map producer.
+fn crystal_map_animation_phase(count: u64, frame_count: u32, animation_tick: u32) -> u32 {
+    let frame_count = u64::from(frame_count.max(1));
+    let dwell = u64::from(animation_tick).saturating_add(1);
+    let cycle = frame_count.saturating_mul(dwell).max(1);
+    ((count % cycle) / dwell) as u32
+}
+
+fn map_animation_frame_visible(count: u64, frame: &MapAnimationFrame) -> bool {
+    crystal_map_animation_phase(count, frame.frame_count, frame.animation_tick) == frame.phase
+}
+
+fn animate_map_tiles(time: Res<Time>, mut frames: Query<(&MapAnimationFrame, &mut Visibility)>) {
+    let count = crystal_map_animation_count(time.elapsed());
+    for (frame, mut visibility) in &mut frames {
+        let active = map_animation_frame_visible(count, frame);
+        *visibility = if active {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
+    }
+}
+
+fn sync_map_animation_component(
+    commands: &mut Commands,
+    entity: Entity,
+    phase: u32,
+    frame_count: u32,
+    animation_tick: u32,
+) {
+    if frame_count > 1 {
+        commands.entity(entity).insert((
+            MapAnimationFrame {
+                phase,
+                frame_count,
+                animation_tick,
+            },
+            if phase == 0 {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            },
+        ));
+    } else {
+        commands
+            .entity(entity)
+            .remove::<MapAnimationFrame>()
+            .insert(Visibility::Visible);
+    }
+}
+
+#[cfg(test)]
+mod map_animation_tests {
+    use super::*;
+
+    #[test]
+    fn crystal_animation_clock_advances_once_per_hundred_milliseconds() {
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(0)),
+            0
+        );
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(99)),
+            0
+        );
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(100)),
+            1
+        );
+        assert_eq!(
+            crystal_map_animation_count(std::time::Duration::from_millis(999)),
+            9
+        );
+    }
+
+    #[test]
+    fn crystal_animation_phase_matches_frame_and_tick_dwell_formula() {
+        assert_eq!(
+            (0..=3)
+                .map(|count| crystal_map_animation_phase(count, 3, 0))
+                .collect::<Vec<_>>(),
+            [0, 1, 2, 0]
+        );
+        assert_eq!(
+            (0..=9)
+                .map(|count| crystal_map_animation_phase(count, 3, 2))
+                .collect::<Vec<_>>(),
+            [0, 0, 0, 1, 1, 1, 2, 2, 2, 0]
+        );
+        assert_eq!(crystal_map_animation_phase(u64::MAX, 0, u32::MAX), 0);
+    }
+
+    #[test]
+    fn animation_family_exposes_exactly_one_phase() {
+        let frames = (0..3)
+            .map(|phase| MapAnimationFrame {
+                phase,
+                frame_count: 3,
+                animation_tick: 1,
+            })
+            .collect::<Vec<_>>();
+        for count in 0..12 {
+            let visible = frames
+                .iter()
+                .enumerate()
+                .filter_map(|(index, frame)| {
+                    map_animation_frame_visible(count, frame).then_some(index)
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(visible.len(), 1, "count {count} must expose one phase");
+            assert_eq!(visible[0] as u32, crystal_map_animation_phase(count, 3, 1));
+        }
+    }
+}
 
 /// Bevy-native map-tile renderer. Builds/refreshes atlas-page layouts, then skips
 /// an already-applied producer/image revision. The producer folds the camera
@@ -1293,6 +3544,7 @@ fn sync_map_render(
         &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
     >,
     mut transform_query: Query<&mut Transform>,
+    mut native_trace_state: Local<Option<String>>,
 ) {
     let active = map_state
         .snapshot
@@ -1307,6 +3559,8 @@ fn sync_map_render(
             atlas_assets.images.clear();
             atlas_assets.url_image_keys.clear();
             atlas_assets.layouts.clear();
+            atlas_assets.layout_rects.clear();
+            atlas_assets.layout_sizes.clear();
             atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
         }
         presentation_poses.set_applied_map_provenance(None, None);
@@ -1330,6 +3584,10 @@ fn sync_map_render(
         .and_then(|entity_snapshot| entity_snapshot.center_x.zip(entity_snapshot.center_y))
         .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
     if matches!((map_center, entity_center), (Some(map), Some(entity)) if map != entity) {
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("waiting-center map={map_center:?} entity={entity_center:?}"),
+        );
         return;
     }
 
@@ -1340,11 +3598,11 @@ fn sync_map_render(
         &mut texture_atlas_layouts,
     );
 
-    if registry.map_render.applied.as_ref().is_some_and(|applied| {
-        snapshot.revision.is_some()
-            && applied.producer_revision == snapshot.revision
-            && applied.image_revision == atlas_assets.revision
-    }) {
+    if map_render_revision_is_current(
+        snapshot.revision,
+        registry.map_render.applied.as_ref(),
+        atlas_assets.revision,
+    ) {
         return;
     }
 
@@ -1378,6 +3636,10 @@ fn sync_map_render(
         }
     });
     if let Some((key, error)) = failed_url_asset {
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("asset-failed key={key} error={error}"),
+        );
         publish_map_status(
             "map-render-asset-error",
             &format!("Failed to load map atlas {key}: {error}"),
@@ -1387,6 +3649,25 @@ fn sync_map_render(
         return;
     }
     if !atlases_ready {
+        let states = snapshot
+            .atlases
+            .iter()
+            .map(|atlas| {
+                let state = atlas_assets.images.get(&atlas.key).map_or_else(
+                    || "missing-handle".to_owned(),
+                    |image| format!("{:?}", asset_server.load_state(image.id())),
+                );
+                format!("{}={state}", atlas.key)
+            })
+            .collect::<Vec<_>>()
+            .join(",");
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!(
+                "waiting-atlases center={map_center:?} count={} states=[{states}]",
+                snapshot.atlases.len()
+            ),
+        );
         return;
     }
 
@@ -1397,6 +3678,17 @@ fn sync_map_render(
         .iter()
         .all(|tile| atlas_assets.images.contains_key(&tile.image_key));
     if !standalone_images_ready {
+        let missing = snapshot
+            .standalone_tiles
+            .iter()
+            .filter(|tile| !atlas_assets.images.contains_key(&tile.image_key))
+            .map(|tile| tile.image_key.as_str())
+            .collect::<Vec<_>>()
+            .join(",");
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("waiting-standalone missing=[{missing}]"),
+        );
         return;
     }
 
@@ -1407,8 +3699,26 @@ fn sync_map_render(
         .iter()
         .all(|key| atlas_assets.images.contains_key(key));
     if !retained_images_ready {
+        let missing = snapshot
+            .retained_image_keys
+            .iter()
+            .filter(|key| !atlas_assets.images.contains_key(*key))
+            .map(String::as_str)
+            .collect::<Vec<_>>()
+            .join(",");
+        trace_native_map_state(
+            &mut native_trace_state,
+            format!("waiting-retained missing=[{missing}]"),
+        );
         return;
     }
+
+    // A loaded atlas page does not guarantee that every draw can bind: stale
+    // manifests or an incorrect library-index mapping can still omit a layout
+    // or rect. Keep rendering the valid subset, but surface exact coverage in
+    // the native trace instead of silently turning skipped draws into black
+    // background holes.
+    let missing_bindings = map_render_missing_bindings(snapshot, &atlas_assets);
 
     // The producer uses the fold-in model (`cameraOffset` stays (0, 0); sub-cell
     // motion is already baked into `left`/`top`), so this offset is normally a
@@ -1447,6 +3757,13 @@ fn sync_map_render(
             if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
                 transform.translation = Vec3::new(world_x, world_y, world_z);
             }
+            sync_map_animation_component(
+                &mut commands,
+                handle.entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
         } else {
             let Some((image, texture_atlas)) = map_render_image_binding(tile, &atlas_assets) else {
                 continue;
@@ -1465,6 +3782,13 @@ fn sync_map_render(
                     Transform::from_xyz(world_x, world_y, world_z),
                 ))
                 .id();
+            sync_map_animation_component(
+                &mut commands,
+                entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
             registry.map_render.tiles.insert(
                 tile.key.clone(),
                 MapRenderTileHandle {
@@ -1508,6 +3832,13 @@ fn sync_map_render(
                     transform.scale = Vec3::new(tile.width, tile.height, 1.0);
                 }
             }
+            sync_map_animation_component(
+                &mut commands,
+                handle.entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
         } else {
             let image = atlas_assets
                 .images
@@ -1548,6 +3879,13 @@ fn sync_map_render(
                     ))
                     .id()
             };
+            sync_map_animation_component(
+                &mut commands,
+                entity,
+                tile.animation_phase,
+                tile.animation_frame_count,
+                tile.animation_tick,
+            );
             registry.map_render.tiles.insert(
                 tile.key.clone(),
                 MapRenderTileHandle {
@@ -1593,6 +3931,12 @@ fn sync_map_render(
     atlas_assets
         .layouts
         .retain(|key, _| active_atlas_keys.contains(key));
+    atlas_assets
+        .layout_rects
+        .retain(|key, _| active_atlas_keys.contains(key));
+    atlas_assets
+        .layout_sizes
+        .retain(|key, _| active_atlas_keys.contains(key));
     if atlas_assets.images.len() != previous_image_count
         || atlas_assets.layouts.len() != previous_layout_count
     {
@@ -1630,6 +3974,32 @@ fn sync_map_render(
         &snapshot.ack_key,
         &presented_image_keys,
     );
+    trace_native_map_state(
+        &mut native_trace_state,
+        format!(
+            "synced center={map_center:?} tiles={} standalone={} live={live_count} missingBindings={} sample=[{}]",
+            snapshot.tiles.len(),
+            snapshot.standalone_tiles.len(),
+            missing_bindings.len(),
+            missing_bindings.iter().take(8).cloned().collect::<Vec<_>>().join(",")
+        ),
+    );
+}
+
+fn trace_native_map_state(last: &mut Option<String>, message: String) {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if (std::env::var_os("MIR2_NATIVE_TRACE_MAP").is_some()
+            || std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some())
+            && last.as_ref() != Some(&message)
+        {
+            eprintln!("[runtime-map] {message}");
+            *last = Some(message);
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    let _ = (last, message);
 }
 
 /// Build the `TextureAtlasLayout` for each map atlas page not already cached.
@@ -1643,34 +4013,88 @@ fn sync_map_render_atlas_layouts(
     atlas_assets: &mut RuntimeMapRenderAtlases,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
 ) {
-    for atlas in &snapshot.atlases {
-        if !atlas_assets.images.contains_key(&atlas.key) {
-            if let Some(image_url) = &atlas.image_url {
-                let asset_path = browser_asset_path(image_url);
-                atlas_assets
-                    .images
-                    .insert(atlas.key.clone(), asset_server.load(asset_path));
-                atlas_assets.url_image_keys.insert(atlas.key.clone());
-                atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
-            }
-        }
-        if atlas_assets.layouts.contains_key(&atlas.key) {
+    // Native MapRenderState carries URL-backed standalone images in the same
+    // JSON as the atlas descriptors. WASM may upload those pixels through the
+    // separate setMir2MapRenderAtlas channel, but the Windows host has no such
+    // uploader. Queue every URL-backed image here so the atomic readiness gate
+    // below can complete instead of waiting forever on standalone foregrounds.
+    for (key, asset_path) in map_render_url_image_sources(snapshot) {
+        if atlas_assets.images.contains_key(&key) {
             continue;
         }
-        let mut layout = TextureAtlasLayout::new_empty(UVec2::new(atlas.width, atlas.height));
+        atlas_assets
+            .images
+            .insert(key.clone(), asset_server.load(asset_path));
+        atlas_assets.url_image_keys.insert(key);
+        atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
+    }
+
+    for atlas in &snapshot.atlases {
+        // The producer sends only the rects used by the current viewport. The
+        // atlas page key remains stable as the player moves, so retaining the
+        // first layout forever makes every newly encountered rect fail binding
+        // and exposes the black window background as grid-aligned holes. Grow a
+        // page's known rect set monotonically and rebuild only when it changes.
+        let merged = merge_map_render_atlas_rects(atlas, atlas_assets);
+        if merged.is_none() && atlas_assets.layouts.contains_key(&atlas.key) {
+            continue;
+        }
+        let (size, known_rects) = merged.unwrap_or_else(|| {
+            (
+                UVec2::new(atlas.width, atlas.height),
+                atlas_assets
+                    .layout_rects
+                    .get(&atlas.key)
+                    .cloned()
+                    .unwrap_or_default(),
+            )
+        });
+
+        let mut layout = TextureAtlasLayout::new_empty(size);
         let mut rects = HashMap::new();
-        for rect in &atlas.rects {
-            let index = layout.add_texture(URect {
-                min: UVec2::new(rect.x, rect.y),
-                max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
-            });
-            rects.insert(rect.key.clone(), index);
+        let mut known_rects = known_rects.into_iter().collect::<Vec<_>>();
+        known_rects.sort_by(|left, right| left.0.cmp(&right.0));
+        for (key, geometry) in known_rects {
+            let index = layout.add_texture(geometry);
+            rects.insert(key, index);
         }
         let layout = texture_atlas_layouts.add(layout);
-        atlas_assets
+        if let Some((stale_layout, _)) = atlas_assets
             .layouts
-            .insert(atlas.key.clone(), (layout, rects));
+            .insert(atlas.key.clone(), (layout, rects))
+        {
+            texture_atlas_layouts.remove(stale_layout.id());
+        }
+        atlas_assets.layout_sizes.insert(atlas.key.clone(), size);
+        atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
     }
+}
+
+fn merge_map_render_atlas_rects(
+    atlas: &MapRenderAtlas,
+    atlas_assets: &mut RuntimeMapRenderAtlases,
+) -> Option<(UVec2, HashMap<String, URect>)> {
+    let size = UVec2::new(atlas.width, atlas.height);
+    let size_changed = atlas_assets.layout_sizes.get(&atlas.key) != Some(&size);
+    if size_changed {
+        atlas_assets.layout_rects.remove(&atlas.key);
+    }
+    let known = atlas_assets
+        .layout_rects
+        .entry(atlas.key.clone())
+        .or_default();
+    let mut changed = size_changed;
+    for rect in &atlas.rects {
+        let geometry = URect {
+            min: UVec2::new(rect.x, rect.y),
+            max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+        };
+        if known.get(&rect.key) != Some(&geometry) {
+            known.insert(rect.key.clone(), geometry);
+            changed = true;
+        }
+    }
+    changed.then(|| (size, known.clone()))
 }
 
 /// Resolve a tile to its atlas page image + `TextureAtlas` (layout + sub-rect
@@ -1690,6 +4114,28 @@ fn map_render_image_binding(
             index,
         },
     ))
+}
+
+fn map_render_missing_bindings(
+    snapshot: &MapRenderState,
+    atlas_assets: &RuntimeMapRenderAtlases,
+) -> Vec<String> {
+    snapshot
+        .tiles
+        .iter()
+        .filter_map(|tile| {
+            let reason = match atlas_assets.layouts.get(&tile.atlas_key) {
+                None => "layout",
+                Some((_, rects)) if !rects.contains_key(&tile.atlas_rect_key) => "rect",
+                Some(_) if !atlas_assets.images.contains_key(&tile.atlas_key) => "image",
+                Some(_) => return None,
+            };
+            Some(format!(
+                "{}:{}#{}:{reason}",
+                tile.key, tile.atlas_key, tile.atlas_rect_key
+            ))
+        })
+        .collect()
 }
 
 fn sync_map_scene(
@@ -1943,6 +4389,9 @@ fn sync_entity_render_layers(
     asset_server: Res<AssetServer>,
     atlas_assets: Res<RuntimeEntityRenderAtlases>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut additive_materials: ResMut<Assets<additive_material::CrystalAdditiveMaterial>>,
+    mut additive_cache: ResMut<additive_material::CrystalAdditiveMaterialCache>,
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
     mut local_motion: ResMut<local_motion::LocalMotionPresentationShadow>,
@@ -1951,15 +4400,28 @@ fn sync_entity_render_layers(
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
+    mut additive_material_query: Query<
+        &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
+    >,
 ) {
     let Some(snapshot) = &entity_render_state.snapshot else {
-        clear_entity_render_layers(&mut commands, &mut registry);
+        clear_entity_render_layers(
+            &mut commands,
+            &mut registry,
+            &mut additive_cache,
+            &mut additive_materials,
+        );
         presentation_poses.set_applied_entity_center(None);
         return;
     };
 
     if !snapshot.enabled {
-        clear_entity_render_layers(&mut commands, &mut registry);
+        clear_entity_render_layers(
+            &mut commands,
+            &mut registry,
+            &mut additive_cache,
+            &mut additive_materials,
+        );
         presentation_poses.set_applied_entity_center(None);
         return;
     }
@@ -2018,6 +4480,7 @@ fn sync_entity_render_layers(
     }
 
     let mut alive = HashSet::new();
+    let mut alive_actor_objects = HashSet::new();
     sync_entity_render_atlas_layouts(
         snapshot,
         &asset_server,
@@ -2067,69 +4530,244 @@ fn sync_entity_render_layers(
             (entity_interp_offset(entity, motion_table.now_ms), source)
         };
         presentation_poses.record_entity(&entity.object_id, motion_offset, pose_source);
+
+        // A player is one visual composite. Preflight every current body/hair/
+        // weapon layer before mutating any of them; otherwise one ready atlas
+        // page can advance while another layer still retains its previous page,
+        // briefly assembling one actor from different action frames. The
+        // retained set comes from the registry rather than only this snapshot:
+        // an optional old weapon/mount omitted by a deferred replacement still
+        // belongs to the visible old composite and must not be cleaned up early.
+        let retained_actor_keys = registry
+            .entity_render_layers
+            .keys()
+            .filter(|key| entity_render_key_is_actor(&entity.object_id, key))
+            .cloned()
+            .collect::<Vec<_>>();
+        let has_retained_actor_layer = !retained_actor_keys.is_empty();
+        let incoming_actor_layer_count = entity
+            .layers
+            .iter()
+            .filter(|layer| entity_render_layer_is_actor(entity, layer))
+            .count();
+        let mut defer_actor_composite = has_retained_actor_layer && incoming_actor_layer_count == 0;
+        if has_retained_actor_layer && incoming_actor_layer_count > 0 {
+            for layer in entity
+                .layers
+                .iter()
+                .filter(|layer| entity_render_layer_is_actor(entity, layer))
+            {
+                let layer_key = entity_render_layer_key(entity, layer);
+                let image_binding =
+                    entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
+                let image_source_changed = registry
+                    .entity_render_layers
+                    .get(&layer_key)
+                    .is_none_or(|handle| {
+                        handle.image_key != image_binding.image_key
+                            || handle.atlas_key != image_binding.atlas_key
+                    });
+                if image_source_changed {
+                    // Keep the requested replacement alive across deferred
+                    // ticks. The old Sprite still owns only its old image.
+                    registry
+                        .entity_render_pending_images
+                        .insert(layer_key, image_binding.image.clone());
+                    defer_actor_composite |=
+                        !entity_render_image_is_ready(&image_binding, &asset_server, &atlas_assets);
+                } else {
+                    registry.entity_render_pending_images.remove(&layer_key);
+                }
+            }
+        } else if incoming_actor_layer_count == 0 {
+            for key in &retained_actor_keys {
+                registry.entity_render_pending_images.remove(key);
+            }
+        }
+
+        let actor_root = entity_render_actor_root(snapshot, entity, motion_offset);
+        if has_retained_actor_layer || incoming_actor_layer_count > 0 {
+            alive_actor_objects.insert(entity.object_id.clone());
+        }
+        if defer_actor_composite {
+            alive.extend(retained_actor_keys.iter().cloned());
+            if let (Some(previous_root), Some(current_root)) = (
+                registry
+                    .entity_render_actor_roots
+                    .get(&entity.object_id)
+                    .copied(),
+                actor_root,
+            ) {
+                let delta = current_root - previous_root;
+                for key in &retained_actor_keys {
+                    if let Some(handle) = registry.entity_render_layers.get(key) {
+                        if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                            transform.translation += delta;
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(actor_root) = actor_root {
+            registry
+                .entity_render_actor_roots
+                .insert(entity.object_id.clone(), actor_root);
+        }
+
         for layer in &entity.layers {
-            let layer_key = if layer.key.is_empty() {
-                format!("{}:{}", entity.object_id, layer.path)
-            } else {
-                layer.key.clone()
-            };
+            let layer_key = entity_render_layer_key(entity, layer);
             alive.insert(layer_key.clone());
             let position = entity_render_layer_position(snapshot, layer, motion_offset);
-            let opacity = layer
-                .opacity
-                .unwrap_or(if entity.dead { 0.45 } else { 1.0 });
+            let actor_layer = entity_render_layer_is_actor(entity, layer);
+            if actor_layer && defer_actor_composite {
+                continue;
+            }
+            let opacity = layer.opacity.unwrap_or(1.0);
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 
-            if let Some(handle) = registry.entity_render_layers.get_mut(&layer_key) {
-                if handle.image_key != image_binding.image_key
-                    || handle.atlas_key != image_binding.atlas_key
-                    || handle.atlas_rect_key != image_binding.atlas_rect_key
+            // Non-actor decoration/effect layers keep their independent ready
+            // handoff; they must not stall the body/hair/weapon composite.
+            if !actor_layer {
+                if let Some((layer_entity, image_source_changed)) =
+                    registry.entity_render_layers.get(&layer_key).map(|handle| {
+                        (
+                            handle.entity,
+                            handle.image_key != image_binding.image_key
+                                || handle.atlas_key != image_binding.atlas_key,
+                        )
+                    })
                 {
+                    if image_source_changed
+                        && !entity_render_image_is_ready(
+                            &image_binding,
+                            &asset_server,
+                            &atlas_assets,
+                        )
+                    {
+                        registry
+                            .entity_render_pending_images
+                            .insert(layer_key.clone(), image_binding.image.clone());
+                        if let Ok(mut transform) = transform_query.get_mut(layer_entity) {
+                            transform.translation = position;
+                        }
+                        continue;
+                    }
+                }
+            }
+
+            if registry
+                .entity_render_layers
+                .get(&layer_key)
+                .is_some_and(|handle| handle.additive != layer.additive)
+            {
+                if let Some(old) = registry.entity_render_layers.remove(&layer_key) {
+                    commands.entity(old.entity).despawn();
+                    if old.additive {
+                        additive_cache.evict(
+                            &entity_additive_material_key(&layer_key),
+                            &mut additive_materials,
+                        );
+                    }
+                }
+            }
+
+            if let Some(handle) = registry.entity_render_layers.get_mut(&layer_key) {
+                let binding_changed = handle.image_key != image_binding.image_key
+                    || handle.atlas_key != image_binding.atlas_key
+                    || handle.atlas_rect_key != image_binding.atlas_rect_key;
+                if layer.additive {
+                    let material = additive_cache.material_with_uv(
+                        &entity_additive_material_key(&layer_key),
+                        image_binding.image.clone(),
+                        opacity,
+                        image_binding.uv_scale_offset,
+                        &mut additive_materials,
+                    );
+                    if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                        *binding = MeshMaterial2d(material);
+                    }
+                } else if binding_changed {
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.image = image_binding.image.clone();
-                        sprite.texture_atlas = image_binding.texture_atlas.clone();
-                        sprite.rect = None;
+                        sprite.texture_atlas = None;
+                        sprite.rect = image_binding.image_rect;
                     }
-                    handle.image_key = image_binding.image_key.clone();
-                    handle.atlas_key = image_binding.atlas_key.clone();
-                    handle.atlas_rect_key = image_binding.atlas_rect_key.clone();
                 }
-                if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
-                    sprite.custom_size =
-                        Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
-                    sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
-                    sprite.texture_atlas = image_binding.texture_atlas.clone();
-                    sprite.rect = None;
+                handle.image_key = image_binding.image_key.clone();
+                handle.atlas_key = image_binding.atlas_key.clone();
+                handle.atlas_rect_key = image_binding.atlas_rect_key.clone();
+                if !layer.additive {
+                    if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                        sprite.custom_size =
+                            Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
+                        sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
+                        sprite.texture_atlas = None;
+                        sprite.rect = image_binding.image_rect;
+                    }
                 }
                 if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
                     transform.translation = position;
+                    if layer.additive {
+                        transform.scale =
+                            Vec3::new(layer.width.max(1.0), layer.height.max(1.0), 1.0);
+                    }
                 }
+                registry.entity_render_pending_images.remove(&layer_key);
                 continue;
             }
 
-            let sprite_entity = commands
-                .spawn((
-                    MirEntityRenderLayer,
-                    Sprite {
-                        image: image_binding.image.clone(),
-                        texture_atlas: image_binding.texture_atlas.clone(),
-                        custom_size: Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0))),
-                        color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
-                        ..default()
-                    },
-                    Transform::from_translation(position),
-                ))
-                .id();
+            let sprite_entity = if layer.additive {
+                let mesh = additive_cache.unit_quad(&mut meshes);
+                let material = additive_cache.material_with_uv(
+                    &entity_additive_material_key(&layer_key),
+                    image_binding.image.clone(),
+                    opacity,
+                    image_binding.uv_scale_offset,
+                    &mut additive_materials,
+                );
+                commands
+                    .spawn((
+                        MirEntityRenderLayer,
+                        Mesh2d(mesh),
+                        MeshMaterial2d(material),
+                        Transform::from_translation(position).with_scale(Vec3::new(
+                            layer.width.max(1.0),
+                            layer.height.max(1.0),
+                            1.0,
+                        )),
+                    ))
+                    .id()
+            } else {
+                commands
+                    .spawn((
+                        MirEntityRenderLayer,
+                        Sprite {
+                            image: image_binding.image.clone(),
+                            texture_atlas: None,
+                            custom_size: Some(Vec2::new(
+                                layer.width.max(1.0),
+                                layer.height.max(1.0),
+                            )),
+                            rect: image_binding.image_rect,
+                            color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
+                            ..default()
+                        },
+                        Transform::from_translation(position),
+                    ))
+                    .id()
+            };
             registry.entity_render_layers.insert(
-                layer_key,
+                layer_key.clone(),
                 EntityRenderLayerHandle {
                     entity: sprite_entity,
                     image_key: image_binding.image_key,
                     atlas_key: image_binding.atlas_key,
                     atlas_rect_key: image_binding.atlas_rect_key,
+                    additive: layer.additive,
                 },
             );
+            registry.entity_render_pending_images.remove(&layer_key);
         }
     }
 
@@ -2143,8 +4781,20 @@ fn sync_entity_render_layers(
     for key in stale_keys {
         if let Some(handle) = registry.entity_render_layers.remove(&key) {
             commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&entity_additive_material_key(&key), &mut additive_materials);
+            }
         }
+        registry.entity_render_pending_images.remove(&key);
     }
+
+    registry
+        .entity_render_pending_images
+        .retain(|key, _| alive.contains(key));
+
+    registry
+        .entity_render_actor_roots
+        .retain(|object_id, _| alive_actor_objects.contains(object_id));
 
     presentation_poses.set_applied_entity_center(entity_center);
 }
@@ -2154,7 +4804,47 @@ struct EntityRenderImageBinding {
     image_key: String,
     atlas_key: Option<String>,
     atlas_rect_key: Option<String>,
-    texture_atlas: Option<TextureAtlas>,
+    image_rect: Option<Rect>,
+    uv_scale_offset: Vec4,
+}
+
+fn entity_render_layer_key(entity: &EntityRenderEntry, layer: &EntityRenderLayer) -> String {
+    if layer.key.is_empty() {
+        format!("{}:{}", entity.object_id, layer.path)
+    } else {
+        layer.key.clone()
+    }
+}
+
+fn entity_render_layer_is_actor(entity: &EntityRenderEntry, layer: &EntityRenderLayer) -> bool {
+    entity_render_key_is_actor(&entity.object_id, &layer.key)
+}
+
+fn entity_render_key_is_actor(object_id: &str, key: &str) -> bool {
+    let prefix = format!("{object_id}:");
+    key.strip_prefix(&prefix).is_some_and(|role| {
+        matches!(
+            role,
+            "mount" | "weapon-primary" | "weapon-secondary" | "body" | "hair"
+        )
+    })
+}
+
+fn entity_render_image_is_ready(
+    binding: &EntityRenderImageBinding,
+    asset_server: &AssetServer,
+    atlas_assets: &RuntimeEntityRenderAtlases,
+) -> bool {
+    let uploaded_image_ready = binding
+        .atlas_key
+        .as_ref()
+        .and_then(|atlas_key| atlas_assets.images.get(atlas_key))
+        .is_some_and(|image| image.id() == binding.image.id());
+    uploaded_image_ready || asset_server.is_loaded_with_dependencies(binding.image.id())
+}
+
+fn entity_additive_material_key(layer_key: &str) -> String {
+    format!("entity:{layer_key}")
 }
 
 fn sync_entity_render_atlas_layouts(
@@ -2164,10 +4854,7 @@ fn sync_entity_render_atlas_layouts(
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
     registry: &mut SceneRegistry,
 ) {
-    let mut alive = HashSet::new();
-
     for atlas in &snapshot.atlases {
-        alive.insert(atlas.key.clone());
         let size = UVec2::new(atlas.width, atlas.height);
         let uploaded_image = atlas_assets.images.get(&atlas.key).cloned();
         let url_image = atlas.image_url.as_ref().map(|image_url| {
@@ -2182,32 +4869,53 @@ fn sync_entity_render_atlas_layouts(
             (None, None)
         };
 
-        // Prebuilt pages keep a stable page key while the web producer sends
-        // only rects used by the current scene. A turn or attack can therefore
-        // add rects under an existing key. Reusing the old layout made those
-        // frames miss the atlas and fall back to asynchronous per-PNG loading,
-        // which presented as disappearing monsters and skipped attacks.
-        let layout_is_current =
-            registry
-                .entity_render_atlases
-                .get(&atlas.key)
-                .is_some_and(|existing| {
-                    existing.size == size
-                        && existing.image_key == image_key
-                        && entity_render_atlas_contains_rects(&existing.rects, &atlas.rects)
-                });
-        if layout_is_current {
-            continue;
+        // Prebuilt pages keep a stable page key while the producer publishes
+        // only the page and rects used by the current animation frame. Keep
+        // every observed compatible page cached for the scene and grow its
+        // layout in place. Dropping a page merely because the current frame
+        // lives on another page makes a later frame rebuild the layout and its
+        // GPU-facing handle, which appears as a repeating actor flash. The
+        // cache is bounded by the packaged manifest pages and is cleared by
+        // `clear_entity_render_layers` on scene/session teardown.
+        if let Some(existing) = registry.entity_render_atlases.get_mut(&atlas.key) {
+            let compatible = existing.size == size && existing.image_key == image_key;
+            if compatible {
+                existing.image = image.clone();
+                let missing = atlas
+                    .rects
+                    .iter()
+                    .filter(|rect| !existing.rects.contains_key(&rect.key))
+                    .collect::<Vec<_>>();
+                if missing.is_empty() {
+                    continue;
+                }
+                if let Some(mut layout) = texture_atlas_layouts.get_mut(&existing.layout) {
+                    for rect in missing {
+                        let uv_rect = URect {
+                            min: UVec2::new(rect.x, rect.y),
+                            max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+                        };
+                        let index = layout.add_texture(uv_rect);
+                        existing.rects.insert(rect.key.clone(), index);
+                        existing.uv_rects.insert(rect.key.clone(), uv_rect);
+                    }
+                    existing.image = image;
+                    continue;
+                }
+            }
         }
 
         let mut layout = TextureAtlasLayout::new_empty(size);
         let mut rects = HashMap::new();
+        let mut uv_rects = HashMap::new();
         for rect in &atlas.rects {
-            let index = layout.add_texture(URect {
+            let uv_rect = URect {
                 min: UVec2::new(rect.x, rect.y),
                 max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
-            });
+            };
+            let index = layout.add_texture(uv_rect);
             rects.insert(rect.key.clone(), index);
+            uv_rects.insert(rect.key.clone(), uv_rect);
         }
         let layout = texture_atlas_layouts.add(layout);
         registry.entity_render_atlases.insert(
@@ -2215,18 +4923,16 @@ fn sync_entity_render_atlas_layouts(
             EntityRenderAtlasHandle {
                 layout,
                 rects,
+                uv_rects,
                 size,
                 image_key,
                 image,
             },
         );
     }
-
-    registry
-        .entity_render_atlases
-        .retain(|key, _| alive.contains(key));
 }
 
+#[cfg(test)]
 fn entity_render_atlas_contains_rects(
     existing: &HashMap<String, usize>,
     incoming: &[EntityRenderAtlasRect],
@@ -2242,17 +4948,23 @@ fn entity_render_image_binding(
 ) -> EntityRenderImageBinding {
     if let (Some(atlas_key), Some(rect_key)) = (&layer.atlas_key, &layer.atlas_rect_key) {
         if let Some(atlas) = registry.entity_render_atlases.get(atlas_key) {
-            if let Some(index) = atlas.rects.get(rect_key) {
+            if atlas.rects.contains_key(rect_key) {
+                let uv_scale_offset = atlas
+                    .uv_rects
+                    .get(rect_key)
+                    .map(|rect| entity_atlas_uv_scale_offset(atlas.size, *rect))
+                    .unwrap_or(Vec4::new(1.0, 1.0, 0.0, 0.0));
                 if let (Some(image_key), Some(image)) = (&atlas.image_key, &atlas.image) {
                     return EntityRenderImageBinding {
                         image: image.clone(),
                         image_key: image_key.clone(),
                         atlas_key: Some(atlas_key.clone()),
                         atlas_rect_key: Some(rect_key.clone()),
-                        texture_atlas: Some(TextureAtlas {
-                            layout: atlas.layout.clone(),
-                            index: *index,
+                        image_rect: atlas.uv_rects.get(rect_key).map(|rect| Rect {
+                            min: rect.min.as_vec2(),
+                            max: rect.max.as_vec2(),
                         }),
+                        uv_scale_offset,
                     };
                 }
 
@@ -2262,10 +4974,11 @@ fn entity_render_image_binding(
                         image_key: format!("atlas:{atlas_key}"),
                         atlas_key: Some(atlas_key.clone()),
                         atlas_rect_key: Some(rect_key.clone()),
-                        texture_atlas: Some(TextureAtlas {
-                            layout: atlas.layout.clone(),
-                            index: *index,
+                        image_rect: atlas.uv_rects.get(rect_key).map(|rect| Rect {
+                            min: rect.min.as_vec2(),
+                            max: rect.max.as_vec2(),
                         }),
+                        uv_scale_offset,
                     };
                 }
             }
@@ -2278,15 +4991,74 @@ fn entity_render_image_binding(
         image_key: asset_path,
         atlas_key: None,
         atlas_rect_key: None,
-        texture_atlas: None,
+        image_rect: None,
+        uv_scale_offset: Vec4::new(1.0, 1.0, 0.0, 0.0),
     }
 }
 
-fn clear_entity_render_layers(commands: &mut Commands, registry: &mut SceneRegistry) {
-    for (_, handle) in registry.entity_render_layers.drain() {
-        commands.entity(handle.entity).despawn();
+fn entity_atlas_uv_scale_offset(size: UVec2, rect: URect) -> Vec4 {
+    if size.x == 0 || size.y == 0 {
+        return Vec4::new(1.0, 1.0, 0.0, 0.0);
     }
+    let width = size.x as f32;
+    let height = size.y as f32;
+    Vec4::new(
+        (rect.max.x - rect.min.x) as f32 / width,
+        (rect.max.y - rect.min.y) as f32 / height,
+        rect.min.x as f32 / width,
+        rect.min.y as f32 / height,
+    )
+}
+
+fn clear_entity_render_layers(
+    commands: &mut Commands,
+    registry: &mut SceneRegistry,
+    additive_cache: &mut additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &mut Assets<additive_material::CrystalAdditiveMaterial>,
+) {
+    for (key, handle) in registry.entity_render_layers.drain() {
+        commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&entity_additive_material_key(&key), additive_materials);
+        }
+    }
+    registry.entity_render_pending_images.clear();
+    registry.entity_render_actor_roots.clear();
     registry.entity_render_atlases.clear();
+}
+
+/// Stable world-space root shared by every actor layer in the native producer.
+/// Frame-specific sprite offsets live in each layer's `left`/`top`; using those
+/// offsets while a replacement frame is only partially ready tears the retained
+/// body/hair/weapon composite apart. Grid/center coordinates recover the common
+/// root so a deferred old composite can move as one rigid group.
+fn entity_render_actor_root(
+    snapshot: &EntityRenderState,
+    entity: &EntityRenderEntry,
+    offset: Vec2,
+) -> Option<Vec3> {
+    const CELL_WIDTH: f32 = 48.0;
+    const CELL_HEIGHT: f32 = 32.0;
+    const ENTITY_DEPTH_GAIN: i64 = 10;
+    const WORLD_DEPTH_DIVISOR: f32 = 100_000.0;
+
+    let (center_x, center_y) = snapshot.center_x.zip(snapshot.center_y)?;
+    let (grid_x, grid_y) = entity.grid_x.zip(entity.grid_y)?;
+    let origin_x = (snapshot.stage_width * 0.5 / CELL_WIDTH).floor() * CELL_WIDTH;
+    let origin_y = ((snapshot.stage_height * 0.5 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
+    let root_left = origin_x + (i64::from(grid_x) - i64::from(center_x)) as f32 * CELL_WIDTH;
+    let root_top = origin_y + (i64::from(grid_y) - i64::from(center_y)) as f32 * CELL_HEIGHT;
+    let depth = i64::from(grid_y)
+        .saturating_mul(1_000)
+        .saturating_add(i64::from(grid_x).saturating_mul(10))
+        .saturating_mul(ENTITY_DEPTH_GAIN) as f32
+        / WORLD_DEPTH_DIVISOR;
+
+    Some(Vec3::new(
+        root_left + offset.x - snapshot.stage_width * 0.5,
+        snapshot.stage_height * 0.5 - (root_top + offset.y),
+        depth,
+    ))
 }
 
 /// Screen→world position for one entity layer.
@@ -2377,23 +5149,76 @@ fn browser_asset_path(path: &str) -> String {
 /// scrolls the wrong way, flip the sign(s) here (this is the one spot).
 fn self_camera_screen_offset(
     motion_table: &motion::EntityMotionTable,
+    applied_map_center: Option<presentation_pose::PresentationGridCenter>,
 ) -> (Vec2, presentation_pose::CameraPoseSource) {
     let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) =
         PENDING_SELF_CAMERA_MOTION.with(|cell| cell.get())
     else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
-    let now = motion_table.now_ms;
-    if expires_ms <= started_ms || now >= expires_ms || (from_x == to_x && from_y == to_y) {
+    let window = local_motion::LocalTsMotionWindow {
+        from_x,
+        from_y,
+        to_x,
+        to_y,
+        started_ms,
+        expires_ms,
+    };
+    let Some(camera_offset) =
+        self_camera_offset_for_applied_center(window, motion_table.now_ms, applied_map_center)
+    else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
+    };
+    (
+        camera_offset,
+        presentation_pose::CameraPoseSource::SelfWindow,
+    )
+}
+
+fn self_camera_offset_for_applied_center(
+    window: local_motion::LocalTsMotionWindow,
+    now_ms: f64,
+    applied_map_center: Option<presentation_pose::PresentationGridCenter>,
+) -> Option<Vec2> {
+    if window.expires_ms <= window.started_ms
+        || now_ms >= window.expires_ms
+        || (window.from_x == window.to_x && window.from_y == window.to_y)
+    {
+        return None;
     }
     // Successive movement windows can start from the fractional pose of the
     // previous step. Preserve that value across the JS/WASM boundary; coercing
     // it to i32 makes the fallback camera disagree with the local-command pose.
-    let offset = motion::compute_motion_offset_fractional(
-        from_x, from_y, to_x, to_y, started_ms, expires_ms, now, 48.0, 32.0,
+    let mut entity_offset = motion::compute_motion_offset_fractional(
+        window.from_x,
+        window.from_y,
+        window.to_x,
+        window.to_y,
+        window.started_ms,
+        window.expires_ms,
+        now_ms,
+        48.0,
+        32.0,
     );
-    (-offset, presentation_pose::CameraPoseSource::SelfWindow)
+    if let Some(center) = applied_map_center {
+        let center_matches_window = (center.x == window.from_x.round() as i32
+            && center.y == window.from_y.round() as i32)
+            || (center.x == window.to_x.round() as i32 && center.y == window.to_y.round() as i32);
+        if !center_matches_window {
+            return None;
+        }
+        // `compute_motion_offset_fractional` is target-relative
+        // (`current - to`). Before an ACK the retained map/entity frame is
+        // still source-centred, so convert the same physical pose to
+        // `current - applied_center`. When the target-centred frame commits,
+        // the centre delta disappears and the camera changes by exactly the
+        // producer's whole-cell recentering amount. The composed pixels are
+        // therefore continuous across the ACK instead of flashing by most of
+        // a run step.
+        entity_offset.x += (window.to_x - center.x as f32) * 48.0;
+        entity_offset.y += (window.to_y - center.y as f32) * 32.0;
+    }
+    Some(-entity_offset)
 }
 
 fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTsMotionWindow> {
@@ -2417,6 +5242,81 @@ fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTs
     })
 }
 
+#[cfg(test)]
+mod self_camera_motion_tests {
+    use super::*;
+
+    fn run_window() -> local_motion::LocalTsMotionWindow {
+        local_motion::LocalTsMotionWindow {
+            from_x: 10.0,
+            from_y: 5.0,
+            to_x: 12.0,
+            to_y: 5.0,
+            started_ms: 0.0,
+            expires_ms: 600.0,
+        }
+    }
+
+    #[test]
+    fn local_camera_uses_the_current_committed_map_center() {
+        let source = self_camera_offset_for_applied_center(
+            run_window(),
+            0.0,
+            Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
+        );
+        let target = self_camera_offset_for_applied_center(
+            run_window(),
+            0.0,
+            Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+        );
+
+        // Crystal applies phase zero immediately: the physical pose is 16 px
+        // right of the source, equivalently 80 px left of the target. The
+        // inverse camera offsets differ by exactly one two-tile recenter (96
+        // px), so switching committed centres cannot change composed pixels.
+        assert_eq!(source, Some(Vec2::new(-16.0, 0.0)));
+        assert_eq!(target, Some(Vec2::new(80.0, 0.0)));
+        assert_eq!(target.unwrap().x - source.unwrap().x, 96.0);
+    }
+
+    #[test]
+    fn local_camera_preserves_later_crystal_phases_across_the_ack() {
+        let source = self_camera_offset_for_applied_center(
+            run_window(),
+            100.0,
+            Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
+        );
+        let target = self_camera_offset_for_applied_center(
+            run_window(),
+            100.0,
+            Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+        );
+        assert_eq!(source, Some(Vec2::new(-32.0, 0.0)));
+        assert_eq!(target, Some(Vec2::new(64.0, 0.0)));
+        assert_eq!(target.unwrap().x - source.unwrap().x, 96.0);
+    }
+
+    #[test]
+    fn stale_scene_center_and_expired_window_fail_closed() {
+        assert_eq!(
+            self_camera_offset_for_applied_center(
+                run_window(),
+                0.0,
+                Some(presentation_pose::PresentationGridCenter { x: 2, y: 11 }),
+            ),
+            None
+        );
+        assert_eq!(
+            self_camera_offset_for_applied_center(
+                run_window(),
+                600.0,
+                Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+            ),
+            None
+        );
+    }
+}
+
 fn begin_presentation_pose_frame(
     entity_render_state: Res<RuntimeEntityRenderState>,
     motion_table: Res<motion::EntityMotionTable>,
@@ -2431,7 +5331,11 @@ fn begin_presentation_pose_frame(
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     presentation_poses.begin_frame(motion_table.now_ms, renderer_enabled);
-    let (ts_camera_offset, ts_source) = self_camera_screen_offset(&motion_table);
+    // `sync_map_render` runs immediately before this system. Use the centre it
+    // actually committed, not the newer requested snapshot centre, so a local
+    // movement window has the same screen pose before and after its fast ACK.
+    let (ts_camera_offset, ts_source) =
+        self_camera_screen_offset(&motion_table, presentation_poses.applied_map_center());
     let mut selected_camera_offset = ts_camera_offset;
     let mut selected_source = ts_source;
     let mut selected_motion = None;
@@ -3199,6 +6103,43 @@ fn publish_map_status(phase: &str, message: &str, ack_key: &str, image_keys: &[S
 mod entity_atlas_tests {
     use super::*;
 
+    #[test]
+    fn stable_map_render_revision_skips_only_the_applied_image_generation() {
+        let applied = AppliedMapRenderState {
+            producer_revision: Some(41),
+            image_revision: 7,
+        };
+        assert!(map_render_revision_is_current(Some(41), Some(&applied), 7));
+        assert!(!map_render_revision_is_current(None, Some(&applied), 7));
+        assert!(!map_render_revision_is_current(Some(42), Some(&applied), 7));
+        assert!(!map_render_revision_is_current(Some(41), Some(&applied), 8));
+        assert!(!map_render_revision_is_current(Some(41), None, 7));
+    }
+
+    fn entity_sync_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_asset::<Mesh>()
+            .init_asset::<TextureAtlasLayout>()
+            .init_asset::<additive_material::CrystalAdditiveMaterial>()
+            .init_resource::<RuntimeEntityRenderState>()
+            .init_resource::<RuntimeEntityRenderAtlases>()
+            .init_resource::<motion::EntityMotionTable>()
+            .init_resource::<local_motion::LocalMotionPresentationShadow>()
+            .init_resource::<remote_motion::RemoteMotionPresentation>()
+            .init_resource::<presentation_pose::PresentationPoseBuffer>()
+            .init_resource::<SceneRegistry>()
+            .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
+            .init_resource::<Assets<Image>>()
+            .init_resource::<Assets<Mesh>>()
+            .init_resource::<Assets<TextureAtlasLayout>>()
+            .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .add_systems(Update, sync_entity_render_layers);
+        app
+    }
+
     fn rect(key: &str) -> EntityRenderAtlasRect {
         EntityRenderAtlasRect {
             key: key.to_string(),
@@ -3220,6 +6161,741 @@ mod entity_atlas_tests {
             &existing,
             &[rect("standing"), rect("attack")]
         ));
+    }
+
+    #[test]
+    fn animation_frames_extend_one_stable_atlas_layout() {
+        let mut app = entity_sync_test_app();
+        let state = |rect_key: &str| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "starter:p0",
+                    "width": 2048,
+                    "height": 2048,
+                    "imageUrl": "/bevy-entity-atlases/starter.png",
+                    "rects": [{
+                        "key": rect_key,
+                        "x": if rect_key == "standing-0" { 0 } else { 32 },
+                        "y": 0,
+                        "width": 32,
+                        "height": 48
+                    }]
+                }],
+                "entities": []
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-0"));
+        app.update();
+        let first_layout = {
+            let registry = app.world().resource::<SceneRegistry>();
+            let atlas = registry
+                .entity_render_atlases
+                .get("starter:p0")
+                .expect("initial atlas layout");
+            assert_eq!(atlas.rects.len(), 1);
+            atlas.layout.id()
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-1"));
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        let atlas = registry
+            .entity_render_atlases
+            .get("starter:p0")
+            .expect("extended atlas layout");
+        assert_eq!(atlas.layout.id(), first_layout);
+        assert!(atlas.rects.contains_key("standing-0"));
+        assert!(atlas.rects.contains_key("standing-1"));
+        assert_eq!(atlas.rects.len(), 2);
+    }
+
+    #[test]
+    fn animation_page_switch_retains_each_atlas_layout() {
+        let mut app = entity_sync_test_app();
+        let state = |page_key: &str, image_name: &str, rect_key: &str| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": page_key,
+                    "width": 2048,
+                    "height": 2048,
+                    "imageUrl": format!("/bevy-entity-atlases/{image_name}"),
+                    "rects": [{
+                        "key": rect_key,
+                        "x": 0,
+                        "y": 0,
+                        "width": 32,
+                        "height": 48
+                    }]
+                }],
+                "entities": []
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("starter:p0", "starter.png", "standing-0"));
+        app.update();
+        let first_page_layout = app
+            .world()
+            .resource::<SceneRegistry>()
+            .entity_render_atlases["starter:p0"]
+            .layout
+            .id();
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("starter:p1", "starter-p1.png", "standing-1"));
+        app.update();
+        {
+            let registry = app.world().resource::<SceneRegistry>();
+            assert!(registry.entity_render_atlases.contains_key("starter:p0"));
+            assert!(registry.entity_render_atlases.contains_key("starter:p1"));
+        }
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("starter:p0", "starter.png", "standing-0"));
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert_eq!(
+            registry.entity_render_atlases["starter:p0"].layout.id(),
+            first_page_layout
+        );
+    }
+
+    #[test]
+    fn regular_animation_uses_direct_image_rect_on_one_retained_sprite() {
+        let mut app = entity_sync_test_app();
+        let state = |rect_key: &str, x: u32| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "starter:p4",
+                    "width": 2048,
+                    "height": 2048,
+                    "imageUrl": "/bevy-entity-atlases/starter-p4.png",
+                    "rects": [{
+                        "key": rect_key,
+                        "x": x,
+                        "y": 20,
+                        "width": 32,
+                        "height": 48
+                    }]
+                }],
+                "entities": [{
+                    "objectId": "1001",
+                    "layers": [{
+                        "key": "1001:body",
+                        "path": format!("/original-ui/CArmour/00/{rect_key}.png"),
+                        "atlasKey": "starter:p4",
+                        "atlasRectKey": rect_key,
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005
+                    }]
+                }]
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-0", 10));
+        app.update();
+        let entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        let first = app.world().get::<Sprite>(entity).expect("body sprite");
+        assert!(first.texture_atlas.is_none());
+        assert_eq!(first.rect, Some(Rect::new(10.0, 20.0, 42.0, 68.0)));
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("standing-1", 50));
+        app.update();
+        let retained =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        assert_eq!(retained, entity);
+        let second = app
+            .world()
+            .get::<Sprite>(retained)
+            .expect("retained body sprite");
+        assert!(second.texture_atlas.is_none());
+        assert_eq!(second.rect, Some(Rect::new(50.0, 20.0, 82.0, 68.0)));
+    }
+
+    #[test]
+    fn unready_entity_image_switch_retains_the_visible_binding() {
+        let mut app = entity_sync_test_app();
+        let state = |path: &str| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "entities": [{
+                    "objectId": "1001",
+                    "layers": [{
+                        "key": "1001:body",
+                        "path": path,
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005
+                    }]
+                }]
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("/original-ui/CArmour/00/standing.png"));
+        app.update();
+        let entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        let original_image = app
+            .world()
+            .get::<Sprite>(entity)
+            .expect("initial body sprite")
+            .image
+            .id();
+        let original_key = app.world().resource::<SceneRegistry>().entity_render_layers
+            ["1001:body"]
+            .image_key
+            .clone();
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state("/original-ui/CArmour/00/new-page.png"));
+        app.update();
+
+        let retained = &app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"];
+        assert_eq!(retained.entity, entity);
+        assert_eq!(retained.image_key, original_key);
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(entity)
+                .expect("retained body sprite")
+                .image
+                .id(),
+            original_image,
+            "an undecoded replacement image must not blank the visible actor"
+        );
+    }
+
+    #[test]
+    fn unready_actor_layer_defers_the_whole_composite() {
+        let mut app = entity_sync_test_app();
+        let initial: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true,
+            "stageWidth": 1024,
+            "stageHeight": 768,
+            "centerX": 10,
+            "centerY": 10,
+            "entities": [{
+                "objectId": "1001",
+                "gridX": 10,
+                "gridY": 10,
+                "layers": [
+                    {
+                        "key": "1001:body",
+                        "path": "/original-ui/CArmour/00/body-old.png",
+                        "left": 478,
+                        "top": 350,
+                        "width": 32,
+                        "height": 48,
+                        "z": 101005
+                    },
+                    {
+                        "key": "1001:hair",
+                        "path": "/original-ui/CHair/00/hair-old.png",
+                        "left": 482,
+                        "top": 345,
+                        "width": 24,
+                        "height": 40,
+                        "z": 101006
+                    },
+                    {
+                        "key": "1001:weapon-primary",
+                        "path": "/original-ui/CWeapon/00/weapon-old.png",
+                        "left": 468,
+                        "top": 348,
+                        "width": 40,
+                        "height": 50,
+                        "z": 101004
+                    }
+                ]
+            }]
+        }))
+        .expect("initial actor composite");
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(initial);
+        app.update();
+
+        let (initial_entities, initial_keys, initial_positions) = {
+            let world = app.world();
+            let registry = world.resource::<SceneRegistry>();
+            let entities = [
+                registry.entity_render_layers["1001:body"].entity,
+                registry.entity_render_layers["1001:hair"].entity,
+                registry.entity_render_layers["1001:weapon-primary"].entity,
+            ];
+            let keys = [
+                registry.entity_render_layers["1001:body"].image_key.clone(),
+                registry.entity_render_layers["1001:hair"].image_key.clone(),
+                registry.entity_render_layers["1001:weapon-primary"]
+                    .image_key
+                    .clone(),
+            ];
+            let positions = entities.map(|entity| {
+                world
+                    .get::<Transform>(entity)
+                    .expect("initial actor transform")
+                    .translation
+            });
+            (entities, keys, positions)
+        };
+
+        let ready_body_image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("ready:p0".to_owned(), ready_body_image);
+        let mixed_ready: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true,
+            "stageWidth": 1024,
+            "stageHeight": 768,
+            "centerX": 10,
+            "centerY": 10,
+            "atlases": [
+                {
+                    "key": "ready:p0",
+                    "width": 64,
+                    "height": 64,
+                    "rects": [{
+                        "key": "body-new",
+                        "x": 0,
+                        "y": 0,
+                        "width": 48,
+                        "height": 56
+                    }]
+                },
+                {
+                    "key": "waiting:p0",
+                    "width": 64,
+                    "height": 64,
+                    "rects": [{
+                        "key": "hair-new",
+                        "x": 0,
+                        "y": 0,
+                        "width": 20,
+                        "height": 30
+                    }]
+                }
+            ],
+            "entities": [{
+                "objectId": "1001",
+                "gridX": 11,
+                "gridY": 11,
+                "layers": [
+                    {
+                        "key": "1001:body",
+                        "path": "/original-ui/CArmour/00/body-new.png",
+                        "atlasKey": "ready:p0",
+                        "atlasRectKey": "body-new",
+                        "left": 600,
+                        "top": 100,
+                        "width": 48,
+                        "height": 56,
+                        "z": 111105
+                    },
+                    {
+                        "key": "1001:hair",
+                        "path": "/original-ui/CHair/00/hair-unready.png",
+                        "atlasKey": "waiting:p0",
+                        "atlasRectKey": "hair-new",
+                        "left": 300,
+                        "top": 500,
+                        "width": 20,
+                        "height": 30,
+                        "z": 111106
+                    }
+                ]
+            }]
+        }))
+        .expect("mixed-ready actor composite");
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(mixed_ready);
+        app.update();
+
+        {
+            let world = app.world();
+            let registry = world.resource::<SceneRegistry>();
+            assert_eq!(
+                registry.entity_render_layers["1001:body"].image_key, initial_keys[0],
+                "ready body must wait for the unready hair layer"
+            );
+            assert_eq!(
+                registry.entity_render_layers["1001:hair"].image_key, initial_keys[1],
+                "hair retains the same prior composite frame"
+            );
+            assert_eq!(
+                registry.entity_render_layers["1001:weapon-primary"].image_key, initial_keys[2],
+                "an old optional weapon remains until the replacement composite commits"
+            );
+            assert!(
+                registry
+                    .entity_render_pending_images
+                    .get("1001:hair")
+                    .is_some_and(Handle::is_strong),
+                "the unready replacement must keep a strong handle across deferred ticks"
+            );
+
+            for (index, entity) in initial_entities.iter().copied().enumerate() {
+                let deferred = world
+                    .get::<Transform>(entity)
+                    .expect("retained deferred actor transform")
+                    .translation;
+                assert_eq!(
+                    (deferred - initial_positions[index]).truncate(),
+                    Vec2::new(48.0, -32.0),
+                    "every old actor layer must move by one shared x/y root delta"
+                );
+                assert!(
+                    ((deferred - initial_positions[index]).z - 0.101).abs() < 0.000_001,
+                    "every old actor layer must move by the current tile depth delta"
+                );
+            }
+        }
+
+        app.update();
+        for (index, entity) in initial_entities.iter().copied().enumerate() {
+            let repeated = app
+                .world()
+                .get::<Transform>(entity)
+                .expect("repeated deferred actor transform")
+                .translation;
+            let delta = repeated - initial_positions[index];
+            assert_eq!(delta.truncate(), Vec2::new(48.0, -32.0));
+            assert!(
+                (delta.z - 0.101).abs() < 0.000_001,
+                "repeating one deferred snapshot must not reapply its root delta"
+            );
+        }
+
+        let ready_hair_image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("waiting:p0".to_owned(), ready_hair_image);
+        app.update();
+
+        let world = app.world();
+        let registry = world.resource::<SceneRegistry>();
+        assert!(
+            registry.entity_render_pending_images.is_empty(),
+            "committed replacement images are owned by their Sprites and leave no pending handles"
+        );
+        assert_eq!(
+            registry.entity_render_layers["1001:body"].image_key,
+            "atlas:ready:p0"
+        );
+        assert_eq!(
+            registry.entity_render_layers["1001:hair"].image_key,
+            "atlas:waiting:p0"
+        );
+        assert!(
+            !registry
+                .entity_render_layers
+                .contains_key("1001:weapon-primary"),
+            "the omitted old weapon is removed only after the new composite is ready"
+        );
+        assert_eq!(
+            world
+                .get::<Transform>(registry.entity_render_layers["1001:body"].entity)
+                .expect("committed body transform")
+                .translation,
+            Vec3::new(112.0, 256.0, 1.11105)
+        );
+        assert_eq!(
+            world
+                .get::<Transform>(registry.entity_render_layers["1001:hair"].entity)
+                .expect("committed hair transform")
+                .translation,
+            Vec3::new(-202.0, -131.0, 1.11106)
+        );
+    }
+
+    #[test]
+    fn additive_entity_layer_keeps_exact_atlas_uv_subrect() {
+        let state: EntityRenderState = serde_json::from_str(
+            r#"{
+                "enabled":true,
+                "stageWidth":1024,
+                "stageHeight":768,
+                "atlases":[{
+                    "key":"starter:p6",
+                    "width":100,
+                    "height":200,
+                    "imageUrl":"/bevy-entity-atlases/starter-p6.png",
+                    "rects":[{
+                        "key":"effect",
+                        "x":10,
+                        "y":20,
+                        "width":30,
+                        "height":40
+                    }]
+                }],
+                "entities":[{
+                    "objectId":"2005",
+                    "layers":[{
+                        "key":"2005:scarecrow-die-effect",
+                        "path":"/original-ui/Monster/005/227.png",
+                        "atlasKey":"starter:p6",
+                        "atlasRectKey":"effect",
+                        "left":0,
+                        "top":0,
+                        "width":76,
+                        "height":72,
+                        "z":1,
+                        "additive":true
+                    }]
+                }]
+            }"#,
+        )
+        .expect("additive entity state");
+        assert!(state.entities[0].layers[0].additive);
+
+        let uv = entity_atlas_uv_scale_offset(
+            UVec2::new(2048, 1024),
+            URect {
+                min: UVec2::new(512, 256),
+                max: UVec2::new(768, 384),
+            },
+        );
+        assert_eq!(uv, Vec4::new(0.125, 0.125, 0.25, 0.25));
+    }
+
+    #[test]
+    fn additive_entity_layer_uses_material_mesh_and_evicts_on_removal() {
+        let mut app = entity_sync_test_app();
+        let colliding_effect_key = "2005:scarecrow-die-effect";
+        let colliding_effect_image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut().resource_scope(
+            |world, mut cache: Mut<additive_material::CrystalAdditiveMaterialCache>| {
+                let mut materials =
+                    world.resource_mut::<Assets<additive_material::CrystalAdditiveMaterial>>();
+                cache.material(
+                    colliding_effect_key,
+                    colliding_effect_image,
+                    1.0,
+                    &mut materials,
+                );
+            },
+        );
+        let snapshot: EntityRenderState = serde_json::from_str(
+            r#"{
+                "enabled":true,
+                "stageWidth":1024,
+                "stageHeight":768,
+                "atlases":[{
+                    "key":"starter:p6",
+                    "width":100,
+                    "height":200,
+                    "imageUrl":"/bevy-entity-atlases/starter-p6.png",
+                    "rects":[{
+                        "key":"effect",
+                        "x":10,
+                        "y":20,
+                        "width":30,
+                        "height":40
+                    }]
+                }],
+                "entities":[{
+                    "objectId":"2005",
+                    "layers":[{
+                        "key":"2005:scarecrow-die-effect",
+                        "path":"/original-ui/Monster/005/227.png",
+                        "atlasKey":"starter:p6",
+                        "atlasRectKey":"effect",
+                        "left":480,
+                        "top":352,
+                        "width":76,
+                        "height":72,
+                        "z":50008,
+                        "additive":true
+                    }]
+                }]
+            }"#,
+        )
+        .expect("additive entity snapshot");
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot);
+        app.update();
+
+        let entity = app.world().resource::<SceneRegistry>().entity_render_layers
+            ["2005:scarecrow-die-effect"]
+            .entity;
+        assert!(app
+            .world()
+            .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+            .is_some());
+        assert!(app.world().get::<Sprite>(entity).is_none());
+        let material_handle = app
+            .world()
+            .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+            .expect("additive binding")
+            .0
+            .clone();
+        let material = app
+            .world()
+            .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .get(&material_handle)
+            .expect("additive atlas material");
+        assert_eq!(material.uv_scale_offset(), Vec4::new(0.3, 0.2, 0.1, 0.1));
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            2,
+            "standalone effect and namespaced entity material coexist"
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(
+            serde_json::from_str(
+                r#"{"enabled":true,"stageWidth":1024,"stageHeight":768,"entities":[]}"#,
+            )
+            .unwrap(),
+        );
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .entity_render_layers
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1,
+            "removing the entity cannot evict a standalone effect with the same raw key"
+        );
+        assert!(!app.world().entities().contains(entity));
+    }
+
+    #[test]
+    fn entity_layer_rebuilds_between_sprite_and_additive_mesh_with_same_stable_key() {
+        let snapshot = |additive: bool| -> EntityRenderState {
+            serde_json::from_value(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "starter:p6",
+                    "width": 100,
+                    "height": 200,
+                    "imageUrl": "/bevy-entity-atlases/starter-p6.png",
+                    "rects": [{
+                        "key": "effect",
+                        "x": 10,
+                        "y": 20,
+                        "width": 30,
+                        "height": 40
+                    }]
+                }],
+                "entities": [{
+                    "objectId": "2005",
+                    "layers": [{
+                        "key": "stable-layer",
+                        "path": "/original-ui/Monster/005/227.png",
+                        "atlasKey": "starter:p6",
+                        "atlasRectKey": "effect",
+                        "left": 480,
+                        "top": 352,
+                        "width": 76,
+                        "height": 72,
+                        "z": 50008,
+                        "additive": additive
+                    }]
+                }]
+            }))
+            .expect("entity layer mode snapshot")
+        };
+
+        let mut app = entity_sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot(false));
+        app.update();
+        let sprite_entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["stable-layer"].entity;
+        assert!(app.world().get::<Sprite>(sprite_entity).is_some());
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot(true));
+        app.update();
+        let additive_entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["stable-layer"].entity;
+        assert_ne!(additive_entity, sprite_entity);
+        assert!(!app.world().entities().contains(sprite_entity));
+        assert!(app
+            .world()
+            .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(additive_entity)
+            .is_some());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot(false));
+        app.update();
+        let restored_sprite =
+            app.world().resource::<SceneRegistry>().entity_render_layers["stable-layer"].entity;
+        assert_ne!(restored_sprite, additive_entity);
+        assert!(!app.world().entities().contains(additive_entity));
+        assert!(app.world().get::<Sprite>(restored_sprite).is_some());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
     }
 
     #[test]
@@ -3262,5 +6938,1969 @@ mod entity_atlas_tests {
             serde_json::from_str(r#"{"enabled":true,"stageWidth":1024,"stageHeight":768}"#)
                 .expect("retainedImageKeys should be optional");
         assert!(defaulted.retained_image_keys.is_empty());
+    }
+
+    #[test]
+    fn map_render_state_accepts_standalone_image_urls() {
+        let state: MapRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "standaloneTiles": [{
+                    "key":"standalone:tree",
+                    "imageKey":"standalone:WemadeMir2/Objects#7112",
+                    "imageUrl":"/generated/native-map-keyed/pages/hash.png",
+                    "left":10,
+                    "top":20,
+                    "width":64,
+                    "height":96,
+                    "z":1
+                }]
+            }"#,
+        )
+        .expect("standalone imageUrl should deserialize");
+        assert_eq!(state.standalone_tiles.len(), 1);
+        assert_eq!(
+            state.standalone_tiles[0].image_url.as_deref(),
+            Some("/generated/native-map-keyed/pages/hash.png")
+        );
+        assert_eq!(
+            map_render_url_image_sources(&state),
+            vec![(
+                "standalone:WemadeMir2/Objects#7112".to_owned(),
+                "generated/native-map-keyed/pages/hash.png".to_owned()
+            )]
+        );
+    }
+
+    #[test]
+    fn map_render_url_sources_include_atlases_and_standalone_tiles() {
+        let state: MapRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "atlases": [{
+                    "key": "map:page",
+                    "width": 512,
+                    "height": 512,
+                    "imageUrl": "/generated/map-atlas/page.png?rev=1"
+                }],
+                "standaloneTiles": [{
+                    "key": "standalone:tree",
+                    "imageKey": "standalone:tree:image",
+                    "imageUrl": "/generated/native-map-keyed/tree.png",
+                    "left": 0,
+                    "top": 0,
+                    "width": 64,
+                    "height": 96,
+                    "z": 1
+                }]
+            }"#,
+        )
+        .expect("URL-backed map state should deserialize");
+
+        assert_eq!(
+            map_render_url_image_sources(&state),
+            vec![
+                (
+                    "map:page".to_owned(),
+                    "generated/map-atlas/page.png".to_owned()
+                ),
+                (
+                    "standalone:tree:image".to_owned(),
+                    "generated/native-map-keyed/tree.png".to_owned()
+                ),
+            ]
+        );
+    }
+
+    #[test]
+    fn map_render_binding_coverage_reports_missing_rects() {
+        let state: MapRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "tiles": [
+                    {"key":"ok","atlasKey":"map:page","rectKey":"tiles#1","left":0,"top":0,"width":96,"height":64,"z":0},
+                    {"key":"hole","atlasKey":"map:page","rectKey":"tiles#2","left":96,"top":0,"width":96,"height":64,"z":0}
+                ]
+            }"#,
+        )
+        .expect("map render state should deserialize");
+        let atlases = RuntimeMapRenderAtlases {
+            images: HashMap::from([("map:page".to_owned(), Handle::<Image>::default())]),
+            layouts: HashMap::from([(
+                "map:page".to_owned(),
+                (
+                    Handle::<TextureAtlasLayout>::default(),
+                    HashMap::from([("tiles#1".to_owned(), 0)]),
+                ),
+            )]),
+            ..default()
+        };
+
+        assert_eq!(
+            map_render_missing_bindings(&state, &atlases),
+            ["hole:map:page#tiles#2:rect"]
+        );
+    }
+
+    #[test]
+    fn map_atlas_layout_accumulates_rects_across_viewports() {
+        let atlas = |rect_key: &str, width: u32| MapRenderAtlas {
+            key: "map:page".to_owned(),
+            width,
+            height: 512,
+            image_url: None,
+            rects: vec![MapRenderAtlasRect {
+                key: rect_key.to_owned(),
+                x: if rect_key == "tiles#1" { 0 } else { 96 },
+                y: 0,
+                width: 96,
+                height: 64,
+            }],
+        };
+        let mut assets = RuntimeMapRenderAtlases::default();
+
+        let (size, first) = merge_map_render_atlas_rects(&atlas("tiles#1", 512), &mut assets)
+            .expect("first viewport creates a layout");
+        assets.layout_sizes.insert("map:page".to_owned(), size);
+        assert_eq!(first.len(), 1);
+
+        let (_, second) = merge_map_render_atlas_rects(&atlas("tiles#2", 512), &mut assets)
+            .expect("a later viewport grows the stable page layout");
+        assert_eq!(second.len(), 2);
+        assert!(second.contains_key("tiles#1"));
+        assert!(second.contains_key("tiles#2"));
+        assert!(merge_map_render_atlas_rects(&atlas("tiles#2", 512), &mut assets).is_none());
+
+        let (_, resized) = merge_map_render_atlas_rects(&atlas("tiles#2", 1024), &mut assets)
+            .expect("page dimension changes rebuild from a clean rect set");
+        assert_eq!(resized.len(), 1);
+        assert!(!resized.contains_key("tiles#1"));
+    }
+
+    #[test]
+    fn effect_render_state_deserializes_entries() {
+        let state: EffectRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "effects": [{
+                    "key": "fx-cast-1",
+                    "imageUrl": "/original-effects/Magic/0.png",
+                    "maskImageUrl": "/original-effects/Magic/0.png",
+                    "left": 10.0,
+                    "top": 20.0,
+                    "width": 44.0,
+                    "height": 75.0,
+                    "z": 9.0,
+                    "additive": true,
+                    "opacity": 0.7
+                }]
+            }"#,
+        )
+        .expect("effect render state should deserialize");
+        assert_eq!(state.effects.len(), 1);
+        let entry = &state.effects[0];
+        assert_eq!(entry.key, "fx-cast-1");
+        assert!(entry.additive);
+        assert_eq!(entry.opacity, Some(0.7));
+        assert_eq!(
+            entry.image_url.as_deref(),
+            Some("/original-effects/Magic/0.png")
+        );
+        assert_eq!(
+            entry.mask_image_url.as_deref(),
+            Some("/original-effects/Magic/0.png")
+        );
+        assert!(effect_render_active_image_keys(&state).contains("original-effects/Magic/0.png"));
+    }
+
+    #[test]
+    fn effect_render_position_matches_entity_layer_contract() {
+        let state: EffectRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "effects": [{
+                    "key": "ground-1",
+                    "imageUrl": "/a.png",
+                    "left": 488.0,
+                    "top": 360.0,
+                    "width": 48.0,
+                    "height": 48.0,
+                    "z": 4.8,
+                    "additive": true
+                }]
+            }"#,
+        )
+        .expect("deserialize");
+        let entry = &state.effects[0];
+        let pos = effect_render_layer_position(&state, entry);
+        // A screen-stage centre rect maps to the world origin (centred, Y-flip).
+        assert!((pos.x - 0.0).abs() < 0.001);
+        assert!((pos.y - 0.0).abs() < 0.001);
+        assert_eq!(pos.z, 4.8 / 100_000.0);
+    }
+}
+
+#[cfg(test)]
+mod effect_mask_shadow_tests {
+    use super::*;
+
+    fn effect_state_with_mask(mask: Option<&str>, shadow: Option<(f32, f32)>) -> EffectRenderState {
+        EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-1".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                opacity: None,
+                mask_image_url: mask.map(|s| s.to_owned()),
+                mask_width: mask.map(|_| 32.0),
+                mask_height: mask.map(|_| 32.0),
+                mask_x: mask.map(|_| 470.0),
+                mask_y: mask.map(|_| 340.0),
+                frame_x: mask.map(|_| 480.0),
+                frame_y: mask.map(|_| 352.0),
+                shadow_x: shadow.map(|(x, _)| x),
+                shadow_y: shadow.map(|(_, y)| y),
+            }],
+        }
+    }
+
+    #[test]
+    fn frame_with_mask_emits_mask_render_state() {
+        let state = effect_state_with_mask(Some("/original-effects/Magic/0.png"), None);
+        assert!(state.effects[0].mask_image_url.is_some());
+        let keys = effect_render_active_image_keys(&state);
+        assert!(keys.contains("original-effects/Magic/0.png"));
+    }
+
+    #[test]
+    fn missing_mask_falls_back_without_placeholder() {
+        let state = effect_state_with_mask(None, None);
+        assert!(state.effects[0].mask_image_url.is_none());
+        let keys = effect_render_active_image_keys(&state);
+        assert_eq!(keys.len(), 1);
+    }
+
+    #[test]
+    fn effect_shadow_uses_manifest_offsets() {
+        let state = effect_state_with_mask(None, Some((5.0, -3.0)));
+        let entry = &state.effects[0];
+        assert_eq!(entry.shadow_x, Some(5.0));
+        assert_eq!(entry.shadow_y, Some(-3.0));
+        let pos = effect_render_layer_position(&state, entry);
+        let shadow_left = entry.left + 5.0;
+        let shadow_top = entry.top - 3.0;
+        let shadow_center_x = shadow_left + entry.width * 0.5;
+        let shadow_center_y = shadow_top + entry.height * 0.5;
+        let shadow_pos = Vec3::new(
+            shadow_center_x - state.stage_width * 0.5,
+            state.stage_height * 0.5 - shadow_center_y,
+            entry.z / 100_000.0 - 0.0005,
+        );
+        assert!((shadow_pos.x - (pos.x + 5.0)).abs() < 0.01);
+    }
+
+    #[test]
+    fn shadow_renders_below_primary_effect() {
+        let state = effect_state_with_mask(None, Some((2.0, 2.0)));
+        let entry = &state.effects[0];
+        let primary_pos = effect_render_layer_position(&state, entry);
+        let shadow_left = entry.left + 2.0;
+        let shadow_top = entry.top + 2.0;
+        let shadow_center_x = shadow_left + entry.width * 0.5;
+        let shadow_center_y = shadow_top + entry.height * 0.5;
+        let shadow_pos = Vec3::new(
+            shadow_center_x - state.stage_width * 0.5,
+            state.stage_height * 0.5 - shadow_center_y,
+            entry.z / 100_000.0 - 0.0005,
+        );
+        assert!(shadow_pos.z < primary_pos.z);
+    }
+
+    #[test]
+    fn additive_toggle_rebuilds_all_required_layers() {
+        let mut cache = crate::additive_material::CrystalAdditiveMaterialCache::default();
+        let mut materials = Assets::<crate::additive_material::CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let img = images.add(Image::default());
+        let key = "fx-1";
+        let h1 = cache.material(key, img.clone(), 1.0, &mut materials);
+        assert_eq!(cache.len(), 1);
+        cache.evict(key, &mut materials);
+        assert_eq!(cache.len(), 0);
+        let h2 = cache.material(key, img, 1.0, &mut materials);
+        assert_ne!(h1, h2);
+    }
+
+    fn sync_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_asset::<Mesh>()
+            .init_asset::<ColorMaterial>()
+            .init_asset::<crate::additive_material::CrystalAdditiveMaterial>()
+            .init_asset::<crate::lighting::CrystalMultiplyMaterial>()
+            .init_resource::<SceneRegistry>()
+            .init_resource::<RuntimeEffectRenderState>()
+            .init_resource::<RuntimeLightingRenderState>()
+            .init_resource::<SceneResetRevision>()
+            .init_resource::<RuntimeLightingSceneResetTracker>()
+            .init_resource::<RuntimeEffectShadowCleanupTracker>()
+            .init_resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
+            .init_resource::<Assets<Image>>()
+            .init_resource::<Assets<Mesh>>()
+            .init_resource::<Assets<ColorMaterial>>()
+            .init_resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
+            .init_resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .add_systems(
+                Update,
+                (
+                    apply_scene_reset_to_lighting,
+                    sync_effect_render,
+                    sync_lighting_render,
+                    cleanup_reset_effect_shadows,
+                )
+                    .chain(),
+            );
+        app
+    }
+
+    #[test]
+    fn sync_effect_render_spawns_primary_mask_and_shadow_and_cleans_up() {
+        // Run the real ECS sync_effect_render system and verify the layer
+        // lifecycle: spawn, update, despawn, and asset recycling.
+        let mut app = sync_test_app();
+        // A mask+shadow effect snapshot (geometry distinct from primary: the
+        // producer sends real local values frame.x=-20, frame.y=0, maskX=3,
+        // maskY=-7 in the SAME origin).
+        let snapshot = EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-e2e".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                opacity: Some(0.7),
+                mask_image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                mask_width: Some(32.0),
+                mask_height: Some(32.0),
+                mask_x: Some(3.0),
+                mask_y: Some(-7.0),
+                frame_x: Some(-20.0),
+                frame_y: Some(0.0),
+                shadow_x: Some(4.0),
+                shadow_y: Some(0.0),
+            }],
+        };
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(snapshot);
+        app.update();
+
+        let registry = app.world().resource::<SceneRegistry>();
+        assert_eq!(registry.effect_render.len(), 1, "primary sprite spawned");
+        assert!(registry.effect_render.contains_key("fx-e2e"));
+        assert_eq!(registry.effect_render_masks.len(), 1, "mask spawned");
+        assert!(registry.effect_render_masks.contains_key("fx-e2e:mask"));
+
+        // Mask transform: primary left=480 top=352, frame.x=-20 frame.y=0, maskX=3
+        // maskY=-7 => mask dx=3-(-20)=23, dy=-7-0=-7. Mask left=503 top=345.
+        // Center=(503+16,345+16)=(519,361) -> world=(519-512,384-361)=(7,23).
+        let mask_entity = registry.effect_render_masks["fx-e2e:mask"].entity;
+        let mask_transform = *app.world().get::<Transform>(mask_entity).unwrap();
+        assert!(
+            (mask_transform.translation.x - 7.0).abs() < 0.5,
+            "mask x uses maskX-frameX"
+        );
+        assert!(
+            (mask_transform.translation.y - 23.0).abs() < 0.5,
+            "mask y uses maskY-frameY"
+        );
+        assert!(
+            (mask_transform.scale.x - 32.0).abs() < 0.1,
+            "mask uses mask width"
+        );
+
+        // (4, 0) is valid: a single axis may be zero, and the shadow remains
+        // below the primary without changing the primary transform.
+        assert_eq!(registry.effect_render_shadows.len(), 1, "shadow spawned");
+        let shadow_entity = registry.effect_render_shadows["fx-e2e:shadow"].entity;
+        let primary_entity = registry.effect_render["fx-e2e"].entity;
+        let primary_binding = app
+            .world()
+            .get::<MeshMaterial2d<crate::additive_material::CrystalAdditiveMaterial>>(
+                primary_entity,
+            )
+            .expect("primary additive material binding");
+        let primary_material = app
+            .world()
+            .resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
+            .get(&primary_binding.0)
+            .expect("primary additive material");
+        assert!((primary_material.opacity() - 0.7).abs() < f32::EPSILON);
+        let mask_binding = app
+            .world()
+            .get::<MeshMaterial2d<crate::additive_material::CrystalAdditiveMaterial>>(mask_entity)
+            .expect("mask additive material binding");
+        let mask_material = app
+            .world()
+            .resource::<Assets<crate::additive_material::CrystalAdditiveMaterial>>()
+            .get(&mask_binding.0)
+            .expect("mask additive material");
+        assert!((mask_material.opacity() - 0.7).abs() < f32::EPSILON);
+        let primary_transform = *app.world().get::<Transform>(primary_entity).unwrap();
+        let shadow_transform = *app.world().get::<Transform>(shadow_entity).unwrap();
+        assert!(shadow_transform.translation.z < primary_transform.translation.z);
+        assert!(
+            (shadow_transform.translation.x - (primary_transform.translation.x + 4.0)).abs() < 0.5
+        );
+        assert_ne!(shadow_transform.scale, primary_transform.scale);
+        assert_eq!(
+            app.world().resource::<Assets<ColorMaterial>>().len(),
+            1,
+            "shadow owns one procedural material"
+        );
+        assert_eq!(
+            app.world().resource::<Assets<Mesh>>().len(),
+            2,
+            "primary unit quad and shadow ellipse are allocated"
+        );
+
+        // Update the same effect (retained in place, no new entities).
+        let prim_count = app.world().resource::<SceneRegistry>().effect_render.len();
+        let mask_count = app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_masks
+            .len();
+        let shadow_count = app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows
+            .len();
+        let shadow_entity_after_first_update = app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows["fx-e2e:shadow"]
+            .entity;
+        app.update();
+        let registry_after = app.world().resource::<SceneRegistry>();
+        assert_eq!(
+            registry_after.effect_render.len(),
+            prim_count,
+            "no duplicate primary on update"
+        );
+        assert_eq!(
+            registry_after.effect_render_masks.len(),
+            mask_count,
+            "no duplicate mask on update"
+        );
+        assert_eq!(
+            registry_after.effect_render_shadows.len(),
+            shadow_count,
+            "no duplicate shadow on update"
+        );
+        assert_eq!(
+            registry_after.effect_render_shadows["fx-e2e:shadow"].entity,
+            shadow_entity_after_first_update,
+            "shadow entity retained on update"
+        );
+
+        // Remove the effect; all layers and materials are cleaned up.
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![],
+        });
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert!(registry.effect_render.is_empty(), "primary despawned");
+        assert!(registry.effect_render_masks.is_empty(), "mask despawned");
+        assert!(
+            registry.effect_render_shadows.is_empty(),
+            "shadow despawned"
+        );
+        assert!(
+            registry.effect_render_images.is_empty(),
+            "effect images released"
+        );
+        let cache = app
+            .world()
+            .resource::<crate::additive_material::CrystalAdditiveMaterialCache>();
+        assert_eq!(cache.len(), 0, "materials recycled");
+        assert_eq!(
+            app.world().resource::<Assets<ColorMaterial>>().len(),
+            0,
+            "shadow materials recycled"
+        );
+        assert_eq!(
+            app.world().resource::<Assets<Mesh>>().len(),
+            1,
+            "shadow ellipse mesh recycled while primary unit quad remains"
+        );
+    }
+
+    #[test]
+    fn sync_effect_render_no_shadow_when_only_single_axis_missing() {
+        // A missing axis must not create a shadow entity, even though the other
+        // axis is present.
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-noshadow".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                opacity: None,
+                mask_image_url: None,
+                mask_width: None,
+                mask_height: None,
+                mask_x: None,
+                mask_y: None,
+                frame_x: None,
+                frame_y: None,
+                shadow_x: None,
+                shadow_y: Some(5.0),
+            }],
+        });
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        // Producer never emits a partial shadow pair; runtime must not create one.
+        assert!(
+            registry.effect_render_shadows.is_empty(),
+            "no shadow when pair incomplete"
+        );
+        assert_eq!(registry.effect_render.len(), 1, "primary still rendered");
+    }
+
+    #[test]
+    fn sync_effect_render_shadow_zero_axes_still_spawn_and_update_in_place() {
+        let mut app = sync_test_app();
+        let shadow_state = |x, y| EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-zero-axis".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                opacity: None,
+                mask_image_url: None,
+                mask_width: None,
+                mask_height: None,
+                mask_x: None,
+                mask_y: None,
+                frame_x: None,
+                frame_y: None,
+                shadow_x: Some(x),
+                shadow_y: Some(y),
+            }],
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(shadow_state(0.0, -5.0));
+        app.update();
+        let first = app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows["fx-zero-axis:shadow"]
+            .clone();
+        let first_transform = *app.world().get::<Transform>(first.entity).unwrap();
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 1);
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(shadow_state(6.0, 0.0));
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        let updated = registry.effect_render_shadows["fx-zero-axis:shadow"].clone();
+        assert_eq!(
+            updated.entity, first.entity,
+            "zero-axis update retained entity"
+        );
+        assert_eq!(
+            updated.material, first.material,
+            "zero-axis update retained material"
+        );
+        let updated_transform = *app.world().get::<Transform>(updated.entity).unwrap();
+        assert_ne!(updated_transform.translation, first_transform.translation);
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 1);
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![],
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows
+            .is_empty());
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 0);
+        assert_eq!(app.world().resource::<Assets<Mesh>>().len(), 1);
+    }
+
+    #[test]
+    fn sync_effect_render_scene_reset_recycles_shadow_assets() {
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(effect_state_with_mask(None, Some((0.0, 0.0))));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .effect_render_shadows
+                .len(),
+            1
+        );
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 1);
+
+        // MapChanged and LogOut both advance the scene reset revision in the
+        // native host. Clearing the snapshot before the revision models the
+        // same boundary and prevents the renderer from recreating the layer.
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = None;
+        app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
+        app.update();
+
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_shadows
+            .is_empty());
+        assert_eq!(app.world().resource::<Assets<ColorMaterial>>().len(), 0);
+        assert_eq!(app.world().resource::<Assets<Mesh>>().len(), 1);
+    }
+
+    #[test]
+    fn sync_effect_render_mask_geometry_follows_nonzero_to_zero() {
+        // A mask with real local values that resolve to a zero delta
+        // (frame.x=-20, maskX=-20) still renders at the primary position.
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-maskzero".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                opacity: None,
+                mask_image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                mask_width: Some(48.0),
+                mask_height: Some(48.0),
+                mask_x: Some(-20.0),
+                mask_y: Some(0.0),
+                frame_x: Some(-20.0),
+                frame_y: Some(0.0),
+                shadow_x: None,
+                shadow_y: None,
+            }],
+        });
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert_eq!(
+            registry.effect_render_masks.len(),
+            1,
+            "mask at zero delta still spawned"
+        );
+        // dx = -20-(-20) = 0, dy = 0-0 = 0 -> centered on primary (world x = 480+24-512 = -8).
+        let mask_entity = registry.effect_render_masks["fx-maskzero:mask"].entity;
+        let mask_transform = *app.world().get::<Transform>(mask_entity).unwrap();
+        assert!(
+            (mask_transform.translation.x - (-8.0)).abs() < 0.5,
+            "zero-delta mask centered on primary x"
+        );
+    }
+
+    #[test]
+    fn sync_effect_render_disabled_snapshot_clears_all_layers() {
+        // enabled=false must clear every effect layer and recycle materials.
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![EffectRenderEntry {
+                key: "fx-dis".to_owned(),
+                image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                left: 480.0,
+                top: 352.0,
+                width: 48.0,
+                height: 48.0,
+                z: 9.0,
+                additive: true,
+                opacity: None,
+                mask_image_url: Some("/original-effects/Magic/0.png".to_owned()),
+                mask_width: Some(32.0),
+                mask_height: Some(32.0),
+                mask_x: Some(3.0),
+                mask_y: Some(-7.0),
+                frame_x: Some(-20.0),
+                frame_y: Some(0.0),
+                shadow_x: None,
+                shadow_y: None,
+            }],
+        });
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .effect_render_masks
+                .len(),
+            1
+        );
+        // Disable the snapshot.
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: false,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            effects: vec![],
+        });
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert!(
+            registry.effect_render.is_empty(),
+            "primary cleared on disable"
+        );
+        assert!(
+            registry.effect_render_masks.is_empty(),
+            "mask cleared on disable"
+        );
+        assert!(
+            registry.effect_render_shadows.is_empty(),
+            "shadow cleared on disable"
+        );
+        let cache = app
+            .world()
+            .resource::<crate::additive_material::CrystalAdditiveMaterialCache>();
+        assert_eq!(cache.len(), 0, "materials recycled on disable");
+    }
+
+    #[test]
+    fn sync_lighting_is_bounded_and_clears_on_map_logout_or_reconnect_reset() {
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(lighting::LightingRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            time_of_day_light_setting: Some(4),
+            map_light_setting: None,
+            light_setting: None,
+            map_dark_light: 2,
+            map_lights: (0..220)
+                .map(|index| lighting::MapLightSource {
+                    key: format!("map-{index}"),
+                    draw_x: index as f32,
+                    draw_y: index as f32,
+                    light: 1,
+                    offset_x: 0.0,
+                    offset_y: 0.0,
+                })
+                .collect(),
+            entity_lights: Vec::new(),
+        });
+        app.update();
+        let (buffer_camera, buffer_image, composite_entity, multiply_material, first_layer) = {
+            let registry = app.world().resource::<SceneRegistry>();
+            assert_eq!(registry.lighting_layers.len(), lighting::MAX_NATIVE_LIGHTS);
+            assert_eq!(
+                registry.lighting_images.len(),
+                lighting::LIGHT_TEXTURE_COUNT
+            );
+            let darkness = registry
+                .lighting_darkness
+                .as_ref()
+                .expect("offscreen darkness buffer spawned");
+            (
+                darkness.buffer_camera,
+                darkness.buffer_image.clone(),
+                darkness.composite_entity,
+                darkness.material.clone(),
+                registry.lighting_layers.values().next().unwrap().entity,
+            )
+        };
+        assert!(
+            app.world()
+                .get::<MirLightingBufferCamera>(buffer_camera)
+                .is_some(),
+            "one isolated light-buffer camera exists"
+        );
+        assert!(
+            app.world()
+                .get::<MirLightingComposite>(composite_entity)
+                .is_some(),
+            "one main-pass multiply composite exists"
+        );
+        assert!(
+            app.world()
+                .get::<MirLightingBufferLayer>(first_layer)
+                .is_some(),
+            "light sprites live in the isolated buffer"
+        );
+        assert!(
+            app.world().get::<RenderLayers>(first_layer).is_some(),
+            "light sprite cannot leak into the main scene pass"
+        );
+        assert!(
+            app.world()
+                .resource::<Assets<Image>>()
+                .get(&buffer_image)
+                .is_some(),
+            "offscreen target is retained while active"
+        );
+        assert!(
+            app.world()
+                .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+                .get(&multiply_material)
+                .is_some(),
+            "multiply material samples the retained target"
+        );
+
+        // Map change, logout and reconnect all advance SceneResetRevision. Run
+        // the real reset system, not a manually-cleared snapshot, and require
+        // the renderer resources to disappear in that same update.
+        app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
+        app.update();
+        let registry = app.world().resource::<SceneRegistry>();
+        assert!(registry.lighting_layers.is_empty());
+        assert!(registry.lighting_images.is_empty());
+        assert!(registry.lighting_darkness.is_none());
+        assert!(app.world().get_entity(buffer_camera).is_err());
+        assert!(app.world().get_entity(composite_entity).is_err());
+        assert!(app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&buffer_image)
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .get(&multiply_material)
+            .is_none());
+        assert_eq!(
+            app.world()
+                .resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
+    fn sync_lighting_stage_resize_rebuilds_without_leaking_old_targets() {
+        let mut app = sync_test_app();
+        let state = |width, height| lighting::LightingRenderState {
+            enabled: true,
+            stage_width: width,
+            stage_height: height,
+            time_of_day_light_setting: Some(4),
+            map_light_setting: None,
+            light_setting: None,
+            map_dark_light: 0,
+            map_lights: Vec::new(),
+            entity_lights: vec![lighting::EntityLightSource {
+                key: "self".to_owned(),
+                draw_x: width * 0.5,
+                draw_y: height * 0.5,
+                kind: "selfPlayer".to_owned(),
+                light: Some(3),
+                dead: false,
+                is_self: true,
+            }],
+        };
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(state(1024.0, 768.0));
+        app.update();
+        let (old_camera, old_composite, old_image, old_material) = {
+            let registry = app.world().resource::<SceneRegistry>();
+            let darkness = registry.lighting_darkness.as_ref().unwrap();
+            (
+                darkness.buffer_camera,
+                darkness.composite_entity,
+                darkness.buffer_image.clone(),
+                darkness.material.clone(),
+            )
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(state(800.0, 600.0));
+        app.update();
+
+        let registry = app.world().resource::<SceneRegistry>();
+        let rebuilt = registry.lighting_darkness.as_ref().unwrap();
+        assert_eq!(rebuilt.stage_size, UVec2::new(800, 600));
+        assert_ne!(rebuilt.buffer_camera, old_camera);
+        assert_ne!(rebuilt.composite_entity, old_composite);
+        assert_ne!(rebuilt.buffer_image, old_image);
+        assert_ne!(rebuilt.material, old_material);
+        assert_eq!(registry.lighting_layers.len(), 1);
+        assert_eq!(
+            app.world()
+                .resource::<crate::additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1
+        );
+        assert!(app.world().get_entity(old_camera).is_err());
+        assert!(app.world().get_entity(old_composite).is_err());
+        assert!(app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&old_image)
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .get(&old_material)
+            .is_none());
+    }
+}
+
+#[cfg(test)]
+mod native_data_path_tests {
+    use super::*;
+
+    fn ingest_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .init_resource::<Assets<Mesh>>()
+            .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
+            .insert_resource(mir2_client_bevy::read_model::UiReadModel::default())
+            .insert_resource(mir2_client_bevy::read_model::UiSurfaceSignals::default())
+            .insert_resource(mir2_client_bevy::map::MapModel::default())
+            .insert_resource(mir2_client_bevy::entities::EntityModelSet::default())
+            .insert_resource(mir2_client_bevy::inventory::InventoryModel::default())
+            .insert_resource(mir2_client_bevy::chat::ChatModel::default())
+            .insert_resource(mir2_client_bevy::mail::MailModel::default())
+            .insert_resource(mir2_client_bevy::shop::ShopModel::default())
+            .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
+            .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+            .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
+            .insert_resource(mir2_client_bevy::social::SocialModel::default())
+            .insert_resource(PendingOperations::default())
+            .insert_resource(InventoryOperationFeedback::default())
+            .insert_resource(AuthoritativeModelRevisions::default())
+            .insert_resource(SessionResetRevision::default())
+            .insert_resource(SessionResetGameShopPreservation::default())
+            .insert_resource(RuntimeSessionResetTracker::default())
+            .insert_resource(RuntimeWorldState::default())
+            .insert_resource(RuntimeEntityRenderState::default())
+            .insert_resource(RuntimeEntityRenderAtlases::default())
+            .insert_resource(RuntimeMapRenderState::default())
+            .insert_resource(RuntimeMapRenderAtlases::default())
+            .insert_resource(RuntimeEffectRenderState::default())
+            .insert_resource(RuntimeMapCameraOffset::default())
+            .insert_resource(interpolation::SnapshotBuffer::default())
+            .insert_resource(motion::EntityMotionTable::default())
+            .insert_resource(presentation_pose::PresentationPoseBuffer::default())
+            .insert_resource(SceneRegistry::default())
+            .insert_resource(SceneResetRevision::default())
+            .insert_resource(RuntimeSceneResetTracker::default())
+            .insert_resource(RuntimeSceneModelResetTracker::default())
+            .insert_resource(native_ingest::NativeInbound::new())
+            .add_systems(
+                Update,
+                (
+                    ingest_pending_scene_and_data_reset,
+                    apply_scene_reset_to_runtime,
+                    apply_scene_reset_to_scene_models,
+                    apply_session_reset_to_runtime_models,
+                    ingest_pending_ui_read_model,
+                    ingest_pending_map_model,
+                    ingest_pending_entity_model_set,
+                    ingest_pending_inventory_model,
+                )
+                    .chain(),
+            )
+            .add_systems(
+                Update,
+                (
+                    ingest_pending_inventory_operation_ack,
+                    ingest_pending_wallet_patch,
+                    ingest_pending_mail_model,
+                    ingest_pending_shop_model,
+                    ingest_pending_game_shop_info,
+                    ingest_pending_game_shop_stock,
+                    ingest_pending_game_shop_receipt,
+                    ingest_pending_npc_shop_service,
+                    ingest_pending_storage_patch,
+                    ingest_pending_storage_items,
+                    ingest_pending_storage_model,
+                    ingest_pending_skill_model,
+                    ingest_pending_social_model,
+                    ingest_pending_chat_line,
+                )
+                    .chain()
+                    .after(ingest_pending_inventory_model),
+            );
+        app
+    }
+
+    #[test]
+    fn native_mail_shop_storage_payloads_update_preserve_reject_and_reset() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Hello","gold":10,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":false}]}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_shop_model(
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_model(
+            r#"{"items":[{"key":"sword","name":"Iron Sword","quantity":1,"slot":3,"container":4}],"size":30,"has_password":false,"unlocked":true,"has_expanded":false,"expiry":0}"#.to_owned()
+        ));
+        for index in 0..105 {
+            assert!(native_ingest::push_native_game_shop_info(format!(
+                r#"{{"itemIndex":1000,"gameShopIndex":{},"itemName":"Cash {}","goldPrice":10,"creditPrice":2,"count":1,"stock":0,"stockLevel":0,"canBuyGold":true,"canBuyCredit":true}}"#,
+                index, index
+            )));
+        }
+        assert!(native_ingest::push_native_game_shop_stock(
+            r#"{"gIndex":42,"stockLevel":7}"#.to_owned()
+        ));
+        app.update();
+
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                .npc_shop_open_requested
+        );
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::mail::MailModel>()
+                .mails
+                .len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .goods
+                .len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageModel>()
+                .items
+                .len(),
+            1
+        );
+        {
+            let game_shop = app
+                .world()
+                .resource::<mir2_client_bevy::game_shop::GameShopModel>();
+            assert_eq!(game_shop.items.len(), 105);
+            assert_eq!(game_shop.items[42].stock_level, 7);
+        }
+
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::mail::MailModel>()
+            .selected_id = Some(7);
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::shop::ShopModel>()
+            .selected_id = Some(9);
+        {
+            let mut storage = app
+                .world_mut()
+                .resource_mut::<mir2_client_bevy::storage::StorageModel>();
+            storage.selected_storage_slot = Some(3);
+            storage.password_draft = "old-password".to_owned();
+            storage.new_password_draft = "new-password".to_owned();
+            storage.confirm_password_draft = "new-password".to_owned();
+        }
+
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Updated","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":true}]}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_shop_model(
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_npc_shop_service(
+            r#"{"mode":"buy","repairRate":null}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_items(
+            r#"{"items":[{"key":"sword","name":"Iron Sword","quantity":2,"slot":3,"container":4}]}"#.to_owned()
+        ));
+        app.update();
+
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                .npc_shop_open_requested
+        );
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::mail::MailModel>()
+                .selected_id,
+            Some(7)
+        );
+        {
+            let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
+            assert_eq!(shop.selected_id, None);
+            assert!(shop.allows_buy());
+        }
+        assert!(native_ingest::push_native_npc_shop_service(
+            r#"{"mode":"repair","repairRate":1.5}"#.to_owned()
+        ));
+        app.update();
+        {
+            let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
+            assert!(shop.allows_repair());
+            assert_eq!(shop.repair_rate, Some(1.5));
+        }
+        assert!(native_ingest::push_native_npc_shop_service(
+            r#"{"mode":"specialRepair","repairRate":null}"#.to_owned()
+        ));
+        app.update();
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::shop::ShopModel>()
+            .allows_repair());
+        {
+            let storage = app
+                .world()
+                .resource::<mir2_client_bevy::storage::StorageModel>();
+            assert_eq!(storage.items[0].quantity, 2);
+            assert_eq!(storage.selected_storage_slot, Some(3));
+            assert_eq!(storage.password_draft, "old-password");
+            assert_eq!(storage.new_password_draft, "new-password");
+        }
+
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":{}}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_shop_model(
+            r#"{"goods":{}}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_model(
+            r#"{"items":{}}"#.to_owned()
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::mail::MailModel>()
+                .selected_id,
+            Some(7)
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .selected_id,
+            None
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageModel>()
+                .items[0]
+                .quantity,
+            2
+        );
+
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Unread baseline","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":false}]}"#.to_owned()
+        ));
+        app.update();
+        let read_key = mir2_client_bevy::pending_operations::PendingOperationKey::ReadMail(7);
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(read_key.clone()));
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Periodic unread","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":false}]}"#.to_owned()
+        ));
+        app.update();
+        assert!(app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&read_key));
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Authoritative read","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":true}]}"#.to_owned()
+        ));
+        app.update();
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&read_key));
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::mail::MailModel>()
+                .mails[0]
+                .read
+        );
+
+        assert!(native_ingest::push_native_data_reset());
+        app.update();
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::shop::ShopModel>()
+            .goods
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>()
+            .items
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .items
+            .is_empty());
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                .npc_shop_open_requested
+        );
+    }
+
+    #[test]
+    fn native_storage_nacks_release_exact_pending_operations_without_mutating_models() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        let unlock = PendingOperationKey::StorageUnlock;
+        let remove = PendingOperationKey::StorageRemovePassword;
+        let deposit = PendingOperationKey::StorageDeposit {
+            unique_id: 77,
+            from: 3,
+            to: 9,
+        };
+        {
+            let mut pending = app.world_mut().resource_mut::<PendingOperations>();
+            assert!(pending.try_begin(unlock.clone()));
+            assert!(pending.try_begin(remove.clone()));
+            assert!(pending.try_begin(deposit.clone()));
+        }
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"unlock","success":false}}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"deposit","from":3,"to":9,"success":false}}"#.to_owned()
+        ));
+        app.update();
+
+        let pending = app.world().resource::<PendingOperations>();
+        assert!(!pending.contains(&unlock));
+        assert!(!pending.contains(&deposit));
+        assert!(pending.contains(&remove));
+        let storage = app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>();
+        assert!(!storage.has_password);
+        assert!(!storage.unlocked);
+        assert!(storage.items.is_empty());
+    }
+
+    #[test]
+    fn native_game_shop_receipt_requires_exact_pending_request() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        let request = app
+            .world_mut()
+            .resource_mut::<mir2_client_bevy::game_shop::GameShopModel>()
+            .begin_purchase(31, 2, 1)
+            .expect("reserve purchase");
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(PendingOperationKey::GameShop(request.request_id.clone())));
+
+        assert!(native_ingest::push_native_game_shop_receipt(
+            r#"{"protocol":"nativeGameShopReceiptV1","requestId":"gs-wrong","success":true,"gIndex":31,"quantity":2,"priceType":1,"mailId":999}"#.to_owned()
+        ));
+        app.update();
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .pending_purchase
+            .is_some());
+        assert_eq!(app.world().resource::<PendingOperations>().len(), 1);
+
+        assert!(native_ingest::push_native_game_shop_receipt(format!(
+            r#"{{"protocol":"nativeGameShopReceiptV1","requestId":"{}","success":true,"gIndex":31,"quantity":2,"priceType":1,"newStockLevel":3,"mailId":1842}}"#,
+            request.request_id
+        )));
+        app.update();
+        let model = app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>();
+        assert!(model.pending_purchase.is_none());
+        assert_eq!(
+            model.last_receipt.as_ref().and_then(|r| r.mail_id),
+            Some(1842)
+        );
+        assert!(app.world().resource::<PendingOperations>().is_empty());
+    }
+
+    #[test]
+    fn scene_reset_clears_scene_same_frame_but_preserves_personal_models_and_pending() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.world_mut().resource_mut::<RuntimeWorldState>().snapshot =
+            Some(serde_json::from_str(r#"{"entities":[]}"#).unwrap());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(
+            serde_json::from_str(r#"{"enabled":true,"stageWidth":1024,"stageHeight":768}"#)
+                .unwrap(),
+        );
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(
+            serde_json::from_str(r#"{"enabled":true,"stageWidth":1024,"stageHeight":768}"#)
+                .unwrap(),
+        );
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(
+            serde_json::from_str(
+                r#"{"enabled":true,"stageWidth":1024,"stageHeight":768,"effects":[]}"#,
+            )
+            .unwrap(),
+        );
+
+        let map_entity = app.world_mut().spawn_empty().id();
+        let effect_entity = app.world_mut().spawn_empty().id();
+        let additive_entity = app.world_mut().spawn_empty().id();
+        app.world_mut().resource_scope(
+            |world, mut cache: Mut<additive_material::CrystalAdditiveMaterialCache>| {
+                let mut materials =
+                    world.resource_mut::<Assets<additive_material::CrystalAdditiveMaterial>>();
+                cache.material(
+                    &entity_additive_material_key("scene-additive"),
+                    Handle::<Image>::default(),
+                    1.0,
+                    &mut materials,
+                );
+            },
+        );
+        {
+            let mut registry = app.world_mut().resource_mut::<SceneRegistry>();
+            registry.map.spawned.push(map_entity);
+            registry.effect_render.insert(
+                "fx".to_owned(),
+                EffectRenderLayerHandle {
+                    entity: effect_entity,
+                    image_key: "fx.png".to_owned(),
+                    additive: false,
+                },
+            );
+            registry.entity_render_layers.insert(
+                "scene-additive".to_owned(),
+                EntityRenderLayerHandle {
+                    entity: additive_entity,
+                    image_key: "atlas:scene".to_owned(),
+                    atlas_key: Some("scene".to_owned()),
+                    atlas_rect_key: Some("effect".to_owned()),
+                    additive: true,
+                },
+            );
+        }
+
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::read_model::UiReadModel>()
+            .player
+            .name = Some("Still logged in".to_owned());
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::inventory::InventoryModel>()
+            .gold = 123;
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::map::MapModel>()
+            .center_x = 77;
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::entities::EntityModelSet>()
+            .entities
+            .push(mir2_client_bevy::entities::EntityModel {
+                object_id: "scene-entity".to_owned(),
+                kind: mir2_client_bevy::entities::EntityKind::Monster,
+                name: "Scene entity".to_owned(),
+                x: 1,
+                y: 2,
+                level: None,
+                direction: None,
+            });
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::mail::MailModel>()
+            .selected_id = Some(7);
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::game_shop::GameShopModel>()
+            .upsert(mir2_client_bevy::game_shop::GameShopEntry {
+                game_shop_index: 1,
+                item_index: 2,
+                item_name: "Cash item".to_owned(),
+                ..Default::default()
+            });
+        let pending_key = mir2_client_bevy::pending_operations::PendingOperationKey::StorageExpand;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(pending_key.clone()));
+
+        assert!(native_ingest::push_native_scene_reset());
+        app.update();
+
+        assert!(app
+            .world()
+            .resource::<RuntimeWorldState>()
+            .snapshot
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<RuntimeMapRenderState>()
+            .snapshot
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<RuntimeEntityRenderState>()
+            .snapshot
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<RuntimeEffectRenderState>()
+            .snapshot
+            .is_none());
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::map::MapModel>()
+                .center_x,
+            0
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::entities::EntityModelSet>()
+            .entities
+            .is_empty());
+        let registry = app.world().resource::<SceneRegistry>();
+        assert!(registry.map.spawned.is_empty());
+        assert!(registry.effect_render.is_empty());
+        assert!(registry.entity_render_layers.is_empty());
+        assert!(!app.world().entities().contains(map_entity));
+        assert!(!app.world().entities().contains(effect_entity));
+        assert!(!app.world().entities().contains(additive_entity));
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>()
+                .player
+                .name
+                .as_deref(),
+            Some("Still logged in")
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::inventory::InventoryModel>()
+                .gold,
+            123
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::mail::MailModel>()
+                .selected_id,
+            Some(7)
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+                .items
+                .len(),
+            1
+        );
+        assert!(app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&pending_key));
+        assert_eq!(app.world().resource::<SessionResetRevision>().0, 0);
+    }
+
+    #[test]
+    fn data_reset_includes_scene_reset_and_clears_all_models_and_pending() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.world_mut().resource_mut::<RuntimeWorldState>().snapshot =
+            Some(serde_json::from_str(r#"{"entities":[]}"#).unwrap());
+        let scene_entity = app.world_mut().spawn_empty().id();
+        app.world_mut()
+            .resource_mut::<SceneRegistry>()
+            .map
+            .spawned
+            .push(scene_entity);
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::inventory::InventoryModel>()
+            .gold = 999;
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::game_shop::GameShopModel>()
+            .upsert(mir2_client_bevy::game_shop::GameShopEntry {
+                game_shop_index: 9,
+                item_index: 10,
+                item_name: "Account A cash item".to_owned(),
+                ..Default::default()
+            });
+        app.world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(mir2_client_bevy::pending_operations::PendingOperationKey::StorageExpand);
+
+        assert!(native_ingest::push_native_data_reset());
+        app.update();
+
+        assert!(app
+            .world()
+            .resource::<RuntimeWorldState>()
+            .snapshot
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .map
+            .spawned
+            .is_empty());
+        assert!(!app.world().entities().contains(scene_entity));
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::inventory::InventoryModel>()
+                .gold,
+            0
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .items
+            .is_empty());
+        assert!(app.world().resource::<PendingOperations>().is_empty());
+        assert_eq!(app.world().resource::<SessionResetRevision>().0, 1);
+        assert_eq!(app.world().resource::<SceneResetRevision>().0, 1);
+    }
+
+    #[test]
+    fn data_reset_clears_all_character_read_models_before_next_account_snapshot() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::read_model::UiReadModel>()
+            .player
+            .name = Some("Account A".to_owned());
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::map::MapModel>()
+            .center_x = 321;
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::entities::EntityModelSet>()
+            .entities
+            .push(mir2_client_bevy::entities::EntityModel {
+                object_id: "100".to_owned(),
+                kind: mir2_client_bevy::entities::EntityKind::SelfPlayer,
+                name: "Account A".to_owned(),
+                x: 1,
+                y: 2,
+                level: Some(7),
+                direction: Some("Down".to_owned()),
+            });
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::inventory::InventoryModel>()
+            .gold = 999;
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::chat::ChatModel>()
+            .lines
+            .push(mir2_client_bevy::chat::ChatLine {
+                text: "A-only".to_owned(),
+                channel: "normal".to_owned(),
+            });
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::skill_model::SkillModel>()
+            .skills
+            .push(mir2_client_bevy::skill_model::SkillEntry {
+                id: 1,
+                name: "FireBall".to_owned(),
+                level: 1,
+                key: Some("1".to_owned()),
+                cooldown_ms: 500,
+                mp_cost: 5,
+            });
+        app.world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(mir2_client_bevy::pending_operations::PendingOperationKey::StorageExpand);
+
+        assert!(native_ingest::push_native_data_reset());
+        app.update();
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>()
+                .player
+                .name,
+            None
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::map::MapModel>()
+                .center_x,
+            0
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::entities::EntityModelSet>()
+            .entities
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::inventory::InventoryModel>()
+                .gold,
+            0
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::chat::ChatModel>()
+            .lines
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModel>()
+            .skills
+            .is_empty());
+        assert!(app.world().resource::<PendingOperations>().is_empty());
+        assert_eq!(app.world().resource::<SessionResetRevision>().0, 1);
+    }
+
+    #[test]
+    fn unchanged_periodic_inventory_snapshot_keeps_pending_until_exact_nack() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        *app.world_mut()
+            .resource_mut::<mir2_client_bevy::inventory::InventoryModel>() =
+            mir2_client_bevy::inventory::InventoryModel {
+                gold: 10,
+                items: vec![mir2_client_bevy::inventory::ItemModel {
+                    unique_id: Some(10),
+                    key: "small-hp-drug".into(),
+                    name: "Potion".into(),
+                    quantity: 5,
+                    slot: 0,
+                    container: 0,
+                    ..mir2_client_bevy::inventory::ItemModel::default()
+                }],
+                ..Default::default()
+            };
+        let key = mir2_client_bevy::pending_operations::PendingOperationKey::Split {
+            grid: "inventory".into(),
+            unique_id: 10,
+            count: 2,
+        };
+        app.world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(key.clone());
+
+        assert!(native_ingest::push_native_inventory_model(
+            r#"{"gold":10,"items":[{"uniqueId":10,"key":"small-hp-drug","name":"Potion","quantity":5,"slot":0,"container":0}]}"#.to_owned()
+        ));
+        app.update();
+        assert!(app.world().resource::<PendingOperations>().contains(&key));
+
+        assert!(native_ingest::push_native_inventory_operation_ack(
+            r#"{"operation":"split","grid":"Inventory","unique_id":10,"count":2,"success":false}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(!app.world().resource::<PendingOperations>().contains(&key));
+        assert_eq!(
+            app.world()
+                .resource::<InventoryOperationFeedback>()
+                .last
+                .as_ref()
+                .map(InventoryOperationAck::success),
+            Some(false)
+        );
+    }
+
+    #[test]
+    fn reset_drops_account_a_models_but_preserves_account_b_models_queued_after_it() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_inventory_model(
+            r#"{"gold":111,"items":[]}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_data_reset());
+        assert!(native_ingest::push_native_inventory_model(
+            r#"{"gold":222,"items":[]}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_ui_read_model(
+            r#"{"player":{"name":"Account B","hp":10,"maxHp":10}}"#.to_owned()
+        ));
+
+        app.update();
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::inventory::InventoryModel>()
+                .gold,
+            222
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>()
+                .player
+                .name
+                .as_deref(),
+            Some("Account B")
+        );
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod native_soak_metrics_tests {
+    use super::*;
+
+    #[test]
+    fn native_soak_counts_empty_scene_are_zero() {
+        let registry = SceneRegistry::default();
+        let effect_state = RuntimeEffectRenderState::default();
+        let additive_cache = additive_material::CrystalAdditiveMaterialCache::default();
+        let additive_materials = Assets::<additive_material::CrystalAdditiveMaterial>::default();
+
+        assert_eq!(
+            native_soak_counts(
+                &registry,
+                &effect_state,
+                &additive_cache,
+                &additive_materials,
+            ),
+            NativeSoakCounts::default()
+        );
+    }
+
+    #[test]
+    fn native_soak_counts_separate_retained_layers_and_assets() {
+        let mut registry = SceneRegistry::default();
+        registry.effect_render.insert(
+            "fx-primary".to_owned(),
+            EffectRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "primary.png".to_owned(),
+                additive: true,
+            },
+        );
+        registry.effect_render_masks.insert(
+            "fx-primary:mask".to_owned(),
+            EffectRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "mask.png".to_owned(),
+                additive: true,
+            },
+        );
+        registry.effect_render_shadows.insert(
+            "fx-primary:shadow".to_owned(),
+            EffectShadowLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                mesh: Handle::default(),
+                material: Handle::default(),
+            },
+        );
+        registry
+            .effect_render_images
+            .insert("primary.png".to_owned(), Handle::default());
+        registry.entity_render_layers.insert(
+            "player:body".to_owned(),
+            EntityRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "player.png".to_owned(),
+                atlas_key: None,
+                atlas_rect_key: None,
+                additive: false,
+            },
+        );
+        registry.entities.insert(
+            "player".to_owned(),
+            SceneEntityHandles {
+                root: Entity::PLACEHOLDER,
+                shadow: Entity::PLACEHOLDER,
+                body: Entity::PLACEHOLDER,
+                crest: Entity::PLACEHOLDER,
+                facing: Entity::PLACEHOLDER,
+                selection: Entity::PLACEHOLDER,
+            },
+        );
+        registry.entity_render_atlases.insert(
+            "players".to_owned(),
+            EntityRenderAtlasHandle {
+                layout: Handle::default(),
+                rects: HashMap::new(),
+                uv_rects: HashMap::new(),
+                size: UVec2::new(1, 1),
+                image_key: None,
+                image: None,
+            },
+        );
+        registry.map_render.tiles.insert(
+            "tile-1".to_owned(),
+            MapRenderTileHandle {
+                entity: Entity::PLACEHOLDER,
+                last_seen_generation: 1,
+            },
+        );
+        registry.map.spawned.push(Entity::PLACEHOLDER);
+        registry.mine_nodes.insert(
+            (1, 2),
+            MineNodeHandles {
+                root: Entity::PLACEHOLDER,
+                ore: Entity::PLACEHOLDER,
+            },
+        );
+        registry.lighting_layers.insert(
+            "light-1".to_owned(),
+            EffectRenderLayerHandle {
+                entity: Entity::PLACEHOLDER,
+                image_key: "light.png".to_owned(),
+                additive: false,
+            },
+        );
+        registry.lighting_images.push(Handle::default());
+
+        let effect_state = RuntimeEffectRenderState {
+            snapshot: Some(
+                serde_json::from_str(
+                    r#"{
+                        "enabled": true,
+                        "stageWidth": 1024,
+                        "stageHeight": 768,
+                        "effects": [{
+                            "key": "fx-primary",
+                            "left": 0,
+                            "top": 0,
+                            "width": 1,
+                            "height": 1,
+                            "z": 1
+                        }]
+                    }"#,
+                )
+                .expect("minimal effect render state should deserialize"),
+            ),
+        };
+        let mut additive_cache = additive_material::CrystalAdditiveMaterialCache::default();
+        let mut additive_materials =
+            Assets::<additive_material::CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let image = images.add(Image::default());
+        let cached_material =
+            additive_cache.material("fx-primary", image, 1.0, &mut additive_materials);
+
+        let counts = native_soak_counts(
+            &registry,
+            &effect_state,
+            &additive_cache,
+            &additive_materials,
+        );
+
+        assert_eq!(counts.snapshot_effects, 1);
+        assert_eq!(counts.retained_effect_primary, 1);
+        assert_eq!(counts.retained_effect_masks, 1);
+        assert_eq!(counts.retained_effect_shadows, 1);
+        assert_eq!(counts.retained_effect_images, 1);
+        assert_eq!(counts.retained_entity_layers, 1);
+        assert_eq!(counts.legacy_scene_entities, 1);
+        assert_eq!(counts.entity_atlases, 1);
+        assert_eq!(counts.map_render_tiles, 1);
+        assert_eq!(counts.map_spawned_entities, 1);
+        assert_eq!(counts.mine_nodes, 1);
+        assert_eq!(counts.lighting_layers, 1);
+        assert_eq!(counts.lighting_images, 1);
+        assert_eq!(counts.additive_cache_entries, 1);
+        assert_eq!(counts.additive_cache_live_entries, 1);
+        assert_eq!(counts.additive_asset_count, 1);
+
+        let encoded = native_soak_metrics_json(4_242, 12_345, &counts);
+        let payload: serde_json::Value =
+            serde_json::from_str(&encoded).expect("native soak metrics should be valid JSON");
+        assert_eq!(payload["processId"], 4_242);
+        assert_eq!(payload["timestampMs"], 12_345);
+        assert_eq!(payload["snapshotEffects"], 1);
+        assert_eq!(payload["additiveCacheEntries"], 1);
+        assert_eq!(payload["additiveCacheLiveEntries"], 1);
+        assert!(!encoded.contains('\n'));
+
+        additive_materials.remove(cached_material.id());
+        let stale = native_soak_counts(
+            &registry,
+            &effect_state,
+            &additive_cache,
+            &additive_materials,
+        );
+        assert_eq!(stale.additive_cache_entries, 1);
+        assert_eq!(stale.additive_cache_live_entries, 0);
+        assert_eq!(stale.additive_asset_count, 0);
     }
 }

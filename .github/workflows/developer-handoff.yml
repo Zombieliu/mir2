@@ -83,11 +83,85 @@ jobs:
         working-directory: mir2-web3
         run: ./scripts/test-developer-asset-installer.ps1
 
-      - name: Build Player Web with tracked runtime
+      - name: Fetch pinned prebuilt Bevy runtime
+        id: bevy_prebuilt
+        continue-on-error: true
+        working-directory: mir2-web3/apps/web
+        run: npm run runtime:fetch:prebuilt
+
+      - name: Install pinned Bevy runtime build tools
+        if: ${{ steps.bevy_prebuilt.outcome == 'failure' }}
+        shell: pwsh
+        working-directory: mir2-web3/apps/game-client/runtime
+        run: |
+          $toolchainText = Get-Content -LiteralPath rust-toolchain.toml -Raw
+          $toolchainMatch = [regex]::Match($toolchainText, '(?m)^channel\s*=\s*"([^"]+)"')
+          if (-not $toolchainMatch.Success) {
+            throw "Unable to resolve the pinned runtime toolchain from rust-toolchain.toml"
+          }
+          $toolchain = $toolchainMatch.Groups[1].Value
+
+          $lockText = Get-Content -LiteralPath Cargo.lock -Raw
+          $wasmBindgenMatch = [regex]::Match(
+            $lockText,
+            '(?ms)^\[\[package\]\]\s*\r?\nname = "wasm-bindgen"\s*\r?\nversion = "([^"]+)"'
+          )
+          if (-not $wasmBindgenMatch.Success) {
+            throw "Unable to resolve the pinned wasm-bindgen version from Cargo.lock"
+          }
+          $wasmBindgenVersion = $wasmBindgenMatch.Groups[1].Value
+
+          rustup toolchain install `
+            $toolchain `
+            --profile minimal `
+            --component rustfmt `
+            --target wasm32-unknown-unknown
+          if ($LASTEXITCODE -ne 0) {
+            throw "Unable to install runtime toolchain $toolchain"
+          }
+          $runtimeCargo = (rustup which cargo --toolchain $toolchain).Trim()
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $runtimeCargo)) {
+            throw "Unable to resolve cargo for runtime toolchain $toolchain"
+          }
+          $runtimeRustc = (rustup which rustc --toolchain $toolchain).Trim()
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $runtimeRustc)) {
+            throw "Unable to resolve rustc for runtime toolchain $toolchain"
+          }
+          $env:RUSTUP_TOOLCHAIN = $toolchain
+          $env:RUSTC = $runtimeRustc
+          & $runtimeCargo install wasm-bindgen-cli --version $wasmBindgenVersion --locked
+          if ($LASTEXITCODE -ne 0) {
+            throw "Unable to install wasm-bindgen-cli $wasmBindgenVersion"
+          }
+          "CARGO_BIN=$runtimeCargo" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RUSTC=$runtimeRustc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Rebuild pinned Bevy runtime from source
+        if: ${{ steps.bevy_prebuilt.outcome == 'failure' }}
+        working-directory: mir2-web3/apps/web
+        env:
+          MIR2_USE_PREBUILT_BEVY_RUNTIME: "0"
+        run: npm run runtime:build:release
+
+      - name: Build Player Web with verified runtime
         working-directory: mir2-web3/apps/web
         env:
           MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
         run: npm run build
+
+      - name: Verify active Bevy runtime bundle
+        working-directory: mir2-web3/apps/web
+        run: npm run test:bevy-runtime-budget
+
+      - name: Verify pinned prebuilt Bevy runtime manifest remains exact
+        if: ${{ steps.bevy_prebuilt.outcome == 'success' }}
+        shell: pwsh
+        run: git diff --exit-code -- mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
+
+      - name: Restore current-source Bevy runtime manifest after fallback validation
+        if: ${{ steps.bevy_prebuilt.outcome == 'failure' }}
+        shell: pwsh
+        run: git restore --source=HEAD --worktree -- mir2-web3/apps/web/lib/generated/bevy_runtime_version.json
 
       - name: Typecheck and build Admin Web
         working-directory: mir2-web3/apps/admin-web

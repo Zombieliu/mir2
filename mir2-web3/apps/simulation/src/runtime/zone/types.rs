@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
-use crate::config::GroundDropSnapshot;
+use crate::config::{GroundDropSnapshot, WorldEntityDisposition};
 
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate};
 use mir2_protocol::{
@@ -43,6 +43,64 @@ pub struct ZoneKey {
     pub map_file_name: String,
     pub channel_id: u16,
     pub instance_id: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneMapMetadata {
+    pub map_index: i32,
+    pub file_name: String,
+    pub title: String,
+    pub mini_map: u16,
+    pub big_map: u16,
+    pub lights: u8,
+    pub map_dark_light: u8,
+    pub music: u16,
+    pub weather: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneNpcTeleportDestination {
+    pub map_file_name: String,
+    pub object_id: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneNpcTeleportConfig {
+    pub enabled: bool,
+    pub cost: u32,
+    pub maps: BTreeMap<String, ZoneMapMetadata>,
+    pub destinations: Vec<ZoneNpcTeleportDestination>,
+}
+
+impl ZoneNpcTeleportConfig {
+    pub fn disabled(cost: u32) -> Self {
+        Self {
+            enabled: false,
+            cost,
+            maps: BTreeMap::new(),
+            destinations: Vec::new(),
+        }
+    }
+
+    pub fn destination_enabled(&self, map_file_name: &str, object_id: u32) -> bool {
+        self.enabled
+            && self.destinations.iter().any(|destination| {
+                destination.object_id == object_id
+                    && destination
+                        .map_file_name
+                        .eq_ignore_ascii_case(map_file_name)
+            })
+    }
+
+    pub fn map(&self, map_file_name: &str) -> Option<&ZoneMapMetadata> {
+        self.maps
+            .get(&map_file_name.to_ascii_lowercase())
+            .or_else(|| {
+                self.maps
+                    .values()
+                    .find(|map| map.file_name.eq_ignore_ascii_case(map_file_name))
+            })
+    }
 }
 
 impl ZoneKey {
@@ -165,6 +223,23 @@ impl ZonePlayerCombatStats {
     }
 }
 
+/// Trusted combat-admission state mirrored from the owning personal session.
+///
+/// This is deliberately separate from client packets and render snapshots.
+/// A newly joined Zone player has no value and therefore cannot attack until
+/// the trusted gateway/session integration explicitly synchronizes it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZonePlayerCombatState {
+    pub class: MirClass,
+    pub has_class_weapon: bool,
+    pub riding_mount: bool,
+    #[serde(default)]
+    pub mount_attack_allowed: bool,
+    pub dead: bool,
+    pub attack_blocked: bool,
+    pub fishing: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneJoin {
     pub session_id: SessionId,
@@ -200,13 +275,65 @@ pub struct ZoneMovementAction {
     pub received_at_ms: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneMonsterRespawnPolicy {
+    /// Smallest wall-clock delay before this spawn may return. This is a
+    /// floor applied after the signed Crystal random window is evaluated.
+    pub minimum_delay_ms: u64,
+    /// Delay before applying the deterministic random window.
+    pub base_delay_ms: u64,
+    /// Size of one deterministic jitter step. Zero disables jitter.
+    pub random_delay_step_ms: u64,
+    /// Number of deterministic jitter outcomes, including the zero step.
+    pub random_delay_steps: u64,
+    /// Number of steps subtracted from the base before adding the roll.
+    pub random_delay_subtract_steps: u64,
+    /// Stable source coordinates keep the jitter independent of sessions.
+    pub rule_index: u32,
+    pub slot_index: u32,
+}
+
+impl ZoneMonsterRespawnPolicy {
+    pub(crate) fn due_at_ms(self, died_at_ms: u64) -> u64 {
+        let steps = self.random_delay_steps.max(1);
+        let random_step = if self.random_delay_step_ms == 0 || steps == 1 {
+            0
+        } else {
+            let salt = (died_at_ms / 1_000)
+                .wrapping_mul(1_103_515_245)
+                .wrapping_add(u64::from(self.rule_index).wrapping_mul(97_651))
+                .wrapping_add(u64::from(self.slot_index).wrapping_mul(12_347))
+                .wrapping_add(0x9E37_79B9);
+            salt % steps
+        };
+        died_at_ms.saturating_add(self.delay_ms_for_roll(random_step))
+    }
+
+    fn delay_ms_for_roll(self, random_step: u64) -> u64 {
+        let delay_ms = self
+            .base_delay_ms
+            .saturating_add(random_step.saturating_mul(self.random_delay_step_ms))
+            .saturating_sub(
+                self.random_delay_subtract_steps
+                    .saturating_mul(self.random_delay_step_ms),
+            )
+            .max(self.minimum_delay_ms);
+        delay_ms
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterSpawn {
     pub object_id: u32,
     pub name: String,
     pub name_colour_argb: i32,
     pub image: u16,
     pub ai: u8,
+    /// Explicit authoritative relationship to players. `None` represents an
+    /// old or incomplete producer and is deliberately treated as non-hostile;
+    /// AI controls behaviour, never combat authorization.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disposition: Option<WorldEntityDisposition>,
     pub level: u16,
     pub max_hp: i32,
     pub hp: i32,
@@ -227,6 +354,10 @@ pub struct ZoneMonsterSpawn {
     /// `defense.is_zero()` the zone treats the monster as having no armour/dodge
     /// and applies trusted damage unchanged (legacy behaviour).
     pub defense: ZoneMonsterDefense,
+    /// Server-authored wall-clock respawn policy. Dynamic/event monsters leave
+    /// this unset and therefore do not silently become persistent map spawns.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub respawn: Option<ZoneMonsterRespawnPolicy>,
     pub drops: Vec<GroundDropSnapshot>,
 }
 
@@ -308,6 +439,11 @@ pub enum ZoneCommand {
         direction: MirDirection,
         now_ms: u64,
     },
+    TeleportToNpc {
+        session_id: SessionId,
+        object_id: u32,
+        available_gold: u32,
+    },
     UpdateChatProfile {
         session_id: SessionId,
         profile: ZoneChatProfile,
@@ -318,6 +454,12 @@ pub enum ZoneCommand {
     UpdatePlayerCombatStats {
         session_id: SessionId,
         stats: ZonePlayerCombatStats,
+    },
+    /// Trusted server-to-zone admission update. This command is an internal
+    /// API and must never be constructed from raw client JSON.
+    SyncPlayerCombatState {
+        session_id: SessionId,
+        state: ZonePlayerCombatState,
     },
     SyncPlayerTransform {
         session_id: SessionId,
@@ -380,9 +522,37 @@ pub enum ZoneCommand {
         damage: i32,
         now_ms: u64,
     },
+    /// Trusted gateway transaction for a shared melee target that may not yet
+    /// be retained by this Zone. Admission is checked before the optional
+    /// monster is materialized, and the whole operation commits atomically.
+    PlayerAttackMaterializedObject {
+        session_id: SessionId,
+        object_id: u32,
+        monster: Option<ZoneMonsterSpawn>,
+        direction: MirDirection,
+        spell: u8,
+        level: u8,
+        attack_type: u8,
+        damage: i32,
+        now_ms: u64,
+    },
     PlayerRangeAttackObject {
         session_id: SessionId,
         object_id: u32,
+        direction: MirDirection,
+        target: Point,
+        spell: Spell,
+        level: u8,
+        attack_type: u8,
+        damage: i32,
+        now_ms: u64,
+    },
+    /// Trusted gateway transaction equivalent of
+    /// `PlayerAttackMaterializedObject` for Archer range attacks.
+    PlayerRangeAttackMaterializedObject {
+        session_id: SessionId,
+        object_id: u32,
+        monster: Option<ZoneMonsterSpawn>,
         direction: MirDirection,
         target: Point,
         spell: Spell,
@@ -440,14 +610,32 @@ pub enum ZoneCommand {
         group_members: Vec<String>,
         now_ms: u64,
     },
+    /// Legacy object-id-only command. The authoritative runtime rejects it;
+    /// callers must use `CommitGroundDropClaimWithTicket`.
     CommitGroundDropClaim {
         session_id: SessionId,
         object_id: u32,
     },
+    CommitGroundDropClaimWithTicket {
+        session_id: SessionId,
+        ticket: GroundDropClaimTicket,
+    },
+    /// Legacy object-id-only command. The authoritative runtime rejects it;
+    /// callers must use `CancelGroundDropClaimWithTicket`.
     CancelGroundDropClaim {
         session_id: SessionId,
         object_id: u32,
         now_ms: u64,
+    },
+    CancelGroundDropClaimWithTicket {
+        session_id: SessionId,
+        ticket: GroundDropClaimTicket,
+        now_ms: u64,
+    },
+    /// Trusted server-side interaction boundary. Discards movement intents
+    /// that were accepted before an NPC/dialog action became authoritative.
+    CancelPendingMovement {
+        session_id: SessionId,
     },
     TickPlayerMovement {
         session_id: SessionId,
@@ -470,6 +658,34 @@ pub enum ZoneCommand {
     },
 }
 
+impl ZoneCommand {
+    /// Construct a trusted server-to-zone combat admission update without
+    /// exposing the internal state as a client protocol shape.
+    pub fn sync_player_combat_state(
+        session_id: SessionId,
+        class: MirClass,
+        has_class_weapon: bool,
+        riding_mount: bool,
+        mount_attack_allowed: bool,
+        dead: bool,
+        attack_blocked: bool,
+        fishing: bool,
+    ) -> Self {
+        Self::SyncPlayerCombatState {
+            session_id,
+            state: ZonePlayerCombatState {
+                class,
+                has_class_weapon,
+                riding_mount,
+                mount_attack_allowed,
+                dead,
+                attack_blocked,
+                fishing,
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum ZoneOutbound {
     ToSession {
@@ -488,14 +704,25 @@ pub enum ZoneOutbound {
         position: Point,
         direction: MirDirection,
     },
+    NpcTeleportCommit {
+        session_id: SessionId,
+        gold_cost: u32,
+        map: ZoneMapMetadata,
+    },
     ConsumeShoutPermission {
         session_id: SessionId,
         map_shout: bool,
         server_shout: bool,
     },
+    /// Legacy outbound retained for source compatibility. New claims use the
+    /// ticket-bearing variant exclusively.
     GroundDropClaimed {
         session_id: SessionId,
         drop: GroundDropSnapshot,
+    },
+    GroundDropClaimedWithTicket {
+        session_id: SessionId,
+        ticket: GroundDropClaimTicket,
     },
     MonsterKillAward {
         session_id: SessionId,
@@ -536,11 +763,31 @@ pub(crate) struct ZoneObject {
 pub(crate) struct ZoneGroundDrop {
     pub drop: GroundDropSnapshot,
     pub owner_expires_at_ms: Option<u64>,
+    #[serde(default)]
+    pub drop_generation: u64,
+    #[serde(default)]
+    pub payload_digest: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneGroundDropClaim {
     pub session_id: SessionId,
+    pub drop: GroundDropSnapshot,
+    #[serde(default)]
+    pub ticket: Option<GroundDropClaimTicket>,
+}
+
+/// Authoritative internal capability for a ground-drop claim. This type is
+/// intentionally not exported through the client snapshot or packet layers.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GroundDropClaimTicket {
+    pub claim_id: u64,
+    pub object_id: u32,
+    pub drop_generation: u64,
+    pub payload_digest: String,
+    pub idempotency_key: String,
+    pub session_id: SessionId,
+    pub owner_object_id: Option<u32>,
     pub drop: GroundDropSnapshot,
 }
 
@@ -548,6 +795,11 @@ pub(crate) struct ZoneGroundDropClaim {
 pub(crate) struct ZoneNativeMonster {
     pub name: String,
     pub ai: u8,
+    /// Retained authoritative relationship supplied by the spawn producer.
+    /// Missing legacy checkpoint data fails closed.
+    #[serde(default)]
+    pub disposition: Option<WorldEntityDisposition>,
+    #[serde(default)]
     pub hostile_to_player: bool,
     pub owner_session_id: Option<SessionId>,
     pub master_object_id: u32,
@@ -593,6 +845,12 @@ pub(crate) struct ZoneNativeMonster {
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct ZoneNativeMonsterRespawn {
+    pub spawn: ZoneMonsterSpawn,
+    pub due_at_ms: Option<u64>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ZoneNativeMonsterSnapshot {
@@ -602,6 +860,27 @@ pub struct ZoneNativeMonsterSnapshot {
     pub hp: i32,
     pub max_hp: i32,
     pub dead: bool,
+    pub disposition: Option<WorldEntityDisposition>,
+    pub hostile_to_player: bool,
+}
+
+impl ZoneMonsterSpawn {
+    pub fn is_authoritatively_hostile_to_player(&self) -> bool {
+        self.disposition == Some(WorldEntityDisposition::Hostile)
+    }
+
+    /// Crystal passive livestock can be struck by an adjacent physical melee
+    /// attack even though it must never acquire or attack a player itself.
+    /// Friendly entities and incomplete legacy records continue to fail closed.
+    pub fn is_authoritatively_melee_attackable_by_player(&self) -> bool {
+        self.is_authoritatively_hostile_to_player()
+            || (self.disposition == Some(WorldEntityDisposition::Neutral)
+                && zone_native_monster_requires_harvest(self.ai))
+    }
+}
+
+pub(super) fn zone_native_monster_requires_harvest(ai: u8) -> bool {
+    crate::runtime::monsters::monster_ai_requires_harvest(ai)
 }
 
 impl ZoneNativeMonster {
@@ -612,7 +891,8 @@ impl ZoneNativeMonster {
         Self {
             name: spawn.name.clone(),
             ai: spawn.ai,
-            hostile_to_player: zone_native_monster_targets_players(spawn.ai),
+            disposition: spawn.disposition,
+            hostile_to_player: spawn.is_authoritatively_hostile_to_player(),
             owner_session_id: None,
             master_object_id: 0,
             owner_player_object_id: 0,
@@ -686,10 +966,6 @@ fn normalize_zone_monster_attack_speed_ms(value: u64) -> u64 {
     }
 }
 
-pub(crate) fn zone_native_monster_targets_players(ai: u8) -> bool {
-    !matches!(ai, 1 | 2 | 3 | 6 | 34 | 56 | 57 | 58 | 113)
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZonePlayer {
     pub session_id: SessionId,
@@ -738,6 +1014,10 @@ pub(crate) struct ZonePlayer {
     pub last_regen_at_ms: u64,
     pub chat_profile: ZoneChatProfile,
     pub combat_stats: ZonePlayerCombatStats,
+    /// `None` is the fail-closed default until the trusted session synchronizes
+    /// all combat predicates.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat_state: Option<ZonePlayerCombatState>,
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) reincarnation_offer: Option<ZoneReincarnationOffer>,
@@ -801,8 +1081,84 @@ impl ZonePlayer {
             last_regen_at_ms: 0,
             chat_profile: join.chat_profile,
             combat_stats: join.combat_stats,
+            combat_state: None,
             buffs: BTreeMap::new(),
             reincarnation_offer: None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod combat_state_tests {
+    use super::*;
+
+    #[test]
+    fn old_host_defaults_missing_mount_attack_capability_to_denied() {
+        let mut value = serde_json::to_value(ZonePlayerCombatState {
+            class: MirClass::Warrior,
+            has_class_weapon: false,
+            riding_mount: true,
+            mount_attack_allowed: true,
+            dead: false,
+            attack_blocked: false,
+            fishing: false,
+        })
+        .expect("serialize combat state");
+        value
+            .as_object_mut()
+            .expect("combat state object")
+            .remove("mount_attack_allowed");
+        let restored: ZonePlayerCombatState =
+            serde_json::from_value(value).expect("deserialize old combat state");
+        assert!(!restored.mount_attack_allowed);
+    }
+
+    #[test]
+    fn crystal_minutes_delay_matches_private_formula_when_random_exceeds_delay() {
+        let policy = ZoneMonsterRespawnPolicy {
+            minimum_delay_ms: 60_000,
+            base_delay_ms: 10 * 60_000,
+            random_delay_step_ms: 60_000,
+            random_delay_steps: 60,
+            random_delay_subtract_steps: 30,
+            rule_index: 0,
+            slot_index: 0,
+        };
+        let delays = (0..60)
+            .map(|roll| policy.delay_ms_for_roll(roll))
+            .collect::<Vec<_>>();
+        for (roll, delay_ms) in delays.iter().copied().enumerate() {
+            let expected_minutes = (10_i64 - 30 + roll as i64).max(1) as u64;
+            assert_eq!(delay_ms, expected_minutes * 60_000);
+        }
+        assert_eq!(delays.iter().filter(|delay| **delay == 60_000).count(), 22);
+        assert_eq!(delays.last(), Some(&(39 * 60_000)));
+    }
+
+    #[test]
+    fn fixed_tick_delay_matches_private_formula_for_every_roll() {
+        let policy = ZoneMonsterRespawnPolicy {
+            minimum_delay_ms: 0,
+            base_delay_ms: 7_000,
+            random_delay_step_ms: 1_000,
+            random_delay_steps: 5,
+            random_delay_subtract_steps: 0,
+            rule_index: 0,
+            slot_index: 0,
+        };
+        for roll in 0..5 {
+            assert_eq!(policy.delay_ms_for_roll(roll), (7 + roll) * 1_000);
+        }
+    }
+
+    #[test]
+    fn crystal_harvest_ai_contract_is_shared_by_session_and_zone() {
+        for ai in 0_u8..=u8::MAX {
+            assert_eq!(
+                crate::runtime::monsters::initial_harvest_monster_state(ai).is_some(),
+                zone_native_monster_requires_harvest(ai),
+                "private and Zone harvest semantics diverged for AI {ai}"
+            );
         }
     }
 }

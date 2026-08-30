@@ -265,6 +265,9 @@ fn parse_direction(value: Option<&str>) -> Direction {
 
 fn parse_action(value: &str) -> Option<AnimationAction> {
     match value {
+        "harvest" => Some(AnimationAction::Harvest),
+        "show" => Some(AnimationAction::Show),
+        "hide" => Some(AnimationAction::Hide),
         "walking" => Some(AnimationAction::Walking),
         "running" => Some(AnimationAction::Running),
         "attack1" => Some(AnimationAction::Attack1),
@@ -272,10 +275,13 @@ fn parse_action(value: &str) -> Option<AnimationAction> {
         "attack3" => Some(AnimationAction::Attack3),
         "attack4" => Some(AnimationAction::Attack4),
         "attackRange1" => Some(AnimationAction::AttackRange1),
+        "attackRange2" => Some(AnimationAction::AttackRange2),
+        "dashAttack" => Some(AnimationAction::DashAttack),
         "spell" => Some(AnimationAction::Spell),
         "struck" => Some(AnimationAction::Struck),
         "die" => Some(AnimationAction::Die),
         "dead" => Some(AnimationAction::Dead),
+        "skeleton" => Some(AnimationAction::Skeleton),
         "revive" => Some(AnimationAction::Revive),
         _ => None,
     }
@@ -290,6 +296,7 @@ fn normalize_action(kind: EntityKind, action: AnimationAction) -> AnimationActio
             | AnimationAction::Attack3
             | AnimationAction::Attack4
             | AnimationAction::AttackRange1
+            | AnimationAction::AttackRange2
             | AnimationAction::Spell,
         ) => AnimationAction::Attack1,
         _ => action,
@@ -300,6 +307,8 @@ fn action_name(action: AnimationAction) -> &'static str {
     match action {
         AnimationAction::Standing => "standing",
         AnimationAction::Harvest => "harvest",
+        AnimationAction::Show => "show",
+        AnimationAction::Hide => "hide",
         AnimationAction::Walking => "walking",
         AnimationAction::Running => "running",
         AnimationAction::Attack1 => "attack1",
@@ -307,10 +316,13 @@ fn action_name(action: AnimationAction) -> &'static str {
         AnimationAction::Attack3 => "attack3",
         AnimationAction::Attack4 => "attack4",
         AnimationAction::AttackRange1 => "attackRange1",
+        AnimationAction::AttackRange2 => "attackRange2",
+        AnimationAction::DashAttack => "dashAttack",
         AnimationAction::Spell => "spell",
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "die",
         AnimationAction::Dead => "dead",
+        AnimationAction::Skeleton => "skeleton",
         AnimationAction::Revive => "revive",
     }
 }
@@ -319,16 +331,22 @@ fn animation_state_name(action: AnimationAction) -> &'static str {
     match action {
         AnimationAction::Standing => "standing",
         AnimationAction::Harvest => "harvesting",
+        AnimationAction::Show => "showing",
+        AnimationAction::Hide => "hiding",
         AnimationAction::Walking => "walking",
         AnimationAction::Running => "running",
         AnimationAction::Attack1
         | AnimationAction::Attack2
         | AnimationAction::Attack3
-        | AnimationAction::Attack4 => "attackMelee",
-        AnimationAction::AttackRange1 | AnimationAction::Spell => "attackRange",
+        | AnimationAction::Attack4
+        | AnimationAction::DashAttack => "attackMelee",
+        AnimationAction::AttackRange1 | AnimationAction::AttackRange2 | AnimationAction::Spell => {
+            "attackRange"
+        }
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "dying",
         AnimationAction::Dead => "dead",
+        AnimationAction::Skeleton => "skeleton",
         AnimationAction::Revive => "reviving",
     }
 }
@@ -376,6 +394,17 @@ mod tests {
         assert_eq!(repeated.poses[0].action, "attack1");
         assert_eq!(repeated.poses[0].logical_frame_index, 2);
         assert!(repeated.errors.is_empty());
+    }
+
+    #[test]
+    fn attack_range_two_round_trips_as_the_ranged_animation_state() {
+        let mut bridge = AnimationBridge::new("0:player".to_owned(), 7, 1_000);
+        let resolved = bridge.resolve(input(1_000, "attackRange2", Some("magic:122:1")));
+
+        assert_eq!(resolved.poses[0].action, "attackRange2");
+        assert_eq!(resolved.poses[0].animation_state, "attackRange");
+        assert_eq!(resolved.poses[0].logical_frame_index, 0);
+        assert!(resolved.errors.is_empty());
     }
 
     #[test]

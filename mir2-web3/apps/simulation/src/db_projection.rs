@@ -67,6 +67,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0010_commercial_identity",
         include_str!("../../../infra/postgres/migrations/0010_commercial_identity.sql"),
     ),
+    (
+        "0011_game_economy_trade_projections",
+        include_str!("../../../infra/postgres/migrations/0011_game_economy_trade_projections.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.
@@ -735,6 +739,7 @@ mod tests {
         systems.guild.name = "Heroes".to_string();
         systems.mail.push(crate::config::Stage5MailMessage {
             id: 1,
+            delivery_nonce: "projection-fixture-mail-1".to_string(),
             from: "GM".to_string(),
             to: "Hero".to_string(),
             subject: "Welcome".to_string(),

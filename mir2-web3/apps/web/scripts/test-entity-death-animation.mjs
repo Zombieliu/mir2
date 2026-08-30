@@ -63,3 +63,18 @@ test("a new death incarnation receives a new action token", () => {
     "life:12346",
   );
 });
+
+test("maps a Scarecrow revive window to a distinct Revive action token", () => {
+  const scarecrow = {
+    objectId: "monster-2005",
+    kind: "monster",
+    direction: "Right",
+    dead: false,
+    reviveStartedAt: 20_005,
+  };
+
+  assert.deepEqual(animationEventForEntity(scarecrow, "reviving"), {
+    action: "revive",
+    actionToken: "revive:20005",
+  });
+});

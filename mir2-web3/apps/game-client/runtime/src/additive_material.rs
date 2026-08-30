@@ -35,6 +35,18 @@ pub(crate) struct CrystalAdditiveMaterial {
     texture: Handle<Image>,
 }
 
+impl CrystalAdditiveMaterial {
+    #[cfg(test)]
+    pub(crate) fn uv_scale_offset(&self) -> Vec4 {
+        self.uv_scale_offset
+    }
+
+    #[cfg(test)]
+    pub(crate) fn opacity(&self) -> f32 {
+        self.tint.alpha
+    }
+}
+
 impl Material2d for CrystalAdditiveMaterial {
     fn fragment_shader() -> ShaderRef {
         ShaderRef::Path(
@@ -81,8 +93,24 @@ impl CrystalAdditiveMaterialCache {
         opacity: f32,
         materials: &mut Assets<CrystalAdditiveMaterial>,
     ) -> Handle<CrystalAdditiveMaterial> {
+        self.material_with_uv(
+            cache_key,
+            texture,
+            opacity,
+            Vec4::new(1.0, 1.0, 0.0, 0.0),
+            materials,
+        )
+    }
+
+    pub(crate) fn material_with_uv(
+        &mut self,
+        cache_key: &str,
+        texture: Handle<Image>,
+        opacity: f32,
+        uv_scale_offset: Vec4,
+        materials: &mut Assets<CrystalAdditiveMaterial>,
+    ) -> Handle<CrystalAdditiveMaterial> {
         let tint = LinearRgba::new(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
-        let uv_scale_offset = Vec4::new(1.0, 1.0, 0.0, 0.0);
         if let Some(handle) = self.materials.get(cache_key) {
             if let Some(mut material) = materials.get_mut(handle) {
                 material.texture = texture;
@@ -99,6 +127,29 @@ impl CrystalAdditiveMaterialCache {
         });
         self.materials.insert(cache_key.to_owned(), handle.clone());
         handle
+    }
+
+    pub(crate) fn evict(
+        &mut self,
+        cache_key: &str,
+        materials: &mut Assets<CrystalAdditiveMaterial>,
+    ) {
+        if let Some(handle) = self.materials.remove(cache_key) {
+            materials.remove(handle.id());
+        }
+    }
+
+    #[cfg(any(not(target_arch = "wasm32"), test))]
+    pub(crate) fn len(&self) -> usize {
+        self.materials.len()
+    }
+
+    #[cfg(any(not(target_arch = "wasm32"), test))]
+    pub(crate) fn live_len(&self, materials: &Assets<CrystalAdditiveMaterial>) -> usize {
+        self.materials
+            .values()
+            .filter(|handle| materials.get(*handle).is_some())
+            .count()
     }
 }
 
@@ -142,5 +193,44 @@ mod tests {
         let shader = include_str!("crystal_additive_material.wgsl");
         assert!(shader.contains("let coverage = source_alpha * brightness;"));
         assert!(shader.contains("sampled.rgb * tint.rgb * source_alpha"));
+    }
+
+    #[test]
+    fn effect_material_cache_evicts_stale_entries_and_remains_bounded() {
+        let mut cache = CrystalAdditiveMaterialCache::default();
+        let mut materials = Assets::<CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let dummy_image = images.add(Image::default());
+        for i in 0..120 {
+            let key = format!("fx-{i}");
+            cache.material(&key, dummy_image.clone(), 1.0, &mut materials);
+        }
+        assert_eq!(cache.len(), 120);
+        assert_eq!(materials.len(), 120);
+        for i in 0..100 {
+            let key = format!("fx-{i}");
+            cache.evict(&key, &mut materials);
+        }
+        assert_eq!(cache.len(), 20);
+        assert_eq!(materials.len(), 20);
+        for i in 120..200 {
+            let key = format!("fx-{i}");
+            cache.material(&key, dummy_image.clone(), 1.0, &mut materials);
+        }
+        assert!(cache.len() <= 100);
+        assert_eq!(cache.len(), materials.len());
+    }
+
+    #[test]
+    fn additive_material_cache_retains_exact_atlas_uv_rect() {
+        let mut cache = CrystalAdditiveMaterialCache::default();
+        let mut materials = Assets::<CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let image = images.add(Image::default());
+        let uv = Vec4::new(0.25, 0.125, 0.5, 0.75);
+        let handle = cache.material_with_uv("scarecrow", image, 0.8, uv, &mut materials);
+        let material = materials.get(&handle).expect("cached additive material");
+        assert_eq!(material.uv_scale_offset, uv);
+        assert_eq!(material.tint.alpha, 0.8);
     }
 }

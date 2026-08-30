@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import net from "node:net";
 import os from "node:os";
@@ -158,6 +158,9 @@ async function main(args) {
     accountTempDir = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-bevy-map-standalone-account-"));
     gatewayLogDir = await fs.mkdtemp(path.join(os.tmpdir(), "mir2-bevy-map-standalone-log-"));
     const accountStorePath = path.join(accountTempDir, "accounts.json");
+    const saveRecoveryDir = path.join(accountTempDir, "save-recovery");
+    const saveRecoveryMacKey = randomBytes(32).toString("hex");
+    runtimeSecrets.add(saveRecoveryMacKey);
     const gatewayLogPath = path.join(gatewayLogDir, "gateway.log");
 
     gateway = await launchGateway({
@@ -165,6 +168,8 @@ async function main(args) {
       webPort: ports.web,
       tcpPort: ports.tcp,
       accountStorePath,
+      saveRecoveryDir,
+      saveRecoveryMacKey,
       qaControlToken,
       logPath: gatewayLogPath,
     });
@@ -399,6 +404,8 @@ async function launchGateway({
   webPort,
   tcpPort,
   accountStorePath,
+  saveRecoveryDir,
+  saveRecoveryMacKey,
   qaControlToken,
   logPath,
 }) {
@@ -406,7 +413,7 @@ async function launchGateway({
   const child = spawn(executable, [], {
     cwd: REPO_ROOT,
     env: {
-      ...process.env,
+      ...isolatedChildEnvironment(),
       MIR2_RUNTIME_ENV: "development",
       MIR2_DEPLOYMENT_ENV: "development",
       MIR2_ENV: "development",
@@ -417,6 +424,8 @@ async function launchGateway({
       MIR2_GATEWAY_TCP_ADDR: `${LOOPBACK_HOST}:${tcpPort}`,
       MIR2_ACCOUNT_STORE_PATH: accountStorePath,
       MIR2_ACCOUNT_STORE_BACKEND: "file",
+      MIR2_SAVE_RECOVERY_MAC_KEY: saveRecoveryMacKey,
+      MIR2_SAVE_RECOVERY_DIR: saveRecoveryDir,
       MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY: "1",
       MIR2_GATEWAY_QA_CONTROL_TOKEN: qaControlToken,
     },
@@ -530,7 +539,7 @@ function runChild(command, commandArgs, timeoutMs) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, commandArgs, {
       cwd: WEB_ROOT,
-      env: process.env,
+      env: isolatedChildEnvironment(),
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
@@ -753,6 +762,13 @@ async function removeOwnedTempDir(directory, expectedPrefix) {
     throw new Error(`Refusing to remove unowned temporary directory: ${resolved}`);
   }
   await fs.rm(resolved, { recursive: true, force: true });
+}
+
+function isolatedChildEnvironment() {
+  const env = { ...process.env };
+  delete env.MIR2_SAVE_RECOVERY_MAC_KEY;
+  delete env.MIR2_SAVE_RECOVERY_DIR;
+  return env;
 }
 
 function redactSensitive(value) {

@@ -32,6 +32,8 @@ export type EntityAttackEvent = {
   type: "entityAttack";
   /** Stringified objectId of the attacker. */
   objectId: string;
+  /** Optional Crystal Spell identity carried by ObjectAttack. */
+  spell?: number | string | null;
 };
 
 /** An entity was struck (took a hit). Triggers struck sound + hit-flash. */
@@ -39,6 +41,8 @@ export type EntityStruckEvent = {
   type: "entityStruck";
   /** Stringified objectId of the struck entity. */
   objectId: string;
+  /** Stringified attacker id; the client resolves weapon/class from live actor state. */
+  attackerId?: string;
 };
 
 /** An entity died. Triggers death sound. */
@@ -48,13 +52,28 @@ export type EntityDiedEvent = {
   objectId: string;
 };
 
+/** A player revive effect/audio was authorized by Revived or ObjectRevived(effect=true). */
+export type EntityRevivedEvent = {
+  type: "entityRevived";
+  objectId: string;
+};
+
 /** An entity cast a magic spell. Triggers magic sound. */
 export type MagicCastEvent = {
   type: "magicCast";
   /** Stringified objectId of the caster. */
   objectId: string;
   /** Crystal Spell enum value (used to derive the 20000+spell*10 sound id). */
-  spell: number | null | undefined;
+  spell: number | string | null | undefined;
+};
+
+/** A Crystal ObjectEffect reached an authoritative target object. */
+export type MagicEffectEvent = {
+  type: "magicEffect";
+  /** Stringified target object id. */
+  objectId: string;
+  /** Raw Crystal ObjectEffect enum value. */
+  effect: number;
 };
 
 /** Play a raw Crystal SoundList id directly (from a PlaySound server packet). */
@@ -113,7 +132,9 @@ export type GameEvent =
   | EntityAttackEvent
   | EntityStruckEvent
   | EntityDiedEvent
+  | EntityRevivedEvent
   | MagicCastEvent
+  | MagicEffectEvent
   | PlaySoundEvent
   | UiSoundEvent
   | GainedGoldEvent

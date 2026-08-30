@@ -43,6 +43,7 @@ pub mod node_identity {
 pub mod node_security;
 pub mod operator;
 pub mod regional;
+mod resume;
 pub mod rewards {
     pub use dubhe_network_core::rewards::*;
 }

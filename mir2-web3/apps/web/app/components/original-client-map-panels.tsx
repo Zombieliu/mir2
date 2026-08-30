@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 import {
   crystalMiniMapRadarColor,
@@ -114,6 +114,8 @@ export function BigMapDialog({
   onClose: () => void;
 }) {
   const [showWorldMap, setShowWorldMap] = useState(false);
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const mapDebug = useMapDebugEnabled();
   const bigMapAsset =
     originalBigMapAssetPath(world.bigMapIndex) ?? originalMiniMapAssetPath(world.miniMapIndex);
@@ -124,7 +126,10 @@ export function BigMapDialog({
     ? bigMapImagePointToViewportPoint(playerImagePoint, viewport, bigMapAsset)
     : null;
   const coordinateLabel = player ? `[ ${player.x}, ${player.y} ]` : "[ 0, 0 ]";
-  const npcRows = bigMapNpcRowsForWorld(world).slice(0, 18);
+  const searchQuery = search.trim().toLowerCase();
+  const npcRows = bigMapNpcRowsForWorld(world)
+    .filter((entity) => !searchQuery || entity.name.toLowerCase().includes(searchQuery))
+    .slice(0, 18);
   const mapDebugNpcRows = mapDebug ? bigMapNpcRowsForWorld(world) : [];
 
   return (
@@ -142,9 +147,9 @@ export function BigMapDialog({
         {localizeCrystalMapTitle(world.mapTitle, t) ?? world.mapFileName ?? ""}
       </div>
       <div className="big-map-close"><SpriteButton sprite={ORIGINAL_UI.bigMap.closeButton} label={t("ui.close")} onClick={onClose} /></div>
-      <div className="big-map-scroll up"><SpriteButton sprite={ORIGINAL_UI.bigMap.upButton} label={t("ui.up", [], "Up")} onClick={() => undefined} /></div>
-      <div className="big-map-scroll thumb"><SpriteButton sprite={ORIGINAL_UI.bigMap.positionBar} label={t("ui.scroll", [], "Scroll")} onClick={() => undefined} /></div>
-      <div className="big-map-scroll down"><SpriteButton sprite={ORIGINAL_UI.bigMap.downButton} label={t("ui.down", [], "Down")} onClick={() => undefined} /></div>
+      <div className="big-map-scroll up"><SpriteButton sprite={ORIGINAL_UI.bigMap.upButton} label={t("ui.up", [], "Up")} disabled /></div>
+      <div className="big-map-scroll thumb"><SpriteButton sprite={ORIGINAL_UI.bigMap.positionBar} label={t("ui.scroll", [], "Scroll")} disabled /></div>
+      <div className="big-map-scroll down"><SpriteButton sprite={ORIGINAL_UI.bigMap.downButton} label={t("ui.down", [], "Down")} disabled /></div>
       <div className="big-map-viewport" style={{ left: viewport.left, top: viewport.top, width: viewport.width, height: viewport.height }}>
         {bigMapAsset ? (
           <img
@@ -227,6 +232,8 @@ export function BigMapDialog({
             type="button"
             className="big-map-npc-row"
             style={{ top: index * 21 }}
+            disabled
+            aria-label={bigMapNpcDisplayName(localizeCrystalEntityName(entity.name, t))}
           >
             <img
               className="big-map-npc-icon"
@@ -245,9 +252,16 @@ export function BigMapDialog({
       </div>
       <div className="big-map-world-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.worldButton} label={t("ui.world", [], "World")} onClick={() => setShowWorldMap(true)} /></div>
       <div className="big-map-my-location-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.myLocationButton} label={t("ui.myLocation", [], "My Location")} onClick={() => setShowWorldMap(false)} /></div>
-      <div className="big-map-teleport-button disabled"><SpriteButton sprite={ORIGINAL_UI.bigMap.teleportButton} label={t("ui.teleport", [], "Teleport")} onClick={() => undefined} active /></div>
-      <div className="big-map-search-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.searchButton} label={t("ui.search", [], "Search")} onClick={() => undefined} /></div>
-      <input className="big-map-search-input" aria-label={t("ui.search", [], "Search")} readOnly />
+      <div className="big-map-teleport-button disabled"><SpriteButton sprite={ORIGINAL_UI.bigMap.teleportButton} label={t("ui.teleport", [], "Teleport")} disabled active /></div>
+      <div className="big-map-search-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.searchButton} label={t("ui.search", [], "Search")} onClick={() => searchRef.current?.focus()} /></div>
+      <input
+        ref={searchRef}
+        className="big-map-search-input"
+        aria-label={t("ui.search", [], "Search")}
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        spellCheck={false}
+      />
       {showWorldMap ? (
         <div className="big-map-world-overlay">
           <img

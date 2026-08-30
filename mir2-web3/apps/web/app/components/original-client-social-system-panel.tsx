@@ -7,7 +7,6 @@ import {
   featureTitleForSocialPanel,
   resolveSystemMenuShellText,
   rankingRequestForSocialTab,
-  stage5CommandForSocialAction,
   systemMenuSocialPanelDefinition,
   type SocialDisplayWorld,
   type SystemMenuSocialPanel,
@@ -27,14 +26,12 @@ export function SocialSystemPanel({
   panel,
   playerName,
   world,
-  onRunStage5Command,
   onSendClientCommand,
 }: {
   t: TranslateFn;
   panel: SystemMenuSocialPanel;
   playerName: string | null;
   world: SocialDisplayWorld;
-  onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
 }) {
   const definition = systemMenuSocialPanelDefinition(panel, playerName, world);
@@ -206,25 +203,29 @@ export function SocialSystemPanel({
       <div className="system-social-actions">
         {activeTab.actions.map((action) => {
           const resolvedAction = resolveSystemMenuShellText(action, playerName);
+          const clientCommand = clientCommandForSocialAction(
+            panel,
+            activeTab.key,
+            resolvedAction,
+            resolvedSelectedRowName,
+          );
+          const unavailable = clientCommand === null;
           return (
             <button
               key={`${panel}-${activeTab.key}-${action}`}
               type="button"
               data-social-action-label={resolvedAction}
+              data-social-action-status={unavailable ? "unavailable" : "ready"}
+              disabled={unavailable}
+              title={
+                unavailable
+                  ? "This action needs a dedicated flow with a real target, selection, or input."
+                  : undefined
+              }
               onClick={() => {
-                const clientCommand = clientCommandForSocialAction(panel, activeTab.key, resolvedAction, resolvedSelectedRowName);
-                if (clientCommand) {
-                  onSendClientCommand(clientCommand);
-                  setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
-                  return;
-                }
-                const command = stage5CommandForSocialAction(panel, activeTab.key, resolvedAction, resolvedSelectedRowName);
-                if (command) {
-                  onRunStage5Command(command.action, command.args);
-                  setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
-                } else {
-                  setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
-                }
+                if (!clientCommand) return;
+                onSendClientCommand(clientCommand);
+                setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
               }}
             >
               {resolvedAction}

@@ -145,3 +145,14 @@ docker stats --no-stream
 Gate 20 是单机 1,000 CCU 验收层；证据绑定实际 Docker 主机资源，不能线性外推
 Commercial 容量。Gate 21 的 `3,000` CCU、完整故障矩阵和滚动升级仍是
 Regional 正式认证边界，但当前窗口同样为 15 分钟；长期耐久另行认证。
+
+## Gateway save-recovery 范围
+
+Gate 20 的 Compose 只启动 PostgreSQL、Zone Host 和 acceptance 负载器，不启动
+mir2-gateway，因此没有 Gateway recovery 变量或卷。当前渲染模型中，
+`com.obelisk.mir2.role=gateway` 的 service 为 0，build target、Gateway image
+token 和 TCP/Web runtime environment 疑似守卫也发现 0 个。
+
+角色标签是权威 Gateway 清单。未来若在 Gate 20 增加实际 Gateway，必须显式添加该
+标签并接入 recovery；启发式守卫只负责拒绝明显的缺标/错标，不能声称能识别任意
+generic image、默认监听地址的未标注进程。

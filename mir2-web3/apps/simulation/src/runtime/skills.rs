@@ -90,6 +90,7 @@ pub(super) struct SkillState {
 impl SkillState {
     pub(super) fn snapshot(&self, tick: u64, language: LanguageCode) -> SkillSnapshot {
         let metadata = skill_cast_metadata_for_skill_key(&self.key);
+        let mp_cost = authoritative_skill_mana_cost(self).and_then(|cost| u32::try_from(cost).ok());
         SkillSnapshot {
             key: self.key.clone(),
             name: localized_skill_name(language, &self.key, &self.name),
@@ -97,6 +98,7 @@ impl SkillState {
             spell: metadata.spell.map(str::to_string),
             cast_kind: metadata.cast_kind.as_str().to_string(),
             offensive: metadata.offensive,
+            mp_cost,
             level: self.level,
             experience: self.experience,
             hotkey: self.hotkey,
@@ -512,6 +514,32 @@ pub(super) fn crystal_magic_for_skill_key(key: &str) -> Option<CrystalMagicTempl
         .find(|magic| normalize_crystal_skill_key(&magic.spell) == key)
 }
 
+fn skill_mana_cost_from_authoritative_metadata(
+    definition: Option<&SkillTemplate>,
+    crystal_magic: Option<&CrystalMagicTemplate>,
+    level: u8,
+) -> Option<i32> {
+    let cost = definition
+        .map(|definition| definition.mana_cost)
+        .or_else(|| {
+            crystal_magic.map(|magic| {
+                i32::from(magic.base_cost)
+                    .saturating_add(i32::from(magic.level_cost).saturating_mul(i32::from(level)))
+            })
+        })?;
+    (cost >= 0).then_some(cost)
+}
+
+fn authoritative_skill_mana_cost(skill: &SkillState) -> Option<i32> {
+    let definition = skill_definition(&skill.key);
+    let crystal_magic = crystal_magic_for_skill_key(&skill.key);
+    skill_mana_cost_from_authoritative_metadata(
+        definition.as_ref(),
+        crystal_magic.as_ref(),
+        skill.level,
+    )
+}
+
 pub(super) fn client_magic_for_skill_state(skill: &SkillState, tick: u64) -> Option<ClientMagic> {
     let magic = crystal_magic_for_skill_key(&skill.key)?;
     Some(ClientMagic {
@@ -913,6 +941,25 @@ pub(super) fn cast_skill_with_context(
     key: &str,
     context: Option<SkillCastContext>,
 ) -> Vec<ServerPacket> {
+    cast_skill_with_context_impl(world, key, context, None)
+}
+
+#[cfg(test)]
+fn cast_skill_with_manifest_magic_for_test(
+    world: &mut World,
+    key: &str,
+    context: Option<SkillCastContext>,
+    crystal_magic: CrystalMagicTemplate,
+) -> Vec<ServerPacket> {
+    cast_skill_with_context_impl(world, key, context, Some(crystal_magic))
+}
+
+fn cast_skill_with_context_impl(
+    world: &mut World,
+    key: &str,
+    context: Option<SkillCastContext>,
+    crystal_magic_override: Option<CrystalMagicTemplate>,
+) -> Vec<ServerPacket> {
     let tick = super::session::runtime_tick(world);
     let skill_index = {
         let skills = world.resource::<SkillResource>();
@@ -924,7 +971,8 @@ pub(super) fn cast_skill_with_context(
 
     let skill = world.resource::<SkillResource>().skills[index].clone();
     let definition = skill_definition(skill.key.as_str());
-    let crystal_magic = crystal_magic_for_skill_key(skill.key.as_str());
+    let crystal_magic =
+        crystal_magic_override.or_else(|| crystal_magic_for_skill_key(skill.key.as_str()));
     let crystal_spell = definition
         .as_ref()
         .and_then(|definition| definition.crystal_spell.as_deref())
@@ -938,15 +986,11 @@ pub(super) fn cast_skill_with_context(
     });
     let manifest_handles_magic_progression = crystal_spell
         .is_some_and(|spell| matches!(spell, "BackStep" | "ShoulderDash" | "FlashDash"));
-    let Some(mana_cost) = definition
-        .as_ref()
-        .map(|definition| definition.mana_cost)
-        .or_else(|| {
-            crystal_magic.as_ref().map(|magic| {
-                i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(skill.level)
-            })
-        })
-    else {
+    let Some(mana_cost) = skill_mana_cost_from_authoritative_metadata(
+        definition.as_ref(),
+        crystal_magic.as_ref(),
+        skill.level,
+    ) else {
         return Vec::new();
     };
     let Some(player) = player_entity(world) else {
@@ -1047,6 +1091,7 @@ pub(super) fn cast_skill_with_context(
         }
     }
 
+    let mut unsupported_manifest_spell = false;
     if definition.is_none() {
         // Scope the spell's Crystal DefenceType so scheduled/immediate monster damage rolls the
         // correct target armour (AC/MAC), then restore the prior value.
@@ -1063,8 +1108,25 @@ pub(super) fn cast_skill_with_context(
             spell_packet,
             context.as_ref(),
             tick,
+            &mut unsupported_manifest_spell,
         ));
         set_cast_defence(world, previous_defence);
+    }
+
+    if unsupported_manifest_spell {
+        // Crystal changes MP before dispatching the spell switch, so the failed
+        // cast still exposes the ObjectMana packet. Its default branch then
+        // emits only Magic/ObjectMagic with Cast=false; it does not set
+        // CastTime, schedule damage, or advance magic progression.
+        append_failed_manifest_cast_packets(
+            &mut packets,
+            world,
+            player,
+            spell_packet,
+            context.as_ref(),
+            skill.level,
+        );
+        return packets;
     }
 
     if let Some(spell) = spell_packet.filter(|_| !override_default_magic_packets) {
@@ -1172,6 +1234,7 @@ fn apply_manifest_spell_effect(
     spell: Option<Spell>,
     context: Option<&SkillCastContext>,
     tick: u64,
+    unsupported: &mut bool,
 ) -> Vec<ServerPacket> {
     let mut packets = Vec::new();
     let Some(magic) = crystal_magic else {
@@ -1655,37 +1718,50 @@ fn apply_manifest_spell_effect(
             ));
             return packets;
         }
-        _ => {}
+        _ => {
+            *unsupported = true;
+            return packets;
+        }
     }
+}
 
-    let Some(context) = context else {
-        return packets;
-    };
-    if context.target_id == 0 || matches!(spell, Some(Spell::None | Spell::Healing)) {
-        return packets;
-    }
-    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
-        return packets;
-    };
-    let Some(player_object_id) = current_player_object_id(world) else {
-        return packets;
-    };
-    let damage = crystal_spell_damage(world, tick, magic, skill.level);
-    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    schedule_damage_to_monster(
-        world,
-        due_tick,
-        player_object_id,
-        target_entity,
-        damage,
-        Some(target_name.clone()),
-        Some(PendingMonsterDefeatAction {
-            object_id: context.target_id,
-            name: target_name,
-        }),
-    );
-    packets
+fn append_failed_manifest_cast_packets(
+    packets: &mut Vec<ServerPacket>,
+    world: &World,
+    player: Entity,
+    spell: Option<Spell>,
+    context: Option<&SkillCastContext>,
+    level: u8,
+) {
+    let spell = spell.unwrap_or(Spell::None);
+    let object_id = current_player_object_id(world).unwrap_or_default();
+    let location = entity_position(world, player).unwrap_or(Point { x: 0, y: 0 });
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let target_id = context.map(|context| context.target_id).unwrap_or_default();
+
+    packets.push(ServerPacket::Magic {
+        spell,
+        target_id,
+        target: location.clone(),
+        cast: false,
+        level,
+        secondary_target_ids: Vec::new(),
+    });
+    packets.push(ServerPacket::ObjectMagic {
+        object_id,
+        location: location.clone(),
+        direction,
+        spell,
+        target_id,
+        target: location,
+        cast: false,
+        level,
+        self_broadcast: false,
+        secondary_target_ids: Vec::new(),
+    });
 }
 
 fn apply_crystal_self_buff_spell(
@@ -8349,5 +8425,321 @@ mod crystal_damage_formula_tests {
                 "{spell}"
             );
         }
+    }
+
+    fn started_skill_test_session() -> SimulationSession {
+        use crate::config::SimulationConfig;
+        use crate::runtime::session::SimulationSession;
+        use mir2_protocol::ClientPacket;
+
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let login = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert!(login
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let start = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(start
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        session
+    }
+
+    fn prepare_wizard_combat_position(session: &mut SimulationSession) -> (Entity, Point) {
+        use crate::runtime::components::{CharacterBody, Position};
+        use crate::runtime::resources::{PlayerRuntimeResource, SessionResource};
+        use mir2_protocol::MirClass;
+
+        let world = session.app.world_mut();
+        let player = player_entity(world).expect("started session player");
+        {
+            let mut session_resource = world.resource_mut::<SessionResource>();
+            let selected = session_resource
+                .selected_character
+                .as_mut()
+                .expect("selected character");
+            selected.class = MirClass::Wizard;
+            selected.level = 60;
+        }
+        world
+            .entity_mut(player)
+            .get_mut::<CharacterBody>()
+            .expect("character body")
+            .class = MirClass::Wizard;
+        world
+            .entity_mut(player)
+            .get_mut::<CharacterBody>()
+            .expect("character body")
+            .level = 60;
+        let origin = Point { x: 333, y: 300 };
+        world
+            .entity_mut(player)
+            .get_mut::<Position>()
+            .expect("player position")
+            .0 = origin.clone();
+        world
+            .resource_mut::<PlayerRuntimeResource>()
+            .player_position = origin.clone();
+        world
+            .entity_mut(player)
+            .get_mut::<PlayerVitals>()
+            .expect("player vitals")
+            .mp = 500;
+        (player, origin)
+    }
+
+    fn spawn_hostile_skill_target(world: &mut World, object_id: u32, position: Point) -> Entity {
+        use crate::config::WorldEntityDisposition;
+        use crate::runtime::components::{
+            DisplayName, Monster, MonsterAgent, MonsterCombatStats, MonsterVitals, ObjectId,
+            Position, WorldObject,
+        };
+
+        world
+            .spawn((
+                WorldObject,
+                ObjectId(object_id),
+                DisplayName::literal("Skill Test Target"),
+                Position(position.clone()),
+                Monster,
+                MonsterVitals {
+                    hp: 500,
+                    max_hp: 500,
+                },
+                MonsterCombatStats::default(),
+                MonsterAgent {
+                    image: 1,
+                    dead: false,
+                    patrol_origin: position,
+                    ai: 0,
+                    disposition: WorldEntityDisposition::Hostile,
+                    hostile_to_player: true,
+                    tracking_player: false,
+                    view_range: 0,
+                    can_wander: false,
+                    move_interval_ticks: u64::MAX,
+                    attack_interval_ticks: u64::MAX,
+                    next_move_tick: u64::MAX,
+                    next_attack_tick: u64::MAX,
+                    route: Vec::new(),
+                    route_index: 0,
+                    route_waiting: false,
+                    next_route_tick: u64::MAX,
+                },
+            ))
+            .id()
+    }
+
+    fn test_skill_state(key: &str) -> SkillState {
+        SkillState {
+            key: key.to_string(),
+            name: key.to_string(),
+            description: "test skill".to_string(),
+            level: 0,
+            experience: 0,
+            hotkey: 0,
+            cooldown_ticks: 0,
+            delay_ms: 0,
+            cooldown_ends_at: 0,
+            cast_time_ms: 0,
+        }
+    }
+
+    #[test]
+    fn unsupported_manifest_spell_fails_closed_like_crystal_default() {
+        use crate::runtime::components::MonsterVitals;
+        use crate::runtime::resources::{RuntimeQueueResource, SkillResource};
+        use mir2_protocol::{MirDirection, ServerPacket};
+
+        let mut session = started_skill_test_session();
+        let (player, origin) = prepare_wizard_combat_position(&mut session);
+        let target_id = 98_771;
+        let target = spawn_hostile_skill_target(
+            session.app.world_mut(),
+            target_id,
+            Point {
+                x: origin.x + 1,
+                y: origin.y,
+            },
+        );
+        let skill_key = "unsupported-target-spell";
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SkillResource>()
+            .skills
+            .push(test_skill_state(skill_key));
+        let mut magic = test_magic("UnsupportedTargetSpell", 100, 0, 20, 0, 1.0, 0.0);
+        magic.base_cost = 7;
+        magic.delay_base = 500;
+        let before_mp = entity_player_vitals(session.app.world(), player)
+            .expect("player vitals")
+            .mp;
+        let before_target_hp = session
+            .app
+            .world()
+            .entity(target)
+            .get::<MonsterVitals>()
+            .expect("target vitals")
+            .hp;
+        let before_queue_len = session
+            .app
+            .world()
+            .resource::<RuntimeQueueResource>()
+            .pending_combat_actions
+            .len();
+        let context = SkillCastContext {
+            direction: MirDirection::Right,
+            target_id,
+            target: Point {
+                x: origin.x + 1,
+                y: origin.y,
+            },
+        };
+
+        let packets = cast_skill_with_manifest_magic_for_test(
+            session.app.world_mut(),
+            skill_key,
+            Some(context),
+            magic,
+        );
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Magic {
+                spell: Spell::None,
+                target_id: packet_target_id,
+                cast: false,
+                ..
+            } if *packet_target_id == target_id
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMagic {
+                spell: Spell::None,
+                target_id: packet_target_id,
+                cast: false,
+                ..
+            } if *packet_target_id == target_id
+        )));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Magic { cast: true, .. }
+                | ServerPacket::ObjectMagic { cast: true, .. }
+                | ServerPacket::ObjectProjectile { .. }
+        )));
+        assert_eq!(
+            entity_player_vitals(session.app.world(), player)
+                .expect("player vitals")
+                .mp,
+            before_mp - 7,
+            "Crystal spends MP before its default spell switch branch"
+        );
+        assert_eq!(
+            session
+                .app
+                .world()
+                .resource::<SkillResource>()
+                .skills
+                .iter()
+                .find(|skill| skill.key == skill_key)
+                .expect("unsupported skill")
+                .cooldown_ends_at,
+            0,
+            "failed Crystal default does not enter cooldown"
+        );
+        assert_eq!(
+            session
+                .app
+                .world()
+                .resource::<RuntimeQueueResource>()
+                .pending_combat_actions
+                .len(),
+            before_queue_len,
+            "unsupported manifest spell must not queue delayed damage"
+        );
+        assert_eq!(
+            session
+                .app
+                .world()
+                .entity(target)
+                .get::<MonsterVitals>()
+                .expect("target vitals")
+                .hp,
+            before_target_hp,
+            "unsupported manifest spell must not damage its target"
+        );
+    }
+
+    #[test]
+    fn explicit_fireball_manifest_path_still_queues_offensive_cast() {
+        use crate::runtime::resources::{RuntimeQueueResource, SkillResource};
+        use mir2_protocol::{MirDirection, ServerPacket};
+
+        let mut session = started_skill_test_session();
+        let (_player, origin) = prepare_wizard_combat_position(&mut session);
+        let target_id = 98_772;
+        spawn_hostile_skill_target(
+            session.app.world_mut(),
+            target_id,
+            Point {
+                x: origin.x + 1,
+                y: origin.y,
+            },
+        );
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SkillResource>()
+            .skills
+            .push(crystal_skill_state("FireBall", 0).expect("FireBall manifest skill"));
+        let packets = cast_skill_with_context(
+            session.app.world_mut(),
+            "fireball",
+            Some(SkillCastContext {
+                direction: MirDirection::Right,
+                target_id,
+                target: Point {
+                    x: origin.x + 1,
+                    y: origin.y,
+                },
+            }),
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Magic {
+                spell: Spell::FireBall,
+                cast: true,
+                ..
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMagic {
+                spell: Spell::FireBall,
+                cast: true,
+                ..
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectProjectile {
+                spell: Spell::FireBall,
+                source_id: _,
+                destination_id,
+            } if *destination_id == target_id
+        )));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Magic { cast: false, .. } | ServerPacket::ObjectMagic { cast: false, .. }
+        )));
+        assert!(!session
+            .app
+            .world()
+            .resource::<RuntimeQueueResource>()
+            .pending_combat_actions
+            .is_empty());
     }
 }

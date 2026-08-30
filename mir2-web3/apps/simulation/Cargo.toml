@@ -9,6 +9,10 @@ license = "MIT"
 name = "mir2_simulation"
 path = "src/lib.rs"
 
+[features]
+default = []
+test-support = []
+
 [dependencies]
 argon2 = "0.5.3"
 base64 = "0.22"

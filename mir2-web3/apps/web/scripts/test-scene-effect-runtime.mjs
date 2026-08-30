@@ -38,11 +38,51 @@ const protectionAnimation = {
   frames: [{ path: "/fx/protection.png", width: 20, height: 24, x: -10, y: -18 }],
   durationMs: 100,
 };
+const flamingSwordAnimation = (direction) => ({
+  ...animation,
+  name: "FlamingSword",
+  kind: "attackOverlay",
+  frames: Array.from({ length: 6 }, (_, frame) => ({
+    path: `/fx/${3480 + direction * 10 + frame}.png`,
+    width: 64,
+    height: 72,
+    x: -24,
+    y: -52,
+  })),
+  interval: 100,
+  opacity: 0.7,
+  light: 0,
+  repeat: false,
+  offset: { x: 0, y: 0 },
+  durationMs: 600,
+});
+const playerReviveAnimation = {
+  ...animation,
+  name: "PlayerRevive",
+  kind: "target",
+  frames: Array.from({ length: 20 }, (_, frame) => ({
+    path: `/fx/revive-${1220 + frame}.png`,
+    width: 64,
+    height: 72,
+    x: -24,
+    y: -52,
+  })),
+  interval: 100,
+  light: 6,
+  durationMs: 2_000,
+};
 const crystal = {
   // Spell 12 and SpellEffect 12 deliberately have different names. The scene
   // runtime must resolve spell packets through the Spell enum, not Effect.
   effectNameForNumber: (_assets, value) => (value === 12 ? "Mine" : value === 31 ? "FireBall" : null),
-  spellNameForNumber: (value) => (value === 12 ? "ProtectionField" : value === 31 ? "FireBall" : null),
+  spellNameForNumber: (value) =>
+    value === 8
+      ? "FlamingSword"
+      : value === 12
+        ? "ProtectionField"
+        : value === 31
+          ? "FireBall"
+          : null,
   resolveSpellEffect: (_assets, name, direction) => (name === "FireBall" && direction === 3 ? animation : null),
   resolveSpellCastEffect: (_assets, name, direction) => {
     if (direction !== 3) return null;
@@ -50,7 +90,15 @@ const crystal = {
     if (name === "ProtectionField") return protectionAnimation;
     return null;
   },
-  resolveMapEffect: (_assets, name) => name === "FireBall" ? { ...animation, repeat: true } : null,
+  resolveSpellAttackOverlayEffect: (_assets, name, direction) =>
+    name === "FlamingSword" && direction >= 0 && direction < 8
+      ? flamingSwordAnimation(direction)
+      : null,
+  resolveMapEffect: (_assets, name) => {
+    if (name === "FireBall") return { ...animation, repeat: true };
+    if (name === "PlayerRevive") return playerReviveAnimation;
+    return null;
+  },
   resolveMapEffectByNumber: () => null,
   effectFrameAt: (instance, now) => {
     let index = Math.floor((now - instance.startedAt) / instance.animation.interval);
@@ -87,6 +135,11 @@ assert.match(
   pageSource,
   /case "Magic":[\s\S]*enqueueSceneEffect\(\{ \.\.\.payload, objectId: worldRef\.current\.playerObjectId \}, "spell"\)[\s\S]*spawnRangeProjectile/,
   "the local player Magic packet must enter the same cast/projectile renderer as ObjectMagic",
+);
+assert.match(
+  pageSource,
+  /function markWorldEntityAttack[\s\S]*applyObjectAttackSceneState\([\s\S]*current\.entities,[\s\S]*current\.effects,[\s\S]*payload,[\s\S]*now,[\s\S]*crystalAttackActionDurationMs/,
+  "ObjectAttack must project FlamingSword into the attacker-bound scene-effect store",
 );
 assert.match(
   pageSource,
@@ -129,6 +182,16 @@ assert.equal(
   90,
   "transient combat spells remain above actors",
 );
+assert.equal(
+  runtime.crystalSceneEffectLayerOffset("attackOverlay"),
+  90,
+  "attacker-bound overlays remain above the actor layer",
+);
+assert.equal(
+  runtime.crystalSceneEffectLayerOffset("actorEffect"),
+  90,
+  "actor-bound revive effects remain above the actor layer",
+);
 assert.deepEqual(
   runtime.sceneEffectAnimationAssetUrls({
     ...animation,
@@ -162,6 +225,11 @@ assert.match(
   "each Crystal effect must follow camera motion without transforming its pass-through parent",
 );
 assert.match(
+  resolvedEffectLayerSource,
+  /effect\.objectId[\s\S]*viewportEntitySprites\.find[\s\S]*opacity:\s*animation\.opacity/,
+  "attack overlays must follow the live attacker and preserve Crystal DrawBlend rate",
+);
+assert.match(
   globalCssSource,
   /\.belt-dialog-overlay\s*\{[^}]*opacity:\s*0;/s,
   "the opaque Crystal belt overlay must not darken the transparent item slots",
@@ -193,6 +261,187 @@ assert.equal(
   1,
 );
 
+const reviveEffect = {
+  ...base,
+  key: "crystal-player-revive:42",
+  source: "actorEffect",
+  spellOrEffect: "PlayerRevive",
+  objectId: "42",
+  direction: 0,
+  startedAt: 5_000,
+  expiresAt: 7_000,
+};
+assert.equal(
+  runtime.resolveSceneEffectFrame({}, reviveEffect, 5_000).frame.path,
+  "/fx/revive-1220.png",
+);
+assert.equal(
+  runtime.resolveSceneEffectFrame({}, reviveEffect, 6_999).frame.path,
+  "/fx/revive-1239.png",
+);
+assert.equal(runtime.resolveSceneEffectFrame({}, reviveEffect, 7_000), null);
+
+for (const [direction, directionName] of [
+  [0, "Up"],
+  [1, "UpRight"],
+  [2, "Right"],
+  [3, "DownRight"],
+  [4, "Down"],
+  [5, "DownLeft"],
+  [6, "Left"],
+  [7, "UpLeft"],
+]) {
+  const overlay = runtime.createFlamingSwordAttackOverlay(
+    {
+      objectId: 1000,
+      location: { x: 288, y: 616 },
+      direction: directionName,
+      spell: 8,
+    },
+    10_000,
+  );
+  assert.equal(overlay.direction, direction);
+  assert.equal(overlay.source, "attackOverlay");
+  assert.equal(overlay.expiresAt, 10_600);
+  assert.equal(
+    runtime.resolveSceneEffectFrame({}, overlay, 10_000).frame.path,
+    `/fx/${3480 + direction * 10}.png`,
+  );
+  assert.equal(
+    runtime.resolveSceneEffectFrame({}, overlay, 10_000).animation.opacity,
+    0.7,
+  );
+  assert.equal(
+    runtime.resolveSceneEffectFrame({}, overlay, 10_599).frame.path,
+    `/fx/${3485 + direction * 10}.png`,
+  );
+  assert.equal(runtime.resolveSceneEffectFrame({}, overlay, 10_600), null);
+}
+
+const firstFlame = runtime.createFlamingSwordAttackOverlay(
+  { objectId: 1000, location: { x: 288, y: 616 }, direction: "Up", spell: 8 },
+  20_000,
+);
+const restartedFlame = runtime.createFlamingSwordAttackOverlay(
+  { objectId: 1000, location: { x: 289, y: 616 }, direction: "Right", spell: "FlamingSword" },
+  20_200,
+);
+const otherFlame = runtime.createFlamingSwordAttackOverlay(
+  { objectId: 1001, direction: "Down", spell: 8 },
+  20_210,
+  { x: 290, y: 616 },
+);
+assert.equal(
+  runtime.upsertFlamingSwordAttackOverlay([firstFlame], restartedFlame, 20_200).length,
+  1,
+  "the same attacker restarts one stable overlay",
+);
+const coexisting = runtime.upsertFlamingSwordAttackOverlay(
+  runtime.upsertFlamingSwordAttackOverlay([firstFlame], restartedFlame, 20_200),
+  otherFlame,
+  20_210,
+);
+assert.equal(coexisting.length, 2, "different attackers keep independent overlays");
+assert.equal(coexisting[0].x, 289);
+assert.equal(coexisting[1].x, 290);
+const existingEffects = [{ ...base, key: "existing", expiresAt: 40_000 }];
+assert.equal(
+  runtime.applyObjectAttackSceneEffects(
+    existingEffects,
+    { objectId: 1000, location: { x: 288, y: 616 }, direction: "Down", spell: 0 },
+    30_000,
+  ),
+  existingEffects,
+  "the ObjectAttack reducer preserves ordinary attack state by reference",
+);
+const reducerFirst = runtime.applyObjectAttackSceneEffects(
+  existingEffects,
+  { objectId: 1000, location: { x: 288, y: 616 }, direction: "Up", spell: 8 },
+  30_000,
+);
+const reducerRestarted = runtime.applyObjectAttackSceneEffects(
+  reducerFirst,
+  { objectId: 1000, location: { x: 289, y: 616 }, direction: "Right", spell: "FlamingSword" },
+  30_200,
+);
+const reducerCoexisting = runtime.applyObjectAttackSceneEffects(
+  reducerRestarted,
+  { objectId: 1001, direction: "Down", spell: 8 },
+  30_210,
+  { x: 290, y: 616 },
+);
+assert.equal(reducerRestarted.filter((effect) => effect.source === "attackOverlay").length, 1);
+assert.equal(reducerRestarted.at(-1).startedAt, 30_200);
+assert.equal(reducerRestarted.at(-1).x, 289);
+assert.equal(reducerCoexisting.filter((effect) => effect.source === "attackOverlay").length, 2);
+const pageAttackEntity = {
+  objectId: "self-1",
+  x: 288,
+  y: 616,
+  direction: "Down",
+};
+const pageAttackState = runtime.applyObjectAttackSceneState(
+  [pageAttackEntity],
+  [],
+  {
+    objectId: "self-1",
+    location: { x: 289, y: 616 },
+    direction: "Right",
+    spell: 8,
+    attackType: 0,
+  },
+  31_000,
+  () => 600,
+);
+assert.deepEqual(
+  {
+    x: pageAttackState.entities[0].x,
+    direction: pageAttackState.entities[0].direction,
+    attackAnimation: pageAttackState.entities[0].attackAnimation,
+    attackStartedAt: pageAttackState.entities[0].attackStartedAt,
+    attackUntil: pageAttackState.entities[0].attackUntil,
+  },
+  { x: 289, direction: "Right", attackAnimation: "melee1", attackStartedAt: 31_000, attackUntil: 31_600 },
+  "the page-consumed reducer atomically applies actor pose and action timing",
+);
+assert.equal(pageAttackState.effects.length, 1);
+assert.equal(pageAttackState.effects[0].source, "attackOverlay");
+const pageRestartedState = runtime.applyObjectAttackSceneState(
+  pageAttackState.entities,
+  pageAttackState.effects,
+  { objectId: "self-1", location: { x: 290, y: 616 }, direction: "Up", spell: 8 },
+  31_200,
+  () => 600,
+);
+const pageCoexistingState = runtime.applyObjectAttackSceneState(
+  [...pageRestartedState.entities, { ...pageAttackEntity, objectId: "other-2", x: 291 }],
+  pageRestartedState.effects,
+  { objectId: "other-2", direction: "Down", spell: 8 },
+  31_210,
+  () => 600,
+);
+assert.equal(pageRestartedState.effects.length, 1, "same page actor restarts one overlay");
+assert.equal(pageRestartedState.effects[0].startedAt, 31_200);
+assert.equal(pageCoexistingState.effects.length, 2, "two page actors retain independent overlays");
+const ordinaryPageState = runtime.applyObjectAttackSceneState(
+  pageCoexistingState.entities,
+  pageCoexistingState.effects,
+  { objectId: "self-1", direction: "Down", spell: 0 },
+  31_300,
+  () => 600,
+);
+assert.equal(ordinaryPageState.effects, pageCoexistingState.effects);
+assert.equal(runtime.resolveSceneEffectFrame({}, pageRestartedState.effects[0], 31_799).frame.path, "/fx/3485.png");
+assert.equal(runtime.resolveSceneEffectFrame({}, pageRestartedState.effects[0], 31_800), null);
+assert.equal(
+  runtime.createFlamingSwordAttackOverlay(
+    { objectId: 1000, location: { x: 288, y: 616 }, direction: "Down", spell: 0 },
+    30_000,
+  ),
+  null,
+  "ordinary attacks never create a FlamingSword overlay",
+);
+
 const worldSpell = {
   ...base,
   key: "crystal-world-spell:239",
@@ -206,4 +455,4 @@ assert.equal(
   "ObjectSpell resolves the repeating ground animation after the cast animation would end",
 );
 
-console.log("scene effect runtime: 17 passed");
+console.log("scene effect runtime: FlamingSword and legacy contracts passed");

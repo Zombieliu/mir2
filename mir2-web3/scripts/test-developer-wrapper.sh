@@ -8,6 +8,7 @@ fake_bin="${test_root}/bin"
 mkdir -p "${fake_bin}"
 release_lock="${project_root}/config/developer-release.json"
 release_backup="${test_root}/developer-release.json"
+docker_log="${test_root}/docker.log"
 
 cleanup() {
   if [[ -f "${release_backup}" ]]; then
@@ -16,6 +17,7 @@ cleanup() {
   fi
   rm -f -- "${fake_bin}/gh"
   rm -f -- "${fake_bin}/docker"
+  rm -f -- "${docker_log}"
   rmdir "${fake_bin}" 2>/dev/null || true
   rmdir "${test_root}" 2>/dev/null || true
 }
@@ -24,6 +26,10 @@ trap cleanup EXIT
 cat > "${fake_bin}/docker" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
+
+if [[ -n "${MIR2_FAKE_DOCKER_LOG:-}" ]]; then
+  printf '%s\n' "$*" >>"${MIR2_FAKE_DOCKER_LOG}"
+fi
 
 case "${1:-}" in
   info)
@@ -55,6 +61,11 @@ case "${1:-}" in
       *" config --quiet "*) exit 0 ;;
       *" build workspace "*) exit 0 ;;
       *" run --rm --no-deps -T asset-fetch "*) cat >/dev/null; exit 0 ;;
+      *" run --rm --no-deps --user "*" --entrypoint node workspace apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs "*)
+        if [[ "${MIR2_FAKE_RUNTIME_FETCH_FAIL:-0}" = "1" ]]; then exit 1; fi
+        exit 0
+        ;;
+      *" run --rm --no-deps --user "*" --entrypoint bash workspace -lc "*"MIR2_USE_PREBUILT_BEVY_RUNTIME=0"*) exit 0 ;;
       *" run --rm --no-deps workspace bash "*) exit 0 ;;
       *) printf 'Unexpected fake Docker Compose command: %s\n' "$*" >&2; exit 2 ;;
     esac
@@ -126,6 +137,19 @@ fallback_output="$(
 printf '%s\n' "${fallback_output}"
 grep -F "falling back to the locked local build" <<<"${fallback_output}" >/dev/null
 grep -F "Build the locked local developer image" <<<"${fallback_output}" >/dev/null
+
+runtime_fallback_output="$(
+  PATH="${fake_bin}:${PATH}" \
+  MIR2_DEV_IMAGE="mir2-web3-developer:wrapper-test" \
+  MIR2_FAKE_RUNTIME_FETCH_FAIL=1 \
+  MIR2_FAKE_DOCKER_LOG="${docker_log}" \
+    "${project_root}/scripts/dev.sh" verify
+)"
+printf '%s\n' "${runtime_fallback_output}"
+grep -F "Pinned Bevy runtime is unavailable; rebuilding it from current source." \
+  <<<"${runtime_fallback_output}" >/dev/null
+grep -F "MIR2_USE_PREBUILT_BEVY_RUNTIME=0 node apps/web/scripts/build-bevy-runtime.mjs release" \
+  "${docker_log}" >/dev/null
 
 set +e
 custom_output="$(

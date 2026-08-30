@@ -13,6 +13,7 @@ use super::map::{
     apply_current_player_position_map_transfer, is_current_map_transfer_source,
     normalize_map_file_name, relocate_player_to_map,
 };
+use super::map_events::map_coordinate_hint_packets_for_path;
 use super::monster_ai::advance_world;
 use super::npc::dismiss_dialog;
 use super::packets::{object_health_info_for_entity, object_revived_info_for_entity};
@@ -479,6 +480,20 @@ fn pathfind_next_step(
     Some(first)
 }
 
+fn movement_path_between(source: &Point, destination: &Point) -> Vec<Point> {
+    let mut path = Vec::new();
+    let mut current = source.clone();
+    while current != *destination {
+        let next = step_point_toward(&current, destination);
+        if next == current {
+            break;
+        }
+        path.push(next.clone());
+        current = next;
+    }
+    path
+}
+
 pub(super) fn clamp_to_map_region(world: &World, point: Point) -> Point {
     let bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
 
@@ -725,6 +740,7 @@ impl SimulationSession {
                 };
 
                 if let Some(next_step) = next_step {
+                    let movement_path = movement_path_between(&next_position, &next_step);
                     if let Some(direction) = direction_toward(&next_position, &next_step) {
                         self.app
                             .world_mut()
@@ -739,6 +755,10 @@ impl SimulationSession {
                             running,
                             &mut packets,
                         );
+                        packets.extend(map_coordinate_hint_packets_for_path(
+                            self.app.world(),
+                            &movement_path,
+                        ));
                         packets.extend(apply_current_player_position_map_transfer(
                             self.app.world_mut(),
                         ));
@@ -765,15 +785,6 @@ impl SimulationSession {
             return packets;
         }
 
-        // See move_to_with_mode_impl: a normal direction key also reactivates
-        // a transfer source restored as the persisted player position.
-        let mut standing_transfer_packets =
-            apply_current_player_position_map_transfer(self.app.world_mut());
-        if !standing_transfer_packets.is_empty() {
-            standing_transfer_packets.extend(advance_world(self.app.world_mut()));
-            return standing_transfer_packets;
-        }
-
         let Some(player) = player_entity(self.app.world()) else {
             return Vec::new();
         };
@@ -784,6 +795,21 @@ impl SimulationSession {
             .world_mut()
             .entity_mut(player)
             .insert(Facing(direction));
+        self.app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>()
+            .player_direction = direction;
+
+        // See move_to_with_mode_impl: a normal direction key also reactivates
+        // a transfer source restored as the persisted player position. Crystal
+        // applies the new facing before CheckMovement, so ENTERMAP receives
+        // the requested direction as well.
+        let mut standing_transfer_packets =
+            apply_current_player_position_map_transfer(self.app.world_mut());
+        if !standing_transfer_packets.is_empty() {
+            standing_transfer_packets.extend(advance_world(self.app.world_mut()));
+            return standing_transfer_packets;
+        }
 
         if running && !crystal_player_can_run(self.app.world_mut()) {
             let mut packets = vec![ServerPacket::UserLocation {
@@ -805,11 +831,16 @@ impl SimulationSession {
         if current_position != previous_position {
             follow_player_with_stage5_hero(
                 self.app.world_mut(),
-                previous_position,
+                previous_position.clone(),
                 previous_direction,
                 running,
                 &mut packets,
             );
+            let movement_path = movement_path_between(&previous_position, &current_position);
+            packets.extend(map_coordinate_hint_packets_for_path(
+                self.app.world(),
+                &movement_path,
+            ));
             packets.extend(apply_current_player_position_map_transfer(
                 self.app.world_mut(),
             ));

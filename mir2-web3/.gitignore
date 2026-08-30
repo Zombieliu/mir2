@@ -9,9 +9,11 @@ out/
 docs/generated/remote-assets/
 docs/generated/player-qa/
 docs/generated/packet-traces/
+docs/generated/crystal-semantic-parity/
 docs/stage2-screenshots/
 docs/stage5-screenshots/
 artifacts/qa-evidence/
+artifacts/windows-vertical-slice/
 apps/web/public/original-asset-manifest.generated.json
 apps/web/public/bevy-runtime/
 # Full Crystal conversion is reproducible from the local client. Do not commit

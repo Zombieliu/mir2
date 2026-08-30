@@ -3582,6 +3582,7 @@ fn push_stage5_mail(
         .saturating_add(1);
     systems.mail.push(Stage5MailMessage {
         id,
+        delivery_nonce: mir2_simulation::new_stage5_mail_delivery_nonce(),
         from: "GM System".to_string(),
         to,
         subject: subject.to_string(),
@@ -11811,6 +11812,7 @@ mod tests {
         let mut systems = Stage5SystemsState::default();
         systems.mail.push(mir2_simulation::Stage5MailMessage {
             id: 1,
+            delivery_nonce: "admin-fixture-mail-1".into(),
             from: "GM".into(),
             to: "LiveScout".into(),
             subject: "Real mail".into(),

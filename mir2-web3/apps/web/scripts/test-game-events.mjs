@@ -52,10 +52,54 @@ function loadTypeScriptModule(url, requireMap = {}) {
 const soundTriggersStub = {
   playEntityAttackSound: () => {},
   playEntityStruckSound: () => {},
-  playEntityDieSound: () => {},
+  scheduleEntityDieSound: () => {},
   playMagicSoundId: () => false,
   monsterImageFromBodyLibrary: () => null,
 };
+
+const triggerPlayedIds = [];
+const originalSoundTriggersModule = loadTypeScriptModule(
+  new URL("../lib/original-sound-triggers.ts", import.meta.url),
+  {
+    "./original-sound-events": {
+      ORIGINAL_SOUND_IDS: {
+        swingSword: 10052,
+        struckShort: 10060,
+        struckWooden: 10061,
+        struckSword: 10062,
+        struckSword2: 10063,
+        struckAxe: 10064,
+        struckClub: 10065,
+        struckBodySword: 10120,
+        struckBodyAxe: 10121,
+        struckBodyLongStick: 10122,
+        struckBodyFist: 10123,
+        mountStruckTiger1: 10179,
+        mountStruckTiger2: 10180,
+        mountStruckWolf: 10193,
+        femaleFlinch: 10129,
+        maleFlinch: 10128,
+        femaleDie: 10131,
+        maleDie: 10130,
+      },
+    },
+    "./original-audio": {
+      playOriginalSoundId(soundId) {
+        triggerPlayedIds.push(soundId);
+        return true;
+      },
+      playOriginalSoundIdWithFallback(soundIds) {
+        triggerPlayedIds.push(soundIds[0]);
+        return true;
+      },
+    },
+    "./crystal-magic-effects": {
+      spellNumberForName(spell) {
+        return spell === "Healing" ? 61 : null;
+      },
+    },
+  },
+);
 
 const BASE = new URL("../lib/game-events/", import.meta.url);
 
@@ -112,10 +156,19 @@ function makeAudioSink(entityRef = null) {
       playOriginalSoundId(soundId) { calls.push({ fn: "playOriginalSoundId", soundId }); },
       playOriginalSoundEvent(event) { calls.push({ fn: "playOriginalSoundEvent", event }); },
       setOriginalMusicId(musicId) { calls.push({ fn: "setOriginalMusicId", musicId }); },
-      playEntityAttackSound(entity) { calls.push({ fn: "playEntityAttackSound", entity }); },
-      playEntityStruckSound(entity) { calls.push({ fn: "playEntityStruckSound", entity }); },
-      playEntityDieSound(entity) { calls.push({ fn: "playEntityDieSound", entity }); },
-      playMagicSoundId(spell) { calls.push({ fn: "playMagicSoundId", spell }); },
+      playEntityAttackSound(entity, spell, objectId) {
+        calls.push({ fn: "playEntityAttackSound", entity, spell, objectId });
+      },
+      playEntityStruckSound(entity, attacker) {
+        calls.push({ fn: "playEntityStruckSound", entity, attacker });
+      },
+      scheduleEntityDieSound(entity, objectId) {
+        calls.push({ fn: "scheduleEntityDieSound", entity, objectId });
+      },
+      playReviveSound() { calls.push({ fn: "playReviveSound" }); },
+      playMagicSoundId(spell, variantOne) {
+        calls.push({ fn: "playMagicSoundId", spell, variantOne: variantOne === true });
+      },
       soundEntityRefFor(_objectId) { return entityRef; },
       playGoldSound() { calls.push({ fn: "playGoldSound" }); },
     },
@@ -206,6 +259,7 @@ check("onAny handler receives every event type", () => {
   bus.emit({ type: "entityStruck", objectId: "2" });
   bus.emit({ type: "entityDied", objectId: "3" });
   bus.emit({ type: "magicCast", objectId: "4", spell: 31 });
+  bus.emit({ type: "magicEffect", objectId: "5", effect: 3 });
   bus.emit({ type: "playSound", soundId: 100 });
   bus.emit({ type: "gainedGold", amount: 500 });
   bus.emit({ type: "mapMusicChanged", musicId: 146 });
@@ -215,6 +269,7 @@ check("onAny handler receives every event type", () => {
     "entityStruck",
     "entityDied",
     "magicCast",
+    "magicEffect",
     "playSound",
     "gainedGold",
     "mapMusicChanged",
@@ -261,28 +316,252 @@ check("entityAttack -> playEntityAttackSound with resolved entity ref", () => {
   assert.equal(calls.length, 1);
   assert.equal(calls[0].fn, "playEntityAttackSound");
   assert.deepEqual(calls[0].entity, fakeRef);
+  assert.equal(calls[0].spell, undefined);
+  assert.equal(calls[0].objectId, "42");
 });
 
-check("entityStruck -> playEntityStruckSound", () => {
+check("entityAttack preserves FlamingSword spell identity for the audio sink", () => {
   const bus = createGameEventBus();
-  const fakeRef = { kind: "selfPlayer", genderKey: "male" };
+  const fakeRef = { kind: "player", sprite: null, genderKey: "male" };
   const { calls, sink } = makeAudioSink(fakeRef);
   registerSoundSubscriber(bus, sink);
-  bus.emit({ type: "entityStruck", objectId: "7" });
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].fn, "playEntityStruckSound");
-  assert.equal(calls[0].entity, fakeRef);
+  bus.emit({ type: "entityAttack", objectId: "42", spell: 8 });
+  assert.deepEqual(calls, [
+    { fn: "playEntityAttackSound", entity: fakeRef, spell: 8, objectId: "42" },
+  ]);
 });
 
-check("entityDied -> playEntityDieSound", () => {
+check("FlamingSword player attack plays exact M8-1 now and normal swing at frame 1", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 1;
+  };
+  try {
+    originalSoundTriggersModule.playEntityAttackSound(
+      { kind: "player", sprite: null, genderKey: "male" },
+      8,
+      "42",
+    );
+    assert.deepEqual(triggerPlayedIds, [20081]);
+    assert.equal(scheduled.length, 1);
+    assert.equal(scheduled[0].delay, 100);
+    scheduled[0].callback();
+    assert.deepEqual(triggerPlayedIds, [20081, 10052]);
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
+});
+
+check("FlamingSword delayed swing is cancelled with its removed actor", () => {
+  triggerPlayedIds.length = 0;
+  const cleared = [];
+  const realSetTimeout = globalThis.setTimeout;
+  const realClearTimeout = globalThis.clearTimeout;
+  globalThis.setTimeout = () => 77;
+  globalThis.clearTimeout = (timer) => cleared.push(timer);
+  try {
+    originalSoundTriggersModule.playEntityAttackSound(
+      { kind: "player", sprite: null, genderKey: "male" },
+      "FlamingSword",
+      "actor-77",
+    );
+    originalSoundTriggersModule.cancelPendingEntityAttackSounds("actor-77");
+    assert.deepEqual(triggerPlayedIds, [20081]);
+    assert.deepEqual(cleared, [77]);
+  } finally {
+    originalSoundTriggersModule.cancelPendingEntityAttackSounds();
+    globalThis.setTimeout = realSetTimeout;
+    globalThis.clearTimeout = realClearTimeout;
+  }
+});
+
+check("ordinary player attack never plays the FlamingSword-specific sound", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 1;
+  };
+  try {
+    originalSoundTriggersModule.playEntityAttackSound(
+      { kind: "player", sprite: null, genderKey: "male" },
+      0,
+    );
+    assert.deepEqual(triggerPlayedIds, [10052]);
+    assert.equal(scheduled.length, 0);
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
+});
+
+check("Scarecrow Attack1 resolves BaseImage + 1 immediately", () => {
+  triggerPlayedIds.length = 0;
+  originalSoundTriggersModule.playEntityAttackSound(
+    { kind: "monster", sprite: { bodyLibrary: "/original-ui/Monster/005" } },
+    0,
+    "scarecrow-5",
+  );
+  assert.deepEqual(triggerPlayedIds, [51]);
+});
+
+check("Scarecrow Struck plays BaseImage + 2 before the exact weapon clang", () => {
+  const cases = [
+    ["warrior", "CWeapon/00", 10061],
+    ["warrior", "CWeapon/01", 10060],
+    ["warrior", "CWeapon/02", 10062],
+    ["warrior", "CWeapon/03", 10063],
+    ["warrior", "CWeapon/04", 10064],
+    ["warrior", "CWeapon/06", 10060],
+    ["warrior", "CWeapon/21", 10065],
+    ["assassin", "CWeapon/04", 10060],
+  ];
+  for (const [classKey, weaponLibrary, expected] of cases) {
+    triggerPlayedIds.length = 0;
+    originalSoundTriggersModule.playEntityStruckSound(
+      { kind: "monster", sprite: { bodyLibrary: "Monster/005" } },
+      { kind: "player", classKey, sprite: { weaponLibrary } },
+    );
+    assert.deepEqual(triggerPlayedIds, [52, expected], `${classKey}/${weaponLibrary}`);
+  }
+});
+
+check("Scarecrow Struck with unknown attacker keeps flinch and invents no clang", () => {
+  for (const attacker of [
+    null,
+    { kind: "monster", sprite: { bodyLibrary: "Monster/004" } },
+    { kind: "player", classKey: "warrior", sprite: { weaponLibrary: null } },
+  ]) {
+    triggerPlayedIds.length = 0;
+    originalSoundTriggersModule.playEntityStruckSound(
+      { kind: "monster", sprite: { bodyLibrary: "/original-ui/Monster/005" } },
+      attacker,
+    );
+    assert.deepEqual(triggerPlayedIds, [52]);
+  }
+});
+
+check("entityStruck -> playEntityStruckSound with attacker context", () => {
+  const bus = createGameEventBus();
+  const targetRef = { kind: "selfPlayer", genderKey: "male" };
+  const attackerRef = {
+    kind: "player",
+    genderKey: "female",
+    sprite: { weaponLibrary: "CWeapon/04" },
+  };
+  const { calls, sink } = makeAudioSink();
+  sink.soundEntityRefFor = (objectId) => objectId === "7" ? targetRef : attackerRef;
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "entityStruck", objectId: "7", attackerId: "8" });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].fn, "playEntityStruckSound");
+  assert.equal(calls[0].entity, targetRef);
+  assert.equal(calls[0].attacker, attackerRef);
+});
+
+check("player struck audio follows Crystal weapon/armour body cue then flinch", () => {
+  triggerPlayedIds.length = 0;
+  originalSoundTriggersModule.playEntityStruckSound(
+    {
+      kind: "player",
+      classKey: "warrior",
+      genderKey: "female",
+      sprite: { bodyLibrary: "CArmour/03" },
+    },
+    { kind: "player", classKey: "warrior", sprite: { weaponLibrary: "CWeapon/04" } },
+  );
+  assert.deepEqual(triggerPlayedIds, [10131, 10129], "axe hit + heavy armour offset, then female flinch");
+});
+
+check("mounted player struck audio uses the mount family then flinch", () => {
+  triggerPlayedIds.length = 0;
+  const realRandom = Math.random;
+  Math.random = () => 0;
+  try {
+    originalSoundTriggersModule.playEntityStruckSound(
+      {
+        kind: "player",
+        classKey: "warrior",
+        genderKey: "male",
+        sprite: { bodyLibrary: "CArmour/03", mountLibrary: "Mount/05" },
+      },
+      { kind: "player", classKey: "warrior", sprite: { weaponLibrary: "CWeapon/04" } },
+    );
+  } finally {
+    Math.random = realRandom;
+  }
+  assert.deepEqual(triggerPlayedIds, [10179, 10128], "tiger mount hit then male flinch, no body hit");
+});
+
+check("entityDied -> scheduleEntityDieSound with actor identity", () => {
   const bus = createGameEventBus();
   const fakeRef = { kind: "player", genderKey: "female" };
   const { calls, sink } = makeAudioSink(fakeRef);
   registerSoundSubscriber(bus, sink);
   bus.emit({ type: "entityDied", objectId: "9" });
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].fn, "playEntityDieSound");
+  assert.equal(calls[0].fn, "scheduleEntityDieSound");
   assert.equal(calls[0].entity, fakeRef);
+  assert.equal(calls[0].objectId, "9");
+});
+
+check("player death cue is delayed to Die frame 1 and can be cancelled", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const cleared = [];
+  const realSetTimeout = globalThis.setTimeout;
+  const realClearTimeout = globalThis.clearTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 91;
+  };
+  globalThis.clearTimeout = (timer) => cleared.push(timer);
+  try {
+    originalSoundTriggersModule.scheduleEntityDieSound(
+      { kind: "player", genderKey: "female" },
+      "player-9",
+    );
+    assert.deepEqual(triggerPlayedIds, []);
+    assert.equal(scheduled[0].delay, 100);
+    originalSoundTriggersModule.cancelPendingEntitySounds("player-9");
+    assert.deepEqual(cleared, [91]);
+  } finally {
+    originalSoundTriggersModule.cancelPendingEntitySounds();
+    globalThis.setTimeout = realSetTimeout;
+    globalThis.clearTimeout = realClearTimeout;
+  }
+});
+
+check("Scarecrow death cue resolves BaseImage + 3 immediately", () => {
+  triggerPlayedIds.length = 0;
+  const scheduled = [];
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (callback, delay) => {
+    scheduled.push({ callback, delay });
+    return 92;
+  };
+  try {
+    originalSoundTriggersModule.scheduleEntityDieSound(
+      { kind: "monster", sprite: { bodyLibrary: "/original-ui/Monster/005" } },
+      "scarecrow-5",
+    );
+    assert.deepEqual(triggerPlayedIds, [53]);
+    assert.deepEqual(scheduled, []);
+  } finally {
+    originalSoundTriggersModule.cancelPendingEntitySounds();
+    globalThis.setTimeout = realSetTimeout;
+  }
+});
+
+check("entityRevived -> playReviveSound", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "entityRevived", objectId: "9" });
+  assert.deepEqual(calls, [{ fn: "playReviveSound" }]);
 });
 
 check("magicCast -> playMagicSoundId with the spell value", () => {
@@ -303,6 +582,44 @@ check("magicCast with null spell still calls playMagicSoundId (graceful no-op pa
   assert.equal(calls.length, 1);
   assert.equal(calls[0].fn, "playMagicSoundId");
   assert.equal(calls[0].spell, null);
+});
+
+check("Healing string magicCast preserves the protocol enum name", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "magicCast", objectId: "1000", spell: "Healing" });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].spell, "Healing");
+  assert.equal(calls[0].variantOne, false);
+});
+
+check("Healing name and numeric id resolve exact cast and target sound ids", () => {
+  triggerPlayedIds.length = 0;
+  assert.equal(originalSoundTriggersModule.playMagicSoundId("Healing"), true);
+  assert.equal(originalSoundTriggersModule.playMagicSoundId(61, true), true);
+  assert.deepEqual(triggerPlayedIds, [20610, 20611]);
+});
+
+check("Healing magicEffect -> playMagicSoundId variant one", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "magicEffect", objectId: "2005", effect: 3 });
+  assert.deepEqual(calls, [
+    { fn: "playMagicSoundId", spell: 61, variantOne: true },
+  ]);
+});
+
+check("unknown magicEffect stays silent and unsubscribe stops Healing", () => {
+  const bus = createGameEventBus();
+  const { calls, sink } = makeAudioSink();
+  const unsubscribe = registerSoundSubscriber(bus, sink);
+  bus.emit({ type: "magicEffect", objectId: "2005", effect: 2 });
+  assert.equal(calls.length, 0);
+  unsubscribe();
+  bus.emit({ type: "magicEffect", objectId: "2005", effect: 3 });
+  assert.equal(calls.length, 0);
 });
 
 check("playSound -> playOriginalSoundId with correct id", () => {
@@ -514,7 +831,7 @@ check("full combat sequence wires both subscribers correctly", () => {
 
   assert.equal(audio.calls.filter((c) => c.fn === "playEntityAttackSound").length, 1);
   assert.equal(audio.calls.filter((c) => c.fn === "playEntityStruckSound").length, 1);
-  assert.equal(audio.calls.filter((c) => c.fn === "playEntityDieSound").length, 1);
+  assert.equal(audio.calls.filter((c) => c.fn === "scheduleEntityDieSound").length, 1);
   assert.equal(vfx.calls.filter((c) => c.fn === "markEntityStruck").length, 1);
   assert.equal(vfx.calls.filter((c) => c.fn === "addDamageFloater").length, 1);
   assert.equal(vfx.calls.find((c) => c.fn === "addDamageFloater").damage, -120);

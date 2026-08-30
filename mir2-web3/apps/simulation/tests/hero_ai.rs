@@ -14,7 +14,18 @@ const STAT_MAX_MC: u8 = 7;
 const STAT_DAMAGE_REDUCTION_PERCENT: u8 = 124;
 const STAT_MANA_PENALTY_PERCENT: u8 = 127;
 
+fn login_demo(session: &mut SimulationSession) {
+    let packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
 fn start_with_hero(session: &mut SimulationSession, class: MirClass, behaviour: u8) {
+    login_demo(session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.handle_packet(ClientPacket::NewHero {
         name: "Aide".to_string(),
@@ -98,6 +109,7 @@ fn session_with_saved_hero_and_player_hp_in_scene_with_learned_magics(
     }
 
     let mut session = SimulationSession::new(config);
+    login_demo(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session
 }
@@ -937,6 +949,13 @@ fn hero_inventory_book_magic_key_save_loop_enables_hero_ai_spell() {
     }
     let saved_config = config.clone();
     let mut session = SimulationSession::new(config);
+    let login_packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(login_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let learn_packets = session.handle_packet(ClientPacket::UseItem {

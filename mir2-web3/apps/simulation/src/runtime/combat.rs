@@ -4,7 +4,7 @@ use mir2_game_data::{
     format_localized_text, localized_text_or_fallback, CrystalMagicTemplate,
     CrystalRespawnTemplate,
 };
-use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
+use mir2_protocol::{ChatType, MirClass, MirDirection, Point, ServerPacket};
 use mir2_protocol::{ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo, Spell};
 
 use super::buffs::{apply_or_refresh_buff, BuffState};
@@ -20,6 +20,7 @@ use super::drops::{
     HarvestTargetSelection,
 };
 use super::equipment::{damage_weapon_durability, damage_worn_durability};
+use super::items::crystal_item_template_for_item_key;
 use super::map::is_safe_zone_point;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
@@ -43,9 +44,10 @@ use super::packets::{
     visible_object_bundle_for_entity,
 };
 use super::resources::{
-    is_in_world, runtime_tick, BuffResource, ElementalResource, GmRuntimeResource,
-    MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SkillResource,
+    is_in_world, runtime_tick, BuffResource, ElementalResource, FishingResource, GmRuntimeResource,
+    InventoryResource, MapRuntimeResource, MountResource, PlayerRuntimeResource,
+    RuntimeClockResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
+    SkillResource,
 };
 use super::session::SimulationSession;
 use super::skills::{
@@ -57,6 +59,30 @@ use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
     attack_target_in_direction_at_distance(world, direction, 1)
+}
+
+fn monster_is_player_attackable(agent: &MonsterAgent) -> bool {
+    // Crystal AI 1/2/3 are passive hunt or harvest targets (Hen/Pig/Bull,
+    // Deer/Sheep, trees/chests). They do not initiate combat, but the original
+    // client still lets the player attack them. Other non-hostile agents are
+    // guards, trainers, gates, or friendly objects and remain protected.
+    agent.hostile_to_player || matches!(agent.ai, 1 | 2 | 3)
+}
+
+pub(super) fn melee_target_is_authoritatively_attackable_in_direction(
+    world: &World,
+    direction: MirDirection,
+    requested_spell: Spell,
+) -> Option<bool> {
+    let object_id = attack_target_in_direction(world, direction).or_else(|| {
+        (requested_spell == Spell::Thrusting && skill_toggle_state(world, Spell::Thrusting))
+            .then(|| attack_target_in_direction_at_distance(world, direction, 2))
+            .flatten()
+    })?;
+    let entity = entity_by_object_id(world, object_id)?;
+    world
+        .get::<MonsterAgent>(entity)
+        .map(monster_is_player_attackable)
 }
 
 #[allow(deprecated)]
@@ -102,6 +128,73 @@ const MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER: i32 = 1_000;
 /// pauses while the player is actively taking damage.
 const CRYSTAL_PLAYER_REGEN_INTERVAL_TICKS: u64 = 10;
 const CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_TICKS: u64 = 10;
+/// Crystal `Globals.ClassWeaponCount` and `Globals.MaxAttackRange`.
+const CRYSTAL_CLASS_WEAPON_COUNT: i16 = 100;
+const CRYSTAL_PLAYER_MAX_RANGE_ATTACK_TILES: i32 = 9;
+
+/// Server-authoritative Crystal `HasClassWeapon` for the active player.
+///
+/// Crystal's player `RangeAttack` accepts only weapon shapes in class-weapon
+/// bucket 2 (the Archer bucket). Crystal's `HasClassWeapon` does not add a
+/// durability predicate, so this check must not become stricter than the
+/// authoritative class/shape rule. The server never trusts client snapshot
+/// declarations when authorizing damage.
+pub(super) fn crystal_player_has_class_weapon(world: &World) -> bool {
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    if world
+        .entity(player)
+        .get::<super::components::CharacterBody>()
+        .map(|body| body.class)
+        != Some(MirClass::Archer)
+    {
+        return false;
+    }
+
+    let Some(inventory) = world.get_resource::<InventoryResource>() else {
+        return false;
+    };
+    inventory
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == crate::config::EquipmentSlot::Weapon)
+        .and_then(|item| crystal_item_template_for_item_key(&item.key))
+        .is_some_and(|template| {
+            template.shape >= 0 && template.shape / CRYSTAL_CLASS_WEAPON_COUNT == 2
+        })
+}
+
+pub(super) fn crystal_player_is_riding_mount(world: &World) -> bool {
+    // Missing authoritative mount state must reject, not silently authorize.
+    world
+        .get_resource::<MountResource>()
+        .map(|mount| mount.riding_mount)
+        .unwrap_or(true)
+}
+
+/// Crystal `CharacterInfo.CanRideAttack`:
+/// `(HasMount && Bells != null) || !RidingMount`.
+///
+/// `mount_type >= 0` is the authoritative local equivalent of `HasMount`.
+/// Missing mount state fails closed.
+pub(super) fn crystal_player_can_mount_attack(world: &World) -> bool {
+    world
+        .get_resource::<MountResource>()
+        .is_some_and(|mount| !mount.riding_mount || (mount.mount_type >= 0 && mount.has_bells))
+}
+
+pub(super) fn crystal_player_is_fishing(world: &World) -> bool {
+    // Missing authoritative fishing state must reject, not silently authorize.
+    world
+        .get_resource::<FishingResource>()
+        .map(|fishing| fishing.fishing)
+        .unwrap_or(true)
+}
+
+pub(super) fn crystal_player_is_dazed(world: &World) -> bool {
+    crystal_player_has_active_buff(world, HELL_KEEPER_DAZED_BUFF_KEY)
+}
 
 fn qa_natural_kill_damage_multiplier_from(raw: Option<&str>) -> i32 {
     raw.and_then(|value| value.trim().parse::<i32>().ok())
@@ -556,6 +649,53 @@ fn crystal_monster_agility(world: &World, monster_entity: Entity) -> i32 {
         .unwrap_or(0)
 }
 
+/// Stable accuracy roll with enough avalanche mixing to avoid modulo resonance.
+///
+/// The generic world roll is intentionally cheap and linear. Reusing it here
+/// made some agility spans pathological: its tick coefficient is divisible by
+/// nine, so an agility-eight target could be a permanent hit or permanent miss
+/// for one attacker/target pair. Crystal rolls accuracy again on every swing;
+/// mix tick and identities before reducing to the requested span so successive
+/// attacks retain that behaviour while remaining replay-deterministic.
+pub(super) fn crystal_accuracy_roll(
+    current_tick: u64,
+    attacker_id: u32,
+    target_object_id: u32,
+    span: u64,
+) -> u64 {
+    if span <= 1 {
+        return 0;
+    }
+
+    let mut value = current_tick.wrapping_add(0x9E37_79B9_7F4A_7C15)
+        ^ u64::from(attacker_id).wrapping_mul(0xBF58_476D_1CE4_E5B9)
+        ^ u64::from(target_object_id).wrapping_mul(0x94D0_49BB_1331_11EB);
+    value = (value ^ (value >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    (value ^ (value >> 31)) % span
+}
+
+#[cfg(test)]
+mod crystal_accuracy_roll_tests {
+    use super::crystal_accuracy_roll;
+
+    #[test]
+    fn agility_eight_roll_changes_across_successive_ticks() {
+        let rolls = (0..32)
+            .map(|tick| crystal_accuracy_roll(tick, 1_000, 206_629, 9))
+            .collect::<Vec<_>>();
+
+        assert!(
+            rolls.contains(&0),
+            "zero-accuracy attacker must sometimes hit"
+        );
+        assert!(
+            rolls.iter().any(|roll| *roll > 0),
+            "agility-eight target must sometimes dodge"
+        );
+    }
+}
+
 fn crystal_player_hit_roll_succeeds(
     world: &World,
     attacker_id: u32,
@@ -571,10 +711,11 @@ fn crystal_player_hit_roll_succeeds(
         return true;
     }
 
-    let roll = deterministic_roll(
+    let target_object_id = entity_object_id(world, target_entity).unwrap_or(target_entity.index());
+    let roll = crystal_accuracy_roll(
         current_tick,
-        usize::try_from(attacker_id).unwrap_or_default(),
-        target_entity.index() as usize,
+        attacker_id,
+        target_object_id,
         u64::try_from(agility.saturating_add(1)).unwrap_or(1),
     );
     roll <= u64::try_from(crystal_player_accuracy(world).max(0)).unwrap_or(0)
@@ -3104,13 +3245,14 @@ impl SimulationSession {
         }
         if current_player_is_dead(self.app.world())
             || crystal_player_attack_blocked_by_status(self.app.world())
+            || crystal_player_is_fishing(self.app.world())
+            || !crystal_player_can_mount_attack(self.app.world())
         {
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];
         }
 
-        dismiss_dialog(self.app.world_mut());
         let Some(monster_entity) = entity_by_object_id(self.app.world(), object_id) else {
             return Vec::new();
         };
@@ -3137,6 +3279,13 @@ impl SimulationSession {
         {
             return Vec::new();
         }
+        if !monster_is_player_attackable(monster_agent) {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
+
+        dismiss_dialog(self.app.world_mut());
 
         let Some(direction) = direction_toward(&player_position, &target_position) else {
             return Vec::new();
@@ -3382,6 +3531,21 @@ impl SimulationSession {
             .world_mut()
             .entity_mut(monster_entity)
             .insert(agent);
+        // Weapon skills still enter through the melee packet path, but Crystal
+        // resolves their declared defence type rather than the default
+        // auto-attack AcAgility defence. Capture it only while scheduling so
+        // unrelated queued combat retains the surrounding cast scope.
+        let previous_defence = match attack_spell {
+            Spell::FlamingSword => Some(set_cast_defence(
+                self.app.world_mut(),
+                Some(CrystalDefence::Ac),
+            )),
+            Spell::Thrusting => Some(set_cast_defence(
+                self.app.world_mut(),
+                Some(CrystalDefence::Agility),
+            )),
+            _ => None,
+        };
         schedule_damage_to_monster_with_due_packet(
             self.app.world_mut(),
             hit_due_tick,
@@ -3395,6 +3559,9 @@ impl SimulationSession {
             }),
             due_packet,
         );
+        if let Some(previous_defence) = previous_defence {
+            set_cast_defence(self.app.world_mut(), previous_defence);
+        }
         queue_melee_passive_skill_progression(self.app.world_mut(), hit_due_tick, current_tick);
 
         packets.extend(advance_world(self.app.world_mut()));
@@ -3460,13 +3627,25 @@ impl SimulationSession {
         &mut self,
         direction: MirDirection,
         target_id: u32,
-        target_location: Point,
+        _target_location: Point,
     ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
         if current_player_is_dead(self.app.world())
             || crystal_player_attack_blocked_by_status(self.app.world())
+        {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
+        // A RangeAttack packet is only an intent. Crystal authorizes this path
+        // for an Archer holding a live class weapon, and the native candidate
+        // deliberately disallows mounted ranged attacks. Re-check every
+        // predicate from authoritative ECS/resources; never trust client JSON.
+        if !crystal_player_has_class_weapon(self.app.world())
+            || crystal_player_is_riding_mount(self.app.world())
+            || crystal_player_is_fishing(self.app.world())
         {
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
@@ -3485,13 +3664,9 @@ impl SimulationSession {
         let Some(target_position) = entity_position(self.app.world(), target_entity) else {
             return Vec::new();
         };
-        // Server-authoritative range gate: a client may only ranged-attack a
-        // target inside its data window. Beyond that the client cannot
-        // legitimately know the target exists, so reject (anti-cheat / no
-        // cross-map attacks). Uses the visibility range rather than a tight
-        // weapon range to stay parity-safe for all in-view gameplay.
-        if tile_distance(&player_position, &target_position)
-            > super::crystal_compat::CRYSTAL_DATA_RANGE
+        // Crystal `Globals.MaxAttackRange` is nine tiles. Validate the actual
+        // target transform, not the client-supplied target location.
+        if tile_distance(&player_position, &target_position) > CRYSTAL_PLAYER_MAX_RANGE_ATTACK_TILES
         {
             return Vec::new();
         }
@@ -3560,7 +3735,7 @@ impl SimulationSession {
             },
             ServerPacket::RangeAttack {
                 target_id,
-                target: target_location.clone(),
+                target: target_position.clone(),
                 spell,
             },
         ];
@@ -3580,7 +3755,7 @@ impl SimulationSession {
                 location: player_position,
                 direction,
                 target_id,
-                target: target_location,
+                target: target_position,
                 attack_type: 0,
                 spell: spell as u8,
                 level: spell_level,
@@ -3594,7 +3769,14 @@ impl SimulationSession {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
-        if current_player_is_dead(self.app.world()) {
+        if current_player_is_dead(self.app.world())
+            || crystal_player_movement_blocked_by_status(self.app.world())
+        {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
+        if crystal_player_is_riding_mount(self.app.world()) {
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];
@@ -3620,7 +3802,24 @@ impl SimulationSession {
             });
             match selection {
                 HarvestTargetSelection::Target(target) => {
-                    packets.extend(harvest_monster_entity(self.app.world_mut(), target));
+                    let harvested = harvest_monster_entity(self.app.world_mut(), target);
+                    if harvested
+                        .iter()
+                        .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { .. }))
+                    {
+                        // Hidden plant/maggot subclasses still need their final
+                        // harvested corpse transition to survive visibility
+                        // filtering without advancing the whole AI world.
+                        if let Some(mut ai_state) = self
+                            .app
+                            .world_mut()
+                            .entity_mut(target)
+                            .get_mut::<MonsterAiState>()
+                        {
+                            ai_state.hidden = false;
+                        }
+                    }
+                    packets.extend(harvested);
                 }
                 HarvestTargetSelection::OwnerBlocked => {
                     packets.push(system_message_key(
@@ -3631,7 +3830,6 @@ impl SimulationSession {
             }
         }
 
-        packets.extend(advance_world(self.app.world_mut()));
         packets
     }
 }

@@ -28,6 +28,7 @@ const ATLAS_PADDING = 1;
 const INITIAL_WIDTH = 1024;
 export const MAX_SIZE = 4096;
 export const DEFAULT_MAX_PAGE_PIXELS = 1024 * 256;
+export const NEAR_BLACK_CHANNEL_MAX = 16;
 
 const args = parseArgs(process.argv.slice(2));
 const outDir = path.resolve(args.outDir ?? DEFAULT_OUT_DIR);
@@ -51,8 +52,8 @@ async function main() {
   }
 
   // `--skipIfPresent` (used by the `dev` hook) short-circuits when a manifest already exists, so a
-  // warm `npm run dev` doesn't pay the ~48s repack every start. CI/`build` calls it without the flag
-  // to always produce a fresh atlas from the committed source PNGs.
+  // warm `npm run dev` doesn't pay the ~48s repack or source scan every start. CI/`build` calls it
+  // without the flag to always inspect and produce a fresh atlas from the committed source PNGs.
   if (args.skipIfPresent) {
     const existingManifest = path.join(outDir, "manifest.json");
     if (await exists(existingManifest)) {
@@ -77,15 +78,32 @@ async function main() {
     throw new Error("No map-library PNG directories found under public/original-map");
   }
 
+  const selectedLibraries = [];
+  const qualityFindings = [];
+  for (const lib of selected) {
+    const sources = await collectLibrarySources(lib);
+    if (!sources.length) continue;
+    selectedLibraries.push({ lib, sources });
+    qualityFindings.push(
+      ...(await findUniformOpaqueNearBlackPlaceholderSources(sources)).map((finding) => ({
+        ...finding,
+        libraryKey: lib.libraryKey,
+      })),
+    );
+  }
+  reportMapAtlasSourceQuality(
+    qualityFindings,
+    path.resolve(WEB_ROOT, "..", ".."),
+    args.strictSourceQuality === "true",
+  );
+
   await fs.mkdir(outDir, { recursive: true });
   await removeStaleMapAtlasArtifacts(outDir);
   const atlases = [];
   let totalSources = 0;
   let totalImageBytes = 0;
 
-  for (const lib of selected) {
-    const sources = await collectLibrarySources(lib);
-    if (!sources.length) continue;
+  for (const { lib, sources } of selectedLibraries) {
     totalSources += sources.length;
 
     // One library may need multiple pages if its frames exceed the texture budget.
@@ -205,6 +223,94 @@ async function collectLibrarySources(lib) {
     sources.push({ filePath, frame, width, height });
   }
   return sources;
+}
+
+export async function findUniformOpaqueNearBlackPlaceholderSources(sources) {
+  const findings = [];
+  for (const source of sources) {
+    const stats = await sharp(source.filePath).ensureAlpha().stats();
+    if (!isUniformOpaqueNearBlackPlaceholder(stats)) continue;
+    findings.push({
+      filePath: source.filePath,
+      frame: source.frame,
+      width: source.width,
+      height: source.height,
+      rgba: stats.channels.slice(0, 4).map((channel) => channel.min),
+    });
+  }
+  return findings;
+}
+
+export function isUniformOpaqueNearBlackPlaceholder(stats) {
+  const channels = stats?.channels;
+  if (!Array.isArray(channels) || channels.length < 4) return false;
+
+  const rgb = channels.slice(0, 3);
+  const alpha = channels[3];
+  return (
+    rgb.every(
+      (channel) =>
+        Number.isFinite(channel?.min) &&
+        Number.isFinite(channel?.max) &&
+        channel.min === channel.max &&
+        channel.min >= 0 &&
+        channel.max <= NEAR_BLACK_CHANNEL_MAX,
+    ) &&
+    Number.isFinite(alpha?.min) &&
+    Number.isFinite(alpha?.max) &&
+    alpha.min === 255 &&
+    alpha.max === 255
+  );
+}
+
+export function reportMapAtlasSourceQuality(
+  findings,
+  repoRoot = path.resolve(WEB_ROOT, "..", ".."),
+  strictGroundTiles = false,
+) {
+  if (!findings.length) return;
+
+  const groundTileFindings = findings.filter((finding) =>
+    mapAtlasLibrarySupportsRawUpload(finding.libraryKey),
+  );
+  const otherFindings = findings.filter(
+    (finding) => !mapAtlasLibrarySupportsRawUpload(finding.libraryKey),
+  );
+  if (otherFindings.length) {
+    console.warn(
+      [
+        `[mir2-map-atlas] warning: found ${otherFindings.length} uniform opaque near-black source image(s) outside ground-tile libraries; continuing without making these known placeholder objects fatal.`,
+        ...formatMapAtlasQualityFindingPaths(otherFindings, repoRoot),
+      ].join("\n"),
+    );
+  }
+  if (groundTileFindings.length && strictGroundTiles) {
+    throw new Error(
+      [
+        `[mir2-map-atlas] ground-tile quality check failed: found ${groundTileFindings.length} uniform opaque near-black source image(s). Replace or re-export these source PNGs before building the map atlas:`,
+        ...formatMapAtlasQualityFindingPaths(groundTileFindings, repoRoot),
+      ].join("\n"),
+    );
+  }
+  if (groundTileFindings.length) {
+    console.warn(
+      [
+        `[mir2-map-atlas] warning: found ${groundTileFindings.length} uniform opaque near-black ground-tile source image(s). Use --strictSourceQuality to make this release-blocking:`,
+        ...formatMapAtlasQualityFindingPaths(groundTileFindings, repoRoot),
+      ].join("\n"),
+    );
+  }
+}
+
+function formatMapAtlasQualityFindingPaths(findings, repoRoot) {
+  return findings
+    .map((finding) => {
+      const relativePath =
+        (path.relative(repoRoot, finding.filePath) || finding.filePath).split(path.sep).join("/");
+      const rgba = Array.isArray(finding.rgba) ? ` (RGBA ${finding.rgba.join(",")})` : "";
+      return `  - ${relativePath}${rgba}`;
+    })
+    .sort((a, b) => a.localeCompare(b));
 }
 
 // Shelf-pack into one or more pages (each <= MAX_SIZE). Tall/wide frames that don't fit a row

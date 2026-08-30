@@ -4,7 +4,11 @@
 //! [`ChatModel`] so messages render identically. The panel is presentational;
 //! chat authorization and delivery stay server-authoritative.
 
+#[cfg(not(feature = "native-ui"))]
+use bevy::prelude::Resource;
+#[cfg(feature = "native-ui")]
 use bevy::prelude::*;
+#[cfg(feature = "native-ui")]
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, Node, PositionType, UiRect, Val,
 };
@@ -20,6 +24,104 @@ pub struct ChatLine {
     pub text: String,
     /// `normal` / `shout` / `whisper` / `group` / `system` / `hint` etc.
     pub channel: String,
+}
+
+/// The renderer-neutral canonical chat categories used by the native and Web
+/// presentation layers.
+///
+/// Crystal emits a few historical aliases (`Shout2`, `System2`,
+/// `LineMessage`, and so on).  Keep those aliases at the boundary and reduce
+/// them to this single vocabulary before applying either the control-bar
+/// filter or the settings visibility filter.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ChatChannel {
+    Normal,
+    System,
+    Hint,
+    LineMessage,
+    Shout,
+    WhisperIn,
+    WhisperOut,
+    Relationship,
+    Lover,
+    Mentor,
+    Group,
+    Guild,
+    Trade,
+}
+
+impl ChatChannel {
+    pub const ALL: [Self; 13] = [
+        Self::Normal,
+        Self::System,
+        Self::Hint,
+        Self::LineMessage,
+        Self::Shout,
+        Self::WhisperIn,
+        Self::WhisperOut,
+        Self::Relationship,
+        Self::Lover,
+        Self::Mentor,
+        Self::Group,
+        Self::Guild,
+        Self::Trade,
+    ];
+
+    pub const fn all() -> &'static [Self] {
+        &Self::ALL
+    }
+
+    /// Parse a Crystal/backend channel name case-insensitively.
+    ///
+    /// The aliases intentionally preserve Crystal's presentation families:
+    /// shout variants and announcement/level-up notices belong to the Shout
+    /// family for styling/control-bar purposes, while the settings filter is
+    /// resolved separately by [`Self::settings_filter_channel`].
+    pub fn parse(value: &str) -> Self {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "system" | "system1" | "system2" | "server" => Self::System,
+            "hint" => Self::Hint,
+            "linemessage" | "line" => Self::LineMessage,
+            "shout" | "shout1" | "shout2" | "shout3" | "announcement" | "levelup" => Self::Shout,
+            "whisperin" | "whisper_in" => Self::WhisperIn,
+            "whisperout" | "whisper_out" => Self::WhisperOut,
+            "whisper" => Self::WhisperIn,
+            "relationship" => Self::Relationship,
+            "lover" => Self::Lover,
+            "mentor" => Self::Mentor,
+            "group" => Self::Group,
+            "guild" => Self::Guild,
+            "trade" => Self::Trade,
+            "normal" | "trainer" | "" => Self::Normal,
+            _ => Self::Normal,
+        }
+    }
+
+    /// Resolve the exact channel families controlled by Crystal's settings
+    /// visibility flags. This mirrors Web `filteredByCrystalSettings`:
+    /// `Hint`, `Announcement`, `LevelUp`, `Trainer`, `Mentor`,
+    /// `Relationship`, and other unlisted types are intentionally not
+    /// settings-filterable, even when [`Self::parse`] maps them into a shared
+    /// presentation family.
+    pub fn settings_filter_channel(value: &str) -> Option<Self> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "normal" => Some(Self::Normal),
+            "linemessage" | "line" => Some(Self::LineMessage),
+            "whisperin" | "whisper_in" | "whisper" => Some(Self::WhisperIn),
+            "whisperout" | "whisper_out" => Some(Self::WhisperOut),
+            "shout" | "shout1" | "shout2" | "shout3" => Some(Self::Shout),
+            "system" | "system1" | "system2" => Some(Self::System),
+            "group" => Some(Self::Group),
+            "guild" => Some(Self::Guild),
+            _ => None,
+        }
+    }
+}
+
+impl ChatLine {
+    pub fn canonical_channel(&self) -> ChatChannel {
+        ChatChannel::parse(&self.channel)
+    }
 }
 
 /// The renderer-neutral chat read model (most recent last).
@@ -49,16 +151,20 @@ impl ChatModel {
 }
 
 /// Marker on the chat panel root.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct ChatPanelRoot;
 
 /// Marker on the chat text node.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct ChatText;
 
 /// Build the shared Mir2 chat panel.
+#[cfg(feature = "native-ui")]
 pub struct Mir2ChatPlugin;
 
+#[cfg(feature = "native-ui")]
 impl Plugin for Mir2ChatPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChatModel>()
@@ -70,6 +176,7 @@ impl Plugin for Mir2ChatPlugin {
     }
 }
 
+#[cfg(feature = "native-ui")]
 fn spawn_chat_panel(mut commands: Commands) {
     commands
         .spawn((
@@ -102,6 +209,7 @@ fn spawn_chat_panel(mut commands: Commands) {
         });
 }
 
+#[cfg(feature = "native-ui")]
 fn update_chat_panel(model: Res<ChatModel>, texts: Query<&mut Text, With<ChatText>>) {
     let joined = model.recent_text(6).join("\n");
     for mut text in texts {
@@ -141,5 +249,27 @@ mod tests {
         }
         assert_eq!(model.recent_text(3), vec!["m2", "m3", "m4"]);
         assert_eq!(model.recent_text(10).len(), 5);
+    }
+
+    #[test]
+    fn settings_filter_channel_keeps_presentation_aliases_separate() {
+        assert_eq!(ChatChannel::all().len(), 13);
+        assert_eq!(ChatChannel::parse("Announcement"), ChatChannel::Shout);
+        assert_eq!(ChatChannel::parse("LevelUp"), ChatChannel::Shout);
+        assert_eq!(ChatChannel::parse("Hint"), ChatChannel::Hint);
+        assert_eq!(ChatChannel::parse("Shout1"), ChatChannel::Shout);
+        assert_eq!(ChatChannel::parse("System1"), ChatChannel::System);
+
+        assert_eq!(ChatChannel::settings_filter_channel("Announcement"), None);
+        assert_eq!(ChatChannel::settings_filter_channel("LevelUp"), None);
+        assert_eq!(ChatChannel::settings_filter_channel("Hint"), None);
+        assert_eq!(
+            ChatChannel::settings_filter_channel("Shout1"),
+            Some(ChatChannel::Shout)
+        );
+        assert_eq!(
+            ChatChannel::settings_filter_channel("System1"),
+            Some(ChatChannel::System)
+        );
     }
 }

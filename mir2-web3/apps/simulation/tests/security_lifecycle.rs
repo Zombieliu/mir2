@@ -14,6 +14,19 @@ fn assert_rejected(command: WorldCommand) {
     );
 }
 
+fn login_demo_runtime(runtime: &mut InProcessWorldRuntime) {
+    let packets = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        }))
+        .expect("demo account should authenticate");
+    assert!(matches!(
+        packets.as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
+}
+
 #[test]
 fn unauthenticated_start_game_rejected() {
     let command = WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 });
@@ -90,6 +103,7 @@ fn town_revive_from_field_changes_to_the_configured_bind_map() {
     let bind_map_file_name = config.map.file_name.clone();
     let bind_position = config.spawn.clone();
     let mut runtime = InProcessWorldRuntime::new(config);
+    login_demo_runtime(&mut runtime);
     runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
             character_index: 0,
@@ -145,10 +159,13 @@ fn queued_potion_cannot_revive_a_dead_player_before_town_revive() {
         .with_crystal_world_runtime()
         .with_platinum_176_profile();
     let bind_position = config.spawn.clone();
+    let account_id = "queued-potion-death-lifecycle";
+    SimulationSession::provision_passkey_account(&config, account_id)
+        .expect("trusted fixture provisioning should succeed");
     let mut runtime = InProcessWorldRuntime::new(config);
     runtime
         .execute(WorldCommand::PasskeyLogin {
-            account_id: "queued-potion-death-lifecycle".to_string(),
+            account_id: account_id.to_string(),
         })
         .expect("fixture account should authenticate");
     let created = runtime
@@ -237,6 +254,7 @@ fn start_game_preserves_a_valid_full_map_transform_outside_the_starter_window() 
     }
 
     let mut runtime = InProcessWorldRuntime::new(config);
+    login_demo_runtime(&mut runtime);
     runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
             character_index: 0,
@@ -284,6 +302,7 @@ fn start_game_recovers_an_out_of_bounds_legacy_revive_transform() {
     }
 
     let mut runtime = InProcessWorldRuntime::new(config);
+    login_demo_runtime(&mut runtime);
     let packets = runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
             character_index: 0,
@@ -314,7 +333,10 @@ fn start_game_recovers_an_out_of_bounds_legacy_revive_transform() {
 #[test]
 fn passkey_account_can_create_character_and_start_game() {
     let account_id = "sui:0xpasskey-lifecycle";
-    let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+    let config = SimulationConfig::default();
+    SimulationSession::provision_passkey_account(&config, account_id)
+        .expect("trusted fixture provisioning should succeed");
+    let mut runtime = InProcessWorldRuntime::new(config);
 
     let login = runtime
         .execute(WorldCommand::PasskeyLogin {

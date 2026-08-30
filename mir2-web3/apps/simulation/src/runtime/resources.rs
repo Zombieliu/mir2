@@ -19,7 +19,13 @@ use super::quests::QuestState;
 use super::skills::SkillState;
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+};
 use std::time::{SystemTime, UNIX_EPOCH};
+
+const UNKNOWN_ACTIVE_SAVE_REVISION: u64 = u64::MAX;
 
 pub(super) fn current_language(world: &World) -> LanguageCode {
     world.resource::<SessionResource>().language
@@ -440,6 +446,7 @@ pub(super) struct SessionResource {
     pub(super) account_id: Option<String>,
     pub(super) characters: Vec<CharacterRecord>,
     pub(super) selected_character: Option<CharacterRecord>,
+    active_save_revision: Arc<AtomicU64>,
 }
 
 impl SessionResource {
@@ -450,7 +457,28 @@ impl SessionResource {
             account_id: None,
             characters: vec![config.default_character.clone()],
             selected_character: None,
+            active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
         }
+    }
+
+    pub(super) fn active_save_revision(&self) -> Option<u64> {
+        let revision = self.active_save_revision.load(Ordering::Acquire);
+        (revision != UNKNOWN_ACTIVE_SAVE_REVISION).then_some(revision)
+    }
+
+    pub(super) fn bind_active_save_revision(&self, revision: u64) {
+        self.active_save_revision.store(revision, Ordering::Release);
+    }
+
+    pub(super) fn clear_active_save_revision(&self) {
+        self.active_save_revision
+            .store(UNKNOWN_ACTIVE_SAVE_REVISION, Ordering::Release);
+    }
+
+    pub(super) fn advance_active_save_revision(&self, expected: u64, revision: u64) -> bool {
+        self.active_save_revision
+            .compare_exchange(expected, revision, Ordering::AcqRel, Ordering::Acquire)
+            .is_ok()
     }
 }
 
@@ -683,6 +711,7 @@ pub(super) struct ItemRentalRecordState {
 
 #[derive(Debug, Clone)]
 pub(super) struct ActiveItemRentalState {
+    pub(super) transaction_nonce: String,
     pub(super) partner_name: String,
     pub(super) fee: u32,
     pub(super) days: u32,
@@ -814,6 +843,9 @@ pub(super) struct MountResource {
     pub(super) riding_mount: bool,
     pub(super) has_saddle: bool,
     pub(super) has_reins: bool,
+    /// Crystal `MountSlot.Bells`. Derived from the equipped mount's embedded
+    /// authoritative item; no client packet may declare this capability.
+    pub(super) has_bells: bool,
 }
 
 impl MountResource {
@@ -823,6 +855,7 @@ impl MountResource {
             riding_mount: false,
             has_saddle: true,
             has_reins: false,
+            has_bells: false,
         }
     }
 }

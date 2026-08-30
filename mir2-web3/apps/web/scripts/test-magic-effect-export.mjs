@@ -9,6 +9,7 @@ import ts from "typescript";
 
 import {
   assembleMagicEffectsFromMeta,
+  CLIENT_EFFECTS,
   cropPackedRgba,
   MAP_EFFECTS,
   normalizeAdditiveRgba,
@@ -46,7 +47,7 @@ function effectsFetch(outputDir) {
 
 function allRequiredIndices() {
   const byLibrary = new Map();
-  for (const spec of [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS]) {
+  for (const spec of [...SPELL_EFFECTS, ...WORLD_SPELL_EFFECTS, ...CLIENT_EFFECTS, ...OBJECT_EFFECTS, ...MAP_EFFECTS]) {
     for (const phaseSpec of [spec, spec.projectile, spec.impact, spec.returnEffect].filter(Boolean)) {
       if (!byLibrary.has(phaseSpec.library)) byLibrary.set(phaseSpec.library, new Set());
       for (let value = 0; value < (phaseSpec.valueCount ?? 1); value += 1) {
@@ -126,6 +127,78 @@ async function testAssembleMode() {
   assert.equal(manifest.schemaVersion, 2);
   assert.equal(manifest.generatedAt, null, "manifest has no clock-dependent data");
   assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length);
+  assert.deepEqual(manifest.client_effects, CLIENT_EFFECTS);
+  assert.deepEqual(manifest.client_effects[0], {
+    effect: "LeftGuardRangeProjectile",
+    library: "Magic",
+    base: 10,
+    count: 6,
+    interval: 30,
+    directionCount: 16,
+    directionStride: 10,
+    directionRanges: Array.from({ length: 16 }, (_, direction) => ({
+      direction,
+      base: 10 + direction * 10,
+      end: 15 + direction * 10,
+    })),
+    kind: "projectile",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirObjects/MonsterObject.cs::LeftGuard/AttackRange1/FrameIndex4/CreateProjectile",
+      symbol: "LeftGuardRangeProjectile",
+    },
+  });
+  assert.deepEqual(manifest.client_effects[1], {
+    effect: "NewMoveDestination",
+    library: "Magic3",
+    base: 500,
+    count: 10,
+    interval: 60,
+    kind: "ground",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirScenes/GameScene.cs::MapControl.OnMouseClick/Settings.NewMove",
+      symbol: "NewMoveDestination",
+    },
+  });
+  assert.deepEqual(manifest.client_effects[2], {
+    effect: "PlayerRevive",
+    library: "Magic2",
+    base: 1220,
+    count: 20,
+    interval: 100,
+    kind: "target",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirScenes/GameScene.cs::Revived/ObjectRevived",
+      symbol: "PlayerRevive",
+    },
+  });
+  assert.deepEqual(manifest.client_effects[3], {
+    effect: "RightGuardRangeHit",
+    library: "Magic2",
+    base: 10,
+    count: 5,
+    interval: 60,
+    kind: "impact",
+    blend: true,
+    light: 6,
+    repeat: false,
+    offset: { x: 0, y: 0 },
+    provenance: {
+      source: "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4",
+      symbol: "RightGuardRangeHit",
+    },
+  });
   const trapWorldSpell = manifest.ground_effects.find(
     (entry) => entry.spell === "TrapHexagon" && entry.provenance.source.includes("SpellObject.cs"),
   );
@@ -186,6 +259,42 @@ async function testAssembleMode() {
   assert.equal(lightning.spellId, 40);
   assert.equal(lightning.directionStride, 20);
   assert.deepEqual(lightning.directionRanges[7], { direction: 7, base: 1110, end: 1115 });
+  const flamingSword = manifest.spell_effects.find((entry) => entry.spell === "FlamingSword");
+  assert.deepEqual(
+    {
+      spellId: flamingSword.spellId,
+      kind: flamingSword.kind,
+      library: flamingSword.library,
+      base: flamingSword.base,
+      count: flamingSword.count,
+      interval: flamingSword.interval,
+      directionCount: flamingSword.directionCount,
+      directionStride: flamingSword.directionStride,
+      blend: flamingSword.blend,
+      rate: flamingSword.rate,
+      light: flamingSword.light,
+      repeat: flamingSword.repeat,
+    },
+    {
+      spellId: 8,
+      kind: "attackOverlay",
+      library: "Magic",
+      base: 3480,
+      count: 6,
+      interval: 100,
+      directionCount: 8,
+      directionStride: 10,
+      blend: true,
+      rate: 0.7,
+      light: 0,
+      repeat: false,
+    },
+  );
+  assert.deepEqual(flamingSword.directionRanges[7], { direction: 7, base: 3550, end: 3555 });
+  assert.deepEqual(flamingSword.provenance, {
+    source: "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+    symbol: "Spell.FlamingSword",
+  });
   assert.deepEqual(
     manifest.spell_effects.find((entry) => entry.spell === "SummonHolyDeva"),
     {
@@ -213,13 +322,62 @@ async function testAssembleMode() {
   assert.equal(effects.resolveSpellCastEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/0.png");
   assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/10.png");
   assert.equal(effects.resolveSpellImpactEffect(assets, "FireBall").frames[0].path, "/original-ui/Magic/170.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "GreatFireBall").frames[0].path, "/original-ui/Magic/400.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "GreatFireBall").frames.at(-1).path, "/original-ui/Magic/409.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "GreatFireBall", 15).frames[0].path, "/original-ui/Magic/560.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "GreatFireBall", 15).frames.at(-1).path, "/original-ui/Magic/565.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "GreatFireBall").frames[0].path, "/original-ui/Magic/570.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "GreatFireBall").frames.at(-1).path, "/original-ui/Magic/579.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireBounce").frames[0].path, "/original-ui/Magic/400.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireBounce").frames.at(-1).path, "/original-ui/Magic/409.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 0).frames[0].path, "/original-ui/Magic/410.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 15).frames[0].path, "/original-ui/Magic/560.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 15).frames.at(-1).path, "/original-ui/Magic/565.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "FireBounce", 15).interval, 30);
+  assert.equal(effects.resolveSpellImpactEffect(assets, "FireBounce").frames[0].path, "/original-ui/Magic/570.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "FireBounce").frames.at(-1).path, "/original-ui/Magic/579.png");
   assert.equal(effects.resolveSpellCastEffect(assets, "SoulFireBall"), null);
   assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1160.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall", 15).frames[0].path, "/original-ui/Magic/1310.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "SoulFireBall", 15).frames.at(-1).path, "/original-ui/Magic/1312.png");
   assert.equal(effects.resolveSpellImpactEffect(assets, "SoulFireBall").frames[0].path, "/original-ui/Magic/1360.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "Hallucination"), null);
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "Hallucination", 0).frames[0].path, "/original-ui/Magic/1160.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "Hallucination", 15).frames[0].path, "/original-ui/Magic/1310.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "Hallucination", 15).frames.at(-1).path, "/original-ui/Magic/1312.png");
+  assert.equal(effects.resolveSpellProjectileEffect(assets, "Hallucination", 15).interval, 48);
+  assert.equal(effects.resolveSpellImpactEffect(assets, "Hallucination").frames[0].path, "/original-ui/Magic2/1110.png");
+  assert.equal(effects.resolveSpellImpactEffect(assets, "Hallucination").frames.at(-1).path, "/original-ui/Magic2/1119.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireWall").frames[0].path, "/original-ui/Magic/1620.png");
+  assert.equal(effects.resolveSpellCastEffect(assets, "FireWall").frames.at(-1).path, "/original-ui/Magic/1629.png");
+  assert.equal(effects.resolveMapEffect(assets, "FireWall").frames[0].path, "/original-ui/Magic/1630.png");
+  assert.equal(effects.resolveMapEffect(assets, "FireWall").frames.at(-1).path, "/original-ui/Magic/1635.png");
+  assert.equal(effects.resolveMapEffect(assets, "FireWall").repeat, true);
+  assert.equal(effects.resolveMapEffect(assets, "FireWall").light, 3);
+  assert.equal(effects.resolveSpellCastEffect(assets, "FlamingSword"), null);
+  const flamingSwordUpLeft = effects.resolveSpellAttackOverlayEffect(assets, "FlamingSword", 7);
+  assert.equal(flamingSwordUpLeft.frames.length, 6);
+  assert.equal(flamingSwordUpLeft.frames[0].path, "/original-ui/Magic/3550.png");
+  assert.equal(flamingSwordUpLeft.frames.at(-1).path, "/original-ui/Magic/3555.png");
+  assert.equal(flamingSwordUpLeft.opacity, 0.7);
+  assert.equal(flamingSwordUpLeft.light, 0);
   assert.equal(effects.resolveSpellReturnEffect(assets, "Vampirism").frames[0].path, "/original-ui/Magic2/1090.png");
   assert.equal(effects.spellNameForNumber(12), "ProtectionField", "Spell ids do not collide with SpellEffect names");
+  assert.equal(effects.spellNumberForName("Healing"), 61);
+  assert.equal(effects.spellNumberForName("UnknownSpell"), null);
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").frames[0].path, "/original-ui/Magic/1390.png");
   assert.equal(effects.resolveMapEffect(assets, "TrapHexagon").repeat, true);
+  const playerRevive = effects.resolveMapEffect(assets, "PlayerRevive");
+  assert.equal(playerRevive.frames.length, 20);
+  assert.equal(playerRevive.frames[0].path, "/original-ui/Magic2/1220.png");
+  assert.equal(playerRevive.frames.at(-1).path, "/original-ui/Magic2/1239.png");
+  assert.equal(playerRevive.durationMs, 2_000);
+  assert.equal(playerRevive.light, 6);
+  const newMoveDestination = effects.resolveMapEffect(assets, "NewMoveDestination");
+  assert.equal(newMoveDestination.frames.length, 10);
+  assert.equal(newMoveDestination.frames[0].path, "/original-ui/Magic3/500.png");
+  assert.equal(newMoveDestination.frames.at(-1).path, "/original-ui/Magic3/509.png");
+  assert.equal(newMoveDestination.durationMs, 600);
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 7).frames[0].path, "/original-ui/Magic2/2210.png");
   assert.equal(effects.resolveSpellEffect(assets, "Haste", 8), null);
   assert.equal(effects.effectNameForNumber(assets, 12), "Mine");

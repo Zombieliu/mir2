@@ -1,6 +1,11 @@
 {
   "version": 3,
   "count": 1602,
+  "frameSet": {
+    "seek": 3557644,
+    "count": 0,
+    "actions": []
+  },
   "frames": [
     {
       "index": 197,
@@ -325,6 +330,20 @@
       "maskPath": null
     },
     {
+      "index": 423,
+      "width": 260,
+      "height": 22,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/423.png",
+      "maskPath": null
+    },
+    {
       "index": 431,
       "width": 32,
       "height": 18,
@@ -364,6 +383,90 @@
       "maskWidth": null,
       "maskHeight": null,
       "path": "/original-ui/Prguse2/433.png",
+      "maskPath": null
+    },
+    {
+      "index": 470,
+      "width": 12,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/470.png",
+      "maskPath": null
+    },
+    {
+      "index": 471,
+      "width": 12,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/471.png",
+      "maskPath": null
+    },
+    {
+      "index": 472,
+      "width": 12,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/472.png",
+      "maskPath": null
+    },
+    {
+      "index": 473,
+      "width": 12,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/473.png",
+      "maskPath": null
+    },
+    {
+      "index": 474,
+      "width": 12,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/474.png",
+      "maskPath": null
+    },
+    {
+      "index": 475,
+      "width": 12,
+      "height": 12,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/475.png",
       "maskPath": null
     },
     {
