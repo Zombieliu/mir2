@@ -516,12 +516,12 @@ impl NativeLightingPublisher {
                     .and_then(Value::as_str)
                     .and_then(crate::map_parser::load_map);
                 self.map_frame_offsets = map
-                    .as_ref()
+                    .as_deref()
                     .map(crate::map_parser::native_map_light_frame_offsets)
                     .unwrap_or_default();
                 let state = self.bridge.build_render_state(
                     payload,
-                    map.as_ref(),
+                    map.as_deref(),
                     &self.map_frame_offsets,
                     &native_lighting_default_motion(),
                     &self.assets,
@@ -3096,8 +3096,6 @@ where
                             "[gateway-client] packet UserLocation payload={}",
                             event.payload.as_ref().unwrap_or(&Value::Null)
                         );
-                    } else {
-                        eprintln!("[gateway-client] packet UserLocation");
                     }
                 }
                 "Chat" | "ObjectChat" => {
@@ -3487,6 +3485,14 @@ fn forward_packet_first_world(
     let entity_json = serde_json::to_string(&entity_model).map_err(|error| error.to_string())?;
     let _ = mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
 
+    // A successful Crystal movement acknowledgement only advances the local
+    // scene/camera and releases the pending action. Inventory, learned skills,
+    // mail, storage and shop are unrelated immutable models on this packet and
+    // remain on their authoritative snapshot / dedicated packet paths.
+    if !packet_first_world_needs_aux_models(source_packet) {
+        return Ok(());
+    }
+
     let _ = push_native_skill_model_from_world(payload)?;
 
     if let Some(mut mail) = try_transform_mail_model_from_snapshot(payload) {
@@ -3503,6 +3509,10 @@ fn forward_packet_first_world(
     }
 
     Ok(())
+}
+
+fn packet_first_world_needs_aux_models(source_packet: Option<&PacketEvent>) -> bool {
+    !matches!(source_packet, Some(PacketEvent::UserLocation(_)))
 }
 
 fn push_local_map_render_state(payload: &Value) -> Result<bool, String> {
@@ -3523,9 +3533,14 @@ fn push_local_map_render_state(payload: &Value) -> Result<bool, String> {
         .unwrap_or_else(|| crate::map_parser::disabled_map_render_state(map_file_name, viewport));
     let render_json = serde_json::to_string(&render_state).map_err(|error| error.to_string())?;
     let _ = mir2_bevy_runtime::native_ingest::push_native_map_render_state(render_json);
-    if rendered {
-        eprintln!("[gateway-client] pushed real map render state for {map_file_name}");
-    } else {
+    if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+        eprintln!(
+            "[gateway-client] {} map render state for {map_file_name} at ({}, {})",
+            if rendered { "pushed real" } else { "disabled" },
+            viewport.center_x,
+            viewport.center_y,
+        );
+    } else if !rendered {
         eprintln!(
             "[gateway-client] cleared stale map: destination render unavailable for {map_file_name}"
         );
@@ -3861,10 +3876,14 @@ fn transform_map_model(payload: &Value) -> Value {
             )
         })
         .unwrap_or((0, 0));
+    let time_of_day_light_setting = value_u64(payload.get("lightSetting"))
+        .and_then(|value| u8::try_from(value).ok())
+        .filter(|value| *value <= 4);
 
     json!({
         "centerX": center_x,
         "centerY": center_y,
+        "timeOfDayLightSetting": time_of_day_light_setting,
         "patches": payload.get("terrainPatches").cloned().unwrap_or(Value::Array(vec![])),
     })
 }
@@ -4994,6 +5013,22 @@ mod tests {
             })
         );
         assert!(native_self_movement_ack(None, &payload).is_none());
+    }
+
+    #[test]
+    fn user_location_fast_path_does_not_republish_unrelated_aux_models() {
+        let movement = PacketEvent::UserLocation(crate::native_protocol::UserLocation {
+            location: mir2_client_bevy::big_map::BigMapPoint { x: 41, y: 42 },
+            direction: Some("right".to_owned()),
+        });
+        assert!(!packet_first_world_needs_aux_models(Some(&movement)));
+        assert!(packet_first_world_needs_aux_models(None));
+        assert!(packet_first_world_needs_aux_models(Some(
+            &PacketEvent::Disconnect(crate::native_protocol::Disconnect {
+                reason: Some("test".to_owned()),
+                raw: Value::Null,
+            })
+        )));
     }
 
     #[test]
@@ -6752,9 +6787,12 @@ mod tests {
 
     #[test]
     fn map_model_transform_matches_the_shared_map_shape() {
-        let map = transform_map_model(&gateway_payload());
+        let mut payload = gateway_payload();
+        payload["lightSetting"] = json!(4);
+        let map = transform_map_model(&payload);
         assert_eq!(map["centerX"], json!(9));
         assert_eq!(map["centerY"], json!(7));
+        assert_eq!(map["timeOfDayLightSetting"], json!(4));
         let patches = map["patches"].as_array().expect("patches");
         assert_eq!(patches.len(), 1);
         assert_eq!(patches[0]["kind"], json!("grass"));
@@ -6766,6 +6804,7 @@ mod tests {
         .expect("MapModel");
         assert_eq!(model.center_x, 9);
         assert_eq!(model.center_y, 7);
+        assert_eq!(model.time_of_day_light_setting, Some(4));
         assert_eq!(model.patches.len(), 1);
     }
 

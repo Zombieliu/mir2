@@ -1728,7 +1728,9 @@ pub fn drain_gameplay_events(
     };
     reconcile_quest_refresh(&mut models.pending, &models.quests, &snapshot.quests);
     mark_authoritative_refresh(&mut models.revisions, AuthoritativeModelDomain::Quest);
-    *models.quests = snapshot.quests;
+    if *models.quests != snapshot.quests {
+        *models.quests = snapshot.quests;
+    }
     *models.dialog = snapshot.dialog;
     *models.nearby_npcs = snapshot.nearby_npcs;
     *models.combat_target = snapshot.combat_target;

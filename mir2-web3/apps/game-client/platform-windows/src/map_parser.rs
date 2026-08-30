@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -103,18 +103,18 @@ const PARSED_MAP_CACHE_CAPACITY: usize = 8;
 
 #[derive(Default)]
 struct ParsedMapCache {
-    entries: HashMap<String, ParsedMap>,
+    entries: HashMap<String, Arc<ParsedMap>>,
     least_recent: VecDeque<String>,
 }
 
 impl ParsedMapCache {
-    fn get(&mut self, key: &str) -> Option<ParsedMap> {
-        let value = self.entries.get(key)?.clone();
+    fn get(&mut self, key: &str) -> Option<Arc<ParsedMap>> {
+        let value = Arc::clone(self.entries.get(key)?);
         self.touch(key);
         Some(value)
     }
 
-    fn insert(&mut self, key: String, map: ParsedMap) {
+    fn insert(&mut self, key: String, map: Arc<ParsedMap>) {
         self.entries.insert(key.clone(), map);
         self.touch(&key);
         while self.entries.len() > PARSED_MAP_CACHE_CAPACITY {
@@ -513,11 +513,48 @@ pub fn middle_is_additive(animation_frame: u8) -> bool {
 /// slice; `frame_count` carries the animation width so a future frame-cycling
 /// renderer can expand it).
 pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
+    resolve_map_tile_draws_in_bounds(
+        map,
+        0,
+        i32::from(map.width).saturating_sub(1),
+        0,
+        i32::from(map.height).saturating_sub(1),
+    )
+}
+
+fn resolve_map_tile_draws_in_viewport(map: &ParsedMap, viewport: MapViewport) -> Vec<MapTileDraw> {
+    let margin_x = viewport.draw_margin_x();
+    let margin_y = viewport.draw_margin_y();
+    resolve_map_tile_draws_in_bounds(
+        map,
+        viewport.center_x.saturating_sub(margin_x).max(0),
+        viewport
+            .center_x
+            .saturating_add(margin_x)
+            .min(i32::from(map.width).saturating_sub(1)),
+        viewport.center_y.saturating_sub(margin_y).max(0),
+        viewport
+            .center_y
+            .saturating_add(margin_y)
+            .min(i32::from(map.height).saturating_sub(1)),
+    )
+}
+
+fn resolve_map_tile_draws_in_bounds(
+    map: &ParsedMap,
+    min_x: i32,
+    max_x: i32,
+    min_y: i32,
+    max_y: i32,
+) -> Vec<MapTileDraw> {
     let mut draws = Vec::new();
+    if min_x > max_x || min_y > max_y {
+        return draws;
+    }
     // Type-100 cells are serialized x-major, matching the authoritative Web
     // parser's `cells[x * height + y]` lookup.
-    for x in 0..map.width {
-        for y in 0..map.height {
+    for x in min_x..=max_x {
+        for y in min_y..=max_y {
             let cell = &map.cells[x as usize * map.height as usize + y as usize];
 
             // Back layer: Crystal's primary floor. Omitting this layer leaves
@@ -526,8 +563,8 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
             let back_frame = (cell.back_image & 0x1fff_ffff) - 1;
             if cell.back_index >= 0 && back_frame >= 0 && x % 2 == 0 && y % 2 == 0 {
                 draws.push(MapTileDraw {
-                    x: x as i32,
-                    y: y as i32,
+                    x,
+                    y,
                     layer: TileLayer::Back,
                     library: library_key_for_index(cell.back_index),
                     frame_index: back_frame,
@@ -546,8 +583,8 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
             let tile_animation_count = u32::from(cell.tile_animation_frames);
             if tile_animation_frame >= 0 && tile_animation_count > 0 {
                 draws.push(MapTileDraw {
-                    x: x as i32,
-                    y: y as i32,
+                    x,
+                    y,
                     layer: TileLayer::TileAnimation,
                     library: library_key_for_index(190),
                     frame_index: tile_animation_frame,
@@ -563,8 +600,8 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
             let middle_frame = i32::from(cell.middle_image) - 1;
             if middle_frame >= 0 {
                 draws.push(MapTileDraw {
-                    x: x as i32,
-                    y: y as i32,
+                    x,
+                    y,
                     layer: TileLayer::Middle,
                     library: library_key_for_index(cell.middle_index),
                     frame_index: middle_frame,
@@ -581,8 +618,8 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
             let front_frame = (i32::from(cell.front_image) & 0x7fff) - 1;
             if cell.front_index >= 0 && front_frame >= 0 {
                 draws.push(MapTileDraw {
-                    x: x as i32,
-                    y: y as i32,
+                    x,
+                    y,
                     layer: TileLayer::Front,
                     library: library_key_for_index(cell.front_index),
                     frame_index: front_frame,
@@ -747,9 +784,22 @@ fn standalone_tile_key(draw: &MapTileDraw, rect_key: &str) -> String {
     )
 }
 
+static MAP_ATLAS_INDEX_CACHE: OnceLock<Mutex<Option<(PathBuf, Arc<AtlasIndex>)>>> = OnceLock::new();
+
 /// Load + index the map-atlas manifest (compact schema v2 or legacy `atlases`).
-fn load_atlas_index() -> Option<AtlasIndex> {
+/// Packaged indexes are immutable for one native process; cache the parsed
+/// manifest so movement acknowledgements never re-read or re-index it.
+fn load_atlas_index() -> Option<Arc<AtlasIndex>> {
     let path = find_map_atlas_manifest()?;
+    let cache = MAP_ATLAS_INDEX_CACHE.get_or_init(|| Mutex::new(None));
+    {
+        let cached = cache.lock().ok()?;
+        if let Some((cached_path, index)) = cached.as_ref() {
+            if cached_path == &path {
+                return Some(Arc::clone(index));
+            }
+        }
+    }
     let text = fs::read_to_string(&path).ok()?;
     let manifest: Value = serde_json::from_str(&text).ok()?;
 
@@ -865,24 +915,28 @@ fn load_atlas_index() -> Option<AtlasIndex> {
     if pages.is_empty() {
         return None;
     }
-    Some(AtlasIndex {
+    let index = Arc::new(AtlasIndex {
         pages,
         rect_to_atlas,
         rects: indexed_rects,
-    })
+    });
+    if let Ok(mut cached) = cache.lock() {
+        *cached = Some((path, Arc::clone(&index)));
+    }
+    Some(index)
 }
 
-static NATIVE_KEYED_INDEX_CACHE: OnceLock<Mutex<Option<(PathBuf, StandaloneIndex)>>> =
+static NATIVE_KEYED_INDEX_CACHE: OnceLock<Mutex<Option<(PathBuf, Arc<StandaloneIndex>)>>> =
     OnceLock::new();
 
-fn load_native_keyed_index() -> Option<StandaloneIndex> {
+fn load_native_keyed_index() -> Option<Arc<StandaloneIndex>> {
     let path = find_native_keyed_manifest()?;
     let cache = NATIVE_KEYED_INDEX_CACHE.get_or_init(|| Mutex::new(None));
     {
         let cached = cache.lock().ok()?;
         if let Some((cached_path, index)) = cached.as_ref() {
             if cached_path == &path {
-                return Some(index.clone());
+                return Some(Arc::clone(index));
             }
         }
     }
@@ -921,9 +975,9 @@ fn load_native_keyed_index() -> Option<StandaloneIndex> {
             },
         );
     }
-    let index = StandaloneIndex { entries };
+    let index = Arc::new(StandaloneIndex { entries });
     if let Ok(mut cached) = cache.lock() {
-        *cached = Some((path, index.clone()));
+        *cached = Some((path, Arc::clone(&index)));
     }
     Some(index)
 }
@@ -982,7 +1036,12 @@ pub fn build_map_render_state(map: &ParsedMap, viewport: MapViewport) -> Option<
     let atlas_index = load_atlas_index()?;
     let standalone_index = load_native_keyed_index();
 
-    build_map_render_state_with_indexes(map, viewport, &atlas_index, standalone_index.as_ref())
+    build_map_render_state_with_indexes(
+        map,
+        viewport,
+        atlas_index.as_ref(),
+        standalone_index.as_deref(),
+    )
 }
 
 /// Build a map frame whose acknowledgement identity includes the authoritative
@@ -995,7 +1054,9 @@ pub fn build_map_render_state_for_file(
     map_file_name: &str,
 ) -> Option<Value> {
     let mut state = build_map_render_state(map, viewport)?;
-    state["ackKey"] = json!(map_render_ack_key(map_file_name, viewport));
+    let ack_key = map_render_ack_key(map_file_name, viewport);
+    state["ackKey"] = json!(ack_key);
+    state["revision"] = json!(map_render_revision(map_file_name, viewport, true));
     Some(state)
 }
 
@@ -1010,6 +1071,7 @@ pub fn disabled_map_render_state(map_file_name: &str, viewport: MapViewport) -> 
         "centerX": viewport.center_x,
         "centerY": viewport.center_y,
         "ackKey": map_render_ack_key(map_file_name, viewport),
+        "revision": map_render_revision(map_file_name, viewport, false),
         "tiles": [],
         "atlases": [],
         "standaloneTiles": [],
@@ -1025,13 +1087,43 @@ fn map_render_ack_key(map_file_name: &str, viewport: MapViewport) -> String {
     )
 }
 
+/// Stable producer revision for one immutable local-map viewport.
+///
+/// Parsed maps and packaged atlas indexes are process-cached, so within one
+/// native run the draw list is fully identified by map identity, viewport
+/// geometry and whether the producer resolved a complete frame. The runtime
+/// uses this revision to avoid walking and rewriting every retained tile on
+/// every Bevy frame after the snapshot has already been applied.
+fn map_render_revision(map_file_name: &str, viewport: MapViewport, enabled: bool) -> u64 {
+    const FNV_OFFSET_BASIS: u64 = 0xcbf2_9ce4_8422_2325;
+    const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;
+    const REVISION_SCHEMA: &[u8] = b"mir2-native-map-render-v1";
+
+    let identity = map_cache_key(map_file_name).unwrap_or_else(|| "unknown".to_owned());
+    let mut revision = FNV_OFFSET_BASIS;
+    for byte in REVISION_SCHEMA
+        .iter()
+        .copied()
+        .chain(identity.bytes())
+        .chain(viewport.center_x.to_le_bytes())
+        .chain(viewport.center_y.to_le_bytes())
+        .chain(viewport.width.to_le_bytes())
+        .chain(viewport.height.to_le_bytes())
+        .chain([u8::from(enabled)])
+    {
+        revision ^= u64::from(byte);
+        revision = revision.wrapping_mul(FNV_PRIME);
+    }
+    revision
+}
+
 fn build_map_render_state_with_indexes(
     map: &ParsedMap,
     viewport: MapViewport,
     atlas_index: &AtlasIndex,
     standalone_index: Option<&StandaloneIndex>,
 ) -> Option<Value> {
-    let draws = resolve_map_tile_draws(map);
+    let draws = resolve_map_tile_draws_in_viewport(map, viewport);
     let mut used_rects: HashMap<String, HashSet<String>> = HashMap::new();
     let mut tiles: Vec<Value> = Vec::new();
     let mut standalone_tiles: Vec<Value> = Vec::new();
@@ -1241,13 +1333,14 @@ fn build_map_render_state_with_indexes(
         })
         .collect();
 
-    if !missing_standalone.is_empty() {
+    let trace_render = std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some();
+    if trace_render && !missing_standalone.is_empty() {
         eprintln!(
             "[native-map] skipped {} standalone tiles with missing native keyed/additive assets",
             missing_standalone.len()
         );
     }
-    if !incomplete_animation_families.is_empty() {
+    if trace_render && !incomplete_animation_families.is_empty() {
         eprintln!(
             "[native-map] held {} incomplete animation families on their source base frame",
             incomplete_animation_families.len()
@@ -1273,7 +1366,7 @@ fn build_map_render_state_with_indexes(
 }
 
 /// Locate + parse a local `.map.gz` for the given map file name.
-pub fn load_map(map_file_name: &str) -> Option<ParsedMap> {
+pub fn load_map(map_file_name: &str) -> Option<Arc<ParsedMap>> {
     let cache_key = map_cache_key(map_file_name)?;
     if let Ok(mut cache) = parsed_map_cache().lock() {
         if let Some(map) = cache.get(&cache_key) {
@@ -1285,9 +1378,9 @@ pub fn load_map(map_file_name: &str) -> Option<ParsedMap> {
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
     let mut bytes = Vec::new();
     decoder.read_to_end(&mut bytes).ok()?;
-    let map = parse_crystal_map(&bytes)?;
+    let map = Arc::new(parse_crystal_map(&bytes)?);
     if let Ok(mut cache) = parsed_map_cache().lock() {
-        cache.insert(cache_key, map.clone());
+        cache.insert(cache_key, Arc::clone(&map));
     }
     Some(map)
 }
@@ -1353,19 +1446,63 @@ mod tests {
     }
 
     #[test]
+    fn map_render_revision_is_stable_and_tracks_semantic_view_changes() {
+        let viewport = MapViewport {
+            center_x: 5,
+            center_y: 12,
+            width: 22,
+            height: 18,
+        };
+        let revision = map_render_revision("0141.map.gz", viewport, true);
+        assert_ne!(revision, 0);
+        assert_eq!(revision, map_render_revision("0141", viewport, true));
+        assert_eq!(revision, map_render_revision("0141", viewport, true));
+        assert_ne!(
+            revision,
+            map_render_revision(
+                "0141",
+                MapViewport {
+                    center_x: viewport.center_x + 1,
+                    ..viewport
+                },
+                true,
+            )
+        );
+        assert_ne!(
+            revision,
+            map_render_revision(
+                "0141",
+                MapViewport {
+                    width: viewport.width + 1,
+                    ..viewport
+                },
+                true,
+            )
+        );
+        assert_ne!(revision, map_render_revision("0141", viewport, false));
+        assert_eq!(
+            disabled_map_render_state("0141", viewport)["revision"],
+            json!(map_render_revision("0141", viewport, false))
+        );
+    }
+
+    #[test]
     fn parsed_map_cache_is_bounded_and_refreshes_the_current_map() {
         let mut cache = ParsedMapCache::default();
-        let map = || ParsedMap {
-            width: 0,
-            height: 0,
-            cells: Vec::new(),
+        let map = || {
+            Arc::new(ParsedMap {
+                width: 0,
+                height: 0,
+                cells: Vec::new(),
+            })
         };
         for index in 0..=PARSED_MAP_CACHE_CAPACITY {
             cache.insert(index.to_string(), map());
         }
         assert_eq!(cache.entries.len(), PARSED_MAP_CACHE_CAPACITY);
         assert!(cache.get("0").is_none());
-        assert!(cache.get("8").is_some());
+        let cached = cache.get("8").expect("latest map remains cached");
+        assert!(Arc::ptr_eq(&cached, cache.entries.get("8").unwrap()));
     }
 
     fn middle_cell(library: i16, frame: i16) -> MapCell {
@@ -1393,6 +1530,52 @@ mod tests {
             center_y: 0,
             width: 19,
             height: 15,
+        }
+    }
+
+    #[test]
+    fn viewport_draw_resolution_visits_only_the_retained_map_window() {
+        let map = ParsedMap {
+            width: 40,
+            height: 40,
+            cells: vec![middle_cell(0, 0); 40 * 40],
+        };
+        let viewport = MapViewport {
+            center_x: 20,
+            center_y: 20,
+            width: 19,
+            height: 15,
+        };
+        let draws = resolve_map_tile_draws_in_viewport(&map, viewport);
+        let expected_width = viewport.draw_margin_x() * 2 + 1;
+        let expected_height = viewport.draw_margin_y() * 2 + 1;
+        assert_eq!(draws.len(), (expected_width * expected_height) as usize);
+        assert!(draws
+            .iter()
+            .all(|draw| viewport.retains_cell(draw.x, draw.y)));
+        assert!(draws.len() < resolve_map_tile_draws(&map).len());
+    }
+
+    #[test]
+    fn viewport_draw_resolution_fails_closed_for_zero_dimensions() {
+        for map in [
+            ParsedMap {
+                width: 0,
+                height: 0,
+                cells: Vec::new(),
+            },
+            ParsedMap {
+                width: 1,
+                height: 0,
+                cells: Vec::new(),
+            },
+            ParsedMap {
+                width: 0,
+                height: 1,
+                cells: Vec::new(),
+            },
+        ] {
+            assert!(resolve_map_tile_draws_in_viewport(&map, viewport()).is_empty());
         }
     }
 

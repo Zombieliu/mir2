@@ -3499,6 +3499,7 @@
       "interval": 100,
       "kind": "ground",
       "blend": true,
+      "rate": 0.8,
       "light": 0,
       "repeat": true,
       "offset": {

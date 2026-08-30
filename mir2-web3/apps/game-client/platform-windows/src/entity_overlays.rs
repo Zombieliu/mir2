@@ -86,6 +86,9 @@ impl NativeEntityOverlays {
     }
 
     pub fn replace_payload(&mut self, payload: Value) {
+        if self.latest_payload.as_ref() == Some(&payload) {
+            return;
+        }
         self.latest_payload = Some(payload);
         self.dirty = true;
     }
@@ -204,6 +207,9 @@ enum QuestMarkerKind {
     QuestionGreen = 53,
 }
 
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct NativeQuestMarker(QuestMarkerKind);
+
 impl QuestMarkerKind {
     fn from_crystal_discriminant(value: i64) -> Option<Self> {
         match value {
@@ -256,6 +262,7 @@ pub fn sync_native_entity_overlays(
     shell: Res<NativeShellModel>,
     mut overlays: ResMut<NativeEntityOverlays>,
     roots: Query<Entity, With<NativeEntityOverlayRoot>>,
+    mut quest_marker_images: Query<(&NativeQuestMarker, &mut ImageNode)>,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     player_ui: Option<Res<NativePlayerUiState>>,
@@ -279,13 +286,17 @@ pub fn sync_native_entity_overlays(
     let hovered_object_id = presentation.hovered_object_id();
     let self_hovered = presentation.self_hovered();
     let quest_marker_phase = quest_marker_animation_phase(now_ms);
-    if overlays.last_quest_marker_phase != quest_marker_phase
-        || quest_tracker
-            .as_ref()
-            .is_some_and(|tracker| tracker.is_changed())
+    if overlays.last_quest_marker_phase != quest_marker_phase {
+        overlays.last_quest_marker_phase = quest_marker_phase;
+        for (marker, mut image) in &mut quest_marker_images {
+            image.image = asset_server.load(marker.0.asset_path(quest_marker_phase));
+        }
+    }
+    if quest_tracker
+        .as_ref()
+        .is_some_and(|tracker| tracker.is_changed())
     {
         overlays.dirty = true;
-        overlays.last_quest_marker_phase = quest_marker_phase;
     }
     if !overlays.dirty
         && overlays.last_in_game == in_game
@@ -386,6 +397,7 @@ pub fn sync_native_entity_overlays(
                 if let Some(marker) = entry.quest_marker {
                     root.spawn((
                         Name::new(format!("NativeQuestMarker:{marker:?}")),
+                        NativeQuestMarker(marker),
                         Node {
                             position_type: PositionType::Absolute,
                             left: Val::Px(entry.left),
@@ -953,6 +965,21 @@ fn argb_color(value: i64) -> Option<Color> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn identical_payload_does_not_rebuild_entity_overlays() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [{"objectId": 1, "kind": "npc", "name": "Smith", "x": 10, "y": 20}]
+        });
+        let mut overlays = NativeEntityOverlays::default();
+        overlays.replace_payload(payload.clone());
+        assert!(overlays.dirty);
+
+        overlays.dirty = false;
+        overlays.replace_payload(payload);
+        assert!(!overlays.dirty);
+    }
 
     #[test]
     fn overlays_match_crystal_cell_offsets_names_and_self_health() {

@@ -84,3 +84,54 @@ class-specific player-action denominator remain open. Real keyboard/mouse
 acceptance, 100/125/150% DPI, same-scene capture, 30-minute native soak, human
 visual/feel acceptance and formal publisher signing are also open.
 `globalParityPercent=null` remains mandatory.
+
+## 2026-08-31 native movement hot-path follow-up
+
+Base revision: `89e00c106342f455db397c03c8f57bf4f0b17217` plus the reviewed
+Windows movement working-tree patch.
+
+The user-observed sustained Walk/Run stall was traced to native presentation
+work performed after every `UserLocation`, not to Zone rejection or missing
+ACKs. The local map producer re-read and re-indexed the atlas manifest, cloned
+the complete parsed map and resolved every cell before filtering to the
+viewport. It also omitted `MapRenderState.revision`, so the Bevy runtime could
+never take its applied-frame early return and rewrote the retained map tile
+transforms on every render frame.
+
+The bounded correction now:
+
+- shares parsed maps, the atlas index and the native keyed-asset index through
+  immutable `Arc` caches;
+- resolves only the visible viewport plus the existing six-cell guard instead
+  of traversing the complete map;
+- publishes a stable map/map-center/viewport revision, while preserving the
+  image revision as an independent retry trigger for asynchronous atlas loads;
+- keeps `UserLocation` on the world/UI/map/entity and exact movement-ACK path,
+  but does not republish unrelated skills, mail, storage or shop models;
+- keeps high-frequency packet/map diagnostics behind
+  `MIR2_NATIVE_TRACE_RENDER`.
+
+Automated regression evidence at this working-tree state:
+
+| Gate | Result |
+|---|---|
+| Map parser viewport/cache/revision regressions | PASS, 34/34 |
+| Full Windows native-host suite | PASS, 494/494 |
+| Full shared runtime suite | PASS, 206/206 |
+| Debug native executable build | PASS |
+| Loopback Gateway connection after clean client restart | PASS, one WS connection |
+
+Restarted executable evidence:
+
+- observed: 2026-08-31 02:18 +08:00
+- PID: `285812`
+- path: `apps/game-client/platform-windows/target/debug/mir2-platform-windows.exe`
+- size: `141264384` bytes
+- SHA-256: `0D54775EA30315FA4F9D7CF7D91B59242C36DC6FE2262CCDA6680C4611956F3B`
+- Gateway: `ws://127.0.0.1:7112/ws` (loopback development transport)
+
+This closes the automated hot-path regression only. Sustained movement feel in
+the visible client still requires the user's live comparison against Crystal;
+same-EXE authenticated WSS, real DPI, native 30-minute soak, human visual/audio
+feel, complete semantic denominators, production installer/updater, legal asset
+closure and formal publisher signing remain open. `globalParityPercent=null`.

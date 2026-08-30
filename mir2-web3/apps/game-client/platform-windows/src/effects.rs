@@ -5643,8 +5643,18 @@ mod tests {
             &zone,
         );
 
-        let initial = fx.tick(0).expect("TrapHexagon should render immediately");
-        assert!(initial.contains("/original-effects/Magic/1390.png"));
+        for phase in 0..10_u64 {
+            let rendered = fx
+                .tick(phase * 100)
+                .expect("TrapHexagon should render every Crystal phase");
+            let rendered: Value = serde_json::from_str(&rendered).expect("effect render JSON");
+            let effect = &rendered["effects"][0];
+            assert!(effect["imageUrl"]
+                .as_str()
+                .is_some_and(|path| path.ends_with(&format!("/Magic/{}.png", 1390 + phase))));
+            assert_eq!(effect["additive"], true);
+            assert!((effect["opacity"].as_f64().unwrap_or_default() - 0.8).abs() < 1e-6);
+        }
         let later = fx
             .tick(10_000)
             .expect("persistent ObjectSpell should continue animating");

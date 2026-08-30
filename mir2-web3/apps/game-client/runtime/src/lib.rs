@@ -416,6 +416,18 @@ struct AppliedMapRenderState {
     image_revision: u64,
 }
 
+fn map_render_revision_is_current(
+    producer_revision: Option<u64>,
+    applied: Option<&AppliedMapRenderState>,
+    image_revision: u64,
+) -> bool {
+    producer_revision.is_some()
+        && applied.is_some_and(|applied| {
+            applied.producer_revision == producer_revision
+                && applied.image_revision == image_revision
+        })
+}
+
 #[derive(Clone, Copy)]
 struct SceneEntityHandles {
     root: Entity,
@@ -3586,11 +3598,11 @@ fn sync_map_render(
         &mut texture_atlas_layouts,
     );
 
-    if registry.map_render.applied.as_ref().is_some_and(|applied| {
-        snapshot.revision.is_some()
-            && applied.producer_revision == snapshot.revision
-            && applied.image_revision == atlas_assets.revision
-    }) {
+    if map_render_revision_is_current(
+        snapshot.revision,
+        registry.map_render.applied.as_ref(),
+        atlas_assets.revision,
+    ) {
         return;
     }
 
@@ -6090,6 +6102,19 @@ fn publish_map_status(phase: &str, message: &str, ack_key: &str, image_keys: &[S
 #[cfg(test)]
 mod entity_atlas_tests {
     use super::*;
+
+    #[test]
+    fn stable_map_render_revision_skips_only_the_applied_image_generation() {
+        let applied = AppliedMapRenderState {
+            producer_revision: Some(41),
+            image_revision: 7,
+        };
+        assert!(map_render_revision_is_current(Some(41), Some(&applied), 7));
+        assert!(!map_render_revision_is_current(None, Some(&applied), 7));
+        assert!(!map_render_revision_is_current(Some(42), Some(&applied), 7));
+        assert!(!map_render_revision_is_current(Some(41), Some(&applied), 8));
+        assert!(!map_render_revision_is_current(Some(41), None, 7));
+    }
 
     fn entity_sync_test_app() -> App {
         let mut app = App::new();

@@ -189,6 +189,12 @@ pub struct CrystalHudMapTitle;
 pub struct CrystalHudMapCoordinate;
 
 #[derive(Component, Debug)]
+struct CrystalHudMapTitleContainer;
+
+#[derive(Component, Debug)]
+struct CrystalHudMapCoordinateContainer;
+
+#[derive(Component, Debug)]
 pub struct CrystalHudMinimap;
 
 #[derive(Component, Debug)]
@@ -463,7 +469,7 @@ fn spawn_crystal_hud(
                 2.0,
             );
 
-            spawn_text(
+            spawn_vertical_centered_text(
                 root,
                 CrystalHudHpText,
                 &format!("HP {}", ui_model.player.hp_label().replacen(" / ", "/", 1)),
@@ -472,7 +478,7 @@ fn spawn_crystal_hud(
                 WHITE,
                 Justify::Center,
             );
-            spawn_text(
+            spawn_vertical_centered_text(
                 root,
                 CrystalHudMpText,
                 &compact_mp_label(&ui_model),
@@ -579,8 +585,9 @@ fn spawn_crystal_hud(
             spawn_belt_controls(root, &asset_server);
 
             spawn_minimap_frame(root, &asset_server);
-            spawn_vertical_centered_text(
+            spawn_vertical_centered_text_with_container(
                 root,
+                CrystalHudMapTitleContainer,
                 CrystalHudMapTitle,
                 ui_model.player.map_name.as_deref().unwrap_or(""),
                 MAP_TITLE_RECT,
@@ -588,8 +595,9 @@ fn spawn_crystal_hud(
                 WHITE,
                 Justify::Center,
             );
-            spawn_vertical_centered_text(
+            spawn_vertical_centered_text_with_container(
                 root,
+                CrystalHudMapCoordinateContainer,
                 CrystalHudMapCoordinate,
                 &format!("{}, {}", map_model.center_x, map_model.center_y),
                 MAP_COORDINATE_RECT,
@@ -598,7 +606,7 @@ fn spawn_crystal_hud(
                 Justify::Center,
             );
 
-            spawn_hud_buttons(root, &asset_server);
+            spawn_hud_buttons(root, &asset_server, map_model.time_of_day_light_setting);
             root.spawn((
                 CrystalHudNewMail,
                 absolute_node(NEW_MAIL_RECT),
@@ -766,7 +774,11 @@ fn weight_bar_asset(ratio: f32) -> (&'static str, u16) {
     }
 }
 
-fn spawn_hud_buttons(parent: &mut ChildSpawnerCommands, asset_server: &AssetServer) {
+fn spawn_hud_buttons(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    time_of_day_light_setting: Option<u8>,
+) {
     spawn_hud_button(
         parent,
         asset_server,
@@ -802,12 +814,20 @@ fn spawn_hud_buttons(parent: &mut ChildSpawnerCommands, asset_server: &AssetServ
         spec::MINIMAP_TOGGLE,
         CrystalHudAction::MinimapToggle,
     );
-    spawn_marked_frame(
-        parent,
-        asset_server,
-        spec::LIGHT_SETTING,
-        CrystalHudLightSetting,
-    );
+    let mut light_setting = spec::LIGHT_SETTING;
+    light_setting.index = minimap_light_frame_index(time_of_day_light_setting);
+    spawn_marked_frame(parent, asset_server, light_setting, CrystalHudLightSetting);
+}
+
+/// Crystal `GameScene` maps the authoritative global TimeOfDay setting to
+/// these four Prguse frames. `Normal` intentionally shares the day frame.
+const fn minimap_light_frame_index(time_of_day_light_setting: Option<u8>) -> u16 {
+    match time_of_day_light_setting {
+        Some(1) => 2095, // Dawn
+        Some(3) => 2094, // Evening
+        Some(4) => 2092, // Night
+        _ => 2093,       // Day, Normal, absent, or invalid
+    }
 }
 
 fn spawn_marked_frame<T: Component>(
@@ -1003,16 +1023,48 @@ fn spawn_vertical_centered_text<T: Component>(
             text_root,
             marker,
             value,
-            Node {
-                width: Val::Percent(100.0),
-                ..default()
-            },
+            full_width_text_node(),
             font_size,
             color,
             justify,
             true,
         );
     });
+}
+
+fn spawn_vertical_centered_text_with_container<C: Component, T: Component>(
+    parent: &mut ChildSpawnerCommands,
+    container_marker: C,
+    marker: T,
+    value: &str,
+    rect: CrystalRect,
+    font_size: f32,
+    color: Color,
+    justify: Justify,
+) {
+    let mut container = text_absolute_node(rect);
+    container.align_items = AlignItems::Center;
+    parent
+        .spawn((container_marker, container))
+        .with_children(|text_root| {
+            spawn_text_entity(
+                text_root,
+                marker,
+                value,
+                full_width_text_node(),
+                font_size,
+                color,
+                justify,
+                true,
+            );
+        });
+}
+
+fn full_width_text_node() -> Node {
+    Node {
+        width: Val::Percent(100.0),
+        ..default()
+    }
 }
 
 fn spawn_unoutlined_text<T: Component>(
@@ -1730,12 +1782,18 @@ fn signed_item_bonus(value: i32) -> String {
 
 fn update_hud_map_model(
     map_model: Res<MapModel>,
+    asset_server: Res<AssetServer>,
     mut coordinates: Query<&mut Text, With<CrystalHudMapCoordinate>>,
+    mut light_settings: Query<&mut ImageNode, With<CrystalHudLightSetting>>,
 ) {
     set_text(
         &mut coordinates,
         format!("{}, {}", map_model.center_x, map_model.center_y),
     );
+    let frame_index = minimap_light_frame_index(map_model.time_of_day_light_setting);
+    for mut image in light_settings.iter_mut() {
+        image.image = asset_server.load(format!("original-ui/Prguse/{frame_index}.png"));
+    }
 }
 
 fn update_hud_minimap_visibility(
@@ -1745,8 +1803,8 @@ fn update_hud_minimap_visibility(
     mut node_queries: ParamSet<(
         Query<&mut Node, With<CrystalHudMinimap>>,
         Query<&mut Node, With<CrystalHudMinimapCollapsed>>,
-        Query<&mut Node, With<CrystalHudMapTitle>>,
-        Query<&mut Node, With<CrystalHudMapCoordinate>>,
+        Query<&mut Node, With<CrystalHudMapTitleContainer>>,
+        Query<&mut Node, With<CrystalHudMapCoordinateContainer>>,
         Query<(&CrystalHudAction, &mut Node)>,
         Query<&mut Node, With<CrystalHudLightSetting>>,
         Query<&mut Node, With<CrystalHudNewMail>>,
@@ -2022,15 +2080,33 @@ mod tests {
     #[test]
     fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
         let mut app = App::new();
-        app.insert_resource(NativeShellModel::default())
-            .init_resource::<UiReadModel>();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<UiReadModel>();
         app.add_systems(Update, update_hud_minimap_visibility);
-        app.world_mut()
-            .spawn((Node::default(), CrystalHudMinimap, CrystalHudMapTitle));
-        app.world_mut()
-            .spawn((Node::default(), CrystalHudMapCoordinate));
+        app.world_mut().spawn((
+            Node::default(),
+            CrystalHudMinimap,
+            CrystalHudMapTitleContainer,
+        ));
+        let coordinate = app
+            .world_mut()
+            .spawn((Node::default(), CrystalHudMapCoordinateContainer))
+            .id();
 
         app.update();
+
+        assert_eq!(
+            app.world().entity(coordinate).get::<Node>().unwrap().top,
+            Val::Px(MINIMAP_COLLAPSED_FOOTER_TOP)
+        );
+    }
+
+    #[test]
+    fn centered_hud_text_fills_its_source_rect_before_justification() {
+        assert_eq!(full_width_text_node().width, Val::Percent(100.0));
     }
 
     #[test]
@@ -2042,6 +2118,17 @@ mod tests {
         );
         assert_eq!(minimap_footer_top(true), 131.0);
         assert_eq!(minimap_footer_top(false), 22.0);
+    }
+
+    #[test]
+    fn minimap_light_indicator_uses_crystal_time_of_day_frames() {
+        assert_eq!(minimap_light_frame_index(None), 2093);
+        assert_eq!(minimap_light_frame_index(Some(0)), 2093);
+        assert_eq!(minimap_light_frame_index(Some(1)), 2095);
+        assert_eq!(minimap_light_frame_index(Some(2)), 2093);
+        assert_eq!(minimap_light_frame_index(Some(3)), 2094);
+        assert_eq!(minimap_light_frame_index(Some(4)), 2092);
+        assert_eq!(minimap_light_frame_index(Some(99)), 2093);
     }
 
     fn item(key: &str, name: &str, container: u8, slot: u32, quantity: u32) -> ItemModel {

@@ -310,7 +310,8 @@ const worldSpell = (name, library, base, count, interval, extra = {}) => ({
 // Packet-backed world spell objects use a different frame range from the
 // caster's MirAction.Spell animation and remain alive until ObjectRemove.
 export const WORLD_SPELL_EFFECTS = [
-  worldSpell("TrapHexagon", "Magic", 1390, 10, 100),
+  // SpellObject.Draw uses DrawBlend(..., 0.8F) for persistent world spells.
+  worldSpell("TrapHexagon", "Magic", 1390, 10, 100, { rate: 0.8 }),
   worldSpell("FireWall", "Magic", 1630, 6, 120, { light: 3 }),
   worldSpell("PoisonCloud", "Magic2", 1650, 20, 120, { light: 3 }),
   worldSpell("Blizzard", "Magic2", 1550, 30, 100, {

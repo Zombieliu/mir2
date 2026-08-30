@@ -984,10 +984,10 @@ pub fn mouse_world_interaction_system(
         movement.stop_hold(now_ms, "buttonReleased");
         return;
     }
-    if presentation.hovered_object_id().is_some() {
-        movement.stop_hold(now_ms, "hoveredActor");
-        return;
-    }
+    // Crystal keeps an already-active pointer hold alive while the cursor
+    // crosses another actor. Initial clicks on actors are still handled by
+    // the branches above, while the movement planner below continues to
+    // validate occupancy and steer around blocked tiles.
 
     if !movement.can_send(now_ms) {
         return;
@@ -2102,6 +2102,51 @@ mod tests {
         assert_eq!(pending.mode, WorldPointerMovementMode::Run);
         assert_eq!(pending.from, (11, 10));
         assert_eq!(pending.to, (13, 10));
+    }
+
+    #[test]
+    fn active_pointer_hold_survives_cursor_crossing_an_actor() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hovered_object_id_for_test(Some("77"));
+        app.update();
+
+        let state = app.world().resource::<WorldPointerMovementState>();
+        assert_eq!(state.active, Some(WorldPointerMovementMode::Run));
+        assert!(
+            state.pending.is_some(),
+            "actor hover discarded the pending run"
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "pending hold flooded before ack"
+        );
     }
 
     #[test]
