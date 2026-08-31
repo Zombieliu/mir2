@@ -1,0 +1,96 @@
+{
+  "schema": "mir2-windows-native-player-journey-issues/v1",
+  "runId": "windows-native-level1-15-20260831",
+  "baseCommit": "2176a71900b59c596be7b9061307ff5b15cfafb5",
+  "globalParityPercent": null,
+  "issues": [
+    {
+      "id": "PLAY-001",
+      "level": 1,
+      "step": "native-login-preflight",
+      "timestamp": "2026-08-31T00:00:00+08:00",
+      "map": null,
+      "position": null,
+      "category": "input",
+      "severity": "medium",
+      "expected": "A known Crystal login failure should tell the player what action is needed.",
+      "actual": "The native dialog exposed only the raw text `login failed (result 3)`.",
+      "reproducible": true,
+      "reproCount": 1,
+      "evidence": {
+        "screenshot": "computer-use preflight observation",
+        "clientLog": null,
+        "gatewayEvents": null,
+        "stateBefore": "Login form with an account absent from the active account store.",
+        "stateAfter": "Login form showing raw result code 3."
+      },
+      "suspectedOwner": "native-client",
+      "status": "fixed-pending-runtime-verification",
+      "fixCommit": null,
+      "verification": "Unit coverage added for Crystal result codes 0–5, unknown codes, missing codes and authoritative ban reasons."
+    },
+    {
+      "id": "PLAY-002",
+      "level": 1,
+      "step": "native-input-preflight",
+      "timestamp": "2026-08-31T00:00:00+08:00",
+      "map": null,
+      "position": null,
+      "category": "loot",
+      "severity": "high",
+      "expected": "Holding left click to a ground tile should perform Crystal's throttled pickup check once the authoritative player reaches that tile.",
+      "actual": "The pointer movement stopped at the destination without the held-input pickup check; only the initial click path could emit `PickUpTile`.",
+      "reproducible": true,
+      "reproCount": 1,
+      "evidence": {
+        "screenshot": null,
+        "clientLog": null,
+        "gatewayEvents": null,
+        "stateBefore": "Held left pointer movement toward an empty target tile.",
+        "stateAfter": "Authoritative arrival with no tile pickup intent."
+      },
+      "suspectedOwner": "native-client",
+      "status": "fixed-pending-runtime-verification",
+      "fixCommit": null,
+      "verification": "Regression test confirms one normal Gateway intent on arrival and a 200 ms repeat throttle."
+    },
+    {
+      "id": "PLAY-003",
+      "level": 1,
+      "step": "native-login-preflight",
+      "timestamp": "2026-08-31T12:08:29+08:00",
+      "map": null,
+      "position": null,
+      "category": "input",
+      "severity": "high",
+      "expected": "Ctrl+V should paste filtered clipboard text into the focused account or password field without exposing password contents.",
+      "actual": "Ctrl+V had no effect in either native login field, forcing credentials to be entered one key at a time.",
+      "reproducible": true,
+      "reproCount": 1,
+      "evidence": {
+        "screenshot": "computer-use native login observation",
+        "clientLog": null,
+        "gatewayEvents": null,
+        "stateBefore": "Native login form with focus in an editable account or password field.",
+        "stateAfter": "Clipboard text was not inserted after Ctrl+V."
+      },
+      "suspectedOwner": "native-client",
+      "status": "fixed-runtime-verified",
+      "fixCommit": null,
+      "verification": "Seven focused tests and the full 503-test Windows host suite passed. The final Windows host rebuilt, and Computer Use verified real Ctrl+V insertion in both the account field and the masked password field. Paste is scoped to shell fields, modifier state resets on focus loss, and the temporary password clipboard value was cleared after the check."
+    }
+  ],
+  "openGates": [
+    "native-account-created-through-visible-UI",
+    "q1-q9-real-player-route",
+    "natural-level-10-15-progression",
+    "logout-relogin-persistence",
+    "real-DPI",
+    "30-minute-native-soak",
+    "human-visual-audio-feel",
+    "complete-semantic-denominators",
+    "production-installer-updater",
+    "legal-asset-closure",
+    "formal-publisher-signing"
+  ]
+}

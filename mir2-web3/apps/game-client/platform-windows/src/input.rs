@@ -69,6 +69,7 @@ const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_LIMIT: usize = 16;
 const CRYSTAL_NPC_CLICK_GUARD_MS: f64 = 5_000.0;
+const CRYSTAL_PICKUP_INTERVAL_MS: f64 = 200.0;
 
 #[derive(Clone, Debug, PartialEq)]
 struct PendingSelfMove {
@@ -113,6 +114,7 @@ pub struct WorldPointerMovementState {
     last_packet_ack_at_ms: Option<f64>,
     last_npc_object_id: Option<u32>,
     npc_click_blocked_until_ms: f64,
+    last_tile_pickup_at_ms: Option<f64>,
     blocked_steps: Vec<BlockedSelfMove>,
     last_plan_block_trace_at_ms: Option<f64>,
 }
@@ -251,6 +253,7 @@ impl WorldPointerMovementState {
         self.input_blocked_until_ms = 0.0;
         self.last_npc_object_id = None;
         self.npc_click_blocked_until_ms = 0.0;
+        self.last_tile_pickup_at_ms = None;
         self.self_object_id = Some(object_id.to_owned());
         self.authoritative_position = Some(position);
         self.authoritative_direction = Some(direction.to_owned());
@@ -386,6 +389,30 @@ fn pickup_tile_intent(
         .find(|entity| entity.kind == EntityKind::SelfPlayer)
         .filter(|entity| (entity.x, entity.y) == hovered_grid_position)
         .map(|_| QuestUiIntent::PickUpTile)
+}
+
+fn queue_tile_pickup_if_ready(
+    movement: &mut WorldPointerMovementState,
+    queue: Option<&mut QuestUiIntentQueue>,
+    hovered_grid_position: Option<(i32, i32)>,
+    origin: (i32, i32),
+    now_ms: f64,
+) -> bool {
+    if hovered_grid_position != Some(origin)
+        || movement
+            .last_tile_pickup_at_ms
+            .is_some_and(|last| now_ms < last + CRYSTAL_PICKUP_INTERVAL_MS)
+    {
+        return false;
+    }
+    let Some(queue) = queue else {
+        return false;
+    };
+    if !queue.push_intent(QuestUiIntent::PickUpTile) {
+        return false;
+    }
+    movement.last_tile_pickup_at_ms = Some(now_ms);
+    true
 }
 
 fn movement_direction_toward(
@@ -958,7 +985,12 @@ pub fn mouse_world_interaction_system(
                 return;
             }
             if let Some(queue) = queue.as_deref_mut() {
-                queue.push_intent(intent);
+                let is_tile_pickup = matches!(&intent, QuestUiIntent::PickUpTile);
+                if queue.push_intent(intent) {
+                    if is_tile_pickup {
+                        movement.last_tile_pickup_at_ms = Some(now_ms);
+                    }
+                }
             }
             return;
         }
@@ -989,10 +1021,26 @@ pub fn mouse_world_interaction_system(
     // the branches above, while the movement planner below continues to
     // validate occupancy and steer around blocked tiles.
 
+    let origin = movement.authoritative_position.unwrap_or(entity_position);
+    // Crystal's MapControl.CheckInput checks the selected tile before trying
+    // another movement step. Once a held left-click arrives on the tile under
+    // the cursor, it emits PickUp (throttled by PickUpTime) even though item
+    // objects are not part of the renderer-neutral entity model. Keep this on
+    // the normal QuestUiIntentQueue so the Gateway remains authoritative.
+    if mode == WorldPointerMovementMode::Walk
+        && queue_tile_pickup_if_ready(
+            &mut movement,
+            queue.as_deref_mut(),
+            presentation.hovered_grid_position(),
+            origin,
+            now_ms,
+        )
+    {
+        return;
+    }
     if !movement.can_send(now_ms) {
         return;
     }
-    let origin = movement.authoritative_position.unwrap_or(entity_position);
     let (Some(direction), Some(commands)) = (
         movement_direction_toward(presentation.hovered_grid_position(), origin),
         commands.as_deref(),
@@ -1957,6 +2005,18 @@ mod tests {
                 .drain_intents(),
             vec![QuestUiIntent::PickUpTile]
         );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.update();
+        assert!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents()
+                .is_empty(),
+            "initial same-tile click and held path must not double-send"
+        );
     }
 
     #[test]
@@ -2050,6 +2110,88 @@ mod tests {
             .release(MouseButton::Left);
         app.update();
         assert!(receiver.try_recv().is_err(), "released walk kept sending");
+    }
+
+    #[test]
+    fn left_hold_picks_up_after_authoritative_arrival_on_cursor_tile() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        // With center (10, 10), this cursor cell resolves to (11, 10).
+        presentation.set_hover_grid_context_for_test((10, 10), (528.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction }))
+                if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 11;
+        push_test_movement_ack(&app, 11, 10, "right");
+        advance_movement_clock(&mut app, 600);
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpTile]
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "pickup must use the intent queue"
+        );
+
+        // Crystal's PickUpTime is 200ms; a held button may issue another
+        // pickup only after that server request interval.
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+
+        advance_movement_clock(&mut app, 199);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+
+        advance_movement_clock(&mut app, 1);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpTile]
+        );
     }
 
     #[test]

@@ -13,6 +13,7 @@ use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 mod assets;
 mod atlas;
 mod capture;
+mod clipboard;
 mod cursor;
 mod effects;
 mod entity_overlays;
@@ -151,6 +152,13 @@ fn main() {
         input::sanitize_native_hud_pointer_input
             .after(shell_bridge::drain_gateway_events)
             .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
+    // Ctrl+V is owned by the focused native text field. The host reads the
+    // Windows Unicode clipboard only for that explicit shortcut; ordinary
+    // key/text input remains owned by the shared shell/overlay systems.
+    app.add_systems(
+        bevy::app::Update,
+        clipboard::paste_system.before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
     );
     app.add_systems(
         bevy::app::Update,

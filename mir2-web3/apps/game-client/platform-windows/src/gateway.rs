@@ -3630,11 +3630,27 @@ fn dispatch_shell_event(
             })
         }
         InboundEvent::Packet(PacketEvent::LoginFailure(failure)) => {
+            // Crystal's LoginBanned packet carries an authoritative reason;
+            // preserve any protocol-provided reason before interpreting the
+            // numeric Login result below.
             let message = failure.reason.clone().unwrap_or_else(|| {
-                failure.result.map_or_else(
-                    || "login failed".to_owned(),
-                    |result| format!("login failed (result {result})"),
-                )
+                // These are Crystal's S.Login result codes. Keep the
+                // account-not-found distinction (Crystal exposes it too), but
+                // intentionally collapse credential failures into one message
+                // so the native UI does not reveal which secret was wrong.
+                match failure.result {
+                    Some(0) => "login is currently disabled".to_owned(),
+                    Some(1) => "account ID is invalid".to_owned(),
+                    Some(2) => "password is invalid".to_owned(),
+                    Some(3) => "account does not exist".to_owned(),
+                    Some(4) => "invalid credentials".to_owned(),
+                    Some(5) => "password change required before login".to_owned(),
+                    Some(result) => format!("login failed (result {result})"),
+                    None => failure
+                        .reason
+                        .clone()
+                        .unwrap_or_else(|| "login failed".to_owned()),
+                }
             });
             Some(ShellGatewayEvent::LoginFailure { message })
         }
@@ -8646,6 +8662,55 @@ mod tests {
             let actual = receiver.try_recv().expect("shell account event");
             assert_eq!(matches!(actual, ShellGatewayEvent::AccountCreated), created);
         }
+    }
+
+    #[test]
+    fn shell_dispatch_maps_crystal_login_result_codes_to_actionable_messages() {
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let expected = [
+            (0, "login is currently disabled"),
+            (1, "account ID is invalid"),
+            (2, "password is invalid"),
+            (3, "account does not exist"),
+            (4, "invalid credentials"),
+            (5, "password change required before login"),
+            (99, "login failed (result 99)"),
+        ];
+
+        for (result, message) in expected {
+            let event = parse_inbound_event(&format!(
+                r#"{{"type":"packet","packet":"Login","payload":{{"result":{result}}}}}"#
+            ))
+            .expect("login event");
+            dispatch_shell_event(&event, &context, &sender);
+            match receiver.try_recv().expect("shell login failure event") {
+                ShellGatewayEvent::LoginFailure { message: actual } => {
+                    assert_eq!(actual, message)
+                }
+                other => panic!("unexpected event: {other:?}"),
+            }
+        }
+
+        let missing_result =
+            parse_inbound_event(r#"{"type":"packet","packet":"Login","payload":{}}"#)
+                .expect("missing-result login event");
+        dispatch_shell_event(&missing_result, &context, &sender);
+        assert!(matches!(
+            receiver.try_recv().expect("missing-result shell event"),
+            ShellGatewayEvent::LoginFailure { message } if message == "login failed"
+        ));
+
+        let banned = parse_inbound_event(
+            r#"{"type":"packet","packet":"LoginBanned","payload":{"reason":"account is temporarily banned"}}"#,
+        )
+        .expect("login-banned event");
+        dispatch_shell_event(&banned, &context, &sender);
+        assert!(matches!(
+            receiver.try_recv().expect("login-banned shell event"),
+            ShellGatewayEvent::LoginFailure { message }
+                if message == "account is temporarily banned"
+        ));
     }
 
     #[tokio::test]
