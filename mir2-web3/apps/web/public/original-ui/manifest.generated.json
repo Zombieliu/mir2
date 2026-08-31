@@ -1,6 +1,6 @@
 {
   "sourceKind": "external-crystal-client-data",
-  "exportedAt": "2026-08-29T04:23:22.199Z",
+  "exportedAt": "2026-08-31T17:15:54.766Z",
   "libraries": {
     "CArmour/00": {
       "version": 2,
@@ -336583,6 +336583,20 @@
           "maskWidth": null,
           "maskHeight": null,
           "path": "/original-ui/Prguse/340.png",
+          "maskPath": null
+        },
+        {
+          "index": 360,
+          "width": 456,
+          "height": 190,
+          "x": 0,
+          "y": 0,
+          "shadowX": 0,
+          "shadowY": 0,
+          "hasMask": false,
+          "maskWidth": null,
+          "maskHeight": null,
+          "path": "/original-ui/Prguse/360.png",
           "maskPath": null
         },
         {

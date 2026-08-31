@@ -103,6 +103,56 @@
       "status": "fixed-pending-runtime-verification",
       "fixCommit": null,
       "verification": "Four new regressions cover boundary prefetch, a strict two-intent cap, ordered late-ACK retirement, correction rollback, and snapshot prefix confirmation. The complete Windows host suite passes 507/507; rebuilt-client player verification remains open."
+    },
+    {
+      "id": "PLAY-005",
+      "level": 1,
+      "step": "native-hud-preflight",
+      "timestamp": "2026-09-01T00:00:00+08:00",
+      "map": "0",
+      "position": null,
+      "category": "visual",
+      "severity": "high",
+      "expected": "HUD HP/MP, level and minimap labels should remain centered inside their Crystal source rectangles.",
+      "actual": "Single-line labels drifted to the left because Bevy ignored text justification for an unbounded NoWrap layout.",
+      "reproducible": true,
+      "reproCount": 2,
+      "evidence": {
+        "screenshot": "user-observed HUD label drift",
+        "clientLog": null,
+        "gatewayEvents": null,
+        "stateBefore": "TextLayout justification applied to a full-width child whose NoWrap text layout remained unbounded.",
+        "stateAfter": "Fixed Crystal rectangle owns flex alignment and the text child is auto-sized."
+      },
+      "suspectedOwner": "native-client",
+      "status": "fixed-pending-runtime-verification",
+      "fixCommit": null,
+      "verification": "The focused HUD suite passes 31/31 and the full native-UI suite passes 464/464. Authenticated in-game visual capture remains open."
+    },
+    {
+      "id": "PLAY-006",
+      "level": 1,
+      "step": "native-connection-loss-preflight",
+      "timestamp": "2026-09-01T00:00:00+08:00",
+      "map": null,
+      "position": null,
+      "category": "visual",
+      "severity": "high",
+      "expected": "Connection loss should render inside Crystal's original message box with readable bounded text and one source-sized OK button.",
+      "actual": "The generic confirm panel mixed title, instruction, raw localized socket error and duplicate Retry text in overlapping rectangles.",
+      "reproducible": true,
+      "reproCount": 2,
+      "evidence": {
+        "screenshot": "connection-lost-crystal-messagebox.png",
+        "clientLog": null,
+        "gatewayEvents": "Gateway unavailable; real connection failure path used.",
+        "stateBefore": "Prguse/1084 confirm/input panel and unrelated Title/320..322 button geometry.",
+        "stateAfter": "Prguse/360 at 456x190 with Title/200..202 OK at 76x25 and bounded summary text."
+      },
+      "suspectedOwner": "native-client",
+      "status": "fixed-runtime-verified",
+      "fixCommit": null,
+      "verification": "Five focused connection tests and the full 464-test native-UI suite pass. A rebuilt EXE was captured from its exact HWND and shows no overlap, overflow, duplicate label or input-field artifact."
     }
   ],
   "openGates": [

@@ -325,7 +325,7 @@ impl CrystalNewMailBlink {
 /// Exact source-relative positions from Crystal's `MainDialog`.
 pub const HP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 673.0, 100.0, 14.0);
 pub const MP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 688.0, 100.0, 14.0);
-pub const LEVEL_RECT: CrystalRect = CrystalRect::new(5.0, 724.0, 30.0, 14.0);
+pub const LEVEL_RECT: CrystalRect = CrystalRect::new(5.0, 724.0, 22.0, 14.0);
 pub const NAME_RECT: CrystalRect = CrystalRect::new(6.0, 736.0, 90.0, 16.0);
 pub const GOLD_RECT: CrystalRect = CrystalRect::new(919.0, 735.0, 99.0, 13.0);
 pub const EXPERIENCE_TEXT_RECT: CrystalRect = CrystalRect::new(491.0, 749.0, 40.0, 12.0);
@@ -1018,15 +1018,16 @@ fn spawn_vertical_centered_text<T: Component>(
 ) {
     let mut container = text_absolute_node(rect);
     container.align_items = AlignItems::Center;
+    container.justify_content = horizontal_justify_content(justify);
     parent.spawn(container).with_children(|text_root| {
         spawn_text_entity(
             text_root,
             marker,
             value,
-            full_width_text_node(),
+            auto_sized_text_node(),
             font_size,
             color,
-            justify,
+            Justify::Left,
             true,
         );
     });
@@ -1044,6 +1045,7 @@ fn spawn_vertical_centered_text_with_container<C: Component, T: Component>(
 ) {
     let mut container = text_absolute_node(rect);
     container.align_items = AlignItems::Center;
+    container.justify_content = horizontal_justify_content(justify);
     parent
         .spawn((container_marker, container))
         .with_children(|text_root| {
@@ -1051,20 +1053,25 @@ fn spawn_vertical_centered_text_with_container<C: Component, T: Component>(
                 text_root,
                 marker,
                 value,
-                full_width_text_node(),
+                auto_sized_text_node(),
                 font_size,
                 color,
-                justify,
+                Justify::Left,
                 true,
             );
         });
 }
 
-fn full_width_text_node() -> Node {
-    Node {
-        width: Val::Percent(100.0),
-        ..default()
+fn horizontal_justify_content(justify: Justify) -> JustifyContent {
+    match justify {
+        Justify::Center => JustifyContent::Center,
+        Justify::Right | Justify::End => JustifyContent::FlexEnd,
+        Justify::Justified | Justify::Left | Justify::Start => JustifyContent::FlexStart,
     }
+}
+
+fn auto_sized_text_node() -> Node {
+    Node::default()
 }
 
 fn spawn_unoutlined_text<T: Component>(
@@ -2105,8 +2112,25 @@ mod tests {
     }
 
     #[test]
-    fn centered_hud_text_fills_its_source_rect_before_justification() {
-        assert_eq!(full_width_text_node().width, Val::Percent(100.0));
+    fn centered_hud_text_uses_flex_alignment_for_unwrapped_single_lines() {
+        assert_eq!(
+            horizontal_justify_content(Justify::Center),
+            JustifyContent::Center
+        );
+        assert_eq!(
+            horizontal_justify_content(Justify::Left),
+            JustifyContent::FlexStart
+        );
+        assert_eq!(
+            horizontal_justify_content(Justify::Right),
+            JustifyContent::FlexEnd
+        );
+        assert_eq!(auto_sized_text_node().width, Val::Auto);
+    }
+
+    #[test]
+    fn level_label_matches_crystal_autosize_extraction_bounds() {
+        assert_eq!(LEVEL_RECT, CrystalRect::new(5.0, 724.0, 22.0, 14.0));
     }
 
     #[test]

@@ -400,6 +400,20 @@
       "maskPath": null
     },
     {
+      "index": 360,
+      "width": 456,
+      "height": 190,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse/360.png",
+      "maskPath": null
+    },
+    {
       "index": 396,
       "width": 16,
       "height": 14,
