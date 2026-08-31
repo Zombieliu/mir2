@@ -78,6 +78,31 @@
       "status": "fixed-runtime-verified",
       "fixCommit": null,
       "verification": "Seven focused tests and the full 503-test Windows host suite passed. The final Windows host rebuilt, and Computer Use verified real Ctrl+V insertion in both the account field and the masked password field. Paste is scoped to shell fields, modifier state resets on focus loss, and the temporary password clipboard value was cleared after the check."
+    },
+    {
+      "id": "PLAY-004",
+      "level": 1,
+      "step": "native-movement-preflight",
+      "timestamp": "2026-08-31T16:36:25+08:00",
+      "map": "0",
+      "position": null,
+      "category": "movement",
+      "severity": "high",
+      "expected": "Holding left or right pointer movement should chain Crystal-paced walk/run presentation while the shared Zone remains authoritative.",
+      "actual": "The native controller allowed only one pending move, so every visual step waited for its UserLocation ACK before the next command and sustained movement visibly paused between steps.",
+      "reproducible": true,
+      "reproCount": 3,
+      "evidence": {
+        "screenshot": "user-observed sustained movement stutter",
+        "clientLog": "movement trace showed command/ACK serialization",
+        "gatewayEvents": "normal authoritative UserLocation acknowledgements",
+        "stateBefore": "One pending movement intent with planning blocked until ACK.",
+        "stateAfter": "A bounded two-intent FIFO presentation window with authoritative correction and timeout rollback."
+      },
+      "suspectedOwner": "native-client",
+      "status": "fixed-pending-runtime-verification",
+      "fixCommit": null,
+      "verification": "Four new regressions cover boundary prefetch, a strict two-intent cap, ordered late-ACK retirement, correction rollback, and snapshot prefix confirmation. The complete Windows host suite passes 507/507; rebuilt-client player verification remains open."
     }
   ],
   "openGates": [

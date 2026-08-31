@@ -20,6 +20,7 @@ This report is not a claim of global Crystal 1:1 parity. Authenticated same-EXE 
 | Preflight: sample account login | 1 | Blocked, diagnosed | Native UI returned Crystal result 3; the account was absent from the active account store. A dedicated non-privileged player account will be created through the native UI against an isolated store. |
 | Preflight: ordinary player controls | 1 | Fixing | Existing head already routes left-click actor interaction/attack and left/right pointer movement; held-left arrival did not repeat Crystal's tile pickup check. Added a 200 ms authoritative `PickUpTile` throttle and regression test. |
 | Preflight: login text editing | 1 | Fixed and runtime verified | The first implementation exposed a same-frame key-chord bug under Windows input bursts. The final path consumes ordered keyboard events, applies field-specific limits/control-character filtering, clears modifier state on focus loss, and is deliberately scoped to shell credential/name fields. The final rebuilt executable was verified with real `Ctrl+V` in both the account and masked password fields. The temporary password clipboard value was cleared after verification. |
+| Preflight: sustained pointer movement | 1 | Automated fix verified; runtime pending | The native controller serialized every walk/run command behind `UserLocation`, producing a visible pause at each presentation boundary. It now uses a bounded two-intent Crystal-style presentation window: the next step may start at the visual boundary, ordered ACKs retire only their confirmed prefix, and correction/timeout clears the whole speculative tail. The complete Windows host suite passes 507/507; rebuilt-client player verification is still required. |
 | q1–q4 | — | Pending | Must be completed with visible UI and ordinary player input. |
 | q5–q9 | — | Pending | Must be completed with visible UI and ordinary player input. |
 | Natural grind / class progression | 10–15 | Pending | No fixture level mutation is accepted as evidence. |
@@ -31,6 +32,7 @@ This report is not a claim of global Crystal 1:1 parity. Authenticated same-EXE 
 - `PLAY-001`: translate Crystal login result 3 into the actionable native message `account does not exist`, while retaining safe fallbacks and authoritative ban reasons.
 - `PLAY-002`: on held left-click arrival at the cursor tile, send Crystal-style tile pickup checks no faster than once every 200 ms through the normal Gateway intent queue.
 - `PLAY-003`: `Ctrl+V` now works in focused native shell fields, including same-frame Windows input bursts, while filtering unsupported text, respecting field limits, resetting modifier state on focus loss, and keeping secrets out of logs. In-game chat remains on its existing text-input path so a `Ctrl+V` chord cannot append a stray literal `v`.
+- `PLAY-004`: sustained left/right pointer movement no longer hard-blocks each visual step on the preceding server ACK. At most two intents may be in flight; planning chains from the predicted tail, ACKs reconcile in FIFO order, and any correction or timeout drops the speculative tail before replanning from authority.
 
 ## Open execution gate
 
