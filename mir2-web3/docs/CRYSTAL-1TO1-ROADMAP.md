@@ -1,5 +1,28 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Guild storage source/logic checkpoint (2026-09-03): original 8x14
+> slots / 8 visible rows, constructor asymmetry, wheel/drag integer steps,
+> original controls and the gold amount modal replace invented native layout.
+> Current-count Guild icons use alpha-bound GetTrueSize, unchanged full-bitmap
+> drawing and valid Items/0;
+> gold uses pending authoritative requests, not local mutations. Native UI
+> 551/551, focused Guild 44/44, Windows 527/527, runtime 212/212, integration
+> 4/4, UI core 43/43, protocol 40/40, game-data 39/39,
+> 924-image coverage and 41 direct source RGBA/geometry checks pass. The shared
+> pure image rule is reused without changing its semantics or wire protocol.
+> A source audit finds 550/1003 PNG frame sizes differ from GetTrueSize and
+> 478 alter 35-pixel-cell centring. Only the new Guild/coin path is fixed;
+> primary item/NPC centring and zero-image paths remain open. This supersedes
+> older exact-centering claims based on PNG dimensions, not their asset or
+> quantity-selection results.
+> Source/test ledger and current Windows/runtime/integration results:
+> `docs/generated/player-qa/native-ui-parity-20260903-guild-storage/README.md`.
+> No new native EXE was launched or captured while Computer Use is paused.
+> Guild item operations, overlays/full text editing/window overlap/shared
+> throttle, other concrete-item surfaces, FloorItems and every original-pair,
+> package/light, DPI and human gate stay open. All 33 backlog IDs remain;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Latest source stack-image checkpoint (2026-09-03): the shared pure selector
 > implements Crystal `Shared/Data/ItemData.cs:641-681` across personal item
 > snapshots, NPC goods and Windows native decoding. Exact source identity

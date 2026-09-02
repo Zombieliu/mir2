@@ -2,6 +2,34 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 native Guild storage checkpoint: WN-ITEM-002/003 now include
+> source-shaped eight-column storage, fourteen authoritative rows and an
+> eight-row viewport with original integer scrolling and stable slot IDs.
+> Current counts select source UserItem.Image; alpha-bound GetTrueSize centres
+> the unchanged full PNG, including legitimate Items/0. Original tab/scroll
+> assets, leader-only withdrawal and MirAmountBox replace generic buttons and
+> the inline amount field. Amount ownership, stale guild/rank/balance, zero,
+> pending/cooldown and focus/session cases have headless coverage; no client
+> gold mutation is introduced. Final native UI 551/551, focused Guild 44/44,
+> Windows 527/527, runtime 212/212, stack integration 4/4,
+> UI core 43/43, protocol 40/40, game-data 39/39, the 11-test/924-image gate
+> and 41 direct original-frame RGBA/geometry checks pass.
+> The source alpha audit finds 550/1003 frame-size differences and 478 altered
+> 35-pixel-cell offsets. Primary bag/belt/equipment/storage/NPC paths still use
+> PNG-frame centring and need correction; earlier PNG pixel checks did not
+> compare against original GetTrueSize. Guild/coin is the only corrected path
+> in this round. Primary Items/0 handling also remains open.
+>
+> This is not fresh GUI evidence: user Escape still pauses Computer Use, and
+> no new application EXE or capture was produced. Guild item dragging/store/
+> retrieve/merge, source state overlays, full WinForms text editing/GDI raster,
+> Guild window movement/topmost pointer dispatch and cross-action LastGuildMsg
+> remain open. Current Windows/runtime/integration checks and exact scope:
+> `docs/generated/player-qa/native-ui-parity-20260903-guild-storage/README.md`.
+> Trade/other surfaces, FloorItems, prior original-pair/package/light/DPI/human
+> gates and all 33 backlog IDs are retained; `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
 > 2026-09-03 native source stack-image checkpoint: bag/belt/equipment/storage
 > and NPC goods now select the original UserItem.Image from exact Info and
 > live count before resolving true-size geometry. Ordinary known source

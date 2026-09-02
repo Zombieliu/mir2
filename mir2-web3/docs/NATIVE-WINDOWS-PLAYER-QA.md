@@ -1,5 +1,30 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-09-03 native Guild storage source/logic checkpoint: the original
+> 8x14 grid, 8-row viewport, stable slot IDs, source integer scrolling,
+> alpha-bound current-count icons, valid Items/0, original tab/scroll art and
+> gold MirAmountBox now have headless coverage. Final native UI 551/551,
+> focused Guild 44/44, Windows 527/527, runtime 212/212, integration 4/4,
+> UI core 43/43, protocol 40/40, game-data 39/39, all 924 item
+> images and 41 direct original RGBA/geometry checks pass. Current host and
+> integration outcomes are recorded separately in
+> `docs/generated/player-qa/native-ui-parity-20260903-guild-storage/README.md`.
+> Source GetTrueSize differs from PNG dimensions for 550/1003 exported Items,
+> with 478 different 35-pixel-cell offsets. This round corrects Guild/coin
+> only. Primary item and NPC centring, including older claims based on
+> PNG-frame pixel checks, is still an explicit open leaf.
+>
+> No fresh EXE launch, screenshot or foreground input was performed: Computer
+> Use remains paused after user Escape. Once explicitly resumed, the manual
+> route must bind the final binary and authoritative fixture to populated
+> first/last storage rows, real wheel/drag, deposit/withdraw/zero/cancel,
+> identity/rank/balance changes and matching packets; never mutate ordinary
+> player state merely for a screenshot. Guild item operations, state overlays,
+> full text/clipboard/GDI behavior, window overlap/movement and shared throttle
+> remain open, as do original paired-state, trusted package/light, actual DPI
+> and human acceptance. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`; all 33 prior backlog IDs remain.
+
 > 2026-09-03 native Crystal NPC goods-cell checkpoint: the fresh Windows EXE
 > SHA-256
 > `159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`

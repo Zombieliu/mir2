@@ -189,6 +189,21 @@ pub struct CrystalItemTooltipSourceModel {
     pub real_socket_infos: Vec<Option<CrystalItemInfoModel>>,
 }
 
+impl CrystalItemTooltipSourceModel {
+    /// Crystal's concrete-stack image uses Info and the current authoritative
+    /// count, never viewer realInfo or a possibly stale tooltip UserItem count.
+    /// Catalogue previews must continue to use `info.image` directly.
+    pub fn user_item_image(&self, count: u32) -> u16 {
+        mir2_protocol::crystal_user_item_image(
+            self.info.item_type,
+            self.info.shape,
+            self.info.stack_size,
+            self.info.image,
+            count,
+        )
+    }
+}
+
 /// Grid slot width/height in CSS px for the inventory grid.
 pub const SLOT_SIZE: f32 = 40.0;
 /// Slots per row in the bag grid.
@@ -510,6 +525,53 @@ pub fn inventory_summary(model: &InventoryModel) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn concrete_item_image_uses_current_count_and_base_info_not_tooltip_or_viewer_variant() {
+        let source = CrystalItemTooltipSourceModel {
+            info: CrystalItemInfoModel {
+                item_type: 8,
+                shape: 0,
+                stack_size: 300,
+                image: 2960,
+                ..Default::default()
+            },
+            real_info: Some(CrystalItemInfoModel {
+                item_type: 8,
+                shape: 2,
+                stack_size: 150,
+                image: 999,
+                ..Default::default()
+            }),
+            user_item: Some(CrystalUserItemModel {
+                count: 1,
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        assert_eq!(source.user_item_image(199), 3660);
+        assert_eq!(source.user_item_image(200), 3661);
+        assert_eq!(source.user_item_image(300), 3662);
+        assert_eq!(source.info.image, 2960); // Catalogue previews are unchanged.
+        assert_eq!(source.user_item.as_ref().unwrap().count, 1);
+    }
+
+    #[test]
+    fn concrete_item_image_preserves_non_amulets_unknown_shapes_and_zero_stack_size() {
+        for (item_type, shape, stack_size) in [(13, 0, 20), (8, 3, 20), (8, 0, 0)] {
+            let source = CrystalItemTooltipSourceModel {
+                info: CrystalItemInfoModel {
+                    item_type,
+                    shape,
+                    stack_size,
+                    image: 277,
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+            assert_eq!(source.user_item_image(300), 277);
+        }
+    }
 
     fn item(key: &str, container: u8, slot: u32) -> ItemModel {
         ItemModel {

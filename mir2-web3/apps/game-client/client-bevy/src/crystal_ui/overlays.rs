@@ -6,6 +6,7 @@ use bevy::app::AppExit;
 use bevy::asset::{load_internal_asset, uuid_handle};
 use bevy::ecs::system::SystemParam;
 use bevy::input::keyboard::KeyboardInput;
+use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use bevy::render::render_resource::{
@@ -60,7 +61,9 @@ use crate::storage::{
 use crate::storage::{storage_deposit_enabled, storage_withdraw_enabled};
 
 use super::assets::CrystalButtonAssetSet;
+use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
+use super::item_image::crystal_true_size_rgba8;
 use super::item_tooltip::{
     crystal_item_tooltip_document, crystal_item_tooltip_document_from_source,
     crystal_item_tooltip_document_from_source_with_options, CrystalItemTooltipOptions,
@@ -77,6 +80,10 @@ use super::panel_layouts::{
 };
 use super::spec::{CrystalButtonSpec, CrystalFrameSpec, CrystalRect};
 use super::widget::{spawn_crystal_image_button, CrystalImageButton, CrystalItemHint};
+
+#[cfg(test)]
+#[path = "guild_storage_tests.rs"]
+mod guild_storage_tests;
 
 const BIG_MAP_SEARCH_COOLDOWN_MS: u64 = 1_000;
 const NPC_GOODS_CELL_WIDTH: f32 = 205.0;
@@ -757,9 +764,9 @@ pub struct NativePlayerUiState {
     /// EditGuildMember request is accepted by the outbound queue.
     pub guild_recruit_draft: String,
     pub guild_recruit_focused: bool,
-    pub guild_gold_draft: String,
-    pub guild_gold_focused: bool,
-    pub guild_storage_page: usize,
+    pub guild_gold_prompt: Option<GuildGoldPrompt>,
+    pub guild_gold_ready_at_ms: u64,
+    pub guild_storage: GuildStorageUi,
     pub selected_guild_rank: Option<u8>,
     pub guild_rank_name_draft: String,
     pub guild_rank_name_focused: bool,
@@ -860,9 +867,9 @@ impl Default for NativePlayerUiState {
             selected_guild_member: None,
             guild_recruit_draft: String::new(),
             guild_recruit_focused: false,
-            guild_gold_draft: String::new(),
-            guild_gold_focused: false,
-            guild_storage_page: 0,
+            guild_gold_prompt: None,
+            guild_gold_ready_at_ms: 0,
+            guild_storage: GuildStorageUi::default(),
             selected_guild_rank: None,
             guild_rank_name_draft: String::new(),
             guild_rank_name_focused: false,
@@ -1027,12 +1034,13 @@ impl NativePlayerUiState {
         });
     }
     pub fn blocks_gameplay_keys(&self) -> bool {
-        self.core.blocks_gameplay_keys()
+        self.core.blocks_gameplay_keys() || self.amount_modal_open()
     }
     pub fn blocks_world_click(&self) -> bool {
         self.core.blocks_world_click()
             || self.inspect.is_some()
             || self.inventory_delete_prompt.is_some()
+            || self.guild_gold_prompt.is_some()
             || self.help.open
     }
     pub fn blocks_world_action(&self, dialog_open: bool, dead: bool) -> bool {
@@ -1081,9 +1089,8 @@ impl NativePlayerUiState {
         self.selected_guild_member = None;
         self.guild_recruit_draft.clear();
         self.guild_recruit_focused = false;
-        self.guild_gold_draft.clear();
-        self.guild_gold_focused = false;
-        self.guild_storage_page = 0;
+        self.guild_gold_prompt = None;
+        self.guild_storage.end_drag();
         self.selected_guild_rank = None;
         self.guild_rank_name_draft.clear();
         self.guild_rank_name_focused = false;
@@ -1092,6 +1099,10 @@ impl NativePlayerUiState {
 
     pub fn inventory_delete_prompt_open(&self) -> bool {
         self.inventory_delete_prompt.is_some()
+    }
+
+    pub fn amount_modal_open(&self) -> bool {
+        self.inventory_delete_prompt.is_some() || self.guild_gold_prompt.is_some()
     }
 
     /// Open the source-shaped delete prompt for one current carried-item
@@ -1357,7 +1368,7 @@ pub fn modal_priority_for_state(
     dialog_open: bool,
     dead: bool,
 ) -> Option<OverlayModalPriority> {
-    if state.inventory_delete_prompt_open() {
+    if state.amount_modal_open() {
         return Some(OverlayModalPriority::SystemMenu);
     }
     if state.menu_open() {
@@ -1987,6 +1998,29 @@ struct OverlayInventory;
 struct OverlayInventoryDeleteModal;
 
 #[derive(Component)]
+struct OverlayGuildGoldModal;
+
+#[derive(Component)]
+struct OverlayGuildGoldInput;
+
+#[derive(Component)]
+pub struct OverlayGuildStorageCell {
+    /// Original server slot, not the visible row/column's renumbered index.
+    pub slot: usize,
+}
+
+#[derive(Component)]
+struct OverlayGuildStorageThumb;
+
+/// Resolve original PNG dimensions after loading instead of stretching every
+/// source UserItem into an invented fixed-size icon. This is presentation only.
+#[derive(Component)]
+struct OriginalItemImage {
+    cell_width: i32,
+    cell_height: i32,
+}
+
+#[derive(Component)]
 struct OverlayInventoryDeleteCursor;
 
 #[derive(Component)]
@@ -2152,11 +2186,13 @@ enum OverlayButton {
     GuildKickSelected,
     GuildAssignPreviousRank,
     GuildAssignNextRank,
-    GuildGoldFocus,
     GuildGoldDeposit,
     GuildGoldWithdraw,
-    GuildStoragePreviousPage,
-    GuildStorageNextPage,
+    GuildGoldConfirm,
+    GuildGoldCancel,
+    GuildGoldClose,
+    GuildStoragePreviousRow,
+    GuildStorageNextRow,
     SelectGuildRank(u8),
     GuildRankNameFocus,
     GuildRankNameSave,
@@ -2271,6 +2307,7 @@ struct OverlayButtonControls<'w, 's> {
 pub(crate) struct OverlayKeyboardControls<'w> {
     surface_signals: Option<ResMut<'w, UiSurfaceSignals>>,
     ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
+    ui: Option<Res<'w, UiReadModel>>,
 }
 
 #[derive(SystemParam)]
@@ -2353,6 +2390,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<crate::audio::NativeGameplayAudioQueue>()
             .init_resource::<crate::audio::NativeUiAudioQueue>()
             .add_message::<CursorMoved>()
+            .add_message::<MouseWheel>()
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(
                 Startup,
@@ -2378,7 +2416,11 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             )
             .add_systems(
                 Update,
-                (sync_big_map_ui, sync_local_panel_models)
+                (
+                    sync_big_map_ui,
+                    sync_local_panel_models,
+                    sync_guild_storage_ui,
+                )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate)
                     .before(process_overlay_keyboard),
@@ -2391,6 +2433,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     process_help_drag,
                     process_inventory_drag,
                     process_inventory_delete_pointer,
+                    process_guild_storage_pointer,
                     process_overlay_keyboard,
                     process_overlay_buttons,
                     crate::audio::sync_native_ui_audio,
@@ -2403,7 +2446,12 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate),
             )
-            .add_systems(Update, render_overlays.in_set(NativePlayerUiSet::Read));
+            .add_systems(
+                Update,
+                (render_overlays, layout_original_item_images)
+                    .chain()
+                    .in_set(NativePlayerUiSet::Read),
+            );
     }
 }
 
@@ -2507,6 +2555,100 @@ fn reconcile_inventory_capacity(
     state.inspect = None;
     state.inventory_operation = None;
     state.drop_confirmation = None;
+    true
+}
+
+fn sync_guild_storage_ui(
+    shell: Res<NativeShellModel>,
+    mut state: ResMut<NativePlayerUiState>,
+    social: Res<crate::social::SocialModel>,
+) {
+    let active = shell.screen == NativeShellScreen::InGame
+        && state.guild_open()
+        && state.guild_left_page == GuildLeftPage::Storage;
+    if !active {
+        state.guild_storage.end_drag();
+    }
+    if state.guild_gold_prompt.as_ref().is_some_and(|prompt| {
+        !active
+            || social.guild.name.as_deref() != Some(prompt.guild_name.as_str())
+            || (prompt.action == GuildGoldAction::Withdraw && social.guild.my_rank_id != 0)
+    }) {
+        state.guild_gold_prompt = None;
+    }
+}
+
+fn open_guild_gold_prompt(
+    state: &mut NativePlayerUiState,
+    guild: &crate::social::GuildModel,
+    player_gold: u32,
+    action: GuildGoldAction,
+    now_ms: u64,
+) -> bool {
+    let Some(name) = guild.name.as_ref().filter(|name| !name.is_empty()) else {
+        return false;
+    };
+    if !state.guild_open()
+        || state.guild_left_page != GuildLeftPage::Storage
+        || state.amount_modal_open()
+        || now_ms < state.guild_gold_ready_at_ms
+        || (action == GuildGoldAction::Withdraw && guild.my_rank_id != 0)
+    {
+        return false;
+    }
+    // GuildDialog does not require CanStoreItem to donate gold. Withdrawal is
+    // leader-only, independently of CanRetrieveItem. The server repeats these
+    // checks and owns safe-zone, balance, capacity and mutation authority.
+    let maximum = match action {
+        GuildGoldAction::Deposit => player_gold,
+        GuildGoldAction::Withdraw => guild.gold,
+    };
+    state.guild_gold_prompt = Some(GuildGoldPrompt::new(action, name.clone(), maximum));
+    state.guild_storage.end_drag();
+    true
+}
+
+/// A valid OK closes the amount box even for zero. Never optimistically mutate
+/// gold, reuse an old guild identity, or submit against a stale rank/balance.
+fn confirm_guild_gold(
+    state: &mut NativePlayerUiState,
+    social: &mut crate::social::SocialModel,
+    player_gold: u32,
+    now_ms: u64,
+    intents: &mut NativePlayerUiIntentQueue,
+) -> bool {
+    let Some(amount) = state
+        .guild_gold_prompt
+        .as_ref()
+        .and_then(GuildGoldPrompt::amount)
+    else {
+        return false;
+    };
+    let prompt = state
+        .guild_gold_prompt
+        .take()
+        .expect("validated amount prompt");
+    let guild = &social.guild;
+    let current = state.guild_open()
+        && state.guild_left_page == GuildLeftPage::Storage
+        && guild.name.as_deref() == Some(prompt.guild_name.as_str())
+        && match prompt.action {
+            GuildGoldAction::Deposit => amount <= player_gold,
+            GuildGoldAction::Withdraw => guild.my_rank_id == 0 && amount <= guild.gold,
+        };
+    if amount > 0
+        && current
+        && now_ms >= state.guild_gold_ready_at_ms
+        && intents.push_social_pending(
+            social,
+            NativePlayerUiIntent::GuildStorageGoldChange {
+                change_type: prompt.action.change_type(),
+                amount,
+            },
+        )
+    {
+        state.guild_gold_ready_at_ms = now_ms.saturating_add(100);
+    }
     true
 }
 
@@ -2696,6 +2838,21 @@ fn spawn_overlay_root(mut commands: Commands) {
                     ..default()
                 },
                 GlobalZIndex(OVERLAY_INVENTORY_DELETE_CURSOR_Z),
+                BackgroundColor(Color::NONE),
+            ));
+            root.spawn((
+                OverlayGuildGoldModal,
+                Button,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
+                    display: Display::None,
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
                 BackgroundColor(Color::NONE),
             ));
             root.spawn((
@@ -2912,7 +3069,9 @@ fn consume_hud_buttons(
     mut intents: ResMut<NativePlayerUiIntentQueue>,
     mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
 ) {
-    if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame) {
+    if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
+        || state.amount_modal_open()
+    {
         return;
     }
     for (interaction, action, image_button) in buttons.iter() {
@@ -3028,7 +3187,7 @@ fn process_help_drag(
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    if !state.help.open {
+    if !state.help.open || state.amount_modal_open() {
         state.help.end_drag();
         return;
     }
@@ -3067,7 +3226,7 @@ fn process_inventory_drag(
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
-    if !state.inventory_open() || state.inventory_delete_prompt.is_some() {
+    if !state.inventory_open() || state.amount_modal_open() {
         state.inventory_window.end_drag();
         state.inventory_window.clear_cursor();
         return;
@@ -3148,7 +3307,7 @@ fn process_inventory_delete_pointer(
 ) {
     if !state.inventory_open()
         || !state.inventory_delete_mode
-        || state.inventory_delete_prompt.is_some()
+        || state.amount_modal_open()
         || !mouse.is_some_and(|mouse| mouse.just_pressed(MouseButton::Right))
     {
         return;
@@ -3172,6 +3331,115 @@ fn process_inventory_delete_pointer(
         state.cancel_inventory_delete();
         ui_audio.push(crate::audio::NativeUiSound::ButtonB);
     }
+}
+
+fn process_guild_storage_pointer(
+    mut state: ResMut<NativePlayerUiState>,
+    shell: Res<NativeShellModel>,
+    mouse: Option<Res<ButtonInput<MouseButton>>>,
+    windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    mut wheel: MessageReader<MouseWheel>,
+    mut cursor_moves: MessageReader<CursorMoved>,
+    mut last_cursor: Local<Option<Vec2>>,
+) {
+    if shell.screen != NativeShellScreen::InGame
+        || !state.guild_open()
+        || state.guild_left_page != GuildLeftPage::Storage
+        || state.amount_modal_open()
+    {
+        state.guild_storage.end_drag();
+        wheel.clear();
+        cursor_moves.clear();
+        *last_cursor = None;
+        return;
+    }
+    let Ok((window_entity, window)) = windows.single() else {
+        state.guild_storage.end_drag();
+        wheel.clear();
+        cursor_moves.clear();
+        *last_cursor = None;
+        return;
+    };
+    if !window.focused {
+        state.guild_storage.end_drag();
+        wheel.clear();
+        cursor_moves.clear();
+        *last_cursor = None;
+        return;
+    }
+    let origin = Vec2::new(
+        CRYSTAL_GUILD_PANEL_RECT.left + guild_storage::PAGE.left,
+        CRYSTAL_GUILD_PANEL_RECT.top + guild_storage::PAGE.top,
+    );
+    let cursor_path = cursor_moves
+        .read()
+        .filter(|event| event.window == window_entity)
+        .map(|event| cursor_logical(window, event.position) - origin)
+        .collect::<Vec<_>>();
+    let cursor = cursor_path
+        .last()
+        .copied()
+        .or_else(|| help_cursor_logical(window).map(|cursor| cursor - origin));
+    if let Some(mouse) = mouse {
+        let mut drag_from = *last_cursor;
+        if mouse.just_pressed(MouseButton::Left) {
+            let observed = cursor_path.first().copied().or(cursor);
+            let previous = last_cursor.filter(|previous| {
+                state
+                    .guild_storage
+                    .thumb_rect()
+                    .contains(previous.x, previous.y)
+                    && observed.is_some_and(|current| previous.distance(current) > 2.0)
+            });
+            if let Some(start) = previous.or(observed) {
+                if state
+                    .guild_storage
+                    .begin_drag(start.x as i32, start.y as i32)
+                {
+                    drag_from = Some(start);
+                }
+            }
+        }
+        let moved = drag_from.zip(cursor).is_some_and(|(from, to)| from != to)
+            || (!mouse.just_pressed(MouseButton::Left) && !cursor_path.is_empty());
+        // MirControl.OnMouseDown only records the grab; OnMoving runs on
+        // motion, not on every held frame. A stationary first press must not
+        // silently normalize the source constructor's StorageIndex=1 to zero.
+        if moved && (mouse.pressed(MouseButton::Left) || mouse.just_released(MouseButton::Left)) {
+            if let Some(cursor) = cursor {
+                state.guild_storage.drag_to(cursor.y as i32);
+            }
+        }
+        if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+            state.guild_storage.end_drag();
+        }
+    } else {
+        state.guild_storage.end_drag();
+    }
+    let within_page = cursor.is_some_and(|cursor| {
+        CrystalRect::new(
+            0.0,
+            0.0,
+            guild_storage::PAGE.width,
+            guild_storage::PAGE.height,
+        )
+        .contains(cursor.x, cursor.y)
+    });
+    for event in wheel.read() {
+        if within_page
+            && !state.guild_storage.is_dragging()
+            && event.window == window_entity
+            && event.unit == MouseScrollUnit::Line
+            && event.y.is_finite()
+            && event.y != 0.0
+        {
+            // Winit reports Windows wheel delta / 120 as LineDelta. Restore
+            // the source delta before its integer notch division. Pixel-unit
+            // touchpad events have no Crystal WinForms equivalent here.
+            state.guild_storage.wheel_delta((event.y * 120.0) as i32);
+        }
+    }
+    *last_cursor = cursor;
 }
 
 pub(crate) fn process_overlay_keyboard(
@@ -3211,7 +3479,119 @@ pub(crate) fn process_overlay_keyboard(
     let OverlayKeyboardControls {
         mut surface_signals,
         mut ui_audio,
+        ui,
     } = keyboard_controls;
+
+    if state.guild_gold_prompt.is_some() {
+        // Preserve event order when typing/backspace/Enter share one frame.
+        // Drain the whole batch even after closing, so later keys from that
+        // modal cannot leak into a newly opened textbox on the next frame.
+        let events: Vec<_> = typed.read().cloned().collect();
+        let mut confirm = false;
+        let mut cancel = false;
+        if events.is_empty() {
+            // Also support hosts/tests which provide only ButtonInput edges.
+            cancel = keys.just_pressed(KeyCode::Escape);
+            confirm = keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter);
+            let prompt = state.guild_gold_prompt.as_mut().expect("open gold prompt");
+            if (keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight))
+                && keys.just_pressed(KeyCode::KeyA)
+            {
+                prompt.select_all = true;
+            }
+            if keys.just_pressed(KeyCode::Backspace) {
+                prompt.backspace();
+            }
+        } else {
+            let control_bit = |key| match key {
+                KeyCode::ControlLeft => 1u8,
+                KeyCode::ControlRight => 2u8,
+                _ => 0,
+            };
+            let mut controls = u8::from(keys.pressed(KeyCode::ControlLeft))
+                | (u8::from(keys.pressed(KeyCode::ControlRight)) << 1);
+            // ButtonInput is the final frame state. Recover the starting
+            // modifier state for a coalesced Ctrl-down/A/Ctrl-up sequence.
+            for event in events.iter().rev() {
+                let bit = control_bit(event.key_code);
+                if event.state == ButtonState::Released {
+                    controls |= bit;
+                } else if !event.repeat {
+                    controls &= !bit;
+                }
+            }
+            for event in events {
+                let bit = control_bit(event.key_code);
+                if bit != 0 {
+                    if event.state == ButtonState::Pressed {
+                        controls |= bit;
+                    } else {
+                        controls &= !bit;
+                    }
+                    continue;
+                }
+                if event.state != ButtonState::Pressed {
+                    continue;
+                }
+                match event.key_code {
+                    KeyCode::Escape => {
+                        cancel = true;
+                        break;
+                    }
+                    KeyCode::Enter | KeyCode::NumpadEnter => {
+                        confirm = true;
+                        break;
+                    }
+                    KeyCode::Backspace => state
+                        .guild_gold_prompt
+                        .as_mut()
+                        .expect("open gold prompt")
+                        .backspace(),
+                    KeyCode::KeyA if controls != 0 => {
+                        state
+                            .guild_gold_prompt
+                            .as_mut()
+                            .expect("open gold prompt")
+                            .select_all = true;
+                    }
+                    _ => {
+                        if let Some(text) = &event.text {
+                            state
+                                .guild_gold_prompt
+                                .as_mut()
+                                .expect("open gold prompt")
+                                .push_text(text);
+                        }
+                    }
+                }
+            }
+        }
+        if cancel {
+            state.guild_gold_prompt = None;
+        } else if confirm {
+            if state
+                .guild_gold_prompt
+                .as_ref()
+                .is_some_and(|prompt| prompt.amount().is_none())
+            {
+                // MirAmountBox invokes Click directly, even when invalid text
+                // hides OK. uint.TryParse leaves Amount=0, so Enter disposes
+                // the dialog without sending a GuildStorageGoldChange packet.
+                state.guild_gold_prompt = None;
+            } else if let Some(social) = social.as_deref_mut() {
+                confirm_guild_gold(
+                    &mut state,
+                    social,
+                    ui.as_deref().map(|model| model.player.gold).unwrap_or(0),
+                    time.as_deref()
+                        .map(|time| time.elapsed().as_millis() as u64)
+                        .unwrap_or(0),
+                    &mut intents,
+                );
+            }
+        }
+        return;
+    }
 
     // MirAmountBox/MirMessageBox consume every keyboard event while modal.
     // Enter confirms, Escape follows Cancel/No, and the amount textbox accepts
@@ -3306,37 +3686,6 @@ pub(crate) fn process_overlay_keyboard(
             if event.state == ButtonState::Pressed {
                 if let Some(text) = &event.text {
                     push_social_name_text(&mut state.guild_recruit_draft, text);
-                }
-            }
-        }
-        return;
-    }
-
-    if state.guild_open()
-        && state.guild_left_page == GuildLeftPage::Storage
-        && state.guild_gold_focused
-    {
-        if keys.just_pressed(KeyCode::Escape) {
-            state.guild_gold_focused = false;
-            state.guild_gold_draft.clear();
-            return;
-        }
-        if keys.just_pressed(KeyCode::Backspace) {
-            state.guild_gold_draft.pop();
-        }
-        if keys.just_pressed(KeyCode::Enter) {
-            state.guild_gold_focused = false;
-            return;
-        }
-        for event in typed.read() {
-            if event.state != ButtonState::Pressed {
-                continue;
-            }
-            if let Some(text) = &event.text {
-                for ch in text.chars().filter(char::is_ascii_digit) {
-                    if state.guild_gold_draft.len() < 10 {
-                        state.guild_gold_draft.push(ch);
-                    }
                 }
             }
         }
@@ -3850,11 +4199,23 @@ fn process_overlay_buttons(
             )
         })
         .unwrap_or((0, 0, String::new()));
+    let gold_modal_was_open = state.guild_gold_prompt.is_some();
+    let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     for (interaction, button) in buttons.iter() {
         if *interaction != Interaction::Pressed {
             continue;
         }
-        if state.inventory_delete_prompt.is_some()
+        if (gold_modal_was_open || state.guild_gold_prompt.is_some())
+            && !matches!(
+                *button,
+                OverlayButton::GuildGoldConfirm
+                    | OverlayButton::GuildGoldCancel
+                    | OverlayButton::GuildGoldClose
+            )
+        {
+            continue;
+        }
+        if (delete_modal_was_open || state.inventory_delete_prompt.is_some())
             && !matches!(
                 *button,
                 OverlayButton::InventoryDeleteConfirm
@@ -4039,8 +4400,8 @@ fn process_overlay_buttons(
                 state.group_invite_draft.clear();
                 state.guild_recruit_focused = false;
                 state.guild_recruit_draft.clear();
-                state.guild_gold_focused = false;
-                state.guild_gold_draft.clear();
+                state.guild_gold_prompt = None;
+                state.guild_storage.end_drag();
                 state.selected_guild_rank = None;
                 state.guild_rank_name_focused = false;
                 state.guild_rank_name_draft.clear();
@@ -4125,10 +4486,17 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::SelectGuildLeftPage(page) => {
+                if (page == GuildLeftPage::Storage && social.guild.my_options & 0x18 == 0)
+                    || (page == GuildLeftPage::Ranks && social.guild.my_options & 0x01 == 0)
+                {
+                    continue;
+                }
                 state.guild_left_page = page;
                 state.selected_guild_member = None;
                 state.guild_recruit_focused = false;
-                state.guild_gold_focused = false;
+                state.guild_gold_prompt = None;
+                state.guild_storage.end_drag();
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 if page != GuildLeftPage::Ranks {
                     state.selected_guild_rank = None;
                     state.guild_rank_name_draft.clear();
@@ -4309,44 +4677,55 @@ fn process_overlay_buttons(
                     },
                 );
             }
-            OverlayButton::GuildGoldFocus => {
-                state.guild_gold_focused = true;
-            }
             OverlayButton::GuildGoldDeposit | OverlayButton::GuildGoldWithdraw => {
-                let Ok(amount) = state.guild_gold_draft.parse::<u32>() else {
+                // MirButton defaults to ButtonB, including a click rejected
+                // by StorageAddGold/StorageRemoveGold's send cooldown.
+                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                let action = if *button == OverlayButton::GuildGoldDeposit {
+                    GuildGoldAction::Deposit
+                } else {
+                    GuildGoldAction::Withdraw
+                };
+                open_guild_gold_prompt(
+                    &mut state,
+                    &social.guild,
+                    gold,
+                    action,
+                    time.as_deref()
+                        .map(|time| time.elapsed().as_millis() as u64)
+                        .unwrap_or(0),
+                );
+            }
+            OverlayButton::GuildGoldConfirm => {
+                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                confirm_guild_gold(
+                    &mut state,
+                    &mut social,
+                    gold,
+                    time.as_deref()
+                        .map(|time| time.elapsed().as_millis() as u64)
+                        .unwrap_or(0),
+                    &mut intents,
+                );
+            }
+            OverlayButton::GuildGoldCancel | OverlayButton::GuildGoldClose => {
+                state.guild_gold_prompt = None;
+                ui_audio.push(if *button == OverlayButton::GuildGoldClose {
+                    crate::audio::NativeUiSound::ButtonA
+                } else {
+                    crate::audio::NativeUiSound::ButtonB
+                });
+            }
+            OverlayButton::GuildStoragePreviousRow | OverlayButton::GuildStorageNextRow => {
+                if !state.guild_open() || state.guild_left_page != GuildLeftPage::Storage {
                     continue;
-                };
-                let change_type = if *button == OverlayButton::GuildGoldDeposit {
-                    0
-                } else {
-                    1
-                };
-                let permission = if change_type == 0 {
-                    "storeItem"
-                } else {
-                    "retrieveItem"
-                };
-                if amount > 0
-                    && social_has_permission(&social.guild, permission)
-                    && intents.push_social_pending(
-                        &mut social,
-                        NativePlayerUiIntent::GuildStorageGoldChange {
-                            change_type,
-                            amount,
-                        },
-                    )
-                {
-                    state.guild_gold_focused = false;
-                    state.guild_gold_draft.clear();
                 }
-            }
-            OverlayButton::GuildStoragePreviousPage => {
-                state.guild_storage_page = state.guild_storage_page.saturating_sub(1);
-            }
-            OverlayButton::GuildStorageNextPage => {
-                let page_count = crate::social::MAX_GUILD_STORAGE_ITEMS.div_ceil(28);
-                state.guild_storage_page =
-                    (state.guild_storage_page + 1).min(page_count.saturating_sub(1));
+                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                if *button == OverlayButton::GuildStoragePreviousRow {
+                    state.guild_storage.previous_row();
+                } else {
+                    state.guild_storage.next_row();
+                }
             }
             OverlayButton::SelectGuildRank(rank_index) => {
                 let Some(rank) = social
@@ -5867,6 +6246,126 @@ fn render_inventory_delete_modal(
     }
 }
 
+fn render_guild_gold_modal(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    prompt: Option<&GuildGoldPrompt>,
+) {
+    let Some(prompt) = prompt else {
+        return;
+    };
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(CRYSTAL_DELETE_AMOUNT_RECT.left),
+                top: Val::Px(CRYSTAL_DELETE_AMOUNT_RECT.top),
+                width: Val::Px(204.0),
+                height: Val::Px(109.0),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|dialog| {
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_frame(
+                    dialog,
+                    asset_server,
+                    "original-ui/Prguse/238.png",
+                    204.0,
+                    109.0,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Prguse2",
+                    360,
+                    361,
+                    362,
+                    CrystalRect::new(180.0, 3.0, 24.0, 21.0),
+                    OverlayButton::GuildGoldClose,
+                );
+                dialog
+                    .spawn(Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(15.0),
+                        top: Val::Px(34.0),
+                        width: Val::Px(38.0),
+                        height: Val::Px(34.0),
+                        ..default()
+                    })
+                    .with_children(|cell| {
+                        spawn_original_item_image(cell, asset_server, 116, 38, 34);
+                    });
+                // Source hides OK for invalid uint input; a dim disabled button
+                // would introduce an image that Crystal does not draw.
+                if prompt.amount().is_some() {
+                    spawn_overlay_crystal_button(
+                        dialog,
+                        asset_server,
+                        "Title",
+                        200,
+                        201,
+                        202,
+                        CrystalRect::new(23.0, 76.0, 76.0, 25.0),
+                        OverlayButton::GuildGoldConfirm,
+                    );
+                }
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    203,
+                    204,
+                    205,
+                    CrystalRect::new(110.0, 76.0, 76.0, 25.0),
+                    OverlayButton::GuildGoldCancel,
+                );
+            }
+            overlay_text_at(
+                dialog,
+                prompt.action.title(),
+                CrystalRect::new(19.0, 8.0, 158.0, 14.0),
+                10.0,
+                Color::WHITE,
+            );
+            let border = match prompt.amount() {
+                None => Color::srgb(1.0, 0.0, 0.0),
+                Some(amount) if amount == prompt.max_amount => Color::srgb(1.0, 0.647, 0.0),
+                Some(_) => Color::srgb(0.0, 1.0, 0.0),
+            };
+            dialog
+                .spawn((
+                    OverlayGuildGoldInput,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(58.0),
+                        top: Val::Px(43.0),
+                        width: Val::Px(132.0),
+                        height: Val::Px(19.0),
+                        border: UiRect::all(Val::Px(1.0)),
+                        padding: UiRect::axes(Val::Px(2.0), Val::Px(0.0)),
+                        align_items: AlignItems::Center,
+                        overflow: Overflow::clip(),
+                        ..default()
+                    },
+                    BackgroundColor(Color::BLACK),
+                    BorderColor::all(border),
+                ))
+                .with_children(|input| {
+                    input.spawn((
+                        Text::new(prompt.draft.clone()),
+                        TextFont {
+                            font_size: FontSize::Px(10.0),
+                            ..default()
+                        },
+                        TextColor(Color::WHITE),
+                        TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                    ));
+                });
+        });
+}
+
 fn render_overlays(
     models: OverlayRenderModels,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -5894,6 +6393,7 @@ fn render_overlays(
         ParamSet<(
             Query<(Entity, &mut Node), With<OverlayInventoryDeleteModal>>,
             Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayInventoryDeleteCursor>>,
+            Query<(Entity, &mut Node), With<OverlayGuildGoldModal>>,
         )>,
     )>,
     mut commands: Commands,
@@ -6087,6 +6587,18 @@ fn render_overlays(
     }
     {
         let mut delete_layers = panels.p2();
+        fill_panel(
+            &mut commands,
+            &mut delete_layers.p2(),
+            state.guild_gold_prompt.is_some(),
+            |parent| {
+                render_guild_gold_modal(
+                    parent,
+                    asset_server.as_deref(),
+                    state.guild_gold_prompt.as_ref(),
+                )
+            },
+        );
         fill_panel(
             &mut commands,
             &mut delete_layers.p0(),
@@ -7575,6 +8087,97 @@ fn overlay_compact_item_button(
     });
 }
 
+fn spawn_original_item_image(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    index: u16,
+    cell_width: i32,
+    cell_height: i32,
+) {
+    // This helper is called only with a concrete source item or a fixed source
+    // control image. Items/0 is real art (e.g. source PigEar), not a missing-icon
+    // sentinel. Unknown/absent source items never call this function.
+    let path = format!("original-ui/Items/{index}.png");
+    parent.spawn((
+        OriginalItemImage {
+            cell_width,
+            cell_height,
+        },
+        Node {
+            position_type: PositionType::Absolute,
+            display: Display::None, // No guessed/stretch dimensions before load.
+            ..default()
+        },
+        ImageNode {
+            image: asset_server.load(path),
+            ..default()
+        },
+    ));
+}
+
+fn layout_original_item_images(
+    images: Option<Res<Assets<Image>>>,
+    mut icons: Query<(&OriginalItemImage, &ImageNode, &mut Node)>,
+    mut true_sizes: Local<
+        std::collections::HashMap<bevy::asset::AssetId<Image>, Option<(i32, i32)>>,
+    >,
+) {
+    let Some(images) = images else {
+        return;
+    };
+    // Retain only geometry, not pixel buffers. Reload/removal invalidates
+    // cached alpha extents, including a modified image with the same handle.
+    if images.is_changed() {
+        true_sizes.clear();
+    }
+    for (cell, image_node, mut node) in &mut icons {
+        let Some(image) = images.get(&image_node.image) else {
+            node.display = Display::None;
+            continue;
+        };
+        let (Ok(width), Ok(height)) = (
+            i32::try_from(image.texture_descriptor.size.width),
+            i32::try_from(image.texture_descriptor.size.height),
+        ) else {
+            node.display = Display::None;
+            continue;
+        };
+        if width <= 0 || height <= 0 {
+            node.display = Display::None;
+            continue;
+        }
+        let true_size = true_sizes.entry(image_node.image.id()).or_insert_with(|| {
+            use bevy::render::render_resource::{TextureDimension, TextureFormat};
+            if image.texture_descriptor.dimension != TextureDimension::D2
+                || image.texture_descriptor.size.depth_or_array_layers != 1
+                || !matches!(
+                    image.texture_descriptor.format,
+                    TextureFormat::Rgba8Unorm
+                        | TextureFormat::Rgba8UnormSrgb
+                        | TextureFormat::Bgra8Unorm
+                        | TextureFormat::Bgra8UnormSrgb
+                )
+            {
+                return None;
+            }
+            crystal_true_size_rgba8(width as u32, height as u32, image.data.as_deref()?)
+        });
+        let Some((true_width, true_height)) = *true_size else {
+            node.display = Display::None;
+            continue;
+        };
+        // C# integer division truncates toward zero, even for images wider
+        // than their cells. GetTrueSize is the alpha-bounds size, not PNG size.
+        // Draw uses the full bitmap: do not crop or subtract its alpha origin.
+        // Library offsets are not used by MirItemCell or the coin Draw(x,y).
+        node.left = Val::Px(((cell.cell_width - true_width) / 2) as f32);
+        node.top = Val::Px(((cell.cell_height - true_height) / 2) as f32);
+        node.width = Val::Px(width as f32);
+        node.height = Val::Px(height as f32);
+        node.display = Display::Flex;
+    }
+}
+
 fn spawn_static_overlay_sprite(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
@@ -8231,20 +8834,30 @@ fn render_guild_panel(
         state.guild_left_page == GuildLeftPage::Members,
         OverlayButton::SelectGuildLeftPage(GuildLeftPage::Members),
     );
-    overlay_absolute_button(
-        parent,
-        "Storage",
-        CrystalRect::new(rect.left + 162.0, rect.top + 38.0, 68.0, 24.0),
-        OverlayButton::SelectGuildLeftPage(GuildLeftPage::Storage),
-        true,
-    );
-    overlay_absolute_button(
-        parent,
-        "Ranks",
-        CrystalRect::new(rect.left + 233.0, rect.top + 38.0, 62.0, 24.0),
-        OverlayButton::SelectGuildLeftPage(GuildLeftPage::Ranks),
-        true,
-    );
+    if guild.my_options & 0x18 != 0 {
+        spawn_guild_tab(
+            parent,
+            asset_server,
+            rect.left + 162.0,
+            rect.top + 38.0,
+            105,
+            106,
+            state.guild_left_page == GuildLeftPage::Storage,
+            OverlayButton::SelectGuildLeftPage(GuildLeftPage::Storage),
+        );
+    }
+    if guild.my_options & 0x01 != 0 {
+        spawn_guild_tab(
+            parent,
+            asset_server,
+            rect.left + 233.0,
+            rect.top + 38.0,
+            101,
+            102,
+            state.guild_left_page == GuildLeftPage::Ranks,
+            OverlayButton::SelectGuildLeftPage(GuildLeftPage::Ranks),
+        );
+    }
     spawn_static_overlay_sprite(
         parent,
         asset_server,
@@ -8279,8 +8892,8 @@ fn spawn_guild_tab(
         asset_server,
         "Title",
         normal,
-        active,
-        active,
+        normal,                                    // Guild tabs have no HoverIndex in Crystal.
+        if idle == 101 { normal } else { active }, // Rank has no PressedIndex.
         CrystalRect::new(left, top, 72.0, 24.0),
         action,
     );
@@ -8492,151 +9105,124 @@ fn render_guild_storage(
     rect: CrystalRect,
     player: &crate::read_model::PlayerStats,
 ) {
-    const PAGE_SIZE: usize = 28;
-    let page_count = crate::social::MAX_GUILD_STORAGE_ITEMS.div_ceil(PAGE_SIZE);
-    let page = state.guild_storage_page.min(page_count.saturating_sub(1));
-    let start = page * PAGE_SIZE;
-    overlay_text_at(
-        parent,
-        &format!("Guild Gold: {}", guild.gold),
-        CrystalRect::new(rect.left + 20.0, rect.top + 70.0, 220.0, 18.0),
-        10.0,
-        GOLD,
+    debug_assert_eq!(
+        guild_storage::SLOT_COUNT,
+        crate::social::MAX_GUILD_STORAGE_ITEMS
     );
-    let draft = if state.guild_gold_focused {
-        format!("Amount: {}|", state.guild_gold_draft)
-    } else if state.guild_gold_draft.is_empty() {
-        "Amount: 0".to_owned()
-    } else {
-        format!("Amount: {}", state.guild_gold_draft)
-    };
-    overlay_clickable_text_at(
-        parent,
-        &draft,
-        CrystalRect::new(rect.left + 20.0, rect.top + 91.0, 150.0, 18.0),
-        OverlayButton::GuildGoldFocus,
-        state.guild_gold_focused,
-        true,
-    );
-    let amount_valid = state
-        .guild_gold_draft
-        .parse::<u32>()
-        .is_ok_and(|amount| amount > 0);
-    overlay_absolute_button(
-        parent,
-        "Deposit",
-        CrystalRect::new(rect.left + 176.0, rect.top + 91.0, 62.0, 18.0),
-        OverlayButton::GuildGoldDeposit,
-        amount_valid && social_has_permission(guild, "storeItem"),
-    );
-    overlay_absolute_button(
-        parent,
-        "Withdraw",
-        CrystalRect::new(rect.left + 242.0, rect.top + 91.0, 68.0, 18.0),
-        OverlayButton::GuildGoldWithdraw,
-        amount_valid && social_has_permission(guild, "retrieveItem"),
-    );
-
-    for offset in 0..PAGE_SIZE {
-        let slot = start + offset;
-        let column = offset % 4;
-        let row = offset / 4;
-        let cell_rect = CrystalRect::new(
-            rect.left + 20.0 + column as f32 * 75.0,
-            rect.top + 121.0 + row as f32 * 31.0,
-            72.0,
-            28.0,
-        );
-        let Some(item) = guild.storage_items.get(slot).and_then(Option::as_ref) else {
-            overlay_text_at(parent, &format!("{slot}: -"), cell_rect, 8.0, TEXT);
-            continue;
-        };
-        let name = item
-            .tooltip_source
-            .as_ref()
-            .map(|source| source.info.name.as_str())
-            .unwrap_or("Item");
-        let icon = item
-            .tooltip_source
-            .as_ref()
-            .map(|source| source.info.image)
-            .unwrap_or_default();
-        let mut cell = parent.spawn((
+    parent
+        .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                left: Val::Px(cell_rect.left),
-                top: Val::Px(cell_rect.top),
-                width: Val::Px(cell_rect.width),
-                height: Val::Px(cell_rect.height),
-                align_items: AlignItems::Center,
-                column_gap: Val::Px(2.0),
-                overflow: Overflow::clip(),
+                left: Val::Px(rect.left + guild_storage::PAGE.left),
+                top: Val::Px(rect.top + guild_storage::PAGE.top),
+                width: Val::Px(guild_storage::PAGE.width),
+                height: Val::Px(guild_storage::PAGE.height),
                 ..default()
             },
-            BackgroundColor(Color::srgba(0.08, 0.06, 0.03, 0.42)),
-            Interaction::None,
-            FocusPolicy::Block,
-        ));
-        if let Some(document) = crystal_item_tooltip_document_from_source(
-            name,
-            icon,
-            u32::from(item.count),
-            item.tooltip_source.as_ref(),
-            player,
-        ) {
-            cell.insert(CrystalItemHint(document));
-        }
-        cell.with_children(|content| {
-            if let Some(path) = item_icon_path(icon) {
-                content.spawn((
-                    Node {
-                        width: Val::Px(26.0),
-                        height: Val::Px(26.0),
-                        ..default()
-                    },
-                    ImageNode {
-                        image: asset_server.load(path),
-                        image_mode: bevy::ui::widget::NodeImageMode::Stretch,
-                        ..default()
-                    },
-                ));
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|page| {
+            spawn_static_overlay_sprite(
+                page,
+                asset_server,
+                guild_storage::BACKGROUND.asset_path(),
+                guild_storage::BACKGROUND.rect,
+            );
+            overlay_text_at(
+                page,
+                &format_crystal_gold(guild.gold),
+                guild_storage::GOLD_LABEL,
+                10.0,
+                Color::WHITE,
+            );
+            for (spec, action) in [
+                (guild_storage::GOLD_ADD, OverlayButton::GuildGoldDeposit),
+                (guild_storage::UP, OverlayButton::GuildStoragePreviousRow),
+                (guild_storage::DOWN, OverlayButton::GuildStorageNextRow),
+            ] {
+                spawn_crystal_image_button(
+                    page,
+                    asset_server,
+                    spec,
+                    CrystalButtonAssetSet::from_spec(spec),
+                    action,
+                    false,
+                    true,
+                );
             }
-            content.spawn((
-                Text::new(format!(
-                    "{slot}: {} x{}",
-                    short_name(name, &item.item_index.to_string()),
-                    item.count
-                )),
-                TextFont {
-                    font_size: FontSize::Px(8.0),
+            if guild.my_rank_id == 0 {
+                let spec = guild_storage::GOLD_REMOVE;
+                spawn_crystal_image_button(
+                    page,
+                    asset_server,
+                    spec,
+                    CrystalButtonAssetSet::from_spec(spec),
+                    OverlayButton::GuildGoldWithdraw,
+                    false,
+                    true,
+                );
+            }
+            let thumb = state.guild_storage.thumb_rect();
+            page.spawn((
+                OverlayGuildStorageThumb,
+                Button,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(thumb.left),
+                    top: Val::Px(thumb.top),
+                    width: Val::Px(thumb.width),
+                    height: Val::Px(thumb.height),
                     ..default()
                 },
-                TextColor(TEXT),
-                TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                ImageNode {
+                    image: asset_server.load("original-ui/Prguse2/206.png"),
+                    ..default()
+                },
             ));
+            for slot in 0..guild_storage::SLOT_COUNT {
+                let Some(cell_rect) = state.guild_storage.cell_rect(slot) else {
+                    continue;
+                };
+                let item = guild.storage_items.get(slot).and_then(Option::as_ref);
+                let mut cell = page.spawn((
+                    OverlayGuildStorageCell { slot },
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(cell_rect.left),
+                        top: Val::Px(cell_rect.top),
+                        width: Val::Px(cell_rect.width),
+                        height: Val::Px(cell_rect.height),
+                        // MirItemCell draws at intrinsic size, including overflow.
+                        ..default()
+                    },
+                    BackgroundColor(Color::NONE),
+                    Interaction::None,
+                    FocusPolicy::Block,
+                ));
+                let Some(item) = item else {
+                    continue;
+                };
+                let Some(source) = item.tooltip_source.as_ref() else {
+                    continue;
+                };
+                let image = source.user_item_image(u32::from(item.count));
+                if let Some(document) = crystal_item_tooltip_document_from_source(
+                    &source.info.name,
+                    image,
+                    u32::from(item.count),
+                    Some(source),
+                    player,
+                ) {
+                    cell.insert(CrystalItemHint(document));
+                }
+                cell.with_children(|content| {
+                    spawn_original_item_image(content, asset_server, image, 35, 35);
+                    if source.info.stack_size > 1 {
+                        overlay_inventory_count(content, &item.count.to_string(), 35.0, 35.0);
+                    }
+                });
+            }
         });
-    }
-    overlay_absolute_button(
-        parent,
-        "Prev",
-        CrystalRect::new(rect.left + 20.0, rect.top + 352.0, 52.0, 18.0),
-        OverlayButton::GuildStoragePreviousPage,
-        page > 0,
-    );
-    overlay_text_at(
-        parent,
-        &format!("{}/{}", page + 1, page_count),
-        CrystalRect::new(rect.left + 80.0, rect.top + 352.0, 50.0, 18.0),
-        9.0,
-        TEXT,
-    );
-    overlay_absolute_button(
-        parent,
-        "Next",
-        CrystalRect::new(rect.left + 130.0, rect.top + 352.0, 52.0, 18.0),
-        OverlayButton::GuildStorageNextPage,
-        page + 1 < page_count,
-    );
 }
 
 fn render_guild_ranks(
@@ -12798,7 +13384,7 @@ mod tests {
             ));
     }
 
-    fn overlay_render_test_app() -> App {
+    pub(super) fn overlay_render_test_app() -> App {
         let mut app = App::new();
         app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
             .init_asset::<Image>()
@@ -16263,7 +16849,7 @@ mod tests {
         ));
     }
 
-    fn help_keyboard_test_app() -> App {
+    pub(super) fn help_keyboard_test_app() -> App {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<MailComposeUi>()
@@ -16286,7 +16872,7 @@ mod tests {
         app
     }
 
-    fn help_button_test_app() -> App {
+    pub(super) fn help_button_test_app() -> App {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<MailComposeUi>()
@@ -16308,7 +16894,7 @@ mod tests {
         app
     }
 
-    fn press_help_button(app: &mut App, action: OverlayButton) {
+    pub(super) fn press_help_button(app: &mut App, action: OverlayButton) {
         let button = app
             .world_mut()
             .spawn((Button, Interaction::Pressed, action))

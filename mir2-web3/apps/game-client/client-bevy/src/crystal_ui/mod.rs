@@ -5,7 +5,9 @@
 
 pub mod assets;
 pub mod chat;
+pub mod guild_storage;
 pub mod hud;
+mod item_image;
 pub mod item_tooltip;
 pub mod login;
 pub mod metrics;

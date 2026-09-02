@@ -3288,6 +3288,7 @@ dependencies = [
  "bevy",
  "chrono",
  "mir2-client-core",
+ "mir2-protocol",
  "mir2-ui-core",
  "serde",
  "serde_json",

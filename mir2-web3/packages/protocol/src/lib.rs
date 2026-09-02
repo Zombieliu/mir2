@@ -2,6 +2,7 @@ pub mod error;
 pub mod frame;
 pub mod ids;
 pub mod io;
+mod item_image;
 pub mod packets;
 pub mod trace;
 pub mod types;
@@ -9,6 +10,7 @@ pub mod types;
 pub use error::{PacketCodecError, Result};
 pub use frame::{decode_frame, encode_frame, PacketFrame};
 pub use ids::{ClientPacketId, ServerPacketId};
+pub use item_image::crystal_user_item_image;
 pub use packets::{
     decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet,
     is_valid_request_id, ClientPacket, ServerPacket, REQUEST_ID_MAX_LEN,

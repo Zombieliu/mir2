@@ -2982,6 +2982,7 @@ dependencies = [
  "bevy",
  "chrono",
  "mir2-client-core",
+ "mir2-protocol",
  "mir2-ui-core",
  "serde",
  "serde_json",
@@ -2991,6 +2992,13 @@ dependencies = [
 [[package]]
 name = "mir2-client-core"
 version = "0.1.0"
+
+[[package]]
+name = "mir2-protocol"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "mir2-ui-core"

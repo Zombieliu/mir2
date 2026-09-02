@@ -36,6 +36,11 @@ const OVERLAY: &[&str] = &[
     "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
     "apps/game-client/ui-core/src/action.rs",
 ];
+const GUILD_STORAGE: &[&str] = &[
+    "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+    "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "apps/game-client/client-bevy/src/social.rs",
+];
 const OPTIONS: &[&str] = &[
     "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
     "apps/game-client/client-bevy/src/options_effects.rs",
@@ -376,11 +381,14 @@ const OVERLAY_ACTIONS: &[&str] = &[
     "GuildRecruitNameSubmit",
     "GuildAssignPreviousRank",
     "GuildAssignNextRank",
-    "GuildGoldFocus",
     "GuildGoldDeposit",
     "GuildGoldWithdraw",
-    "GuildStoragePreviousPage",
-    "GuildStorageNextPage",
+    "GuildGoldConfirm",
+    "GuildGoldCancel",
+    "GuildGoldClose",
+    "GuildStoragePreviousRow",
+    "GuildStorageNextRow",
+    "GuildStorageScroll",
     "SelectGuildRank",
     "GuildRankNameFocus",
     "GuildRankNameSave",
@@ -455,6 +463,7 @@ const CHAT_ACTIONS: &[&str] = &[
     "CloseChatSettings",
 ];
 const KEYBOARD_ACTIONS: &[&str] = &[
+    "GuildGoldAmountEdit",
     "UseBeltItem1",
     "UseBeltItem2",
     "UseBeltItem3",
@@ -536,6 +545,7 @@ pub fn typed_action_contract(action: &str) -> Option<TypedActionContract> {
         | "StorageSetPassword"
         | "StorageRemovePassword"
         | "StorageExpand"
+        | "GuildGoldConfirm"
         | "AcceptQuest"
         | "FinishQuest"
         | "AbandonQuest"
@@ -751,11 +761,15 @@ pub fn all_controls() -> Vec<ControlEntry> {
         c!("GUILD.RANK.NAME", "InGame", "Guild", "RankName", "Rank name", "text_input", None, "one 20-character draft", 1, "rank selected and authoritative CanChangeRank", "GuildRankNameFocus", "Edits only a local rank-name draft", "CloseSocial", "implemented", OVERLAY, None, false),
         c!("GUILD.RANK.SAVE", "InGame", "Guild", "SaveRankName", "Save", "button", None, "single", 1, "valid changed name and authoritative CanChangeRank", "GuildRankNameSave", "Sends one EditGuildMember changeType 2", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
         c!("GUILD.RANK.PERMISSIONS", "InGame", "Guild", "RankPermissionButtons", "Eight permissions", "dynamic_button_family", None, "eight permission bits", 8, "rank selected and authoritative CanChangeRank", "GuildRankTogglePermission", "Sends one EditGuildMember changeType 5 per authoritative permission bit", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
-        c!("GUILD.STORAGE.GOLD", "InGame", "Guild", "GoldAmount", "Amount", "numeric_input", None, "one bounded u32 draft", 1, "Storage tab open", "GuildGoldFocus", "Edits only the local guild-gold amount", "CloseSocial", "implemented", OVERLAY, None, false),
-        c!("GUILD.STORAGE.DEPOSIT", "InGame", "Guild", "DepositGold", "Deposit", "button", None, "single", 1, "valid amount and authoritative CanStoreItem", "GuildGoldDeposit", "Sends GuildStorageGoldChange type 0", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
-        c!("GUILD.STORAGE.WITHDRAW", "InGame", "Guild", "WithdrawGold", "Withdraw", "button", None, "single", 1, "valid amount and authoritative CanRetrieveItem", "GuildGoldWithdraw", "Sends GuildStorageGoldChange type 1", "CloseSocial", "implemented_authoritative_request", OVERLAY, None, false),
-        c!("GUILD.STORAGE.PAGE.PREV", "InGame", "Guild", "StoragePreviousPage", "Prev", "button", None, "single", 1, "Storage tab open after first page", "GuildStoragePreviousPage", "Moves to the previous bounded storage page", "CloseSocial", "implemented", OVERLAY, None, false),
-        c!("GUILD.STORAGE.PAGE.NEXT", "InGame", "Guild", "StorageNextPage", "Next", "button", None, "single", 1, "Storage tab open before last page", "GuildStorageNextPage", "Moves to the next bounded storage page", "CloseSocial", "implemented", OVERLAY, None, false),
+        c!("GUILD.STORAGE.GOLD", "InGame", "Guild Amount", "GoldAmount", "Amount", "input", rect(468.0,372.0,132.0,19.0), "one uint draft initialized to the source maximum", 1, "guild gold modal open", "GuildGoldAmountEdit", "Local numeric input; invalid uint hides OK, values above maximum clamp", "GuildGoldCancel", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.DEPOSIT", "InGame", "Guild", "DepositGold", "+", "button", rect(375.0,541.0,16.0,14.0), "single", 1, "Storage tab open, guild member, 100 ms send cooldown elapsed", "GuildGoldDeposit", "Opens original MirAmountBox with current player gold; does not send before OK", "GuildGoldCancel", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.WITHDRAW", "InGame", "Guild", "WithdrawGold", "-", "button", rect(359.0,541.0,16.0,14.0), "single", 1, "Storage tab open and authoritative myRankId is zero", "GuildGoldWithdraw", "Opens original MirAmountBox with guild gold; hidden for other ranks", "GuildGoldCancel", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.PAGE.PREV", "InGame", "Guild", "StoragePreviousRow", "Up", "button", rect(554.0,229.0,16.0,14.0), "single 12x12 image in a 16x14 hit target", 1, "Storage tab open; source index zero returns without moving", "GuildStoragePreviousRow", "Scrolls eight-column storage up one row, retaining authoritative slot ids", "CloseSocial", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.PAGE.NEXT", "InGame", "Guild", "StorageNextRow", "Down", "button", rect(554.0,546.0,16.0,14.0), "single 12x12 image in a 16x14 hit target", 1, "Storage tab open; source index is clamped to six", "GuildStorageNextRow", "Scrolls eight-column storage down one row using Crystal integer thumb steps", "CloseSocial", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.SCROLL", "InGame", "Guild", "StorageScrollbar", "Storage scrollbar", "pointer_scroll", None, "one 12x18 movable thumb plus Windows wheel notches", 1, "Storage page under the pointer, focused window, no modal", "GuildStorageScroll", "Preserves source initial-state asymmetry and distinct drag versus arrow integer formulas", "CloseSocial", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.GOLD.OK", "InGame", "Guild Amount", "GoldConfirm", "OK", "button", rect(433.0,405.0,76.0,25.0), "single", 1, "valid uint amount in source-shaped modal", "GuildGoldConfirm", "Revalidates guild/rank/current balance, queues one exact pending request; zero closes without sending", "GuildGoldCancel", "implemented_authoritative_request", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.GOLD.CANCEL", "InGame", "Guild Amount", "GoldCancel", "Cancel", "button", rect(520.0,405.0,76.0,25.0), "single", 1, "guild gold modal open", "GuildGoldCancel", "Discards only the local draft, also via Escape", "GuildGoldCancel", "implemented", GUILD_STORAGE, None, false),
+        c!("GUILD.STORAGE.GOLD.CLOSE", "InGame", "Guild Amount", "GoldClose", "Close", "button", rect(590.0,332.0,24.0,21.0), "single", 1, "guild gold modal open", "GuildGoldClose", "Discards only the local draft with Crystal ButtonA", "GuildGoldClose", "implemented", GUILD_STORAGE, None, false),
         c!("GUILD.CLOSE", "InGame", "Guild", "CloseButton", "Close", "button", rect(782.0,172.0,24.0,21.0), "single", 1, "Guild open", "CloseSocial", "Guild closes", "CloseSocial", "implemented", OVERLAY, None, false),
         c!("MENU.DISABLED_SOURCE", "InGame", "System Menu", "DisabledSourceButtons", "Keyboard/Ranking/Creature/Ride/Fishing/Friend/Mentor/Relationship", "disabled_button_family", None, "eight visible source controls", 8, "always disabled", "DisabledSourceControl", "Rendered from Crystal sprites but deliberately non-interactive because no native/backend surface exists", "CloseWindows", "disabled_source_control", OVERLAY, None, true),
         c!("MAIL.PANEL", "InGame", "Mail", "Panel", "Mail", "panel", rect(212.0,80.0,600.0,520.0), "single", 1, "OpenMail", "OpenMail", "Mail list/detail", "CloseMail", "implemented", OVERLAY, None, false),
@@ -1395,10 +1409,48 @@ mod tests {
         let controls = all_controls();
         assert_eq!(
             controls.len(),
-            177,
+            181,
             "the Candidate control inventory changed; update its typed-action contract deliberately"
         );
         validate_registry(&controls).unwrap_or_else(|errors| panic!("{errors:?}"));
+    }
+
+    #[test]
+    fn guild_storage_registry_keeps_prior_ids_and_records_source_rows_and_gold_modal() {
+        let controls = all_controls();
+        for (id, action) in [
+            ("GUILD.STORAGE.GOLD", "GuildGoldAmountEdit"),
+            ("GUILD.STORAGE.DEPOSIT", "GuildGoldDeposit"),
+            ("GUILD.STORAGE.WITHDRAW", "GuildGoldWithdraw"),
+            ("GUILD.STORAGE.PAGE.PREV", "GuildStoragePreviousRow"),
+            ("GUILD.STORAGE.PAGE.NEXT", "GuildStorageNextRow"),
+            ("GUILD.STORAGE.SCROLL", "GuildStorageScroll"),
+            ("GUILD.STORAGE.GOLD.OK", "GuildGoldConfirm"),
+            ("GUILD.STORAGE.GOLD.CANCEL", "GuildGoldCancel"),
+            ("GUILD.STORAGE.GOLD.CLOSE", "GuildGoldClose"),
+        ] {
+            let control = controls.iter().find(|control| control.id == id).unwrap();
+            assert_eq!(control.action, action);
+            assert!(
+                control.reference_image.is_none(),
+                "no native capture has been taken"
+            );
+            assert!(control
+                .source_provenance
+                .iter()
+                .any(|source| source.ends_with("guild_storage.rs")));
+        }
+        assert_eq!(
+            typed_action_contract("GuildGoldConfirm")
+                .unwrap()
+                .repeat_policy,
+            RepeatPolicy::HostAcknowledged
+        );
+        assert_eq!(
+            action_mapping("GuildGoldAmountEdit"),
+            Some(ActionMapping::Keyboard)
+        );
+        assert!(action_mapping("GuildGoldFocus").is_none());
     }
 
     #[test]

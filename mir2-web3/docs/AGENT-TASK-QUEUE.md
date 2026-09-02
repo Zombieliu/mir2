@@ -1,5 +1,35 @@
 # Agent Task Queue
 
+> Windows Guild storage source/logic checkpoint (2026-09-03): replace the
+> four-column text/page substitute with the original 8x14 storage grid,
+> eight-row viewport, stable 112 slot IDs, source integer wheel/drag behavior,
+> original tabs/arrows and MirAmountBox gold flow. Actual current counts select
+> UserItem.Image before alpha-bound GetTrueSize centring; full bitmaps still
+> draw unchanged and known Items/0 is drawable on the new Guild path.
+> Gold remains authoritative with identity/rank/balance, modal ownership and
+> pending/cooldown guards. Final shared native UI 551/551, focused Guild 44/44,
+> UI core 43/43, protocol 40/40, game-data 39/39, all 924 item images and
+> direct original RGBA/geometry comparison of 41 relevant frames pass.
+> The pure shared image rule moves into protocol without wire/semantic changes;
+> runtime/Android/Windows dependency locks are synchronized. Final Windows
+> 527/527, runtime 212/212 and stack integration 4/4 pass; no full-server
+> result is inferred from older runs. A source alpha audit finds 550/1003
+> frame-size differences and 478 different 35-pixel-cell offsets.
+>
+> Computer Use stays paused after user Escape: no GUI launch or fresh capture
+> occurred. Next bounded CLI leaf is primary bag/belt/equipment/storage/NPC
+> GetTrueSize centring and Items/0 handling: this Guild fix does not close
+> those paths, and older PNG-frame pixel checks did not prove true-size parity.
+> Other leaves retain Guild item operations/overlays/full text editing,
+> window overlap/movement/shared throttle, trade/other concrete-item surfaces,
+> FloorItems and final-source real-input, original pairs, package/light, DPI
+> and human gates. All 33 backlog IDs remain. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-guild-storage/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; goal
+> and stacked Draft PR #250 remain open. A second exact generated test PDB
+> was relocated to a hash-verified recoverable system-temp backup; no source,
+> asset, save, EXE or unrelated process was removed.
+
 > Windows source UserItem.Image checkpoint (2026-09-03): exact Amulet/Poison
 > quantity bands now drive personal bag/belt/storage/equipment snapshots,
 > NPC goods and native icon geometry. Known ordinary items also use source
