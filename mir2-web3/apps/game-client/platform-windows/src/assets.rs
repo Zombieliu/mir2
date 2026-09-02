@@ -1,6 +1,27 @@
 //! Runtime asset-root discovery for relocatable native builds.
 
+use std::io::Write;
 use std::path::{Component, Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static R2_HITS: AtomicUsize = AtomicUsize::new(0);
+static LOCAL_HITS: AtomicUsize = AtomicUsize::new(0);
+
+pub fn asset_hit_stats() -> (usize, usize) {
+    (
+        LOCAL_HITS.load(Ordering::Relaxed),
+        R2_HITS.load(Ordering::Relaxed),
+    )
+}
+
+pub fn has_local_full() -> bool {
+    asset_root()
+        .map(|root| {
+            root.join("generated/crystal-packs/full/index.json")
+                .is_file()
+        })
+        .unwrap_or(false)
+}
 
 pub const ASSET_ROOT_ENV: &str = "MIR2_NATIVE_ASSET_ROOT";
 pub const ASSET_ROOT_ENV_ALIAS: &str = "MIR2_ASSET_ROOT";
@@ -83,15 +104,17 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
             let mut message = format!(
                 "no Mir2 asset bundle found. Place a complete mir2-assets directory beside the executable, or set {ASSET_ROOT_ENV}."
             );
-            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, and the four original-ui/Cursors native PNGs.");
+            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, and the four original-ui/Cursors native PNGs.");
             for (candidate, diag) in diagnostics {
                 message.push_str(&format!(
-                    "\n  candidate {} -> entity={} map={} effect={} items={} cursors={} complete={}",
+                    "\n  candidate {} -> entity={} map={} native_map_keyed={} effect={} items={} state_items={} cursors={} complete={}",
                     candidate.display(),
                     diag.has_entity_manifest,
                     diag.has_map_manifest,
+                    diag.has_native_map_keyed_manifest,
                     diag.has_effect_manifest,
                     diag.has_item_icons,
+                    diag.has_state_items,
                     diag.has_crystal_cursors,
                     diag.is_complete
                 ));
@@ -103,12 +126,14 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
 
 fn incomplete_asset_error(path: &Path, diagnostics: AssetRootDiagnostics) -> String {
     format!(
-        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} effect_manifest={} item_icons={} crystal_cursors={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
+        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} native_map_keyed_manifest={} effect_manifest={} item_icons={} state_items={} crystal_cursors={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
         path.display(),
         diagnostics.has_entity_manifest,
         diagnostics.has_map_manifest,
+        diagnostics.has_native_map_keyed_manifest,
         diagnostics.has_effect_manifest,
         diagnostics.has_item_icons,
+        diagnostics.has_state_items,
         diagnostics.has_crystal_cursors
     )
 }
@@ -144,8 +169,10 @@ pub struct AssetRootDiagnostics {
     pub is_complete: bool,
     pub has_entity_manifest: bool,
     pub has_map_manifest: bool,
+    pub has_native_map_keyed_manifest: bool,
     pub has_effect_manifest: bool,
     pub has_item_icons: bool,
+    pub has_state_items: bool,
     pub has_crystal_cursors: bool,
 }
 
@@ -156,6 +183,9 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     let has_map_manifest = candidate
         .join("generated/map-atlas/manifest.json")
         .is_file();
+    let has_native_map_keyed_manifest = candidate
+        .join("generated/native-map-keyed/manifest.json")
+        .is_file();
     let has_effect_manifest = candidate
         .join("original-effects/effects.generated.json")
         .is_file();
@@ -163,6 +193,10 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     let has_item_icons = item_root.join("meta.json").is_file()
         && item_root.join("0.png").is_file()
         && item_root.join("3792.png").is_file();
+    let state_item_root = candidate.join("original-ui/StateItem");
+    let has_state_items = state_item_root.join("meta.json").is_file()
+        && state_item_root.join("30.png").is_file()
+        && state_item_root.join("5152.png").is_file();
     let cursor_root = candidate.join("original-ui/Cursors");
     let has_crystal_cursors = [
         "Cursor_Default.png",
@@ -174,16 +208,145 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     .all(|name| cursor_root.join(name).is_file());
     let is_complete = has_entity_manifest
         && has_map_manifest
+        && has_native_map_keyed_manifest
         && has_effect_manifest
         && has_item_icons
+        && has_state_items
         && has_crystal_cursors;
     AssetRootDiagnostics {
         is_complete,
         has_entity_manifest,
         has_map_manifest,
+        has_native_map_keyed_manifest,
         has_effect_manifest,
         has_item_icons,
+        has_state_items,
         has_crystal_cursors,
+    }
+}
+
+pub const R2_ASSET_BASE_URL_ENV: &str = "MIR2_R2_ASSET_BASE_URL";
+
+fn r2_base_urls() -> Vec<String> {
+    if let Ok(url) = std::env::var(R2_ASSET_BASE_URL_ENV) {
+        let trimmed = url.trim();
+        if !trimmed.is_empty() {
+            return vec![trimmed.to_owned()];
+        }
+    }
+    // Fallback to the same R2 prefix the Web uses (production-web-assets.json).
+    // Keep it hard-coded so a dev checkout without env still gets on-demand pages.
+    vec![
+        "https://assets.mir2.obelisk.build/mir2/v/20260730-fullcrystal-f71b89aa-gzip1".to_owned(),
+        "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1".to_owned(),
+    ]
+}
+
+pub(crate) fn r2_cache_dir() -> PathBuf {
+    let p = PathBuf::from("F:\\mir2-r2-cache");
+    if std::fs::create_dir_all(&p).is_ok() || p.is_dir() {
+        return p;
+    }
+    std::env::temp_dir().join("mir2-r2-cache")
+}
+
+use std::collections::HashSet;
+use std::sync::{Mutex, OnceLock};
+
+static R2_INFLIGHT: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
+
+fn r2_inflight() -> &'static Mutex<HashSet<String>> {
+    R2_INFLIGHT.get_or_init(|| Mutex::new(HashSet::new()))
+}
+
+fn ensure_r2_cached(web_path: &str) -> Option<PathBuf> {
+    let relative = web_path.trim_start_matches('/');
+    let cache_path = r2_cache_dir().join(relative);
+    if cache_path.is_file() {
+        return Some(cache_path);
+    }
+    // Non-blocking: if this page is already being fetched, just miss this
+    // frame and let the background thread fill the cache. Never block the
+    // Bevy main thread on a network round-trip (the 100ms Crystal tick).
+    {
+        let mut inflight = r2_inflight().lock().unwrap_or_else(|p| p.into_inner());
+        if inflight.contains(web_path) {
+            return None;
+        }
+        inflight.insert(web_path.to_owned());
+    }
+    let web_path_owned = web_path.to_owned();
+    let cache_path_clone = cache_path.clone();
+    std::thread::spawn(move || {
+        let relative = web_path_owned.trim_start_matches('/');
+        let cache_path = cache_path_clone;
+        for base in r2_base_urls() {
+            let url = format!("{}/{}", base.trim_end_matches('/'), relative);
+            let Ok(resp) = ureq::get(&url).call() else {
+                continue;
+            };
+            if resp.status() != 200 {
+                continue;
+            }
+            let mut reader = resp.into_reader();
+            if let Some(parent) = cache_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            let tmp = cache_path.with_extension("tmp");
+            let Ok(mut file) = std::fs::File::create(&tmp) else {
+                continue;
+            };
+            if std::io::copy(&mut reader, &mut file).is_err() {
+                let _ = std::fs::remove_file(&tmp);
+                continue;
+            }
+            let _ = file.sync_all();
+            drop(file);
+            if std::fs::rename(&tmp, &cache_path).is_ok() {
+                break;
+            }
+            let _ = std::fs::remove_file(&tmp);
+        }
+        r2_inflight()
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .remove(&web_path_owned);
+    });
+    None
+}
+
+pub fn batch_prefetch_bichon_town() {
+    // Fire-and-forget: ensure every Bichon town page in the map-atlas manifest
+    // is at least queued for R2. The manifest itself is the first miss.
+    let manifest_web = "generated/map-atlas/manifest.json";
+    let manifest_cached = r2_cache_dir().join(manifest_web);
+    // Kick the manifest first; next tick it will be present and we can fan out.
+    if !manifest_cached.is_file() {
+        let _ = ensure_r2_cached(manifest_web);
+        return;
+    }
+    let Ok(data) = std::fs::read_to_string(&manifest_cached) else {
+        return;
+    };
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(&data) else {
+        return;
+    };
+    let Some(atlases) = json.get("atlases").and_then(|v| v.as_array()) else {
+        return;
+    };
+    for atlas in atlases {
+        // Newer manifests use "pages": [{"u": "/generated/map-atlas/..."}, ...]
+        if let Some(pages) = atlas.get("pages").and_then(|v| v.as_array()) {
+            for page in pages {
+                if let Some(u) = page.get("u").and_then(|v| v.as_str()) {
+                    let _ = ensure_r2_cached(u);
+                }
+            }
+        }
+        // Legacy fallback: single "u" per atlas
+        if let Some(u) = atlas.get("u").and_then(|v| v.as_str()) {
+            let _ = ensure_r2_cached(u);
+        }
     }
 }
 
@@ -192,14 +355,52 @@ pub fn asset_path(web_path: &str) -> Option<PathBuf> {
     if relative.is_empty() || relative.contains(['\\', ':']) {
         return None;
     }
-    let relative = Path::new(relative);
-    if !relative
+    let relative_path = Path::new(relative);
+    if !relative_path
         .components()
         .all(|component| matches!(component, Component::Normal(_)))
     {
         return None;
     }
-    asset_root().map(|root| root.join(relative))
+    // 1) Local first — pure offline determinism.
+    if let Some(root) = asset_root() {
+        let local = root.join(relative_path);
+        if local.is_file() {
+            LOCAL_HITS.fetch_add(1, Ordering::Relaxed);
+            return Some(local);
+        }
+        // Local bundle exists but this page is missing (e.g. full 4446 pages not
+        // yet installed). Kick off R2 on-demand and miss this frame — next
+        // tick the cache will be hit. Do not block the Bevy main thread.
+        if let Some(cached) = ensure_r2_cached(web_path) {
+            let n = R2_HITS.fetch_add(1, Ordering::Relaxed) + 1;
+            let line = format!("[assets] R2 HIT #{n} {web_path} -> {}\n", cached.display());
+            eprintln!("{line}");
+            let _ = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(r2_cache_dir().join("_r2_hits.log"))
+                .and_then(|mut f| f.write_all(line.as_bytes()));
+            return Some(cached);
+        }
+        // Kick off fetch for next tick
+        let _ = ensure_r2_cached(web_path);
+        return None;
+    }
+    // No local bundle at all — try R2 directly (dev without full).
+    if let Some(cached) = ensure_r2_cached(web_path) {
+        let n = R2_HITS.fetch_add(1, Ordering::Relaxed) + 1;
+        let line = format!("[assets] R2 HIT #{n} {web_path} -> {}\n", cached.display());
+        eprintln!("{line}");
+        let _ = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(r2_cache_dir().join("_r2_hits.log"))
+            .and_then(|mut f| f.write_all(line.as_bytes()));
+        return Some(cached);
+    }
+    let _ = ensure_r2_cached(web_path);
+    None
 }
 
 #[cfg(test)]
@@ -212,8 +413,10 @@ mod tests {
         let diagnostics = diagnose_asset_root(&root);
         assert!(diagnostics.has_entity_manifest);
         assert!(diagnostics.has_map_manifest);
+        assert!(diagnostics.has_native_map_keyed_manifest);
         assert!(diagnostics.has_effect_manifest);
         assert!(diagnostics.has_item_icons);
+        assert!(diagnostics.has_state_items);
         assert!(diagnostics.has_crystal_cursors);
         assert!(diagnostics.is_complete);
         match resolve_asset_root() {
@@ -241,8 +444,10 @@ mod tests {
         let diagnostics = diagnose_asset_root(&dir);
         assert!(diagnostics.has_entity_manifest);
         assert!(!diagnostics.has_map_manifest);
+        assert!(!diagnostics.has_native_map_keyed_manifest);
         assert!(!diagnostics.has_effect_manifest);
         assert!(!diagnostics.has_item_icons);
+        assert!(!diagnostics.has_state_items);
         assert!(!diagnostics.has_crystal_cursors);
         assert!(!diagnostics.is_complete);
         let _ = std::fs::remove_dir_all(&dir);
@@ -255,6 +460,7 @@ mod tests {
         for relative in [
             "bevy-entity-atlases/manifest.json",
             "generated/map-atlas/manifest.json",
+            "generated/native-map-keyed/manifest.json",
             "original-effects/effects.generated.json",
         ] {
             let path = dir.join(relative);
@@ -265,6 +471,7 @@ mod tests {
         let diagnostics = diagnose_asset_root(&dir);
         assert!(diagnostics.has_entity_manifest);
         assert!(diagnostics.has_map_manifest);
+        assert!(diagnostics.has_native_map_keyed_manifest);
         assert!(diagnostics.has_effect_manifest);
         assert!(!diagnostics.has_item_icons);
         assert!(!diagnostics.is_complete);
@@ -276,8 +483,19 @@ mod tests {
         std::fs::write(item_root.join("3792.png"), []).expect("last item icon");
         let items_only = diagnose_asset_root(&dir);
         assert!(items_only.has_item_icons);
+        assert!(!items_only.has_state_items);
         assert!(!items_only.has_crystal_cursors);
         assert!(!items_only.is_complete);
+
+        let state_item_root = dir.join("original-ui/StateItem");
+        std::fs::create_dir_all(&state_item_root).expect("state item root");
+        std::fs::write(state_item_root.join("meta.json"), "{}").expect("state item meta");
+        std::fs::write(state_item_root.join("30.png"), []).expect("first state item");
+        std::fs::write(state_item_root.join("5152.png"), []).expect("tail state item");
+        let state_items = diagnose_asset_root(&dir);
+        assert!(state_items.has_state_items);
+        assert!(!state_items.has_crystal_cursors);
+        assert!(!state_items.is_complete);
 
         let cursor_root = dir.join("original-ui/Cursors");
         std::fs::create_dir_all(&cursor_root).expect("cursor root");

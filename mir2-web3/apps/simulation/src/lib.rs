@@ -28,7 +28,8 @@ pub use config::{
     Stage5MailTargetKind, Stage5ProfessionState, Stage5RefineState, Stage5SocialState,
     Stage5SystemsState, Stage5TradeState, VisibleMonsterRecord, VisibleNpcRecord,
     VisiblePlayerRecord, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
-    WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldSnapshot, WorldSnapshotClientView,
+    WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot,
+    WorldSnapshotClientView,
 };
 pub use runtime::{
     crystal_world_respawn_spawns, gate5_demo_scenario, intelligent_creature_allows_ground_drop,

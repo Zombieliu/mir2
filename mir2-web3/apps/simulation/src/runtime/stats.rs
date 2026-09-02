@@ -12,7 +12,7 @@
 use std::collections::BTreeMap;
 
 use bevy_ecs::prelude::{Resource, World};
-use mir2_protocol::MirClass;
+use mir2_protocol::{MirClass, UserItemStat};
 
 use super::crystal_compat::*;
 use super::equipment::EquipmentState;
@@ -40,6 +40,19 @@ impl PlayerStats {
     /// Raw value for a Crystal stat index (0 when absent).
     pub(super) fn get(&self, stat: u8) -> i32 {
         self.values.get(&stat).copied().unwrap_or(0)
+    }
+
+    /// Stable stat-id/value projection for client-side Crystal presentation.
+    /// Absent ids are authoritative zero once the containing snapshot field is
+    /// present; old clients/snapshots can still distinguish missing wholesale.
+    pub(super) fn snapshot_entries(&self) -> Vec<UserItemStat> {
+        self.values
+            .iter()
+            .map(|(stat, value)| UserItemStat {
+                stat: *stat,
+                value: *value,
+            })
+            .collect()
     }
 
     fn add(&mut self, stat: u8, value: i32) {

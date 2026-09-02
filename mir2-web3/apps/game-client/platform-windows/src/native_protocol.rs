@@ -156,6 +156,10 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "questIndex")]
         quest_index: i32,
     },
+    ShareQuest {
+        #[serde(rename = "questIndex")]
+        quest_index: i32,
+    },
     LogOut,
     Disconnect,
     TownRevive,
@@ -183,6 +187,13 @@ pub enum NativeOutboundCommand {
     },
     DropItem {
         key: String,
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        count: u16,
+        #[serde(rename = "heroInventory")]
+        hero_inventory: bool,
+    },
+    DeleteItem {
         #[serde(rename = "uniqueId")]
         unique_id: u64,
         count: u16,
@@ -465,11 +476,13 @@ impl NativeOutboundCommand {
             Self::AcceptQuest { .. } => "acceptQuest",
             Self::FinishQuest { .. } => "finishQuest",
             Self::AbandonQuest { .. } => "abandonQuest",
+            Self::ShareQuest { .. } => "shareQuest",
             Self::TownRevive => "townRevive",
             Self::UseItem { .. } => "useItem",
             Self::EquipItem { .. } => "equipItem",
             Self::RemoveItem { .. } => "removeItem",
             Self::DropItem { .. } => "dropItem",
+            Self::DeleteItem { .. } => "deleteItem",
             Self::RequestMapInfo { .. } => "requestMapInfo",
             Self::SearchMap { .. } => "searchMap",
             Self::TeleportToNpc { .. } => "teleportToNpc",
@@ -533,6 +546,7 @@ pub struct LoginCharacter {
     pub level: Option<i64>,
     pub class: Option<String>,
     pub gender: Option<String>,
+    pub last_access_binary_datetime: Option<i64>,
     pub raw: Value,
 }
 
@@ -1213,6 +1227,8 @@ fn parse_login_character(value: &Value) -> LoginCharacter {
             .get("gender")
             .and_then(Value::as_str)
             .map(str::to_owned),
+        last_access_binary_datetime: coerce_i64(value.get("lastAccessBinaryDatetime"))
+            .or_else(|| coerce_i64(value.get("last_access_binary_datetime"))),
         raw: value.clone(),
     }
 }
@@ -1468,6 +1484,10 @@ mod tests {
             json!({"type":"abandonQuest","requestId":"qs-0000000000000003","questIndex":77}),
         );
         assert_serialized(
+            NativeOutboundCommand::ShareQuest { quest_index: 77 },
+            json!({"type":"shareQuest","questIndex":77}),
+        );
+        assert_serialized(
             NativeOutboundCommand::Magic {
                 object_id: 0,
                 spell: "FireBall".into(),
@@ -1545,6 +1565,19 @@ mod tests {
                 "key":"small-hp-drug",
                 "uniqueId":7001,
                 "count":3,
+                "heroInventory":false
+            }),
+        );
+        assert_serialized(
+            NativeOutboundCommand::DeleteItem {
+                unique_id: 7001,
+                count: 2,
+                hero_inventory: false,
+            },
+            json!({
+                "type":"deleteItem",
+                "uniqueId":7001,
+                "count":2,
                 "heroInventory":false
             }),
         );
@@ -1917,7 +1950,7 @@ mod tests {
             "packet":"LoginSuccess",
             "payload":{
                 "characters":[
-                    {"index":0,"name":"Scion","level":1,"class":"Warrior","gender":"Male"},
+                    {"index":0,"name":"Scion","level":1,"class":"Warrior","gender":"Male","lastAccessBinaryDatetime":"-8584918932854775808"},
                     {"index":1,"name":"Ranger","level":2,"class":"Archer","gender":"Female"}
                 ]
             }
@@ -1928,6 +1961,10 @@ mod tests {
                 assert_eq!(login.characters.len(), 2);
                 assert_eq!(login.characters[0].index, Some(0));
                 assert_eq!(login.characters[0].name.as_deref(), Some("Scion"));
+                assert_eq!(
+                    login.characters[0].last_access_binary_datetime,
+                    Some(-8584918932854775808)
+                );
                 assert_eq!(login.characters[1].name.as_deref(), Some("Ranger"));
             }
             other => panic!("expected login success, got: {other:?}"),

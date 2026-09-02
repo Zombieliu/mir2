@@ -153,6 +153,7 @@
     "test:crystal-temporal-pack": "node --test ./scripts/test-crystal-temporal-pack.mjs",
     "test:movement-paired-frame-diff": "node --test ./scripts/test-movement-paired-frame-diff.mjs",
     "test:crystal-native-capture-state": "node ./scripts/test-crystal-native-capture-state.mjs",
+    "test:crystal-account-state": "node --test --test-concurrency=1 ./scripts/test-crystal-account-state.mjs ./scripts/test-crystal-parity-state.mjs",
     "test:native-visual-pair": "node --test ./scripts/test-native-visual-pair.mjs",
     "test:original-visual-pair": "node --test --test-concurrency=1 ./scripts/test-original-visual-pair.mjs",
     "test:original-asset-manifest": "node --test --test-concurrency=1 ./scripts/test-build-crystal-original-asset-manifest.mjs",

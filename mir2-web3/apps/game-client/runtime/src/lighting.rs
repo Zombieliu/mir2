@@ -7,6 +7,7 @@
 
 use bevy::{
     asset::{embedded_asset, embedded_path, AssetPath},
+    color::LinearRgba,
     mesh::MeshVertexBufferLayoutRef,
     prelude::*,
     reflect::TypePath,
@@ -24,6 +25,16 @@ pub(crate) const LIGHT_TEXTURE_COUNT: usize = 10;
 pub(crate) const LIGHT_BUFFER_RENDER_LAYER: usize = 31;
 pub(crate) const MAX_LIGHT_STAGE_DIMENSION: u32 = 4_096;
 pub(crate) const MAX_LIGHT_SOURCE_KEY_BYTES: usize = 128;
+
+// The main world camera presents ordinary Run across two cells and mounted /
+// SwiftFeet Run across three. The light-buffer camera and multiply quad follow
+// that presented camera pose together; this three-cell *virtual* margin is only
+// a defensive guard for first-frame/scheduling drift. It must remain outside
+// the visible stage during normal motion. The shader maps the quad centre 1:1
+// onto the original stage-sized light target and fills only the guard with the
+// exact clear colour, avoiding a 60% larger offscreen pass.
+pub(crate) const LIGHT_BUFFER_GUARD_X_PX: u32 = 3 * 48;
+pub(crate) const LIGHT_BUFFER_GUARD_Y_PX: u32 = 3 * 32;
 
 const LIGHT_PLACEMENT_SIZES: [(f32, f32); LIGHT_TEXTURE_COUNT] = [
     (125.0, 95.0),
@@ -163,6 +174,29 @@ pub(crate) fn validated_stage_size(state: &LightingRenderState) -> Option<UVec2>
         return None;
     }
     Some(UVec2::new(width as u32, height as u32))
+}
+
+pub(crate) fn guarded_light_composite_size(stage_size: UVec2) -> UVec2 {
+    UVec2::new(
+        stage_size
+            .x
+            .saturating_add(LIGHT_BUFFER_GUARD_X_PX.saturating_mul(2))
+            .min(MAX_LIGHT_STAGE_DIMENSION),
+        stage_size
+            .y
+            .saturating_add(LIGHT_BUFFER_GUARD_Y_PX.saturating_mul(2))
+            .min(MAX_LIGHT_STAGE_DIMENSION),
+    )
+}
+
+pub(crate) fn guarded_light_uv_scale_offset(stage_size: UVec2) -> Vec4 {
+    let composite_size = guarded_light_composite_size(stage_size);
+    Vec4::new(
+        composite_size.x as f32 / stage_size.x as f32,
+        composite_size.y as f32 / stage_size.y as f32,
+        -(LIGHT_BUFFER_GUARD_X_PX as f32) / stage_size.x as f32,
+        -(LIGHT_BUFFER_GUARD_Y_PX as f32) / stage_size.y as f32,
+    )
 }
 
 pub(crate) fn effective_light_setting(state: &LightingRenderState) -> Option<CrystalLightSetting> {
@@ -342,6 +376,10 @@ pub(crate) struct CrystalMultiplyMaterial {
     #[texture(0)]
     #[sampler(1)]
     pub(crate) light_buffer: Handle<Image>,
+    #[uniform(2)]
+    pub(crate) uv_scale_offset: Vec4,
+    #[uniform(3)]
+    pub(crate) border_darkness: LinearRgba,
 }
 
 impl Material2d for CrystalMultiplyMaterial {
@@ -507,6 +545,22 @@ mod tests {
     }
 
     #[test]
+    fn virtual_light_guard_covers_run_without_enlarging_the_offscreen_target() {
+        let stage = UVec2::new(1024, 768);
+        let composite = guarded_light_composite_size(stage);
+        let uv = guarded_light_uv_scale_offset(stage);
+
+        assert_eq!(composite, UVec2::new(1312, 960));
+        assert_eq!((composite.x - stage.x) / 2, LIGHT_BUFFER_GUARD_X_PX);
+        assert_eq!((composite.y - stage.y) / 2, LIGHT_BUFFER_GUARD_Y_PX);
+        assert_eq!(uv, Vec4::new(1.28125, 1.25, -0.140625, -0.125));
+        // A three-cell run presents at most 5/6 of its 144x96 displacement in
+        // phase zero after the target-centred map frame commits.
+        assert!(LIGHT_BUFFER_GUARD_X_PX > 120);
+        assert!(LIGHT_BUFFER_GUARD_Y_PX > 80);
+    }
+
+    #[test]
     fn dead_spell_light_is_preserved_like_crystal_object_loop() {
         let mut value = state(4);
         value.entity_lights.push(EntityLightSource {
@@ -574,6 +628,8 @@ mod tests {
     fn multiply_shader_samples_the_completed_light_buffer() {
         let shader = include_str!("crystal_multiply_material.wgsl");
         assert!(shader.contains("textureSample(light_buffer"));
+        assert!(shader.contains("border_darkness"));
+        assert!(shader.contains("uv_scale_offset"));
         assert!(!shader.contains("var output_color = tint"));
     }
 }

@@ -6,6 +6,8 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+use crate::inventory::CrystalItemTooltipSourceModel;
+
 use crate::inventory::InventoryModel;
 
 pub const SHOP_QUANTITY_MIN: u16 = 1;
@@ -60,6 +62,9 @@ pub struct ShopGood {
     /// Uses the same Crystal Items atlas exported for carried items.
     pub icon: u16,
     pub description: String,
+    /// Exact Crystal `MirGoodsCell.Item` inputs for `CreateItemLabel`.
+    /// Missing metadata remains explicit so legacy packets never invent stats.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 impl ShopGood {

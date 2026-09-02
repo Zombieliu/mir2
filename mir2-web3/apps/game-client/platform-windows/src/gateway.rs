@@ -11,16 +11,21 @@
 
 use std::{
     collections::{HashMap, VecDeque},
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use futures_util::{SinkExt, StreamExt};
 use mir2_client_bevy::game_shop::{GameShopReceipt, GameShopRequest};
+use mir2_client_bevy::inventory::{
+    CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel,
+};
 use mir2_client_bevy::native_shell::{CharacterSummary, NativeGatewayEvent as ShellGatewayEvent};
 use mir2_client_bevy::pending_operations::{InventoryOperationAck, QuestOperationAck};
 use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
 use mir2_client_bevy::social::SocialModel;
+use mir2_game_data::{crystal_item_manifest, crystal_real_item_for_player, CrystalItemTemplate};
+use mir2_protocol::MirClass;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio_tungstenite::tungstenite::Message;
@@ -461,7 +466,7 @@ struct NativeLightingPublisher {
 impl NativeLightingPublisher {
     fn for_connection(generation: u64) -> Self {
         let assets = crate::assets::asset_root()
-            .map(|root| NativeLightAssets::from_asset_root(&root))
+            .map(|root: std::path::PathBuf| NativeLightAssets::from_asset_root(root.as_path()))
             .unwrap_or_default();
         let mut bridge = NativeLightingBridge::default();
         bridge.set_generation(generation);
@@ -760,6 +765,7 @@ struct NativeUiPlayerCursor {
     max_mp: Option<i32>,
     gold: Option<u32>,
     credit: Option<u32>,
+    crystal_stats: Option<Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>>,
     level: Option<u32>,
     experience: Option<i64>,
     max_experience: Option<i64>,
@@ -767,6 +773,10 @@ struct NativeUiPlayerCursor {
     max_weight: Option<u16>,
     name: Option<String>,
     class_name: Option<String>,
+    gender: Option<String>,
+    hair: Option<u8>,
+    guild_name: Option<String>,
+    guild_rank_name: Option<String>,
     map_name: Option<String>,
     in_safe_zone: Option<bool>,
 }
@@ -794,6 +804,14 @@ impl NativeUiPlayerCursor {
         }
         if let Some(value) = value_u32(payload.get("credit")) {
             self.credit = Some(value);
+        }
+        if let Some(value) = payload.get("playerCrystalStats") {
+            if let Ok(stats) = serde_json::from_value::<
+                Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>,
+            >(value.clone())
+            {
+                self.crystal_stats = Some(stats);
+            }
         }
         if let Some(value) = value_i64(payload.get("playerExperience")) {
             self.experience = Some(value);
@@ -840,6 +858,26 @@ impl NativeUiPlayerCursor {
             self_player.and_then(|entity| entity.get("class").or_else(|| entity.get("className"))),
         ) {
             self.class_name = Some(value);
+        }
+        if let Some(value) = value_string(
+            self_player.and_then(|entity| entity.get("gender").or_else(|| entity.get("genderKey"))),
+        ) {
+            self.gender = Some(value);
+        }
+        if let Some(value) = value_u32(self_player.and_then(|entity| entity.get("hair")))
+            .and_then(|value| u8::try_from(value).ok())
+        {
+            self.hair = Some(value);
+        }
+        if let Some(value) = value_string(self_player.and_then(|entity| entity.get("guildName"))) {
+            self.guild_name = Some(value);
+        }
+        if let Some(value) = value_string(self_player.and_then(|entity| {
+            entity
+                .get("guildRankName")
+                .or_else(|| entity.get("guildRank"))
+        })) {
+            self.guild_rank_name = Some(value);
         }
     }
 
@@ -898,6 +936,26 @@ impl NativeUiPlayerCursor {
         {
             self.class_name = Some(value);
         }
+        if let Some(value) =
+            value_string(payload.get("gender").or_else(|| payload.get("genderKey")))
+        {
+            self.gender = Some(value);
+        }
+        if let Some(value) =
+            value_u32(payload.get("hair")).and_then(|value| u8::try_from(value).ok())
+        {
+            self.hair = Some(value);
+        }
+        if let Some(value) = value_string(payload.get("guildName")) {
+            self.guild_name = Some(value);
+        }
+        if let Some(value) = value_string(
+            payload
+                .get("guildRankName")
+                .or_else(|| payload.get("guildRank")),
+        ) {
+            self.guild_rank_name = Some(value);
+        }
         if let Some(value) = payload
             .get("inSafeZone")
             .or_else(|| payload.get("in_safe_zone"))
@@ -928,6 +986,7 @@ impl NativeUiPlayerCursor {
                 "maxMp": self.max_mp.unwrap_or_default(),
                 "gold": self.gold.unwrap_or_default(),
                 "credit": self.credit.unwrap_or_default(),
+                "crystalStats": self.crystal_stats.clone(),
                 "level": self.level.unwrap_or_default(),
                 "experience": self.experience.unwrap_or_default(),
                 "maxExperience": self.max_experience.unwrap_or_default(),
@@ -935,10 +994,266 @@ impl NativeUiPlayerCursor {
                 "maxWeight": self.max_weight.unwrap_or_default(),
                 "name": self.name,
                 "className": self.class_name,
+                "gender": self.gender,
+                "hair": self.hair,
+                "guildName": self.guild_name,
+                "guildRankName": self.guild_rank_name,
                 "mapName": self.map_name,
                 "inSafeZone": self.in_safe_zone.unwrap_or(false),
             }
         })
+    }
+}
+
+fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)> {
+    let level = u16::try_from(cursor.level?).ok()?;
+    let class = match cursor
+        .class_name
+        .as_deref()?
+        .trim()
+        .to_ascii_lowercase()
+        .as_str()
+    {
+        "warrior" => MirClass::Warrior,
+        "wizard" => MirClass::Wizard,
+        "taoist" => MirClass::Taoist,
+        "assassin" => MirClass::Assassin,
+        "archer" => MirClass::Archer,
+        _ => return None,
+    };
+    Some((level, class))
+}
+
+/// Crystal's `UserItem` wire carrier has only an item index. Resolve it only
+/// when that index names exactly one row in the extracted Crystal database;
+/// an ambiguous or absent index must stay partial rather than choosing a row.
+fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplate> {
+    let mut matches = crystal_item_manifest()
+        .items
+        .into_iter()
+        .filter(|item| item.item_index == item_index);
+    let item = matches.next()?;
+    if matches.next().is_some() {
+        return None;
+    }
+    Some(item)
+}
+
+fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> {
+    serde_json::from_value(serde_json::to_value(unique_crystal_tooltip_template(item_index)?).ok()?)
+        .ok()
+}
+
+fn crystal_wire_item_info(value: &Value) -> Option<CrystalItemInfoModel> {
+    let mut object = value.as_object()?.clone();
+    if !object.contains_key("item_index") {
+        object.insert(
+            "item_index".to_owned(),
+            object.get("index").cloned().unwrap_or(Value::Null),
+        );
+    }
+    serde_json::from_value(Value::Object(object)).ok()
+}
+
+fn crystal_real_tooltip_info(
+    info: &CrystalItemInfoModel,
+    viewer: Option<(u16, MirClass)>,
+) -> Option<CrystalItemInfoModel> {
+    let (level, class) = viewer?;
+    if !info.class_based && !info.level_based {
+        return Some(info.clone());
+    }
+    let origin = unique_crystal_tooltip_template(info.item_index)?;
+    let origin_model =
+        serde_json::from_value::<CrystalItemInfoModel>(serde_json::to_value(&origin).ok()?).ok()?;
+    if origin_model != *info {
+        return None;
+    }
+    serde_json::from_value(
+        serde_json::to_value(crystal_real_item_for_player(&origin, level, class)).ok()?,
+    )
+    .ok()
+}
+
+fn crystal_tooltip_source_for_user_item(
+    value: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<CrystalItemTooltipSourceModel> {
+    let user_item = serde_json::from_value::<CrystalUserItemModel>(value.clone()).ok()?;
+    let info = unique_crystal_tooltip_info(user_item.item_index)?;
+    let viewer = crystal_tooltip_viewer(cursor);
+    let socket_infos = user_item
+        .slots
+        .iter()
+        .map(|slot| {
+            slot.as_ref()
+                .and_then(|socket| unique_crystal_tooltip_info(socket.item_index))
+        })
+        .collect::<Vec<_>>();
+    let real_socket_infos = if viewer.is_some() {
+        socket_infos
+            .iter()
+            .map(|socket| {
+                socket
+                    .as_ref()
+                    .and_then(|socket| crystal_real_tooltip_info(socket, viewer))
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+    Some(CrystalItemTooltipSourceModel {
+        real_info: crystal_real_tooltip_info(&info, viewer),
+        info,
+        user_item: Some(user_item),
+        socket_infos,
+        real_socket_infos,
+    })
+}
+
+/// Mirrors `new UserItem(info)` at the two Crystal catalogue-only surfaces.
+/// GameShop supplies a count; QuestCell leaves the constructor's zero count
+/// alone and paints the reward quantity as a separate cell label.
+fn crystal_tooltip_source_for_preview(
+    info: CrystalItemInfoModel,
+    count: u16,
+    cursor: &NativeUiPlayerCursor,
+) -> CrystalItemTooltipSourceModel {
+    let user_item = CrystalUserItemModel {
+        item_index: info.item_index,
+        current_dura: info.durability,
+        max_dura: info.durability,
+        count,
+        identified: false,
+        slots: vec![None; usize::from(info.slots)],
+        ..Default::default()
+    };
+    let viewer = crystal_tooltip_viewer(cursor);
+    CrystalItemTooltipSourceModel {
+        real_info: crystal_real_tooltip_info(&info, viewer),
+        info,
+        user_item: Some(user_item),
+        socket_infos: Vec::new(),
+        real_socket_infos: Vec::new(),
+    }
+}
+
+fn add_quest_reward_tooltip_sources(payload: &mut Value, cursor: &NativeUiPlayerCursor) {
+    let Some(payload_object) = payload.as_object_mut() else {
+        return;
+    };
+    let raw_info = payload_object.get("info").cloned();
+    let Some(rewards) = payload_object
+        .get_mut("rewards")
+        .and_then(Value::as_object_mut)
+    else {
+        return;
+    };
+    for (rendered_key, raw_key) in [
+        ("items", "rewards_fixed_item"),
+        ("selectItems", "rewards_select_item"),
+    ] {
+        let raw_items = raw_info
+            .as_ref()
+            .and_then(|info| info.get(raw_key))
+            .and_then(Value::as_array);
+        let Some(rendered_items) = rewards.get_mut(rendered_key).and_then(Value::as_array_mut)
+        else {
+            continue;
+        };
+        for (index, rendered) in rendered_items.iter_mut().enumerate() {
+            let info = raw_items
+                .and_then(|items| items.get(index))
+                .and_then(|reward| reward.get("item"))
+                .and_then(crystal_wire_item_info)
+                .or_else(|| {
+                    value_i32(rendered.get("itemIndex")).and_then(unique_crystal_tooltip_info)
+                });
+            let (Some(info), Some(object)) = (info, rendered.as_object_mut()) else {
+                continue;
+            };
+            object.insert(
+                "tooltipSource".to_owned(),
+                json!(crystal_tooltip_source_for_preview(info, 0, cursor)),
+            );
+        }
+    }
+}
+
+fn enrich_guild_storage_item(value: &mut Value, cursor: &NativeUiPlayerCursor) {
+    let Some(item) = value.get("item").cloned() else {
+        return;
+    };
+    let Some(source) = crystal_tooltip_source_for_user_item(&item, cursor) else {
+        return;
+    };
+    if let Some(object) = value.as_object_mut() {
+        object.insert("tooltipSource".to_owned(), json!(source));
+    }
+}
+
+fn add_social_item_tooltip_sources(
+    packet: &str,
+    payload: &mut Value,
+    cursor: &NativeUiPlayerCursor,
+) {
+    match packet {
+        "GuildStorageList" => {
+            if let Some(items) = payload.get_mut("items").and_then(Value::as_array_mut) {
+                for item in items.iter_mut().filter(|item| !item.is_null()) {
+                    enrich_guild_storage_item(item, cursor);
+                }
+            }
+        }
+        "GuildStorageItemChange" => {
+            if let Some(item) = payload.get_mut("item").filter(|item| !item.is_null()) {
+                enrich_guild_storage_item(item, cursor);
+            }
+        }
+        "TradeItem" => {
+            let source_items = payload.get("tradeItems").and_then(Value::as_array).cloned();
+            let Some(source_items) = source_items else {
+                return;
+            };
+            let partner_items = source_items
+                .into_iter()
+                .filter(|item| !item.is_null())
+                .map(|item| {
+                    let mut entry = item.as_object().cloned().unwrap_or_default();
+                    let item_index = value_i32(item.get("item_index"));
+                    if let Some(item_index) = item_index {
+                        entry.insert("itemIndex".to_owned(), json!(item_index));
+                        let name = unique_crystal_tooltip_info(item_index)
+                            .map(|info| info.name)
+                            .unwrap_or_else(|| format!("Item #{item_index}"));
+                        entry.insert("name".to_owned(), json!(name));
+                    }
+                    if let Some(unique_id) = value_u64(item.get("unique_id")) {
+                        entry.insert("uniqueId".to_owned(), json!(unique_id));
+                    }
+                    if let Some(source) = crystal_tooltip_source_for_user_item(&item, cursor) {
+                        entry.insert("tooltipSource".to_owned(), json!(source));
+                    }
+                    Value::Object(entry)
+                })
+                .collect();
+            if let Some(object) = payload.as_object_mut() {
+                object.insert("partnerItems".to_owned(), Value::Array(partner_items));
+            }
+        }
+        _ => {}
+    }
+}
+
+fn add_packet_item_tooltip_sources(packet: &mut PacketEvent, cursor: &NativeUiPlayerCursor) {
+    match packet {
+        PacketEvent::NewQuestInfo(info) => {
+            add_quest_reward_tooltip_sources(&mut info.payload, cursor)
+        }
+        PacketEvent::Other { packet, payload } => {
+            add_social_item_tooltip_sources(packet, payload, cursor)
+        }
+        _ => {}
     }
 }
 
@@ -2671,7 +2986,10 @@ fn handle_gateway_text_for_connection<F>(
 where
     F: FnMut(String) -> bool,
 {
-    let parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    let mut parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let InboundEvent::Packet(packet) = &mut parsed {
+        add_packet_item_tooltip_sources(packet, ui_cursor);
+    }
     match parsed {
         InboundEvent::ResumeCredential(event) => {
             record_resume_credential_if_allowed(
@@ -3040,7 +3358,7 @@ where
                 let _ = mir2_bevy_runtime::native_ingest::push_native_storage_model(storage_json);
             }
             if payload_has_valid_shop_array(&payload) {
-                let shop = transform_shop_model_from_snapshot(&payload);
+                let shop = transform_shop_model_from_snapshot(&payload, ui_cursor);
                 let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
                 let _ = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
             }
@@ -3109,7 +3427,8 @@ where
                 }
                 "NPCGoods" => {
                     if let Some(payload) = event.payload.as_ref() {
-                        if let Some(shop) = try_transform_shop_model_from_packet(payload) {
+                        if let Some(shop) = try_transform_shop_model_from_packet(payload, ui_cursor)
+                        {
                             let shop_json =
                                 serde_json::to_string(&shop).map_err(|error| error.to_string())?;
                             let _ =
@@ -3151,7 +3470,8 @@ where
                 }
                 "GameShopInfo" => {
                     if let Some(payload) = event.payload.as_ref() {
-                        if let Some(item) = transform_game_shop_info_from_packet(payload) {
+                        if let Some(item) = transform_game_shop_info_from_packet(payload, ui_cursor)
+                        {
                             let json = serde_json::to_string(&item).map_err(|e| e.to_string())?;
                             let _ =
                                 mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
@@ -3271,6 +3591,7 @@ where
                         &payload,
                         gameplay_adapter,
                         gameplay_events,
+                        ui_cursor,
                         pending_mail_feedback,
                         match &parsed {
                             InboundEvent::Packet(packet) => Some(packet),
@@ -3458,6 +3779,7 @@ fn forward_packet_first_world(
     payload: &Value,
     gameplay_adapter: &NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
+    ui_cursor: &mut NativeUiPlayerCursor,
     pending_mail_feedback: &mut VecDeque<PendingMailOperationFeedback>,
     source_packet: Option<&PacketEvent>,
 ) -> Result<(), String> {
@@ -3471,7 +3793,11 @@ fn forward_packet_first_world(
         serde_json::to_string(&runtime_snapshot).map_err(|error| error.to_string())?;
     let _ = mir2_bevy_runtime::native_ingest::push_native_world_state(runtime_json);
 
-    let ui_model = transform_ui_read_model(payload);
+    // Movement/map packet refreshes clone a partial retained world snapshot.
+    // Merge it into the packet-first cursor so UserInformation-only appearance
+    // (hair, guild and gender) cannot disappear on the next walk/turn packet.
+    ui_cursor.observe_world_snapshot(payload);
+    let ui_model = ui_cursor.to_read_model_json();
     let ui_json = serde_json::to_string(&ui_model).map_err(|error| error.to_string())?;
     let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
 
@@ -3503,7 +3829,7 @@ fn forward_packet_first_world(
         let _ = mir2_bevy_runtime::native_ingest::push_native_storage_model(storage_json);
     }
     if payload_has_valid_shop_array(payload) {
-        let shop = transform_shop_model_from_snapshot(payload);
+        let shop = transform_shop_model_from_snapshot(payload, ui_cursor);
         let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
         let _ = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
     }
@@ -3615,12 +3941,13 @@ fn dispatch_shell_event(
                 .filter_map(|character| {
                     let index = i32::try_from(character.index?).ok()?;
                     let level = u16::try_from(character.level.unwrap_or(1)).unwrap_or(1);
-                    Some(CharacterSummary::new(
+                    Some(CharacterSummary::new_with_last_access(
                         index,
                         character.name.as_deref().unwrap_or("Unnamed"),
                         level,
                         character.class.as_deref().unwrap_or("Unknown"),
                         character.gender.as_deref().unwrap_or("Unknown"),
+                        character.last_access_binary_datetime.unwrap_or_default(),
                     ))
                 })
                 .collect();
@@ -3773,7 +4100,7 @@ fn character_summary_from_value(value: &Value) -> Option<CharacterSummary> {
         .and_then(Value::as_u64)
         .and_then(|level| u16::try_from(level).ok())
         .unwrap_or(1);
-    Some(CharacterSummary::new(
+    Some(CharacterSummary::new_with_last_access(
         index,
         value
             .get("name")
@@ -3788,6 +4115,12 @@ fn character_summary_from_value(value: &Value) -> Option<CharacterSummary> {
             .get("gender")
             .and_then(Value::as_str)
             .unwrap_or("Unknown"),
+        value_i64(
+            value
+                .get("lastAccessBinaryDatetime")
+                .or_else(|| value.get("last_access_binary_datetime")),
+        )
+        .unwrap_or_default(),
     ))
 }
 
@@ -3863,6 +4196,7 @@ fn transform_world_snapshot(payload: &Value) -> Value {
             "maxMp": value_i32_or(payload.get("playerMaxMp"), 0),
             "gold": value_u32_or(payload.get("gold"), 0),
             "credit": value_u32_or(payload.get("credit"), 0),
+            "crystalStats": payload.get("playerCrystalStats").cloned().unwrap_or(Value::Null),
             "level": value_u32_or(self_player.and_then(|entity| entity.get("level")), 0),
             "experience": value_i64_or(payload.get("playerExperience"), 0),
             "maxExperience": value_i64_or(payload.get("playerMaxExperience"), 0),
@@ -3873,6 +4207,19 @@ fn transform_world_snapshot(payload: &Value) -> Value {
                 self_player
                     .and_then(|entity| entity.get("class"))
                     .or_else(|| self_player.and_then(|entity| entity.get("className"))),
+            ),
+            "gender": value_string(
+                self_player
+                    .and_then(|entity| entity.get("gender"))
+                    .or_else(|| self_player.and_then(|entity| entity.get("genderKey"))),
+            ),
+            "hair": value_u32(self_player.and_then(|entity| entity.get("hair")))
+                .and_then(|value| u8::try_from(value).ok()),
+            "guildName": value_string(self_player.and_then(|entity| entity.get("guildName"))),
+            "guildRankName": value_string(
+                self_player
+                    .and_then(|entity| entity.get("guildRankName"))
+                    .or_else(|| self_player.and_then(|entity| entity.get("guildRank"))),
             ),
             "mapName": value_string(payload.get("mapTitle")),
         },
@@ -3993,6 +4340,16 @@ fn transform_inventory_operation_ack(
     packet: &str,
     payload: &Value,
 ) -> Option<InventoryOperationAck> {
+    if packet == "DeleteItem" {
+        // Crystal's S.DeleteItem receipt carries the exact instance/count but
+        // no Success field. Receiving the packet itself is the authoritative
+        // success acknowledgement.
+        return Some(InventoryOperationAck::Delete {
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
+            success: true,
+        });
+    }
     let success = payload.get("success")?.as_bool()?;
     match packet {
         "DropItem" => Some(InventoryOperationAck::Drop {
@@ -4029,7 +4386,10 @@ fn transform_inventory_operation_ack(
     }
 }
 
-fn transform_game_shop_info_from_packet(payload: &Value) -> Option<Value> {
+fn transform_game_shop_info_from_packet(
+    payload: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<Value> {
     let item = payload
         .get("item")
         .filter(|value| value.is_object())
@@ -4044,6 +4404,12 @@ fn transform_game_shop_info_from_packet(payload: &Value) -> Option<Value> {
             .or_else(|| item.get("stock_level")),
     )
     .unwrap_or_else(|| value_i32(item.get("stock")).unwrap_or(0));
+    let tooltip_source = info.and_then(crystal_wire_item_info).map(|info| {
+        let count = value_u32(item.get("count"))
+            .and_then(|value| u16::try_from(value).ok())
+            .unwrap_or(1);
+        crystal_tooltip_source_for_preview(info, count, cursor)
+    });
     Some(json!({
         "itemIndex": value_i32(item.get("itemIndex").or_else(|| item.get("item_index")))
             .or_else(|| value_i32(info.and_then(|value| value.get("index"))))
@@ -4070,6 +4436,7 @@ fn transform_game_shop_info_from_packet(payload: &Value) -> Option<Value> {
         "dateBinaryDatetime": value_i64(item.get("dateBinaryDatetime").or_else(|| item.get("date_binary_datetime"))).unwrap_or_default(),
         "canBuyCredit": item.get("canBuyCredit").or_else(|| item.get("can_buy_credit")).and_then(Value::as_bool).unwrap_or(false),
         "canBuyGold": item.get("canBuyGold").or_else(|| item.get("can_buy_gold")).and_then(Value::as_bool).unwrap_or(false),
+        "tooltipSource": tooltip_source,
     }))
 }
 
@@ -4138,14 +4505,14 @@ fn push_native_npc_shop_service(
     Ok(())
 }
 
-fn transform_shop_model_from_packet(payload: &Value) -> Value {
+fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
     let goods: Vec<Value> = payload
         .get("list")
         .and_then(Value::as_array)
         .map(|list| {
             list.iter()
                 .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot))
+                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
                 .collect()
         })
         .unwrap_or_default();
@@ -4157,7 +4524,7 @@ fn transform_shop_model_from_packet(payload: &Value) -> Value {
     })
 }
 
-fn transform_shop_model_from_snapshot(payload: &Value) -> Value {
+fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
     let list = ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
         .iter()
         .find_map(|key| payload.get(*key))
@@ -4166,7 +4533,7 @@ fn transform_shop_model_from_snapshot(payload: &Value) -> Value {
         .map(|list| {
             list.iter()
                 .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot))
+                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
                 .collect()
         })
         .unwrap_or_default();
@@ -4178,7 +4545,7 @@ fn transform_shop_model_from_snapshot(payload: &Value) -> Value {
     })
 }
 
-fn shop_good_json(item: &Value, fallback: usize) -> Option<Value> {
+fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value> {
     let id = value_u64(
         item.get("uniqueId")
             .or_else(|| item.get("unique_id"))
@@ -4186,6 +4553,10 @@ fn shop_good_json(item: &Value, fallback: usize) -> Option<Value> {
             .or_else(|| item.get("itemIndex"))
             .or_else(|| item.get("item_index")),
     )?;
+    let tooltip_source = item
+        .get("tooltipSource")
+        .cloned()
+        .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
     Some(json!({
         "unique_id": id,
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
@@ -4197,19 +4568,23 @@ fn shop_good_json(item: &Value, fallback: usize) -> Option<Value> {
             .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
         "icon": value_u32(item.get("icon")).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
         "description": value_string(item.get("description")).unwrap_or_default(),
+        "tooltip_source": tooltip_source,
     }))
 }
 
-fn try_transform_shop_model_from_packet(payload: &Value) -> Option<Value> {
+fn try_transform_shop_model_from_packet(
+    payload: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<Value> {
     let list = payload.get("list")?.as_array()?;
     if list
         .iter()
         .enumerate()
-        .any(|(slot, item)| shop_good_json(item, slot).is_none())
+        .any(|(slot, item)| shop_good_json(item, slot, cursor).is_none())
     {
         return None;
     }
-    Some(transform_shop_model_from_packet(payload))
+    Some(transform_shop_model_from_packet(payload, cursor))
 }
 
 fn payload_has_valid_shop_array(payload: &Value) -> bool {
@@ -4692,10 +5067,105 @@ fn transform_chat_line(packet: &str, payload: &Value) -> Option<mir2_client_bevy
     Some(mir2_client_bevy::chat::ChatLine { text, channel })
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct StateItemFrameGeometry {
+    index: u16,
+    width: u16,
+    height: u16,
+    x: i32,
+    y: i32,
+}
+
+#[derive(Debug, Deserialize)]
+struct StateItemLibraryMetadata {
+    frames: Vec<StateItemFrameGeometry>,
+}
+
+static STATE_ITEM_FRAME_GEOMETRY: OnceLock<HashMap<u16, StateItemFrameGeometry>> = OnceLock::new();
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ItemFrameGeometry {
+    index: u16,
+    width: u16,
+    height: u16,
+}
+
+#[derive(Debug, Deserialize)]
+struct ItemLibraryMetadata {
+    frames: Vec<ItemFrameGeometry>,
+}
+
+static ITEM_FRAME_GEOMETRY: OnceLock<HashMap<u16, ItemFrameGeometry>> = OnceLock::new();
+
+/// Resolve Crystal's `useOffset=true` StateItem draw rectangle from the exact
+/// exported library metadata. The snapshot carries the authoritative image
+/// index; this lookup supplies only source geometry and never guesses an item.
+fn state_item_frame_geometry(index: u16) -> Option<StateItemFrameGeometry> {
+    STATE_ITEM_FRAME_GEOMETRY
+        .get_or_init(|| {
+            let Some(path) = crate::assets::asset_path("/original-ui/StateItem/meta.json") else {
+                eprintln!("[gateway-client] StateItem metadata is unavailable");
+                return HashMap::new();
+            };
+            let metadata = std::fs::read_to_string(&path)
+                .ok()
+                .and_then(|text| serde_json::from_str::<StateItemLibraryMetadata>(&text).ok());
+            let Some(metadata) = metadata else {
+                eprintln!(
+                    "[gateway-client] invalid StateItem metadata at {}",
+                    path.display()
+                );
+                return HashMap::new();
+            };
+            metadata
+                .frames
+                .into_iter()
+                .filter(|frame| frame.width > 0 && frame.height > 0)
+                .map(|frame| (frame.index, frame))
+                .collect()
+        })
+        .get(&index)
+        .copied()
+}
+
+/// Crystal bag cells use `Items.GetTrueSize(image)` and center the returned
+/// size. `MirItemCell.UseOffSet` is false, so the library x/y offsets are not
+/// part of this draw path.
+fn item_frame_geometry(index: u16) -> Option<ItemFrameGeometry> {
+    ITEM_FRAME_GEOMETRY
+        .get_or_init(|| {
+            let Some(path) = crate::assets::asset_path("/original-ui/Items/meta.json") else {
+                eprintln!("[gateway-client] Items metadata is unavailable");
+                return HashMap::new();
+            };
+            let metadata = std::fs::read_to_string(&path)
+                .ok()
+                .and_then(|text| serde_json::from_str::<ItemLibraryMetadata>(&text).ok());
+            let Some(metadata) = metadata else {
+                eprintln!(
+                    "[gateway-client] invalid Items metadata at {}",
+                    path.display()
+                );
+                return HashMap::new();
+            };
+            metadata
+                .frames
+                .into_iter()
+                .filter(|frame| frame.width > 0 && frame.height > 0)
+                .map(|frame| (frame.index, frame))
+                .collect()
+        })
+        .get(&index)
+        .copied()
+}
+
 /// Transform a gateway `worldSnapshot` payload into the shared
 /// `mir2-client-bevy::inventory::InventoryModel` JSON shape.
 ///
-/// Container mapping: inventory items → 0 (bag), belt items → 1, equipment → 2.
+/// Container mapping: Bag1/Bag2 → 0 (one logical 0..79 bag grid), belt → 1,
+/// equipment → 2, quest inventory → 3 (read-only Crystal third tab).
 fn transform_inventory_model(payload: &Value) -> Value {
     let gold = value_u32_or(payload.get("gold"), 0);
     // Only an explicit Crystal-array length can unlock page two. Occupied
@@ -4706,7 +5176,7 @@ fn transform_inventory_model(payload: &Value) -> Value {
         .map(mir2_client_bevy::inventory::InventoryModel::canonical_capacity)
         .unwrap_or(mir2_client_bevy::inventory::CRYSTAL_BASE_INVENTORY_CAPACITY);
 
-    let map_items = |items: Option<&Value>, container: u8| -> Vec<Value> {
+    let map_items = |items: Option<&Value>, default_container: u8| -> Vec<Value> {
         items
             .and_then(Value::as_array)
             .map(|list| {
@@ -4723,12 +5193,25 @@ fn transform_inventory_model(payload: &Value) -> Value {
                             .or_else(|| value_string(item.get("item_index")))
                             .or_else(|| unique_id.map(|id| id.to_string()))
                             .unwrap_or_else(|| index.to_string());
+                        let local_slot = normalized_slot(item.get("slot"), fallback_slot);
+                        let source_container = value_string(item.get("container"))
+                            .unwrap_or_default()
+                            .to_ascii_lowercase();
+                        let (container, slot) = if default_container == 0 {
+                            match source_container.as_str() {
+                                "bag2" => (0, 40u32.saturating_add(local_slot)),
+                                "quest" => (3, local_slot),
+                                _ => (0, local_slot),
+                            }
+                        } else {
+                            (default_container, local_slot)
+                        };
                         let mut mapped = json!({
                             "uniqueId": unique_id,
                             "key": key,
                             "name": value_string(item.get("name")).unwrap_or_default(),
                             "quantity": value_u32(item.get("quantity").or_else(|| item.get("count"))).unwrap_or(1),
-                            "slot": normalized_slot(item.get("slot"), fallback_slot),
+                            "slot": slot,
                             "container": container,
                         });
                         extend_item_metadata(&mut mapped, item);
@@ -4754,6 +5237,7 @@ fn transform_inventory_model(payload: &Value) -> Value {
 fn extend_item_metadata(mapped: &mut Value, item: &Value) {
     let metadata = [
         ("icon", &["icon"][..]),
+        ("stateImage", &["stateImage", "state_image"][..]),
         ("description", &["description"][..]),
         (
             "durabilityCurrent",
@@ -4786,6 +5270,7 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
         ("addedLuck", &["addedLuck", "added_luck"][..]),
         ("shape", &["shape"][..]),
         ("socketSlots", &["socketSlots", "socket_slots"][..]),
+        ("tooltipSource", &["tooltipSource", "tooltip_source"][..]),
     ];
     let Some(target) = mapped.as_object_mut() else {
         return;
@@ -4794,6 +5279,22 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
         if let Some(value) = candidates.iter().find_map(|name| item.get(*name)).cloned() {
             target.insert(target_name.to_owned(), value);
         }
+    }
+    let icon = value_u32(target.get("icon"))
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| *value != 0);
+    if let Some(frame) = icon.and_then(item_frame_geometry) {
+        target.insert("iconWidth".to_owned(), json!(frame.width));
+        target.insert("iconHeight".to_owned(), json!(frame.height));
+    }
+    let state_image = value_u32(target.get("stateImage"))
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| *value != 0);
+    if let Some(frame) = state_image.and_then(state_item_frame_geometry) {
+        target.insert("stateImageX".to_owned(), json!(frame.x));
+        target.insert("stateImageY".to_owned(), json!(frame.y));
+        target.insert("stateImageWidth".to_owned(), json!(frame.width));
+        target.insert("stateImageHeight".to_owned(), json!(frame.height));
     }
 }
 
@@ -4869,6 +5370,7 @@ fn transform_ui_read_model(payload: &Value) -> Value {
             "maxMp": value_i32_or(payload.get("playerMaxMp"), 0),
             "gold": value_u32_or(payload.get("gold"), 0),
             "credit": value_u32_or(payload.get("credit"), 0),
+            "crystalStats": payload.get("playerCrystalStats").cloned().unwrap_or(Value::Null),
             "level": value_u32_or(self_player.and_then(|entity| entity.get("level")), 0),
             "experience": value_i64_or(payload.get("playerExperience"), 0),
             "maxExperience": value_i64_or(payload.get("playerMaxExperience"), 0),
@@ -4976,6 +5478,7 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
             "maxMp": value_i32(payload.get("maxMp").or_else(|| payload.get("playerMaxMp"))).unwrap_or_default(),
             "gold": value_u32(payload.get("gold")).unwrap_or_default(),
             "credit": value_u32(payload.get("credit")).unwrap_or_default(),
+            "crystalStats": Value::Null,
             "level": value_u32(payload.get("level")).unwrap_or_default(),
             "experience": value_i64(payload.get("experience").or_else(|| payload.get("playerExperience"))).unwrap_or_default(),
             "maxExperience": value_i64(payload.get("maxExperience").or_else(|| payload.get("playerMaxExperience"))).unwrap_or_default(),
@@ -5122,20 +5625,26 @@ mod tests {
 
     #[test]
     fn recovered_npc_goods_populates_only_the_independent_npc_shop_model() {
-        let model = try_transform_shop_model_from_packet(&json!({
-            "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20 }],
-            "rate": 1.0,
-            "panelType": 0,
-        }))
+        let model = try_transform_shop_model_from_packet(
+            &json!({
+                "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20 }],
+                "rate": 1.0,
+                "panelType": 0,
+            }),
+            &NativeUiPlayerCursor::default(),
+        )
         .expect("complete NPCGoods payload");
         let shop = serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(model)
             .expect("ShopModel-compatible NPC catalog");
         assert_eq!(shop.goods.len(), 1);
         assert_eq!(shop.goods[0].unique_id, 9);
         assert_eq!(shop.goods[0].price, 50);
-        assert!(try_transform_shop_model_from_packet(&json!({
-            "list": [{ "name": "missing identity" }]
-        }))
+        assert!(try_transform_shop_model_from_packet(
+            &json!({
+                "list": [{ "name": "missing identity" }]
+            }),
+            &NativeUiPlayerCursor::default()
+        )
         .is_none());
     }
 
@@ -6550,6 +7059,10 @@ mod tests {
             "playerMaxHp": 100,
             "playerMp": 25,
             "playerMaxMp": 50,
+            "playerCrystalStats": [
+                { "stat": 4, "value": 2 },
+                { "stat": 5, "value": 7 }
+            ],
             "playerExperience": 435,
             "playerMaxExperience": 900,
             "currentWeight": 1,
@@ -6634,6 +7147,13 @@ mod tests {
         assert_eq!(stats["maxMp"], json!(50));
         assert_eq!(stats["gold"], json!(1234));
         assert_eq!(stats["credit"], json!(45));
+        assert_eq!(
+            stats["crystalStats"],
+            json!([
+                { "stat": 4, "value": 2 },
+                { "stat": 5, "value": 7 }
+            ])
+        );
         assert_eq!(stats["level"], json!(3));
         assert_eq!(stats["name"], json!("Demo"));
         assert_eq!(stats["mapName"], json!("BichonProvince"));
@@ -6646,6 +7166,13 @@ mod tests {
         assert_eq!(ui["player"]["maxHp"], json!(100));
         assert_eq!(ui["player"]["gold"], json!(1234));
         assert_eq!(ui["player"]["credit"], json!(45));
+        assert_eq!(
+            ui["player"]["crystalStats"],
+            json!([
+                { "stat": 4, "value": 2 },
+                { "stat": 5, "value": 7 }
+            ])
+        );
         assert_eq!(ui["player"]["experience"], json!(435));
         assert_eq!(ui["player"]["maxExperience"], json!(900));
         assert_eq!(ui["player"]["currentWeight"], json!(1));
@@ -6661,6 +7188,7 @@ mod tests {
         assert_eq!(model.player.max_hp, 100);
         assert_eq!(model.player.gold, 1234);
         assert_eq!(model.player.credit, 45);
+        assert_eq!(model.player.crystal_stats.as_ref().unwrap().len(), 2);
         assert_eq!(model.player.experience, 435);
         assert_eq!(model.player.max_experience, 900);
         assert_eq!(model.player.current_weight, 1);
@@ -6713,6 +7241,10 @@ mod tests {
         cursor.observe_user_information(&json!({
             "name": "Alice",
             "class": "Wizard",
+            "gender": "Female",
+            "hair": 7,
+            "guildName": "Test Guild",
+            "guildRank": "Officer",
             "level": 7,
             "hp": 80,
             "maxHp": 100,
@@ -6726,6 +7258,11 @@ mod tests {
             "maxWeight": 50,
             "mapTitle": "BichonProvince",
             "inSafeZone": true
+        }));
+
+        cursor.observe_world_snapshot(&json!({
+            "playerCrystalStats": [{ "stat": 5, "value": 11 }],
+            "entities": []
         }));
 
         cursor.observe_world_snapshot(&json!({
@@ -6743,9 +7280,14 @@ mod tests {
         .expect("cursor read model");
         assert_eq!(model.player.name.as_deref(), Some("Alice"));
         assert_eq!(model.player.class_name.as_deref(), Some("Wizard"));
+        assert_eq!(model.player.gender.as_deref(), Some("Female"));
+        assert_eq!(model.player.hair, Some(7));
+        assert_eq!(model.player.guild_name.as_deref(), Some("Test Guild"));
+        assert_eq!(model.player.guild_rank_name.as_deref(), Some("Officer"));
         assert_eq!(model.player.level, 7);
         assert_eq!((model.player.hp, model.player.max_hp), (80, 100));
         assert_eq!((model.player.mp, model.player.max_mp), (20, 40));
+        assert_eq!(model.player.crystal_stats.as_ref().unwrap()[0].value, 11);
         assert_eq!(model.player.map_name.as_deref(), Some("BichonProvince"));
         assert!(model.player.in_safe_zone);
     }
@@ -6769,7 +7311,11 @@ mod tests {
                 "kind": "player",
                 "name": "Alice Renamed",
                 "level": 8,
-                "className": "Wizard"
+                "className": "Wizard",
+                "gender": "Male",
+                "hair": 2,
+                "guildName": "New Guild",
+                "guildRankName": "Leader"
             }]
         }));
         cursor.observe_map_identity(&json!({
@@ -6787,6 +7333,10 @@ mod tests {
         );
         assert_eq!(model.player.name.as_deref(), Some("Alice Renamed"));
         assert_eq!(model.player.level, 8);
+        assert_eq!(model.player.gender.as_deref(), Some("Male"));
+        assert_eq!(model.player.hair, Some(2));
+        assert_eq!(model.player.guild_name.as_deref(), Some("New Guild"));
+        assert_eq!(model.player.guild_rank_name.as_deref(), Some("Leader"));
         assert_eq!(model.player.map_name.as_deref(), Some("BorderVillage"));
         assert!(!model.player.in_safe_zone);
 
@@ -6855,46 +7405,87 @@ mod tests {
         let mut payload = gateway_payload();
         payload["inventoryItems"] = json!([
             { "key": "small-hp-drug", "uniqueId": 42, "name": "Red Potion", "quantity": 5, "slot": 0,
+              "container": "bag1",
               "icon": 7, "description": "Restores HP", "durabilityCurrent": 4, "durabilityMax": 5,
               "sellValue": 12, "equipSlot": "Weapon", "grade": "Rare", "attack": 3, "defence": 2,
-              "addedAttack": 1, "addedDefence": 4, "addedLuck": 2, "shape": 9, "socketSlots": 3 }
+              "addedAttack": 1, "addedDefence": 4, "addedLuck": 2, "shape": 9, "socketSlots": 3,
+              "tooltipSource": {
+                "info": { "item_index": 658, "name": "Red Potion", "item_type": 13,
+                  "grade": 0, "stack_size": 20, "stats": [{ "stat": 12, "value": 15 }] },
+                "realInfo": { "item_index": 659, "name": "Red Potion[Warrior]", "item_type": 13,
+                  "grade": 0, "stack_size": 20, "stats": [{ "stat": 12, "value": 19 }] },
+                "userItem": { "unique_id": 42, "item_index": 658, "current_dura": 4,
+                  "max_dura": 5, "count": 5, "slots": [],
+                  "added_stats": [{ "stat": 12, "value": 2 }] },
+                "socketInfos": [],
+                "realSocketInfos": []
+              } },
+            { "key": "bag2-item", "uniqueId": 45, "name": "Bag2 Item", "quantity": 1, "slot": 7,
+              "container": "bag2" },
+            { "key": "quest-leaf", "uniqueId": 46, "name": "Cannibal Leaves", "quantity": 5, "slot": 0,
+              "container": "quest" }
         ]);
+        payload["inventoryCapacity"] = json!(54);
         payload["beltItems"] = json!([
             { "key": "blue-potion", "uniqueId": 43, "name": "Blue Potion", "quantity": 2, "slot": 0 }
         ]);
         payload["equipmentItems"] = json!([
-            { "key": "wooden-sword", "uniqueId": 44, "name": "Wooden Sword", "quantity": 1, "slot": 3 }
+            { "key": "wooden-sword", "uniqueId": 44, "name": "Wooden Sword", "quantity": 1, "slot": 3,
+              "stateImage": 30 }
         ]);
 
         let inventory = transform_inventory_model(&payload);
-        assert_eq!(inventory["capacity"], json!(46));
+        assert_eq!(inventory["capacity"], json!(54));
         assert_eq!(inventory["gold"], json!(1234));
         let items = inventory["items"].as_array().expect("items");
-        assert_eq!(items.len(), 3);
+        assert_eq!(items.len(), 5);
         assert_eq!(items[0]["container"], json!(0));
         assert_eq!(items[0]["key"], json!("small-hp-drug"));
         assert_eq!(items[0]["uniqueId"], json!(42));
-        assert_eq!(items[1]["container"], json!(1));
-        assert_eq!(items[2]["container"], json!(2));
-        assert_eq!(items[2]["name"], json!("Wooden Sword"));
+        assert_eq!(items[1]["container"], json!(0));
+        assert_eq!(items[1]["slot"], json!(47));
+        assert_eq!(items[2]["container"], json!(3));
+        assert_eq!(items[2]["slot"], json!(0));
+        assert_eq!(items[3]["container"], json!(1));
+        assert_eq!(items[4]["container"], json!(2));
+        assert_eq!(items[4]["name"], json!("Wooden Sword"));
 
         let model = serde_json::from_str::<mir2_client_bevy::inventory::InventoryModel>(
             &serde_json::to_string(&inventory).expect("serialize"),
         )
         .expect("InventoryModel");
         assert_eq!(model.gold, 1234);
-        assert_eq!(model.items.len(), 3);
+        assert_eq!(model.items.len(), 5);
         assert_eq!(model.items[0].key, "small-hp-drug");
         assert_eq!(model.items[0].unique_id, Some(42));
         assert_eq!(model.items[0].icon, 7);
+        assert_eq!(model.items[0].icon_width, 36);
+        assert_eq!(model.items[0].icon_height, 26);
         assert_eq!(model.items[0].description, "Restores HP");
         assert_eq!(model.items[0].durability_current, Some(4));
         assert_eq!(model.items[0].durability_max, Some(5));
         assert_eq!(model.items[0].sell_value, 12);
+        let equipped = &model.items[4];
+        assert_eq!(equipped.state_image, 30);
+        assert_eq!(equipped.state_image_x, 75);
+        assert_eq!(equipped.state_image_y, 186);
+        assert_eq!(equipped.state_image_width, 28);
+        assert_eq!(equipped.state_image_height, 57);
         assert_eq!(model.items[0].equip_slot.as_deref(), Some("Weapon"));
         assert_eq!(model.items[0].added_defence, 4);
         assert_eq!(model.items[0].shape, Some(9));
         assert_eq!(model.items[0].socket_slots, 3);
+        let tooltip = model.items[0]
+            .tooltip_source
+            .as_ref()
+            .expect("gateway preserves the exact tooltip source");
+        assert_eq!(tooltip.info.item_index, 658);
+        assert_eq!(tooltip.info.stats[0].value, 15);
+        assert_eq!(tooltip.real_info.as_ref().unwrap().item_index, 659);
+        assert_eq!(tooltip.real_info.as_ref().unwrap().stats[0].value, 19);
+        assert_eq!(tooltip.user_item.as_ref().unwrap().unique_id, 42);
+        assert_eq!(tooltip.user_item.as_ref().unwrap().added_stats[0].value, 2);
+        assert!(tooltip.real_socket_infos.is_empty());
     }
 
     #[test]
@@ -8022,6 +8613,14 @@ mod tests {
             })
         );
         assert_eq!(
+            transform_inventory_operation_ack("DeleteItem", &json!({"uniqueId":7002,"count":2})),
+            Some(InventoryOperationAck::Delete {
+                unique_id: 7002,
+                count: 2,
+                success: true,
+            })
+        );
+        assert_eq!(
             transform_inventory_operation_ack(
                 "MoveItem",
                 &json!({"grid":"Inventory","from":4,"to":9,"success":true})
@@ -8085,29 +8684,35 @@ mod tests {
             &json!({"grid":"Inventory","from":4,"to":9})
         )
         .is_none());
+        assert!(
+            transform_inventory_operation_ack("DeleteItem", &json!({"uniqueId":7002})).is_none()
+        );
     }
 
     #[test]
     fn game_shop_packet_transforms_keep_cash_catalog_and_stock_patch_separate() {
-        let info = transform_game_shop_info_from_packet(&json!({
-            "item": {
-                "item_index": 1200,
-                "g_index": 42,
-                "info": {"index": 1200, "name": "Cash Potion", "item_type": 3, "image": 77},
-                "gold_price": 100,
-                "credit_price": 5,
-                "count": 2,
-                "class": "All",
-                "category": "Potion",
-                "stock": 10,
-                "deal": true,
-                "top_item": false,
-                "date_binary_datetime": 0,
-                "can_buy_credit": true,
-                "can_buy_gold": true
-            },
-            "stockLevel": 8
-        }))
+        let info = transform_game_shop_info_from_packet(
+            &json!({
+                "item": {
+                    "item_index": 1200,
+                    "g_index": 42,
+                    "info": {"index": 1200, "name": "Cash Potion", "item_type": 3, "image": 77},
+                    "gold_price": 100,
+                    "credit_price": 5,
+                    "count": 2,
+                    "class": "All",
+                    "category": "Potion",
+                    "stock": 10,
+                    "deal": true,
+                    "top_item": false,
+                    "date_binary_datetime": 0,
+                    "can_buy_credit": true,
+                    "can_buy_gold": true
+                },
+                "stockLevel": 8
+            }),
+            &NativeUiPlayerCursor::default(),
+        )
         .expect("GameShopInfo");
         let entry = serde_json::from_value::<mir2_client_bevy::game_shop::GameShopEntry>(info)
             .expect("cash entry shape");
@@ -8115,6 +8720,14 @@ mod tests {
         assert_eq!(entry.item_name, "Cash Potion");
         assert_eq!(entry.stock_level, 8);
         assert_eq!(entry.image, 77);
+        assert_eq!(
+            entry
+                .tooltip_source
+                .as_ref()
+                .and_then(|source| source.user_item.as_ref())
+                .map(|item| (item.item_index, item.count, item.identified)),
+            Some((1200, 2, false))
+        );
 
         let stock = transform_game_shop_stock_from_packet(&json!({
             "g_index": 42,
@@ -8126,6 +8739,132 @@ mod tests {
                 .expect("cash stock patch shape");
         assert_eq!(patch.game_shop_index, 42);
         assert_eq!(patch.stock_level, 3);
+    }
+
+    #[test]
+    fn crystal_packet_tooltip_projection_preserves_instance_preview_and_viewer_semantics() {
+        let cursor = NativeUiPlayerCursor {
+            level: Some(20),
+            class_name: Some("Wizard".to_owned()),
+            ..Default::default()
+        };
+        let offered = CrystalUserItemModel {
+            unique_id: 77,
+            item_index: 1,
+            current_dura: 3_000,
+            max_dura: 4_000,
+            count: 1,
+            identified: true,
+            ..Default::default()
+        };
+        let source = crystal_tooltip_source_for_user_item(&json!(offered), &cursor)
+            .expect("unique Crystal UserItem tooltip source");
+        assert_eq!(source.info.item_index, 1);
+        assert_eq!(
+            source.real_info.as_ref().map(|info| info.item_index),
+            Some(3)
+        );
+        assert_eq!(
+            source.user_item.as_ref().map(|item| (
+                item.unique_id,
+                item.current_dura,
+                item.max_dura,
+                item.identified
+            )),
+            Some((77, 3_000, 4_000, true))
+        );
+
+        let info = unique_crystal_tooltip_info(658).expect("quest potion template");
+        let preview = crystal_tooltip_source_for_preview(info.clone(), 5, &cursor);
+        let preview_item = preview.user_item.expect("Crystal preview UserItem");
+        assert_eq!(preview_item.item_index, info.item_index);
+        assert_eq!(
+            (preview_item.current_dura, preview_item.max_dura),
+            (info.durability, info.durability)
+        );
+        assert_eq!(preview_item.count, 5);
+        assert!(!preview_item.identified);
+    }
+
+    #[test]
+    fn quest_trade_and_guild_packet_adapters_retain_complete_tooltip_sources() {
+        let cursor = NativeUiPlayerCursor {
+            level: Some(20),
+            class_name: Some("Wizard".to_owned()),
+            ..Default::default()
+        };
+        let info = mir2_game_data::crystal_item_by_index(658).expect("potion template");
+        let mut quest = json!({
+            "info": {
+                "rewards_fixed_item": [{"item": info, "count": 3}],
+                "rewards_select_item": []
+            },
+            "rewards": {
+                "items": [{"itemIndex": 658, "name": "(HP)DrugSmall", "count": 3}],
+                "selectItems": []
+            }
+        });
+        add_quest_reward_tooltip_sources(&mut quest, &cursor);
+        let quest_source = serde_json::from_value::<CrystalItemTooltipSourceModel>(
+            quest["rewards"]["items"][0]["tooltipSource"].clone(),
+        )
+        .expect("quest tooltip source");
+        let quest_item = quest_source.user_item.expect("quest preview UserItem");
+        assert_eq!(quest_item.item_index, 658);
+        assert_eq!(
+            quest_item.count, 0,
+            "QuestCell paints count outside ShowItem"
+        );
+        assert!(!quest_item.identified);
+
+        let carried = CrystalUserItemModel {
+            unique_id: 88,
+            item_index: 658,
+            count: 4,
+            identified: true,
+            ..Default::default()
+        };
+        let mut trade_payload = json!({"tradeItems": [carried, null]});
+        add_social_item_tooltip_sources("TradeItem", &mut trade_payload, &cursor);
+        let mut trade = SocialModel::default();
+        assert!(trade.apply_packet("TradeItem", &trade_payload));
+        let trade_item = &trade.trade.partner_items[0];
+        assert_eq!(
+            (trade_item.unique_id, trade_item.item_index),
+            (Some(88), Some(658))
+        );
+        assert_eq!(
+            trade_item
+                .tooltip_source
+                .as_ref()
+                .and_then(|source| source.user_item.as_ref())
+                .map(|item| item.count),
+            Some(4)
+        );
+
+        let carried = CrystalUserItemModel {
+            unique_id: 99,
+            item_index: 658,
+            count: 2,
+            identified: true,
+            ..Default::default()
+        };
+        let mut guild_payload = json!({
+            "items": [{"item": carried, "user_id": 12}]
+        });
+        add_social_item_tooltip_sources("GuildStorageList", &mut guild_payload, &cursor);
+        let mut guild = SocialModel::default();
+        assert!(guild.apply_packet("GuildStorageList", &guild_payload));
+        let guild_item = guild.guild.storage_items[0].as_ref().expect("guild item");
+        assert_eq!(
+            (
+                guild_item.unique_id,
+                guild_item.item_index,
+                guild_item.count
+            ),
+            (99, 658, 2)
+        );
+        assert!(guild_item.tooltip_source.is_some());
     }
 
     #[test]
@@ -8199,7 +8938,7 @@ mod tests {
         };
         let (sender, receiver) = std::sync::mpsc::channel();
         let login = parse_inbound_event(
-            r#"{"type":"packet","packet":"LoginSuccess","payload":{"characters":[{"index":3,"name":"Alice","level":7,"class":"Warrior","gender":"Female"}]}}"#,
+            r#"{"type":"packet","packet":"LoginSuccess","payload":{"characters":[{"index":3,"name":"Alice","level":7,"class":"Warrior","gender":"Female","lastAccessBinaryDatetime":"-8584918932854775808"}]}}"#,
         )
         .expect("login event");
 
@@ -8213,6 +8952,10 @@ mod tests {
                 assert_eq!(characters.len(), 1);
                 assert_eq!(characters[0].index, 3);
                 assert_eq!(characters[0].class_name, "Warrior");
+                assert_eq!(
+                    characters[0].last_access_binary_datetime,
+                    -8584918932854775808
+                );
             }
             other => panic!("unexpected event: {other:?}"),
         }

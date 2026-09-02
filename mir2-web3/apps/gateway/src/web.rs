@@ -9394,7 +9394,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -9418,7 +9419,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                     "name": char_info.name,
                     "level": char_info.level,
                     "class": format!("{:?}", char_info.class),
-                    "gender": format!("{:?}", char_info.gender)
+                    "gender": format!("{:?}", char_info.gender),
+                    "lastAccessBinaryDatetime": char_info.last_access_binary_datetime.to_string()
                 }
             }
         }),
@@ -11636,6 +11638,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             if !info.group.is_empty() {
                 payload.insert("group".into(), json!(info.group));
             }
+            payload.insert("minLevelNeeded".into(), json!(info.min_level_needed));
             if !info.description.is_empty() {
                 payload.insert("descriptionLines".into(), json!(info.description));
             }
@@ -11648,6 +11651,18 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                             .map(|line| quest_objective_json(line))
                             .collect(),
                     ),
+                );
+            }
+            if !info.return_description.is_empty() {
+                payload.insert(
+                    "returnDescriptionLines".into(),
+                    json!(info.return_description),
+                );
+            }
+            if !info.completion_description.is_empty() {
+                payload.insert(
+                    "completionDescriptionLines".into(),
+                    json!(info.completion_description),
                 );
             }
             if let Some(rewards) = quest_rewards_json(info) {
@@ -11723,7 +11738,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -12801,6 +12817,36 @@ mod tests {
         assert_eq!(user_storage["payload"]["storage"][0]["unique_id"], 90);
         assert_eq!(user_storage["payload"]["storage"][0]["count"], 2);
         assert!(user_storage["payload"]["storage"][1].is_null());
+    }
+
+    #[test]
+    fn character_roster_events_preserve_crystal_last_access_ticks() {
+        let character = || SelectInfo {
+            index: 7,
+            name: "LastSeenHero".to_string(),
+            level: 12,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            last_access_binary_datetime: -8584918932854775808,
+        };
+
+        let login = super::server_packet_to_event(&ServerPacket::LoginSuccess {
+            characters: vec![character()],
+        });
+        let logout = super::server_packet_to_event(&ServerPacket::LogOutSuccess {
+            characters: vec![character()],
+        });
+        let created = super::server_packet_to_event(&ServerPacket::NewCharacterSuccess {
+            char_info: character(),
+        });
+
+        for value in [
+            &login["payload"]["characters"][0],
+            &logout["payload"]["characters"][0],
+            &created["payload"]["character"],
+        ] {
+            assert_eq!(value["lastAccessBinaryDatetime"], "-8584918932854775808");
+        }
     }
 
     #[test]
@@ -15349,6 +15395,7 @@ mod tests {
         assert_eq!(info["payload"]["id"], 1001);
         assert_eq!(info["payload"]["name"], "Field Wasp");
         assert_eq!(info["payload"]["group"], "Starter");
+        assert_eq!(info["payload"]["minLevelNeeded"], 1);
         assert_eq!(
             info["payload"]["descriptionLines"][0],
             "Help the town guard."
@@ -15359,6 +15406,14 @@ mod tests {
         );
         assert_eq!(info["payload"]["objectives"][0]["current"], 0);
         assert_eq!(info["payload"]["objectives"][0]["required"], 3);
+        assert_eq!(
+            info["payload"]["returnDescriptionLines"][0],
+            "Return to the guard."
+        );
+        assert_eq!(
+            info["payload"]["completionDescriptionLines"][0],
+            "Good work."
+        );
         assert_eq!(info["payload"]["rewards"]["gold"], 500);
         assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
         assert_eq!(

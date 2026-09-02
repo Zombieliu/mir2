@@ -504,6 +504,9 @@ type GatewayWorldItem = {
 
 type GatewayEquipmentItem = {
   slot: EquipmentSlot;
+  key?: string;
+  uniqueId?: number | null;
+  quantity?: number;
   name: string;
   icon: number;
   shape?: number | null;
@@ -512,6 +515,11 @@ type GatewayEquipmentItem = {
   durabilityMax: number;
   attack: number;
   defence: number;
+  grade?: string;
+  addedAttack?: number;
+  addedDefence?: number;
+  addedLuck?: number;
+  socketSlots?: number;
 };
 
 type GatewayQuestEntry = {
@@ -541,6 +549,8 @@ type GatewayKnownSkill = {
   spell?: string | null;
   castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
   offensive?: boolean;
+  level?: number;
+  experience?: number;
   hotkey?: number;
   delayMs?: number;
   castTimeMs?: number;
@@ -563,7 +573,7 @@ type GatewayActiveBuff = {
 };
 
 type Stage5SystemsState = {
-  group?: { members?: string[]; memberInfos?: Array<{ name: string; level?: number; class?: number; hp?: number; maxHp?: number; online?: boolean }>; lootMode?: string; leaderName?: string };
+  group?: { allowGroup?: boolean; members?: string[]; memberInfos?: Array<{ name: string; level?: number; class?: number; hp?: number; maxHp?: number; online?: boolean }>; lootMode?: string; leaderName?: string };
   guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
   social?: { friends?: string[]; blocked?: string[]; friendInfos?: Array<{ name: string; online?: boolean; memo?: string }>; blockedInfos?: Array<{ name: string; memo?: string }> };
   relationship?: Record<string, unknown>;
@@ -577,6 +587,8 @@ type Stage5SystemsState = {
   itemRental?: Record<string, unknown>;
   profession?: { miningLevel?: number; ore?: number; craftedItems?: string[] };
   appearance?: { hair?: number };
+  attackMode?: number;
+  petMode?: number;
   nameLists?: string[];
   intelligentCreatures?: Array<Record<string, unknown>>;
 };
@@ -648,6 +660,7 @@ type GatewayWorldSnapshot = {
   maxWeight: number;
   freeBagSlots: number;
   maxBagSlots: number;
+  inventoryCapacity?: number;
   storageSize?: number;
   hasExpandedStorage?: boolean;
   hasStoragePassword?: boolean;
@@ -815,6 +828,9 @@ type ItemMergeRef = {
 
 type EquipmentItem = {
   slot: EquipmentSlot;
+  key?: string;
+  uniqueId?: number;
+  quantity?: number;
   name: string;
   icon: number;
   shape?: number;
@@ -823,6 +839,11 @@ type EquipmentItem = {
   durabilityMax: number;
   attack: number;
   defence: number;
+  grade?: string;
+  addedAttack?: number;
+  addedDefence?: number;
+  addedLuck?: number;
+  socketSlots?: number;
 };
 
 type QuestEntry = {
@@ -880,6 +901,8 @@ type KnownSkill = {
   spell?: string | null;
   castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
   offensive?: boolean;
+  level?: number;
+  experience?: number;
   hotkey?: number;
   delayMs?: number;
   castTimeMs?: number;
@@ -945,6 +968,7 @@ type WorldState = {
   maxWeight: number;
   freeBagSlots: number;
   maxBagSlots: number;
+  inventoryCapacity: number;
   storageSize: number;
   hasExpandedStorage: boolean;
   hasStoragePassword: boolean;
@@ -1096,6 +1120,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   maxWeight: 0,
   freeBagSlots: 0,
   maxBagSlots: 0,
+  inventoryCapacity: 46,
   storageSize: 80,
   hasExpandedStorage: false,
   hasStoragePassword: false,
@@ -5518,6 +5543,7 @@ export default function HomePage() {
           maxWeight: number;
           freeBagSlots: number;
           maxBagSlots: number;
+          inventoryCapacity: number;
           lightSetting: number | null;
           timeOfDayLightSetting: number | null;
           mapLightSetting: number | null;
@@ -5689,6 +5715,7 @@ export default function HomePage() {
         maxWeight: world.maxWeight,
         freeBagSlots: world.freeBagSlots,
         maxBagSlots: world.maxBagSlots,
+        inventoryCapacity: world.inventoryCapacity,
         lightSetting: world.lightSetting,
         timeOfDayLightSetting: world.timeOfDayLightSetting,
         mapLightSetting: world.mapLightSetting,
@@ -12229,8 +12256,123 @@ export default function HomePage() {
 
   function applyGatewayWorldSnapshot(snapshot: GatewayWorldSnapshot) {
     const playerObjectId = snapshot.playerObjectId === null ? null : String(snapshot.playerObjectId);
-    const previousEntitiesById = new Map(worldRef.current.entities.map((entity) => [entity.objectId, entity]));
     const snapshotNow = Date.now();
+    // ── Fast-path：成功 ACK 仅解锁下一步，不触发整套 world/map/entity 重刷新 ──
+    // 对应 Crystal 原版 MoveTime 解锁，复刻此前每 snapshot 都重建 entities/groundDrops/inventory/belt/storage/quest 等全量是重链主因。
+    {
+      const currentWorldFast = worldRef.current;
+      const curSelf = currentWorldFast.entities.find((e) => e.objectId === playerObjectId) as any;
+      const snapSelf = (snapshot.entities as any[]).find((e: any) => String(e.objectId) === playerObjectId) as any;
+      const sameProjectedList = (
+        left: unknown[] | undefined,
+        right: unknown[] | undefined,
+        project: (value: Record<string, unknown>) => unknown,
+      ) => {
+        const leftValues = left ?? [];
+        const rightValues = right ?? [];
+        return leftValues.length === rightValues.length && leftValues.every((value, index) =>
+          JSON.stringify(project((value ?? {}) as Record<string, unknown>)) ===
+          JSON.stringify(project((rightValues[index] ?? {}) as Record<string, unknown>))
+        );
+      };
+      const itemIdentity = (item: Record<string, unknown>) => ({
+        key: item.key ?? null,
+        uniqueId: item.uniqueId ?? null,
+        slot: item.slot ?? null,
+        container: item.container ?? null,
+        quantity: item.quantity ?? null,
+        icon: item.icon ?? null,
+        durabilityCurrent: item.durabilityCurrent ?? null,
+        durabilityMax: item.durabilityMax ?? null,
+      });
+      const equipmentIdentity = (item: Record<string, unknown>) => ({
+        key: item.key ?? null,
+        uniqueId: item.uniqueId ?? null,
+        slot: item.slot ?? null,
+        quantity: item.quantity ?? null,
+        icon: item.icon ?? null,
+        shape: item.shape ?? null,
+        durabilityCurrent: item.durabilityCurrent ?? null,
+        durabilityMax: item.durabilityMax ?? null,
+      });
+      const questIdentity = (quest: Record<string, unknown>) => ({
+        questId: quest.questId ?? null,
+        stage: quest.stage ?? null,
+        current: quest.current ?? null,
+        required: quest.required ?? null,
+      });
+      const skillIdentity = (skill: Record<string, unknown>) => ({
+        key: skill.key ?? null,
+        level: skill.level ?? null,
+        experience: skill.experience ?? null,
+        hotkey: skill.hotkey ?? null,
+        delayMs: skill.delayMs ?? null,
+      });
+      const buffIdentity = (buff: Record<string, unknown>) => ({
+        key: buff.key ?? null,
+        attackBonus: buff.attackBonus ?? null,
+        defenceBonus: buff.defenceBonus ?? null,
+        stats: buff.stats ?? [],
+      });
+      const snapshotSystems = snapshot.stage5Systems ?? {};
+      const staticStateMatches =
+        snapshot.gold === currentWorldFast.gold &&
+        snapshot.credit === currentWorldFast.credit &&
+        snapshot.playerHp === currentWorldFast.playerHp &&
+        snapshot.playerMaxHp === currentWorldFast.playerMaxHp &&
+        snapshot.playerMp === currentWorldFast.playerMp &&
+        snapshot.playerMaxMp === currentWorldFast.playerMaxMp &&
+        snapshot.playerExperience === currentWorldFast.playerExperience &&
+        snapshot.playerMaxExperience === currentWorldFast.playerMaxExperience &&
+        (snapshot.inventoryCapacity ?? 46) === currentWorldFast.inventoryCapacity &&
+        sameProjectedList(snapshot.inventoryItems, currentWorldFast.inventoryItems, itemIdentity) &&
+        sameProjectedList(snapshot.beltItems, currentWorldFast.beltItems, itemIdentity) &&
+        sameProjectedList(snapshot.storageItems, currentWorldFast.storageItems, itemIdentity) &&
+        sameProjectedList(snapshot.equipmentItems, currentWorldFast.equipmentItems, equipmentIdentity) &&
+        sameProjectedList(snapshot.questLog, currentWorldFast.questLog, questIdentity) &&
+        sameProjectedList(snapshot.knownSkills, currentWorldFast.knownSkills, skillIdentity) &&
+        sameProjectedList(snapshot.activeBuffs, currentWorldFast.activeBuffs, buffIdentity) &&
+        snapshotSystems.appearance?.hair === currentWorldFast.stage5Systems.appearance?.hair &&
+        snapshotSystems.attackMode === currentWorldFast.stage5Systems.attackMode &&
+        snapshotSystems.petMode === currentWorldFast.stage5Systems.petMode &&
+        snapshotSystems.group?.allowGroup === currentWorldFast.stage5Systems.group?.allowGroup;
+      const isMovementOnly =
+        !!curSelf &&
+        !!snapSelf &&
+        staticStateMatches &&
+        Math.max(Math.abs(snapSelf.x - curSelf.x), Math.abs(snapSelf.y - curSelf.y)) <= 2 &&
+        snapshot.entities.length === currentWorldFast.entities.length &&
+        (snapshot.groundDrops?.length ?? 0) === currentWorldFast.groundDrops.length &&
+        snapshot.mapFileName === currentWorldFast.mapFileName;
+      if (isMovementOnly && snapSelf) {
+        const fastOutcome = classifyMovementAckOutcome({
+          pending: pendingSelfMoveRef.current,
+          ack: { x: snapSelf.x, y: snapSelf.y, direction: snapSelf.direction },
+          packetName: "UserLocation",
+        });
+        if (fastOutcome === "confirmed") {
+          pendingSelfMoveRef.current = null;
+          predictedPlayerPositionRef.current = null;
+          // 不清 legacy 队列中的 target 记忆，仅清 pending 保持 prediction 轻
+          nextMoveSendAtRef.current = Math.max(nextMoveSendAtRef.current, snapshotNow);
+          crystalRunPrimedUntilRef.current = snapshotNow + CRYSTAL_RUN_PRIME_MS;
+          // 最小 patch：仅 self 坐标+方向+HP/MP，避免 Presentation 接管/地图大 JSON/ECS 动画全链
+          updateWorld((curr: any) => ({
+            ...curr,
+            entities: curr.entities.map((e: any) =>
+              e.objectId === playerObjectId ? { ...e, x: snapSelf.x, y: snapSelf.y, direction: snapSelf.direction } : e,
+            ),
+            playerHp: snapshot.playerHp ?? curr.playerHp,
+            playerMp: snapshot.playerMp ?? curr.playerMp,
+            playerMaxHp: snapshot.playerMaxHp ?? curr.playerMaxHp,
+            playerMaxMp: snapshot.playerMaxMp ?? curr.playerMaxMp,
+          }));
+          void trySendQueuedCrystalMove();
+          return;
+        }
+      }
+    }
+    const previousEntitiesById = new Map(worldRef.current.entities.map((entity) => [entity.objectId, entity]));
     const entities: WorldEntity[] = snapshot.entities.map((entity) => ({
       objectId: String(entity.objectId),
       kind: entity.kind,
@@ -12325,6 +12467,9 @@ export default function HomePage() {
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
       slot: item.slot,
+      key: item.key,
+      uniqueId: item.uniqueId ?? undefined,
+      quantity: item.quantity,
       name: item.name,
       icon: item.icon,
       shape: item.shape ?? undefined,
@@ -12333,6 +12478,11 @@ export default function HomePage() {
       durabilityMax: item.durabilityMax,
       attack: item.attack,
       defence: item.defence,
+      grade: item.grade,
+      addedAttack: item.addedAttack,
+      addedDefence: item.addedDefence,
+      addedLuck: item.addedLuck,
+      socketSlots: item.socketSlots,
     }));
     const previousQuestById = new Map(
       worldRef.current.questLog.map((quest) => [quest.questId, quest]),
@@ -12363,6 +12513,8 @@ export default function HomePage() {
       spell: skill.spell ?? null,
       castKind: skill.castKind,
       offensive: skill.offensive,
+      level: skill.level,
+      experience: skill.experience,
       hotkey: skill.hotkey,
       delayMs: skill.delayMs,
       castTimeMs: skill.castTimeMs,
@@ -12603,6 +12755,7 @@ export default function HomePage() {
         maxWeight: snapshot.maxWeight,
         freeBagSlots: snapshot.freeBagSlots,
         maxBagSlots: snapshot.maxBagSlots,
+        inventoryCapacity: snapshot.inventoryCapacity ?? current.inventoryCapacity,
         storageSize: snapshot.storageSize ?? current.storageSize,
         hasExpandedStorage: snapshot.hasExpandedStorage ?? current.hasExpandedStorage,
         hasStoragePassword: snapshot.hasStoragePassword ?? current.hasStoragePassword,
@@ -15790,18 +15943,51 @@ function toCharacterEntry(
 
   const value = entry as Record<string, unknown>;
   const translator = buildTranslator(language);
-  const locale = languageLocale(language);
+  const never = translator("client.Never", [], "Never");
+  const binaryLastAccess = formatCrystalBinaryDateTime(
+    value.lastAccessBinaryDatetime ?? value.last_access_binary_datetime,
+    never,
+  );
   return {
     index: typeof value.index === "number" ? value.index : typeof value.Index === "number" ? value.Index : fallbackIndex,
     name: stringOrFallback(value.name ?? value.Name, translator("ui.characterSlotFallback", [fallbackIndex + 1])),
     level: numberOrZero(value.level ?? value.Level) || 1,
     classKey: mapClassKey(value.class ?? value.Class),
     gender: mapGenderKey(value.gender ?? value.Gender),
-    lastAccess: stringOrFallback(
-      value.lastAccess ?? value.LastAccess,
-      new Date().toLocaleString(locale),
-    ),
+    lastAccess:
+      binaryLastAccess ?? stringOrFallback(value.lastAccess ?? value.LastAccess, never),
   };
+}
+
+function formatCrystalBinaryDateTime(value: unknown, never: string): string | null {
+  if (typeof value !== "string" && typeof value !== "number" && typeof value !== "bigint") {
+    return null;
+  }
+
+  let binary: bigint;
+  try {
+    binary = BigInt(value);
+  } catch {
+    return null;
+  }
+  if (binary === 0n) return never;
+
+  const bits = BigInt.asUintN(64, binary);
+  const ticks = bits & 0x3fff_ffff_ffff_ffffn;
+  const kind = bits & 0xc000_0000_0000_0000n;
+  const unixMilliseconds = Number((ticks - 621_355_968_000_000_000n) / 10_000n);
+  const date = new Date(unixMilliseconds);
+  if (!Number.isFinite(unixMilliseconds) || Number.isNaN(date.getTime())) return never;
+
+  const local = kind === 0x8000_0000_0000_0000n || kind === 0xc000_0000_0000_0000n;
+  const year = local ? date.getFullYear() : date.getUTCFullYear();
+  const month = (local ? date.getMonth() : date.getUTCMonth()) + 1;
+  const day = local ? date.getDate() : date.getUTCDate();
+  const hour = local ? date.getHours() : date.getUTCHours();
+  const minute = local ? date.getMinutes() : date.getUTCMinutes();
+  const second = local ? date.getSeconds() : date.getUTCSeconds();
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${String(year).padStart(4, "0")}/${pad(month)}/${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
 }
 
 function fallbackCharacter(language: Mir2Language, fallbackName = ""): SelectCharacterEntry {

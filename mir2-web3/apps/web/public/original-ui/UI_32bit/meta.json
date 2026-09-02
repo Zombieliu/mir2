@@ -1,7 +1,40 @@
 {
   "version": 3,
   "count": 474,
+  "frameSet": {
+    "seek": 6826917,
+    "count": 0,
+    "actions": []
+  },
   "frames": [
+    {
+      "index": 470,
+      "width": 84,
+      "height": 6,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/UI_32bit/470.png",
+      "maskPath": null
+    },
+    {
+      "index": 471,
+      "width": 84,
+      "height": 6,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/UI_32bit/471.png",
+      "maskPath": null
+    },
     {
       "index": 472,
       "width": 76,

@@ -42,8 +42,8 @@ use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{
-    CharacterRecord, GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind,
-    WorldEntitySnapshot, WorldSnapshot,
+    GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
+    WorldSnapshot, CRYSTAL_MAX_INVENTORY_CAPACITY,
 };
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
@@ -209,6 +209,7 @@ impl SimulationSession {
         super::mining::rebuild_mine_spots(app.world_mut());
         app.insert_resource(super::hazard::MapHazardResource::default());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();
         inventory.storage_items = seed_storage_items();
@@ -271,6 +272,10 @@ impl SimulationSession {
 
     pub fn save_active_character(&self) -> Result<(), String> {
         persist_active_character_save(self.app.world())
+    }
+
+    pub fn save_active_character_for_logout(&self) -> Result<(), String> {
+        persist_active_character_save_for_logout(self.app.world())
     }
 
     pub fn has_shared_economy_projection_event(&self, event_id: &str) -> bool {
@@ -578,6 +583,7 @@ impl SimulationSession {
                 return vec![ServerPacket::Login { result: 4 }];
             }
         };
+        let select_infos = account_select_infos(&config, account_id);
         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
         session.account_id = Some(account_id.to_string());
         session.characters = characters;
@@ -587,11 +593,7 @@ impl SimulationSession {
         session.selected_character = None;
         session.clear_active_save_revision();
         vec![ServerPacket::LoginSuccess {
-            characters: session
-                .characters
-                .iter()
-                .map(CharacterRecord::to_select_info)
-                .collect(),
+            characters: select_infos,
         }]
     }
 
@@ -1486,6 +1488,7 @@ fn apply_shared_trade_offer(
         .resource::<InventoryResource>()
         .inventory_items
         .clone();
+    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut delivered_items = Vec::new();
     for offered_item in &offer.items {
         let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
@@ -1501,6 +1504,7 @@ fn apply_shared_trade_offer(
             &staged_inventory,
             item.container,
             item.slot,
+            inventory_capacity,
         ) else {
             return trade_offer_delivery_failed_packets(world, rollback);
         };
@@ -1631,6 +1635,7 @@ fn apply_shared_trade_settlement_projection(
         .resource::<InventoryResource>()
         .inventory_items
         .clone();
+    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut outgoing_deleted_items = Vec::new();
     if !outgoing_already_debited {
         let mut outgoing_ids = BTreeSet::new();
@@ -1672,6 +1677,7 @@ fn apply_shared_trade_settlement_projection(
             &staged_inventory,
             item.container,
             item.slot,
+            inventory_capacity,
         )
         .ok_or_else(|| "trade projection has no free inventory slot".to_string())?;
         item.container = container;
@@ -1924,6 +1930,7 @@ fn preferred_or_empty_trade_delivery_slot(
         &inventory.inventory_items,
         preferred_container,
         preferred_slot,
+        inventory.inventory_capacity,
     )
 }
 
@@ -1931,17 +1938,26 @@ fn preferred_or_empty_trade_delivery_slot_for_items(
     items: &[ItemState],
     preferred_container: ItemContainer,
     preferred_slot: u8,
+    inventory_capacity: u16,
 ) -> Option<(ItemContainer, u8)> {
     if matches!(
         preferred_container,
         ItemContainer::Bag1 | ItemContainer::Bag2
-    ) && !items
-        .iter()
-        .any(|item| item.container == preferred_container && item.slot == preferred_slot)
-    {
-        return Some((preferred_container, preferred_slot));
+    ) {
+        let logical_slot = match preferred_container {
+            ItemContainer::Bag1 => preferred_slot,
+            ItemContainer::Bag2 => 40u8.saturating_add(preferred_slot),
+            _ => unreachable!(),
+        };
+        if is_valid_inventory_slot(logical_slot, inventory_capacity)
+            && !items
+                .iter()
+                .any(|item| item.container == preferred_container && item.slot == preferred_slot)
+        {
+            return Some((preferred_container, preferred_slot));
+        }
     }
-    find_empty_inventory_item_slot(items, ItemContainer::Bag1)
+    find_empty_inventory_item_slot(items, ItemContainer::Bag1, inventory_capacity)
 }
 
 #[cfg(test)]

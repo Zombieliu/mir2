@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
-    SimulationConfig,
+    crystal_bag_slot_capacity, AccountRecord, CharacterRecord, EquipmentSlot,
+    GroundDropItemPayload, ItemContainer, ItemGrade, SimulationConfig,
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
@@ -1653,7 +1653,7 @@ pub(super) fn free_bag_slots(resources: &InventoryResource) -> u16 {
         .iter()
         .filter(|item| matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2))
         .count() as u16;
-    80u16.saturating_sub(used)
+    crystal_bag_slot_capacity(resources.inventory_capacity).saturating_sub(used)
 }
 
 pub(super) fn item_containers_stack_together(
@@ -1671,20 +1671,22 @@ pub(super) fn item_containers_stack_together(
 pub(super) fn empty_slots_for_inventory_container(
     items: &[ItemState],
     container: ItemContainer,
+    inventory_capacity: u16,
 ) -> Vec<(ItemContainer, u8)> {
     match container {
-        ItemContainer::Bag1 | ItemContainer::Bag2 => [ItemContainer::Bag1, ItemContainer::Bag2]
-            .into_iter()
-            .flat_map(|container| {
-                (0..40).filter_map(move |slot| {
-                    let slot = u8::try_from(slot).expect("bag slot count should fit in u8");
+        ItemContainer::Bag1 | ItemContainer::Bag2 => {
+            (0..crystal_bag_slot_capacity(inventory_capacity))
+                .filter_map(|logical_slot| {
+                    let logical_slot = u8::try_from(logical_slot)
+                        .expect("Crystal bag slot count should fit in u8");
+                    let (container, slot) = inventory_container_and_slot_for_index(logical_slot)?;
                     let occupied = items
                         .iter()
                         .any(|item| item.container == container && item.slot == slot);
                     (!occupied).then_some((container, slot))
                 })
-            })
-            .collect(),
+                .collect()
+        }
         other => {
             let max_slots = match other {
                 ItemContainer::Quest => 40,
@@ -1708,8 +1710,9 @@ pub(super) fn empty_slots_for_inventory_container(
 pub(super) fn find_empty_inventory_item_slot(
     items: &[ItemState],
     container: ItemContainer,
+    inventory_capacity: u16,
 ) -> Option<(ItemContainer, u8)> {
-    empty_slots_for_inventory_container(items, container)
+    empty_slots_for_inventory_container(items, container, inventory_capacity)
         .into_iter()
         .next()
 }
@@ -1903,15 +1906,15 @@ fn plan_exact_ground_drop_item(
                 .into_iter()
                 .next()
                 .or_else(|| {
-                    find_empty_inventory_item_slot(&staged.inventory_items, container)
-                        .or(Some((container, preferred_slot)))
-                        .filter(|(candidate_container, candidate_slot)| {
-                            !collection_slot_occupied(
-                                &staged,
-                                *candidate_container,
-                                *candidate_slot,
-                            )
-                        })
+                    find_empty_inventory_item_slot(
+                        &staged.inventory_items,
+                        container,
+                        staged.inventory_capacity,
+                    )
+                    .or(Some((container, preferred_slot)))
+                    .filter(|(candidate_container, candidate_slot)| {
+                        !collection_slot_occupied(&staged, *candidate_container, *candidate_slot)
+                    })
                 })?;
         canonical.container = item_container;
         canonical.slot = slot;
@@ -1972,15 +1975,15 @@ fn plan_exact_ground_drop_item(
                 .into_iter()
                 .next()
                 .or_else(|| {
-                    find_empty_inventory_item_slot(&staged.inventory_items, container)
-                        .or(Some((container, preferred_slot)))
-                        .filter(|(candidate_container, candidate_slot)| {
-                            !collection_slot_occupied(
-                                &staged,
-                                *candidate_container,
-                                *candidate_slot,
-                            )
-                        })
+                    find_empty_inventory_item_slot(
+                        &staged.inventory_items,
+                        container,
+                        staged.inventory_capacity,
+                    )
+                    .or(Some((container, preferred_slot)))
+                    .filter(|(candidate_container, candidate_slot)| {
+                        !collection_slot_occupied(&staged, *candidate_container, *candidate_slot)
+                    })
                 })?;
         let mut item = canonical.clone();
         item.container = item_container;
@@ -2262,7 +2265,11 @@ pub(super) fn add_or_increment_item_with_random_metadata(
         {
             Some(slot) => slot,
             None if last_changed.is_some() => break,
-            None => match find_empty_inventory_item_slot(&resources.inventory_items, container) {
+            None => match find_empty_inventory_item_slot(
+                &resources.inventory_items,
+                container,
+                resources.inventory_capacity,
+            ) {
                 Some(slot) => slot,
                 None if last_changed.is_some() => break,
                 None => (container, preferred_slot),
@@ -2338,18 +2345,21 @@ pub(super) fn crystal_empty_add_item_slots(
             slots.extend(empty_slots_for_inventory_container(
                 &resources.inventory_items,
                 container,
+                resources.inventory_capacity,
             ));
         }
         ItemContainer::Belt => {
             slots.extend(empty_slots_for_inventory_container(
                 &resources.belt_items,
                 container,
+                resources.inventory_capacity,
             ));
         }
         other => {
             slots.extend(empty_slots_for_inventory_container(
                 &resources.inventory_items,
                 other,
+                resources.inventory_capacity,
             ));
         }
     }
@@ -2382,8 +2392,9 @@ pub(super) fn inventory_item_matches_index(item: &ItemState, index: u8) -> bool 
     inventory_index_for_item(item).is_some_and(|item_index| item_index == index)
 }
 
-pub(super) fn is_valid_inventory_slot(slot: u8) -> bool {
-    inventory_container_and_slot_for_index(slot).is_some()
+pub(super) fn is_valid_inventory_slot(slot: u8, inventory_capacity: u16) -> bool {
+    u16::from(slot) < crystal_bag_slot_capacity(inventory_capacity)
+        && inventory_container_and_slot_for_index(slot).is_some()
 }
 
 pub(super) fn move_item_slot_matches_grid(item: &ItemState, grid: MirGridType, slot: u8) -> bool {
@@ -2457,7 +2468,9 @@ pub(super) fn remove_item_destination(
 ) -> Option<(ItemContainer, u8)> {
     let slot = u8::try_from(to).ok()?;
     match grid {
-        MirGridType::Inventory => inventory_container_and_slot_for_index(slot),
+        MirGridType::Inventory => is_valid_inventory_slot(slot, resources.inventory_capacity)
+            .then(|| inventory_container_and_slot_for_index(slot))
+            .flatten(),
         MirGridType::Storage => {
             is_valid_storage_slot(resources, slot).then_some((ItemContainer::Storage, slot))
         }
@@ -2488,7 +2501,9 @@ pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<Serv
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
-        if !is_valid_inventory_slot(from_slot) || !is_valid_storage_slot(&resources, to_slot) {
+        if !is_valid_inventory_slot(from_slot, resources.inventory_capacity)
+            || !is_valid_storage_slot(&resources, to_slot)
+        {
             return vec![failed_packet];
         }
         let Some(index) = resources
@@ -2556,7 +2571,9 @@ pub(super) fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
-        if !is_valid_storage_slot(&resources, from_slot) || !is_valid_inventory_slot(to_slot) {
+        if !is_valid_storage_slot(&resources, from_slot)
+            || !is_valid_inventory_slot(to_slot, resources.inventory_capacity)
+        {
             return vec![failed_packet];
         }
         let Some((to_container, to_inventory_slot)) =
@@ -2631,10 +2648,13 @@ pub(super) fn move_item_impl(
         return vec![failed_packet];
     };
 
-    if matches!(grid, MirGridType::Inventory)
-        && (!is_valid_inventory_slot(from_slot) || !is_valid_inventory_slot(to_slot))
-    {
-        return vec![failed_packet];
+    if matches!(grid, MirGridType::Inventory) {
+        let resources = world.resource::<InventoryResource>();
+        if !is_valid_inventory_slot(from_slot, resources.inventory_capacity)
+            || !is_valid_inventory_slot(to_slot, resources.inventory_capacity)
+        {
+            return vec![failed_packet];
+        }
     }
 
     if matches!(grid, MirGridType::Storage) {

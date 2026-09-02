@@ -1987,6 +1987,11 @@ fn fixed_crystal_light_setting_accepts_only_crystal_runtime_values() {
         2
     );
     assert_eq!(super::crystal_time_of_day_lights_with_override(None, 8), 3);
+    assert_eq!(super::crystal_time_of_day_lights_with_override(None, 13), 4);
+    assert_eq!(
+        super::crystal_time_of_day_lights_with_override(Some("dynamic"), 13),
+        4
+    );
 }
 
 #[test]

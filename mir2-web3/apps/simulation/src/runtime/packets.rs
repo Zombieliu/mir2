@@ -8,8 +8,8 @@ use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
     crystal_map_respawns_by_file_name, crystal_monster_by_index, crystal_monster_by_name,
-    crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
-    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
+    crystal_npc_info_manifest, crystal_real_item_for_player, crystal_recipe_bootstrap_packets,
+    format_localized_text, localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientAuction, ClientBuff,
@@ -29,7 +29,7 @@ use crate::config::{
     Stage5AuctionListing, Stage5HeroState, Stage5ItemRentalRecordSnapshot,
     Stage5ItemRentalSnapshot, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
     WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
-    WorldSnapshot,
+    WorldItemTooltipSource, WorldSnapshot,
 };
 
 use super::big_map::{
@@ -1189,7 +1189,10 @@ fn transfer_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<Serve
     let Some(to_slot) = u8::try_from(to).ok().filter(|slot| *slot < 40) else {
         return vec![failed_packet];
     };
-    if !is_valid_inventory_slot(from_slot) {
+    if !is_valid_inventory_slot(
+        from_slot,
+        world.resource::<InventoryResource>().inventory_capacity,
+    ) {
         return vec![failed_packet];
     }
     if world
@@ -3178,7 +3181,10 @@ fn stage5_guild_storage_item_packet(
             let Some(to_slot) = u8::try_from(to).ok() else {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
-            if !is_valid_inventory_slot(to_slot) {
+            if !is_valid_inventory_slot(
+                to_slot,
+                world.resource::<InventoryResource>().inventory_capacity,
+            ) {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
             let occupied = world
@@ -6040,6 +6046,74 @@ pub(super) fn object_struck_packet(
     })
 }
 
+fn resolve_item_tooltip_source_for_viewer(
+    source: &mut Option<WorldItemTooltipSource>,
+    viewer: Option<(u16, MirClass)>,
+) {
+    let (Some(source), Some((level, class))) = (source.as_mut(), viewer) else {
+        return;
+    };
+    source.real_info = Some(crystal_real_item_for_player(&source.info, level, class));
+    source.real_socket_infos = source
+        .socket_infos
+        .iter()
+        .map(|info| {
+            info.as_ref()
+                .map(|info| crystal_real_item_for_player(info, level, class))
+        })
+        .collect();
+}
+
+#[cfg(test)]
+mod item_tooltip_source_tests {
+    use super::*;
+
+    #[test]
+    fn tooltip_source_resolves_item_and_socket_rows_for_the_active_viewer() {
+        let origin = crystal_item_by_index(1).expect("class-based SpiritBlade origin");
+        let mut source = Some(WorldItemTooltipSource {
+            info: origin.clone(),
+            real_info: None,
+            user_item: None,
+            socket_infos: vec![None, Some(origin)],
+            real_socket_infos: Vec::new(),
+        });
+
+        resolve_item_tooltip_source_for_viewer(&mut source, Some((20, MirClass::Wizard)));
+
+        let source = source.expect("tooltip source remains present");
+        assert_eq!(
+            source.real_info.as_ref().map(|info| info.item_index),
+            Some(3)
+        );
+        assert_eq!(source.real_socket_infos.len(), 2);
+        assert_eq!(source.real_socket_infos[0], None);
+        assert_eq!(
+            source.real_socket_infos[1]
+                .as_ref()
+                .map(|info| info.item_index),
+            Some(3)
+        );
+    }
+
+    #[test]
+    fn tooltip_source_without_viewer_never_manufactures_real_rows() {
+        let mut source = Some(WorldItemTooltipSource {
+            info: crystal_item_by_index(1).expect("class-based SpiritBlade origin"),
+            real_info: None,
+            user_item: None,
+            socket_infos: Vec::new(),
+            real_socket_infos: Vec::new(),
+        });
+
+        resolve_item_tooltip_source_for_viewer(&mut source, None);
+
+        let source = source.expect("tooltip source remains present");
+        assert_eq!(source.real_info, None);
+        assert!(source.real_socket_infos.is_empty());
+    }
+}
+
 pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let resources = world.resource::<InventoryResource>();
     let hero_inventory = world.resource::<HeroInventoryResource>();
@@ -6052,6 +6126,10 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let npc_state = world.resource::<NpcStateResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
     let language = session.language;
+    let tooltip_viewer = session
+        .selected_character
+        .as_ref()
+        .map(|character| (character.level, character.class));
     let tick = super::session::runtime_tick(world);
     let scene_view = active_scene_view(world);
     let mut entities = collect_world_entities(
@@ -6099,6 +6177,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
         player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
+        player_crystal_stats: player_stats.snapshot_entries(),
         player_pk_points: player_runtime.pk_points,
         player_experience: player_runtime.experience,
         player_max_experience: player_runtime.max_experience,
@@ -6108,7 +6187,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         current_weight: current_weight(resources),
         max_weight,
         free_bag_slots: free_bag_slots(resources),
-        max_bag_slots: 80,
+        max_bag_slots: crate::config::crystal_bag_slot_capacity(resources.inventory_capacity),
+        inventory_capacity: resources.inventory_capacity,
         storage_size: resources.storage_size,
         has_expanded_storage: resources.has_expanded_storage,
         has_storage_password: resources.storage_has_password,
@@ -6129,27 +6209,62 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         belt_items: resources
             .belt_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         inventory_items: resources
             .inventory_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         hero_inventory_items: hero_inventory
             .items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         storage_items: resources
             .storage_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         equipment_items: resources
             .equipment_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         quest_log: quest_log_snapshots(world, language),
         active_npc_dialog: npc_state
@@ -6677,9 +6792,9 @@ pub(super) fn current_crystal_time_of_day_lights() -> u8 {
             crystal_time_of_day_lights_for_utc_hour(utc_hour)
         }
         Some(value) => crystal_time_of_day_lights_with_override(Some(value), utc_hour),
-        // Local debug builds stay readable by default. Production Release builds
-        // preserve Crystal's UTC-driven 12-hour day/night cycle.
-        None if cfg!(debug_assertions) => 2,
+        // Crystal uses the same UTC-driven cycle in local and production
+        // servers. QA that needs a stable daytime capture must opt in with the
+        // explicit `day` override instead of silently changing debug visuals.
         None => crystal_time_of_day_lights_for_utc_hour(utc_hour),
     }
 }
@@ -6820,6 +6935,8 @@ pub(super) fn build_user_information(
     storage_password_last_set_binary_datetime: i64,
     expanded_storage_expiry_time_binary_datetime: i64,
     hair: u8,
+    inventory_capacity: u16,
+    belt_items: &[ItemState],
     inventory_items: &[ItemState],
     equipment_items: &[EquipmentState],
     hero: Option<&Stage5HeroState>,
@@ -6850,7 +6967,11 @@ pub(super) fn build_user_information(
         has_hero: hero.is_some(),
         hero_behaviour: hero.map(|hero| hero.behaviour).unwrap_or(0),
         inventory_section_present: true,
-        inventory: Some(user_inventory_slots(inventory_items)),
+        inventory: Some(user_inventory_slots(
+            inventory_capacity,
+            belt_items,
+            inventory_items,
+        )),
         equipment_section_present: true,
         equipment: Some(user_equipment_slots(equipment_items)),
         quest_inventory_section_present: true,
@@ -6878,12 +6999,24 @@ pub(super) fn build_user_information(
     }
 }
 
-pub(super) fn user_inventory_slots(items: &[ItemState]) -> Vec<Option<UserItem>> {
-    let mut slots = vec![None; 46];
+pub(super) fn user_inventory_slots(
+    inventory_capacity: u16,
+    belt_items: &[ItemState],
+    items: &[ItemState],
+) -> Vec<Option<UserItem>> {
+    let mut slots = vec![None; usize::from(inventory_capacity)];
+    for item in belt_items
+        .iter()
+        .filter(|item| item.container == ItemContainer::Belt)
+    {
+        if let Some(slot) = slots.get_mut(usize::from(item.slot)) {
+            *slot = Some(user_item_from_item_state(item));
+        }
+    }
     for item in items {
         let index = match item.container {
-            ItemContainer::Bag1 => usize::from(item.slot),
-            ItemContainer::Bag2 => 40 + usize::from(item.slot),
+            ItemContainer::Bag1 => 6 + usize::from(item.slot),
+            ItemContainer::Bag2 => 46 + usize::from(item.slot),
             _ => continue,
         };
         if let Some(slot) = slots.get_mut(index) {
@@ -8004,7 +8137,7 @@ impl SimulationSession {
 
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
-            if let Err(error) = persist_active_character_save(self.app.world()) {
+            if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 return Err(error);
             }
@@ -8505,6 +8638,7 @@ impl SimulationSession {
                         return vec![ServerPacket::Login { result: 4 }];
                     }
                 };
+                let select_infos = account_select_infos(&config, &account_id);
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                 session.account_id = Some(account_id);
@@ -8512,11 +8646,7 @@ impl SimulationSession {
                 session.selected_character = None;
                 session.clear_active_save_revision();
                 vec![ServerPacket::LoginSuccess {
-                    characters: session
-                        .characters
-                        .iter()
-                        .map(CharacterRecord::to_select_info)
-                        .collect(),
+                    characters: select_infos,
                 }]
             }
             ClientPacket::NewCharacter {
@@ -8617,13 +8747,13 @@ impl SimulationSession {
                 self.app
                     .world_mut()
                     .remove_resource::<BigMapConnectionState>();
+                let config = self
+                    .app
+                    .world()
+                    .resource::<RuntimeConfigResource>()
+                    .config
+                    .clone();
                 {
-                    let config = self
-                        .app
-                        .world()
-                        .resource::<RuntimeConfigResource>()
-                        .config
-                        .clone();
                     {
                         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                         session.selected_character = None;
@@ -8653,13 +8783,8 @@ impl SimulationSession {
                 }
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 rebuild_world(self.app.world_mut());
-                let session = self.app.world().resource::<SessionResource>();
                 vec![ServerPacket::LogOutSuccess {
-                    characters: session
-                        .characters
-                        .iter()
-                        .map(CharacterRecord::to_select_info)
-                        .collect(),
+                    characters: account_select_infos(&config, &account_id),
                 }]
             }
             ClientPacket::Turn { direction } => {

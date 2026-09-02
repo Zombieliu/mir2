@@ -17,8 +17,8 @@ use mir2_game_data::{
     content_profile_respawn_overrides_for_map, crystal_map_respawns_by_file_name,
     crystal_respawn_manifest, platinum_176_profile, platinum_176_profile_bundle,
     starter_map_collision, starter_scene, validate_content_profile, ContentProfile,
-    ContentSkillRule, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds, SceneBootstrap,
-    SceneView, StarterMapCollision, TerrainPatchTemplate,
+    ContentSkillRule, CrystalItemTemplate, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds,
+    SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Notice,
@@ -52,13 +52,17 @@ pub struct CharacterRecord {
 
 impl CharacterRecord {
     pub fn to_select_info(&self) -> SelectInfo {
+        self.to_select_info_with_last_access(0)
+    }
+
+    pub fn to_select_info_with_last_access(&self, last_access_binary_datetime: i64) -> SelectInfo {
         SelectInfo {
             index: self.index,
             name: self.name.clone(),
             level: self.level,
             class: self.class,
             gender: self.gender,
-            last_access_binary_datetime: 638452800000000000,
+            last_access_binary_datetime,
         }
     }
 
@@ -1332,6 +1336,13 @@ pub struct AccountRecord {
     /// tooling / account provisioning; never granted implicitly.
     #[serde(default)]
     pub gm_level: u8,
+    /// Crystal `CharacterInfo.LastLogoutDate`, keyed by character index.
+    ///
+    /// This lives on the account record so the select roster can be produced
+    /// without loading a private in-world save. Legacy stores deserialize as
+    /// `Never` (zero) until that character next leaves the world.
+    #[serde(default)]
+    pub character_last_access_binary_datetimes: BTreeMap<i32, i64>,
     pub characters: Vec<CharacterRecord>,
     pub saves: BTreeMap<i32, CharacterSaveRecord>,
 }
@@ -1363,6 +1374,7 @@ impl AccountRecord {
             ban_until_ms: None,
             banned_at_ms: None,
             gm_level: 0,
+            character_last_access_binary_datetimes: BTreeMap::new(),
             characters: vec![default_character],
             saves,
         }
@@ -1381,9 +1393,24 @@ impl AccountRecord {
             ban_until_ms: None,
             banned_at_ms: None,
             gm_level: 0,
+            character_last_access_binary_datetimes: BTreeMap::new(),
             characters: Vec::new(),
             saves: BTreeMap::new(),
         }
+    }
+
+    pub fn select_infos(&self) -> Vec<SelectInfo> {
+        self.characters
+            .iter()
+            .map(|character| {
+                character.to_select_info_with_last_access(
+                    self.character_last_access_binary_datetimes
+                        .get(&character.index)
+                        .copied()
+                        .unwrap_or_default(),
+                )
+            })
+            .collect()
     }
 
     pub fn active_ban(&self, now_ms: u64) -> Option<AccountBanStatus> {
@@ -1512,6 +1539,11 @@ pub struct CharacterSaveRecord {
     pub chat_banned: bool,
     #[serde(default)]
     pub chat_ban_until_ms: Option<u64>,
+    /// Crystal `CharacterInfo.Inventory.Length`, including the six belt cells.
+    /// The unexpanded array is 46 cells; expansion unlocks Bag2 in the exact
+    /// sequence 54, 58, ..., 86.
+    #[serde(default = "default_inventory_capacity")]
+    pub inventory_capacity: u16,
     pub inventory_items_json: Vec<String>,
     pub belt_items_json: Vec<String>,
     #[serde(default)]
@@ -1523,6 +1555,10 @@ pub struct CharacterSaveRecord {
     pub equipment_items_explicit_empty: bool,
     pub quest_states_json: Vec<String>,
     pub skill_states_json: Vec<String>,
+    /// Active Crystal buffs, encoded as exact private runtime states. Legacy
+    /// saves default to no active buffs, matching the historical behavior.
+    #[serde(default)]
+    pub buff_states_json: Vec<String>,
     #[serde(default)]
     pub npc_flag_states_json: Vec<String>,
     #[serde(default)]
@@ -1579,6 +1615,7 @@ impl CharacterSaveRecord {
             pk_points: 0,
             chat_banned: false,
             chat_ban_until_ms: None,
+            inventory_capacity: default_inventory_capacity(),
             inventory_items_json: Vec::new(),
             belt_items_json: Vec::new(),
             hero_inventory_items_json: Vec::new(),
@@ -1587,6 +1624,7 @@ impl CharacterSaveRecord {
             equipment_items_explicit_empty: false,
             quest_states_json: Vec::new(),
             skill_states_json: Vec::new(),
+            buff_states_json: Vec::new(),
             npc_flag_states_json: Vec::new(),
             npc_saved_values_json: Vec::new(),
             npc_buy_back_items_json: Vec::new(),
@@ -1600,6 +1638,25 @@ impl CharacterSaveRecord {
 
 const fn default_max_experience() -> i64 {
     100
+}
+
+pub const CRYSTAL_BELT_SLOT_COUNT: u16 = 6;
+pub const CRYSTAL_BASE_INVENTORY_CAPACITY: u16 = 46;
+pub const CRYSTAL_MAX_INVENTORY_CAPACITY: u16 = 86;
+
+pub const fn default_inventory_capacity() -> u16 {
+    CRYSTAL_BASE_INVENTORY_CAPACITY
+}
+
+pub const fn is_valid_crystal_inventory_capacity(capacity: u16) -> bool {
+    capacity == CRYSTAL_BASE_INVENTORY_CAPACITY
+        || (capacity >= 54
+            && capacity <= CRYSTAL_MAX_INVENTORY_CAPACITY
+            && (capacity - 54) % 4 == 0)
+}
+
+pub const fn crystal_bag_slot_capacity(capacity: u16) -> u16 {
+    capacity.saturating_sub(CRYSTAL_BELT_SLOT_COUNT)
 }
 
 #[cfg(test)]
@@ -1852,6 +1909,7 @@ mod tests {
         assert!(save.npc_saved_values_json.is_empty());
         assert!(save.npc_buy_back_items_json.is_empty());
         assert!(save.npc_used_goods_items_json.is_empty());
+        assert_eq!(save.inventory_capacity, CRYSTAL_BASE_INVENTORY_CAPACITY);
         assert_eq!(save.experience, 0);
         assert_eq!(save.max_experience, 100);
         let account = store
@@ -5746,6 +5804,39 @@ pub struct WorldItemSnapshot {
     pub grade: ItemGrade,
     pub added_attack: i32,
     pub added_defence: i32,
+    /// Exact Crystal `ItemInfo` + `UserItem` pair used by
+    /// `GameScene.CreateItemLabel`. Older snapshots omit it and clients must
+    /// keep the tooltip partial instead of guessing catalogue or instance
+    /// state from the display name.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tooltip_source: Option<WorldItemTooltipSource>,
+}
+
+/// Lossless source inputs for Crystal's eleven-section item tooltip.
+///
+/// `info` is the immutable `ItemInfo` projection from `Server.MirDB` while
+/// `user_item` is the concrete instance. Equipment snapshots created by an
+/// older save path can still expose `info` without manufacturing missing
+/// instance-only fields.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldItemTooltipSource {
+    pub info: CrystalItemTemplate,
+    /// Crystal `Functions.GetRealItem(info, player.level, player.class)` for
+    /// the active viewer. Name/bind identity still comes from `info`; stats,
+    /// requirements and several type-specific lines use this resolved row.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub real_info: Option<CrystalItemTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_item: Option<UserItem>,
+    /// Direct socket `ItemInfo` values in the same positional order as
+    /// `user_item.slots`. Crystal renders each socket's FriendlyName and also
+    /// folds its base stats into the parent tooltip.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub socket_infos: Vec<Option<CrystalItemTemplate>>,
+    /// Viewer-resolved rows corresponding positionally to `socket_infos`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub real_socket_infos: Vec<Option<CrystalItemTemplate>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -5753,9 +5844,17 @@ pub struct WorldItemSnapshot {
 pub struct EquipmentItemSnapshot {
     pub slot: EquipmentSlot,
     pub key: String,
+    /// Exact Crystal `UserItem.UniqueID` for this worn instance. Legacy
+    /// equipment saves may not have retained it, so absence remains explicit.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unique_id: Option<u64>,
     pub quantity: u32,
     pub name: String,
     pub icon: u16,
+    /// Crystal `ItemInfo.Image` index used by CharacterDialog's
+    /// `Libraries.StateItems.Draw`. This is not the bag icon.
+    #[serde(default)]
+    pub state_image: u16,
     pub shape: Option<u16>,
     pub description: String,
     pub durability_current: u16,
@@ -5769,6 +5868,12 @@ pub struct EquipmentItemSnapshot {
     pub socket_slots: u8,
     pub sealed_expiry_time_binary_datetime: i64,
     pub sealed_next_time_binary_datetime: i64,
+    /// Crystal tooltip source reconstructed through the same bounded
+    /// `EquipmentState -> UserItem` carrier used by native equipment packets.
+    /// Legacy or invalid carriers can still expose catalogue-only information;
+    /// absence of `user_item` remains explicit and fail-closed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tooltip_source: Option<WorldItemTooltipSource>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -5949,7 +6054,7 @@ pub struct BuffSnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct Stage5SystemsState {
     pub group: Stage5GroupState,
     pub guild: Stage5GuildState,
@@ -6671,6 +6776,11 @@ pub struct WorldSnapshot {
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
     pub player_max_mp: Option<i32>,
+    /// Authoritative Crystal stat block used by client presentation such as
+    /// item requirement colouring. Presence (including an empty array) means
+    /// missing stat ids are known zero; older snapshots omit the field.
+    #[serde(default)]
+    pub player_crystal_stats: Vec<UserItemStat>,
     #[serde(default)]
     pub player_pk_points: i32,
     pub player_experience: i64,
@@ -6687,6 +6797,9 @@ pub struct WorldSnapshot {
     pub max_weight: u16,
     pub free_bag_slots: u16,
     pub max_bag_slots: u16,
+    /// Authoritative Crystal inventory-array length, including six belt cells.
+    #[serde(default = "default_inventory_capacity")]
+    pub inventory_capacity: u16,
     pub storage_size: u16,
     pub has_expanded_storage: bool,
     pub has_storage_password: bool,

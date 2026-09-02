@@ -1,5 +1,73 @@
 # Crystal Server Parity
 
+> Crystal remaining tooltip surfaces note (2026-09-03): NPC shop, GameShop,
+> quest reward, guild-storage and trade packets now feed the native client a
+> complete tooltip source without moving authority into presentation code.
+> Instance-bearing surfaces retain their real `UserItem`; catalogue previews
+> follow Crystal's different GameShop and Quest constructors; exact item-index
+> joins and viewer-specific `GetRealItem` fail closed when source identity is
+> absent or ambiguous. Native UI passes 511/511 and the current Windows Debug
+> build succeeds; Windows is 519/520 solely because of the registered Archer
+> atlas fixture assertion. This supersedes the sparse-surface statement in the
+> prior note below. It does not close distributed item ownership, panel visual
+> geometry, same-EXE populated evidence, device or human acceptance, and no
+> server/global percentage is reported.
+>
+> Crystal item-tooltip server-client note (2026-09-03): item ownership and
+> mutation remain server-authoritative; this slice adds only the complete
+> presentation source needed by a faithful client. Simulation resolves each
+> visible personal item with Crystal `Functions.GetRealItem`, retains recursive
+> socket `UserItem` records and exposes current player requirement stats;
+> Gateway carries those exact values to Windows. Focused Simulation/game-data
+> regressions and client native-ui 509/509 pass. The same-EXE WoodenSword hover
+> proves the bounded route, but NPC/cash shops, quest rewards, guild storage and
+> trade remain sparse and must not fabricate metadata. This does not complete
+> distributed account/item ownership, packaging, DPI/device or human visual
+> acceptance, and no server/global percentage is reported.
+
+> CharacterDialog server-client projection note (2026-09-02): no new client
+> authority was introduced. The personal Simulation remains authoritative for
+> equipped items and now projects each Crystal template's `ItemInfo.Image` in
+> `EquipmentItemSnapshot`; existing `UserInformation` gender/hair and existing
+> world/player guild fields are retained by Gateway instead of disappearing on
+> a later partial snapshot. The Windows host resolves presentation geometry
+> from exact exported `StateItem` metadata and fails closed when data is
+> missing. Focused server/Gateway regressions and aligned `1231` native
+> evidence pass. Wing state is still unavailable, and this does not complete
+> Character stats, multiplayer Zone ownership, packaging, device or human
+> acceptance; no server/global percentage is reported.
+
+> Zone movement/light server-client note (2026-09-01): the authoritative Zone
+> now treats both Walk and Run as real 600 ms movement windows and consumes only
+> the latest intent when the actual clock reaches readiness. It no longer
+> executes against a future tick or a 120 ms early grace window; blocked moves
+> still correct only the owner and successful moves retain normal owner/AOI
+> packet surfaces. Windows may predict Crystal's two-cell Run or three cells
+> for mounted/SwiftFeet presentation, but collision and final transform remain
+> server-owned. The local server's unset/`dynamic` light mode now follows the
+> same Crystal UTC time-of-day formula instead of a Debug-only forced Day; fixed
+> `1..4` overrides remain deterministic QA controls, and no gamma manipulation
+> is involved. `shared_zone` passes 204/204 and focused light regressions pass.
+> This closes only the identified local timing/configuration mismatch; full
+> distributed Zone, live-WSS, device and human frontend acceptance remain open,
+> with no server/global percentage reported.
+
+> Character-select LastAccess server/client note (2026-09-01): the local path
+> now follows Crystal's UTC `CharacterInfo.LastLogoutDate`/
+> `SelectInfo.LastAccess` lifecycle instead of returning a hard-coded date.
+> Authoritative final `LogOut`, `Disconnect` and abnormal transport teardown
+> persist the binary DateTime beside the final character snapshot, recovery
+> replay retains the logout-save semantic, subsequent rosters expose it, and
+> Gateway retains its exact signed 64-bit representation. Web and Windows
+> consume it without precision loss; Windows formats the reconstructed value as
+> `yyyy/MM/dd HH:mm:ss`. Focused Simulation 2/2, Gateway LastAccess 2/2,
+> recovery replay 1/1, native protocol 1/1, Windows adapter 1/1 and select UI
+> 6/6 regressions pass. A legacy or new character still correctly shows `Never`
+> until its first completed logout. The adjacent preview residency/shared-clock
+> repair is client presentation only; the local Debug comparison is not
+> same-EXE/device/human acceptance and no server or global percentage is
+> reported.
+
 > Windows NPC click/DataRange server-client note (2026-08-29): revision
 > `dd3179559` is source-bound to Crystal `GameScene.OnMouseClick` and
 > `PlayerObject.CallNPC`. Windows sends `CallNPC [@Main]` immediately for a

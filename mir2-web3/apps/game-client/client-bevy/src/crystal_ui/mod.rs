@@ -6,6 +6,7 @@
 pub mod assets;
 pub mod chat;
 pub mod hud;
+pub mod item_tooltip;
 pub mod login;
 pub mod metrics;
 pub mod minimap;

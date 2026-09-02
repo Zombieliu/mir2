@@ -1478,6 +1478,37 @@ fn mounted_player_walk_uses_the_same_crystal_server_delay() {
         Some(Point { x: 362, y: 250 }),
         "unmounted player should step once its 600ms cadence elapses"
     );
+
+    for who in [&rider, &walker] {
+        let outbounds = zone.handle(ZoneCommand::Run {
+            session_id: who.clone(),
+            direction: MirDirection::Right,
+            seq: 3,
+            now_ms: 800,
+        });
+        assert!(
+            outbounds.is_empty(),
+            "run input may queue early but cannot advance the authoritative clock"
+        );
+    }
+    assert!(zone.tick(1_199).is_empty());
+    assert_eq!(zone.player_position(&rider), Some(Point { x: 322, y: 250 }));
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 362, y: 250 })
+    );
+
+    zone.tick(1_200);
+    assert_eq!(
+        zone.player_position(&rider),
+        Some(Point { x: 325, y: 250 }),
+        "mounted run travels three cells only after the same 600ms cadence"
+    );
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 364, y: 250 }),
+        "ordinary run travels two cells after the same 600ms cadence"
+    );
 }
 
 #[test]
@@ -1520,7 +1551,7 @@ fn run_received_inside_grace_survives_late_zone_tick() {
 }
 
 #[test]
-fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
+fn ready_pending_run_is_consumed_at_real_arrival_before_followup_is_queued() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
@@ -1541,13 +1572,12 @@ fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
         now_ms: 400,
     });
     assert!(
-        has_packet(&run_outbounds, &second, |packet| matches!(
-            packet,
-            ServerPacket::ObjectRun { movement }
-                if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
-        )),
-        "buffered run should be consumed as soon as it arrives near the ready edge: {run_outbounds:?}"
+        run_outbounds.is_empty(),
+        "early run may be buffered but must not fast-forward the Zone clock: {run_outbounds:?}"
     );
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
+    assert!(zone.tick(599).is_empty());
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
 
     let reverse_outbounds = zone.handle(ZoneCommand::Walk {
         session_id: first.clone(),
@@ -1556,30 +1586,34 @@ fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
         now_ms: 700,
     });
 
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert!(
+        has_packet(&reverse_outbounds, &second, |packet| matches!(
+            packet,
+            ServerPacket::ObjectRun { movement }
+                if movement.object_id == 101
+                    && movement.position == (Point { x: 333, y: 270 })
+        )),
+        "arrival after the real ready time must consume the older run before queuing reverse: {reverse_outbounds:?}"
+    );
+
+    assert!(zone.tick(1_299).is_empty());
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    let left_outbounds = zone.tick(1_300);
     assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
     assert!(
-        has_packet(&reverse_outbounds, &first, |packet| matches!(
+        has_packet(&left_outbounds, &first, |packet| matches!(
             packet,
             ServerPacket::UserLocation { location }
                 if location.position == (Point { x: 332, y: 270 })
                     && location.direction == MirDirection::Left
         )),
-        "follow-up reverse walk should also be acknowledged from the same buffered chain: {reverse_outbounds:?}"
-    );
-
-    let left_outbounds = zone.tick(1_000);
-    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
-    assert!(
-        !has_packet(&left_outbounds, &first, |packet| matches!(
-            packet,
-            ServerPacket::UserLocation { .. }
-        )),
-        "buffered chain should not leave a delayed correction packet behind: {left_outbounds:?}"
+        "reverse must wait for the run's real 600ms cadence: {left_outbounds:?}"
     );
 }
 
 #[test]
-fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
+fn buffered_walk_run_reverse_chain_waits_for_real_ready_ticks() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
@@ -1600,16 +1634,15 @@ fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
         seq: 2,
         now_ms: 400,
     });
-    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
     assert!(
-        has_packet(&run_outbounds, &first, |packet| matches!(
-            packet,
-            ServerPacket::UserLocation { location }
-                if location.position == (Point { x: 333, y: 270 })
-        )),
-        "buffered run should acknowledge immediately instead of waiting for a socket tick: {run_outbounds:?}"
+        run_outbounds.is_empty(),
+        "early run must be queued without an immediate location ACK: {run_outbounds:?}"
     );
-    assert!(has_packet(&run_outbounds, &second, |packet| matches!(
+    assert!(zone.tick(599).is_empty());
+    let run_tick = zone.tick(600);
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert!(has_packet(&run_tick, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectRun { movement }
             if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
@@ -1621,17 +1654,15 @@ fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
         seq: 3,
         now_ms: 700,
     });
-    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
     assert!(
-        has_packet(&reverse_outbounds, &first, |packet| matches!(
-            packet,
-            ServerPacket::UserLocation { location }
-                if location.position == (Point { x: 332, y: 270 })
-                    && location.direction == MirDirection::Left
-        )),
-        "buffered reverse walk should acknowledge immediately after a run: {reverse_outbounds:?}"
+        reverse_outbounds.is_empty(),
+        "reverse must remain buffered until the run's 600ms cadence expires: {reverse_outbounds:?}"
     );
-    assert!(has_packet(&reverse_outbounds, &second, |packet| matches!(
+    assert!(zone.tick(1_199).is_empty());
+    let reverse_tick = zone.tick(1_200);
+    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert!(has_packet(&reverse_tick, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectWalk { movement }
             if movement.object_id == 101

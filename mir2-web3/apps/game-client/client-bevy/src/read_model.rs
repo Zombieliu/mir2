@@ -8,6 +8,13 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalPlayerStatModel {
+    pub stat: u8,
+    pub value: i32,
+}
+
 /// Player stats surfaced by the HUD.
 ///
 /// All values are `Option`-safe and clamped by [`UiReadModel::normalized_hp`]
@@ -23,6 +30,10 @@ pub struct PlayerStats {
     pub max_mp: i32,
     pub gold: u32,
     pub credit: u32,
+    /// `Some` means the server supplied its authoritative Crystal stat block;
+    /// a missing id inside that block is zero. `None` is a legacy/partial
+    /// snapshot and must not be treated as proof that a requirement is met.
+    pub crystal_stats: Option<Vec<CrystalPlayerStatModel>>,
     pub level: u32,
     pub experience: i64,
     pub max_experience: i64,
@@ -33,6 +44,14 @@ pub struct PlayerStats {
     /// Older snapshots may omit it; `None` keeps the catalog visible while the
     /// server remains the final authority for a purchase.
     pub class_name: Option<String>,
+    /// Crystal `UserInformation.Gender`. Kept optional so an old or partial
+    /// snapshot cannot silently invent the CharacterDialog paper doll.
+    pub gender: Option<String>,
+    /// Crystal's zero-based hair style index. `0` is a real style, therefore
+    /// absence is represented by `None` rather than a numeric sentinel.
+    pub hair: Option<u8>,
+    pub guild_name: Option<String>,
+    pub guild_rank_name: Option<String>,
     pub map_name: Option<String>,
     /// Server-authoritative safe-zone membership for the local player.
     pub in_safe_zone: bool,
@@ -137,6 +156,7 @@ mod tests {
                 max_mp: 50,
                 gold: 1234,
                 credit: 45,
+                crystal_stats: Some(vec![CrystalPlayerStatModel { stat: 5, value: 4 }]),
                 level: 3,
                 experience: 435,
                 max_experience: 900,
@@ -144,6 +164,10 @@ mod tests {
                 max_weight: 50,
                 name: Some("Demo".to_owned()),
                 class_name: Some("Warrior".to_owned()),
+                gender: Some("Male".to_owned()),
+                hair: Some(0),
+                guild_name: Some("DemoGuild".to_owned()),
+                guild_rank_name: Some("Member".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
                 in_safe_zone: true,
             },

@@ -1,5 +1,230 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-09-03 native remaining item-tooltip surface checkpoint: packet adapters
+> now retain complete tooltip source for NPC shop, GameShop, fixed/selectable
+> quest rewards, guild storage and trade. Automated coverage verifies Crystal's
+> actual-instance versus synthetic-preview distinction, GameShop durability and
+> count, Quest's separate reward quantity, viewer-specific class/level data,
+> recursive socket/bind fields, ambiguous-index rejection and the common hover
+> lifecycle. Native UI passes 511/511. Windows passes 519/520; the sole failure
+> remains the previously recorded Archer atlas fixture expecting
+> `/ARArmour/00/24.png`, while a current Debug executable builds successfully.
+> No populated same-EXE screenshot for these five surfaces has been admitted,
+> and exact panel geometry/hit regions, NPC hide-added-stat behavior, DPI and
+> human Crystal comparison remain required. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+>
+> 2026-09-03 native Crystal item-tooltip checkpoint: an isolated latest
+> Gateway created and persisted the fresh `TooltipR1` fixture, then the exact
+> Windows EXE SHA-256
+> `5257E859B4AB173A8076B58778C59D09D291A7EB90F0FCFA38F696E46181A56F`
+> entered BichonProvince `(288,616)` and opened Bag1. Real Windows pointer input
+> selected slot 0; Escape closed the item-operation layer while leaving hover
+> active, and F12 captured the renderer-owned WoodenSword hint at
+> `docs/generated/player-qa/native-ui-parity-20260903-item-tooltip/item-tooltip-in-game-1788370099170-2.png`
+> (SHA-256
+> `82F2D5ACAB20874FB31D3C3B3EF8EA105D03495BD32ACED27D7BDE0EE6B78AB`).
+> The visible order covers name/quality, type, weight/durability, DC,
+> requirements and price. Adjacent sidecars freeze the same run id, panel/page,
+> dialog origin and world state; `process-provenance.json` freezes process paths
+> and hashes. Native-ui passes 509/509; Windows full suite is 517/518 with only
+> the pre-existing Archer `/ARArmour/00/24.png` fixture failure. Sparse shop,
+> reward, guild-storage and trade models, trusted build/light provenance, DPI
+> and human Crystal comparison remain open. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`. Full report:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-tooltip/README.md`.
+
+> 2026-09-03 native Inventory movable checkpoint: the final current-tree r5
+> EXE (SHA-256
+> `F08FC69F744BC9D6895A7756CF98AAF5A69EEEF4CA8AF10F65BA78D8663B33D3`)
+> used real Windows pointer input to move the source-sized `316x236`
+> InventoryDialog from `(0,0)` to `(275,208)`. Both captures share run id
+> `inventory-drag-20260903-r5`, character, Bag1 contents and BichonProvince
+> `(287,616)`:
+> `docs/generated/player-qa/native-ui-parity-20260903-inventory-drag-final/inventory-drag-inventory-1788365024393-1.png`
+> (SHA-256
+> `64F8A6A4ECB500F40C508ED804FDA686DEEF11A4FDAF507601680202064A5B5C`)
+> and
+> `docs/generated/player-qa/native-ui-parity-20260903-inventory-drag-final/inventory-drag-in-game-1788365096792-2.png`
+> (SHA-256
+> `AED8F77D8F8F6A43E80F985A13748ECFD11BA26C33B462A406F01F6185C8CFE3`).
+> The sidecars independently record the two exact `inventoryLocation` values.
+> Source authority is `InventoryDialog.cs:25-31` plus generic drag/clamp/
+> release behavior at `MirControl.cs:852-935`; original `Title/196.png` is
+> `316x236`. Drag regressions pass 4/4 and full native-ui passes 496/496.
+> Trusted build/light provenance and human visual acceptance remain open.
+> `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-02 native Inventory/DeleteMode checkpoint:
+> `MIR2_NATIVE_CAPTURE_AUTO_SCREEN=inventory-delete` now waits for an
+> authoritative in-game inventory, opens Bag1, enables the real UI DeleteMode
+> and selects the first eligible ordinary bag item. A disposable character
+> with four server-backed items exercised this path through the local Gateway;
+> the renderer capture is
+> `docs/generated/player-qa/native-ui-parity-20260902-inventory-delete/inventory-delete-final-inventory-delete-1788362950757-1.png`
+> (SHA-256
+> `50F30B959365E5E2F4B2F6C1BA677118A683A4A7E91E47FEB4E5E6953F8761B1`).
+> It records the exact centred single-item Yes/No prompt and leaves YES
+> untouched, so the fixture remains intact. The companion Quest-page icon and
+> footer evidence is
+> `docs/generated/player-qa/native-ui-parity-20260902-inventory/inventory-final-inventory-1788360618712-1.png`.
+> The live stacked-item amount-box capture, trusted build provenance,
+> authoritative light and human visual comparison remain gates.
+> `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-02 native Run lighting-camera edge follow-up: the remaining straight
+> dark strip was not a missing map binding and was not fixed by the shader
+> guard alone. `follow_player` advanced the display-Hz `MainCamera`, while the
+> offscreen `MirLightingBufferCamera` and main-pass `MirLightingComposite`
+> stayed at the map-frame origin; movement therefore exposed the material's
+> defensive `border_darkness` region as a ruler-straight band. The ordered
+> presentation chain now runs `follow_lighting_camera` immediately after
+> `follow_player` and copies the committed main-camera X/Y to both lighting
+> followers while preserving their render-order Z and composite scale. The
+> regression `lighting_buffer_and_composite_follow_the_presented_main_camera`
+> locks a non-origin camera pose plus the original `1312x960` guarded composite
+> size. Shared runtime passes 211/211. The full Windows suite reaches 511/512;
+> its sole failure is the pre-existing unrelated Archer atlas fixture assertion
+> for `/ARArmour/00/24.png`. A current-tree Debug EXE (84,956,160 bytes,
+> SHA-256 `E1907E674386F6CEC7116B3BECA4C1E85D390CFFC9179C741F670B4DB4C32510`)
+> was connected to the local `7010` Gateway and exercised three visible
+> multi-cell runs (left, reverse diagonal and downward diagonal) in a 1024x768
+> Bichon scene. All four viewport edges remained continuous; the soft lower-left
+> night-light falloff remained scene-relative and did not become a fixed-width
+> strip. This closes the diagnosed Run edge exposure, not final Crystal 1:1
+> human acceptance. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-02 native Gateway connection-loss follow-up: the user-visible
+> `WebSocket protocol error: Connection reset` was a Gateway failure, not a
+> renderer or local-motion regression. PID/port checks showed the old Gateway
+> still listening on `7011/7111`, but `/health` accepted TCP and returned an
+> empty response. Its runtime log contained repeated spectator append failures
+> with Windows `os error 112` (`磁盘空间不足`), and E: had `0 MB` free.
+> `.mir2-data/spectator` had grown to 22 generated JSONL recordings totaling
+> 5,501,000,469 bytes (individual hourly files reached approximately 426 MB).
+> Those files were moved recoverably to the host temp drive and the local
+> developer launcher now sets `MIR2_SPECTATOR_RECORDING_ENABLED=0`, restoring
+> the caller's prior value on exit. The launcher cleanup self-test passes.
+> After restart, two health checks ten seconds apart both passed,
+> `recordingEnabled=false`, `recordingErrorsTotal=0`, `persistedFramesTotal=0`,
+> the spectator directory remained empty with zero E: free-space delta, and
+> the native client retained one established WebSocket before returning to the
+> Bichon game scene.
+
+> 2026-09-02 native movement camera/thread-boundary follow-up: 60 fps Desktop
+> Duplication evidence proved that the remaining "scene cannot keep up" defect
+> was not network acknowledgement latency. Before the repair, one Walk/Run
+> action exposed only whole-cell camera commits (`+48,-32` and `+48,0`), with
+> no six intermediate Crystal phases. Native input was publishing the local
+> command queue and self-camera window through Rust `thread_local!` storage,
+> while Bevy could consume them on another worker thread. The render side
+> therefore usually saw an empty bridge and only caught a command when the
+> scheduler happened to reuse the producer thread. Native now uses bounded
+> process-wide `Mutex`/`AtomicU64` bridges for those values; WASM keeps the
+> original single-thread `thread_local!` path. Command-time local presentation
+> is enabled for the complete Crystal movement window. The post-fix capture
+> `.mir2-player-qa/video-20260901/native-ddagrab-fixed-v10.mp4` records one
+> automatic route as six `(+8,-4/-6)` diagonal Walk phases, six `(+16,0)` Run
+> phases and six `(+8,0)` final Walk phases, with no reverse flash or whole-cell
+> snap. Shared runtime passes 209/209, native cross-thread bridge regressions
+> pass, and Windows input tests pass 42/42. The final diagnostic-free Debug EXE
+> is 84,921,856 bytes, SHA-256
+> `B1EEED541E3E956202841988052FB4F8505FE66EFFA32620F0A3DA2F58C73BA7`.
+> This is bounded local Debug/video evidence; the restarted native and Crystal
+> windows remain the user's human feel gate. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-01 Bichon Run edge-exposure/performance follow-up: the user-captured
+> bright strip at the native viewport edge was not a missing map tile or a Zone
+> rollback. The map renderer reported `missingBindings=0`; the defect was the
+> world-space darkness/light composite being exactly stage-sized (`1024x768`)
+> while the Crystal Run camera presentation temporarily translates by as much
+> as 120 px horizontally and 80 px vertically. The first repair physically
+> enlarged the offscreen light target to `1312x960`; after the user reported
+> that movement felt unable to keep up, that approximately 60% extra offscreen
+> fill was removed. The light texture is again `1024x768`. A `1312x960`
+> composite mesh now supplies a shader-only `144x96` virtual guard: its central
+> region maps 1:1 to the stage texture and out-of-range UVs emit the exact
+> ambient darkness, so Run cannot reveal unmultiplied scene pixels without
+> enlarging the rendered light target or making local lights screen-relative.
+> Runtime tests pass 207/207 and the locked Windows Debug build passes. A fresh
+> live four-direction retest exercised five Run plus eleven Walk commands; all
+> 16 authoritative locations were confirmed, with zero correction/rollback,
+> `missingBindings=0` throughout, and acknowledgement latency 13-77 ms
+> (31 ms average). The guarded darkness remained present at the viewport edges.
+> The running 84,921,344 byte Debug EXE is SHA-256
+> `AEF8C39FC0CAEA18644045B6C0C661CCDCB836E9B9EE3E6170F502C729C535AE`.
+> This is bounded local Debug evidence; final human movement/visual acceptance
+> remains open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-01 Bichon building-opacity follow-up: the user's same-coordinate
+> `(294,616)` native/Crystal comparison exposed a separate object-compositing
+> defect after the global light cycle was aligned. Ordinary Crystal map PNGs
+> already contain authoritative `.Lib` RGBA with binary alpha, but the native
+> pack rebuilt every normal `Objects*` frame through the legacy black-key
+> feather pass. That converted real edge-connected dark roof/wall pixels into
+> partial alpha and let the pale ground show through. Local normal and additive
+> frames are now staged byte-for-byte; map metadata alone selects normal versus
+> additive runtime blending. The rebuilt map-0 manifest is SHA-256
+> `E82E5573E98BDFC65B7EF463C9F09585F12805399E0783F7837D95F2D0AC1B1D`.
+> Representative visible frames `Objects#7680/#7684/#7688/#7692/#7695/#7701`,
+> `#8403/#8413` and `#8678` are byte-identical to their Crystal-export source,
+> and the native pack regression now locks ordinary RGBA passthrough. A fresh
+> live native restart and read-only 1024x768 observation at `(294,616)` showed
+> opaque dark stalls, Blacksmith building and lower-right house matching the
+> Crystal scene depth instead of the earlier washed-through buildings. This is
+> bounded local Debug evidence; final human acceptance remains open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-01 Bichon map/lighting/movement retest: the native map reader now
+> keeps Crystal's fixed `16x17` cell scan and extends Middle/Front object
+> lookahead by 25 bottom rows, so bottom-anchored tall buildings are no longer
+> cropped out. Startup also requires `generated/native-map-keyed/manifest.json`
+> instead of accepting a partial asset root. The regenerated map-0 pack is
+> SHA-256 `E82E5573E98BDFC65B7EF463C9F09585F12805399E0783F7837D95F2D0AC1B1D`
+> with 7,672 refs, 4,703 entries, 4,520 keyed frames, 183 additive frames and
+> the current all-animation-phase `missingSourceCount=2969`; the earlier 2,508
+> value remains a historical pre-expansion baseline. `Objects#2723..2732` are
+> present as one complete 10-frame family. Live Bichon diagnostics report
+> `tiles=1090`, `standalone=334`, `missingBindings=0` and
+> `incompleteFamilies=0`. The color mismatch was traced to native Debug forcing
+> Day while Crystal was using its UTC light cycle; Debug now follows Crystal's
+> dynamic UTC setting unless an explicit fixed-light override is supplied. No
+> global gamma/darkening adjustment was added. Keyboard and mouse now share the
+> same NewMove, collision, prediction and authoritative-ACK controller;
+> right-click pathing continues after button release, ordinary Run predicts two
+> cells and mounted/SwiftFeet Run predicts three, while authoritative Walk/Run
+> cadence is 600 ms. Focused Windows input/map/presentation suites pass
+> 42/42, 35/35 and 28/28, the native keyed-pack Node regression passes, and
+> shared Zone passes 204/204. This is local Debug/automated evidence only; the
+> running client still requires the user's human map-depth, building-animation
+> and movement-feel acceptance. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-01 character-select Last Online/preview stability retest: the user's
+> side-by-side screenshot exposed two real regressions in the native Candidate:
+> the selected character showed `Never` instead of Crystal's last-online value,
+> and its animated body repeatedly flashed blank. The repaired local Debug path
+> now shows `Scout` as `2026/09/01 12:42:48` using Crystal's UTC
+> `LastLogoutDate`, exact Last Online row bounds, Arial 8 pt text, source
+> `VerticalCenter` alignment and `yyyy/MM/dd HH:mm:ss` format. Preview layers
+> preload and retain their complete
+> 16-frame sets, share one animation clock, and keep the current images until
+> every target layer is dependency-loaded. Fresh 1024x768 observations stayed
+> nonblank across multiple 250 ms ticks and a full animation loop while the
+> original Crystal client was independently returned to its select screen for
+> comparison. Select tests pass 7/7; focused Simulation LastAccess tests pass
+> 2/2, Gateway LastAccess tests pass 2/2, recovery replay passes 1/1, native
+> protocol and Windows adapter regressions pass 1/1 each, and locked native and
+> Gateway builds pass. This is bounded local implementation/QA evidence; the
+> currently running Debug window is not a packaged exact-head Candidate and the
+> user's retest remains the acceptance gate. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
 > 2026-08-29 VIS-01 direct-frame/run/chat follow-up: the exact `02bb678747...`
 > Candidate failed the user's visual retest because whole-actor flicker still
 > occurred. Revision `a3121ce487c93ff37f2ca94d7d60d8e12bf9e5ea`

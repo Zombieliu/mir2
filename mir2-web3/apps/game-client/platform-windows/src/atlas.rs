@@ -602,7 +602,7 @@ fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>>
 
     let loaded = assets::asset_path(&cache_key)
         .and_then(|path| fs::read(path).ok())
-        .and_then(|bytes| decode_png_rgba(&bytes))
+        .and_then(|bytes: Vec<u8>| decode_png_rgba(&bytes))
         .map(|(width, height, rgba)| {
             Arc::new(StarterAtlasPixelPage {
                 width,
@@ -1008,6 +1008,14 @@ fn build_entity_render_state_with_index(
                         .unwrap_or("monster");
                     let x = entity.get("x").and_then(Value::as_i64).unwrap_or(0);
                     let y = entity.get("y").and_then(Value::as_i64).unwrap_or(0);
+                    let sort_x = entity
+                        .get("motionSortX")
+                        .and_then(Value::as_i64)
+                        .unwrap_or(x);
+                    let sort_y = entity
+                        .get("motionSortY")
+                        .and_then(Value::as_i64)
+                        .unwrap_or(y);
                     let direction = entity
                         .get("direction")
                         .and_then(Value::as_str)
@@ -1041,7 +1049,10 @@ fn build_entity_render_state_with_index(
                         .saturating_add(relative_frame);
                     let root_left = entity_origin_x + (x - center_x) as f32 * CELL_WIDTH;
                     let root_top = entity_origin_y + (y - center_y) as f32 * CELL_HEIGHT;
-                    let z_base = entity_z_base(x, y);
+                    // Match Crystal's split CurrentLocation/MapLocation model:
+                    // screen placement is destination-relative, while an
+                    // unfinished move remains sorted at its source cell.
+                    let z_base = entity_z_base(sort_x, sort_y);
                     let mut layers = Vec::new();
 
                     let mount_library = resolved_sprite.mount_library.as_ref();
@@ -1189,6 +1200,8 @@ fn build_entity_render_state_with_index(
                         "motionFromY",
                         "motionToX",
                         "motionToY",
+                        "motionSortX",
+                        "motionSortY",
                         "motionStartedMs",
                         "motionDurationMs",
                     ] {
@@ -2178,6 +2191,8 @@ mod tests {
                 "motionFromY": 7.0,
                 "motionToX": 9.0,
                 "motionToY": 7.0,
+                "motionSortX": 8,
+                "motionSortY": 6,
                 "motionStartedMs": 1700000000100_u64,
                 "motionDurationMs": 600,
                 "sprite": {
@@ -2196,6 +2211,22 @@ mod tests {
         assert_eq!(entity["motionToY"], json!(7.0));
         assert_eq!(entity["motionStartedMs"], json!(1_700_000_000_100_u64));
         assert_eq!(entity["motionDurationMs"], json!(600));
+        let body = &entity["layers"][0];
+        assert_eq!(
+            body["left"],
+            json!(484.0),
+            "visual root stays at the target cell"
+        );
+        assert_eq!(
+            body["top"],
+            json!(344.0),
+            "visual root stays at the target cell"
+        );
+        assert_eq!(
+            body["z"],
+            json!(60_805.0),
+            "an active move keeps Crystal's source-cell sort depth"
+        );
     }
 
     #[test]

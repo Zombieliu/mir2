@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::config::{EquipmentItemSnapshot, EquipmentSlot, ItemContainer, ItemGrade};
+use crate::config::{
+    EquipmentItemSnapshot, EquipmentSlot, ItemContainer, ItemGrade, WorldItemTooltipSource,
+};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_npc_info_by_script_key, crystal_npc_script_by_key, localized_text_or_fallback,
@@ -116,12 +118,43 @@ fn default_equipment_quantity() -> u32 {
 
 impl EquipmentState {
     pub(super) fn snapshot(&self, language: LanguageCode) -> EquipmentItemSnapshot {
+        let user_item = user_item_from_equipment_state(self);
+        let tooltip_info = user_item
+            .as_ref()
+            .and_then(|item| mir2_game_data::crystal_item_by_index(item.item_index))
+            .or_else(|| crystal_item_template_for_item_key(&self.key));
+        let tooltip_source = tooltip_info.map(|info| {
+            let socket_infos = user_item
+                .as_ref()
+                .map(|item| {
+                    item.slots
+                        .iter()
+                        .map(|slot| {
+                            slot.as_ref().and_then(|socket| {
+                                mir2_game_data::crystal_item_by_index(socket.item_index)
+                            })
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+            WorldItemTooltipSource {
+                info,
+                real_info: None,
+                user_item,
+                socket_infos,
+                real_socket_infos: Vec::new(),
+            }
+        });
         EquipmentItemSnapshot {
             slot: self.slot,
             key: self.key.clone(),
+            unique_id: self.user_item_unique_id,
             quantity: self.quantity,
             name: localized_equipment_name(language, &self.key, &self.name),
             icon: self.icon,
+            state_image: crystal_item_template_for_item_key(&self.key)
+                .map(|template| template.image)
+                .unwrap_or_default(),
             shape: self.shape,
             description: localized_equipment_description(language, &self.key, &self.description),
             durability_current: self.durability_current,
@@ -143,6 +176,7 @@ impl EquipmentState {
             socket_slots: self.socket_slots,
             sealed_expiry_time_binary_datetime: self.sealed_expiry_time_binary_datetime,
             sealed_next_time_binary_datetime: self.sealed_next_time_binary_datetime,
+            tooltip_source,
         }
     }
 
@@ -2289,6 +2323,17 @@ mod native_start_equipment_tests {
                     let user_item = user_item_from_equipment_state(item)
                         .expect("starter equipment must serialize for Crystal");
                     assert_eq!(user_item.item_index, template.item_index);
+                    assert_eq!(
+                        item.snapshot(LanguageCode::English).state_image,
+                        template.image,
+                        "CharacterDialog must receive Crystal ItemInfo.Image"
+                    );
+                    let snapshot = item.snapshot(LanguageCode::English);
+                    let tooltip = snapshot
+                        .tooltip_source
+                        .expect("starter equipment must expose Crystal tooltip source");
+                    assert_eq!(tooltip.info.item_index, template.item_index);
+                    assert_eq!(tooltip.user_item, Some(user_item));
                 }
             }
         }
@@ -2320,6 +2365,11 @@ mod native_start_equipment_tests {
                 item_state_from_equipment_state(reloaded.clone(), ItemContainer::Bag1, 8);
 
             assert_eq!(reloaded.user_item_unique_id, Some(exact_uid));
+            assert_eq!(
+                reloaded.snapshot(LanguageCode::English).unique_id,
+                Some(exact_uid),
+                "the world snapshot must retain the worn Crystal instance UID"
+            );
             assert_eq!(
                 user_item_from_equipment_state(&reloaded)
                     .expect("equipped exact UID carrier should serialize")

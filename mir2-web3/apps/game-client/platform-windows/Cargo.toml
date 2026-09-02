@@ -36,6 +36,8 @@ flate2 = "1"
 futures-util = "0.3"
 mir2-bevy-runtime = { path = "../runtime" }
 mir2-client-bevy = { path = "../client-bevy", features = ["native-ui"] }
+mir2-game-data = { path = "../../../packages/game-data" }
+mir2-protocol = { path = "../../../packages/protocol" }
 mir2-ui-core = { path = "../ui-core" }
 png = "0.18"
 serde = { version = "1", features = ["derive"] }
@@ -44,3 +46,14 @@ sha2 = "0.10"
 tokio = { version = "1.52", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
 tokio-tungstenite = "0.29"
 toml = { version = "0.8", default-features = false, features = ["parse"] }
+ureq = { version = "2.10", default-features = false, features = ["tls"] }
+
+# Keep native iteration debuggable while avoiding Bevy's prohibitively slow
+# fully-unoptimized render/update path. Workspace crates retain lightweight
+# optimization for useful stepping; third-party dependencies are optimized so
+# the 100 ms Crystal action clock is not delayed by long debug frames.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

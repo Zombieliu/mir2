@@ -1,5 +1,60 @@
 # Agent Task Queue
 
+> Windows-native Crystal remaining item-surface tooltip projection checkpoint
+> (2026-09-03): NPC goods, GameShop entries, fixed/selectable quest rewards,
+> guild storage and both sides of trade now retain a complete tooltip source
+> instead of reconstructing details from display names. Actual NPC/trade/guild
+> `UserItem` records keep instance durability, additions, sockets and binding;
+> GameShop mirrors Crystal's full-durability/count preview constructor, while
+> Quest keeps its synthetic item count at zero and paints reward quantity
+> separately. Class/level `GetRealItem` resolution is viewer-aware, and absent
+> or duplicate item indexes fail closed. All five surfaces enter the same
+> delayed Crystal hint lifecycle already used by personal items. Native UI is
+> 511/511; Windows is 519/520 with only the previously registered Archer atlas
+> fixture assertion for `/ARArmour/00/24.png`; the current Windows Debug build
+> succeeds. This supersedes the earlier statement below that these models lack
+> full source, but it does not close their exact panel geometry, icon-only hit
+> regions, NPC hide-added-stat option, live populated same-EXE captures, DPI or
+> human comparison. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+>
+> Windows-native Crystal item-tooltip bounded checkpoint (2026-09-03):
+> Simulation/Gateway/client now carry and render the exact personal-item source
+> needed for Crystal's eleven-section hint on inventory, belt, equipment,
+> personal storage and the warehouse-side bag. Requirement colours,
+> unidentified masking, sockets, bind/expiry/seal/rental text and `+(28,28)`
+> clamped placement are covered; native-ui passes 509/509 and focused backend/
+> game-data tests pass. Exact EXE SHA-256
+> `5257E859B4AB173A8076B58778C59D09D291A7EB90F0FCFA38F696E46181A56F`
+> produced a real-pointer WoodenSword F12 capture at
+> `docs/generated/player-qa/native-ui-parity-20260903-item-tooltip/item-tooltip-in-game-1788370099170-2.png`.
+> This closes the bounded personal-item tooltip implementation, not the parent
+> denominator: NPC/cash shops, quest rewards, guild storage and trade lack the
+> full source; trusted package/light, DPI and human acceptance remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Windows-native Bichon map/light/movement follow-up (2026-09-01): the current
+> map-0 keyed baseline is SHA-256
+> `E82E5573E98BDFC65B7EF463C9F09585F12805399E0783F7837D95F2D0AC1B1D`
+> with 7,672 refs, 4,703 entries, 4,520 keyed frames, 183 additive frames and
+> `missingSourceCount=2969`. This supersedes 2,508 only as the current
+> all-animation-phase denominator; the 2,508 statements below remain historical
+> evidence for their earlier builds. The pack includes all ten
+> `Objects#2723..2732` frames, and live Bichon reports `tiles=1090`,
+> `standalone=334`, `missingBindings=0`, `incompleteFamilies=0`. Crystal
+> authoritative RGBA is now staged byte-for-byte for ordinary local map
+> frames; the former second black-key/feather pass no longer makes dark
+> buildings translucent. Same-coordinate `(294,616)` live inspection and the
+> focused pack regression pass. Crystal
+> `16x17+25` object retention, required native-keyed-manifest startup, UTC
+> dynamic light without gamma compensation, unified keyboard/pointer NewMove,
+> release-surviving right-click auto-path, two/three-cell Run prediction and
+> real 600 ms Zone Walk/Run readiness are implemented. Focused Windows suites
+> are 42/42, 35/35 and 28/28; the Node pack regression and `shared_zone`
+> 204/204 pass. Exact packaged-EXE, broader map/device/soak coverage and human
+> frontend acceptance remain open; `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
 > Windows-native NPC click/DataRange follow-up (2026-08-29): revision
 > `dd3179559` replaces the native adjacent-auto-approach compatibility bridge
 > with the behavior verified directly from Crystal `GameScene.OnMouseClick`

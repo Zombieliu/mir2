@@ -9,6 +9,8 @@ use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::inventory::CrystalItemTooltipSourceModel;
+
 pub const MAX_GROUP_MEMBERS: usize = 15;
 pub const MAX_GUILD_MEMBERS: usize = 200;
 pub const MAX_GUILD_RANKS: usize = 32;
@@ -84,6 +86,9 @@ pub struct GuildStorageItemModel {
     pub item_index: i32,
     pub count: u16,
     pub user_id: i64,
+    /// Exact `GuildStorageItem.Item` metadata used by Crystal's shared
+    /// `MirItemCell.OnMouseEnter` tooltip path.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -119,6 +124,8 @@ pub struct TradeItemModel {
     pub item_index: Option<i32>,
     pub name: Option<String>,
     pub count: u16,
+    /// Exact offered `UserItem` metadata used by both Crystal trade grids.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -928,6 +935,10 @@ fn parse_guild_storage_item(value: &Value) -> Option<GuildStorageItemModel> {
         item_index,
         count,
         user_id,
+        tooltip_source: value
+            .get("tooltipSource")
+            .or_else(|| item.get("tooltipSource"))
+            .and_then(|source| serde_json::from_value(source.clone()).ok()),
     })
 }
 
@@ -940,6 +951,9 @@ fn parse_trade_item(value: &Value) -> Option<TradeItemModel> {
         item_index: value_i32(value.get("itemIndex")),
         name: clean_name(value.get("name")),
         count: value_u16(value.get("count")).unwrap_or(1).max(1),
+        tooltip_source: value
+            .get("tooltipSource")
+            .and_then(|source| serde_json::from_value(source.clone()).ok()),
     })
 }
 

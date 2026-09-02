@@ -18,13 +18,14 @@ use crate::pending_operations::{PendingLifecycleSet, SessionResetRevision};
 use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
+use super::item_tooltip::crystal_item_tooltip_document;
 use super::notice::NoticeDialogState;
 use super::overlays::{NativePlayerUiSet, NativePlayerUiState};
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
-#[cfg(test)]
-use super::widget::CrystalHintStyle;
-use super::widget::{spawn_crystal_image_button, CrystalHint, Mir2CrystalHintPlugin};
+use super::widget::{
+    spawn_crystal_image_button, CrystalHint, CrystalItemHint, Mir2CrystalHintPlugin,
+};
 
 const WHITE: Color = Color::WHITE;
 pub(crate) const HUD_Z_INDEX: i32 = 950;
@@ -1482,19 +1483,20 @@ fn update_hud_inventory(
 fn sync_belt_hit_targets(
     mut commands: Commands,
     inventory: Res<InventoryModel>,
+    ui: Res<UiReadModel>,
     targets: Query<(Entity, &CrystalHudBeltHitTarget, Option<&Button>)>,
 ) {
     for (entity, marker, button) in &targets {
         let item = belt_slot_item(&inventory, marker.slot).filter(|item| item.unique_id.is_some());
         let enabled = item.is_some();
         if let Some(item) = item {
-            let broken = item.durability_current == Some(0)
-                && item.durability_max.is_some_and(|maximum| maximum != 0);
             commands
                 .entity(entity)
-                .insert(CrystalHint::item(basic_item_hint(item), broken));
+                .insert(CrystalItemHint(crystal_item_tooltip_document(
+                    item, &ui.player,
+                )));
         } else {
-            commands.entity(entity).remove::<CrystalHint>();
+            commands.entity(entity).remove::<CrystalItemHint>();
         }
         match (enabled, button.is_some()) {
             (true, false) => {
@@ -1738,53 +1740,7 @@ pub const fn belt_control_spec(
 /// authoritative native item snapshot. Missing requirement/bind/awake/rental
 /// fields stay absent instead of being guessed in the presentation layer.
 pub fn basic_item_hint(item: &ItemModel) -> String {
-    let mut lines = vec![bounded_belt_label(&item.name, 64)];
-    if let Some(grade) = item.grade.as_deref().filter(|grade| !grade.is_empty()) {
-        lines.push(format!("Grade: {}", bounded_belt_label(grade, 32)));
-    }
-    if item.quantity > 1 {
-        lines.push(format!("Quantity: {}", item.quantity));
-    }
-    if !item.description.is_empty() {
-        lines.extend(
-            item.description
-                .lines()
-                .take(3)
-                .map(|line| bounded_belt_label(line, 80)),
-        );
-    }
-    if let (Some(current), Some(maximum)) = (item.durability_current, item.durability_max) {
-        lines.push(format!("Durability: {current}/{maximum}"));
-    }
-    if item.attack != 0 || item.added_attack != 0 {
-        lines.push(format!(
-            "Attack: {}{}",
-            item.attack,
-            signed_item_bonus(item.added_attack)
-        ));
-    }
-    if item.defence != 0 || item.added_defence != 0 {
-        lines.push(format!(
-            "Defence: {}{}",
-            item.defence,
-            signed_item_bonus(item.added_defence)
-        ));
-    }
-    if item.added_luck != 0 {
-        lines.push(format!("Luck: {:+}", item.added_luck));
-    }
-    if item.socket_slots != 0 {
-        lines.push(format!("Sockets: {}", item.socket_slots));
-    }
-    lines.join("\n")
-}
-
-fn signed_item_bonus(value: i32) -> String {
-    if value == 0 {
-        String::new()
-    } else {
-        format!(" ({value:+})")
-    }
+    crystal_item_tooltip_document(item, &Default::default()).plain_text()
 }
 
 fn update_hud_map_model(
@@ -1958,7 +1914,9 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::inventory::ItemModel;
+    use crate::inventory::{
+        CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,
+    };
 
     #[test]
     fn inventory_button_uses_exact_crystal_three_state_assets_and_geometry() {
@@ -2171,6 +2129,7 @@ mod tests {
     fn belt_hit_target_tracks_late_population_and_clear() {
         let mut app = App::new();
         app.init_resource::<InventoryModel>()
+            .init_resource::<UiReadModel>()
             .add_systems(Update, sync_belt_hit_targets);
         let target = app
             .world_mut()
@@ -2191,38 +2150,57 @@ mod tests {
             slot: 0,
             container: 1,
             icon: 7,
+            tooltip_source: Some(CrystalItemTooltipSourceModel {
+                info: CrystalItemInfoModel {
+                    item_index: 7,
+                    name: "Potion".to_owned(),
+                    item_type: 1,
+                    durability: 10,
+                    ..Default::default()
+                },
+                user_item: Some(CrystalUserItemModel {
+                    unique_id: 77,
+                    item_index: 7,
+                    current_dura: 10,
+                    max_dura: 10,
+                    count: 2,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
             ..ItemModel::default()
         }];
         app.update();
         assert!(app.world().entity(target).contains::<Button>());
-        assert_eq!(
-            app.world()
-                .entity(target)
-                .get::<CrystalHint>()
-                .map(|hint| hint.0.as_str()),
-            Some("Potion\nQuantity: 2")
-        );
-        assert_eq!(
-            app.world()
-                .entity(target)
-                .get::<CrystalHint>()
-                .map(|hint| hint.1),
-            Some(CrystalHintStyle::Item { broken: false })
-        );
+        let hint = app
+            .world()
+            .entity(target)
+            .get::<CrystalItemHint>()
+            .expect("populated belt cell has a rich item hint");
+        assert!(hint.0.source_complete);
+        assert!(!hint.0.broken);
+        assert!(hint.0.plain_text().contains("Potion (2)"));
 
         {
             let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
             inventory.items[0].durability_current = Some(0);
             inventory.items[0].durability_max = Some(10);
+            let user = inventory.items[0]
+                .tooltip_source
+                .as_mut()
+                .unwrap()
+                .user_item
+                .as_mut()
+                .unwrap();
+            user.current_dura = 0;
+            user.max_dura = 10;
         }
         app.update();
-        assert_eq!(
-            app.world()
-                .entity(target)
-                .get::<CrystalHint>()
-                .map(|hint| hint.1),
-            Some(CrystalHintStyle::Item { broken: true })
-        );
+        assert!(app
+            .world()
+            .entity(target)
+            .get::<CrystalItemHint>()
+            .is_some_and(|hint| hint.0.broken));
 
         app.world_mut()
             .resource_mut::<InventoryModel>()
@@ -2230,7 +2208,7 @@ mod tests {
             .clear();
         app.update();
         assert!(!app.world().entity(target).contains::<Button>());
-        assert!(!app.world().entity(target).contains::<CrystalHint>());
+        assert!(!app.world().entity(target).contains::<CrystalItemHint>());
     }
 
     #[test]
@@ -2460,7 +2438,7 @@ mod tests {
     }
 
     #[test]
-    fn basic_item_hint_uses_only_supported_authoritative_fields() {
+    fn legacy_item_hint_is_explicitly_partial_and_preserves_supported_fields() {
         let item = ItemModel {
             name: "Bronze Sword".to_owned(),
             quantity: 1,
@@ -2476,10 +2454,13 @@ mod tests {
             socket_slots: 2,
             ..ItemModel::default()
         };
+        let document = crystal_item_tooltip_document(&item, &Default::default());
+        assert!(!document.source_complete);
         assert_eq!(
-            basic_item_hint(&item),
-            "Bronze Sword\nGrade: Rare\nA reliable blade.\nDurability: 7/10\nAttack: 3 (+2)\nDefence: 1 (-1)\nLuck: +1\nSockets: 2"
+            document.plain_text(),
+            "Bronze Sword\nRare\nDurability: 7/10\nAttack: 3 (+2)\nLuck: +1\nDefence: 1 (-1)\nSockets: 2\nItem Description\nA reliable blade."
         );
+        assert_eq!(basic_item_hint(&item), document.plain_text());
     }
 
     #[test]

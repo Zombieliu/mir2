@@ -288,6 +288,7 @@ pub struct CharacterSummary {
     pub level: u16,
     pub class_name: String,
     pub gender_name: String,
+    pub last_access_binary_datetime: i64,
 }
 
 impl fmt::Debug for CharacterSummary {
@@ -298,18 +299,34 @@ impl fmt::Debug for CharacterSummary {
             .field("level", &self.level)
             .field("class_name", &self.class_name)
             .field("gender_name", &self.gender_name)
+            .field(
+                "last_access_binary_datetime",
+                &self.last_access_binary_datetime,
+            )
             .finish()
     }
 }
 
 impl CharacterSummary {
     pub fn new(index: i32, name: &str, level: u16, class_name: &str, gender_name: &str) -> Self {
+        Self::new_with_last_access(index, name, level, class_name, gender_name, 0)
+    }
+
+    pub fn new_with_last_access(
+        index: i32,
+        name: &str,
+        level: u16,
+        class_name: &str,
+        gender_name: &str,
+        last_access_binary_datetime: i64,
+    ) -> Self {
         Self {
             index,
             name: name.to_string(),
             level,
             class_name: class_name.to_owned(),
             gender_name: gender_name.to_owned(),
+            last_access_binary_datetime,
         }
     }
 }

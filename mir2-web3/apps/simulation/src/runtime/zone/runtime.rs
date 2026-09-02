@@ -25,10 +25,7 @@ use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
 use super::ecs::ZoneEcs;
-use super::movement::{
-    movement_delay_ms, offset_point, ZONE_MOVE_READY_GRACE_MS, ZONE_RUN_GRACE_MS,
-    ZONE_TURN_DELAY_MS,
-};
+use super::movement::{movement_delay_ms, offset_point, ZONE_RUN_GRACE_MS, ZONE_TURN_DELAY_MS};
 use super::packets::{
     apply_observer_action_state, apply_retained_zone_object_packet, chat_packet,
     object_chat_packet, object_chat_packet_with_text, object_player_packets, object_run_packet,
@@ -1690,8 +1687,7 @@ impl ZoneRuntime {
     }
 
     fn movement_action_ready(player: &ZonePlayer, now_ms: u64) -> bool {
-        !player.movement_actions.is_empty()
-            && now_ms.saturating_add(ZONE_MOVE_READY_GRACE_MS) >= player.movement_ready_at_ms
+        !player.movement_actions.is_empty() && now_ms >= player.movement_ready_at_ms
     }
 
     fn cancel_pending_movement(&mut self, session_id: &SessionId) -> Vec<ZoneOutbound> {
@@ -1728,14 +1724,6 @@ impl ZoneRuntime {
             && self.player_movement_action_ready(&session_id, action.received_at_ms)
         {
             self.tick_player_movement(&session_id, action.received_at_ms)
-        } else if !replaces_pending_step {
-            if let Some(consume_at_ms) =
-                self.buffered_movement_consume_at(&session_id, action.received_at_ms)
-            {
-                self.tick_player_movement(&session_id, consume_at_ms)
-            } else {
-                Vec::new()
-            }
         } else {
             Vec::new()
         };
@@ -1762,10 +1750,6 @@ impl ZoneRuntime {
         player.movement_actions.push_back(action);
         if self.movement_input_arrived_after_ready(&session_id, received_at_ms) {
             outbounds.extend(self.tick_player_movement(&session_id, received_at_ms));
-        } else if let Some(consume_at_ms) =
-            self.buffered_movement_consume_at(&session_id, received_at_ms)
-        {
-            outbounds.extend(self.tick_player_movement(&session_id, consume_at_ms));
         }
         outbounds
     }
@@ -1796,30 +1780,12 @@ impl ZoneRuntime {
         matches!(
             pending.kind,
             ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
-        ) && incoming_seq > pending_seq
+        ) && action.received_at_ms <= player.movement_ready_at_ms
+            && incoming_seq > pending_seq
             && action.received_at_ms
                 <= pending
                     .received_at_ms
                     .saturating_add(ZONE_MOVEMENT_INPUT_BUFFER_MS)
-    }
-
-    fn buffered_movement_consume_at(
-        &self,
-        session_id: &SessionId,
-        received_at_ms: u64,
-    ) -> Option<u64> {
-        let player = self.players.get(session_id)?;
-        let action = player.movement_actions.front()?;
-        if !matches!(
-            action.kind,
-            ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
-        ) {
-            return None;
-        }
-        let ready_at_ms = player.movement_ready_at_ms;
-        (ready_at_ms > received_at_ms
-            && received_at_ms.saturating_add(ZONE_MOVEMENT_INPUT_BUFFER_MS) >= ready_at_ms)
-            .then_some(ready_at_ms)
     }
 
     fn movement_input_arrived_after_ready(

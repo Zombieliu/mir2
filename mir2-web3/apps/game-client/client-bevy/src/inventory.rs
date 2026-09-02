@@ -15,6 +15,180 @@ use bevy::ui::{
 };
 use serde::{Deserialize, Serialize};
 
+/// Exact `CrystalItemTemplate` fields consumed by Crystal's item label. This
+/// renderer-neutral mirror intentionally follows the source snapshot's
+/// snake_case schema; it is not reconstructed from a display name or icon.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalItemInfoModel {
+    pub item_index: i32,
+    pub name: String,
+    pub item_type: u8,
+    pub grade: u8,
+    pub required_type: u8,
+    pub required_class: u8,
+    pub required_gender: u8,
+    pub item_set: u8,
+    pub shape: i16,
+    pub weight: u8,
+    pub light: u8,
+    pub required_amount: u8,
+    pub image: u16,
+    pub durability: u16,
+    pub stack_size: u16,
+    pub price: u32,
+    pub start_item: bool,
+    pub effect: u8,
+    pub need_identify: bool,
+    pub show_group_pickup: bool,
+    pub class_based: bool,
+    pub level_based: bool,
+    pub can_mine: bool,
+    pub global_drop_notify: bool,
+    pub bind: i16,
+    pub unique: i16,
+    pub random_stats_id: u8,
+    pub can_fast_run: bool,
+    pub can_awakening: bool,
+    pub slots: u8,
+    pub stats: Vec<CrystalItemStatModel>,
+    pub tooltip: Option<String>,
+}
+
+impl Default for CrystalItemInfoModel {
+    fn default() -> Self {
+        Self {
+            item_index: 0,
+            name: String::new(),
+            item_type: 0,
+            grade: 0,
+            required_type: 0,
+            required_class: 31,
+            required_gender: 3,
+            item_set: 0,
+            shape: 0,
+            weight: 0,
+            light: 0,
+            required_amount: 0,
+            image: 0,
+            durability: 0,
+            stack_size: 1,
+            price: 0,
+            start_item: false,
+            effect: 0,
+            need_identify: false,
+            show_group_pickup: false,
+            class_based: false,
+            level_based: false,
+            can_mine: false,
+            global_drop_notify: false,
+            bind: 0,
+            unique: 0,
+            random_stats_id: 0,
+            can_fast_run: false,
+            can_awakening: false,
+            slots: 0,
+            stats: Vec::new(),
+            tooltip: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalItemStatModel {
+    pub stat: u8,
+    pub value: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalUserItemModel {
+    pub unique_id: u64,
+    pub item_index: i32,
+    pub current_dura: u16,
+    pub max_dura: u16,
+    pub count: u16,
+    pub soul_bound_id: i32,
+    pub identified: bool,
+    pub cursed: bool,
+    pub slots: Vec<Option<CrystalUserItemModel>>,
+    pub gem_count: u16,
+    pub added_stats: Vec<CrystalItemStatModel>,
+    pub awake_type: u8,
+    pub awake_values: Vec<u8>,
+    pub refined_value: u8,
+    pub refine_added: u8,
+    pub refine_success_chance: i32,
+    pub wedding_ring: i32,
+    pub expire_info: Option<CrystalUserItemExpireModel>,
+    pub rental_information: Option<CrystalUserItemRentalModel>,
+    pub is_shop_item: bool,
+    pub sealed_info: Option<CrystalUserItemSealedModel>,
+    pub gm_made: bool,
+}
+
+impl Default for CrystalUserItemModel {
+    fn default() -> Self {
+        Self {
+            unique_id: 0,
+            item_index: 0,
+            current_dura: 0,
+            max_dura: 0,
+            count: 0,
+            soul_bound_id: -1,
+            identified: true,
+            cursed: false,
+            slots: Vec::new(),
+            gem_count: 0,
+            added_stats: Vec::new(),
+            awake_type: 0,
+            awake_values: Vec::new(),
+            refined_value: 0,
+            refine_added: 0,
+            refine_success_chance: 0,
+            wedding_ring: -1,
+            expire_info: None,
+            rental_information: None,
+            is_shop_item: false,
+            sealed_info: None,
+            gm_made: false,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalUserItemExpireModel {
+    pub expiry_binary_datetime: i64,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalUserItemRentalModel {
+    pub owner_name: String,
+    pub binding_flags: i16,
+    pub expiry_binary_datetime: i64,
+    pub rental_locked: bool,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalUserItemSealedModel {
+    pub expiry_binary_datetime: i64,
+    pub next_seal_binary_datetime: i64,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct CrystalItemTooltipSourceModel {
+    pub info: CrystalItemInfoModel,
+    pub real_info: Option<CrystalItemInfoModel>,
+    pub user_item: Option<CrystalUserItemModel>,
+    pub socket_infos: Vec<Option<CrystalItemInfoModel>>,
+    pub real_socket_infos: Vec<Option<CrystalItemInfoModel>>,
+}
+
 /// Grid slot width/height in CSS px for the inventory grid.
 pub const SLOT_SIZE: f32 = 40.0;
 /// Slots per row in the bag grid.
@@ -39,13 +213,37 @@ pub struct ItemModel {
     pub name: String,
     pub quantity: u32,
     pub slot: u32,
-    /// 0 = inventory bag, 1 = belt, 2 = equipment (client-side grouping).
+    /// 0 = inventory bag, 1 = belt, 2 = equipment, 3 = Crystal quest
+    /// inventory (read-only client-side grouping).
     pub container: u8,
     /// Crystal item image index. `0` is intentionally treated as no image: a
     /// legacy/incomplete snapshot must not cause the native client to guess an
     /// icon from the item name.
     #[serde(default)]
     pub icon: u16,
+    /// Intrinsic `Items.Lib` frame size used by Crystal's `MirItemCell` to
+    /// center the icon inside its 36x32 hit cell. Zero means the exported
+    /// frame geometry was unavailable and must not be guessed or stretched.
+    #[serde(default)]
+    pub icon_width: u16,
+    #[serde(default)]
+    pub icon_height: u16,
+    /// Crystal `ItemInfo.Image` in `StateItem.Lib`, used only by the
+    /// CharacterDialog paper-doll layers. It is distinct from the inventory
+    /// icon above.
+    #[serde(default)]
+    pub state_image: u16,
+    /// Intrinsic `StateItem.Lib` draw geometry. The native gateway resolves
+    /// these from the exported library metadata; zero width/height means the
+    /// authoritative frame was unavailable and must not be guessed.
+    #[serde(default)]
+    pub state_image_x: i32,
+    #[serde(default)]
+    pub state_image_y: i32,
+    #[serde(default)]
+    pub state_image_width: u16,
+    #[serde(default)]
+    pub state_image_height: u16,
     #[serde(default)]
     pub description: String,
     #[serde(default)]
@@ -72,6 +270,11 @@ pub struct ItemModel {
     pub shape: Option<u16>,
     #[serde(default)]
     pub socket_slots: u8,
+    /// Lossless `ItemInfo`/`UserItem` source for the full Crystal tooltip.
+    /// Legacy or partial snapshots leave this absent; presentation code must
+    /// then render only fields that are independently authoritative.
+    #[serde(default)]
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 /// Return the canonical exported Crystal icon path, but deliberately do not
@@ -418,6 +621,91 @@ mod tests {
         assert_eq!(item_durability_label(&full).as_deref(), Some("35/40"));
         assert_eq!(full.added_attack, 3);
         assert_eq!(full.socket_slots, 2);
+    }
+
+    #[test]
+    fn crystal_tooltip_source_json_preserves_catalogue_instance_and_socket_metadata() {
+        let item: ItemModel = serde_json::from_value(serde_json::json!({
+            "uniqueId": 42,
+            "key": "wooden-sword",
+            "name": "Wooden Sword",
+            "quantity": 1,
+            "slot": 2,
+            "container": 0,
+            "tooltipSource": {
+                "info": {
+                    "item_index": 221,
+                    "name": "Wooden Sword",
+                    "item_type": 1,
+                    "grade": 2,
+                    "durability": 4000,
+                    "stats": [{ "stat": 5, "value": 4 }]
+                },
+                "realInfo": {
+                    "item_index": 222,
+                    "name": "Wooden Sword[Warrior]",
+                    "item_type": 1,
+                    "grade": 2,
+                    "durability": 4000,
+                    "stats": [{ "stat": 5, "value": 6 }]
+                },
+                "userItem": {
+                    "unique_id": 42,
+                    "item_index": 221,
+                    "current_dura": 3000,
+                    "max_dura": 4000,
+                    "count": 1,
+                    "added_stats": [{ "stat": 5, "value": 1 }],
+                    "slots": [{
+                        "unique_id": 99,
+                        "item_index": 900,
+                        "current_dura": 1000,
+                        "max_dura": 1000,
+                        "count": 1
+                    }]
+                },
+                "socketInfos": [{
+                    "item_index": 900,
+                    "name": "Ruby",
+                    "item_type": 29,
+                    "stats": [{ "stat": 5, "value": 2 }]
+                }],
+                "realSocketInfos": [{
+                    "item_index": 901,
+                    "name": "Ruby[Warrior]",
+                    "item_type": 29,
+                    "stats": [{ "stat": 5, "value": 3 }]
+                }]
+            }
+        }))
+        .expect("lossless Crystal tooltip source");
+
+        let source = item.tooltip_source.expect("tooltip source");
+        assert_eq!(source.info.item_index, 221);
+        assert_eq!(source.info.grade, 2);
+        assert_eq!(source.info.stats[0].value, 4);
+        assert_eq!(source.real_info.as_ref().unwrap().item_index, 222);
+        assert_eq!(source.real_info.as_ref().unwrap().stats[0].value, 6);
+        let user_item = source.user_item.expect("concrete UserItem");
+        assert_eq!(user_item.unique_id, 42);
+        assert_eq!(user_item.current_dura, 3000);
+        assert_eq!(user_item.added_stats[0].value, 1);
+        assert_eq!(user_item.slots[0].as_ref().unwrap().item_index, 900);
+        assert_eq!(source.socket_infos[0].as_ref().unwrap().name, "Ruby");
+        assert_eq!(
+            source.real_socket_infos[0].as_ref().unwrap().item_index,
+            901
+        );
+
+        let legacy: ItemModel = serde_json::from_value(serde_json::json!({
+            "key": "wooden-sword",
+            "name": "Wooden Sword",
+            "quantity": 1,
+            "slot": 2,
+            "container": 0
+        }))
+        .expect("legacy item remains compatible");
+        assert_eq!(legacy.tooltip_source, None);
     }
 
     #[test]
