@@ -1,5 +1,25 @@
 # Crystal Server Parity
 
+> Source stack-image server/client checkpoint (2026-09-03): the pure
+> `UserItem.Image` rule now projects authoritative quantity onto personal
+> item snapshots and NPC goods. Exact Info.Image/type/shape/StackSize are
+> used; neither saved icon caches nor viewer realInfo override source image
+> identity. Raw UserItem fields, ItemInfo.Image, mutation rules and save data
+> remain unchanged. Shared game-data 39/39 and real protocol integration
+> 4/4 pass, including bag/belt/storage/equipment thresholds, both poisons,
+> cross-belt merge, equip/remove and save/reload. Full Simulation/Gateway
+> library regressions are running; Windows 527/527 passes.
+> Crystal ground ObjectItem sends Item.Image but the original client uses
+> FloorItems: that separate runtime/asset path is not fixed by this Items
+> projection. GameShop, QuestCell, crafting shadows and mail-list thumbnails
+> deliberately retain source base-image behavior; guild/trade and other
+> actual-item surfaces remain open. The historical initial PNG predates
+> the final ordinary-item icon correction and does not close final-source
+> same-EXE input, Crystal pairing, trusted provenance, DPI or human gates.
+> Source and evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> No schema/store migration, auth relaxation or whole-server acceptance is
+> implied; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Character wing server/client note (2026-09-03): the prior missing-wing note
 > below is superseded. `Looks_Wings` now derives from server-owned real armour
 > metadata with Crystal's broken-base-durability rule, and explicit zero

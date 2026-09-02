@@ -151,7 +151,16 @@ impl EquipmentState {
             unique_id: self.user_item_unique_id,
             quantity: self.quantity,
             name: localized_equipment_name(language, &self.key, &self.name),
-            icon: self.icon,
+            icon: tooltip_source.as_ref().map_or(self.icon, |source| {
+                let info = &source.info;
+                mir2_game_data::crystal_user_item_image(
+                    info.item_type,
+                    info.shape,
+                    info.stack_size,
+                    info.image,
+                    self.quantity,
+                )
+            }),
             state_image: crystal_item_template_for_item_key(&self.key)
                 .map(|template| template.image)
                 .unwrap_or_default(),

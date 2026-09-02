@@ -1,5 +1,23 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest source stack-image checkpoint (2026-09-03): the shared pure selector
+> implements Crystal `Shared/Data/ItemData.cs:641-681` across personal item
+> snapshots, NPC goods and Windows native decoding. Exact source identity
+> and current quantity determine the image before true-size geometry; stale
+> saved icons do not override known ordinary Info.Image. Raw source/instance
+> data and deliberately base-image catalogue previews remain unchanged.
+> Windows 527/527, game-data 39/39, stack integration 4/4, the 11-test/
+> 924-image gate and formatting pass; full Simulation/Gateway tests are
+> running. An initial native PNG has 24 fixed-position bag slots with 6,161
+> exact opaque samples and 182 rejected wrong-frame/one-pixel controls.
+> It predates the final ordinary-item correction and is not final-source
+> same-EXE evidence. User Escape stopped foreground automation; only CLI
+> tests, saved-image inspection and documentation continued.
+> Guild/trade/other concrete-item surfaces, FloorItems, overlays, source item
+> operations, fresh manual transitions and every paired-state/DPI/trusted/
+> human gate remain open. Report: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Latest Windows original-asset closure checkpoint (2026-09-03): all 913
 > catalogue base images plus eleven source Amulet/Poison count-derived images
 > are required by a fail-closed 924-image gate. The 643 previously missing

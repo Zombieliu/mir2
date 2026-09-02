@@ -1,5 +1,27 @@
 # Backend 1:1 Progress
 
+> Source UserItem.Image projection checkpoint (2026-09-03): personal bag,
+> belt, storage and equipment snapshots derive icons from exact source
+> Info.Image/type/shape/StackSize and authoritative quantity; Gateway NPC
+> goods apply the same rule while preserving every raw UserItem field.
+> Amulet 200/300 and Poison 50/100/150 boundaries now update after real
+> SplitItem/MergeItem/EquipItem/RemoveItem and save/logout/reload sequences.
+> The source selector covers every 16-bit count for all three shapes, guard
+> fields and the entire 1,628-row catalogue. Known ordinary items override
+> stale legacy icons without rewriting persistent ItemInfo or instance state.
+> Game-data 39/39 and dedicated integration 4/4 pass on final source; full
+> Simulation and Gateway library regressions are still running. Windows is
+> 527/527. The locked regular Gateway outputs are avoided using a fresh
+> system-temp build directory, normal full library harness and unchanged
+> manifest; failed earlier locked-file attempts are not passing evidence.
+> No schema migration, authority relaxation, new protocol mutation or shared
+> Zone change is made. Ground ObjectItem/FloorItems, secondary item surfaces,
+> source native operation UI and final-source real-input evidence remain
+> open. Initial captured binaries predate the final ordinary-icon correction.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> All source-pair/trusted package/DPI/human gates remain open; no global or
+> server-wide parity percentage is claimed.
+
 > Character wing authoritative projection checkpoint (2026-09-03):
 > Simulation resets wing appearance to zero, resolves the exact equipped
 > armour's `GetRealItem` for the current class/level and ignores broken items

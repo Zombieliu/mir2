@@ -507,7 +507,19 @@ impl ItemState {
         WorldItemSnapshot {
             key: self.key.clone(),
             name: localized_item_name(language, &self.key, &self.name),
-            icon: self.icon,
+            // Derive from source identity and live quantity. A legacy saved
+            // icon must not override a known ItemInfo.Image, and split/merge/
+            // use/save must not leave a cached count-band image behind.
+            icon: tooltip_source.as_ref().map_or(self.icon, |source| {
+                let info = &source.info;
+                mir2_game_data::crystal_user_item_image(
+                    info.item_type,
+                    info.shape,
+                    info.stack_size,
+                    info.image,
+                    self.quantity,
+                )
+            }),
             unique_id: item_unique_id(self),
             slot: self.slot,
             container: self.container,

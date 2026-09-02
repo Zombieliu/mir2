@@ -9003,7 +9003,16 @@ fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
 
     if let Some(template) = crystal_item_by_index(item.item_index) {
         entry.insert("name".into(), json!(template.name));
-        entry.insert("icon".into(), json!(template.image));
+        entry.insert(
+            "icon".into(),
+            json!(mir2_game_data::crystal_user_item_image(
+                template.item_type,
+                template.shape,
+                template.stack_size,
+                template.image,
+                u32::from(item.count),
+            )),
+        );
         entry.insert(
             "price".into(),
             json!(((template.price as f32) * rate).floor() as u32),
@@ -13060,6 +13069,40 @@ mod tests {
         let craft = super::server_packet_to_event(&ServerPacket::CraftItem { success: false });
         assert_eq!(craft["packet"], "CraftItem");
         assert_eq!(craft["payload"]["success"], false);
+    }
+
+    #[test]
+    fn npc_goods_stack_images_follow_live_count_and_keep_raw_user_item() {
+        for (index, count, image) in [
+            (710, 49, 3673),
+            (710, 50, 3674),
+            (710, 100, 2960),
+            (710, 150, 3675),
+            (711, 49, 3670),
+            (711, 50, 3671),
+            (711, 100, 2961),
+            (711, 150, 3672),
+            (712, 199, 3660),
+            (712, 200, 3661),
+            (712, 300, 3662),
+            (714, 5, 277),
+        ] {
+            let mut item = sample_user_item(71_001, count);
+            item.item_index = index;
+            let before = serde_json::to_value(&item).unwrap();
+            let event = super::server_packet_to_event(&ServerPacket::NPCGoods {
+                list: vec![item],
+                rate: 1.0,
+                panel_type: 0,
+                hide_added_stats: false,
+            });
+            let good = &event["payload"]["list"][0];
+            assert_eq!(good["icon"], image);
+            assert_eq!(good["count"], count);
+            for (key, value) in before.as_object().unwrap() {
+                assert_eq!(&good[key], value, "raw UserItem field {key}");
+            }
+        }
     }
 
     #[test]

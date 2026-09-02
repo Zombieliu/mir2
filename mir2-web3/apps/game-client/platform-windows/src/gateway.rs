@@ -4572,15 +4572,16 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
         .get("tooltipSource")
         .cloned()
         .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
-    let icon = value_u32(item.get("icon"))
-        .and_then(|value| u16::try_from(value).ok())
+    let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);
+    let icon = crystal_user_item_icon(item, count)
+        .or_else(|| value_u32(item.get("icon")).and_then(|value| u16::try_from(value).ok()))
         .unwrap_or_default();
     let icon_geometry = item_frame_geometry(icon);
     Some(json!({
         "unique_id": id,
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
         "price": value_u32(item.get("price")).unwrap_or_default(),
-        "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
+        "count": u16::try_from(count).unwrap_or(1),
         "stock": value_i32(item.get("stock")).unwrap_or(-1),
         "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
             .and_then(|value| u8::try_from(value).ok())
@@ -5314,6 +5315,11 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
             target.insert(target_name.to_owned(), value);
         }
     }
+    if let Some(icon) = value_u32(target.get("quantity"))
+        .and_then(|quantity| crystal_user_item_icon(item, quantity))
+    {
+        target.insert("icon".to_owned(), json!(icon));
+    }
     let icon = value_u32(target.get("icon"))
         .and_then(|value| u16::try_from(value).ok())
         .filter(|value| *value != 0);
@@ -5330,6 +5336,34 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
         target.insert("stateImageWidth".to_owned(), json!(frame.width));
         target.insert("stateImageHeight".to_owned(), json!(frame.height));
     }
+}
+
+/// Resolve only concrete UserItem surfaces (bag/belt/equipment/storage/NPC
+/// goods). Catalogue previews never call this. The current quantity is the
+/// authority, not a stale tooltip UserItem count, icon, or viewer realInfo.
+fn crystal_user_item_icon(item: &Value, count: u32) -> Option<u16> {
+    if let Some(info) = item
+        .get("tooltipSource")
+        .or_else(|| item.get("tooltip_source"))
+        .and_then(|source| source.get("info"))
+    {
+        return Some(mir2_game_data::crystal_user_item_image(
+            u8::try_from(value_u32(info.get("item_type"))?).ok()?,
+            i16::try_from(value_i32(info.get("shape"))?).ok()?,
+            u16::try_from(value_u32(info.get("stack_size"))?).ok()?,
+            u16::try_from(value_u32(info.get("image"))?).ok()?,
+            count,
+        ));
+    }
+    let index = value_i32(item.get("item_index").or_else(|| item.get("itemIndex")))?;
+    let info = unique_crystal_tooltip_template(index)?;
+    Some(mir2_game_data::crystal_user_item_image(
+        info.item_type,
+        info.shape,
+        info.stack_size,
+        info.image,
+        count,
+    ))
 }
 
 /// Transform a gateway `worldSnapshot` payload into the shared
@@ -5746,7 +5780,9 @@ mod tests {
         assert_eq!(storage.items.len(), 1);
         assert_eq!(storage.items[0].key, "55");
         assert_eq!(storage.items[0].quantity, 3);
-        assert_eq!(storage.items[0].icon, 24);
+        // Exact source index 321 resolves image 61; an enriched but stale icon
+        // must not override the original UserItem.Info.Image property.
+        assert_eq!(storage.items[0].icon, 61);
         assert_eq!(storage.items[0].durability_current, Some(8));
         assert_eq!(storage.items[0].durability_max, Some(10));
         assert_eq!(storage.items[0].sell_value, 99);
@@ -7500,6 +7536,90 @@ mod tests {
             model.entities[1].kind,
             mir2_client_bevy::entities::EntityKind::Monster
         );
+    }
+
+    #[test]
+    fn user_item_count_images_and_true_size_refresh_across_native_surfaces() {
+        let cursor = NativeUiPlayerCursor::default();
+        // Includes both poison width changes and the Amulet's three bands.
+        for (index, count, image, width, height) in [
+            (710, 49, 3673, 16, 28),
+            (710, 50, 3674, 24, 27),
+            (710, 100, 2960, 28, 29),
+            (710, 150, 3675, 28, 29),
+            (711, 49, 3670, 20, 29),
+            (711, 50, 3671, 24, 27),
+            (711, 100, 2961, 28, 29),
+            (711, 150, 3672, 28, 29),
+            (712, 199, 3660, 32, 30),
+            (712, 200, 3661, 32, 30),
+            (712, 300, 3662, 32, 30),
+        ] {
+            let info = unique_crystal_tooltip_template(index).unwrap();
+            let instance = json!({
+                "key": format!("crystal-item-{index}"), "uniqueId": 71001,
+                "quantity": count, "slot": 0, "icon": info.image,
+                "stateImage": info.image, "tooltipSource": {
+                    "info": info, "realInfo": {"image": 1},
+                    "userItem": {"item_index": index, "count": 1}
+                }
+            });
+            for field in ["inventoryItems", "beltItems", "equipmentItems"] {
+                let payload = json!({field: [instance.clone()]});
+                let model = transform_inventory_model(&payload);
+                let mapped = &model["items"][0];
+                assert_eq!(mapped["icon"], image, "{field} count {count}");
+                assert_eq!(mapped["iconWidth"], width);
+                assert_eq!(mapped["iconHeight"], height);
+                assert_eq!(mapped["stateImage"], info.image);
+                assert_eq!(mapped["tooltipSource"], instance["tooltipSource"]);
+            }
+            // Raw storage/shop carriers have an exact index but no enriched
+            // icon or tooltip source. They use the same source rule.
+            let wire = json!({"item_index": index, "unique_id": 71001, "count": count});
+            let storage = storage_items_json(&[wire.clone()]).unwrap();
+            assert_eq!(storage[0]["icon"], image);
+            assert_eq!(storage[0]["iconWidth"], width);
+            assert_eq!(storage[0]["iconHeight"], height);
+            let good = shop_good_json(&wire, 0, &cursor).unwrap();
+            assert_eq!(good["icon"], image);
+            assert_eq!(good["icon_width"], width);
+            assert_eq!(good["icon_height"], height);
+            assert_eq!(good["count"], count);
+        }
+    }
+
+    #[test]
+    fn user_item_selector_never_guesses_identity_from_names_or_partial_info() {
+        for item in [
+            json!({"name": "Amulet", "icon": 270, "shape": 0}),
+            json!({"item_index": -1, "name": "GreenPoison", "icon": 259}),
+            json!({"tooltipSource": {"info": {"item_type": 8, "shape": 1}}}),
+            json!({"tooltipSource": {"realInfo": {"item_type": 8, "shape": 1, "stack_size": 500, "image": 259}}}),
+        ] {
+            assert_eq!(crystal_user_item_icon(&item, 300), None);
+        }
+        for index in [658, 713, 714] {
+            let info = unique_crystal_tooltip_template(index).unwrap();
+            assert_eq!(
+                crystal_user_item_icon(&json!({"itemIndex": index, "icon": 24}), 300),
+                Some(info.image)
+            );
+        }
+    }
+
+    #[test]
+    fn catalogue_shop_preview_keeps_base_image_even_with_large_count() {
+        let info = unique_crystal_tooltip_template(712).unwrap();
+        let preview = transform_game_shop_info_from_packet(
+            &json!({
+                "g_index": 1, "item_index": 712, "info": info, "count": 300,
+            }),
+            &NativeUiPlayerCursor::default(),
+        )
+        .unwrap();
+        assert_eq!(preview["image"], 270, "GameShopCell draws Item.Info.Image");
+        assert_eq!(preview["count"], 300);
     }
 
     #[test]

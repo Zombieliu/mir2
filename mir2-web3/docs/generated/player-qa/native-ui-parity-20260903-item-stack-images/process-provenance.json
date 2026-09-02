@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "mir2-native-stack-image-process-evidence-v1",
+  "evidenceKind": "local-development-observation-not-trusted-package-attestation",
+  "recordedOnLocalDate": "2026-09-03",
+  "workingTreeBaseRevision": "685cce29f9d463a2eaa64dd4aa62d23ae4a56190",
+  "workingTreeDirtyAtBuild": true,
+  "crystalSourceRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "relevantCrystalSourceFilesClean": true,
+  "finalSourceFiles": [
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 411890,
+      "sha256": "b0b830ee3272e1329b140d8c3a2b3d1ab52bc10c95f0640d694a70bd65bdb709"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 717542,
+      "sha256": "41b2e6a02affe8c633ce330af5a35d1f9efbb099977af01dfb58e51471ff13fa"
+    },
+    {
+      "path": "apps/simulation/src/runtime/items.rs",
+      "bytes": 164400,
+      "sha256": "57ce36e01e76637994344c7ea13851bd08618319122476f43b4a8482d207c597"
+    },
+    {
+      "path": "apps/simulation/src/runtime/equipment.rs",
+      "bytes": 103768,
+      "sha256": "0fdfff7ef5d0c861b5c793d8b45e7ecb6b958489fc47a39e5c869aeeda88a98b"
+    },
+    {
+      "path": "packages/game-data/src/lib.rs",
+      "bytes": 146510,
+      "sha256": "6d5a57ee30a8ca1da6ab7c2848a4496303e140e4ce5fec9e96085d0fba35dec3"
+    },
+    {
+      "path": "packages/game-data/src/crystal_item_image.rs",
+      "bytes": 3905,
+      "sha256": "d5e5a176dfca91c21765ae98b1e653fcb9696aca28d175b457be103606631246"
+    },
+    {
+      "path": "apps/simulation/tests/item_stack_images.rs",
+      "bytes": 11054,
+      "sha256": "c7d06473e60ca4cec3a36a9433f592c605d96862cf6e04081e3cd208b26e5793"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/prepare-item-stack-image-fixture.mjs",
+      "bytes": 4414,
+      "sha256": "a8a2f06abafa15efed2f13fd663cd219bed284b42c9c3401ae534a6d36dbe8c3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-item-stack-image-capture.mjs",
+      "bytes": 7930,
+      "sha256": "8e048be412d030b38093abe08b5dd3152fb3b72dca21fea58cd3aefc06b72266"
+    }
+  ],
+  "capture": {
+    "runId": "item-stack-images-20260903-r1",
+    "capturedAt": "2026-09-02T21:25:24.956Z",
+    "account": "stack-image-qa",
+    "character": "StackImageQA",
+    "characterIndex": 0,
+    "class": "Taoist",
+    "level": 50,
+    "map": "BichonProvince",
+    "position": {
+      "x": 290,
+      "y": 620
+    },
+    "logicalSize": {
+      "width": 1024,
+      "height": 768
+    },
+    "dpiScale": 1,
+    "native": {
+      "path": "apps/game-client/platform-windows/target/debug/mir2-stack-images-qa.exe",
+      "bytes": 88407552,
+      "sha256": "77178c9d79089e4f136c5d5409c71d5e274046224b8a08e8dba6874edc61670a",
+      "pid": 254696,
+      "startedAt": "2026-09-03T05:24:59.5230670+08:00"
+    },
+    "gateway": {
+      "path": "target/debug/mir2-gateway.exe",
+      "bytes": 95135744,
+      "sha256": "c1df115d13faed1ba6aa74b688dd485849d00a8194be29880fb33692e4db81ff",
+      "pid": 253296,
+      "startedAt": "2026-09-03T05:24:38.0398320+08:00",
+      "endpoint": "ws://127.0.0.1:7430/ws"
+    },
+    "sourceRelation": "Both binaries precede the final known-identity-overrides-stale-base-icon correction; not a final-source executable capture.",
+    "actions": [
+      "automatic-inventory-capture"
+    ],
+    "manualTransitionsCaptured": false,
+    "foregroundAutomationStoppedByUser": true,
+    "foregroundAutomationResumed": false,
+    "image": {
+      "path": "docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/stack-images-r1-inventory-1788384324956-1.png",
+      "bytes": 1674805,
+      "sha256": "59cf01834bf46c918a4fea8f9a3d698117941b676244ae5e06cc59d1b519463e"
+    },
+    "sidecar": {
+      "path": "docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/stack-images-r1-inventory-1788384324956-1.json",
+      "bytes": 1072,
+      "sha256": "7ff144642cbbf18aa233dba20181ece00e1846c09f337a18e901a0b522d6a90d"
+    },
+    "rendererSidecarUnmodified": true
+  },
+  "unchangedRegularNativeExecutable": {
+    "path": "apps/game-client/platform-windows/target/debug/mir2-platform-windows.exe",
+    "bytes": 88405504,
+    "sha256": "55ca1d61a6977f164b1d6222de2aaafd4e21fef4a1c5db898ebee6ff0fbdb993"
+  },
+  "assets": [
+    {
+      "path": "apps/web/public/original-ui/manifest.generated.json",
+      "bytes": 10703122,
+      "sha256": "a5aff31cf3a6e4217f6599f769ed5652cf2769dff0ab5bcba3618c1246c81c13"
+    },
+    {
+      "path": "apps/web/public/original-ui/Items/meta.json",
+      "bytes": 459663,
+      "sha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    }
+  ],
+  "fixture": {
+    "seedInitialSha256": "1be03018ddb19d486ffbfa93ad4625be692dcf0111e40a9fa85265f86ccd4af6",
+    "outputInitialSha256": "900075a2c6a70d8da7450bee35bb83761bab360c5517312b1d050b859e90cdd4",
+    "initialHashesAreNotCurrentAutosaveHashes": true,
+    "bagItems": 24,
+    "beltItems": 6,
+    "storageItems": 6,
+    "gmLevel": 0,
+    "seedUnchanged": true,
+    "catalogueUnchanged": true,
+    "exclusiveCreateRefusesExistingOutput": true,
+    "credentialsAndStoresCommitted": false
+  },
+  "restoredManifests": [
+    {
+      "path": "apps/gateway/Cargo.toml",
+      "bytes": 3050,
+      "sha256": "8c96f6ed7c62a21f6e26b8dc0a9f273724d024f2fcef1eedeba947a038ec951c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 1826,
+      "sha256": "17fab3b8e127a414df3d9a197d429b45f3b68476a056e0f1fa1065a89a28017e"
+    }
+  ],
+  "regression": {
+    "rustVersion": "1.95.0",
+    "rustTestThreads": 1,
+    "windows": {
+      "passed": 527,
+      "failed": 0,
+      "finalSource": true
+    },
+    "gameData": {
+      "passed": 39,
+      "failed": 0,
+      "finalSource": true
+    },
+    "itemStackIntegration": {
+      "passed": 4,
+      "failed": 0,
+      "finalSource": true
+    },
+    "simulation": {
+      "status": "running",
+      "expectedTests": 1491
+    },
+    "gateway": {
+      "status": "running",
+      "expectedTests": 668,
+      "temporaryTargetDirectory": "mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f",
+      "profileTestDebug": 0,
+      "incremental": false,
+      "features": [
+        "mir2-simulation/test-support"
+      ],
+      "normalLibHarness": true
+    },
+    "itemIconGate": {
+      "passed": 11,
+      "requiredImages": 924
+    },
+    "formatAndDiffChecks": "passed"
+  },
+  "pixelSample": {
+    "path": "docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/pixel-sample.json",
+    "bytes": 26576,
+    "sha256": "41cfbabfb624056979951f2258c9fa999c3f8842d5b8e303f2ca58ceb4e948d1",
+    "matchedSlots": 24,
+    "checkedOpaquePixels": 6161,
+    "mismatchedPixels": 0,
+    "rejectedWrongFrames": 86,
+    "rejectedOnePixelTranslations": 96
+  },
+  "temporaryBuildFailuresNotCountedAsPass": [
+    "regular native output externally locked",
+    "regular Gateway lib-test output externally locked",
+    "temporary Gateway integration target also attempted to build the locked regular Gateway binary"
+  ],
+  "noUserProgramClosed": true,
+  "noCacheDeletion": true,
+  "acceptance": {
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "sameStateCrystalPair": false,
+    "finalSourceSameExeCapture": false,
+    "manualTransitions": false,
+    "trustedPackageProvenance": false,
+    "authoritativeLight": false,
+    "otherDpi": false
+  }
+}

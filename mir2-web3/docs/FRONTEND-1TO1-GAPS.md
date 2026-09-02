@@ -2,6 +2,31 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 native source stack-image checkpoint: bag/belt/equipment/storage
+> and NPC goods now select the original UserItem.Image from exact Info and
+> live count before resolving true-size geometry. Ordinary known source
+> identities override stale cached icon values; GameShop/Quest/craft-shadow/
+> mail-list base-image exceptions stay intact. Windows 527/527, game-data
+> 39/39, stack integration 4/4 and the 11-test/924-image asset gate pass.
+> Full backend library suites are still running at report preparation.
+>
+> A read-only check of the initial inventory PNG matches all 24 fixed bag
+> cells (6,161 opaque RGB samples), with 86 rejected wrong frames and 96
+> rejected one-pixel translations. It excludes count-label pixels, alpha
+> edges and other panels. Crucially, both captured binaries predate the
+> final ordinary-item base-icon correction, and the user stopped Computer
+> Use before manual transitions. No current-source EXE or interactive
+> stack acceptance is claimed, and foreground work must remain paused until
+> the user explicitly resumes it. Report and unchanged draft sidecar:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+>
+> WN-ITEM-002 remains open for guild/trade and every other actual-item surface,
+> ground FloorItems, durability/locked/selected/sealed/unavailable overlays,
+> final-source manual input, original paired state, real DPI and human QA.
+> WN-CHAR-002 source operations/raw-versus-normalized belt addressing and all
+> other backlog IDs remain unchanged. No prior denominator is discarded;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-09-03 Windows-native full-catalogue icon/high-armour checkpoint: the
 > original export now follows all 1,628 catalogue rows (913 base Images) plus
 > the eleven Amulet/Poison stack images from `Shared/Data/ItemData.cs:641-681`.
