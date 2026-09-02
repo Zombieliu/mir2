@@ -626,18 +626,25 @@ fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>>
     loaded
 }
 
-fn sprite_library_exists(library: &str) -> bool {
+fn sprite_library_in_atlas(index: &StarterAtlasIndex, library: &str) -> bool {
     let encoded_prefix = format!("{}/", library.trim_end_matches('/')).replace(' ', "%20");
-    starter_atlas_index().is_some_and(|index| {
-        index
-            .rect_by_path
-            .keys()
-            .any(|path| path.starts_with(&encoded_prefix))
-    }) || assets::asset_path(library.trim_start_matches('/')).is_some_and(|path| path.is_dir())
+    index
+        .rect_by_path
+        .keys()
+        .any(|path| path.starts_with(&encoded_prefix))
 }
 
-fn available_sprite_library(sprite: Option<&Value>, field: &str) -> Option<String> {
-    sprite_library(sprite, field).filter(|library| sprite_library_exists(library))
+fn sprite_library_exists(library: &str) -> bool {
+    starter_atlas_index().is_some_and(|index| sprite_library_in_atlas(index, library))
+        || assets::asset_path(library.trim_start_matches('/')).is_some_and(|path| path.is_dir())
+}
+
+fn available_sprite_library(
+    sprite: Option<&Value>,
+    field: &str,
+    library_exists: &impl Fn(&str) -> bool,
+) -> Option<String> {
+    sprite_library(sprite, field).filter(|library| library_exists(library))
 }
 
 fn uses_archer_alt(action: AnimationAction) -> bool {
@@ -670,6 +677,14 @@ fn uses_assassin_alt(action: AnimationAction) -> bool {
 pub(crate) fn resolved_native_sprite(
     entity: &Value,
     action: AnimationAction,
+) -> ResolvedNativeSprite {
+    resolved_native_sprite_with_availability(entity, action, &sprite_library_exists)
+}
+
+fn resolved_native_sprite_with_availability(
+    entity: &Value,
+    action: AnimationAction,
+    library_exists: &impl Fn(&str) -> bool,
 ) -> ResolvedNativeSprite {
     let kind = entity
         .get("kind")
@@ -731,11 +746,11 @@ pub(crate) fn resolved_native_sprite(
         weapon_library_secondary = None;
         weapon_frame_offset = Some(gender_weapon_offset);
     }
-    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary");
-    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary");
-    let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary");
+    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary", library_exists);
+    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary", library_exists);
+    let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary", library_exists);
     let alt_weapon_library_secondary =
-        available_sprite_library(sprite, "altWeaponLibrarySecondary");
+        available_sprite_library(sprite, "altWeaponLibrarySecondary", library_exists);
     let archer_alt = class_key == "archer"
         && alt_body_library
             .as_deref()
@@ -972,6 +987,7 @@ fn build_entity_render_state_internal(
         effect_visible,
         index,
         STARTER_ATLAS_PIXELS.get().and_then(Option::as_ref),
+        sprite_library_exists,
     )
 }
 
@@ -982,6 +998,7 @@ fn build_entity_render_state_with_index(
     effect_visible: bool,
     index: &StarterAtlasIndex,
     pixels: Option<&StarterAtlasPixels>,
+    library_exists: impl Fn(&str) -> bool,
 ) -> Option<Value> {
     let (center_x, center_y) = scene_center(payload);
     let entity_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
@@ -1036,7 +1053,8 @@ fn build_entity_render_state_with_index(
                         .and_then(|poses| poses.get(&object_id))
                         .map(|(_, action)| *action)
                         .unwrap_or_else(|| payload_animation_action(entity));
-                    let resolved_sprite = resolved_native_sprite(entity, action);
+                    let resolved_sprite =
+                        resolved_native_sprite_with_availability(entity, action, &library_exists);
                     let relative_frame = pose_overrides
                         .and_then(|poses| poses.get(&object_id))
                         .map(|(frame, _)| *frame)
@@ -1366,6 +1384,7 @@ pub(crate) fn build_entity_render_state_with_manifest_for_test(
         effect_visible,
         &index,
         None,
+        |library| sprite_library_in_atlas(&index, library),
     )
 }
 
@@ -1398,6 +1417,7 @@ pub(crate) fn build_entity_render_state_with_manifest_and_pixels_for_test(
         effect_visible,
         &index,
         Some(&pixels),
+        |library| sprite_library_in_atlas(&index, library),
     )
 }
 
@@ -2505,6 +2525,19 @@ mod tests {
 
     #[test]
     fn archer_walk_and_range_two_use_alt_layers_then_standing_returns_to_common_body() {
+        // This contract test owns its asset availability. It must not depend
+        // on a developer's untracked ARArmour directory or a CI package cache.
+        let manifest = routing_atlas_manifest_fixture(&[
+            "/original-ui/ARArmour/00/24.png",
+            "/original-ui/ARHair/00/24.png",
+            "/original-ui/ARWeapon/00%20S/24.png",
+            "/original-ui/ARArmour/00/192.png",
+            "/original-ui/ARHair/00/192.png",
+            "/original-ui/ARWeapon/00%20S/192.png",
+            "/original-ui/CArmour/00/0.png",
+            "/original-ui/CHair/00/0.png",
+            "/original-ui/CWeapon/00/0.png",
+        ]);
         let payload = json!({
             "sceneView": { "center": { "x": 9, "y": 7 } },
             "entities": [{
@@ -2530,9 +2563,11 @@ mod tests {
                 }
             }]
         });
-        let walking = build_entity_render_state_with_poses(
+        let walking = build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("1002".to_owned(), (24, AnimationAction::Walking))]),
+            true,
+            &manifest,
         )
         .expect("archer walking render state");
         let walking_layers = walking["entities"][0]["layers"]
@@ -2564,7 +2599,12 @@ mod tests {
         }));
 
         let archer = &payload["entities"][0];
-        let range_two = resolved_native_sprite(archer, AnimationAction::AttackRange2);
+        let index = parse_starter_atlas_manifest(&manifest).expect("archer fixture atlas");
+        let range_two = resolved_native_sprite_with_availability(
+            archer,
+            AnimationAction::AttackRange2,
+            &|library| sprite_library_in_atlas(&index, library),
+        );
         assert_eq!(range_two.body_library, "/original-ui/ARArmour/00");
         assert_eq!(
             range_two.hair_library.as_deref(),
@@ -2576,9 +2616,38 @@ mod tests {
         );
         assert!(range_two.weapon_library_secondary.is_none());
 
-        let standing = build_entity_render_state_with_poses(
+        let range_render = build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::from([("1002".to_owned(), (192, AnimationAction::AttackRange2))]),
+            true,
+            &manifest,
+        )
+        .expect("archer ranged render state");
+        assert!(range_render["entities"][0]["layers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|layer| layer["path"]
+                .as_str()
+                .is_some_and(|path| path.ends_with("/ARArmour/00/192.png"))));
+
+        let unavailable =
+            resolved_native_sprite_with_availability(archer, AnimationAction::Walking, &|_| false);
+        assert_eq!(unavailable.body_library, "/original-ui/CArmour/00");
+        assert_eq!(
+            unavailable.hair_library.as_deref(),
+            Some("/original-ui/CHair/00")
+        );
+        assert_eq!(
+            unavailable.weapon_library.as_deref(),
+            Some("/original-ui/CWeapon/00")
+        );
+
+        let standing = build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("1002".to_owned(), (0, AnimationAction::Standing))]),
+            true,
+            &manifest,
         )
         .expect("archer standing render state");
         assert!(standing["entities"][0]["layers"]
