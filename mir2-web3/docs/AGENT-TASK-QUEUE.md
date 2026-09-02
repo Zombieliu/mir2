@@ -1,5 +1,32 @@
 # Agent Task Queue
 
+> Windows Character wing and real unequip checkpoint (2026-09-03): source
+> `HumanObject.RefreshEquipmentStats` now supplies the real armour's
+> `WingEffect` to the self-only native read model. Source `Prguse2/1202..1205`
+> frames use exact intrinsic geometry and additive DrawBlend, with explicit
+> zero/reset handling and no wing without armour. The current EXE SHA-256 is
+> `8BA170AA654FCE1EB911033203C22F018EAD2A4B973F04A4F80A8679E2FF6F20`.
+> Four gender/effect captures and a same-process Bichon `(290,620)` real-input
+> equip -> unequip -> first bag cell -> re-equip cycle are recorded under
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/`.
+> Unequip now targets the first free normalized Gateway bag slot, not
+> `equipment/-1` or a raw Crystal +6 offset, and does not mutate locally.
+> Native UI 519/519, runtime 212/212, Windows 521/521, Simulation 1491/1491,
+> Gateway 666 active/1 ignored, wing integration 5/5 and recall integration
+> 2/2 pass. The Archer CI fixture's availability now comes from its own
+> manifest; the production asset fallback remains unchanged.
+>
+> Next leaves remain in the complete immutable backlog: source item-cell
+> operation UI and belt/amulet slot semantics (`WN-CHAR-002`), MirArmour
+> original icons `Items/595`/`605` (`WN-ITEM-002`), the head-only high-armour
+> world actors (`WN-ACTOR-001`), remaining Character tabs and class/gear matrix,
+> specialized item surfaces, capture-helper one-shot release (`WN-QA-002`),
+> original same-state pairs, trusted package/light, DPI and human comparison.
+> The stale Character/Quest/fixture rows are updated without deleting any
+> denominator leaf. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`; the current goal and draft stacked PR #250 stay
+> open. No final human acceptance or whole-game completion is claimed.
+
 > Windows-native Crystal NPC `MirGoodsCell` checkpoint (2026-09-03): the
 > bounded NPC-goods row now follows the source `205x32` hit/hover rectangle,
 > `40x32` true-size icon centring, labels at `(44,0)`, `(23,17)` and `(44,14)`,

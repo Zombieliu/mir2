@@ -104,10 +104,10 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
             let mut message = format!(
                 "no Mir2 asset bundle found. Place a complete mir2-assets directory beside the executable, or set {ASSET_ROOT_ENV}."
             );
-            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, and the four original-ui/Cursors native PNGs.");
+            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, original-ui/Prguse2/meta.json, original-ui/Prguse2/1202.png through 1205.png, and the four original-ui/Cursors native PNGs.");
             for (candidate, diag) in diagnostics {
                 message.push_str(&format!(
-                    "\n  candidate {} -> entity={} map={} native_map_keyed={} effect={} items={} state_items={} cursors={} complete={}",
+                    "\n  candidate {} -> entity={} map={} native_map_keyed={} effect={} items={} state_items={} character_wings={} cursors={} complete={}",
                     candidate.display(),
                     diag.has_entity_manifest,
                     diag.has_map_manifest,
@@ -115,6 +115,7 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
                     diag.has_effect_manifest,
                     diag.has_item_icons,
                     diag.has_state_items,
+                    diag.has_character_wings,
                     diag.has_crystal_cursors,
                     diag.is_complete
                 ));
@@ -126,7 +127,7 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
 
 fn incomplete_asset_error(path: &Path, diagnostics: AssetRootDiagnostics) -> String {
     format!(
-        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} native_map_keyed_manifest={} effect_manifest={} item_icons={} state_items={} crystal_cursors={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
+        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} native_map_keyed_manifest={} effect_manifest={} item_icons={} state_items={} character_wings={} crystal_cursors={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, original-ui/Prguse2/meta.json, original-ui/Prguse2/1202.png through 1205.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
         path.display(),
         diagnostics.has_entity_manifest,
         diagnostics.has_map_manifest,
@@ -134,6 +135,7 @@ fn incomplete_asset_error(path: &Path, diagnostics: AssetRootDiagnostics) -> Str
         diagnostics.has_effect_manifest,
         diagnostics.has_item_icons,
         diagnostics.has_state_items,
+        diagnostics.has_character_wings,
         diagnostics.has_crystal_cursors
     )
 }
@@ -173,6 +175,7 @@ pub struct AssetRootDiagnostics {
     pub has_effect_manifest: bool,
     pub has_item_icons: bool,
     pub has_state_items: bool,
+    pub has_character_wings: bool,
     pub has_crystal_cursors: bool,
 }
 
@@ -197,6 +200,11 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     let has_state_items = state_item_root.join("meta.json").is_file()
         && state_item_root.join("30.png").is_file()
         && state_item_root.join("5152.png").is_file();
+    let wing_root = candidate.join("original-ui/Prguse2");
+    let has_character_wings = wing_root.join("meta.json").is_file()
+        && ["1202.png", "1203.png", "1204.png", "1205.png"]
+            .iter()
+            .all(|name| wing_root.join(name).is_file());
     let cursor_root = candidate.join("original-ui/Cursors");
     let has_crystal_cursors = [
         "Cursor_Default.png",
@@ -212,6 +220,7 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
         && has_effect_manifest
         && has_item_icons
         && has_state_items
+        && has_character_wings
         && has_crystal_cursors;
     AssetRootDiagnostics {
         is_complete,
@@ -221,6 +230,7 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
         has_effect_manifest,
         has_item_icons,
         has_state_items,
+        has_character_wings,
         has_crystal_cursors,
     }
 }
@@ -417,6 +427,7 @@ mod tests {
         assert!(diagnostics.has_effect_manifest);
         assert!(diagnostics.has_item_icons);
         assert!(diagnostics.has_state_items);
+        assert!(diagnostics.has_character_wings);
         assert!(diagnostics.has_crystal_cursors);
         assert!(diagnostics.is_complete);
         match resolve_asset_root() {
@@ -448,6 +459,7 @@ mod tests {
         assert!(!diagnostics.has_effect_manifest);
         assert!(!diagnostics.has_item_icons);
         assert!(!diagnostics.has_state_items);
+        assert!(!diagnostics.has_character_wings);
         assert!(!diagnostics.has_crystal_cursors);
         assert!(!diagnostics.is_complete);
         let _ = std::fs::remove_dir_all(&dir);
@@ -484,6 +496,7 @@ mod tests {
         let items_only = diagnose_asset_root(&dir);
         assert!(items_only.has_item_icons);
         assert!(!items_only.has_state_items);
+        assert!(!items_only.has_character_wings);
         assert!(!items_only.has_crystal_cursors);
         assert!(!items_only.is_complete);
 
@@ -494,8 +507,25 @@ mod tests {
         std::fs::write(state_item_root.join("5152.png"), []).expect("tail state item");
         let state_items = diagnose_asset_root(&dir);
         assert!(state_items.has_state_items);
+        assert!(!state_items.has_character_wings);
         assert!(!state_items.has_crystal_cursors);
         assert!(!state_items.is_complete);
+
+        let wing_root = dir.join("original-ui/Prguse2");
+        std::fs::create_dir_all(&wing_root).expect("character wing root");
+        std::fs::write(wing_root.join("meta.json"), "{}").expect("character wing meta");
+        for name in ["1202.png", "1203.png", "1204.png"] {
+            std::fs::write(wing_root.join(name), []).expect("character wing image");
+        }
+        assert!(
+            !diagnose_asset_root(&dir).has_character_wings,
+            "all four effect/gender variants are required"
+        );
+        std::fs::write(wing_root.join("1205.png"), []).expect("last character wing image");
+        let character_wings = diagnose_asset_root(&dir);
+        assert!(character_wings.has_character_wings);
+        assert!(!character_wings.has_crystal_cursors);
+        assert!(!character_wings.is_complete);
 
         let cursor_root = dir.join("original-ui/Cursors");
         std::fs::create_dir_all(&cursor_root).expect("cursor root");

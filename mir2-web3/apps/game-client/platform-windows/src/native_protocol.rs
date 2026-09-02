@@ -1548,10 +1548,10 @@ mod tests {
         assert_serialized(
             NativeOutboundCommand::RemoveItem {
                 unique_id: 42,
-                grid: "equipment".into(),
-                to: -1,
+                grid: "inventory".into(),
+                to: 0,
             },
-            json!({"type":"removeItem","uniqueId":42,"grid":"equipment","to":-1}),
+            json!({"type":"removeItem","uniqueId":42,"grid":"inventory","to":0}),
         );
         assert_serialized(
             NativeOutboundCommand::DropItem {

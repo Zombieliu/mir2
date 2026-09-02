@@ -50,6 +50,10 @@ pub struct PlayerStats {
     /// Crystal's zero-based hair style index. `0` is a real style, therefore
     /// absence is represented by `None` rather than a numeric sentinel.
     pub hair: Option<u8>,
+    /// Crystal `UserObject.WingEffect`. Only values 1 and 2 select a
+    /// CharacterDialog wing frame; `0` and other values intentionally draw
+    /// nothing. Kept optional so partial snapshots cannot invent an effect.
+    pub wing_effect: Option<u8>,
     pub guild_name: Option<String>,
     pub guild_rank_name: Option<String>,
     pub map_name: Option<String>,
@@ -166,6 +170,7 @@ mod tests {
                 class_name: Some("Warrior".to_owned()),
                 gender: Some("Male".to_owned()),
                 hair: Some(0),
+                wing_effect: Some(1),
                 guild_name: Some("DemoGuild".to_owned()),
                 guild_rank_name: Some("Member".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
@@ -212,5 +217,21 @@ mod tests {
         assert_eq!(model.player.normalized_experience(), 1.0);
         assert_eq!(model.player.normalized_weight(), 1.0);
         assert_eq!(model.player.available_weight(), 0);
+    }
+
+    #[test]
+    fn wing_effect_round_trips_without_defaulting_missing_authority() {
+        let json = serde_json::to_value(sample()).expect("serialize player read model");
+        assert_eq!(json["player"]["wingEffect"], serde_json::json!(1));
+        let restored: UiReadModel = serde_json::from_value(json).expect("player read model");
+        assert_eq!(restored.player.wing_effect, Some(1));
+
+        let legacy: UiReadModel =
+            serde_json::from_value(serde_json::json!({"player": {}})).expect("legacy player");
+        assert_eq!(legacy.player.wing_effect, None);
+        let cleared: UiReadModel =
+            serde_json::from_value(serde_json::json!({"player": {"wingEffect": 0}}))
+                .expect("explicit no-wing state");
+        assert_eq!(cleared.player.wing_effect, Some(0));
     }
 }

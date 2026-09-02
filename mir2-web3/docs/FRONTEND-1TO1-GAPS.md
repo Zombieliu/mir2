@@ -2,6 +2,39 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 Windows-native Character wing/unequip checkpoint: Simulation now
+> derives `WingEffect` from the wearer's exact, non-broken real armour template,
+> and Gateway preserves self-only authority, explicit zero clearing and partial
+> snapshot/session-reset semantics. CharacterDialog draws only source effects
+> 1/2, only while armour exists, using original `Prguse2/1202..1205` intrinsic
+> rectangles and SourceAlpha + One DrawBlend before the existing StateItem
+> armour -> weapon -> helmet-or-hair layers. Four retained material handles
+> avoid per-frame GPU asset churn; startup requires all four source PNGs.
+>
+> Final Debug EXE SHA-256
+> `8BA170AA654FCE1EB911033203C22F018EAD2A4B973F04A4F80A8679E2FF6F20`
+> produced four gender/effect captures and a real-pointer same-process
+> WingOneM cycle at BichonProvince `(290,620)`: wing present -> armour removed
+> and wing absent -> exact item in bag cell 0 -> re-equipped and wing restored.
+> This exposed and fixes the old `RemoveItem { grid: equipment, to: -1 }` and
+> the raw-array/normalized-bag offset mismatch. The current Gateway takes a
+> normalized 0-based bag destination; it must not receive Crystal's raw +6.
+> The client waits for authoritative state and refuses stale/full-bag targets.
+>
+> Native UI 519/519, runtime 212/212, Windows 521/521, Simulation 1491/1491,
+> Gateway 666 active/1 ignored, wing integration 5/5 and the affected recall
+> integration 2/2 pass. The formerly failing Archer atlas test now owns its
+> deterministic manifest availability and tests the real unavailable-library
+> fallback; production routing is unchanged. Evidence and source/hash ledger:
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+> This supersedes older notes below that wing data is absent or the Windows
+> suite has a known Archer failure. The generic item-operation popup,
+> name-based equip destinations, belt-first amulet/merge path, full Character
+> tabs/class/gear matrix, missing MirArmour icons `Items/595` and `605`,
+> head-only high-armour world actors, original same-state pairing, trusted
+> package/light provenance, DPI and human acceptance remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-09-03 Windows-native Crystal NPC goods-cell checkpoint: Candidate now
 > renders each NPC catalog entry as Crystal's source `MirGoodsCell` rather
 > than the former combined text row. The full `205x32` cell is the click/hover

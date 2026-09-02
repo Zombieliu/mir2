@@ -1,5 +1,26 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Character wing projection/Windows verification (2026-09-03):
+> Simulation follows Crystal `HumanObject.cs:1795-1847` for real-armour
+> `Looks_Wings`, broken base durability and explicit zero; `@SETLIGHT` retains
+> that appearance. Gateway and the native model keep only the current self
+> actor's value and clear it across session resets. CharacterDialog adds
+> exact original `Prguse2/1202..1205` DrawBlend layers before armour, weapon and
+> helmet-or-hair, gated by equipped armour. Same-EXE evidence covers four
+> gender/effect combinations and the real unequip/first-free-bag/re-equip
+> cycle. The latter also fixes `equipment/-1` and respects the existing
+> normalized-bag Gateway contract rather than sending Crystal's raw +6.
+> Native UI 519/519, runtime 212/212, Windows 521/521, Simulation 1491/1491,
+> Gateway 666 active/1 ignored, wing integration 5/5 and recall integration
+> 2/2 pass. The previously failing Archer test is now a deterministic
+> manifest-backed test with unavailable-library coverage, not an asset-route
+> workaround. Report:
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+> Remaining source item interactions, belt/amulet semantics, missing high-gear
+> icon/world assets, full Character matrix, original paired screenshots,
+> trusted package/light, DPI and human acceptance stay in the denominator.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Latest Windows Crystal item-tooltip surface projection (2026-09-03): the
 > shared eleven-section hint now has authoritative source data on NPC goods,
 > GameShop, fixed/selectable quest rewards, guild storage and both trade sides.

@@ -7101,6 +7101,35 @@ pub(super) fn collect_map_transfer_snapshots(world: &World) -> Vec<MapTransferSn
     transfers
 }
 
+/// Crystal `HumanObject.RefreshEquipmentStats`: reset Looks_Wings, select
+/// GetRealItem for the wearer's class/level, skip broken base ItemInfo, and
+/// take Effect only from armour. An instance MaxDura of zero does not make
+/// a normally durable item unbreakable.
+fn crystal_player_wing_effect(body: &CharacterBody, items: &[EquipmentState]) -> u8 {
+    let mut effect = 0;
+    for item in items {
+        let info = match item
+            .user_item_metadata
+            .as_ref()
+            .and_then(|metadata| metadata.item_index)
+        {
+            Some(index) => crystal_item_by_index(index),
+            None => crystal_item_template_for_item_key(&item.key),
+        };
+        let Some(info) = info else {
+            continue;
+        };
+        if item.durability_current == 0 && info.durability > 0 {
+            continue;
+        }
+        let real_info = crystal_real_item_for_player(&info, body.level, body.class);
+        if real_info.item_type == CRYSTAL_ITEM_TYPE_ARMOUR {
+            effect = real_info.effect;
+        }
+    }
+    effect
+}
+
 #[allow(deprecated)]
 /// Crystal `GetUpdateInfo()` for `@SETLIGHT`: the self player's `S.PlayerUpdate`
 /// carrying the new personal light alongside the real weapon/armour shapes, so the
@@ -7128,7 +7157,9 @@ pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<Serv
         weapon,
         weapon_effect: 0,
         armour,
-        wing_effect: 0,
+        wing_effect: body.map_or(0, |body| {
+            crystal_player_wing_effect(&body, &equipment_items)
+        }),
     })
 }
 
@@ -7140,6 +7171,9 @@ pub(super) fn collect_world_entities(
 ) -> Vec<WorldEntitySnapshot> {
     let mut result = Vec::new();
     let self_light = crystal_self_player_light(world, self_equipment_items);
+    let self_wing_effect = player_entity(world)
+        .and_then(|player| world.entity(player).get::<CharacterBody>())
+        .map(|body| crystal_player_wing_effect(body, self_equipment_items));
     // The local player's mount state lives in `MountResource` (Crystal sends
     // `MountType`/`RidingMount` per player object); carry it only while riding so the
     // self-entity sprite renders the mount and hides weapons, matching `entity_sprite_snapshot`.
@@ -7316,6 +7350,7 @@ pub(super) fn collect_world_entities(
             hp,
             max_hp,
             light,
+            wing_effect: self_marker.is_some().then_some(self_wing_effect).flatten(),
             name_colour_argb,
             dead,
             riding_mount: self_marker.is_some().then_some(self_riding_mount).flatten(),

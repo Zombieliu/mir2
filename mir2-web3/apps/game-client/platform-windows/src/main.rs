@@ -117,12 +117,13 @@ fn main() {
     });
     let diag = assets::diagnose_asset_root(&asset_root);
     eprintln!(
-        "[platform-windows] asset_root={} has_entity_manifest={} has_map_manifest={} has_native_map_keyed_manifest={} has_effect_manifest={} has_crystal_cursors={} complete={}",
+        "[platform-windows] asset_root={} has_entity_manifest={} has_map_manifest={} has_native_map_keyed_manifest={} has_effect_manifest={} has_character_wings={} has_crystal_cursors={} complete={}",
         asset_root.display(),
         diag.has_entity_manifest,
         diag.has_map_manifest,
         diag.has_native_map_keyed_manifest,
         diag.has_effect_manifest,
+        diag.has_character_wings,
         diag.has_crystal_cursors,
         diag.is_complete
     );

@@ -5752,6 +5752,11 @@ pub struct WorldEntitySnapshot {
     /// Crystal object light encoding: radius is `light % 15`; players also use
     /// `light / 15` as the source-strength bucket.
     pub light: u8,
+    /// Crystal `Looks_Wings`: the non-broken armour's real ItemInfo.Effect.
+    /// Explicit zero clears an existing effect; absent means this producer
+    /// does not model the actor's appearance (never borrow another actor's).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wing_effect: Option<u8>,
     pub name_colour_argb: i32,
     pub dead: bool,
     /// Authoritative player mount state. Remote/session-external players use

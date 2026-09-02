@@ -3,10 +3,15 @@
 use std::collections::VecDeque;
 
 use bevy::app::AppExit;
+use bevy::asset::{load_internal_asset, uuid_handle};
 use bevy::ecs::system::SystemParam;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
+use bevy::render::render_resource::{
+    AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, RenderPipelineDescriptor,
+};
+use bevy::shader::{Shader, ShaderRef};
 use bevy::text::{Justify, LineBreak, TextLayout};
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, FocusPolicy, Interaction, JustifyContent,
@@ -78,6 +83,70 @@ const NPC_GOODS_CELL_WIDTH: f32 = 205.0;
 const NPC_GOODS_CELL_HEIGHT: f32 = 32.0;
 const NPC_GOODS_ICON_AREA_WIDTH: i32 = 40;
 const NPC_GOODS_NEW_ICON_ASSET: &str = "original-ui/Prguse/550.png";
+
+const CRYSTAL_ADDITIVE_UI_SHADER_HANDLE: Handle<Shader> =
+    uuid_handle!("7842d484-2b55-4b54-989d-cda47cd4c40a");
+
+/// Crystal `DXManager.SetBlend(true)` uses SourceAlpha + One for RGB. This
+/// material keeps CharacterDialog's `Prguse2.DrawBlend` wing layer distinct
+/// from the ordinary alpha-blended armour, weapon and hair images.
+#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
+struct CrystalAdditiveUiMaterial {
+    #[texture(0)]
+    #[sampler(1)]
+    image: Handle<Image>,
+}
+
+/// Hold the four immutable material handles across per-frame overlay rebuilds
+/// so the render asset is not recreated before the GPU can prepare it.
+#[derive(Resource)]
+struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+
+impl CrystalCharacterWingMaterials {
+    fn get(&self, index: u16) -> Option<&Handle<CrystalAdditiveUiMaterial>> {
+        self.0.get(usize::from(index.checked_sub(1202)?))
+    }
+}
+
+fn load_character_wing_materials(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<CrystalAdditiveUiMaterial>>,
+) {
+    commands.insert_resource(CrystalCharacterWingMaterials(std::array::from_fn(
+        |offset| {
+            materials.add(CrystalAdditiveUiMaterial {
+                image: asset_server.load(format!("original-ui/Prguse2/{}.png", 1202 + offset)),
+            })
+        },
+    )));
+}
+
+const CRYSTAL_DRAW_BLEND_STATE: BlendState = BlendState {
+    color: BlendComponent {
+        src_factor: BlendFactor::SrcAlpha,
+        dst_factor: BlendFactor::One,
+        operation: BlendOperation::Add,
+    },
+    alpha: BlendComponent::OVER,
+};
+
+impl UiMaterial for CrystalAdditiveUiMaterial {
+    fn fragment_shader() -> ShaderRef {
+        CRYSTAL_ADDITIVE_UI_SHADER_HANDLE.into()
+    }
+
+    fn specialize(descriptor: &mut RenderPipelineDescriptor, _key: UiMaterialKey<Self>) {
+        if let Some(target) = descriptor
+            .fragment
+            .as_mut()
+            .and_then(|fragment| fragment.targets.first_mut())
+            .and_then(Option::as_mut)
+        {
+            target.blend = Some(CRYSTAL_DRAW_BLEND_STATE);
+        }
+    }
+}
 
 /// Overlay mutation must run before any `Res<NativePlayerUiState>` readers in
 /// the same Update. Unordered Res + ResMut on this resource panics Bevy B0001.
@@ -2207,6 +2276,7 @@ pub(crate) struct OverlayKeyboardControls<'w> {
 #[derive(SystemParam)]
 struct OverlayRenderModels<'w> {
     asset_server: Option<Res<'w, AssetServer>>,
+    wing_materials: Option<Res<'w, CrystalCharacterWingMaterials>>,
     shell: Option<Res<'w, NativeShellModel>>,
     state: Res<'w, NativePlayerUiState>,
     inventory: Res<'w, InventoryModel>,
@@ -2232,6 +2302,21 @@ pub struct Mir2CrystalOverlayPlugin;
 
 impl Plugin for Mir2CrystalOverlayPlugin {
     fn build(&self, app: &mut App) {
+        // Unit-only Apps intentionally omit AssetPlugin/RenderPlugin. Keep the
+        // pure interaction systems usable there, while every real renderer
+        // registers the exact Crystal DrawBlend material and embedded shader.
+        if app.world().contains_resource::<AssetServer>()
+            && app.world().contains_resource::<Assets<Shader>>()
+        {
+            load_internal_asset!(
+                app,
+                CRYSTAL_ADDITIVE_UI_SHADER_HANDLE,
+                "crystal_additive_ui.wgsl",
+                Shader::from_wgsl
+            );
+            app.add_plugins(UiMaterialPlugin::<CrystalAdditiveUiMaterial>::default())
+                .add_systems(Startup, load_character_wing_materials);
+        }
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<UiEffectQueue>()
             .init_resource::<NativePlayerUiIntentQueue>()
@@ -5362,14 +5447,32 @@ fn inspected_remove_intent(
     inventory: &InventoryModel,
 ) -> Option<NativePlayerUiIntent> {
     let inspect = state.inspect.as_ref()?;
+    if inspect.container != 2 {
+        return None;
+    }
     let item = inventory
         .items
         .iter()
         .find(|item| item.container == 2 && item.slot == inspect.slot && item.key == inspect.key)?;
+    // Crystal MirItemCell.RemoveItem selects the first free bag cell, whose
+    // raw Inventory-array index starts at 6. This host's WebSocket contract
+    // (Simulation::remove_item_destination) uses a normalized 0-based bag
+    // index instead. Do not send the raw +6 or the worn item's source grid.
+    // Belt-first amulet removal/merging remains a separate protocol gap:
+    // that endpoint cannot address a belt destination, so never alias one
+    // to an unrelated bag cell.
+    let free_bag = (0..inventory.bag_slot_capacity())
+        .find(|slot| {
+            !inventory
+                .items
+                .iter()
+                .any(|candidate| candidate.container == 0 && candidate.slot == u32::from(*slot))
+        })
+        .map(i32::from);
     Some(NativePlayerUiIntent::RemoveItem {
         unique_id: item_unique_id(item)?,
-        grid: "equipment".to_owned(),
-        to: -1,
+        grid: "inventory".to_owned(),
+        to: free_bag?,
     })
 }
 
@@ -5797,6 +5900,7 @@ fn render_overlays(
 ) {
     let OverlayRenderModels {
         asset_server,
+        wing_materials,
         shell,
         state,
         inventory,
@@ -5856,6 +5960,7 @@ fn render_overlays(
                 render_equipment(
                     parent,
                     asset_server.as_deref(),
+                    wing_materials.as_deref(),
                     &inventory,
                     &ui,
                     &state,
@@ -6497,62 +6602,150 @@ fn crystal_character_state_item_frame(item: &ItemModel) -> Option<CrystalFrameSp
     ))
 }
 
-fn spawn_character_frame(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    frame: CrystalFrameSpec,
-) {
-    spawn_static_overlay_sprite(parent, asset_server, frame.asset_path(), frame.rect);
+fn crystal_character_wing_frame(
+    wing_effect: Option<u8>,
+    gender: Option<&str>,
+) -> Option<CrystalFrameSpec> {
+    let gender_offset = crystal_character_gender_offset(gender)?;
+    let wing_offset = match wing_effect? {
+        1 => 2,
+        2 => 4,
+        _ => return None,
+    };
+    let index = 1200 + wing_offset + gender_offset;
+    // Exact `Prguse2` intrinsic rectangles (`useOffset=true`) exported from
+    // the same Crystal library consumed by CharacterDialog.cs.
+    let rect = match index {
+        1202 => CrystalRect::new(64.0, 138.0, 148.0, 139.0),
+        1203 => CrystalRect::new(64.0, 145.0, 148.0, 144.0),
+        1204 => CrystalRect::new(55.0, 140.0, 156.0, 185.0),
+        1205 => CrystalRect::new(56.0, 144.0, 156.0, 185.0),
+        _ => return None,
+    };
+    Some(CrystalFrameSpec::new("Prguse2", index, rect))
 }
 
-fn crystal_character_paper_doll_frames(
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CrystalCharacterBlend {
+    Alpha,
+    DrawBlend,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct CrystalCharacterLayer {
+    frame: CrystalFrameSpec,
+    blend: CrystalCharacterBlend,
+}
+
+impl CrystalCharacterLayer {
+    const fn alpha(frame: CrystalFrameSpec) -> Self {
+        Self {
+            frame,
+            blend: CrystalCharacterBlend::Alpha,
+        }
+    }
+
+    const fn draw_blend(frame: CrystalFrameSpec) -> Self {
+        Self {
+            frame,
+            blend: CrystalCharacterBlend::DrawBlend,
+        }
+    }
+}
+
+fn spawn_character_layer(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    wing_materials: Option<&CrystalCharacterWingMaterials>,
+    layer: CrystalCharacterLayer,
+) {
+    match layer.blend {
+        CrystalCharacterBlend::Alpha => {
+            spawn_static_overlay_sprite(
+                parent,
+                asset_server,
+                layer.frame.asset_path(),
+                layer.frame.rect,
+            );
+        }
+        CrystalCharacterBlend::DrawBlend => {
+            let Some(material) =
+                wing_materials.and_then(|materials| materials.get(layer.frame.index))
+            else {
+                return;
+            };
+            parent.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(layer.frame.rect.left),
+                    top: Val::Px(layer.frame.rect.top),
+                    width: Val::Px(layer.frame.rect.width),
+                    height: Val::Px(layer.frame.rect.height),
+                    ..default()
+                },
+                MaterialNode(material.clone()),
+            ));
+        }
+    }
+}
+
+fn crystal_character_paper_doll_layers(
     inventory: &InventoryModel,
     ui: &UiReadModel,
-) -> Vec<CrystalFrameSpec> {
+) -> Vec<CrystalCharacterLayer> {
     let equipped = |slot| {
         inventory
             .items
             .iter()
             .find(|item| item.container == 2 && item.slot == slot)
     };
-    let mut frames = Vec::with_capacity(3);
+    let mut layers = Vec::with_capacity(4);
 
-    // Exact CharacterPage.AfterDraw order: wing (when authoritative data is
-    // available), armour, weapon, then helmet-or-hair. WingEffect is not yet a
-    // personal read-model field, so this slice deliberately emits no fake wing.
-    for slot in [1, 0] {
-        if let Some(frame) = equipped(slot).and_then(crystal_character_state_item_frame) {
-            frames.push(frame);
+    // Exact CharacterPage.AfterDraw condition and order: a wing is legal only
+    // while an armour item exists, then armour, weapon, and helmet-or-hair.
+    if let Some(armour) = equipped(1) {
+        if let Some(frame) =
+            crystal_character_wing_frame(ui.player.wing_effect, ui.player.gender.as_deref())
+        {
+            layers.push(CrystalCharacterLayer::draw_blend(frame));
         }
+        if let Some(frame) = crystal_character_state_item_frame(armour) {
+            layers.push(CrystalCharacterLayer::alpha(frame));
+        }
+    }
+    if let Some(frame) = equipped(0).and_then(crystal_character_state_item_frame) {
+        layers.push(CrystalCharacterLayer::alpha(frame));
     }
     if let Some(helmet) = equipped(2) {
         if let Some(frame) = crystal_character_state_item_frame(helmet) {
-            frames.push(frame);
+            layers.push(CrystalCharacterLayer::alpha(frame));
         }
     } else if let Some(frame) = crystal_character_hair_frame(
         ui.player.class_name.as_deref(),
         ui.player.gender.as_deref(),
         ui.player.hair,
     ) {
-        frames.push(frame);
+        layers.push(CrystalCharacterLayer::alpha(frame));
     }
-    frames
+    layers
 }
 
 fn render_character_paper_doll(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
+    wing_materials: Option<&CrystalCharacterWingMaterials>,
     inventory: &InventoryModel,
     ui: &UiReadModel,
 ) {
-    for frame in crystal_character_paper_doll_frames(inventory, ui) {
-        spawn_character_frame(parent, asset_server, frame);
+    for layer in crystal_character_paper_doll_layers(inventory, ui) {
+        spawn_character_layer(parent, asset_server, wing_materials, layer);
     }
 }
 
 fn render_equipment(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
+    wing_materials: Option<&CrystalCharacterWingMaterials>,
     inventory: &InventoryModel,
     ui: &UiReadModel,
     state: &NativePlayerUiState,
@@ -6660,7 +6853,7 @@ fn render_equipment(
                     }
                 }
                 // CharacterPage.AfterDraw runs after its MirItemCell children.
-                render_character_paper_doll(parent, asset_server, inventory, ui);
+                render_character_paper_doll(parent, asset_server, wing_materials, inventory, ui);
             }
             CharacterPage::Stats1 => {
                 for (text, top) in [
@@ -11484,7 +11677,123 @@ mod tests {
     }
 
     #[test]
-    fn crystal_character_paper_doll_order_is_armour_weapon_then_helmet_or_hair() {
+    fn crystal_character_wings_use_exact_source_indices_offsets_and_draw_blend() {
+        let source: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../web/public/original-ui/Prguse2/meta.json"
+        ))
+        .expect("original Prguse2 export metadata");
+        for (effect, gender, index, rect) in [
+            (1, "Male", 1202, CrystalRect::new(64.0, 138.0, 148.0, 139.0)),
+            (
+                1,
+                "Female",
+                1203,
+                CrystalRect::new(64.0, 145.0, 148.0, 144.0),
+            ),
+            (2, "Male", 1204, CrystalRect::new(55.0, 140.0, 156.0, 185.0)),
+            (
+                2,
+                "Female",
+                1205,
+                CrystalRect::new(56.0, 144.0, 156.0, 185.0),
+            ),
+        ] {
+            assert_eq!(
+                crystal_character_wing_frame(Some(effect), Some(gender)),
+                Some(CrystalFrameSpec::new("Prguse2", index, rect))
+            );
+            let metadata = source["frames"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|frame| frame["index"].as_u64() == Some(u64::from(index)))
+                .expect("exact wing frame in original library");
+            for (field, value) in [
+                ("x", rect.left),
+                ("y", rect.top),
+                ("width", rect.width),
+                ("height", rect.height),
+            ] {
+                assert_eq!(
+                    metadata[field].as_f64(),
+                    Some(f64::from(value)),
+                    "frame {index} {field}"
+                );
+            }
+        }
+        assert!(crystal_character_wing_frame(None, Some("Male")).is_none());
+        assert!(crystal_character_wing_frame(Some(0), Some("Male")).is_none());
+        assert!(crystal_character_wing_frame(Some(3), Some("Female")).is_none());
+        assert!(crystal_character_wing_frame(Some(1), None).is_none());
+
+        assert_eq!(
+            CRYSTAL_DRAW_BLEND_STATE.color,
+            BlendComponent {
+                src_factor: BlendFactor::SrcAlpha,
+                dst_factor: BlendFactor::One,
+                operation: BlendOperation::Add,
+            }
+        );
+    }
+
+    #[test]
+    fn crystal_character_wing_material_installs_source_additive_pipeline_and_fixed_handles() {
+        use bevy::render::render_resource::{
+            ColorTargetState, ColorWrites, FragmentState, TextureFormat,
+        };
+
+        let format = TextureFormat::Bgra8UnormSrgb;
+        let mut descriptor = RenderPipelineDescriptor {
+            fragment: Some(FragmentState {
+                targets: vec![Some(ColorTargetState {
+                    format,
+                    blend: Some(BlendState::ALPHA_BLENDING),
+                    write_mask: ColorWrites::ALL,
+                })],
+                ..default()
+            }),
+            ..default()
+        };
+        CrystalAdditiveUiMaterial::specialize(
+            &mut descriptor,
+            UiMaterialKey {
+                target_format: format,
+                bind_group_data: (),
+            },
+        );
+        assert_eq!(
+            descriptor.fragment.unwrap().targets[0]
+                .as_ref()
+                .unwrap()
+                .blend,
+            Some(CRYSTAL_DRAW_BLEND_STATE)
+        );
+        assert!(matches!(CrystalAdditiveUiMaterial::fragment_shader(),
+            ShaderRef::Handle(handle) if handle == CRYSTAL_ADDITIVE_UI_SHADER_HANDLE));
+
+        let mut assets = Assets::<CrystalAdditiveUiMaterial>::default();
+        let handles = CrystalCharacterWingMaterials(std::array::from_fn(|_| {
+            assets.add(CrystalAdditiveUiMaterial {
+                image: Handle::default(),
+            })
+        }));
+        for index in 1202..=1205 {
+            assert_eq!(
+                handles.get(index),
+                Some(&handles.0[usize::from(index - 1202)])
+            );
+        }
+        assert!(handles.get(1201).is_none());
+        assert!(handles.get(1206).is_none());
+        assert_eq!(
+            assets.len(),
+            4,
+            "one retained material per source wing frame"
+        );
+    }
+
+    #[test]
+    fn crystal_character_paper_doll_order_is_wing_armour_weapon_then_helmet_or_hair() {
         let state_item = |slot, image, x, y, width, height| ItemModel {
             container: 2,
             slot,
@@ -11504,20 +11813,47 @@ mod tests {
         ui.player.class_name = Some("Warrior".to_owned());
         ui.player.gender = Some("Male".to_owned());
         ui.player.hair = Some(0);
+        ui.player.wing_effect = Some(1);
 
-        let frames = crystal_character_paper_doll_frames(&inventory, &ui);
+        let layers = crystal_character_paper_doll_layers(&inventory, &ui);
         assert_eq!(
-            frames.iter().map(|frame| frame.index).collect::<Vec<_>>(),
-            vec![60, 30, 441]
+            layers
+                .iter()
+                .map(|layer| layer.frame.index)
+                .collect::<Vec<_>>(),
+            vec![1202, 60, 30, 441]
         );
-        assert_eq!(frames[0].rect, CrystalRect::new(92.0, 194.0, 80.0, 128.0));
+        assert_eq!(layers[0].blend, CrystalCharacterBlend::DrawBlend);
+        assert_eq!(layers[1].blend, CrystalCharacterBlend::Alpha);
+        assert_eq!(
+            layers[0].frame.rect,
+            CrystalRect::new(64.0, 138.0, 148.0, 139.0)
+        );
+        assert_eq!(
+            layers[1].frame.rect,
+            CrystalRect::new(92.0, 194.0, 80.0, 128.0)
+        );
 
         inventory.items.push(state_item(2, 100, 120, 160, 24, 30));
-        let frames = crystal_character_paper_doll_frames(&inventory, &ui);
+        let layers = crystal_character_paper_doll_layers(&inventory, &ui);
         assert_eq!(
-            frames.iter().map(|frame| frame.index).collect::<Vec<_>>(),
-            vec![60, 30, 100],
+            layers
+                .iter()
+                .map(|layer| layer.frame.index)
+                .collect::<Vec<_>>(),
+            vec![1202, 60, 30, 100],
             "a present helmet suppresses Crystal's hair fallback"
+        );
+
+        inventory.items.retain(|item| item.slot != 1);
+        let layers = crystal_character_paper_doll_layers(&inventory, &ui);
+        assert_eq!(
+            layers
+                .iter()
+                .map(|layer| layer.frame.index)
+                .collect::<Vec<_>>(),
+            vec![30, 100],
+            "Crystal never draws a wing without an equipped armour item"
         );
     }
 
@@ -14387,6 +14723,103 @@ mod tests {
         assert_eq!(input.top, Val::Px(43.0));
         assert_eq!(input.width, Val::Px(132.0));
         assert_eq!(input.height, Val::Px(19.0));
+    }
+
+    #[test]
+    fn character_unequip_addresses_first_real_free_bag_cell_and_never_mutates_locally() {
+        let armour = ItemModel {
+            unique_id: Some(121),
+            key: "crystal-item-375".to_owned(),
+            container: 2,
+            slot: 1,
+            quantity: 1,
+            ..default()
+        };
+        let state = NativePlayerUiState {
+            inspect: Some(inspect_from_item(&armour)),
+            ..default()
+        };
+        let mut inventory = InventoryModel {
+            items: vec![armour.clone()],
+            ..default()
+        };
+        assert!(matches!(inspected_remove_intent(&state, &inventory),
+            Some(NativePlayerUiIntent::RemoveItem { unique_id: 121, grid, to: 0 }) if grid == "inventory"));
+        assert_eq!(
+            inventory.items,
+            vec![armour.clone()],
+            "receipt owns equipment changes"
+        );
+
+        for slot in 0..40 {
+            inventory.items.push(ItemModel {
+                container: 0,
+                slot,
+                ..default()
+            });
+        }
+        assert!(
+            inspected_remove_intent(&state, &inventory).is_none(),
+            "normal gear cannot target a locked bag page or use a guessed -1 destination"
+        );
+        inventory.capacity = 54;
+        assert!(matches!(
+            inspected_remove_intent(&state, &inventory),
+            Some(NativePlayerUiIntent::RemoveItem { to: 40, .. })
+        ));
+        inventory
+            .items
+            .retain(|item| !(item.container == 0 && item.slot == 17));
+        assert!(
+            matches!(
+                inspected_equip_intent(&state, &inventory),
+                Some(NativePlayerUiIntent::RemoveItem { to: 17, .. })
+            ),
+            "keyboard G and pointer unequip use the same slot mapping"
+        );
+        let mut stale = state;
+        stale.inspect.as_mut().unwrap().container = 3;
+        assert!(inspected_remove_intent(&stale, &inventory).is_none());
+    }
+
+    #[test]
+    fn character_unequip_never_aliases_a_free_belt_slot_to_an_occupied_bag_slot() {
+        let mut source = crate::inventory::CrystalItemTooltipSourceModel::default();
+        source.info.item_type = 8; // Crystal ItemType.Amulet.
+        let amulet = ItemModel {
+            unique_id: Some(700),
+            key: "amulet".to_owned(),
+            container: 2,
+            slot: 9,
+            tooltip_source: Some(source),
+            ..default()
+        };
+        let state = NativePlayerUiState {
+            inspect: Some(inspect_from_item(&amulet)),
+            ..default()
+        };
+        let mut inventory = InventoryModel {
+            items: vec![amulet],
+            ..default()
+        };
+        for slot in 0..40 {
+            inventory.items.push(ItemModel {
+                container: 0,
+                slot,
+                ..default()
+            });
+        }
+        assert!(
+            inspected_remove_intent(&state, &inventory).is_none(),
+            "the current normalized-bag endpoint must not misroute a free belt cell"
+        );
+        inventory
+            .items
+            .retain(|item| !(item.container == 0 && item.slot == 17));
+        assert!(matches!(
+            inspected_remove_intent(&state, &inventory),
+            Some(NativePlayerUiIntent::RemoveItem { to: 17, .. })
+        ));
     }
 
     #[test]

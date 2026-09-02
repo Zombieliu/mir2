@@ -8912,12 +8912,15 @@ mod native_data_path_tests {
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":111,"items":[]}"#.to_owned()
         ));
+        assert!(native_ingest::push_native_ui_read_model(
+            r#"{"player":{"name":"Account A","wingEffect":1}}"#.to_owned()
+        ));
         assert!(native_ingest::push_native_data_reset());
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":222,"items":[]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_ui_read_model(
-            r#"{"player":{"name":"Account B","hp":10,"maxHp":10}}"#.to_owned()
+            r#"{"player":{"name":"Account B","hp":10,"maxHp":10,"wingEffect":2}}"#.to_owned()
         ));
 
         app.update();
@@ -8935,6 +8938,13 @@ mod native_data_path_tests {
                 .name
                 .as_deref(),
             Some("Account B")
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>()
+                .player
+                .wing_effect,
+            Some(2)
         );
     }
 }

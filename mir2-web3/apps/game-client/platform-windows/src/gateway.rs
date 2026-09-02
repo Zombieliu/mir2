@@ -775,6 +775,7 @@ struct NativeUiPlayerCursor {
     class_name: Option<String>,
     gender: Option<String>,
     hair: Option<u8>,
+    wing_effect: Option<u8>,
     guild_name: Option<String>,
     guild_rank_name: Option<String>,
     map_name: Option<String>,
@@ -868,6 +869,17 @@ impl NativeUiPlayerCursor {
             .and_then(|value| u8::try_from(value).ok())
         {
             self.hair = Some(value);
+        }
+        if let Some(value) = value_u32(self_player.and_then(|entity| {
+            entity
+                .get("wingEffect")
+                .or_else(|| entity.get("wing_effect"))
+        }))
+        .and_then(|value| u8::try_from(value).ok())
+        {
+            // Zero is an explicit authoritative clear; a missing field is a
+            // partial snapshot and must preserve the previous value.
+            self.wing_effect = Some(value);
         }
         if let Some(value) = value_string(self_player.and_then(|entity| entity.get("guildName"))) {
             self.guild_name = Some(value);
@@ -996,6 +1008,7 @@ impl NativeUiPlayerCursor {
                 "className": self.class_name,
                 "gender": self.gender,
                 "hair": self.hair,
+                "wingEffect": self.wing_effect,
                 "guildName": self.guild_name,
                 "guildRankName": self.guild_rank_name,
                 "mapName": self.map_name,
@@ -7297,8 +7310,13 @@ mod tests {
         }));
 
         cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
             "playerCrystalStats": [{ "stat": 5, "value": 11 }],
-            "entities": []
+            "entities": [{
+                "objectId": 99,
+                "kind": "player",
+                "wingEffect": 2
+            }]
         }));
 
         cursor.observe_world_snapshot(&json!({
@@ -7318,6 +7336,7 @@ mod tests {
         assert_eq!(model.player.class_name.as_deref(), Some("Wizard"));
         assert_eq!(model.player.gender.as_deref(), Some("Female"));
         assert_eq!(model.player.hair, Some(7));
+        assert_eq!(model.player.wing_effect, Some(2));
         assert_eq!(model.player.guild_name.as_deref(), Some("Test Guild"));
         assert_eq!(model.player.guild_rank_name.as_deref(), Some("Officer"));
         assert_eq!(model.player.level, 7);
@@ -7350,6 +7369,7 @@ mod tests {
                 "className": "Wizard",
                 "gender": "Male",
                 "hair": 2,
+                "wingEffect": 1,
                 "guildName": "New Guild",
                 "guildRankName": "Leader"
             }]
@@ -7371,6 +7391,7 @@ mod tests {
         assert_eq!(model.player.level, 8);
         assert_eq!(model.player.gender.as_deref(), Some("Male"));
         assert_eq!(model.player.hair, Some(2));
+        assert_eq!(model.player.wing_effect, Some(1));
         assert_eq!(model.player.guild_name.as_deref(), Some("New Guild"));
         assert_eq!(model.player.guild_rank_name.as_deref(), Some("Leader"));
         assert_eq!(model.player.map_name.as_deref(), Some("BorderVillage"));
@@ -7382,9 +7403,54 @@ mod tests {
         )
         .expect("reset cursor read model");
         assert_eq!(reset.player.name, None);
+        assert_eq!(reset.player.wing_effect, None);
         assert_eq!(reset.player.hp, 0);
         assert_eq!(reset.player.map_name, None);
         assert!(!reset.player.in_safe_zone);
+    }
+
+    #[test]
+    fn native_ui_wing_effect_uses_only_self_authority_and_zero_clears_it() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
+            "entities": [
+                { "objectId": 7, "kind": "player", "wingEffect": 2 },
+                { "objectId": 99, "kind": "player", "wingEffect": 1 }
+            ]
+        }));
+        assert_eq!(cursor.wing_effect, Some(1));
+
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId": 99,
+            "entities": [{ "objectId": 7, "kind": "player", "wingEffect": 2 }]
+        }));
+        assert_eq!(
+            cursor.wing_effect,
+            Some(1),
+            "remote appearance cannot overwrite self"
+        );
+
+        cursor.observe_world_snapshot(&json!({
+            "entities": [{ "kind": "selfPlayer", "wing_effect": 0 }]
+        }));
+        assert_eq!(
+            cursor.wing_effect,
+            Some(0),
+            "zero is an authoritative clear"
+        );
+
+        for invalid in [Value::Null, json!(-1), json!(256)] {
+            cursor.observe_world_snapshot(&json!({
+                "entities": [{ "kind": "selfPlayer", "wingEffect": invalid }]
+            }));
+            assert_eq!(cursor.wing_effect, Some(0));
+        }
+        let model = serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(
+            cursor.to_read_model_json(),
+        )
+        .expect("wing read model");
+        assert_eq!(model.player.wing_effect, Some(0));
     }
 
     #[test]

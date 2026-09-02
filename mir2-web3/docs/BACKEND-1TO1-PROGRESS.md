@@ -1,5 +1,28 @@
 # Backend 1:1 Progress
 
+> Character wing authoritative projection checkpoint (2026-09-03):
+> Simulation resets wing appearance to zero, resolves the exact equipped
+> armour's `GetRealItem` for the current class/level and ignores broken items
+> according to the base template's durability, matching Crystal
+> `HumanObject.cs:1795-1847`. It does not trust a client-supplied effect or an
+> instance MaxDura of zero. `WorldEntitySnapshot.wingEffect` is optional for
+> unknown actors, explicit zero for no wing, and self-only in personal world
+> collection; real ObjectPlayer appearance is retained by Gateway. The
+> `@SETLIGHT` PlayerUpdate path no longer overwrites valid wings with zero.
+> Native consumption preserves partial snapshots and clears session state.
+> Full Simulation 1491/1491 and Gateway 666 active/1 ignored pass; dedicated
+> wing catalogue/broken/no-armour/unequip/re-equip/save/reload tests pass 5/5,
+> and the affected recall integration passes 2/2.
+>
+> Real Windows input also verifies an exact armour instance moves to the first
+> free bag cell and back while wings clear/restore. The current item endpoint
+> uses normalized bag indexes; the client now respects this contract without
+> weakening item authority. Crystal raw Inventory/belt index unification and
+> belt-first amulet merging are still open and must not be claimed by this
+> slice. No schema/store migration, authentication relaxation, shared-Zone
+> ownership change, backend/global percentage or human acceptance is implied.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+
 > Crystal non-personal tooltip projection checkpoint (2026-09-03): the native
 > packet boundary now enriches NPC goods, GameShop, quest rewards, guild
 > storage and trade with a complete presentation source while leaving all item

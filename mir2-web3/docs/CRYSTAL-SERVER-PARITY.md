@@ -1,5 +1,24 @@
 # Crystal Server Parity
 
+> Character wing server/client note (2026-09-03): the prior missing-wing note
+> below is superseded. `Looks_Wings` now derives from server-owned real armour
+> metadata with Crystal's broken-base-durability rule, and explicit zero
+> clears the effect after unequip. Personal snapshots do not lend self
+> appearance to other actors; ObjectPlayer keeps its own wire effect, while
+> native partial snapshots and session resets retain the intended ownership
+> boundary. `@SETLIGHT` preserves the current equipment-derived effect.
+> Full Simulation 1491/1491, Gateway 666 active/1 ignored, dedicated wing
+> integration 5/5 and affected recall integration 2/2 pass. Windows 521/521,
+> native UI 519/519 and runtime 212/212 pass with same-EXE four-frame and real
+> unequip/re-equip evidence in
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+> The fixed native unequip path uses the existing normalized-bag destination
+> contract; raw Crystal/belt addressing and amulet merge parity remain open.
+> This is a bounded appearance/projection correction, not completion of
+> server gameplay, distributed authority, source item interaction UI,
+> packaging/light, DPI or human visual acceptance. No server/global percentage
+> is reported.
+
 > Crystal remaining tooltip surfaces note (2026-09-03): NPC shop, GameShop,
 > quest reward, guild-storage and trade packets now feed the native client a
 > complete tooltip source without moving authority into presentation code.

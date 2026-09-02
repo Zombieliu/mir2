@@ -5875,6 +5875,7 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         hp: None,
         max_hp: None,
         light: info.light,
+        wing_effect: None,
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
         // ObjectMonster carries behaviour AI but no authoritative relationship.
@@ -5913,6 +5914,7 @@ fn world_entity_from_zone_monster_spawn(
         hp: Some(monster.hp),
         max_hp: Some(monster.max_hp),
         light: 0,
+        wing_effect: None,
         name_colour_argb: spawn.name_colour_argb,
         dead: monster.dead,
         disposition: monster
@@ -6038,6 +6040,7 @@ fn world_entity_from_object_player_info(
         hp: None,
         max_hp: None,
         light: info.light,
+        wing_effect: Some(info.wing_effect),
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
         disposition: WorldEntityDisposition::Friendly,
@@ -6068,6 +6071,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         hp: None,
         max_hp: None,
         light: 10,
+        wing_effect: None,
         name_colour_argb: info.name_colour_argb,
         dead: false,
         disposition: WorldEntityDisposition::Neutral,
@@ -14790,6 +14794,7 @@ mod tests {
         let entity = world_entity_from_object_player_info(&info, None);
         assert_eq!(entity.riding_mount, Some(false));
         assert_eq!(entity.fishing, Some(true));
+        assert_eq!(entity.wing_effect, Some(6));
         let sprite = entity.sprite.expect("remote appearance sprite");
         assert_eq!(sprite.body_library, "CArmour/03");
         assert_eq!(sprite.hair_library.as_deref(), Some("CHair/02"));
@@ -25431,6 +25436,7 @@ mod tests {
             hp: Some(12),
             max_hp: Some(12),
             light: 0,
+            wing_effect: None,
             name_colour_argb: -1,
             dead: false,
             disposition: WorldEntityDisposition::Neutral,
@@ -25521,6 +25527,7 @@ mod tests {
             hp: None,
             max_hp: None,
             light: 3,
+            wing_effect: Some(0),
             name_colour_argb: -1,
             dead: false,
             disposition: WorldEntityDisposition::Friendly,
