@@ -1,6 +1,32 @@
 # Agent Task Queue
 
-> Windows Guild storage source/logic checkpoint (2026-09-03): replace the
+> Windows primary-item true-size checkpoint (2026-09-03): bag, belt,
+> equipment, personal storage and NPC goods now share source alpha-bound
+> GetTrueSize centring, full unstretched original images and valid source
+> Items/0. Fourteen equipment cells and personal storage use original 36x32
+> bounds; oversized images are not clipped, and source stackable count 1
+> is visible. Persistent belt late-load/change/clear ordering is tested.
+> Warehouse-side, trade and amount icon regions reuse the helper without
+> claiming their whole layouts/operations. All 1003 exported PNGs match
+> original RGBA/metadata; 5015 native node geometries pass. Final native UI
+> 562/562, Windows 528/528, runtime 212/212, UI core 43/43, the 11-test/
+> 924-image gate, fixture reproduction and formatting pass. Historical
+> server tests are not reused as current results.
+>
+> Next bounded CLI leaf: original TradeDialog/GuestTradeDialog window/cell
+> geometry and gold/confirm/cancel state; preserve authoritative transactions.
+> Other open leaves include Guild operations/overlays/full editing, window
+> overlap/movement/shared throttle, other concrete-item and base-preview
+> surfaces, FloorItems and WN-CHAR-002 source operations/slot addressing.
+> Computer Use remains paused after user Escape; no GUI launch/input/capture
+> occurred. All 33 backlog IDs and final-source original-pair/package/light/
+> DPI/soak/human gates remain. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-true-size/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; goal
+> and stacked Draft PR #250 stay open. This supersedes only the primary
+> GetTrueSize/zero-image gaps in the historical Guild checkpoint below.
+
+> Historical Windows Guild storage source/logic checkpoint (2026-09-03): replace the
 > four-column text/page substitute with the original 8x14 storage grid,
 > eight-row viewport, stable 112 slot IDs, source integer wheel/drag behavior,
 > original tabs/arrows and MirAmountBox gold flow. Actual current counts select

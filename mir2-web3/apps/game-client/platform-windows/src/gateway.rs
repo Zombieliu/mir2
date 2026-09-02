@@ -4573,10 +4573,12 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
         .cloned()
         .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
     let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);
-    let icon = crystal_user_item_icon(item, count)
-        .or_else(|| value_u32(item.get("icon")).and_then(|value| u16::try_from(value).ok()))
-        .unwrap_or_default();
-    let icon_geometry = item_frame_geometry(icon);
+    let icon = crystal_user_item_icon(item, count).or_else(|| {
+        value_u32(item.get("icon"))
+            .and_then(|value| u16::try_from(value).ok())
+            .filter(|value| *value != 0)
+    });
+    let icon_geometry = icon.and_then(item_frame_geometry);
     Some(json!({
         "unique_id": id,
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
@@ -4586,7 +4588,7 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
         "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
             .and_then(|value| u8::try_from(value).ok())
             .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
-        "icon": icon,
+        "icon": icon.unwrap_or_default(),
         "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),
         "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),
         "description": value_string(item.get("description")).unwrap_or_default(),
@@ -5165,9 +5167,9 @@ fn state_item_frame_geometry(index: u16) -> Option<StateItemFrameGeometry> {
         .copied()
 }
 
-/// Crystal bag cells use `Items.GetTrueSize(image)` and center the returned
-/// size. `MirItemCell.UseOffSet` is false, so the library x/y offsets are not
-/// part of this draw path.
+/// Exported full-bitmap dimensions retained in the legacy read model. These
+/// are NOT GetTrueSize: native cell layout measures alpha from the loaded PNG.
+/// MirItemCell ignores library x/y offsets and still draws the full bitmap.
 fn item_frame_geometry(index: u16) -> Option<ItemFrameGeometry> {
     ITEM_FRAME_GEOMETRY
         .get_or_init(|| {
@@ -5315,14 +5317,16 @@ fn extend_item_metadata(mapped: &mut Value, item: &Value) {
             target.insert(target_name.to_owned(), value);
         }
     }
-    if let Some(icon) = value_u32(target.get("quantity"))
-        .and_then(|quantity| crystal_user_item_icon(item, quantity))
-    {
+    let source_icon = value_u32(target.get("quantity"))
+        .and_then(|quantity| crystal_user_item_icon(item, quantity));
+    if let Some(icon) = source_icon {
         target.insert("icon".to_owned(), json!(icon));
     }
-    let icon = value_u32(target.get("icon"))
-        .and_then(|value| u16::try_from(value).ok())
-        .filter(|value| *value != 0);
+    let icon = source_icon.or_else(|| {
+        value_u32(target.get("icon"))
+            .and_then(|value| u16::try_from(value).ok())
+            .filter(|value| *value != 0)
+    });
     if let Some(frame) = icon.and_then(item_frame_geometry) {
         target.insert("iconWidth".to_owned(), json!(frame.width));
         target.insert("iconHeight".to_owned(), json!(frame.height));
@@ -7487,6 +7491,43 @@ mod tests {
         )
         .expect("wing read model");
         assert_eq!(model.player.wing_effect, Some(0));
+    }
+
+    #[test]
+    fn source_zero_image_keeps_full_frame_metadata_but_legacy_zero_stays_absent() {
+        let known = json!({
+            "uniqueId": 987654321,
+            "name": "Source zero",
+            "icon": 71,
+            "count": 1,
+            "tooltipSource": { "info": {
+                "item_type": 0, "shape": 0, "stack_size": 1, "image": 0
+            }}
+        });
+        let mut mapped = json!({ "quantity": 1 });
+        extend_item_metadata(&mut mapped, &known);
+        assert_eq!(mapped["icon"], 0);
+        assert_eq!(
+            (mapped["iconWidth"].as_u64(), mapped["iconHeight"].as_u64()),
+            (Some(32), Some(23))
+        );
+        assert_eq!(mapped["tooltipSource"], known["tooltipSource"]);
+
+        let legacy = json!({ "uniqueId": 987654321, "name": "PigEar", "icon": 0, "count": 1 });
+        let mut missing = json!({ "quantity": 1 });
+        extend_item_metadata(&mut missing, &legacy);
+        assert_eq!(missing["icon"], 0);
+        assert!(missing.get("iconWidth").is_none());
+        assert!(missing.get("iconHeight").is_none());
+
+        let cursor = NativeUiPlayerCursor::default();
+        let good = shop_good_json(&known, 0, &cursor).unwrap();
+        assert_eq!(good["icon"], 0);
+        assert_eq!(good["icon_width"], 32);
+        assert_eq!(good["icon_height"], 23);
+        let missing = shop_good_json(&legacy, 0, &cursor).unwrap();
+        assert_eq!(missing["icon_width"], 0);
+        assert_eq!(missing["icon_height"], 0);
     }
 
     #[test]

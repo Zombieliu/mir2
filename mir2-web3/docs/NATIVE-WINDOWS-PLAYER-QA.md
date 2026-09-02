@@ -1,6 +1,27 @@
 # Windows 原生可玩闭环验收清单
 
-> 2026-09-03 native Guild storage source/logic checkpoint: the original
+> 2026-09-03 primary-item source/logic checkpoint: bag, belt, equipment,
+> personal storage and NPC goods use original alpha-bound GetTrueSize while
+> drawing the complete bitmap. Legitimate source Items/0, stackable count 1,
+> source 36x32 equipment/storage cells, oversized draws and belt late-load/
+> change/clear are covered. Warehouse-side/trade/amount icon regions share
+> the helper; their whole-window and item-operation gaps are not closed.
+> All 1003 exported original PNGs match RGBA/metadata and 5015 exact native
+> node geometries pass. Final native UI 562/562, Windows 528/528, runtime
+> 212/212, UI core 43/43 and item-icon 11/11 plus 924-image coverage pass.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-true-size/README.md`.
+>
+> Computer Use is still paused after user Escape; no application window,
+> input injection or new screenshot occurred. After explicit resumption,
+> bind the final binary/state to populated primary/NPC/trade views, real
+> quantity changes, zero/oversized images and original same-state pairs.
+> This source/node evidence is not a GPU pixel or same-EXE acceptance claim.
+> Preserve every original-pair/package/light/DPI/soak/human gate and all 33
+> IDs. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+> The historical Guild note's primary image-layout/zero gap is superseded;
+> source operations, state overlays and remaining specialized layouts are not.
+
+> Historical 2026-09-03 native Guild storage source/logic checkpoint: the original
 > 8x14 grid, 8-row viewport, stable slot IDs, source integer scrolling,
 > alpha-bound current-count icons, valid Items/0, original tab/scroll art and
 > gold MirAmountBox now have headless coverage. Final native UI 551/551,

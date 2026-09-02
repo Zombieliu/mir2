@@ -10,7 +10,7 @@ use bevy::text::LineBreak;
 use bevy::ui::{widget::NodeImageMode, Display, FocusPolicy, Node, PositionType, Val};
 use bevy::window::PrimaryWindow;
 
-use crate::inventory::{item_icon_path, InventoryModel, ItemModel};
+use crate::inventory::{InventoryModel, ItemModel};
 use crate::mail::MailModel;
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
@@ -18,6 +18,7 @@ use crate::pending_operations::{PendingLifecycleSet, SessionResetRevision};
 use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
+use super::item_image::{layout_original_item_images, original_item_image_bundle};
 use super::item_tooltip::crystal_item_tooltip_document;
 use super::notice::NoticeDialogState;
 use super::overlays::{NativePlayerUiSet, NativePlayerUiState};
@@ -26,6 +27,10 @@ use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::{
     spawn_crystal_image_button, CrystalHint, CrystalItemHint, Mir2CrystalHintPlugin,
 };
+
+#[cfg(test)]
+#[path = "hud_item_image_tests.rs"]
+mod hud_item_image_tests;
 
 const WHITE: Color = Color::WHITE;
 pub(crate) const HUD_Z_INDEX: i32 = 950;
@@ -368,7 +373,9 @@ impl Plugin for Mir2CrystalHudPlugin {
             )
             .add_systems(
                 Update,
-                update_hud_inventory.run_if(resource_changed::<InventoryModel>),
+                update_hud_inventory
+                    .run_if(resource_changed::<InventoryModel>)
+                    .before(layout_original_item_images),
             )
             .add_systems(
                 Update,
@@ -906,22 +913,14 @@ fn spawn_belt_slot(
         CrystalHudAction::BeltUse(slot),
     ));
     hit_target.with_children(|button| {
-        let path = item.and_then(|item| item_icon_path(item.icon));
         button.spawn((
             CrystalHudBeltIcon { slot },
-            Node {
-                display: if path.is_some() {
-                    Display::Flex
-                } else {
-                    Display::None
-                },
-                ..default()
-            },
-            ImageNode {
-                image: path.map(|path| asset_server.load(path)).unwrap_or_default(),
-                image_mode: NodeImageMode::Auto,
-                ..default()
-            },
+            original_item_image_bundle(
+                asset_server,
+                item.and_then(ItemModel::user_item_image_index),
+                32,
+                32,
+            ),
         ));
     });
     spawn_text(
@@ -1467,12 +1466,14 @@ fn update_hud_inventory(
         free_inventory_slots(&inventory).to_string(),
     );
     for (marker, mut image, mut node) in &mut icons {
-        if let Some(path) =
-            belt_slot_item(&inventory, marker.slot).and_then(|item| item_icon_path(item.icon))
-        {
-            image.image = asset_server.load(path);
-            node.display = Display::Flex;
-        } else {
+        let handle = belt_slot_item(&inventory, marker.slot)
+            .and_then(ItemModel::user_item_image_index)
+            .map(|index| asset_server.load(format!("original-ui/Items/{index}.png")))
+            .unwrap_or_default();
+        if image.image != handle {
+            image.image = handle;
+            // The shared layout runs after this update, even if the new PNG
+            // has not loaded. Never show the old icon's rectangle meanwhile.
             node.display = Display::None;
         }
     }
@@ -1871,16 +1872,12 @@ pub fn free_inventory_slots(model: &InventoryModel) -> u32 {
     u32::from(model.effective_capacity()).saturating_sub(occupied)
 }
 
-/// Produce a bounded label suitable for one 40-pixel belt slot.
+/// MirItemCell's stack label, including one for a source stackable item.
 pub fn belt_item_label(model: &InventoryModel, slot: u8) -> String {
     let Some(item) = belt_slot_item(model, slot) else {
         return String::new();
     };
-    if item.quantity > 1 {
-        item.quantity.to_string()
-    } else {
-        String::new()
-    }
+    item.crystal_stack_label()
 }
 
 /// Crystal `BeltDialog.Key` uses a fixed 26x14 label at `(8 + slot*35, 2)`

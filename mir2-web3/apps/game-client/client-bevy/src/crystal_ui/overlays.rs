@@ -27,7 +27,7 @@ use crate::game_shop::{
     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
     GAME_SHOP_QUANTITY_MIN,
 };
-use crate::inventory::{item_icon_path, InventoryModel, ItemModel};
+use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
 use crate::mail::{
     mail_claim_enabled, mail_delete_enabled, MailModel, MailOperationKind, MailPageCursor,
     MAX_MAIL_ATTACHMENTS,
@@ -63,7 +63,11 @@ use crate::storage::{storage_deposit_enabled, storage_withdraw_enabled};
 use super::assets::CrystalButtonAssetSet;
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
-use super::item_image::crystal_true_size_rgba8;
+#[cfg(test)]
+use super::item_image::OriginalItemImage;
+use super::item_image::{
+    layout_original_item_images, original_item_image_bundle, spawn_original_item_image,
+};
 use super::item_tooltip::{
     crystal_item_tooltip_document, crystal_item_tooltip_document_from_source,
     crystal_item_tooltip_document_from_source_with_options, CrystalItemTooltipOptions,
@@ -84,6 +88,10 @@ use super::widget::{spawn_crystal_image_button, CrystalImageButton, CrystalItemH
 #[cfg(test)]
 #[path = "guild_storage_tests.rs"]
 mod guild_storage_tests;
+
+#[cfg(test)]
+#[path = "primary_item_image_tests.rs"]
+mod primary_item_image_tests;
 
 const BIG_MAP_SEARCH_COOLDOWN_MS: u64 = 1_000;
 const NPC_GOODS_CELL_WIDTH: f32 = 205.0;
@@ -378,21 +386,22 @@ pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 
 /// 1024x768 stage.
 pub const CRYSTAL_CHARACTER_PANEL_RECT: CrystalRect = CrystalRect::new(760.0, 0.0, 264.0, 380.0);
 const CRYSTAL_CHARACTER_PAGE_RECT: CrystalRect = CrystalRect::new(8.0, 90.0, 248.0, 284.0);
+// CharacterDialog.cs:229-348 uses MirItemCell's default 36x32 hit size.
 const CRYSTAL_CHARACTER_EQUIPMENT_SLOTS: [(u32, CrystalRect); 14] = [
-    (0, CrystalRect::new(131.0, 97.0, 32.0, 32.0)),
-    (1, CrystalRect::new(171.0, 97.0, 32.0, 32.0)),
-    (2, CrystalRect::new(211.0, 97.0, 32.0, 32.0)),
-    (13, CrystalRect::new(211.0, 152.0, 32.0, 32.0)),
-    (4, CrystalRect::new(211.0, 188.0, 32.0, 32.0)),
-    (3, CrystalRect::new(211.0, 224.0, 32.0, 32.0)),
-    (5, CrystalRect::new(16.0, 260.0, 32.0, 32.0)),
-    (6, CrystalRect::new(211.0, 260.0, 32.0, 32.0)),
-    (7, CrystalRect::new(16.0, 296.0, 32.0, 32.0)),
-    (8, CrystalRect::new(211.0, 296.0, 32.0, 32.0)),
-    (9, CrystalRect::new(16.0, 332.0, 32.0, 32.0)),
-    (11, CrystalRect::new(56.0, 332.0, 32.0, 32.0)),
-    (10, CrystalRect::new(96.0, 332.0, 32.0, 32.0)),
-    (12, CrystalRect::new(136.0, 332.0, 32.0, 32.0)),
+    (0, CrystalRect::new(131.0, 97.0, 36.0, 32.0)),
+    (1, CrystalRect::new(171.0, 97.0, 36.0, 32.0)),
+    (2, CrystalRect::new(211.0, 97.0, 36.0, 32.0)),
+    (13, CrystalRect::new(211.0, 152.0, 36.0, 32.0)),
+    (4, CrystalRect::new(211.0, 188.0, 36.0, 32.0)),
+    (3, CrystalRect::new(211.0, 224.0, 36.0, 32.0)),
+    (5, CrystalRect::new(16.0, 260.0, 36.0, 32.0)),
+    (6, CrystalRect::new(211.0, 260.0, 36.0, 32.0)),
+    (7, CrystalRect::new(16.0, 296.0, 36.0, 32.0)),
+    (8, CrystalRect::new(211.0, 296.0, 36.0, 32.0)),
+    (9, CrystalRect::new(16.0, 332.0, 36.0, 32.0)),
+    (11, CrystalRect::new(56.0, 332.0, 36.0, 32.0)),
+    (10, CrystalRect::new(96.0, 332.0, 36.0, 32.0)),
+    (12, CrystalRect::new(136.0, 332.0, 36.0, 32.0)),
 ];
 const CRYSTAL_MALE_HAIR_RECTS: [CrystalRect; 9] = [
     CrystalRect::new(131.0, 173.0, 16.0, 14.0),
@@ -2012,14 +2021,6 @@ pub struct OverlayGuildStorageCell {
 #[derive(Component)]
 struct OverlayGuildStorageThumb;
 
-/// Resolve original PNG dimensions after loading instead of stretching every
-/// source UserItem into an invented fixed-size icon. This is presentation only.
-#[derive(Component)]
-struct OriginalItemImage {
-    cell_width: i32,
-    cell_height: i32,
-}
-
 #[derive(Component)]
 struct OverlayInventoryDeleteCursor;
 
@@ -2803,7 +2804,6 @@ fn spawn_overlay_root(mut commands: Commands) {
                     width: Val::Px(INVENTORY_PANEL_SIZE.width as f32),
                     height: Val::Px(INVENTORY_PANEL_SIZE.height as f32),
                     display: Display::None,
-                    overflow: Overflow::clip(),
                     ..default()
                 },
                 BackgroundColor(Color::NONE),
@@ -6047,23 +6047,27 @@ fn render_inventory_delete_item(
     }) else {
         return;
     };
-    let (Some(path), Some(icon_rect)) = (
-        item_icon_path(item.icon),
-        crystal_inventory_icon_rect(item, item_box.width, item_box.height),
-    ) else {
+    let Some(index) = item.user_item_image_index() else {
         return;
     };
-    spawn_static_overlay_sprite(
-        parent,
-        asset_server,
-        path,
-        CrystalRect::new(
-            item_box.left + icon_rect.left,
-            item_box.top + icon_rect.top,
-            icon_rect.width,
-            icon_rect.height,
-        ),
-    );
+    parent
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(item_box.left),
+            top: Val::Px(item_box.top),
+            width: Val::Px(item_box.width),
+            height: Val::Px(item_box.height),
+            ..default()
+        })
+        .with_children(|cell| {
+            spawn_original_item_image(
+                cell,
+                asset_server,
+                index,
+                item_box.width as i32,
+                item_box.height as i32,
+            );
+        });
 }
 
 fn render_inventory_delete_modal(
@@ -6842,7 +6846,6 @@ fn render_inventory(
                             * (INVENTORY_PAGE_SIZE / INVENTORY_PAGE_COLUMNS - 1)
                             + INVENTORY_CELL_SIZE.height as usize) as f32,
                     ),
-                    overflow: Overflow::clip(),
                     ..default()
                 },
                 BackgroundColor(Color::NONE),
@@ -7671,8 +7674,8 @@ fn overlay_absolute_button(
     }
 }
 
-/// Crystal inventory/equipment cells are image-led. Text remains only as a
-/// fail-closed fallback for old snapshots that do not carry an icon index.
+/// Crystal inventory/equipment cells draw original pixels, without substituting
+/// abbreviated names for missing icons or clipping images to the hit rectangle.
 /// Only stack counts are drawn over bag icons: full durability values such as
 /// `400/400` do not fit a 32-pixel Crystal cell and belong in item details.
 fn overlay_absolute_item_button(
@@ -7691,7 +7694,6 @@ fn overlay_absolute_item_button(
             top: Val::Px(rect.top),
             width: Val::Px(rect.width),
             height: Val::Px(rect.height),
-            overflow: Overflow::clip(),
             ..default()
         },
         BackgroundColor(Color::NONE),
@@ -7702,38 +7704,19 @@ fn overlay_absolute_item_button(
         entity.insert(action);
     }
     entity.with_children(|cell| {
-        if let (Some(path), Some(icon_rect)) = (
-            item_icon_path(item.icon),
-            crystal_inventory_icon_rect(item, rect.width, rect.height),
-        ) {
-            cell.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(icon_rect.left),
-                    top: Val::Px(icon_rect.top),
-                    width: Val::Px(icon_rect.width),
-                    height: Val::Px(icon_rect.height),
-                    ..default()
-                },
-                ImageNode {
-                    image: asset_server.load(path),
-                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
-                    color: if enabled {
-                        Color::WHITE
-                    } else {
-                        Color::srgba(0.412, 0.412, 0.412, 0.8)
-                    },
-                    ..default()
-                },
-            ));
-        } else if item.icon == 0 {
-            overlay_text_at(
-                cell,
-                &short_slot_name(&item.name, &item.key),
-                CrystalRect::new(1.0, 9.0, rect.width - 2.0, 12.0),
-                8.0,
-                TEXT,
+        if let Some(index) = item.user_item_image_index() {
+            let (marker, node, mut image) = original_item_image_bundle(
+                asset_server,
+                Some(index),
+                rect.width as i32,
+                rect.height as i32,
             );
+            image.color = if enabled {
+                Color::WHITE
+            } else {
+                Color::srgba(0.412, 0.412, 0.412, 0.8)
+            };
+            cell.spawn((marker, node, image));
         }
         let detail = inventory_cell_stack_label(item);
         if !detail.is_empty() {
@@ -7762,26 +7745,6 @@ fn overlay_absolute_inventory_cell(
     if enabled {
         entity.insert((Button, action));
     }
-}
-
-fn crystal_inventory_icon_rect(
-    item: &ItemModel,
-    cell_width: f32,
-    cell_height: f32,
-) -> Option<CrystalRect> {
-    if item.icon == 0 || item.icon_width == 0 || item.icon_height == 0 {
-        return None;
-    }
-    let width = i32::from(item.icon_width);
-    let height = i32::from(item.icon_height);
-    let left = (cell_width as i32 - width) / 2;
-    let top = (cell_height as i32 - height) / 2;
-    Some(CrystalRect::new(
-        left as f32,
-        top as f32,
-        width as f32,
-        height as f32,
-    ))
 }
 
 fn overlay_inventory_count(
@@ -7825,20 +7788,6 @@ fn crystal_npc_goods_cell_rect(row: usize) -> CrystalRect {
         NPC_GOODS_CELL_WIDTH,
         NPC_GOODS_CELL_HEIGHT,
     )
-}
-
-fn crystal_npc_goods_icon_rect(good: &ShopGood) -> Option<CrystalRect> {
-    if good.icon == 0 || good.icon_width == 0 || good.icon_height == 0 {
-        return None;
-    }
-    let width = i32::from(good.icon_width);
-    let height = i32::from(good.icon_height);
-    Some(CrystalRect::new(
-        ((NPC_GOODS_ICON_AREA_WIDTH - width) / 2) as f32,
-        ((NPC_GOODS_CELL_HEIGHT as i32 - height) / 2) as f32,
-        width as f32,
-        height as f32,
-    ))
 }
 
 fn crystal_npc_goods_new_icon_visible(good: &ShopGood, goods: &[ShopGood]) -> bool {
@@ -7889,7 +7838,6 @@ fn overlay_absolute_shop_good_button(
             top: Val::Px(rect.top),
             width: Val::Px(rect.width),
             height: Val::Px(rect.height),
-            overflow: Overflow::clip(),
             ..default()
         },
         BackgroundColor(Color::NONE),
@@ -7916,26 +7864,15 @@ fn overlay_absolute_shop_good_button(
         entity.insert(CrystalItemHint(document));
     }
     entity.with_children(|row| {
-        if let (Some(asset_server), Some(path), Some(icon_rect)) = (
-            asset_server,
-            item_icon_path(good.icon),
-            crystal_npc_goods_icon_rect(good),
-        ) {
+        if let (Some(asset_server), Some(index)) = (asset_server, good.user_item_image_index()) {
             row.spawn((
                 OverlayNpcShopGoodIcon,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(icon_rect.left),
-                    top: Val::Px(icon_rect.top),
-                    width: Val::Px(icon_rect.width),
-                    height: Val::Px(icon_rect.height),
-                    ..default()
-                },
-                ImageNode {
-                    image: asset_server.load(path),
-                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
-                    ..default()
-                },
+                original_item_image_bundle(
+                    asset_server,
+                    Some(index),
+                    NPC_GOODS_ICON_AREA_WIDTH,
+                    NPC_GOODS_CELL_HEIGHT as i32,
+                ),
             ));
         }
         row.spawn((
@@ -8058,19 +7995,14 @@ fn overlay_compact_item_button(
         entity.insert(action);
     }
     entity.with_children(|row| {
-        if let (Some(asset_server), Some(path)) = (asset_server, item_icon_path(item.icon)) {
-            row.spawn((
-                Node {
-                    width: Val::Px(24.0),
-                    height: Val::Px(24.0),
-                    ..default()
-                },
-                ImageNode {
-                    image: asset_server.load(path),
-                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
+        if let (Some(asset_server), Some(index)) = (asset_server, item.user_item_image_index()) {
+            row.spawn(Node {
+                width: Val::Px(36.0),
+                height: Val::Px(32.0),
+                flex_shrink: 0.0,
+                ..default()
+            })
+            .with_children(|cell| spawn_original_item_image(cell, asset_server, index, 36, 32));
         }
         row.spawn((
             Text::new(label.to_owned()),
@@ -8085,97 +8017,6 @@ fn overlay_compact_item_button(
             }),
         ));
     });
-}
-
-fn spawn_original_item_image(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    index: u16,
-    cell_width: i32,
-    cell_height: i32,
-) {
-    // This helper is called only with a concrete source item or a fixed source
-    // control image. Items/0 is real art (e.g. source PigEar), not a missing-icon
-    // sentinel. Unknown/absent source items never call this function.
-    let path = format!("original-ui/Items/{index}.png");
-    parent.spawn((
-        OriginalItemImage {
-            cell_width,
-            cell_height,
-        },
-        Node {
-            position_type: PositionType::Absolute,
-            display: Display::None, // No guessed/stretch dimensions before load.
-            ..default()
-        },
-        ImageNode {
-            image: asset_server.load(path),
-            ..default()
-        },
-    ));
-}
-
-fn layout_original_item_images(
-    images: Option<Res<Assets<Image>>>,
-    mut icons: Query<(&OriginalItemImage, &ImageNode, &mut Node)>,
-    mut true_sizes: Local<
-        std::collections::HashMap<bevy::asset::AssetId<Image>, Option<(i32, i32)>>,
-    >,
-) {
-    let Some(images) = images else {
-        return;
-    };
-    // Retain only geometry, not pixel buffers. Reload/removal invalidates
-    // cached alpha extents, including a modified image with the same handle.
-    if images.is_changed() {
-        true_sizes.clear();
-    }
-    for (cell, image_node, mut node) in &mut icons {
-        let Some(image) = images.get(&image_node.image) else {
-            node.display = Display::None;
-            continue;
-        };
-        let (Ok(width), Ok(height)) = (
-            i32::try_from(image.texture_descriptor.size.width),
-            i32::try_from(image.texture_descriptor.size.height),
-        ) else {
-            node.display = Display::None;
-            continue;
-        };
-        if width <= 0 || height <= 0 {
-            node.display = Display::None;
-            continue;
-        }
-        let true_size = true_sizes.entry(image_node.image.id()).or_insert_with(|| {
-            use bevy::render::render_resource::{TextureDimension, TextureFormat};
-            if image.texture_descriptor.dimension != TextureDimension::D2
-                || image.texture_descriptor.size.depth_or_array_layers != 1
-                || !matches!(
-                    image.texture_descriptor.format,
-                    TextureFormat::Rgba8Unorm
-                        | TextureFormat::Rgba8UnormSrgb
-                        | TextureFormat::Bgra8Unorm
-                        | TextureFormat::Bgra8UnormSrgb
-                )
-            {
-                return None;
-            }
-            crystal_true_size_rgba8(width as u32, height as u32, image.data.as_deref()?)
-        });
-        let Some((true_width, true_height)) = *true_size else {
-            node.display = Display::None;
-            continue;
-        };
-        // C# integer division truncates toward zero, even for images wider
-        // than their cells. GetTrueSize is the alpha-bounds size, not PNG size.
-        // Draw uses the full bitmap: do not crop or subtract its alpha origin.
-        // Library offsets are not used by MirItemCell or the coin Draw(x,y).
-        node.left = Val::Px(((cell.cell_width - true_width) / 2) as f32);
-        node.top = Val::Px(((cell.cell_height - true_height) / 2) as f32);
-        node.width = Val::Px(width as f32);
-        node.height = Val::Px(height as f32);
-        node.display = Display::Flex;
-    }
 }
 
 fn spawn_static_overlay_sprite(
@@ -9487,11 +9328,7 @@ fn spawn_partner_trade_item(
                 .map(|source| source.info.name.as_str())
         })
         .unwrap_or("Item");
-    let icon = item
-        .tooltip_source
-        .as_ref()
-        .map(|source| source.info.image)
-        .unwrap_or_default();
+    let icon = concrete_item_image_index(0, u32::from(item.count), item.tooltip_source.as_ref());
     let mut row = parent.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -9506,7 +9343,7 @@ fn spawn_partner_trade_item(
     ));
     if let Some(document) = crystal_item_tooltip_document_from_source(
         name,
-        icon,
+        icon.unwrap_or_default(),
         u32::from(item.count),
         item.tooltip_source.as_ref(),
         player,
@@ -9514,19 +9351,17 @@ fn spawn_partner_trade_item(
         row.insert(CrystalItemHint(document));
     }
     row.with_children(|content| {
-        if let (Some(asset_server), Some(path)) = (asset_server, item_icon_path(icon)) {
-            content.spawn((
-                Node {
-                    width: Val::Px(30.0),
-                    height: Val::Px(30.0),
+        if let (Some(asset_server), Some(index)) = (asset_server, icon) {
+            content
+                .spawn(Node {
+                    width: Val::Px(36.0),
+                    height: Val::Px(32.0),
+                    flex_shrink: 0.0,
                     ..default()
-                },
-                ImageNode {
-                    image: asset_server.load(path),
-                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
+                })
+                .with_children(|cell| {
+                    spawn_original_item_image(cell, asset_server, index, 36, 32);
+                });
         }
         content.spawn((
             Text::new(format!("{} x{}", short_name(name, "Item"), item.count)),
@@ -9559,19 +9394,17 @@ fn spawn_trade_offer_item(
         CrystalItemHint(crystal_item_tooltip_document(item, player)),
     ));
     row.with_children(|content| {
-        if let (Some(asset_server), Some(path)) = (asset_server, item_icon_path(item.icon)) {
-            content.spawn((
-                Node {
-                    width: Val::Px(30.0),
-                    height: Val::Px(30.0),
+        if let (Some(asset_server), Some(index)) = (asset_server, item.user_item_image_index()) {
+            content
+                .spawn(Node {
+                    width: Val::Px(36.0),
+                    height: Val::Px(32.0),
+                    flex_shrink: 0.0,
                     ..default()
-                },
-                ImageNode {
-                    image: asset_server.load(path),
-                    image_mode: bevy::ui::widget::NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
+                })
+                .with_children(|cell| {
+                    spawn_original_item_image(cell, asset_server, index, 36, 32);
+                });
         }
         content.spawn((
             Text::new(format!(
@@ -11516,8 +11349,8 @@ fn render_storage(
         let rect = CrystalRect::new(
             9.0 + column as f32 * 37.0,
             60.0 + row as f32 * 33.0,
+            36.0,
             32.0,
-            30.0,
         );
         if let Some(item) = slot.item {
             let selected = storage_ui.storage_selection
@@ -11956,21 +11789,8 @@ fn short_name(name: &str, key: &str) -> String {
     }
 }
 
-fn short_slot_name(name: &str, key: &str) -> String {
-    let source = if name.trim().is_empty() { key } else { name };
-    let mut chars = source.chars();
-    let taken: String = chars.by_ref().take(4).collect();
-    if chars.next().is_some() {
-        format!("{taken}.")
-    } else {
-        taken
-    }
-}
-
 fn inventory_cell_stack_label(item: &ItemModel) -> String {
-    (item.quantity > 1)
-        .then(|| item.quantity.to_string())
-        .unwrap_or_default()
+    item.crystal_stack_label()
 }
 
 fn title(parent: &mut ChildSpawnerCommands, text: &str) {
@@ -12173,20 +11993,20 @@ mod tests {
         assert_eq!(
             CRYSTAL_CHARACTER_EQUIPMENT_SLOTS,
             [
-                (0, CrystalRect::new(131.0, 97.0, 32.0, 32.0)),
-                (1, CrystalRect::new(171.0, 97.0, 32.0, 32.0)),
-                (2, CrystalRect::new(211.0, 97.0, 32.0, 32.0)),
-                (13, CrystalRect::new(211.0, 152.0, 32.0, 32.0)),
-                (4, CrystalRect::new(211.0, 188.0, 32.0, 32.0)),
-                (3, CrystalRect::new(211.0, 224.0, 32.0, 32.0)),
-                (5, CrystalRect::new(16.0, 260.0, 32.0, 32.0)),
-                (6, CrystalRect::new(211.0, 260.0, 32.0, 32.0)),
-                (7, CrystalRect::new(16.0, 296.0, 32.0, 32.0)),
-                (8, CrystalRect::new(211.0, 296.0, 32.0, 32.0)),
-                (9, CrystalRect::new(16.0, 332.0, 32.0, 32.0)),
-                (11, CrystalRect::new(56.0, 332.0, 32.0, 32.0)),
-                (10, CrystalRect::new(96.0, 332.0, 32.0, 32.0)),
-                (12, CrystalRect::new(136.0, 332.0, 32.0, 32.0)),
+                (0, CrystalRect::new(131.0, 97.0, 36.0, 32.0)),
+                (1, CrystalRect::new(171.0, 97.0, 36.0, 32.0)),
+                (2, CrystalRect::new(211.0, 97.0, 36.0, 32.0)),
+                (13, CrystalRect::new(211.0, 152.0, 36.0, 32.0)),
+                (4, CrystalRect::new(211.0, 188.0, 36.0, 32.0)),
+                (3, CrystalRect::new(211.0, 224.0, 36.0, 32.0)),
+                (5, CrystalRect::new(16.0, 260.0, 36.0, 32.0)),
+                (6, CrystalRect::new(211.0, 260.0, 36.0, 32.0)),
+                (7, CrystalRect::new(16.0, 296.0, 36.0, 32.0)),
+                (8, CrystalRect::new(211.0, 296.0, 36.0, 32.0)),
+                (9, CrystalRect::new(16.0, 332.0, 36.0, 32.0)),
+                (11, CrystalRect::new(56.0, 332.0, 36.0, 32.0)),
+                (10, CrystalRect::new(96.0, 332.0, 36.0, 32.0)),
+                (12, CrystalRect::new(136.0, 332.0, 36.0, 32.0)),
             ]
         );
     }
@@ -12746,7 +12566,6 @@ mod tests {
     #[test]
     fn compact_labels_use_supported_ascii_and_bag_cells_hide_durability() {
         assert_eq!(short_name("DestructionDrug", "fallback"), "Destruct..");
-        assert_eq!(short_slot_name("Potion", "fallback"), "Poti.");
 
         let durable = ItemModel {
             quantity: 1,
@@ -12765,29 +12584,7 @@ mod tests {
 
     #[test]
     fn inventory_icons_use_true_size_centering_and_fail_closed_without_geometry() {
-        let potion = ItemModel {
-            icon: 7,
-            icon_width: 36,
-            icon_height: 26,
-            ..default()
-        };
-        assert_eq!(
-            crystal_inventory_icon_rect(&potion, 36.0, 32.0),
-            Some(CrystalRect::new(0.0, 3.0, 36.0, 26.0))
-        );
-
-        let odd_height = ItemModel {
-            icon: 30,
-            icon_width: 36,
-            icon_height: 25,
-            ..default()
-        };
-        assert_eq!(
-            crystal_inventory_icon_rect(&odd_height, 36.0, 32.0),
-            Some(CrystalRect::new(0.0, 3.0, 36.0, 25.0))
-        );
-
-        assert!(crystal_inventory_icon_rect(&ItemModel::default(), 36.0, 32.0).is_none());
+        primary_item_image_tests::assert_inventory_icon_geometry_and_missing_source();
     }
 
     #[test]
@@ -13045,6 +12842,7 @@ mod tests {
 
         app.update();
 
+        primary_item_image_tests::load_original_images(app.world_mut());
         {
             let world = app.world_mut();
             let mut cell_query = world.query_filtered::<
@@ -13123,10 +12921,7 @@ mod tests {
             tooltip_source: Some(surface_tooltip_source(221, "Sword", 7, 1, 1)),
             ..Default::default()
         };
-        assert_eq!(
-            crystal_npc_goods_icon_rect(&good),
-            Some(CrystalRect::new(2.0, 3.0, 36.0, 26.0))
-        );
+        assert_eq!(good.user_item_image_index(), Some(7));
         good.tooltip_source
             .as_mut()
             .unwrap()

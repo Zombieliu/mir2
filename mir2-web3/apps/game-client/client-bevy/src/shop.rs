@@ -61,8 +61,8 @@ pub struct ShopGood {
     pub panel_type: u8,
     /// Uses the same Crystal Items atlas exported for carried items.
     pub icon: u16,
-    /// Exact `Items.GetTrueSize(image)` source dimensions. Crystal centers
-    /// this rectangle in MirGoodsCell's 40x32 icon area.
+    /// Legacy full PNG-frame dimensions, not alpha-bound GetTrueSize.
+    /// The native renderer measures the loaded original pixels instead.
     pub icon_width: u16,
     pub icon_height: u16,
     pub description: String,
@@ -72,6 +72,14 @@ pub struct ShopGood {
 }
 
 impl ShopGood {
+    pub fn user_item_image_index(&self) -> Option<u16> {
+        crate::inventory::concrete_item_image_index(
+            self.icon,
+            u32::from(self.count),
+            self.tooltip_source.as_ref(),
+        )
+    }
+
     pub fn stock_label(&self) -> String {
         if self.stock < 0 {
             "∞".to_owned()

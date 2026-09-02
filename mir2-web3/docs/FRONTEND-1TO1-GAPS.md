@@ -2,7 +2,29 @@
 
 Last updated: 2026-09-03
 
-> 2026-09-03 native Guild storage checkpoint: WN-ITEM-002/003 now include
+> 2026-09-03 native primary-item true-size checkpoint: WN-ITEM-001/002/003,
+> WN-CHAR-001 and the belt leaf of WN-HUD-001 now have source alpha-size
+> centring/full-bitmap, valid source Items/0 and actual-PNG regressions.
+> Equipment's fourteen cells and personal storage now use original 36x32
+> bounds; bag/grid/NPC-row clipping is removed, source StackSize shows count
+> 1 and persistent belt loading/clearing cannot leave a stale/white icon.
+> Warehouse-side, trade and amount icon regions also use the helper, while
+> their full windows, operations and overlays remain separate open work.
+> All 1003 exported PNGs match original RGBA/metadata, 5015 node geometries
+> pass, and full native UI 562/562, Windows 528/528, runtime 212/212, UI core
+> 43/43, the 11-test/924-image gate and formatting are green. The original
+> fixture reproduces exactly after newline normalization.
+>
+> This supersedes the primary centring/zero-image gaps in the historical
+> Guild note below. No new GUI capture or final-source same-EXE claim is
+> made while Computer Use remains paused after user Escape. Full trade/
+> GameShop/Quest/other layouts, source item operations/state overlays,
+> FloorItems, WN-CHAR-002 slot contracts and all 33 backlog IDs remain open
+> as recorded, with original-pair/package/light/DPI/soak/human gates intact.
+> `docs/generated/player-qa/native-ui-parity-20260903-item-true-size/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Historical 2026-09-03 native Guild storage checkpoint: WN-ITEM-002/003 now include
 > source-shaped eight-column storage, fourteen authoritative rows and an
 > eight-row viewport with original integer scrolling and stable slot IDs.
 > Current counts select source UserItem.Image; alpha-bound GetTrueSize centres

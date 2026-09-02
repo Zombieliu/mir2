@@ -231,14 +231,14 @@ pub struct ItemModel {
     /// 0 = inventory bag, 1 = belt, 2 = equipment, 3 = Crystal quest
     /// inventory (read-only client-side grouping).
     pub container: u8,
-    /// Crystal item image index. `0` is intentionally treated as no image: a
-    /// legacy/incomplete snapshot must not cause the native client to guess an
-    /// icon from the item name.
+    /// Legacy Crystal image index. Use `user_item_image_index` for concrete
+    /// items: authoritative source Info may legitimately select Items/0.
+    /// Without source Info, legacy zero still means missing, not a name guess.
     #[serde(default)]
     pub icon: u16,
-    /// Intrinsic `Items.Lib` frame size used by Crystal's `MirItemCell` to
-    /// center the icon inside its 36x32 hit cell. Zero means the exported
-    /// frame geometry was unavailable and must not be guessed or stretched.
+    /// Legacy full PNG-frame dimensions, not Crystal GetTrueSize. Retained
+    /// for read-model compatibility; native item layout measures nonzero
+    /// alpha from the loaded original image and draws the full bitmap.
     #[serde(default)]
     pub icon_width: u16,
     #[serde(default)]
@@ -290,6 +290,39 @@ pub struct ItemModel {
     /// then render only fields that are independently authoritative.
     #[serde(default)]
     pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
+}
+
+/// Concrete UserItem identity, distinct from a base-image catalogue preview.
+/// A present source Info owns both image zero and the current-count selector.
+/// Legacy positive indices remain usable; absent legacy zero stays absent.
+pub fn concrete_item_image_index(
+    legacy_icon: u16,
+    count: u32,
+    source: Option<&CrystalItemTooltipSourceModel>,
+) -> Option<u16> {
+    source
+        .map(|source| source.user_item_image(count))
+        .or_else(|| (legacy_icon != 0).then_some(legacy_icon))
+}
+
+impl ItemModel {
+    pub fn user_item_image_index(&self) -> Option<u16> {
+        concrete_item_image_index(self.icon, self.quantity, self.tooltip_source.as_ref())
+    }
+
+    /// MirItemCell shows every count, including one, when Info.StackSize > 1.
+    /// Older snapshots have no StackSize, so retain only their known stacks.
+    pub fn crystal_stack_label(&self) -> String {
+        let stacked = self
+            .tooltip_source
+            .as_ref()
+            .map_or(self.quantity > 1, |source| source.info.stack_size > 1);
+        if stacked {
+            self.quantity.to_string()
+        } else {
+            String::new()
+        }
+    }
 }
 
 /// Return the canonical exported Crystal icon path, but deliberately do not
@@ -571,6 +604,53 @@ mod tests {
             };
             assert_eq!(source.user_item_image(300), 277);
         }
+    }
+
+    #[test]
+    fn concrete_zero_image_requires_source_info_and_ignores_names_or_stale_icons() {
+        let mut item = ItemModel {
+            name: "PigEar".into(),
+            quantity: 1,
+            ..Default::default()
+        };
+        assert_eq!(item.user_item_image_index(), None);
+        item.icon = 71;
+        assert_eq!(item.user_item_image_index(), Some(71));
+        item.tooltip_source = Some(CrystalItemTooltipSourceModel {
+            info: CrystalItemInfoModel {
+                image: 0,
+                ..Default::default()
+            },
+            real_info: Some(CrystalItemInfoModel {
+                image: 7,
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
+        assert_eq!(item.user_item_image_index(), Some(0));
+        item.tooltip_source.as_mut().unwrap().info.image = 30;
+        assert_eq!(item.user_item_image_index(), Some(30));
+        assert_eq!(item.icon, 71);
+    }
+
+    #[test]
+    fn crystal_stack_label_uses_source_stack_size_including_one_without_inventing_legacy_counts() {
+        let mut item = ItemModel {
+            quantity: 1,
+            ..Default::default()
+        };
+        assert_eq!(item.crystal_stack_label(), "");
+        item.quantity = 2;
+        assert_eq!(item.crystal_stack_label(), "2");
+        item.tooltip_source = Some(CrystalItemTooltipSourceModel::default());
+        assert_eq!(item.crystal_stack_label(), "");
+        item.tooltip_source.as_mut().unwrap().info.stack_size = 300;
+        for count in [0, 1, 2, 300] {
+            item.quantity = count;
+            assert_eq!(item.crystal_stack_label(), count.to_string());
+        }
+        item.tooltip_source.as_mut().unwrap().info.stack_size = 0;
+        assert_eq!(item.crystal_stack_label(), "");
     }
 
     fn item(key: &str, container: u8, slot: u32) -> ItemModel {

@@ -1,6 +1,125 @@
 //! Crystal `Client/MirGraphics/MLibrary.cs:959-1059`.
 //! `GetTrueSize` measures nonzero-alpha bounds; Draw still uses the full bitmap.
 
+use bevy::prelude::*;
+
+/// Source cell bounds, independent of the full image's dimensions and alpha
+/// origin. Also used by the persistent HUD belt, not only rebuilt dialogs.
+#[derive(Component)]
+pub(super) struct OriginalItemImage {
+    pub cell_width: i32,
+    pub cell_height: i32,
+}
+
+pub(super) fn original_item_image_bundle(
+    asset_server: &AssetServer,
+    index: Option<u16>,
+    cell_width: i32,
+    cell_height: i32,
+) -> (OriginalItemImage, Node, ImageNode) {
+    (
+        OriginalItemImage {
+            cell_width,
+            cell_height,
+        },
+        Node {
+            position_type: PositionType::Absolute,
+            display: Display::None,
+            ..default()
+        },
+        ImageNode {
+            image: index
+                .map(|index| asset_server.load(format!("original-ui/Items/{index}.png")))
+                .unwrap_or_default(),
+            ..default()
+        },
+    )
+}
+
+pub(super) fn spawn_original_item_image(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    index: u16,
+    cell_width: i32,
+    cell_height: i32,
+) {
+    parent.spawn(original_item_image_bundle(
+        asset_server,
+        Some(index),
+        cell_width,
+        cell_height,
+    ));
+}
+
+pub(super) fn layout_original_item_images(
+    images: Option<Res<Assets<Image>>>,
+    mut icons: Query<(&OriginalItemImage, &ImageNode, &mut Node)>,
+    mut true_sizes: Local<
+        std::collections::HashMap<bevy::asset::AssetId<Image>, Option<(i32, i32)>>,
+    >,
+) {
+    let Some(images) = images else {
+        for (_, _, mut node) in &mut icons {
+            node.display = Display::None;
+        }
+        return;
+    };
+    // Cache only dimensions. Same-handle reloads and removals invalidate them.
+    if images.is_changed() {
+        true_sizes.clear();
+    }
+    for (cell, image_node, mut node) in &mut icons {
+        // Bevy can install a real white texture for the default image handle.
+        // An empty belt cell must never turn that into a fabricated item.
+        if image_node.image == Handle::<Image>::default() {
+            node.display = Display::None;
+            continue;
+        }
+        let Some(image) = images.get(&image_node.image) else {
+            node.display = Display::None;
+            continue;
+        };
+        let (Ok(width), Ok(height)) = (
+            i32::try_from(image.texture_descriptor.size.width),
+            i32::try_from(image.texture_descriptor.size.height),
+        ) else {
+            node.display = Display::None;
+            continue;
+        };
+        if width <= 0 || height <= 0 {
+            node.display = Display::None;
+            continue;
+        }
+        let true_size = true_sizes.entry(image_node.image.id()).or_insert_with(|| {
+            use bevy::render::render_resource::{TextureDimension, TextureFormat};
+            if image.texture_descriptor.dimension != TextureDimension::D2
+                || image.texture_descriptor.size.depth_or_array_layers != 1
+                || !matches!(
+                    image.texture_descriptor.format,
+                    TextureFormat::Rgba8Unorm
+                        | TextureFormat::Rgba8UnormSrgb
+                        | TextureFormat::Bgra8Unorm
+                        | TextureFormat::Bgra8UnormSrgb
+                )
+            {
+                return None;
+            }
+            crystal_true_size_rgba8(width as u32, height as u32, image.data.as_deref()?)
+        });
+        let Some((true_width, true_height)) = *true_size else {
+            node.display = Display::None;
+            continue;
+        };
+        // C# divides integers toward zero. GetTrueSize returns alpha-bounds
+        // SIZE only: Draw neither crops nor subtracts the alpha/library origin.
+        node.left = Val::Px(((cell.cell_width - true_width) / 2) as f32);
+        node.top = Val::Px(((cell.cell_height - true_height) / 2) as f32);
+        node.width = Val::Px(width as f32);
+        node.height = Val::Px(height as f32);
+        node.display = Display::Flex;
+    }
+}
+
 /// Return only the source visible-bounds size, never a cropped image or offset.
 /// The all-transparent source frame deliberately retains its full dimensions.
 pub(super) fn crystal_true_size_rgba8(

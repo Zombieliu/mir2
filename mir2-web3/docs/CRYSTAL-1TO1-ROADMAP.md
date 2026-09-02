@@ -1,6 +1,24 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Latest Guild storage source/logic checkpoint (2026-09-03): original 8x14
+> Latest primary-item true-size checkpoint (2026-09-03): the alpha-bound
+> GetTrueSize/full-bitmap rule now covers bag/belt/equipment/personal storage
+> and NPC goods, including valid source zero images and stackable count 1.
+> Equipment/storage use source 36x32 cells; oversized art is not clipped and
+> belt late-load/change/clear is ordered and tested. Warehouse-side/trade/
+> amount icon regions share the rule, not a whole-window acceptance claim.
+> Every currently exported Items PNG (1003) matches original RGBA/metadata;
+> 5015 exact native node geometries and the reproducible source fixture pass.
+> Full native UI 562/562, Windows 528/528, runtime 212/212, UI core 43/43,
+> item-icon 11/11 plus 924-image coverage and formatting pass.
+> Report: `docs/generated/player-qa/native-ui-parity-20260903-item-true-size/README.md`.
+> This supersedes the primary image-layout/zero leaves below, not source
+> operations, state overlays, full specialized windows, FloorItems or other
+> registered gaps. Computer Use remains paused; no new GUI or same-EXE
+> screenshot evidence is claimed. All 33 IDs and original-pair/package/light/
+> DPI/soak/human gates remain; `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> Historical Guild storage source/logic checkpoint (2026-09-03): original 8x14
 > slots / 8 visible rows, constructor asymmetry, wheel/drag integer steps,
 > original controls and the gold amount modal replace invented native layout.
 > Current-count Guild icons use alpha-bound GetTrueSize, unchanged full-bitmap
