@@ -36,8 +36,8 @@ eleven original frames and their true-size geometry; known ordinary items
 use source Info.Image rather than stale legacy icons. Catalogue previews
 deliberately keep source base images. Raw source/instance/persistence fields
 are not rewritten. Windows 527/527, game-data 39/39, real protocol stack
-integration 4/4 and the 11-test/924-image gate pass. Full Simulation/Gateway
-library tests are still running at this checkpoint.
+integration 4/4 and the 11-test/924-image gate pass. Full Simulation 1491/1491
+and Gateway 667 passed / one existing ignored subsequently pass on final source.
 
 The initial automated PNG contains all eleven frames and unaffected guards.
 Independent fixed-position sampling matches 24 bag slots / 6,161 opaque

@@ -7,7 +7,8 @@
 > state and catalogue-preview images are preserved. Windows 527/527, shared
 > game-data 39/39, four real split/merge/equip/save/reload integration tests,
 > item-icon 11/11 plus all 924 images, and formatting checks pass. Full
-> Simulation/Gateway regressions are still running at this checkpoint.
+> Simulation 1491/1491 and Gateway 667 passed / one existing ignored now pass
+> on the final source in `2cb9098407e21c47fbd43863aea6b3655a609c8b`.
 >
 > The initial native inventory capture contains all eleven quantity images.
 > An independent fixed-coordinate check matches 6,161 opaque pixels across
@@ -17,7 +18,9 @@
 > with Escape; do not resume foreground/window interaction without a new
 > explicit user request. The normal output files are locked and the work
 > volume nearly full; backend regression uses an isolated system-temp target,
-> without closing unrelated programs or deleting caches.
+> without closing unrelated programs or purging caches. After regression, one
+> exact 209 MiB generated test PDB was relocated to a hash-verified system-temp
+> backup to recover work-volume space; source/assets/stores/EXEs are unchanged.
 >
 > Next WN-ITEM-002 leaves: guild/trade/other actual-item surfaces, FloorItems,
 > overlays and final-source manual transitions; preserve source base-image

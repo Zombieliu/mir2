@@ -81,8 +81,8 @@ The final source identities are in [process-provenance.json](process-provenance.
 | Windows binary unit tests | 527 passed, 0 failed, on the final source correction |
 | Shared game-data unit tests | 39 passed; includes all 196,608 shape/count combinations, guards and the 1,628-row catalogue |
 | `item_stack_images` integration | 4 passed on final source |
-| Full Simulation library regression | In progress at report preparation; not yet claimed passed |
-| Full Gateway library regression | In progress in isolated system-temp build directory; not yet claimed passed |
+| Full Simulation library regression | 1,491 passed / 0 failed / 0 ignored; 954.62 seconds on final source |
+| Full Gateway library regression | 667 passed / 0 failed / one existing ignored; 784.45 seconds in the isolated system-temp build directory |
 | Original item-icon suite | 11 passed; all 924 required original images pass integrity verification |
 | Both Rust formatting checks / git diff check | Passed |
 | Fixture and capture-verifier syntax | Passed |
@@ -132,6 +132,15 @@ cargo +1.95.0 test -p mir2-game-data --lib -- --quiet
 
 Only debug-symbol generation/incremental caching differ in that build. The
 normal complete library test source, assertions and feature set are retained.
+Both full suites completed successfully after the implementation commit was
+pushed; their final-source identities match `2cb9098407e21c47fbd43863aea6b3655a609c8b`.
+
+The work volume then had only about 26 MB free. After confirming the Simulation
+test process had exited, its exact generated 219,566,080-byte PDB was moved to
+a new system-temp backup and its SHA-256 verified unchanged. This recovers
+about 209 MiB without removing source, assets, saves, any executable or any
+backup. The ledger records both locations for recovery; only debugging that
+old test executable may require returning its PDB. No cache was purged.
 
 ## Initial native capture, not final-source visual acceptance
 

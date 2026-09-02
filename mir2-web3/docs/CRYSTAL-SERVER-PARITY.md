@@ -7,8 +7,9 @@
 > identity. Raw UserItem fields, ItemInfo.Image, mutation rules and save data
 > remain unchanged. Shared game-data 39/39 and real protocol integration
 > 4/4 pass, including bag/belt/storage/equipment thresholds, both poisons,
-> cross-belt merge, equip/remove and save/reload. Full Simulation/Gateway
-> library regressions are running; Windows 527/527 passes.
+> cross-belt merge, equip/remove and save/reload. Full Simulation 1491/1491
+> and Gateway 667 passed / one existing ignored pass on the final source;
+> Windows 527/527 also passes.
 > Crystal ground ObjectItem sends Item.Image but the original client uses
 > FloorItems: that separate runtime/asset path is not fixed by this Items
 > projection. GameShop, QuestCell, crafting shadows and mail-list thumbnails

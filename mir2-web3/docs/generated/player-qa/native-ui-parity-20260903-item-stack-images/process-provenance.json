@@ -171,12 +171,20 @@
       "finalSource": true
     },
     "simulation": {
-      "status": "running",
-      "expectedTests": 1491
+      "status": "passed",
+      "passed": 1491,
+      "failed": 0,
+      "ignored": 0,
+      "elapsedSeconds": 954.62,
+      "verifiedSourceRevision": "2cb9098407e21c47fbd43863aea6b3655a609c8b"
     },
     "gateway": {
-      "status": "running",
-      "expectedTests": 668,
+      "status": "passed",
+      "passed": 667,
+      "failed": 0,
+      "ignored": 1,
+      "elapsedSeconds": 784.45,
+      "verifiedSourceRevision": "2cb9098407e21c47fbd43863aea6b3655a609c8b",
       "temporaryTargetDirectory": "mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f",
       "profileTestDebug": 0,
       "incremental": false,
@@ -208,6 +216,15 @@
   ],
   "noUserProgramClosed": true,
   "noCacheDeletion": true,
+  "postRegressionSymbolRelocation": {
+    "reason": "Recover work-volume space using only this run's regenerable test symbols, after confirming its test process had exited",
+    "originalRelativePath": "target/debug/deps/mir2_simulation-1ebf3ad8ce4d018d.pdb",
+    "backupPath": "C:/Users/Administrator/AppData/Local/Temp/mir2-stack-image-symbol-backup-4006396c52944475a6dae03b0669f2d4/mir2_simulation-1ebf3ad8ce4d018d.pdb",
+    "bytes": 219566080,
+    "sha256BeforeAndAfter": "b8cddb599fb28fe1fdf8a210cde8a76a6bdbe7770e89d434f32dcf384b61aa66",
+    "backupRetained": true,
+    "executablesSourceAssetsAndStoresUnchanged": true
+  },
   "acceptance": {
     "visualAccepted": false,
     "accepted": false,

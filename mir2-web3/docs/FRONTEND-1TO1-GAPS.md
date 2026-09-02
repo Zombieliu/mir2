@@ -8,7 +8,8 @@ Last updated: 2026-09-03
 > identities override stale cached icon values; GameShop/Quest/craft-shadow/
 > mail-list base-image exceptions stay intact. Windows 527/527, game-data
 > 39/39, stack integration 4/4 and the 11-test/924-image asset gate pass.
-> Full backend library suites are still running at report preparation.
+> Full Simulation 1491/1491 and Gateway 667 passed / one existing ignored
+> subsequently passed on the same final source; no failed test was excluded.
 >
 > A read-only check of the initial inventory PNG matches all 24 fixed bag
 > cells (6,161 opaque RGB samples), with 86 rejected wrong frames and 96

@@ -7,8 +7,9 @@
 > saved icons do not override known ordinary Info.Image. Raw source/instance
 > data and deliberately base-image catalogue previews remain unchanged.
 > Windows 527/527, game-data 39/39, stack integration 4/4, the 11-test/
-> 924-image gate and formatting pass; full Simulation/Gateway tests are
-> running. An initial native PNG has 24 fixed-position bag slots with 6,161
+> 924-image gate and formatting pass; full Simulation 1491/1491 and Gateway
+> 667 passed / one existing ignored also pass on final source. An initial
+> native PNG has 24 fixed-position bag slots with 6,161
 > exact opaque samples and 182 rejected wrong-frame/one-pixel controls.
 > It predates the final ordinary-item correction and is not final-source
 > same-EXE evidence. User Escape stopped foreground automation; only CLI

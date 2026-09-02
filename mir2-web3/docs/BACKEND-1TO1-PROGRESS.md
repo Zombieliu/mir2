@@ -9,9 +9,9 @@
 > The source selector covers every 16-bit count for all three shapes, guard
 > fields and the entire 1,628-row catalogue. Known ordinary items override
 > stale legacy icons without rewriting persistent ItemInfo or instance state.
-> Game-data 39/39 and dedicated integration 4/4 pass on final source; full
-> Simulation and Gateway library regressions are still running. Windows is
-> 527/527. The locked regular Gateway outputs are avoided using a fresh
+> Game-data 39/39 and dedicated integration 4/4 pass on final source, as do
+> full Simulation 1491/1491 and Gateway 667 passed / one existing ignored.
+> Windows is 527/527. The locked regular Gateway outputs are avoided using a fresh
 > system-temp build directory, normal full library harness and unchanged
 > manifest; failed earlier locked-file attempts are not passing evidence.
 > No schema migration, authority relaxation, new protocol mutation or shared
